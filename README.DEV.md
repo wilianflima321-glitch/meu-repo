@@ -11,9 +11,9 @@ Prerequisites
 Start the developer mock backend (runs on 127.0.0.1:8010)
 
 ```powershell
-# from repo root
-npm run dev:mock-backend;
-# If you need to stop: find the process and stop it, or close the terminal.
+# from repo root (run in a terminal you can leave open)
+npm run dev:mock-backend
+# If you need to stop: Ctrl+C or close the terminal.
 ```
 
 Run ai-ide unit tests (sequential runner uses compiled JS in the Theia fork):
@@ -42,23 +42,26 @@ npm run dev:mock-backend;
 Run ai-ide unit tests (sequential runner uses compiled JS in the Theia fork):
 
 ```powershell
-# change to the theia fork package
-Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide;
-node ./test/run-mocha.js;
-Pop-Location;
+# from repo root (recommended)
+npm run test:ai-ide
+
+# or, change directory to the package and run the programmatic mocha runner:
+Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide
+node ./test/run-mocha.js
+Pop-Location
 ```
 
 Run Playwright smoke E2E tests (targets mock backend by default)
 
 ```powershell
-# ensure playwright browsers are installed (one-time)
-npm run playwright:install;
+# one-time: install playwright browsers (Linux/Windows/Mac with dependencies)
+npm run playwright:install
 
 # run tests (headless by default)
-npm run test:e2e;
+npm run test:e2e
 
 # run headed if you want to watch the browsers
-npm run test:e2e:headed;
+npm run test:e2e:headed
 ```
 
 TypeScript checks
@@ -69,6 +72,9 @@ npx -y tsc --noEmit -p .\cloud-web-app\web\tsconfig.json
 
 # check the Theia ai-ide package
 npx -y tsc --noEmit -p .\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\tsconfig.json
+
+# quick local run that approximates CI (runs TS check, ai-ide tests, and Playwright E2E)
+npm run ci:local
 ```
 
 Repo syntax check (existing helper)
