@@ -38,7 +38,9 @@ export class TaskContextFileStorageService implements TaskContextStorageService 
     readonly onDidChange = this.onDidChangeEmitter.event;
 
     protected sanitizeLabel(label: string): string {
-        return label.replace(/^[^\p{L}\p{N}]+/vg, '');
+        // Use the 'u' (unicode) flag instead of the ES2024-only 'v' flag to keep
+        // compatibility with older compilation targets. '\p{...}' requires 'u'.
+        return label.replace(/^[^\p{L}\p{N}]+/gu, '');
     }
 
     protected getStorageLocation(): URI | undefined {
@@ -78,7 +80,9 @@ export class TaskContextFileStorageService implements TaskContextStorageService 
         this.toDisposeOnStorageChange?.dispose();
         this.toDisposeOnStorageChange = undefined;
         if (!newStorage) { return; }
-        this.toDisposeOnStorageChange = new DisposableCollection(
+        this.toDisposeOnStorageChange = new DisposableCollection();
+        // push disposables after constructing to avoid relying on constructor overloads
+        this.toDisposeOnStorageChange.push(
             this.fileService.watch(newStorage, { recursive: true, excludes: [] }),
             this.fileService.onDidFilesChange(event => {
                 const relevantChanges = event.changes.filter(candidate => newStorage.isEqualOrParent(candidate.resource));
@@ -153,7 +157,10 @@ export class TaskContextFileStorageService implements TaskContextStorageService 
                 date: new Date().toISOString(),
                 label,
             };
-            const derivedName = label.trim().replace(/[^\p{L}\p{N}]/vg, '-').replace(/^-+|-+$/g, '');
+            // Replace non-letter/number characters with '-' using 'u' (unicode)
+            // rather than the ES2024 'v' flag so TypeScript doesn't require
+            // a newer target.
+            const derivedName = label.trim().replace(/[^\p{L}\p{N}]/gu, '-').replace(/^-+|-+$/g, '');
             const filename = (derivedName.length > 32 ? derivedName.slice(0, derivedName.indexOf('-', 32)) : derivedName) + '.md';
             const content = yaml.dump(frontmatter).trim() + `${EOL}---${EOL}` + summary.summary;
             const uri = storageLocation.resolve(filename);

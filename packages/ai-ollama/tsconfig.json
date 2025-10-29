@@ -1,14 +1,30 @@
 {
-  "extends": "../../configs/base.tsconfig",
+  "extends": "../../configs/base.tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "baseUrl": ".",
+    "paths": {
+      "@theia/ai-backend-client": [
+        "../ai-backend-client/src"
+      ],
+      "@theia/ai-backend-client/*": [
+        "../ai-backend-client/src/*"
+      ]
+    }
   },
   "include": [
     "src"
   ],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts"
+  ],
   "references": [
+    {
+      "path": "../ai-backend-client"
+    },
     {
       "path": "../ai-core"
     },

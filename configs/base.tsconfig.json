@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "skipLibCheck": true,
+  "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
     "noImplicitAny": true,
@@ -25,6 +26,33 @@
       "DOM",
       "DOM.AsyncIterable"
     ],
+    "paths": {
+      "@theia/ai-core/lib/node": [
+        "../packages/ai-core/lib/node/*"
+      ],
+      "@theia/ai-core/lib/node/*": [
+        "../packages/ai-core/lib/node/*"
+      ],
+      "@theia/ai-core/*": [
+        "../packages/ai-core/lib/*",
+        "../packages/ai-core/src/*"
+      ],
+      "@theia/ai-core": [
+        "../packages/ai-core/lib/common/index.d.ts",
+        "../packages/ai-core/lib/common/index.js",
+        "../packages/ai-core/src"
+      ],
+      "@theia/core/*": [
+        "../packages/core/lib/*",
+        "../packages/core/src/*"
+      ],
+      "@theia/core": [
+        "../packages/core/lib/common/index.d.ts",
+        "../packages/core/lib/common/index.js",
+        "../packages/core/src"
+      ],
+      
+    },
     "sourceMap": true
   }
 }

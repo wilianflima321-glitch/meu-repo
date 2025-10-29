@@ -3,7 +3,19 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+  "target": "es2022",
+  "lib": ["es2022", "dom"],
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "importHelpers": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+    "noImplicitAny": false,
+    "types": ["node", "jest", "mocha", "@testing-library/jest-dom"]
   },
   "include": [
     "src"

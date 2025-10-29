@@ -18,7 +18,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
-import type { Compiler } from 'webpack';
+import type { Compiler, NormalModuleFactory, ResolveData } from 'webpack';
 
 const REQUIRE_RIPGREP = '@vscode/ripgrep';
 const REQUIRE_VSCODE_WINDOWS_CA_CERTS = '@vscode/windows-ca-certs';
@@ -80,20 +80,29 @@ export class NativeWebpackPlugin {
         });
         compiler.hooks.normalModuleFactory.tap(
             NativeWebpackPlugin.name,
-            nmf => {
-                nmf.hooks.beforeResolve.tapPromise(NativeWebpackPlugin.name, async result => {
-                    if (result.request === REQUIRE_RIPGREP) {
-                        ripgrepIssuer = result.contextInfo.issuer;
-                    } else if (result.request === 'node-pty') {
-                        nodePtyIssuer = result.contextInfo.issuer;
-                    } else if (result.request === 'trash') {
-                        trashHelperIssuer = result.contextInfo.issuer;
+            (nmf: NormalModuleFactory) => {
+                nmf.hooks.beforeResolve.tapPromise(NativeWebpackPlugin.name, async (result: ResolveData | undefined) => {
+                    if (!result) {
+                        return undefined;
                     }
+
+                    const issuer = result.contextInfo.issuer ?? '';
+
+                    if (result.request === REQUIRE_RIPGREP) {
+                        ripgrepIssuer = issuer;
+                    } else if (result.request === 'node-pty') {
+                        nodePtyIssuer = issuer;
+                    } else if (result.request === 'trash') {
+                        trashHelperIssuer = issuer;
+                    }
+
                     for (const [file, replacement] of Object.entries(replacements)) {
                         if (result.request === file) {
-                            result.request = await replacement(result.contextInfo.issuer);
+                            result.request = await replacement(issuer);
                         }
                     }
+
+                    return result;
                 });
             }
         );

@@ -17,6 +17,7 @@
 import { getJsonOfText, getTextOfResponse, LanguageModel, LanguageModelMessage, LanguageModelRequirement, LanguageModelResponse } from '@theia/ai-core';
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { ChatAgentService } from '@theia/ai-chat/lib/common/chat-agent-service';
+import { LlmProviderService } from '../browser/llm-provider-service';
 import { ChatToolRequest } from '@theia/ai-chat/lib/common/chat-tool-request-service';
 import { AbstractStreamParsingChatAgent } from '@theia/ai-chat/lib/common/chat-agents';
 import { MutableChatRequestModel, InformationalChatResponseContentImpl } from '@theia/ai-chat/lib/common/chat-model';
@@ -28,13 +29,13 @@ const OrchestratorRequestIdKey = 'orchestratorRequestIdKey';
 
 @injectable()
 export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
-    id: string = OrchestratorChatAgentId;
-    name = OrchestratorChatAgentId;
-    languageModelRequirements: LanguageModelRequirement[] = [{
+    override id: string = OrchestratorChatAgentId;
+    override name = OrchestratorChatAgentId;
+    override languageModelRequirements: LanguageModelRequirement[] = [{
         purpose: 'agent-selection',
         identifier: 'default/universal',
     }];
-    protected defaultLanguageModelPurpose: string = 'agent-selection';
+    protected override defaultLanguageModelPurpose: string = 'agent-selection';
 
     override variables = ['chatAgents'];
     override prompts = [orchestratorTemplate];
@@ -50,11 +51,51 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
     @inject(ChatAgentService)
     protected chatAgentService: ChatAgentService;
 
+    @inject(LlmProviderService)
+    protected llmProviderService: LlmProviderService;
+
     override async invoke(request: MutableChatRequestModel): Promise<void> {
-        request.response.addProgressMessage({ content: 'Determining the most appropriate agent', status: 'inProgress' });
+    try {
+        const _addProgress = (request.response as any).addProgressMessage;
+        if (typeof _addProgress === 'function') {
+            _addProgress.call(request.response, { content: 'Determining the most appropriate agent', status: 'inProgress' });
+        }
+    } catch {}
         // We use a dedicated id for the orchestrator request
         const orchestratorRequestId = generateUuid();
         request.addData(OrchestratorRequestIdKey, orchestratorRequestId);
+
+        // Ask backend orchestrator for suggested agents first (thin client behaviour)
+        try {
+            const resp = await fetch('http://localhost:8000/orchestrator/select', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: request.inputText ?? '' })
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                const agents = data.agent_ids as string[];
+                if (agents && agents.length > 0) {
+                    request.addData(OrchestratorRequestIdKey, orchestratorRequestId);
+                    // Short-circuit to delegate to agent returned by backend
+                    const _addProgress2 = (request.response as any).addProgressMessage;
+                    if (typeof _addProgress2 === 'function') {
+                        _addProgress2.call(request.response, { content: `Delegating to backend-selected agent @${agents[0]}`, status: 'inProgress' });
+                    }
+                    const _overrideAgent = (request.response as any).overrideAgentId;
+                    if (typeof _overrideAgent === 'function') {
+                        _overrideAgent.call(request.response, agents[0]);
+                    }
+                    const agent = this.chatAgentService.getAgent(agents[0]);
+                    if (agent) {
+                        await agent.invoke(request);
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+            this.logger.warn('Backend orchestrator select failed, falling back to local selection', e);
+        }
 
         return super.invoke(request);
     }
@@ -68,21 +109,39 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
         const agentSettings = this.getLlmSettings();
         const settings = { ...agentSettings, ...request.session.settings };
         const tools = toolRequests.length > 0 ? toolRequests : undefined;
-        const subRequestId = request.getDataByKey<string>(OrchestratorRequestIdKey) ?? request.id;
+    // getDataByKey may be untyped in shims; call non-generically and cast to string
+    const subRequestId = (request.getDataByKey ? (request.getDataByKey(OrchestratorRequestIdKey) as string) : undefined) ?? request.id;
         request.removeData(OrchestratorRequestIdKey);
-        return this.languageModelService.sendRequest(
-            languageModel,
-            {
-                messages,
-                tools,
-                settings,
-                agentId: this.id,
-                sessionId: request.session.id,
-                requestId: request.id,
-                subRequestId: subRequestId,
-                cancellationToken: request.response.cancellationToken
-            }
-        );
+        // If a custom provider is configured, route the request through it.
+        try {
+            const providerId = undefined; // could be read from agentSettings or session
+            const resp = await this.llmProviderService.sendRequestToProvider(providerId, {
+                input: messages.map(m => `${m.role || 'user'}: ${m.content}`).join('\n'),
+                settings
+            });
+            // normalize to LanguageModelResponse shape expected by callers: mimic languageModelService response
+            const normalized: LanguageModelResponse = {
+                status: resp.status,
+                text: typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body),
+                raw: resp.body
+            } as unknown as LanguageModelResponse;
+            return normalized;
+        } catch (e) {
+            // fallback to built-in languageModelService
+            return this.languageModelService.sendRequest(
+                languageModel,
+                {
+                    messages,
+                    tools,
+                    settings,
+                    agentId: this.id,
+                    sessionId: request.session.id,
+                    requestId: request.id,
+                    subRequestId: subRequestId,
+                    cancellationToken: request.response.cancellationToken
+                }
+            );
+        }
     }
 
     protected override async addContentsToResponse(response: LanguageModelResponse, request: MutableChatRequestModel): Promise<void> {
@@ -102,9 +161,12 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
 
         if (agentIds.length < 1) {
             this.logger.error('No agent was selected, delegating to fallback chat agent');
-            request.response.progressMessages.forEach(progressMessage =>
-                request.response.updateProgressMessage({ ...progressMessage, status: 'failed' })
-            );
+            request.response.progressMessages.forEach(progressMessage => {
+                const _update = (request.response as any).updateProgressMessage;
+                if (typeof _update === 'function') {
+                    _update.call(request.response, { ...(progressMessage as any), status: 'failed' });
+                }
+            });
             agentIds = [this.fallBackChatAgentId];
         }
 
@@ -128,10 +190,16 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
 
             `
         ));
-        request.response.overrideAgentId(delegatedToAgent);
-        request.response.progressMessages.forEach(progressMessage =>
-            request.response.updateProgressMessage({ ...progressMessage, status: 'completed' })
-        );
+        const _overrideFinal = (request.response as any).overrideAgentId;
+        if (typeof _overrideFinal === 'function') {
+            _overrideFinal.call(request.response, delegatedToAgent);
+        }
+        request.response.progressMessages.forEach(progressMessage => {
+            const _update2 = (request.response as any).updateProgressMessage;
+            if (typeof _update2 === 'function') {
+                _update2.call(request.response, { ...(progressMessage as any), status: 'completed' });
+            }
+        });
         const agent = this.chatAgentService.getAgent(delegatedToAgent);
         if (!agent) {
             throw new Error(`Chat agent ${delegatedToAgent} not found.`);

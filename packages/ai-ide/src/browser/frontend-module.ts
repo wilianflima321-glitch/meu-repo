@@ -16,6 +16,22 @@
 
 import '../../src/browser/style/index.css';
 
+// Inject codicons CSS from CDN at runtime to provide icons without installing
+// the package locally (avoids native build/toolchain issues while iterating).
+if (typeof document !== 'undefined' && document && document.head) {
+    try {
+        const _codiconHref = 'https://unpkg.com/@vscode/codicons@latest/dist/codicon.css';
+        if (!document.querySelector(`link[href="${_codiconHref}"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = _codiconHref;
+            document.head.appendChild(link);
+        }
+    } catch (e) {
+        // benign if DOM not available at module evaluation time
+    }
+}
+
 import { ContainerModule } from '@theia/core/shared/inversify';
 import { ChatAgent, DefaultChatAgentId, FallbackChatAgentId } from '@theia/ai-chat/lib/common';
 import { Agent, AIVariableContribution, bindToolProvider } from '@theia/ai-core/lib/common';
@@ -76,6 +92,7 @@ import { AIMCPConfigurationWidget } from './ai-configuration/mcp-configuration-w
 import { ChatWelcomeMessageProvider } from '@theia/ai-chat-ui/lib/browser/chat-tree-view';
 import { IdeChatWelcomeMessageProvider } from './ide-chat-welcome-message-provider';
 import { AITokenUsageConfigurationWidget } from './ai-configuration/token-usage-configuration-widget';
+import { ProviderConfigurationWidget } from './ai-configuration/provider-configuration-widget';
 import { TaskContextSummaryVariableContribution } from './task-background-summary-variable';
 import { TaskContextFileStorageService } from './task-context-file-storage-service';
 import { TaskContextStorageService } from '@theia/ai-chat/lib/browser/task-context-service';
@@ -88,6 +105,11 @@ import { aiIdePreferenceSchema } from '../common/ai-ide-preferences';
 import { AIActivationService } from '@theia/ai-core/lib/browser';
 import { AIIdeActivationServiceImpl } from './ai-ide-activation-service';
 import { AiConfigurationPreferences } from '../common/ai-configuration-preferences';
+import { LlmProviderRegistry } from './llm-provider-registry';
+import { aiLlmPreferenceSchema } from '../common/ai-llm-preferences';
+import { AI_LLM_PROVIDERS_PREF } from '../common/ai-llm-preferences';
+import { LlmProviderService } from './llm-provider-service';
+import { LlmProviderCommandContribution } from './llm-provider-command-contribution';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(PreferenceContribution).toConstantValue({ schema: aiIdePreferenceSchema });
@@ -96,6 +118,33 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(AIIdeActivationServiceImpl).toSelf().inSingletonScope();
     // rebinds the default implementation of '@theia/ai-core'
     rebind(AIActivationService).toService(AIIdeActivationServiceImpl);
+
+    bind(PreferenceContribution).toConstantValue({ schema: aiLlmPreferenceSchema });
+
+    bind(LlmProviderRegistry).toSelf().inSingletonScope();
+    bind(LlmProviderService).toSelf().inSingletonScope();
+    bind(LlmProviderCommandContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(LlmProviderCommandContribution);
+    bind(ProviderConfigurationWidget).toSelf();
+    bind(WidgetFactory)
+        .toDynamicValue(ctx => ({ id: ProviderConfigurationWidget.ID, createWidget: () => ctx.container.get(ProviderConfigurationWidget) }))
+        .inSingletonScope();
+
+    // Billing admin widget
+    const { BillingAdminWidget } = require('./admin/billing-admin-widget');
+    const { BillingAdminContribution } = require('./admin/billing-admin-contribution');
+    bind(BillingAdminWidget).toSelf();
+    bind(BillingAdminContribution).toSelf().inSingletonScope();
+    bind(WidgetFactory)
+        .toDynamicValue(ctx => ({ id: BillingAdminWidget.ID, createWidget: () => ctx.container.get(BillingAdminWidget) }))
+        .inSingletonScope();
+    const { BillingAdminCommandContribution } = require('./admin/billing-admin-command-contribution');
+    bind(BillingAdminCommandContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(BillingAdminCommandContribution as any);
+    bind(FrontendApplicationContribution).toService(BillingAdminContribution as any);
+
+    // ensure preference key symbol is referenced so TS doesn't report it as unused in incremental builds
+    void AI_LLM_PROVIDERS_PREF;
 
     bind(ArchitectAgent).toSelf().inSingletonScope();
     bind(Agent).toService(ArchitectAgent);
@@ -117,8 +166,9 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(Agent).toService(AppTesterChatAgent);
     bind(ChatAgent).toService(AppTesterChatAgent);
     bind(BrowserAutomation).toDynamicValue(ctx => {
-        const provider = ctx.container.get<ServiceConnectionProvider>(RemoteConnectionProvider);
-        return provider.createProxy<BrowserAutomation>(browserAutomationPath);
+        const provider = ctx.container.get(RemoteConnectionProvider) as ServiceConnectionProvider;
+        // `createProxy` may be untyped in some versions; avoid using a type-argument and cast instead
+        return (provider.createProxy(browserAutomationPath) as unknown) as BrowserAutomation;
     }).inSingletonScope();
 
     bind(CommandChatAgent).toSelf().inSingletonScope();

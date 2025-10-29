@@ -31,13 +31,12 @@ export class OllamaLanguageModelsManagerImpl implements OllamaLanguageModelsMana
     protected readonly tokenUsageService: TokenUsageService;
 
     get host(): string | undefined {
-        return this._host ?? process.env.OLLAMA_HOST;
+        return this._host;
     }
 
-    // Triggered from frontend. In case you want to use the models on the backend
-    // without a frontend then call this yourself
-    protected calculateStatus(host: string | undefined): LanguageModelStatus {
-        return host ? { status: 'ready' } : { status: 'unavailable', message: 'No Ollama host set' };
+    protected calculateStatus(_host: string | undefined): LanguageModelStatus {
+        // Connection and routing are delegated to the backend runtime.
+        return { status: 'ready' };
     }
 
     async createOrUpdateLanguageModels(...models: OllamaModelDescription[]): Promise<void> {

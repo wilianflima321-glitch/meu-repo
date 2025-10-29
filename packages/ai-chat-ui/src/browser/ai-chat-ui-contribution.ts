@@ -40,6 +40,11 @@ import { TaskContextService } from '@theia/ai-chat/lib/browser/task-context-serv
 
 export const AI_CHAT_TOGGLE_COMMAND_ID = 'aiChat:toggle';
 
+type DateFnsLocale = {
+    code?: string;
+    [key: string]: unknown;
+};
+
 @injectable()
 export class AIChatContribution extends AbstractViewContribution<ChatViewWidget> implements TabBarToolbarContribution {
 
@@ -470,7 +475,8 @@ export class AIChatContribution extends AbstractViewContribution<ChatViewWidget>
     }
 }
 
-function getDateFnsLocale(): locales.Locale {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return nls.locale ? (locales as any)[nls.locale] ?? locales.enUS : locales.enUS;
+const dateFnsLocales = locales as Record<string, DateFnsLocale> & { enUS: DateFnsLocale };
+
+function getDateFnsLocale(): DateFnsLocale {
+    return nls.locale ? dateFnsLocales[nls.locale] ?? dateFnsLocales.enUS : dateFnsLocales.enUS;
 }

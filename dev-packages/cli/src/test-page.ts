@@ -52,7 +52,7 @@ export default async function newTestPage(options: TestPageOptions): Promise<pup
     const files = collectFiles(fileOptions);
 
     const page = await newPage();
-    page.on('dialog', dialog => dialog.dismiss());
+    page.on('dialog', (dialog: any) => dialog.dismiss());
     page.on('pageerror', console.error);
 
     let theiaLoaded = false;

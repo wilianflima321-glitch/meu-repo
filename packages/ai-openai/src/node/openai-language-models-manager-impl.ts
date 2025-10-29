@@ -35,21 +35,17 @@ export class OpenAiLanguageModelsManagerImpl implements OpenAiLanguageModelsMana
     protected readonly tokenUsageService: TokenUsageService;
 
     get apiKey(): string | undefined {
-        return this._apiKey ?? process.env.OPENAI_API_KEY;
+        return this._apiKey;
     }
 
     get apiVersion(): string | undefined {
-        return this._apiVersion ?? process.env.OPENAI_API_VERSION;
+        return this._apiVersion;
     }
 
-    protected calculateStatus(modelDescription: OpenAiModelDescription, effectiveApiKey: string | undefined): LanguageModelStatus {
-        // Always mark custom models (models with url) as ready for now as we do not know about API Key requirements
-        if (modelDescription.url) {
-            return { status: 'ready' };
-        }
-        return effectiveApiKey
-            ? { status: 'ready' }
-            : { status: 'unavailable', message: 'No OpenAI API key set' };
+    protected calculateStatus(_modelDescription: OpenAiModelDescription, _effectiveApiKey: string | undefined): LanguageModelStatus {
+        // The backend service handles credentials and routing, so from the IDE perspective
+        // the model is always ready as long as the runtime is reachable.
+        return { status: 'ready' };
     }
 
     // Triggered from frontend. In case you want to use the models on the backend
@@ -57,27 +53,10 @@ export class OpenAiLanguageModelsManagerImpl implements OpenAiLanguageModelsMana
     async createOrUpdateLanguageModels(...modelDescriptions: OpenAiModelDescription[]): Promise<void> {
         for (const modelDescription of modelDescriptions) {
             const model = await this.languageModelRegistry.getLanguageModel(modelDescription.id);
-            const apiKeyProvider = () => {
-                if (modelDescription.apiKey === true) {
-                    return this.apiKey;
-                }
-                if (modelDescription.apiKey) {
-                    return modelDescription.apiKey;
-                }
-                return undefined;
-            };
-            const apiVersionProvider = () => {
-                if (modelDescription.apiVersion === true) {
-                    return this.apiVersion;
-                }
-                if (modelDescription.apiVersion) {
-                    return modelDescription.apiVersion;
-                }
-                return undefined;
-            };
+            const apiKeyProvider = () => this.apiKey;
+            const apiVersionProvider = () => this.apiVersion;
 
-            // Determine the effective API key for status
-            const status = this.calculateStatus(modelDescription, apiKeyProvider());
+            const status = this.calculateStatus(modelDescription, undefined);
 
             if (model) {
                 if (!(model instanceof OpenAiModel)) {
@@ -121,18 +100,10 @@ export class OpenAiLanguageModelsManagerImpl implements OpenAiLanguageModelsMana
     }
 
     setApiKey(apiKey: string | undefined): void {
-        if (apiKey) {
-            this._apiKey = apiKey;
-        } else {
-            this._apiKey = undefined;
-        }
+        this._apiKey = apiKey;
     }
 
     setApiVersion(apiVersion: string | undefined): void {
-        if (apiVersion) {
-            this._apiVersion = apiVersion;
-        } else {
-            this._apiVersion = undefined;
-        }
+        this._apiVersion = apiVersion;
     }
 }

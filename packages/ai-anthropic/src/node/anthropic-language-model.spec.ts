@@ -28,9 +28,7 @@ describe('AnthropicModel', () => {
                     status: 'ready'
                 },
                 true,
-                true,
-                () => 'test-api-key',
-                DEFAULT_MAX_TOKENS
+                true
             );
 
             expect(model.maxRetries).to.equal(3);
@@ -46,7 +44,6 @@ describe('AnthropicModel', () => {
                 },
                 true,
                 true,
-                () => 'test-api-key',
                 DEFAULT_MAX_TOKENS,
                 customMaxRetries
             );
@@ -63,7 +60,6 @@ describe('AnthropicModel', () => {
                 },
                 true,
                 true,
-                () => 'test-api-key',
                 DEFAULT_MAX_TOKENS,
                 5
             );
@@ -73,6 +69,7 @@ describe('AnthropicModel', () => {
             expect(model.enableStreaming).to.be.true;
             expect(model.maxTokens).to.equal(DEFAULT_MAX_TOKENS);
             expect(model.maxRetries).to.equal(5);
+            expect(model.useCaching).to.be.true;
         });
     });
 });

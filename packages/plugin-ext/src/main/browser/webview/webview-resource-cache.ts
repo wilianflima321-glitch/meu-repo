@@ -79,7 +79,11 @@ export class WebviewResourceCache {
             return;
         }
         const body = await response.body();
-        await cache.put(url, new Response(body, {
+        // ensure we pass an ArrayBuffer (not SharedArrayBuffer) to Response to satisfy BodyInit typing
+        // create a copied Uint8Array so the underlying buffer is a standard ArrayBuffer
+        const array = body instanceof Uint8Array ? body : new Uint8Array(body);
+        const buffer = array.slice().buffer; // slice() copies and produces a new ArrayBuffer-backed Uint8Array
+        await cache.put(url, new Response(buffer, {
             status: 200,
             headers: { 'ETag': response.eTag }
         }));

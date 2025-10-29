@@ -1,0 +1,161 @@
+{
+  "name": "@aethel/aethel-task-submission",
+  "version": "1.0.0",
+  "description": "Aethel Task Submission for users to send requests, upload files, and receive outputs via various means",
+  "keywords": [
+    "theia-extension",
+    "aethel",
+    "task-submission",
+    "file-upload",
+    "api",
+    "real-time"
+  ],
+  "license": "Proprietary Aethel License",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aethel/aethel-theia-fork.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aethel/aethel-theia-fork/issues"
+  },
+  "homepage": "https://aethel-ide.com",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "^1.43.0",
+    "@theia/filesystem": "^1.43.0",
+    "@theia/workspace": "^1.43.0",
+    "express": "^4.18.0",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.0",
+    "axios": "^1.6.0",
+    "graphql": "^16.8.0",
+    "apollo-server-express": "^3.12.0"
+  },
+  "devDependencies": {
+    "@theia/cli": "^1.43.0",
+    "typescript": "^5.0.0",
+    "rimraf": "^3.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/aethel-task-submission-frontend-module",
+      "backend": "lib/node/aethel-task-submission-backend-module"
+    }
+  ],
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "webpack --config ./webpack.config.js",
+    "watch": "webpack --config ./webpack.config.js --watch",
+    "test": "mocha --config ../../configs/mocha-config.json",
+    "lint": "eslint --config ../../configs/.eslintrc.json --ext .ts,.tsx src"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "yarn": ">=1.15.0"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "aethel.task-submission.submitTask",
+        "title": "Submit Task",
+        "category": "Aethel Tasks"
+      },
+      {
+        "command": "aethel.task-submission.uploadFile",
+        "title": "Upload File",
+        "category": "Aethel Tasks"
+      },
+      {
+        "command": "aethel.task-submission.viewResults",
+        "title": "View Task Results",
+        "category": "Aethel Tasks"
+      },
+      {
+        "command": "aethel.task-submission.apiEndpoint",
+        "title": "Configure API Endpoint",
+        "category": "Aethel Tasks"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "aethel.task-submission.submitTask"
+        },
+        {
+          "command": "aethel.task-submission.uploadFile"
+        },
+        {
+          "command": "aethel.task-submission.viewResults"
+        },
+        {
+          "command": "aethel.task-submission.apiEndpoint"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "aethel-task-queue",
+          "name": "Task Queue",
+          "icon": "$(list-ordered)"
+        },
+        {
+          "id": "aethel-task-results",
+          "name": "Task Results",
+          "icon": "$(output)"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Aethel Task Submission",
+      "properties": {
+        "aethel.taskSubmission.apiPort": {
+          "type": "number",
+          "default": 3001,
+          "description": "Port for Aethel API server"
+        },
+        "aethel.taskSubmission.websocketEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable WebSocket for real-time task updates"
+        },
+        "aethel.taskSubmission.allowedFileTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["*"],
+          "description": "Allowed file types for upload"
+        },
+        "aethel.taskSubmission.integrations": {
+          "type": "object",
+          "properties": {
+            "github": {
+              "type": "boolean",
+              "default": true
+            },
+            "slack": {
+              "type": "boolean",
+              "default": false
+            },
+            "discord": {
+              "type": "boolean",
+              "default": false
+            },
+            "email": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "description": "Enable integrations for task notifications"
+        }
+      }
+    }
+  }
+}

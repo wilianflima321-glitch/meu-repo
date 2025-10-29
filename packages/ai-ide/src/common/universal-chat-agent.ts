@@ -14,8 +14,9 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import { LanguageModelRequirement } from '@theia/ai-core/lib/common';
-import { injectable } from '@theia/core/shared/inversify';
+import { LanguageModelRequirement, LanguageModel, LanguageModelMessage, LanguageModelResponse } from '@theia/ai-core/lib/common';
+import { injectable, inject } from '@theia/core/shared/inversify';
+import { LlmProviderService } from '../browser/llm-provider-service';
 import { AbstractStreamParsingChatAgent } from '@theia/ai-chat/lib/common/chat-agents';
 import { nls } from '@theia/core';
 import { universalTemplate, universalTemplateVariant } from './universal-prompt-template';
@@ -23,13 +24,13 @@ import { universalTemplate, universalTemplateVariant } from './universal-prompt-
 export const UniversalChatAgentId = 'Universal';
 @injectable()
 export class UniversalChatAgent extends AbstractStreamParsingChatAgent {
-   id: string = UniversalChatAgentId;
-   name = UniversalChatAgentId;
-   languageModelRequirements: LanguageModelRequirement[] = [{
+   override id: string = UniversalChatAgentId;
+   override name = UniversalChatAgentId;
+   override languageModelRequirements: LanguageModelRequirement[] = [{
       purpose: 'chat',
       identifier: 'default/universal',
    }];
-   protected defaultLanguageModelPurpose: string = 'chat';
+   protected override defaultLanguageModelPurpose: string = 'chat';
    override description = nls.localize('theia/ai/chat/universal/description', 'This agent is designed to help software developers by providing concise and accurate '
       + 'answers to general programming and software development questions. It is also the fall-back for any generic '
       + 'questions the user might ask. The universal agent currently does not have any context by default, i.e. it cannot '
@@ -37,4 +38,23 @@ export class UniversalChatAgent extends AbstractStreamParsingChatAgent {
 
    override prompts = [{ id: 'universal-system', defaultVariant: universalTemplate, variants: [universalTemplateVariant] }];
    protected override systemPromptId: string = 'universal-system';
+
+   @inject(LlmProviderService)
+   protected llmProviderService: LlmProviderService;
+
+   protected override async sendLlmRequest(
+      request: any,
+      messages: LanguageModelMessage[],
+      toolRequests: any[],
+      languageModel: LanguageModel
+   ): Promise<LanguageModelResponse> {
+      const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
+      try {
+         const resp = await (this.llmProviderService as any).sendRequestToProvider(undefined, { input: messages.map(m => `${m.role||'user'}: ${m.content}`).join('\n'), settings });
+         const normalized: LanguageModelResponse = { status: resp.status, text: typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body), raw: resp.body } as unknown as LanguageModelResponse;
+         return normalized;
+      } catch (e) {
+         return this.languageModelService.sendRequest(languageModel, { messages, tools: toolRequests.length ? toolRequests : undefined, settings, agentId: this.id, sessionId: request.session.id, requestId: request.id, cancellationToken: request.response?.cancellationToken });
+      }
+   }
 }

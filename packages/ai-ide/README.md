@@ -1,3 +1,45 @@
+# AI IDE (package: @theia/ai-ide) - Quickstart
+
+Passos rápidos para desenvolvedores no Windows (resumido):
+
+1) Verifique pré-requisitos
+
+ - Node 18+ e npm
+ - (Opcional para builds nativos) Visual Studio Build Tools (cl.exe)
+
+2) Bootstrap (instale dependências do mock e Playwright browsers se for usar E2E)
+
+```powershell
+# do repositório root
+.\tools\scripts\bootstrap-dev.ps1 -InstallDeps -InstallPlaywrightBrowsers
+```
+
+3) Rodar testes unitários (pacote `ai-ide`)
+
+```powershell
+cd packages/ai-ide
+npx jest --config jest.config.js --runInBand
+```
+
+4) Rodar mock backend (developer mock)
+
+```powershell
+cd tools/llm-mock
+npm start
+# ou em background
+npm run start:background
+```
+
+5) Rodar Playwright E2E (opcional)
+
+```powershell
+cd tools/llm-mock
+npx playwright test playwright/test.spec.ts --project=chromium
+```
+
+Notas
+- Se os testes unitários falharem por imports Theia, o fluxo de desenvolvimento usa mocks locais (`packages/ai-ide/__mocks__`) para acelerar iterações.
+- Se você preferir um ambiente "real", instale as dependências Theia dev-packages conforme instruções do projeto e execute `theiaext build`.
 <div align='center'>
 
 <br />

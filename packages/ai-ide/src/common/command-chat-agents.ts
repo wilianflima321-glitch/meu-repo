@@ -32,6 +32,7 @@ import {
 } from '@theia/core';
 
 import { commandTemplate } from './command-prompt-template';
+import { LlmProviderService } from '../browser/llm-provider-service';
 
 interface ParsedCommand {
     type: 'theia-command' | 'custom-handler' | 'no-command'
@@ -46,14 +47,16 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
     protected commandRegistry: CommandRegistry;
     @inject(MessageService)
     protected messageService: MessageService;
+    @inject(LlmProviderService)
+    protected llmProviderService: LlmProviderService;
 
-    id: string = 'Command';
-    name = 'Command';
-    languageModelRequirements: LanguageModelRequirement[] = [{
+    override id: string = 'Command';
+    override name = 'Command';
+    override languageModelRequirements: LanguageModelRequirement[] = [{
         purpose: 'command',
         identifier: 'default/universal',
     }];
-    protected defaultLanguageModelPurpose: string = 'command';
+    protected override defaultLanguageModelPurpose: string = 'command';
 
     override description = 'This agent is aware of all commands that the user can execute within the Theia IDE, the tool that the user is currently working with. \
     Based on the user request, it can find the right command and then let the user execute it.';
@@ -75,7 +78,11 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
         if (systemPrompt === undefined) {
             throw new Error('Couldn\'t get prompt ');
         }
-        return SystemMessageDescription.fromResolvedPromptFragment(systemPrompt);
+        // `fromResolvedPromptFragment` may be an optional helper in some versions; guard at runtime
+        if (typeof (SystemMessageDescription as any).fromResolvedPromptFragment === 'function') {
+            return (SystemMessageDescription as any).fromResolvedPromptFragment(systemPrompt);
+        }
+        return undefined;
     }
 
     /**
@@ -91,6 +98,17 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
 }`;
         const parsedCommand = JSON.parse(jsonString) as ParsedCommand;
         return parsedCommand;
+    }
+
+    protected async sendLlmRequest(request: MutableChatRequestModel, messages: any[], toolRequests: any[], languageModel: any) {
+        const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
+        try {
+            const resp = await (this.llmProviderService as any).sendRequestToProvider(undefined, { input: messages.map(m => `${m.role||'user'}: ${m.content}`).join('\n'), settings });
+            const normalized: any = { status: resp.status, text: typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body), raw: resp.body };
+            return normalized;
+        } catch (e) {
+            return this.languageModelService.sendRequest(languageModel, { messages, tools: toolRequests.length ? toolRequests : undefined, settings, agentId: this.id, sessionId: request.session.id, requestId: request.id, cancellationToken: request.response?.cancellationToken });
+        }
     }
 
     protected createResponseContent(parsedCommand: ParsedCommand, request: MutableChatRequestModel): ChatResponseContent {

@@ -1,0 +1,132 @@
+{
+  "name": "@aethel/aethel-cloud-connector",
+  "version": "1.0.0",
+  "description": "Aethel Cloud Connector for integrating with AWS, Azure, GCP for AI and compute offloading",
+  "keywords": [
+    "theia-extension",
+    "aethel",
+    "cloud-connector",
+    "aws",
+    "azure",
+    "gcp",
+    "ai-offloading"
+  ],
+  "license": "Proprietary Aethel License",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aethel/aethel-theia-fork.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aethel/aethel-theia-fork/issues"
+  },
+  "homepage": "https://aethel-ide.com",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "^1.43.0",
+    "@theia/preferences": "^1.43.0",
+    "aws-sdk": "^2.1500.0",
+    "@google-cloud/aiplatform": "^3.0.0",
+    "@azure/identity": "^3.0.0",
+    "@google-cloud/storage": "^7.0.0"
+  },
+  "devDependencies": {
+    "@theia/cli": "^1.43.0",
+    "typescript": "^5.0.0",
+    "rimraf": "^3.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/aethel-cloud-connector-frontend-module",
+      "backend": "lib/node/aethel-cloud-connector-backend-module"
+    }
+  ],
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "webpack --config ./webpack.config.js",
+    "watch": "webpack --config ./webpack.config.js --watch",
+    "test": "mocha --config ../../configs/mocha-config.json",
+    "lint": "eslint --config ../../configs/.eslintrc.json --ext .ts,.tsx src"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "yarn": ">=1.15.0"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "aethel.cloud-connector.connectAWS",
+        "title": "Connect to AWS",
+        "category": "Aethel Cloud"
+      },
+      {
+        "command": "aethel.cloud-connector.connectAzure",
+        "title": "Connect to Azure",
+        "category": "Aethel Cloud"
+      },
+      {
+        "command": "aethel.cloud-connector.connectGCP",
+        "title": "Connect to GCP",
+        "category": "Aethel Cloud"
+      },
+      {
+        "command": "aethel.cloud-connector.offloadTask",
+        "title": "Offload Task to Cloud",
+        "category": "Aethel Cloud"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "aethel.cloud-connector.connectAWS"
+        },
+        {
+          "command": "aethel.cloud-connector.connectAzure"
+        },
+        {
+          "command": "aethel.cloud-connector.connectGCP"
+        },
+        {
+          "command": "aethel.cloud-connector.offloadTask"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "aethel-cloud-resources",
+          "name": "Cloud Resources",
+          "icon": "$(cloud)"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Aethel Cloud Connector",
+      "properties": {
+        "aethel.cloudConnector.awsRegion": {
+          "type": "string",
+          "default": "us-east-1",
+          "description": "AWS region for cloud operations"
+        },
+        "aethel.cloudConnector.azureSubscriptionId": {
+          "type": "string",
+          "description": "Azure subscription ID"
+        },
+        "aethel.cloudConnector.gcpProjectId": {
+          "type": "string",
+          "description": "GCP project ID"
+        },
+        "aethel.cloudConnector.autoOffload": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically offload large AI tasks to cloud"
+        }
+      }
+    }
+  }
+}

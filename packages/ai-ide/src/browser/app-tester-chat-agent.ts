@@ -22,6 +22,7 @@ import { LanguageModelRequirement } from '@theia/ai-core/lib/common';
 import { MCPFrontendService, MCPServerDescription } from '@theia/ai-mcp/lib/common/mcp-server-manager';
 import { nls } from '@theia/core';
 import { inject, injectable } from '@theia/core/shared/inversify';
+import { LlmProviderService } from '../browser/llm-provider-service';
 import { MCP_SERVERS_PREF } from '@theia/ai-mcp/lib/common/mcp-preferences';
 import { PreferenceScope, PreferenceService } from '@theia/core/lib/common';
 import { appTesterTemplate, appTesterTemplateVariant, REQUIRED_MCP_SERVERS } from './app-tester-prompt-template';
@@ -35,14 +36,16 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
 
     @inject(PreferenceService)
     protected readonly preferenceService: PreferenceService;
+    @inject(LlmProviderService)
+    protected readonly llmProviderService: any;
 
-    id: string = AppTesterChatAgentId;
-    name = AppTesterChatAgentId;
-    languageModelRequirements: LanguageModelRequirement[] = [{
+    override id: string = AppTesterChatAgentId;
+    override name = AppTesterChatAgentId;
+    override languageModelRequirements: LanguageModelRequirement[] = [{
         purpose: 'chat',
         identifier: 'default/code',
     }];
-    protected defaultLanguageModelPurpose: string = 'chat';
+    protected override defaultLanguageModelPurpose: string = 'chat';
     override description = nls.localize('theia/ai/chat/app-tester/description', 'This agent tests your application user interface to verify user-specified test scenarios through the Playwright MCP server. '
         + 'It can automate testing workflows and provide detailed feedback on application functionality.');
 
@@ -60,51 +63,76 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
                 request.response.response.addContent(new QuestionResponseContentImpl(
                     'The Playwright MCP servers are not running. Would you like to start them now? This may install the Playwright MCP servers.',
                     [
-                        { text: 'Yes, start the servers', value: 'yes' },
+                            { text: 'Yes, start the servers', value: 'yes' },
                         { text: 'No, cancel', value: 'no' }
                     ],
                     request,
                     async selectedOption => {
                         if (selectedOption.value === 'yes') {
                             // Show progress
-                            const progress = request.response.addProgressMessage({ content: 'Starting Playwright MCP servers.', show: 'whileIncomplete' });
+                                const _addProgressFn = (request.response as any).addProgressMessage;
+                                const progress = typeof _addProgressFn === 'function' ? _addProgressFn.call(request.response, { content: 'Starting Playwright MCP servers.', show: 'whileIncomplete' }) : undefined;
                             try {
                                 await this.startServers();
                                 // Remove progress, continue with normal flow
-                                request.response.updateProgressMessage({ ...progress, show: 'whileIncomplete', status: 'completed' });
+                                if (progress) {
+                                    // progress may be a ChatProgressMessage; only update if present
+                                    const _updateProgressFn = (request.response as any).updateProgressMessage;
+                                    if (typeof _updateProgressFn === 'function') {
+                                        _updateProgressFn.call(request.response, { ...(progress as any), status: 'completed' });
+                                    }
+                                }
                                 await super.invoke(request);
                             } catch (error) {
-                                request.response.response.addContent(new ErrorChatResponseContentImpl(
-                                    new Error('Failed to start Playwright MCP server: ' + (error instanceof Error ? error.message : String(error)))
-                                ));
-                                request.response.complete();
+                                const _addContent = (request.response as any)?.response?.addContent;
+                                if (typeof _addContent === 'function') {
+                                    _addContent.call((request.response as any).response, new ErrorChatResponseContentImpl(
+                                        new Error('Failed to start Playwright MCP server: ' + (error instanceof Error ? error.message : String(error)))
+                                    ));
+                                }
+                                (request.response as any)?.complete?.();
                             }
                         } else {
                             // Continue without starting the server
-                            request.response.response.addContent(new MarkdownChatResponseContentImpl('Please setup the MCP servers.'));
-                            request.response.complete();
+                                const _addContent2 = (request.response as any)?.response?.addContent;
+                                if (typeof _addContent2 === 'function') {
+                                    _addContent2.call((request.response as any).response, new MarkdownChatResponseContentImpl('Please setup the MCP servers.'));
+                                }
+                                const _completeFn = (request.response as any).complete;
+                                if (typeof _completeFn === 'function') {
+                                    _completeFn.call(request.response);
+                                }
                         }
                     }
                 ));
-                request.response.waitForInput();
+                const _waitForInput = (request.response as any).waitForInput;
+                if (typeof _waitForInput === 'function') {
+                    _waitForInput.call(request.response);
+                }
                 return;
             }
             // If already running, continue as normal
             await super.invoke(request);
         } catch (error) {
-            request.response.response.addContent(new ErrorChatResponseContentImpl(
-                new Error('Error checking Playwright MCP server status: ' + (error instanceof Error ? error.message : String(error)))
-            ));
-            request.response.complete();
+            const _addContentErr = request.response?.response?.addContent;
+            if (typeof _addContentErr === 'function') {
+                _addContentErr.call(request.response.response, new ErrorChatResponseContentImpl(
+                    new Error('Error checking Playwright MCP server status: ' + (error instanceof Error ? error.message : String(error)))
+                ));
+            }
+            const _completeOnErr = (request.response as any).complete;
+            if (typeof _completeOnErr === 'function') {
+                _completeOnErr.call(request.response);
+            }
         }
     }
 
-    protected async requiresStartingServers(): Promise<boolean> {
+    protected override async requiresStartingServers(): Promise<boolean> {
         const allStarted = await Promise.all(REQUIRED_MCP_SERVERS.map(server => this.mcpService.isServerStarted(server.name)));
         return allStarted.some(started => !started);
     }
 
-    protected async startServers(): Promise<void> {
+    protected override async startServers(): Promise<void> {
         await this.ensureServersStarted(...REQUIRED_MCP_SERVERS);
     }
 
@@ -113,7 +141,7 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
      *
      * @returns A promise that resolves when the server is started
      */
-    async ensureServersStarted(...servers: MCPServerDescription[]): Promise<void> {
+    override async ensureServersStarted(...servers: MCPServerDescription[]): Promise<void> {
         try {
             const serversToInstall: MCPServerDescription[] = [];
             const serversToStart: MCPServerDescription[] = [];
@@ -129,7 +157,11 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
 
             for (const server of serversToInstall) {
                 const currentServers = this.preferenceService.get<Record<string, MCPServerDescription>>(MCP_SERVERS_PREF, {});
-                await this.preferenceService.set(MCP_SERVERS_PREF, { ...currentServers, [server.name]: server }, PreferenceScope.User);
+                if (typeof (this.preferenceService as any)?.set === 'function') {
+                    await (this.preferenceService as any).set(MCP_SERVERS_PREF, { ...currentServers, [server.name]: server }, (PreferenceScope as any).User);
+                } else if (typeof (this.preferenceService as any)?.updateValue === 'function') {
+                    await (this.preferenceService as any).updateValue(MCP_SERVERS_PREF, { ...currentServers, [server.name]: server });
+                }
                 await this.mcpService.addOrUpdateServer(server);
             }
 
@@ -139,6 +171,17 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
         } catch (error) {
             this.logger.error(`Error starting MCP servers ${servers.map(s => s.name)}: ${error}`);
             throw error;
+        }
+    }
+
+    protected override async sendLlmRequest(request: MutableChatRequestModel, messages: any[], toolRequests: any[], languageModel: any) {
+        const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
+        try {
+            const resp = await (this.llmProviderService as any).sendRequestToProvider(undefined, { input: messages.map(m => `${m.role||'user'}: ${m.content}`).join('\n'), settings });
+            const normalized: any = { status: resp.status, text: typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body), raw: resp.body };
+            return normalized;
+        } catch (e) {
+            return this.languageModelService.sendRequest(languageModel, { messages, tools: toolRequests.length ? toolRequests : undefined, settings, agentId: this.id, sessionId: request.session.id, requestId: request.id, cancellationToken: request.response?.cancellationToken });
         }
     }
 }

@@ -13,7 +13,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
-const { expect } = require('chai');
+// Use the global `chai` provided by @types/chai and reference chai.expect explicitly
 const { OpenAiModelUtils } = require('./openai-language-model');
 const utils = new OpenAiModelUtils();
 
@@ -26,7 +26,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'system', type: 'text', text: 'another system message' },
             ];
             const result = utils.processMessages(messages, 'skip');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'user message' }
             ]);
         });
@@ -38,7 +38,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'ai', type: 'text', text: 'ai message' }
             ];
             const result = utils.processMessages(messages, 'skip');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'user message' },
                 { role: 'user', content: 'another user message' },
                 { role: 'assistant', content: 'ai message' }
@@ -54,7 +54,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'ai', type: 'text', text: 'ai message' }
             ];
             const result = utils.processMessages(messages, 'mergeWithFollowingUserMessage');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'system msg\nuser msg' },
                 { role: 'assistant', content: 'ai message' }
             ]);
@@ -66,7 +66,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'ai', type: 'text', text: 'ai message' }
             ];
             const result = utils.processMessages(messages, 'mergeWithFollowingUserMessage');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'system only msg' },
                 { role: 'assistant', content: 'ai message' }
             ]);
@@ -81,7 +81,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'ai', type: 'text', text: 'ai message' }
             ];
             const result = utils.processMessages(messages, 'mergeWithFollowingUserMessage');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'user message' },
                 { role: 'user', content: 'system message\nsystem message2\nuser message2' },
                 { role: 'assistant', content: 'ai message' }
@@ -96,7 +96,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'ai', type: 'text', text: 'ai message' }
             ];
             const result = utils.processMessages(messages, 'mergeWithFollowingUserMessage');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'user message' },
                 { role: 'user', content: 'system message\nsystem message2' },
                 { role: 'assistant', content: 'ai message' }
@@ -113,7 +113,7 @@ describe('OpenAiModelUtils - processMessages', () => {
             ];
             // Using a developerMessageSettings that is not merge/skip, e.g., 'developer'
             const result = utils.processMessages(messages, 'developer');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'user message' },
                 { role: 'developer', content: 'system message' },
                 { role: 'assistant', content: 'ai message' }
@@ -129,7 +129,7 @@ describe('OpenAiModelUtils - processMessages', () => {
             ];
             // Since the first message is system and developerMessageSettings is not merge/skip, ordering is not adjusted
             const result = utils.processMessages(messages, 'user');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'user', content: 'system msg' },
                 { role: 'assistant', content: 'ai msg' }
             ]);
@@ -141,7 +141,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'ai', type: 'text', text: 'ai msg' }
             ];
             const result = utils.processMessages(messages, 'system');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'system', content: 'system msg' },
                 { role: 'assistant', content: 'ai msg' }
             ]);
@@ -154,7 +154,7 @@ describe('OpenAiModelUtils - processMessages', () => {
                 { actor: 'ai', type: 'text', text: 'ai msg' }
             ];
             const result = utils.processMessages(messages, 'developer');
-            expect(result).to.deep.equal([
+            chai.expect(result).to.deep.equal([
                 { role: 'developer', content: 'system msg' },
                 { role: 'user', content: 'user msg' },
                 { role: 'assistant', content: 'ai msg' }

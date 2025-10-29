@@ -37,8 +37,9 @@ export class NodeFileUploadService implements BackendApplicationContribution {
         app.post(
             http_path,
             // `multer` handles `multipart/form-data` containing our file to upload.
-            multer({ dest }).single('file'),
-            (request, response, next) => this.handleFileUpload(request, response)
+            // Cast to any to avoid TypeScript type conflicts between multiple @types/express copies.
+            (multer({ dest }).single('file') as any),
+            (request: any, response: any, next: any) => this.handleFileUpload(request, response)
         );
     }
 

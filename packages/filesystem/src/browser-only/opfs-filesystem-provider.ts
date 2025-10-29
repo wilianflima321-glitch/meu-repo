@@ -228,7 +228,10 @@ export class OPFSFileSystemProvider implements FileSystemProviderWithFileReadWri
             writeableHandle = await handle?.createWritable();
 
             // Write content at once
-            await writeableHandle?.write(content);
+            // cast the underlying buffer to ArrayBuffer for compatibility with the FileSystemWritableFileStream API
+            // (some environments represent ArrayBuffer as SharedArrayBuffer which is not assignable to ArrayBuffer
+            // in the typings, so cast to ArrayBuffer here to satisfy the compiler)
+            await writeableHandle?.write(content.buffer as ArrayBuffer);
 
             this.onDidChangeFileEmitter.fire([{ resource: resource, type: FileChangeType.UPDATED }]);
         } catch (error) {

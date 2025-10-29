@@ -14,13 +14,12 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import * as webpack from 'webpack';
+import type { Compiler, ContextModuleFactory } from 'webpack';
 
 export class MonacoWebpackPlugin {
-    apply(compiler: webpack.Compiler): void {
-        compiler.hooks.contextModuleFactory.tap('MonacoBuildPlugin', cmf => {
-            cmf.hooks.contextModuleFiles.tap('MonacoBuildPlugin', files => files.filter(file => !file.endsWith('.d.ts')));
-
+    apply(compiler: Compiler): void {
+        compiler.hooks.contextModuleFactory.tap('MonacoBuildPlugin', (cmf: ContextModuleFactory) => {
+            cmf.hooks.contextModuleFiles.tap('MonacoBuildPlugin', (files: string[]) => files.filter(file => !file.endsWith('.d.ts')));
         });
     }
 }

@@ -72,25 +72,35 @@ export class TemplatePreferenceContribution implements FrontendApplicationContri
         const workspaceRootUri = workspaceRoot.resource;
         const configProperties: PromptFragmentCustomizationProperties = {};
 
+        const getPref = <T = any>(key: string, d: T): T => {
+            const getter = (this.preferenceService as any).get;
+            if (typeof getter === 'function') {
+                return getter.call(this.preferenceService, key, d) as T;
+            }
+            return d;
+        };
+
         if (!changedPreference || changedPreference === PROMPT_TEMPLATE_WORKSPACE_DIRECTORIES_PREF) {
-            const relativeDirectories = this.preferenceService.get<string[]>(PROMPT_TEMPLATE_WORKSPACE_DIRECTORIES_PREF, []);
+            const relativeDirectories = getPref<string[]>(PROMPT_TEMPLATE_WORKSPACE_DIRECTORIES_PREF, []);
             configProperties.directoryPaths = relativeDirectories.map(dir => {
                 const path = new Path(dir);
-                const uri = workspaceRootUri.resolve(path.toString());
-                return uri.path.toString();
+                const resolveFn = (workspaceRootUri as any).resolve;
+                const uri = typeof resolveFn === 'function' ? resolveFn.call(workspaceRootUri, path.toString()) : (workspaceRootUri as any);
+                return (uri && uri.path) ? uri.path.toString() : '';
             });
         }
 
         if (!changedPreference || changedPreference === PROMPT_TEMPLATE_ADDITIONAL_EXTENSIONS_PREF) {
-            configProperties.extensions = this.preferenceService.get<string[]>(PROMPT_TEMPLATE_ADDITIONAL_EXTENSIONS_PREF, []);
+            configProperties.extensions = getPref<string[]>(PROMPT_TEMPLATE_ADDITIONAL_EXTENSIONS_PREF, []);
         }
 
         if (!changedPreference || changedPreference === PROMPT_TEMPLATE_WORKSPACE_FILES_PREF) {
-            const relativeFilePaths = this.preferenceService.get<string[]>(PROMPT_TEMPLATE_WORKSPACE_FILES_PREF, []);
+            const relativeFilePaths = getPref<string[]>(PROMPT_TEMPLATE_WORKSPACE_FILES_PREF, []);
             configProperties.filePaths = relativeFilePaths.map(filePath => {
                 const path = new Path(filePath);
-                const uri = workspaceRootUri.resolve(path.toString());
-                return uri.path.toString();
+                const resolveFn = (workspaceRootUri as any).resolve;
+                const uri = typeof resolveFn === 'function' ? resolveFn.call(workspaceRootUri, path.toString()) : (workspaceRootUri as any);
+                return (uri && uri.path) ? uri.path.toString() : '';
             });
         }
 

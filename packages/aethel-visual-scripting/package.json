@@ -1,0 +1,100 @@
+{
+  "name": "@aethel/aethel-visual-scripting",
+  "version": "1.0.0",
+  "description": "Aethel Visual Scripting extension for node-based programming with AGI optimization",
+  "keywords": [
+    "theia-extension",
+    "aethel",
+    "visual-scripting",
+    "node-graph",
+    "godot-like",
+    "agi"
+  ],
+  "license": "Proprietary Aethel License",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aethel/aethel-theia-fork.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aethel/aethel-theia-fork/issues"
+  },
+  "homepage": "https://aethel-ide.com",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "^1.43.0",
+    "@theia/editor": "^1.43.0",
+    "@theia/filesystem": "^1.43.0",
+    "@theia/monaco": "^1.43.0",
+    "@theia/workspace": "^1.43.0",
+    "litegraph.js": "^0.7.18",
+    "d3": "^7.0.0"
+  },
+  "devDependencies": {
+    "@theia/cli": "^1.43.0",
+    "typescript": "^5.0.0",
+    "rimraf": "^3.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/aethel-visual-scripting-frontend-module",
+      "backend": "lib/node/aethel-visual-scripting-backend-module"
+    }
+  ],
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "webpack --config ./webpack.config.js",
+    "watch": "webpack --config ./webpack.config.js --watch",
+    "test": "mocha --config ../../configs/mocha-config.json",
+    "lint": "eslint --config ../../configs/.eslintrc.json --ext .ts,.tsx src"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "yarn": ">=1.15.0"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "aethel.visual-scripting.open",
+        "title": "Open Visual Scripting Editor",
+        "category": "Aethel"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "aethel.visual-scripting.open"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "aethel-visual-scripting",
+          "name": "Visual Scripts",
+          "icon": "$(graph)"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Aethel Visual Scripting",
+      "properties": {
+        "aethel.visualScripting.autoOptimize": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AGI auto-optimization for node graphs"
+        },
+        "aethel.visualScripting.godotIntegration": {
+          "type": "boolean",
+          "default": true,
+          "description": "Integrate with Godot engine for advanced node types"
+        }
+      }
+    }
+  }
+}

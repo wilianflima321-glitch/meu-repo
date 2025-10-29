@@ -42,7 +42,10 @@ export class AIVariableConfigurationWidget extends ReactWidget {
         this.title.label = AIVariableConfigurationWidget.LABEL;
         this.title.closable = false;
         this.update();
-        this.toDispose.push(this.variableService.onDidChangeVariables(() => this.update()));
+    // The onDidChangeVariables API may return either a unregister function or a Disposable.
+    // Treat the return as 'any' and wrap unconditionally to avoid testing a value typed as void.
+    const d: any = this.variableService.onDidChangeVariables(() => this.update());
+    this.toDispose.push({ dispose: () => { try { if (typeof d === 'function') { d(); } else if (d && typeof d.dispose === 'function') { d.dispose(); } } catch { } } } as any);
     }
 
     protected render(): React.ReactNode {
@@ -50,7 +53,7 @@ export class AIVariableConfigurationWidget extends ReactWidget {
             <ul>
                 {this.variableService.getVariables().map(variable =>
                     <li key={variable.id} className='variable-item' >
-                        <div className='settings-section-title settings-section-category-title' style={{ paddingLeft: 0, paddingBottom: 10 }}>{variable.name}</div>
+                        <div className='settings-section-title settings-section-category-title variable-title'>{variable.name}</div>
                         <small>{variable.id}</small>
                         <small>{variable.description}</small>
                         {this.renderReferencedVariables(variable)}

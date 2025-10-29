@@ -55,19 +55,20 @@ export class AIToolsConfigurationWidget extends ReactWidget {
         this.title.closable = false;
         this.loadData();
         this.update();
-        this.toDispose.pushAll([
-            this.preferenceService.onPreferenceChanged(async e => {
-                if (e.preferenceName === 'ai-features.chat.toolConfirmation') {
-                    this.defaultState = await this.loadDefaultConfirmation();
-                    this.toolConfirmationModes = await this.loadToolConfigurationModes();
-                    this.update();
-                }
-            }),
-            this.toolInvocationRegistry.onDidChange(async () => {
-                this.tools = await this.loadTools();
+        const pChanged: any = this.preferenceService.onPreferenceChanged(async e => {
+            if (e.preferenceName === 'ai-features.chat.toolConfirmation') {
+                this.defaultState = await this.loadDefaultConfirmation();
+                this.toolConfirmationModes = await this.loadToolConfigurationModes();
                 this.update();
-            })
-        ]);
+            }
+        });
+        const tChanged: any = this.toolInvocationRegistry.onDidChange(async () => {
+            this.tools = await this.loadTools();
+            this.update();
+        });
+
+        this.toDispose.push({ dispose: () => { try { if (typeof pChanged === 'function') { pChanged(); } else if (pChanged && typeof pChanged.dispose === 'function') { pChanged.dispose(); } } catch { } } } as any);
+        this.toDispose.push({ dispose: () => { try { if (typeof tChanged === 'function') { tChanged(); } else if (tChanged && typeof tChanged.dispose === 'function') { tChanged.dispose(); } } catch { } } } as any);
     }
 
     protected async loadData(): Promise<void> {
@@ -122,21 +123,19 @@ export class AIToolsConfigurationWidget extends ReactWidget {
             return <div>Loading tools...</div>;
         }
         return <div className='ai-tools-configuration-container'>
-            <div className='ai-tools-configuration-default-section' style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className='ai-tools-configuration-default-section ai-tools-default-row'>
                 <div className='ai-tools-configuration-default-label'>Default Tool Confirmation Mode:</div>
                 <select
                     className="ai-tools-configuration-default-select"
                     value={this.defaultState}
                     onChange={this.handleDefaultStateChange}
-                    style={{ marginLeft: 8 }}
                 >
                     {TOOL_OPTIONS.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                 </select>
                 <button
-                    className='ai-tools-configuration-reset-btn'
-                    style={{ marginLeft: 'auto' }}
+                    className='ai-tools-configuration-reset-btn ai-tools-reset'
                     title='Reset all tools to default'
                     onClick={() => this.resetAllToolsToDefault()}
                 >

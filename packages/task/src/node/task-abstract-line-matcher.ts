@@ -109,10 +109,13 @@ export abstract class AbstractLineMatcher {
             this.fillProperty(data, property, pattern, matches, trim);
         } else if (patternProperty !== undefined && patternProperty < matches.length) {
             let value = matches[patternProperty];
-            if (trim) {
+            if (value === undefined) {
+                value = '';
+            }
+            if (trim && typeof value === 'string') {
                 value = value.trim();
             }
-            (data[property] as string) += endOfLine + value;
+            (data[property] as string) += endOfLine + String(value);
         }
     }
 
@@ -124,7 +127,9 @@ export abstract class AbstractLineMatcher {
                 if (trim) {
                     value = value.trim();
                 }
-                (data[property] as string) = value;
+                // Ensure we assign a string (safe coercion) to avoid TS complaining about undefined
+                const s = String(value);
+                (data as any)[property] = s;
             }
         }
     }
@@ -177,16 +182,18 @@ export abstract class AbstractLineMatcher {
         return this.createRange(startLine, startColumn, endLine, endColumn);
     }
 
-    private parseLocationInfo(value: string): Range | null {
+    private parseLocationInfo(value: string | undefined): Range | null {
         if (!value || !value.match(/(\d+|\d+,\d+|\d+,\d+,\d+,\d+)/)) {
             // eslint-disable-next-line no-null/no-null
             return null;
         }
-        const parts = value.split(',');
-        const startLine = parseInt(parts[0]);
-        const startColumn = parts.length > 1 ? parseInt(parts[1]) : undefined;
+        const parts: string[] = value.split(',');
+        const startLine: number = parseInt(parts[0], 10);
+        const startColumn: number | undefined = parts.length > 1 ? parseInt(parts[1], 10) : undefined;
         if (parts.length > 3) {
-            return this.createRange(startLine, startColumn, parseInt(parts[2]), parseInt(parts[3]));
+            const endLine = parseInt(parts[2], 10);
+            const endColumn = parseInt(parts[3], 10);
+            return this.createRange(startLine, startColumn, endLine, endColumn);
         } else {
             return this.createRange(startLine, startColumn, undefined, undefined);
         }

@@ -31,25 +31,13 @@ export class AnthropicLanguageModelsManagerImpl implements AnthropicLanguageMode
     protected readonly tokenUsageService: TokenUsageService;
 
     get apiKey(): string | undefined {
-        return this._apiKey ?? process.env.ANTHROPIC_API_KEY;
+        return this._apiKey;
     }
 
     async createOrUpdateLanguageModels(...modelDescriptions: AnthropicModelDescription[]): Promise<void> {
         for (const modelDescription of modelDescriptions) {
             const model = await this.languageModelRegistry.getLanguageModel(modelDescription.id);
-            const apiKeyProvider = () => {
-                if (modelDescription.apiKey === true) {
-                    return this.apiKey;
-                }
-                if (modelDescription.apiKey) {
-                    return modelDescription.apiKey;
-                }
-                return undefined;
-            };
-
-            // Determine status based on API key presence
-            const effectiveApiKey = apiKeyProvider();
-            const status = this.getStatusForApiKey(effectiveApiKey);
+            const status = this.calculateStatus(modelDescription);
 
             if (model) {
                 if (!(model instanceof AnthropicModel)) {
@@ -59,10 +47,10 @@ export class AnthropicLanguageModelsManagerImpl implements AnthropicLanguageMode
                 await this.languageModelRegistry.patchLanguageModel<AnthropicModel>(modelDescription.id, {
                     model: modelDescription.model,
                     enableStreaming: modelDescription.enableStreaming,
-                    apiKey: apiKeyProvider,
-                    status,
+                    useCaching: modelDescription.useCaching,
                     maxTokens: modelDescription.maxTokens !== undefined ? modelDescription.maxTokens : DEFAULT_MAX_TOKENS,
-                    maxRetries: modelDescription.maxRetries
+                    maxRetries: modelDescription.maxRetries,
+                    status,
                 });
             } else {
                 this.languageModelRegistry.addLanguageModels([
@@ -72,8 +60,7 @@ export class AnthropicLanguageModelsManagerImpl implements AnthropicLanguageMode
                         status,
                         modelDescription.enableStreaming,
                         modelDescription.useCaching,
-                        apiKeyProvider,
-                        modelDescription.maxTokens,
+                        modelDescription.maxTokens ?? DEFAULT_MAX_TOKENS,
                         modelDescription.maxRetries,
                         this.tokenUsageService
                     )
@@ -87,20 +74,13 @@ export class AnthropicLanguageModelsManagerImpl implements AnthropicLanguageMode
     }
 
     setApiKey(apiKey: string | undefined): void {
-        if (apiKey) {
-            this._apiKey = apiKey;
-        } else {
-            this._apiKey = undefined;
-        }
+        this._apiKey = apiKey;
     }
 
-    /**
-     * Returns the status for a language model based on the presence of an API key.
-     */
-    protected getStatusForApiKey(effectiveApiKey: string | undefined): LanguageModelStatus {
-        return effectiveApiKey
-            ? { status: 'ready' }
-            : { status: 'unavailable', message: 'No API key set' };
+    protected calculateStatus(_modelDescription: AnthropicModelDescription): LanguageModelStatus {
+        // Credentials and routing are handled by the backend runtime. If the runtime is reachable,
+        // the model is considered ready from the IDE perspective.
+        return { status: 'ready' };
     }
 }
 

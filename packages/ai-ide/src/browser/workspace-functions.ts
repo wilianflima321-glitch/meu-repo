@@ -50,6 +50,24 @@ export class WorkspaceFunctionScope {
     private gitignoreMatcher: ReturnType<typeof ignore> | undefined;
     private gitignoreWatcherInitialized = false;
 
+    // Helper to safely access preference values. Some PreferenceService signatures
+    // can be typed as possibly undefined; this helper centralizes the defaulting
+    // behavior used across this file.
+    public safeGetPreference<T>(key: string, defaultValue: T): T {
+        // preferences.get may be undefined in certain typings; guard at runtime.
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const getter: any = (this.preferences as any)?.get;
+            if (typeof getter === 'function') {
+                const v = getter.call(this.preferences, key, defaultValue);
+                return v === undefined ? defaultValue : v;
+            }
+        } catch {
+            // Fallthrough to default
+        }
+        return defaultValue;
+    }
+
     async getWorkspaceRoot(): Promise<URI> {
         const wsRoots = await this.workspaceService.roots;
         if (wsRoots.length === 0) {
@@ -87,8 +105,8 @@ export class WorkspaceFunctionScope {
     }
 
     async shouldExclude(stat: FileStat): Promise<boolean> {
-        const shouldConsiderGitIgnore = this.preferences.get(CONSIDER_GITIGNORE_PREF, false);
-        const userExcludePatterns = this.preferences.get<string[]>(USER_EXCLUDE_PATTERN_PREF, []);
+    const shouldConsiderGitIgnore = this.safeGetPreference(CONSIDER_GITIGNORE_PREF, false);
+    const userExcludePatterns = this.safeGetPreference<string[]>(USER_EXCLUDE_PATTERN_PREF, []);
 
         if (this.isUserExcluded(stat.resource.path.base, userExcludePatterns)) {
             return true;
@@ -117,7 +135,7 @@ export class WorkspaceFunctionScope {
                     const gitignoreContent = await this.fileService.read(gitignoreUri);
                     this.gitignoreMatcher = ignore().add(gitignoreContent.value);
                 }
-                const relativePath = workspaceRoot.relative(stat.resource);
+                const relativePath = (workspaceRoot && typeof (workspaceRoot as any).relative === 'function') ? (workspaceRoot as any).relative(stat.resource) : undefined;
                 if (relativePath) {
                     const relativePathStr = relativePath.toString() + (stat.isDirectory ? '/' : '');
                     if (this.gitignoreMatcher.ignores(relativePathStr)) {
@@ -629,11 +647,11 @@ export class FindFilesByPattern implements ToolProvider {
         const patterns: string[] = [];
 
         // Get user exclude patterns from preferences
-        const userExcludePatterns = this.preferences.get<string[]>(USER_EXCLUDE_PATTERN_PREF, []);
-        patterns.push(...userExcludePatterns);
+    const userExcludePatterns = this.workspaceScope.safeGetPreference<string[]>(USER_EXCLUDE_PATTERN_PREF, []);
+    patterns.push(...userExcludePatterns);
 
-        // Add gitignore patterns if enabled
-        const shouldConsiderGitIgnore = this.preferences.get(CONSIDER_GITIGNORE_PREF, false);
+    // Add gitignore patterns if enabled
+    const shouldConsiderGitIgnore = this.workspaceScope.safeGetPreference(CONSIDER_GITIGNORE_PREF, false);
         if (shouldConsiderGitIgnore) {
             try {
                 const gitignoreUri = workspaceRoot.resolve('.gitignore');
@@ -675,12 +693,15 @@ export class FindFilesByPattern implements ToolProvider {
                     break;
                 }
 
-                const relativePath = workspaceRoot.relative(child.resource)?.toString();
-                if (!relativePath) {
+                const relativePathRaw = (workspaceRoot && typeof (workspaceRoot as any).relative === 'function') ? (workspaceRoot as any).relative(child.resource)?.toString() : undefined;
+                if (!relativePathRaw) {
                     continue;
                 }
+                // Narrow to a definite string before using inside callbacks so TypeScript
+                // does not consider it possibly undefined inside the matcher lambdas.
+                const relativePathStr: string = relativePathRaw;
 
-                const shouldExclude = excludeMatchers.some(matcher => matcher.match(relativePath)) ||
+                const shouldExclude = excludeMatchers.some(matcher => matcher.match(relativePathStr)) ||
                     (await this.workspaceScope.shouldExclude(child));
 
                 if (shouldExclude) {
@@ -689,8 +710,8 @@ export class FindFilesByPattern implements ToolProvider {
 
                 if (child.isDirectory) {
                     await this.traverseDirectory(child.resource, workspaceRoot, patternMatcher, excludeMatchers, results, maxResults, cancellationToken);
-                } else if (patternMatcher.match(relativePath)) {
-                    results.push(relativePath);
+                } else if (patternMatcher.match(relativePathStr)) {
+                    results.push(relativePathStr);
                 }
             }
         } catch {

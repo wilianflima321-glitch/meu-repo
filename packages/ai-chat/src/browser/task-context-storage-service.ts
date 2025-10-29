@@ -29,7 +29,8 @@ export class InMemoryTaskContextStorage implements TaskContextStorageService {
     readonly onDidChange = this.onDidChangeEmitter.event;
 
     protected sanitizeLabel(label: string): string {
-        return label.replace(/^[^\p{L}\p{N}]+/vg, '');
+        // remove leading non-letter/number characters; use 'u' for unicode property escapes
+        return label.replace(/^[^\p{L}\p{N}]+/u, '');
     }
 
     @inject(AIVariableResourceResolver)

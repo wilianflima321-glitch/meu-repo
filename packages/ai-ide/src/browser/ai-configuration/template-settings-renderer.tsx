@@ -36,13 +36,19 @@ export const PromptVariantRenderer: React.FC<PromptVariantRendererProps> = ({
         const currentVariant = promptService.getSelectedVariantId(promptVariantSet.id);
         setSelectedVariant(currentVariant ?? defaultVariantId!);
 
-        const disposable = promptService.onSelectedVariantChange(notification => {
+        const disposable: any = promptService.onSelectedVariantChange((notification: any) => {
             if (notification.promptVariantSetId === promptVariantSet.id) {
                 setSelectedVariant(notification.variantId ?? defaultVariantId!);
             }
         });
         return () => {
-            disposable.dispose();
+            try {
+                if (disposable && typeof disposable.dispose === 'function') {
+                    disposable.dispose();
+                } else if (typeof disposable === 'function') {
+                    disposable();
+                }
+            } catch { }
         };
     }, [promptVariantSet.id, promptService, defaultVariantId]);
 
@@ -97,14 +103,14 @@ export const PromptVariantRenderer: React.FC<PromptVariantRendererProps> = ({
                     onClick={openTemplate}
                     disabled={isInvalidVariant}
                 >
-                    {nls.localizeByDefault('Edit')}
+                    {nls.localize('theia/ai/core/templateSettings/edit', 'Edit')}
                 </button>
                 <button
                     className="theia-button secondary"
                     onClick={resetTemplate}
                     disabled={isInvalidVariant}
                 >
-                    {nls.localizeByDefault('Reset')}
+                    {nls.localize('theia/ai/core/templateSettings/reset', 'Reset')}
                 </button>
             </div>
         </div>

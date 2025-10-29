@@ -29,6 +29,6 @@ export function bindCommonLogger(bind: interfaces.Bind): void {
 }
 
 function getName(request: interfaces.Request): string | undefined {
-    const named = request.target.metadata.find(e => e.key === 'named');
+    const named = request.target.metadata.find((e: interfaces.Metadata) => e.key === 'named');
     return named ? named.value?.toString() : undefined;
 }

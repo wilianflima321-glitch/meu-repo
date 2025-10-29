@@ -65,25 +65,30 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
         const matchingAgentsPromise = this.loadMatchingAgentIdsForAllAliases();
         Promise.all([aliasesPromise, languageModelsPromise, matchingAgentsPromise]).then(() => this.update());
 
-        this.languageModelAliasRegistry.ready.then(() =>
-            this.toDispose.push(this.languageModelAliasRegistry.onDidChange(async () => {
+        this.languageModelAliasRegistry.ready.then(() => {
+            const d: any = this.languageModelAliasRegistry.onDidChange(async () => {
                 await this.loadAliases();
                 this.update();
-            }))
-        );
+            });
+            // Wrap the return as 'any' and avoid testing it in a boolean context (which fails if it's typed as void).
+            this.toDispose.push({ dispose: () => { try { if (typeof d === 'function') { d(); } else if (typeof (d as any).dispose === 'function') { (d as any).dispose(); } } catch { } } } as any);
+        });
 
-        this.toDispose.pushAll([
-            this.languageModelRegistry.onChange(async () => {
-                await this.loadAliases();
-                await this.loadLanguageModels();
-                this.update();
-            }),
-            this.aiSettingsService.onDidChange(async () => {
-                await this.loadMatchingAgentIdsForAllAliases();
-                this.update();
-            }),
-            this.aiConfigurationSelectionService.onDidAliasChange(() => this.update())
-        ]);
+        // Capture listener returns as 'any' and wrap them to ensure a Disposable-like object is pushed.
+        const r1: any = this.languageModelRegistry.onChange(async () => {
+            await this.loadAliases();
+            await this.loadLanguageModels();
+            this.update();
+        });
+        const r2: any = this.aiSettingsService.onDidChange(async () => {
+            await this.loadMatchingAgentIdsForAllAliases();
+            this.update();
+        });
+        const r3: any = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
+
+        this.toDispose.push({ dispose: () => { try { if (typeof r1 === 'function') { r1(); } else if (r1 && typeof r1.dispose === 'function') { r1.dispose(); } } catch { } } } as any);
+        this.toDispose.push({ dispose: () => { try { if (typeof r2 === 'function') { r2(); } else if (r2 && typeof r2.dispose === 'function') { r2.dispose(); } } catch { } } } as any);
+        this.toDispose.push({ dispose: () => { try { if (typeof r3 === 'function') { r3(); } else if (r3 && typeof r3.dispose === 'function') { r3.dispose(); } } catch { } } } as any);
     }
 
     protected async loadAliases(): Promise<void> {
@@ -123,7 +128,7 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
                     }
                 } else {
                     // requirement is NOT set via settings, check if this alias is the default for this agent
-                    if (agent.languageModelRequirements.some((req: LanguageModelRequirement) => req.identifier === alias.id)) {
+                    if ((agent.languageModelRequirements ?? []).some((req: LanguageModelRequirement) => req.identifier === alias.id)) {
                         matchingAgentIds.push(agent.id);
                     }
                 }

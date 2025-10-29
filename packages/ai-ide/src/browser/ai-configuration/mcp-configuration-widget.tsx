@@ -126,10 +126,7 @@ export class AIMCPConfigurationWidget extends ReactWidget {
         const error = server.error;
         return (
             <div className="mcp-status-container">
-                <span className="mcp-status-badge" style={{
-                    backgroundColor: colors.bg,
-                    color: colors.fg
-                }}>
+                <span className="mcp-status-badge mcp-status-dynamic" data-bg={colors.bg} data-fg={colors.fg}>
                     {displayStatus}
                 </span>
                 {error && (
@@ -256,10 +253,7 @@ export class AIMCPConfigurationWidget extends ReactWidget {
         return (
             <div className="mcp-server-section">
                 <span className="mcp-section-label">{nls.localize('theia/ai/mcpConfiguration/autostart', 'Autostart: ')}</span>
-                <span className="mcp-autostart-badge" style={{
-                    backgroundColor: server.autostart ? 'var(--theia-successBackground)' : 'var(--theia-errorBackground)',
-                    color: server.autostart ? 'var(--theia-successForeground)' : 'var(--theia-errorForeground)',
-                }}>
+                <span className={"mcp-autostart-badge " + (server.autostart ? 'enabled' : 'disabled')}>
                     {server.autostart ? nls.localize('theia/ai/mcpConfiguration/enabled', 'Enabled') : nls.localize('theia/ai/mcpConfiguration/disabled', 'Disabled')}
                 </span>
             </div>
@@ -273,20 +267,14 @@ export class AIMCPConfigurationWidget extends ReactWidget {
         const isToolsExpanded = this.expandedTools[server.name] || false;
         return (
             <div className="mcp-tools-section">
-                <div style={{ display: 'flex', alignItems: 'center' }} onClick={() => this.toggleTools(server.name)}>
-                    <div className="mcp-toggle-indicator" style={{ display: 'flex' }}>
-                        <span style={{
-                            display: 'inline-block',
-                            transition: 'transform 0.2s ease',
-                            fontSize: '12px'
-                        }}>
-                            {isToolsExpanded ? '▼' : '►'}
-                        </span>
+                <div className='mcp-tools-header' onClick={() => this.toggleTools(server.name)}>
+                    <div className="mcp-toggle-indicator">
+                        <span className='mcp-toggle-icon'>{isToolsExpanded ? '▼' : '►'}</span>
                     </div>
-                    <div style={{ flexGrow: 1 }}>
+                    <div className='mcp-tools-header-label'>
                         <span className="mcp-section-label">{nls.localize('theia/ai/mcpConfiguration/tools', 'Tools: ')}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '4px' }}>
+                    <div className='mcp-tools-header-actions'>
                         {this.renderButton(
                             <i className="codicon codicon-versions"></i>,
                             nls.localize('theia/ai/mcpConfiguration/copyAllList', 'Copy all (list of all tools)'),
@@ -317,8 +305,7 @@ export class AIMCPConfigurationWidget extends ReactWidget {
                             e => {
                                 e.stopPropagation();
                                 navigator.clipboard.writeText(`#${PROMPT_VARIABLE.name}:${this.mcpFrontendService.getPromptTemplateId(server.name)}`);
-                                this.messageService.info(nls.localize('theia/ai/mcpConfiguration/copiedAllSingle', 'Copied all tools to clipboard (single prompt fragment with \
-                                    all tools)'));
+                                this.messageService.info(nls.localize('theia/ai/mcpConfiguration/copiedAllSingle', 'Copied all tools to clipboard (single prompt fragment with all tools)'));
                             },
                             'mcp-copy-tool-button'
                         )}
@@ -327,11 +314,11 @@ export class AIMCPConfigurationWidget extends ReactWidget {
                 {isToolsExpanded && (
                     <div className="mcp-tools-list">
                         {server.tools.map(tool => (
-                            <div key={tool.name} style={{ display: 'flex', alignItems: 'center' }}>
-                                <div style={{ flexGrow: 1 }}>
+                            <div key={tool.name} className='mcp-tool-row'>
+                                <div className='mcp-tool-desc'>
                                     <strong>{tool.name}:</strong> {tool.description}
                                 </div>
-                                <div style={{ display: 'flex', gap: '4px' }}>
+                                <div className='mcp-tool-actions'>
                                     {this.renderButton(
                                         <i className="codicon codicon-copy"></i>,
                                         nls.localize('theia/ai/mcpConfiguration/copyForPrompt', 'Copy tool (for chat or prompt template)'),

@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import { LanguageModelRegistry, LanguageModelStatus } from '@theia/ai-core';
+import { LanguageModelRegistry, LanguageModelStatus, TokenUsageService } from '@theia/ai-core';
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { HuggingFaceModel } from './huggingface-language-model';
 import { HuggingFaceLanguageModelsManager, HuggingFaceModelDescription } from '../common';
@@ -27,12 +27,16 @@ export class HuggingFaceLanguageModelsManagerImpl implements HuggingFaceLanguage
     @inject(LanguageModelRegistry)
     protected readonly languageModelRegistry: LanguageModelRegistry;
 
+    @inject(TokenUsageService)
+    protected readonly tokenUsageService: TokenUsageService;
+
     get apiKey(): string | undefined {
-        return this._apiKey ?? process.env.HUGGINGFACE_API_KEY;
+        return this._apiKey;
     }
 
-    protected calculateStatus(apiKey: string | undefined): LanguageModelStatus {
-        return apiKey ? { status: 'ready' } : { status: 'unavailable', message: 'No Hugging Face API key set' };
+    protected calculateStatus(_apiKey: string | undefined): LanguageModelStatus {
+        // The backend runtime owns credential management. From the IDE perspective the model is always ready.
+        return { status: 'ready' };
     }
 
     async createOrUpdateLanguageModels(...modelDescriptions: HuggingFaceModelDescription[]): Promise<void> {
@@ -49,6 +53,7 @@ export class HuggingFaceLanguageModelsManagerImpl implements HuggingFaceLanguage
                 model.model = modelDescription.model;
                 model.apiKey = apiKeyProvider;
                 model.status = status;
+                model.enableStreaming = true;
             } else {
                 this.languageModelRegistry.addLanguageModels([
                     new HuggingFaceModel(
@@ -62,6 +67,8 @@ export class HuggingFaceLanguageModelsManagerImpl implements HuggingFaceLanguage
                         undefined,
                         undefined,
                         undefined,
+                        true,
+                        this.tokenUsageService
                     )
                 ]);
             }

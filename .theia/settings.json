@@ -20,4 +20,8 @@
     "MD033": false, // allow inline html
     "MD041": false // don't require h1 in first line
   },
+  // Aethel branding defaults
+  "workbench.colorTheme": "Aethel Dark",
+  "workbench.preferredDarkColorTheme": "Aethel Dark",
+  "workbench.preferredLightColorTheme": "Aethel Light"
 }

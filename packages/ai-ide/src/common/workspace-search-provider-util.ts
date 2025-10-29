@@ -27,7 +27,7 @@ import { URI } from '@theia/core';
 export function optimizeSearchResults(results: SearchInWorkspaceResult[], workspaceRoot: URI): Array<{ file: string; matches: Array<{ line: number; text: string }> }> {
     return results.map(result => {
         const fileUri = new URI(result.fileUri);
-        const relativePath = workspaceRoot.relative(fileUri);
+        const relativePath = (workspaceRoot && typeof workspaceRoot.relative === 'function') ? workspaceRoot.relative(fileUri) : undefined;
 
         return {
             file: relativePath ? relativePath.toString() : result.fileUri,

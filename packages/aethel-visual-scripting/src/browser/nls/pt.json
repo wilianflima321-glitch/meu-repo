@@ -1,0 +1,7 @@
+{
+    "displayName": "Scripting Visual Aethel",
+    "description": "Programação visual baseada em nós com otimização AGI",
+    "openEditor": "Abrir Editor de Scripting Visual",
+    "autoOptimize": "Habilitar otimização automática AGI para gráficos de nós",
+    "godotIntegration": "Integrar com engine Godot para tipos de nós avançados"
+}

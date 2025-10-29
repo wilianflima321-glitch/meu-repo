@@ -211,13 +211,15 @@ export class MarkdownPreviewHandler implements PreviewHandler {
         return attribute ? Number.parseInt(attribute) : undefined;
     }
 
-    protected engine: markdownit | undefined;
-    protected getEngine(): markdownit {
+    // Use `any` here to avoid compile-time type conflicts between different @types/markdown-it
+    // packages present in the workspace. The runtime markdown-it instance remains unchanged.
+    protected engine: any | undefined;
+    protected getEngine(): any {
         if (!this.engine) {
-            const engine: markdownit = this.engine = markdownit({
+            const engine: any = this.engine = markdownit({
                 html: true,
                 linkify: true,
-                highlight: (str, lang) => {
+                highlight: (str: string, lang: string) => {
                     if (lang && hljs.getLanguage(lang)) {
                         try {
                             return '<pre class="hljs"><code><div>' + hljs.highlight(lang, str, true).value + '</div></code></pre>';
@@ -229,8 +231,8 @@ export class MarkdownPreviewHandler implements PreviewHandler {
             const renderers = ['heading_open', 'paragraph_open', 'list_item_open', 'blockquote_open', 'code_block', 'image', 'fence'];
             for (const renderer of renderers) {
                 const originalRenderer = engine.renderer.rules[renderer];
-                engine.renderer.rules[renderer] = (tokens, index, options, env, self) => {
-                    const token = tokens[index];
+                engine.renderer.rules[renderer] = (tokens: any[], index: number, options: any, env: any, self: any) => {
+                    const token: any = tokens[index];
                     if (token.map) {
                         const line = token.map[0];
                         token.attrJoin('class', 'line');
@@ -244,12 +246,12 @@ export class MarkdownPreviewHandler implements PreviewHandler {
             }
             const originalImageRenderer = engine.renderer.rules.image;
             if (originalImageRenderer) {
-                engine.renderer.rules.image = (tokens, index, options, env, self) => {
+                engine.renderer.rules.image = (tokens: any[], index: number, options: any, env: any, self: any) => {
                     if (RenderContentParams.is(env)) {
                         const documentUri = env.originUri;
-                        const token = tokens[index];
+                        const token: any = tokens[index];
                         if (token.attrs) {
-                            const srcAttr = token.attrs.find(a => a[0] === 'src');
+                            const srcAttr = token.attrs.find((a: any) => a[0] === 'src');
                             if (srcAttr) {
                                 const href = srcAttr[1];
                                 srcAttr[1] = this.linkNormalizer.normalizeLink(documentUri, href);
@@ -289,9 +291,9 @@ export class MarkdownPreviewHandler implements PreviewHandler {
             for (const name of ['html_block', 'html_inline']) {
                 const originalRenderer = engine.renderer.rules[name];
                 if (originalRenderer) {
-                    engine.renderer.rules[name] = (tokens, index, options, env, self) => {
-                        const currentToken = tokens[index];
-                        const content = currentToken.content;
+                    engine.renderer.rules[name] = (tokens: any[], index: number, options: any, env: any, self: any) => {
+                        const currentToken: any = tokens[index];
+                        const content: string = currentToken.content;
                         if (content.includes('<img') && RenderContentParams.is(env)) {
                             const documentUri = env.originUri;
                             currentToken.content = normalizeAllImgSrcInHTML(content, link => this.linkNormalizer.normalizeLink(documentUri, link));

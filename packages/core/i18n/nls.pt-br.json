@@ -15,7 +15,7 @@
   "debug.breakpoint.editCondition": "Editar condição...",
   "debug.breakpoint.removeSelected": "Remover pontos de parada selecionados",
   "notebook.cell.changeToCode": "Alterar célula para código",
-  "notebook.cell.changeToMarkdown": "Mudança de célula para Mardown",
+  "notebook.cell.changeToMarkdown": "Alterar célula para Markdown",
   "notebook.cell.insertMarkdownCellAbove": "Inserir célula Markdown acima",
   "notebook.cell.insertMarkdownCellBelow": "Inserir célula Markdown abaixo",
   "terminal:new:profile": "Criar um novo terminal integrado a partir de um perfil",
@@ -87,18 +87,18 @@
         "applyAll": "Aplicar tudo",
         "applyAllTitle": "Aplicar todas as alterações pendentes",
         "attachToContext": "Anexar elementos ao contexto",
-        "cancel": "Cancel (Esc)",
+        "cancel": "Cancelar (Esc)",
         "chat-view-tree-widget": {
           "ai": "IA",
           "aiConfigurationView": "Visualização da configuração de IA",
           "aiFeatureHeader": "Recursos de IA disponíveis (versão alfa)!",
-          "aiFeaturesEnable": "Recursos de áudio: Ativar",
+          "aiFeaturesEnable": "Recursos de IA: Ativar",
           "aiHistoryView": "Visualização do histórico de IA",
           "featuresDisabled": "Atualmente, todos os recursos de IA estão desativados!",
           "howToEnable": "Como ativar os recursos de IA:",
           "noRenderer": "Erro: Nenhum renderizador encontrado",
           "scrollToBottom": "Ir para a mensagem mais recente",
-          "settingsMenu": "o menu de configurações",
+          "settingsMenu": "O menu de configurações",
           "waitingForInput": "Aguardando entrada",
           "you": "Você"
         },
@@ -111,7 +111,7 @@
             "label": "Prompt delegado:"
           },
           "response": {
-            "label": "Response:"
+            "label": "Resposta:"
           },
           "starting": "Delegação inicial...",
           "status": {
@@ -128,12 +128,12 @@
         "errorChatInvocation": "Ocorreu um erro durante a invocação do serviço de bate-papo.",
         "node": {
           "toolbar": {
-            "cancel": "Cancel",
+            "cancel": "Cancelar",
             "edit": "Editar",
             "retry": "Repetir"
           }
         },
-        "openDiff": "Difusão aberta",
+        "openDiff": "Diferença aberta",
         "openOriginalFile": "Abrir arquivo original",
         "performThisTask": "Execute esta tarefa.",
         "removeChat": "Remover bate-papo",
@@ -149,7 +149,7 @@
         },
         "toolcall-part-renderer": {
           "denied": "Execução negada",
-          "finished": "Ran"
+          "finished": "Executado"
         },
         "toolconfirmation": {
           "allow": "Permitir",
@@ -163,7 +163,7 @@
           "deny": "Negar",
           "deny-forever": "Sempre negar",
           "deny-forever-tooltip": "Sempre negue essa ferramenta",
-          "deny-session": "Negar para este Chat",
+          "deny-session": "Negar para este bate-papo",
           "deny-session-tooltip": "Negar todas as chamadas dessa ferramenta para essa sessão de bate-papo",
           "deny-tooltip": "Negar essa chamada de ferramenta uma vez",
           "header": "Confirmar a execução da ferramenta",
@@ -187,7 +187,7 @@
         },
         "debounceDelay": {
           "description": "Controla o atraso em milissegundos antes de acionar as conclusões de IA após a detecção de alterações no editor.                Requer que a opção `Automatic Code Completion` esteja ativada. Digite 0 para desativar o atraso de debounce.",
-          "title": "Atraso de devolução"
+          "title": "Atraso de debounce"
         },
         "excludedFileExts": {
           "description": "Especifique as extensões de arquivo (por exemplo, .md, .txt) em que as conclusões de IA devem ser desativadas.",
@@ -213,7 +213,7 @@
           "notUsedInPrompt": "Não usado no prompt",
           "promptTemplates": "Modelos de prompts",
           "selectAgentMessage": "Selecione um agente primeiro!",
-          "undeclared": "Não declarado"
+          "undeclared": "Não configurado"
         },
         "aiConfiguration": {
           "label": "Configuração de IA [Alfa]"
@@ -270,7 +270,7 @@
           "activeCustomizationLabel": "Ativo",
           "activeCustomizationTitle": "Personalização ativa",
           "builtInLabel": "Incorporado",
-          "cancelButton": "Cancel",
+          "cancelButton": "Cancelar",
           "createCustomizationTitle": "Criar personalização",
           "customization": "personalização",
           "customizationLabel": "Personalização",
@@ -325,7 +325,7 @@
           "unavailableVariant": "A variante selecionada não está mais disponível"
         },
         "variable-contribution": {
-          "builtInVariable": "Theia Built-in Variable",
+          "builtInVariable": "Variável incorporada do Theia",
           "currentAbsoluteFilePath": "O caminho absoluto do arquivo aberto no momento. Observe que a maioria dos agentes espera um caminho de arquivo relativo (relativo ao espaço de trabalho atual).",
           "currentFileContent": "O conteúdo simples do arquivo aberto no momento. Isso exclui as informações de onde o conteúdo está vindo. Observe que a maioria dos agentes funcionará melhor com um caminho de arquivo relativo (relativo ao espaço de trabalho atual).",
           "currentRelativeDirPath": "O caminho relativo do diretório que contém o arquivo aberto no momento.",
@@ -360,7 +360,7 @@
           "exchangeId": "ID",
           "timestamp": "Iniciado"
         },
-        "open-history-tooltip": "História da IA aberta...",
+        "open-history-tooltip": "Histórico da IA aberto...",
         "request-card": {
           "agent": "Agente",
           "model": "Modelo",
@@ -370,10 +370,10 @@
           "title": "Solicitação"
         },
         "sortChronologically": {
-          "tooltip": "Classificar cronologicamente"
+          "tooltip": "Ordenar cronologicamente"
         },
         "sortReverseChronologically": {
-          "tooltip": "Classificar em ordem cronológica inversa"
+          "tooltip": "Ordenar em ordem cronológica inversa"
         },
         "toggleCompact": {
           "tooltip": "Mostrar visualização compacta"
@@ -1266,18 +1266,18 @@
       "insertGroupLeft": "Inserir separador de grupo (Esquerda)",
       "insertGroupRight": "Inserir separador de grupo (à direita)",
       "leftColumn": "Coluna da esquerda",
-      "openJSON": "Personalizar barra de ferramentas (Open JSON)",
+      "openJSON": "Personalizar barra de ferramentas (Abrir JSON)",
       "removeCommand": "Remover Comando da Barra de Ferramentas",
       "restoreDefaults": "Restaurar os padrões da barra de ferramentas",
       "rightColumn": "Coluna da direita",
       "selectIcon": "Selecione Ícone",
-      "toggleToolbar": "Barra de ferramentas Toggle",
+      "toggleToolbar": "Alternar barra de ferramentas",
       "toolbarLocationPlaceholder": "Onde você gostaria que o comando fosse adicionado?",
-      "useDefaultIcon": "Use o Ícone Default"
+      "useDefaultIcon": "Usar o ícone padrão"
     },
     "typehierarchy": {
-      "subtypeHierarchy": "Subtipo Hierarquia",
-      "supertypeHierarchy": "Supertipo Hierarquia"
+      "subtypeHierarchy": "Hierarquia de Subtipo",
+      "supertypeHierarchy": "Hierarquia de Supertipo"
     },
     "variableResolver": {
       "listAllVariables": "Variável: Listar tudo"

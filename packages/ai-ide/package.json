@@ -39,8 +39,22 @@
     "access": "public"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^14.0.0",
     "@theia/cli": "1.64.0",
-    "@theia/test": "1.64.0"
+    "@theia/test": "1.64.0",
+    "jest": "^29.6.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "jsdom": "^21.1.0",
+    "ts-jest": "^29.1.0"
+  },
+  "scripts": {
+    "build": "theiaext build",
+    "clean": "theiaext clean",
+    "compile": "theiaext compile",
+    "lint": "theiaext lint",
+    "test": "theiaext test",
+    "watch": "theiaext watch"
   },
   "theiaExtensions": [
     {
@@ -53,14 +67,6 @@
     "lib",
     "src"
   ],
-  "scripts": {
-    "build": "theiaext build",
-    "clean": "theiaext clean",
-    "compile": "theiaext compile",
-    "lint": "theiaext lint",
-    "test": "theiaext test",
-    "watch": "theiaext watch"
-  },
   "nyc": {
     "extends": "../../configs/nyc.json"
   },

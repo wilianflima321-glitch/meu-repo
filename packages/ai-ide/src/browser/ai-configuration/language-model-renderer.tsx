@@ -40,22 +40,24 @@ export const LanguageModelRenderer: React.FC<LanguageModelSettingsProps> = (
 
     React.useEffect(() => {
         const computeLmRequirementMap = async () => {
-            const map = await agent.languageModelRequirements.reduce(async (accPromise, curr) => {
+            const requirements = agent.languageModelRequirements ?? [];
+            const map = await requirements.reduce(async (accPromise, curr) => {
                 const acc = await accPromise;
+                const purpose = curr.purpose ?? 'default';
                 // take the agents requirements and override them with the user settings if present
-                const lmRequirement = await findLanguageModelRequirement(curr.purpose) ?? curr;
+                const lmRequirement = await findLanguageModelRequirement(purpose) ?? curr;
                 // if no llm is selected through the identifier, see what would be the default
                 if (!lmRequirement.identifier) {
                     const llm = await languageModelRegistry.selectLanguageModel({ agent: agent.id, ...lmRequirement });
                     (lmRequirement as Mutable<LanguageModelRequirement>).identifier = llm?.id;
                 }
-                acc[curr.purpose] = lmRequirement;
+                acc[purpose] = lmRequirement;
                 return acc;
             }, Promise.resolve({} as Record<string, LanguageModelRequirement>));
             setLmRequirementMap(map);
         };
         computeLmRequirementMap();
-    }, []);
+    }, [agent.languageModelRequirements, languageModelRegistry]);
 
     // Effect to resolve alias to model whenever requirements.identifier or aliases change
     React.useEffect(() => {
@@ -80,8 +82,9 @@ export const LanguageModelRenderer: React.FC<LanguageModelSettingsProps> = (
 
     return <div className='language-model-container'>
         {Object.values(lmRequirementMap).map((requirement, index) => {
-            const isAlias = requirement.identifier && aliases.some(a => a.id === requirement.identifier);
-            const resolvedModel = isAlias ? resolvedAliasModels[requirement.identifier] : undefined;
+            const id = requirement.identifier;
+            const isAlias = !!id && aliases.some(a => a.id === id);
+            const resolvedModel = isAlias && id ? resolvedAliasModels[id] : undefined;
             return (
                 <React.Fragment key={index}>
                     <div className="ai-alias-evaluates-to-container">
@@ -96,9 +99,9 @@ export const LanguageModelRenderer: React.FC<LanguageModelSettingsProps> = (
                             </label>
                             <select
                                 className="theia-select"
-                                id={`model-select-${agent.id}-${requirement.purpose}`}
-                                value={requirement.identifier}
-                                onChange={event => onSelectedModelChange(requirement.purpose, event)}
+                                id={`model-select-${agent.id}-${requirement.purpose ?? 'default'}`}
+                                value={requirement.identifier ?? ''}
+                                onChange={event => onSelectedModelChange(requirement.purpose ?? 'default', event)}
                             >
                                 <option value=""></option>
                                 {/* Aliases first, then languange models */}

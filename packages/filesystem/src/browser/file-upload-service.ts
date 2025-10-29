@@ -432,10 +432,14 @@ export class FileUploadService {
 
     protected async indexCustomDataTransfer(targetUri: URI, dataTransfer: CustomDataTransfer, context: FileUploadService.Context): Promise<void> {
         for (const [_, item] of dataTransfer) {
-            const fileInfo = item.asFile();
-            if (fileInfo) {
-                await this.indexFile(targetUri, new File([await fileInfo.data()], fileInfo.id), context);
-            }
+                const fileInfo = item.asFile();
+                if (fileInfo) {
+                    const data = await fileInfo.data();
+                    // ensure we pass a real ArrayBuffer-backed Uint8Array to the File constructor
+                    const arr = new Uint8Array(data.buffer as ArrayBuffer, data.byteOffset, data.byteLength);
+                    const buffer = arr.buffer.slice(arr.byteOffset, arr.byteOffset + arr.byteLength);
+                    await this.indexFile(targetUri, new File([buffer], fileInfo.id), context);
+                }
         }
     }
 

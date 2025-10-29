@@ -50,10 +50,10 @@ export default async function runTest(options: TestOptions): Promise<void> {
             // the app has focus, to avoid failures of tests that query the UI's state.
             if (launch && launch.devtools) {
                 promises.push(testPage.waitForSelector('#theia-app-shell.lm-Widget.theia-ApplicationShell')
-                    .then(e => {
+                    .then((element: any) => {
                         // eslint-disable-next-line no-null/no-null
-                        if (e !== null) {
-                            e.click();
+                        if (element !== null) {
+                            element.click();
                         }
                     }));
             }

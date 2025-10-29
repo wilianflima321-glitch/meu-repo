@@ -632,7 +632,9 @@ export async function outputWebviewPreload(ctx: PreloadContext): Promise<void> {
                     mime: item.mime,
                     metadata: outputData.metadata,
                     data(): Uint8Array {
-                        return item.data;
+                        // ensure we return a real Uint8Array backed by an ArrayBuffer (not SharedArrayBuffer-like)
+                        const d = item.data as Uint8Array & { buffer: ArrayBuffer };
+                        return new Uint8Array(d.buffer, d.byteOffset, d.byteLength);
                     },
                     text(): string {
                         return new TextDecoder().decode(this.data());
@@ -641,7 +643,10 @@ export async function outputWebviewPreload(ctx: PreloadContext): Promise<void> {
                         return JSON.parse(this.text());
                     },
                     blob(): Blob {
-                        return new Blob([this.data()], { type: this.mime });
+                        const arr = this.data();
+                        // copy to a new Uint8Array to ensure the underlying buffer is a standard ArrayBuffer
+                        const copied = arr instanceof Uint8Array ? arr.slice() : new Uint8Array(arr).slice();
+                        return new Blob([copied.buffer], { type: this.mime });
                     },
 
                 }));

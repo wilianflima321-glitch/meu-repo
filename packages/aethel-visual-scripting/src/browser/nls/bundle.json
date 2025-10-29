@@ -1,0 +1,7 @@
+{
+    "displayName": "Aethel Visual Scripting",
+    "description": "Node-based visual programming with AGI optimization",
+    "openEditor": "Open Visual Scripting Editor",
+    "autoOptimize": "Enable AGI auto-optimization for node graphs",
+    "godotIntegration": "Integrate with Godot engine for advanced node types"
+}

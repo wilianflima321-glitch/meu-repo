@@ -104,14 +104,14 @@ export class AIPromptFragmentsConfigurationWidget extends ReactWidget {
         this.loadPromptFragments();
         this.loadAgents();
 
-        this.toDispose.pushAll([
-            this.promptService.onPromptsChange(() => {
-                this.loadPromptFragments();
-            }),
-            this.agentService.onDidChangeAgents(() => {
-                this.loadAgents();
-            })
-        ]);
+        const d1: any = this.promptService.onPromptsChange(() => {
+            this.loadPromptFragments();
+        });
+        const d2: any = this.agentService.onDidChangeAgents(() => {
+            this.loadAgents();
+        });
+        this.toDispose.push({ dispose: () => { try { if (typeof d1 === 'function') { d1(); } else if (typeof (d1 as any).dispose === 'function') { (d1 as any).dispose(); } } catch { } } } as any);
+        this.toDispose.push({ dispose: () => { try { if (typeof d2 === 'function') { d2(); } else if (typeof (d2 as any).dispose === 'function') { (d2 as any).dispose(); } } catch { } } } as any);
     }
 
     /**

@@ -30,7 +30,8 @@ import {
 } from '@theia/ai-core/lib/common';
 import { codicon, QuickInputService, ReactWidget } from '@theia/core/lib/browser';
 import { URI } from '@theia/core/lib/common';
-import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
+import { inject, injectable } from '@theia/core/shared/inversify';
+import { postConstruct } from 'inversify';
 import * as React from '@theia/core/shared/react';
 import { AIConfigurationSelectionService } from './ai-configuration-service';
 import { LanguageModelRenderer } from './language-model-renderer';
@@ -93,17 +94,21 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         });
         this.languageModelAliasRegistry.ready.then(() => {
             this.languageModelAliases = this.languageModelAliasRegistry.getAliases();
-            this.toDispose.push(this.languageModelAliasRegistry.onDidChange(() => {
+            const d = this.languageModelAliasRegistry.onDidChange(() => {
                 this.languageModelAliases = this.languageModelAliasRegistry.getAliases();
                 this.update();
-            }));
+            });
+            this.pushDisposable(d);
         });
-        this.toDispose.push(this.languageModelRegistry.onChange(({ models }) => {
+        const d2 = this.languageModelRegistry.onChange((payload: { models?: LanguageModel[] }) => {
+            const models = payload.models;
             this.languageModelAliases = this.languageModelAliasRegistry.getAliases();
             this.languageModels = models;
             this.update();
-        }));
-        this.toDispose.push(this.promptService.onPromptsChange(() => this.update()));
+        });
+        this.pushDisposable(d2);
+        const d3 = this.promptService.onPromptsChange(() => this.update());
+        this.pushDisposable(d3);
 
         this.aiSettingsService.onDidChange(() => this.update());
         this.aiConfigurationSelectionService.onDidAgentChange(() => this.update());
@@ -111,9 +116,43 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         this.update();
     }
 
+    /**
+     * Normalize and push a disposable-like value into this.toDispose.
+     * Accepts functions, objects with a dispose() method, or disposables.
+     */
+    protected pushDisposable(d: any): void {
+        if (!d) {
+            return;
+        }
+        // If it's a function (unregister callback), wrap it
+        if (typeof d === 'function') {
+            this.toDispose.push({ dispose: d } as any);
+            return;
+        }
+        // If it already has dispose(), push as-is
+        if (typeof d.dispose === 'function') {
+            this.toDispose.push(d as any);
+            return;
+        }
+        // Last resort: if it has a 'dispose' property that's not a function, ignore
+    }
+
+    protected normalizeLocation(raw: any): { uri: URI, exists: boolean } {
+        if (!raw) {
+            return { uri: new URI(''), exists: false };
+        }
+        // raw may be a string (uri) or an object { uri, exists }
+        if (typeof raw === 'string') {
+            return { uri: new URI(raw), exists: false };
+        }
+        const uri = (raw.uri && (raw.uri as any).path) ? raw.uri as URI : new URI(String(raw.uri));
+        const exists = !!raw.exists;
+        return { uri, exists };
+    }
+
     protected render(): React.ReactNode {
         return <div className='ai-agent-configuration-main'>
-            <div className='configuration-agents-list theia-Tree theia-TreeContainer' style={{ width: '25%' }}>
+            <div className='configuration-agents-list theia-Tree theia-TreeContainer configuration-agents-sidebar'>
                 <ul>
                     {this.agentService.getAllAgents().map(agent => {
                         const isActive = this.aiConfigurationSelectionService.getActiveAgent()?.id === agent.id;
@@ -125,7 +164,6 @@ export class AIAgentConfigurationWidget extends ReactWidget {
                 </ul>
                 <div className='configuration-agents-add'>
                     <button
-                        style={{ marginLeft: 0 }}
                         className='theia-button main'
                         onClick={() => this.addCustomAgent()}>
                         {nls.localize('theia/ai/core/agentConfiguration/addCustomAgent', 'Add Custom Agent')}
@@ -155,15 +193,15 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         const globalVariables = Array.from(new Set([...parsedPromptParts.globalVariables, ...agent.variables]));
         const functions = Array.from(new Set([...parsedPromptParts.functions, ...agent.functions]));
 
-        return <div key={agent.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div className='settings-section-title settings-section-category-title' style={{ paddingLeft: 0, paddingBottom: 10 }}>
+        return <div key={agent.id} className='agent-details-column'>
+            <div className='settings-section-title settings-section-category-title agent-title'>
                 {this.renderAgentName(agent)}
-                <pre style={{ fontSize: 'small', margin: 0 }}>
+                <pre className='agent-id-pre'>
                     Id: {agent.id}
                 </pre>
             </div>
-            <div style={{ paddingBottom: 10 }}>{agent.description}</div>
-            <div style={{ paddingBottom: 10 }}>
+            <div className='agent-description'>{agent.description}</div>
+            <div className='agent-enable-row'>
                 <label>
                     <input type="checkbox" checked={enabled} onChange={this.toggleAgentEnabled} />
                     {nls.localize('theia/ai/core/agentConfiguration/enableAgent', 'Enable Agent')}
@@ -270,7 +308,8 @@ export class AIAgentConfigurationWidget extends ReactWidget {
 
         // If only one location is available, use the direct approach
         if (locations.length === 1) {
-            this.promptFragmentCustomizationService.openCustomAgentYaml(locations[0].uri);
+            const first = this.normalizeLocation(locations[0]);
+            this.promptFragmentCustomizationService.openCustomAgentYaml(first.uri.toString());
             return;
         }
 
@@ -279,19 +318,27 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         quickPick.title = 'Select Location for Custom Agents File';
         quickPick.placeholder = 'Choose where to create or open a custom agents file';
 
-        quickPick.items = locations.map(location => ({
-            label: location.uri.path.toString(),
-            description: location.exists ? 'Open existing file' : 'Create new file',
-            location
-        }));
+        quickPick.items = locations.map(locationRaw => {
+            const location = this.normalizeLocation(locationRaw);
+            return ({
+                label: (location.uri && (location.uri as any).path) ? ((location.uri as any).path && (location.uri as any).path.toString ? (location.uri as any).path.toString() : String((location.uri as any).path)) : String(location.uri),
+                description: location.exists ? 'Open existing file' : 'Create new file',
+                location
+            });
+        });
 
-        quickPick.onDidAccept(async () => {
-            const selectedItem = quickPick.selectedItems[0] as unknown as { location: { uri: URI, exists: boolean } };
-            if (selectedItem && selectedItem.location) {
+        const acceptDisposable = quickPick.onDidAccept(async () => {
+            const selectedItem = quickPick.selectedItems[0] as any;
+            const loc = selectedItem?.location as any;
+            if (loc) {
                 quickPick.dispose();
-                this.promptFragmentCustomizationService.openCustomAgentYaml(selectedItem.location.uri);
+                const raw = loc.uri;
+                // Normalize potential string URIs to a URI instance at runtime
+                const uri = (raw && (raw as any).path) ? raw : new URI(String(raw));
+                this.promptFragmentCustomizationService.openCustomAgentYaml(uri.toString());
             }
         });
+        this.pushDisposable(acceptDisposable);
 
         quickPick.show();
     }
@@ -322,7 +369,7 @@ interface AgentGlobalVariablesProps {
 }
 const AgentGlobalVariables = ({ variables: globalVariables, showVariableConfigurationTab }: AgentGlobalVariablesProps) => {
     if (globalVariables.length === 0) {
-        return <>{nls.localizeByDefault('None')}</>;
+        return <>{nls.localize('theia/ai/core/agentConfiguration/none', 'None')}</>;
     }
     return <>
         {globalVariables.map(variableId => <li key={variableId} className='theia-TreeNode theia-CompositeTreeNode theia-ExpandableTreeNode theia-mod-selected'>
@@ -339,7 +386,7 @@ interface AgentFunctionsProps {
 }
 const AgentFunctions = ({ functions }: AgentFunctionsProps) => {
     if (functions.length === 0) {
-        return <>{nls.localizeByDefault('None')}</>;
+        return <>{nls.localize('theia/ai/core/agentConfiguration/none', 'None')}</>;
     }
     return <>
         {functions.map(functionId => <li key={functionId} className='variable-reference'>
@@ -356,7 +403,7 @@ const AgentSpecificVariables = ({ promptVariables, agent }: AgentSpecificVariabl
     const agentDefinedVariablesName = agent.agentSpecificVariables.map(v => v.name);
     const variables = Array.from(new Set([...promptVariables, ...agentDefinedVariablesName]));
     if (variables.length === 0) {
-        return <>{nls.localizeByDefault('None')}</>;
+        return <>{nls.localize('theia/ai/core/agentConfiguration/none', 'None')}</>;
     }
     return <>
         {variables.map(variableId =>

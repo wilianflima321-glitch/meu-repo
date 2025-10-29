@@ -27,7 +27,7 @@ const browserAutomationModule = ConnectionContainerModule.create(({ bind, bindBa
     bind(BrowserAutomation).to(BrowserAutomationImpl).inSingletonScope();
     bind(ConnectionHandler).toDynamicValue(ctx =>
         new RpcConnectionHandler<BrowserAutomationClient>(browserAutomationPath, client => {
-            const server = ctx.container.get<BrowserAutomationImpl>(BrowserAutomation);
+            const server = ctx.container.get(BrowserAutomation) as BrowserAutomationImpl;
             server.setClient(client);
             client.onDidCloseConnection(() => server.close());
             return server;

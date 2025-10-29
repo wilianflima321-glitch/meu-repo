@@ -79,7 +79,7 @@ export class BrowserAutomationImpl implements RpcServer<BrowserAutomationClient>
             if (!element) {
                 throw new Error(`Element with selector "${selector}" not found`);
             }
-            content = await page.evaluate(el => el.outerHTML, element);
+            content = await page.evaluate((el: { outerHTML: string }) => el.outerHTML, element);
         } else {
             content = await page.content();
         }

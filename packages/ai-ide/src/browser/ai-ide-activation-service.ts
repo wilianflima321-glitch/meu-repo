@@ -52,9 +52,10 @@ export class AIIdeActivationServiceImpl implements AIActivationService, Frontend
     initialize(): MaybePromise<void> {
         this.isAiEnabledKey = this.contextKeyService.createKey(ENABLE_AI_CONTEXT_KEY, false);
         // make sure we don't miss once preferences are ready
-        this.preferenceService.ready.then(() => {
-            const enableValue = this.preferenceService.get<boolean>(PREFERENCE_NAME_ENABLE_AI, false);
-            this.updateEnableValue(enableValue);
+        // preferenceService.ready may be optional in some environments; normalize to a Promise
+        Promise.resolve(this.preferenceService.ready).then(() => {
+            const enableValue = this.preferenceService.get ? this.preferenceService.get<boolean>(PREFERENCE_NAME_ENABLE_AI, false) : false;
+            this.updateEnableValue(enableValue as boolean);
         });
         this.preferenceService.onPreferenceChanged(e => {
             if (e.preferenceName === PREFERENCE_NAME_ENABLE_AI) {
