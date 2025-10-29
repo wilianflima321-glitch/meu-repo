@@ -204,6 +204,19 @@ function verifyScene(scene, constraints) {
       if (hasSmoke) errors.push({ entityId: e.id || null, reason: 'smoke_present' });
     }
   }
+  if (constraints.includes('no_violence')) {
+    const violentTerms = ['kill','attack','shoot','murder','stab','assault'];
+    for (const e of entities) {
+      const action = (e && (e.action || (e.properties && e.properties.action))) || '';
+      const text = String(action).toLowerCase();
+      for (const t of violentTerms) {
+        if (text.includes(t)) {
+          errors.push({ entityId: e.id || null, reason: 'violent_action' });
+          break;
+        }
+      }
+    }
+  }
   // new rule: no_children_near_fire - if any entity is a child (role:'child' or age<18) and any entity has properties.fire=true, flag
   if (constraints.includes('no_children_near_fire')) {
     const hasFire = entities.some(e => e && e.properties && e.properties.fire);
@@ -249,6 +262,19 @@ function verifyScene(scene, constraints) {
       }
     }
   if (Array.isArray(constraints) && constraints.includes('no_smoke')) {
+    if (Array.isArray(constraints) && constraints.includes('no_violence')) {
+      const violentTerms = ['kill','attack','shoot','murder','stab','assault'];
+      for (const e of entities) {
+        const action = (e && (e.action || (e.properties && e.properties.action))) || '';
+        const text = String(action).toLowerCase();
+        for (const t of violentTerms) {
+          if (text.includes(t)) {
+            errors.push({ entityId: e.id || null, reason: 'violent_action' });
+            break;
+          }
+        }
+      }
+    }
     // no_children_near_fire: if any child (role:'child' or age<18) exists and any entity has properties.fire true -> error
     if (Array.isArray(constraints) && constraints.includes('no_children_near_fire')) {
       const hasFire = entities.some(e => e && e.properties && e.properties.fire);
