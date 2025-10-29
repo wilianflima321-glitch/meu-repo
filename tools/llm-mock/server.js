@@ -31,6 +31,8 @@ app.post('/api/llm/providers', (req, res) => {
     providerIds: Array.isArray(body.providerIds) ? body.providerIds : (body.providerIds ? [body.providerIds] : []),
     mode: body.mode || undefined,
     timeoutMs: body.timeoutMs || undefined,
+    verificationMode: body.verificationMode || 'strict',
+    constraints: Array.isArray(body.constraints) ? body.constraints : (body.constraints ? [body.constraints] : []),
     createdBy: body.createdBy || 'mock',
     createdAt: now
   };
@@ -157,6 +159,29 @@ app.post('/api/llm/dev/run-ensemble/:id', (req, res) => {
     if (scene && constraints && constraints.length) {
       const errors = verifyScene(scene, constraints);
       if (errors && errors.length) {
+        // if ensemble is in soft verification mode, don't block — return warnings but proceed
+        if (ensemble.verificationMode === 'soft') {
+          const created = [];
+          for (const pid of providerIds) {
+            const ev = {
+              id: uuidv4(),
+              requestId,
+              providerId: pid,
+              userId,
+              orgId: body.orgId || null,
+              model,
+              tokensInput: tokensInput,
+              tokensOutput: tokensOutput,
+              estimatedProviderCost: 0,
+              billingMode: ensemble.billingMode || 'self',
+              status: 0,
+              createdAt: new Date().toISOString()
+            };
+            core.addUsageEvent(ev);
+            created.push({ id: ev.id, providerId: pid });
+          }
+          return res.status(202).json({ requestId, created, warnings: errors });
+        }
         return res.status(422).json({ ok: false, errors });
       }
     }

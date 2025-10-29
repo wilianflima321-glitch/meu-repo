@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev:mock-backend": "node tools/dev-mock-backend/server.js",
+  "dev:mock-backend": "node tools/dev-mock-backend/server.js",
+  "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/dev-scripts/dev.ps1",
     "playwright:install": "npx playwright install --with-deps",
     "test:e2e": "npx playwright test --config=playwright.config.ts",
     "test:e2e:headed": "npx playwright test --headed --config=playwright.config.ts",

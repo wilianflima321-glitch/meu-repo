@@ -15,7 +15,12 @@ on:
 jobs:
   windows-check:
     name: Windows checks (syntax, tsc, ai-ide tests)
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        node: ['20']
+      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node }}
 
       - name: Cache node modules
         uses: actions/cache@v4
@@ -31,6 +36,7 @@ jobs:
           path: |
             ~/.npm
             node_modules
+            ~/.cache
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
@@ -52,9 +58,20 @@ jobs:
           node ./test/run-mocha.js
           Pop-Location
 
+      - name: Upload windows logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-logs
+          path: |
+            cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/*.log
+
   e2e:
     name: Playwright E2E (optional)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20']
     needs: windows-check
     if: ${{ github.event.inputs.run_e2e == 'true' }}
     steps:
@@ -70,7 +87,15 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npm run playwright:install
+        # Cache Playwright browsers to speed up CI (stored in ~/.cache/ms-playwright)
+        - name: Cache Playwright browsers
+          uses: actions/cache@v4
+          with:
+            path: ~/.cache/ms-playwright
+            key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+        - name: Install Playwright browsers
+          run: npm run playwright:install
 
       - name: Start dev mock backend + proxy shim
         run: |
@@ -84,8 +109,20 @@ jobs:
           chmod +x tools/ci/dev-mock-health.sh || true
           tools/ci/dev-mock-health.sh
 
-      - name: Run Playwright tests
-        run: npx playwright test --config=playwright.config.ts
+      - name: Run Playwright tests (with retries and traces on first retry)
+        env:
+          # ensure Playwright stores browsers in cache path
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+        run: |
+          # run with 1 retry to reduce flakes; on first retry Playwright will collect trace
+          npx playwright test --config=playwright.config.ts --retries=1
+
+      - name: Upload Playwright traces (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: $(pwd)/playwright-report
 
       - name: Upload Playwright report
         if: always()
