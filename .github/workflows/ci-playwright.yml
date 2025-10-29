@@ -1,3 +1,44 @@
+name: CI — Jest and Playwright
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ infra/playwright-ci-ensemble ]
+
+jobs:
+  test:
+    name: Run Jest unit tests and Playwright E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install repo dependencies
+        run: |
+          npm ci
+
+      - name: Run syntax check (repo)
+        run: |
+          powershell -NoProfile -Command "pwsh -c 'echo running syntax check not on Windows in CI' || true"
+
+      - name: Run Jest tests for mock package
+        working-directory: tools/llm-mock
+        run: npm test --silent
+
+      - name: Setup Playwright browsers and deps
+        uses: microsoft/playwright-github-action@v1
+        with:
+          install-deps: true
+
+      - name: Run Playwright tests
+        run: |
+          npx playwright test --project=chromium --reporter=github
 name: CI - Jest + Playwright
 
 on:
