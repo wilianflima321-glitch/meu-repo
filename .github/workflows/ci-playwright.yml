@@ -21,7 +21,8 @@ jobs:
 
       - name: Install repo dependencies
         run: |
-          npm ci
+          # use npm install instead of npm ci because this repository does not include a lockfile
+          npm install --no-audit --no-fund
 
       - name: Run Jest tests for mock package
         working-directory: tools/llm-mock
