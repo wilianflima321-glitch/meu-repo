@@ -194,6 +194,7 @@ function verifyScene(scene, constraints) {
       try {
         // look for actions of type 'throw' or 'launch' in scene.actions
         const actions = (scene && Array.isArray(scene.actions)) ? scene.actions : [];
+        const obstacles = (scene && Array.isArray(scene.obstacles)) ? scene.obstacles : (scene && scene.world && scene.world.obstacles) || [];
         for (const a of actions) {
           try {
             const verb = (a && a.verb) || (a && a.action) || '';
@@ -202,19 +203,35 @@ function verifyScene(scene, constraints) {
               const v0 = Number(params.v0 || params.speed || 0);
               const angle = Number(params.angleDeg || params.angle || 45);
               const g = (scene && scene.worldRules && typeof scene.worldRules.gravity === 'number') ? scene.worldRules.gravity : 9.81;
-              const range = physics.computeRange(v0, angle, g);
+              const mass = Number(params.mass || (a.actorProps && a.actorProps.mass) || 1);
+              const dragCoef = Number(params.dragCoef || (a.params && a.params.dragCoef) || 0);
+
+              // compute vacuum and drag-aware ranges
+              const rangeVac = physics.computeRange(v0, angle, g);
+              const rangeWithDrag = physics.computeRangeWithDrag(v0, angle, { g, mass, dragCoef });
+
               const targetDistance = Number(params.targetDistance || (a.target && a.target.distance) || NaN);
-              if (!isNaN(targetDistance) && !isNaN(range) && range + 0.001 < targetDistance) {
-                // find actor entity to check magic exceptions
-                const actorId = a.actorId || a.actor || (a.params && a.params.actorId) || null;
-                const actor = actorId ? entities.find(e => String(e.id) === String(actorId)) : null;
-                const isMagic = !!(actor && actor.powers && actor.powers.isMagic);
+
+              // sample trajectory and check for obstacle collisions
+              const traj = physics.sampleTrajectory(v0, angle, g, 1000, { mass, dragCoef, dt: 0.02 });
+              const collides = physics.trajectoryIntersectsAABBs(traj, obstacles);
+
+              // find actor entity to check magic exceptions
+              const actorId = a.actorId || a.actor || (a.params && a.params.actorId) || null;
+              const actor = actorId ? entities.find(e => String(e.id) === String(actorId)) : null;
+              const isMagic = !!(actor && actor.powers && actor.powers.isMagic);
+
+              if (collides) {
+                errors.push({ reason: 'trajectory_collision', message: 'trajectory intersects an obstacle before reaching target', details: { action: a, actorId } });
+              }
+
+              // if desired target is farther than physics allow, flag
+              if (!isNaN(targetDistance) && !isNaN(rangeWithDrag) && rangeWithDrag + 0.001 < targetDistance) {
                 if (isMagic) {
-                  // fantasy exception: record as a non-blocking fantasy warning
                   const cost = (actor && actor.powers && (actor.powers.magicCost || actor.powers.manaCost)) ? (actor.powers.magicCost || actor.powers.manaCost) : undefined;
-                  errors.push({ reason: 'fantasy_exception', message: `magic exception: actor ${actorId} allowed to exceed physics`, details: { v0, angle, g, range, targetDistance, action: a, actorId, cost } });
+                  errors.push({ reason: 'fantasy_exception', message: `magic exception: actor ${actorId} allowed to exceed physics`, details: { v0, angle, g, rangeVac, rangeWithDrag, targetDistance, action: a, actorId, cost } });
                 } else {
-                  errors.push({ reason: 'trajectory_impossible', message: `computed range ${range.toFixed(2)} < target ${targetDistance}`, details: { v0, angle, g, range, targetDistance, action: a } });
+                  errors.push({ reason: 'trajectory_impossible', message: `computed (drag) range ${Number(rangeWithDrag).toFixed(2)} < target ${targetDistance}`, details: { v0, angle, g, rangeVac, rangeWithDrag, targetDistance, action: a } });
                 }
               }
             }
