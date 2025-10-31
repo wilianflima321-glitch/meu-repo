@@ -24,6 +24,15 @@ jobs:
           # use npm install instead of npm ci because this repository does not include a lockfile
           npm install --no-audit --no-fund
 
+      - name: Install mock server dependencies (if present)
+        run: |
+          if [ -f tools/llm-mock/package.json ]; then
+            echo "Found tools/llm-mock/package.json — installing dependencies"
+            (cd tools/llm-mock && npm install --no-audit --no-fund)
+          else
+            echo "No package.json in tools/llm-mock — skipping"
+          fi
+
       - name: Run Jest tests for mock package (if present)
         run: |
           # Run Jest only if the mock package has a package.json and tests configured
