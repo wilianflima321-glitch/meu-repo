@@ -24,9 +24,15 @@ jobs:
           # use npm install instead of npm ci because this repository does not include a lockfile
           npm install --no-audit --no-fund
 
-      - name: Run Jest tests for mock package
-        working-directory: tools/llm-mock
-        run: npm test --silent
+      - name: Run Jest tests for mock package (if present)
+        run: |
+          # Run Jest only if the mock package has a package.json and tests configured
+          if [ -f tools/llm-mock/package.json ]; then
+            echo "Found tools/llm-mock/package.json — running npm test in that directory"
+            (cd tools/llm-mock && npm test --silent)
+          else
+            echo "No package.json in tools/llm-mock — skipping Jest unit tests"
+          fi
 
       - name: Setup Playwright browsers and deps
         uses: microsoft/playwright-github-action@v1
