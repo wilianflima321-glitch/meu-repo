@@ -1,4 +1,4 @@
-name: CI
+name: CIname: CI
 
 on:
   push:
@@ -9,6 +9,10 @@ on:
     inputs:
       run_e2e:
         description: 'Run Playwright E2E job (set to "true" to run)'
+        required: false
+        default: 'false'
+      run_proxy_tests:
+        description: 'Start proxy shim for proxy-related tests (set to "true" to start).'
         required: false
         default: 'false'
 
@@ -74,10 +78,13 @@ jobs:
 
       - name: Start dev mock backend + proxy shim
         run: |
-          # Start the dev mock backend on port 8011 and capture logs
-          nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
-          # Start the proxy shim on port 8010 which forwards to the mock backend
-          nohup env LISTEN_PORT=8010 TARGET_PORT=8011 node tools/ci/proxy-shim.js > proxy-shim.log 2>&1 &
+          # Start dev mock backend always; start proxy shim only if input run_proxy_tests == "true"
+          if [ "${{ github.event.inputs.run_proxy_tests }}" = "true" ]; then
+            nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
+            nohup env LISTEN_PORT=8010 TARGET_PORT=8011 node tools/ci/proxy-shim.js > proxy-shim.log 2>&1 &
+          else
+            nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
+          fi
 
       - name: Wait for backend (health check)
         run: |
@@ -102,4 +109,3 @@ jobs:
           path: |
             dev-mock.log
             proxy-shim.log
-
