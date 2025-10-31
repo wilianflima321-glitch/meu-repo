@@ -34,10 +34,13 @@ jobs:
             echo "No package.json in tools/llm-mock — skipping Jest unit tests"
           fi
 
-      - name: Setup Playwright browsers and deps
-        uses: microsoft/playwright-github-action@v1
-        with:
-          install-deps: true
+      - name: Install Playwright system dependencies and browsers
+        run: |
+          # Use playwright CLI to install system deps and browsers. The microsoft/playwright-github-action@v1
+          # is deprecated and may fail on some runner images. Prefer npx playwright install --with-deps.
+          npx playwright install --with-deps
+          # Ensure the chromium browser is installed for the tests (idempotent).
+          npx playwright install chromium
 
       - name: Start mock server (background) and wait
         working-directory: ${{ github.workspace }}
@@ -50,7 +53,8 @@ jobs:
 
       - name: Run Playwright tests
         run: |
-          npx playwright test --project=chromium --reporter=github || true
+          # Run Playwright tests and generate an HTML report in playwright-report
+          npx playwright test --project=chromium --reporter=html || true
 
       - name: Upload server log
         if: always()
