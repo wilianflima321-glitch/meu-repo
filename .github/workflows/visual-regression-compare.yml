@@ -5,6 +5,10 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   compare:
     runs-on: ubuntu-latest
@@ -76,6 +80,10 @@ jobs:
       - name: Check report and create issue if regressions
         uses: actions/github-script@v6
         with:
+          # Prefer a repo secret PAT for creating issues (secrets.GH_PAT).
+          # If you don't add the secret, the step will still run but may fail to create an issue
+          # when executed from forks; add a secret named GH_PAT with a minimal PAT (issues scope)
+          github-token: ${{ secrets.GH_PAT }}
           script: |
             const fs = require('fs');
             const reportPath = 'tools/ide/visual-regression/output/diffs/compare-report.json';
