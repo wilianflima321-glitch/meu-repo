@@ -51,14 +51,32 @@ jobs:
           # Ensure the chromium browser is installed for the tests (idempotent).
           npx playwright install chromium
 
-      - name: Start mock server (background) and wait
+      - name: Start mock server (background) and robust-health-wait
         working-directory: ${{ github.workspace }}
         run: |
           # start server in background and capture logs
           nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2>&1 & echo $! > tools/llm-mock/server.pid || true
-          # install wait-on and wait for server to accept connections
-          npm i -g wait-on || true
-          npx wait-on http://127.0.0.1:8010 --timeout 30000 || (cat tools/llm-mock/server.log && exit 1)
+          # robust health polling: try several times with short sleeps, print logs on failure
+          echo "Waiting for mock /health to respond on http://127.0.0.1:8010/health"
+          MAX_ATTEMPTS=15
+          SLEEP_SECONDS=2
+          ATTEMPT=1
+          until [ $ATTEMPT -gt $MAX_ATTEMPTS ]
+          do
+            if curl -sSf http://127.0.0.1:8010/health >/dev/null 2>&1; then
+              echo "mock /health OK (attempt $ATTEMPT)"
+              break
+            fi
+            echo "mock /health not ready (attempt $ATTEMPT/$MAX_ATTEMPTS), sleeping ${SLEEP_SECONDS}s..."
+            sleep $SLEEP_SECONDS
+            ATTEMPT=$((ATTEMPT+1))
+          done
+          if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+            echo "mock did not become healthy after $MAX_ATTEMPTS attempts"
+            echo "---- server.log (tail) ----"
+            tail -n 200 tools/llm-mock/server.log || true
+            exit 1
+          fi
 
       - name: Run Playwright tests
         run: |
