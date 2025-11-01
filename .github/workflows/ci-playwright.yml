@@ -58,7 +58,8 @@ jobs:
           nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2>&1 & echo $! > tools/llm-mock/server.pid || true
           # robust health polling: try several times with short sleeps, print logs on failure
           echo "Waiting for mock /health to respond on http://127.0.0.1:8010/health"
-          MAX_ATTEMPTS=15
+          # increase attempts to be more resilient on slower runners
+          MAX_ATTEMPTS=30
           SLEEP_SECONDS=2
           ATTEMPT=1
           until [ $ATTEMPT -gt $MAX_ATTEMPTS ]
@@ -75,6 +76,11 @@ jobs:
             echo "mock did not become healthy after $MAX_ATTEMPTS attempts"
             echo "---- server.log (tail) ----"
             tail -n 200 tools/llm-mock/server.log || true
+            # also print any verifier debug file if present
+            if [ -f tools/llm-mock/verifier-debug.json ]; then
+              echo "---- verifier-debug.json (head) ----"
+              head -n 200 tools/llm-mock/verifier-debug.json || true
+            fi
             exit 1
           fi
 
@@ -89,6 +95,13 @@ jobs:
         with:
           name: server-log
           path: tools/llm-mock/server.log
+
+      - name: Upload verifier debug (if present)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verifier-debug
+          path: tools/llm-mock/verifier-debug.json
 
       - name: Upload Playwright report
         if: always()

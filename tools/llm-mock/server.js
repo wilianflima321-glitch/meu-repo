@@ -161,9 +161,20 @@ app.post('/api/llm/dev/run-ensemble/:id', (req, res) => {
     if (scene && constraints && constraints.length) {
   // Log scene and constraints to aid debugging of verifier behavior. Use debug level;
   // enable via MOCK_DEBUG environment variable in CI/local dev to avoid noisy logs.
-  core.logger.debug({ ensembleId: id, constraints, scene }, 'run-ensemble: verifying scene against constraints');
-  const errors = verifier.verifyScene(scene, constraints);
-  core.logger.debug({ ensembleId: id, errors }, 'run-ensemble: verifier result');
+      core.logger.debug({ ensembleId: id, constraints, scene }, 'run-ensemble: verifying scene against constraints');
+      const errors = verifier.verifyScene(scene, constraints);
+      core.logger.debug({ ensembleId: id, errors }, 'run-ensemble: verifier result');
+      // If MOCK_DEBUG is enabled, persist a short verifier debug trace to disk to assist CI triage
+      try {
+        if (process.env.MOCK_DEBUG && String(process.env.MOCK_DEBUG).toLowerCase() !== 'false') {
+          const dbg = { time: new Date().toISOString(), ensembleId: id, constraints, scene, errors };
+          try {
+            fs.writeFileSync(path.join(__dirname, 'verifier-debug.json'), JSON.stringify(dbg, null, 2));
+          } catch (e) {
+            core.logger.debug({ err: e }, 'failed to write verifier-debug.json');
+          }
+        }
+      } catch (e) { /* noop */ }
       if (errors && errors.length) {
         // if ensemble is in soft verification mode, don't block — return warnings but proceed
         if (ensemble.verificationMode === 'soft') {

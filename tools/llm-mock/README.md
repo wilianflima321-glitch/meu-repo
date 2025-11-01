@@ -17,6 +17,21 @@ Invoke-RestMethod -Uri 'http://localhost:8010/health' -Method Get
 ```
 
 Send a test telemetry event:
+Debug and MOCK_DEBUG
+
+When you want verbose verifier instrumentation in development or CI set the `MOCK_DEBUG` environment variable. Example (PowerShell):
+
+```powershell
+$env:MOCK_DEBUG = 'true'
+Start-Job -Name llm-mock -ScriptBlock { Set-Location 'G:\repo\tools\llm-mock'; node server.js *> server.log }
+Get-Content .\server.log -Tail 100
+Get-Content .\verifier-debug.json -ErrorAction SilentlyContinue
+```
+
+When `MOCK_DEBUG` is enabled the mock will:
+- switch the logger to debug (via `MOCK_DEBUG` in `mock-core.js`)
+- write `tools/llm-mock/verifier-debug.json` containing the last verifier input/output (used by CI artifacts)
+
 
 ```powershell
 $body = @{ event='dev_smoke'; payload=@{ info='ok' } } | ConvertTo-Json
