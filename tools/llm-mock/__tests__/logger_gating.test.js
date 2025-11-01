@@ -19,7 +19,13 @@ describe('logger gating via MOCK_DEBUG', () => {
     // Run a short node subprocess that requires the mock-core module and prints logger.level
     const script = `Object.assign(process.env, ${JSON.stringify(env)}); const core = require('./lib/mock-core'); console.log(core.logger.level);`;
     // Use execFileSync with explicit args to avoid quoting issues on Windows paths
-    const out = execFileSync(process.execPath, ['-e', script], { cwd: __dirname + '/..' });
+    // Prepare child env: remove MOCK_DEBUG unless it's explicitly provided in env param
+    const childEnv = Object.assign({}, process.env);
+    if (!Object.prototype.hasOwnProperty.call(env, 'MOCK_DEBUG')) {
+      delete childEnv.MOCK_DEBUG;
+    }
+    Object.assign(childEnv, env || {});
+    const out = execFileSync(process.execPath, ['-e', script], { cwd: __dirname + '/..', env: childEnv });
     return String(out || '').trim();
   }
 

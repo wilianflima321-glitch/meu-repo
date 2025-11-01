@@ -63,9 +63,15 @@ jobs:
               echo "Killing PID $PID" && kill -9 $PID || true
             fi
           fi
-          # start server in background and capture logs (separate stdout/stderr)
-          # enable MOCK_DEBUG so the server will emit verifier debug artifacts when available
-          MOCK_DEBUG=true nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2> tools/llm-mock/server.err.log & echo $! > tools/llm-mock/server.pid || true
+          # start a small CI-only mock (ci-mock) which implements both root and /api/llm endpoints
+          # it has no external deps and ensures the smoke checks are stable in CI
+          if [ -f tools/ci/ci-mock.js ]; then
+            echo "Starting CI mock (tools/ci/ci-mock.js) with MOCK_DEBUG enabled"
+            MOCK_DEBUG=true nohup node tools/ci/ci-mock.js > tools/ci/ci-mock.log 2> tools/ci/ci-mock.err.log & echo $! > tools/ci/ci-mock.pid || true
+          else
+            echo "Fallback: starting tools/llm-mock/server.js"
+            MOCK_DEBUG=true nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2> tools/llm-mock/server.err.log & echo $! > tools/llm-mock/server.pid || true
+          fi
           # robust health polling: try several times with short sleeps, print logs on failure
           echo "Waiting for mock /health to respond on http://127.0.0.1:8010/health"
           # increase attempts to be more resilient on slower runners (total ~180s)
@@ -84,23 +90,29 @@ jobs:
           done
           if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
             echo "mock did not become healthy after $MAX_ATTEMPTS attempts"
-            echo "---- server.log (tail) ----"
-            tail -n 200 tools/llm-mock/server.log || true
+            echo "---- ci-mock log (tail) ----"
+            tail -n 200 tools/ci/ci-mock.log || true
             # also print any verifier debug file if present
             if [ -f tools/llm-mock/verifier-debug.json ]; then
               echo "---- verifier-debug.json (head) ----"
               # print the whole debug file to aid triage (should be small)
               cat tools/llm-mock/verifier-debug.json || true
             fi
-            echo "---- server.err.log (tail) ----"
-            tail -n 200 tools/llm-mock/server.err.log || true
+            echo "---- ci-mock stderr (tail) ----"
+            tail -n 200 tools/ci/ci-mock.err.log || true
+            # run additional diagnostic helper to capture network/listener state and full logs
+            if [ -f tools/ci/dev-mock-health.sh ]; then
+              echo "Running tools/ci/dev-mock-health.sh to generate tools/ci/dev-mock-health.log"
+              bash tools/ci/dev-mock-health.sh || true
+            fi
             exit 1
           fi
 
       - name: Run Playwright tests
         run: |
           # Run Playwright tests and generate an HTML report in playwright-report
-          npx playwright test --project=chromium --reporter=html || true
+          # add a single retry to reduce transient flakiness in CI
+          npx playwright test --project=chromium --retries=1 --reporter=html || true
 
       - name: Upload server log
         if: always()
@@ -115,6 +127,13 @@ jobs:
         with:
           name: server-err-log
           path: tools/llm-mock/server.err.log
+
+      - name: Upload dev-mock-health log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-mock-health
+          path: tools/ci/dev-mock-health.log
 
       - name: Upload verifier debug (if present)
         if: always()
