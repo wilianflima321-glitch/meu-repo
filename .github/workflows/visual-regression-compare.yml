@@ -84,7 +84,9 @@ jobs:
             const total = report.totalDiff || 0;
             if (total > 500) {
               const body = `Visual regression detected: total differing pixels = ${total}. See artifacts attached to the workflow run.`;
-              await github.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: 'Visual regression detected', body });
+              // Use the REST client on the GitHub object (github.rest.issues) —
+              // actions/github-script exposes `github.rest` for API calls.
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: 'Visual regression detected', body });
               core.setFailed('Visual regression threshold exceeded');
             } else {
               core.info(`Total diff pixels: ${total}`);
