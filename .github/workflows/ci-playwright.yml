@@ -28,7 +28,8 @@ jobs:
         run: |
           if [ -f tools/llm-mock/package.json ]; then
             echo "Found tools/llm-mock/package.json — installing dependencies"
-            (cd tools/llm-mock && npm install --no-audit --no-fund)
+            # Use npm ci when a lockfile is present for reproducible installs, otherwise fall back to npm install
+            (cd tools/llm-mock && if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi)
           else
             echo "No package.json in tools/llm-mock — skipping"
           fi
@@ -54,12 +55,21 @@ jobs:
       - name: Start mock server (background) and robust-health-wait
         working-directory: ${{ github.workspace }}
         run: |
-          # start server in background and capture logs
-          nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2>&1 & echo $! > tools/llm-mock/server.pid || true
+          # Kill any existing listener on 8010 to avoid EADDRINUSE flakes
+          if ss -ltnp 2>/dev/null | grep -q ':8010\b'; then
+            echo "Found existing listener on 8010 — attempting to kill"
+            PID=$(ss -ltnp 2>/dev/null | grep ':8010\b' | awk '{print $6}' | sed -E 's/.*,([0-9]+)\/.*$/\1/' | head -n1)
+            if [ -n "$PID" ]; then
+              echo "Killing PID $PID" && kill -9 $PID || true
+            fi
+          fi
+          # start server in background and capture logs (separate stdout/stderr)
+          # enable MOCK_DEBUG so the server will emit verifier debug artifacts when available
+          MOCK_DEBUG=true nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2> tools/llm-mock/server.err.log & echo $! > tools/llm-mock/server.pid || true
           # robust health polling: try several times with short sleeps, print logs on failure
           echo "Waiting for mock /health to respond on http://127.0.0.1:8010/health"
-          # increase attempts to be more resilient on slower runners
-          MAX_ATTEMPTS=30
+          # increase attempts to be more resilient on slower runners (total ~180s)
+          MAX_ATTEMPTS=90
           SLEEP_SECONDS=2
           ATTEMPT=1
           until [ $ATTEMPT -gt $MAX_ATTEMPTS ]
@@ -79,8 +89,11 @@ jobs:
             # also print any verifier debug file if present
             if [ -f tools/llm-mock/verifier-debug.json ]; then
               echo "---- verifier-debug.json (head) ----"
-              head -n 200 tools/llm-mock/verifier-debug.json || true
+              # print the whole debug file to aid triage (should be small)
+              cat tools/llm-mock/verifier-debug.json || true
             fi
+            echo "---- server.err.log (tail) ----"
+            tail -n 200 tools/llm-mock/server.err.log || true
             exit 1
           fi
 
@@ -95,6 +108,13 @@ jobs:
         with:
           name: server-log
           path: tools/llm-mock/server.log
+
+      - name: Upload server error log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-err-log
+          path: tools/llm-mock/server.err.log
 
       - name: Upload verifier debug (if present)
         if: always()
