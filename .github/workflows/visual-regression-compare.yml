@@ -40,6 +40,14 @@ jobs:
         run: |
           node tools/ide/visual-regression/capture_baseline.js --baseUrl http://localhost:3000 --out tools/ide/visual-regression/output/current || true
 
+      - name: (fallback) Start static server for capture
+        if: always()
+        run: |
+          # In case the project does not expose a live dev server on 3000 in CI,
+          # serve the bundled test_site so capture_baseline can fetch pages.
+          python3 -m http.server 3000 --directory tools/ide/ui-audit/test_site > /dev/null 2>&1 &
+          echo "Static test site started"
+
       - name: Restore baseline (if present)
         run: |
           if git rev-parse --verify visual-baseline >/dev/null 2>&1; then
