@@ -8,7 +8,7 @@ test('verifier: empty scene and empty constraints yields no errors', () => {
 });
 
 test('verifier: weapon present triggers weapon_present error', () => {
-  const scene = { entities: [ { id: 'e1', properties: { holding: 'knife' } } ] };
+  const scene = { entities: [ { id: 'e1', properties: { holding: 'weapon' } } ] };
   const errors = verifier.verifyScene(scene, ['no_weapons']);
   expect(errors.length).toBeGreaterThan(0);
   const reasons = errors.map(e => e.reason);
