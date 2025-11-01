@@ -1,0 +1,111 @@
+name: CIname: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: 'Run Playwright E2E job (set to "true" to run)'
+        required: false
+        default: 'false'
+      run_proxy_tests:
+        description: 'Start proxy shim for proxy-related tests (set to "true" to start).'
+        required: false
+        default: 'false'
+
+jobs:
+  windows-check:
+    name: Windows checks (syntax, tsc, ai-ide tests)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Repo syntax check (PowerShell)
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File build/check_syntax.ps1
+
+      - name: TypeScript check (ai-ide package)
+        run: npx -y tsc --noEmit -p cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json
+
+      - name: Run ai-ide unit tests
+        shell: pwsh
+        run: |
+          Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide
+          node ./test/run-mocha.js
+          Pop-Location
+
+  e2e:
+    name: Playwright E2E (optional)
+    runs-on: ubuntu-latest
+    needs: windows-check
+    if: ${{ github.event.inputs.run_e2e == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npm run playwright:install
+
+      - name: Start dev mock backend + proxy shim
+        run: |
+          # Start dev mock backend always; start proxy shim only if input run_proxy_tests == "true"
+          if [ "${{ github.event.inputs.run_proxy_tests }}" = "true" ]; then
+            nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
+            nohup env LISTEN_PORT=8010 TARGET_PORT=8011 node tools/ci/proxy-shim.js > proxy-shim.log 2>&1 &
+          else
+            nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
+          fi
+
+      - name: Wait for backend (health check)
+        run: |
+          chmod +x tools/ci/dev-mock-health.sh || true
+          tools/ci/dev-mock-health.sh
+
+      - name: Run Playwright tests
+        run: npx playwright test --config=playwright.config.ts
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Upload dev mock logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-mock-log
+          path: |
+            dev-mock.log
+            proxy-shim.log
