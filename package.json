@@ -19,6 +19,8 @@
     "typescript": "^5.9.3",
     "@playwright/test": "^1.36.0",
     "axe-core": "^4.7.2",
-    "minimist": "^1.2.8"
+    "minimist": "^1.2.8",
+    "pngjs": "^7.0.0",
+    "pixelmatch": "^5.3.0"
   }
 }
