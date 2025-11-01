@@ -4,7 +4,9 @@ const path = require('path');
 const pino = require('pino');
 const client = require('prom-client');
 
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+// If MOCK_DEBUG is truthy, enable debug-level logging regardless of LOG_LEVEL
+const effectiveLogLevel = (process.env.MOCK_DEBUG && String(process.env.MOCK_DEBUG).toLowerCase() !== 'false') ? 'debug' : (process.env.LOG_LEVEL || 'info');
+const logger = pino({ level: effectiveLogLevel });
 // basic metrics
 const register = new client.Registry();
 const reconcileCounter = new client.Counter({ name: 'llm_mock_reconcile_runs_total', help: 'Number of reconcile runs', registers: [register] });

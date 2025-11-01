@@ -4,6 +4,7 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const core = require('./lib/mock-core');
 const DATA = core.DATA;
+const verifier = require('./lib/verifier');
 const fs = require('fs');
 const path = require('path');
 
@@ -155,9 +156,14 @@ app.post('/api/llm/dev/run-ensemble/:id', (req, res) => {
     const tokensOutput = body.tokensOutput || 0;
     // verify scene constraints if provided or if ensemble defines constraints
     const scene = body.scene || null;
-    const constraints = (ensemble && Array.isArray(ensemble.constraints)) ? ensemble.constraints : (body.constraints || (scene && scene.constraints) || []);
+  // Prefer ensemble-defined constraints only when non-empty; otherwise allow per-request or scene-level constraints
+  const constraints = (ensemble && Array.isArray(ensemble.constraints) && ensemble.constraints.length) ? ensemble.constraints : (body.constraints || (scene && scene.constraints) || []);
     if (scene && constraints && constraints.length) {
-      const errors = verifyScene(scene, constraints);
+  // Log scene and constraints to aid debugging of verifier behavior. Use debug level;
+  // enable via MOCK_DEBUG environment variable in CI/local dev to avoid noisy logs.
+  core.logger.debug({ ensembleId: id, constraints, scene }, 'run-ensemble: verifying scene against constraints');
+  const errors = verifier.verifyScene(scene, constraints);
+  core.logger.debug({ ensembleId: id, errors }, 'run-ensemble: verifier result');
       if (errors && errors.length) {
         // if ensemble is in soft verification mode, don't block — return warnings but proceed
         if (ensemble.verificationMode === 'soft') {
@@ -211,52 +217,7 @@ app.post('/api/llm/dev/run-ensemble/:id', (req, res) => {
   }
 });
 
-// Helper: verifyScene - reuse logic for verify endpoint and run-ensemble
-function verifyScene(scene, constraints) {
-  const entities = scene && scene.entities ? scene.entities : [];
-  const errors = [];
-  if (constraints.includes('no_weapons')) {
-    for (const e of entities) {
-      const holding = (e && (e.holding || (e.properties && e.properties.holding))) || null;
-      if (holding && typeof holding === 'string' && holding.toLowerCase().includes('weapon')) {
-        errors.push({ entityId: e.id || null, reason: 'weapon_present' });
-      }
-    }
-  }
-  if (constraints.includes('no_smoke')) {
-    for (const e of entities) {
-      const hasSmoke = e && (e.properties && e.properties.smoke) || false;
-      if (hasSmoke) errors.push({ entityId: e.id || null, reason: 'smoke_present' });
-    }
-  }
-  if (constraints.includes('no_violence')) {
-    const violentTerms = ['kill','attack','shoot','murder','stab','assault'];
-    for (const e of entities) {
-      const action = (e && (e.action || (e.properties && e.properties.action))) || '';
-      const text = String(action).toLowerCase();
-      for (const t of violentTerms) {
-        if (text.includes(t)) {
-          errors.push({ entityId: e.id || null, reason: 'violent_action' });
-          break;
-        }
-      }
-    }
-  }
-  // new rule: no_children_near_fire - if any entity is a child (role:'child' or age<18) and any entity has properties.fire=true, flag
-  if (constraints.includes('no_children_near_fire')) {
-    const hasFire = entities.some(e => e && e.properties && e.properties.fire);
-    if (hasFire) {
-      for (const e of entities) {
-        const role = (e && e.role) || null;
-        const age = (e && e.age) || null;
-        if ((role === 'child') || (typeof age === 'number' && age < 18)) {
-          errors.push({ entityId: e.id || null, reason: 'child_near_fire' });
-        }
-      }
-    }
-  }
-  return errors;
-}
+
 
 // Dev: verify a structured scene/plan against simple constraints (no_weapons, no_smoke, etc.)
 app.post('/api/llm/dev/verify-scene', (req, res) => {
@@ -264,7 +225,7 @@ app.post('/api/llm/dev/verify-scene', (req, res) => {
     const body = req.body || {};
     const scene = body.scene || {};
     const constraints = body.constraints || scene.constraints || [];
-    const errors = verifyScene(scene, constraints);
+  const errors = verifier.verifyScene(scene, constraints);
     if (errors.length) return res.status(422).json({ ok: false, errors });
     return res.json({ ok: true });
   } catch (e) {
@@ -273,57 +234,7 @@ app.post('/api/llm/dev/verify-scene', (req, res) => {
   }
 });
 
-// Helper: verifyScene returns an array of errors (empty if ok)
-function verifyScene(scene, constraints) {
-  const errors = [];
-  try {
-    const entities = (scene && scene.entities) || [];
-  if (Array.isArray(constraints) && constraints.includes('no_weapons')) {
-      for (const e of entities) {
-        const holding = (e && (e.holding || (e.properties && e.properties.holding))) || null;
-        if (holding && typeof holding === 'string' && holding.toLowerCase().includes('weapon')) {
-          errors.push({ entityId: e.id || null, reason: 'weapon_present' });
-        }
-      }
-    }
-  if (Array.isArray(constraints) && constraints.includes('no_smoke')) {
-    if (Array.isArray(constraints) && constraints.includes('no_violence')) {
-      const violentTerms = ['kill','attack','shoot','murder','stab','assault'];
-      for (const e of entities) {
-        const action = (e && (e.action || (e.properties && e.properties.action))) || '';
-        const text = String(action).toLowerCase();
-        for (const t of violentTerms) {
-          if (text.includes(t)) {
-            errors.push({ entityId: e.id || null, reason: 'violent_action' });
-            break;
-          }
-        }
-      }
-    }
-    // no_children_near_fire: if any child (role:'child' or age<18) exists and any entity has properties.fire true -> error
-    if (Array.isArray(constraints) && constraints.includes('no_children_near_fire')) {
-      const hasFire = entities.some(e => e && e.properties && e.properties.fire);
-      if (hasFire) {
-        for (const e of entities) {
-          const role = (e && e.role) || null;
-          const age = (e && e.age) || null;
-          if ((role === 'child') || (typeof age === 'number' && age < 18)) {
-            errors.push({ entityId: e.id || null, reason: 'child_near_fire' });
-          }
-        }
-      }
-    }
-      for (const e of entities) {
-        const hasSmoke = e && (e.properties && e.properties.smoke) || false;
-        if (hasSmoke) errors.push({ entityId: e.id || null, reason: 'smoke_present' });
-      }
-    }
-  } catch (e) {
-    core.logger.error({ err: e }, 'verifyScene internal error');
-    errors.push({ reason: 'internal_error' });
-  }
-  return errors;
-}
+
 
 // Quotas endpoints
 app.get('/api/llm/quotas/:userId', (req, res) => {
