@@ -13,25 +13,28 @@ describe('logger gating via MOCK_DEBUG', () => {
     delete require.cache[mockCorePath];
   });
 
+  const { execFileSync } = require('child_process');
+
+  function nodeLoggerLevelWithEnv(env) {
+    // Run a short node subprocess that requires the mock-core module and prints logger.level
+    const script = `Object.assign(process.env, ${JSON.stringify(env)}); const core = require('./lib/mock-core'); console.log(core.logger.level);`;
+    // Use execFileSync with explicit args to avoid quoting issues on Windows paths
+    const out = execFileSync(process.execPath, ['-e', script], { cwd: __dirname + '/..' });
+    return String(out || '').trim();
+  }
+
   test('default without MOCK_DEBUG uses info level', () => {
-    delete process.env.MOCK_DEBUG;
-    delete require.cache[mockCorePath];
-    const core = require('../lib/mock-core');
-    // pino logger exposes .level
-    expect(core.logger.level).toBe('info');
+    const level = nodeLoggerLevelWithEnv({});
+    expect(level).toBe('info');
   });
 
   test('with MOCK_DEBUG=true sets debug level', () => {
-    process.env.MOCK_DEBUG = 'true';
-    delete require.cache[mockCorePath];
-    const core = require('../lib/mock-core');
-    expect(core.logger.level).toBe('debug');
+    const level = nodeLoggerLevelWithEnv({ MOCK_DEBUG: 'true' });
+    expect(level).toBe('debug');
   });
 
   test('with MOCK_DEBUG=false keeps info level', () => {
-    process.env.MOCK_DEBUG = 'false';
-    delete require.cache[mockCorePath];
-    const core = require('../lib/mock-core');
-    expect(core.logger.level).toBe('info');
+    const level = nodeLoggerLevelWithEnv({ MOCK_DEBUG: 'false' });
+    expect(level).toBe('info');
   });
 });
