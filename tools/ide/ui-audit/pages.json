@@ -1,0 +1,6 @@
+[
+  { "name": "home", "path": "/" },
+  { "name": "editor", "path": "/editor" },
+  { "name": "livepreview", "path": "/live" },
+  { "name": "settings", "path": "/settings" }
+]
