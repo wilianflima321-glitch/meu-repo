@@ -36,10 +36,6 @@ jobs:
         run: |
           git fetch origin visual-baseline:visual-baseline || echo 'no baseline branch'
 
-      - name: Capture current screenshots
-        run: |
-          node tools/ide/visual-regression/capture_baseline.js --baseUrl http://localhost:3000 --out tools/ide/visual-regression/output/current || true
-
       - name: (fallback) Start static server for capture
         if: always()
         run: |
@@ -47,6 +43,10 @@ jobs:
           # serve the bundled test_site so capture_baseline can fetch pages.
           python3 -m http.server 3000 --directory tools/ide/ui-audit/test_site > /dev/null 2>&1 &
           echo "Static test site started"
+
+      - name: Capture current screenshots
+        run: |
+          node tools/ide/visual-regression/capture_baseline.js --baseUrl http://localhost:3000 --out tools/ide/visual-regression/output/current || true
 
       - name: Restore baseline (if present)
         run: |
