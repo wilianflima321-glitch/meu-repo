@@ -557,7 +557,9 @@ setInterval(() => {
 }, 60 * 1000);
 
 const port = process.env.PORT || 8010;
-app.listen(port, () => core.logger.info(`LLM mock listening on http://localhost:${port}`));
+// Bind explicitly on IPv4 (0.0.0.0) to avoid environments where Node binds only to IPv6
+// and causes 127.0.0.1 (IPv4) clients to observe connection failures.
+app.listen(port, '0.0.0.0', () => core.logger.info(`LLM mock listening on http://localhost:${port}`));
 
 // Prometheus metrics scrape endpoint
 app.get('/metrics', async (req, res) => {

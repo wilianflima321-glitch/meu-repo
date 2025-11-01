@@ -1,0 +1,4 @@
+{"level":30,"time":1762007649461,"pid":10252,"hostname":"RENATO","msg":"LLM mock listening on http://localhost:8010"}
+{"level":30,"time":1762007709456,"pid":10252,"hostname":"RENATO","paymentId":"b50fdf0f-f875-4b30-baff-91e0c981e1a7","billingRecordId":"6eb2f3f0-d494-4fa9-902d-59102bd5c121","userId":"e2e-user","msg":"payment created"}
+{"level":30,"time":1762007709461,"pid":10252,"hostname":"RENATO","paymentId":"42357f02-dbc4-4884-a300-056eebc74916","billingRecordId":"c4532203-a0b7-4ae0-b424-e4e623c0af6f","userId":"e2e-user","msg":"payment created"}
+{"level":30,"time":1762007709461,"pid":10252,"hostname":"RENATO","created":10,"msg":"periodic reconcile created billing records"}
