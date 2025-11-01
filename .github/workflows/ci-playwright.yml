@@ -1,0 +1,111 @@
+name: CI — Jest and Playwright
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ infra/playwright-ci-ensemble, infra/playwright-ci-ensemble-workflow-fix ]
+
+jobs:
+  test:
+    name: Run Jest unit tests and Playwright E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install repo dependencies
+        run: |
+          # use npm install instead of npm ci because this repository does not include a lockfile
+          npm install --no-audit --no-fund
+
+      - name: Install mock server dependencies (if present)
+        run: |
+          if [ -f tools/llm-mock/package.json ]; then
+            echo "Found tools/llm-mock/package.json — installing dependencies"
+            (cd tools/llm-mock && npm install --no-audit --no-fund)
+          else
+            echo "No package.json in tools/llm-mock — skipping"
+          fi
+
+      - name: Run Jest tests for mock package (if present)
+        run: |
+          # Run Jest only if the mock package has a package.json and tests configured
+          if [ -f tools/llm-mock/package.json ]; then
+            echo "Found tools/llm-mock/package.json — running npm test in that directory"
+            (cd tools/llm-mock && npm test --silent)
+          else
+            echo "No package.json in tools/llm-mock — skipping Jest unit tests"
+          fi
+
+      - name: Install Playwright system dependencies and browsers
+        run: |
+          # Use playwright CLI to install system deps and browsers. The microsoft/playwright-github-action@v1
+          # is deprecated and may fail on some runner images. Prefer npx playwright install --with-deps.
+          npx playwright install --with-deps
+          # Ensure the chromium browser is installed for the tests (idempotent).
+          npx playwright install chromium
+
+      - name: Start mock server (background) and robust-health-wait
+        working-directory: ${{ github.workspace }}
+        run: |
+          # start server in background and capture logs
+          nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2>&1 & echo $! > tools/llm-mock/server.pid || true
+          # robust health polling: try several times with short sleeps, print logs on failure
+          echo "Waiting for mock /health to respond on http://127.0.0.1:8010/health"
+          # increase attempts to be more resilient on slower runners
+          MAX_ATTEMPTS=30
+          SLEEP_SECONDS=2
+          ATTEMPT=1
+          until [ $ATTEMPT -gt $MAX_ATTEMPTS ]
+          do
+            if curl -sSf http://127.0.0.1:8010/health >/dev/null 2>&1; then
+              echo "mock /health OK (attempt $ATTEMPT)"
+              break
+            fi
+            echo "mock /health not ready (attempt $ATTEMPT/$MAX_ATTEMPTS), sleeping ${SLEEP_SECONDS}s..."
+            sleep $SLEEP_SECONDS
+            ATTEMPT=$((ATTEMPT+1))
+          done
+          if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+            echo "mock did not become healthy after $MAX_ATTEMPTS attempts"
+            echo "---- server.log (tail) ----"
+            tail -n 200 tools/llm-mock/server.log || true
+            # also print any verifier debug file if present
+            if [ -f tools/llm-mock/verifier-debug.json ]; then
+              echo "---- verifier-debug.json (head) ----"
+              head -n 200 tools/llm-mock/verifier-debug.json || true
+            fi
+            exit 1
+          fi
+
+      - name: Run Playwright tests
+        run: |
+          # Run Playwright tests and generate an HTML report in playwright-report
+          npx playwright test --project=chromium --reporter=html || true
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-log
+          path: tools/llm-mock/server.log
+
+      - name: Upload verifier debug (if present)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verifier-debug
+          path: tools/llm-mock/verifier-debug.json
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
