@@ -34,18 +34,27 @@ export class AIToolsConfigurationWidget extends ReactWidget {
     static readonly LABEL = 'Tools';
 
     @inject(ToolConfirmationManager)
-    protected readonly confirmationManager: ToolConfirmationManager;
+    private _confirmationManager?: ToolConfirmationManager;
+    @inject(ToolConfirmationManager)
+    protected set confirmationManager(v: ToolConfirmationManager) { this._confirmationManager = v; }
+    protected get confirmationManager(): ToolConfirmationManager { if (!this._confirmationManager) { throw new Error('AIToolsConfigurationWidget: confirmationManager not injected'); } return this._confirmationManager; }
 
     @inject(PreferenceService)
-    protected readonly preferenceService: PreferenceService;
+    private _preferenceService?: PreferenceService;
+    @inject(PreferenceService)
+    protected set preferenceService(v: PreferenceService) { this._preferenceService = v; }
+    protected get preferenceService(): PreferenceService { if (!this._preferenceService) { throw new Error('AIToolsConfigurationWidget: preferenceService not injected'); } return this._preferenceService; }
 
     @inject(ToolInvocationRegistry)
-    protected readonly toolInvocationRegistry: ToolInvocationRegistry;
+    private _toolInvocationRegistry?: ToolInvocationRegistry;
+    @inject(ToolInvocationRegistry)
+    protected set toolInvocationRegistry(v: ToolInvocationRegistry) { this._toolInvocationRegistry = v; }
+    protected get toolInvocationRegistry(): ToolInvocationRegistry { if (!this._toolInvocationRegistry) { throw new Error('AIToolsConfigurationWidget: toolInvocationRegistry not injected'); } return this._toolInvocationRegistry; }
 
     // Mocked tool list and state
     protected tools: string[] = [];
     protected toolConfirmationModes: Record<string, ToolConfirmationMode> = {};
-    protected defaultState: ToolConfirmationMode;
+    protected defaultState: ToolConfirmationMode = ToolConfirmationMode.DISABLED;
     protected loading = true;
 
     @postConstruct()
@@ -55,7 +64,7 @@ export class AIToolsConfigurationWidget extends ReactWidget {
         this.title.closable = false;
         this.loadData();
         this.update();
-        const pChanged: any = this.preferenceService.onPreferenceChanged(async e => {
+    const pChanged: any = this.preferenceService.onPreferenceChanged(async (e: any) => {
             if (e.preferenceName === 'ai-features.chat.toolConfirmation') {
                 this.defaultState = await this.loadDefaultConfirmation();
                 this.toolConfirmationModes = await this.loadToolConfigurationModes();

@@ -32,12 +32,21 @@ export const AppTesterChatAgentId = 'AppTester';
 export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
 
     @inject(MCPFrontendService)
-    protected readonly mcpService: MCPFrontendService;
+    private _mcpService?: MCPFrontendService;
+    @inject(MCPFrontendService)
+    protected set mcpService(v: MCPFrontendService) { this._mcpService = v; }
+    protected get mcpService(): MCPFrontendService { if (!this._mcpService) { throw new Error('AppTesterChatAgent: mcpService not injected'); } return this._mcpService; }
 
     @inject(PreferenceService)
-    protected readonly preferenceService: PreferenceService;
+    private _preferenceService?: PreferenceService;
+    @inject(PreferenceService)
+    protected set preferenceService(v: PreferenceService) { this._preferenceService = v; }
+    protected get preferenceService(): PreferenceService { if (!this._preferenceService) { throw new Error('AppTesterChatAgent: preferenceService not injected'); } return this._preferenceService; }
     @inject(LlmProviderService)
-    protected readonly llmProviderService: any;
+    private _llmProviderService?: any;
+    @inject(LlmProviderService)
+    protected set llmProviderService(v: any) { this._llmProviderService = v; }
+    protected get llmProviderService(): any { if (!this._llmProviderService) { throw new Error('AppTesterChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
 
     override id: string = AppTesterChatAgentId;
     override name = AppTesterChatAgentId;
@@ -67,7 +76,7 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
                         { text: 'No, cancel', value: 'no' }
                     ],
                     request,
-                    async selectedOption => {
+                    async (selectedOption: any) => {
                         if (selectedOption.value === 'yes') {
                             // Show progress
                                 const _addProgressFn = (request.response as any).addProgressMessage;
