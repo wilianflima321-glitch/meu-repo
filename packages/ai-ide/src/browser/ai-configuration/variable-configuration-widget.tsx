@@ -27,14 +27,20 @@ export class AIVariableConfigurationWidget extends ReactWidget {
     static readonly ID = 'ai-variable-configuration-container-widget';
     static readonly LABEL = 'Variables';
 
+    private _variableService?: AIVariableService;
     @inject(AIVariableService)
-    protected readonly variableService: AIVariableService;
+    protected set variableService(v: AIVariableService) { this._variableService = v; }
+    protected get variableService(): AIVariableService { if (!this._variableService) { throw new Error('AIVariableConfigurationWidget: variableService not injected'); } return this._variableService; }
 
+    private _agentService?: AgentService;
     @inject(AgentService)
-    protected readonly agentService: AgentService;
+    protected set agentService(v: AgentService) { this._agentService = v; }
+    protected get agentService(): AgentService { if (!this._agentService) { throw new Error('AIVariableConfigurationWidget: agentService not injected'); } return this._agentService; }
 
+    private _aiConfigurationSelectionService?: AIConfigurationSelectionService;
     @inject(AIConfigurationSelectionService)
-    protected readonly aiConfigurationSelectionService: AIConfigurationSelectionService;
+    protected set aiConfigurationSelectionService(v: AIConfigurationSelectionService) { this._aiConfigurationSelectionService = v; }
+    protected get aiConfigurationSelectionService(): AIConfigurationSelectionService { if (!this._aiConfigurationSelectionService) { throw new Error('AIVariableConfigurationWidget: aiConfigurationSelectionService not injected'); } return this._aiConfigurationSelectionService; }
 
     @postConstruct()
     protected init(): void {
@@ -90,7 +96,7 @@ export class AIVariableConfigurationWidget extends ReactWidget {
         return <div className='variable-args-container'>
             <h3>Variable Arguments</h3>
             <div className='variable-args'>
-                {variable.args.map(arg =>
+                {variable.args.map((arg: any) =>
                     <React.Fragment key={arg.name}>
                         <span>{arg.name}</span>
                         <small>{arg.description}</small>

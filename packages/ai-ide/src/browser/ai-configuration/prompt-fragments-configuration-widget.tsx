@@ -91,8 +91,13 @@ export class AIPromptFragmentsConfigurationWidget extends ReactWidget {
      */
     protected userSelectedVariantIds: Map<string, string | undefined> = new Map();
 
-    @inject(PromptService) protected promptService: PromptService;
-    @inject(AgentService) protected agentService: AgentService;
+    private _promptService?: PromptService;
+    @inject(PromptService) protected set promptService(v: PromptService) { this._promptService = v; }
+    protected get promptService(): PromptService { if (!this._promptService) { throw new Error('AIPromptFragmentsConfigurationWidget: promptService not injected'); } return this._promptService; }
+
+    private _agentService?: AgentService;
+    @inject(AgentService) protected set agentService(v: AgentService) { this._agentService = v; }
+    protected get agentService(): AgentService { if (!this._agentService) { throw new Error('AIPromptFragmentsConfigurationWidget: agentService not injected'); } return this._agentService; }
 
     @postConstruct()
     protected init(): void {

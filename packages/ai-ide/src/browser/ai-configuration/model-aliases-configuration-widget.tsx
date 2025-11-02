@@ -32,16 +32,30 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
     static readonly ID = 'ai-model-aliases-configuration-widget';
     static readonly LABEL = nls.localize('theia/ai/core/modelAliasesConfiguration/label', 'Model Aliases');
 
+    private _languageModelAliasRegistry?: LanguageModelAliasRegistry;
     @inject(LanguageModelAliasRegistry)
-    protected readonly languageModelAliasRegistry: LanguageModelAliasRegistry;
+    protected set languageModelAliasRegistry(v: LanguageModelAliasRegistry) { this._languageModelAliasRegistry = v; }
+    protected get languageModelAliasRegistry(): LanguageModelAliasRegistry { if (!this._languageModelAliasRegistry) { throw new Error('ModelAliasesConfigurationWidget: languageModelAliasRegistry not injected'); } return this._languageModelAliasRegistry; }
+
+    private _languageModelRegistry?: FrontendLanguageModelRegistry;
     @inject(LanguageModelRegistry)
-    protected readonly languageModelRegistry: FrontendLanguageModelRegistry;
+    protected set languageModelRegistry(v: FrontendLanguageModelRegistry) { this._languageModelRegistry = v; }
+    protected get languageModelRegistry(): FrontendLanguageModelRegistry { if (!this._languageModelRegistry) { throw new Error('ModelAliasesConfigurationWidget: languageModelRegistry not injected'); } return this._languageModelRegistry; }
+
+    private _aiConfigurationSelectionService?: AIConfigurationSelectionService;
     @inject(AIConfigurationSelectionService)
-    protected readonly aiConfigurationSelectionService: AIConfigurationSelectionService;
+    protected set aiConfigurationSelectionService(v: AIConfigurationSelectionService) { this._aiConfigurationSelectionService = v; }
+    protected get aiConfigurationSelectionService(): AIConfigurationSelectionService { if (!this._aiConfigurationSelectionService) { throw new Error('ModelAliasesConfigurationWidget: aiConfigurationSelectionService not injected'); } return this._aiConfigurationSelectionService; }
+
+    private _aiSettingsService?: AISettingsService;
     @inject(AISettingsService)
-    protected readonly aiSettingsService: AISettingsService;
+    protected set aiSettingsService(v: AISettingsService) { this._aiSettingsService = v; }
+    protected get aiSettingsService(): AISettingsService { if (!this._aiSettingsService) { throw new Error('ModelAliasesConfigurationWidget: aiSettingsService not injected'); } return this._aiSettingsService; }
+
+    private _agentService?: AgentService;
     @inject(AgentService)
-    protected readonly agentService: AgentService;
+    protected set agentService(v: AgentService) { this._agentService = v; }
+    protected get agentService(): AgentService { if (!this._agentService) { throw new Error('ModelAliasesConfigurationWidget: agentService not injected'); } return this._agentService; }
 
     protected aliases: LanguageModelAlias[] = [];
     protected languageModels: LanguageModel[] = [];
@@ -123,12 +137,12 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
                 const requirementSetting = await this.aiSettingsService.getAgentSettings(agent.id);
                 if (requirementSetting?.languageModelRequirements) {
                     // requirement is set via settings, check if it is this alias
-                    if (requirementSetting?.languageModelRequirements?.find(e => e.identifier === alias.id)) {
+                    if (requirementSetting?.languageModelRequirements?.find((e: any) => e.identifier === alias.id)) {
                         matchingAgentIds.push(agent.id);
                     }
                 } else {
                     // requirement is NOT set via settings, check if this alias is the default for this agent
-                    if ((agent.languageModelRequirements ?? []).some((req: LanguageModelRequirement) => req.identifier === alias.id)) {
+                    if ((agent.languageModelRequirements ?? []).some((req: any) => req.identifier === alias.id)) {
                         matchingAgentIds.push(agent.id);
                     }
                 }
