@@ -21,6 +21,10 @@ jobs:
         run: |
           npm ci
 
+      - name: Install Playwright browsers
+        run: |
+          npx playwright install --with-deps
+
       - name: Start dev server (background)
         run: |
           # Attempt to start a dev server; adjust command if your project has a dedicated start script
