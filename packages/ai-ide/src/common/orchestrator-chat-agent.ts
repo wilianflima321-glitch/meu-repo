@@ -48,11 +48,15 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
 
     private fallBackChatAgentId = 'Universal';
 
+    private _chatAgentService?: ChatAgentService;
     @inject(ChatAgentService)
-    protected chatAgentService: ChatAgentService;
+    protected set chatAgentService(v: ChatAgentService) { this._chatAgentService = v; }
+    protected get chatAgentService(): ChatAgentService { if (!this._chatAgentService) { throw new Error('OrchestratorChatAgent: chatAgentService not injected'); } return this._chatAgentService; }
 
+    private _llmProviderService?: LlmProviderService;
     @inject(LlmProviderService)
-    protected llmProviderService: LlmProviderService;
+    protected set llmProviderService(v: LlmProviderService) { this._llmProviderService = v; }
+    protected get llmProviderService(): LlmProviderService { if (!this._llmProviderService) { throw new Error('OrchestratorChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
 
     override async invoke(request: MutableChatRequestModel): Promise<void> {
     try {
@@ -161,7 +165,7 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
 
         if (agentIds.length < 1) {
             this.logger.error('No agent was selected, delegating to fallback chat agent');
-            request.response.progressMessages.forEach(progressMessage => {
+            request.response.progressMessages.forEach((progressMessage: any) => {
                 const _update = (request.response as any).updateProgressMessage;
                 if (typeof _update === 'function') {
                     _update.call(request.response, { ...(progressMessage as any), status: 'failed' });
@@ -194,7 +198,7 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
         if (typeof _overrideFinal === 'function') {
             _overrideFinal.call(request.response, delegatedToAgent);
         }
-        request.response.progressMessages.forEach(progressMessage => {
+    request.response.progressMessages.forEach((progressMessage: any) => {
             const _update2 = (request.response as any).updateProgressMessage;
             if (typeof _update2 === 'function') {
                 _update2.call(request.response, { ...(progressMessage as any), status: 'completed' });

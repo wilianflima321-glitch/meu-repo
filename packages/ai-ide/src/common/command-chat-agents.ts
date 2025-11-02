@@ -43,12 +43,20 @@ interface ParsedCommand {
 
 @injectable()
 export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<ParsedCommand> {
+    private _commandRegistry?: CommandRegistry;
     @inject(CommandRegistry)
-    protected commandRegistry: CommandRegistry;
+    protected set commandRegistry(v: CommandRegistry) { this._commandRegistry = v; }
+    protected get commandRegistry(): CommandRegistry { if (!this._commandRegistry) { throw new Error('CommandChatAgent: commandRegistry not injected'); } return this._commandRegistry; }
+
+    private _messageService?: MessageService;
     @inject(MessageService)
-    protected messageService: MessageService;
+    protected set messageService(v: MessageService) { this._messageService = v; }
+    protected get messageService(): MessageService { if (!this._messageService) { throw new Error('CommandChatAgent: messageService not injected'); } return this._messageService; }
+
+    private _llmProviderService?: LlmProviderService;
     @inject(LlmProviderService)
-    protected llmProviderService: LlmProviderService;
+    protected set llmProviderService(v: LlmProviderService) { this._llmProviderService = v; }
+    protected get llmProviderService(): LlmProviderService { if (!this._llmProviderService) { throw new Error('CommandChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
 
     override id: string = 'Command';
     override name = 'Command';

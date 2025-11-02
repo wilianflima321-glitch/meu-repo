@@ -39,8 +39,10 @@ export class UniversalChatAgent extends AbstractStreamParsingChatAgent {
    override prompts = [{ id: 'universal-system', defaultVariant: universalTemplate, variants: [universalTemplateVariant] }];
    protected override systemPromptId: string = 'universal-system';
 
+   private _llmProviderService?: LlmProviderService;
    @inject(LlmProviderService)
-   protected llmProviderService: LlmProviderService;
+   protected set llmProviderService(v: LlmProviderService) { this._llmProviderService = v; }
+   protected get llmProviderService(): LlmProviderService { if (!this._llmProviderService) { throw new Error('UniversalChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
 
    protected override async sendLlmRequest(
       request: any,
