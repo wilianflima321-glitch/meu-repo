@@ -38,14 +38,20 @@ import { DiagnosticSeverity, Range } from '@theia/core/shared/vscode-languageser
 export class WorkspaceFunctionScope {
     protected readonly GITIGNORE_FILE_NAME = '.gitignore';
 
+    private _workspaceService?: WorkspaceService;
     @inject(WorkspaceService)
-    protected readonly workspaceService: WorkspaceService;
+    protected set workspaceService(v: WorkspaceService) { this._workspaceService = v; }
+    protected get workspaceService(): WorkspaceService { if (!this._workspaceService) { throw new Error('WorkspaceFunctionScope: workspaceService not injected'); } return this._workspaceService; }
 
+    private _fileService?: FileService;
     @inject(FileService)
-    protected readonly fileService: FileService;
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('WorkspaceFunctionScope: fileService not injected'); } return this._fileService; }
 
+    private _preferences?: PreferenceService;
     @inject(PreferenceService)
-    protected readonly preferences: PreferenceService;
+    protected set preferences(v: PreferenceService) { this._preferences = v; }
+    protected get preferences(): PreferenceService { if (!this._preferences) { throw new Error('WorkspaceFunctionScope: preferences not injected'); } return this._preferences; }
 
     private gitignoreMatcher: ReturnType<typeof ignore> | undefined;
     private gitignoreWatcherInitialized = false;
@@ -172,11 +178,15 @@ export class GetWorkspaceDirectoryStructure implements ToolProvider {
         };
     }
 
+    private _fileService?: FileService;
     @inject(FileService)
-    protected readonly fileService: FileService;
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('GetWorkspaceDirectoryStructure: fileService not injected'); } return this._fileService; }
 
+    private _workspaceScope?: WorkspaceFunctionScope;
     @inject(WorkspaceFunctionScope)
-    protected workspaceScope: WorkspaceFunctionScope;
+    protected set workspaceScope(v: WorkspaceFunctionScope) { this._workspaceScope = v; }
+    protected get workspaceScope(): WorkspaceFunctionScope { if (!this._workspaceScope) { throw new Error('GetWorkspaceDirectoryStructure: workspaceScope not injected'); } return this._workspaceScope; }
 
     private async getDirectoryStructure(cancellationToken?: CancellationToken): Promise<Record<string, unknown>> {
         if (cancellationToken?.isCancellationRequested) {
@@ -250,14 +260,20 @@ export class FileContentFunction implements ToolProvider {
         };
     }
 
+    private _fileService?: FileService;
     @inject(FileService)
-    protected readonly fileService: FileService;
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('FileContentFunction: fileService not injected'); } return this._fileService; }
 
+    private _workspaceScope?: WorkspaceFunctionScope;
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceScope: WorkspaceFunctionScope;
+    protected set workspaceScope(v: WorkspaceFunctionScope) { this._workspaceScope = v; }
+    protected get workspaceScope(): WorkspaceFunctionScope { if (!this._workspaceScope) { throw new Error('FileContentFunction: workspaceScope not injected'); } return this._workspaceScope; }
 
+    private _monacoWorkspace?: MonacoWorkspace;
     @inject(MonacoWorkspace)
-    protected readonly monacoWorkspace: MonacoWorkspace;
+    protected set monacoWorkspace(v: MonacoWorkspace) { this._monacoWorkspace = v; }
+    protected get monacoWorkspace(): MonacoWorkspace { if (!this._monacoWorkspace) { throw new Error('FileContentFunction: monacoWorkspace not injected'); } return this._monacoWorkspace; }
 
     private parseArg(arg_string: string): string {
         const result = JSON.parse(arg_string);
@@ -327,11 +343,15 @@ export class GetWorkspaceFileList implements ToolProvider {
         };
     }
 
+    private _fileService?: FileService;
     @inject(FileService)
-    protected readonly fileService: FileService;
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('GetWorkspaceFileList: fileService not injected'); } return this._fileService; }
 
+    private _workspaceScope?: WorkspaceFunctionScope;
     @inject(WorkspaceFunctionScope)
-    protected workspaceScope: WorkspaceFunctionScope;
+    protected set workspaceScope(v: WorkspaceFunctionScope) { this._workspaceScope = v; }
+    protected get workspaceScope(): WorkspaceFunctionScope { if (!this._workspaceScope) { throw new Error('GetWorkspaceFileList: workspaceScope not injected'); } return this._workspaceScope; }
 
     async getProjectFileList(path?: string, cancellationToken?: CancellationToken): Promise<string | string[]> {
         if (cancellationToken?.isCancellationRequested) {
@@ -399,17 +419,25 @@ export class GetWorkspaceFileList implements ToolProvider {
 export class FileDiagnosticProvider implements ToolProvider {
     static ID = GET_FILE_DIAGNOSTICS_ID;
 
+    private _workspaceScope?: WorkspaceFunctionScope;
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceScope: WorkspaceFunctionScope;
+    protected set workspaceScope(v: WorkspaceFunctionScope) { this._workspaceScope = v; }
+    protected get workspaceScope(): WorkspaceFunctionScope { if (!this._workspaceScope) { throw new Error('FileDiagnosticProvider: workspaceScope not injected'); } return this._workspaceScope; }
 
+    private _problemManager?: ProblemManager;
     @inject(ProblemManager)
-    protected readonly problemManager: ProblemManager;
+    protected set problemManager(v: ProblemManager) { this._problemManager = v; }
+    protected get problemManager(): ProblemManager { if (!this._problemManager) { throw new Error('FileDiagnosticProvider: problemManager not injected'); } return this._problemManager; }
 
+    private _modelService?: MonacoTextModelService;
     @inject(MonacoTextModelService)
-    protected readonly modelService: MonacoTextModelService;
+    protected set modelService(v: MonacoTextModelService) { this._modelService = v; }
+    protected get modelService(): MonacoTextModelService { if (!this._modelService) { throw new Error('FileDiagnosticProvider: modelService not injected'); } return this._modelService; }
 
+    private _openerService?: OpenerService;
     @inject(OpenerService)
-    protected readonly openerService: OpenerService;
+    protected set openerService(v: OpenerService) { this._openerService = v; }
+    protected get openerService(): OpenerService { if (!this._openerService) { throw new Error('FileDiagnosticProvider: openerService not injected'); } return this._openerService; }
 
     getTool(): ToolRequest {
         return {
@@ -467,7 +495,7 @@ export class FileDiagnosticProvider implements ToolProvider {
                     const timeout = setTimeout(res, 5000);
 
                     // Give another moment for additional markers to come in from different sources.
-                    const listener = this.problemManager.onDidChangeMarkers(changed => changed.isEqual(uri) && setTimeout(res, 500));
+                    const listener = this.problemManager.onDidChangeMarkers((changed: any) => changed.isEqual(uri) && setTimeout(res, 500));
                     toDispose.push(listener);
 
                     // Handle cancellation
@@ -546,14 +574,20 @@ export class FileDiagnosticProvider implements ToolProvider {
 export class FindFilesByPattern implements ToolProvider {
     static ID = FIND_FILES_BY_PATTERN_FUNCTION_ID;
 
+    private _workspaceScope?: WorkspaceFunctionScope;
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceScope: WorkspaceFunctionScope;
+    protected set workspaceScope(v: WorkspaceFunctionScope) { this._workspaceScope = v; }
+    protected get workspaceScope(): WorkspaceFunctionScope { if (!this._workspaceScope) { throw new Error('FindFilesByPattern: workspaceScope not injected'); } return this._workspaceScope; }
 
+    private _preferences?: PreferenceService;
     @inject(PreferenceService)
-    protected readonly preferences: PreferenceService;
+    protected set preferences(v: PreferenceService) { this._preferences = v; }
+    protected get preferences(): PreferenceService { if (!this._preferences) { throw new Error('FindFilesByPattern: preferences not injected'); } return this._preferences; }
 
+    private _fileService?: FileService;
     @inject(FileService)
-    protected readonly fileService: FileService;
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('FindFilesByPattern: fileService not injected'); } return this._fileService; }
 
     getTool(): ToolRequest {
         return {
