@@ -4,6 +4,7 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const core = require('./lib/mock-core');
 const DATA = core.DATA;
+const { verifyScene } = require('./lib/verifier');
 const fs = require('fs');
 const path = require('path');
 
@@ -211,53 +212,6 @@ app.post('/api/llm/dev/run-ensemble/:id', (req, res) => {
   }
 });
 
-// Helper: verifyScene - reuse logic for verify endpoint and run-ensemble
-function verifyScene(scene, constraints) {
-  const entities = scene && scene.entities ? scene.entities : [];
-  const errors = [];
-  if (constraints.includes('no_weapons')) {
-    for (const e of entities) {
-      const holding = (e && (e.holding || (e.properties && e.properties.holding))) || null;
-      if (holding && typeof holding === 'string' && holding.toLowerCase().includes('weapon')) {
-        errors.push({ entityId: e.id || null, reason: 'weapon_present' });
-      }
-    }
-  }
-  if (constraints.includes('no_smoke')) {
-    for (const e of entities) {
-      const hasSmoke = e && (e.properties && e.properties.smoke) || false;
-      if (hasSmoke) errors.push({ entityId: e.id || null, reason: 'smoke_present' });
-    }
-  }
-  if (constraints.includes('no_violence')) {
-    const violentTerms = ['kill','attack','shoot','murder','stab','assault'];
-    for (const e of entities) {
-      const action = (e && (e.action || (e.properties && e.properties.action))) || '';
-      const text = String(action).toLowerCase();
-      for (const t of violentTerms) {
-        if (text.includes(t)) {
-          errors.push({ entityId: e.id || null, reason: 'violent_action' });
-          break;
-        }
-      }
-    }
-  }
-  // new rule: no_children_near_fire - if any entity is a child (role:'child' or age<18) and any entity has properties.fire=true, flag
-  if (constraints.includes('no_children_near_fire')) {
-    const hasFire = entities.some(e => e && e.properties && e.properties.fire);
-    if (hasFire) {
-      for (const e of entities) {
-        const role = (e && e.role) || null;
-        const age = (e && e.age) || null;
-        if ((role === 'child') || (typeof age === 'number' && age < 18)) {
-          errors.push({ entityId: e.id || null, reason: 'child_near_fire' });
-        }
-      }
-    }
-  }
-  return errors;
-}
-
 // Dev: verify a structured scene/plan against simple constraints (no_weapons, no_smoke, etc.)
 app.post('/api/llm/dev/verify-scene', (req, res) => {
   try {
@@ -273,58 +227,6 @@ app.post('/api/llm/dev/verify-scene', (req, res) => {
   }
 });
 
-// Helper: verifyScene returns an array of errors (empty if ok)
-function verifyScene(scene, constraints) {
-  const errors = [];
-  try {
-    const entities = (scene && scene.entities) || [];
-  if (Array.isArray(constraints) && constraints.includes('no_weapons')) {
-      for (const e of entities) {
-        const holding = (e && (e.holding || (e.properties && e.properties.holding))) || null;
-        if (holding && typeof holding === 'string' && holding.toLowerCase().includes('weapon')) {
-          errors.push({ entityId: e.id || null, reason: 'weapon_present' });
-        }
-      }
-    }
-  if (Array.isArray(constraints) && constraints.includes('no_smoke')) {
-    if (Array.isArray(constraints) && constraints.includes('no_violence')) {
-      const violentTerms = ['kill','attack','shoot','murder','stab','assault'];
-      for (const e of entities) {
-        const action = (e && (e.action || (e.properties && e.properties.action))) || '';
-        const text = String(action).toLowerCase();
-        for (const t of violentTerms) {
-          if (text.includes(t)) {
-            errors.push({ entityId: e.id || null, reason: 'violent_action' });
-            break;
-          }
-        }
-      }
-    }
-    // no_children_near_fire: if any child (role:'child' or age<18) exists and any entity has properties.fire true -> error
-    if (Array.isArray(constraints) && constraints.includes('no_children_near_fire')) {
-      const hasFire = entities.some(e => e && e.properties && e.properties.fire);
-      if (hasFire) {
-        for (const e of entities) {
-          const role = (e && e.role) || null;
-          const age = (e && e.age) || null;
-          if ((role === 'child') || (typeof age === 'number' && age < 18)) {
-            errors.push({ entityId: e.id || null, reason: 'child_near_fire' });
-          }
-        }
-      }
-    }
-      for (const e of entities) {
-        const hasSmoke = e && (e.properties && e.properties.smoke) || false;
-        if (hasSmoke) errors.push({ entityId: e.id || null, reason: 'smoke_present' });
-      }
-    }
-  } catch (e) {
-    core.logger.error({ err: e }, 'verifyScene internal error');
-    errors.push({ reason: 'internal_error' });
-  }
-  return errors;
-}
-
 // Quotas endpoints
 app.get('/api/llm/quotas/:userId', (req, res) => {
   const userId = req.params.userId;
@@ -336,7 +238,7 @@ app.put('/api/llm/quotas/:userId', (req, res) => {
   const userId = req.params.userId;
   const body = req.body || {};
   DATA.quotas[userId] = { monthlyTokens: body.monthlyTokens || 0 };
-  persist();
+  core.persist();
   res.status(204).end();
 });
 
@@ -507,122 +409,6 @@ app.get('/api/llm/billing/export', (req, res) => {
     res.status(500).send('export_error');
   }
 });
-
-// Helper: apply query filters and pagination to billing_records
-function filterBillingRecords(query) {
-  const all = DATA.billing_records || [];
-  let out = all.slice();
-  if (!query) return out;
-  const { userId, providerId, from, to, limit, offset } = query;
-  if (userId) {
-    out = out.filter(r => String(r.userId) === String(userId));
-  }
-  if (providerId) {
-    out = out.filter(r => String(r.providerId) === String(providerId));
-  }
-  if (from) {
-    const f = new Date(String(from));
-    if (!isNaN(f.getTime())) out = out.filter(r => new Date(r.reconciledAt) >= f);
-  }
-  if (to) {
-    const t = new Date(String(to));
-    if (!isNaN(t.getTime())) out = out.filter(r => new Date(r.reconciledAt) <= t);
-  }
-  const lim = parseInt(limit) || null;
-  const off = parseInt(offset) || 0;
-  if (lim && lim > 0) {
-    out = out.slice(off, off + lim);
-  } else if (off && off > 0) {
-    out = out.slice(off);
-  }
-  return out;
-}
-
-// Automatic periodic reconciliation (every 60 seconds) to ease dev testing
-// Reconcile function used by both manual endpoint and periodic run. Returns created records.
-function reconcileOnce() {
-  const newRecords = [];
-  for (const u of DATA.usage_events) {
-    const already = DATA.billing_records.find(b => b.usageEventId === u.id);
-    if (already) continue;
-    const provider = findProvider(u.providerId);
-    const tokens = sumTokens(u);
-    // apply redeemed promo freeTokens if any
-    let freeTokensUsed = 0;
-    if (u.userId && DATA.redeemedPromos && Array.isArray(DATA.redeemedPromos[u.userId])) {
-      for (const red of DATA.redeemedPromos[u.userId]) {
-        if (!red.remainingFreeTokens || red.remainingFreeTokens <= 0) continue;
-        const use = Math.min(red.remainingFreeTokens, tokens - freeTokensUsed);
-        if (use > 0) {
-          red.remainingFreeTokens -= use;
-          freeTokensUsed += use;
-        }
-        if (freeTokensUsed >= tokens) break;
-      }
-    }
-    const billedTokens = Math.max(0, tokens - freeTokensUsed);
-    const providerRate = (provider && provider.rateCard && provider.rateCard.pricePerToken) ? provider.rateCard.pricePerToken : 0;
-    const providerCost = +(providerRate * billedTokens);
-    const infra = +(0.00001 * billedTokens); // tiny infra cost per token for mock
-    const maintenance = +(0.05 * providerCost);
-    const margin = +((providerCost + infra + maintenance) * 0.2);
-    const amount = +(providerCost + infra + maintenance + margin);
-    const billedTo = (u.billingMode === 'platform') ? 'platform' : (u.billingMode === 'self') ? 'user' : 'sponsor';
-    const rec = {
-      id: uuidv4(),
-      usageEventId: u.id,
-      providerId: u.providerId,
-      userId: u.userId,
-      orgId: u.orgId,
-      tokens,
-      freeTokensUsed,
-      billedTokens,
-      providerCost,
-      infra,
-      maintenance,
-      margin,
-      amount,
-      currency: (provider && provider.rateCard && provider.rateCard.currency) ? provider.rateCard.currency : 'USD',
-      billedTo,
-      reconciledAt: new Date().toISOString()
-    };
-    DATA.billing_records.push(rec);
-    newRecords.push(rec);
-  }
-  if (newRecords.length) persist();
-  if (newRecords.length) console.log(`reconcileOnce created ${newRecords.length} records`);
-  // after creating billing records, ensure payment links exist for billable user-charges
-  for (const r of newRecords) {
-    try {
-      attachPaymentLinkIfNeeded(r);
-    } catch (e) {
-      console.error('attachPaymentLinkIfNeeded failed', e);
-    }
-  }
-  return newRecords;
-}
-
-function generatePaymentUrl(id) {
-  const base = (DATA.paymentConfig && DATA.paymentConfig.basePaymentUrl) ? DATA.paymentConfig.basePaymentUrl.replace(/\/$/, '') : 'https://payments.example.com';
-  // simple tokenized path
-  return `${base}/pay/${id}`;
-}
-
-function attachPaymentLinkIfNeeded(billingRecord) {
-  if (!billingRecord) return null;
-  // Only create payment link for user-billed items with amount > 0
-  if (billingRecord.billedTo !== 'user') return null;
-  if (!billingRecord.amount || billingRecord.amount <= 0) return null;
-  ensureDefaults();
-  if (billingRecord.paymentLinkId) return DATA.payments.find(p => p.id === billingRecord.paymentLinkId) || null;
-  const pid = uuidv4();
-  const url = generatePaymentUrl(pid);
-  const payment = { id: pid, billingRecordId: billingRecord.id, userId: billingRecord.userId, amount: billingRecord.amount, currency: billingRecord.currency || 'USD', status: 'pending', url, createdAt: new Date().toISOString() };
-  DATA.payments.push(payment);
-  billingRecord.paymentLinkId = pid;
-  persist();
-  return payment;
-}
 
 // Periodic reconciliation (every 60 seconds)
 setInterval(() => {
