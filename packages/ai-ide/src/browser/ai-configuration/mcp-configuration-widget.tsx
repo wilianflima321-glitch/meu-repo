@@ -39,16 +39,28 @@ export class AIMCPConfigurationWidget extends ReactWidget {
     protected expandedTools: Record<string, boolean> = {};
 
     @inject(MCPFrontendService)
-    protected readonly mcpFrontendService: MCPFrontendService;
+    private _mcpFrontendService?: MCPFrontendService;
+    @inject(MCPFrontendService)
+    protected set mcpFrontendService(v: MCPFrontendService) { this._mcpFrontendService = v; }
+    protected get mcpFrontendService(): MCPFrontendService { if (!this._mcpFrontendService) { throw new Error('AIMCPConfigurationWidget: mcpFrontendService not injected'); } return this._mcpFrontendService; }
 
     @inject(MCPFrontendNotificationService)
-    protected readonly mcpFrontendNotificationService: MCPFrontendNotificationService;
+    private _mcpFrontendNotificationService?: MCPFrontendNotificationService;
+    @inject(MCPFrontendNotificationService)
+    protected set mcpFrontendNotificationService(v: MCPFrontendNotificationService) { this._mcpFrontendNotificationService = v; }
+    protected get mcpFrontendNotificationService(): MCPFrontendNotificationService { if (!this._mcpFrontendNotificationService) { throw new Error('AIMCPConfigurationWidget: mcpFrontendNotificationService not injected'); } return this._mcpFrontendNotificationService; }
 
     @inject(HoverService)
-    protected readonly hoverService: HoverService;
+    private _hoverService?: HoverService;
+    @inject(HoverService)
+    protected set hoverService(v: HoverService) { this._hoverService = v; }
+    protected get hoverService(): HoverService { if (!this._hoverService) { throw new Error('AIMCPConfigurationWidget: hoverService not injected'); } return this._hoverService; }
 
     @inject(MessageService)
-    protected readonly messageService: MessageService;
+    private _messageService?: MessageService;
+    @inject(MessageService)
+    protected set messageService(v: MessageService) { this._messageService = v; }
+    protected get messageService(): MessageService { if (!this._messageService) { throw new Error('AIMCPConfigurationWidget: messageService not injected'); } return this._messageService; }
 
     @postConstruct()
     protected init(): void {

@@ -29,13 +29,22 @@ import { Path, PreferenceService } from '@theia/core';
 export class TemplatePreferenceContribution implements FrontendApplicationContribution {
 
     @inject(PreferenceService)
-    protected readonly preferenceService: PreferenceService;
+    private _preferenceService?: PreferenceService;
+    @inject(PreferenceService)
+    protected set preferenceService(v: PreferenceService) { this._preferenceService = v; }
+    protected get preferenceService(): PreferenceService { if (!this._preferenceService) { throw new Error('TemplatePreferenceContribution: preferenceService not injected'); } return this._preferenceService; }
 
     @inject(DefaultPromptFragmentCustomizationService)
-    protected readonly customizationService: DefaultPromptFragmentCustomizationService;
+    private _customizationService?: DefaultPromptFragmentCustomizationService;
+    @inject(DefaultPromptFragmentCustomizationService)
+    protected set customizationService(v: DefaultPromptFragmentCustomizationService) { this._customizationService = v; }
+    protected get customizationService(): DefaultPromptFragmentCustomizationService { if (!this._customizationService) { throw new Error('TemplatePreferenceContribution: customizationService not injected'); } return this._customizationService; }
 
     @inject(WorkspaceService)
-    protected readonly workspaceService: WorkspaceService;
+    private _workspaceService?: WorkspaceService;
+    @inject(WorkspaceService)
+    protected set workspaceService(v: WorkspaceService) { this._workspaceService = v; }
+    protected get workspaceService(): WorkspaceService { if (!this._workspaceService) { throw new Error('TemplatePreferenceContribution: workspaceService not injected'); } return this._workspaceService; }
 
     onStart(): void {
         Promise.all([this.preferenceService.ready, this.workspaceService.ready]).then(() => {
@@ -43,7 +52,7 @@ export class TemplatePreferenceContribution implements FrontendApplicationContri
             this.updateConfiguration();
 
             // Listen for preference changes
-            this.preferenceService.onPreferenceChanged(event => {
+            this.preferenceService.onPreferenceChanged((event: any) => {
                 if (event.preferenceName === PROMPT_TEMPLATE_WORKSPACE_DIRECTORIES_PREF ||
                     event.preferenceName === PROMPT_TEMPLATE_ADDITIONAL_EXTENSIONS_PREF ||
                     event.preferenceName === PROMPT_TEMPLATE_WORKSPACE_FILES_PREF) {

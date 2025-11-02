@@ -32,22 +32,52 @@ export class AIConfigurationContainerWidget extends BaseWidget {
 
     static readonly ID = 'ai-configuration';
     static readonly LABEL = nls.localize('theia/ai/core/aiConfiguration/label', 'AI Configuration [Beta]');
-    protected dockpanel: DockPanel;
+    private _dockpanel?: DockPanel;
+    protected set dockpanel(v: DockPanel) { this._dockpanel = v; }
+    protected get dockpanel(): DockPanel { if (!this._dockpanel) { throw new Error('AIConfigurationContainerWidget: dockpanel not initialized'); } return this._dockpanel; }
 
+    private _dockPanelFactory?: TheiaDockPanel.Factory;
     @inject(TheiaDockPanel.Factory)
-    protected readonly dockPanelFactory: TheiaDockPanel.Factory;
-    @inject(WidgetManager)
-    protected readonly widgetManager: WidgetManager;
-    @inject(AIConfigurationSelectionService)
-    protected readonly aiConfigurationSelectionService: AIConfigurationSelectionService;
+    protected set dockPanelFactory(v: TheiaDockPanel.Factory) { this._dockPanelFactory = v; }
+    protected get dockPanelFactory(): TheiaDockPanel.Factory { if (!this._dockPanelFactory) { throw new Error('AIConfigurationContainerWidget: dockPanelFactory not injected'); } return this._dockPanelFactory; }
 
-    protected agentsWidget: AIAgentConfigurationWidget;
-    protected variablesWidget: AIVariableConfigurationWidget;
-    protected mcpWidget: AIMCPConfigurationWidget;
-    protected tokenUsageWidget: AITokenUsageConfigurationWidget;
-    protected promptFragmentsWidget: AIPromptFragmentsConfigurationWidget;
-    protected toolsWidget: AIToolsConfigurationWidget;
-    protected modelAliasesWidget: ModelAliasesConfigurationWidget;
+    private _widgetManager?: WidgetManager;
+    @inject(WidgetManager)
+    protected set widgetManager(v: WidgetManager) { this._widgetManager = v; }
+    protected get widgetManager(): WidgetManager { if (!this._widgetManager) { throw new Error('AIConfigurationContainerWidget: widgetManager not injected'); } return this._widgetManager; }
+
+    private _aiConfigurationSelectionService?: AIConfigurationSelectionService;
+    @inject(AIConfigurationSelectionService)
+    protected set aiConfigurationSelectionService(v: AIConfigurationSelectionService) { this._aiConfigurationSelectionService = v; }
+    protected get aiConfigurationSelectionService(): AIConfigurationSelectionService { if (!this._aiConfigurationSelectionService) { throw new Error('AIConfigurationContainerWidget: aiConfigurationSelectionService not injected'); } return this._aiConfigurationSelectionService; }
+
+    private _agentsWidget?: AIAgentConfigurationWidget;
+    protected set agentsWidget(v: AIAgentConfigurationWidget) { this._agentsWidget = v; }
+    protected get agentsWidget(): AIAgentConfigurationWidget { if (!this._agentsWidget) { throw new Error('AIConfigurationContainerWidget: agentsWidget not initialized'); } return this._agentsWidget; }
+
+    private _variablesWidget?: AIVariableConfigurationWidget;
+    protected set variablesWidget(v: AIVariableConfigurationWidget) { this._variablesWidget = v; }
+    protected get variablesWidget(): AIVariableConfigurationWidget { if (!this._variablesWidget) { throw new Error('AIConfigurationContainerWidget: variablesWidget not initialized'); } return this._variablesWidget; }
+
+    private _mcpWidget?: AIMCPConfigurationWidget;
+    protected set mcpWidget(v: AIMCPConfigurationWidget) { this._mcpWidget = v; }
+    protected get mcpWidget(): AIMCPConfigurationWidget { if (!this._mcpWidget) { throw new Error('AIConfigurationContainerWidget: mcpWidget not initialized'); } return this._mcpWidget; }
+
+    private _tokenUsageWidget?: AITokenUsageConfigurationWidget;
+    protected set tokenUsageWidget(v: AITokenUsageConfigurationWidget) { this._tokenUsageWidget = v; }
+    protected get tokenUsageWidget(): AITokenUsageConfigurationWidget { if (!this._tokenUsageWidget) { throw new Error('AIConfigurationContainerWidget: tokenUsageWidget not initialized'); } return this._tokenUsageWidget; }
+
+    private _promptFragmentsWidget?: AIPromptFragmentsConfigurationWidget;
+    protected set promptFragmentsWidget(v: AIPromptFragmentsConfigurationWidget) { this._promptFragmentsWidget = v; }
+    protected get promptFragmentsWidget(): AIPromptFragmentsConfigurationWidget { if (!this._promptFragmentsWidget) { throw new Error('AIConfigurationContainerWidget: promptFragmentsWidget not initialized'); } return this._promptFragmentsWidget; }
+
+    private _toolsWidget?: AIToolsConfigurationWidget;
+    protected set toolsWidget(v: AIToolsConfigurationWidget) { this._toolsWidget = v; }
+    protected get toolsWidget(): AIToolsConfigurationWidget { if (!this._toolsWidget) { throw new Error('AIConfigurationContainerWidget: toolsWidget not initialized'); } return this._toolsWidget; }
+
+    private _modelAliasesWidget?: ModelAliasesConfigurationWidget;
+    protected set modelAliasesWidget(v: ModelAliasesConfigurationWidget) { this._modelAliasesWidget = v; }
+    protected get modelAliasesWidget(): ModelAliasesConfigurationWidget { if (!this._modelAliasesWidget) { throw new Error('AIConfigurationContainerWidget: modelAliasesWidget not initialized'); } return this._modelAliasesWidget; }
 
     @postConstruct()
     protected init(): void {
@@ -90,7 +120,7 @@ export class AIConfigurationContainerWidget extends BaseWidget {
     }
 
     protected initListeners(): void {
-        this.aiConfigurationSelectionService.onDidSelectConfiguration(widgetId => {
+    this.aiConfigurationSelectionService.onDidSelectConfiguration((widgetId: any) => {
             if (widgetId === AIAgentConfigurationWidget.ID) {
                 this.dockpanel.activateWidget(this.agentsWidget);
             } else if (widgetId === AIVariableConfigurationWidget.ID) {
