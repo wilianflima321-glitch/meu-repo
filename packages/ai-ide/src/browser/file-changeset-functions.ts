@@ -230,17 +230,25 @@ export class WriteFileContent implements ToolProvider {
 
 @injectable()
 export class ReplaceContentInFileFunctionHelper {
+    private _workspaceFunctionScope?: WorkspaceFunctionScope;
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceFunctionScope!: WorkspaceFunctionScope;
+    protected set workspaceFunctionScope(v: WorkspaceFunctionScope) { this._workspaceFunctionScope = v; }
+    protected get workspaceFunctionScope(): WorkspaceFunctionScope { if (!this._workspaceFunctionScope) { throw new Error('ReplaceContentInFileFunctionHelper: workspaceFunctionScope not injected'); } return this._workspaceFunctionScope; }
 
+    private _fileService?: FileService;
     @inject(FileService)
-    fileService!: FileService;
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('ReplaceContentInFileFunctionHelper: fileService not injected'); } return this._fileService; }
 
+    private _fileChangeFactory?: ChangeSetFileElementFactory;
     @inject(ChangeSetFileElementFactory)
-    protected readonly fileChangeFactory!: ChangeSetFileElementFactory;
+    protected set fileChangeFactory(v: ChangeSetFileElementFactory) { this._fileChangeFactory = v; }
+    protected get fileChangeFactory(): ChangeSetFileElementFactory { if (!this._fileChangeFactory) { throw new Error('ReplaceContentInFileFunctionHelper: fileChangeFactory not injected'); } return this._fileChangeFactory; }
 
+    private _fileChangeSetTitleProvider?: FileChangeSetTitleProvider;
     @inject(FileChangeSetTitleProvider)
-    protected readonly fileChangeSetTitleProvider!: FileChangeSetTitleProvider;
+    protected set fileChangeSetTitleProvider(v: FileChangeSetTitleProvider) { this._fileChangeSetTitleProvider = v; }
+    protected get fileChangeSetTitleProvider(): FileChangeSetTitleProvider { if (!this._fileChangeSetTitleProvider) { throw new Error('ReplaceContentInFileFunctionHelper: fileChangeSetTitleProvider not injected'); } return this._fileChangeSetTitleProvider; }
 
     private replacer: ContentReplacer;
 
@@ -480,8 +488,10 @@ export class ReplaceContentInFileFunctionHelper {
 @injectable()
 export class SimpleSuggestFileReplacements implements ToolProvider {
     static ID = 'simpleSuggestFileReplacements';
+    private _replaceContentInFileFunctionHelper?: ReplaceContentInFileFunctionHelper;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
+    protected set replaceContentInFileFunctionHelper(v: ReplaceContentInFileFunctionHelper) { this._replaceContentInFileFunctionHelper = v; }
+    protected get replaceContentInFileFunctionHelper(): ReplaceContentInFileFunctionHelper { if (!this._replaceContentInFileFunctionHelper) { throw new Error('SimpleSuggestFileReplacements: replaceContentInFileFunctionHelper not injected'); } return this._replaceContentInFileFunctionHelper; }
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata();
@@ -503,8 +513,10 @@ export class SimpleSuggestFileReplacements implements ToolProvider {
 @injectable()
 export class SimpleWriteFileReplacements implements ToolProvider {
     static ID = 'simpleWriteFileReplacements';
+    private _replaceContentInFileFunctionHelper2?: ReplaceContentInFileFunctionHelper;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
+    protected set replaceContentInFileFunctionHelper(v: ReplaceContentInFileFunctionHelper) { this._replaceContentInFileFunctionHelper2 = v; }
+    protected get replaceContentInFileFunctionHelper(): ReplaceContentInFileFunctionHelper { if (!this._replaceContentInFileFunctionHelper2) { throw new Error('SimpleWriteFileReplacements: replaceContentInFileFunctionHelper not injected'); } return this._replaceContentInFileFunctionHelper2; }
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata(false, true);
@@ -526,8 +538,10 @@ export class SimpleWriteFileReplacements implements ToolProvider {
 @injectable()
 export class SuggestFileReplacements implements ToolProvider {
     static ID = SUGGEST_FILE_REPLACEMENTS_ID;
+    private _replaceContentInFileFunctionHelper3?: ReplaceContentInFileFunctionHelper;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
+    protected set replaceContentInFileFunctionHelper(v: ReplaceContentInFileFunctionHelper) { this._replaceContentInFileFunctionHelper3 = v; }
+    protected get replaceContentInFileFunctionHelper(): ReplaceContentInFileFunctionHelper { if (!this._replaceContentInFileFunctionHelper3) { throw new Error('SuggestFileReplacements: replaceContentInFileFunctionHelper not injected'); } return this._replaceContentInFileFunctionHelper3; }
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata(true);
@@ -549,8 +563,10 @@ export class SuggestFileReplacements implements ToolProvider {
 @injectable()
 export class WriteFileReplacements implements ToolProvider {
     static ID = WRITE_FILE_REPLACEMENTS_ID;
+    private _replaceContentInFileFunctionHelper4?: ReplaceContentInFileFunctionHelper;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
+    protected set replaceContentInFileFunctionHelper(v: ReplaceContentInFileFunctionHelper) { this._replaceContentInFileFunctionHelper4 = v; }
+    protected get replaceContentInFileFunctionHelper(): ReplaceContentInFileFunctionHelper { if (!this._replaceContentInFileFunctionHelper4) { throw new Error('WriteFileReplacements: replaceContentInFileFunctionHelper not injected'); } return this._replaceContentInFileFunctionHelper4; }
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata(true, true);
@@ -572,8 +588,10 @@ export class WriteFileReplacements implements ToolProvider {
 @injectable()
 export class ClearFileChanges implements ToolProvider {
     static ID = CLEAR_FILE_CHANGES_ID;
+    private _replaceContentInFileFunctionHelper5?: ReplaceContentInFileFunctionHelper;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
+    protected set replaceContentInFileFunctionHelper(v: ReplaceContentInFileFunctionHelper) { this._replaceContentInFileFunctionHelper5 = v; }
+    protected get replaceContentInFileFunctionHelper(): ReplaceContentInFileFunctionHelper { if (!this._replaceContentInFileFunctionHelper5) { throw new Error('ClearFileChanges: replaceContentInFileFunctionHelper not injected'); } return this._replaceContentInFileFunctionHelper5; }
 
     getTool(): ToolRequest {
         return {
@@ -604,8 +622,10 @@ export class ClearFileChanges implements ToolProvider {
 @injectable()
 export class GetProposedFileState implements ToolProvider {
     static ID = GET_PROPOSED_CHANGES_ID;
+    private _replaceContentInFileFunctionHelper6?: ReplaceContentInFileFunctionHelper;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
+    protected set replaceContentInFileFunctionHelper(v: ReplaceContentInFileFunctionHelper) { this._replaceContentInFileFunctionHelper6 = v; }
+    protected get replaceContentInFileFunctionHelper(): ReplaceContentInFileFunctionHelper { if (!this._replaceContentInFileFunctionHelper6) { throw new Error('GetProposedFileState: replaceContentInFileFunctionHelper not injected'); } return this._replaceContentInFileFunctionHelper6; }
 
     getTool(): ToolRequest {
         return {
