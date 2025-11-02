@@ -52,32 +52,50 @@ export class AIAgentConfigurationWidget extends ReactWidget {
     static readonly ID = 'ai-agent-configuration-container-widget';
     static readonly LABEL = nls.localize('theia/ai/core/agentConfiguration/label', 'Agents');
 
+    private _agentService?: AgentService;
     @inject(AgentService)
-    protected readonly agentService: AgentService;
+    protected set agentService(v: AgentService) { this._agentService = v; }
+    protected get agentService(): AgentService { if (!this._agentService) { throw new Error('AIAgentConfigurationWidget: agentService not injected'); } return this._agentService; }
 
+    private _languageModelRegistry?: FrontendLanguageModelRegistry;
     @inject(LanguageModelRegistry)
-    protected readonly languageModelRegistry: FrontendLanguageModelRegistry;
+    protected set languageModelRegistry(v: FrontendLanguageModelRegistry) { this._languageModelRegistry = v; }
+    protected get languageModelRegistry(): FrontendLanguageModelRegistry { if (!this._languageModelRegistry) { throw new Error('AIAgentConfigurationWidget: languageModelRegistry not injected'); } return this._languageModelRegistry; }
 
+    private _promptFragmentCustomizationService?: PromptFragmentCustomizationService;
     @inject(PromptFragmentCustomizationService)
-    protected readonly promptFragmentCustomizationService: PromptFragmentCustomizationService;
+    protected set promptFragmentCustomizationService(v: PromptFragmentCustomizationService) { this._promptFragmentCustomizationService = v; }
+    protected get promptFragmentCustomizationService(): PromptFragmentCustomizationService { if (!this._promptFragmentCustomizationService) { throw new Error('AIAgentConfigurationWidget: promptFragmentCustomizationService not injected'); } return this._promptFragmentCustomizationService; }
 
+    private _languageModelAliasRegistry?: LanguageModelAliasRegistry;
     @inject(LanguageModelAliasRegistry)
-    protected readonly languageModelAliasRegistry: LanguageModelAliasRegistry;
+    protected set languageModelAliasRegistry(v: LanguageModelAliasRegistry) { this._languageModelAliasRegistry = v; }
+    protected get languageModelAliasRegistry(): LanguageModelAliasRegistry { if (!this._languageModelAliasRegistry) { throw new Error('AIAgentConfigurationWidget: languageModelAliasRegistry not injected'); } return this._languageModelAliasRegistry; }
 
+    private _aiSettingsService?: AISettingsService;
     @inject(AISettingsService)
-    protected readonly aiSettingsService: AISettingsService;
+    protected set aiSettingsService(v: AISettingsService) { this._aiSettingsService = v; }
+    protected get aiSettingsService(): AISettingsService { if (!this._aiSettingsService) { throw new Error('AIAgentConfigurationWidget: aiSettingsService not injected'); } return this._aiSettingsService; }
 
+    private _aiConfigurationSelectionService?: AIConfigurationSelectionService;
     @inject(AIConfigurationSelectionService)
-    protected readonly aiConfigurationSelectionService: AIConfigurationSelectionService;
+    protected set aiConfigurationSelectionService(v: AIConfigurationSelectionService) { this._aiConfigurationSelectionService = v; }
+    protected get aiConfigurationSelectionService(): AIConfigurationSelectionService { if (!this._aiConfigurationSelectionService) { throw new Error('AIAgentConfigurationWidget: aiConfigurationSelectionService not injected'); } return this._aiConfigurationSelectionService; }
 
+    private _variableService?: AIVariableService;
     @inject(AIVariableService)
-    protected readonly variableService: AIVariableService;
+    protected set variableService(v: AIVariableService) { this._variableService = v; }
+    protected get variableService(): AIVariableService { if (!this._variableService) { throw new Error('AIAgentConfigurationWidget: variableService not injected'); } return this._variableService; }
 
+    private _promptService?: PromptService;
     @inject(PromptService)
-    protected promptService: PromptService;
+    protected set promptService(v: PromptService) { this._promptService = v; }
+    protected get promptService(): PromptService { if (!this._promptService) { throw new Error('AIAgentConfigurationWidget: promptService not injected'); } return this._promptService; }
 
+    private _quickInputService?: QuickInputService;
     @inject(QuickInputService)
-    protected readonly quickInputService: QuickInputService;
+    protected set quickInputService(v: QuickInputService) { this._quickInputService = v; }
+    protected get quickInputService(): QuickInputService { if (!this._quickInputService) { throw new Error('AIAgentConfigurationWidget: quickInputService not injected'); } return this._quickInputService; }
 
     protected languageModels: LanguageModel[] | undefined;
     protected languageModelAliases: LanguageModelAlias[] = [];
@@ -278,7 +296,7 @@ export class AIAgentConfigurationWidget extends ReactWidget {
             const prompt = storedPrompt?.template ?? template.template;
             const variableMatches = matchVariablesRegEx(prompt);
 
-            variableMatches.forEach(match => {
+            variableMatches.forEach((match: any) => {
                 const variableId = match[1];
                 // if the variable is part of the variable service and not part of the agent specific variables then it is a global variable
                 if (this.variableService.hasVariable(variableId) &&
