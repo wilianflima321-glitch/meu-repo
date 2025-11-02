@@ -43,16 +43,46 @@ export class SuggestFileContent implements ToolProvider {
     static ID = SUGGEST_FILE_CONTENT_ID;
 
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceFunctionScope: WorkspaceFunctionScope;
+    // use setter-based injection with a backing field to avoid definite-assignment assertions
+    private _workspaceFunctionScope?: WorkspaceFunctionScope;
+    @inject(WorkspaceFunctionScope)
+    protected set workspaceFunctionScope(v: WorkspaceFunctionScope) { this._workspaceFunctionScope = v; }
+    protected get workspaceFunctionScope(): WorkspaceFunctionScope {
+        if (!this._workspaceFunctionScope) {
+            throw new Error('Dependency not injected: workspaceFunctionScope');
+        }
+        return this._workspaceFunctionScope;
+    }
 
+    private _fileService?: FileService;
     @inject(FileService)
-    fileService: FileService;
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService {
+        if (!this._fileService) {
+            throw new Error('Dependency not injected: fileService');
+        }
+        return this._fileService;
+    }
 
+    private _fileChangeFactory?: ChangeSetFileElementFactory;
     @inject(ChangeSetFileElementFactory)
-    protected readonly fileChangeFactory: ChangeSetFileElementFactory;
+    protected set fileChangeFactory(v: ChangeSetFileElementFactory) { this._fileChangeFactory = v; }
+    protected get fileChangeFactory(): ChangeSetFileElementFactory {
+        if (!this._fileChangeFactory) {
+            throw new Error('Dependency not injected: fileChangeFactory');
+        }
+        return this._fileChangeFactory;
+    }
 
+    private _fileChangeSetTitleProvider?: FileChangeSetTitleProvider;
     @inject(FileChangeSetTitleProvider)
-    protected readonly fileChangeSetTitleProvider: FileChangeSetTitleProvider;
+    protected set fileChangeSetTitleProvider(v: FileChangeSetTitleProvider) { this._fileChangeSetTitleProvider = v; }
+    protected get fileChangeSetTitleProvider(): FileChangeSetTitleProvider {
+        if (!this._fileChangeSetTitleProvider) {
+            throw new Error('Dependency not injected: fileChangeSetTitleProvider');
+        }
+        return this._fileChangeSetTitleProvider;
+    }
 
     getTool(): ToolRequest {
         return {
@@ -114,16 +144,25 @@ export class WriteFileContent implements ToolProvider {
     static ID = WRITE_FILE_CONTENT_ID;
 
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceFunctionScope: WorkspaceFunctionScope;
+    private _workspaceFunctionScope2?: WorkspaceFunctionScope;
+    @inject(WorkspaceFunctionScope)
+    protected set workspaceFunctionScope(v: WorkspaceFunctionScope) { this._workspaceFunctionScope2 = v; }
+    protected get workspaceFunctionScope(): WorkspaceFunctionScope { if (!this._workspaceFunctionScope2) { throw new Error('WriteFileContent: workspaceFunctionScope not injected'); } return this._workspaceFunctionScope2; }
 
+    private _fileService2?: FileService;
     @inject(FileService)
-    fileService: FileService;
+    protected set fileService(v: FileService) { this._fileService2 = v; }
+    protected get fileService(): FileService { if (!this._fileService2) { throw new Error('WriteFileContent: fileService not injected'); } return this._fileService2; }
 
+    private _fileChangeFactory2?: ChangeSetFileElementFactory;
     @inject(ChangeSetFileElementFactory)
-    protected readonly fileChangeFactory: ChangeSetFileElementFactory;
+    protected set fileChangeFactory(v: ChangeSetFileElementFactory) { this._fileChangeFactory2 = v; }
+    protected get fileChangeFactory(): ChangeSetFileElementFactory { if (!this._fileChangeFactory2) { throw new Error('WriteFileContent: fileChangeFactory not injected'); } return this._fileChangeFactory2; }
 
+    private _fileChangeSetTitleProvider2?: FileChangeSetTitleProvider;
     @inject(FileChangeSetTitleProvider)
-    protected readonly fileChangeSetTitleProvider: FileChangeSetTitleProvider;
+    protected set fileChangeSetTitleProvider(v: FileChangeSetTitleProvider) { this._fileChangeSetTitleProvider2 = v; }
+    protected get fileChangeSetTitleProvider(): FileChangeSetTitleProvider { if (!this._fileChangeSetTitleProvider2) { throw new Error('WriteFileContent: fileChangeSetTitleProvider not injected'); } return this._fileChangeSetTitleProvider2; }
 
     getTool(): ToolRequest {
         return {
@@ -192,16 +231,16 @@ export class WriteFileContent implements ToolProvider {
 @injectable()
 export class ReplaceContentInFileFunctionHelper {
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceFunctionScope: WorkspaceFunctionScope;
+    protected readonly workspaceFunctionScope!: WorkspaceFunctionScope;
 
     @inject(FileService)
-    fileService: FileService;
+    fileService!: FileService;
 
     @inject(ChangeSetFileElementFactory)
-    protected readonly fileChangeFactory: ChangeSetFileElementFactory;
+    protected readonly fileChangeFactory!: ChangeSetFileElementFactory;
 
     @inject(FileChangeSetTitleProvider)
-    protected readonly fileChangeSetTitleProvider: FileChangeSetTitleProvider;
+    protected readonly fileChangeSetTitleProvider!: FileChangeSetTitleProvider;
 
     private replacer: ContentReplacer;
 
@@ -442,7 +481,7 @@ export class ReplaceContentInFileFunctionHelper {
 export class SimpleSuggestFileReplacements implements ToolProvider {
     static ID = 'simpleSuggestFileReplacements';
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper: ReplaceContentInFileFunctionHelper;
+    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata();
@@ -465,7 +504,7 @@ export class SimpleSuggestFileReplacements implements ToolProvider {
 export class SimpleWriteFileReplacements implements ToolProvider {
     static ID = 'simpleWriteFileReplacements';
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper: ReplaceContentInFileFunctionHelper;
+    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata(false, true);
@@ -488,7 +527,7 @@ export class SimpleWriteFileReplacements implements ToolProvider {
 export class SuggestFileReplacements implements ToolProvider {
     static ID = SUGGEST_FILE_REPLACEMENTS_ID;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper: ReplaceContentInFileFunctionHelper;
+    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata(true);
@@ -511,7 +550,7 @@ export class SuggestFileReplacements implements ToolProvider {
 export class WriteFileReplacements implements ToolProvider {
     static ID = WRITE_FILE_REPLACEMENTS_ID;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper: ReplaceContentInFileFunctionHelper;
+    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
 
     getTool(): ToolRequest {
         const metadata = this.replaceContentInFileFunctionHelper.getToolMetadata(true, true);
@@ -534,7 +573,7 @@ export class WriteFileReplacements implements ToolProvider {
 export class ClearFileChanges implements ToolProvider {
     static ID = CLEAR_FILE_CHANGES_ID;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper: ReplaceContentInFileFunctionHelper;
+    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
 
     getTool(): ToolRequest {
         return {
@@ -566,7 +605,7 @@ export class ClearFileChanges implements ToolProvider {
 export class GetProposedFileState implements ToolProvider {
     static ID = GET_PROPOSED_CHANGES_ID;
     @inject(ReplaceContentInFileFunctionHelper)
-    protected readonly replaceContentInFileFunctionHelper: ReplaceContentInFileFunctionHelper;
+    protected readonly replaceContentInFileFunctionHelper!: ReplaceContentInFileFunctionHelper;
 
     getTool(): ToolRequest {
         return {

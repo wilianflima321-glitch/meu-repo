@@ -22,7 +22,10 @@ import { BrowserAutomation } from '../common/browser-automation-protocol';
 @injectable()
 export abstract class BrowserAutomationToolProvider implements ToolProvider {
     @inject(BrowserAutomation)
-    protected readonly browser: BrowserAutomation;
+    private _browser?: BrowserAutomation;
+    @inject(BrowserAutomation)
+    protected set browser(v: BrowserAutomation) { this._browser = v; }
+    protected get browser(): BrowserAutomation { if (!this._browser) { throw new Error('BrowserAutomationToolProvider: browser not injected'); } return this._browser; }
 
     abstract getTool(): ToolRequest;
 }
@@ -32,7 +35,10 @@ export class LaunchBrowserProvider extends BrowserAutomationToolProvider {
     static ID = LAUNCH_BROWSER_FUNCTION_ID;
 
     @inject(MCPServerManager)
-    protected readonly mcpServerManager: MCPServerManager;
+    private _mcpServerManager?: MCPServerManager;
+    @inject(MCPServerManager)
+    protected set mcpServerManager(v: MCPServerManager) { this._mcpServerManager = v; }
+    protected get mcpServerManager(): MCPServerManager { if (!this._mcpServerManager) { throw new Error('LaunchBrowserProvider: mcpServerManager not injected'); } return this._mcpServerManager; }
 
     getTool(): ToolRequest {
         return {
@@ -157,7 +163,7 @@ export class QueryDomProvider extends BrowserAutomationToolProvider {
                 },
                 required: []
             },
-            handler: async arg => {
+            handler: async (arg: any) => {
                 try {
                     const { selector } = JSON.parse(arg);
                     return await this.browser.queryDom(selector);

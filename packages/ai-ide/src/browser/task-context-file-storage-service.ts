@@ -28,12 +28,29 @@ import { BinaryBuffer } from '@theia/core/lib/common/buffer';
 
 @injectable()
 export class TaskContextFileStorageService implements TaskContextStorageService {
-    @inject(InMemoryTaskContextStorage) protected readonly inMemoryStorage: InMemoryTaskContextStorage;
-    @inject(PreferenceService) protected readonly preferenceService: PreferenceService;
-    @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
-    @inject(FileService) protected readonly fileService: FileService;
-    @inject(OpenerService) protected readonly openerService: OpenerService;
-    @inject(ILogger) protected readonly logger: ILogger;
+    private _inMemoryStorage?: InMemoryTaskContextStorage;
+    @inject(InMemoryTaskContextStorage) protected set inMemoryStorage(v: InMemoryTaskContextStorage) { this._inMemoryStorage = v; }
+    protected get inMemoryStorage(): InMemoryTaskContextStorage { if (!this._inMemoryStorage) { throw new Error('TaskContextFileStorageService: inMemoryStorage not injected'); } return this._inMemoryStorage; }
+
+    private _preferenceService?: PreferenceService;
+    @inject(PreferenceService) protected set preferenceService(v: PreferenceService) { this._preferenceService = v; }
+    protected get preferenceService(): PreferenceService { if (!this._preferenceService) { throw new Error('TaskContextFileStorageService: preferenceService not injected'); } return this._preferenceService; }
+
+    private _workspaceService?: WorkspaceService;
+    @inject(WorkspaceService) protected set workspaceService(v: WorkspaceService) { this._workspaceService = v; }
+    protected get workspaceService(): WorkspaceService { if (!this._workspaceService) { throw new Error('TaskContextFileStorageService: workspaceService not injected'); } return this._workspaceService; }
+
+    private _fileService?: FileService;
+    @inject(FileService) protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('TaskContextFileStorageService: fileService not injected'); } return this._fileService; }
+
+    private _openerService?: OpenerService;
+    @inject(OpenerService) protected set openerService(v: OpenerService) { this._openerService = v; }
+    protected get openerService(): OpenerService { if (!this._openerService) { throw new Error('TaskContextFileStorageService: openerService not injected'); } return this._openerService; }
+
+    private _logger?: ILogger;
+    @inject(ILogger) protected set logger(v: ILogger) { this._logger = v; }
+    protected get logger(): ILogger { if (!this._logger) { throw new Error('TaskContextFileStorageService: logger not injected'); } return this._logger; }
     protected readonly onDidChangeEmitter = new Emitter<void>();
     readonly onDidChange = this.onDidChangeEmitter.event;
 
@@ -67,7 +84,7 @@ export class TaskContextFileStorageService implements TaskContextStorageService 
     protected async doInit(): Promise<void> {
         await this.ready;
         this.watchStorage();
-        this.preferenceService.onPreferenceChanged(e => {
+    this.preferenceService.onPreferenceChanged((e: any) => {
             if (e.preferenceName === TASK_CONTEXT_STORAGE_DIRECTORY_PREF) {
                 this.watchStorage().catch(error => this.logger.error(error));
             }
