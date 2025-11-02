@@ -23,6 +23,7 @@ interface State {
   mode?: 'fast' | 'blend' | 'best';
   timeoutMs?: number;
   constraints?: string; // comma-separated constraints for ensemble
+  verificationMode?: 'strict' | 'soft'; // how to handle verifier failures
 }
 
 @injectable()
@@ -30,13 +31,22 @@ export class ProviderConfigurationWidget extends BaseWidget {
   static ID = ProviderConfigurationWidgetID;
 
   @inject(WidgetManager)
-  protected readonly widgetManager!: WidgetManager;
+  private _widgetManager?: WidgetManager;
+  @inject(WidgetManager)
+  protected set widgetManager(v: WidgetManager) { this._widgetManager = v; }
+  protected get widgetManager(): WidgetManager { if (!this._widgetManager) { throw new Error('ProviderConfigurationWidget: widgetManager not injected'); } return this._widgetManager; }
 
   @inject(LlmProviderRegistry)
-  protected readonly registry!: LlmProviderRegistry;
+  private _registry?: LlmProviderRegistry;
+  @inject(LlmProviderRegistry)
+  protected set registry(v: LlmProviderRegistry) { this._registry = v; }
+  protected get registry(): LlmProviderRegistry { if (!this._registry) { throw new Error('ProviderConfigurationWidget: registry not injected'); } return this._registry; }
 
   @inject(MessageService)
-  protected readonly messageService!: MessageService;
+  private _messageService?: MessageService;
+  @inject(MessageService)
+  protected set messageService(v: MessageService) { this._messageService = v; }
+  protected get messageService(): MessageService { if (!this._messageService) { throw new Error('ProviderConfigurationWidget: messageService not injected'); } return this._messageService; }
 
   protected state: State = { id: '', name: '', endpoint: '', apiKey: '', providers: [] };
 
@@ -122,6 +132,13 @@ export class ProviderConfigurationWidget extends BaseWidget {
                   <label>Constraints (comma separated, e.g. no_weapons,no_smoke)</label>
                   <input value={this.state.constraints ?? ''} onChange={e => { this.state.constraints = (e.target as HTMLInputElement).value; this.update(); }} />
                 </div>
+                <div>
+                  <label>Verification mode</label>
+                  <select value={this.state.verificationMode ?? 'strict'} onChange={e => { this.state.verificationMode = (e.target as HTMLSelectElement).value as any; this.update(); }}>
+                    <option value='strict'>Strict (block on violations)</option>
+                    <option value='soft'>Soft (warn but proceed)</option>
+                  </select>
+                </div>
               </>
             )}
             <div>
@@ -172,6 +189,8 @@ export class ProviderConfigurationWidget extends BaseWidget {
       (cfg as any).timeoutMs = this.state.timeoutMs ?? 2500;
       const constraints = (this.state.constraints || '').split(',').map(s => s.trim()).filter(Boolean);
       if (constraints.length) (cfg as any).constraints = constraints;
+      // verification mode: soft warns or strict blocks
+      (cfg as any).verificationMode = this.state.verificationMode ?? 'strict';
     }
     try {
       this.registry.addProvider(cfg as any);

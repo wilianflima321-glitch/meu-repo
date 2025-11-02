@@ -31,16 +31,28 @@ import { optimizeSearchResults } from '../common/workspace-search-provider-util'
 export class WorkspaceSearchProvider implements ToolProvider {
 
     @inject(SearchInWorkspaceService)
-    protected readonly searchService: SearchInWorkspaceService;
+    private _searchService?: SearchInWorkspaceService;
+    @inject(SearchInWorkspaceService)
+    protected set searchService(v: SearchInWorkspaceService) { this._searchService = v; }
+    protected get searchService(): SearchInWorkspaceService { if (!this._searchService) { throw new Error('WorkspaceSearchProvider: searchService not injected'); } return this._searchService; }
 
     @inject(WorkspaceFunctionScope)
-    protected readonly workspaceScope: WorkspaceFunctionScope;
+    private _workspaceScope?: WorkspaceFunctionScope;
+    @inject(WorkspaceFunctionScope)
+    protected set workspaceScope(v: WorkspaceFunctionScope) { this._workspaceScope = v; }
+    protected get workspaceScope(): WorkspaceFunctionScope { if (!this._workspaceScope) { throw new Error('WorkspaceSearchProvider: workspaceScope not injected'); } return this._workspaceScope; }
 
     @inject(PreferenceService)
-    protected readonly preferenceService: PreferenceService;
+    private _preferenceService?: PreferenceService;
+    @inject(PreferenceService)
+    protected set preferenceService(v: PreferenceService) { this._preferenceService = v; }
+    protected get preferenceService(): PreferenceService { if (!this._preferenceService) { throw new Error('WorkspaceSearchProvider: preferenceService not injected'); } return this._preferenceService; }
 
     @inject(FileService)
-    protected readonly fileService: FileService;
+    private _fileService?: FileService;
+    @inject(FileService)
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('WorkspaceSearchProvider: fileService not injected'); } return this._fileService; }
 
     getTool(): ToolRequest {
         return {
@@ -78,7 +90,7 @@ export class WorkspaceSearchProvider implements ToolProvider {
                 },
                 required: ['query', 'useRegExp']
             },
-            handler: (argString, ctx: MutableChatRequestModel) => this.handleSearch(argString, ctx?.response?.cancellationToken)
+            handler: (argString: any, ctx: MutableChatRequestModel) => this.handleSearch(argString, ctx?.response?.cancellationToken)
         };
     }
 

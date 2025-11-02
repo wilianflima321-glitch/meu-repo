@@ -33,10 +33,16 @@ export class AITokenUsageConfigurationWidget extends ReactWidget {
     protected tokenUsageData: ModelTokenUsageData[] = [];
 
     @inject(MessageService)
-    protected readonly messageService: MessageService;
+    private _messageService?: MessageService;
+    @inject(MessageService)
+    protected set messageService(v: MessageService) { this._messageService = v; }
+    protected get messageService(): MessageService { if (!this._messageService) { throw new Error('AITokenUsageConfigurationWidget: messageService not injected'); } return this._messageService; }
 
     @inject(TokenUsageFrontendService)
-    protected readonly tokenUsageService: TokenUsageFrontendService;
+    private _tokenUsageService?: TokenUsageFrontendService;
+    @inject(TokenUsageFrontendService)
+    protected set tokenUsageService(v: TokenUsageFrontendService) { this._tokenUsageService = v; }
+    protected get tokenUsageService(): TokenUsageFrontendService { if (!this._tokenUsageService) { throw new Error('AITokenUsageConfigurationWidget: tokenUsageService not injected'); } return this._tokenUsageService; }
 
     @postConstruct()
     protected init(): void {
