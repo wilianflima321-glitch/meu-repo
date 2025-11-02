@@ -57,8 +57,10 @@ const TheiaIdeAiLogo = ({ width = 200, height = 200, className = '' }) =>
 @injectable()
 export class IdeChatWelcomeMessageProvider implements ChatWelcomeMessageProvider {
 
+    private _commandRegistry?: CommandRegistry;
     @inject(CommandRegistry)
-    protected commandRegistry: CommandRegistry;
+    protected set commandRegistry(v: CommandRegistry) { this._commandRegistry = v; }
+    protected get commandRegistry(): CommandRegistry { if (!this._commandRegistry) { throw new Error('IdeChatWelcomeMessageProvider: commandRegistry not injected'); } return this._commandRegistry; }
 
     renderWelcomeMessage?(): React.ReactNode {
         return <div className={'theia-WelcomeMessage'}>
