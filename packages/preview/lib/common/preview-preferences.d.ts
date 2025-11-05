@@ -1,0 +1,14 @@
+import { interfaces } from '@theia/core/shared/inversify';
+import { PreferenceService } from '@theia/core/lib/common/preferences/preference-service';
+import { PreferenceProxy } from '@theia/core/lib/common/preferences/preference-proxy';
+import { PreferenceSchema } from '@theia/core/lib/common/preferences/preference-schema';
+export declare const PreviewConfigSchema: PreferenceSchema;
+export interface PreviewConfiguration {
+    'preview.openByDefault': boolean;
+}
+export declare const PreviewPreferenceContribution: unique symbol;
+export declare const PreviewPreferences: unique symbol;
+export type PreviewPreferences = PreferenceProxy<PreviewConfiguration>;
+export declare function createPreviewPreferences(preferences: PreferenceService, schema?: PreferenceSchema): PreviewPreferences;
+export declare function bindPreviewPreferences(bind: interfaces.Bind): void;
+//# sourceMappingURL=preview-preferences.d.ts.map

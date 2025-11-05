@@ -1,0 +1,1 @@
+{"version":3,"file":"remote-connection-socket-provider.d.ts","sourceRoot":"","sources":["../../src/electron-node/remote-connection-socket-provider.ts"],"names":[],"mappings":"AAiBA,OAAO,EAAM,MAAM,EAAE,MAAM,kBAAkB,CAAC;AAE9C,MAAM,WAAW,gCAAgC;IAC7C,IAAI,EAAE,MAAM,CAAC;IACb,IAAI,EAAE,MAAM,CAAC;CAChB;AAED,qBACa,8BAA8B;IAEvC,cAAc,CAAC,OAAO,EAAE,gCAAgC,GAAG,MAAM;CAMpE"}

@@ -1,0 +1,312 @@
+﻿yarn run v1.22.22
+$ npm run compile && npm run build:applications --silent
+yarn : npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+No linha:1 caractere:97
++ ...  $env:NPM_CONFIG_LOGLEVEL='verbose'; yarn build --silent 2>&1 | Out-F ...
++                                          ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm verbose cli...\bin\npm-cli.js:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm info using npm@11.6.1
+npm info using node@v24.10.0
+npm warn Unknown env config "argv". This will stop working in the next major version of npm.
+npm warn Unknown env config "version-commit-hooks". This will stop working in the next major version of npm.
+npm warn Unknown env config "version-git-message". This will stop working in the next major version of npm.
+npm warn Unknown env config "version-git-tag". This will stop working in the next major version of npm.
+npm warn Unknown env config "version-tag-prefix". This will stop working in the next major version of npm.
+npm verbose title npm run compile
+npm verbose argv "run" "compile"
+npm verbose logfile logs-max:10 dir:C:\Users\RENATOINSIDECODE\AppData\Local\npm-cache\_logs\2025-10-20T01_18_08_918Z-
+npm verbose logfile C:\Users\RENATOINSIDECODE\AppData\Local\npm-cache\_logs\2025-10-20T01_18_08_918Z-debug-0.log
+
+> @theia/monorepo@0.0.0 compile
+> lerna run compile
+
+lerna notice cli v7.4.2
+
+ >  Lerna (powered by Nx)   Running target compile for 86 projects:
+
+    - @theia/application-manager
+    - @theia/application-package
+    - @theia/cli
+    - @theia/ffmpeg
+    - @theia/localization-manager
+    - @theia/native-webpack-plugin
+    - @theia/ovsx-client
+    - @theia/eslint-plugin
+    - @theia/re-exports
+    - @theia/request
+    - @theia/example-browser
+    - @theia/example-browser-only
+    - @theia/example-electron
+    - @theia/playwright
+    - aethel-python-pack
+    - @theia/ai-anthropic
+    - @theia/ai-chat
+    - @theia/ai-chat-ui
+    - @theia/ai-code-completion
+    - @theia/ai-core
+    - @theia/ai-core-ui
+    - @theia/ai-editor
+    - @theia/ai-google
+    - @theia/ai-history
+    - @theia/ai-huggingface
+    - @theia/ai-ide
+    - @theia/ai-llamafile
+    - @theia/ai-mcp
+    - @theia/ai-mcp-ui
+    - @theia/ai-ollama
+    - @theia/ai-openai
+    - @theia/ai-scanoss
+    - @theia/ai-terminal
+    - @theia/ai-vercel-ai
+    - @theia/bulk-edit
+    - @theia/callhierarchy
+    - @theia/collaboration
+    - @theia/console
+    - @theia/core
+    - @theia/debug
+    - @theia/dev-container
+    - @theia/editor
+    - @theia/editor-preview
+    - @theia/external-terminal
+    - @theia/file-search
+    - @theia/filesystem
+    - @theia/getting-started
+    - @theia/git
+    - @theia/keymaps
+    - @theia/markers
+    - @theia/memory-inspector
+    - @theia/messages
+    - @theia/metrics
+    - @theia/mini-browser
+    - @theia/monaco
+    - @theia/navigator
+    - @theia/notebook
+    - @theia/outline-view
+    - @theia/output
+    - @theia/plugin
+    - @theia/plugin-dev
+    - @theia/plugin-ext
+    - @theia/plugin-ext-headless
+    - @theia/plugin-ext-vscode
+    - @theia/plugin-metrics
+    - @theia/preferences
+    - @theia/preview
+    - @theia/process
+    - @theia/property-view
+    - @theia/remote
+    - @theia/remote-wsl
+    - @theia/scanoss
+    - @theia/scm
+    - @theia/scm-extra
+    - @theia/search-in-workspace
+    - @theia/secondary-window
+    - @theia/task
+    - @theia/terminal
+    - @theia/test
+    - @theia/timeline
+    - @theia/toolbar
+    - @theia/typehierarchy
+    - @theia/userstorage
+    - @theia/variable-resolver
+    - @theia/vsx-registry
+    - @theia/workspace
+
+ 
+
+> @theia/re-exports:compile
+
+
+> @theia/request:compile
+
+
+> @theia/plugin:compile
+
+
+> @theia/ffmpeg:compile
+
+(node:10472) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/request: (node:9684) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors 
+that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+@theia/request: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/re-exports: [2K[1G@theia/re-exports: [2m$ theiaext compile[22m
+@theia/plugin: (node:7592) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors 
+that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+@theia/plugin: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/request: [2K[1G@theia/request: [2m$ theiaext compile[22m
+@theia/plugin: [2K[1G@theia/plugin: [2m$ theiaext compile[22m
+@theia/ffmpeg: (node:1104) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors 
+that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+@theia/ffmpeg: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/re-exports: $ ts-clean-dangling && tsc --project .
+@theia/ffmpeg: [2K[1G[2m$ theiaext compile[22m
+@theia/request: $ ts-clean-dangling && tsc --project .
+@theia/plugin: $ ts-clean-dangling && tsc --project .
+@theia/ffmpeg: $ ts-clean-dangling && tsc --project .
+
+> @theia/native-webpack-plugin:compile
+
+
+> @theia/ovsx-client:compile
+
+
+> @theia/application-package:compile
+
+
+> @theia/localization-manager:compile
+
+@theia/native-webpack-plugin: (node:8740) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and 
+prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` 
+vulnerabilities.
+@theia/native-webpack-plugin: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/application-package: (node:5020) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and 
+prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` 
+vulnerabilities.
+@theia/application-package: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/native-webpack-plugin: [2K[1G@theia/native-webpack-plugin: [2m$ theiaext compile[22m
+@theia/application-package: [2K[1G@theia/application-package: [2m$ theiaext compile[22m
+@theia/ovsx-client: (node:5872) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to 
+errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` 
+vulnerabilities.
+@theia/ovsx-client: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/ovsx-client: [2K[1G@theia/ovsx-client: [2m$ theiaext compile[22m
+@theia/native-webpack-plugin: $ ts-clean-dangling && tsc --project .
+@theia/application-package: $ ts-clean-dangling && tsc --project .
+@theia/ovsx-client: $ ts-clean-dangling && tsc --project .
+@theia/localization-manager: (node:9888) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and 
+prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` 
+vulnerabilities.
+@theia/localization-manager: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/localization-manager: [2K[1G@theia/localization-manager: [2m$ theiaext compile[22m
+@theia/localization-manager: $ ts-clean-dangling && tsc --project .
+
+> aethel-python-pack:compile
+
+
+> @theia/core:compile
+
+
+> @theia/application-manager:compile
+
+
+> @theia/eslint-plugin:compile
+
+aethel-python-pack: [2K[1Gaethel-python-pack: [33mwarning[39m package.json: No license field
+aethel-python-pack: [2K[1Gaethel-python-pack: [2m$ tsc -p ./[22m
+@theia/core: (node:11028) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors 
+that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+@theia/core: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/core: [2K[1G@theia/core: [2m$ theiaext compile[22m
+@theia/application-manager: (node:11552) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and 
+prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` 
+vulnerabilities.
+@theia/application-manager: (Use `node --trace-deprecation ...` to show where the warning was created)
+@theia/application-manager: [2K[1G@theia/application-manager: [2m$ theiaext compile[22m
+@theia/core: $ ts-clean-dangling && tsc --project .
+aethel-python-pack: error TS5057: Cannot find a tsconfig.json file at the specified directory: './'.
+@theia/application-manager: $ ts-clean-dangling && tsc --project .
+aethel-python-pack: [2K[1Gaethel-python-pack: [31merror[39m Command failed with exit code 1.
+aethel-python-pack: [2K[1Gaethel-python-pack: [94minfo[39m Visit [1mhttps://yarnpkg.com/en/docs/cli/run[22m for documentation about this command.
+@theia/eslint-plugin: [2K[1G@theia/eslint-plugin: [2m$ theiaext compile[22m
+@theia/eslint-plugin: $ ts-clean-dangling && tsc --project .
+@theia/core: src/common/message-rpc/rpc-message-encoder.ts(94,30): error TS4113: This member cannot have an 'override' modifier because it is not declared in the base class 'Error'.
+@theia/core: Exit with failure status (2): ts-clean-dangling && tsc --project .
+@theia/core: [2K[1G@theia/core: [31merror[39m Command failed with exit code 2.
+@theia/core: [2K[1G@theia/core: [94minfo[39m Visit [1mhttps://yarnpkg.com/en/docs/cli/run[22m for documentation about this command.
+
+ 
+
+ >  Lerna (powered by Nx)   Running target compile for 86 projects failed
+
+   Tasks not run because their dependencies failed or --nx-bail=true:
+   
+   - @theia/cli:compile
+   - @theia/example-browser:compile
+   - @theia/example-browser-only:compile
+   - @theia/example-electron:compile
+   - @theia/playwright:compile
+   - @theia/ai-anthropic:compile
+   - @theia/ai-chat:compile
+   - @theia/ai-chat-ui:compile
+   - @theia/ai-code-completion:compile
+   - @theia/ai-core:compile
+   - @theia/ai-core-ui:compile
+   - @theia/ai-editor:compile
+   - @theia/ai-google:compile
+   - @theia/ai-history:compile
+   - @theia/ai-huggingface:compile
+   - @theia/ai-ide:compile
+   - @theia/ai-llamafile:compile
+   - @theia/ai-mcp:compile
+   - @theia/ai-mcp-ui:compile
+   - @theia/ai-ollama:compile
+   - @theia/ai-openai:compile
+   - @theia/ai-scanoss:compile
+   - @theia/ai-terminal:compile
+   - @theia/ai-vercel-ai:compile
+   - @theia/bulk-edit:compile
+   - @theia/callhierarchy:compile
+   - @theia/collaboration:compile
+   - @theia/console:compile
+   - @theia/debug:compile
+   - @theia/dev-container:compile
+   - @theia/editor:compile
+   - @theia/editor-preview:compile
+   - @theia/external-terminal:compile
+   - @theia/file-search:compile
+   - @theia/filesystem:compile
+   - @theia/getting-started:compile
+   - @theia/git:compile
+   - @theia/keymaps:compile
+   - @theia/markers:compile
+   - @theia/memory-inspector:compile
+   - @theia/messages:compile
+   - @theia/metrics:compile
+   - @theia/mini-browser:compile
+   - @theia/monaco:compile
+   - @theia/navigator:compile
+   - @theia/notebook:compile
+   - @theia/outline-view:compile
+   - @theia/output:compile
+   - @theia/plugin-dev:compile
+   - @theia/plugin-ext:compile
+   - @theia/plugin-ext-headless:compile
+   - @theia/plugin-ext-vscode:compile
+   - @theia/plugin-metrics:compile
+   - @theia/preferences:compile
+   - @theia/preview:compile
+   - @theia/process:compile
+   - @theia/property-view:compile
+   - @theia/remote:compile
+   - @theia/remote-wsl:compile
+   - @theia/scanoss:compile
+   - @theia/scm:compile
+   - @theia/scm-extra:compile
+   - @theia/search-in-workspace:compile
+   - @theia/secondary-window:compile
+   - @theia/task:compile
+   - @theia/terminal:compile
+   - @theia/test:compile
+   - @theia/timeline:compile
+   - @theia/toolbar:compile
+   - @theia/typehierarchy:compile
+   - @theia/userstorage:compile
+   - @theia/variable-resolver:compile
+   - @theia/vsx-registry:compile
+   - @theia/workspace:compile
+   
+   Failed tasks:
+   
+   - aethel-python-pack:compile
+   - @theia/core:compile
+
+npm verbose cwd G:\repo\cloud-ide-desktop\aethel_theia_fork
+npm verbose os Windows_NT 10.0.19045
+npm verbose node v24.10.0
+npm verbose npm  v11.6.1
+npm verbose exit 1
+npm verbose code 1
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

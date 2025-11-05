@@ -1,0 +1,9 @@
+import { DefaultSecondaryWindowService } from '../../browser/window/default-secondary-window-service';
+import { ApplicationShell, ExtractableWidget } from '../../browser';
+export declare class ElectronSecondaryWindowService extends DefaultSecondaryWindowService {
+    focus(win: Window): void;
+    registerShutdownListeners(): void;
+    protected windowCreated(newWindow: Window, widget: ExtractableWidget, shell: ApplicationShell): void;
+    private canClose;
+}
+//# sourceMappingURL=electron-secondary-window-service.d.ts.map

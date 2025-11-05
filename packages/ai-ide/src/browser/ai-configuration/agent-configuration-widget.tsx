@@ -143,7 +143,10 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         }
         // If it's a function (unregister callback), wrap it
         if (typeof d === 'function') {
-            this.toDispose.push({ dispose: (d as (...args: unknown[]) => unknown) } as unknown as Disposable);
+            // The function type uses an unused parameter name in the type declaration;
+            // suppress the no-unused-vars rule here to avoid lint noise.
+            // eslint-disable-next-line no-unused-vars
+            this.toDispose.push({ dispose: (d as (..._args: unknown[]) => unknown) } as unknown as Disposable);
             return;
         }
         // If it already has dispose(), push as-is

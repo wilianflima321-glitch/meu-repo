@@ -17,7 +17,7 @@ import * as React from '@theia/core/shared/react';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { LanguageModelAliasRegistry, LanguageModelAlias } from '@theia/ai-core/lib/common/language-model-alias';
-import { FrontendLanguageModelRegistry, LanguageModel, LanguageModelRegistry, LanguageModelRequirement } from '@theia/ai-core/lib/common/language-model';
+import { FrontendLanguageModelRegistry, LanguageModel, LanguageModelRegistry } from '@theia/ai-core/lib/common/language-model';
 import { nls } from '@theia/core/lib/common/nls';
 import { Disposable } from '@theia/core';
 import { AIConfigurationSelectionService } from './ai-configuration-service';
@@ -82,7 +82,10 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
                 return undefined;
             }
             if (typeof x === 'function') {
-                return { dispose: () => { try { (x as (...args: unknown[]) => unknown)(); } catch { } } } as Disposable;
+                // The function type uses an unused parameter name in the type declaration;
+                // suppress the no-unused-vars rule here to avoid lint noise.
+                // eslint-disable-next-line no-unused-vars
+                return { dispose: () => { try { (x as (..._args: unknown[]) => unknown)(); } catch { } } } as Disposable;
             }
             if (x && typeof (x as { dispose?: unknown }).dispose === 'function') {
                 return x as Disposable;

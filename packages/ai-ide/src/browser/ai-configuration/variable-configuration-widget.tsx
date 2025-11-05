@@ -58,7 +58,10 @@ export class AIVariableConfigurationWidget extends ReactWidget {
                 return undefined;
             }
             if (typeof x === 'function') {
-                return { dispose: () => { try { (x as (...args: unknown[]) => unknown)(); } catch { } } } as Disposable;
+                // The function type uses an unused parameter name in the type declaration;
+                // suppress the no-unused-vars rule here to avoid lint noise.
+                // eslint-disable-next-line no-unused-vars
+                return { dispose: () => { try { (x as (..._args: unknown[]) => unknown)(); } catch { } } } as Disposable;
             }
             if (x && typeof (x as { dispose?: unknown }).dispose === 'function') {
                 return x as Disposable;

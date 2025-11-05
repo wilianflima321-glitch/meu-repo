@@ -1,0 +1,23 @@
+﻿node.exe : npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm verbose cli...\bin\npm-cli.js:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm info using npm@11.6.1
+npm info using node@v24.10.0
+npm info config found workspace root at G:\repo\cloud-ide-desktop\aethel_theia_fork
+npm verbose title npm exec lerna run compile --stream
+npm verbose argv "exec" "--" "lerna" "run" "compile" "--stream"
+npm verbose logfile logs-max:10 dir:C:\Users\RENATOINSIDECODE\AppData\Local\npm-cache\_logs\2025-10-20T01_41_36_848Z-
+npm verbose logfile C:\Users\RENATOINSIDECODE\AppData\Local\npm-cache\_logs\2025-10-20T01_41_36_848Z-debug-0.log
+lerna notice cli v7.4.2
+lerna ERR! JSONError JSON Error in G:\repo\cloud-ide-desktop\aethel_theia_fork\packages\aethel-python-pack\package.json:
+lerna ERR! JSONError Unexpected token '´╗┐', "´╗┐{  "name"... is not valid JSON
+npm verbose cwd G:\repo\cloud-ide-desktop\aethel_theia_fork\packages\aethel-python-pack
+npm verbose os Windows_NT 10.0.19045
+npm verbose node v24.10.0
+npm verbose npm  v11.6.1
+npm verbose exit 1
+npm verbose code 1

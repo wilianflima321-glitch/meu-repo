@@ -1,3 +1,4 @@
+/* eslint-env jest */
 import { EnsembleProvider, EnsembleCfg } from './ensemble-provider';
 import { ILlmProvider, SendRequestOptions, LlmProviderResponse } from '../../common/llm-provider';
 
@@ -14,6 +15,8 @@ class FakeProvider implements ILlmProvider {
     this.delayMs = delayMs;
   }
   async sendRequest(_options: SendRequestOptions): Promise<LlmProviderResponse> {
+    // keep the parameter present for signature compatibility but mark as used
+    void _options;
     if (this.delayMs > 0) {await new Promise(r => setTimeout(r, this.delayMs));}
     return { status: 200, body: this.body };
   }

@@ -1,0 +1,17 @@
+import { Command } from '@theia/core/lib/common';
+export declare namespace VSXExtensionsCommands {
+    const CLEAR_ALL: Command;
+    const INSTALL_FROM_VSIX: Command & {
+        dialogLabel: string;
+    };
+    const INSTALL_VSIX_FILE: Command;
+    const INSTALL_ANOTHER_VERSION: Command;
+    const DISABLE: Command;
+    const ENABLE: Command;
+    const COPY: Command;
+    const COPY_EXTENSION_ID: Command;
+    const SHOW_BUILTINS: Command;
+    const SHOW_INSTALLED: Command;
+    const SHOW_RECOMMENDATIONS: Command;
+}
+//# sourceMappingURL=vsx-extension-commands.d.ts.map

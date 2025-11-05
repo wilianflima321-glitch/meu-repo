@@ -1,0 +1,41 @@
+import { TextEditorsMain, TextEditorConfigurationUpdate, Selection, TextEditorRevealType, SingleEditOperation, ApplyEditsOptions, DecorationRenderOptions, ThemeDecorationInstanceRenderOptions, DecorationOptions, WorkspaceEditDto, DocumentsMain, WorkspaceEditMetadataDto, SnippetEditOptions } from '../../common/plugin-api-rpc';
+import { Range, TextDocumentShowOptions } from '../../common/plugin-api-rpc-model';
+import { EditorsAndDocumentsMain } from './editors-and-documents-main';
+import { RPCProtocol } from '../../common/rpc-protocol';
+import { Disposable } from '@theia/core/lib/common/disposable';
+import { UriComponents } from '../../common/uri-components';
+import { type ILineChange } from '@theia/monaco-editor-core/esm/vs/editor/common/diff/legacyLinesDiffComputer';
+import { interfaces } from '@theia/core/shared/inversify';
+export declare class TextEditorsMainImpl implements TextEditorsMain, Disposable {
+    private readonly editorsAndDocuments;
+    private readonly documents;
+    private readonly proxy;
+    private readonly toDispose;
+    private readonly editorsToDispose;
+    private readonly fileEndpoint;
+    private readonly bulkEditService;
+    private readonly notebookService;
+    constructor(editorsAndDocuments: EditorsAndDocumentsMain, documents: DocumentsMain, rpc: RPCProtocol, container: interfaces.Container);
+    dispose(): void;
+    private onTextEditorAdd;
+    private onTextEditorRemove;
+    $tryShowTextDocument(uri: UriComponents, options?: TextDocumentShowOptions): Promise<void>;
+    $trySetOptions(id: string, options: TextEditorConfigurationUpdate): Promise<void>;
+    $trySetSelections(id: string, selections: Selection[]): Promise<void>;
+    $tryRevealRange(id: string, range: Range, revealType: TextEditorRevealType): Promise<void>;
+    $tryApplyEdits(id: string, modelVersionId: number, edits: SingleEditOperation[], opts: ApplyEditsOptions): Promise<boolean>;
+    $tryApplyWorkspaceEdit(dto: WorkspaceEditDto, metadata?: WorkspaceEditMetadataDto): Promise<boolean>;
+    $tryInsertSnippet(id: string, template: string, ranges: Range[], opts: SnippetEditOptions): Promise<boolean>;
+    $registerTextEditorDecorationType(key: string, options: DecorationRenderOptions): void;
+    protected injectRemoteUris(options: DecorationRenderOptions | ThemeDecorationInstanceRenderOptions): void;
+    protected toRemoteUri(uri?: UriComponents): UriComponents | undefined;
+    $removeTextEditorDecorationType(key: string): void;
+    $tryHideEditor(id: string): Promise<void>;
+    $trySetDecorations(id: string, key: string, ranges: DecorationOptions[]): Promise<void>;
+    $trySetDecorationsFast(id: string, key: string, ranges: number[]): Promise<void>;
+    $save(uri: UriComponents): PromiseLike<UriComponents | undefined>;
+    $saveAs(uri: UriComponents): PromiseLike<UriComponents | undefined>;
+    $saveAll(includeUntitled?: boolean): Promise<boolean>;
+    $getDiffInformation(id: string): Promise<ILineChange[]>;
+}
+//# sourceMappingURL=text-editors-main.d.ts.map

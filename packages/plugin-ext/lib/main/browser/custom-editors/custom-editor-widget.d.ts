@@ -1,0 +1,35 @@
+import URI from '@theia/core/lib/common/uri';
+import { ApplicationShell, DelegatingSaveable, NavigatableWidget, Saveable, SaveableSource } from '@theia/core/lib/browser';
+import { SaveableService } from '@theia/core/lib/browser/saveable-service';
+import { Reference } from '@theia/core/lib/common/reference';
+import { WebviewWidget } from '../webview/webview';
+import { CustomEditorModel } from './custom-editors-main';
+import { CustomEditorWidget as CustomEditorWidgetShape } from '@theia/editor/lib/browser';
+export declare class CustomEditorWidget extends WebviewWidget implements CustomEditorWidgetShape, SaveableSource, NavigatableWidget {
+    static FACTORY_ID: string;
+    static readonly SIDE_BY_SIDE_FACTORY_ID: string;
+    resource: URI;
+    protected _modelRef: Reference<CustomEditorModel | undefined>;
+    get modelRef(): Reference<CustomEditorModel | undefined>;
+    set modelRef(modelRef: Reference<CustomEditorModel>);
+    protected readonly delegatingSaveable: DelegatingSaveable;
+    get saveable(): Saveable;
+    protected readonly shell: ApplicationShell;
+    protected readonly saveService: SaveableService;
+    protected init(): void;
+    undo(): void;
+    redo(): void;
+    getResourceUri(): URI | undefined;
+    createMoveToUri(resourceUri: URI): URI | undefined;
+    storeState(): CustomEditorWidget.State;
+    restoreState(oldState: CustomEditorWidget.State): void;
+    onMove(handler: (newResource: URI) => Promise<void>): void;
+    private _moveHandler?;
+    private doMove;
+}
+export declare namespace CustomEditorWidget {
+    interface State extends WebviewWidget.State {
+        strResource: string;
+    }
+}
+//# sourceMappingURL=custom-editor-widget.d.ts.map

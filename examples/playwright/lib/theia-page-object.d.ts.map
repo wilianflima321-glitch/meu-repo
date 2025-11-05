@@ -1,0 +1,1 @@
+{"version":3,"file":"theia-page-object.d.ts","sourceRoot":"","sources":["../src/theia-page-object.ts"],"names":[],"mappings":"AAgBA,OAAO,EAAE,IAAI,EAAE,MAAM,kBAAkB,CAAC;AAExC,OAAO,EAAE,QAAQ,EAAE,MAAM,aAAa,CAAC;AAEvC,8BAAsB,eAAe;IAEd,GAAG,EAAE,QAAQ;gBAAb,GAAG,EAAE,QAAQ;IAEhC,IAAI,IAAI,IAAI,IAAI,CAEf;CAEJ"}

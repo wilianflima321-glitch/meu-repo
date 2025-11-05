@@ -1,0 +1,1 @@
+{"version":3,"file":"remote-service.d.ts","sourceRoot":"","sources":["../../src/electron-browser/remote-service.ts"],"names":[],"mappings":"AAkBA,qBACa,aAAa;IAEtB,SAAS,CAAC,UAAU,EAAE,OAAO,CAAC;IAE9B,WAAW,IAAI,OAAO;IAItB,YAAY,CAAC,KAAK,EAAE,OAAO,GAAG,IAAI;CAGrC"}
