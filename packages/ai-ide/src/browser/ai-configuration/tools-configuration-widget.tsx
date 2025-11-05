@@ -76,8 +76,8 @@ export class AIToolsConfigurationWidget extends ReactWidget {
             this.tools = await this.loadTools();
             this.update();
         });
-        this.toDispose.push({ dispose: () => { try { if (typeof _pChanged === 'function') { (_pChanged as (...args: unknown[]) => unknown)(); } else if (_pChanged && typeof (_pChanged as { dispose?: unknown }).dispose === 'function') { ((_pChanged as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
-        this.toDispose.push({ dispose: () => { try { if (typeof _tChanged === 'function') { (_tChanged as (...args: unknown[]) => unknown)(); } else if (_tChanged && typeof (_tChanged as { dispose?: unknown }).dispose === 'function') { ((_tChanged as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+        this.toDispose.push({ dispose: () => { try { if (typeof _pChanged === 'function') { (_pChanged as Function)(); } else if (_pChanged && typeof (_pChanged as { dispose?: unknown }).dispose === 'function') { ((_pChanged as { dispose: Function }).dispose)(); } } catch { } } } as unknown as Disposable);
+    this.toDispose.push({ dispose: () => { try { if (typeof _tChanged === 'function') { (_tChanged as Function)(); } else if (_tChanged && typeof (_tChanged as { dispose?: unknown }).dispose === 'function') { ((_tChanged as { dispose: Function }).dispose)(); } } catch { } } } as unknown as Disposable);
     }
 
     protected async loadData(): Promise<void> {

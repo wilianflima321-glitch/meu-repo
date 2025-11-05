@@ -84,7 +84,7 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
 
     override async invoke(request: MutableChatRequestModel): Promise<void> {
     try {
-        const _addProgress = bindFn<(msg: { content: string; status?: string }) => void>(request.response, 'addProgressMessage');
+    const _addProgress = bindFn<Function>(request.response, 'addProgressMessage');
         if (_addProgress) {
             _addProgress({ content: 'Determining the most appropriate agent', status: 'inProgress' });
         }
@@ -106,11 +106,11 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
                 if (agents && agents.length > 0) {
                     request.addData(OrchestratorRequestIdKey, orchestratorRequestId);
                     // Short-circuit to delegate to agent returned by backend
-                    const _addProgress2 = bindFn<(msg: { content: string; status?: string }) => void>(request.response, 'addProgressMessage');
+                    const _addProgress2 = bindFn<Function>(request.response, 'addProgressMessage');
                     if (_addProgress2) {
                         _addProgress2({ content: `Delegating to backend-selected agent @${agents[0]}`, status: 'inProgress' });
                     }
-                    const _overrideAgent = bindFn<(id: string) => void>(request.response, 'overrideAgentId');
+                    const _overrideAgent = bindFn<Function>(request.response, 'overrideAgentId');
                     if (_overrideAgent) {
                         _overrideAgent(agents[0]);
                     }
@@ -191,7 +191,7 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
     if (_agentIds.length < 1) {
             this.logger.error('No agent was selected, delegating to fallback chat agent');
             // use runtime-bound updater if available
-            const updateProgress = bindFn<(p: unknown) => void>(request.response, 'updateProgressMessage');
+            const updateProgress = bindFn<Function>(request.response, 'updateProgressMessage');
             if (updateProgress) {
                 request.response.progressMessages.forEach((progressMessage: unknown) => {
                     try { updateProgress({ ...(progressMessage as unknown as Record<string, unknown>), status: 'failed' }); } catch {}
@@ -220,12 +220,12 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
 
             `
         ));
-        const overrideFinal = bindFn<(id: string) => void>(request.response, 'overrideAgentId');
+    const overrideFinal = bindFn<Function>(request.response, 'overrideAgentId');
         if (overrideFinal) {
             try { overrideFinal(delegatedToAgent); } catch {}
         }
 
-        const updateProgress2 = bindFn<(p: unknown) => void>(request.response, 'updateProgressMessage');
+    const updateProgress2 = bindFn<Function>(request.response, 'updateProgressMessage');
         if (updateProgress2) {
             request.response.progressMessages.forEach((progressMessage: unknown) => {
                 try { updateProgress2({ ...(progressMessage as unknown as Record<string, unknown>), status: 'completed' }); } catch {}

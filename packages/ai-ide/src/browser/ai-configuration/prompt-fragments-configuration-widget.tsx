@@ -115,8 +115,8 @@ export class AIPromptFragmentsConfigurationWidget extends ReactWidget {
         const _d2: unknown = this.agentService.onDidChangeAgents(() => {
             this.loadAgents();
         });
-        this.toDispose.push({ dispose: () => { try { if (typeof _d1 === 'function') { (_d1 as (...args: unknown[]) => unknown)(); } else if (_d1 && typeof (_d1 as { dispose?: unknown }).dispose === 'function') { ((_d1 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
-        this.toDispose.push({ dispose: () => { try { if (typeof _d2 === 'function') { (_d2 as (...args: unknown[]) => unknown)(); } else if (_d2 && typeof (_d2 as { dispose?: unknown }).dispose === 'function') { ((_d2 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+    this.toDispose.push({ dispose: () => { try { if (typeof _d1 === 'function') { (_d1 as Function)(); } else if (_d1 && typeof (_d1 as { dispose?: unknown }).dispose === 'function') { ((_d1 as { dispose: Function }).dispose)(); } } catch { } } } as unknown as Disposable);
+    this.toDispose.push({ dispose: () => { try { if (typeof _d2 === 'function') { (_d2 as Function)(); } else if (_d2 && typeof (_d2 as { dispose?: unknown }).dispose === 'function') { ((_d2 as { dispose: Function }).dispose)(); } } catch { } } } as unknown as Disposable);
     }
 
     /**
@@ -533,14 +533,14 @@ export class AIPromptFragmentsConfigurationWidget extends ReactWidget {
         const allVariantIds = new Set<string>();
 
         // Collect all variant IDs from prompt variant sets
-        this.promptVariantsMap.forEach((variants, _) => {
+        for (const variants of this.promptVariantsMap.values()) {
             variants.forEach(variantId => allVariantIds.add(variantId));
-        });
+        }
 
         // Add prompt variant set main IDs
-        this.promptVariantsMap.forEach((_, promptVariantSetId) => {
+        for (const promptVariantSetId of this.promptVariantsMap.keys()) {
             allVariantIds.add(promptVariantSetId);
-        });
+        }
 
         // Filter the fragment map to only include non-prompt variant set fragments
         this.promptFragmentMap.forEach((fragments, promptFragmentId) => {

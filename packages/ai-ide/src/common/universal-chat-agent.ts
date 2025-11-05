@@ -53,12 +53,12 @@ export class UniversalChatAgent extends AbstractStreamParsingChatAgent {
       languageModel: LanguageModel
    ): Promise<LanguageModelResponse> {
       const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
-      try {
+       try {
        const _svc: unknown = this.llmProviderService;
-       const sendFn = ((): ((p?: unknown, o?: unknown) => Promise<unknown>) | undefined => {
+       const sendFn = ((): Function | undefined => {
           const maybe = _svc as unknown as { sendRequestToProvider?: unknown };
           if (_svc && typeof maybe.sendRequestToProvider === 'function') {
-             return (maybe.sendRequestToProvider as Function).bind(_svc) as unknown as (p?: unknown, o?: unknown) => Promise<unknown>;
+             return (maybe.sendRequestToProvider as Function).bind(_svc) as unknown as Function;
           }
           return undefined;
        })();
