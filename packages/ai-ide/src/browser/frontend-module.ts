@@ -147,7 +147,6 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(FrontendApplicationContribution).toService(BillingAdminContribution as unknown);
 
     // ensure preference key symbol is referenced so TS doesn't report it as unused in incremental builds
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _aiLlmPref = AI_LLM_PROVIDERS_PREF;
     // reference the pref token to avoid unused-variable warnings in incremental builds
     void _aiLlmPref;
