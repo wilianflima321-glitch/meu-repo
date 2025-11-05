@@ -145,8 +145,13 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         if (typeof d === 'function') {
             // The function type uses an unused parameter name in the type declaration;
             // suppress the no-unused-vars rule here to avoid lint noise.
-            // eslint-disable-next-line no-unused-vars
-            this.toDispose.push({ dispose: (d as (..._args: unknown[]) => unknown) } as unknown as Disposable);
+            // wrap the provided disposable/callback into a safe Disposable object
+            if (typeof d === 'function') {
+                const disposeFn = d as unknown as () => unknown;
+                this.toDispose.push({ dispose: () => { try { disposeFn(); } catch { /* swallow */ } } } as Disposable);
+            } else {
+                this.toDispose.push({ dispose: () => {} } as Disposable);
+            }
             return;
         }
         // If it already has dispose(), push as-is

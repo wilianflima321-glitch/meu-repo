@@ -84,8 +84,8 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
             if (typeof x === 'function') {
                 // The function type uses an unused parameter name in the type declaration;
                 // suppress the no-unused-vars rule here to avoid lint noise.
-                // eslint-disable-next-line no-unused-vars
-                return { dispose: () => { try { (x as (..._args: unknown[]) => unknown)(); } catch { } } } as Disposable;
+                const fn = x as unknown as () => unknown;
+                return { dispose: () => { try { fn(); } catch { /* swallow */ } } } as Disposable;
             }
             if (x && typeof (x as { dispose?: unknown }).dispose === 'function') {
                 return x as Disposable;
