@@ -1,0 +1,5 @@
+[
+  { "type": "delta", "text": "The quick brown" },
+  { "type": "delta", "text": " fox jumps" },
+  { "type": "final", "text": " over the lazy dog." }
+]
