@@ -36,15 +36,15 @@ export const PromptVariantRenderer: React.FC<PromptVariantRendererProps> = ({
         const currentVariant = promptService.getSelectedVariantId(promptVariantSet.id);
         setSelectedVariant(currentVariant ?? defaultVariantId!);
 
-        const disposable: unknown = promptService.onSelectedVariantChange((notification: { promptVariantSetId?: string; variantId?: string }) => {
+    const _disposable: unknown = promptService.onSelectedVariantChange((notification: { promptVariantSetId?: string; variantId?: string }) => {
             if (notification.promptVariantSetId === promptVariantSet.id) {
                 setSelectedVariant(notification.variantId ?? defaultVariantId!);
             }
         });
         return () => {
             try {
-                if (disposable && typeof (disposable as { dispose?: unknown }).dispose === 'function') {
-                    const maybe = disposable as unknown;
+                if (_disposable && typeof (_disposable as { dispose?: unknown }).dispose === 'function') {
+                    const maybe = _disposable as unknown;
                     try {
                         if (maybe && typeof (maybe as any).dispose === 'function') {
                             (maybe as any).dispose();
@@ -52,12 +52,12 @@ export const PromptVariantRenderer: React.FC<PromptVariantRendererProps> = ({
                             (maybe as any)();
                         }
                     } catch { /* swallow */ }
-                } else if (typeof disposable === 'function') {
+                } else if (typeof _disposable === 'function') {
                     try {
-                        if (typeof disposable === 'function') {
-                            (disposable as any)();
-                        } else if (disposable && typeof (disposable as any).dispose === 'function') {
-                            (disposable as any).dispose();
+                        if (typeof _disposable === 'function') {
+                            (_disposable as any)();
+                        } else if (_disposable && typeof (_disposable as any).dispose === 'function') {
+                            (_disposable as any).dispose();
                         }
                     } catch { /* swallow */ }
                 }
