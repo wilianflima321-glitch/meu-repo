@@ -58,8 +58,6 @@ export class AIVariableConfigurationWidget extends ReactWidget {
                 return undefined;
             }
             if (typeof x === 'function') {
-                // The function type uses an unused parameter name in the type declaration;
-                // suppress the no-unused-vars rule here to avoid lint noise.
                 const fn = x as unknown as () => unknown;
                 return { dispose: () => { try { fn(); } catch { /* swallow */ } } } as Disposable;
             }
@@ -68,9 +66,9 @@ export class AIVariableConfigurationWidget extends ReactWidget {
             }
             return undefined;
         };
-        const dd = makeDisposable(d);
-        if (dd) {
-            this.toDispose.push(dd);
+        const _dd = makeDisposable(d);
+        if (_dd) {
+            this.toDispose.push(_dd);
         }
     }
 

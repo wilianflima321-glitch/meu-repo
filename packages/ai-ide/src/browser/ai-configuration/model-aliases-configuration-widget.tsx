@@ -82,8 +82,6 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
                 return undefined;
             }
             if (typeof x === 'function') {
-                // The function type uses an unused parameter name in the type declaration;
-                // suppress the no-unused-vars rule here to avoid lint noise.
                 const fn = x as unknown as () => unknown;
                 return { dispose: () => { try { fn(); } catch { /* swallow */ } } } as Disposable;
             }
@@ -119,9 +117,9 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
         });
         const r3: unknown = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
 
-    const rr1 = makeDisposable(r1); if (rr1) { this.toDispose.push(rr1); }
-    const rr2 = makeDisposable(r2); if (rr2) { this.toDispose.push(rr2); }
-    const rr3 = makeDisposable(r3); if (rr3) { this.toDispose.push(rr3); }
+    const _rr1 = makeDisposable(r1); if (_rr1) { this.toDispose.push(_rr1); }
+    const _rr2 = makeDisposable(r2); if (_rr2) { this.toDispose.push(_rr2); }
+    const _rr3 = makeDisposable(r3); if (_rr3) { this.toDispose.push(_rr3); }
     }
 
     protected async loadAliases(): Promise<void> {
