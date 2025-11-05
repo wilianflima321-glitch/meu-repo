@@ -27,8 +27,8 @@ describe('EnsembleProvider', () => {
     const cfg: EnsembleCfg = { providerIds: ['p1', 'p2'], mode: 'fast', timeoutMs: 1000 };
     const e = new EnsembleProvider(cfg, factory);
     const resp = await e.sendRequest({ input: 'hi' });
-    expect(resp.status).toBe(200);
-    expect(resp.body).toEqual({ text: 'first' });
+  expect(resp.status).toBe(200);
+  expect((resp.body as any)).toEqual({ text: 'first' });
   });
 
   test('blend mode concatenates texts', async () => {
@@ -38,11 +38,11 @@ describe('EnsembleProvider', () => {
     const cfg: EnsembleCfg = { providerIds: ['p1', 'p2'], mode: 'blend', timeoutMs: 1000 };
     const e = new EnsembleProvider(cfg, factory);
     const resp = await e.sendRequest({ input: 'blend' });
-    expect(resp.status).toBe(207);
-    expect(resp.body.blended).toBe(true);
-    expect(typeof resp.body.text).toBe('string');
-    expect(resp.body.text).toContain('one');
-    expect(resp.body.text).toContain('two');
+  expect(resp.status).toBe(207);
+  expect((resp.body as any).blended).toBe(true);
+  expect(typeof (resp.body as any).text).toBe('string');
+  expect((resp.body as any).text).toContain('one');
+  expect((resp.body as any).text).toContain('two');
   });
 
   test('best mode picks the longest text', async () => {
@@ -52,9 +52,9 @@ describe('EnsembleProvider', () => {
     const cfg: EnsembleCfg = { providerIds: ['p1', 'p2'], mode: 'best', timeoutMs: 1000 };
     const e = new EnsembleProvider(cfg, factory);
     const resp = await e.sendRequest({ input: 'best' });
-    expect(resp.status).toBe(200);
-    // should be the second provider's body
-    expect(resp.body).toEqual({ text: 'this is a longer answer' });
+  expect(resp.status).toBe(200);
+  // should be the second provider's body
+  expect((resp.body as any)).toEqual({ text: 'this is a longer answer' });
   });
 
   test('timeout causes fallback and other providers can succeed', async () => {
@@ -64,8 +64,8 @@ describe('EnsembleProvider', () => {
     const cfg: EnsembleCfg = { providerIds: ['p1', 'p2'], mode: 'fast', timeoutMs: 50 };
     const e = new EnsembleProvider(cfg, factory);
     const resp = await e.sendRequest({ input: 'timeout test' });
-    // p1 will timeout; p2 should succeed and be returned
-    expect(resp.status).toBe(200);
-    expect(resp.body).toEqual({ text: 'fast' });
+  // p1 will timeout; p2 should succeed and be returned
+  expect(resp.status).toBe(200);
+  expect((resp.body as any)).toEqual({ text: 'fast' });
   });
 });

@@ -36,10 +36,9 @@ export const PromptVariantRenderer: React.FC<PromptVariantRendererProps> = ({
         const currentVariant = promptService.getSelectedVariantId(promptVariantSet.id);
         setSelectedVariant(currentVariant ?? defaultVariantId!);
 
-        const disposable: unknown = promptService.onSelectedVariantChange((notification: unknown) => {
+        const disposable: unknown = promptService.onSelectedVariantChange((notification: { promptVariantSetId?: string; variantId?: string }) => {
             if (notification.promptVariantSetId === promptVariantSet.id) {
-                // notification is an unknown runtime value; access safely
-                setSelectedVariant((notification as { variantId?: string }).variantId ?? defaultVariantId!);
+                setSelectedVariant(notification.variantId ?? defaultVariantId!);
             }
         });
         return () => {

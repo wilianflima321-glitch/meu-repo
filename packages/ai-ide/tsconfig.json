@@ -1,8 +1,8 @@
 {
   "extends": "../../configs/base.tsconfig",
   "compilerOptions": {
-    "composite": true,
-    "rootDir": "src",
+  "composite": true,
+  "rootDir": ".",
     "outDir": "lib",
   "target": "es2022",
   "lib": ["es2022", "dom"],

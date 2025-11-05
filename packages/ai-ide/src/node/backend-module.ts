@@ -29,7 +29,10 @@ const browserAutomationModule = ConnectionContainerModule.create(({ bind, bindBa
     new RpcConnectionHandler<BrowserAutomationClient>(browserAutomationPath, (client: BrowserAutomationClient) => {
             const server = ctx.container.get(BrowserAutomation) as BrowserAutomationImpl;
             server.setClient(client);
-            client.onDidCloseConnection(() => server.close());
+            // The client may or may not implement onDidCloseConnection; guard the call.
+            if (typeof (client as any).onDidCloseConnection === 'function') {
+                (client as any).onDidCloseConnection(() => server.close());
+            }
             return server;
         })
     ).inSingletonScope();

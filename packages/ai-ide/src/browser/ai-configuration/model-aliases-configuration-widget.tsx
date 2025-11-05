@@ -74,6 +74,21 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
         this.id = ModelAliasesConfigurationWidget.ID;
         this.title.label = ModelAliasesConfigurationWidget.LABEL;
         this.title.closable = false;
+        // Helper: normalize listener-return values into a Disposable if possible.
+        // Some listeners return a Disposable object, others return an unregister function,
+        // and some may return nothing. This helper makes it safe to push into `this.toDispose`.
+        const makeDisposable = (x: unknown): Disposable | undefined => {
+            if (!x) {
+                return undefined;
+            }
+            if (typeof x === 'function') {
+                return { dispose: () => { try { (x as (...args: unknown[]) => unknown)(); } catch { } } } as Disposable;
+            }
+            if (x && typeof (x as { dispose?: unknown }).dispose === 'function') {
+                return x as Disposable;
+            }
+            return undefined;
+        };
 
         const aliasesPromise = this.loadAliases();
         const languageModelsPromise = this.loadLanguageModels();
@@ -85,8 +100,8 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
                 await this.loadAliases();
                 this.update();
             });
-            // Wrap the return as 'any' and avoid testing it in a boolean context (which fails if it's typed as void).
-            this.toDispose.push({ dispose: () => { try { if (typeof d === 'function') { (d as (...args: unknown[]) => unknown)(); } else if (d && typeof (d as { dispose?: unknown }).dispose === 'function') { ((d as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+            const dd = makeDisposable(d);
+            if (dd) { this.toDispose.push(dd); }
         });
 
         // Capture listener returns as 'any' and wrap them to ensure a Disposable-like object is pushed.
@@ -101,9 +116,9 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
         });
         const r3: unknown = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
 
-        this.toDispose.push({ dispose: () => { try { if (typeof r1 === 'function') { (r1 as (...args: unknown[]) => unknown)(); } else if (r1 && typeof (r1 as { dispose?: unknown }).dispose === 'function') { ((r1 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
-        this.toDispose.push({ dispose: () => { try { if (typeof r2 === 'function') { (r2 as (...args: unknown[]) => unknown)(); } else if (r2 && typeof (r2 as { dispose?: unknown }).dispose === 'function') { ((r2 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
-        this.toDispose.push({ dispose: () => { try { if (typeof r3 === 'function') { (r3 as (...args: unknown[]) => unknown)(); } else if (r3 && typeof (r3 as { dispose?: unknown }).dispose === 'function') { ((r3 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+    const rr1 = makeDisposable(r1); if (rr1) { this.toDispose.push(rr1); }
+    const rr2 = makeDisposable(r2); if (rr2) { this.toDispose.push(rr2); }
+    const rr3 = makeDisposable(r3); if (rr3) { this.toDispose.push(rr3); }
     }
 
     protected async loadAliases(): Promise<void> {

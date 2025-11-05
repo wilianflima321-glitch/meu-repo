@@ -30,8 +30,7 @@ import {
 } from '@theia/ai-core/lib/common';
 import { codicon, QuickInputService, ReactWidget } from '@theia/core/lib/browser';
 import { URI } from '@theia/core/lib/common';
-import { inject, injectable } from '@theia/core/shared/inversify';
-import { postConstruct } from '@theia/core/sharedinversify';
+import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import * as React from '@theia/core/shared/react';
 import { AIConfigurationSelectionService } from './ai-configuration-service';
 import { LanguageModelRenderer } from './language-model-renderer';
@@ -116,7 +115,7 @@ export class AIAgentConfigurationWidget extends ReactWidget {
                 this.languageModelAliases = this.languageModelAliasRegistry.getAliases();
                 this.update();
             });
-                this.pushDisposable(d as unknown as Disposable);
+                this.pushDisposable(d);
         });
         const d2 = this.languageModelRegistry.onChange((payload: { models?: LanguageModel[] }) => {
             const models = payload.models;
@@ -124,9 +123,9 @@ export class AIAgentConfigurationWidget extends ReactWidget {
             this.languageModels = models;
             this.update();
         });
-        this.pushDisposable(d2 as unknown as Disposable);
+    this.pushDisposable(d2);
         const d3 = this.promptService.onPromptsChange(() => this.update());
-        this.pushDisposable(d3 as unknown as Disposable);
+    this.pushDisposable(d3);
 
         this.aiSettingsService.onDidChange(() => this.update());
         this.aiConfigurationSelectionService.onDidAgentChange(() => this.update());
@@ -390,7 +389,7 @@ export class AIAgentConfigurationWidget extends ReactWidget {
                 this.promptFragmentCustomizationService.openCustomAgentYaml(uri.toString());
             }
         });
-        this.pushDisposable(acceptDisposable);
+    this.pushDisposable(acceptDisposable);
 
         quickPick.show();
     }

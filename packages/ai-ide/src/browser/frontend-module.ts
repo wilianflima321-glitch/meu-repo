@@ -33,7 +33,7 @@ if (typeof document !== 'undefined' && document && document.head) {
 }
 
 import { ContainerModule } from '@theia/core/shared/inversify';
-import type { interfaces } from '@theia/core/sharedinversify';
+import type { interfaces } from 'inversify';
 import { ChatAgent, DefaultChatAgentId, FallbackChatAgentId } from '@theia/ai-chat/lib/common';
 import { Agent, AIVariableContribution, bindToolProvider } from '@theia/ai-core/lib/common';
 import { ArchitectAgent } from './architect-agent';

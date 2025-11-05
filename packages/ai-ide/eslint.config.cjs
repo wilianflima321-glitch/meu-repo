@@ -14,7 +14,8 @@ module.exports = {
     {
       files: ['**/*.ts', '**/*.tsx'],
       languageOptions: {
-        parser: '@typescript-eslint/parser',
+        // Force-resolve the parser so ESLint finds the correct module resolution
+        parser: require.resolve('@typescript-eslint/parser'),
         parserOptions: {
           ecmaVersion: 2020,
           sourceType: 'module',
@@ -23,6 +24,8 @@ module.exports = {
         },
         env: { node: true, browser: true }
       },
+      // Ensure plugin is available via normal resolution (the name is fine), but
+      // resolve parser explicitly above which was causing calculateConfigForFile to fail.
       plugins: ['@typescript-eslint'],
       rules: {
         // keep rules minimal during migration; enable more later
