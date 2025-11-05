@@ -58,16 +58,17 @@ export class AIVariableConfigurationWidget extends ReactWidget {
                 return undefined;
             }
             if (typeof x === 'function') {
-                return { dispose: () => { try { (x as (...args: unknown[]) => unknown)(); } catch { } } } as Disposable;
+                const fn = x as unknown as () => unknown;
+                return { dispose: () => { try { fn(); } catch { /* swallow */ } } } as Disposable;
             }
             if (x && typeof (x as { dispose?: unknown }).dispose === 'function') {
                 return x as Disposable;
             }
             return undefined;
         };
-        const dd = makeDisposable(d);
-        if (dd) {
-            this.toDispose.push(dd);
+        const _dd = makeDisposable(d);
+        if (_dd) {
+            this.toDispose.push(_dd);
         }
     }
 

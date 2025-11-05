@@ -44,9 +44,22 @@ export const PromptVariantRenderer: React.FC<PromptVariantRendererProps> = ({
         return () => {
             try {
                 if (disposable && typeof (disposable as { dispose?: unknown }).dispose === 'function') {
-                    ((disposable as { dispose: (...args: unknown[]) => unknown }).dispose)();
+                    const maybe = disposable as unknown;
+                    try {
+                        if (maybe && typeof (maybe as any).dispose === 'function') {
+                            (maybe as any).dispose();
+                        } else if (typeof maybe === 'function') {
+                            (maybe as any)();
+                        }
+                    } catch { /* swallow */ }
                 } else if (typeof disposable === 'function') {
-                    (disposable as (...args: unknown[]) => unknown)();
+                    try {
+                        if (typeof disposable === 'function') {
+                            (disposable as any)();
+                        } else if (disposable && typeof (disposable as any).dispose === 'function') {
+                            (disposable as any).dispose();
+                        }
+                    } catch { /* swallow */ }
                 }
             } catch { }
         };

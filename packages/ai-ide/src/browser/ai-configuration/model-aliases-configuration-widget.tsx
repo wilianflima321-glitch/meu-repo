@@ -17,7 +17,7 @@ import * as React from '@theia/core/shared/react';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { LanguageModelAliasRegistry, LanguageModelAlias } from '@theia/ai-core/lib/common/language-model-alias';
-import { FrontendLanguageModelRegistry, LanguageModel, LanguageModelRegistry, LanguageModelRequirement } from '@theia/ai-core/lib/common/language-model';
+import { FrontendLanguageModelRegistry, LanguageModel, LanguageModelRegistry } from '@theia/ai-core/lib/common/language-model';
 import { nls } from '@theia/core/lib/common/nls';
 import { Disposable } from '@theia/core';
 import { AIConfigurationSelectionService } from './ai-configuration-service';
@@ -82,7 +82,8 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
                 return undefined;
             }
             if (typeof x === 'function') {
-                return { dispose: () => { try { (x as (...args: unknown[]) => unknown)(); } catch { } } } as Disposable;
+                const fn = x as unknown as () => unknown;
+                return { dispose: () => { try { fn(); } catch { /* swallow */ } } } as Disposable;
             }
             if (x && typeof (x as { dispose?: unknown }).dispose === 'function') {
                 return x as Disposable;
@@ -116,9 +117,9 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
         });
         const r3: unknown = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
 
-    const rr1 = makeDisposable(r1); if (rr1) { this.toDispose.push(rr1); }
-    const rr2 = makeDisposable(r2); if (rr2) { this.toDispose.push(rr2); }
-    const rr3 = makeDisposable(r3); if (rr3) { this.toDispose.push(rr3); }
+    const _rr1 = makeDisposable(r1); if (_rr1) { this.toDispose.push(_rr1); }
+    const _rr2 = makeDisposable(r2); if (_rr2) { this.toDispose.push(_rr2); }
+    const _rr3 = makeDisposable(r3); if (_rr3) { this.toDispose.push(_rr3); }
     }
 
     protected async loadAliases(): Promise<void> {

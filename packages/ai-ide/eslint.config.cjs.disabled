@@ -1,0 +1,5 @@
+// Temporary disabled copy of package flat ESLint config.
+// Renamed to .disabled to force legacy `.eslintrc.*` discovery during
+// incremental migration and to allow CLI linting to run predictably.
+
+module.exports = {};

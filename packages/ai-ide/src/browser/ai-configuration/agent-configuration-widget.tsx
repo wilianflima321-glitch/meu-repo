@@ -141,9 +141,10 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         if (!d) {
             return;
         }
-        // If it's a function (unregister callback), wrap it
+        // If it's a function (unregister callback), wrap it into a safe Disposable
         if (typeof d === 'function') {
-            this.toDispose.push({ dispose: (d as (...args: unknown[]) => unknown) } as unknown as Disposable);
+            const disposeFn = d as unknown as () => unknown;
+            this.toDispose.push({ dispose: () => { try { disposeFn(); } catch { /* swallow */ } } } as Disposable);
             return;
         }
         // If it already has dispose(), push as-is
