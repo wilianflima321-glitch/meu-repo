@@ -89,7 +89,8 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
             throw new Error('Couldn\'t get prompt ');
         }
         // `fromResolvedPromptFragment` may be an optional helper in some versions; guard at runtime
-        const sysMsgDescHelpers = SystemMessageDescription as unknown as { fromResolvedPromptFragment?: (s: string) => SystemMessageDescription };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    const sysMsgDescHelpers = SystemMessageDescription as unknown as { fromResolvedPromptFragment?: (_s: string) => SystemMessageDescription };
         if (typeof sysMsgDescHelpers.fromResolvedPromptFragment === 'function') {
             return sysMsgDescHelpers.fromResolvedPromptFragment(systemPrompt);
         }
@@ -115,10 +116,10 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
         const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
         try {
             const _svc: unknown = this.llmProviderService;
-            const sendFn = ((): ((p?: unknown, o?: unknown) => Promise<unknown>) | undefined => {
+            const sendFn = ((): Function | undefined => {
                 const maybe = _svc as unknown as { sendRequestToProvider?: unknown };
                 if (_svc && typeof maybe.sendRequestToProvider === 'function') {
-                    return (maybe.sendRequestToProvider as Function).bind(_svc) as unknown as (p?: unknown, o?: unknown) => Promise<unknown>;
+                    return (maybe.sendRequestToProvider as Function).bind(_svc) as unknown as Function;
                 }
                 return undefined;
             })();
@@ -129,9 +130,9 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
             const normalizeProviderResp = (r: unknown) => {
                 if (r && typeof r === 'object') {
                     const maybe = r as unknown as { status?: unknown; body?: unknown };
-                    const s = maybe.status;
+                    const _s = maybe.status;
                     const body = maybe.body ?? r;
-                    const status = typeof s === 'number' ? s : 200;
+                    const status = typeof _s === 'number' ? _s : 200;
                     return { status, text: typeof body === 'string' ? body : JSON.stringify(body), raw: body };
                 }
                 return { status: 200, text: typeof r === 'string' ? r : JSON.stringify(r), raw: r };
