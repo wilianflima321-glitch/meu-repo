@@ -111,6 +111,9 @@ import { aiLlmPreferenceSchema, AI_LLM_PROVIDERS_PREF } from '../common/ai-llm-p
 import { LlmProviderService as BrowserLlmProviderService } from './llm-provider-service';
 import { LlmProviderService as CommonLlmProviderService } from '../common/llm-provider-service';
 import { LlmProviderCommandContribution } from './llm-provider-command-contribution';
+import { BillingAdminWidget } from './admin/billing-admin-widget';
+import { BillingAdminContribution } from './admin/billing-admin-contribution';
+import { BillingAdminCommandContribution } from './admin/billing-admin-command-contribution';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(PreferenceContribution).toConstantValue({ schema: aiIdePreferenceSchema });
@@ -134,14 +137,11 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         .inSingletonScope();
 
     // Billing admin widget
-    const { BillingAdminWidget } = require('./admin/billing-admin-widget');
-    const { BillingAdminContribution } = require('./admin/billing-admin-contribution');
     bind(BillingAdminWidget).toSelf();
     bind(BillingAdminContribution).toSelf().inSingletonScope();
     bind(WidgetFactory)
         .toDynamicValue((ctx: interfaces.Context) => ({ id: BillingAdminWidget.ID, createWidget: () => ctx.container.get(BillingAdminWidget) }))
         .inSingletonScope();
-    const { BillingAdminCommandContribution } = require('./admin/billing-admin-command-contribution');
     bind(BillingAdminCommandContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(BillingAdminCommandContribution as unknown);
     bind(FrontendApplicationContribution).toService(BillingAdminContribution as unknown);
