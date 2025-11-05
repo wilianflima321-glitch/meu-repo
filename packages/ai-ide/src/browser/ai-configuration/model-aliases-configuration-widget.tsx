@@ -19,6 +19,7 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { LanguageModelAliasRegistry, LanguageModelAlias } from '@theia/ai-core/lib/common/language-model-alias';
 import { FrontendLanguageModelRegistry, LanguageModel, LanguageModelRegistry, LanguageModelRequirement } from '@theia/ai-core/lib/common/language-model';
 import { nls } from '@theia/core/lib/common/nls';
+import { Disposable } from '@theia/core';
 import { AIConfigurationSelectionService } from './ai-configuration-service';
 import { AgentService, AISettingsService } from '@theia/ai-core';
 
@@ -80,29 +81,29 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
         Promise.all([aliasesPromise, languageModelsPromise, matchingAgentsPromise]).then(() => this.update());
 
         this.languageModelAliasRegistry.ready.then(() => {
-            const d: any = this.languageModelAliasRegistry.onDidChange(async () => {
+            const d: unknown = this.languageModelAliasRegistry.onDidChange(async () => {
                 await this.loadAliases();
                 this.update();
             });
             // Wrap the return as 'any' and avoid testing it in a boolean context (which fails if it's typed as void).
-            this.toDispose.push({ dispose: () => { try { if (typeof d === 'function') { d(); } else if (typeof (d as any).dispose === 'function') { (d as any).dispose(); } } catch { } } } as any);
+            this.toDispose.push({ dispose: () => { try { if (typeof d === 'function') { (d as (...args: unknown[]) => unknown)(); } else if (d && typeof (d as { dispose?: unknown }).dispose === 'function') { ((d as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
         });
 
         // Capture listener returns as 'any' and wrap them to ensure a Disposable-like object is pushed.
-        const r1: any = this.languageModelRegistry.onChange(async () => {
+        const r1: unknown = this.languageModelRegistry.onChange(async () => {
             await this.loadAliases();
             await this.loadLanguageModels();
             this.update();
         });
-        const r2: any = this.aiSettingsService.onDidChange(async () => {
+        const r2: unknown = this.aiSettingsService.onDidChange(async () => {
             await this.loadMatchingAgentIdsForAllAliases();
             this.update();
         });
-        const r3: any = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
+        const r3: unknown = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
 
-        this.toDispose.push({ dispose: () => { try { if (typeof r1 === 'function') { r1(); } else if (r1 && typeof r1.dispose === 'function') { r1.dispose(); } } catch { } } } as any);
-        this.toDispose.push({ dispose: () => { try { if (typeof r2 === 'function') { r2(); } else if (r2 && typeof r2.dispose === 'function') { r2.dispose(); } } catch { } } } as any);
-        this.toDispose.push({ dispose: () => { try { if (typeof r3 === 'function') { r3(); } else if (r3 && typeof r3.dispose === 'function') { r3.dispose(); } } catch { } } } as any);
+        this.toDispose.push({ dispose: () => { try { if (typeof r1 === 'function') { (r1 as (...args: unknown[]) => unknown)(); } else if (r1 && typeof (r1 as { dispose?: unknown }).dispose === 'function') { ((r1 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+        this.toDispose.push({ dispose: () => { try { if (typeof r2 === 'function') { (r2 as (...args: unknown[]) => unknown)(); } else if (r2 && typeof (r2 as { dispose?: unknown }).dispose === 'function') { ((r2 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+        this.toDispose.push({ dispose: () => { try { if (typeof r3 === 'function') { (r3 as (...args: unknown[]) => unknown)(); } else if (r3 && typeof (r3 as { dispose?: unknown }).dispose === 'function') { ((r3 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
     }
 
     protected async loadAliases(): Promise<void> {

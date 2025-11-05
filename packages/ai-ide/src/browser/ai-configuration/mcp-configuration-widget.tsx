@@ -26,7 +26,7 @@ import {
     MCPServerDescription,
     MCPServerStatus
 } from '@theia/ai-mcp/lib/common/mcp-server-manager';
-import { MessageService, nls } from '@theia/core';
+import { MessageService, nls, Disposable } from '@theia/core';
 import { PROMPT_VARIABLE } from '@theia/ai-core/lib/common/prompt-variable-contribution';
 
 @injectable()
@@ -67,9 +67,10 @@ export class AIMCPConfigurationWidget extends ReactWidget {
         this.id = AIMCPConfigurationWidget.ID;
         this.title.label = AIMCPConfigurationWidget.LABEL;
         this.title.closable = false;
-        this.toDispose.push(this.mcpFrontendNotificationService.onDidUpdateMCPServers(async () => {
+        const mcpUpdateListener: unknown = this.mcpFrontendNotificationService.onDidUpdateMCPServers(async () => {
             this.loadServers();
-        }));
+        });
+        this.toDispose.push(mcpUpdateListener as unknown as Disposable);
         this.loadServers();
     }
 
@@ -265,7 +266,7 @@ export class AIMCPConfigurationWidget extends ReactWidget {
         return (
             <div className="mcp-server-section">
                 <span className="mcp-section-label">{nls.localize('theia/ai/mcpConfiguration/autostart', 'Autostart: ')}</span>
-                <span className={"mcp-autostart-badge " + (server.autostart ? 'enabled' : 'disabled')}>
+                <span className={'mcp-autostart-badge ' + (server.autostart ? 'enabled' : 'disabled')}>
                     {server.autostart ? nls.localize('theia/ai/mcpConfiguration/enabled', 'Enabled') : nls.localize('theia/ai/mcpConfiguration/disabled', 'Disabled')}
                 </span>
             </div>

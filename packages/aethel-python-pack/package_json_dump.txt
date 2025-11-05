@@ -1,0 +1,69 @@
+﻿{
+    "name": "aethel-python-pack",
+    "publisher": "aethel",
+    "version": "1.0.0",
+    "displayName": "Aethel Python Language Pack",
+    "description": "Provides comprehensive Python language support for Aethel IDE, including IntelliSense, debugging, and AI features.",
+    "categories": [
+        "Programming Languages"
+    ],
+    "keywords": [
+        "python",
+        "pyright",
+        "debugpy"
+    ],
+    "main": "./out/extension",
+    "scripts": {
+        "clean": "rimraf out",
+        "compile": "node -e \"const fs=require('fs');const cp=require('child_process'); if(fs.existsSync('src')){cp.execSync('tsc -p ./',{stdio:'inherit'})} else {console.log('no TS sources for aethel-python-pack')}}\",
+        "watch": "node -e \"const fs=require('fs');const cp=require('child_process'); if(fs.existsSync('src')){cp.execSync('tsc -watch -p ./',{stdio:'inherit'})} else {console.log('no TS sources for aethel-python-pack (watch skipped)')}}\"
+    },
+    "dependencies": {
+        "pyright": "^1.1.370",
+        "vscode-languageclient": "^9.0.1"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.89.0",
+        "typescript": "^5.4.5"
+    },
+    "contributes": {
+        "languages": [
+            {
+                "id": "python",
+                "aliases": [
+                    "Python"
+                ],
+                "extensions": [
+                    ".py",
+                    ".pyw"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "python",
+                "scopeName": "source.python",
+                "path": "./syntaxes/python.tmLanguage.json"
+            }
+        ],
+        "debuggers": [
+            {
+                "type": "python",
+                "label": "Aethel Python Debug",
+                "program": "./out/debugAdapter.js"
+            }
+        ],
+        "configuration": {
+            "title": "Aethel Python",
+            "properties": {
+                "aethel.python.pythonPath": {
+                    "type": "string",
+                    "description": "Path to the Python interpreter. This will be used to launch the debug adapter.",
+                    "default": "python"
+                }
+            }
+        }
+    }
+}
+

@@ -1,0 +1,86 @@
+# This file defines the Language Servers and Debug Adapters que serão incluídos por padrão
+# no Aethel IDE.
+
+languagePackages:
+  python:
+    name: "Python Language Support"
+    languageId: "python"
+    version: "1.0.0"
+    serverPath: "pyright"
+    debugAdapterPath: "debugpy"
+    fileExtensions: [".py"]
+    serverConfig:
+      args: ["--stdio"]
+    debugConfig:
+      args: ["--wait-for-client"]
+    dependencies:
+      - name: "pyright"
+        version: "^1.1.0"
+      - name: "debugpy"
+        version: "^1.6.0"
+  
+  typescript:
+    name: "TypeScript/JavaScript Support"
+    languageId: "typescript"
+    version: "1.0.0"
+    serverPath: "typescript-language-server"
+    fileExtensions: [".ts", ".tsx", ".js", ".jsx"]
+    serverConfig:
+      args: ["--stdio"]
+    dependencies:
+      - name: "typescript-language-server"
+        version: "^2.0.0"
+      - name: "typescript"
+        version: "^5.0.0"
+  
+  cpp:
+    name: "C/C++ Support"
+    languageId: "cpp"
+    version: "1.0.0"
+    serverPath: "clangd"
+    debugAdapterPath: "cpptools"
+    fileExtensions: [".c", ".cpp", ".h", ".hpp"]
+    serverConfig:
+      args: []
+    debugConfig:
+      args: []
+    dependencies:
+      - name: "clangd"
+        version: "latest"
+      - name: "cpptools"
+        version: "latest"
+
+debugAdapters:
+  python:
+    name: "Python Debugger"
+    type: "python"
+    version: "1.0.0"
+    adapterPath: "debugpy"
+    configuration:
+      runtime: "python"
+    configurationSnippets:
+      - label: "Python: Current File"
+        description: "Debug currently active Python file"
+        body:
+          type: "python"
+          request: "launch"
+          program: "${file}"
+          console: "integratedTerminal"
+  
+  cpptools:
+    name: "C/C++ Debugger"
+    type: "cppdbg"
+    version: "1.0.0"
+    adapterPath: "cpptools"
+    configurationSnippets:
+      - label: "C/C++: Current File"
+        description: "Debug currently active C/C++ file"
+        body:
+          type: "cppdbg"
+          request: "launch"
+          program: "${fileDirname}/${fileBasenameNoExtension}"
+          args: []
+          stopAtEntry: false
+          cwd: "${workspaceFolder}"
+          environment: []
+          externalConsole: false

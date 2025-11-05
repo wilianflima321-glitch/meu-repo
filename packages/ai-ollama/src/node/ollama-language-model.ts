@@ -29,10 +29,10 @@ import {
     UserRequest
 } from '@theia/ai-core';
 import { CancellationToken, Disposable } from '@theia/core';
-import { aethelApiClient, APIError } from '../../../ai-core/src/node/aethel-api-client';
+import { aethelApiClient, APIError } from '@theia/ai-core/lib/node/aethel-api-client';
 
 // Tipos simplificados para a requisição ao Aethel Backend
-type AethelChatRequest = {
+interface AethelChatRequest {
     model: string;
     messages: { role: 'user' | 'assistant' | 'system', content: string }[];
     stream?: boolean;
@@ -42,7 +42,7 @@ type AethelChatRequest = {
     frequency_penalty?: number;
     presence_penalty?: number;
     // Outros parâmetros podem ser adicionados aqui conforme necessário
-};
+}
 
 export const OllamaModelIdentifier = Symbol('OllamaModelIdentifier');
 
@@ -71,11 +71,13 @@ export class OllamaModel implements LanguageModel {
         return this.handleNonStreamingRequest(aethelRequest, request);
     }
 
-    protected async handleStreamingRequest(aethelRequest: AethelChatRequest, userRequest: UserRequest, cancellationToken?: CancellationToken): Promise<LanguageModelStreamResponse> {
+    protected async handleStreamingRequest(
+        aethelRequest: AethelChatRequest, userRequest: UserRequest, cancellationToken?: CancellationToken
+    ): Promise<LanguageModelStreamResponse> {
         const cancellationDisposable: Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
-            // A API de stream do Aethel backend (baseada em FastAPI) não suporta cancelamento no meio do stream de forma direta.
-            // A melhor abordagem é parar de consumir o iterador, o que o navegador/cliente fará.
-            // O backend eventualmente perceberá a conexão fechada.
+            // A API de stream do Aethel backend (baseada em FastAPI) não suporta cancelamento
+            // no meio do stream de forma direta. A melhor abordagem é parar de consumir o iterador,
+            // o que o navegador/cliente fará. O backend eventualmente perceberá a conexão fechada.
         });
 
         const cleanup = () => {
@@ -118,11 +120,14 @@ export class OllamaModel implements LanguageModel {
                 return this.buildParsedResponse(content);
             }
 
-            const usage = (response as any).usage;
+            interface ChatResponseWithUsage {
+                usage?: { prompt_tokens?: number; completion_tokens?: number };
+            }
+            const usage = (response as unknown as ChatResponseWithUsage).usage;
             if (this.tokenUsageService && usage) {
                 await this.tokenUsageService.recordTokenUsage(this.id, {
-                    inputTokens: usage.prompt_tokens,
-                    outputTokens: usage.completion_tokens,
+                    inputTokens: usage.prompt_tokens ?? 0,
+                    outputTokens: usage.completion_tokens ?? 0,
                     requestId: userRequest.requestId,
                 });
             }
@@ -177,9 +182,9 @@ export class OllamaModel implements LanguageModel {
                 if (content) {
                     return { role, content };
                 }
-                return null;
+                return undefined;
             })
-            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== null);
+            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== undefined);
     }
 
     protected toRole(message: LanguageModelMessage): 'system' | 'user' | 'assistant' {
@@ -194,12 +199,12 @@ export class OllamaModel implements LanguageModel {
         }
     }
 
-    protected toStringContent(message: LanguageModelMessage): string | null {
+    protected toStringContent(message: LanguageModelMessage): string | undefined {
         if (LanguageModelMessage.isTextMessage(message)) {
             return message.text;
         }
         if (LanguageModelMessage.isThinkingMessage(message)) {
-            return null; // Ignorar mensagens de "thinking"
+            return undefined; // Ignorar mensagens de "thinking"
         }
         // A lógica complexa de tools, images, etc., é simplificada ou delegada ao backend.
         // Por enquanto, apenas o conteúdo de texto é suportado nesta refatoração.

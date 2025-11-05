@@ -26,7 +26,10 @@ import { LIST_TASKS_FUNCTION_ID, RUN_TASK_FUNCTION_ID } from '../common/workspac
 export class TaskListProvider implements ToolProvider {
 
     @inject(TaskService)
-    protected readonly taskService: TaskService;
+    private _taskService?: TaskService;
+    @inject(TaskService)
+    protected set taskService(v: TaskService) { this._taskService = v; }
+    protected get taskService(): TaskService { if (!this._taskService) { throw new Error('TaskListProvider: taskService not injected'); } return this._taskService; }
 
     getTool(): ToolRequest {
         return {
@@ -66,10 +69,16 @@ export class TaskListProvider implements ToolProvider {
 export class TaskRunnerProvider implements ToolProvider {
 
     @inject(TaskService)
-    protected readonly taskService: TaskService;
+    private _taskService?: TaskService;
+    @inject(TaskService)
+    protected set taskService(v: TaskService) { this._taskService = v; }
+    protected get taskService(): TaskService { if (!this._taskService) { throw new Error('TaskRunnerProvider: taskService not injected'); } return this._taskService; }
 
     @inject(TerminalService)
-    protected readonly terminalService: TerminalService;
+    private _terminalService?: TerminalService;
+    @inject(TerminalService)
+    protected set terminalService(v: TerminalService) { this._terminalService = v; }
+    protected get terminalService(): TerminalService { if (!this._terminalService) { throw new Error('TaskRunnerProvider: terminalService not injected'); } return this._terminalService; }
 
     getTool(): ToolRequest {
         return {

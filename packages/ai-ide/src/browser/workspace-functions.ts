@@ -62,10 +62,11 @@ export class WorkspaceFunctionScope {
     public safeGetPreference<T>(key: string, defaultValue: T): T {
         // preferences.get may be undefined in certain typings; guard at runtime.
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const getter: any = (this.preferences as any)?.get;
+            // Narrow PreferenceService.get in a typed, runtime-checked way to avoid `any`.
+            const prefs = this.preferences as unknown as { get?: (key: string, def: T) => T | undefined };
+            const getter = prefs?.get;
             if (typeof getter === 'function') {
-                const v = getter.call(this.preferences, key, defaultValue);
+                const v = getter.call(this.preferences, key, defaultValue) as T | undefined;
                 return v === undefined ? defaultValue : v;
             }
         } catch {
@@ -141,9 +142,10 @@ export class WorkspaceFunctionScope {
                     const gitignoreContent = await this.fileService.read(gitignoreUri);
                     this.gitignoreMatcher = ignore().add(gitignoreContent.value);
                 }
-                const relativePath = (workspaceRoot && typeof (workspaceRoot as any).relative === 'function') ? (workspaceRoot as any).relative(stat.resource) : undefined;
-                if (relativePath) {
-                    const relativePathStr = relativePath.toString() + (stat.isDirectory ? '/' : '');
+                const relativeFunc = (workspaceRoot as unknown as { relative?: (res: URI) => unknown })?.relative;
+                const relativePath = (workspaceRoot && typeof relativeFunc === 'function') ? relativeFunc.call(workspaceRoot, stat.resource) : undefined;
+                    if (relativePath) {
+                    const relativePathStr = String((relativePath as { toString?: () => string }).toString ? (relativePath as { toString?: () => string }).toString!() : relativePath) + (stat.isDirectory ? '/' : '');
                     if (this.gitignoreMatcher.ignores(relativePathStr)) {
                         return true;
                     }
@@ -727,7 +729,9 @@ export class FindFilesByPattern implements ToolProvider {
                     break;
                 }
 
-                const relativePathRaw = (workspaceRoot && typeof (workspaceRoot as any).relative === 'function') ? (workspaceRoot as any).relative(child.resource)?.toString() : undefined;
+                const relativeFunc = (workspaceRoot as unknown as { relative?: (res: URI) => unknown })?.relative;
+                const relativeRaw = (workspaceRoot && typeof relativeFunc === 'function') ? relativeFunc.call(workspaceRoot, child.resource) : undefined;
+                const relativePathRaw = relativeRaw !== undefined ? String((relativeRaw as { toString?: () => string }).toString ? (relativeRaw as { toString?: () => string }).toString!() : relativeRaw) : undefined;
                 if (!relativePathRaw) {
                     continue;
                 }

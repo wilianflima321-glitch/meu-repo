@@ -29,13 +29,13 @@ import { aethelApiClient, APIError } from '@theia/ai-core/lib/node';
 import { GoogleLanguageModelRetrySettings } from './google-language-models-manager-impl';
 
 // Tipos simplificados para a requisição ao Aethel Backend
-type AethelChatRequest = {
+interface AethelChatRequest {
     model: string;
     messages: { role: 'user' | 'assistant' | 'system', content: string }[];
     stream?: boolean;
     temperature?: number;
     max_tokens?: number;
-};
+}
 
 export const GoogleModelIdentifier = Symbol('GoogleModelIdentifier');
 
@@ -75,7 +75,10 @@ export class GoogleModel implements LanguageModel {
 
             const text = response.message?.content ?? '';
 
-            const maybeUsage = (response as any).usage;
+            interface ChatResponseWithUsage {
+                usage?: { prompt_tokens?: number; completion_tokens?: number };
+            }
+            const maybeUsage = (response as unknown as ChatResponseWithUsage).usage;
             if (this.tokenUsageService && maybeUsage) {
                     await this.tokenUsageService.recordTokenUsage(this.id, {
                         inputTokens: maybeUsage.prompt_tokens ?? 0,
@@ -118,9 +121,9 @@ export class GoogleModel implements LanguageModel {
                 if (content) {
                     return { role, content };
                 }
-                return null;
+                return undefined;
             })
-            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== null);
+            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== undefined);
     }
 
     protected toRole(message: LanguageModelMessage): 'system' | 'user' | 'assistant' {
@@ -134,12 +137,12 @@ export class GoogleModel implements LanguageModel {
         }
     }
 
-    protected toStringContent(message: LanguageModelMessage): string | null {
+    protected toStringContent(message: LanguageModelMessage): string | undefined {
         if (LanguageModelMessage.isTextMessage(message)) {
             return message.text;
         }
         if (LanguageModelMessage.isThinkingMessage(message)) {
-            return null; // Ignorar mensagens de "thinking"
+            return undefined; // Ignorar mensagens de "thinking"
         }
         // Simplificado para não suportar tools e images nesta refatoração inicial
         // A lógica complexa de transformação de mensagens foi removida pois agora é responsabilidade do backend.

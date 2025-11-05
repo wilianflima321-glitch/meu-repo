@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+  "target": "es2022",
+    "module": "commonjs",
+  "lib": ["es2022", "dom"],
+    "jsx": "react-jsx",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+    "skipLibCheck": true,
+    "strict": false,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

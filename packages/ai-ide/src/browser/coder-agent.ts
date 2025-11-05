@@ -25,7 +25,9 @@ import { AI_CHAT_NEW_CHAT_WINDOW_COMMAND, ChatCommands } from '@theia/ai-chat-ui
 
 @injectable()
 export class CoderAgent extends AbstractStreamParsingChatAgent {
-    @inject(ChatService) protected readonly chatService: ChatService;
+    private _chatService?: ChatService;
+    @inject(ChatService) protected set chatService(v: ChatService) { this._chatService = v; }
+    protected get chatService(): ChatService { if (!this._chatService) { throw new Error('CoderAgent: chatService not injected'); } return this._chatService; }
     id: string = 'Coder';
     name = 'Coder';
     languageModelRequirements: LanguageModelRequirement[] = [{

@@ -1,0 +1,40 @@
+{
+  "name": "@theia/ai-backend-client",
+  "version": "1.0.0",
+  "description": "Aethel Backend API Client for AI providers (OpenAI, Anthropic, Ollama, Hugging Face, Google)",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "EPL-2.0",
+  "author": "Aethel Project",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "@theia/core": "1.64.0",
+    "@theia/ai-core": "1.64.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/node": "^20.11.5",
+    "rimraf": "^5.0.5"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/ai-backend-client-frontend-module",
+      "backend": "lib/node/ai-backend-client-backend-module"
+    }
+  ],
+  "keywords": [
+    "theia-extension",
+    "aethel",
+    "ai",
+    "backend",
+    "api-client"
+  ]
+}

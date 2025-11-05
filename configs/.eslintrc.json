@@ -1,0 +1,8 @@
+{
+  "root": true,
+  "extends": ["./build.eslintrc.json"],
+  "env": {
+    "node": true,
+    "es2021": true
+  }
+}

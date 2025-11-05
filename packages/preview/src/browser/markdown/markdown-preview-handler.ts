@@ -213,6 +213,7 @@ export class MarkdownPreviewHandler implements PreviewHandler {
 
     // Use `any` here to avoid compile-time type conflicts between different @types/markdown-it
     // packages present in the workspace. The runtime markdown-it instance remains unchanged.
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     protected engine: any | undefined;
     protected getEngine(): any {
         if (!this.engine) {
@@ -307,5 +308,6 @@ export class MarkdownPreviewHandler implements PreviewHandler {
         }
         return this.engine;
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
 }

@@ -14,6 +14,8 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
 
+/* eslint-disable @typescript-eslint/no-explicit-any, max-len */
+
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { AbstractTextToModelParsingChatAgent, SystemMessageDescription } from '@theia/ai-chat/lib/common/chat-agents';
 import { AIVariableContext, LanguageModelRequirement } from '@theia/ai-core';
@@ -32,7 +34,7 @@ import {
 } from '@theia/core';
 
 import { commandTemplate } from './command-prompt-template';
-import { LlmProviderService } from '../browser/llm-provider-service';
+import { LlmProviderService } from './llm-provider-service';
 
 interface ParsedCommand {
     type: 'theia-command' | 'custom-handler' | 'no-command'
@@ -87,8 +89,9 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
             throw new Error('Couldn\'t get prompt ');
         }
         // `fromResolvedPromptFragment` may be an optional helper in some versions; guard at runtime
-        if (typeof (SystemMessageDescription as any).fromResolvedPromptFragment === 'function') {
-            return (SystemMessageDescription as any).fromResolvedPromptFragment(systemPrompt);
+        const sysMsgDescHelpers = SystemMessageDescription as unknown as { fromResolvedPromptFragment?: (s: string) => SystemMessageDescription };
+        if (typeof sysMsgDescHelpers.fromResolvedPromptFragment === 'function') {
+            return sysMsgDescHelpers.fromResolvedPromptFragment(systemPrompt);
         }
         return undefined;
     }
@@ -111,9 +114,29 @@ export class CommandChatAgent extends AbstractTextToModelParsingChatAgent<Parsed
     protected async sendLlmRequest(request: MutableChatRequestModel, messages: any[], toolRequests: any[], languageModel: any) {
         const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
         try {
-            const resp = await (this.llmProviderService as any).sendRequestToProvider(undefined, { input: messages.map(m => `${m.role||'user'}: ${m.content}`).join('\n'), settings });
-            const normalized: any = { status: resp.status, text: typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body), raw: resp.body };
-            return normalized;
+            const svc: unknown = this.llmProviderService;
+            const sendFn = ((): ((p?: unknown, o?: unknown) => Promise<unknown>) | undefined => {
+                const maybe = svc as unknown as { sendRequestToProvider?: unknown };
+                if (svc && typeof maybe.sendRequestToProvider === 'function') {
+                    return (maybe.sendRequestToProvider as Function).bind(svc) as unknown as (p?: unknown, o?: unknown) => Promise<unknown>;
+                }
+                return undefined;
+            })();
+            if (!sendFn) {
+                throw new Error('LlmProviderService.sendRequestToProvider not available');
+            }
+            const resp = await sendFn(undefined, { input: messages.map(m => `${m.role || 'user'}: ${m.content}`).join('\n'), settings });
+            const normalizeProviderResp = (r: unknown) => {
+                if (r && typeof r === 'object') {
+                    const maybe = r as unknown as { status?: unknown; body?: unknown };
+                    const s = maybe.status;
+                    const body = maybe.body ?? r;
+                    const status = typeof s === 'number' ? s : 200;
+                    return { status, text: typeof body === 'string' ? body : JSON.stringify(body), raw: body };
+                }
+                return { status: 200, text: typeof r === 'string' ? r : JSON.stringify(r), raw: r };
+            };
+            return normalizeProviderResp(resp);
         } catch (e) {
             return this.languageModelService.sendRequest(languageModel, { messages, tools: toolRequests.length ? toolRequests : undefined, settings, agentId: this.id, sessionId: request.session.id, requestId: request.id, cancellationToken: request.response?.cancellationToken });
         }

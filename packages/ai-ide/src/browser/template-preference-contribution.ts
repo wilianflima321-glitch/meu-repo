@@ -81,21 +81,39 @@ export class TemplatePreferenceContribution implements FrontendApplicationContri
         const workspaceRootUri = workspaceRoot.resource;
         const configProperties: PromptFragmentCustomizationProperties = {};
 
-        const getPref = <T = any>(key: string, d: T): T => {
-            const getter = (this.preferenceService as any).get;
+        const getPref = <T = unknown>(key: string, d: T): T => {
+            const pref = this.preferenceService as unknown as { get?: (k: string, def: T) => T | undefined };
+            const getter = pref?.get;
             if (typeof getter === 'function') {
-                return getter.call(this.preferenceService, key, d) as T;
+                const v = getter.call(this.preferenceService, key, d) as T | undefined;
+                return v === undefined ? d : v;
             }
             return d;
+        };
+
+        const formatUriPath = (uriRaw: unknown): string => {
+            if (!uriRaw) {
+                return '';
+            }
+            if (typeof uriRaw === 'object') {
+                const p = (uriRaw as { path?: unknown }).path;
+                if (p) {
+                    if (typeof (p as { toString?: () => string }).toString === 'function') {
+                        return (p as { toString?: () => string }).toString!();
+                    }
+                    return String(p);
+                }
+            }
+            return '';
         };
 
         if (!changedPreference || changedPreference === PROMPT_TEMPLATE_WORKSPACE_DIRECTORIES_PREF) {
             const relativeDirectories = getPref<string[]>(PROMPT_TEMPLATE_WORKSPACE_DIRECTORIES_PREF, []);
             configProperties.directoryPaths = relativeDirectories.map(dir => {
                 const path = new Path(dir);
-                const resolveFn = (workspaceRootUri as any).resolve;
-                const uri = typeof resolveFn === 'function' ? resolveFn.call(workspaceRootUri, path.toString()) : (workspaceRootUri as any);
-                return (uri && uri.path) ? uri.path.toString() : '';
+                const resolveFn = (workspaceRootUri as unknown as { resolve?: (p: string) => unknown })?.resolve;
+                const uri = typeof resolveFn === 'function' ? resolveFn.call(workspaceRootUri, path.toString()) : workspaceRootUri;
+                return formatUriPath(uri);
             });
         }
 
@@ -107,9 +125,9 @@ export class TemplatePreferenceContribution implements FrontendApplicationContri
             const relativeFilePaths = getPref<string[]>(PROMPT_TEMPLATE_WORKSPACE_FILES_PREF, []);
             configProperties.filePaths = relativeFilePaths.map(filePath => {
                 const path = new Path(filePath);
-                const resolveFn = (workspaceRootUri as any).resolve;
-                const uri = typeof resolveFn === 'function' ? resolveFn.call(workspaceRootUri, path.toString()) : (workspaceRootUri as any);
-                return (uri && uri.path) ? uri.path.toString() : '';
+                const resolveFn = (workspaceRootUri as unknown as { resolve?: (p: string) => unknown })?.resolve;
+                const uri = typeof resolveFn === 'function' ? resolveFn.call(workspaceRootUri, path.toString()) : workspaceRootUri;
+                return formatUriPath(uri);
             });
         }
 

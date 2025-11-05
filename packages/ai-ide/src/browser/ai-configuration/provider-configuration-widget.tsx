@@ -1,8 +1,22 @@
-import * as React from 'react';
+import * as React from '@theia/core/shared/react';
 import { BaseWidget, WidgetManager } from '@theia/core/lib/browser';
 import { injectable, inject } from '@theia/core/shared/inversify';
 import { LlmProviderRegistry } from '../../browser/llm-provider-registry';
 import { MessageService } from '@theia/core';
+import { LlmProviderConfig } from '../../common/ai-llm-preferences';
+
+// Extended provider shape used by this UI to hold ensemble fields without leaking `any`.
+type ExtendedLlmProviderConfig = LlmProviderConfig & {
+  // extend base provider type to include ensemble variant
+  type?: 'custom' | 'aethel' | 'ensemble';
+  // ensemble specific
+  providerIds?: string[];
+  mode?: 'fast' | 'blend' | 'best';
+  timeoutMs?: number;
+  constraints?: string[];
+  verificationMode?: 'strict' | 'soft';
+  rateCard?: { pricePerToken?: number; currency?: string };
+};
 
 export const ProviderConfigurationWidgetID = 'ai-llm-provider-configuration-widget';
 
@@ -11,7 +25,7 @@ interface State {
   name: string;
   endpoint: string;
   apiKey: string;
-  providers: any[];
+  providers: ExtendedLlmProviderConfig[];
   selected?: string;
   billingMode?: 'platform' | 'self' | 'sponsored';
   pricePerToken?: number;
@@ -118,7 +132,7 @@ export class ProviderConfigurationWidget extends BaseWidget {
                 </div>
                 <div>
                   <label>Ensemble mode</label>
-                  <select value={this.state.mode ?? 'fast'} onChange={e => { this.state.mode = (e.target as HTMLSelectElement).value as any; this.update(); }}>
+                  <select value={this.state.mode ?? 'fast'} onChange={e => { this.state.mode = (e.target as HTMLSelectElement).value as 'fast' | 'blend' | 'best'; this.update(); }}>
                     <option value='fast'>Fast (first good)</option>
                     <option value='blend'>Blend (concatenate)</option>
                     <option value='best'>Best (heuristic)</option>
@@ -134,7 +148,7 @@ export class ProviderConfigurationWidget extends BaseWidget {
                 </div>
                 <div>
                   <label>Verification mode</label>
-                  <select value={this.state.verificationMode ?? 'strict'} onChange={e => { this.state.verificationMode = (e.target as HTMLSelectElement).value as any; this.update(); }}>
+                  <select value={this.state.verificationMode ?? 'strict'} onChange={e => { this.state.verificationMode = (e.target as HTMLSelectElement).value as 'strict' | 'soft'; this.update(); }}>
                     <option value='strict'>Strict (block on violations)</option>
                     <option value='soft'>Soft (warn but proceed)</option>
                   </select>
@@ -143,7 +157,7 @@ export class ProviderConfigurationWidget extends BaseWidget {
             )}
             <div>
               <label>Billing mode</label>
-              <select value={this.state.billingMode ?? 'self'} onChange={e => { this.state.billingMode = (e.target as HTMLSelectElement).value as any; this.update(); }}>
+              <select value={this.state.billingMode ?? 'self'} onChange={e => { this.state.billingMode = (e.target as HTMLSelectElement).value as 'platform' | 'self' | 'sponsored'; this.update(); }}>
                 <option value='self'>Self (user-owned)</option>
                 <option value='platform'>Platform (Aethel billed)</option>
                 <option value='sponsored'>Sponsored / Free</option>
@@ -169,36 +183,35 @@ export class ProviderConfigurationWidget extends BaseWidget {
 
   protected save() {
     // Enforce non-admin authors to create self-billed providers
-    const isAdmin = (typeof window !== 'undefined' && (window as any).__IS_ADMIN) === true;
+    const isAdmin = typeof window !== 'undefined' && (window as unknown as { __IS_ADMIN?: boolean }).__IS_ADMIN === true;
     const billingMode = isAdmin ? (this.state.billingMode ?? 'self') : 'self';
-    const cfg: any = {
+    const cfg: ExtendedLlmProviderConfig = {
       id: this.state.id || `local-${Date.now()}`,
       name: this.state.name || this.state.id,
-      endpoint: this.state.endpoint,
-      apiKey: this.state.apiKey,
-      billingMode,
+      endpoint: this.state.endpoint || undefined,
+      apiKey: this.state.apiKey || undefined,
+      billingMode: billingMode as ExtendedLlmProviderConfig['billingMode'],
       rateCard: { pricePerToken: this.state.pricePerToken ?? 0, currency: this.state.currency ?? 'USD' },
       ownerId: isAdmin ? this.state.ownerId ?? undefined : undefined,
-      // ensemble fields
-      type: this.state.type ?? 'custom'
-    };
-    if (cfg.type === 'ensemble') {
+      type: (this.state.type as ExtendedLlmProviderConfig['type']) ?? 'custom'
+    } as ExtendedLlmProviderConfig;
+  if ((cfg.type as unknown as string) === 'ensemble') {
       const members = (this.state.providerIds || '').split(',').map(s => s.trim()).filter(Boolean);
-      (cfg as any).providerIds = members;
-      (cfg as any).mode = this.state.mode ?? 'fast';
-      (cfg as any).timeoutMs = this.state.timeoutMs ?? 2500;
+      cfg.providerIds = members;
+      cfg.mode = this.state.mode ?? 'fast';
+      cfg.timeoutMs = this.state.timeoutMs ?? 2500;
       const constraints = (this.state.constraints || '').split(',').map(s => s.trim()).filter(Boolean);
-      if (constraints.length) (cfg as any).constraints = constraints;
+      if (constraints.length) { cfg.constraints = constraints; }
       // verification mode: soft warns or strict blocks
-      (cfg as any).verificationMode = this.state.verificationMode ?? 'strict';
+      cfg.verificationMode = this.state.verificationMode ?? 'strict';
     }
     try {
-      this.registry.addProvider(cfg as any);
+      this.registry.addProvider(cfg);
       // optimistic update to list
       const existing = this.state.providers.filter(p => p.id !== cfg.id);
-      const sanitized = { ...cfg, apiKey: undefined };
+      const sanitized = { ...cfg } as ExtendedLlmProviderConfig;
       // hide secret on UI
-      if ('apiKey' in sanitized) delete sanitized.apiKey;
+  if ('apiKey' in sanitized) { delete (sanitized as unknown as Record<string, unknown>)['apiKey']; }
       this.state.providers = [...existing, sanitized];
       this.state.selected = cfg.id;
       // clear apiKey from local state
@@ -218,7 +231,7 @@ export class ProviderConfigurationWidget extends BaseWidget {
 
   protected selectProvider(id: string) {
     const p = this.state.providers.find(x => x.id === id);
-    if (!p) return;
+    if (!p) {return;}
     this.state.id = p.id;
     this.state.name = p.name || p.id;
     this.state.endpoint = p.endpoint || '';
@@ -231,7 +244,7 @@ export class ProviderConfigurationWidget extends BaseWidget {
     try {
       this.registry.removeProvider(id);
       this.state.providers = this.state.providers.filter(p => p.id !== id);
-      if (this.state.selected === id) this.clear();
+      if (this.state.selected === id) {this.clear();}
       this.messageService.info('Provider delete triggered (backend will be updated if available).');
     } catch (e) {
       this.messageService.error('Failed to delete provider');

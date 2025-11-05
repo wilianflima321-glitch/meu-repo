@@ -129,7 +129,8 @@ export abstract class AbstractLineMatcher {
                 }
                 // Ensure we assign a string (safe coercion) to avoid TS complaining about undefined
                 const s = String(value);
-                (data as any)[property] = s;
+                const mutable = data as Record<string, unknown>;
+                mutable[property as string] = s;
             }
         }
     }

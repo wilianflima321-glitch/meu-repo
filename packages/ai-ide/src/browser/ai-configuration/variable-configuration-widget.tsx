@@ -16,6 +16,7 @@
 
 import { Agent, AgentService, AIVariable, AIVariableService } from '@theia/ai-core/lib/common';
 import { codicon, ReactWidget } from '@theia/core/lib/browser';
+import { Disposable } from '@theia/core';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import * as React from '@theia/core/shared/react';
 import { AIAgentConfigurationWidget } from './agent-configuration-widget';
@@ -48,10 +49,10 @@ export class AIVariableConfigurationWidget extends ReactWidget {
         this.title.label = AIVariableConfigurationWidget.LABEL;
         this.title.closable = false;
         this.update();
-    // The onDidChangeVariables API may return either a unregister function or a Disposable.
-    // Treat the return as 'any' and wrap unconditionally to avoid testing a value typed as void.
-    const d: any = this.variableService.onDidChangeVariables(() => this.update());
-    this.toDispose.push({ dispose: () => { try { if (typeof d === 'function') { d(); } else if (d && typeof d.dispose === 'function') { d.dispose(); } } catch { } } } as any);
+        // The onDidChangeVariables API may return either a unregister function or a Disposable.
+        // Treat the return as an unknown runtime value and wrap unconditionally to avoid testing a value typed as void.
+        const d: unknown = this.variableService.onDidChangeVariables(() => this.update());
+        this.toDispose.push({ dispose: () => { try { if (typeof d === 'function') { (d as (...args: unknown[]) => unknown)(); } else if (d && typeof (d as { dispose?: unknown }).dispose === 'function') { ((d as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
     }
 
     protected render(): React.ReactNode {

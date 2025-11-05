@@ -23,6 +23,14 @@ import { BackendApplicationContribution, FileUri } from '@theia/core/lib/node';
 import { injectable } from '@theia/core/shared/inversify';
 import { HTTP_FILE_UPLOAD_PATH } from '../common/file-upload';
 
+// Use the Multer file type from the Express/Multer types to maintain compatibility
+// with the request object provided by multer middleware. Declared at module scope
+// so it can be referenced by both the configure callback and the handler method.
+interface MulterRequest extends express.Request {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    file?: Express.Multer.File;
+}
+
 @injectable()
 export class NodeFileUploadService implements BackendApplicationContribution {
     private static readonly UPLOAD_DIR = 'theia_upload';
@@ -34,12 +42,14 @@ export class NodeFileUploadService implements BackendApplicationContribution {
         ]);
         console.debug(`HTTP file upload URL path: ${http_path}`);
         console.debug(`Backend file upload cache path: ${dest}`);
+        // Handler will use the module-scoped MulterRequest interface defined above.
+
         app.post(
             http_path,
             // `multer` handles `multipart/form-data` containing our file to upload.
-            // Cast to any to avoid TypeScript type conflicts between multiple @types/express copies.
-            (multer({ dest }).single('file') as any),
-            (request: any, response: any, next: any) => this.handleFileUpload(request, response)
+            // Multer's single() returns a request handler. Cast to express.RequestHandler to satisfy typings.
+            (multer({ dest }).single('file') as express.RequestHandler),
+            (request: MulterRequest, response: express.Response, next: express.NextFunction) => this.handleFileUpload(request, response)
         );
     }
 
@@ -57,7 +67,7 @@ export class NodeFileUploadService implements BackendApplicationContribution {
         return path.join(os.tmpdir(), NodeFileUploadService.UPLOAD_DIR);
     }
 
-    protected async handleFileUpload(request: express.Request, response: express.Response): Promise<void> {
+    protected async handleFileUpload(request: MulterRequest, response: express.Response): Promise<void> {
         const fields = request.body;
         if (!request.file || typeof fields !== 'object' || typeof fields.uri !== 'string') {
             response.sendStatus(400); // bad request

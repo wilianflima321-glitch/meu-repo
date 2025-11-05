@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import { nls } from '@theia/core';
+import { nls, Disposable } from '@theia/core';
 import { ConfirmDialog, ReactWidget, codicon } from '@theia/core/lib/browser';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import {
@@ -109,14 +109,14 @@ export class AIPromptFragmentsConfigurationWidget extends ReactWidget {
         this.loadPromptFragments();
         this.loadAgents();
 
-        const d1: any = this.promptService.onPromptsChange(() => {
+        const d1: unknown = this.promptService.onPromptsChange(() => {
             this.loadPromptFragments();
         });
-        const d2: any = this.agentService.onDidChangeAgents(() => {
+        const d2: unknown = this.agentService.onDidChangeAgents(() => {
             this.loadAgents();
         });
-        this.toDispose.push({ dispose: () => { try { if (typeof d1 === 'function') { d1(); } else if (typeof (d1 as any).dispose === 'function') { (d1 as any).dispose(); } } catch { } } } as any);
-        this.toDispose.push({ dispose: () => { try { if (typeof d2 === 'function') { d2(); } else if (typeof (d2 as any).dispose === 'function') { (d2 as any).dispose(); } } catch { } } } as any);
+        this.toDispose.push({ dispose: () => { try { if (typeof d1 === 'function') { (d1 as (...args: unknown[]) => unknown)(); } else if (d1 && typeof (d1 as { dispose?: unknown }).dispose === 'function') { ((d1 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+        this.toDispose.push({ dispose: () => { try { if (typeof d2 === 'function') { (d2 as (...args: unknown[]) => unknown)(); } else if (d2 && typeof (d2 as { dispose?: unknown }).dispose === 'function') { ((d2 as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
     }
 
     /**

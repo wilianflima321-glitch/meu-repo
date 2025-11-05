@@ -14,9 +14,11 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
 
+/* eslint-disable @typescript-eslint/no-explicit-any, max-len */
+
 import { LanguageModelRequirement, LanguageModel, LanguageModelMessage, LanguageModelResponse } from '@theia/ai-core/lib/common';
 import { injectable, inject } from '@theia/core/shared/inversify';
-import { LlmProviderService } from '../browser/llm-provider-service';
+import { LlmProviderService } from './llm-provider-service';
 import { AbstractStreamParsingChatAgent } from '@theia/ai-chat/lib/common/chat-agents';
 import { nls } from '@theia/core';
 import { universalTemplate, universalTemplateVariant } from './universal-prompt-template';
@@ -52,9 +54,29 @@ export class UniversalChatAgent extends AbstractStreamParsingChatAgent {
    ): Promise<LanguageModelResponse> {
       const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
       try {
-         const resp = await (this.llmProviderService as any).sendRequestToProvider(undefined, { input: messages.map(m => `${m.role||'user'}: ${m.content}`).join('\n'), settings });
-         const normalized: LanguageModelResponse = { status: resp.status, text: typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body), raw: resp.body } as unknown as LanguageModelResponse;
-         return normalized;
+       const svc: unknown = this.llmProviderService;
+       const sendFn = ((): ((p?: unknown, o?: unknown) => Promise<unknown>) | undefined => {
+          const maybe = svc as unknown as { sendRequestToProvider?: unknown };
+          if (svc && typeof maybe.sendRequestToProvider === 'function') {
+             return (maybe.sendRequestToProvider as Function).bind(svc) as unknown as (p?: unknown, o?: unknown) => Promise<unknown>;
+          }
+          return undefined;
+       })();
+       if (!sendFn) {
+          throw new Error('LlmProviderService.sendRequestToProvider not available');
+       }
+       const resp = await sendFn(undefined, { input: messages.map(m => `${m.role || 'user'}: ${m.content}`).join('\n'), settings });
+       const normalizeProviderResp = (r: unknown): LanguageModelResponse => {
+          if (r && typeof r === 'object') {
+             const maybe = r as unknown as { status?: unknown; body?: unknown };
+             const s = maybe.status;
+             const body = maybe.body ?? r;
+             const status = typeof s === 'number' ? s : 200;
+             return { status, text: typeof body === 'string' ? body : JSON.stringify(body), raw: body } as unknown as LanguageModelResponse;
+          }
+          return { status: 200, text: typeof r === 'string' ? r : JSON.stringify(r), raw: r } as unknown as LanguageModelResponse;
+       };
+       return normalizeProviderResp(resp);
       } catch (e) {
          return this.languageModelService.sendRequest(languageModel, { messages, tools: toolRequests.length ? toolRequests : undefined, settings, agentId: this.id, sessionId: request.session.id, requestId: request.id, cancellationToken: request.response?.cancellationToken });
       }

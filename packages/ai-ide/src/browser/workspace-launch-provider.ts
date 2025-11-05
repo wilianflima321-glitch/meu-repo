@@ -32,7 +32,10 @@ import {
 export class LaunchListProvider implements ToolProvider {
 
     @inject(DebugConfigurationManager)
-    protected readonly debugConfigurationManager: DebugConfigurationManager;
+    private _debugConfigurationManager?: DebugConfigurationManager;
+    @inject(DebugConfigurationManager)
+    protected set debugConfigurationManager(v: DebugConfigurationManager) { this._debugConfigurationManager = v; }
+    protected get debugConfigurationManager(): DebugConfigurationManager { if (!this._debugConfigurationManager) { throw new Error('LaunchListProvider: debugConfigurationManager not injected'); } return this._debugConfigurationManager; }
 
     getTool(): ToolRequest {
         return {
@@ -85,10 +88,16 @@ export class LaunchListProvider implements ToolProvider {
 export class LaunchRunnerProvider implements ToolProvider {
 
     @inject(DebugConfigurationManager)
-    protected readonly debugConfigurationManager: DebugConfigurationManager;
+    private _debugConfigurationManager?: DebugConfigurationManager;
+    @inject(DebugConfigurationManager)
+    protected set debugConfigurationManager(v: DebugConfigurationManager) { this._debugConfigurationManager = v; }
+    protected get debugConfigurationManager(): DebugConfigurationManager { if (!this._debugConfigurationManager) { throw new Error('LaunchRunnerProvider: debugConfigurationManager not injected'); } return this._debugConfigurationManager; }
 
     @inject(DebugSessionManager)
-    protected readonly debugSessionManager: DebugSessionManager;
+    private _debugSessionManager?: DebugSessionManager;
+    @inject(DebugSessionManager)
+    protected set debugSessionManager(v: DebugSessionManager) { this._debugSessionManager = v; }
+    protected get debugSessionManager(): DebugSessionManager { if (!this._debugSessionManager) { throw new Error('LaunchRunnerProvider: debugSessionManager not injected'); } return this._debugSessionManager; }
 
     getTool(): ToolRequest {
         return {
@@ -170,7 +179,10 @@ export class LaunchRunnerProvider implements ToolProvider {
 export class LaunchStopProvider implements ToolProvider {
 
     @inject(DebugSessionManager)
-    protected readonly debugSessionManager: DebugSessionManager;
+    private _debugSessionManager?: DebugSessionManager;
+    @inject(DebugSessionManager)
+    protected set debugSessionManager(v: DebugSessionManager) { this._debugSessionManager = v; }
+    protected get debugSessionManager(): DebugSessionManager { if (!this._debugSessionManager) { throw new Error('LaunchStopProvider: debugSessionManager not injected'); } return this._debugSessionManager; }
 
     getTool(): ToolRequest {
         return {

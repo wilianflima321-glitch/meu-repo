@@ -31,28 +31,52 @@ import { AICommandHandlerFactory } from '@theia/ai-core/lib/browser';
 @injectable()
 export class SummarizeSessionCommandContribution implements CommandContribution {
     @inject(ChatService)
-    protected readonly chatService: ChatService;
+    private _chatService?: ChatService;
+    @inject(ChatService)
+    protected set chatService(v: ChatService) { this._chatService = v; }
+    protected get chatService(): ChatService { if (!this._chatService) { throw new Error('SummarizeSessionCommandContribution: chatService not injected'); } return this._chatService; }
 
     @inject(TaskContextService)
-    protected readonly taskContextService: TaskContextService;
+    private _taskContextService?: TaskContextService;
+    @inject(TaskContextService)
+    protected set taskContextService(v: TaskContextService) { this._taskContextService = v; }
+    protected get taskContextService(): TaskContextService { if (!this._taskContextService) { throw new Error('SummarizeSessionCommandContribution: taskContextService not injected'); } return this._taskContextService; }
 
     @inject(CommandService)
-    protected readonly commandService: CommandService;
+    private _commandService?: CommandService;
+    @inject(CommandService)
+    protected set commandService(v: CommandService) { this._commandService = v; }
+    protected get commandService(): CommandService { if (!this._commandService) { throw new Error('SummarizeSessionCommandContribution: commandService not injected'); } return this._commandService; }
 
     @inject(CoderAgent)
-    protected readonly coderAgent: CoderAgent;
+    private _coderAgent?: CoderAgent;
+    @inject(CoderAgent)
+    protected set coderAgent(v: CoderAgent) { this._coderAgent = v; }
+    protected get coderAgent(): CoderAgent { if (!this._coderAgent) { throw new Error('SummarizeSessionCommandContribution: coderAgent not injected'); } return this._coderAgent; }
 
     @inject(TaskContextStorageService)
-    protected readonly taskContextStorageService: TaskContextStorageService;
+    private _taskContextStorageService?: TaskContextStorageService;
+    @inject(TaskContextStorageService)
+    protected set taskContextStorageService(v: TaskContextStorageService) { this._taskContextStorageService = v; }
+    protected get taskContextStorageService(): TaskContextStorageService { if (!this._taskContextStorageService) { throw new Error('SummarizeSessionCommandContribution: taskContextStorageService not injected'); } return this._taskContextStorageService; }
 
     @inject(FileService)
-    protected readonly fileService: FileService;
+    private _fileService?: FileService;
+    @inject(FileService)
+    protected set fileService(v: FileService) { this._fileService = v; }
+    protected get fileService(): FileService { if (!this._fileService) { throw new Error('SummarizeSessionCommandContribution: fileService not injected'); } return this._fileService; }
 
     @inject(WorkspaceService)
-    protected readonly wsService: WorkspaceService;
+    private _wsService?: WorkspaceService;
+    @inject(WorkspaceService)
+    protected set wsService(v: WorkspaceService) { this._wsService = v; }
+    protected get wsService(): WorkspaceService { if (!this._wsService) { throw new Error('SummarizeSessionCommandContribution: wsService not injected'); } return this._wsService; }
 
     @inject(AICommandHandlerFactory)
-    protected readonly commandHandlerFactory: AICommandHandlerFactory;
+    private _commandHandlerFactory?: AICommandHandlerFactory;
+    @inject(AICommandHandlerFactory)
+    protected set commandHandlerFactory(v: AICommandHandlerFactory) { this._commandHandlerFactory = v; }
+    protected get commandHandlerFactory(): AICommandHandlerFactory { if (!this._commandHandlerFactory) { throw new Error('SummarizeSessionCommandContribution: commandHandlerFactory not injected'); } return this._commandHandlerFactory; }
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand(AI_UPDATE_TASK_CONTEXT_COMMAND, this.commandHandlerFactory({

@@ -23,8 +23,9 @@ export class LlmProviderCommandContribution implements CommandContribution {
             execute: async () => {
                 try {
                     const widget = await this.widgetManager.getOrCreateWidget(ProviderConfigurationWidgetID);
-                    if (widget && typeof (widget as any).activate === 'function') {
-                        (widget as any).activate();
+                    const w = widget as unknown as { activate?: () => void } | undefined;
+                    if (w && typeof w.activate === 'function') {
+                        w.activate();
                     }
                 } catch (e) {
                     console.error('Failed to open provider configuration widget', e);

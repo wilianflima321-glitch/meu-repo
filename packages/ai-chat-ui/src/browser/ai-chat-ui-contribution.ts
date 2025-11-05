@@ -40,10 +40,10 @@ import { TaskContextService } from '@theia/ai-chat/lib/browser/task-context-serv
 
 export const AI_CHAT_TOGGLE_COMMAND_ID = 'aiChat:toggle';
 
-type DateFnsLocale = {
+interface DateFnsLocale {
     code?: string;
     [key: string]: unknown;
-};
+}
 
 @injectable()
 export class AIChatContribution extends AbstractViewContribution<ChatViewWidget> implements TabBarToolbarContribution {

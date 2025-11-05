@@ -18,7 +18,7 @@
 
 import { AbstractStreamParsingChatAgent } from '@theia/ai-chat/lib/common/chat-agents';
 import { ErrorChatResponseContentImpl, MarkdownChatResponseContentImpl, MutableChatRequestModel, QuestionResponseContentImpl } from '@theia/ai-chat/lib/common/chat-model';
-import { LanguageModelRequirement } from '@theia/ai-core/lib/common';
+import { LanguageModelRequirement, LanguageModelResponse } from '@theia/ai-core/lib/common';
 import { MCPFrontendService, MCPServerDescription } from '@theia/ai-mcp/lib/common/mcp-server-manager';
 import { nls } from '@theia/core';
 import { inject, injectable } from '@theia/core/shared/inversify';
@@ -43,10 +43,10 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
     protected set preferenceService(v: PreferenceService) { this._preferenceService = v; }
     protected get preferenceService(): PreferenceService { if (!this._preferenceService) { throw new Error('AppTesterChatAgent: preferenceService not injected'); } return this._preferenceService; }
     @inject(LlmProviderService)
-    private _llmProviderService?: any;
+    private _llmProviderService?: unknown;
     @inject(LlmProviderService)
-    protected set llmProviderService(v: any) { this._llmProviderService = v; }
-    protected get llmProviderService(): any { if (!this._llmProviderService) { throw new Error('AppTesterChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
+    protected set llmProviderService(v: unknown) { this._llmProviderService = v; }
+    protected get llmProviderService(): unknown { if (this._llmProviderService === undefined) { throw new Error('AppTesterChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
 
     override id: string = AppTesterChatAgentId;
     override name = AppTesterChatAgentId;
@@ -79,42 +79,60 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
                     async (selectedOption: any) => {
                         if (selectedOption.value === 'yes') {
                             // Show progress
-                                const _addProgressFn = (request.response as any).addProgressMessage;
-                                const progress = typeof _addProgressFn === 'function' ? _addProgressFn.call(request.response, { content: 'Starting Playwright MCP servers.', show: 'whileIncomplete' }) : undefined;
+                            const responseObj = request.response as unknown as { addProgressMessage?: (...args: unknown[]) => unknown, updateProgressMessage?: (...args: unknown[]) => unknown };
+                            const _addProgressFn = responseObj.addProgressMessage;
+                            const progress = typeof _addProgressFn === 'function' ? _addProgressFn.call(request.response, { content: 'Starting Playwright MCP servers.', show: 'whileIncomplete' }) : undefined;
                             try {
                                 await this.startServers();
                                 // Remove progress, continue with normal flow
                                 if (progress) {
                                     // progress may be a ChatProgressMessage; only update if present
-                                    const _updateProgressFn = (request.response as any).updateProgressMessage;
+                                    const _updateProgressFn = responseObj.updateProgressMessage;
                                     if (typeof _updateProgressFn === 'function') {
-                                        _updateProgressFn.call(request.response, { ...(progress as any), status: 'completed' });
+                                        try {
+                                            const progressObj = progress as unknown;
+                                            if (progressObj && typeof progressObj === 'object') {
+                                                const p = { ...(progressObj as Record<string, unknown>), status: 'completed' };
+                                                _updateProgressFn.call(request.response, p);
+                                            } else {
+                                                _updateProgressFn.call(request.response, { status: 'completed' });
+                                            }
+                                        } catch {
+                                            // fall back to a minimal update
+                                            _updateProgressFn.call(request.response, { status: 'completed' });
+                                        }
                                     }
                                 }
                                 await super.invoke(request);
                             } catch (error) {
-                                const _addContent = (request.response as any)?.response?.addContent;
+                                const responseRoot = request.response as unknown as { response?: { addContent?: (...args: unknown[]) => unknown }, complete?: (...args: unknown[]) => unknown };
+                                const _addContent = responseRoot.response?.addContent;
                                 if (typeof _addContent === 'function') {
-                                    _addContent.call((request.response as any).response, new ErrorChatResponseContentImpl(
+                                    _addContent.call(responseRoot.response, new ErrorChatResponseContentImpl(
                                         new Error('Failed to start Playwright MCP server: ' + (error instanceof Error ? error.message : String(error)))
                                     ));
                                 }
-                                (request.response as any)?.complete?.();
+                                const _complete = responseRoot.complete;
+                                if (typeof _complete === 'function') {
+                                    _complete.call(request.response);
+                                }
                             }
                         } else {
                             // Continue without starting the server
-                                const _addContent2 = (request.response as any)?.response?.addContent;
+                                const responseRoot = request.response as unknown as { response?: { addContent?: (...args: unknown[]) => unknown }, complete?: (...args: unknown[]) => unknown };
+                                const _addContent2 = responseRoot.response?.addContent;
                                 if (typeof _addContent2 === 'function') {
-                                    _addContent2.call((request.response as any).response, new MarkdownChatResponseContentImpl('Please setup the MCP servers.'));
+                                    _addContent2.call(responseRoot.response, new MarkdownChatResponseContentImpl('Please setup the MCP servers.'));
                                 }
-                                const _completeFn = (request.response as any).complete;
+                                const _completeFn = responseRoot.complete;
                                 if (typeof _completeFn === 'function') {
                                     _completeFn.call(request.response);
                                 }
                         }
                     }
                 ));
-                const _waitForInput = (request.response as any).waitForInput;
+                const waitObj = request.response as unknown as { waitForInput?: (...args: unknown[]) => unknown };
+                const _waitForInput = waitObj.waitForInput;
                 if (typeof _waitForInput === 'function') {
                     _waitForInput.call(request.response);
                 }
@@ -123,13 +141,14 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
             // If already running, continue as normal
             await super.invoke(request);
         } catch (error) {
-            const _addContentErr = request.response?.response?.addContent;
+            const responseRoot = request.response as unknown as { response?: { addContent?: (...args: unknown[]) => unknown }, complete?: (...args: unknown[]) => unknown };
+            const _addContentErr = responseRoot.response?.addContent;
             if (typeof _addContentErr === 'function') {
-                _addContentErr.call(request.response.response, new ErrorChatResponseContentImpl(
+                _addContentErr.call(responseRoot.response, new ErrorChatResponseContentImpl(
                     new Error('Error checking Playwright MCP server status: ' + (error instanceof Error ? error.message : String(error)))
                 ));
             }
-            const _completeOnErr = (request.response as any).complete;
+            const _completeOnErr = responseRoot.complete;
             if (typeof _completeOnErr === 'function') {
                 _completeOnErr.call(request.response);
             }
@@ -166,10 +185,11 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
 
             for (const server of serversToInstall) {
                 const currentServers = this.preferenceService.get<Record<string, MCPServerDescription>>(MCP_SERVERS_PREF, {});
-                if (typeof (this.preferenceService as any)?.set === 'function') {
-                    await (this.preferenceService as any).set(MCP_SERVERS_PREF, { ...currentServers, [server.name]: server }, (PreferenceScope as any).User);
-                } else if (typeof (this.preferenceService as any)?.updateValue === 'function') {
-                    await (this.preferenceService as any).updateValue(MCP_SERVERS_PREF, { ...currentServers, [server.name]: server });
+                const pref = this.preferenceService as unknown as { set?: (k: string, v: unknown, scope?: unknown) => Promise<unknown>, updateValue?: (k: string, v: unknown) => Promise<unknown> };
+                if (typeof pref.set === 'function') {
+                    await pref.set.call(this.preferenceService, MCP_SERVERS_PREF, { ...currentServers, [server.name]: server }, (PreferenceScope as unknown as object));
+                } else if (typeof pref.updateValue === 'function') {
+                    await pref.updateValue.call(this.preferenceService, MCP_SERVERS_PREF, { ...currentServers, [server.name]: server });
                 }
                 await this.mcpService.addOrUpdateServer(server);
             }
@@ -186,9 +206,19 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
     protected override async sendLlmRequest(request: MutableChatRequestModel, messages: any[], toolRequests: any[], languageModel: any) {
         const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
         try {
-            const resp = await (this.llmProviderService as any).sendRequestToProvider(undefined, { input: messages.map(m => `${m.role||'user'}: ${m.content}`).join('\n'), settings });
-            const normalized: any = { status: resp.status, text: typeof resp.body === 'string' ? resp.body : JSON.stringify(resp.body), raw: resp.body };
-            return normalized;
+            const provider = this.llmProviderService as unknown as { sendRequestToProvider?: (id: unknown, payload: unknown) => Promise<unknown> };
+            const sendFn = provider.sendRequestToProvider;
+            if (typeof sendFn === 'function') {
+                const resp = await sendFn.call(provider, undefined, { input: messages.map(m => `${m.role || 'user'}: ${m.content}`).join('\n'), settings });
+                const normalizeProviderResp = (r: unknown): LanguageModelResponse => {
+                    const rr = r as { status?: unknown, body?: unknown } | undefined;
+                    const status = rr && typeof rr.status === 'number' ? rr.status : (rr && typeof rr.status === 'string' ? Number(rr.status) || 200 : 200);
+                    const body = rr?.body ?? r;
+                    const text = typeof body === 'string' ? body : JSON.stringify(body);
+                    return { status, text, raw: body } as unknown as LanguageModelResponse;
+                };
+                return normalizeProviderResp(resp);
+            }
         } catch (e) {
             return this.languageModelService.sendRequest(languageModel, { messages, tools: toolRequests.length ? toolRequests : undefined, settings, agentId: this.id, sessionId: request.session.id, requestId: request.id, cancellationToken: request.response?.cancellationToken });
         }

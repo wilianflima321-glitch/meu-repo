@@ -79,7 +79,9 @@ export class BrowserAutomationImpl implements RpcServer<BrowserAutomationClient>
             if (!element) {
                 throw new Error(`Element with selector "${selector}" not found`);
             }
-            content = await page.evaluate((el: { outerHTML: string }) => el.outerHTML, element);
+            // Puppeteer's page.evaluate expects a callback with flexible args; cast element to any for compatibility.
+            // Puppeteer's page.evaluate executes in the page context; accept unknown and cast inside to avoid `any`.
+            content = await page.evaluate((el: unknown) => ((el as Element)?.outerHTML ?? ''), element as unknown);
         } else {
             content = await page.content();
         }

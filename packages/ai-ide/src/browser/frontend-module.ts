@@ -33,6 +33,7 @@ if (typeof document !== 'undefined' && document && document.head) {
 }
 
 import { ContainerModule } from '@theia/core/shared/inversify';
+import type { interfaces } from '@theia/core/sharedinversify';
 import { ChatAgent, DefaultChatAgentId, FallbackChatAgentId } from '@theia/ai-chat/lib/common';
 import { Agent, AIVariableContribution, bindToolProvider } from '@theia/ai-core/lib/common';
 import { ArchitectAgent } from './architect-agent';
@@ -106,9 +107,9 @@ import { AIActivationService } from '@theia/ai-core/lib/browser';
 import { AIIdeActivationServiceImpl } from './ai-ide-activation-service';
 import { AiConfigurationPreferences } from '../common/ai-configuration-preferences';
 import { LlmProviderRegistry } from './llm-provider-registry';
-import { aiLlmPreferenceSchema } from '../common/ai-llm-preferences';
-import { AI_LLM_PROVIDERS_PREF } from '../common/ai-llm-preferences';
-import { LlmProviderService } from './llm-provider-service';
+import { aiLlmPreferenceSchema, AI_LLM_PROVIDERS_PREF } from '../common/ai-llm-preferences';
+import { LlmProviderService as BrowserLlmProviderService } from './llm-provider-service';
+import { LlmProviderService as CommonLlmProviderService } from '../common/llm-provider-service';
 import { LlmProviderCommandContribution } from './llm-provider-command-contribution';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
@@ -122,12 +123,14 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(PreferenceContribution).toConstantValue({ schema: aiLlmPreferenceSchema });
 
     bind(LlmProviderRegistry).toSelf().inSingletonScope();
-    bind(LlmProviderService).toSelf().inSingletonScope();
+    // Bind the browser implementation to the common abstract token so common code can inject the service
+    bind(CommonLlmProviderService).to(BrowserLlmProviderService).inSingletonScope();
+    bind(BrowserLlmProviderService).toSelf().inSingletonScope();
     bind(LlmProviderCommandContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(LlmProviderCommandContribution);
     bind(ProviderConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({ id: ProviderConfigurationWidget.ID, createWidget: () => ctx.container.get(ProviderConfigurationWidget) }))
+        .toDynamicValue((ctx: interfaces.Context) => ({ id: ProviderConfigurationWidget.ID, createWidget: () => ctx.container.get(ProviderConfigurationWidget) }))
         .inSingletonScope();
 
     // Billing admin widget
@@ -136,15 +139,16 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(BillingAdminWidget).toSelf();
     bind(BillingAdminContribution).toSelf().inSingletonScope();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({ id: BillingAdminWidget.ID, createWidget: () => ctx.container.get(BillingAdminWidget) }))
+        .toDynamicValue((ctx: interfaces.Context) => ({ id: BillingAdminWidget.ID, createWidget: () => ctx.container.get(BillingAdminWidget) }))
         .inSingletonScope();
     const { BillingAdminCommandContribution } = require('./admin/billing-admin-command-contribution');
     bind(BillingAdminCommandContribution).toSelf().inSingletonScope();
-    bind(CommandContribution).toService(BillingAdminCommandContribution as any);
-    bind(FrontendApplicationContribution).toService(BillingAdminContribution as any);
+    bind(CommandContribution).toService(BillingAdminCommandContribution as unknown);
+    bind(FrontendApplicationContribution).toService(BillingAdminContribution as unknown);
 
     // ensure preference key symbol is referenced so TS doesn't report it as unused in incremental builds
-    void AI_LLM_PROVIDERS_PREF;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _aiLlmPref = AI_LLM_PROVIDERS_PREF;
 
     bind(ArchitectAgent).toSelf().inSingletonScope();
     bind(Agent).toService(ArchitectAgent);
@@ -165,7 +169,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(AppTesterChatAgent).toSelf().inSingletonScope();
     bind(Agent).toService(AppTesterChatAgent);
     bind(ChatAgent).toService(AppTesterChatAgent);
-    bind(BrowserAutomation).toDynamicValue(ctx => {
+    bind(BrowserAutomation).toDynamicValue((ctx: interfaces.Context) => {
         const provider = ctx.container.get(RemoteConnectionProvider) as ServiceConnectionProvider;
         // `createProxy` may be untyped in some versions; avoid using a type-argument and cast instead
         return (provider.createProxy(browserAutomationPath) as unknown) as BrowserAutomation;
@@ -204,7 +208,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(AIConfigurationSelectionService).toSelf().inSingletonScope();
     bind(AIConfigurationContainerWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: AIConfigurationContainerWidget.ID,
             createWidget: () => ctx.container.get(AIConfigurationContainerWidget)
         }))
@@ -220,7 +224,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
 
     bind(AIVariableConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: AIVariableConfigurationWidget.ID,
             createWidget: () => ctx.container.get(AIVariableConfigurationWidget)
         }))
@@ -228,7 +232,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
 
     bind(AIAgentConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: AIAgentConfigurationWidget.ID,
             createWidget: () => ctx.container.get(AIAgentConfigurationWidget)
         }))
@@ -236,7 +240,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
 
     bind(ModelAliasesConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: ModelAliasesConfigurationWidget.ID,
             createWidget: () => ctx.container.get(ModelAliasesConfigurationWidget)
         }))
@@ -250,7 +254,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
 
     bind(AIToolsConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: AIToolsConfigurationWidget.ID,
             createWidget: () => ctx.container.get(AIToolsConfigurationWidget)
         }))
@@ -263,7 +267,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
 
     bind(AIMCPConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: AIMCPConfigurationWidget.ID,
             createWidget: () => ctx.container.get(AIMCPConfigurationWidget)
         }))
@@ -271,7 +275,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     // Register the token usage configuration widget
     bind(AITokenUsageConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: AITokenUsageConfigurationWidget.ID,
             createWidget: () => ctx.container.get(AITokenUsageConfigurationWidget)
         }))
@@ -285,7 +289,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(CommandContribution).to(SummarizeSessionCommandContribution);
     bind(AIPromptFragmentsConfigurationWidget).toSelf();
     bind(WidgetFactory)
-        .toDynamicValue(ctx => ({
+        .toDynamicValue((ctx: interfaces.Context) => ({
             id: AIPromptFragmentsConfigurationWidget.ID,
             createWidget: () => ctx.container.get(AIPromptFragmentsConfigurationWidget)
         }))

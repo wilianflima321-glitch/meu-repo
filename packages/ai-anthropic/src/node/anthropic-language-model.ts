@@ -28,14 +28,14 @@ import { CancellationToken } from '@theia/core';
 import { aethelApiClient, APIError } from '@theia/ai-core/lib/node';
 
 // Tipos simplificados para a requisição ao Aethel Backend
-type AethelChatRequest = {
+interface AethelChatRequest {
     model: string;
     messages: { role: 'user' | 'assistant' | 'system', content: string }[];
     stream?: boolean;
     temperature?: number;
     max_tokens?: number;
     top_p?: number;
-};
+}
 
 export const DEFAULT_MAX_TOKENS = 4096;
 export const AnthropicModelIdentifier = Symbol('AnthropicModelIdentifier');
@@ -73,7 +73,10 @@ export class AnthropicModel implements LanguageModel {
 
             const text = response.message?.content ?? '';
 
-            const maybeUsage = (response as any).usage;
+            interface ChatResponseWithUsage {
+                usage?: { prompt_tokens?: number; completion_tokens?: number };
+            }
+            const maybeUsage = (response as unknown as ChatResponseWithUsage).usage;
             if (this.tokenUsageService && maybeUsage) {
                 await this.tokenUsageService.recordTokenUsage(this.id, {
                     inputTokens: maybeUsage.prompt_tokens ?? 0,
@@ -119,9 +122,9 @@ export class AnthropicModel implements LanguageModel {
                 if (content) {
                     return { role, content };
                 }
-                return null;
+                return undefined;
             })
-            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== null);
+            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== undefined);
     }
 
     protected toRole(message: LanguageModelMessage): 'system' | 'user' | 'assistant' {
@@ -134,13 +137,13 @@ export class AnthropicModel implements LanguageModel {
         return 'user';
     }
 
-    protected toStringContent(message: LanguageModelMessage): string | null {
+    protected toStringContent(message: LanguageModelMessage): string | undefined {
         if (LanguageModelMessage.isTextMessage(message)) {
             return message.text;
         }
         if (LanguageModelMessage.isThinkingMessage(message)) {
             // Ignorar mensagens de "thinking"
-            return null;
+            return undefined;
         }
         // Simplificado para não suportar tools e images nesta refatoração inicial
         return JSON.stringify(message);

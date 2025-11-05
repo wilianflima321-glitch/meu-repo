@@ -14,11 +14,15 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false,
-    "noImplicitAny": false,
+  "noImplicitAny": true,
+  "strict": true,
+  "strictPropertyInitialization": true,
+  "useUnknownInCatchVariables": false,
     "types": ["node", "jest", "mocha", "@testing-library/jest-dom"]
   },
   "include": [
-    "src"
+    "src",
+    "jest.setup.ts"
   ],
   "references": [
     {

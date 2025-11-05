@@ -28,17 +28,17 @@ import {
     UserRequest
 } from '@theia/ai-core';
 import { CancellationToken, Disposable } from '@theia/core';
-import { aethelApiClient, APIError } from '../../../ai-core/src/node/aethel-api-client';
+import { aethelApiClient, APIError } from '@theia/ai-core/lib/node/aethel-api-client';
 
 // Tipos simplificados para a requisição ao Aethel Backend
-type AethelChatRequest = {
+interface AethelChatRequest {
     model: string;
     messages: { role: 'user' | 'assistant' | 'system', content: string }[];
     stream?: boolean;
     temperature?: number;
     max_tokens?: number;
     top_p?: number;
-};
+}
 
 export const HuggingFaceModelIdentifier = Symbol('HuggingFaceModelIdentifier');
 export const DEFAULT_MAX_TOKENS = 4096;
@@ -81,10 +81,13 @@ export class HuggingFaceModel implements LanguageModel {
         return this.handleNonStreamingRequest(aethelRequest, request);
     }
 
-    protected async handleStreamingRequest(aethelRequest: AethelChatRequest, userRequest: UserRequest, cancellationToken?: CancellationToken): Promise<LanguageModelStreamResponse> {
+    protected async handleStreamingRequest(
+        aethelRequest: AethelChatRequest, userRequest: UserRequest, cancellationToken?: CancellationToken
+    ): Promise<LanguageModelStreamResponse> {
         const cancellationDisposable: Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
-            // A API de stream do Aethel backend (baseada em FastAPI) não suporta cancelamento no meio do stream de forma direta.
-            // A melhor abordagem é parar de consumir o iterador, o que o navegador/cliente fará.
+            // A API de stream do Aethel backend (baseada em FastAPI) não suporta cancelamento
+            // no meio do stream de forma direta. A melhor abordagem é parar de consumir o iterador,
+            // o que o navegador/cliente fará.
         });
 
         const cleanup = () => {
@@ -122,11 +125,14 @@ export class HuggingFaceModel implements LanguageModel {
             const response = await aethelApiClient.chat(aethelRequest);
             const text = response.message?.content ?? '';
 
-            const usage = (response as any).usage;
+            interface ChatResponseWithUsage {
+                usage?: { prompt_tokens?: number; completion_tokens?: number };
+            }
+            const usage = (response as unknown as ChatResponseWithUsage).usage;
             if (this.tokenUsageService && usage) {
                 await this.tokenUsageService.recordTokenUsage(this.id, {
-                    inputTokens: usage.prompt_tokens,
-                    outputTokens: usage.completion_tokens,
+                    inputTokens: usage.prompt_tokens ?? 0,
+                    outputTokens: usage.completion_tokens ?? 0,
                     requestId: userRequest.requestId,
                 });
             }
@@ -182,9 +188,9 @@ export class HuggingFaceModel implements LanguageModel {
                 if (content) {
                     return { role, content };
                 }
-                return null;
+                return undefined;
             })
-            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== null);
+            .filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== undefined);
     }
 
     protected toRole(message: LanguageModelMessage): 'system' | 'user' | 'assistant' {
@@ -198,12 +204,12 @@ export class HuggingFaceModel implements LanguageModel {
         }
     }
 
-    protected toStringContent(message: LanguageModelMessage): string | null {
+    protected toStringContent(message: LanguageModelMessage): string | undefined {
         if (LanguageModelMessage.isTextMessage(message)) {
             return message.text;
         }
         if (LanguageModelMessage.isThinkingMessage(message)) {
-            return null;
+            return undefined;
         }
         // Simplificado para a refatoração inicial
         return JSON.stringify(message);

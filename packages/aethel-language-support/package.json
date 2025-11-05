@@ -1,0 +1,43 @@
+{
+    "name": "@aethel/language-support",
+    "version": "0.1.0",
+    "description": "Language Support and Debug Adapter Manager for Aethel IDE",
+    "keywords": [
+        "aethel-ide",
+        "language-support",
+        "lsp",
+        "dap"
+    ],
+    "license": "EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aethel-ide/aethel.git"
+    },
+    "dependencies": {
+        "@theia/core": "^1.42.0",
+        "@theia/debug": "^1.42.0",
+        "@theia/monaco": "^1.42.0",
+        "@theia/plugin": "^1.42.0",
+        "@theia/plugin-ext": "^1.42.0",
+        "@theia/vsx-registry": "^1.42.0",
+        "@types/vscode": "^1.42.0",
+        "vscode-debugprotocol": "^1.42.0",
+        "vscode-languageserver-protocol": "^3.17.0"
+    },
+    "devDependencies": {
+        "rimraf": "^5.0.0",
+        "typescript": "^5.1.3"
+    },
+    "scripts": {
+        "build": "tsc",
+        "clean": "rimraf lib",
+        "prepare": "yarn clean && yarn build",
+        "test": "jest"
+    },
+    "theiaExtensions": [
+        {
+            "frontend": "lib/browser/aethel-language-support-frontend-module",
+            "backend": "lib/node/aethel-language-support-backend-module"
+        }
+    ]
+}

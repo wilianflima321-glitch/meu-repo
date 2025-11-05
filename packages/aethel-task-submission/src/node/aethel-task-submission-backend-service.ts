@@ -1,6 +1,6 @@
 import { injectable } from '@theia/core/shared/inversify';
 import { BackendApplicationContribution } from '@theia/core/lib/node/backend-application';
-import { AethelTaskSubmissionService, Task } from '../common/aethel-task-submission-service';
+import { AethelTaskSubmissionService, AethelTaskSubmissionServicePath, Task } from '../common/aethel-task-submission-service';
 import { RpcConnectionHandler } from '@theia/core/lib/common/messaging/proxy-factory';
 
 @injectable()
@@ -25,7 +25,9 @@ export class AethelTaskSubmissionBackendService implements AethelTaskSubmissionS
 
     async getTaskStatus(id: string): Promise<Task> {
         const task = this.tasks.find(t => t.id === id);
-        if (!task) throw new Error('Task not found');
+        if (!task) {
+            throw new Error('Task not found');
+        }
         return task;
     }
 
@@ -39,7 +41,8 @@ export class AethelTaskSubmissionBackendService implements AethelTaskSubmissionS
     }
 }
 
-export const AethelTaskSubmissionServiceHandler: RpcConnectionHandler<AethelTaskSubmissionService> = {
-    path: '/services/aethel-task-submission',
-    handler: AethelTaskSubmissionBackendService
-};
+export const AethelTaskSubmissionServiceHandler: RpcConnectionHandler<AethelTaskSubmissionService> =
+    new RpcConnectionHandler(
+        AethelTaskSubmissionServicePath,
+        () => new AethelTaskSubmissionBackendService()
+    );

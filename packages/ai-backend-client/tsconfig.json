@@ -1,0 +1,24 @@
+{
+  "extends": "../../configs/base.tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+    "composite": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../ai-core"
+    },
+    {
+      "path": "../core"
+    }
+  ]
+}

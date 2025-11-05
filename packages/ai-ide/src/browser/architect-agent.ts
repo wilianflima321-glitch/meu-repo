@@ -24,7 +24,9 @@ import { AI_SUMMARIZE_SESSION_AS_TASK_FOR_CODER, AI_UPDATE_TASK_CONTEXT_COMMAND 
 
 @injectable()
 export class ArchitectAgent extends AbstractStreamParsingChatAgent {
-    @inject(ChatService) protected readonly chatService: ChatService;
+    private _chatService?: ChatService;
+    @inject(ChatService) protected set chatService(v: ChatService) { this._chatService = v; }
+    protected get chatService(): ChatService { if (!this._chatService) { throw new Error('ArchitectAgent: chatService not injected'); } return this._chatService; }
 
     name = 'Architect';
     id = 'Architect';

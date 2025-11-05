@@ -1,0 +1,7 @@
+{
+  "npmScope": "theia",
+  "affected": {"defaultBase": "main"},
+  "tasksRunnerOptions": {"default": {"runner": "nx/tasks-runners/default","options": {"parallel": 3,"cacheableOperations": ["build","compile","test","lint"]}}},
+  "targetDefaults": {},
+  "projects": {}
+}

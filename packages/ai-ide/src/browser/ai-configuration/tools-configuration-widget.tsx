@@ -15,6 +15,7 @@
 // *****************************************************************************
 
 import { ReactWidget, ConfirmDialog } from '@theia/core/lib/browser';
+import { Disposable } from '@theia/core';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import * as React from '@theia/core/shared/react';
 import { ToolInvocationRegistry } from '@theia/ai-core';
@@ -64,20 +65,20 @@ export class AIToolsConfigurationWidget extends ReactWidget {
         this.title.closable = false;
         this.loadData();
         this.update();
-    const pChanged: any = this.preferenceService.onPreferenceChanged(async (e: any) => {
+        const pChanged: unknown = this.preferenceService.onPreferenceChanged(async (e: { preferenceName?: string }) => {
             if (e.preferenceName === 'ai-features.chat.toolConfirmation') {
                 this.defaultState = await this.loadDefaultConfirmation();
                 this.toolConfirmationModes = await this.loadToolConfigurationModes();
                 this.update();
             }
         });
-        const tChanged: any = this.toolInvocationRegistry.onDidChange(async () => {
+        const tChanged: unknown = this.toolInvocationRegistry.onDidChange(async () => {
             this.tools = await this.loadTools();
             this.update();
         });
 
-        this.toDispose.push({ dispose: () => { try { if (typeof pChanged === 'function') { pChanged(); } else if (pChanged && typeof pChanged.dispose === 'function') { pChanged.dispose(); } } catch { } } } as any);
-        this.toDispose.push({ dispose: () => { try { if (typeof tChanged === 'function') { tChanged(); } else if (tChanged && typeof tChanged.dispose === 'function') { tChanged.dispose(); } } catch { } } } as any);
+        this.toDispose.push({ dispose: () => { try { if (typeof pChanged === 'function') { (pChanged as (...args: unknown[]) => unknown)(); } else if (pChanged && typeof (pChanged as { dispose?: unknown }).dispose === 'function') { ((pChanged as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
+        this.toDispose.push({ dispose: () => { try { if (typeof tChanged === 'function') { (tChanged as (...args: unknown[]) => unknown)(); } else if (tChanged && typeof (tChanged as { dispose?: unknown }).dispose === 'function') { ((tChanged as { dispose: (...args: unknown[]) => unknown }).dispose)(); } } catch { } } } as unknown as Disposable);
     }
 
     protected async loadData(): Promise<void> {

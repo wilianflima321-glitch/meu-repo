@@ -8,6 +8,27 @@
 // SPDX-License-Identifier: EPL-2.0
 // *****************************************************************************
 
+// *****************************************************************************
+// Copyright (C) 2017 Ericsson and others.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License v. 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0/.
+//
+// This Source Code may also be made available under the following Secondary
+// Licenses when the conditions for such availability set forth in the Eclipse
+// Public License v. 2.0 are satisfied: GNU General Public License, version 2
+// with the GNU Classpath Exception which is available at
+// https://www.gnu.org/software/classpath/license.html.
+//
+// SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
+// *****************************************************************************
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import {
     LanguageModel,
     LanguageModelMessage,
@@ -19,18 +40,18 @@ import {
     UserRequest
 } from '@theia/ai-core';
 import { CancellationToken } from '@theia/core';
-import { injectable } from 'inversify';
+import { injectable } from '@theia/core/shared/inversify';
 import { aethelApiClient, APIError } from '@theia/ai-core/lib/node/aethel-api-client';
 
 // Tipos simplificados para a requisição ao Aethel Backend
-type AethelChatRequest = {
+interface AethelChatRequest {
     model: string;
     messages: { role: 'user' | 'assistant' | 'system', content: string }[];
     stream?: boolean;
     // Adicionar outros parâmetros que o backend Aethel suporta, se necessário
     temperature?: number;
     max_tokens?: number;
-};
+}
 
 export const OpenAiModelIdentifier = Symbol('OpenAiModelIdentifier');
 export type DeveloperMessageSettings = 'user' | 'system' | 'developer' | 'mergeWithFollowingUserMessage' | 'skip';
@@ -70,7 +91,10 @@ export class OpenAiModel implements LanguageModel {
 
             const text = response.message?.content ?? '';
 
-            const maybeUsage = (response as any).usage;
+            interface ChatResponseWithUsage {
+                usage?: { prompt_tokens?: number; completion_tokens?: number };
+            }
+            const maybeUsage = (response as unknown as ChatResponseWithUsage).usage;
             if (this.tokenUsageService && maybeUsage) {
                 await this.tokenUsageService.recordTokenUsage(this.id, {
                     inputTokens: maybeUsage.prompt_tokens ?? 0,
@@ -133,7 +157,7 @@ export class OpenAiModelUtils {
                 content = message.text;
             } else if (LanguageModelMessage.isThinkingMessage(message)) {
                 // Ignorar mensagens de "thinking"
-                return null;
+                return undefined;
             }
             // Adicionar tratamento para outros tipos de mensagem se necessário (Tool, Image, etc.)
 
@@ -153,7 +177,7 @@ export class OpenAiModelUtils {
             if (content) {
                 return { role, content };
             }
-            return null;
-        }).filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== null);
+            return undefined;
+        }).filter((m): m is { role: 'user' | 'assistant' | 'system', content: string } => m !== undefined);
     }
 }

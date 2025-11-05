@@ -26,7 +26,7 @@ import { aiIdePreferenceSchema } from '../common/ai-ide-preferences';
 const browserAutomationModule = ConnectionContainerModule.create(({ bind, bindBackendService, bindFrontendService }) => {
     bind(BrowserAutomation).to(BrowserAutomationImpl).inSingletonScope();
     bind(ConnectionHandler).toDynamicValue(ctx =>
-        new RpcConnectionHandler<BrowserAutomationClient>(browserAutomationPath, client => {
+    new RpcConnectionHandler<BrowserAutomationClient>(browserAutomationPath, (client: BrowserAutomationClient) => {
             const server = ctx.container.get(BrowserAutomation) as BrowserAutomationImpl;
             server.setClient(client);
             client.onDidCloseConnection(() => server.close());

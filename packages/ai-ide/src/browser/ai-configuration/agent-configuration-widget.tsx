@@ -31,13 +31,13 @@ import {
 import { codicon, QuickInputService, ReactWidget } from '@theia/core/lib/browser';
 import { URI } from '@theia/core/lib/common';
 import { inject, injectable } from '@theia/core/shared/inversify';
-import { postConstruct } from 'inversify';
+import { postConstruct } from '@theia/core/sharedinversify';
 import * as React from '@theia/core/shared/react';
 import { AIConfigurationSelectionService } from './ai-configuration-service';
 import { LanguageModelRenderer } from './language-model-renderer';
 import { LanguageModelAliasRegistry, LanguageModelAlias } from '@theia/ai-core/lib/common/language-model-alias';
 import { AIVariableConfigurationWidget } from './variable-configuration-widget';
-import { nls } from '@theia/core';
+import { nls, Disposable } from '@theia/core';
 import { PromptVariantRenderer } from './template-settings-renderer';
 
 interface ParsedPrompt {
@@ -112,11 +112,11 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         });
         this.languageModelAliasRegistry.ready.then(() => {
             this.languageModelAliases = this.languageModelAliasRegistry.getAliases();
-            const d = this.languageModelAliasRegistry.onDidChange(() => {
+                const d = this.languageModelAliasRegistry.onDidChange(() => {
                 this.languageModelAliases = this.languageModelAliasRegistry.getAliases();
                 this.update();
             });
-            this.pushDisposable(d);
+                this.pushDisposable(d as unknown as Disposable);
         });
         const d2 = this.languageModelRegistry.onChange((payload: { models?: LanguageModel[] }) => {
             const models = payload.models;
@@ -124,9 +124,9 @@ export class AIAgentConfigurationWidget extends ReactWidget {
             this.languageModels = models;
             this.update();
         });
-        this.pushDisposable(d2);
+        this.pushDisposable(d2 as unknown as Disposable);
         const d3 = this.promptService.onPromptsChange(() => this.update());
-        this.pushDisposable(d3);
+        this.pushDisposable(d3 as unknown as Disposable);
 
         this.aiSettingsService.onDidChange(() => this.update());
         this.aiConfigurationSelectionService.onDidAgentChange(() => this.update());
@@ -138,24 +138,46 @@ export class AIAgentConfigurationWidget extends ReactWidget {
      * Normalize and push a disposable-like value into this.toDispose.
      * Accepts functions, objects with a dispose() method, or disposables.
      */
-    protected pushDisposable(d: any): void {
+    protected pushDisposable(d: unknown): void {
         if (!d) {
             return;
         }
         // If it's a function (unregister callback), wrap it
         if (typeof d === 'function') {
-            this.toDispose.push({ dispose: d } as any);
+            this.toDispose.push({ dispose: (d as (...args: unknown[]) => unknown) } as unknown as Disposable);
             return;
         }
         // If it already has dispose(), push as-is
-        if (typeof d.dispose === 'function') {
-            this.toDispose.push(d as any);
+        if (d && typeof (d as { dispose?: unknown }).dispose === 'function') {
+            this.toDispose.push(d as unknown as Disposable);
             return;
         }
         // Last resort: if it has a 'dispose' property that's not a function, ignore
     }
 
-    protected normalizeLocation(raw: any): { uri: URI, exists: boolean } {
+    /**
+     * Safely format a runtime URI-like object into a displayable label.
+     * Accepts real URI instances or plain strings/objects that have a `path` property.
+     */
+    protected formatUriLabel(uriRaw: unknown): string {
+        if (!uriRaw) {
+            return '';
+        }
+        if (typeof uriRaw === 'object') {
+            const asObj = uriRaw as { path?: unknown };
+            const p = asObj.path;
+            if (p) {
+                // Prefer a runtime toString if present, otherwise fallback to String()
+                if (typeof (p as { toString?: () => string }).toString === 'function') {
+                    return (p as { toString?: () => string }).toString!();
+                }
+                return String(p);
+            }
+        }
+        return String(uriRaw);
+    }
+
+    protected normalizeLocation(raw: unknown): { uri: URI, exists: boolean } {
         if (!raw) {
             return { uri: new URI(''), exists: false };
         }
@@ -163,8 +185,15 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         if (typeof raw === 'string') {
             return { uri: new URI(raw), exists: false };
         }
-        const uri = (raw.uri && (raw.uri as any).path) ? raw.uri as URI : new URI(String(raw.uri));
-        const exists = !!raw.exists;
+        const rawObj = raw as { uri?: unknown, exists?: unknown };
+        const uriCandidate = rawObj.uri;
+        let uri: URI;
+        if (uriCandidate && typeof uriCandidate === 'object' && 'path' in (uriCandidate as object) && (uriCandidate as { path?: unknown }).path) {
+            uri = uriCandidate as URI;
+        } else {
+            uri = new URI(String(uriCandidate));
+        }
+        const exists = !!rawObj.exists;
         return { uri, exists };
     }
 
@@ -339,20 +368,25 @@ export class AIAgentConfigurationWidget extends ReactWidget {
         quickPick.items = locations.map(locationRaw => {
             const location = this.normalizeLocation(locationRaw);
             return ({
-                label: (location.uri && (location.uri as any).path) ? ((location.uri as any).path && (location.uri as any).path.toString ? (location.uri as any).path.toString() : String((location.uri as any).path)) : String(location.uri),
+                label: this.formatUriLabel(location.uri),
                 description: location.exists ? 'Open existing file' : 'Create new file',
                 location
             });
         });
 
         const acceptDisposable = quickPick.onDidAccept(async () => {
-            const selectedItem = quickPick.selectedItems[0] as any;
-            const loc = selectedItem?.location as any;
+            const selectedItem = quickPick.selectedItems[0] as unknown;
+            const loc = (selectedItem && typeof selectedItem === 'object' && 'location' in (selectedItem as object)) ? (selectedItem as { location?: unknown }).location as unknown : undefined;
             if (loc) {
                 quickPick.dispose();
-                const raw = loc.uri;
+                const raw = (loc as { uri?: unknown }).uri;
                 // Normalize potential string URIs to a URI instance at runtime
-                const uri = (raw && (raw as any).path) ? raw : new URI(String(raw));
+                let uri: URI;
+                if (raw && typeof raw === 'object' && 'path' in (raw as object) && (raw as { path?: unknown }).path) {
+                    uri = raw as URI;
+                } else {
+                    uri = new URI(String(raw));
+                }
                 this.promptFragmentCustomizationService.openCustomAgentYaml(uri.toString());
             }
         });
