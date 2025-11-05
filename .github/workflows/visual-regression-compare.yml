@@ -38,6 +38,7 @@ jobs:
 
       - name: Fetch visual-baseline branch
         run: |
+          # Attempt to fetch the baseline branch if it exists; don't fail if it doesn't.
           git fetch origin visual-baseline:visual-baseline || echo 'no baseline branch'
 
       - name: (fallback) Start static server for capture
@@ -55,21 +56,31 @@ jobs:
       - name: Restore baseline (if present)
         run: |
           # Try to restore committed baseline from the visual-baseline branch.
-          # Some baseline PRs store images under output/baseline; support that layout.
+          # If the baseline output doesn't exist after the checkout, skip gracefully.
           if git rev-parse --verify visual-baseline >/dev/null 2>&1; then
-            # Prefer explicit checkout of the committed baseline output directory if present
             git checkout visual-baseline -- tools/ide/visual-regression/output/baseline || true
-            mkdir -p tools/ide/visual-regression/baseline || true
-            cp -r tools/ide/visual-regression/output/baseline/* tools/ide/visual-regression/baseline/ 2>/dev/null || true
-            # Also attempt the legacy path
             git checkout visual-baseline -- tools/ide/visual-regression/baseline || true
+            if [ -d "tools/ide/visual-regression/output/baseline" ]; then
+              mkdir -p tools/ide/visual-regression/baseline || true
+              cp -r tools/ide/visual-regression/output/baseline/* tools/ide/visual-regression/baseline/ 2>/dev/null || true
+            fi
+            if [ -d "tools/ide/visual-regression/baseline" ]; then
+              echo 'Baseline restored'
+            else
+              echo 'baseline directory not present after checkout; skipping compare'
+            fi
           else
-            echo 'No baseline to compare against'
+            echo 'No baseline branch to compare against; skipping restore'
           fi
 
       - name: Compare baseline vs current
         run: |
-          node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 100 --total 500 || echo 'compare exit code indicates diffs'
+          # Only run compare if baseline directory exists; otherwise skip with notice.
+          if [ -d "tools/ide/visual-regression/baseline" ]; then
+            node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 100 --total 500 || echo 'compare exit code indicates diffs'
+          else
+            echo 'No baseline present; skipping compare step'
+          fi
 
       - name: Upload diffs
         uses: actions/upload-artifact@v4
@@ -78,11 +89,11 @@ jobs:
           path: tools/ide/visual-regression/output/diffs
 
       - name: Check report and create issue if regressions
+        if: ${{ secrets.GH_PAT != '' }}
         uses: actions/github-script@v6
         with:
           # Prefer a repo secret PAT for creating issues (secrets.GH_PAT).
-          # If you don't add the secret, the step will still run but may fail to create an issue
-          # when executed from forks; add a secret named GH_PAT with a minimal PAT (issues scope)
+          # When running from forks/sealed contexts the secret will be empty and this step will be skipped.
           github-token: ${{ secrets.GH_PAT }}
           script: |
             const fs = require('fs');
@@ -92,8 +103,6 @@ jobs:
             const total = report.totalDiff || 0;
             if (total > 500) {
               const body = `Visual regression detected: total differing pixels = ${total}. See artifacts attached to the workflow run.`;
-              // Use the REST client on the GitHub object (github.rest.issues) —
-              // actions/github-script exposes `github.rest` for API calls.
               await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: 'Visual regression detected', body });
               core.setFailed('Visual regression threshold exceeded');
             } else {
