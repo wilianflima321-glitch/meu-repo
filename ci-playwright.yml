@@ -68,8 +68,9 @@ jobs:
           npx playwright install --with-deps
 
       - name: TypeScript check (ai-ide)
-        run: |
-          npx -y tsc --noEmit -p cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json
+          # Run tsc from the theia fork root so project references resolve
+          working-directory: cloud-ide-desktop/aethel_theia_fork
+          run: npx -y tsc --noEmit -p packages/ai-ide/tsconfig.json
 
       - name: Run Jest unit tests (ai-ide)
         run: |

@@ -49,7 +49,10 @@ jobs:
         run: powershell -ExecutionPolicy Bypass -File build/check_syntax.ps1
 
       - name: TypeScript check (ai-ide package)
-        run: npx -y tsc --noEmit -p cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json
+        # Run tsc with working-directory set to the theia fork root so the
+        # package project references resolve correctly on all runners.
+        working-directory: cloud-ide-desktop/aethel_theia_fork
+        run: npx -y tsc --noEmit -p packages/ai-ide/tsconfig.json
 
       - name: Run ai-ide unit tests
         shell: pwsh
