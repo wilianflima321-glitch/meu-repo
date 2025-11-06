@@ -37,9 +37,9 @@ export class LlmProviderService {
   }
 
   getProvider(providerId?: string): ILlmProvider | undefined {
-  const all = this._registry.getAll();
+  const _all = this._registry.getAll();
   const pid = providerId ?? this._registry.getDefaultProviderId();
-    const cfg = pid ? all.find(p => p.id === pid) : all[0];
+    const cfg = pid ? _all.find(p => p.id === pid) : _all[0];
     if (!cfg) {return undefined;}
     return this.instantiate(cfg);
   }

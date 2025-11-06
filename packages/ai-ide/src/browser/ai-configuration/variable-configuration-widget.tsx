@@ -51,7 +51,7 @@ export class AIVariableConfigurationWidget extends ReactWidget {
         this.update();
         // The onDidChangeVariables API may return either a unregister function or a Disposable.
         // Treat the return as an unknown runtime value and wrap unconditionally to avoid testing a value typed as void.
-        const d: unknown = this.variableService.onDidChangeVariables(() => this.update());
+    const _d: unknown = this.variableService.onDidChangeVariables(() => this.update());
         // Normalize listener return into a Disposable. Supports unregister functions and Disposable objects.
         const makeDisposable = (x: unknown): Disposable | undefined => {
             if (!x) {
@@ -66,7 +66,7 @@ export class AIVariableConfigurationWidget extends ReactWidget {
             }
             return undefined;
         };
-        const _dd = makeDisposable(d);
+        const _dd = makeDisposable(_d);
         if (_dd) {
             this.toDispose.push(_dd);
         }

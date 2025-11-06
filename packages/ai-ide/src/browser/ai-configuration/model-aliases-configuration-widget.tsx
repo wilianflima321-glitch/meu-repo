@@ -97,29 +97,29 @@ export class ModelAliasesConfigurationWidget extends ReactWidget {
         Promise.all([aliasesPromise, languageModelsPromise, matchingAgentsPromise]).then(() => this.update());
 
         this.languageModelAliasRegistry.ready.then(() => {
-            const d: unknown = this.languageModelAliasRegistry.onDidChange(async () => {
+            const _d: unknown = this.languageModelAliasRegistry.onDidChange(async () => {
                 await this.loadAliases();
                 this.update();
             });
-            const dd = makeDisposable(d);
-            if (dd) { this.toDispose.push(dd); }
+            const _dd = makeDisposable(_d);
+            if (_dd) { this.toDispose.push(_dd); }
         });
 
         // Capture listener returns as 'any' and wrap them to ensure a Disposable-like object is pushed.
-        const r1: unknown = this.languageModelRegistry.onChange(async () => {
+        const _r1: unknown = this.languageModelRegistry.onChange(async () => {
             await this.loadAliases();
             await this.loadLanguageModels();
             this.update();
         });
-        const r2: unknown = this.aiSettingsService.onDidChange(async () => {
+        const _r2: unknown = this.aiSettingsService.onDidChange(async () => {
             await this.loadMatchingAgentIdsForAllAliases();
             this.update();
         });
-        const r3: unknown = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
+        const _r3: unknown = this.aiConfigurationSelectionService.onDidAliasChange(() => this.update());
 
-    const _rr1 = makeDisposable(r1); if (_rr1) { this.toDispose.push(_rr1); }
-    const _rr2 = makeDisposable(r2); if (_rr2) { this.toDispose.push(_rr2); }
-    const _rr3 = makeDisposable(r3); if (_rr3) { this.toDispose.push(_rr3); }
+    const _rr1 = makeDisposable(_r1); if (_rr1) { this.toDispose.push(_rr1); }
+    const _rr2 = makeDisposable(_r2); if (_rr2) { this.toDispose.push(_rr2); }
+    const _rr3 = makeDisposable(_r3); if (_rr3) { this.toDispose.push(_rr3); }
     }
 
     protected async loadAliases(): Promise<void> {

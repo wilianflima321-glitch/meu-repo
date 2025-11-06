@@ -76,9 +76,9 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
                     async (selectedOption: any) => {
                         if (selectedOption.value === 'yes') {
                             // Show progress
-                            const responseObj = request.response as unknown as { addProgressMessage?: (...args: unknown[]) => unknown, updateProgressMessage?: (...args: unknown[]) => unknown };
-                            const _addProgressFn = responseObj.addProgressMessage;
-                            const progress = typeof _addProgressFn === 'function' ? _addProgressFn.call(request.response, { content: 'Starting Playwright MCP servers.', show: 'whileIncomplete' }) : undefined;
+                                const responseObj = request.response as unknown as { addProgressMessage?: Function, updateProgressMessage?: Function };
+                                const _addProgressFn = responseObj.addProgressMessage;
+                                const progress = typeof _addProgressFn === 'function' ? _addProgressFn.call(request.response, { content: 'Starting Playwright MCP servers.', show: 'whileIncomplete' }) : undefined;
                             try {
                                 await this.startServers();
                                 // Remove progress, continue with normal flow
@@ -102,7 +102,7 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
                                 }
                                 await super.invoke(request);
                             } catch (error) {
-                                const responseRoot = request.response as unknown as { response?: { addContent?: (...args: unknown[]) => unknown }, complete?: (...args: unknown[]) => unknown };
+                                    const responseRoot = request.response as unknown as { response?: { addContent?: Function }, complete?: Function };
                                 const _addContent = responseRoot.response?.addContent;
                                 if (typeof _addContent === 'function') {
                                     _addContent.call(responseRoot.response, new ErrorChatResponseContentImpl(
@@ -116,7 +116,7 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
                             }
                         } else {
                             // Continue without starting the server
-                                const responseRoot = request.response as unknown as { response?: { addContent?: (...args: unknown[]) => unknown }, complete?: (...args: unknown[]) => unknown };
+                                const responseRoot = request.response as unknown as { response?: { addContent?: Function }, complete?: Function };
                                 const _addContent2 = responseRoot.response?.addContent;
                                 if (typeof _addContent2 === 'function') {
                                     _addContent2.call(responseRoot.response, new MarkdownChatResponseContentImpl('Please setup the MCP servers.'));
@@ -128,7 +128,7 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
                         }
                     }
                 ));
-                const waitObj = request.response as unknown as { waitForInput?: (...args: unknown[]) => unknown };
+                    const waitObj = request.response as unknown as { waitForInput?: Function };
                 const _waitForInput = waitObj.waitForInput;
                 if (typeof _waitForInput === 'function') {
                     _waitForInput.call(request.response);
@@ -138,7 +138,7 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
             // If already running, continue as normal
             await super.invoke(request);
         } catch (error) {
-            const responseRoot = request.response as unknown as { response?: { addContent?: (...args: unknown[]) => unknown }, complete?: (...args: unknown[]) => unknown };
+                const responseRoot = request.response as unknown as { response?: { addContent?: Function }, complete?: Function };
             const _addContentErr = responseRoot.response?.addContent;
             if (typeof _addContentErr === 'function') {
                 _addContentErr.call(responseRoot.response, new ErrorChatResponseContentImpl(
@@ -182,11 +182,11 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
 
             for (const server of serversToInstall) {
                 const currentServers = this.preferenceService.get<Record<string, MCPServerDescription>>(MCP_SERVERS_PREF, {});
-                const pref = this.preferenceService as unknown as { set?: (k: string, v: unknown, scope?: unknown) => Promise<unknown>, updateValue?: (k: string, v: unknown) => Promise<unknown> };
+                const pref = this.preferenceService as unknown as { set?: Function, updateValue?: Function };
                 if (typeof pref.set === 'function') {
-                    await pref.set.call(this.preferenceService, MCP_SERVERS_PREF, { ...currentServers, [server.name]: server }, (PreferenceScope as unknown as object));
+                    await (pref.set as Function).call(this.preferenceService, MCP_SERVERS_PREF, { ...currentServers, [server.name]: server }, (PreferenceScope as unknown as object));
                 } else if (typeof pref.updateValue === 'function') {
-                    await pref.updateValue.call(this.preferenceService, MCP_SERVERS_PREF, { ...currentServers, [server.name]: server });
+                    await (pref.updateValue as Function).call(this.preferenceService, MCP_SERVERS_PREF, { ...currentServers, [server.name]: server });
                 }
                 await this.mcpService.addOrUpdateServer(server);
             }
@@ -203,7 +203,7 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
     protected override async sendLlmRequest(request: MutableChatRequestModel, messages: any[], toolRequests: any[], languageModel: any) {
         const settings = { ...(this.getLlmSettings ? this.getLlmSettings() : {}), ...request.session?.settings };
         try {
-            const provider = this.llmProviderService as unknown as { sendRequestToProvider?: (id: unknown, payload: unknown) => Promise<unknown> };
+            const provider = this.llmProviderService as unknown as { sendRequestToProvider?: Function };
             const sendFn = provider.sendRequestToProvider;
             if (typeof sendFn === 'function') {
                 const resp = await sendFn.call(provider, undefined, { input: messages.map(m => `${m.role || 'user'}: ${m.content}`).join('\n'), settings });
