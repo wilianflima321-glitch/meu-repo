@@ -28,4 +28,32 @@ describe('verifier - additional edge cases', () => {
     const errors = verifier.verifyScene(scene, ['trajectory_checks']);
     expect(Array.isArray(errors)).toBe(true);
   });
+
+  test('chronology checks detect time-travel and before/after birth phrasing', () => {
+    const scene = { description: 'They travelled back in time. Before they were born, the event happened.' };
+    const errors = verifier.verifyScene(scene, ['checkChronology']);
+    const reasons = errors.map(e => e && (e.reason || e.code)).filter(Boolean);
+    expect(reasons).toEqual(expect.arrayContaining(['time_anomaly','chronology_error']));
+  });
+
+  test('self-harm first-person phrasing triggers detection', () => {
+    const scene = { dialogue: "I can't go on. I want to die." };
+    const errors = verifier.verifyScene(scene, ['checkSelfHarmPhrasing']);
+    const reasons = errors.map(e => e && (e.reason || e.code)).filter(Boolean);
+    expect(reasons).toContain('self_harm_phrase');
+  });
+
+  test('drug instructions and use are detected', () => {
+    const scene = { description: 'Where to get heroin? I will inject fentanyl later.' };
+    const errors = verifier.verifyScene(scene, ['checkDrugMentions']);
+    const reasons = errors.map(e => e && (e.reason || e.code)).filter(Boolean);
+    expect(reasons).toEqual(expect.arrayContaining(['drug_instruction','drug_use']));
+  });
+
+  test('child endangerment via description triggers child_endangerment', () => {
+    const scene = { description: 'A child is standing next to a chainsaw on the table.' };
+    const errors = verifier.verifyScene(scene, ['checkChildSafety']);
+    const reasons = errors.map(e => e && (e.reason || e.code)).filter(Boolean);
+    expect(reasons).toContain('child_endangerment');
+  });
 });

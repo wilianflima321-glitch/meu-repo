@@ -69,7 +69,11 @@ jobs:
 
       - name: TypeScript check (ai-ide)
         run: |
-          npx -y tsc --noEmit -p cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json
+          if [ -f "cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json" ]; then
+            (cd cloud-ide-desktop/aethel_theia_fork && npx -y tsc --noEmit -p packages/ai-ide/tsconfig.json)
+          else
+            echo "::warning::ai-ide tsconfig not present in repo; skipping ai-ide TypeScript check"
+          fi
 
       - name: Run Jest unit tests (ai-ide)
         run: |

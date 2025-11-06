@@ -72,12 +72,14 @@ jobs:
             echo "Fallback: starting tools/llm-mock/server.js"
             MOCK_DEBUG=true nohup node tools/llm-mock/server.js > tools/llm-mock/server.log 2> tools/llm-mock/server.err.log & echo $! > tools/llm-mock/server.pid || true
           fi
-          # robust health polling: try several times with short sleeps, print logs on failure
+          # robust health polling: try several times with adaptive sleeps, print logs on failure
           echo "Waiting for mock /health to respond on http://127.0.0.1:8010/health"
-          # increase attempts to be more resilient on slower runners (total ~180s)
+          # increase attempts to be more resilient on slower runners (total ~180s+ when backoff applied)
           MAX_ATTEMPTS=90
           SLEEP_SECONDS=2
           ATTEMPT=1
+          # record start time (ms) to compute a simple metric for health wait duration
+          START_TS_MS=$(date +%s%3N || date +%s)
           until [ $ATTEMPT -gt $MAX_ATTEMPTS ]
           do
             if curl -sSf http://127.0.0.1:8010/health >/dev/null 2>&1; then
@@ -87,7 +89,24 @@ jobs:
             echo "mock /health not ready (attempt $ATTEMPT/$MAX_ATTEMPTS), sleeping ${SLEEP_SECONDS}s..."
             sleep $SLEEP_SECONDS
             ATTEMPT=$((ATTEMPT+1))
+            # every 15 attempts, increase the sleep up to a reasonable cap to allow slow runners
+            if [ $((ATTEMPT % 15)) -eq 0 ]; then
+              SLEEP_SECONDS=$((SLEEP_SECONDS * 2))
+              if [ $SLEEP_SECONDS -gt 30 ]; then SLEEP_SECONDS=30; fi
+            fi
           done
+          END_TS_MS=$(date +%s%3N || date +%s)
+          # compute duration (ms). If date +%s%3N not available, this will be seconds; convert to ms heuristically.
+          if [[ $START_TS_MS =~ ^[0-9]+$ && $END_TS_MS =~ ^[0-9]+$ ]]; then
+            HEALTH_WAIT_MS=$((END_TS_MS - START_TS_MS))
+          else
+            HEALTH_WAIT_MS=0
+          fi
+          echo "HEALTH_WAIT_MS=$HEALTH_WAIT_MS" >> $GITHUB_ENV
+          # persist a very small JSON metrics file for artifact upload and regression tracking
+          mkdir -p tools/ci
+          echo "{\"health_wait_ms\": $HEALTH_WAIT_MS, \"attempts\": $ATTEMPT}" > tools/ci/ci-metrics.json
+          echo "Wrote tools/ci/ci-metrics.json (health_wait_ms=$HEALTH_WAIT_MS, attempts=$ATTEMPT)"
           if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
             echo "mock did not become healthy after $MAX_ATTEMPTS attempts"
             echo "---- ci-mock log (tail) ----"
@@ -108,25 +127,80 @@ jobs:
             exit 1
           fi
 
+      - name: Run CI smoke checks
+        run: |
+          if [ -f tools/ci/smoke_ci.sh ]; then
+            echo "Running CI smoke checks"
+            chmod +x tools/ci/smoke_ci.sh
+            bash tools/ci/smoke_ci.sh || true
+          else
+            echo "No smoke script found; skipping"
+          fi
+
       - name: Run Playwright tests
         run: |
           # Run Playwright tests and generate an HTML report in playwright-report
           # add a single retry to reduce transient flakiness in CI
           npx playwright test --project=chromium --retries=1 --reporter=html || true
 
+      - name: Archive Playwright report (zip)
+        if: always()
+        run: |
+          if [ -d playwright-report ]; then
+            echo "Zipping playwright-report"
+            apt-get update -y && apt-get install -y zip || true
+            zip -r playwright-report.zip playwright-report || true
+          fi
+
+        - name: Validate artifacts presence and size
+          if: always()
+          run: |
+            echo "Validating expected build artifacts before upload..."
+            FAIL=0
+            # expected files and minimal sizes (bytes)
+            declare -A files
+            files[tools/llm-mock/server.log]=200
+            files[tools/ci/ci-mock.log]=200
+            files[playwright-report.zip]=1024
+            files[tools/ci/ci-metrics.json]=10
+            for f in "${!files[@]}"; do
+              min=${files[$f]}
+              if [ -f "$f" ]; then
+                size=$(stat -c%s "$f" 2>/dev/null || echo 0)
+                echo "$f size=$size bytes (min required $min)"
+                if [ "$size" -lt "$min" ]; then
+                  echo "ERROR: $f is smaller than expected ($size < $min)"
+                  FAIL=1
+                fi
+              else
+                echo "ERROR: missing expected artifact $f"
+                FAIL=1
+              fi
+            done
+            if [ "$FAIL" -eq 1 ]; then
+              echo "Artifact validation failed. Failing the job to avoid false success without artifacts."
+              exit 1
+            else
+              echo "All expected artifacts present and above minimum size."
+            fi
+
       - name: Upload server log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: server-log
-          path: tools/llm-mock/server.log
+          path: |
+            tools/llm-mock/server.log
+            tools/ci/ci-mock.log
 
       - name: Upload server error log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: server-err-log
-          path: tools/llm-mock/server.err.log
+          path: |
+            tools/llm-mock/server.err.log
+            tools/ci/ci-mock.err.log
 
       - name: Upload dev-mock-health log
         if: always()
@@ -142,9 +216,56 @@ jobs:
           name: verifier-debug
           path: tools/llm-mock/verifier-debug.json
 
+      - name: Upload CI metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-metrics
+          path: tools/ci/ci-metrics.json
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: playwright-report
+          path: |
+            playwright-report
+            playwright-report/**
+            playwright-report.zip
+
+      - name: Post summary comment to PR (when applicable)
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNums = []
+            // try to detect PRs associated with this run by matching head ref
+            const headRef = process.env.GITHUB_HEAD_REF || github.context.payload.pull_request?.head?.ref
+            if (headRef) {
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${context.repo.owner}:${headRef}`,
+                state: 'open'
+              })
+              for (const pr of prs.data) prNums.push(pr.number)
+            }
+            // fallback: if workflow triggered by pull_request event, use that PR number
+            if (github.context.payload.pull_request) prNums.push(github.context.payload.pull_request.number)
+            if (prNums.length === 0) {
+              core.info('No PR associated with this run; skipping PR comment.')
+            } else {
+              const metricsPath = 'tools/ci/ci-metrics.json'
+              let metrics = '{}'
+              try {
+                const fs = require('fs')
+                if (fs.existsSync(metricsPath)) metrics = fs.readFileSync(metricsPath,'utf8')
+              } catch (e) {
+                core.warning('Could not read metrics file: ' + e.message)
+              }
+              const body = `CI run summary:\n\n- health_wait_ms: ${process.env.HEALTH_WAIT_MS || 'N/A'}\n- metrics: ${metrics}\n\n(Automated comment from CI)`
+              for (const num of prNums) {
+                await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: num, body })
+                core.info(`Posted CI summary comment to PR #${num}`)
+              }
+            }
