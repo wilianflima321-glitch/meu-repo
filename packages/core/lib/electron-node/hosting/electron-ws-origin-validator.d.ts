@@ -1,8 +1,0 @@
-import * as http from 'http';
-import { BackendRemoteService } from '../../node/remote/backend-remote-service';
-import { WsRequestValidatorContribution } from '../../node/ws-request-validators';
-export declare class ElectronWsOriginValidator implements WsRequestValidatorContribution {
-    protected readonly backendRemoteService: BackendRemoteService;
-    allowWsUpgrade(request: http.IncomingMessage): boolean;
-}
-//# sourceMappingURL=electron-ws-origin-validator.d.ts.map

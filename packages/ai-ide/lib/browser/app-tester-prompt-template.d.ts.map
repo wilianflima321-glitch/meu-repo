@@ -1,1 +1,0 @@
-{"version":3,"file":"app-tester-prompt-template.d.ts","sourceRoot":"","sources":["../../src/browser/app-tester-prompt-template.ts"],"names":[],"mappings":"AAWA,OAAO,EAAE,kBAAkB,EAAE,MAAM,2BAA2B,CAAC;AAG/D,OAAO,EAAE,oBAAoB,EAAE,MAAM,6CAA6C,CAAC;AAGnF,eAAO,MAAM,oBAAoB,EAAE,oBAAoB,EAmBtD,CAAC;AAEF,eAAO,MAAM,iBAAiB,EAAE,kBAyC/B,CAAC;AAEF,eAAO,MAAM,wBAAwB,EAAE,kBAGtC,CAAC"}

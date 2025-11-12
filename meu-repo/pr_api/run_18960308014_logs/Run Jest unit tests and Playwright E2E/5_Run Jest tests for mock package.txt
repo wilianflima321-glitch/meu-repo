@@ -1,0 +1,5 @@
+﻿2025-10-31T01:54:55.5297747Z ##[group]Run npm test --silent
+2025-10-31T01:54:55.5298055Z [36;1mnpm test --silent[0m
+2025-10-31T01:54:55.5316919Z shell: /usr/bin/bash -e {0}
+2025-10-31T01:54:55.5317179Z ##[endgroup]
+2025-10-31T01:54:55.6664497Z ##[error]Process completed with exit code 1.

@@ -1,1 +1,0 @@
-{"version":3,"file":"monaco-webpack-plugins.d.ts","sourceRoot":"","sources":["../src/monaco-webpack-plugins.ts"],"names":[],"mappings":"AAgBA,OAAO,KAAK,EAAE,QAAQ,EAAwB,MAAM,SAAS,CAAC;AAE9D,qBAAa,mBAAmB;IAC5B,KAAK,CAAC,QAAQ,EAAE,QAAQ,GAAG,IAAI;CAKlC"}

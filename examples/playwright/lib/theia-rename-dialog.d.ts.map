@@ -1,1 +1,0 @@
-{"version":3,"file":"theia-rename-dialog.d.ts","sourceRoot":"","sources":["../src/theia-rename-dialog.ts"],"names":[],"mappings":"AAgBA,OAAO,EAAE,WAAW,EAAE,MAAM,gBAAgB,CAAC;AAG7C,qBAAa,iBAAkB,SAAQ,WAAW;IAExC,YAAY,CAAC,OAAO,EAAE,MAAM,GAAG,OAAO,CAAC,IAAI,CAAC;IAM5C,OAAO,IAAI,OAAO,CAAC,IAAI,CAAC;CAOjC"}
