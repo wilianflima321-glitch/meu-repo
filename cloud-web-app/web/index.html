@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aethel — Portal</title>
+    <style>body{font-family:system-ui,Arial;margin:2rem} .card{max-width:720px} a{color:#0366d6}</style>
+  </head>
+  <body>
+    <h1>Aethel — Portal Web (MVP)</h1>
+    <div class="card">
+      <p>Use este portal como launcher/entrada. Integração com backend em breve.</p>
+      <ul id="links"></ul>
+    </div>
+    <script>
+      (function(){
+        var base = (typeof window !== 'undefined' && (window.NEXT_PUBLIC_API_URL || window.env && window.env.NEXT_PUBLIC_API_URL)) || (location.origin.replace(/\/$/, '')) || 'http://localhost:8000';
+        function make(href, text){
+          var li = document.createElement('li');
+          var a = document.createElement('a'); a.href = href; a.target = '_blank'; a.textContent = text; li.appendChild(a); return li;
+        }
+        var ul = document.getElementById('links');
+        if(ul){
+          ul.appendChild(make(base + '/health', 'Backend Health'));
+          ul.appendChild(make(base + '/auth/providers', 'Auth Providers'));
+          ul.appendChild(make(base + '/billing/plans', 'Planos'));
+        }
+      })();
+    </script>
+  </body>
+</html>

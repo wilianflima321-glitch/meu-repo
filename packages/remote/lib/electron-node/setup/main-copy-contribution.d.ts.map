@@ -1,1 +1,0 @@
-{"version":3,"file":"main-copy-contribution.d.ts","sourceRoot":"","sources":["../../../src/electron-node/setup/main-copy-contribution.ts"],"names":[],"mappings":"AAiBA,OAAO,EAAE,sBAAsB,EAAE,kBAAkB,EAAE,MAAM,sDAAsD,CAAC;AAElH,qBACa,oBAAqB,YAAW,sBAAsB;IACzD,IAAI,CAAC,QAAQ,EAAE,kBAAkB,GAAG,OAAO,CAAC,IAAI,CAAC;CAM1D"}

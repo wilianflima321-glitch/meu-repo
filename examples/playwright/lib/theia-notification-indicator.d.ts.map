@@ -1,1 +1,0 @@
-{"version":3,"file":"theia-notification-indicator.d.ts","sourceRoot":"","sources":["../src/theia-notification-indicator.ts"],"names":[],"mappings":"AAgBA,OAAO,EAAE,oBAAoB,EAAE,MAAM,0BAA0B,CAAC;AAIhE,qBAAa,0BAA2B,SAAQ,oBAAoB;IAChE,EAAE,SAA+B;IAE3B,gBAAgB,IAAI,OAAO,CAAC,OAAO,CAAC;IAM3B,cAAc,CAAC,mBAAmB,UAAQ,GAAG,OAAO,CAAC,IAAI,CAAC;IAOnE,aAAa,IAAI,OAAO,CAAC,IAAI,CAAC;CAOvC"}

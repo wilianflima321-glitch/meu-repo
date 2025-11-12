@@ -5,7 +5,7 @@
     "dev:mock-backend": "node tools/llm-mock/server.js",
     "dev": "cd examples/browser-ide-app && npm start",
     "playwright:install": "npx playwright install --with-deps",
-    "test:e2e": "npx playwright test --config=playwright.config.ts",
+    "test:e2e": "npx playwright test --config=playwright.config.js",
     "test:e2e:headed": "npx playwright test --headed --config=playwright.config.ts",
     "check:ai-ide-ts": "node -e \"const fs=require('fs'); const p='cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json'; if(!fs.existsSync(p)){console.warn('ai-ide tsconfig not present; skipping'); process.exit(0);} const {execSync}=require('child_process'); execSync('npx -y tsc --noEmit -p '+p, {stdio:'inherit'});\"",
     "test:ai-ide": "node cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js",
@@ -13,16 +13,19 @@
     "ci:local": "npm run test:all"
   },
   "devDependencies": {
+    "@playwright/test": "^1.36.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/testing-library__react": "^10.0.1",
-    "typescript": "^5.9.3",
-    "@playwright/test": "^1.36.0",
-    "axe-core": "^4.7.2",
+  "axe-core": "^4.7.2",
+  "glob": "^11.0.0",
+    "ignore": "^7.0.5",
     "minimist": "^1.2.8",
+    "p-queue": "^9.0.0",
+    "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
-    "pixelmatch": "^5.3.0"
+    "typescript": "^5.9.3"
   }
 }

@@ -44,6 +44,12 @@ jobs:
             echo "No package.json in tools/llm-mock — skipping Jest unit tests"
           fi
 
+      - name: Run AI IDE unit tests
+        env:
+          FULL_TESTS: '1'
+        run: |
+          npm run test:ai-ide
+
       - name: Install Playwright system dependencies and browsers
         run: |
           # Use playwright CLI to install system deps and browsers. The microsoft/playwright-github-action@v1
@@ -140,8 +146,15 @@ jobs:
       - name: Run Playwright tests
         run: |
           # Run Playwright tests and generate an HTML report in playwright-report
-          # add a single retry to reduce transient flakiness in CI
-          npx playwright test --project=chromium --retries=1 --reporter=html || true
+          # Guard invocation: only run Playwright when a config file is present to
+          # avoid passing --project when projects are not defined (causes errors).
+          if [ -f playwright.config.ts ] || [ -f playwright.config.js ]; then
+            echo "Found playwright config - running tests with --config"
+            # Prefer --config to selectively run projects defined in the repo
+            npx playwright test --config=playwright.config.ts --retries=1 --reporter=html || true
+          else
+            echo "No playwright config found; skipping Playwright tests"
+          fi
 
       - name: Archive Playwright report (zip)
         if: always()
@@ -152,37 +165,37 @@ jobs:
             zip -r playwright-report.zip playwright-report || true
           fi
 
-        - name: Validate artifacts presence and size
-          if: always()
-          run: |
-            echo "Validating expected build artifacts before upload..."
-            FAIL=0
-            # expected files and minimal sizes (bytes)
-            declare -A files
-            files[tools/llm-mock/server.log]=200
-            files[tools/ci/ci-mock.log]=200
-            files[playwright-report.zip]=1024
-            files[tools/ci/ci-metrics.json]=10
-            for f in "${!files[@]}"; do
-              min=${files[$f]}
-              if [ -f "$f" ]; then
-                size=$(stat -c%s "$f" 2>/dev/null || echo 0)
-                echo "$f size=$size bytes (min required $min)"
-                if [ "$size" -lt "$min" ]; then
-                  echo "ERROR: $f is smaller than expected ($size < $min)"
-                  FAIL=1
-                fi
-              else
-                echo "ERROR: missing expected artifact $f"
+      - name: Validate artifacts presence and size
+        if: always()
+        run: |
+          echo "Validating expected build artifacts before upload..."
+          FAIL=0
+          # expected files and minimal sizes (bytes)
+          declare -A files
+          files[tools/llm-mock/server.log]=200
+          files[tools/ci/ci-mock.log]=200
+          files[playwright-report.zip]=1024
+          files[tools/ci/ci-metrics.json]=10
+          for f in "${!files[@]}"; do
+            min=${files[$f]}
+            if [ -f "$f" ]; then
+              size=$(stat -c%s "$f" 2>/dev/null || echo 0)
+              echo "$f size=$size bytes (min required $min)"
+              if [ "$size" -lt "$min" ]; then
+                echo "ERROR: $f is smaller than expected ($size < $min)"
                 FAIL=1
               fi
-            done
-            if [ "$FAIL" -eq 1 ]; then
-              echo "Artifact validation failed. Failing the job to avoid false success without artifacts."
-              exit 1
             else
-              echo "All expected artifacts present and above minimum size."
+              echo "ERROR: missing expected artifact $f"
+              FAIL=1
             fi
+          done
+          if [ "$FAIL" -eq 1 ]; then
+            echo "Artifact validation failed. Failing the job to avoid false success without artifacts."
+            exit 1
+          else
+            echo "All expected artifacts present and above minimum size."
+          fi
 
       - name: Upload server log
         if: always()

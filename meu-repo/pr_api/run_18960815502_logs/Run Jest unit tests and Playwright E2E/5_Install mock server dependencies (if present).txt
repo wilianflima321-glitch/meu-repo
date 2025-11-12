@@ -1,0 +1,14 @@
+﻿2025-10-31T02:27:21.5270922Z ##[group]Run if [ -f tools/llm-mock/package.json ]; then
+2025-10-31T02:27:21.5271585Z [36;1mif [ -f tools/llm-mock/package.json ]; then[0m
+2025-10-31T02:27:21.5272253Z [36;1m  echo "Found tools/llm-mock/package.json — installing dependencies"[0m
+2025-10-31T02:27:21.5272983Z [36;1m  (cd tools/llm-mock && npm install --no-audit --no-fund)[0m
+2025-10-31T02:27:21.5273613Z [36;1melse[0m
+2025-10-31T02:27:21.5274013Z [36;1m  echo "No package.json in tools/llm-mock — skipping"[0m
+2025-10-31T02:27:21.5274482Z [36;1mfi[0m
+2025-10-31T02:27:21.5315018Z shell: /usr/bin/bash -e {0}
+2025-10-31T02:27:21.5315290Z ##[endgroup]
+2025-10-31T02:27:21.5380870Z Found tools/llm-mock/package.json — installing dependencies
+2025-10-31T02:27:45.9200267Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2025-10-31T02:27:46.2733253Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-10-31T02:27:47.2728782Z 
+2025-10-31T02:27:47.2730113Z added 339 packages in 26s

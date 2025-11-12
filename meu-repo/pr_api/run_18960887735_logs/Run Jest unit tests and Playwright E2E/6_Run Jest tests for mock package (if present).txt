@@ -1,0 +1,19 @@
+﻿2025-10-31T02:32:14.7341986Z ##[group]Run # Run Jest only if the mock package has a package.json and tests configured
+2025-10-31T02:32:14.7342566Z [36;1m# Run Jest only if the mock package has a package.json and tests configured[0m
+2025-10-31T02:32:14.7342996Z [36;1mif [ -f tools/llm-mock/package.json ]; then[0m
+2025-10-31T02:32:14.7343420Z [36;1m  echo "Found tools/llm-mock/package.json — running npm test in that directory"[0m
+2025-10-31T02:32:14.7343858Z [36;1m  (cd tools/llm-mock && npm test --silent)[0m
+2025-10-31T02:32:14.7344124Z [36;1melse[0m
+2025-10-31T02:32:14.7344403Z [36;1m  echo "No package.json in tools/llm-mock — skipping Jest unit tests"[0m
+2025-10-31T02:32:14.7344754Z [36;1mfi[0m
+2025-10-31T02:32:14.7375924Z shell: /usr/bin/bash -e {0}
+2025-10-31T02:32:14.7376405Z ##[endgroup]
+2025-10-31T02:32:14.7432865Z Found tools/llm-mock/package.json — running npm test in that directory
+2025-10-31T02:32:15.7724153Z PASS __tests__/verifier_magic.test.js
+2025-10-31T02:32:15.8191883Z PASS __tests__/physics.test.js
+2025-10-31T02:32:15.8204409Z 
+2025-10-31T02:32:15.8213132Z Test Suites: 2 passed, 2 total
+2025-10-31T02:32:15.8214935Z Tests:       4 passed, 4 total
+2025-10-31T02:32:15.8215462Z Snapshots:   0 total
+2025-10-31T02:32:15.8215908Z Time:        0.537 s
+2025-10-31T02:32:15.8216688Z Ran all test suites.

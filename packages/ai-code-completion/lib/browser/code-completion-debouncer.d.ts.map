@@ -1,1 +1,0 @@
-{"version":3,"file":"code-completion-debouncer.d.ts","sourceRoot":"","sources":["../../src/browser/code-completion-debouncer.ts"],"names":[],"mappings":"AAgBA,qBAAa,yBAAyB;IAElC,OAAO,CAAC,SAAS,CAAC,CAAS;IAE3B,QAAQ,CAAC,CAAC,EAAE,QAAQ,EAAE,MAAM,OAAO,CAAC,CAAC,CAAC,EAAE,aAAa,EAAE,MAAM,GAAG,OAAO,CAAC,CAAC,CAAC;CAc7E"}
