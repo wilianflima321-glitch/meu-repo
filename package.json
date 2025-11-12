@@ -1,14 +1,15 @@
 {
   "scripts": {
+    "start": "cd examples/browser-ide-app && npm install && npm start",
+    "ide": "cd examples/browser-ide-app && npm start",
     "dev:mock-backend": "node tools/llm-mock/server.js",
-    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/dev-scripts/dev.ps1",
+    "dev": "cd examples/browser-ide-app && npm start",
     "playwright:install": "npx playwright install --with-deps",
     "test:e2e": "npx playwright test --config=playwright.config.js",
     "test:e2e:headed": "npx playwright test --headed --config=playwright.config.ts",
-  "check:ai-ide-ts": "node -e \"const fs=require('fs'); const p='cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json'; if(!fs.existsSync(p)){console.warn('ai-ide tsconfig not present; skipping'); process.exit(0);} const {execSync}=require('child_process'); execSync('npx -y tsc --noEmit -p '+p, {stdio:'inherit'});\"",
-  "build:ai-ide": "node -e \"const fs=require('fs'); const p='cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json'; if(!fs.existsSync(p)){console.warn('ai-ide tsconfig not present; skipping'); process.exit(0);} const {execSync}=require('child_process'); execSync('npx -y tsc -p '+p, {stdio:'inherit'});\"",
-  "test:ai-ide": "npm run build:ai-ide && node cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js",
-  "test:all": "npm run check:ai-ide-ts && npm run test:ai-ide && npm run test:e2e",
+    "check:ai-ide-ts": "node -e \"const fs=require('fs'); const p='cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json'; if(!fs.existsSync(p)){console.warn('ai-ide tsconfig not present; skipping'); process.exit(0);} const {execSync}=require('child_process'); execSync('npx -y tsc --noEmit -p '+p, {stdio:'inherit'});\"",
+    "test:ai-ide": "node cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js",
+    "test:all": "npm run check:ai-ide-ts && npm run test:ai-ide && npm run test:e2e",
     "ci:local": "npm run test:all"
   },
   "devDependencies": {
