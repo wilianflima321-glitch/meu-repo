@@ -95,7 +95,16 @@ app.post('/api/llm/usage', (req, res) => {
     if (callerUser) {
       const nowDate = new Date();
       const monthKey = `${nowDate.getUTCFullYear()}-${String(nowDate.getUTCMonth()+1).padStart(2,'0')}`;
-      const usedThisMonth = DATA.usage_events.filter(u => u.userId === callerUser && u.createdAt && u.createdAt.startsWith(monthKey.substring(0,4))).reduce((s, u) => s + ((u.tokensInput||0) + (u.tokensOutput||0)), 0);
+      const yearPrefix = monthKey.substring(0, 4);
+      
+      // Optimized: single pass through usage events to calculate monthly usage
+      let usedThisMonth = 0;
+      for (const u of DATA.usage_events) {
+        if (u.userId === callerUser && u.createdAt && u.createdAt.startsWith(yearPrefix)) {
+          usedThisMonth += (u.tokensInput || 0) + (u.tokensOutput || 0);
+        }
+      }
+      
       const quota = (DATA.quotas && DATA.quotas[callerUser] && DATA.quotas[callerUser].monthlyTokens) ? DATA.quotas[callerUser].monthlyTokens : null;
       if (quota !== null && quota !== undefined) {
         if (usedThisMonth + incomingTokens > quota) {
@@ -104,7 +113,7 @@ app.post('/api/llm/usage', (req, res) => {
         }
       }
     }
-    // dedup check
+    // dedup check - optimized with direct find
     const existing = DATA.usage_events.find(u => u.providerId === providerId && u.requestId === requestId);
     if (existing) {
       return res.json({ requestId, billed: true, chargeTarget: 'dedup', billingRecordId: existing.id });

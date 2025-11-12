@@ -1,4 +1,4 @@
-const physics = require('../lib/physics');
+const physics = require('./physics');
 
 test('computeRangeWithDrag < computeRange when drag present', () => {
   const v0 = 20; // m/s
