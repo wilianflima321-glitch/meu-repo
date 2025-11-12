@@ -114,6 +114,10 @@ import { LlmProviderCommandContribution } from './llm-provider-command-contribut
 import { BillingAdminWidget } from './admin/billing-admin-widget';
 import { BillingAdminContribution } from './admin/billing-admin-contribution';
 import { BillingAdminCommandContribution } from './admin/billing-admin-command-contribution';
+import { AiIdeLayoutContribution } from './layout/ai-ide-layout-contribution';
+import { AiIdeBrandingWidget } from './branding/ai-ide-branding-widget';
+import { AiIdeBrandingContribution } from './branding/ai-ide-branding-contribution';
+import { AiIdeStatusBarContribution } from './status/ai-ide-status-bar-contribution';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(PreferenceContribution).toConstantValue({ schema: aiIdePreferenceSchema });
@@ -145,6 +149,15 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(BillingAdminCommandContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(BillingAdminCommandContribution as unknown);
     bind(FrontendApplicationContribution).toService(BillingAdminContribution as unknown);
+
+    bind(AiIdeBrandingWidget).toSelf().inSingletonScope();
+    bind(FrontendApplicationContribution).to(AiIdeBrandingContribution).inSingletonScope();
+
+    bind(AiIdeLayoutContribution).toSelf().inSingletonScope();
+    bind(FrontendApplicationContribution).toService(AiIdeLayoutContribution);
+
+    bind(AiIdeStatusBarContribution).toSelf().inSingletonScope();
+    bind(FrontendApplicationContribution).toService(AiIdeStatusBarContribution);
 
     // ensure preference key symbol is referenced so TS doesn't report it as unused in incremental builds
     const _aiLlmPref = AI_LLM_PROVIDERS_PREF;
