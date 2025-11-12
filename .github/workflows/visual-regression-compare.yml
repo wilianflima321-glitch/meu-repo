@@ -92,12 +92,10 @@ jobs:
           path: tools/ide/visual-regression/output/diffs
 
       - name: Check report and create issue if regressions
-        if: ${{ secrets.GH_PAT != '' }}
+        if: always()
         uses: actions/github-script@v6
         with:
-          # Prefer a repo secret PAT for creating issues (secrets.GH_PAT).
-          # When running from forks/sealed contexts the secret will be empty and this step will be skipped.
-          github-token: ${{ secrets.GH_PAT }}
+          github-token: ${{ github.token }}
           script: |
             const fs = require('fs');
             const reportPath = 'tools/ide/visual-regression/output/diffs/compare-report.json';
@@ -106,7 +104,12 @@ jobs:
             const total = report.totalDiff || 0;
             if (total > 500) {
               const body = `Visual regression detected: total differing pixels = ${total}. See artifacts attached to the workflow run.`;
-              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: 'Visual regression detected', body });
+              try {
+                await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: 'Visual regression detected', body });
+                core.info('Opened regression issue for visibility.');
+              } catch (error) {
+                core.warning(`Unable to create issue: ${error.message}`);
+              }
               core.setFailed('Visual regression threshold exceeded');
             } else {
               core.info(`Total diff pixels: ${total}`);
