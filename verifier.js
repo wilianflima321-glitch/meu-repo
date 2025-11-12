@@ -3,6 +3,16 @@ const selfHarmTerms = ['suicide','self-harm','kill myself','end my life'];
 const drugTerms = ['cocaine','heroin','meth','fentanyl','opioid'];
 const physics = require('./physics');
 
+// Pre-compile regex patterns for better performance
+const CHRONOLOGY_PATTERN = /\b(before|after) (he|she|they) (was|were) born\b/;
+const TIME_TRAVEL_PATTERN = /\b(time travel|travelled back in time|went back in time|from the future)\b/;
+const SELF_HARM_PHRASE_PATTERN = /\b(i want to die|i am going to kill myself|i will kill myself|i can't go on)\b/;
+const DRUG_INSTRUCTION_PATTERN = /\b(buy meth|where to get heroin|how to make meth|order pills online|needle exchange)\b/;
+const DRUG_SUBSTANCE_PATTERN = /\b(cocaine|heroin|methamphetamine|fentanyl)\b/;
+const DRUG_ACTION_PATTERN = /\b(use|inject|smoke|snort|consume)\b/;
+const CHILD_PATTERN = /\b(child|kid|toddler|baby)\b/;
+const DANGER_PATTERN = /\b(fire|gun|weapon|chainsaw|dangerous|machine)\b/;
+
 function lower(s) { return (s || '').toString().toLowerCase(); }
 
 function checkNoWeapons(entities, errors) {
@@ -152,10 +162,10 @@ function verifyScene(scene, constraints) {
   // 1) Chronology: detect obvious time-travel or reversed time phrases
   if (cs.includes('checkChronology') || cs.includes('chronology_checks')) {
     const text = (scene && scene.description) ? scene.description.toLowerCase() : '';
-    if (/\b(before|after) (he|she|they) (was|were) born\b/.test(text)) {
+    if (CHRONOLOGY_PATTERN.test(text)) {
       errors.push({ reason: 'chronology_error', message: 'possible inconsistent chronology detected' });
     }
-    if (/\b(time travel|travelled back in time|went back in time|from the future)\b/.test(text)) {
+    if (TIME_TRAVEL_PATTERN.test(text)) {
       errors.push({ reason: 'time_anomaly', message: 'explicit time-travel mentioned' });
     }
   }
@@ -163,7 +173,7 @@ function verifyScene(scene, constraints) {
   // 2) Self-harm phrasing: detect first-person self-harm or ideation phrasing
   if (cs.includes('checkSelfHarmPhrasing') || cs.includes('self_harm_phrase')) {
     const text = ((scene && (scene.dialogue || scene.description || '')).toLowerCase() || '');
-    if (/\b(i want to die|i am going to kill myself|i will kill myself|i can't go on)\b/.test(text)) {
+    if (SELF_HARM_PHRASE_PATTERN.test(text)) {
       errors.push({ reason: 'self_harm_phrase', message: 'first-person self-harm phrasing detected' });
     }
   }
@@ -171,10 +181,10 @@ function verifyScene(scene, constraints) {
   // 3) Drug mentions with intent: simplistic detection of illicit drug usage or procurement
   if (cs.includes('checkDrugMentions') || cs.includes('drug_checks')) {
     const text = (scene && (scene.description || scene.dialogue || '')).toLowerCase();
-    if (/\b(buy meth|where to get heroin|how to make meth|order pills online|needle exchange)\b/.test(text)) {
+    if (DRUG_INSTRUCTION_PATTERN.test(text)) {
       errors.push({ reason: 'drug_instruction', message: 'possible illicit drug instructions or procurement' });
     }
-    if (/\b(cocaine|heroin|methamphetamine|fentanyl)\b/.test(text) && /\b(use|inject|smoke|snort|consume)\b/.test(text)) {
+    if (DRUG_SUBSTANCE_PATTERN.test(text) && DRUG_ACTION_PATTERN.test(text)) {
       errors.push({ reason: 'drug_use', message: 'explicit drug use mentioned' });
     }
   }
@@ -182,7 +192,7 @@ function verifyScene(scene, constraints) {
   // 4) Age-involved risky scenarios: child + dangerous activity
   if (cs.includes('checkChildSafety') || cs.includes('child_safety')) {
     const text = (scene && (scene.description || scene.dialogue || '')).toLowerCase();
-    if (/\b(child|kid|toddler|baby)\b/.test(text) && /\b(fire|gun|weapon|chainsaw|dangerous|machine)\b/.test(text)) {
+    if (CHILD_PATTERN.test(text) && DANGER_PATTERN.test(text)) {
       errors.push({ reason: 'child_endangerment', message: 'child near dangerous activity' });
     }
   }
