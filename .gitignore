@@ -1,0 +1,35 @@
+# Node
+node_modules/
+
+# Logs
+*.log
+
+# Mac
+.DS_Store
+
+# Build and distribution
+dist/
+build/
+
+# TypeScript build outputs
+**/lib/
+**/*.tsbuildinfo
+**/coverage/
+**/.nyc_output/
+
+# Env
+.env
+.env.local
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+
+# Local data
+data.json
+package-lock.json

@@ -1,0 +1,13 @@
+{
+  "welcome": "Bem-vindo ao Aethel IDE",
+  "download": "Baixar",
+  "chat": "Chat",
+  "login": "Entrar",
+  "register": "Cadastrar",
+  "home": "Início",
+  "features": "Recursos",
+  "support": "Suporte",
+  "dashboard": "Painel",
+  "plans": "Planos",
+  "admin": "Admin",  "vrPreview": {    "placeholder": "Prévia VR - Aethel IDE"  }
+}

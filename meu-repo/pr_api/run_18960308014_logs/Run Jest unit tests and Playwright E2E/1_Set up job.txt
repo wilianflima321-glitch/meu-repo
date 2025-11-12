@@ -1,0 +1,32 @@
+﻿2025-10-31T01:54:41.3901756Z Current runner version: '2.328.0'
+2025-10-31T01:54:41.3925808Z ##[group]Runner Image Provisioner
+2025-10-31T01:54:41.3926623Z Hosted Compute Agent
+2025-10-31T01:54:41.3927103Z Version: 20250912.392
+2025-10-31T01:54:41.3927684Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+2025-10-31T01:54:41.3928319Z Build Date: 2025-09-12T15:23:14Z
+2025-10-31T01:54:41.3928876Z ##[endgroup]
+2025-10-31T01:54:41.3929384Z ##[group]Operating System
+2025-10-31T01:54:41.3929889Z Ubuntu
+2025-10-31T01:54:41.3930340Z 24.04.3
+2025-10-31T01:54:41.3930725Z LTS
+2025-10-31T01:54:41.3931163Z ##[endgroup]
+2025-10-31T01:54:41.3931567Z ##[group]Runner Image
+2025-10-31T01:54:41.3932057Z Image: ubuntu-24.04
+2025-10-31T01:54:41.3932521Z Version: 20250929.60.1
+2025-10-31T01:54:41.3933446Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250929.60/images/ubuntu/Ubuntu2404-Readme.md
+2025-10-31T01:54:41.3934678Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250929.60
+2025-10-31T01:54:41.3935830Z ##[endgroup]
+2025-10-31T01:54:41.3936892Z ##[group]GITHUB_TOKEN Permissions
+2025-10-31T01:54:41.3938696Z Contents: read
+2025-10-31T01:54:41.3939179Z Metadata: read
+2025-10-31T01:54:41.3939680Z Packages: read
+2025-10-31T01:54:41.3940084Z ##[endgroup]
+2025-10-31T01:54:41.3942017Z Secret source: Actions
+2025-10-31T01:54:41.3942629Z Prepare workflow directory
+2025-10-31T01:54:41.4354377Z Prepare all required actions
+2025-10-31T01:54:41.4410410Z Getting action download info
+2025-10-31T01:54:41.9501518Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-31T01:54:42.0386265Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2025-10-31T01:54:42.1154690Z Download action repository 'microsoft/playwright-github-action@v1' (SHA:91d778e7ba32fe5946d69a20848327c9718cdbc2)
+2025-10-31T01:54:42.7947984Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-31T01:54:42.9726636Z Complete job name: Run Jest unit tests and Playwright E2E

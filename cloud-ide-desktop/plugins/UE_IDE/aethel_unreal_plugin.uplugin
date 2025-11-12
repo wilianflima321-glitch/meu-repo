@@ -1,0 +1,24 @@
+{
+    'FileVersion': 3,
+    'Version': 1,
+    'VersionName': '1.0',
+    'FriendlyName': 'Aethel Unreal Plugin',
+    'Description': 'Integra Aethel IA com Unreal Engine',
+    'Category': 'Development',
+    'CreatedBy': 'Aethel Team',
+    'CreatedByURL': 'https://aethel.com',
+    'DocsURL': '',
+    'MarketplaceURL': '',
+    'SupportURL': '',
+    'CanContainContent': true,
+    'IsBetaVersion': false,
+    'IsExperimentalVersion': false,
+    'Installed': false,
+    'Modules': [
+        {
+            'Name': 'AethelPlugin',
+            'Type': 'Runtime',
+            'LoadingPhase': 'Default'
+        }
+    ]
+}

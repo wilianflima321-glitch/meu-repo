@@ -1,0 +1,47 @@
+{
+  "welcome": "Welcome to Aethel IDE",
+  "download": "Download",
+  "chat": "Chat",
+  "login": "Login",
+  "register": "Register",
+  "home": "Home",
+  "features": "Features",
+  "support": "Support",
+  "dashboard": "Dashboard",
+  "plans": "Plans",
+  "admin": "Admin",
+  "vr": "VR Preview",
+  "vrPreview": {
+    "placeholder": "VR Preview - Aethel IDE"
+  },
+  "marketplace": {
+    "title": "Extensions Marketplace",
+    "description": "Discover and install extensions for Aethel IDE"
+  },
+  "git": {
+    "title": "Git Integration",
+    "staged": "Staged Changes",
+    "modified": "Modified Files",
+    "untracked": "Untracked Files",
+    "commit": "Commit",
+    "push": "Push",
+    "pull": "Pull",
+    "ahead": "commits ahead",
+    "behind": "commits behind"
+  },
+  "terminal": {
+    "title": "Integrated Terminal"
+  },
+  "explorer": {
+    "title": "File Explorer"
+  },
+  "search": {
+    "title": "Search & Replace"
+  },
+  "debugger": {
+    "title": "Debugger"
+  },
+  "settings": {
+    "title": "Settings"
+  }
+}

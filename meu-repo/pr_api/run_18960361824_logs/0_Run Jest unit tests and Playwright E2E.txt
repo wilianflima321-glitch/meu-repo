@@ -1,0 +1,222 @@
+﻿2025-10-31T01:58:11.8496490Z Current runner version: '2.328.0'
+2025-10-31T01:58:11.8572365Z ##[group]Runner Image Provisioner
+2025-10-31T01:58:11.8573722Z Hosted Compute Agent
+2025-10-31T01:58:11.8574698Z Version: 20250912.392
+2025-10-31T01:58:11.8575666Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+2025-10-31T01:58:11.8577057Z Build Date: 2025-09-12T15:23:14Z
+2025-10-31T01:58:11.8578073Z ##[endgroup]
+2025-10-31T01:58:11.8579243Z ##[group]Operating System
+2025-10-31T01:58:11.8580312Z Ubuntu
+2025-10-31T01:58:11.8581106Z 24.04.3
+2025-10-31T01:58:11.8581931Z LTS
+2025-10-31T01:58:11.8582751Z ##[endgroup]
+2025-10-31T01:58:11.8583593Z ##[group]Runner Image
+2025-10-31T01:58:11.8584493Z Image: ubuntu-24.04
+2025-10-31T01:58:11.8585492Z Version: 20250929.60.1
+2025-10-31T01:58:11.8587415Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250929.60/images/ubuntu/Ubuntu2404-Readme.md
+2025-10-31T01:58:11.8610731Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250929.60
+2025-10-31T01:58:11.8612503Z ##[endgroup]
+2025-10-31T01:58:11.8614440Z ##[group]GITHUB_TOKEN Permissions
+2025-10-31T01:58:11.8617170Z Contents: read
+2025-10-31T01:58:11.8618028Z Metadata: read
+2025-10-31T01:58:11.8639328Z Packages: read
+2025-10-31T01:58:11.8640233Z ##[endgroup]
+2025-10-31T01:58:11.8643500Z Secret source: Actions
+2025-10-31T01:58:11.8645097Z Prepare workflow directory
+2025-10-31T01:58:11.9244962Z Prepare all required actions
+2025-10-31T01:58:11.9301386Z Getting action download info
+2025-10-31T01:58:12.2561121Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-31T01:58:12.4546750Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2025-10-31T01:58:12.5519067Z Download action repository 'microsoft/playwright-github-action@v1' (SHA:91d778e7ba32fe5946d69a20848327c9718cdbc2)
+2025-10-31T01:58:12.8005625Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-31T01:58:13.0129833Z Complete job name: Run Jest unit tests and Playwright E2E
+2025-10-31T01:58:13.0800692Z ##[group]Run actions/checkout@v4
+2025-10-31T01:58:13.0801529Z with:
+2025-10-31T01:58:13.0801961Z   repository: wilianflima321-glitch/meu-repo
+2025-10-31T01:58:13.0802649Z   token: ***
+2025-10-31T01:58:13.0803027Z   ssh-strict: true
+2025-10-31T01:58:13.0803410Z   ssh-user: git
+2025-10-31T01:58:13.0803799Z   persist-credentials: true
+2025-10-31T01:58:13.0804227Z   clean: true
+2025-10-31T01:58:13.0804609Z   sparse-checkout-cone-mode: true
+2025-10-31T01:58:13.0805082Z   fetch-depth: 1
+2025-10-31T01:58:13.0805451Z   fetch-tags: false
+2025-10-31T01:58:13.0805839Z   show-progress: true
+2025-10-31T01:58:13.0806222Z   lfs: false
+2025-10-31T01:58:13.0806575Z   submodules: false
+2025-10-31T01:58:13.0806957Z   set-safe-directory: true
+2025-10-31T01:58:13.0807565Z ##[endgroup]
+2025-10-31T01:58:13.1946786Z Syncing repository: wilianflima321-glitch/meu-repo
+2025-10-31T01:58:13.1949456Z ##[group]Getting Git version info
+2025-10-31T01:58:13.1951040Z Working directory is '/home/runner/work/meu-repo/meu-repo'
+2025-10-31T01:58:13.1955208Z [command]/usr/bin/git version
+2025-10-31T01:58:13.2042851Z git version 2.51.0
+2025-10-31T01:58:13.2070966Z ##[endgroup]
+2025-10-31T01:58:13.2087662Z Temporarily overriding HOME='/home/runner/work/_temp/7d0ef232-d9a1-4333-9497-dca4432bb94d' before making global git config changes
+2025-10-31T01:58:13.2091263Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-31T01:58:13.2105996Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/meu-repo/meu-repo
+2025-10-31T01:58:13.2148939Z Deleting the contents of '/home/runner/work/meu-repo/meu-repo'
+2025-10-31T01:58:13.2153323Z ##[group]Initializing the repository
+2025-10-31T01:58:13.2158765Z [command]/usr/bin/git init /home/runner/work/meu-repo/meu-repo
+2025-10-31T01:58:13.2297265Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-31T01:58:13.2299372Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-31T01:58:13.2302655Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-31T01:58:13.2303827Z hint:
+2025-10-31T01:58:13.2304657Z hint: 	git config --global init.defaultBranch <name>
+2025-10-31T01:58:13.2305994Z hint:
+2025-10-31T01:58:13.2306955Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-31T01:58:13.2308706Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-31T01:58:13.2309898Z hint:
+2025-10-31T01:58:13.2310506Z hint: 	git branch -m <name>
+2025-10-31T01:58:13.2311212Z hint:
+2025-10-31T01:58:13.2312146Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-31T01:58:13.2314696Z Initialized empty Git repository in /home/runner/work/meu-repo/meu-repo/.git/
+2025-10-31T01:58:13.2318888Z [command]/usr/bin/git remote add origin https://github.com/wilianflima321-glitch/meu-repo
+2025-10-31T01:58:13.2370618Z ##[endgroup]
+2025-10-31T01:58:13.2371793Z ##[group]Disabling automatic garbage collection
+2025-10-31T01:58:13.2374404Z [command]/usr/bin/git config --local gc.auto 0
+2025-10-31T01:58:13.2407405Z ##[endgroup]
+2025-10-31T01:58:13.2408925Z ##[group]Setting up auth
+2025-10-31T01:58:13.2414927Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-31T01:58:13.2448490Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-31T01:58:13.2809023Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-31T01:58:13.2842363Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-31T01:58:13.3075757Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-31T01:58:13.3123028Z ##[endgroup]
+2025-10-31T01:58:13.3125367Z ##[group]Fetching the repository
+2025-10-31T01:58:13.3133901Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +9aa52379f6c565ddb6b0dae3ef3db17502751d72:refs/remotes/origin/infra/playwright-ci-ensemble-workflow-fix
+2025-10-31T01:58:13.5124505Z From https://github.com/wilianflima321-glitch/meu-repo
+2025-10-31T01:58:13.5126344Z  * [new ref]         9aa52379f6c565ddb6b0dae3ef3db17502751d72 -> origin/infra/playwright-ci-ensemble-workflow-fix
+2025-10-31T01:58:13.5159528Z ##[endgroup]
+2025-10-31T01:58:13.5160746Z ##[group]Determining the checkout info
+2025-10-31T01:58:13.5163436Z ##[endgroup]
+2025-10-31T01:58:13.5167165Z [command]/usr/bin/git sparse-checkout disable
+2025-10-31T01:58:13.5216856Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-31T01:58:13.5242628Z ##[group]Checking out the ref
+2025-10-31T01:58:13.5246337Z [command]/usr/bin/git checkout --progress --force -B infra/playwright-ci-ensemble-workflow-fix refs/remotes/origin/infra/playwright-ci-ensemble-workflow-fix
+2025-10-31T01:58:13.5319259Z Switched to a new branch 'infra/playwright-ci-ensemble-workflow-fix'
+2025-10-31T01:58:13.5323677Z branch 'infra/playwright-ci-ensemble-workflow-fix' set up to track 'origin/infra/playwright-ci-ensemble-workflow-fix'.
+2025-10-31T01:58:13.5332843Z ##[endgroup]
+2025-10-31T01:58:13.5368090Z [command]/usr/bin/git log -1 --format=%H
+2025-10-31T01:58:13.5391164Z 9aa52379f6c565ddb6b0dae3ef3db17502751d72
+2025-10-31T01:58:13.5632395Z ##[group]Run actions/setup-node@v4
+2025-10-31T01:58:13.5632904Z with:
+2025-10-31T01:58:13.5633254Z   node-version: 18
+2025-10-31T01:58:13.5633632Z   always-auth: false
+2025-10-31T01:58:13.5634025Z   check-latest: false
+2025-10-31T01:58:13.5634562Z   token: ***
+2025-10-31T01:58:13.5634913Z ##[endgroup]
+2025-10-31T01:58:13.7438718Z Found in cache @ /opt/hostedtoolcache/node/18.20.8/x64
+2025-10-31T01:58:13.7444135Z ##[group]Environment details
+2025-10-31T01:58:16.3931362Z node: v18.20.8
+2025-10-31T01:58:16.3933191Z npm: 10.8.2
+2025-10-31T01:58:16.3936305Z yarn: 1.22.22
+2025-10-31T01:58:16.3939068Z ##[endgroup]
+2025-10-31T01:58:16.4077222Z ##[group]Run # use npm install instead of npm ci because this repository does not include a lockfile
+2025-10-31T01:58:16.4080538Z [36;1m# use npm install instead of npm ci because this repository does not include a lockfile[0m
+2025-10-31T01:58:16.4082700Z [36;1mnpm install --no-audit --no-fund[0m
+2025-10-31T01:58:16.4205680Z shell: /usr/bin/bash -e {0}
+2025-10-31T01:58:16.4206964Z ##[endgroup]
+2025-10-31T01:58:27.3191413Z 
+2025-10-31T01:58:27.3203958Z added 70 packages in 11s
+2025-10-31T01:58:27.3396678Z ##[group]Run # Run Jest only if the mock package has a package.json and tests configured
+2025-10-31T01:58:27.3397304Z [36;1m# Run Jest only if the mock package has a package.json and tests configured[0m
+2025-10-31T01:58:27.3397760Z [36;1mif [ -f tools/llm-mock/package.json ]; then[0m
+2025-10-31T01:58:27.3398486Z [36;1m  echo "Found tools/llm-mock/package.json — running npm test in that directory"[0m
+2025-10-31T01:58:27.3399047Z [36;1m  (cd tools/llm-mock && npm test --silent)[0m
+2025-10-31T01:58:27.3399335Z [36;1melse[0m
+2025-10-31T01:58:27.3399658Z [36;1m  echo "No package.json in tools/llm-mock — skipping Jest unit tests"[0m
+2025-10-31T01:58:27.3400018Z [36;1mfi[0m
+2025-10-31T01:58:27.3433265Z shell: /usr/bin/bash -e {0}
+2025-10-31T01:58:27.3433544Z ##[endgroup]
+2025-10-31T01:58:27.3493837Z No package.json in tools/llm-mock — skipping Jest unit tests
+2025-10-31T01:58:27.3534304Z ##[warning]Unexpected input(s) 'install-deps', valid inputs are ['']
+2025-10-31T01:58:27.3545141Z ##[group]Run microsoft/playwright-github-action@v1
+2025-10-31T01:58:27.3545481Z with:
+2025-10-31T01:58:27.3545686Z   install-deps: true
+2025-10-31T01:58:27.3545918Z ##[endgroup]
+2025-10-31T01:58:27.3907377Z ##[warning]This GitHub Action is deprecated. We recommend installing dependencies via 'npx playwright install --with-deps' instead. See https://playwright.dev/docs/cli#install-system-dependencies for more information.
+2025-10-31T01:58:27.3935105Z [command]/usr/bin/sudo apt-get update
+2025-10-31T01:58:27.5177482Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2025-10-31T01:58:27.6263812Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2025-10-31T01:58:27.6431341Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2025-10-31T01:58:27.6459803Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2025-10-31T01:58:27.6589739Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2025-10-31T01:58:27.6635295Z Get:6 https://packages.microsoft.com/repos/azure-cli noble InRelease [3564 B]
+2025-10-31T01:58:27.6809391Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2025-10-31T01:58:27.8166321Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1545 kB]
+2025-10-31T01:58:27.8382839Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [294 kB]
+2025-10-31T01:58:27.8415448Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+2025-10-31T01:58:27.8440362Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 c-n-f Metadata [15.4 kB]
+2025-10-31T01:58:27.8476781Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1498 kB]
+2025-10-31T01:58:27.8710828Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [303 kB]
+2025-10-31T01:58:27.8786707Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [378 kB]
+2025-10-31T01:58:27.8841218Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 c-n-f Metadata [31.4 kB]
+2025-10-31T01:58:27.8842917Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2175 kB]
+2025-10-31T01:58:27.9115895Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [490 kB]
+2025-10-31T01:58:27.9690259Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+2025-10-31T01:58:27.9691835Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 c-n-f Metadata [516 B]
+2025-10-31T01:58:27.9732911Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [30.3 kB]
+2025-10-31T01:58:27.9779508Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [5564 B]
+2025-10-31T01:58:27.9782073Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+2025-10-31T01:58:27.9784011Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 c-n-f Metadata [484 B]
+2025-10-31T01:58:27.9802985Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7148 B]
+2025-10-31T01:58:27.9832428Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [11.0 kB]
+2025-10-31T01:58:27.9854364Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+2025-10-31T01:58:27.9879301Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+2025-10-31T01:58:28.0513587Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1270 kB]
+2025-10-31T01:58:28.0663881Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [211 kB]
+2025-10-31T01:58:28.0761089Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+2025-10-31T01:58:28.0797914Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 c-n-f Metadata [9008 B]
+2025-10-31T01:58:28.1312363Z Get:32 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [905 kB]
+2025-10-31T01:58:28.1417532Z Get:33 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [203 kB]
+2025-10-31T01:58:28.1452710Z Get:34 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.2 kB]
+2025-10-31T01:58:28.1475809Z Get:35 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 c-n-f Metadata [19.4 kB]
+2025-10-31T01:58:28.1546396Z Get:36 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2080 kB]
+2025-10-31T01:58:28.1772069Z Get:37 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [470 kB]
+2025-10-31T01:58:28.1833815Z Get:38 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Components [208 B]
+2025-10-31T01:58:28.1867176Z Get:39 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 c-n-f Metadata [500 B]
+2025-10-31T01:58:28.1880447Z Get:40 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [27.4 kB]
+2025-10-31T01:58:28.1919655Z Get:41 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [5708 B]
+2025-10-31T01:58:28.1935193Z Get:42 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [208 B]
+2025-10-31T01:58:28.1944894Z Get:43 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 c-n-f Metadata [384 B]
+2025-10-31T01:58:28.1970589Z Get:44 https://packages.microsoft.com/repos/azure-cli noble/main amd64 Packages [1629 B]
+2025-10-31T01:58:28.2962255Z Get:45 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [11.1 kB]
+2025-10-31T01:58:28.3033007Z Get:46 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [65.9 kB]
+2025-10-31T01:58:28.3101549Z Get:47 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [48.7 kB]
+2025-10-31T01:58:37.2423260Z Fetched 12.7 MB in 2s (6685 kB/s)
+2025-10-31T01:58:37.9849540Z Reading package lists...
+2025-10-31T01:58:37.9990604Z ##[error]Cannot install dependencies for this linux distribution!
+2025-10-31T01:58:38.0099003Z ##[group]Run actions/upload-artifact@v4
+2025-10-31T01:58:38.0099307Z with:
+2025-10-31T01:58:38.0099476Z   name: server-log
+2025-10-31T01:58:38.0099683Z   path: tools/llm-mock/server.log
+2025-10-31T01:58:38.0099924Z   if-no-files-found: warn
+2025-10-31T01:58:38.0100140Z   compression-level: 6
+2025-10-31T01:58:38.0100333Z   overwrite: false
+2025-10-31T01:58:38.0100533Z   include-hidden-files: false
+2025-10-31T01:58:38.0100742Z ##[endgroup]
+2025-10-31T01:58:38.2391133Z ##[warning]No files were found with the provided path: tools/llm-mock/server.log. No artifacts will be uploaded.
+2025-10-31T01:58:38.2533516Z ##[group]Run actions/upload-artifact@v4
+2025-10-31T01:58:38.2533805Z with:
+2025-10-31T01:58:38.2533997Z   name: playwright-report
+2025-10-31T01:58:38.2534232Z   path: playwright-report
+2025-10-31T01:58:38.2534443Z   if-no-files-found: warn
+2025-10-31T01:58:38.2534805Z   compression-level: 6
+2025-10-31T01:58:38.2535126Z   overwrite: false
+2025-10-31T01:58:38.2535433Z   include-hidden-files: false
+2025-10-31T01:58:38.2535701Z ##[endgroup]
+2025-10-31T01:58:38.4773715Z ##[warning]No files were found with the provided path: playwright-report. No artifacts will be uploaded.
+2025-10-31T01:58:38.4941354Z Post job cleanup.
+2025-10-31T01:58:38.5877778Z [command]/usr/bin/git version
+2025-10-31T01:58:38.5917017Z git version 2.51.0
+2025-10-31T01:58:38.5962547Z Temporarily overriding HOME='/home/runner/work/_temp/157306e3-608b-4565-9370-0707c4c4599f' before making global git config changes
+2025-10-31T01:58:38.5965080Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-31T01:58:38.5969700Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/meu-repo/meu-repo
+2025-10-31T01:58:38.6014513Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-31T01:58:38.6050212Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-31T01:58:38.6360665Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-31T01:58:38.6383191Z http.https://github.com/.extraheader
+2025-10-31T01:58:38.6397276Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-10-31T01:58:38.6430178Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-31T01:58:38.6760348Z Cleaning up orphan processes

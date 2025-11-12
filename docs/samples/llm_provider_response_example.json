@@ -1,0 +1,9 @@
+{
+  "status": 200,
+  "text": "This is the model generated text",
+  "raw": {
+    "id": "resp_123",
+    "usage": { "tokens": 123 },
+    "choices": [ { "text": "This is the model generated text" } ]
+  }
+}

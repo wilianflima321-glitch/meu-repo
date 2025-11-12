@@ -1,0 +1,69 @@
+﻿2025-10-31T02:01:09.3739460Z ##[group]Run actions/checkout@v4
+2025-10-31T02:01:09.3740315Z with:
+2025-10-31T02:01:09.3740745Z   repository: wilianflima321-glitch/meu-repo
+2025-10-31T02:01:09.3741453Z   token: ***
+2025-10-31T02:01:09.3741832Z   ssh-strict: true
+2025-10-31T02:01:09.3742225Z   ssh-user: git
+2025-10-31T02:01:09.3742618Z   persist-credentials: true
+2025-10-31T02:01:09.3743065Z   clean: true
+2025-10-31T02:01:09.3743447Z   sparse-checkout-cone-mode: true
+2025-10-31T02:01:09.3743920Z   fetch-depth: 1
+2025-10-31T02:01:09.3744299Z   fetch-tags: false
+2025-10-31T02:01:09.3744691Z   show-progress: true
+2025-10-31T02:01:09.3745081Z   lfs: false
+2025-10-31T02:01:09.3745447Z   submodules: false
+2025-10-31T02:01:09.3745852Z   set-safe-directory: true
+2025-10-31T02:01:09.3746475Z ##[endgroup]
+2025-10-31T02:01:09.4901969Z Syncing repository: wilianflima321-glitch/meu-repo
+2025-10-31T02:01:09.4905151Z ##[group]Getting Git version info
+2025-10-31T02:01:09.4908022Z Working directory is '/home/runner/work/meu-repo/meu-repo'
+2025-10-31T02:01:09.4910880Z [command]/usr/bin/git version
+2025-10-31T02:01:09.4975966Z git version 2.51.0
+2025-10-31T02:01:09.5005786Z ##[endgroup]
+2025-10-31T02:01:09.5022997Z Temporarily overriding HOME='/home/runner/work/_temp/ee2beb8f-67a9-40e2-9b06-008736072789' before making global git config changes
+2025-10-31T02:01:09.5026715Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-31T02:01:09.5048338Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/meu-repo/meu-repo
+2025-10-31T02:01:09.5081897Z Deleting the contents of '/home/runner/work/meu-repo/meu-repo'
+2025-10-31T02:01:09.5085537Z ##[group]Initializing the repository
+2025-10-31T02:01:09.5090273Z [command]/usr/bin/git init /home/runner/work/meu-repo/meu-repo
+2025-10-31T02:01:09.5192873Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-31T02:01:09.5196463Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-31T02:01:09.5200254Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-31T02:01:09.5203123Z hint:
+2025-10-31T02:01:09.5204264Z hint: 	git config --global init.defaultBranch <name>
+2025-10-31T02:01:09.5205686Z hint:
+2025-10-31T02:01:09.5206851Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-31T02:01:09.5209137Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-31T02:01:09.5210902Z hint:
+2025-10-31T02:01:09.5211675Z hint: 	git branch -m <name>
+2025-10-31T02:01:09.5212983Z hint:
+2025-10-31T02:01:09.5214166Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-31T02:01:09.5216667Z Initialized empty Git repository in /home/runner/work/meu-repo/meu-repo/.git/
+2025-10-31T02:01:09.5219626Z [command]/usr/bin/git remote add origin https://github.com/wilianflima321-glitch/meu-repo
+2025-10-31T02:01:09.5361146Z ##[endgroup]
+2025-10-31T02:01:09.5363043Z ##[group]Disabling automatic garbage collection
+2025-10-31T02:01:09.5365724Z [command]/usr/bin/git config --local gc.auto 0
+2025-10-31T02:01:09.5401020Z ##[endgroup]
+2025-10-31T02:01:09.5402317Z ##[group]Setting up auth
+2025-10-31T02:01:09.5405558Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-31T02:01:09.5440217Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-31T02:01:09.5785564Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-31T02:01:09.5820582Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-31T02:01:09.6052273Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-31T02:01:09.6089523Z ##[endgroup]
+2025-10-31T02:01:09.6092178Z ##[group]Fetching the repository
+2025-10-31T02:01:09.6111132Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +dbd325e69d93f899fbd3652f3ad9cf9527982d17:refs/remotes/origin/infra/playwright-ci-ensemble-workflow-fix
+2025-10-31T02:01:09.8136154Z From https://github.com/wilianflima321-glitch/meu-repo
+2025-10-31T02:01:09.8139133Z  * [new ref]         dbd325e69d93f899fbd3652f3ad9cf9527982d17 -> origin/infra/playwright-ci-ensemble-workflow-fix
+2025-10-31T02:01:09.8144233Z ##[endgroup]
+2025-10-31T02:01:09.8146698Z ##[group]Determining the checkout info
+2025-10-31T02:01:09.8150039Z ##[endgroup]
+2025-10-31T02:01:09.8150980Z [command]/usr/bin/git sparse-checkout disable
+2025-10-31T02:01:09.8183072Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-31T02:01:09.8215705Z ##[group]Checking out the ref
+2025-10-31T02:01:09.8221175Z [command]/usr/bin/git checkout --progress --force -B infra/playwright-ci-ensemble-workflow-fix refs/remotes/origin/infra/playwright-ci-ensemble-workflow-fix
+2025-10-31T02:01:09.8300160Z Switched to a new branch 'infra/playwright-ci-ensemble-workflow-fix'
+2025-10-31T02:01:09.8305135Z branch 'infra/playwright-ci-ensemble-workflow-fix' set up to track 'origin/infra/playwright-ci-ensemble-workflow-fix'.
+2025-10-31T02:01:09.8310124Z ##[endgroup]
+2025-10-31T02:01:09.8343408Z [command]/usr/bin/git log -1 --format=%H
+2025-10-31T02:01:09.8366596Z dbd325e69d93f899fbd3652f3ad9cf9527982d17

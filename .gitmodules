@@ -1,0 +1,3 @@
+[submodule "cloud-ide-desktop/aethel_theia_fork"]
+	path = cloud-ide-desktop/aethel_theia_fork
+	url = ./cloud-ide-desktop/aethel_theia_fork

@@ -1,0 +1,19 @@
+{
+  "id": "provider-gemini-example",
+  "name": "Gemini (example)",
+  "type": "custom",
+  "endpoint": "https://gemini.googleapis.com/v1/models/gemini-proto:generate",
+  "apiKey": "REPLACE_WITH_YOUR_KEY",
+  "description": "Local example entry to show how to configure a Gemini provider for the mock. Do NOT commit real keys.",
+  "isEnabled": false,
+  "billingMode": "self",
+  "ownerId": null,
+  "rateCard": { "pricePerToken": 0.0002, "currency": "USD" },
+  "config": {
+    "model": "gemini-proto",
+    "additionalOptions": {
+      "temperature": 0.0,
+      "topP": 0.95
+    }
+  }
+}

@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: 'Run Playwright E2E job (set to "true" to run)'
+        required: false
+        default: 'false'
+
+jobs:
+  windows-check:
+    name: Windows checks (syntax, tsc, ai-ide tests)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        node: ['20']
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            ~/.cache
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Repo syntax check (PowerShell)
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File build/check_syntax.ps1
+
+      - name: TypeScript check (ai-ide package)
+        # If the theia fork tree isn't present in this repo (it often isn't in
+        # lightweight forks), skip the ai-ide tsc step instead of failing the
+        # whole job. This keeps CI green for other checks while preserving the
+        # intended tsc invocation when the tree is present.
+        run: |
+          if [ -f "cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json" ]; then
+            (cd cloud-ide-desktop/aethel_theia_fork && npx -y tsc --noEmit -p packages/ai-ide/tsconfig.json)
+          else
+            echo "::warning::ai-ide tsconfig not present in repo; skipping ai-ide TypeScript check"
+          fi
+
+      - name: Run ai-ide unit tests
+        shell: pwsh
+        run: |
+          Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide
+          node ./test/run-mocha.js
+          Pop-Location
+
+      - name: Upload windows logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-logs
+          path: |
+            cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/*.log
+
+  e2e:
+    name: Playwright E2E (optional)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20']
+    needs: windows-check
+    if: ${{ github.event.inputs.run_e2e == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        # Cache Playwright browsers to speed up CI (stored in ~/.cache/ms-playwright)
+        - name: Cache Playwright browsers
+          uses: actions/cache@v4
+          with:
+            path: ~/.cache/ms-playwright
+            key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+        - name: Install Playwright browsers
+          run: npm run playwright:install
+
+      - name: Start dev mock backend + proxy shim
+        run: |
+          # Start the dev mock backend on port 8011 and capture logs
+          nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
+          # Start the proxy shim on port 8010 which forwards to the mock backend
+          nohup env LISTEN_PORT=8010 TARGET_PORT=8011 node tools/ci/proxy-shim.js > proxy-shim.log 2>&1 &
+
+      - name: Wait for backend (health check)
+        run: |
+          chmod +x tools/ci/dev-mock-health.sh || true
+          tools/ci/dev-mock-health.sh
+
+      - name: Run Playwright tests (with retries and traces on first retry)
+        env:
+          # ensure Playwright stores browsers in cache path
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+        run: |
+          # run with 1 retry to reduce flakes; on first retry Playwright will collect trace
+          npx playwright test --config=playwright.config.ts --retries=1
+
+      - name: Upload Playwright traces (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: $(pwd)/playwright-report
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Upload dev mock logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-mock-log
+          path: |
+            dev-mock.log
+            proxy-shim.log
+
