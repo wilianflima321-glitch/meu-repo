@@ -1,0 +1,1 @@
+{"version":3,"file":"billing-admin-contribution.d.ts","sourceRoot":"","sources":["../../../src/browser/admin/billing-admin-contribution.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,aAAa,EAAE,MAAM,yBAAyB,CAAC;AAGxD,qBACa,wBAAwB;IAEjC,SAAS,CAAC,QAAQ,CAAC,aAAa,EAAG,aAAa,CAAC;IAE3C,UAAU;CAInB"}

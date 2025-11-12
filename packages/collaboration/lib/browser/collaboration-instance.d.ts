@@ -1,0 +1,94 @@
+import * as types from 'open-collaboration-protocol';
+import * as Y from 'yjs';
+import * as awarenessProtocol from 'y-protocols/awareness';
+import { Disposable, DisposableCollection, Emitter, Event, MessageService, URI } from '@theia/core';
+import { Container, interfaces } from '@theia/core/shared/inversify';
+import { ApplicationShell } from '@theia/core/lib/browser/shell/application-shell';
+import { EditorManager } from '@theia/editor/lib/browser/editor-manager';
+import { FileService } from '@theia/filesystem/lib/browser/file-service';
+import { MonacoTextModelService } from '@theia/monaco/lib/browser/monaco-text-model-service';
+import { CollaborationWorkspaceService } from './collaboration-workspace-service';
+import { Range as MonacoRange } from '@theia/monaco-editor-core';
+import { MonacoEditorModel } from '@theia/monaco/lib/browser/monaco-editor-model';
+import { Deferred } from '@theia/core/lib/common/promise-util';
+import { EditorDecoration, EditorWidget, Selection, TextEditorDocument } from '@theia/editor/lib/browser';
+import { OpenerService } from '@theia/core/lib/browser';
+import { CollaborationFileSystemProvider } from './collaboration-file-system-provider';
+import { Range } from '@theia/core/shared/vscode-languageserver-protocol';
+import { CollaborationColorService } from './collaboration-color-service';
+import { OpenCollaborationYjsProvider } from 'open-collaboration-yjs';
+import { CollaborationUtils } from './collaboration-utils';
+export declare const CollaborationInstanceFactory: unique symbol;
+export type CollaborationInstanceFactory = (connection: CollaborationInstanceOptions) => CollaborationInstance;
+export declare const CollaborationInstanceOptions: unique symbol;
+export interface CollaborationInstanceOptions {
+    role: 'host' | 'guest';
+    connection: types.ProtocolBroadcastConnection;
+}
+export declare function createCollaborationInstanceContainer(parent: interfaces.Container, options: CollaborationInstanceOptions): Container;
+export interface DisposablePeer extends Disposable {
+    peer: types.Peer;
+}
+export declare const COLLABORATION_SELECTION = "theia-collaboration-selection";
+export declare const COLLABORATION_SELECTION_MARKER = "theia-collaboration-selection-marker";
+export declare const COLLABORATION_SELECTION_INVERTED = "theia-collaboration-selection-inverted";
+export declare class CollaborationInstance implements Disposable {
+    protected readonly messageService: MessageService;
+    protected readonly workspaceService: CollaborationWorkspaceService;
+    protected readonly fileService: FileService;
+    protected readonly monacoModelService: MonacoTextModelService;
+    protected readonly editorManager: EditorManager;
+    protected readonly openerService: OpenerService;
+    protected readonly shell: ApplicationShell;
+    protected readonly options: CollaborationInstanceOptions;
+    protected readonly collaborationColorService: CollaborationColorService;
+    protected readonly utils: CollaborationUtils;
+    protected identity: Deferred<types.Peer>;
+    protected peers: Map<string, DisposablePeer>;
+    protected yjs: Y.Doc;
+    protected yjsAwareness: awarenessProtocol.Awareness;
+    protected yjsProvider: OpenCollaborationYjsProvider;
+    protected colorIndex: number;
+    protected editorDecorations: Map<EditorWidget, string[]>;
+    protected fileSystem?: CollaborationFileSystemProvider;
+    protected permissions: types.Permissions;
+    protected onDidCloseEmitter: Emitter<void>;
+    get onDidClose(): Event<void>;
+    protected toDispose: DisposableCollection;
+    protected _readonly: boolean;
+    get readonly(): boolean;
+    set readonly(value: boolean);
+    get isHost(): boolean;
+    get host(): types.Peer;
+    protected init(): void;
+    protected registerProtocolEvents(connection: types.ProtocolBroadcastConnection): void;
+    protected registerEditorEvents(connection: types.ProtocolBroadcastConnection): void;
+    protected isSharedResource(resource?: URI): boolean;
+    protected registerFileSystemEvents(connection: types.ProtocolBroadcastConnection): void;
+    protected rerenderPresence(...widgets: EditorWidget[]): void;
+    protected rerenderPresenceDecorations(decorations: Map<string, EditorDecoration[]>, ...widgets: EditorWidget[]): void;
+    protected registerFileSystemChanges(): void;
+    protected registerPresenceUpdate(widget: EditorWidget): Promise<void>;
+    protected updateEditorPresence(widget: EditorWidget): void;
+    protected setSharedSelection(selection?: types.ClientSelection): void;
+    protected rangeEqual(a: Range, b: Range): boolean;
+    initialize(data: types.InitData): Promise<void>;
+    protected addPeer(peer: types.Peer): void;
+    protected createPeerStyleSheet(peer: types.Peer): Disposable;
+    protected getOpenEditors(uri?: URI): EditorWidget[];
+    protected createSelectionFromRelative(selection: types.RelativeTextSelection, model: MonacoEditorModel): Selection | undefined;
+    protected createRelativeSelection(selection: Selection, model: TextEditorDocument, ytext: Y.Text): types.RelativeTextSelection;
+    protected readonly yjsMutex: import("lib0/mutex").mutex;
+    protected registerModelUpdate(model: MonacoEditorModel): void;
+    protected resetYjsText(yjsText: Y.Text, text: string): void;
+    protected getModel(uri: URI): MonacoEditorModel | undefined;
+    protected pushChangesToModel(model: MonacoEditorModel, changes: {
+        range: MonacoRange;
+        text: string;
+        forceMoveMarkers?: boolean;
+    }[]): void;
+    protected softReplaceModel(model: MonacoEditorModel, text: string): void;
+    protected openUri(uri: URI): Promise<void>;
+    dispose(): void;
+}
+//# sourceMappingURL=collaboration-instance.d.ts.map

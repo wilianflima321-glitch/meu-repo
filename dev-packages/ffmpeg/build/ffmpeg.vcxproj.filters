@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="..">
+      <UniqueIdentifier>{739DB09A-CC57-A953-A6CF-F64FA08E4FA7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\native">
+      <UniqueIdentifier>{D56EDB24-21BF-8816-5D92-25C635122F26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..">
+      <UniqueIdentifier>{739DB09A-CC57-A953-A6CF-F64FA08E4FA7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\native">
+      <UniqueIdentifier>{D56EDB24-21BF-8816-5D92-25C635122F26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:">
+      <UniqueIdentifier>{8CFF81E0-219F-7AC4-FE29-B3328AD4560B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:\repo">
+      <UniqueIdentifier>{0107C7CE-B60A-D671-3E9A-C8C43D026F23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:\repo\cloud-ide-desktop">
+      <UniqueIdentifier>{9AE6D97B-C352-DE4B-B97C-0F952ABEEC44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:\repo\cloud-ide-desktop\aethel_theia_fork">
+      <UniqueIdentifier>{7367046F-B8BA-FD92-4725-4E1E553E2F60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:\repo\cloud-ide-desktop\aethel_theia_fork\node_modules">
+      <UniqueIdentifier>{56DF7A98-063D-FB9D-485C-089023B4C16A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:\repo\cloud-ide-desktop\aethel_theia_fork\node_modules\@electron">
+      <UniqueIdentifier>{6FD122B1-87CE-5BE7-127F-692B6E499EA3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:\repo\cloud-ide-desktop\aethel_theia_fork\node_modules\@electron\node-gyp">
+      <UniqueIdentifier>{77348C0E-2034-7791-74D5-63C077DF5A3B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="G:\repo\cloud-ide-desktop\aethel_theia_fork\node_modules\@electron\node-gyp\src">
+      <UniqueIdentifier>{8CDEE807-BC53-E450-C8B8-4DEBB66742D4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..">
+      <UniqueIdentifier>{739DB09A-CC57-A953-A6CF-F64FA08E4FA7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\native\ffmpeg.c">
+      <Filter>..\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\native\win-ffmpeg.c">
+      <Filter>..\native</Filter>
+    </ClCompile>
+    <ClCompile Include="G:\repo\cloud-ide-desktop\aethel_theia_fork\node_modules\@electron\node-gyp\src\win_delay_load_hook.cc">
+      <Filter>G:\repo\cloud-ide-desktop\aethel_theia_fork\node_modules\@electron\node-gyp\src</Filter>
+    </ClCompile>
+    <None Include="..\binding.gyp">
+      <Filter>..</Filter>
+    </None>
+  </ItemGroup>
+</Project>

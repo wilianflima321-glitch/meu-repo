@@ -1,0 +1,1 @@
+{"version":3,"file":"webview-frontend-preference-contribution.d.ts","sourceRoot":"","sources":["../../../../src/main/browser/webview/webview-frontend-preference-contribution.ts"],"names":[],"mappings":"AAcA,OAAO,EAAO,sBAAsB,EAAoB,uBAAuB,EAAmB,MAAM,aAAa,CAAC;AAetH,qBAAa,qCAAsC,YAAW,sBAAsB;IAC1E,UAAU,CAAC,OAAO,EAAE,uBAAuB,GAAG,OAAO,CAAC,IAAI,CAAC;CAMpE"}

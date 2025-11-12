@@ -1,0 +1,1 @@
+{"version":3,"file":"headless-plugin-protocol.d.ts","sourceRoot":"","sources":["../../src/common/headless-plugin-protocol.ts"],"names":[],"mappings":"AAgBA,cAAc,mBAAmB,CAAC;AAElC,OAAO,QAAQ,mBAAmB,CAAC;IACjC;;OAEG;IACH,UAAU,aAAa;QACnB;;WAEG;QACH,QAAQ,CAAC,EAAE;YACP,4DAA4D;YAC5D,gBAAgB,CAAC,EAAE,MAAM,EAAE,CAAC;SAC/B,CAAA;KACJ;CACF;AAED;;;GAGG;AACH,eAAO,MAAM,iCAAiC,eAA8C,CAAC"}

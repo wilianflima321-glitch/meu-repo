@@ -156,9 +156,25 @@ app.post('/api/llm/dev/run-ensemble/:id', (req, res) => {
     const tokensOutput = body.tokensOutput || 0;
     // verify scene constraints if provided or if ensemble defines constraints
     const scene = body.scene || null;
-    const constraints = (ensemble && Array.isArray(ensemble.constraints)) ? ensemble.constraints : (body.constraints || (scene && scene.constraints) || []);
+  // Prefer ensemble-defined constraints only when non-empty; otherwise allow per-request or scene-level constraints
+  const constraints = (ensemble && Array.isArray(ensemble.constraints) && ensemble.constraints.length) ? ensemble.constraints : (body.constraints || (scene && scene.constraints) || []);
     if (scene && constraints && constraints.length) {
-      const errors = verifyScene(scene, constraints);
+  // Log scene and constraints to aid debugging of verifier behavior. Use debug level;
+  // enable via MOCK_DEBUG environment variable in CI/local dev to avoid noisy logs.
+      core.logger.debug({ ensembleId: id, constraints, scene }, 'run-ensemble: verifying scene against constraints');
+      const errors = verifier.verifyScene(scene, constraints);
+      core.logger.debug({ ensembleId: id, errors }, 'run-ensemble: verifier result');
+      // If MOCK_DEBUG is enabled, persist a short verifier debug trace to disk to assist CI triage
+      try {
+        if (process.env.MOCK_DEBUG && String(process.env.MOCK_DEBUG).toLowerCase() !== 'false') {
+          const dbg = { time: new Date().toISOString(), ensembleId: id, constraints, scene, errors };
+          try {
+            fs.writeFileSync(path.join(__dirname, 'verifier-debug.json'), JSON.stringify(dbg, null, 2));
+          } catch (e) {
+            core.logger.debug({ err: e }, 'failed to write verifier-debug.json');
+          }
+        }
+      } catch (e) { /* noop */ }
       if (errors && errors.length) {
         // if ensemble is in soft verification mode, don't block — return warnings but proceed
         if (ensemble.verificationMode === 'soft') {
@@ -218,7 +234,7 @@ app.post('/api/llm/dev/verify-scene', (req, res) => {
     const body = req.body || {};
     const scene = body.scene || {};
     const constraints = body.constraints || scene.constraints || [];
-    const errors = verifyScene(scene, constraints);
+  const errors = verifier.verifyScene(scene, constraints);
     if (errors.length) return res.status(422).json({ ok: false, errors });
     return res.json({ ok: true });
   } catch (e) {
@@ -421,7 +437,9 @@ setInterval(() => {
 }, 60 * 1000);
 
 const port = process.env.PORT || 8010;
-app.listen(port, () => core.logger.info(`LLM mock listening on http://localhost:${port}`));
+// Bind explicitly on IPv4 (0.0.0.0) to avoid environments where Node binds only to IPv6
+// and causes 127.0.0.1 (IPv4) clients to observe connection failures.
+app.listen(port, '0.0.0.0', () => core.logger.info(`LLM mock listening on http://localhost:${port}`));
 
 // Prometheus metrics scrape endpoint
 app.get('/metrics', async (req, res) => {
