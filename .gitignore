@@ -16,6 +16,8 @@ build/
 **/*.tsbuildinfo
 **/coverage/
 **/.nyc_output/
+playwright-report/
+test-results/
 
 # Env
 .env
