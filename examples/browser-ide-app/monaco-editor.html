@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Monaco Editor - AI IDE</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #1e1e1e;
+        }
+        
+        #toolbar {
+            background: #252526;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 1px solid #3e3e42;
+        }
+        
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #1177bb;
+        }
+        
+        select {
+            background: #3c3c3c;
+            color: white;
+            border: 1px solid #3e3e42;
+            padding: 8px;
+            border-radius: 3px;
+        }
+        
+        #editor-container {
+            width: 100%;
+            height: calc(100vh - 50px);
+        }
+        
+        #status {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #007acc;
+            color: white;
+            padding: 5px 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <button onclick="runCode()">▶️ Run</button>
+        <button onclick="formatCode()">🎨 Format</button>
+        <button onclick="askAI()">🤖 AI Help</button>
+        <button onclick="saveCode()">💾 Save</button>
+        <select id="language-select" onchange="changeLanguage()">
+            <option value="typescript">TypeScript</option>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="go">Go</option>
+            <option value="rust">Rust</option>
+        </select>
+        <span style="margin-left: auto; font-size: 12px;">
+            Monaco Editor | AI-Powered IDE
+        </span>
+    </div>
+    
+    <div id="editor-container"></div>
+    
+    <div id="status">
+        Ready | Line 1, Col 1 | UTF-8 | TypeScript
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script>
+        let editor;
+        
+        require.config({ 
+            paths: { 
+                'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' 
+            } 
+        });
+        
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: `// Welcome to AI IDE with Monaco Editor!
+// This is a fully functional code editor with AI assistance
+
+interface User {
+    name: string;
+    email: string;
+}
+
+function validateEmail(email: string): boolean {
+    const regex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    return regex.test(email);
+}
+
+const user: User = {
+    name: "Developer",
+    email: "dev@ai-ide.com"
+};
+
+console.log(\`User: \${user.name}\`);
+console.log(\`Email valid: \${validateEmail(user.email)}\`);
+
+// Try pressing Ctrl+Space for AI completions!
+// Try pressing Ctrl+S to save
+// Try pressing Ctrl+Shift+F to format`,
+                language: 'typescript',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: true },
+                fontSize: 14,
+                lineNumbers: 'on',
+                roundedSelection: false,
+                scrollBeyondLastLine: false,
+                readOnly: false,
+                cursorStyle: 'line',
+                suggestOnTriggerCharacters: true,
+                quickSuggestions: true,
+                formatOnPaste: true,
+                formatOnType: true,
+                tabSize: 2,
+            });
+            
+            // Update status bar
+            editor.onDidChangeCursorPosition((e) => {
+                const position = editor.getPosition();
+                const lang = editor.getModel().getLanguageId();
+                document.getElementById('status').textContent = 
+                    `Line ${position.lineNumber}, Col ${position.column} | UTF-8 | ${lang}`;
+            });
+            
+            // Keyboard shortcuts
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function() {
+                saveCode();
+            });
+            
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, function() {
+                formatCode();
+            });
+            
+            editor.addCommand(monaco.KeyCode.F5, function() {
+                runCode();
+            });
+            
+            // Auto-save every 30 seconds
+            setInterval(saveCode, 30000);
+            
+            // Restore saved code
+            const saved = localStorage.getItem('monaco_code');
+            const savedLang = localStorage.getItem('monaco_lang');
+            if (saved) {
+                editor.setValue(saved);
+            }
+            if (savedLang) {
+                document.getElementById('language-select').value = savedLang;
+                monaco.editor.setModelLanguage(editor.getModel(), savedLang);
+            }
+            
+            console.log('Monaco Editor loaded successfully!');
+        });
+        
+        function runCode() {
+            const code = editor.getValue();
+            const lang = editor.getModel().getLanguageId();
+            
+            console.log('='.repeat(50));
+            console.log('Running code:', lang);
+            console.log('='.repeat(50));
+            
+            if (lang === 'javascript' || lang === 'typescript') {
+                try {
+                    eval(code);
+                    alert('✅ Code executed successfully! Check console for output.');
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                    console.error(error);
+                }
+            } else {
+                alert(`Running ${lang} code requires a backend. For now, check the console.`);
+                console.log(code);
+            }
+        }
+        
+        function formatCode() {
+            editor.getAction('editor.action.formatDocument').run();
+            alert('✅ Code formatted!');
+        }
+        
+        async function askAI() {
+            const selection = editor.getSelection();
+            const selectedText = editor.getModel().getValueInRange(selection);
+            const prompt = window.prompt('Ask AI about your code:', selectedText ? 'Explain this code' : 'Help me write...');
+            
+            if (!prompt) return;
+            
+            const code = selectedText || editor.getValue();
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/agent/coder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{
+                            role: 'user',
+                            content: `${prompt}\\n\\nCode:\\n${code}`
+                        }]
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Show AI response
+                const aiResponse = result.content || 'No response from AI';
+                alert('🤖 AI Response:\\n\\n' + aiResponse.substring(0, 500) + '...');
+                
+                // Optionally insert AI suggestion
+                if (selectedText && confirm('Insert AI suggestion?')) {
+                    editor.executeEdits('', [{
+                        range: selection,
+                        text: aiResponse
+                    }]);
+                }
+            } catch (error) {
+                alert('❌ Error calling AI: ' + error.message + '\\n\\nMake sure the server is running on port 3000');
+            }
+        }
+        
+        function changeLanguage() {
+            const lang = document.getElementById('language-select').value;
+            monaco.editor.setModelLanguage(editor.getModel(), lang);
+            localStorage.setItem('monaco_lang', lang);
+            
+            // Update sample code for language
+            const samples = {
+                typescript: `// TypeScript Example
+interface User {
+    name: string;
+    age: number;
+}
+
+const greet = (user: User): string => {
+    return \`Hello, \${user.name}!\`;
+};`,
+                javascript: `// JavaScript Example
+function fibonacci(n) {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+console.log(fibonacci(10));`,
+                python: `# Python Example
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+print(factorial(5))`,
+                java: `// Java Example
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}`,
+                go: `// Go Example
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}`,
+                rust: `// Rust Example
+fn main() {
+    println!("Hello, World!");
+}`
+            };
+            
+            if (samples[lang] && confirm('Load sample code for ' + lang + '?')) {
+                editor.setValue(samples[lang]);
+            }
+        }
+        
+        function saveCode() {
+            const code = editor.getValue();
+            const lang = editor.getModel().getLanguageId();
+            localStorage.setItem('monaco_code', code);
+            localStorage.setItem('monaco_lang', lang);
+            console.log('✅ Code auto-saved');
+        }
+    </script>
+</body>
+</html>

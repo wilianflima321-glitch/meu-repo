@@ -35,12 +35,28 @@ function sampleTrajectory(v0, angleDeg, g = 9.81, steps = 100, opts = {}) {
   let x = 0;
   let y = 0;
   const points = [];
+  
+  // Pre-calculate constant values
+  const hasDrag = dragCoef && dragCoef !== 0;
+  const dragOverMass = hasDrag ? dragCoef / mass : 0;
+  
   for (let i = 0; i < steps; i++) {
     const t = i * dt;
-    // drag acceleration approx: a_drag_x = -k * v * vx / m ; a_drag_y = -k * v * vy / m
-    const v = Math.sqrt(vx * vx + vy * vy) || 0;
-    const a_drag_x = dragCoef && v > 0 ? (-dragCoef * v * vx) / mass : 0;
-    const a_drag_y = dragCoef && v > 0 ? (-dragCoef * v * vy) / mass : 0;
+    
+    // Optimize drag acceleration calculation
+    let a_drag_x = 0;
+    let a_drag_y = 0;
+    if (hasDrag) {
+      const vxSq = vx * vx;
+      const vySq = vy * vy;
+      const v = Math.sqrt(vxSq + vySq);
+      if (v > 0) {
+        const dragFactor = -dragOverMass * v;
+        a_drag_x = dragFactor * vx;
+        a_drag_y = dragFactor * vy;
+      }
+    }
+    
     // integrate velocities
     vx = vx + a_drag_x * dt;
     vy = vy + (-g + a_drag_y) * dt;
@@ -64,17 +80,25 @@ function aabbIntersects(a, b) {
 
 function trajectoryIntersectsAABBs(trajPoints, aabbs) {
   if (!Array.isArray(trajPoints) || !Array.isArray(aabbs)) return false;
+  
+  // Early exit if no boxes to check
+  if (aabbs.length === 0) return false;
+  
   for (const p of trajPoints) {
     const px = p.x || 0;
     const py = p.y || 0;
-    const pz = 0; // 2D for now
+    
     for (const box of aabbs) {
       // treat box as ground-aligned 2D rectangle on x/y
-      const b = Object.assign({ z: 0, d: 1 }, box);
-      // simple point-in-rect check
-      const bx1 = b.x || 0, by1 = b.y || 0;
-      const bx2 = bx1 + (b.w || 0), by2 = by1 + (b.h || 0);
-      if (px >= bx1 && px <= bx2 && py >= by1 && py <= by2) return true;
+      const bx1 = box.x || 0;
+      const by1 = box.y || 0;
+      const bx2 = bx1 + (box.w || 0);
+      const by2 = by1 + (box.h || 0);
+      
+      // simple point-in-rect check with early exit
+      if (px >= bx1 && px <= bx2 && py >= by1 && py <= by2) {
+        return true;
+      }
     }
   }
   return false;
