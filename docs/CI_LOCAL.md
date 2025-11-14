@@ -55,4 +55,20 @@ Collect debug artifacts
 - `tools/ci/smoke_ci.log`
 - `playwright-report/` (HTML report)
 
+Generate a Playwright summary text file
+
+1. Run Playwright with the JSON reporter enabled, for example:
+
+	```bash
+	npx playwright test --config=playwright.config.js --reporter="line,json=test-results/playwright.json,html"
+	```
+
+2. Convert the JSON results into the tracked summary file:
+
+	```bash
+	npm run diagnostics:playwright
+	```
+
+	This writes/updates `diagnostics/PLAYWRIGHT_SUMMARY.txt` and can also be used by CI to attach a lightweight summary to workflow artifacts.
+
 If you reproduce an issue, attach the artifacts above to the PR or paste them in the issue to speed triage.

@@ -1,1 +1,14 @@
 
+
+name: placeholder
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report status
+        run: echo "No default workflow defined yet."
+

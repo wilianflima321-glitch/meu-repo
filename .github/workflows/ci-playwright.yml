@@ -144,15 +144,22 @@ jobs:
           fi
 
       - name: Run Playwright tests
-        run: >-
-          bash -eo pipefail -c '
-            if [ -f playwright.config.ts ] || [ -f playwright.config.js ]; then
-              echo "Found playwright config - running tests with --config"
-              npx playwright test --config=playwright.config.ts --retries=1 --reporter=html || true
-            else
-              echo "No playwright config found; skipping Playwright tests"
-            fi
-          '
+        shell: bash
+        run: |
+          set -eo pipefail
+          if [ -f playwright.config.ts ]; then
+            PLAYWRIGHT_CONFIG=playwright.config.ts
+          elif [ -f playwright.config.js ]; then
+            PLAYWRIGHT_CONFIG=playwright.config.js
+          else
+            PLAYWRIGHT_CONFIG=""
+          fi
+          if [ -z "$PLAYWRIGHT_CONFIG" ]; then
+            echo "No playwright config found; skipping Playwright tests"
+          else
+            echo "Found $PLAYWRIGHT_CONFIG - running tests with --config"
+            npx playwright test --config="$PLAYWRIGHT_CONFIG" --retries=1 --reporter=html || true
+          fi
 
       - name: Archive Playwright report (zip)
         if: always()
@@ -164,6 +171,7 @@ jobs:
           fi
 
       - name: Validate artifacts presence and size
+        shell: bash
         if: always()
         run: |
           echo "Validating expected build artifacts before upload..."

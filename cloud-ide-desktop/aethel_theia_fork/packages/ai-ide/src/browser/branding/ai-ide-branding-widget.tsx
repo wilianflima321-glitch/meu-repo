@@ -9,6 +9,7 @@ import { AIToolsConfigurationWidget } from '../ai-configuration/tools-configurat
 import { AITokenUsageConfigurationWidget } from '../ai-configuration/token-usage-configuration-widget';
 import { ChatViewWidget } from '@theia/ai-chat-ui/lib/browser/chat-view-widget';
 import { AIHistoryView } from '@theia/ai-history/lib/browser/ai-history-widget';
+import { getBrandingCopy } from './branding-copy';
 
 type ShellArea = 'main' | 'left' | 'right' | 'bottom' | 'top';
 
@@ -41,51 +42,56 @@ export class AiIdeBrandingWidget extends ReactWidget {
 
     @postConstruct()
     protected init(): void {
-        this.quickActions = [
+        this.quickActions = this.createQuickActions();
+    }
+
+    protected createQuickActions(): QuickActionConfig[] {
+        const copy = getBrandingCopy();
+        return [
             {
                 id: 'providers',
-                label: 'Provedores',
-                description: 'Configurar provedores LLM e credenciais',
+                label: copy.quickActions.providers.label,
+                description: copy.quickActions.providers.description,
                 codicon: 'cloud',
                 widgetId: ProviderConfigurationWidget.ID,
                 area: 'left'
             },
             {
                 id: 'agents',
-                label: 'Agentes',
-                description: 'Gerenciar agentes orquestradores',
+                label: copy.quickActions.agents.label,
+                description: copy.quickActions.agents.description,
                 codicon: 'organization',
                 widgetId: AIAgentConfigurationWidget.ID,
                 area: 'left'
             },
             {
                 id: 'tools',
-                label: 'Ferramentas',
-                description: 'Habilitar e revisar ferramentas disponíveis',
+                label: copy.quickActions.tools.label,
+                description: copy.quickActions.tools.description,
                 codicon: 'tools',
                 widgetId: AIToolsConfigurationWidget.ID,
                 area: 'left'
             },
             {
                 id: 'usage',
-                label: 'Uso de Tokens',
-                description: 'Monitorar consumo e billing',
+                label: copy.quickActions.usage.label,
+                description: copy.quickActions.usage.description,
                 codicon: 'graph-line',
                 widgetId: AITokenUsageConfigurationWidget.ID,
                 area: 'bottom'
             },
             {
                 id: 'chat',
-                label: 'Chat',
-                description: 'Voltar para a conversa ativa',
+                label: copy.quickActions.chat.label,
+                description: copy.quickActions.chat.description,
                 codicon: 'comment-discussion',
                 widgetId: ChatViewWidget.ID,
                 area: 'main'
             },
             {
                 id: 'history',
-                label: 'Histórico',
-                description: 'Explorar execuções e auditoria',
+                label: copy.quickActions.history.label,
+                description: copy.quickActions.history.description,
                 codicon: 'history',
                 widgetId: AIHistoryView.ID,
                 area: 'right'
@@ -94,24 +100,27 @@ export class AiIdeBrandingWidget extends ReactWidget {
     }
 
     protected render(): React.ReactNode {
+        const copy = getBrandingCopy();
         return (
             <div className='ai-ide-branding-bar'>
                 <div className='ai-ide-branding-identity'>
-                    <div className='ai-ide-logo-mark' aria-hidden='true'>
-                        <svg width='32' height='32' viewBox='0 0 32 32' role='img'>
+                    <div className='ai-ide-logo-mark'>
+                        <svg width='32' height='32' viewBox='0 0 64 64' role='img' aria-label={copy.logoAriaLabel}>
+                            <title>{copy.logoTitle}</title>
                             <defs>
                                 <linearGradient id='ai-ide-logo-gradient' x1='0%' y1='0%' x2='100%' y2='100%'>
                                     <stop offset='0%' stopColor='#6366f1'/>
-                                    <stop offset='100%' stopColor='#22d3ee'/>
+                                    <stop offset='100%' stopColor='#ec4899'/>
                                 </linearGradient>
                             </defs>
-                            <rect x='2' y='2' width='28' height='28' rx='8' fill='url(#ai-ide-logo-gradient)'/>
-                            <path d='M11.5 22L16 10l4.5 12h-2.6l-.9-2.4h-3.6l-.9 2.4h-2.6Zm4.5-4.4L14.8 14l-1.2 3.6h2.4Z' fill='#0f172a'/>
+                            <rect width='64' height='64' rx='14' fill='url(#ai-ide-logo-gradient)'/>
+                            <path d='M18 42l14-22 14 22' stroke='#ffffff' strokeWidth='4' strokeLinecap='round' strokeLinejoin='round'/>
+                            <circle cx='32' cy='42' r='3' fill='#ffffff'/>
                         </svg>
                     </div>
                     <div className='ai-ide-branding-text'>
-                        <span className='ai-ide-branding-name'>Aethel IDE</span>
-                        <span className='ai-ide-branding-tagline'>Orquestre provedores, agentes e ferramentas de IA com confiança</span>
+                        <span className='ai-ide-branding-name'>{copy.name}</span>
+                        <span className='ai-ide-branding-tagline'>{copy.tagline}</span>
                     </div>
                 </div>
                 <div className='ai-ide-branding-actions'>

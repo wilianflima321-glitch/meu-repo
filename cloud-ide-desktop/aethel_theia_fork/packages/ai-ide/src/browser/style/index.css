@@ -3,6 +3,11 @@
 :root {
     --ai-ide-font-stack: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --ai-ide-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
+    --ai-ide-brand-primary: #6366f1;
+    --ai-ide-brand-secondary: #ec4899;
+    --ai-ide-brand-tertiary: #22d3ee;
+    --ai-ide-brand-tertiary-rgb: 34, 211, 238;
+    --ai-ide-brand-gradient: linear-gradient(135deg, var(--ai-ide-brand-primary), var(--ai-ide-brand-secondary));
     --ai-ide-background: #0f172a;
     --ai-ide-surface: #1e293b;
     --ai-ide-surface-alt: #273554;
@@ -10,9 +15,10 @@
     --ai-ide-overlay: rgba(15, 23, 42, 0.85);
     --ai-ide-border: rgba(99, 102, 241, 0.35);
     --ai-ide-border-muted: rgba(148, 163, 184, 0.24);
-    --ai-ide-border-strong: rgba(94, 234, 212, 0.45);
-    --ai-ide-accent: #6366f1;
-    --ai-ide-accent-secondary: #22d3ee;
+    --ai-ide-border-strong: rgba(236, 72, 153, 0.45);
+    --ai-ide-accent: var(--ai-ide-brand-primary);
+    --ai-ide-accent-secondary: var(--ai-ide-brand-secondary);
+    --ai-ide-accent-tertiary: var(--ai-ide-brand-tertiary);
     --ai-ide-accent-warm: #f59e0b;
     --ai-ide-text: #f8fafc;
     --ai-ide-text-muted: #cbd5e1;
@@ -32,8 +38,8 @@
 body,
 .theia-app-shell {
     font-family: var(--ai-ide-font-stack);
-    background: radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.25), transparent 55%),
-        radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.15), transparent 50%),
+    background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.35), transparent 55%),
+        radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.25), transparent 50%),
         linear-gradient(140deg, #070b14 0%, #0b1222 40%, #111c33 100%);
     color: var(--ai-ide-text);
     letter-spacing: 0.01em;
@@ -124,6 +130,7 @@ body,
     justify-content: space-between;
     gap: 24px;
     padding: 12px 24px;
+    flex-wrap: wrap;
 }
 
 .ai-ide-branding-identity {
@@ -138,6 +145,7 @@ body,
     border-radius: 12px;
     box-shadow: var(--ai-ide-shadow-sm);
     overflow: hidden;
+    background: var(--ai-ide-brand-gradient);
 }
 
 .ai-ide-branding-text {
@@ -163,21 +171,22 @@ body,
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
+    justify-content: flex-end;
 }
 
 .ai-ide-branding-action {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(99, 102, 241, 0.18);
-    border: 1px solid rgba(99, 102, 241, 0.4);
+    background: linear-gradient(120deg, rgba(99, 102, 241, 0.18), rgba(236, 72, 153, 0.2));
+    border: 1px solid rgba(236, 72, 153, 0.45);
     border-radius: var(--ai-ide-radius-sm);
     color: var(--ai-ide-text);
     padding: 8px 14px;
     font-size: 12px;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    transition: transform var(--ai-ide-transition), box-shadow var(--ai-ide-transition), border-color var(--ai-ide-transition);
+    transition: transform var(--ai-ide-transition), box-shadow var(--ai-ide-transition), border-color var(--ai-ide-transition), background var(--ai-ide-transition);
 }
 
 .ai-ide-branding-action .codicon {
@@ -186,8 +195,9 @@ body,
 
 .ai-ide-branding-action:hover {
     transform: translateY(-1px);
-    border-color: rgba(34, 211, 238, 0.6);
-    box-shadow: 0 10px 30px rgba(34, 211, 238, 0.25);
+    border-color: rgba(236, 72, 153, 0.8);
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.35);
+    background: linear-gradient(120deg, rgba(99, 102, 241, 0.35), rgba(236, 72, 153, 0.38));
 }
 
 .ai-ide-branding-action:focus-visible {
@@ -265,7 +275,7 @@ button:not(.ai-ide-branding-action) {
 
 button:not(.ai-ide-branding-action):hover {
     background: rgba(99, 102, 241, 0.25);
-    border-color: rgba(34, 211, 238, 0.45);
+    border-color: rgba(236, 72, 153, 0.45);
 }
 
 label {
@@ -278,12 +288,16 @@ label {
 }
 
 .provider-config-root {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
     padding: 12px 18px;
     color: var(--ai-ide-text);
     font-size: 13px;
+}
+
+.provider-config-columns {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: flex-start;
 }
 
 .provider-config-column {
@@ -403,8 +417,8 @@ label {
 }
 
 .ai-ide-chat-bubble.user {
-    border-color: rgba(34, 211, 238, 0.55);
-    background: rgba(20, 184, 166, 0.16);
+    border-color: rgba(var(--ai-ide-brand-tertiary-rgb), 0.55);
+    background: rgba(var(--ai-ide-brand-tertiary-rgb), 0.16);
 }
 
 .ai-ide-chat-bubble.assistant {
@@ -438,7 +452,7 @@ label {
 }
 
 .ai-ide-footer-button.primary {
-    background: linear-gradient(120deg, rgba(99, 102, 241, 0.85), rgba(34, 211, 238, 0.75));
+    background: linear-gradient(120deg, rgba(99, 102, 241, 0.85), rgba(236, 72, 153, 0.75));
     border: none;
     color: #0b1120;
     font-weight: 600;
@@ -472,10 +486,24 @@ label {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(34, 211, 238, 0.55);
+    background: rgba(236, 72, 153, 0.55);
 }
 
 ::selection {
     background: rgba(99, 102, 241, 0.35);
     color: #f8fafc;
+}
+
+@media (max-width: 1200px) {
+    .provider-config-columns {
+        grid-template-columns: 1fr;
+    }
+    .ai-ide-branding-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .ai-ide-branding-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
 }

@@ -60,10 +60,18 @@ if (!testFiles || !testFiles.length) {
 // If a light-weight package.spec.js exists, run only that to avoid heavy imports during smoke/test (allows coverage runner to run)
 const packageSpec = testFiles.find(f => f === 'lib/package.spec.js' || f.endsWith('/package.spec.js') || f.endsWith('\\package.spec.js'));
 const registrySpec = testFiles.find(f => f.includes('llm-provider-registry.spec.js'));
+const brandingSpec = testFiles.find(f => f.includes('ai-ide-branding-widget.spec.js'));
 // By default prefer the lightweight package.spec.js to avoid loading heavy Theia modules in limited environments.
 // Set FULL_TESTS=1 to run the entire compiled test suite.
 if (packageSpec && process.env.FULL_TESTS !== '1') {
-  testFiles = registrySpec ? [packageSpec, registrySpec] : [packageSpec];
+  const focused = [packageSpec];
+  if (registrySpec) {
+    focused.push(registrySpec);
+  }
+  if (brandingSpec) {
+    focused.push(brandingSpec);
+  }
+  testFiles = Array.from(new Set(focused));
 }
 
 console.log('Running mocha:', mochaBin, args.concat(testFiles).join(' '));
