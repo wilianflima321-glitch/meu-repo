@@ -1,32 +1,34 @@
 import { injectable, inject } from '@theia/core/shared/inversify';
 import { FrontendApplicationContribution } from '@theia/core/lib/browser/frontend-application-contribution';
 import { StatusBar, StatusBarAlignment } from '@theia/core/lib/browser/status-bar/status-bar';
-import { PreferenceService } from '@theia/core';
 import { DisposableCollection } from '@theia/core/lib/common/disposable';
 import { AIConfigurationSelectionService } from '../ai-configuration/ai-configuration-service';
 import { LlmProviderRegistry } from '../llm-provider-registry';
-import { AI_LLM_PROVIDERS_PREF } from '../../common/ai-llm-preferences';
 import type { Agent } from '@theia/ai-core/lib/common';
+import type { LlmProviderConfig } from '../../common/ai-llm-preferences';
 
 @injectable()
 export class AiIdeStatusBarContribution implements FrontendApplicationContribution {
     protected readonly toDispose = new DisposableCollection();
+    protected currentDefaultProviderId: string | undefined;
+    protected currentProviders: LlmProviderConfig[] = [];
 
     constructor(
         @inject(StatusBar) private readonly statusBar: StatusBar,
         @inject(LlmProviderRegistry) private readonly providerRegistry: LlmProviderRegistry,
         @inject(AIConfigurationSelectionService) private readonly selectionService: AIConfigurationSelectionService,
-        @inject(PreferenceService) private readonly preferenceService: PreferenceService,
     ) {}
 
     onStart(): void {
         this.renderProviderSummary();
         this.renderActiveAgent();
 
-        this.toDispose.push(this.preferenceService.onPreferenceChanged(change => {
-            if (change.preferenceName === AI_LLM_PROVIDERS_PREF) {
-                this.renderProviderSummary();
-            }
+        this.toDispose.push(this.providerRegistry.onDidChangeProviders(providers => {
+            this.renderProviderSummary(providers, this.currentDefaultProviderId);
+        }));
+        this.toDispose.push(this.providerRegistry.onDidChangeDefaultProvider(id => {
+            this.currentDefaultProviderId = id;
+            this.renderProviderSummary(this.currentProviders, id);
         }));
 
         const agentEvent = this.selectionService.onDidAgentChange as unknown;
@@ -37,9 +39,11 @@ export class AiIdeStatusBarContribution implements FrontendApplicationContributi
         }
     }
 
-    protected renderProviderSummary(): void {
-        const providers = this.safeGetProviders();
-        const defaultProvider = this.providerRegistry.getDefaultProviderId();
+    protected renderProviderSummary(providersArg?: LlmProviderConfig[], defaultProviderId?: string): void {
+    const providers = providersArg ?? this.safeGetProviders();
+    this.currentProviders = [...providers];
+        const defaultProvider = defaultProviderId ?? this.currentDefaultProviderId ?? this.providerRegistry.getDefaultProviderId();
+        this.currentDefaultProviderId = defaultProvider;
         const total = providers.length;
         const summary = total === 0 ? 'Nenhum provedor configurado' : `${total} provedor${total > 1 ? 'es' : ''}`;
         const tooltip = defaultProvider
@@ -66,7 +70,7 @@ export class AiIdeStatusBarContribution implements FrontendApplicationContributi
         });
     }
 
-    protected safeGetProviders(): Array<{ id: string; name?: string }> {
+    protected safeGetProviders(): LlmProviderConfig[] {
         try {
             return this.providerRegistry.getAll();
         } catch (error) {
