@@ -1,0 +1,6 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./cloud-ide-desktop/aethel_theia_fork/packages/ai-ide" }
+  ]
+}

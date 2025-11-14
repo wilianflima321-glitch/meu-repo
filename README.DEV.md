@@ -1,106 +1,94 @@
 # Developer Quickstart (Windows PowerShell)
 
-This file explains the common developer flows for the repo on Windows (PowerShell).
-It's focused on what we've been doing: running the `ai-ide` unit tests under Node (no browser), starting the lightweight developer mock backend, and running Playwright E2E smoke tests.
+Use this guide to run the core developer flows on Windows: start the mock backend, execute the `ai-ide` unit tests, exercise the Playwright smoke suite, and capture diagnostics so CI parity stays high.
 
-Prerequisites
+## Prerequisites
 - Node.js (recommended LTS)
 - npm
-- PowerShell (Windows default)
+- Windows PowerShell (the commands below assume the default shell)
 
-Start the developer mock backend (runs on 127.0.0.1:8010)
+## Install dependencies
+Run once after cloning to keep the repo root and the LLM mock server in sync:
 
 ```powershell
-# from repo root (run in a terminal you can leave open)
+npm install
+Push-Location tools/llm-mock
+npm install
+Pop-Location
+```
+
+The Playwright tests depend on `tools/llm-mock`, so forgetting the second `npm install` will break the MCP/tooling flows.
+
+## Start the developer mock backend (127.0.0.1:8010)
+
+```powershell
 npm run dev:mock-backend
-# If you need to stop: Ctrl+C or close the terminal.
 ```
 
-Run ai-ide unit tests (sequential runner uses compiled JS in the Theia fork):
+Leave this terminal open while running Playwright or any flows that rely on mocked providers.
+
+## Run ai-ide unit tests (mocha)
 
 ```powershell
-# change to the theia fork package
-Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide;
-# Developer Quickstart (Windows PowerShell)
-
-This file explains the common developer flows for the repo on Windows (PowerShell).
-It's focused on running the `ai-ide` unit tests under Node (no browser), starting the lightweight developer mock backend, and running Playwright E2E smoke tests.
-
-Prerequisites
-- Node.js (recommended LTS)
-- npm
-- PowerShell (Windows default)
-
-Start the developer mock backend (runs on 127.0.0.1:8010)
-
-```powershell
-# from repo root
-npm run dev:mock-backend;
-# If you need to stop: find the process and stop it, or close the terminal.
-```
-
-Run ai-ide unit tests (sequential runner uses compiled JS in the Theia fork):
-
-```powershell
-# from repo root (recommended)
 npm run test:ai-ide
 
-# or, change directory to the package and run the programmatic mocha runner:
 Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide
 node ./test/run-mocha.js
 Pop-Location
 ```
 
-Run Playwright smoke E2E tests (targets mock backend by default)
+The top-level script handles compilation for you; the manual runner is helpful when you need to debug inside the package.
+
+## Run Playwright smoke E2E tests
 
 ```powershell
-# one-time: install playwright browsers (Linux/Windows/Mac with dependencies)
 npm run playwright:install
-
-# run tests (headless by default)
 npm run test:e2e
-
-# run headed if you want to watch the browsers
 npm run test:e2e:headed
 ```
 
-TypeScript checks
+- Always start the mock backend first (see above) so the tests can hit `127.0.0.1:8010`.
+- Use the headed variant when you need to observe UI regressions in real time.
+
+## Generate Playwright diagnostics summary
+After a Playwright run, consolidate results into `diagnostics/PLAYWRIGHT_SUMMARY.txt` so CI and reviewers see the same data:
 
 ```powershell
-# check the web package
+npm run diagnostics:playwright
+```
+
+This command invokes `tools/ci/write-playwright-summary.mjs` to read `test-results/playwright.json` and emit a human-readable summary; attach the text file to PRs when browser flakes occur.
+
+## TypeScript checks
+
+```powershell
 npx -y tsc --noEmit -p .\cloud-web-app\web\tsconfig.json
-
-# check the Theia ai-ide package
 npx -y tsc --noEmit -p .\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\tsconfig.json
-
-# quick local run that approximates CI (runs TS check, ai-ide tests, and Playwright E2E)
 npm run ci:local
 ```
 
-Repo syntax check (existing helper)
+`npm run ci:local` approximates the GitHub Actions pipeline by chaining TypeScript, mocha, and Playwright steps.
+
+## Repo syntax check
 
 ```powershell
-# runs various syntax checks across the repo
 powershell -ExecutionPolicy Bypass -File build/check_syntax.ps1
 ```
 
-Notes & Troubleshooting
-- If Playwright fails with ECONNREFUSED to ::1:8010, set NEXT_PUBLIC_API_URL or ensure the mock backend is bound to 127.0.0.1 (our dev mock binds IPv4 by default). On Windows sometimes ::1 (IPv6) causes mismatched bindings.
-- If port 8010 is in use: either stop the other service or change the mock backend port (tools/dev-mock-backend/server.js).
-- For migrating code using the legacy `apiClient` instance: the compatibility wrapper `cloud-web-app/web/lib/api-client.ts` delegates to the canonical `cloud-web-app/web/lib/api.ts` client so both styles are supported.
+## Notes & Troubleshooting
+- If Playwright reports `ECONNREFUSED ::1:8010`, set `NEXT_PUBLIC_API_URL` to `http://127.0.0.1:8010` or ensure Windows is not routing to IPv6.
+- When port 8010 is occupied, either stop the other process or change the mock backend port in `tools/dev-mock-backend/server.js`.
+- The legacy `apiClient` wrapper in `cloud-web-app/web/lib/api-client.ts` still proxies to the canonical client, so incremental migrations are safe.
 
-Further work to consider
-- Expand Playwright E2E to cover full web UI chat flows and add that to CI as an optional job.
-- Create a POC Theia extension that proxies AI provider calls through the backend and validate with the mock backend.
+## CI overview
+- `.github/workflows/ci.yml` runs Windows + Ubuntu lint/tests on push/PR and includes an optional `workflow_dispatch` input for Playwright E2E.
+- `.github/workflows/ci-playwright.yml` is the dedicated browser pipeline; wire `npm run diagnostics:playwright` artifacts into its uploads for parity with local runs.
 
-CI
---
-We provide a lightweight GitHub Actions workflow at `.github/workflows/ci.yml` that runs on pushes/PRs to `main`:
+Use the `workflow_dispatch` entry points when you need to validate browsers or diagnostics on demand.
 
-- `build` job (runs on Windows): checks repo syntax (`build/check_syntax.ps1`), runs a TypeScript check, and executes the `ai-ide` unit tests.
-- `e2e` job (manual `workflow_dispatch`): installs Playwright browsers and runs the Playwright smoke tests. Trigger it manually to avoid running browser tests on every push.
-
-Use the `workflow_dispatch` button in GitHub Actions to run the E2E job when you want to validate browsers.
+## Related docs
+- `docs/ai-ide-quality-status.md` — live status checklist for the IDE surface and CI coverage.
+- `docs/ai-ide-best-in-market-plan.md` — roadmap describing how we surpass VS Code/Unreal/Copilot.
 
 ---
 Generated by automation on request. If anything is missing or you want me to push a branch with these infra/docs changes, tell me to proceed and I will create a feature branch and run CI on GitHub (if you want that step automated).
