@@ -15,6 +15,12 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0
 // *****************************************************************************
 Object.defineProperty(exports, "__esModule", { value: true });
+require("@fontsource/inter/400.css");
+require("@fontsource/inter/500.css");
+require("@fontsource/inter/600.css");
+require("@fontsource/inter/700.css");
+require("@fontsource/jetbrains-mono/400.css");
+require("@fontsource/jetbrains-mono/600.css");
 require("../../src/browser/style/index.css");
 // Inject codicons CSS from CDN at runtime to provide icons without installing
 // the package locally (avoids native build/toolchain issues while iterating).
