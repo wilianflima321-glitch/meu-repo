@@ -1,0 +1,12 @@
+export declare const FILE_CONTENT_FUNCTION_ID = "getFileContent";
+export declare const GET_WORKSPACE_FILE_LIST_FUNCTION_ID = "getWorkspaceFileList";
+export declare const GET_WORKSPACE_DIRECTORY_STRUCTURE_FUNCTION_ID = "getWorkspaceDirectoryStructure";
+export declare const GET_FILE_DIAGNOSTICS_ID = "getFileDiagnostics";
+export declare const SEARCH_IN_WORKSPACE_FUNCTION_ID = "searchInWorkspace";
+export declare const FIND_FILES_BY_PATTERN_FUNCTION_ID = "findFilesByPattern";
+export declare const LIST_TASKS_FUNCTION_ID = "listTasks";
+export declare const RUN_TASK_FUNCTION_ID = "runTask";
+export declare const LIST_LAUNCH_CONFIGURATIONS_FUNCTION_ID = "listLaunchConfigurations";
+export declare const RUN_LAUNCH_CONFIGURATION_FUNCTION_ID = "runLaunchConfiguration";
+export declare const STOP_LAUNCH_CONFIGURATION_FUNCTION_ID = "stopLaunchConfiguration";
+//# sourceMappingURL=workspace-functions.d.ts.map

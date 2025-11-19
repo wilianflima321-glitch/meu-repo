@@ -14,6 +14,7 @@ build/
 
 # TypeScript build outputs
 **/lib/
+!cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/lib/
 !cloud-ide-desktop/aethel_theia_fork/packages/monaco/lib/
 **/*.tsbuildinfo
 **/coverage/
