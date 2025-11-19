@@ -58,6 +58,9 @@ npm run diagnostics:playwright
 ```
 
 This command invokes `tools/ci/write-playwright-summary.mjs` to read `test-results/playwright.json` and emit a human-readable summary; attach the text file to PRs when browser flakes occur.
+ 
+GitHub Actions (`ci-playwright.yml`) now runs the same summary generation step automatically and uploads `PLAYWRIGHT_SUMMARY.txt` for every browser run, so local and remote diagnostics stay in sync.
+GitHub Actions (`ci-playwright.yml`) now runs the same summary generation step automatically and uploads `PLAYWRIGHT_SUMMARY.txt` for every browser run, so local and remote diagnostics stay in sync.
 
 ## TypeScript checks
 
