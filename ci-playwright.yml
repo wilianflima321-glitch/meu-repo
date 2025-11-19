@@ -92,12 +92,17 @@ jobs:
               core.info('Summary file empty; skipping PR comment');
               return;
             }
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const body = [
               '### Playwright Summary',
               '',
               '```',
               summary,
-              '```'
+              '```',
+              '',
+              `[View workflow run](${runUrl})`,
+              '',
+              'Artifacts: Playwright report + summary attached to this run.'
             ].join('\n');
             await github.rest.issues.createComment({
               ...context.repo,
