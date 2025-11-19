@@ -10,9 +10,11 @@ node_modules/
 # Build and distribution
 dist/
 build/
+!cloud-ide-desktop/aethel_theia_fork/build/
 
 # TypeScript build outputs
 **/lib/
+!cloud-ide-desktop/aethel_theia_fork/packages/monaco/lib/
 **/*.tsbuildinfo
 **/coverage/
 **/.nyc_output/
