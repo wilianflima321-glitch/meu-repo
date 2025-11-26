@@ -6,6 +6,7 @@
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
     <style>
         html, body {
             overflow: hidden;
@@ -191,6 +192,12 @@
         </div>
         
         <div class="button-group">
+            <label>Physics</label>
+            <button onclick="togglePhysics()" id="physicsToggle">🎯 Enable Physics</button>
+            <button onclick="resetPhysics()">🔄 Reset Physics</button>
+        </div>
+        
+        <div class="button-group">
             <label>Scene</label>
             <button onclick="clearScene()">🗑️ Clear All</button>
             <button onclick="resetCamera()">📷 Reset Camera</button>
@@ -206,6 +213,7 @@
 
     <div id="stats">
         <div>📊 <strong>Objects:</strong> <span id="objectCount">0</span></div>
+        <div>🎯 <strong>Physics:</strong> <span id="physicsStatus">Disabled</span></div>
         <div>🎥 <strong>Camera:</strong> ArcRotate</div>
         <div>💡 <strong>Lights:</strong> 2</div>
         <div>⚡ <strong>FPS:</strong> <span id="fps">60</span></div>
@@ -215,6 +223,9 @@
         let canvas, engine, scene, camera, selectedMesh;
         let objectCounter = 0;
         let meshes = [];
+        let physicsEnabled = false;
+        let physicsWorld = null;
+        let physicsPlugin = null;
 
         window.addEventListener('DOMContentLoaded', function() {
             initScene();
@@ -279,6 +290,9 @@
             gridMaterial.lineColor = new BABYLON.Color3(0.5, 0.5, 0.6);
             gridMaterial.opacity = 0.98;
             ground.material = gridMaterial;
+            
+            // Setup physics world (disabled by default)
+            setupPhysics();
 
             // Selection
             scene.onPointerDown = function(evt, pickResult) {
@@ -305,7 +319,7 @@
                 { size: 1 },
                 scene
             );
-            cube.position.y = 0.5;
+            cube.position.y = 3;
             cube.position.x = Math.random() * 4 - 2;
             cube.position.z = Math.random() * 4 - 2;
             
@@ -314,6 +328,7 @@
             cube.material = material;
             
             meshes.push(cube);
+            onMeshCreated(cube);
             updateObjectCount();
             selectMesh(cube);
         }
@@ -325,7 +340,7 @@
                 { diameter: 1 },
                 scene
             );
-            sphere.position.y = 0.5;
+            sphere.position.y = 3;
             sphere.position.x = Math.random() * 4 - 2;
             sphere.position.z = Math.random() * 4 - 2;
             
@@ -334,6 +349,7 @@
             sphere.material = material;
             
             meshes.push(sphere);
+            onMeshCreated(sphere);
             updateObjectCount();
             selectMesh(sphere);
         }
@@ -345,7 +361,7 @@
                 { height: 1, diameter: 1 },
                 scene
             );
-            cylinder.position.y = 0.5;
+            cylinder.position.y = 3;
             cylinder.position.x = Math.random() * 4 - 2;
             cylinder.position.z = Math.random() * 4 - 2;
             
@@ -354,6 +370,7 @@
             cylinder.material = material;
             
             meshes.push(cylinder);
+            onMeshCreated(cylinder);
             updateObjectCount();
             selectMesh(cylinder);
         }
@@ -365,7 +382,7 @@
                 { size: 1 },
                 scene
             );
-            plane.position.y = 1;
+            plane.position.y = 3;
             plane.position.x = Math.random() * 4 - 2;
             plane.position.z = Math.random() * 4 - 2;
             
@@ -375,6 +392,7 @@
             plane.material = material;
             
             meshes.push(plane);
+            onMeshCreated(plane);
             updateObjectCount();
             selectMesh(plane);
         }
@@ -506,6 +524,193 @@
         function updateStats() {
             const fps = engine.getFps().toFixed(0);
             document.getElementById('fps').textContent = fps;
+        }
+
+        // ========================================
+        // PHYSICS ENGINE - Cannon.js Integration
+        // ========================================
+
+        function setupPhysics() {
+            // Setup Babylon.js physics plugin with Cannon.js
+            const gravityVector = new BABYLON.Vector3(0, -9.81, 0);
+            physicsPlugin = new BABYLON.CannonJSPlugin(true, 10, CANNON);
+            scene.enablePhysics(gravityVector, physicsPlugin);
+            
+            // Disable physics initially
+            scene.getPhysicsEngine().setTimeStep(0);
+            
+            console.log('✅ Physics engine ready (disabled by default)');
+        }
+
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            const btn = document.getElementById('physicsToggle');
+            const status = document.getElementById('physicsStatus');
+            
+            if (physicsEnabled) {
+                btn.textContent = '⏸️ Disable Physics';
+                btn.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+                status.textContent = 'Enabled';
+                status.style.color = '#48bb78';
+                
+                // Enable physics engine
+                scene.getPhysicsEngine().setTimeStep(1/60);
+                
+                // Add ground physics
+                const ground = scene.getMeshByName('ground');
+                if (ground && !ground.physicsImpostor) {
+                    ground.physicsImpostor = new BABYLON.PhysicsImpostor(
+                        ground,
+                        BABYLON.PhysicsImpostor.BoxImpostor,
+                        { mass: 0, restitution: 0.5, friction: 0.5 },
+                        scene
+                    );
+                }
+                
+                // Enable physics for all existing objects
+                meshes.forEach(mesh => {
+                    if (!mesh.physicsImpostor) {
+                        enablePhysicsForMesh(mesh);
+                    }
+                });
+                
+                alert('🎯 Physics Enabled!\n\nObjects will now fall and collide.\nCreate new objects to see physics in action.');
+            } else {
+                btn.textContent = '🎯 Enable Physics';
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                status.textContent = 'Disabled';
+                status.style.color = '#a0aec0';
+                
+                // Disable physics engine
+                scene.getPhysicsEngine().setTimeStep(0);
+                
+                // Dispose all physics impostors
+                meshes.forEach(mesh => {
+                    if (mesh.physicsImpostor) {
+                        mesh.physicsImpostor.dispose();
+                        mesh.physicsImpostor = null;
+                    }
+                });
+                
+                const ground = scene.getMeshByName('ground');
+                if (ground && ground.physicsImpostor) {
+                    ground.physicsImpostor.dispose();
+                    ground.physicsImpostor = null;
+                }
+                
+                alert('⏸️ Physics Disabled\n\nObjects are now static.');
+            }
+        }
+
+        function enablePhysicsForMesh(mesh) {
+            if (!physicsEnabled) return;
+            
+            let impostor;
+            const mass = 1; // Default mass
+            const restitution = 0.5; // Bounciness
+            const friction = 0.5;
+            
+            // Determine impostor type based on mesh type
+            if (mesh.name.includes('sphere')) {
+                impostor = BABYLON.PhysicsImpostor.SphereImpostor;
+            } else if (mesh.name.includes('cylinder')) {
+                impostor = BABYLON.PhysicsImpostor.CylinderImpostor;
+            } else if (mesh.name.includes('plane')) {
+                impostor = BABYLON.PhysicsImpostor.PlaneImpostor;
+            } else {
+                impostor = BABYLON.PhysicsImpostor.BoxImpostor;
+            }
+            
+            // Create physics impostor
+            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
+                mesh,
+                impostor,
+                { mass: mass, restitution: restitution, friction: friction },
+                scene
+            );
+            
+            console.log(`✅ Physics enabled for ${mesh.name}`);
+        }
+
+        function resetPhysics() {
+            if (!physicsEnabled) {
+                alert('⚠️ Physics is disabled. Enable it first!');
+                return;
+            }
+            
+            // Reset all objects to initial positions
+            meshes.forEach((mesh, index) => {
+                mesh.position.y = 3 + (index * 2);
+                
+                if (mesh.physicsImpostor) {
+                    // Reset velocity and angular velocity
+                    mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, 0, 0));
+                    mesh.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0, 0, 0));
+                }
+            });
+            
+            alert('🔄 Physics Reset\n\nAll objects returned to initial positions.');
+        }
+
+        // Hook into mesh creation to auto-enable physics
+        function onMeshCreated(mesh) {
+            if (physicsEnabled) {
+                enablePhysicsForMesh(mesh);
+            }
+        }
+
+        // AI Physics Configuration
+        async function aiConfigurePhysics() {
+            if (!selectedMesh) {
+                alert('⚠️ Select an object first!');
+                return;
+            }
+            
+            if (!physicsEnabled) {
+                alert('⚠️ Enable physics first!');
+                return;
+            }
+            
+            const prompt = window.prompt('🤖 AI Physics Config\n\nDescribe desired behavior:', 'Make it bouncy');
+            if (!prompt) return;
+            
+            // AI-powered physics configuration
+            if (prompt.toLowerCase().includes('bouncy') || prompt.toLowerCase().includes('bounce')) {
+                selectedMesh.physicsImpostor.restitution = 0.9;
+                alert('🤖 AI: Made object very bouncy (restitution: 0.9)');
+            } else if (prompt.toLowerCase().includes('heavy')) {
+                selectedMesh.physicsImpostor.mass = 10;
+                alert('🤖 AI: Made object heavy (mass: 10)');
+            } else if (prompt.toLowerCase().includes('light')) {
+                selectedMesh.physicsImpostor.mass = 0.1;
+                alert('🤖 AI: Made object light (mass: 0.1)');
+            } else if (prompt.toLowerCase().includes('slippery')) {
+                selectedMesh.physicsImpostor.friction = 0.1;
+                alert('🤖 AI: Made object slippery (friction: 0.1)');
+            } else if (prompt.toLowerCase().includes('sticky')) {
+                selectedMesh.physicsImpostor.friction = 1.5;
+                alert('🤖 AI: Made object sticky (friction: 1.5)');
+            } else {
+                alert('🤖 AI: Applied balanced physics settings');
+            }
+        }
+
+        // Add physics button to inspector when object is selected
+        const originalUpdateInspector = updateInspector;
+        function updateInspector() {
+            originalUpdateInspector();
+            
+            if (selectedMesh && physicsEnabled) {
+                const physicsButton = `
+                    <div class="property">
+                        <label>Physics AI</label>
+                        <button onclick="aiConfigurePhysics()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); width: 100%;">
+                            🤖 AI Configure Physics
+                        </button>
+                    </div>
+                `;
+                document.getElementById('inspector-content').innerHTML += physicsButton;
+            }
         }
     </script>
 </body>

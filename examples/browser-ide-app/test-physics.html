@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Physics Engine Test</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        #renderCanvas { width: 800px; height: 600px; border: 2px solid #333; }
+        #controls { margin: 20px 0; }
+        button { padding: 10px 20px; margin: 5px; font-size: 14px; cursor: pointer; }
+        #status { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Physics Engine Test - Cannon.js + Babylon.js</h1>
+    
+    <div id="status">
+        <strong>Status:</strong> <span id="statusText">Initializing...</span><br>
+        <strong>Physics:</strong> <span id="physicsStatus">Disabled</span><br>
+        <strong>Objects:</strong> <span id="objectCount">0</span><br>
+        <strong>FPS:</strong> <span id="fps">0</span>
+    </div>
+    
+    <div id="controls">
+        <button onclick="togglePhysics()">Enable Physics</button>
+        <button onclick="addCube()">Add Cube</button>
+        <button onclick="addSphere()">Add Sphere</button>
+        <button onclick="resetScene()">Reset Scene</button>
+    </div>
+    
+    <canvas id="renderCanvas"></canvas>
+    
+    <script>
+        let canvas, engine, scene, camera;
+        let physicsEnabled = false;
+        let meshes = [];
+        let objectCounter = 0;
+        
+        // Initialize scene
+        window.addEventListener('DOMContentLoaded', function() {
+            canvas = document.getElementById('renderCanvas');
+            engine = new BABYLON.Engine(canvas, true);
+            
+            scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color3(0.2, 0.2, 0.3);
+            
+            // Camera
+            camera = new BABYLON.ArcRotateCamera(
+                "camera",
+                Math.PI / 2,
+                Math.PI / 2.5,
+                15,
+                new BABYLON.Vector3(0, 0, 0),
+                scene
+            );
+            camera.attachControl(canvas, true);
+            
+            // Light
+            const light = new BABYLON.HemisphericLight(
+                "light",
+                new BABYLON.Vector3(0, 1, 0),
+                scene
+            );
+            
+            // Ground
+            const ground = BABYLON.MeshBuilder.CreateGround(
+                "ground",
+                { width: 20, height: 20 },
+                scene
+            );
+            const groundMat = new BABYLON.StandardMaterial("groundMat", scene);
+            groundMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+            ground.material = groundMat;
+            
+            // Setup physics
+            const gravityVector = new BABYLON.Vector3(0, -9.81, 0);
+            const physicsPlugin = new BABYLON.CannonJSPlugin(true, 10, CANNON);
+            scene.enablePhysics(gravityVector, physicsPlugin);
+            scene.getPhysicsEngine().setTimeStep(0); // Disabled initially
+            
+            // Render loop
+            engine.runRenderLoop(function() {
+                scene.render();
+                document.getElementById('fps').textContent = engine.getFps().toFixed(0);
+            });
+            
+            window.addEventListener('resize', function() {
+                engine.resize();
+            });
+            
+            document.getElementById('statusText').textContent = 'Ready ✅';
+            console.log('✅ Scene initialized');
+            console.log('✅ Cannon.js loaded:', typeof CANNON !== 'undefined');
+            console.log('✅ Physics plugin ready');
+        });
+        
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            const statusEl = document.getElementById('physicsStatus');
+            
+            if (physicsEnabled) {
+                scene.getPhysicsEngine().setTimeStep(1/60);
+                
+                // Add ground physics
+                const ground = scene.getMeshByName('ground');
+                if (ground && !ground.physicsImpostor) {
+                    ground.physicsImpostor = new BABYLON.PhysicsImpostor(
+                        ground,
+                        BABYLON.PhysicsImpostor.BoxImpostor,
+                        { mass: 0, restitution: 0.5 },
+                        scene
+                    );
+                }
+                
+                // Enable physics for existing objects
+                meshes.forEach(mesh => {
+                    if (!mesh.physicsImpostor) {
+                        enablePhysics(mesh);
+                    }
+                });
+                
+                statusEl.textContent = 'Enabled ✅';
+                statusEl.style.color = 'green';
+                console.log('✅ Physics enabled');
+            } else {
+                scene.getPhysicsEngine().setTimeStep(0);
+                
+                meshes.forEach(mesh => {
+                    if (mesh.physicsImpostor) {
+                        mesh.physicsImpostor.dispose();
+                        mesh.physicsImpostor = null;
+                    }
+                });
+                
+                const ground = scene.getMeshByName('ground');
+                if (ground && ground.physicsImpostor) {
+                    ground.physicsImpostor.dispose();
+                    ground.physicsImpostor = null;
+                }
+                
+                statusEl.textContent = 'Disabled ❌';
+                statusEl.style.color = 'red';
+                console.log('⏸️ Physics disabled');
+            }
+        }
+        
+        function enablePhysics(mesh) {
+            const impostor = mesh.name.includes('sphere') 
+                ? BABYLON.PhysicsImpostor.SphereImpostor 
+                : BABYLON.PhysicsImpostor.BoxImpostor;
+            
+            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
+                mesh,
+                impostor,
+                { mass: 1, restitution: 0.7, friction: 0.5 },
+                scene
+            );
+            
+            console.log(`✅ Physics enabled for ${mesh.name}`);
+        }
+        
+        function addCube() {
+            objectCounter++;
+            const cube = BABYLON.MeshBuilder.CreateBox(
+                `cube-${objectCounter}`,
+                { size: 1 },
+                scene
+            );
+            cube.position.y = 5;
+            cube.position.x = Math.random() * 4 - 2;
+            cube.position.z = Math.random() * 4 - 2;
+            
+            const mat = new BABYLON.StandardMaterial(`mat-${objectCounter}`, scene);
+            mat.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+            cube.material = mat;
+            
+            meshes.push(cube);
+            
+            if (physicsEnabled) {
+                enablePhysics(cube);
+            }
+            
+            updateCount();
+            console.log(`✅ Created ${cube.name}`);
+        }
+        
+        function addSphere() {
+            objectCounter++;
+            const sphere = BABYLON.MeshBuilder.CreateSphere(
+                `sphere-${objectCounter}`,
+                { diameter: 1 },
+                scene
+            );
+            sphere.position.y = 5;
+            sphere.position.x = Math.random() * 4 - 2;
+            sphere.position.z = Math.random() * 4 - 2;
+            
+            const mat = new BABYLON.StandardMaterial(`mat-${objectCounter}`, scene);
+            mat.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+            sphere.material = mat;
+            
+            meshes.push(sphere);
+            
+            if (physicsEnabled) {
+                enablePhysics(sphere);
+            }
+            
+            updateCount();
+            console.log(`✅ Created ${sphere.name}`);
+        }
+        
+        function resetScene() {
+            meshes.forEach(mesh => mesh.dispose());
+            meshes = [];
+            objectCounter = 0;
+            updateCount();
+            console.log('🔄 Scene reset');
+        }
+        
+        function updateCount() {
+            document.getElementById('objectCount').textContent = meshes.length;
+        }
+    </script>
+</body>
+</html>
