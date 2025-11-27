@@ -1,0 +1,180 @@
+// Prisma Schema for Cloud Web App
+// Database: PostgreSQL
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================
+// USER & AUTH
+// ============================================
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String?
+  plan      String    @default("free") // free, pro, team, enterprise
+  stripeCustomerId String? @unique
+  
+  projects  Project[]
+  sessions  Session[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  @@index([email])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([token])
+}
+
+// ============================================
+// PROJECTS
+// ============================================
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  template  String?  // platformer2d, fps3d, etc
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  files     File[]
+  assets    Asset[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============================================
+// FILES
+// ============================================
+
+model File {
+  id        String   @id @default(cuid())
+  path      String   // /src/main.js
+  content   String   @db.Text
+  language  String?  // javascript, typescript, python, etc
+  
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([projectId, path])
+  @@index([projectId])
+}
+
+// ============================================
+// ASSETS
+// ============================================
+
+model Asset {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // image, 3d, audio, video
+  url       String   // S3 or CDN URL
+  size      Int      // bytes
+  mimeType  String?
+  
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([projectId])
+  @@index([type])
+}
+
+// ============================================
+// BILLING
+// ============================================
+
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  stripeSubscriptionId String @unique
+  stripePriceId   String
+  status          String   // active, canceled, past_due
+  currentPeriodEnd DateTime
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  stripePaymentId String   @unique
+  amount          Int      // cents
+  currency        String   @default("usd")
+  status          String   // succeeded, failed, pending
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([status])
+}
+
+// ============================================
+// MARKETPLACE
+// ============================================
+
+model MarketplaceItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  price       Int      // cents, 0 for free
+  category    String   // template, asset, plugin
+  authorId    String
+  downloads   Int      @default(0)
+  rating      Float    @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([category])
+  @@index([authorId])
+}
+
+// ============================================
+// ADMIN
+// ============================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // login, create_project, delete_file, etc
+  resource  String?  // project_id, file_id, etc
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
