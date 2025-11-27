@@ -1,14 +1,28 @@
 # 🚀 AI IDE - Sistema Multi-Agente Completo
 
 **Status**: ✅ **TOTALMENTE FUNCIONAL E PRONTO PARA USO**  
-**Versão**: 1.0.0  
-**Data**: 2025-11-12
+**Versão**: 1.1.0  
+**Data**: 2025-11-27  
+**Última Atualização**: Adicionados Project Manager, Integration Hub e Python Server
 
 ---
 
 ## ⚡ INÍCIO RÁPIDO
 
-### Executar a IDE (3 comandos)
+### Opção 1: Python Server (Recomendado - Sem dependências)
+
+```bash
+# 1. Navegar para a IDE
+cd examples/browser-ide-app
+
+# 2. Iniciar servidor
+python3 server.py
+
+# 3. Abrir no navegador
+# http://localhost:3000
+```
+
+### Opção 2: Node.js Server (Se tiver Node instalado)
 
 ```bash
 # 1. Clonar repositório (se ainda não fez)
@@ -36,27 +50,36 @@ Uma **IDE completa com sistema multi-agente de IA** que inclui:
 
 ✅ **Interface Web Completa**
 - Dashboard responsivo
+- Project Manager com 20+ templates
 - Demonstrações interativas
 - Estatísticas em tempo real
 
 ✅ **Backend Funcional**
+- Python Server (sem dependências)
+- Node.js Server (alternativo)
 - API REST completa
 - Suporte a 8+ providers LLM
 - Sistema de streaming
 
 ✅ **Infraestrutura Robusta**
+- Integration Hub (comunicação centralizada)
 - Validação de inputs
 - Tratamento de erros
 - Logging estruturado
 - Criptografia AES-256-GCM
+- Atalhos de teclado profissionais
 
 ---
 
 ## 📋 REQUISITOS
 
+### Mínimos (Python Server)
+- **Python** 3.6+ instalado
+- Navegador moderno (Chrome, Firefox, Safari, Edge)
+
+### Opcionais (Node.js Server)
 - **Node.js** 18+ instalado
 - **npm** ou **yarn**
-- Navegador moderno (Chrome, Firefox, Safari, Edge)
 
 ---
 

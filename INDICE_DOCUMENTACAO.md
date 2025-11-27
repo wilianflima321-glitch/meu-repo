@@ -1,20 +1,47 @@
 # 📚 ÍNDICE DA DOCUMENTAÇÃO - Navegação Rápida
 
-**Data**: 2025-11-26  
-**Total de Documentos**: 30+  
+**Data**: 2025-11-27  
+**Total de Documentos**: 35+  
+**Tamanho Total**: 300KB+  
 **Organização**: Por categoria e prioridade
 
 ---
 
 ## 🎯 DOCUMENTOS PRINCIPAIS (LEIA PRIMEIRO)
 
-### 1. Visão Geral e Estado Atual
-📄 **[SUMARIO_EXECUTIVO_2025-11-26.md](./SUMARIO_EXECUTIVO_2025-11-26.md)**  
+### 1. Início Rápido ✨ NOVO
+📄 **[GUIA_RAPIDO.md](./GUIA_RAPIDO.md)**  
+- Início em 3 passos
+- Componentes principais
+- Atalhos de teclado
+- Templates disponíveis
+- Troubleshooting
+- **Leia primeiro para começar a usar**
+
+### 2. Visão Geral e Estado Atual ✨ ATUALIZADO
+📄 **[SUMARIO_EXECUTIVO_2025-11-27.md](./SUMARIO_EXECUTIVO_2025-11-27.md)**  
 - Visão geral consolidada do projeto
-- Estado atual (40% completo)
-- Decisões estratégicas
-- Próximas ações imediatas
-- **Leia primeiro para entender tudo**
+- Estado atual (45% completo)
+- Comparação com concorrentes
+- Modelo de negócio
+- Roadmap completo
+- **Leia para entender o projeto**
+
+### 3. Trabalho Realizado ✨ NOVO
+📄 **[TRABALHO_CONTINUADO_2025-11-27.md](./TRABALHO_CONTINUADO_2025-11-27.md)**  
+- Trabalho realizado em 2025-11-27
+- 3 novos componentes implementados
+- Progresso de 40% → 45%
+- Estatísticas atualizadas
+- **Leia para ver últimas atualizações**
+
+### 4. Como Continuar ✨ NOVO
+📄 **[COMO_CONTINUAR.md](./COMO_CONTINUAR.md)**  
+- Próximas prioridades
+- Checklist para cada feature
+- Ferramentas e recursos
+- Metas por período
+- **Leia para saber o que fazer a seguir**
 
 ---
 
