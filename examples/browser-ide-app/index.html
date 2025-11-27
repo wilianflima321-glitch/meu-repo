@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI IDE - Sistema Multi-Agente Completo</title>
+    <link rel="stylesheet" href="design-system.css">
     <style>
         /* Command Palette */
         .command-palette {
@@ -247,9 +248,9 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-neutral-50, #f5f7fa);
             min-height: 100vh;
-            color: #333;
+            color: var(--text-primary, #1f2937);
         }
 
         .container {
@@ -493,9 +494,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>🤖 AI IDE - Sistema Multi-Agente</h1>
+            <h1><span id="logo-icon"></span> AI IDE - Sistema Multi-Agente</h1>
             <p class="subtitle">IDE Completa com 5 Agentes Especializados</p>
-            <span class="status">✅ Totalmente Funcional</span>
+            <span class="status"><span id="status-icon"></span> Totalmente Funcional</span>
         </header>
 
         <div class="main-grid">
@@ -522,7 +523,7 @@
             </div>
 
             <div class="card agent-card">
-                <h2>🏗️ Architect Agent</h2>
+                <h2><span class="agent-icon" data-icon="layers"></span> Architect Agent</h2>
                 <p><strong>Especialista em:</strong></p>
                 <ul class="feature-list">
                     <li>Design Patterns (GoF, Enterprise, Cloud)</li>
@@ -533,7 +534,7 @@
             </div>
 
             <div class="card agent-card">
-                <h2>💻 Coder Agent</h2>
+                <h2><span class="agent-icon" data-icon="code"></span> Coder Agent</h2>
                 <p><strong>Especialista em:</strong></p>
                 <ul class="feature-list">
                     <li>Geração de Código (TS, Python, Java, Go, Rust)</li>
@@ -544,7 +545,7 @@
             </div>
 
             <div class="card agent-card">
-                <h2>🔍 Research Agent</h2>
+                <h2><span class="agent-icon" data-icon="search"></span> Research Agent</h2>
                 <p><strong>Capacidades:</strong></p>
                 <ul class="feature-list">
                     <li>Pesquisa em Múltiplas Fontes</li>
@@ -555,7 +556,7 @@
             </div>
 
             <div class="card agent-card">
-                <h2>🎨 AI Dream System</h2>
+                <h2><span class="agent-icon" data-icon="sparkles"></span> AI Dream System</h2>
                 <p><strong>Funcionalidades:</strong></p>
                 <ul class="feature-list">
                     <li>Geração Iterativa com Refinamento</li>
@@ -566,7 +567,7 @@
             </div>
 
             <div class="card agent-card">
-                <h2>🧠 Character Memory Bank</h2>
+                <h2><span class="agent-icon" data-icon="brain"></span> Character Memory Bank</h2>
                 <p><strong>Recursos:</strong></p>
                 <ul class="feature-list">
                     <li>Memória Persistente (localStorage)</li>
@@ -985,22 +986,22 @@ console.log(validateEmail('user@')); // false
         
         <div class="template-grid">
             <div class="template-card" onclick="selectTemplate('game')">
-                <div class="icon">🎮</div>
+                <div class="icon" data-icon="gamepad"></div>
                 <div class="name">Criar um Jogo</div>
                 <div class="desc">Plataforma 2D/3D, RPG, Puzzle...</div>
             </div>
             <div class="template-card" onclick="selectTemplate('movie')">
-                <div class="icon">🎬</div>
+                <div class="icon" data-icon="film"></div>
                 <div class="name">Criar Filme/Animação</div>
                 <div class="desc">Cenas 3D, personagens, efeitos...</div>
             </div>
             <div class="template-card" onclick="selectTemplate('app')">
-                <div class="icon">📱</div>
+                <div class="icon" data-icon="smartphone"></div>
                 <div class="name">Criar um App</div>
                 <div class="desc">Web, mobile, desktop...</div>
             </div>
             <div class="template-card" onclick="selectTemplate('ai')">
-                <div class="icon">🤖</div>
+                <div class="icon" data-icon="brain"></div>
                 <div class="name">IA me Ajude!</div>
                 <div class="desc">Não sei por onde começar</div>
             </div>
@@ -1014,7 +1015,7 @@ console.log(validateEmail('user@')); // false
     <!-- AI Assistant Floating -->
     <div class="ai-floating">
         <div id="ai-suggestions" class="ai-suggestion">
-            <p style="margin: 0 0 10px 0; font-weight: bold;">💡 Sugestões da IA:</p>
+            <p style="margin: 0 0 10px 0; font-weight: bold;"><span id="bulb-icon"></span> Sugestões da IA:</p>
             <div class="suggestion-item" onclick="applySuggestion('physics')">
                 • Adicionar física aos objetos
             </div>
@@ -1025,9 +1026,50 @@ console.log(validateEmail('user@')); // false
                 • Otimizar performance
             </div>
         </div>
-        <div class="ai-avatar" onclick="toggleAISuggestions()">
-            🤖
+        <div class="ai-avatar" onclick="toggleAISuggestions()" id="ai-avatar-icon">
         </div>
     </div>
+
+    <!-- Load Core Systems -->
+    <script src="icons.js"></script>
+    <script src="toast-system.js"></script>
+    <script src="tooltip-system.js"></script>
+    <script src="theme-toggle.js"></script>
+    <script src="templates.js"></script>
+    <script src="integration-hub.js"></script>
+    <script src="ai-context-manager.js"></script>
+    <script src="navbar.js"></script>
+    <script src="breadcrumbs.js"></script>
+    <script src="init.js"></script>
+    <script>
+        // Initialize all icons
+        document.addEventListener('DOMContentLoaded', () => {
+            // Header icons
+            if (document.getElementById('logo-icon')) {
+                document.getElementById('logo-icon').innerHTML = Icons.get('brain', 28);
+            }
+            if (document.getElementById('status-icon')) {
+                document.getElementById('status-icon').innerHTML = Icons.get('checkCircle', 16);
+            }
+            
+            // AI Assistant icon
+            if (document.getElementById('ai-avatar-icon')) {
+                document.getElementById('ai-avatar-icon').innerHTML = Icons.get('brain', 30);
+            }
+            if (document.getElementById('bulb-icon')) {
+                document.getElementById('bulb-icon').innerHTML = Icons.get('lightbulb', 16);
+            }
+            
+            // Load all icons with data-icon attribute
+            document.querySelectorAll('[data-icon]').forEach(el => {
+                const iconName = el.getAttribute('data-icon');
+                const size = el.classList.contains('icon') ? 32 : 
+                            el.classList.contains('agent-icon') ? 24 : 20;
+                el.innerHTML = Icons.get(iconName, size);
+            });
+            
+            console.log('✅ All icons loaded successfully');
+        });
+    </script>
 </body>
 </html>

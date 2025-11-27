@@ -510,3 +510,57 @@ code {
 .shadow-sm { box-shadow: var(--shadow-sm) !important; }
 .shadow-md { box-shadow: var(--shadow-md) !important; }
 .shadow-lg { box-shadow: var(--shadow-lg) !important; }
+
+/* ============================================
+   DARK THEME SUPPORT
+   ============================================ */
+
+[data-theme="dark"] {
+  /* Background colors - VS Code inspired */
+  --color-neutral-50: #2d2d30;
+  --color-neutral-100: #252526;
+  --color-neutral-200: #3e3e42;
+  --color-neutral-300: #4e4e52;
+  --color-neutral-400: #6b6b6b;
+  --color-neutral-500: #858585;
+  --color-neutral-600: #9d9d9d;
+  --color-neutral-700: #b8b8b8;
+  --color-neutral-800: #cccccc;
+  --color-neutral-900: #e0e0e0;
+
+  /* Adjust shadows for dark theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+
+  /* Primary colors adjusted for dark */
+  --color-primary-500: #7c8aed;
+  --color-primary-600: #8b97f0;
+}
+
+/* Dark theme body */
+[data-theme="dark"] body {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+}
+
+/* Dark theme scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--color-neutral-100);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-200);
+  border-radius: 6px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-300);
+}

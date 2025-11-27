@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Visual Scripting - AI IDE</title>
+    <link rel="stylesheet" href="design-system.css">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -401,5 +402,19 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+    
+    <!-- Load Core Systems -->
+    <script src="icons.js"></script>
+    <script src="toast-system.js"></script>
+    <script src="tooltip-system.js"></script>
+    <script src="theme-toggle.js"></script>
+    <script src="undo-redo-system.js"></script>
+    <script src="integration-hub.js"></script>
+    <script src="ai-context-manager.js"></script>
+    <script src="console-panel.js"></script>
+    <script src="navbar.js"></script>
+    <script src="breadcrumbs.js"></script>
+    <script src="file-explorer.js"></script>
+    <script src="init.js"></script>
 </body>
 </html>

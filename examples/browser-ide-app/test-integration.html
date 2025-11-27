@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Tests - AI IDE</title>
+    <link rel="stylesheet" href="design-system.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #007acc;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #4ec9b0;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #1e1e1e;
+            border-left: 3px solid #666;
+            border-radius: 4px;
+        }
+        
+        .test-item.pass {
+            border-left-color: #48bb78;
+        }
+        
+        .test-item.fail {
+            border-left-color: #f56565;
+        }
+        
+        .test-item.pending {
+            border-left-color: #ed8936;
+        }
+        
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .test-result {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        
+        .test-error {
+            color: #f56565;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .summary {
+            background: #2d2d30;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .summary-item {
+            display: inline-block;
+            margin-right: 30px;
+            font-size: 18px;
+        }
+        
+        .summary-item .label {
+            color: #a0aec0;
+        }
+        
+        .summary-item .value {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .pass-value { color: #48bb78; }
+        .fail-value { color: #f56565; }
+        .pending-value { color: #ed8936; }
+        
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #1177bb;
+        }
+        
+        .controls {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Integration Tests - AI IDE</h1>
+        
+        <div class="controls">
+            <button onclick="runAllTests()">▶️ Run All Tests</button>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+            <button onclick="exportResults()">📥 Export Results</button>
+        </div>
+        
+        <div id="test-results"></div>
+        
+        <div class="summary" id="summary" style="display: none;">
+            <div class="summary-item">
+                <span class="label">Total:</span>
+                <span class="value" id="total-tests">0</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Passed:</span>
+                <span class="value pass-value" id="passed-tests">0</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Failed:</span>
+                <span class="value fail-value" id="failed-tests">0</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Pending:</span>
+                <span class="value pending-value" id="pending-tests">0</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Success Rate:</span>
+                <span class="value" id="success-rate">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load all systems -->
+    <script src="icons.js"></script>
+    <script src="toast-system.js"></script>
+    <script src="tooltip-system.js"></script>
+    <script src="theme-toggle.js"></script>
+    <script src="templates.js"></script>
+    <script src="undo-redo-system.js"></script>
+    <script src="integration-hub.js"></script>
+    <script src="ai-context-manager.js"></script>
+    <script src="navbar.js"></script>
+    <script src="breadcrumbs.js"></script>
+    <script src="file-explorer.js"></script>
+
+    <script>
+        // Test Framework
+        class TestRunner {
+            constructor() {
+                this.tests = [];
+                this.results = [];
+            }
+
+            addTest(name, category, fn) {
+                this.tests.push({ name, category, fn });
+            }
+
+            async runAll() {
+                this.results = [];
+                const resultsContainer = document.getElementById('test-results');
+                resultsContainer.innerHTML = '';
+
+                // Group tests by category
+                const categories = {};
+                this.tests.forEach(test => {
+                    if (!categories[test.category]) {
+                        categories[test.category] = [];
+                    }
+                    categories[test.category].push(test);
+                });
+
+                // Run tests by category
+                for (const [category, tests] of Object.entries(categories)) {
+                    const section = document.createElement('div');
+                    section.className = 'test-section';
+                    section.innerHTML = `<h2>${category}</h2>`;
+                    resultsContainer.appendChild(section);
+
+                    for (const test of tests) {
+                        const result = await this.runTest(test);
+                        this.results.push(result);
+                        this.displayResult(section, result);
+                    }
+                }
+
+                this.displaySummary();
+            }
+
+            async runTest(test) {
+                const startTime = Date.now();
+                let status = 'pending';
+                let error = null;
+
+                try {
+                    await test.fn();
+                    status = 'pass';
+                } catch (e) {
+                    status = 'fail';
+                    error = e.message;
+                }
+
+                const duration = Date.now() - startTime;
+
+                return {
+                    name: test.name,
+                    category: test.category,
+                    status,
+                    error,
+                    duration
+                };
+            }
+
+            displayResult(container, result) {
+                const item = document.createElement('div');
+                item.className = `test-item ${result.status}`;
+                
+                let html = `
+                    <div class="test-name">
+                        ${result.status === 'pass' ? '✅' : result.status === 'fail' ? '❌' : '⏳'} 
+                        ${result.name}
+                    </div>
+                    <div class="test-result">
+                        Duration: ${result.duration}ms
+                    </div>
+                `;
+
+                if (result.error) {
+                    html += `<div class="test-error">Error: ${result.error}</div>`;
+                }
+
+                item.innerHTML = html;
+                container.appendChild(item);
+            }
+
+            displaySummary() {
+                const summary = document.getElementById('summary');
+                summary.style.display = 'block';
+
+                const total = this.results.length;
+                const passed = this.results.filter(r => r.status === 'pass').length;
+                const failed = this.results.filter(r => r.status === 'fail').length;
+                const pending = this.results.filter(r => r.status === 'pending').length;
+                const successRate = total > 0 ? ((passed / total) * 100).toFixed(1) : 0;
+
+                document.getElementById('total-tests').textContent = total;
+                document.getElementById('passed-tests').textContent = passed;
+                document.getElementById('failed-tests').textContent = failed;
+                document.getElementById('pending-tests').textContent = pending;
+                document.getElementById('success-rate').textContent = successRate + '%';
+            }
+        }
+
+        const runner = new TestRunner();
+
+        // ============================================
+        // ICONS TESTS
+        // ============================================
+        runner.addTest('Icons system loaded', 'Icons', () => {
+            if (typeof Icons === 'undefined') {
+                throw new Error('Icons not loaded');
+            }
+        });
+
+        runner.addTest('Icons.get() works', 'Icons', () => {
+            const icon = Icons.get('code', 24);
+            if (!icon || !icon.includes('svg')) {
+                throw new Error('Icons.get() failed');
+            }
+        });
+
+        runner.addTest('Icons has required icons', 'Icons', () => {
+            const required = ['code', 'folder', 'file', 'save', 'play', 'sun', 'moon'];
+            for (const name of required) {
+                const icon = Icons.get(name, 16);
+                if (!icon) {
+                    throw new Error(`Icon "${name}" not found`);
+                }
+            }
+        });
+
+        // ============================================
+        // INTEGRATION HUB TESTS
+        // ============================================
+        runner.addTest('IntegrationHub loaded', 'IntegrationHub', () => {
+            if (typeof window.IntegrationHub === 'undefined') {
+                throw new Error('IntegrationHub not loaded');
+            }
+        });
+
+        runner.addTest('IntegrationHub has components map', 'IntegrationHub', () => {
+            if (!window.IntegrationHub.components) {
+                throw new Error('Components map not found');
+            }
+        });
+
+        runner.addTest('IntegrationHub has state', 'IntegrationHub', () => {
+            if (!window.IntegrationHub.state) {
+                throw new Error('State not found');
+            }
+        });
+
+        runner.addTest('IntegrationHub.emit() works', 'IntegrationHub', () => {
+            let eventFired = false;
+            window.IntegrationHub.on('test:event', () => {
+                eventFired = true;
+            });
+            window.IntegrationHub.emit('test:event', {});
+            if (!eventFired) {
+                throw new Error('Event not fired');
+            }
+        });
+
+        // ============================================
+        // THEME TOGGLE TESTS
+        // ============================================
+        runner.addTest('ThemeToggle loaded', 'Theme', () => {
+            if (typeof ThemeToggle === 'undefined') {
+                throw new Error('ThemeToggle not loaded');
+            }
+        });
+
+        runner.addTest('ThemeToggle.toggle() works', 'Theme', () => {
+            const initialTheme = document.documentElement.getAttribute('data-theme');
+            ThemeToggle.toggle();
+            const newTheme = document.documentElement.getAttribute('data-theme');
+            if (initialTheme === newTheme) {
+                throw new Error('Theme did not change');
+            }
+            // Toggle back
+            ThemeToggle.toggle();
+        });
+
+        // ============================================
+        // TOAST SYSTEM TESTS
+        // ============================================
+        runner.addTest('ToastSystem loaded', 'Toast', () => {
+            if (typeof window.ToastSystem === 'undefined') {
+                throw new Error('ToastSystem not loaded');
+            }
+        });
+
+        runner.addTest('ToastSystem.show() works', 'Toast', () => {
+            window.ToastSystem.show('Test toast', 'success');
+            const toasts = document.querySelectorAll('.toast');
+            if (toasts.length === 0) {
+                throw new Error('Toast not created');
+            }
+        });
+
+        // ============================================
+        // TEMPLATES TESTS
+        // ============================================
+        runner.addTest('Templates loaded', 'Templates', () => {
+            if (typeof Templates === 'undefined') {
+                throw new Error('Templates not loaded');
+            }
+        });
+
+        runner.addTest('Templates has games', 'Templates', () => {
+            if (!Templates.games || Object.keys(Templates.games).length === 0) {
+                throw new Error('No game templates found');
+            }
+        });
+
+        runner.addTest('Templates.getAll() works', 'Templates', () => {
+            const all = Templates.getAll();
+            if (!all || Object.keys(all).length === 0) {
+                throw new Error('getAll() returned empty');
+            }
+        });
+
+        runner.addTest('Templates.search() works', 'Templates', () => {
+            const results = Templates.search('platformer');
+            if (!results || results.length === 0) {
+                throw new Error('search() failed');
+            }
+        });
+
+        // ============================================
+        // AI CONTEXT MANAGER TESTS
+        // ============================================
+        runner.addTest('GlobalContextManager loaded', 'AI Context', () => {
+            if (typeof globalContext === 'undefined') {
+                throw new Error('GlobalContextManager not loaded');
+            }
+        });
+
+        runner.addTest('GlobalContextManager has context', 'AI Context', () => {
+            if (!globalContext.projectContext) {
+                throw new Error('Project context not found');
+            }
+        });
+
+        runner.addTest('GlobalContextManager.addToContext() works', 'AI Context', () => {
+            const result = globalContext.addToContext('characters', {
+                name: 'Test Hero',
+                personality: 'brave'
+            });
+            if (!result) {
+                throw new Error('addToContext() failed');
+            }
+        });
+
+        runner.addTest('GlobalContextManager.getContextForAI() works', 'AI Context', () => {
+            const context = globalContext.getContextForAI();
+            if (!context || !context.project) {
+                throw new Error('getContextForAI() failed');
+            }
+        });
+
+        // ============================================
+        // NAVBAR TESTS
+        // ============================================
+        runner.addTest('GlobalNavbar loaded', 'Navbar', () => {
+            if (typeof window.GlobalNavbar === 'undefined') {
+                throw new Error('GlobalNavbar not loaded');
+            }
+        });
+
+        runner.addTest('Navbar element exists', 'Navbar', () => {
+            const navbar = document.getElementById('global-navbar');
+            if (!navbar) {
+                throw new Error('Navbar element not found');
+            }
+        });
+
+        runner.addTest('Navbar has menu items', 'Navbar', () => {
+            const items = document.querySelectorAll('.navbar-item');
+            if (items.length === 0) {
+                throw new Error('No menu items found');
+            }
+        });
+
+        // ============================================
+        // BREADCRUMBS TESTS
+        // ============================================
+        runner.addTest('Breadcrumbs loaded', 'Breadcrumbs', () => {
+            if (typeof window.Breadcrumbs === 'undefined') {
+                throw new Error('Breadcrumbs not loaded');
+            }
+        });
+
+        runner.addTest('Breadcrumbs element exists', 'Breadcrumbs', () => {
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            if (!breadcrumbs) {
+                throw new Error('Breadcrumbs element not found');
+            }
+        });
+
+        // ============================================
+        // HELPER FUNCTIONS
+        // ============================================
+        async function runAllTests() {
+            await runner.runAll();
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+            runner.results = [];
+        }
+
+        function exportResults() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                results: runner.results,
+                summary: {
+                    total: runner.results.length,
+                    passed: runner.results.filter(r => r.status === 'pass').length,
+                    failed: runner.results.filter(r => r.status === 'fail').length,
+                    pending: runner.results.filter(r => r.status === 'pending').length
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test-results-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                runAllTests();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
