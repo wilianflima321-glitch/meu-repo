@@ -1,0 +1,147 @@
+name: Cloud Web App CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'cloud-web-app/web/**'
+      - '.github/workflows/cloud-web-app.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'cloud-web-app/web/**'
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloud-web-app/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: cloud-web-app/web
+        run: npm ci
+
+      - name: Generate Prisma Client
+        working-directory: cloud-web-app/web
+        run: npm run db:generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+      - name: Run Prisma migrations
+        working-directory: cloud-web-app/web
+        run: npx prisma db push
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+      - name: Run tests
+        working-directory: cloud-web-app/web
+        run: npm test
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          JWT_SECRET: test-secret-key
+
+      - name: Run linter
+        working-directory: cloud-web-app/web
+        run: npm run lint
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloud-web-app/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: cloud-web-app/web
+        run: npm ci
+
+      - name: Build application
+        working-directory: cloud-web-app/web
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          JWT_SECRET: build-secret-key
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: cloud-web-app/web/.next
+          retention-days: 7
+
+  docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./cloud-web-app/web
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/aethel-web:latest
+            ${{ secrets.DOCKER_USERNAME }}/aethel-web:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/aethel-web:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/aethel-web:buildcache,mode=max
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+      - name: Deploy to server
+        run: |
+          echo "Deployment step - configure based on your infrastructure"
+          echo "Options: AWS ECS, Kubernetes, Docker Swarm, etc."

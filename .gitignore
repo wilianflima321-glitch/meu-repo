@@ -12,12 +12,16 @@ dist/
 build/
 
 # TypeScript build outputs
-**/lib/
+# **/lib/ - DISABLED: We need lib/ for source code
 **/*.tsbuildinfo
 **/coverage/
 **/.nyc_output/
 playwright-report/
 test-results/
+
+# Specific lib build outputs (not source)
+**/dist/lib/
+**/build/lib/
 
 # Env
 .env
