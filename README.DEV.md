@@ -1,11 +1,13 @@
-# Developer Quickstart (Windows PowerShell)
+# Developer Quickstart
 
-Use this guide to run the core developer flows on Windows: start the mock backend, execute the `ai-ide` unit tests, exercise the Playwright smoke suite, and capture diagnostics so CI parity stays high.
+Development guide for the AI IDE package and related components.
 
 ## Prerequisites
-- Node.js (recommended LTS)
-- npm
-- Windows PowerShell (the commands below assume the default shell)
+- Node.js 20+ LTS
+- npm or pnpm
+- Git
+
+**Note**: The devcontainer includes Node.js 20 and pnpm pre-installed.
 
 ## Install dependencies
 Run once after cloning to keep the repo root and the LLM mock server in sync:

@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+/* Local fonts - no CDN dependencies for offline use */
+@import './fonts.css';
+
+/* Widget styles with ai-ide-* classes */
+@import './widgets.css';
+
+/* Accessibility enhancements - WCAG 2.1 AA compliance */
+@import './accessibility.css';
 
 :root {
     --ai-ide-font-stack: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;

@@ -118,8 +118,30 @@ import { AiIdeLayoutContribution } from './layout/ai-ide-layout-contribution';
 import { AiIdeBrandingWidget } from './branding/ai-ide-branding-widget';
 import { AiIdeBrandingContribution } from './branding/ai-ide-branding-contribution';
 import { AiIdeStatusBarContribution } from './status/ai-ide-status-bar-contribution';
+import { MissionControlWidget } from './missions/mission-control';
+import { LLMRouter } from '../common/llm/llm-router';
+import { PolicyEngine } from '../common/compliance/policy-engine';
+import { ToolchainRegistry } from '../common/toolchains/toolchain-registry';
+import { ContextStore } from '../common/context/context-store';
+import { SecureFetch } from '../common/data/secure-fetch';
+import { MissionTelemetry } from '../common/telemetry/mission-telemetry';
+import { TradingAgent } from './trading-agent';
+import { ResearchAgent } from './research-agent';
+import { CreativeAgent } from './creative-agent';
+import { ConfigService } from '../common/config/config-service';
+import { NotificationService } from './notifications/notification-service';
+import { NotificationCenterWidget } from './notifications/NotificationCenter';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
+    // Initialize ConfigService early
+    bind(ConfigService).toSelf().inSingletonScope();
+    bind(FrontendApplicationContribution).toDynamicValue(ctx => ({
+        async initialize(): Promise<void> {
+            const configService = ctx.container.get(ConfigService);
+            await configService.load();
+            console.log('ConfigService initialized');
+        }
+    })).inSingletonScope();
     bind(PreferenceContribution).toConstantValue({ schema: aiIdePreferenceSchema });
     bind(PreferenceContribution).toConstantValue({ schema: WorkspacePreferencesSchema });
 
@@ -159,6 +181,33 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(AiIdeStatusBarContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(AiIdeStatusBarContribution);
 
+    // New platform components
+    bind(LLMRouter).toSelf().inSingletonScope();
+    bind(PolicyEngine).toSelf().inSingletonScope();
+    bind(ToolchainRegistry).toSelf().inSingletonScope();
+    bind(ContextStore).toSelf().inSingletonScope();
+    bind(SecureFetch).toSelf().inSingletonScope();
+    bind(MissionTelemetry).toSelf().inSingletonScope();
+    
+    // Notification System
+    bind(NotificationService).toSelf().inSingletonScope();
+    bind(NotificationCenterWidget).toSelf();
+    bind(WidgetFactory)
+        .toDynamicValue((ctx: interfaces.Context) => ({
+            id: NotificationCenterWidget.ID,
+            createWidget: () => ctx.container.get(NotificationCenterWidget)
+        }))
+        .inSingletonScope();
+
+    // Mission Control Widget
+    bind(MissionControlWidget).toSelf();
+    bind(WidgetFactory)
+        .toDynamicValue((ctx: interfaces.Context) => ({
+            id: MissionControlWidget.ID,
+            createWidget: () => ctx.container.get(MissionControlWidget)
+        }))
+        .inSingletonScope();
+
     // ensure preference key symbol is referenced so TS doesn't report it as unused in incremental builds
     const _aiLlmPref = AI_LLM_PROVIDERS_PREF;
     // reference the pref token to avoid unused-variable warnings in incremental builds
@@ -171,6 +220,18 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(CoderAgent).toSelf().inSingletonScope();
     bind(Agent).toService(CoderAgent);
     bind(ChatAgent).toService(CoderAgent);
+
+    bind(TradingAgent).toSelf().inSingletonScope();
+    bind(Agent).toService(TradingAgent);
+    bind(ChatAgent).toService(TradingAgent);
+
+    bind(ResearchAgent).toSelf().inSingletonScope();
+    bind(Agent).toService(ResearchAgent);
+    bind(ChatAgent).toService(ResearchAgent);
+
+    bind(CreativeAgent).toSelf().inSingletonScope();
+    bind(Agent).toService(CreativeAgent);
+    bind(ChatAgent).toService(CreativeAgent);
 
     bind(OrchestratorChatAgent).toSelf().inSingletonScope();
     bind(Agent).toService(OrchestratorChatAgent);

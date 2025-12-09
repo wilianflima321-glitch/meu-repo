@@ -1,0 +1,106 @@
+/**
+ * Local font definitions - no CDN dependencies
+ * Fonts should be bundled with the application for offline use
+ */
+
+/* Inter font family - UI text */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Inter Regular'), local('Inter-Regular'),
+         url('./fonts/inter-regular.woff2') format('woff2'),
+         url('./fonts/inter-regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: local('Inter Medium'), local('Inter-Medium'),
+         url('./fonts/inter-medium.woff2') format('woff2'),
+         url('./fonts/inter-medium.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: local('Inter SemiBold'), local('Inter-SemiBold'),
+         url('./fonts/inter-semibold.woff2') format('woff2'),
+         url('./fonts/inter-semibold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: local('Inter Bold'), local('Inter-Bold'),
+         url('./fonts/inter-bold.woff2') format('woff2'),
+         url('./fonts/inter-bold.woff') format('woff');
+}
+
+/* JetBrains Mono - monospace code font */
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('JetBrains Mono Regular'), local('JetBrainsMono-Regular'),
+         url('./fonts/jetbrains-mono-regular.woff2') format('woff2'),
+         url('./fonts/jetbrains-mono-regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: local('JetBrains Mono SemiBold'), local('JetBrainsMono-SemiBold'),
+         url('./fonts/jetbrains-mono-semibold.woff2') format('woff2'),
+         url('./fonts/jetbrains-mono-semibold.woff') format('woff');
+}
+
+/* Codicons - icon font */
+@font-face {
+    font-family: 'codicon';
+    font-display: block;
+    src: url('./fonts/codicon.ttf') format('truetype');
+}
+
+.codicon {
+    font-family: 'codicon';
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-decoration: none;
+    text-rendering: auto;
+    text-transform: none;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+}
+
+/* Codicon classes */
+.codicon-warning:before { content: '\ea6c'; }
+.codicon-error:before { content: '\ea87'; }
+.codicon-info:before { content: '\ea74'; }
+.codicon-check:before { content: '\eab2'; }
+.codicon-close:before { content: '\ea76'; }
+.codicon-symbol-boolean:before { content: '\ea8f'; }
+.codicon-play:before { content: '\eb2c'; }
+.codicon-debug-start:before { content: '\eb2c'; }
+.codicon-terminal:before { content: '\ea85'; }
+.codicon-settings:before { content: '\eb51'; }
+.codicon-gear:before { content: '\eb51'; }
+.codicon-file:before { content: '\ea7b'; }
+.codicon-folder:before { content: '\ea83'; }
+.codicon-search:before { content: '\ea6d'; }
+.codicon-refresh:before { content: '\ea72'; }
+.codicon-chevron-right:before { content: '\eab4'; }
+.codicon-chevron-down:before { content: '\eab4'; }
+.codicon-menu:before { content: '\eb94'; }
