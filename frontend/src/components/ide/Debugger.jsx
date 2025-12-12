@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useIDEStore } from '@/store/ideStore';
 import { startDebugSession, addBreakpoint as addBreakpointAPI, debugStep, stopDebugSession } from '@/services/api';
 import { 
-  Bug, Play, Pause, Square, StepInto, StepOver, StepOut, RotateCcw,
+  Bug, Play, Pause, Square, ArrowDownToLine, ArrowRight, ArrowUpFromLine, RotateCcw,
   Circle, ChevronRight, ChevronDown, Variable, Layers, FileCode
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
