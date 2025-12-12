@@ -2,49 +2,110 @@ import React from 'react';
 import { useIDEStore } from '@/store/ideStore';
 import {
   Files, Search, GitBranch, Puzzle, Settings, ChevronRight, ChevronDown,
-  FileCode, Folder, FolderOpen, Plus, RefreshCw, MoreVertical
+  FileCode, Folder, FolderOpen, Plus, RefreshCw, MoreVertical, Trash2, Edit2
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { cn } from '@/lib/utils';
 
-const iconMap = {
-  js: '📄', jsx: '⚛️', ts: '📘', tsx: '⚛️', py: '🐍', html: '🌐',
-  css: '🎨', json: '📋', md: '📝', git: '🔒', env: '🔐',
-  folder: '📁', folderOpen: '📂'
-};
+// Import new panels
+import SearchPanel from './SearchPanel';
+import GitPanel from './GitPanel';
+import ExtensionsPanel from './ExtensionsPanel';
+import SettingsPanel from './SettingsPanel';
 
 const getFileIcon = (name, type, isOpen) => {
-  if (type === 'folder') return isOpen ? <FolderOpen className="w-4 h-4 text-yellow-500" /> : <Folder className="w-4 h-4 text-yellow-500" />;
-  const ext = name.split('.').pop();
-  return <FileCode className="w-4 h-4 text-blue-400" />;
+  if (type === 'folder') {
+    return isOpen ? <FolderOpen className="w-4 h-4 text-yellow-500" /> : <Folder className="w-4 h-4 text-yellow-500" />;
+  }
+  
+  const ext = name.split('.').pop()?.toLowerCase();
+  const iconMap = {
+    js: { color: 'text-yellow-400', label: 'JS' },
+    jsx: { color: 'text-cyan-400', label: 'JSX' },
+    ts: { color: 'text-blue-400', label: 'TS' },
+    tsx: { color: 'text-blue-400', label: 'TSX' },
+    py: { color: 'text-green-400', label: 'PY' },
+    html: { color: 'text-orange-400', label: 'HTML' },
+    css: { color: 'text-blue-400', label: 'CSS' },
+    scss: { color: 'text-pink-400', label: 'SCSS' },
+    json: { color: 'text-yellow-300', label: 'JSON' },
+    md: { color: 'text-zinc-400', label: 'MD' },
+    yaml: { color: 'text-red-400', label: 'YML' },
+    yml: { color: 'text-red-400', label: 'YML' },
+    svg: { color: 'text-orange-300', label: 'SVG' },
+    png: { color: 'text-purple-400', label: 'IMG' },
+    jpg: { color: 'text-purple-400', label: 'IMG' },
+    gif: { color: 'text-purple-400', label: 'IMG' },
+  };
+  
+  return <FileCode className={cn("w-4 h-4", iconMap[ext]?.color || 'text-zinc-400')} />;
 };
 
-const FileTreeItem = ({ node, level = 0, expandedFolders, toggleFolder, onFileClick }) => {
+const FileTreeItem = ({ node, level = 0, expandedFolders, toggleFolder, onFileClick, selectedFile }) => {
   const isFolder = node.type === 'folder';
   const isExpanded = expandedFolders.has(node.id);
+  const isSelected = selectedFile === node.id;
   
   return (
     <div>
-      <div
-        className={cn(
-          "flex items-center gap-1 px-2 py-1 cursor-pointer hover:bg-zinc-700/50 rounded text-sm",
-          "text-zinc-300 hover:text-white transition-colors"
-        )}
-        style={{ paddingLeft: `${level * 12 + 8}px` }}
-        onClick={() => isFolder ? toggleFolder(node.id) : onFileClick(node)}
-        data-testid={`file-tree-item-${node.name}`}
-      >
-        {isFolder && (
-          <span className="w-4 h-4 flex items-center justify-center">
-            {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-          </span>
-        )}
-        {!isFolder && <span className="w-4" />}
-        {getFileIcon(node.name, node.type, isExpanded)}
-        <span className="truncate">{node.name}</span>
-      </div>
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <div
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 cursor-pointer rounded text-sm transition-colors",
+              "text-zinc-300 hover:text-white hover:bg-zinc-700/50",
+              isSelected && "bg-blue-500/20 text-white"
+            )}
+            style={{ paddingLeft: `${level * 12 + 8}px` }}
+            onClick={() => isFolder ? toggleFolder(node.id) : onFileClick(node)}
+            data-testid={`file-tree-item-${node.name}`}
+          >
+            {isFolder && (
+              <span className="w-4 h-4 flex items-center justify-center">
+                {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </span>
+            )}
+            {!isFolder && <span className="w-4" />}
+            {getFileIcon(node.name, node.type, isExpanded)}
+            <span className="truncate flex-1">{node.name}</span>
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="bg-zinc-900 border-zinc-700 w-48">
+          {isFolder ? (
+            <>
+              <ContextMenuItem className="text-xs gap-2">
+                <Plus className="w-3 h-3" /> New File
+              </ContextMenuItem>
+              <ContextMenuItem className="text-xs gap-2">
+                <Folder className="w-3 h-3" /> New Folder
+              </ContextMenuItem>
+              <ContextMenuSeparator className="bg-zinc-700" />
+            </>
+          ) : null}
+          <ContextMenuItem className="text-xs gap-2">
+            <Edit2 className="w-3 h-3" /> Rename
+          </ContextMenuItem>
+          <ContextMenuItem className="text-xs gap-2">
+            Copy Path
+          </ContextMenuItem>
+          <ContextMenuItem className="text-xs gap-2">
+            Copy Relative Path
+          </ContextMenuItem>
+          <ContextMenuSeparator className="bg-zinc-700" />
+          <ContextMenuItem className="text-xs gap-2 text-red-400 focus:text-red-400">
+            <Trash2 className="w-3 h-3" /> Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
       {isFolder && isExpanded && node.children?.map(child => (
         <FileTreeItem
           key={child.id}
@@ -53,19 +114,23 @@ const FileTreeItem = ({ node, level = 0, expandedFolders, toggleFolder, onFileCl
           expandedFolders={expandedFolders}
           toggleFolder={toggleFolder}
           onFileClick={onFileClick}
+          selectedFile={selectedFile}
         />
       ))}
     </div>
   );
 };
 
-const Sidebar = () => {
-  const {
-    activePanel, setActivePanel, sidebarCollapsed, toggleSidebar,
-    fileTree, openFile, currentProject
-  } = useIDEStore();
-  
+const FileExplorerPanel = () => {
+  const { fileTree, openFile, currentProject, activeFileId } = useIDEStore();
   const [expandedFolders, setExpandedFolders] = React.useState(new Set());
+  
+  // Auto-expand root folder
+  React.useEffect(() => {
+    if (fileTree?.id && !expandedFolders.has(fileTree.id)) {
+      setExpandedFolders(prev => new Set([...prev, fileTree.id]));
+    }
+  }, [fileTree?.id]);
   
   const toggleFolder = (id) => {
     setExpandedFolders(prev => {
@@ -75,6 +140,67 @@ const Sidebar = () => {
       return next;
     });
   };
+  
+  return (
+    <>
+      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800">
+        <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+          {currentProject?.name || 'Explorer'}
+        </span>
+        <div className="flex gap-1">
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6" data-testid="new-file-btn">
+                  <Plus className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom"><p>New File</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6" data-testid="new-folder-btn">
+                  <Folder className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom"><p>New Folder</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6" data-testid="refresh-btn">
+                  <RefreshCw className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom"><p>Refresh</p></TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+      <ScrollArea className="flex-1">
+        <div className="py-2">
+          {fileTree ? (
+            <FileTreeItem
+              node={fileTree}
+              expandedFolders={expandedFolders}
+              toggleFolder={toggleFolder}
+              onFileClick={openFile}
+              selectedFile={activeFileId}
+            />
+          ) : (
+            <div className="px-4 py-8 text-center text-zinc-500 text-sm">
+              <Folder className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
+              <p>No project open</p>
+              <p className="text-xs mt-1">Create or open a project to start</p>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+    </>
+  );
+};
+
+const Sidebar = () => {
+  const { activePanel, setActivePanel, sidebarCollapsed } = useIDEStore();
   
   const panels = [
     { id: 'explorer', icon: Files, label: 'Explorer' },
@@ -95,14 +221,17 @@ const Sidebar = () => {
                 <button
                   onClick={() => setActivePanel(panel.id)}
                   className={cn(
-                    "w-10 h-10 flex items-center justify-center rounded-lg transition-colors",
+                    "w-10 h-10 flex items-center justify-center rounded-lg transition-colors relative",
                     activePanel === panel.id
-                      ? "bg-zinc-800 text-white border-l-2 border-blue-500"
+                      ? "bg-zinc-800 text-white"
                       : "text-zinc-500 hover:text-white hover:bg-zinc-800/50"
                   )}
                   data-testid={`sidebar-${panel.id}`}
                 >
                   <panel.icon className="w-5 h-5" />
+                  {activePanel === panel.id && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-white rounded-r" />
+                  )}
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right">
@@ -115,39 +244,8 @@ const Sidebar = () => {
       
       {/* Panel Content */}
       {!sidebarCollapsed && (
-        <div className="w-60 bg-zinc-900/50 border-r border-zinc-800 flex flex-col">
-          {activePanel === 'explorer' && (
-            <>
-              <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800">
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Explorer</span>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-6 w-6" data-testid="new-file-btn">
-                    <Plus className="w-3 h-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" data-testid="refresh-btn">
-                    <RefreshCw className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-              <ScrollArea className="flex-1">
-                <div className="py-2">
-                  {fileTree ? (
-                    <FileTreeItem
-                      node={fileTree}
-                      expandedFolders={expandedFolders}
-                      toggleFolder={toggleFolder}
-                      onFileClick={openFile}
-                    />
-                  ) : (
-                    <div className="px-4 py-8 text-center text-zinc-500 text-sm">
-                      No project open
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </>
-          )}
-          
+        <div className="w-60 bg-zinc-900/50 border-r border-zinc-800 flex flex-col overflow-hidden">
+          {activePanel === 'explorer' && <FileExplorerPanel />}
           {activePanel === 'search' && <SearchPanel />}
           {activePanel === 'git' && <GitPanel />}
           {activePanel === 'extensions' && <ExtensionsPanel />}
@@ -155,202 +253,6 @@ const Sidebar = () => {
         </div>
       )}
     </div>
-  );
-};
-
-const SearchPanel = () => {
-  const { searchQuery, setSearchQuery, searchResults, setSearchResults, currentProject } = useIDEStore();
-  const [loading, setLoading] = React.useState(false);
-  
-  return (
-    <>
-      <div className="px-3 py-2 border-b border-zinc-800">
-        <input
-          type="text"
-          placeholder="Search files..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500"
-          data-testid="search-input"
-        />
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          {searchResults.length > 0 ? (
-            searchResults.map((result, i) => (
-              <div key={i} className="p-2 hover:bg-zinc-800 rounded cursor-pointer text-sm">
-                <div className="text-white font-medium">{result.file?.name}</div>
-                {result.matches?.map((match, j) => (
-                  <div key={j} className="text-zinc-400 text-xs mt-1">
-                    {match.line && `Line ${match.line}: `}{match.text}
-                  </div>
-                ))}
-              </div>
-            ))
-          ) : searchQuery ? (
-            <div className="text-zinc-500 text-sm text-center py-4">No results</div>
-          ) : (
-            <div className="text-zinc-500 text-sm text-center py-4">Enter search query</div>
-          )}
-        </div>
-      </ScrollArea>
-    </>
-  );
-};
-
-const GitPanel = () => {
-  const { gitStatus, gitBranch, gitChanges } = useIDEStore();
-  
-  return (
-    <>
-      <div className="px-4 py-2 border-b border-zinc-800">
-        <span className="text-xs font-semibold text-zinc-400 uppercase">Source Control</span>
-      </div>
-      <div className="p-3">
-        <div className="flex items-center gap-2 text-sm text-white mb-3">
-          <GitBranch className="w-4 h-4" />
-          <span>{gitBranch}</span>
-        </div>
-        <div className="space-y-1">
-          <div className="text-xs text-zinc-400 uppercase mb-2">Changes</div>
-          {gitChanges?.length > 0 ? (
-            gitChanges.map((change, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm text-zinc-300 py-1">
-                <span className={cn(
-                  "text-xs px-1 rounded",
-                  change.status === 'modified' && "text-yellow-500",
-                  change.status === 'added' && "text-green-500",
-                  change.status === 'deleted' && "text-red-500"
-                )}>
-                  {change.status[0].toUpperCase()}
-                </span>
-                <span className="truncate">{change.file}</span>
-              </div>
-            ))
-          ) : (
-            <div className="text-zinc-500 text-sm">No changes</div>
-          )}
-        </div>
-      </div>
-    </>
-  );
-};
-
-const ExtensionsPanel = () => {
-  const { extensions, toggleExtension } = useIDEStore();
-  
-  return (
-    <>
-      <div className="px-4 py-2 border-b border-zinc-800">
-        <span className="text-xs font-semibold text-zinc-400 uppercase">Extensions</span>
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2 space-y-2">
-          {extensions.map(ext => (
-            <div key={ext.id} className="p-2 bg-zinc-800/50 rounded hover:bg-zinc-800 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-white font-medium">{ext.name}</span>
-                <button
-                  onClick={() => toggleExtension(ext.id)}
-                  className={cn(
-                    "text-xs px-2 py-0.5 rounded",
-                    ext.enabled ? "bg-green-500/20 text-green-400" : "bg-zinc-700 text-zinc-400"
-                  )}
-                  data-testid={`ext-toggle-${ext.id}`}
-                >
-                  {ext.enabled ? 'Enabled' : 'Disabled'}
-                </button>
-              </div>
-              <div className="text-xs text-zinc-500 mt-1">{ext.description}</div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
-    </>
-  );
-};
-
-const SettingsPanel = () => {
-  const { settings, updateSettings, theme, setTheme, themes } = useIDEStore();
-  
-  return (
-    <>
-      <div className="px-4 py-2 border-b border-zinc-800">
-        <span className="text-xs font-semibold text-zinc-400 uppercase">Settings</span>
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="p-3 space-y-4">
-          <div>
-            <label className="text-xs text-zinc-400 block mb-1">Font Size</label>
-            <input
-              type="number"
-              value={settings.fontSize}
-              onChange={(e) => updateSettings({ fontSize: parseInt(e.target.value) })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-white"
-              data-testid="font-size-input"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-zinc-400 block mb-1">Tab Size</label>
-            <input
-              type="number"
-              value={settings.tabSize}
-              onChange={(e) => updateSettings({ tabSize: parseInt(e.target.value) })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm text-white"
-              data-testid="tab-size-input"
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-zinc-400">Minimap</label>
-            <button
-              onClick={() => updateSettings({ minimap: !settings.minimap })}
-              className={cn(
-                "w-8 h-4 rounded-full transition-colors",
-                settings.minimap ? "bg-blue-500" : "bg-zinc-700"
-              )}
-              data-testid="minimap-toggle"
-            >
-              <div className={cn(
-                "w-3 h-3 bg-white rounded-full transition-transform",
-                settings.minimap ? "translate-x-4" : "translate-x-0.5"
-              )} />
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-zinc-400">Word Wrap</label>
-            <button
-              onClick={() => updateSettings({ wordWrap: !settings.wordWrap })}
-              className={cn(
-                "w-8 h-4 rounded-full transition-colors",
-                settings.wordWrap ? "bg-blue-500" : "bg-zinc-700"
-              )}
-              data-testid="wordwrap-toggle"
-            >
-              <div className={cn(
-                "w-3 h-3 bg-white rounded-full transition-transform",
-                settings.wordWrap ? "translate-x-4" : "translate-x-0.5"
-              )} />
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-zinc-400">Auto Save</label>
-            <button
-              onClick={() => updateSettings({ autoSave: !settings.autoSave })}
-              className={cn(
-                "w-8 h-4 rounded-full transition-colors",
-                settings.autoSave ? "bg-blue-500" : "bg-zinc-700"
-              )}
-              data-testid="autosave-toggle"
-            >
-              <div className={cn(
-                "w-3 h-3 bg-white rounded-full transition-transform",
-                settings.autoSave ? "translate-x-4" : "translate-x-0.5"
-              )} />
-            </button>
-          </div>
-        </div>
-      </ScrollArea>
-    </>
   );
 };
 
