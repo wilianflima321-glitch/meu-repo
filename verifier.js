@@ -338,7 +338,10 @@ function verifyScene(scene, constraints) {
                   .filter(point => point && typeof point.x === 'number')
                   .map(point => point.x);
                 if (validXs.length) {
-                  rangeWithDrag = Math.max(...validXs);
+                  const maxX = validXs.reduce((max, x) => Math.max(max, x), -Infinity);
+                  if (Number.isFinite(maxX)) {
+                    rangeWithDrag = maxX;
+                  }
                 }
               }
             }
