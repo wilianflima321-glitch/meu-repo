@@ -106,7 +106,7 @@ const SearchPanel = () => {
               )}
               title="Match Case"
             >
-              <CaseSensitive className="w-3.5 h-3.5" />
+              <ALargeSmall className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setOptions(p => ({ ...p, wholeWord: !p.wholeWord }))}
