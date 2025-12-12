@@ -3,7 +3,7 @@ import { useIDEStore } from '@/store/ideStore';
 import { searchFiles } from '@/services/api';
 import {
   Search, Filter, Replace, ChevronDown, ChevronRight, FileCode,
-  X, MoreHorizontal, RefreshCw, CaseSensitive, Regex, WholeWord
+  X, MoreHorizontal, RefreshCw, ALargeSmall, WholeWord, Regex
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
