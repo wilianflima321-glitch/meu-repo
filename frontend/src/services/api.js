@@ -10,6 +10,20 @@ const api = axios.create({
   }
 });
 
+// Add auth token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Auth
+export const login = (data) => api.post('/auth/login', data);
+export const register = (data) => api.post('/auth/register', data);
+export const getMe = () => api.get('/auth/me');
+
 // Projects
 export const createProject = (data) => api.post('/projects', data);
 export const getProjects = () => api.get('/projects');
