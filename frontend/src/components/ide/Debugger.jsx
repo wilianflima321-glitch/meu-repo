@@ -129,13 +129,13 @@ const Debugger = () => {
             </Button>
             <div className="w-px h-4 bg-zinc-700 mx-1" />
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStep('over')} disabled={!isPaused} data-testid="debug-step-over">
-              <StepOver className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4" />
             </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStep('into')} disabled={!isPaused} data-testid="debug-step-into">
-              <StepInto className="w-4 h-4" />
+              <ArrowDownToLine className="w-4 h-4" />
             </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStep('out')} disabled={!isPaused} data-testid="debug-step-out">
-              <StepOut className="w-4 h-4" />
+              <ArrowUpFromLine className="w-4 h-4" />
             </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleStart} data-testid="debug-restart">
               <RotateCcw className="w-4 h-4" />
