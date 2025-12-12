@@ -334,13 +334,13 @@ function verifyScene(scene, constraints) {
             if (shouldSimulateTrajectory) {
               trajectoryPoints = physics.sampleTrajectory(v0, angle, g, 1000, { mass, dragCoef, dt: 0.02 });
               if (trajectoryPoints.length > 0) {
-                let rangeFromTrajectory = 0;
-                for (const point of trajectoryPoints) {
-                  if (point && typeof point.x === 'number' && point.x > rangeFromTrajectory) {
-                    rangeFromTrajectory = point.x;
-                  }
+                const validXs = trajectoryPoints.map(point =>
+                  point && typeof point.x === 'number' ? point.x : Number.NEGATIVE_INFINITY
+                );
+                const maxX = Math.max(...validXs);
+                if (Number.isFinite(maxX)) {
+                  rangeWithDrag = maxX;
                 }
-                rangeWithDrag = rangeFromTrajectory || rangeWithDrag;
               }
             }
 
