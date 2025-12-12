@@ -1,15 +1,18 @@
 # 🧭 FONTE ÚNICA DA VERDADE — DOCUMENTAÇÃO CANÔNICA
 
-**Objetivo**: eliminar duplicidades, evitar lacunas e manter apenas referências oficiais sem material de protótipo/demo. Use estes documentos como autoridade para cada área.
+**Objetivo**: eliminar duplicações e evitar lacunas mantendo apenas referências oficiais, sem material de protótipo/demo.  
+Use estes documentos como autoridade para cada área.  
+Quando surgir uma nova versão datada, troque a referência para a mais recente.  
+Meta: manter a IDE alinhada em UX e robustez no nível VS Code / Unreal / Copilot, consolidando todas as entregas já existentes.
 
 ---
 
 ## 📌 Referências canônicas por domínio
 
-- **Visão executiva e estado**: `SUMARIO_EXECUTIVO_2025-11-27.md` (substitui versões anteriores e `EXECUTIVE_SUMMARY*.md`).
+- **Visão executiva e estado**: `SUMARIO_EXECUTIVO_2025-11-27.md` (padrão `SUMARIO_EXECUTIVO_YYYY-MM-DD.md`; versão vigente; substitui versões anteriores e `EXECUTIVE_SUMMARY*.md`).
 - **Produto/IDE e uso**: `README.md`, `GUIA_RAPIDO.md` e `README.DEV.md` (evita divergências com guias antigos ou rascunhos).
 - **Planejamento e roadmap**: `PROXIMOS_PASSOS_PRIORITARIOS.md` (curto prazo) e `PLANO_SUPERAR_UNREAL.md` (longo prazo). Considere `ROADMAP_TO_100.md` como histórico apenas.
-- **Entrega e releases**: `ENTREGA_FINAL_2025-11-27.md` + `ENTREGA_FINAL_COMPLETA_IDE.md` (usados como estado final; demais *FINAL*/*FINALIZACAO* servem apenas como registro).
+- **Entrega e releases**: `ENTREGA_FINAL_2025-11-26.md` + `ENTREGA_FINAL_COMPLETA_IDE.md` (estado final atual; versões futuras devem substituir estas. Demais *FINAL*/*FINALIZAÇÃO* servem apenas como registro).
 - **UX/Interface**: `ANALISE_ESTRUTURA_INTERFACE_2025-11-27.md` e `UX_PROFISSIONAL_COMPLETO.md` (mantêm a navegação e padrões; trate outros relatórios de UX como apoio).
 - **Gaps e riscos**: `LACUNAS_ATUAIS_2025-11-26.md` e `GAPS_ANALYSIS.md` (únicas fontes para lacunas e mitigação).
 
@@ -26,7 +29,6 @@
 
 ## 🔭 Lacunas futuras a monitorar
 
-- **Navegação da IDE**: garantir links ativos para project-manager, asset-manager e test-physics conforme recomendado na análise de interface.  
+- **Navegação da IDE**: garantir links ativos para project-manager, asset-manager e test-physics conforme recomendado em `ANALISE_ESTRUTURA_INTERFACE_2025-11-27.md`.  
 - **Versões de entrega**: manter uma única versão “final” por data para evitar múltiplos arquivos `FINAL_*`.  
 - **Checklist operacional**: centralizar checklists em `DEPLOYMENT_CHECKLIST.md` e `VALIDACAO_IDE_FUNCIONAL.md` para não repetir instruções.
-
