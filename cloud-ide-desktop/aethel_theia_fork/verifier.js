@@ -218,9 +218,12 @@ function verifyScene(scene, constraints) {
 
               if (shouldSimulateTrajectory) {
                 trajectoryPoints = physics.sampleTrajectory(v0, angle, g, 1000, { mass, dragCoef, dt: 0.02 });
-                if (dragCoef !== 0 && trajectoryPoints.length > 0) {
-                  const lastPoint = trajectoryPoints[trajectoryPoints.length - 1];
-                  rangeWithDrag = lastPoint ? lastPoint.x : rangeWithDrag;
+                if (trajectoryPoints.length > 0) {
+                  const rangeFromTrajectory = trajectoryPoints.reduce((max, point) => {
+                    const px = typeof point.x === 'number' ? point.x : 0;
+                    return px > max ? px : max;
+                  }, rangeWithDrag);
+                  rangeWithDrag = rangeFromTrajectory;
                 }
               }
 
