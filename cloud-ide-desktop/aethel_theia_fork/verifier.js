@@ -198,9 +198,8 @@ function verifyScene(scene, constraints) {
         const hasObstacles = obstacles.length > 0;
         for (const a of actions) {
           try {
-            const normalizedVerb = (a && a.verb) || (a && a.action) || '';
-            const lowerVerb = String(normalizedVerb).toLowerCase();
-            if (lowerVerb === 'throw' || lowerVerb === 'launch') {
+            const normalizedVerb = String((a && a.verb) || (a && a.action) || '').toLowerCase();
+            if (normalizedVerb === 'throw' || normalizedVerb === 'launch') {
               const params = a.params || {};
               const v0 = Number(params.v0 || params.speed || 0);
               const angle = Number(params.angleDeg || params.angle || 45);
