@@ -1,0 +1,179 @@
+name: Merge Unrelated Histories
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Target branch (e.g., main)'
+        required: true
+        default: 'main'
+      source_branch:
+        description: 'Source branch (e.g., conflict_121225_0213)'
+        required: true
+      strategy:
+        description: 'Merge strategy (manual, ours, theirs)'
+        required: false
+        default: 'manual'
+        type: choice
+        options:
+          - manual
+          - ours
+          - theirs
+      create_pr:
+        description: 'Create a PR instead of direct merge'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  merge-unrelated-histories:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history
+          ref: ${{ github.event.inputs.target_branch }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch all branches
+        run: |
+          git fetch --all
+          git branch -a
+
+      - name: Verify branches exist
+        run: |
+          if ! git rev-parse --verify origin/${{ github.event.inputs.target_branch }} > /dev/null 2>&1; then
+            echo "Error: Target branch '${{ github.event.inputs.target_branch }}' does not exist"
+            exit 1
+          fi
+          
+          if ! git rev-parse --verify origin/${{ github.event.inputs.source_branch }} > /dev/null 2>&1; then
+            echo "Error: Source branch '${{ github.event.inputs.source_branch }}' does not exist"
+            exit 1
+          fi
+
+      - name: Create backup branches
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          git branch backup_${{ github.event.inputs.target_branch }}_${TIMESTAMP} origin/${{ github.event.inputs.target_branch }}
+          git branch backup_${{ github.event.inputs.source_branch }}_${TIMESTAMP} origin/${{ github.event.inputs.source_branch }}
+          git push origin backup_${{ github.event.inputs.target_branch }}_${TIMESTAMP}
+          git push origin backup_${{ github.event.inputs.source_branch }}_${TIMESTAMP}
+          echo "Created backup branches with timestamp: ${TIMESTAMP}"
+
+      - name: Create merge branch
+        if: ${{ github.event.inputs.create_pr == 'true' }}
+        run: |
+          MERGE_BRANCH="merge/unrelated-histories-$(date +%Y%m%d-%H%M%S)"
+          echo "MERGE_BRANCH=${MERGE_BRANCH}" >> $GITHUB_ENV
+          git checkout -b ${MERGE_BRANCH}
+
+      - name: Attempt merge with unrelated histories
+        id: merge
+        run: |
+          set +e  # Don't exit on error
+          
+          MERGE_CMD="git merge origin/${{ github.event.inputs.source_branch }} --allow-unrelated-histories --no-ff -m 'Merge unrelated histories from ${{ github.event.inputs.source_branch }}'"
+          
+          if [ "${{ github.event.inputs.strategy }}" = "ours" ]; then
+            MERGE_CMD="$MERGE_CMD -X ours"
+            echo "Using 'ours' strategy"
+          elif [ "${{ github.event.inputs.strategy }}" = "theirs" ]; then
+            MERGE_CMD="$MERGE_CMD -X theirs"
+            echo "Using 'theirs' strategy"
+          fi
+          
+          echo "Executing: $MERGE_CMD"
+          eval $MERGE_CMD
+          MERGE_EXIT=$?
+          
+          if [ $MERGE_EXIT -eq 0 ]; then
+            echo "merge_status=success" >> $GITHUB_OUTPUT
+            echo "Merge completed successfully"
+          else
+            echo "merge_status=conflicts" >> $GITHUB_OUTPUT
+            echo "Merge has conflicts"
+          fi
+          
+          exit 0  # Don't fail the workflow
+
+      - name: Handle merge conflicts
+        if: steps.merge.outputs.merge_status == 'conflicts'
+        run: |
+          echo "## Merge Conflicts Detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following files have conflicts:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          git diff --name-only --diff-filter=U >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please resolve conflicts manually and push to the merge branch." >> $GITHUB_STEP_SUMMARY
+          
+          # Abort the merge for now
+          git merge --abort
+          exit 1
+
+      - name: Push changes
+        if: steps.merge.outputs.merge_status == 'success'
+        run: |
+          if [ "${{ github.event.inputs.create_pr }}" = "true" ]; then
+            git push origin ${MERGE_BRANCH}
+            echo "Pushed to branch: ${MERGE_BRANCH}"
+          else
+            git push origin ${{ github.event.inputs.target_branch }}
+            echo "Pushed directly to: ${{ github.event.inputs.target_branch }}"
+          fi
+
+      - name: Create Pull Request
+        if: steps.merge.outputs.merge_status == 'success' && github.event.inputs.create_pr == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.MERGE_BRANCH }}
+          base: ${{ github.event.inputs.target_branch }}
+          title: "Merge unrelated histories from ${{ github.event.inputs.source_branch }}"
+          body: |
+            ## Merge Unrelated Histories
+            
+            This PR merges branch `${{ github.event.inputs.source_branch }}` into `${{ github.event.inputs.target_branch }}` using `--allow-unrelated-histories`.
+            
+            ### Details
+            - **Target Branch**: `${{ github.event.inputs.target_branch }}`
+            - **Source Branch**: `${{ github.event.inputs.source_branch }}`
+            - **Strategy**: `${{ github.event.inputs.strategy }}`
+            - **Created by**: GitHub Actions Workflow
+            
+            ### Backup Branches
+            Backup branches have been created in case rollback is needed:
+            - `backup_${{ github.event.inputs.target_branch }}_*`
+            - `backup_${{ github.event.inputs.source_branch }}_*`
+            
+            ### Next Steps
+            1. Review the changes in this PR
+            2. Run tests to ensure everything works
+            3. Merge this PR when ready
+            
+            ### Documentation
+            For more information, see:
+            - [MERGE_UNRELATED_HISTORIES.md](./MERGE_UNRELATED_HISTORIES.md)
+            - [QUICK_FIX_UNRELATED_HISTORIES.md](./QUICK_FIX_UNRELATED_HISTORIES.md)
+
+      - name: Summary
+        if: steps.merge.outputs.merge_status == 'success'
+        run: |
+          echo "## Merge Successful ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Successfully merged ${{ github.event.inputs.source_branch }} into ${{ github.event.inputs.target_branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.create_pr }}" = "true" ]; then
+            echo "A pull request has been created for review." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Changes have been pushed directly to ${{ github.event.inputs.target_branch }}." >> $GITHUB_STEP_SUMMARY
+          fi

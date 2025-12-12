@@ -367,6 +367,22 @@ cd examples/browser-ide-app
 node server.js
 ```
 
+### Git: "There isn't anything to compare" Error?
+
+If you see an error about unrelated histories when merging branches:
+
+```bash
+# Quick fix
+git merge <branch-name> --allow-unrelated-histories
+
+# Or use the automated script
+./scripts/merge-unrelated-histories.sh main conflict_branch
+
+# Or use GitHub Actions workflow: "Merge Unrelated Histories"
+```
+
+See [QUICK_FIX_UNRELATED_HISTORIES.md](./QUICK_FIX_UNRELATED_HISTORIES.md) for details.
+
 ---
 
 ## 🎯 PRÓXIMOS PASSOS
@@ -434,6 +450,7 @@ Tempo de Inicialização      <2s        <5s       ✅
 - **Issues**: Abra uma issue no GitHub
 - **Guia de Uso**: `GUIA_USO_COMPLETO.md`
 - **Troubleshooting**: `examples/browser-ide-app/README.md`
+- **Merge Issues**: See `MERGE_UNRELATED_HISTORIES.md` for git merge solutions
 
 ---
 
