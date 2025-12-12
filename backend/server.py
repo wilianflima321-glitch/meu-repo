@@ -957,6 +957,119 @@ async def get_debug_session(session_id: str):
         raise HTTPException(status_code=404, detail="Debug session not found")
     return session
 
+# ============== AUTH ENDPOINTS ==============
+
+from passlib.context import CryptContext
+from jose import jwt, JWTError
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+SECRET_KEY = os.environ.get("JWT_SECRET", "your-secret-key-change-in-production")
+ALGORITHM = "HS256"
+
+class User(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: str
+    password_hash: str = ""
+    plan: str = "free"  # free, pro, enterprise
+    avatar: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserRegister(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserResponse(BaseModel):
+    id: str
+    name: str
+    email: str
+    plan: str
+    avatar: Optional[str] = None
+
+def create_token(user_id: str, email: str) -> str:
+    payload = {
+        "sub": user_id,
+        "email": email,
+        "exp": datetime.now(timezone.utc).timestamp() + 86400 * 7  # 7 days
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+@api_router.post("/auth/register", response_model=dict)
+async def register(data: UserRegister):
+    # Check if email exists
+    existing = await db.users.find_one({"email": data.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    user = User(
+        name=data.name,
+        email=data.email,
+        password_hash=hash_password(data.password)
+    )
+    
+    await db.users.insert_one(prepare_doc(user.model_dump()))
+    token = create_token(user.id, user.email)
+    
+    return {
+        "token": token,
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "plan": user.plan
+        }
+    }
+
+@api_router.post("/auth/login", response_model=dict)
+async def login(data: UserLogin):
+    user = await db.users.find_one({"email": data.email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(data.password, user.get("password_hash", "")):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    token = create_token(user["id"], user["email"])
+    
+    return {
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "plan": user.get("plan", "free")
+        }
+    }
+
+@api_router.get("/auth/me", response_model=dict)
+async def get_current_user(authorization: str = None):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    try:
+        token = authorization.replace("Bearer ", "")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return user
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 # ============== HEALTH CHECK ==============
 
 @api_router.get("/health")
