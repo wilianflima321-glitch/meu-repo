@@ -258,24 +258,4 @@ const highlightMatch = (text, query) => {
   );
 };
 
-// Icons
-const CaseSensitive = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <text x="4" y="17" fontSize="14" fontWeight="bold" fill="currentColor" stroke="none">Aa</text>
-  </svg>
-);
-
-const WholeWord = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <text x="3" y="16" fontSize="12" fontWeight="bold" fill="currentColor" stroke="none">ab</text>
-    <rect x="1" y="4" width="22" height="16" rx="2" strokeWidth="1.5" fill="none" />
-  </svg>
-);
-
-const Regex = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <text x="4" y="17" fontSize="14" fontWeight="bold" fill="currentColor" stroke="none">.*</text>
-  </svg>
-);
-
 export default SearchPanel;
