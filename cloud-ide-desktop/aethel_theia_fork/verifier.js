@@ -225,8 +225,6 @@ function verifyScene(scene, constraints) {
                 }
               } else if (dragCoef !== 0 && hasTargetDistance) {
                 rangeWithDrag = physics.computeRangeWithDrag(v0, angle, { g, mass, dragCoef });
-              } else if (dragCoef === 0) {
-                rangeWithDrag = rangeVac;
               }
 
               // sample trajectory and check for obstacle collisions
