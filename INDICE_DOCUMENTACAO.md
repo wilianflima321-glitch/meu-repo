@@ -9,6 +9,13 @@
 
 ## 🎯 DOCUMENTOS PRINCIPAIS (LEIA PRIMEIRO)
 
+### 0. Fonte Única da Verdade ✨ NOVO
+📄 **[DOCUMENTACAO_CANONICA.md](./DOCUMENTACAO_CANONICA.md)**  
+- Canoniza quais documentos usar por domínio  
+- Indica o que é histórico vs. ativo  
+- Diretrizes para evitar duplicidades e protótipos  
+- **Leia antes de abrir ou criar novos docs**
+
 ### 1. Início Rápido ✨ NOVO
 📄 **[GUIA_RAPIDO.md](./GUIA_RAPIDO.md)**  
 - Início em 3 passos
