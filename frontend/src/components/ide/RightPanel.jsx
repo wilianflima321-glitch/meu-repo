@@ -3,22 +3,24 @@ import { useIDEStore } from '@/store/ideStore';
 import AIAssistant from './AIAssistant';
 import AnimationTools from './AnimationTools';
 import ProfilingTools from './ProfilingTools';
-import { Sparkles, Layers, Activity, X } from 'lucide-react';
+import LivePreview from './LivePreview';
+import { Sparkles, Layers, Activity, Monitor, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const RightPanel = () => {
   const { rightPanelOpen, rightPanelTab, setRightPanelTab, toggleRightPanel } = useIDEStore();
   
   const tabs = [
-    { id: 'ai', label: 'AI Assistant', icon: Sparkles, color: 'text-purple-400' },
-    { id: 'animation', label: 'Animation', icon: Layers, color: 'text-orange-400' },
+    { id: 'ai', label: 'AI', icon: Sparkles, color: 'text-purple-400' },
+    { id: 'preview', label: 'Preview', icon: Monitor, color: 'text-cyan-400' },
+    { id: 'animation', label: 'Timeline', icon: Layers, color: 'text-orange-400' },
     { id: 'profiling', label: 'Profiler', icon: Activity, color: 'text-green-400' },
   ];
   
   if (!rightPanelOpen) return null;
   
   return (
-    <div className="w-80 bg-zinc-900 border-l border-zinc-800 flex flex-col" data-testid="right-panel">
+    <div className="w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col" data-testid="right-panel">
       {/* Tabs */}
       <div className="flex items-center border-b border-zinc-800">
         {tabs.map(tab => (
@@ -49,6 +51,7 @@ const RightPanel = () => {
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         {rightPanelTab === 'ai' && <AIAssistant />}
+        {rightPanelTab === 'preview' && <LivePreview />}
         {rightPanelTab === 'animation' && <AnimationTools />}
         {rightPanelTab === 'profiling' && <ProfilingTools />}
       </div>
