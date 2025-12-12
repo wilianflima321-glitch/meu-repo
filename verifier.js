@@ -238,27 +238,27 @@ function verifyScene(scene, constraints) {
   const errors = [];
   try {
     const entities = (scene && scene.entities) || [];
-    const cs = Array.isArray(constraints) ? constraints : (typeof constraints === 'string' ? [constraints] : []);
+    const normalizedConstraints = Array.isArray(constraints) ? constraints : (typeof constraints === 'string' ? [constraints] : []);
 
     // Optimize: Use combined entity check for common constraint combinations
     const entityChecks = ['no_weapons', 'no_smoke', 'no_violence', 'no_self_harm', 'no_drugs', 'no_nudity', 'no_relations_inconsistent', 'relations', 'no_pose_anomalies', 'pose'];
-    const hasEntityChecks = entityChecks.some(c => cs.includes(c));
+    const hasEntityChecks = entityChecks.some(c => normalizedConstraints.includes(c));
     
     if (hasEntityChecks) {
       // Single-pass through entities for multiple checks (performance optimization)
-      checkEntitiesCombined(entities, cs, errors);
+      checkEntitiesCombined(entities, normalizedConstraints, errors);
     }
     
     // Special case: children near fire requires two passes
-    if (cs.includes('no_children_near_fire')) checkNoChildrenNearFire(entities, errors);
+    if (normalizedConstraints.includes('no_children_near_fire')) checkNoChildrenNearFire(entities, errors);
     
-  if (cs.includes('no_time_anomaly') || cs.includes('chronology')) {
+  if (normalizedConstraints.includes('no_time_anomaly') || normalizedConstraints.includes('chronology')) {
     checkChronology(scene, errors);
   }
   
   // --- New deterministic checks added ---------------
   // 1) Chronology: detect obvious time-travel or reversed time phrases
-  if (cs.includes('checkChronology') || cs.includes('chronology_checks')) {
+  if (normalizedConstraints.includes('checkChronology') || normalizedConstraints.includes('chronology_checks')) {
     const text = (scene && scene.description) ? scene.description.toLowerCase() : '';
     if (CHRONOLOGY_PATTERN.test(text)) {
       errors.push({ reason: 'chronology_error', message: 'possible inconsistent chronology detected' });
@@ -269,7 +269,7 @@ function verifyScene(scene, constraints) {
   }
 
   // 2) Self-harm phrasing: detect first-person self-harm or ideation phrasing
-  if (cs.includes('checkSelfHarmPhrasing') || cs.includes('self_harm_phrase')) {
+  if (normalizedConstraints.includes('checkSelfHarmPhrasing') || normalizedConstraints.includes('self_harm_phrase')) {
     const text = ((scene && (scene.dialogue || scene.description || '')).toLowerCase() || '');
     if (SELF_HARM_PHRASE_PATTERN.test(text)) {
       errors.push({ reason: 'self_harm_phrase', message: 'first-person self-harm phrasing detected' });
@@ -277,7 +277,7 @@ function verifyScene(scene, constraints) {
   }
 
   // 3) Drug mentions with intent: simplistic detection of illicit drug usage or procurement
-  if (cs.includes('checkDrugMentions') || cs.includes('drug_checks')) {
+  if (normalizedConstraints.includes('checkDrugMentions') || normalizedConstraints.includes('drug_checks')) {
     const text = (scene && (scene.description || scene.dialogue || '')).toLowerCase();
     if (DRUG_INSTRUCTION_PATTERN.test(text)) {
       errors.push({ reason: 'drug_instruction', message: 'possible illicit drug instructions or procurement' });
@@ -288,7 +288,7 @@ function verifyScene(scene, constraints) {
   }
 
   // 4) Age-involved risky scenarios: child + dangerous activity
-  if (cs.includes('checkChildSafety') || cs.includes('child_safety')) {
+  if (normalizedConstraints.includes('checkChildSafety') || normalizedConstraints.includes('child_safety')) {
     const text = (scene && (scene.description || scene.dialogue || '')).toLowerCase();
     if (CHILD_PATTERN.test(text) && DANGER_PATTERN.test(text)) {
       errors.push({ reason: 'child_endangerment', message: 'child near dangerous activity' });
@@ -296,11 +296,12 @@ function verifyScene(scene, constraints) {
   }
   
     // physics / trajectory checks
-    if (cs.includes('physics_checks') || cs.includes('trajectory_checks')) {
+    if (normalizedConstraints.includes('physics_checks') || normalizedConstraints.includes('trajectory_checks')) {
       try {
         // look for actions of type 'throw' or 'launch' in scene.actions
         const actions = (scene && Array.isArray(scene.actions)) ? scene.actions : [];
         const obstacles = (scene && Array.isArray(scene.obstacles)) ? scene.obstacles : (scene && scene.world && scene.world.obstacles) || [];
+        const hasObstacles = obstacles.length > 0;
         
         // Optimize: Create entity lookup map for O(1) access
         const entityMap = new Map();
@@ -310,9 +311,9 @@ function verifyScene(scene, constraints) {
         
         for (const a of actions) {
           try {
-            const verb = String((a && a.verb) || (a && a.action) || '').toLowerCase();
+            const normalizedVerb = String((a && a.verb) || (a && a.action) || '').toLowerCase();
             // Optimize: Single string comparison instead of two separate checks
-            if (verb !== 'throw' && verb !== 'launch') continue;
+            if (normalizedVerb !== 'throw' && normalizedVerb !== 'launch') continue;
             
             const params = a.params || {};
             const v0 = Number(params.v0 || params.speed || 0);
@@ -323,13 +324,32 @@ function verifyScene(scene, constraints) {
 
             // compute vacuum and drag-aware ranges
             const rangeVac = physics.computeRange(v0, angle, g);
-            const rangeWithDrag = physics.computeRangeWithDrag(v0, angle, { g, mass, dragCoef });
-
             const targetDistance = Number(params.targetDistance || (a.target && a.target.distance) || NaN);
+            const hasTargetDistance = Number.isFinite(targetDistance);
+            const shouldSimulateTrajectory = hasObstacles || (dragCoef !== 0 && hasTargetDistance);
+
+            let rangeWithDrag = rangeVac;
+            let trajectoryPoints = null;
+
+            if (shouldSimulateTrajectory) {
+              trajectoryPoints = physics.sampleTrajectory(v0, angle, g, 1000, { mass, dragCoef, dt: 0.02 });
+              if (trajectoryPoints.length > 0) {
+                const validXs = trajectoryPoints
+                  .filter(point => point && typeof point.x === 'number')
+                  .map(point => point.x);
+                if (validXs.length) {
+                  const maxX = validXs.reduce((max, x) => Math.max(max, x), -Infinity);
+                  if (Number.isFinite(maxX)) {
+                    rangeWithDrag = maxX;
+                  }
+                }
+              }
+            }
 
             // sample trajectory and check for obstacle collisions
-            const traj = physics.sampleTrajectory(v0, angle, g, 1000, { mass, dragCoef, dt: 0.02 });
-            const collides = physics.trajectoryIntersectsAABBs(traj, obstacles);
+            const collides = hasObstacles && trajectoryPoints
+              ? physics.trajectoryIntersectsAABBs(trajectoryPoints, obstacles)
+              : false;
 
             // Optimize: Use Map for O(1) entity lookup instead of find()
             const actorId = a.actorId || a.actor || (a.params && a.params.actorId) || null;
