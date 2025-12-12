@@ -328,7 +328,7 @@ function verifyScene(scene, constraints) {
             const hasTargetDistance = Number.isFinite(targetDistance);
             const shouldSimulateTrajectory = hasObstacles || (dragCoef !== 0 && hasTargetDistance);
 
-            let rangeWithDrag = dragCoef === 0 ? rangeVac : NaN;
+            let rangeWithDrag = rangeVac;
             let trajectoryPoints = null;
 
             if (shouldSimulateTrajectory) {
@@ -337,8 +337,6 @@ function verifyScene(scene, constraints) {
                 const lastPoint = trajectoryPoints[trajectoryPoints.length - 1];
                 rangeWithDrag = lastPoint ? lastPoint.x : rangeWithDrag;
               }
-            } else if (dragCoef !== 0 && hasTargetDistance) {
-              rangeWithDrag = physics.computeRangeWithDrag(v0, angle, { g, mass, dragCoef });
             }
 
             // sample trajectory and check for obstacle collisions
