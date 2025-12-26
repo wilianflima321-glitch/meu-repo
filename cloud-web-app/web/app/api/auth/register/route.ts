@@ -32,13 +32,14 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user - Novo usuário começa em trial do Starter (7 dias)
+    // Após trial, deve escolher um plano pago
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name: name || null,
-        plan: 'free',
+        plan: 'starter_trial', // Trial de 7 dias do Starter
       },
     });
 

@@ -2326,7 +2326,9 @@ export default function AethelDashboard() {
                           <div>
                             <h3 className="aethel-text-xl aethel-font-semibold">{plan.name}</h3>
                             <p className="aethel-text-3xl aethel-font-bold aethel-text-slate-200">
-                              {plan.price > 0 ? `US$ ${plan.price.toFixed(2)}/mês` : 'Gratuito'}
+                              {/* Todos os planos são pagos - estratégia zero prejuízo */}
+                              US$ {plan.price?.toFixed(2) || '0.00'}/mês
+                              {plan.priceBRL && <span className="aethel-text-sm aethel-text-slate-400 aethel-ml-2">(R${plan.priceBRL})</span>}
                             </p>
                           </div>
                           {isActive && (

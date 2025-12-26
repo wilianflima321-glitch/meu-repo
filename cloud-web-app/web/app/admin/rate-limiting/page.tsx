@@ -2,14 +2,20 @@
 
 import React, { useState } from 'react';
 
+/**
+ * Rate Limiting Admin - Alinhado com planos 2025
+ * Sem plano Free - todos os planos são pagos
+ */
 export default function RateLimitingPage() {
   const [limits, setLimits] = useState([
-    { id: 1, endpoint: '/api/generate', plan: 'Free', requestsPerMinute: 10, currentUsage: 8 },
-    { id: 2, endpoint: '/api/generate', plan: 'Pro', requestsPerMinute: 100, currentUsage: 45 },
-    { id: 3, endpoint: '/api/chat', plan: 'Enterprise', requestsPerMinute: 1000, currentUsage: 200 }
+    { id: 1, endpoint: '/api/generate', plan: 'Starter', requestsPerMinute: 30, currentUsage: 12 },
+    { id: 2, endpoint: '/api/generate', plan: 'Basic', requestsPerMinute: 60, currentUsage: 25 },
+    { id: 3, endpoint: '/api/generate', plan: 'Pro', requestsPerMinute: 120, currentUsage: 45 },
+    { id: 4, endpoint: '/api/generate', plan: 'Studio', requestsPerMinute: 300, currentUsage: 80 },
+    { id: 5, endpoint: '/api/generate', plan: 'Enterprise', requestsPerMinute: 1000, currentUsage: 200 }
   ]);
 
-  const [newLimit, setNewLimit] = useState({ endpoint: '', plan: 'Free', requestsPerMinute: '' });
+  const [newLimit, setNewLimit] = useState({ endpoint: '', plan: 'Starter', requestsPerMinute: '' });
 
   const handleCreate = () => {
     if (newLimit.endpoint && newLimit.requestsPerMinute) {
@@ -20,7 +26,7 @@ export default function RateLimitingPage() {
         requestsPerMinute: parseInt(newLimit.requestsPerMinute),
         currentUsage: 0
       }]);
-      setNewLimit({ endpoint: '', plan: 'Free', requestsPerMinute: '' });
+      setNewLimit({ endpoint: '', plan: 'Starter', requestsPerMinute: '' });
     }
   };
 

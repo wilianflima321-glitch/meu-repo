@@ -29,40 +29,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate plan exists
-    const validPlans = ['free', 'starter', 'pro', 'enterprise'];
+    // Validate plan exists - Planos alinhados com estratégia 2025
+    // SEM FREE TIER - Todos os planos são pagos para garantir zero prejuízo
+    const validPlans = ['starter', 'basic', 'pro', 'studio', 'enterprise'];
     if (!validPlans.includes(planId)) {
       return NextResponse.json(
-        { error: 'Invalid plan ID' },
+        { error: 'Invalid plan ID. Valid plans: starter, basic, pro, studio, enterprise' },
         { status: 400 }
       );
     }
 
-    // Free plan - just update subscription
-    if (planId === 'free') {
-      const subscription = await prisma.subscription.upsert({
-        where: { userId: user.userId },
-        create: {
-          userId: user.userId,
-          plan: 'free',
-          status: 'active',
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-        },
-        update: {
-          plan: 'free',
-          status: 'active',
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        subscription,
-        message: 'Free plan activated',
-      });
-    }
+    // Plan pricing (USD) - Margem mínima 89%
+    const planPrices: Record<string, number> = {
+      starter: 3,     // $3/mês - R$15
+      basic: 9,       // $9/mês - R$45
+      pro: 29,        // $29/mês - R$149
+      studio: 79,     // $79/mês - R$399
+      enterprise: 199 // $199/mês - R$999
+    };
 
     // For paid plans, create a mock checkout session
     // In production, integrate with Stripe:
