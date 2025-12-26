@@ -1,4 +1,7 @@
 {
+  "name": "aethel-engine",
+  "version": "2.0.0",
+  "description": "Aethel AI Engine - Superior autonomous AI platform",
   "scripts": {
     "start": "cd examples/browser-ide-app && npm install && npm start",
     "ide": "cd examples/browser-ide-app && npm start",
@@ -12,7 +15,11 @@
     "test:ai-ide": "npm run build:ai-ide && node cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js",
     "test:all": "npm run check:ai-ide-ts && npm run test:ai-ide && npm run test:e2e",
     "ci:local": "npm run test:all",
-    "diagnostics:playwright": "node tools/ci/write-playwright-summary.mjs --json test-results/playwright.json --out diagnostics/PLAYWRIGHT_SUMMARY.txt"
+    "diagnostics:playwright": "node tools/ci/write-playwright-summary.mjs --json test-results/playwright.json --out diagnostics/PLAYWRIGHT_SUMMARY.txt",
+    "test:quick-ai": "npx ts-node -P src/common/tests/tsconfig.cjs.json src/common/tests/quick-ai-test.ts",
+    "test:llm": "npx ts-node src/common/llm/tests/llm-integration.test.ts",
+    "test:browser": "npx ts-node src/common/web-automation/tests/browser.test.ts",
+    "test:trading": "npx ts-node src/common/trading/tests/exchange.test.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
@@ -20,6 +27,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/chai": "^5.2.3",
     "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^24.9.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -32,9 +40,30 @@
     "p-queue": "^9.0.0",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@theia/filesystem": "^1.66.2"
+    "@theia/filesystem": "^1.66.2",
+    
+    "openai": "^4.52.0",
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@google/generative-ai": "^0.12.0",
+    "groq-sdk": "^0.5.0",
+    
+    "playwright": "^1.40.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    
+    "ccxt": "^4.2.0",
+    "technicalindicators": "^3.1.0",
+    
+    "dotenv": "^16.4.5",
+    "axios": "^1.6.8",
+    "ws": "^8.16.0",
+    "uuid": "^9.0.1",
+    "crypto-js": "^4.2.0",
+    "inversify": "^6.0.2",
+    "reflect-metadata": "^0.2.2"
   }
 }

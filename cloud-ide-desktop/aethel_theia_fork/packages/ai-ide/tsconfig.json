@@ -18,14 +18,19 @@
   "strict": true,
   "strictPropertyInitialization": true,
   "useUnknownInCatchVariables": false,
-    "types": ["node", "jest", "mocha", "@testing-library/jest-dom"],
-    "baseUrl": "../..",
+    "types": ["node", "mocha"],
+    "ignoreDeprecations": "5.0",
     "paths": {
-      "@theia/*": ["packages/*"]
+      "@theia/*": ["../../packages/*"]
     }
   },
   "include": [
     "src",
+    "src/common/types/*.d.ts",
     "jest.setup.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts"
   ]
 }
