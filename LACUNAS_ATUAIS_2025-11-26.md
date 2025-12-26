@@ -127,21 +127,23 @@ Testes:               85%+ cobertura
 ---
 
 #### 5. Audio Engine
-**Status**: ❌ Não implementado  
-**Impacto**: Sem som, jogos ficam sem vida  
+**Status**: ⚠️ Parcial (engine existe; integração/IA/UI pendentes)  
+**Impacto**: Sem pipeline completo de áudio/IA, jogos ficam sem polimento  
 **Esforço**: 4 semanas, 1 dev  
 **Custo**: ~$16K  
 **Prioridade**: #5
 
 **O que falta**:
-- 3D spatial audio
-- Audio mixer
-- Effects (reverb, delay, etc.)
-- Music player
-- AI music generation
-- AI voice synthesis
+- Integração/UI dedicada (editor) + workflow no IDE
+- Music player/pipeline de playback integrado ao projeto
+- AI music generation (pendente)
+- AI voice synthesis (pendente)
+- (Opcional) 3D spatial audio completo
 
-**Limitação**: Jogos sem áudio profissional
+**Já existe no repo (Theia fork)**:
+- Engine de processamento/mixagem/efeitos/análise: `cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/src/common/audio/audio-processing-engine.ts`
+
+**Limitação**: Sem UX/IA integrada para áudio profissional
 
 ---
 

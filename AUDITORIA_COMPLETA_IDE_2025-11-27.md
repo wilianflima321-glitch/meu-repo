@@ -541,9 +541,12 @@ body {
 - Post-processing
 
 #### 9. Audio Engine (4 semanas)
-- 3D spatial audio
-- Audio mixer
-- AI music generation
+- Integração/UI de áudio no IDE (editor)
+- AI music generation (integração)
+- AI voice (TTS) (integração)
+- (Opcional) 3D spatial audio completo
+
+Nota: engine base já existe no Theia fork: `cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/src/common/audio/audio-processing-engine.ts`
 
 #### 10. Marketplace (8 semanas)
 - Asset store

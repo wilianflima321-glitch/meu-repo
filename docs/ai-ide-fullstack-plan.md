@@ -568,17 +568,20 @@
 ---
 
 ### 17. Audio Engine
-**Status**: ❌ Not Implemented  
+**Status**: ⚠️ Partial (core engine exists; AI generation pending)  
 **Priority**: P2  
 **Effort**: 4 weeks, 1 dev
 
 **Requirements**:
-- 3D spatial audio
-- Audio mixer
-- Effects (reverb, delay, etc.)
-- Music player
-- AI music generation
-- AI voice synthesis
+- Audio mixer (multi-track)
+- Effects (reverb/delay/EQ/etc.)
+- Analysis + mastering utilities
+- Music playback/workflow integration
+- AI music generation (pending)
+- AI voice synthesis (pending)
+
+**Already in repo (Theia fork)**:
+- `cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/src/common/audio/audio-processing-engine.ts`
 
 ---
 

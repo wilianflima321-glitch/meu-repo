@@ -185,11 +185,13 @@ class CommandHistory {
 **Tempo**: 1 semana
 
 **Features**:
-- 3D spatial audio
-- Audio mixer
-- Effects (reverb, delay, EQ)
-- Music player
-- AI music generation
+- UI/editor de áudio (camada de produto)
+- Integração do mixer/efeitos com o projeto
+- Music player no workflow
+- AI music generation (integração)
+- (Opcional) 3D spatial audio completo
+
+**Nota**: o engine base já existe no Theia fork (processamento/mixagem/efeitos/análise). Esta etapa é principalmente UI + integração + IA.
 
 **Impacto**: Áudio profissional
 

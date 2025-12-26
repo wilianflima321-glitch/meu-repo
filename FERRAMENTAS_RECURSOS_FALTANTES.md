@@ -21,7 +21,7 @@ Asset Management             ❌       ✅        ❌         🔴 Crítico
 Rendering Engine             ❌       ✅        ❌         🔴 Crítico
 Physics Engine               ❌       ✅        ❌         🔴 Crítico
 Animation System             ❌       ✅        ❌         🔴 Crítico
-Audio Engine                 ❌       ✅        ❌         🟡 Importante
+Audio Engine                 ⚠️       ✅        ❌         🟡 Importante
 Debugging                    ❌       ✅        ✅         🔴 Crítico
 Version Control              ❌       ✅        ✅         🔴 Crítico
 Colaboração                  ❌       ❌        ✅         🟡 Importante
@@ -354,17 +354,18 @@ export class AnimationSystem {
 ---
 
 ### 9. Audio Engine
-**Status**: ❌ Não implementado  
+**Status**: ⚠️ Parcial (engine de processamento/mixagem existe; IA pendente)  
 **Prioridade**: 🟡 Importante  
 **Esforço**: 4-6 semanas
 
-**O Que Falta**:
-- ✅ 3D spatial audio
-- ✅ Audio mixer
-- ✅ Effects (reverb, delay, etc.)
-- ✅ Music system
-- ✅ Voice synthesis (AI)
-- ✅ Sound generation (AI)
+**Já existe no repo (Theia fork)**:
+- Engine de áudio com tracks, mixagem, efeitos, análise e mastering
+- Arquivo: `cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/src/common/audio/audio-processing-engine.ts`
+
+**O Que Ainda Falta (para “AAA + IA”)**:
+- IA de síntese de voz (TTS) integrada ao editor
+- IA de geração de música/som integrada ao fluxo
+- (Opcional) Spatial/3D audio completo + UI dedicada
 
 **Implementação**:
 ```typescript

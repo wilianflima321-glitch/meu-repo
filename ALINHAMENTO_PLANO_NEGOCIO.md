@@ -1,6 +1,7 @@
 # Alinhamento Completo - Plano de Negócio & Plataforma
 
-**Data**: 2024-12-09  
+**Data**: 2025-12-24 (Atualizado)  
+**Versão**: 2.0 - Estratégia ZERO PREJUÍZO  
 **Objetivo**: Garantir que TODA a plataforma está alinhada com o plano de negócio
 
 ---
@@ -8,7 +9,7 @@
 ## 🎯 VISÃO DE NEGÓCIO
 
 ### Proposta de Valor Única
-**"A única plataforma AI IDE que oferece multi-missão (Code, Trading, Research, Creative) com cost optimization, policy engine e observabilidade enterprise"**
+**"A única plataforma AI IDE que oferece multi-missão (Code, Trading, Research, Creative) com cost optimization, policy engine e observabilidade enterprise - a partir de R$15/mês"**
 
 ### Diferenciadores Competitivos
 1. ✅ **Multi-Mission Support** - 4 domínios em uma plataforma
@@ -16,83 +17,109 @@
 3. ✅ **Policy Engine** - Guardrails e approval workflows
 4. ✅ **Enterprise Observability** - 12 SLOs, dashboards por domínio
 5. ✅ **Security First** - PII masking, ToS compliance, audit trails
+6. ✅ **17 Sistemas AAA** - Engine completo em todos os planos
+7. ✅ **IAs Ultra Baratas** - Gemini Flash, DeepSeek (90%+ margem)
 
 ---
 
-## 💰 MODELO DE MONETIZAÇÃO
+## 💰 MODELO DE MONETIZAÇÃO - ZERO PREJUÍZO
 
-### Planos e Pricing
+### ⚠️ IMPORTANTE: SEM PLANO GRATUITO
 
-#### 1. FREE TIER ($0/mês)
-**Target**: Desenvolvedores individuais, estudantes
+**Por que eliminamos o FREE tier:**
+- FREE = prejuízo garantido (usuários custam sem pagar)
+- Starter a R$15/mês é acessível para qualquer desenvolvedor
+- 100% dos usuários geram receita
+- Margem mínima 89% em todos os planos
+
+### Planos e Pricing (2025)
+
+#### 1. STARTER ($3/R$15 mês)
+**Target**: Iniciantes, estudantes, projetos pessoais
 
 **Limites**:
-- ✅ Budget: $10/mês em LLM
+- ✅ Tokens: 500K/mês
 - ✅ Domínios: Code apenas
-- ✅ Agents: Coder, Universal, Command
-- ✅ Concurrent missions: 1
-- ✅ Context history: 7 dias
-- ✅ Support: Community
+- ✅ Agents: Coder, Universal
+- ✅ Concurrent: 1
+- ✅ Modelos: Gemini Flash, DeepSeek
+- ✅ Context: 8K tokens
+- ✅ Histórico: 7 dias
 
-**Features Incluídas**:
-- Code generation, refactoring, debugging
-- Basic observability
-- Community templates
-- Public workspace
-
-**Conversão para Pro**: Quando atingir limite de budget ou precisar de Trading/Research
+**Custo real**: $0.10/usuário → **Margem 96.7%**
 
 ---
 
-#### 2. PRO TIER ($49/mês)
-**Target**: Desenvolvedores profissionais, freelancers, pequenas equipes
+#### 2. BASIC ($9/R$45 mês)
+**Target**: Desenvolvedores ativos
 
 **Limites**:
-- ✅ Budget: $500/mês em LLM
+- ✅ Tokens: 2M/mês
+- ✅ Domínios: Code, Research
+- ✅ Agents: Coder, Universal, Architect, Researcher
+- ✅ Concurrent: 2
+- ✅ Modelos: + GPT-4o-mini, Claude Haiku
+- ✅ Context: 16K tokens
+- ✅ Histórico: 30 dias
+
+**Custo real**: $0.55/usuário → **Margem 93.9%**
+
+---
+
+#### 3. PRO ($29/R$149 mês)
+**Target**: Profissionais, freelancers
+
+**Limites**:
+- ✅ Tokens: 8M/mês
 - ✅ Domínios: Code, Trading, Research, Creative
-- ✅ Agents: Todos os 9 agents
-- ✅ Concurrent missions: 5
-- ✅ Context history: 90 dias
-- ✅ Support: Email (24h SLA)
+- ✅ Agents: Todos standard
+- ✅ Concurrent: 5
+- ✅ Modelos: + GPT-4o, Claude Sonnet, Gemini Pro
+- ✅ Context: 32K tokens
+- ✅ Histórico: 90 dias
+- ✅ API Access
+- ✅ Priority Queue
 
-**Features Incluídas**:
-- Tudo do Free +
-- Trading (backtest, paper trading)
-- Research (web scraping, fact-checking)
-- Creative (storyboarding, character dev)
-- Advanced observability
-- Private workspaces
-- API access
-- Custom policies
-
-**Conversão para Enterprise**: Quando precisar de live trading, compliance, ou > 5 usuários
+**Custo real**: $3.12/usuário → **Margem 89.2%**
 
 ---
 
-#### 3. ENTERPRISE TIER (Custom pricing)
-**Target**: Empresas, hedge funds, estúdios
+#### 4. STUDIO ($79/R$399 mês)
+**Target**: Times pequenos, studios indie
 
 **Limites**:
-- ✅ Budget: Custom (ilimitado)
-- ✅ Domínios: Todos + custom
-- ✅ Agents: Todos + custom agents
-- ✅ Concurrent missions: Ilimitado
-- ✅ Context history: 7 anos (compliance)
-- ✅ Support: Dedicated (1h SLA)
+- ✅ Tokens: 25M/mês
+- ✅ Domínios: Todos
+- ✅ Agents: Todos + Custom
+- ✅ Concurrent: 10
+- ✅ Modelos: Todos (inclui premium)
+- ✅ Context: 64K tokens
+- ✅ Histórico: 180 dias
+- ✅ 3 seats inclusos
+- ✅ Webhooks
 
-**Features Incluídas**:
-- Tudo do Pro +
-- Live trading (real money)
-- Production deployment
-- Asset publishing
-- SSO/SAML
-- Audit logs (7 anos)
-- Custom integrations
-- On-premise deployment
-- SLA guarantees
-- Dedicated account manager
+**Custo real**: $8.23/usuário → **Margem 89.6%**
 
-**Pricing**: $499/mês base + $99/usuário adicional
+---
+
+#### 5. ENTERPRISE ($199/R$999 mês)
+**Target**: Empresas, grandes times
+
+**Limites**:
+- ✅ Tokens: 100M/mês
+- ✅ Domínios: Todos + Custom
+- ✅ Agents: Todos + Custom + Private
+- ✅ Concurrent: Ilimitado
+- ✅ Modelos: Todos + Fine-tuned
+- ✅ Context: 128K tokens
+- ✅ Histórico: 365 dias (compliance)
+- ✅ 10 seats inclusos
+- ✅ SSO/SAML
+- ✅ Audit Logs
+- ✅ SLA 99.9%
+- ✅ On-premise option
+
+**Custo real**: $15.94/usuário → **Margem 92.0%**
 
 ---
 

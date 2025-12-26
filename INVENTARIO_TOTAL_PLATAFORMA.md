@@ -325,34 +325,43 @@ Navbar:
 
 ### **Fase 3: Sistema de Pagamentos**
 
-#### **Planos Sugeridos**:
+#### **Planos Atualizados (ZERO PREJUÍZO - 89%+ Margens)**:
 
-**Free Tier**:
+**Starter ($3/R$15 mês)**:
 - 1 projeto
-- 100 MB storage
+- 500K tokens/mês
 - Recursos básicos
-- Marca d'água
+- Modelos: Gemini Flash, DeepSeek Coder
+- Margem: 96.7%
 
-**Pro ($19/mês)**:
+**Basic ($9/R$45 mês)**:
+- 3 projetos
+- 2M tokens/mês
+- + GPT-4o-mini
+- Colaboração básica
+- Margem: 93.9%
+
+**Pro ($29/R$149 mês)**:
 - Projetos ilimitados
-- 10 GB storage
-- Todos os recursos
-- Sem marca d'água
+- 8M tokens/mês
+- + Gemini Pro, Claude Haiku
 - Suporte prioritário
+- Margem: 89.2%
 
-**Team ($49/mês)**:
+**Studio ($79/R$399 mês)**:
 - Tudo do Pro
+- 25M tokens/mês
+- + GPT-4o, Claude Sonnet
 - Colaboração em tempo real
-- 50 GB storage
-- Admin dashboard
-- SSO
+- Margem: 89.6%
 
-**Enterprise (Custom)**:
-- Tudo do Team
-- Storage ilimitado
+**Enterprise ($199/R$999 mês)**:
+- Tudo do Studio
+- 100M tokens/mês
+- Todos os modelos
 - On-premise option
-- SLA
-- Suporte dedicado
+- SLA + Suporte dedicado
+- Margem: 92.0%
 
 #### **Integração Stripe**:
 ```typescript
@@ -419,21 +428,19 @@ const handleCheckout = async (planId) => {
 ### **Fluxo de Pagamento**
 
 ```
-1. User hits limit (free tier)
+1. User precisa de mais recursos
    ↓
-2. Prompt to upgrade
+2. View plans (billing page)
    ↓
-3. View plans (billing page)
+3. Select plan (Starter, Basic, Pro, Studio, Enterprise)
    ↓
-4. Select plan
+4. Checkout (Stripe)
    ↓
-5. Checkout (Stripe)
+5. Payment success
    ↓
-6. Payment success
+6. Unlock features + token allocation
    ↓
-7. Unlock features
-   ↓
-8. Continue working
+7. Continue working with full access
 ```
 
 ---

@@ -426,21 +426,19 @@ Tempo de Inicialização      <2s        <5s       ✅
 ## 🏆 DIFERENCIADORES
 
 ### vs. VSCode
-- ✅ 5 agentes especializados (vs. 1 Copilot)
-- ✅ Suporte a 8+ providers LLM (vs. apenas OpenAI)
-- ✅ Memória persistente (vs. sem memória)
-- ✅ Sistema de pesquisa com cache
+- ✅ Perfis de agente (ex.: architect/coder/research) via backend real
+- ✅ Roteamento para múltiplos providers LLM (dependente de configuração de chaves)
+- ✅ Política real-or-fail (sem “resposta fake” quando não configurado)
+- ✅ Superfícies de status/saúde para diagnosticar readiness
 
 ### vs. Gitpod
-- ✅ Sistema multi-agente (Gitpod não tem)
-- ✅ Visual scripting (planejado)
-- ✅ Memória de personagens (único)
+- ✅ Integrações de IA/missões integradas ao fluxo do IDE
+- ⚠️ Recursos “planejados” permanecem explicitamente não implementados quando aplicável
 
 ### Funcionalidades Únicas
-- ✅ Character Memory Bank (99% consistência visual)
-- ✅ Research Agent com cache inteligente
-- ✅ AI Dream System com validação automática
-- ✅ Multi-agente especializado
+- ✅ Streaming de eventos por WebSocket (inclui `mission.*` para integração)
+- ✅ Mission planner/execução por orquestrador (com readiness real)
+- ⚠️ Módulos avançados retornam `NOT_IMPLEMENTED` se não houver implementação real
 
 ---
 
@@ -462,19 +460,14 @@ Apache 2.0
 
 ## 🎉 STATUS
 
-**✅ SISTEMA TOTALMENTE FUNCIONAL**
+**Status: real-or-fail (sem mocks)**
 
-- ✅ Interface completa e responsiva
-- ✅ 5 agentes implementados e testados
-- ✅ Backend funcionando
-- ✅ Documentação completa (175KB+)
-- ✅ Zero vulnerabilidades
-- ✅ Pronto para uso imediato
-- ✅ Executável em 3 comandos
+- ✅ Backend e integrações expõem estado real (`/api/health`, `/api/status`, WS `mission.*`)
+- ✅ Quando algo não está pronto/configurado, falha explicitamente (`501 NOT_IMPLEMENTED`, `503 LLM_NOT_CONFIGURED`)
+- ⚠️ Execução de agentes depende de configuração de LLM (envs como `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `DEEPSEEK_API_KEY`)
+- ⚠️ Alguns módulos/“agentes” ainda são `NOT_IMPLEMENTED` por design (para não simular capacidade)
 
-**Última Atualização**: 2025-11-12  
-**Versão**: 1.0.0  
-**Status**: ✅ Production Ready
+**Como validar rapidamente**: `npm run -s test:quick-ai`
 
 ---
 

@@ -379,14 +379,25 @@ interface Policy {
 
 ## 💰 Cost Structure
 
-### Per-Mission Pricing
+### Per-Mission Pricing - ZERO PREJUÍZO Strategy (89%+ Margins)
 
-| Mission | Free Tier | Pro | Studio | Enterprise |
-|---------|-----------|-----|--------|------------|
-| **Code** | 100 req/mo | Unlimited | Unlimited | Unlimited |
-| **Trading** | Paper only | Paper only | Real (limited) | Real (full) |
-| **Research** | 50 req/mo | 500 req/mo | 2000 req/mo | Unlimited |
-| **Creative** | 10 assets/mo | 100 assets/mo | 500 assets/mo | Unlimited |
+**5 Tiers - All Paid:**
+| Plano | Preço USD | Preço BRL | Tokens/mês | Margem |
+|-------|-----------|-----------|------------|--------|
+| **Starter** | $3 | R$15 | 500K | 96.7% |
+| **Basic** | $9 | R$45 | 2M | 93.9% |
+| **Pro** | $29 | R$149 | 8M | 89.2% |
+| **Studio** | $79 | R$399 | 25M | 89.6% |
+| **Enterprise** | $199 | R$999 | 100M | 92.0% |
+
+### Per-Mission Limits
+
+| Mission | Starter | Basic | Pro | Studio | Enterprise |
+|---------|---------|-------|-----|--------|------------|
+| **Code** | 50 req/mo | 200 req/mo | Unlimited | Unlimited | Unlimited |
+| **Trading** | ❌ | Paper only | Paper only | Real (limited) | Real (full) |
+| **Research** | 20 req/mo | 50 req/mo | 500 req/mo | 2000 req/mo | Unlimited |
+| **Creative** | ❌ | 10 assets/mo | 100 assets/mo | 500 assets/mo | Unlimited |
 
 ### Budget Controls
 - Daily/monthly caps per workspace

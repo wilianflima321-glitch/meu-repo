@@ -99,18 +99,20 @@ Semana 4: Post-Processing
 
 **O que implementar**:
 ```
-Semana 1-2: Audio System
-- [ ] Web Audio API integration
-- [ ] 3D spatial audio
-- [ ] Audio mixer
-- [ ] Effects (reverb, delay, EQ)
-
-Semana 3-4: AI Features
-- [ ] AI music generation
-- [ ] AI voice synthesis
-- [ ] Audio import/export
+Semana 1-2: Integração + UI
+- [ ] Conectar engine base ao app (browser-ide-app)
 - [ ] Audio editor UI
+- [ ] Audio import/export
+- [ ] Playback + mix básico
+
+Semana 3-4: IA + recursos avançados
+- [ ] AI music generation (integração)
+- [ ] AI voice synthesis (integração)
+- [ ] (Opcional) 3D spatial audio completo
 ```
+
+**Nota**: o engine base já existe no Theia fork (mixagem/efeitos/análise):
+`cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/src/common/audio/audio-processing-engine.ts`
 
 **Arquivos a criar**:
 - `examples/browser-ide-app/audio-editor.html`
