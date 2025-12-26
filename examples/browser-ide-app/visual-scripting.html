@@ -270,10 +270,17 @@
                     const response = await fetch('/api/agent/coder', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ input: `Generate visual scripting logic for: ${prompt}` })
+                        body: JSON.stringify({
+                            input: `Generate visual scripting logic for: ${prompt}`,
+                            workspaceId: 'local',
+                            userId: 'local'
+                        })
                     });
 
-                    const result = await response.json();
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        throw new Error(result && (result.message || result.error) ? (result.message || result.error) : `HTTP ${response.status}`);
+                    }
                     
                     setNodes((nds) => {
                         const filtered = nds.filter(n => !n.id.startsWith('ai-loading'));
@@ -295,7 +302,6 @@
                         });
                     });
                 } catch (error) {
-                    alert('AI generation failed. Using demo response.');
                     setNodes((nds) => {
                         const filtered = nds.filter(n => !n.id.startsWith('ai-loading'));
                         return filtered.concat({
@@ -303,10 +309,10 @@
                             data: { 
                                 label: (
                                     <div className="ai-node">
-                                        <div className="node-label">🤖 AI Generated</div>
+                                        <div className="node-label">AI indisponível</div>
                                         <div style={{fontSize: '11px', marginTop: '5px'}}>{prompt}</div>
                                         <div style={{fontSize: '10px', marginTop: '5px', opacity: 0.8}}>
-                                            // Demo: Player movement logic
+                                            Falha ao gerar via backend.
                                         </div>
                                     </div>
                                 )

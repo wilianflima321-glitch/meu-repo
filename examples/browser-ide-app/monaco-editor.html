@@ -214,18 +214,20 @@ console.log(\`Email valid: \${validateEmail(user.email)}\`);
             const code = selectedText || editor.getValue();
             
             try {
-                const response = await fetch('http://localhost:3000/api/agent/coder', {
+                    const response = await fetch('/api/agent/coder', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: [{
-                            role: 'user',
-                            content: `${prompt}\\n\\nCode:\\n${code}`
-                        }]
+                            input: `${prompt}\n\nCode:\n${code}`,
+                            workspaceId: 'local',
+                            userId: 'local'
                     })
                 });
                 
-                const result = await response.json();
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        throw new Error(result && (result.message || result.error) ? (result.message || result.error) : `HTTP ${response.status}`);
+                    }
                 
                 // Show AI response
                 const aiResponse = result.content || 'No response from AI';
@@ -239,7 +241,7 @@ console.log(\`Email valid: \${validateEmail(user.email)}\`);
                     }]);
                 }
             } catch (error) {
-                alert('❌ Error calling AI: ' + error.message + '\\n\\nMake sure the server is running on port 3000');
+                 alert('❌ Error calling AI: ' + (error && error.message ? error.message : String(error)));
             }
         }
         

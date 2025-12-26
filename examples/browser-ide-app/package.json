@@ -5,18 +5,23 @@
   "private": true,
   "main": "src/index.html",
   "scripts": {
-    "start": "npm run start:backend & npm run start:frontend",
+    "start": "npm run start:backend",
     "start:backend": "node server.js",
-    "start:frontend": "npx serve -s . -p 3000",
     "dev": "npm run start:backend",
     "build": "echo 'Build complete'"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "body-parser": "^1.20.0"
+    "body-parser": "^1.20.0",
+    "dotenv": "^16.4.5",
+    "uuid": "^9.0.1",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
-    "serve": "^14.0.0"
-  }
+    "serve": "^14.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "private": true
 }

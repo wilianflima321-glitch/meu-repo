@@ -624,7 +624,7 @@
                 <li><strong>🎯 Welcome Wizard</strong> - Onboarding para novos usuários (primeira visita)</li>
             </ul>
             <p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">
-                ✨ Todas as features funcionam IMEDIATAMENTE sem instalação adicional!
+                ✨ As capacidades dependem do backend e da configuração (real-or-fail).
             </p>
         </div>
 
@@ -656,9 +656,9 @@
         </div>
 
         <footer class="footer">
-            <p><strong>Status:</strong> ✅ Sistema Totalmente Funcional</p>
+            <p id="system-status"><strong>Status:</strong> Verificando backend...</p>
             <p><strong>Versão:</strong> 1.0.0 | <strong>Data:</strong> 2025-11-12</p>
-            <p>Todos os agentes implementados, testados e documentados</p>
+            <p>Agentes disponíveis dependem do backend e chaves configuradas</p>
         </footer>
     </div>
 
@@ -688,100 +688,37 @@
             response.classList.remove('show');
 
             try {
-                // Simulate agent response (in real app, this would call the backend)
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                const escapeHtml = (s) => String(s)
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#39;');
 
-                let responseText = '';
-                let metadata = {};
+                const resp = await fetch(`/api/agent/${agentType}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        input,
+                        workspaceId: 'local',
+                        userId: 'local'
+                    })
+                });
 
-                switch(agentType) {
-                    case 'architect':
-                        responseText = `<strong>Architect Agent Responde:</strong><br><br>
-                        Para uma aplicação microservices escalável, recomendo:<br><br>
-                        <strong>1. API Gateway Pattern</strong><br>
-                        - Ponto único de entrada<br>
-                        - Roteamento e load balancing<br>
-                        - Rate limiting e autenticação<br><br>
-                        <strong>2. Service Discovery</strong><br>
-                        - Consul ou Eureka<br>
-                        - Health checks automáticos<br>
-                        - Dynamic service registration<br><br>
-                        <strong>3. Circuit Breaker</strong><br>
-                        - Resilience4j ou Hystrix<br>
-                        - Fallback strategies<br>
-                        - Timeout management<br><br>
-                        <strong>4. Event-Driven Architecture</strong><br>
-                        - Message broker (RabbitMQ, Kafka)<br>
-                        - Async communication<br>
-                        - Event sourcing quando apropriado`;
-                        metadata = { tokens: 150, duration: '1.2s', model: 'gpt-4' };
-                        break;
+                const data = await resp.json().catch(() => ({}));
 
-                    case 'coder':
-                        responseText = `<strong>Coder Agent Responde:</strong><br><br>
-                        <div class="code-block">
-function validateEmail(email: string): boolean {
-    // Regex para validação de email
-    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-    
-    // Validações básicas
-    if (!email || typeof email !== 'string') {
-        return false;
-    }
-    
-    // Trim whitespace
-    email = email.trim();
-    
-    // Verifica comprimento
-    if (email.length > 254) {
-        return false;
-    }
-    
-    // Valida formato
-    return emailRegex.test(email);
-}
-
-// Testes
-console.log(validateEmail('user@example.com')); // true
-console.log(validateEmail('invalid')); // false
-console.log(validateEmail('user@')); // false
-                        </div>
-                        <br><strong>Features:</strong><br>
-                        ✓ Validação de tipo TypeScript<br>
-                        ✓ Regex robusto<br>
-                        ✓ Tratamento de edge cases<br>
-                        ✓ Exemplos de uso incluídos`;
-                        metadata = { tokens: 180, duration: '0.8s', model: 'gpt-4', language: 'typescript' };
-                        break;
-
-                    case 'research':
-                        responseText = `<strong>Research Agent Responde:</strong><br><br>
-                        <strong>React 19 - Features Principais</strong><br><br>
-                        Encontradas 6 fontes com confiança de 95%<br><br>
-                        <strong>1. Server Components (Stable)</strong><br>
-                        - Componentes renderizados no servidor<br>
-                        - Zero JavaScript no cliente<br>
-                        - Melhor performance<br><br>
-                        <strong>2. Actions</strong><br>
-                        - Nova API para mutations<br>
-                        - Integração com forms<br>
-                        - Optimistic updates<br><br>
-                        <strong>3. use() Hook</strong><br>
-                        - Suspense para data fetching<br>
-                        - Promise unwrapping<br>
-                        - Context com suspense<br><br>
-                        <strong>4. Asset Loading</strong><br>
-                        - Preload de recursos<br>
-                        - Priorização automática<br><br>
-                        <strong>Custos:</strong> $0.27 | <strong>Cache:</strong> Salvo por 24h`;
-                        metadata = { tokens: 200, duration: '2.1s', sources: 6, confidence: 0.95 };
-                        break;
+                if (!resp.ok) {
+                    const msg = data && (data.message || data.error) ? (data.message || data.error) : `HTTP ${resp.status}`;
+                    throw new Error(msg);
                 }
 
+                const content = data.content || '';
+                const metadata = data.metadata || {};
+
                 // Show response
-                response.innerHTML = responseText + `<div class="metrics">
-                    <strong>Metadados:</strong> ${JSON.stringify(metadata)}
-                </div>`;
+                response.innerHTML = `<strong>Resposta:</strong><br><br>
+                    <div class="code-block" style="white-space: pre-wrap;">${escapeHtml(content)}</div>
+                    <div class="metrics"><strong>Metadados:</strong> ${escapeHtml(JSON.stringify(metadata))}</div>`;
                 response.classList.add('show');
 
             } catch (error) {
@@ -793,8 +730,24 @@ console.log(validateEmail('user@')); // false
         }
 
         // Initialize
-        console.log('AI IDE System loaded successfully!');
-        console.log('5 Agents ready: Architect, Coder, Research, AI Dream, Character Memory');
+        console.log('AI IDE UI loaded.');
+
+        // Atualiza status do backend (sem afirmar pronto quando não está)
+        (async () => {
+            const statusEl = document.getElementById('system-status');
+            try {
+                const r = await fetch('/api/health');
+                const body = await r.json().catch(() => ({}));
+                if (!r.ok) {
+                    statusEl.innerHTML = '<strong>Status:</strong> Backend indisponível';
+                    return;
+                }
+                const s = body && body.status ? String(body.status) : 'unknown';
+                statusEl.innerHTML = `<strong>Status:</strong> Backend ${s}`;
+            } catch {
+                statusEl.innerHTML = '<strong>Status:</strong> Backend indisponível';
+            }
+        })();
         
         // Show welcome modal on first visit
         if (!localStorage.getItem('ide_visited')) {

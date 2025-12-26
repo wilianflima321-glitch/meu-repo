@@ -406,32 +406,46 @@
                 const response = await fetch('/api/agent/coder', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ input: `Generate 3D object: ${prompt}` })
+                    body: JSON.stringify({
+                        input: `Return JSON only with the shape and optional color to create a 3D object. Schema: {"shape":"cube"|"sphere"|"cylinder"|"plane","color":"#RRGGBB"}. Prompt: ${prompt}`,
+                        workspaceId: 'local',
+                        userId: 'local'
+                    })
                 });
 
-                const result = await response.json();
-                
-                // Create object based on prompt
-                if (prompt.toLowerCase().includes('cube') || prompt.toLowerCase().includes('box')) {
-                    addCube();
-                } else if (prompt.toLowerCase().includes('sphere') || prompt.toLowerCase().includes('ball')) {
-                    addSphere();
-                } else if (prompt.toLowerCase().includes('cylinder')) {
-                    addCylinder();
-                } else {
-                    addCube(); // Default
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(result && (result.message || result.error) ? (result.message || result.error) : `HTTP ${response.status}`);
                 }
 
-                alert('🤖 AI created object based on: ' + prompt);
+                const content = String(result.content || '').trim();
+                const extractJson = (text) => {
+                    const start = text.indexOf('{');
+                    const end = text.lastIndexOf('}');
+                    if (start >= 0 && end > start) {
+                        return text.slice(start, end + 1);
+                    }
+                    return text;
+                };
+                const jsonText = extractJson(content);
+                const spec = JSON.parse(jsonText);
+
+                const shape = String(spec.shape || '').toLowerCase();
+                if (shape === 'sphere') addSphere();
+                else if (shape === 'cylinder') addCylinder();
+                else if (shape === 'plane') addPlane();
+                else if (shape === 'cube') addCube();
+                else throw new Error('Invalid shape in AI response');
+
+                alert('Object created using AI specification.');
             } catch (error) {
                 console.error('AI generation error:', error);
-                addCube(); // Fallback
-                alert('Created demo object. AI: ' + prompt);
+                alert('AI generation failed: ' + (error && error.message ? error.message : String(error)));
             }
         }
 
         async function aiOptimizeScene() {
-            alert('🤖 AI Optimization:\n\n✅ Merged similar materials\n✅ Reduced draw calls by 40%\n✅ Optimized lighting\n\nScene performance improved!');
+            alert('AI scene optimization is not implemented yet (requires a real optimization pipeline).');
         }
 
         function clearScene() {

@@ -1,215 +1,68 @@
-# 🚀 AI IDE - Aplicação Browser Completa
+# Browser IDE App (exemplo)
 
-## ✅ Sistema Totalmente Funcional
+Este diretório contém um exemplo de IDE no browser com backend Node.js/TypeScript (Express + WebSocket), usado como alvo de integração para o fluxo de missões (Theia) e para validar o princípio **real-or-fail**.
 
-Esta é uma aplicação browser completa e funcional que demonstra todos os componentes da AI IDE.
+Não há respostas “fake”: quando algo não está implementado ou não está configurado, a API retorna erros explícitos (`501 NOT_IMPLEMENTED`, `503 LLM_NOT_CONFIGURED`, `503 ORCHESTRATOR_NOT_READY`).
 
----
+## Requisitos
 
-## 📋 Requisitos
+- Node.js 18+
+- npm
 
-- Node.js 18+ instalado
-- npm ou yarn
-
----
-
-## 🏃 Como Executar
-
-### Opção 1: Execução Rápida (Recomendado)
+## Como executar
 
 ```bash
-# 1. Navegue para o diretório
 cd examples/browser-ide-app
-
-# 2. Instale as dependências
 npm install
-
-# 3. Inicie o servidor
 npm start
 ```
 
-### Opção 2: Modo Desenvolvimento
+Por padrão o servidor usa `PORT=3000` (ou o valor da env `PORT`).
 
-```bash
-# Inicia com nodemon para auto-reload
-npm run dev
+Abra:
+
+- `http://localhost:3000/`
+
+## Endpoints úteis
+
+- `GET /api/health`: status do servidor + readiness + estado do orquestrador (`initializing/ready/failed`).
+- `GET /api/status`: status do orquestrador (pode retornar `503` enquanto inicializa).
+- `POST /api/agent/:type`: execução real via LLMRouter (sem chaves retorna `503 LLM_NOT_CONFIGURED`).
+- `POST /orchestrator/select`: hook para thin-client (Theia). Retorna `501` se `AETHEL_ORCHESTRATOR_SELECT_AGENT_ID` não estiver definido.
+- `WS /ws`: stream de eventos (inclui `mission.update`, `mission.complete`, `mission.error`).
+
+## Observações (real-or-fail)
+
+- `ai-dream` e `character-memory` retornam `501 NOT_IMPLEMENTED` no backend real.
+- Para habilitar execução de agentes (`architect`, `coder`, `research`), configure ao menos uma chave:
+	- `OPENAI_API_KEY` ou `DEEPSEEK_API_KEY` ou `ANTHROPIC_API_KEY` ou `GOOGLE_API_KEY`
+
+## Diagnóstico rápido (Windows / PowerShell)
+
+```powershell
+$env:PORT=3326
+node .\server.js
 ```
 
-### Opção 3: Servidor Simples
+Se você estiver rodando por um runner que interrompe processos long-running, valide a saúde com:
 
-```bash
-# Apenas o servidor backend
-node server.js
+```powershell
+Invoke-RestMethod -Uri "http://localhost:$env:PORT/api/health" -Method GET | ConvertTo-Json -Depth 6
 ```
 
----
-
-## 🌐 Acessando a IDE
-
-Após iniciar o servidor, abra seu navegador em:
-
-```
-http://localhost:3000
-```
-
-Você verá a interface completa da IDE com:
-- ✅ Dashboard com estatísticas
-- ✅ 5 agentes funcionais
-- ✅ Interface interativa
-- ✅ Demonstrações práticas
-
----
-
-## 🤖 Agentes Disponíveis
-
-### 1. Architect Agent 🏗️
-**Especialista em arquitetura de software**
-
-**Experimente:**
-- "Como estruturar uma aplicação microservices?"
-- "Qual padrão de design usar para um sistema de notificações?"
-- "Como garantir escalabilidade em uma API?"
-
-### 2. Coder Agent 💻
-**Especialista em geração de código**
-
-**Experimente:**
-- "Crie uma função TypeScript para validar email"
-- "Escreva um algoritmo de busca binária em Python"
-- "Implemente um rate limiter em JavaScript"
-
-### 3. Research Agent 🔍
-**Especialista em pesquisa**
-
-**Experimente:**
-- "Pesquise sobre React 19 features"
-- "Quais são as melhores práticas de segurança API?"
-- "Como funciona o algoritmo de consenso Raft?"
-
-### 4. AI Dream System 🎨
-**Sistema de geração criativa**
-
-**Funcionalidades:**
-- Geração iterativa com refinamento
-- Validação de qualidade (85%+)
-- Verificação de consistência
-
-### 5. Character Memory Bank 🧠
-**Memória persistente**
-
-**Funcionalidades:**
-- Armazenamento de perfis
-- Consistência visual 99%+
-- Busca por similaridade
-
----
-
-## 📊 Status do Sistema
-
-```
-Componente                  Status      Linhas
-─────────────────────────────────────────────
-Agentes                     ✅ OK       1500+
-Infraestrutura              ✅ OK       700+
-Integração                  ✅ OK       350+
-Testes                      ✅ OK       400+
-Interface                   ✅ OK       500+
-─────────────────────────────────────────────
-TOTAL                       ✅ OK       3450+
-```
-
----
-
-## 🛠️ Funcionalidades
-
-### ✅ Implementado
-- [x] Interface web completa
-- [x] 5 agentes especializados
-- [x] API REST backend
-- [x] Demonstrações interativas
-- [x] Estatísticas do sistema
-- [x] Documentação completa
-
-### 🔧 Infraestrutura
-- [x] Validação de inputs
-- [x] Tratamento de erros
-- [x] Logging estruturado
-- [x] Streaming em tempo real
-- [x] Criptografia de secrets
-- [x] Suporte a 8+ providers LLM
-
----
-
-## 📁 Estrutura de Arquivos
-
-```
-browser-ide-app/
-├── index.html          # Interface principal (completa)
-├── server.js           # Servidor backend (funcional)
-├── package.json        # Dependências
-└── README.md           # Este arquivo
-```
-
----
-
-## 🧪 Testando os Agentes
-
-### Teste Architect Agent
-
-1. Abra a IDE em `http://localhost:3000`
-2. Clique na aba "Architect Agent"
-3. Digite: "Como estruturar uma aplicação microservices?"
-4. Clique em "Consultar Architect"
-5. Veja a resposta detalhada com recomendações
-
-### Teste Coder Agent
-
-1. Clique na aba "Coder Agent"
-2. Digite: "Crie uma função TypeScript para validar email"
-3. Clique em "Consultar Coder"
-4. Veja o código gerado com exemplos
-
-### Teste Research Agent
-
-1. Clique na aba "Research Agent"
-2. Digite: "Pesquise sobre React 19 features"
-3. Clique em "Consultar Research"
-4. Veja os resultados com fontes e confiança
-
----
-
-## 📚 Documentação Adicional
-
-Toda a documentação está disponível no diretório raiz:
-
-- **ANALISE_REPOSITORIO_COMPLETA.md** - Análise completa (27KB)
-- **RESUMO_EXECUTIVO.md** - Visão geral
-- **GUIA_USO_COMPLETO.md** - Guia prático (15KB)
-- **ARQUITETURA_PROPOSTA.md** - Arquitetura (30KB)
-- **+ 16 documentos adicionais**
-
----
-
-## 🎯 O Que Funciona
-
-### ✅ Interface Completa
-- Dashboard responsivo
-- 5 agentes interativos
-- Demonstrações práticas
-- Estatísticas em tempo real
-
-### ✅ Backend Funcional
-- API REST completa
-- Health check endpoint
-- Simulação de agentes
+### ✅ Backend funcional (real-or-fail)
+- API REST + WS (eventos `mission.*`)
+- Health check (`/api/health`) + status (`/api/status`)
 - CORS habilitado
 
-### ✅ Agentes Implementados
-- Architect Agent (arquitetura)
-- Coder Agent (código)
-- Research Agent (pesquisa)
-- AI Dream System (criação)
-- Character Memory Bank (memória)
+### ✅ Agentes suportados (quando LLM configurado)
+- `architect`
+- `coder`
+- `research`
+
+### 🚫 Recursos não implementados (retornam `501 NOT_IMPLEMENTED`)
+- `ai-dream`
+- `character-memory`
 
 ---
 
@@ -263,13 +116,11 @@ node --version
 
 ## 🎉 Status Final
 
-**✅ SISTEMA TOTALMENTE FUNCIONAL**
+**Status: real-or-fail (sem mocks)**
 
-- Interface completa e responsiva
-- 5 agentes implementados e testados
-- Backend funcionando
-- Documentação completa (175KB+)
-- Pronto para uso imediato
+- O backend expõe status real em `GET /api/health` e `GET /api/status`.
+- Execução de agentes depende de configuração de LLM; sem chaves retorna `503 LLM_NOT_CONFIGURED`.
+- Recursos não implementados retornam `501 NOT_IMPLEMENTED` (não simulamos capacidade).
 
 ---
 
@@ -279,6 +130,5 @@ Apache 2.0
 
 ---
 
-**Última Atualização**: 2025-11-12  
-**Versão**: 1.0.0  
-**Status**: ✅ Produção Ready
+**Última Atualização**: 2025-12-25  
+**Status**: Em evolução (real-or-fail)
