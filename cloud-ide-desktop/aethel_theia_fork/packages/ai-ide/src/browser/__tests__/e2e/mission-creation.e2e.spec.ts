@@ -56,7 +56,7 @@ describe('Mission Creation E2E', () => {
                 estimatedTime: { min: 300, max: 1800, typical: 600 },
                 riskLevel: 'low' as const,
                 requiresApproval: false,
-                requiredPlan: 'free' as const,
+                requiredPlan: 'starter' as const,
                 examples: ['Add authentication', 'Create API endpoint'],
             };
 

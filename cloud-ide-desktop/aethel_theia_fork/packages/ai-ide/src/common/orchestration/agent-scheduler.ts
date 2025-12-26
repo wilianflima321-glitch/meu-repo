@@ -62,6 +62,9 @@ export class AgentScheduler {
     private executing: Map<string, MissionRequest> = new Map();
     private completed: Map<string, any> = new Map();
     private readonly MAX_QUEUE_SIZE = 1000;
+    private acceptedSubmissions = 0;
+    private rejectedSubmissions = 0;
+    private completionTimestampsMs: number[] = [];
 
     /**
      * Register agent with capabilities
@@ -81,11 +84,13 @@ export class AgentScheduler {
 
         // Validate budget
         if (request.budget <= 0) {
+            this.rejectedSubmissions += 1;
             throw new Error('Budget must be positive');
         }
 
         // Check queue capacity
         if (this.queue.length >= this.MAX_QUEUE_SIZE) {
+            this.rejectedSubmissions += 1;
             throw new Error('Queue full - try again later');
         }
 
@@ -96,8 +101,11 @@ export class AgentScheduler {
         this.validatePlan(plan, request);
 
         // Add to queue
+        (request as any).enqueuedAt = Date.now();
         this.queue.push(request);
         this.sortQueue();
+
+        this.acceptedSubmissions += 1;
 
         // Start processing if not already running
         this.processQueue();
@@ -213,6 +221,14 @@ export class AgentScheduler {
 
         this.executing.delete(missionId);
         this.completed.set(missionId, { status: 'completed', completedAt: Date.now() });
+
+        const now = Date.now();
+        this.completionTimestampsMs.push(now);
+        // Keep a sliding window of last 5 minutes
+        const cutoff = now - 5 * 60 * 1000;
+        while (this.completionTimestampsMs.length > 0 && this.completionTimestampsMs[0] < cutoff) {
+            this.completionTimestampsMs.shift();
+        }
     }
 
     /**
@@ -279,8 +295,11 @@ export class AgentScheduler {
             throw new Error(`Agent ${agentId} not found`);
         }
 
-        // Simulate agent execution
-        return { success: true, result: 'Agent executed' };
+        // Real-or-fail: this scheduler does not execute agents locally.
+        // Execution must be delegated to a real orchestrator/backend.
+        throw new Error(
+            `NOT_IMPLEMENTED: Agent execution requires a configured orchestrator backend (missionId=${missionId}, agentId=${agent.agentId}).`
+        );
     }
 
     /**
@@ -575,18 +594,28 @@ export class AgentScheduler {
     }
 
     private calculateAvgWaitTime(): number {
-        // Placeholder - would track actual wait times
-        return 0;
+        if (this.queue.length === 0) return 0;
+        const now = Date.now();
+        const ages = this.queue
+            .map(r => (typeof (r as any).enqueuedAt === 'number' ? now - (r as any).enqueuedAt : 0))
+            .filter(ms => ms >= 0);
+        if (ages.length === 0) return 0;
+        return Math.round(ages.reduce((a, b) => a + b, 0) / ages.length);
     }
 
     private calculateThroughput(): number {
-        // Placeholder - would track completed requests per time unit
-        return 0;
+        const now = Date.now();
+        const windowMs = 60 * 1000;
+        const cutoff = now - windowMs;
+        const countLastMinute = this.completionTimestampsMs.filter(t => t >= cutoff).length;
+        // missions per minute
+        return countLastMinute;
     }
 
     private calculateRejectionRate(): number {
-        // Placeholder - would track rejected vs accepted requests
-        return 0;
+        const total = this.acceptedSubmissions + this.rejectedSubmissions;
+        if (total === 0) return 0;
+        return this.rejectedSubmissions / total;
     }
 
     private processQueue(): void {

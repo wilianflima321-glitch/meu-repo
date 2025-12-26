@@ -29,6 +29,20 @@ import { orchestratorTemplate } from './orchestrator-prompt-template';
 export const OrchestratorChatAgentId = 'Orchestrator';
 const OrchestratorRequestIdKey = 'orchestratorRequestIdKey';
 
+function getOrchestratorSelectUrl(): string {
+    const envBase = (typeof process !== 'undefined' && (process as any)?.env && (process as any).env.AETHEL_ORCHESTRATOR_BASE_URL)
+        ? String((process as any).env.AETHEL_ORCHESTRATOR_BASE_URL)
+        : '';
+
+    const base = envBase
+        ? envBase
+        : (typeof window !== 'undefined' && (window as any).location?.origin)
+            ? String((window as any).location.origin)
+            : 'http://localhost:8000';
+
+    return `${base.replace(/\/+$/, '')}/orchestrator/select`;
+}
+
 // runtime helpers to avoid unsafe `as any` usage
 function bindFn<T extends Function>(obj: unknown, name: string): T | undefined {
     if (obj && typeof (obj as unknown as Record<string, unknown>)[name] === 'function') {
@@ -95,7 +109,7 @@ export class OrchestratorChatAgent extends AbstractStreamParsingChatAgent {
 
         // Ask backend orchestrator for suggested agents first (thin client behaviour)
         try {
-            const resp = await fetch('http://localhost:8000/orchestrator/select', {
+            const resp = await fetch(getOrchestratorSelectUrl(), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: (request as any).inputText ?? '' })

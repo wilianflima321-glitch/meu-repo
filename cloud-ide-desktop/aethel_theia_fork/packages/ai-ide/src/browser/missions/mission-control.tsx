@@ -27,7 +27,8 @@ export interface MissionPreset {
   };
   riskLevel: 'low' | 'medium' | 'high';
   requiresApproval: boolean;
-  requiredPlan: 'free' | 'pro' | 'enterprise';
+  // Planos alinhados com estratégia 2025 - sem free tier
+  requiredPlan: 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
   examples: string[];
 }
 
@@ -320,7 +321,7 @@ export class MissionControlWidget extends ReactWidget {
         estimatedTime: { min: 300, max: 1800, typical: 600 },
         riskLevel: 'low',
         requiresApproval: false,
-        requiredPlan: 'free',
+        requiredPlan: 'starter', // Disponível a partir do Starter (R$15)
         examples: [
           'Add user authentication',
           'Implement REST API endpoint',
@@ -338,7 +339,7 @@ export class MissionControlWidget extends ReactWidget {
         estimatedTime: { min: 600, max: 3600, typical: 1200 },
         riskLevel: 'medium',
         requiresApproval: false,
-        requiredPlan: 'free',
+        requiredPlan: 'starter', // Disponível a partir do Starter (R$15)
         examples: [
           'Extract common utilities',
           'Improve error handling',
@@ -511,6 +512,10 @@ export class MissionControlWidget extends ReactWidget {
     this.update();
 
     try {
+      if (!this.isConnected) {
+        throw new Error('Backend WebSocket indisponível. Conecte o Mission Control a um backend real antes de iniciar uma missão.');
+      }
+
       // Schedule mission with AgentScheduler
       await this.scheduler.scheduleMission({
         id: mission.id,

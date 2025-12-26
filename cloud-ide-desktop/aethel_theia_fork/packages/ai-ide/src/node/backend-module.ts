@@ -22,6 +22,7 @@ import { ConnectionContainerModule } from '@theia/core/lib/node/messaging/connec
 import { WorkspacePreferencesSchema } from '../common/workspace-preferences';
 import { AiConfigurationPreferences } from '../common/ai-configuration-preferences';
 import { aiIdePreferenceSchema } from '../common/ai-ide-preferences';
+import { WorkspaceExecutorService } from './workspace-executor-service';
 
 const browserAutomationModule = ConnectionContainerModule.create(({ bind, bindBackendService, bindFrontendService }) => {
     // Mark unused injected helpers as referenced to avoid lint warnings in this conservative change set.
@@ -42,10 +43,14 @@ const browserAutomationModule = ConnectionContainerModule.create(({ bind, bindBa
 });
 
 export default new ContainerModule(bind => {
+    // ========== Preferences ==========
     bind(PreferenceContribution).toConstantValue({ schema: aiIdePreferenceSchema });
     bind(PreferenceContribution).toConstantValue({ schema: WorkspacePreferencesSchema });
     bind(PreferenceContribution).toConstantValue({ schema: AiConfigurationPreferences });
 
+    // ========== Connection Modules ==========
     bind(ConnectionContainerModule).toConstantValue(browserAutomationModule);
 
+    // ========== Backend Services ==========
+    bind(WorkspaceExecutorService).toSelf().inSingletonScope();
 });

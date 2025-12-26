@@ -50,6 +50,7 @@ export class WebSocketService {
     private reconnectDelay = 1000;
     private heartbeatInterval: any;
     private messageQueue: WSMessage[] = [];
+    private idSeq = 0;
 
     private readonly onMessageEmitter = new Emitter<WSMessage>();
     readonly onMessage: Event<WSMessage> = this.onMessageEmitter.event;
@@ -66,13 +67,14 @@ export class WebSocketService {
     /**
      * Connect to WebSocket server
      */
-    connect(url: string = 'ws://localhost:3000/ws'): void {
+    connect(url?: string): void {
+        const resolvedUrl = url || this.resolveDefaultUrl();
         if (this.ws?.readyState === WebSocket.OPEN) {
             return;
         }
 
         try {
-            this.ws = new WebSocket(url);
+            this.ws = new WebSocket(resolvedUrl);
 
             this.ws.onopen = () => {
                 console.log('WebSocket connected');
@@ -100,7 +102,7 @@ export class WebSocketService {
                 console.log('WebSocket disconnected');
                 this.onDisconnectedEmitter.fire();
                 this.stopHeartbeat();
-                this.attemptReconnect(url);
+                this.attemptReconnect(resolvedUrl);
             };
         } catch (error) {
             console.error('Failed to connect WebSocket:', error);
@@ -212,7 +214,39 @@ export class WebSocketService {
     }
 
     private generateId(): string {
-        return `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        // Deterministic, monotonic IDs (no Math.random in runtime).
+        this.idSeq += 1;
+        return `ws_${Date.now()}_${this.idSeq}`;
+    }
+
+    private resolveDefaultUrl(): string {
+        // Optional env override (works in Node-ish builds).
+        try {
+            const envUrl = (typeof process !== 'undefined' && (process as any)?.env && (process as any).env.AETHEL_WS_URL)
+                ? String((process as any).env.AETHEL_WS_URL)
+                : '';
+            if (envUrl) {
+                return envUrl;
+            }
+        } catch {
+            // ignore
+        }
+
+        // Browser default: same-origin, swap http(s) -> ws(s)
+        try {
+            if (typeof window !== 'undefined' && (window as any).location?.origin) {
+                const origin = String((window as any).location.origin);
+                const wsOrigin = origin.startsWith('https://')
+                    ? origin.replace(/^https:\/\//, 'wss://')
+                    : origin.replace(/^http:\/\//, 'ws://');
+                return `${wsOrigin.replace(/\/+$/, '')}/ws`;
+            }
+        } catch {
+            // ignore
+        }
+
+        // Fallback
+        return 'ws://localhost:3000/ws';
     }
 }
 
@@ -222,6 +256,116 @@ export class WebSocketService {
 @injectable()
 export class MissionWebSocketClient {
     constructor(private wsService: WebSocketService) {}
+
+    /**
+     * Connect to the Mission WS. Default keeps existing local-dev behavior.
+     */
+    async connect(url?: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const disposeConnected = this.wsService.onConnected(() => {
+                disposeConnected.dispose();
+                disposeError.dispose();
+                resolve();
+            });
+
+            const disposeError = this.wsService.onError((err) => {
+                disposeConnected.dispose();
+                disposeError.dispose();
+                reject(err);
+            });
+
+            this.wsService.connect(url);
+        });
+    }
+
+    disconnect(): void {
+        this.wsService.disconnect();
+    }
+
+    /**
+     * MissionControlWidget uses legacy event names like 'mission:update'.
+     * This adapter maps those names to typed WSMessageType.
+     */
+    on(event: string, handler: (payload: any) => void): () => void {
+        const mapped = this.mapLegacyEventToType(event);
+        if (!mapped) {
+            throw new Error(`Unsupported WS event: ${event}`);
+        }
+
+        return this.wsService.subscribe(mapped, (payload) => {
+            // Preserve MissionControlWidget's expected shape: { missionId, updates }
+            if (mapped === WSMessageType.MISSION_UPDATE && payload?.missionId) {
+                handler({ missionId: payload.missionId, updates: payload });
+                return;
+            }
+            handler(payload);
+        });
+    }
+
+    /**
+     * MissionControlWidget uses legacy send events like 'mission:start'.
+     * We encode them as MISSION_UPDATE actions.
+     */
+    send(event: string, payload: any): void {
+        const mapped = this.mapLegacyEventToType(event);
+        if (!mapped) {
+            throw new Error(`Unsupported WS event: ${event}`);
+        }
+
+        if (mapped === WSMessageType.MISSION_UPDATE) {
+            const action = this.mapLegacyMissionAction(event);
+            this.wsService.send(mapped, { ...payload, action });
+            return;
+        }
+
+        this.wsService.send(mapped, payload);
+    }
+
+    private mapLegacyEventToType(event: string): WSMessageType | null {
+        switch (event) {
+            case 'mission:update':
+                return WSMessageType.MISSION_UPDATE;
+            case 'mission:complete':
+                return WSMessageType.MISSION_COMPLETE;
+            case 'mission:error':
+                return WSMessageType.MISSION_ERROR;
+            case 'agent:status':
+                return WSMessageType.AGENT_STATUS;
+            case 'cost:alert':
+                return WSMessageType.COST_ALERT;
+            case 'slo:breach':
+                return WSMessageType.SLO_BREACH;
+            case 'notification':
+                return WSMessageType.NOTIFICATION;
+            case 'heartbeat':
+                return WSMessageType.HEARTBEAT;
+
+            // legacy mission control commands
+            case 'mission:start':
+            case 'mission:pause':
+            case 'mission:resume':
+            case 'mission:cancel':
+                return WSMessageType.MISSION_UPDATE;
+
+            default:
+                return null;
+        }
+    }
+
+    private mapLegacyMissionAction(event: string): string {
+        switch (event) {
+            case 'mission:start':
+                return 'start';
+            case 'mission:pause':
+                return 'pause';
+            case 'mission:resume':
+                return 'resume';
+            case 'mission:cancel':
+                return 'cancel';
+            default:
+                return 'update';
+        }
+    }
 
     /**
      * Subscribe to mission updates

@@ -67,7 +67,7 @@ export class TradingAgent {
                     id: request.workspaceId,
                     budget: this.llmRouter.getBudget(request.workspaceId),
                 },
-                history: await this.getTrading History(request.workspaceId),
+                history: await this.getTradingHistory(request.workspaceId),
             };
 
             const evaluation = await this.policyEngine.evaluate(policyContext);

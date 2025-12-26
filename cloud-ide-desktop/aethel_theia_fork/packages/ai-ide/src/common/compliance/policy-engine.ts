@@ -27,7 +27,7 @@ export interface PolicyContext {
   parameters: any;
   user: {
     id: string;
-    plan: 'free' | 'pro' | 'enterprise';
+    plan: 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
     permissions: string[];
   };
   workspace: {
@@ -84,16 +84,21 @@ export interface ApprovalRequest {
 
 /**
  * Plan limits
+ * Alinhado com planos definitivos 2025
+ * ZERO PREJUÍZO - Todos os planos com margem > 89%
  */
 interface PlanLimits {
-  plan: 'free' | 'pro' | 'enterprise';
+  plan: 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
   limits: {
     maxCostPerDay: number;
     maxCostPerMonth: number;
     allowedDomains: string[];
     allowedTools: string[];
+    allowedModels: string[];
     maxConcurrentTasks: number;
     requiresApprovalAbove: number;
+    tokensPerMonth: number;
+    contextWindow: number;
   };
 }
 
@@ -310,7 +315,7 @@ export class PolicyEngine {
       message: 'All code changes must include tests',
       severity: 'high',
       enabled: true,
-    });
+    }]);
 
     this.rules.set('code.security-scan', {
       id: 'code.security-scan',
@@ -526,39 +531,88 @@ export class PolicyEngine {
   }
 
   private initializePlanLimits(): void {
-    this.planLimits.set('free', {
-      plan: 'free',
+    // ═══════════════════════════════════════════════════════════════
+    //     PLANOS AETHEL ENGINE - ALINHADOS COM ESTRATÉGIA 2025
+    //     ZERO PREJUÍZO - Margem mínima 89% em todos os planos
+    // ═══════════════════════════════════════════════════════════════
+
+    // STARTER - $3/mês (R$15) - Margem 96.7%
+    this.planLimits.set('starter', {
+      plan: 'starter',
       limits: {
-        maxCostPerDay: 1.0,
-        maxCostPerMonth: 10.0,
+        maxCostPerDay: 0.10,
+        maxCostPerMonth: 3.0,
         allowedDomains: ['code'],
         allowedTools: ['code.read', 'code.write', 'code.execute', 'code.test', 'shared.llm'],
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3'],
         maxConcurrentTasks: 1,
         requiresApprovalAbove: 0.5,
+        tokensPerMonth: 500_000,
+        contextWindow: 8000,
       },
     });
 
+    // BASIC - $9/mês (R$45) - Margem 93.9%
+    this.planLimits.set('basic', {
+      plan: 'basic',
+      limits: {
+        maxCostPerDay: 0.50,
+        maxCostPerMonth: 9.0,
+        allowedDomains: ['code', 'research'],
+        allowedTools: ['code.*', 'research.*', 'shared.*'],
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3', 'gpt-4o-mini', 'claude-3-haiku'],
+        maxConcurrentTasks: 2,
+        requiresApprovalAbove: 2.0,
+        tokensPerMonth: 2_000_000,
+        contextWindow: 16000,
+      },
+    });
+
+    // PRO - $29/mês (R$149) - Margem 89.2%
     this.planLimits.set('pro', {
       plan: 'pro',
       limits: {
-        maxCostPerDay: 50.0,
-        maxCostPerMonth: 500.0,
+        maxCostPerDay: 5.0,
+        maxCostPerMonth: 29.0,
         allowedDomains: ['code', 'trading', 'research', 'creative'],
         allowedTools: ['*'],
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3', 'gpt-4o-mini', 'claude-3-haiku', 'gemini-1.5-pro', 'gpt-4o', 'claude-3.5-sonnet'],
         maxConcurrentTasks: 5,
         requiresApprovalAbove: 10.0,
+        tokensPerMonth: 8_000_000,
+        contextWindow: 32000,
       },
     });
 
+    // STUDIO - $79/mês (R$399) - Margem 89.6%
+    this.planLimits.set('studio', {
+      plan: 'studio',
+      limits: {
+        maxCostPerDay: 15.0,
+        maxCostPerMonth: 79.0,
+        allowedDomains: ['code', 'trading', 'research', 'creative'],
+        allowedTools: ['*'],
+        allowedModels: ['*'],
+        maxConcurrentTasks: 10,
+        requiresApprovalAbove: 25.0,
+        tokensPerMonth: 25_000_000,
+        contextWindow: 64000,
+      },
+    });
+
+    // ENTERPRISE - $199/mês (R$999) - Margem 92.0%
     this.planLimits.set('enterprise', {
       plan: 'enterprise',
       limits: {
-        maxCostPerDay: 1000.0,
-        maxCostPerMonth: 10000.0,
-        allowedDomains: ['code', 'trading', 'research', 'creative'],
+        maxCostPerDay: 100.0,
+        maxCostPerMonth: 199.0,
+        allowedDomains: ['code', 'trading', 'research', 'creative', 'custom'],
         allowedTools: ['*'],
-        maxConcurrentTasks: 20,
-        requiresApprovalAbove: 100.0,
+        allowedModels: ['*', 'custom-fine-tuned'],
+        maxConcurrentTasks: 100,
+        requiresApprovalAbove: 50.0,
+        tokensPerMonth: 100_000_000,
+        contextWindow: 128000,
       },
     });
   }
@@ -741,37 +795,86 @@ export class PolicyEngine {
       requiresApprovalAbove: 0.5,
     });
 
-    this.planLimits.set('free', {
-      plan: 'free',
-      limits: freeLimits,
+    // STARTER - $3/mês (entrada, sem free tier)
+    this.planLimits.set('starter', {
+      plan: 'starter',
+      limits: {
+        maxCostPerDay: 0.10,
+        maxCostPerMonth: 3.0,
+        allowedDomains: ['code'],
+        allowedTools: ['code.read', 'code.write', 'shared.llm'],
+        maxConcurrentTasks: 1,
+        requiresApprovalAbove: 0.05,
+        tokensPerMonth: 500_000,
+        contextWindow: 8000,
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3'],
+      },
     });
 
-    const proLimits = this.configService.get('policy.plans.pro', {
-      maxCostPerDay: 50.0,
-      maxCostPerMonth: 500.0,
-      allowedDomains: ['code', 'trading', 'research', 'creative'],
-      allowedTools: ['*'],
-      maxConcurrentTasks: 5,
-      requiresApprovalAbove: 10.0,
+    // BASIC - $9/mês
+    this.planLimits.set('basic', {
+      plan: 'basic',
+      limits: {
+        maxCostPerDay: 0.30,
+        maxCostPerMonth: 9.0,
+        allowedDomains: ['code'],
+        allowedTools: ['code.read', 'code.write', 'code.execute', 'shared.llm'],
+        maxConcurrentTasks: 2,
+        requiresApprovalAbove: 0.15,
+        tokensPerMonth: 2_000_000,
+        contextWindow: 16000,
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3', 'claude-3-haiku'],
+      },
     });
 
+    // PRO - $29/mês
     this.planLimits.set('pro', {
       plan: 'pro',
-      limits: proLimits,
+      limits: {
+        maxCostPerDay: 1.0,
+        maxCostPerMonth: 29.0,
+        allowedDomains: ['code', 'research'],
+        allowedTools: ['code.read', 'code.write', 'code.execute', 'code.test', 'shared.llm'],
+        maxConcurrentTasks: 3,
+        requiresApprovalAbove: 0.50,
+        tokensPerMonth: 10_000_000,
+        contextWindow: 32000,
+        allowedModels: ['gemini-1.5-flash', 'gemini-1.5-pro', 'deepseek-v3', 'claude-3-haiku', 'claude-3.5-sonnet'],
+      },
     });
 
-    const enterpriseLimits = this.configService.get('policy.plans.enterprise', {
-      maxCostPerDay: 1000.0,
-      maxCostPerMonth: 10000.0,
-      allowedDomains: ['code', 'trading', 'research', 'creative'],
-      allowedTools: ['*'],
-      maxConcurrentTasks: 20,
-      requiresApprovalAbove: 100.0,
+    // STUDIO - $79/mês
+    this.planLimits.set('studio', {
+      plan: 'studio',
+      limits: {
+        maxCostPerDay: 3.0,
+        maxCostPerMonth: 79.0,
+        allowedDomains: ['code', 'trading', 'research', 'creative'],
+        allowedTools: ['*'],
+        maxConcurrentTasks: 5,
+        requiresApprovalAbove: 2.0,
+        tokensPerMonth: 50_000_000,
+        contextWindow: 128000,
+        allowedModels: ['*'],
+      },
     });
 
+    // ENTERPRISE - $199/mês
     this.planLimits.set('enterprise', {
       plan: 'enterprise',
-      limits: enterpriseLimits,
+      limits: {
+        maxCostPerDay: 10.0,
+        maxCostPerMonth: 199.0,
+        allowedDomains: ['code', 'trading', 'research', 'creative'],
+        allowedTools: ['*'],
+        maxConcurrentTasks: 10,
+        requiresApprovalAbove: 5.0,
+        tokensPerMonth: -1, // ilimitado
+        contextWindow: 200000,
+        allowedModels: ['*'],
+        prioritySupport: true,
+        dedicatedInfra: true,
+      },
     });
   }
 
@@ -786,7 +889,7 @@ export class PolicyEngine {
       parameters: context,
       user: context.user || {
         id: 'default-user',
-        plan: 'free',
+        plan: 'starter',
         permissions: [],
       },
       workspace: context.workspace || {
@@ -801,7 +904,6 @@ export class PolicyEngine {
     };
 
     return this.evaluate(policyContext);
-  }
   }
 
   private containsSecrets(content: string): boolean {

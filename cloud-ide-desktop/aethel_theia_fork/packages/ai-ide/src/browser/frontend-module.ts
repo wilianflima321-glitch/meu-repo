@@ -131,6 +131,8 @@ import { CreativeAgent } from './creative-agent';
 import { ConfigService } from '../common/config/config-service';
 import { NotificationService } from './notifications/notification-service';
 import { NotificationCenterWidget } from './notifications/NotificationCenter';
+import { TelemetryService } from './onboarding/telemetry-service';
+import { ObservabilityService } from '../common/observability-service';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     // Initialize ConfigService early
@@ -144,6 +146,10 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     })).inSingletonScope();
     bind(PreferenceContribution).toConstantValue({ schema: aiIdePreferenceSchema });
     bind(PreferenceContribution).toConstantValue({ schema: WorkspacePreferencesSchema });
+
+    // ========== Core Services (Required by Agents) ==========
+    bind(TelemetryService).toSelf().inSingletonScope();
+    bind(ObservabilityService).toSelf().inSingletonScope();
 
     bind(AIIdeActivationServiceImpl).toSelf().inSingletonScope();
     // rebinds the default implementation of '@theia/ai-core'

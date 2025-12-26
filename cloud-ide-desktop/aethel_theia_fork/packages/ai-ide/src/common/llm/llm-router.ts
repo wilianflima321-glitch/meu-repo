@@ -123,7 +123,50 @@ interface BudgetTracker {
   spent: number;
   remaining: number;
   alerts: Array<{ threshold: number; triggered: boolean }>;
+  planId?: PlanType;
 }
+
+/**
+ * Plan types - 5 tiers with zero loss margins (89%+)
+ */
+export type PlanType = 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
+
+/**
+ * Plan budget configuration
+ * Alinhado com estratégia ZERO PREJUÍZO:
+ * - Starter: $3/mês, 500K tokens, margin 96.7%
+ * - Basic: $9/mês, 2M tokens, margin 93.9%
+ * - Pro: $29/mês, 8M tokens, margin 89.2%
+ * - Studio: $79/mês, 25M tokens, margin 89.6%
+ * - Enterprise: $199/mês, 100M tokens, margin 92.0%
+ */
+export const PLAN_BUDGETS: Record<PlanType, { budget: number; tokens: number; allowedModels: string[] }> = {
+  starter: {
+    budget: 3,
+    tokens: 500_000,
+    allowedModels: ['gemini-1.5-flash', 'deepseek-coder'], // Cheapest only
+  },
+  basic: {
+    budget: 9,
+    tokens: 2_000_000,
+    allowedModels: ['gemini-1.5-flash', 'deepseek-v3', 'deepseek-coder', 'gpt-4o-mini'],
+  },
+  pro: {
+    budget: 29,
+    tokens: 8_000_000,
+    allowedModels: ['gemini-1.5-flash', 'gemini-1.5-pro', 'deepseek-v3', 'deepseek-coder', 'gpt-4o-mini', 'claude-3-haiku'],
+  },
+  studio: {
+    budget: 79,
+    tokens: 25_000_000,
+    allowedModels: ['gemini-1.5-flash', 'gemini-1.5-pro', 'deepseek-v3', 'deepseek-coder', 'gpt-4o-mini', 'gpt-4o', 'claude-3-haiku', 'claude-3-5-sonnet'],
+  },
+  enterprise: {
+    budget: 199,
+    tokens: 100_000_000,
+    allowedModels: ['gemini-1.5-flash', 'gemini-1.5-pro', 'deepseek-v3', 'deepseek-coder', 'gpt-4o-mini', 'gpt-4o', 'claude-3-haiku', 'claude-3-5-sonnet'], // All models
+  },
+};
 
 /**
  * LLM Router with cost optimization, circuit breakers, and fallback
@@ -372,7 +415,7 @@ export class LLMRouter {
   }
 
   /**
-   * Set workspace budget
+   * Set workspace budget (legacy method)
    */
   setBudget(workspaceId: string, total: number): void {
     this.budgets.set(workspaceId, {
@@ -389,11 +432,44 @@ export class LLMRouter {
   }
 
   /**
+   * Set workspace budget by plan (RECOMMENDED)
+   * Uses PLAN_BUDGETS configuration for zero-loss margins
+   */
+  setBudgetByPlan(workspaceId: string, planId: PlanType): void {
+    const planConfig = PLAN_BUDGETS[planId];
+    this.budgets.set(workspaceId, {
+      workspaceId,
+      total: planConfig.budget,
+      spent: 0,
+      remaining: planConfig.budget,
+      planId,
+      alerts: [
+        { threshold: 0.5, triggered: false },
+        { threshold: 0.8, triggered: false },
+        { threshold: 0.95, triggered: false },
+      ],
+    });
+  }
+
+  /**
+   * Get allowed models for workspace based on plan
+   */
+  getAllowedModels(workspaceId: string): string[] {
+    const budget = this.getBudget(workspaceId);
+    if (budget.planId) {
+      return PLAN_BUDGETS[budget.planId].allowedModels;
+    }
+    // Default to starter plan models if no plan set
+    return PLAN_BUDGETS.starter.allowedModels;
+  }
+
+  /**
    * Get budget status
    */
   getBudget(workspaceId: string): BudgetTracker {
     if (!this.budgets.has(workspaceId)) {
-      this.setBudget(workspaceId, 100); // Default $100
+      // Default to STARTER plan budget ($3) - not free!
+      this.setBudgetByPlan(workspaceId, 'starter');
     }
     return this.budgets.get(workspaceId)!;
   }
@@ -412,9 +488,112 @@ export class LLMRouter {
 
   /**
    * Load providers from ConfigService
+   * Organized by tier for cost optimization (89%+ margins)
    */
   private async loadProvidersFromConfig(): Promise<void> {
-    // Load OpenAI if enabled
+    // ============================================
+    // TIER ECONÔMICO - Para planos Starter/Basic
+    // ============================================
+
+    // Google Gemini - MAIS BARATO ($0.14/1M tokens)
+    const googleEnabled = this.configService.get<boolean>('llm.providers.google.enabled', true);
+    if (googleEnabled) {
+      this.registerProvider({
+        id: 'google',
+        name: 'Google AI',
+        endpoint: this.configService.get('llm.providers.google.endpoint', 'https://generativelanguage.googleapis.com/v1beta'),
+        apiKey: this.configService.get<string>('llm.providers.google.apiKey', ''),
+        rateLimit: this.configService.get('llm.providers.google.rateLimit', {
+          requestsPerMinute: 1500,
+          tokensPerMinute: 1000000,
+        }),
+        pricing: this.configService.get('llm.providers.google.pricing', {
+          inputTokenCost: 0.075,
+          outputTokenCost: 0.30,
+        }),
+        capabilities: this.configService.get('llm.providers.google.capabilities', {
+          streaming: true,
+          functionCalling: true,
+          vision: true,
+          maxContextLength: 1000000,
+        }),
+        models: this.configService.get('llm.providers.google.models', [
+          {
+            id: 'gemini-1.5-flash',
+            name: 'Gemini 1.5 Flash',
+            providerId: 'google',
+            tier: 'fast',
+            contextWindow: 1000000,
+            pricing: { input: 0.075, output: 0.30 },
+            performance: { avgLatencyMs: 300, p95LatencyMs: 600, throughputTPS: 200 },
+            capabilities: ['code', 'chat', 'reasoning', 'vision'],
+          },
+          {
+            id: 'gemini-1.5-pro',
+            name: 'Gemini 1.5 Pro',
+            providerId: 'google',
+            tier: 'quality',
+            contextWindow: 1000000,
+            pricing: { input: 1.25, output: 5.0 },
+            performance: { avgLatencyMs: 1200, p95LatencyMs: 2500, throughputTPS: 100 },
+            capabilities: ['code', 'reasoning', 'analysis', 'vision'],
+          },
+        ]),
+      });
+    }
+
+    // DeepSeek - SEGUNDO MAIS BARATO ($0.18/1M tokens)
+    const deepseekEnabled = this.configService.get<boolean>('llm.providers.deepseek.enabled', true);
+    if (deepseekEnabled) {
+      this.registerProvider({
+        id: 'deepseek',
+        name: 'DeepSeek',
+        endpoint: this.configService.get('llm.providers.deepseek.endpoint', 'https://api.deepseek.com/v1'),
+        apiKey: this.configService.get<string>('llm.providers.deepseek.apiKey', ''),
+        rateLimit: this.configService.get('llm.providers.deepseek.rateLimit', {
+          requestsPerMinute: 500,
+          tokensPerMinute: 500000,
+        }),
+        pricing: this.configService.get('llm.providers.deepseek.pricing', {
+          inputTokenCost: 0.14,
+          outputTokenCost: 0.28,
+        }),
+        capabilities: this.configService.get('llm.providers.deepseek.capabilities', {
+          streaming: true,
+          functionCalling: true,
+          vision: false,
+          maxContextLength: 64000,
+        }),
+        models: this.configService.get('llm.providers.deepseek.models', [
+          {
+            id: 'deepseek-v3',
+            name: 'DeepSeek V3',
+            providerId: 'deepseek',
+            tier: 'balanced',
+            contextWindow: 64000,
+            pricing: { input: 0.14, output: 0.28 },
+            performance: { avgLatencyMs: 400, p95LatencyMs: 800, throughputTPS: 180 },
+            capabilities: ['code', 'reasoning', 'analysis'],
+          },
+          {
+            id: 'deepseek-coder',
+            name: 'DeepSeek Coder',
+            providerId: 'deepseek',
+            tier: 'fast',
+            contextWindow: 64000,
+            pricing: { input: 0.14, output: 0.28 },
+            performance: { avgLatencyMs: 350, p95LatencyMs: 700, throughputTPS: 200 },
+            capabilities: ['code', 'chat'],
+          },
+        ]),
+      });
+    }
+
+    // ============================================
+    // TIER PADRÃO - Para planos Pro/Studio
+    // ============================================
+
+    // OpenAI
     const openaiEnabled = this.configService.get<boolean>('llm.providers.openai.enabled', true);
     if (openaiEnabled) {
       const openaiApiKey = this.configService.get<string>('llm.providers.openai.apiKey', '');
@@ -429,8 +608,8 @@ export class LLMRouter {
           tokensPerMinute: 150000,
         }),
         pricing: this.configService.get('llm.providers.openai.pricing', {
-          inputTokenCost: 0.5,
-          outputTokenCost: 1.5,
+          inputTokenCost: 0.15,
+          outputTokenCost: 0.6,
         }),
         capabilities: this.configService.get('llm.providers.openai.capabilities', {
           streaming: true,
@@ -440,40 +619,34 @@ export class LLMRouter {
         }),
         models: this.configService.get('llm.providers.openai.models', [
           {
-            id: 'gpt-4o',
-            name: 'GPT-4o',
-            providerId: 'openai',
-            tier: 'quality',
-            contextWindow: 128000,
-            pricing: { input: 2.5, output: 10.0 },
-            performance: { avgLatencyMs: 2000, p95LatencyMs: 4000, throughputTPS: 50 },
-            capabilities: ['code', 'reasoning', 'vision'],
-          },
-          {
             id: 'gpt-4o-mini',
             name: 'GPT-4o Mini',
             providerId: 'openai',
             tier: 'balanced',
             contextWindow: 128000,
             pricing: { input: 0.15, output: 0.6 },
-            performance: { avgLatencyMs: 800, p95LatencyMs: 1500, throughputTPS: 100 },
-            capabilities: ['code', 'reasoning'],
+            performance: { avgLatencyMs: 500, p95LatencyMs: 1000, throughputTPS: 150 },
+            capabilities: ['code', 'reasoning', 'chat', 'vision'],
           },
           {
-            id: 'gpt-3.5-turbo',
-            name: 'GPT-3.5 Turbo',
+            id: 'gpt-4o',
+            name: 'GPT-4o',
             providerId: 'openai',
-            tier: 'fast',
-            contextWindow: 16385,
-            pricing: { input: 0.5, output: 1.5 },
-            performance: { avgLatencyMs: 500, p95LatencyMs: 1000, throughputTPS: 150 },
-            capabilities: ['code', 'chat'],
+            tier: 'quality',
+            contextWindow: 128000,
+            pricing: { input: 2.5, output: 10.0 },
+            performance: { avgLatencyMs: 1500, p95LatencyMs: 3000, throughputTPS: 80 },
+            capabilities: ['code', 'reasoning', 'analysis', 'vision'],
           },
         ]),
       });
     }
 
-    // Load Anthropic if enabled
+    // ============================================
+    // TIER PREMIUM - Para planos Studio/Enterprise
+    // ============================================
+
+    // Anthropic
     const anthropicEnabled = this.configService.get<boolean>('llm.providers.anthropic.enabled', true);
     if (anthropicEnabled) {
       const anthropicApiKey = this.configService.get<string>('llm.providers.anthropic.apiKey', '');
@@ -488,8 +661,8 @@ export class LLMRouter {
           tokensPerMinute: 100000,
         }),
         pricing: this.configService.get('llm.providers.anthropic.pricing', {
-          inputTokenCost: 3.0,
-          outputTokenCost: 15.0,
+          inputTokenCost: 0.25,
+          outputTokenCost: 1.25,
         }),
         capabilities: this.configService.get('llm.providers.anthropic.capabilities', {
           streaming: true,
@@ -498,6 +671,16 @@ export class LLMRouter {
           maxContextLength: 200000,
         }),
         models: this.configService.get('llm.providers.anthropic.models', [
+          {
+            id: 'claude-3-haiku',
+            name: 'Claude 3 Haiku',
+            providerId: 'anthropic',
+            tier: 'fast',
+            contextWindow: 200000,
+            pricing: { input: 0.25, output: 1.25 },
+            performance: { avgLatencyMs: 600, p95LatencyMs: 1200, throughputTPS: 120 },
+            capabilities: ['code', 'chat', 'reasoning'],
+          },
           {
             id: 'claude-3-5-sonnet',
             name: 'Claude 3.5 Sonnet',
@@ -508,26 +691,23 @@ export class LLMRouter {
             performance: { avgLatencyMs: 1800, p95LatencyMs: 3500, throughputTPS: 60 },
             capabilities: ['code', 'reasoning', 'analysis'],
           },
-          {
-            id: 'claude-3-haiku',
-          name: 'Claude 3 Haiku',
-          providerId: 'anthropic',
-          tier: 'fast',
-          contextWindow: 200000,
-          pricing: { input: 0.25, output: 1.25 },
-          performance: { avgLatencyMs: 600, p95LatencyMs: 1200, throughputTPS: 120 },
-          capabilities: ['code', 'chat'],
-        },
-      ],
-    });
+        ]),
+      });
+    }
   }
 
   private getCandidateModels(request: RoutingRequest): Array<{ model: LLMModel; provider: LLMProvider }> {
     const candidates: Array<{ model: LLMModel; provider: LLMProvider }> = [];
+    
+    // Get allowed models based on workspace plan
+    const allowedModels = this.getAllowedModels(request.context.workspaceId);
 
     for (const model of this.models.values()) {
       const provider = this.providers.get(model.providerId);
       if (!provider) continue;
+
+      // Check if model is allowed for this plan
+      if (!allowedModels.includes(model.id)) continue;
 
       // Check circuit breaker
       if (!this.canAttempt(provider.id)) continue;
