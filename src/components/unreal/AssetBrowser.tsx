@@ -5,6 +5,7 @@ import { EventBus } from '../../services/EventBus';
 export const AssetBrowser: React.FC = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -18,11 +19,15 @@ export const AssetBrowser: React.FC = () => {
 
   const loadAssets = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
     try {
       const loadedAssets = await assetService.getAssets(currentPath, filterType === 'all' ? undefined : filterType);
       setAssets(loadedAssets);
     } catch (error) {
       console.error('Failed to load assets:', error);
+      setAssets([]);
+      setSelectedAsset(null);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoading(false);
     }
@@ -50,6 +55,7 @@ export const AssetBrowser: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to import assets:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -60,6 +66,7 @@ export const AssetBrowser: React.FC = () => {
       await assetService.exportAsset(selectedAsset);
     } catch (error) {
       console.error('Failed to export asset:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -74,6 +81,7 @@ export const AssetBrowser: React.FC = () => {
       setSelectedAsset(null);
     } catch (error) {
       console.error('Failed to delete asset:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -163,6 +171,8 @@ export const AssetBrowser: React.FC = () => {
       <div className={`asset-grid ${viewMode}`}>
         {isLoading ? (
           <div className="loading">Loading assets...</div>
+        ) : errorMessage ? (
+          <div className="error">{errorMessage}</div>
         ) : filteredAssets.length === 0 ? (
           <div className="no-assets">No assets found</div>
         ) : (
@@ -425,6 +435,14 @@ export const AssetBrowser: React.FC = () => {
           justify-content: center;
           height: 200px;
           color: var(--vscode-descriptionForeground);
+        }
+
+        .error {
+          padding: 12px;
+          border: 1px solid var(--vscode-inputValidation-errorBorder);
+          background: var(--vscode-inputValidation-errorBackground);
+          color: var(--vscode-inputValidation-errorForeground);
+          white-space: pre-wrap;
         }
 
         .asset-details {

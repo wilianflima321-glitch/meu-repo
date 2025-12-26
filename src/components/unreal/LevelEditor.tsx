@@ -9,6 +9,7 @@ export const LevelEditor: React.FC = () => {
   const [level, setLevel] = useState<Level | null>(null);
   const [actors, setActors] = useState<Actor[]>([]);
   const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const [viewMode, setViewMode] = useState<ViewMode>('perspective');
   const [showGrid, setShowGrid] = useState(true);
@@ -27,8 +28,16 @@ export const LevelEditor: React.FC = () => {
 
   const loadLevel = async (lvl: Level) => {
     setLevel(lvl);
-    const levelActors = await levelService.getActors(lvl.id);
-    setActors(levelActors);
+    setErrorMessage(null);
+    try {
+      const levelActors = await levelService.getActors(lvl.id);
+      setActors(levelActors);
+    } catch (error) {
+      console.error('Failed to load level:', error);
+      setActors([]);
+      setSelectedActor(null);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleAddActor = async (type: string) => {
@@ -46,17 +55,29 @@ export const LevelEditor: React.FC = () => {
       properties: {}
     };
 
-    await levelService.addActor(level.id, newActor);
-    setActors([...actors, newActor]);
-    setSelectedActor(newActor);
+    setErrorMessage(null);
+    try {
+      await levelService.addActor(level.id, newActor);
+      setActors([...actors, newActor]);
+      setSelectedActor(newActor);
+    } catch (error) {
+      console.error('Failed to add actor:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleDeleteActor = async () => {
     if (!selectedActor || !level) return;
 
-    await levelService.deleteActor(level.id, selectedActor.id);
-    setActors(actors.filter(a => a.id !== selectedActor.id));
-    setSelectedActor(null);
+    setErrorMessage(null);
+    try {
+      await levelService.deleteActor(level.id, selectedActor.id);
+      setActors(actors.filter(a => a.id !== selectedActor.id));
+      setSelectedActor(null);
+    } catch (error) {
+      console.error('Failed to delete actor:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleDuplicateActor = async () => {
@@ -76,9 +97,15 @@ export const LevelEditor: React.FC = () => {
       }
     };
 
-    await levelService.addActor(level.id, duplicate);
-    setActors([...actors, duplicate]);
-    setSelectedActor(duplicate);
+    setErrorMessage(null);
+    try {
+      await levelService.addActor(level.id, duplicate);
+      setActors([...actors, duplicate]);
+      setSelectedActor(duplicate);
+    } catch (error) {
+      console.error('Failed to duplicate actor:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleTransformChange = (property: 'location' | 'rotation' | 'scale', axis: 'x' | 'y' | 'z', value: number) => {
@@ -99,7 +126,10 @@ export const LevelEditor: React.FC = () => {
     setActors(actors.map(a => a.id === updated.id ? updated : a));
 
     if (level) {
-      levelService.updateActor(level.id, updated.id, updated);
+      void levelService.updateActor(level.id, updated.id, updated).catch((error) => {
+        console.error('Failed to update actor:', error);
+        setErrorMessage(error instanceof Error ? error.message : String(error));
+      });
     }
   };
 
@@ -107,6 +137,7 @@ export const LevelEditor: React.FC = () => {
     if (!level) return;
 
     try {
+      setErrorMessage(null);
       const result = await levelService.buildLighting(level.id);
       if (result.success) {
         EventBus.getInstance().emit('notification:show', {
@@ -121,6 +152,7 @@ export const LevelEditor: React.FC = () => {
       }
     } catch (error) {
       console.error('Build error:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -223,6 +255,10 @@ export const LevelEditor: React.FC = () => {
           <button onClick={handlePlay} className="play-button">Play</button>
         </div>
       </div>
+
+      {errorMessage && (
+        <div className="error">{errorMessage}</div>
+      )}
 
       <div className="editor-content">
         <div className="actors-panel">
@@ -442,6 +478,15 @@ export const LevelEditor: React.FC = () => {
           padding: 8px 12px;
           background: #2a2a2a;
           border-bottom: 1px solid #3a3a3a;
+        }
+
+        .error {
+          margin: 12px;
+          padding: 12px;
+          border: 1px solid #3a3a3a;
+          background: #2a2a2a;
+          color: #ffffff;
+          white-space: pre-wrap;
         }
 
         .toolbar-section {

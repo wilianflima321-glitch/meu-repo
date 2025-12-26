@@ -26,7 +26,7 @@ export interface PolicyContext {
   parameters: any;
   user: {
     id: string;
-    plan: 'free' | 'pro' | 'enterprise';
+    plan: 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
     permissions: string[];
   };
   workspace: {
@@ -83,16 +83,21 @@ export interface ApprovalRequest {
 
 /**
  * Plan limits
+ * Alinhado com planos definitivos 2025
+ * ZERO PREJUÍZO - Todos os planos com margem > 89%
  */
 interface PlanLimits {
-  plan: 'free' | 'pro' | 'enterprise';
+  plan: 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
   limits: {
     maxCostPerDay: number;
     maxCostPerMonth: number;
     allowedDomains: string[];
     allowedTools: string[];
+    allowedModels: string[];
     maxConcurrentTasks: number;
     requiresApprovalAbove: number;
+    tokensPerMonth: number;
+    contextWindow: number;
   };
 }
 
@@ -509,39 +514,88 @@ export class PolicyEngine {
   }
 
   private initializePlanLimits(): void {
-    this.planLimits.set('free', {
-      plan: 'free',
+    // ═══════════════════════════════════════════════════════════════
+    //     PLANOS AETHEL ENGINE - ALINHADOS COM ESTRATÉGIA 2025
+    //     ZERO PREJUÍZO - Margem mínima 89% em todos os planos
+    // ═══════════════════════════════════════════════════════════════
+
+    // STARTER - $3/mês (R$15) - Margem 96.7%
+    this.planLimits.set('starter', {
+      plan: 'starter',
       limits: {
-        maxCostPerDay: 1.0,
-        maxCostPerMonth: 10.0,
+        maxCostPerDay: 0.10,        // $0.10/dia (custo real: ~$0.003/dia)
+        maxCostPerMonth: 3.0,       // $3/mês budget
         allowedDomains: ['code'],
         allowedTools: ['code.read', 'code.write', 'code.execute', 'code.test', 'shared.llm'],
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3'],
         maxConcurrentTasks: 1,
         requiresApprovalAbove: 0.5,
+        tokensPerMonth: 500_000,    // 500K tokens
+        contextWindow: 8000,
       },
     });
 
+    // BASIC - $9/mês (R$45) - Margem 93.9%
+    this.planLimits.set('basic', {
+      plan: 'basic',
+      limits: {
+        maxCostPerDay: 0.50,        // $0.50/dia
+        maxCostPerMonth: 9.0,       // $9/mês budget
+        allowedDomains: ['code', 'research'],
+        allowedTools: ['code.*', 'research.*', 'shared.*'],
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3', 'gpt-4o-mini', 'claude-3-haiku'],
+        maxConcurrentTasks: 2,
+        requiresApprovalAbove: 2.0,
+        tokensPerMonth: 2_000_000,  // 2M tokens
+        contextWindow: 16000,
+      },
+    });
+
+    // PRO - $29/mês (R$149) - Margem 89.2%
     this.planLimits.set('pro', {
       plan: 'pro',
       limits: {
-        maxCostPerDay: 50.0,
-        maxCostPerMonth: 500.0,
+        maxCostPerDay: 5.0,         // $5/dia
+        maxCostPerMonth: 29.0,      // $29/mês budget
         allowedDomains: ['code', 'trading', 'research', 'creative'],
         allowedTools: ['*'],
+        allowedModels: ['gemini-1.5-flash', 'deepseek-v3', 'gpt-4o-mini', 'claude-3-haiku', 'gemini-1.5-pro', 'gpt-4o', 'claude-3.5-sonnet'],
         maxConcurrentTasks: 5,
         requiresApprovalAbove: 10.0,
+        tokensPerMonth: 8_000_000,  // 8M tokens
+        contextWindow: 32000,
       },
     });
 
+    // STUDIO - $79/mês (R$399) - Margem 89.6%
+    this.planLimits.set('studio', {
+      plan: 'studio',
+      limits: {
+        maxCostPerDay: 15.0,        // $15/dia
+        maxCostPerMonth: 79.0,      // $79/mês budget
+        allowedDomains: ['code', 'trading', 'research', 'creative'],
+        allowedTools: ['*'],
+        allowedModels: ['*'],       // Todos incluindo premium
+        maxConcurrentTasks: 10,
+        requiresApprovalAbove: 25.0,
+        tokensPerMonth: 25_000_000, // 25M tokens
+        contextWindow: 64000,
+      },
+    });
+
+    // ENTERPRISE - $199/mês (R$999) - Margem 92.0%
     this.planLimits.set('enterprise', {
       plan: 'enterprise',
       limits: {
-        maxCostPerDay: 1000.0,
-        maxCostPerMonth: 10000.0,
-        allowedDomains: ['code', 'trading', 'research', 'creative'],
+        maxCostPerDay: 100.0,       // $100/dia
+        maxCostPerMonth: 199.0,     // $199/mês budget
+        allowedDomains: ['code', 'trading', 'research', 'creative', 'custom'],
         allowedTools: ['*'],
-        maxConcurrentTasks: 20,
-        requiresApprovalAbove: 100.0,
+        allowedModels: ['*', 'custom-fine-tuned'],
+        maxConcurrentTasks: 100,    // Praticamente ilimitado
+        requiresApprovalAbove: 50.0,
+        tokensPerMonth: 100_000_000, // 100M tokens
+        contextWindow: 128000,
       },
     });
   }

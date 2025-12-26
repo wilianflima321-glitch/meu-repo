@@ -3,6 +3,26 @@ import { injectable, inject, postConstruct } from 'inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/lib/browser';
 
+type WsEnvelope = {
+  id: string;
+  type: string;
+  timestamp: number;
+  payload: any;
+};
+
+type TheiaMissionStatus = MissionStatus['status'];
+
+type TheiaMissionUpdatePayload = {
+  missionId: string;
+  status: TheiaMissionStatus;
+  progress: number;
+  currentStage: string;
+  actualCost: number;
+  estimatedCompletion?: number;
+  errors?: string[];
+  warnings?: string[];
+};
+
 /**
  * Mission preset
  */
@@ -25,7 +45,8 @@ export interface MissionPreset {
   };
   riskLevel: 'low' | 'medium' | 'high';
   requiresApproval: boolean;
-  requiredPlan: 'free' | 'pro' | 'enterprise';
+  // Planos alinhados com estratégia 2025 - sem free tier
+  requiredPlan: 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
   examples: string[];
 }
 
@@ -57,6 +78,9 @@ export class MissionControlWidget extends ReactWidget {
   private missions: MissionStatus[] = [];
   private presets: MissionPreset[] = [];
 
+  private ws: WebSocket | undefined;
+  private wsConnected = false;
+
   @postConstruct()
   protected init(): void {
     this.id = MissionControlWidget.ID;
@@ -66,7 +90,140 @@ export class MissionControlWidget extends ReactWidget {
     this.title.iconClass = 'fa fa-rocket';
 
     this.initializePresets();
+    void this.ensureBackendConnection();
     this.update();
+  }
+
+  override dispose(): void {
+    try {
+      this.ws?.close();
+    } catch {
+      // ignore
+    }
+    this.ws = undefined;
+    this.wsConnected = false;
+    super.dispose();
+  }
+
+  private getBackendBaseUrl(): string {
+    const envBase = (typeof process !== 'undefined' && (process as any)?.env && (process as any).env.AETHEL_BACKEND_BASE_URL)
+      ? String((process as any).env.AETHEL_BACKEND_BASE_URL)
+      : '';
+
+    const base = envBase
+      ? envBase
+      : (typeof window !== 'undefined' && (window as any).location?.origin)
+        ? String((window as any).location.origin)
+        : 'http://localhost:3000';
+
+    return base.replace(/\/+$/, '');
+  }
+
+  private getBackendWsUrl(): string {
+    const base = this.getBackendBaseUrl();
+    const wsOrigin = base.startsWith('https://')
+      ? base.replace(/^https:\/\//, 'wss://')
+      : base.replace(/^http:\/\//, 'ws://');
+    return `${wsOrigin}/ws`;
+  }
+
+  private async ensureBackendConnection(): Promise<void> {
+    if (this.ws && this.wsConnected) return;
+
+    // Try quick HTTP reachability; fail silently here and surface on action.
+    try {
+      await fetch(`${this.getBackendBaseUrl()}/api/health`, { method: 'GET' });
+    } catch {
+      // ignore
+    }
+
+    try {
+      const ws = new WebSocket(this.getBackendWsUrl());
+      this.ws = ws;
+
+      ws.onopen = () => {
+        this.wsConnected = true;
+        this.update();
+      };
+      ws.onclose = () => {
+        this.wsConnected = false;
+        this.update();
+      };
+      ws.onerror = () => {
+        this.wsConnected = false;
+        this.update();
+      };
+      ws.onmessage = (ev) => {
+        try {
+          const data = typeof ev.data === 'string' ? ev.data : '';
+          const msg = JSON.parse(data) as WsEnvelope;
+          this.handleWsMessage(msg);
+        } catch {
+          // ignore invalid messages
+        }
+      };
+    } catch {
+      this.wsConnected = false;
+    }
+  }
+
+  private handleWsMessage(msg: WsEnvelope): void {
+    if (!msg || typeof msg.type !== 'string') return;
+
+    if (msg.type === 'mission.update') {
+      const p = msg.payload as TheiaMissionUpdatePayload;
+      if (!p?.missionId) return;
+      const mission = this.missions.find(m => m.id === p.missionId);
+      if (!mission) return;
+      mission.status = p.status;
+      mission.progress = typeof p.progress === 'number' ? p.progress : mission.progress;
+      mission.currentStage = p.currentStage || mission.currentStage;
+      mission.actualCost = typeof p.actualCost === 'number' ? p.actualCost : mission.actualCost;
+      mission.estimatedCompletion = p.estimatedCompletion ?? mission.estimatedCompletion;
+      if (Array.isArray(p.errors) && p.errors.length) mission.errors = Array.from(new Set([...mission.errors, ...p.errors]));
+      if (Array.isArray(p.warnings) && p.warnings.length) mission.warnings = Array.from(new Set([...mission.warnings, ...p.warnings]));
+      this.update();
+      return;
+    }
+
+    if (msg.type === 'mission.complete') {
+      const missionId = String((msg.payload ?? {})?.missionId ?? '');
+      if (!missionId) return;
+      const mission = this.missions.find(m => m.id === missionId);
+      if (!mission) return;
+      mission.status = 'completed';
+      mission.progress = 1;
+      mission.currentStage = 'Completed';
+      this.update();
+      return;
+    }
+
+    if (msg.type === 'mission.error') {
+      const missionId = String((msg.payload ?? {})?.missionId ?? '');
+      const error = String((msg.payload ?? {})?.error ?? 'Unknown error');
+      if (!missionId) return;
+      const mission = this.missions.find(m => m.id === missionId);
+      if (!mission) return;
+      mission.status = 'failed';
+      mission.progress = 1;
+      mission.currentStage = 'Failed';
+      mission.errors.push(error);
+      this.update();
+    }
+  }
+
+  private async postTask(body: { type: 'mission' | 'web' | 'trading' | 'deploy' | 'custom'; description: string; parameters: any; priority: 'critical' | 'high' | 'normal' | 'low' }):
+    Promise<any> {
+    const resp = await fetch(`${this.getBackendBaseUrl()}/api/tasks/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const text = await resp.text().catch(() => '');
+    if (!resp.ok) {
+      throw new Error(text || `HTTP_${resp.status}`);
+    }
+    return text ? JSON.parse(text) : {};
   }
 
   protected onActivateRequest(msg: Message): void {
@@ -250,7 +407,7 @@ export class MissionControlWidget extends ReactWidget {
         estimatedTime: { min: 300, max: 1800, typical: 600 },
         riskLevel: 'low',
         requiresApproval: false,
-        requiredPlan: 'free',
+        requiredPlan: 'starter', // Disponível a partir do Starter (R$15)
         examples: [
           'Add user authentication',
           'Implement REST API endpoint',
@@ -268,7 +425,7 @@ export class MissionControlWidget extends ReactWidget {
         estimatedTime: { min: 600, max: 3600, typical: 1200 },
         riskLevel: 'medium',
         requiresApproval: false,
-        requiredPlan: 'free',
+        requiredPlan: 'starter', // Disponível a partir do Starter (R$15)
         examples: [
           'Extract common utilities',
           'Improve error handling',
@@ -423,12 +580,13 @@ export class MissionControlWidget extends ReactWidget {
   }
 
   private startMission(preset: MissionPreset): void {
+    const localId = `mission_local_${Date.now()}`;
     const mission: MissionStatus = {
-      id: `mission_${Date.now()}`,
+      id: localId,
       preset: preset.name,
       status: 'queued',
       progress: 0,
-      currentStage: 'Initializing',
+      currentStage: 'Awaiting backend',
       startedAt: Date.now(),
       estimatedCompletion: Date.now() + preset.estimatedTime.typical * 1000,
       actualCost: 0,
@@ -440,68 +598,124 @@ export class MissionControlWidget extends ReactWidget {
     this.missions.push(mission);
     this.update();
 
-    // Simulate mission execution
-    setTimeout(() => this.executeMission(mission.id), 1000);
-  }
-
-  private executeMission(missionId: string): void {
-    const mission = this.missions.find(m => m.id === missionId);
-    if (!mission) return;
-
-    mission.status = 'running';
-    this.update();
-
-    // Simulate progress
-    const interval = setInterval(() => {
-      if (mission.status !== 'running') {
-        clearInterval(interval);
+    void (async () => {
+      await this.ensureBackendConnection();
+      if (!this.wsConnected) {
+        mission.status = 'failed';
+        mission.currentStage = 'Failed';
+        mission.errors.push('BACKEND_WS_UNAVAILABLE: WebSocket do backend indisponível. Inicie o backend e configure a URL (AETHEL_BACKEND_BASE_URL).');
+        this.update();
         return;
       }
 
-      mission.progress += 0.1;
-      mission.actualCost += mission.estimatedCost * 0.1;
+      try {
+        // 1) Create mission
+        const created = await this.postTask({
+          type: 'mission',
+          description: `Create mission: ${preset.name}`,
+          parameters: {
+            action: 'create',
+            name: preset.name,
+            objective: preset.description,
+            context: {
+              domain: preset.domain,
+              toolchain: preset.toolchain,
+              presetId: preset.id,
+            },
+          },
+          priority: preset.riskLevel === 'high' ? 'high' : 'normal',
+        });
 
-      if (mission.progress >= 0.3 && mission.currentStage === 'Initializing') {
-        mission.currentStage = 'Processing';
-      } else if (mission.progress >= 0.7 && mission.currentStage === 'Processing') {
-        mission.currentStage = 'Finalizing';
+        const missionObj = created?.task?.result;
+        const realMissionId = String(missionObj?.id ?? '');
+        if (!realMissionId) {
+          throw new Error('MISSION_CREATE_FAILED: backend não retornou mission.id');
+        }
+
+        // Switch local id to backend mission id
+        mission.id = realMissionId;
+        mission.currentStage = 'Created';
+        this.update();
+
+        // 2) Execute mission
+        await this.postTask({
+          type: 'mission',
+          description: `Execute mission: ${preset.name}`,
+          parameters: { action: 'execute', missionId: realMissionId },
+          priority: preset.riskLevel === 'high' ? 'high' : 'normal',
+        });
+
+        // Do not simulate progress: updates will come via WS.
+        mission.currentStage = 'Queued';
+        this.update();
+      } catch (e) {
+        mission.status = 'failed';
+        mission.currentStage = 'Failed';
+        mission.errors.push(e instanceof Error ? e.message : String(e));
+        this.update();
       }
-
-      if (mission.progress >= 1.0) {
-        mission.progress = 1.0;
-        mission.status = 'completed';
-        mission.currentStage = 'Completed';
-        clearInterval(interval);
-      }
-
-      this.update();
-    }, 1000);
+    })();
   }
 
   private pauseMission(missionId: string): void {
     const mission = this.missions.find(m => m.id === missionId);
-    if (mission) {
-      mission.status = 'paused';
-      this.update();
-    }
+    if (!mission) return;
+    void (async () => {
+      try {
+        await this.postTask({
+          type: 'mission',
+          description: `Pause mission ${missionId}`,
+          parameters: { action: 'pause', missionId },
+          priority: 'normal',
+        });
+        // No simulated state; wait for backend event. We still reflect intent.
+        mission.currentStage = 'Pause requested';
+        this.update();
+      } catch (e) {
+        mission.errors.push(e instanceof Error ? e.message : String(e));
+        this.update();
+      }
+    })();
   }
 
   private resumeMission(missionId: string): void {
     const mission = this.missions.find(m => m.id === missionId);
-    if (mission) {
-      mission.status = 'running';
-      this.executeMission(missionId);
-      this.update();
-    }
+    if (!mission) return;
+    void (async () => {
+      try {
+        await this.postTask({
+          type: 'mission',
+          description: `Resume mission ${missionId}`,
+          parameters: { action: 'resume', missionId },
+          priority: 'normal',
+        });
+        mission.currentStage = 'Resume requested';
+        this.update();
+      } catch (e) {
+        mission.errors.push(e instanceof Error ? e.message : String(e));
+        this.update();
+      }
+    })();
   }
 
   private cancelMission(missionId: string): void {
     const mission = this.missions.find(m => m.id === missionId);
-    if (mission) {
-      mission.status = 'failed';
-      mission.errors.push('Mission cancelled by user');
-      this.update();
-    }
+    if (!mission) return;
+    void (async () => {
+      try {
+        await this.postTask({
+          type: 'mission',
+          description: `Cancel mission ${missionId}`,
+          parameters: { action: 'cancel', missionId },
+          priority: 'normal',
+        });
+        mission.currentStage = 'Cancel requested';
+        this.update();
+      } catch (e) {
+        mission.errors.push(e instanceof Error ? e.message : String(e));
+        this.update();
+      }
+    })();
   }
 
   private removeMission(missionId: string): void {

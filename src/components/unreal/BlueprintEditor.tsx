@@ -9,6 +9,7 @@ export const BlueprintEditor: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<BlueprintNode | null>(null);
   const [draggedNode, setDraggedNode] = useState<BlueprintNode | null>(null);
   const [connectingFrom, setConnectingFrom] = useState<{ nodeId: string; pinIndex: number } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -24,10 +25,20 @@ export const BlueprintEditor: React.FC = () => {
 
   const loadBlueprint = async (bp: Blueprint) => {
     setBlueprint(bp);
-    const bpNodes = await blueprintService.getNodes(bp.id);
-    const bpConnections = await blueprintService.getConnections(bp.id);
-    setNodes(bpNodes);
-    setConnections(bpConnections);
+    setErrorMessage(null);
+    try {
+      const bpNodes = await blueprintService.getNodes(bp.id);
+      const bpConnections = await blueprintService.getConnections(bp.id);
+      setNodes(bpNodes);
+      setConnections(bpConnections);
+    } catch (error) {
+      console.error('Failed to load blueprint:', error);
+      setNodes([]);
+      setConnections([]);
+      setSelectedNode(null);
+      setConnectingFrom(null);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleNodeDragStart = (e: React.MouseEvent, node: BlueprintNode) => {
@@ -52,7 +63,10 @@ export const BlueprintEditor: React.FC = () => {
 
   const handleNodeDragEnd = () => {
     if (draggedNode && blueprint) {
-      blueprintService.updateNode(blueprint.id, draggedNode.id, draggedNode);
+      void blueprintService.updateNode(blueprint.id, draggedNode.id, draggedNode).catch((error) => {
+        console.error('Failed to update node:', error);
+        setErrorMessage(error instanceof Error ? error.message : String(error));
+      });
     }
     setDraggedNode(null);
   };
@@ -71,9 +85,14 @@ export const BlueprintEditor: React.FC = () => {
           toNodeId: nodeId,
           toPinIndex: pinIndex
         };
-        
-        blueprintService.addConnection(blueprint.id, connection);
-        setConnections([...connections, connection]);
+
+        setErrorMessage(null);
+        void blueprintService.addConnection(blueprint.id, connection)
+          .then(() => setConnections([...connections, connection]))
+          .catch((error) => {
+            console.error('Failed to add connection:', error);
+            setErrorMessage(error instanceof Error ? error.message : String(error));
+          });
       }
       setConnectingFrom(null);
     }
@@ -99,25 +118,38 @@ export const BlueprintEditor: React.FC = () => {
       properties: {}
     };
 
-    await blueprintService.addNode(blueprint.id, newNode);
-    setNodes([...nodes, newNode]);
+    setErrorMessage(null);
+    try {
+      await blueprintService.addNode(blueprint.id, newNode);
+      setNodes([...nodes, newNode]);
+    } catch (error) {
+      console.error('Failed to add node:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleDeleteNode = async () => {
     if (!selectedNode || !blueprint) return;
 
-    await blueprintService.deleteNode(blueprint.id, selectedNode.id);
-    setNodes(nodes.filter(n => n.id !== selectedNode.id));
-    setConnections(connections.filter(c => 
-      c.fromNodeId !== selectedNode.id && c.toNodeId !== selectedNode.id
-    ));
-    setSelectedNode(null);
+    setErrorMessage(null);
+    try {
+      await blueprintService.deleteNode(blueprint.id, selectedNode.id);
+      setNodes(nodes.filter(n => n.id !== selectedNode.id));
+      setConnections(connections.filter(c => 
+        c.fromNodeId !== selectedNode.id && c.toNodeId !== selectedNode.id
+      ));
+      setSelectedNode(null);
+    } catch (error) {
+      console.error('Failed to delete node:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleCompile = async () => {
     if (!blueprint) return;
 
     try {
+      setErrorMessage(null);
       const result = await blueprintService.compile(blueprint.id);
       if (result.success) {
         EventBus.getInstance().emit('notification:show', {
@@ -132,6 +164,7 @@ export const BlueprintEditor: React.FC = () => {
       }
     } catch (error) {
       console.error('Compilation error:', error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -213,6 +246,10 @@ export const BlueprintEditor: React.FC = () => {
           <button onClick={handleDeleteNode} disabled={!selectedNode}>Delete</button>
         </div>
       </div>
+
+      {errorMessage && (
+        <div className="error">{errorMessage}</div>
+      )}
 
       <div 
         className="blueprint-canvas"
@@ -351,6 +388,15 @@ export const BlueprintEditor: React.FC = () => {
           padding: 8px 12px;
           background: #2a2a2a;
           border-bottom: 1px solid #3a3a3a;
+        }
+
+        .error {
+          margin: 12px;
+          padding: 12px;
+          border: 1px solid #3a3a3a;
+          background: #2a2a2a;
+          color: #ffffff;
+          white-space: pre-wrap;
         }
 
         .toolbar-section {

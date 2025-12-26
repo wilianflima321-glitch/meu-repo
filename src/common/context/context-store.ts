@@ -420,7 +420,7 @@ export class ContextStore {
       imported++;
     }
 
-    for (const [id, versions] of Object.entries(parsed.versions as any)) {
+    for (const [id, versions] of Object.entries(parsed.versions as Record<string, ContextVersion[]>)) {
       this.versions.set(id, versions);
     }
 

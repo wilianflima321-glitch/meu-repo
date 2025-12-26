@@ -20,7 +20,14 @@ function handleApi(req, pathname, body) {
     case 'auth/providers':
       return { code:200, body: ['anonymous','api-key'] };
     case 'billing/plans':
-      return { code:200, body: [ { id:'free', name:'Free', price:0 } ] };
+      // Planos alinhados com estratégia 2025 - ZERO PREJUÍZO
+      return { code:200, body: [
+        { id:'starter', name:'Starter', price:3, priceBRL:15, tokensPerMonth:500000 },
+        { id:'basic', name:'Basic', price:9, priceBRL:45, tokensPerMonth:2000000 },
+        { id:'pro', name:'Pro', price:29, priceBRL:149, tokensPerMonth:8000000 },
+        { id:'studio', name:'Studio', price:79, priceBRL:399, tokensPerMonth:25000000 },
+        { id:'enterprise', name:'Enterprise', price:199, priceBRL:999, tokensPerMonth:100000000 }
+      ] };
     case 'ai-runtime/chat':
       if (req.method !== 'POST') return { code:405, body: { error: 'method_not_allowed' } };
       return { code:200, body: { id:'mock-response', model:'mock:gpt', choices:[ { message: { role:'assistant', content:'pong' } } ] } };

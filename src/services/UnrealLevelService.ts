@@ -38,11 +38,18 @@ export class UnrealLevelService {
   private levels: Map<string, Level>;
   private actors: Map<string, Actor[]>;
 
+  private providerNotConfiguredError(): Error {
+    return new Error(
+      'UNREAL_LEVEL_PROVIDER_NOT_CONFIGURED: Este projeto ainda não possui integração real com Levels/Actors do Unreal. '
+      + 'Implemente um provider (ex.: Editor bridge/backend) e conecte este serviço.'
+    );
+  }
+
   private constructor() {
     this.eventBus = EventBus.getInstance();
     this.levels = new Map();
     this.actors = new Map();
-    this.initializeMockData();
+    // real-or-fail: não inicializa dados mock
   }
 
   public static getInstance(): UnrealLevelService {
@@ -52,180 +59,61 @@ export class UnrealLevelService {
     return UnrealLevelService.instance;
   }
 
-  private initializeMockData(): void {
-    const mockLevel: Level = {
-      id: 'level_main',
-      name: 'MainLevel',
-      path: '/Game/Maps/MainLevel'
-    };
-
-    this.levels.set(mockLevel.id, mockLevel);
-
-    const mockActors: Actor[] = [
-      {
-        id: 'actor_1',
-        name: 'Floor',
-        type: 'StaticMesh',
-        transform: {
-          location: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0 },
-          scale: { x: 10, y: 10, z: 1 }
-        },
-        properties: { mesh: 'Cube' }
-      },
-      {
-        id: 'actor_2',
-        name: 'DirectionalLight',
-        type: 'Light',
-        transform: {
-          location: { x: 0, y: 0, z: 500 },
-          rotation: { x: -45, y: 0, z: 0 },
-          scale: { x: 1, y: 1, z: 1 }
-        },
-        properties: { intensity: 5, color: '#ffffff' }
-      },
-      {
-        id: 'actor_3',
-        name: 'PlayerStart',
-        type: 'PlayerStart',
-        transform: {
-          location: { x: 0, y: 0, z: 100 },
-          rotation: { x: 0, y: 0, z: 0 },
-          scale: { x: 1, y: 1, z: 1 }
-        },
-        properties: {}
-      }
-    ];
-
-    this.actors.set(mockLevel.id, mockActors);
-  }
-
   public async getLevels(): Promise<Level[]> {
-    return Array.from(this.levels.values());
+    throw this.providerNotConfiguredError();
   }
 
   public async getLevel(id: string): Promise<Level | null> {
-    return this.levels.get(id) || null;
+    void id;
+    throw this.providerNotConfiguredError();
   }
 
   public async createLevel(level: Level): Promise<Level> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        this.levels.set(level.id, level);
-        this.actors.set(level.id, []);
-        this.eventBus.emit('unreal:levelCreated', { level });
-        resolve(level);
-      }, 300);
-    });
+    void level;
+    throw this.providerNotConfiguredError();
   }
 
   public async deleteLevel(id: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const deleted = this.levels.delete(id);
-        if (deleted) {
-          this.actors.delete(id);
-          this.eventBus.emit('unreal:levelDeleted', { id });
-        }
-        resolve(deleted);
-      }, 300);
-    });
+    void id;
+    throw this.providerNotConfiguredError();
   }
 
   public async getActors(levelId: string): Promise<Actor[]> {
-    return this.actors.get(levelId) || [];
+    void levelId;
+    throw this.providerNotConfiguredError();
   }
 
   public async addActor(levelId: string, actor: Actor): Promise<Actor> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const actors = this.actors.get(levelId) || [];
-        actors.push(actor);
-        this.actors.set(levelId, actors);
-        this.eventBus.emit('unreal:actorAdded', { levelId, actor });
-        resolve(actor);
-      }, 100);
-    });
+    void levelId;
+    void actor;
+    throw this.providerNotConfiguredError();
   }
 
   public async updateActor(levelId: string, actorId: string, updates: Partial<Actor>): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const actors = this.actors.get(levelId);
-        if (!actors) {
-          resolve(false);
-          return;
-        }
-
-        const index = actors.findIndex(a => a.id === actorId);
-        if (index === -1) {
-          resolve(false);
-          return;
-        }
-
-        actors[index] = { ...actors[index], ...updates };
-        this.eventBus.emit('unreal:actorUpdated', { levelId, actorId, updates });
-        resolve(true);
-      }, 100);
-    });
+    void levelId;
+    void actorId;
+    void updates;
+    throw this.providerNotConfiguredError();
   }
 
   public async deleteActor(levelId: string, actorId: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const actors = this.actors.get(levelId);
-        if (!actors) {
-          resolve(false);
-          return;
-        }
-
-        const filtered = actors.filter(a => a.id !== actorId);
-        this.actors.set(levelId, filtered);
-        this.eventBus.emit('unreal:actorDeleted', { levelId, actorId });
-        resolve(true);
-      }, 100);
-    });
+    void levelId;
+    void actorId;
+    throw this.providerNotConfiguredError();
   }
 
   public async buildLighting(levelId: string): Promise<BuildResult> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const actors = this.actors.get(levelId) || [];
-        const errors: string[] = [];
-        const warnings: string[] = [];
-
-        const lights = actors.filter(a => a.type === 'Light');
-        if (lights.length === 0) {
-          warnings.push('No lights in level');
-        }
-
-        const result: BuildResult = {
-          success: errors.length === 0,
-          errors,
-          warnings
-        };
-
-        this.eventBus.emit('unreal:lightingBuilt', { levelId, result });
-        resolve(result);
-      }, 2000);
-    });
+    void levelId;
+    throw this.providerNotConfiguredError();
   }
 
   public async playInEditor(levelId: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        this.eventBus.emit('unreal:playInEditor', { levelId });
-        resolve(true);
-      }, 500);
-    });
+    void levelId;
+    throw this.providerNotConfiguredError();
   }
 
   public async save(levelId: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        this.eventBus.emit('unreal:levelSaved', { levelId });
-        resolve(true);
-      }, 500);
-    });
+    void levelId;
+    throw this.providerNotConfiguredError();
   }
 }
