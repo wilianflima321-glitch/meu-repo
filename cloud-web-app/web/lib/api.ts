@@ -306,6 +306,34 @@ export const AethelAPIClient = {
 		});
 		return { status: data?.success ? 'checkout_created' : 'checkout_unknown', checkoutUrl: data?.checkoutUrl };
 	},
+
+	// ========== Profile ==========
+	
+	getProfile: async () => {
+		return requestJSON<{ profile: any }>('/auth/me');
+	},
+	
+	updateProfile: async (updates: Record<string, unknown>) => {
+		return requestJSON<{ profile: any }>('/auth/profile', { method: 'PATCH', body: updates });
+	},
+	
+	deleteAccount: async () => {
+		return requestJSON<{ success: boolean }>('/auth/delete-account', { method: 'DELETE' });
+	},
+	
+	// ========== Sessions ==========
+	
+	getSessions: async () => {
+		return requestJSON<{ sessions: any[] }>('/auth/sessions');
+	},
+	
+	revokeSession: async (sessionId: string) => {
+		return requestJSON<{ success: boolean }>(`/auth/sessions/${encodeURIComponent(sessionId)}`, { method: 'DELETE' });
+	},
+	
+	revokeAllSessions: async () => {
+		return requestJSON<{ success: boolean }>('/auth/sessions', { method: 'DELETE' });
+	},
 };
 
 export default API_BASE;

@@ -52,6 +52,9 @@ import NiagaraVFX from './engine/NiagaraVFX'
 import AnimationBlueprint from './engine/AnimationBlueprint'
 import LandscapeEditor from './engine/LandscapeEditor'
 
+// Media Studio (unified video/image/audio)
+import MediaStudio from './media/MediaStudio'
+
 // Monaco Editor
 import MonacoEditor from './editor/MonacoEditor'
 
@@ -69,7 +72,7 @@ import { NotificationSystem } from './NotificationSystem'
 type EditorTab = {
   id: string
   title: string
-  type: 'code' | 'blueprint' | 'level' | 'material' | 'particles' | 'animation' | 'landscape' | 'settings' | 'keybindings'
+  type: 'code' | 'blueprint' | 'level' | 'material' | 'particles' | 'animation' | 'landscape' | 'settings' | 'keybindings' | 'media'
   path?: string
   dirty?: boolean
 }
@@ -118,9 +121,11 @@ export default function AethelIDE() {
   }, [])
 
   // Handle opening files
-  const handleOpenFile = useCallback((path: string, type: EditorTab['type'] = 'code') => {
+  const handleOpenFile = useCallback((path: string, type?: EditorTab['type']) => {
     const fileName = path.split('/').pop() || 'untitled'
     const existingTab = state.openFiles.find(f => f.path === path)
+
+    const inferredType = type ?? getEditorTypeFromPath(path)
     
     if (existingTab) {
       setState(prev => ({ ...prev, activeFileId: existingTab.id }))
@@ -128,7 +133,7 @@ export default function AethelIDE() {
       const newTab: EditorTab = {
         id: `file-${Date.now()}`,
         title: fileName,
-        type,
+        type: inferredType,
         path,
       }
       setState(prev => ({
@@ -244,6 +249,8 @@ export default function AethelIDE() {
             language={getLanguageFromPath(activeTab.path || '')}
           />
         )
+      case 'media':
+        return <MediaStudio path={activeTab.path} />
       case 'blueprint':
         return <BlueprintEditor />
       case 'level':
@@ -350,6 +357,21 @@ function getLanguageFromPath(path: string): string {
     toml: 'toml',
   }
   return languageMap[ext || ''] || 'plaintext'
+}
+
+function getEditorTypeFromPath(path: string): EditorTab['type'] {
+  const ext = path.split('.').pop()?.toLowerCase() || ''
+  const mediaExts = new Set([
+    // image
+    'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'tga', 'tiff', 'svg',
+    // audio
+    'wav', 'mp3', 'ogg', 'flac', 'm4a', 'aac',
+    // video
+    'mp4', 'webm', 'mov', 'mkv',
+  ])
+
+  if (mediaExts.has(ext)) return 'media'
+  return 'code'
 }
 
 // Export all integrated components for individual use

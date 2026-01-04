@@ -237,7 +237,7 @@ class CodeParser {
       export: /^export\s+/,
     }
     
-    let currentChunk: Partial<CodeChunk> | null = null
+    let currentChunk: (Partial<CodeChunk> & { content: string }) | null = null
     let braceCount = 0
     let chunkStartLine = 0
     
@@ -282,23 +282,27 @@ class CodeParser {
           : braceCount === 0 && lineIndex > chunkStartLine
         
         if (isComplete && currentChunk.content.trim()) {
+          const chunk = currentChunk
           chunks.push({
-            ...currentChunk,
+            ...chunk,
             endLine: lineIndex + 1,
-            content: currentChunk.content.trim(),
+            content: chunk.content.trim(),
           } as CodeChunk)
           currentChunk = null
         }
       }
     })
     
-    // Handle remaining chunk
-    if (currentChunk && currentChunk.content) {
-      chunks.push({
-        ...currentChunk,
-        endLine: lines.length,
-        content: currentChunk.content.trim(),
-      } as CodeChunk)
+    // Handle remaining chunk - type assertion needed after forEach mutation
+    const remainingChunk = currentChunk as (Partial<CodeChunk> & { content: string }) | null
+    if (remainingChunk) {
+      if (remainingChunk.content) {
+        chunks.push({
+          ...remainingChunk,
+          endLine: lines.length,
+          content: remainingChunk.content.trim(),
+        } as CodeChunk)
+      }
     }
     
     return chunks
@@ -314,7 +318,7 @@ class CodeParser {
       import: /^(?:from\s+\S+\s+)?import\s+/,
     }
     
-    let currentChunk: Partial<CodeChunk> | null = null
+    let currentChunk: (Partial<CodeChunk> & { content: string }) | null = null
     let chunkIndent = 0
     
     lines.forEach((line, lineIndex) => {
@@ -357,10 +361,11 @@ class CodeParser {
       if (currentChunk) {
         // Check if we've dedented (chunk complete)
         if (trimmedLine && currentIndent <= chunkIndent && lineIndex > (currentChunk.startLine || 0)) {
+          const chunk = currentChunk
           chunks.push({
-            ...currentChunk,
+            ...chunk,
             endLine: lineIndex,
-            content: currentChunk.content.trim(),
+            content: chunk.content.trim(),
           } as CodeChunk)
           currentChunk = null
         } else {
@@ -369,13 +374,16 @@ class CodeParser {
       }
     })
     
-    // Handle remaining chunk
-    if (currentChunk && currentChunk.content) {
-      chunks.push({
-        ...currentChunk,
-        endLine: lines.length,
-        content: currentChunk.content.trim(),
-      } as CodeChunk)
+    // Handle remaining chunk - type assertion needed after forEach mutation
+    const remainingChunk = currentChunk as (Partial<CodeChunk> & { content: string }) | null
+    if (remainingChunk) {
+      if (remainingChunk.content) {
+        chunks.push({
+          ...remainingChunk,
+          endLine: lines.length,
+          content: remainingChunk.content.trim(),
+        } as CodeChunk)
+      }
     }
     
     return chunks

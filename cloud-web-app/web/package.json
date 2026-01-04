@@ -4,8 +4,12 @@
   "version": "0.2.0",
   "scripts": {
     "dev": "next dev -p 3001 -H 0.0.0.0",
+    "dev:full": "concurrently \"npm run dev\" \"npm run runtime\"",
+    "runtime": "ts-node --transpile-only lib/server/bootstrap.ts",
+    "runtime:dev": "nodemon --exec ts-node --transpile-only lib/server/bootstrap.ts",
     "build": "next build",
     "start": "next start -p 3001 -H 0.0.0.0",
+    "start:full": "concurrently \"npm run start\" \"npm run runtime\"",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",

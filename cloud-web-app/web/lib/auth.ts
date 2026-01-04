@@ -45,3 +45,13 @@ export function authHeaders(): Record<string, string> {
 	const token = getToken();
 	return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
+/**
+ * Logout - clears token and optionally redirects
+ */
+export function logout(redirect: boolean = false): void {
+	clearToken();
+	if (redirect && typeof window !== 'undefined') {
+		window.location.href = '/login';
+	}
+}

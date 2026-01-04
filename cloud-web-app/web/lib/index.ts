@@ -136,8 +136,18 @@ export * from './video-encoder-real';
 // ============================================================================
 
 export * from './ai-agent-system';
-export * from './ai-integration-total';
-export * from './ai-tools-registry';
+export { 
+  initializeEngineState, 
+  aiTools, 
+  engineState, 
+  getAvailableTools, 
+  getToolsByCategory 
+} from './ai-integration-total';
+export { 
+  toolsRegistry, 
+  executeTool, 
+  type ToolResult 
+} from './ai-tools-registry';
 
 // ============================================================================
 // DEVELOPMENT TOOLS

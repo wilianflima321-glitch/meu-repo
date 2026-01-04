@@ -1,0 +1,198 @@
+# ============================================
+# Aethel Engine - Production Docker Compose
+# For production/staging deployments
+# ============================================
+
+services:
+  # ----------------------------------------
+  # PostgreSQL Database
+  # ----------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: aethel-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-aethel}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aethel_secure_password}
+      POSTGRES_DB: ${DB_NAME:-aethel_engine}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-aethel} -d ${DB_NAME:-aethel_engine}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aethel-network
+
+  # ----------------------------------------
+  # Redis Cache
+  # ----------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: aethel-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-aethel_redis_password}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-aethel_redis_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aethel-network
+
+  # ----------------------------------------
+  # Web Application (Next.js)
+  # ----------------------------------------
+  web:
+    build:
+      context: ./cloud-web-app/web
+      dockerfile: Dockerfile
+      target: web
+    container_name: aethel-web
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-aethel}:${DB_PASSWORD:-aethel_secure_password}@postgres:5432/${DB_NAME:-aethel_engine}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-aethel_redis_password}@redis:6379
+      - RUNTIME_URL=ws://runtime:3001
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aethel-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # ----------------------------------------
+  # Runtime Server (WebSocket, Terminal, LSP, DAP)
+  # ----------------------------------------
+  runtime:
+    build:
+      context: ./cloud-web-app/web
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: aethel-runtime
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-aethel}:${DB_PASSWORD:-aethel_secure_password}@postgres:5432/${DB_NAME:-aethel_engine}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-aethel_redis_password}@redis:6379
+      - WS_PORT=3001
+    ports:
+      - "${RUNTIME_PORT:-3001}:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aethel-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+
+  # ----------------------------------------
+  # Nginx Reverse Proxy
+  # ----------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: aethel-nginx
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - web
+      - runtime
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aethel-network
+
+  # ----------------------------------------
+  # MinIO (S3-compatible storage)
+  # ----------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: aethel-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-aethel}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-aethel_minio_password}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aethel-network
+
+# ----------------------------------------
+# Networks
+# ----------------------------------------
+networks:
+  aethel-network:
+    driver: bridge
+
+# ----------------------------------------
+# Volumes
+# ----------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  nginx_logs:
+    driver: local
