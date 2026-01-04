@@ -52,8 +52,8 @@ export interface WorkspaceConfiguration {
 }
 
 class WorkspaceAPI {
-  private workspaceFolders: WorkspaceFolder[] = [];
-  private textDocuments: Map<string, TextDocument> = new Map();
+  private _workspaceFolders: WorkspaceFolder[] = [];
+  private _textDocuments: Map<string, TextDocument> = new Map();
   private fileWatchers: FileSystemWatcher[] = [];
   private configuration: Map<string, any> = new Map();
   private onDidChangeWorkspaceFoldersListeners: Array<(event: any) => void> = [];
@@ -66,22 +66,22 @@ class WorkspaceAPI {
    * Get workspace folders
    */
   get workspaceFolders(): WorkspaceFolder[] | undefined {
-    return this.workspaceFolders.length > 0 ? this.workspaceFolders : undefined;
+    return this._workspaceFolders.length > 0 ? this._workspaceFolders : undefined;
   }
 
   /**
    * Get workspace name
    */
   get name(): string | undefined {
-    return this.workspaceFolders[0]?.name;
+    return this._workspaceFolders[0]?.name;
   }
 
   /**
    * Get workspace file
    */
   get workspaceFile(): string | undefined {
-    return this.workspaceFolders.length > 0 
-      ? `${this.workspaceFolders[0].uri}/.vscode/workspace.code-workspace`
+    return this._workspaceFolders.length > 0 
+      ? `${this._workspaceFolders[0].uri}/.vscode/workspace.code-workspace`
       : undefined;
   }
 
@@ -89,14 +89,14 @@ class WorkspaceAPI {
    * Get text documents
    */
   get textDocuments(): TextDocument[] {
-    return Array.from(this.textDocuments.values());
+    return Array.from(this._textDocuments.values());
   }
 
   /**
    * Get workspace folder for URI
    */
   getWorkspaceFolder(uri: string): WorkspaceFolder | undefined {
-    return this.workspaceFolders.find(folder => uri.startsWith(folder.uri));
+    return this._workspaceFolders.find(folder => uri.startsWith(folder.uri));
   }
 
   /**
@@ -105,7 +105,7 @@ class WorkspaceAPI {
   asRelativePath(pathOrUri: string | { path: string }, includeWorkspaceFolder?: boolean): string {
     const path = typeof pathOrUri === 'string' ? pathOrUri : pathOrUri.path;
     
-    for (const folder of this.workspaceFolders) {
+    for (const folder of this._workspaceFolders) {
       if (path.startsWith(folder.uri)) {
         const relative = path.substring(folder.uri.length + 1);
         return includeWorkspaceFolder ? `${folder.name}/${relative}` : relative;
@@ -123,10 +123,10 @@ class WorkspaceAPI {
     deleteCount: number | null,
     ...workspaceFoldersToAdd: Array<{ uri: string; name?: string }>
   ): boolean {
-    const oldFolders = [...this.workspaceFolders];
+    const oldFolders = [...this._workspaceFolders];
 
     if (deleteCount !== null) {
-      this.workspaceFolders.splice(start, deleteCount);
+      this._workspaceFolders.splice(start, deleteCount);
     }
 
     if (workspaceFoldersToAdd.length > 0) {
@@ -135,23 +135,23 @@ class WorkspaceAPI {
         name: folder.name || `Folder ${start + index}`,
         index: start + index,
       }));
-      this.workspaceFolders.splice(start, 0, ...newFolders);
+      this._workspaceFolders.splice(start, 0, ...newFolders);
     }
 
     // Reindex
-    this.workspaceFolders.forEach((folder, index) => {
+    this._workspaceFolders.forEach((folder, index) => {
       folder.index = index;
     });
 
     // Notify listeners
     this.onDidChangeWorkspaceFoldersListeners.forEach(listener => {
       listener({
-        added: this.workspaceFolders.filter(f => !oldFolders.includes(f)),
-        removed: oldFolders.filter(f => !this.workspaceFolders.includes(f)),
+        added: this._workspaceFolders.filter(f => !oldFolders.includes(f)),
+        removed: oldFolders.filter(f => !this._workspaceFolders.includes(f)),
       });
     });
 
-    console.log('[Workspace] Updated workspace folders:', this.workspaceFolders);
+    console.log('[Workspace] Updated workspace folders:', this._workspaceFolders);
     return true;
   }
 
@@ -162,13 +162,13 @@ class WorkspaceAPI {
     const uriStr = typeof uri === 'string' ? uri : `${uri.scheme}://${uri.path}`;
 
     // Check if already open
-    if (this.textDocuments.has(uriStr)) {
-      return this.textDocuments.get(uriStr)!;
+    if (this._textDocuments.has(uriStr)) {
+      return this._textDocuments.get(uriStr)!;
     }
 
     // Create new document
     const document = this.createTextDocument(uriStr);
-    this.textDocuments.set(uriStr, document);
+    this._textDocuments.set(uriStr, document);
 
     // Notify listeners
     this.onDidOpenTextDocumentListeners.forEach(listener => listener(document));
@@ -196,9 +196,9 @@ class WorkspaceAPI {
    * Save all text documents
    */
   async saveAll(includeUntitled?: boolean): Promise<boolean> {
-    const documents = includeUntitled 
-      ? this.textDocuments 
-      : Array.from(this.textDocuments.values()).filter(d => !d.isUntitled);
+    const documents = includeUntitled
+      ? Array.from(this._textDocuments.values())
+      : Array.from(this._textDocuments.values()).filter(d => !d.isUntitled);
 
     for (const document of documents) {
       await this.saveTextDocument(document);
@@ -479,11 +479,11 @@ class WorkspaceAPI {
    * Initialize workspace
    */
   initialize(folders: Array<{ uri: string; name: string }>): void {
-    this.workspaceFolders = folders.map((folder, index) => ({
+    this._workspaceFolders = folders.map((folder, index) => ({
       ...folder,
       index,
     }));
-    console.log('[Workspace] Initialized with folders:', this.workspaceFolders);
+    console.log('[Workspace] Initialized with folders:', this._workspaceFolders);
   }
 }
 

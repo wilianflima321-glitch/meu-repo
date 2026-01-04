@@ -40,8 +40,27 @@ export interface ArchitectureResponse {
     error?: string;
 }
 
+export interface PromptTemplate {
+    id: string;
+    template: string;
+}
+
 @injectable()
 export class ArchitectAgent {
+    readonly id = 'architect';
+    readonly name = 'Architect';
+    readonly description = 'Analyzes project structure and provides architectural guidance.';
+    readonly promptTemplates: PromptTemplate[] = [
+        { id: 'architecture-design', template: 'Design an architecture and describe components and boundaries.' },
+        { id: 'system-plan', template: 'Create a system plan with steps and trade-offs.' },
+        { id: 'technical-decision', template: 'Recommend a technical decision with pros/cons and risks.' },
+        { id: 'architecture-review', template: 'Review an architecture for issues and improvements.' },
+    ];
+
+    async invoke(request: any): Promise<any> {
+        return this.processRequest(request);
+    }
+
     constructor(
         @inject(TelemetryService) private telemetry: TelemetryService,
         @inject(ObservabilityService) private observability: ObservabilityService,

@@ -101,7 +101,7 @@
 - ✅ Context collection
 - ✅ Code analysis
 - ✅ Project metadata
-- ✅ API ready (mock)
+- ✅ Estrutura pronta para API (real-or-fail: depende de backend/LLM configurado)
 ```
 
 ---

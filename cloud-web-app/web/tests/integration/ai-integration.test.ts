@@ -3,13 +3,65 @@
  * End-to-end tests for AI features
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { getAIApiClient } from '../../lib/api';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { getAIApiClient } from '../../lib/api/index';
 
 describe('AI Integration', () => {
   let aiClient: ReturnType<typeof getAIApiClient>;
 
   beforeEach(() => {
+    // Esses testes rodam via Jest (sem servidor Next rodando). Portanto,
+    // mockamos fetch para simular respostas das rotas /api/ai/*.
+    globalThis.fetch = jest.fn(async (input: any) => {
+      const url = typeof input === 'string' ? input : String(input?.url ?? input);
+
+      const json = async () => {
+        if (url.includes('/completions')) {
+          return {
+            completions: [
+              { text: 'x', confidence: 0.9, documentation: 'test' },
+              { text: 'y', confidence: 0.7 },
+            ],
+          };
+        }
+        if (url.includes('/hover')) {
+          return { content: 'hover', examples: ['ex1', 'ex2'], relatedSymbols: ['a', 'b'] };
+        }
+        if (url.includes('/code-actions')) {
+          return { actions: [{ title: 'Fix', kind: 'quickfix' }] };
+        }
+        if (url.includes('/debug/analyze')) {
+          return { analysis: 'analysis', possibleCauses: ['cause'], suggestions: ['suggestion'] };
+        }
+        if (url.includes('/tests/generate')) {
+          return { tests: 'describe("x", () => {})', coverage: { lines: 90, branches: 80, functions: 85 } };
+        }
+        if (url.includes('/git/commit-message')) {
+          return { message: 'feat: test', alternatives: ['chore: test'] };
+        }
+        if (url.includes('/git/review')) {
+          return { comments: [{ line: 1, severity: 'info', message: 'ok' }], summary: 'summary', score: 8 };
+        }
+        if (url.includes('/git/resolve-conflict')) {
+          return { resolution: 'resolved', explanation: 'explanation', confidence: 0.9 };
+        }
+        if (url.includes('/model/info')) {
+          return { name: 'test-model' };
+        }
+        if (url.includes('/usage/stats')) {
+          return { requests: 1 };
+        }
+        return {};
+      };
+
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json,
+      } as any;
+    }) as any;
+
     aiClient = getAIApiClient();
     // Grant consent for tests
     aiClient.setConsent(true);

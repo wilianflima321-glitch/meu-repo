@@ -59,9 +59,13 @@ export class MultiCursorManager {
 
     // If removing primary cursor, make another one primary
     if (cursor.isPrimary && this.cursors.size > 0) {
-      const firstCursor = this.cursors.values().next().value;
-      firstCursor.isPrimary = true;
-      this.primaryCursorId = firstCursor.id;
+      const firstCursor = this.cursors.values().next().value as Cursor | undefined;
+      if (firstCursor) {
+        firstCursor.isPrimary = true;
+        this.primaryCursorId = firstCursor.id;
+      } else {
+        this.primaryCursorId = null;
+      }
     }
 
     console.log(`[Multi-Cursor] Removed cursor ${id}`);

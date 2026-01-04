@@ -314,14 +314,13 @@
 ### **Iniciar Servidor**
 ```bash
 cd examples/browser-ide-app
-python3 -m http.server 8080
-# ou
-node server.js
+npm install
+npm start
 ```
 
 ### **Abrir no Navegador**
 ```
-http://localhost:8080/index.html
+http://localhost:3000/
 ```
 
 ### **Console Debug**

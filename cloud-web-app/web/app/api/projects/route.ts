@@ -1,34 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-function getUserIdFromToken(req: NextRequest): string | null {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-  try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    return decoded.userId;
-  } catch (error) {
-    return null;
-  }
-}
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 // GET /api/projects - List all projects for user
 export async function GET(req: NextRequest) {
   try {
-    const userId = getUserIdFromToken(req);
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = requireAuth(req);
+		await requireEntitlementsForUser(user.userId);
 
     const projects = await prisma.project.findMany({
-      where: { userId },
+      where: { userId: user.userId },
       orderBy: { updatedAt: 'desc' },
       include: {
         _count: {
@@ -40,20 +23,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(projects);
   } catch (error) {
     console.error('Get projects error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }
 
 // POST /api/projects - Create new project
 export async function POST(req: NextRequest) {
   try {
-    const userId = getUserIdFromToken(req);
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = requireAuth(req);
+		const entitlements = await requireEntitlementsForUser(user.userId);
 
     const { name, template } = await req.json();
 
@@ -64,20 +45,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Enforce limite de projetos
+    if (entitlements.plan.limits.projects !== -1) {
+      const count = await prisma.project.count({ where: { userId: user.userId } });
+      if (count >= entitlements.plan.limits.projects) {
+        return NextResponse.json(
+          {
+            error: 'PROJECT_LIMIT_REACHED',
+            message: `Limite de projetos do plano (${entitlements.plan.limits.projects}) atingido. Faça upgrade.`,
+            plan: entitlements.plan.id,
+          },
+          { status: 402 }
+        );
+      }
+    }
+
     const project = await prisma.project.create({
       data: {
         name,
         template: template || null,
-        userId,
+        userId: user.userId,
       },
     });
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     console.error('Create project error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }

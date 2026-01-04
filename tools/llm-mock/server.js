@@ -258,7 +258,7 @@ app.put('/api/llm/quotas/:userId', (req, res) => {
   const userId = req.params.userId;
   const body = req.body || {};
   DATA.quotas[userId] = { monthlyTokens: body.monthlyTokens || 0 };
-  persist();
+  core.persist();
   res.status(204).end();
 });
 
@@ -511,7 +511,7 @@ function reconcileOnce() {
     DATA.billing_records.push(rec);
     newRecords.push(rec);
   }
-  if (newRecords.length) persist();
+  if (newRecords.length) core.persist();
   if (newRecords.length) console.log(`reconcileOnce created ${newRecords.length} records`);
   // after creating billing records, ensure payment links exist for billable user-charges
   for (const r of newRecords) {
@@ -542,7 +542,7 @@ function attachPaymentLinkIfNeeded(billingRecord) {
   const payment = { id: pid, billingRecordId: billingRecord.id, userId: billingRecord.userId, amount: billingRecord.amount, currency: billingRecord.currency || 'USD', status: 'pending', url, createdAt: new Date().toISOString() };
   DATA.payments.push(payment);
   billingRecord.paymentLinkId = pid;
-  persist();
+  core.persist();
   return payment;
 }
 

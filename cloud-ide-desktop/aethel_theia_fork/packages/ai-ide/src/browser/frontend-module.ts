@@ -137,7 +137,7 @@ import { ObservabilityService } from '../common/observability-service';
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     // Initialize ConfigService early
     bind(ConfigService).toSelf().inSingletonScope();
-    bind(FrontendApplicationContribution).toDynamicValue(ctx => ({
+    bind(FrontendApplicationContribution).toDynamicValue((ctx: interfaces.Context) => ({
         async initialize(): Promise<void> {
             const configService = ctx.container.get(ConfigService);
             await configService.load();

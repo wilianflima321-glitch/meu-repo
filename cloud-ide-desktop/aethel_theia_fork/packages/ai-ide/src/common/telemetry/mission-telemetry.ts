@@ -109,6 +109,16 @@ export interface CreativeMetrics {
  */
 @injectable()
 export class MissionTelemetry {
+  private static readonly missionRuns: Map<string, {
+    missionId: string;
+    name?: string;
+    startTime: number;
+    endTime?: number;
+    status: 'running' | 'completed' | 'failed' | 'unknown';
+    totalCost: number;
+    tokenUsage: { promptTokens: number; completionTokens: number; totalTokens: number };
+  }> = new Map();
+
   private metrics: MissionMetric[] = [];
   private slos: Map<string, SLO> = new Map();
   private sloStatuses: Map<string, SLOStatus> = new Map();
@@ -126,6 +136,97 @@ export class MissionTelemetry {
   constructor() {
     this.initializeSLOs();
     this.startSLOMonitoring();
+  }
+
+  startMission(missionId: string, info: { name?: string; startTime?: Date } = {}): void {
+    const startTime = info.startTime ? info.startTime.getTime() : Date.now();
+    MissionTelemetry.missionRuns.set(missionId, {
+      missionId,
+      name: info.name,
+      startTime,
+      status: 'running',
+      totalCost: 0,
+      tokenUsage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+    });
+  }
+
+  completeMission(missionId: string): void {
+    const run = MissionTelemetry.missionRuns.get(missionId);
+    if (run) {
+      run.status = 'completed';
+      run.endTime = Date.now();
+    }
+  }
+
+  failMission(missionId: string): void {
+    const run = MissionTelemetry.missionRuns.get(missionId);
+    if (run) {
+      run.status = 'failed';
+      run.endTime = Date.now();
+    }
+  }
+
+  endMission(
+    missionId: string,
+    arg: 'completed' | 'failed' | string | { status?: string; endTime?: Date } = 'completed'
+  ): void {
+    const status = typeof arg === 'string' ? arg : (arg.status ?? 'completed');
+    if (status === 'failed') {
+      this.failMission(missionId);
+    } else {
+      this.completeMission(missionId);
+    }
+
+    const run = MissionTelemetry.missionRuns.get(missionId);
+    if (run && typeof arg !== 'string' && arg.endTime) {
+      run.endTime = arg.endTime.getTime();
+    }
+  }
+
+  recordTokenUsage(missionId: string, usage: { promptTokens: number; completionTokens: number; totalTokens: number }): void {
+    const run = MissionTelemetry.missionRuns.get(missionId);
+    if (!run) {
+      // Lazily create if test calls recordTokenUsage before startMission
+      this.startMission(missionId);
+      return this.recordTokenUsage(missionId, usage);
+    }
+    run.tokenUsage.promptTokens += usage.promptTokens;
+    run.tokenUsage.completionTokens += usage.completionTokens;
+    run.tokenUsage.totalTokens += usage.totalTokens;
+  }
+
+  static recordMissionCost(missionId: string, cost: number): void {
+    const run = MissionTelemetry.missionRuns.get(missionId);
+    if (run) {
+      run.totalCost += cost;
+    }
+  }
+
+  getMissionMetrics(missionId: string): {
+    missionId: string;
+    status: string;
+    duration: number;
+    totalCost: number;
+    tokenUsage: { promptTokens: number; completionTokens: number; totalTokens: number };
+  } {
+    const run = MissionTelemetry.missionRuns.get(missionId);
+    if (!run) {
+      return {
+        missionId,
+        status: 'unknown',
+        duration: 0,
+        totalCost: 0,
+        tokenUsage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+      };
+    }
+    const end = run.endTime ?? Date.now();
+    return {
+      missionId,
+      status: run.status,
+      duration: Math.max(0, end - run.startTime),
+      totalCost: run.totalCost,
+      tokenUsage: run.tokenUsage,
+    };
   }
 
   /**

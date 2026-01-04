@@ -1,13 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import { prisma } from '@/lib/db';
 
 interface UninstallRequest {
   extensionId: string;
+  projectId?: string;
 }
+
+// Extensões built-in (sempre disponíveis)
+const BUILTIN_EXTENSION_IDS = [
+  'aethel.blueprint-editor',
+  'aethel.niagara-vfx',
+  'aethel.ai-assistant',
+  'aethel.landscape-editor',
+  'aethel.physics-engine',
+  'aethel.multiplayer',
+];
 
 export async function POST(request: NextRequest) {
   try {
+		const user = requireAuth(request);
+    await requireFeatureForUser(user.userId, 'marketplace');
+
     const body: UninstallRequest = await request.json();
-    const { extensionId } = body;
+		const { extensionId, projectId } = body;
 
     if (!extensionId) {
       return NextResponse.json(
@@ -16,22 +34,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Uninstalling extension: ${extensionId}`);
+    // Built-in não desinstala (sempre disponível)
+    if (BUILTIN_EXTENSION_IDS.includes(extensionId)) {
+      return NextResponse.json({
+        success: true,
+        uninstalled: false,
+        extensionId,
+        builtin: true,
+        message: 'Built-in extension is always available',
+      });
+    }
 
-    // Simulate uninstallation process
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Remove installation from database or file system
-    // For now, just return success
-
-    return NextResponse.json({
-      success: true,
-      message: `Extension ${extensionId} uninstalled successfully`,
-      extensionId,
-      uninstalledAt: new Date().toISOString()
+    // Remove registro de instalação (idempotente)
+    await prisma.installedExtension.deleteMany({
+      where: {
+        userId: user.userId,
+        extensionId,
+      },
     });
+
+    await prisma.auditLog.create({
+      data: {
+        userId: user.userId,
+        action: 'extension_uninstall',
+        resource: extensionId,
+        metadata: { projectId },
+      },
+    });
+
+    return NextResponse.json(
+      {
+			success: true,
+			uninstalled: true,
+			extensionId,
+      },
+    );
   } catch (error) {
     console.error('Extension uninstallation failed:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     return NextResponse.json(
       { success: false, error: 'Uninstallation failed' },
       { status: 500 }

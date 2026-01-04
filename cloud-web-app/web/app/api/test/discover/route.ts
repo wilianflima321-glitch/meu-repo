@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
 
 interface DiscoverTestsRequest {
   adapter: string;
@@ -7,20 +13,81 @@ interface DiscoverTestsRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: DiscoverTestsRequest = await request.json();
-    const { adapter, workspaceRoot } = body;
+		const user = requireAuth(request);
+		await requireEntitlementsForUser(user.userId);
 
-    console.log(`Discovering tests with ${adapter} in ${workspaceRoot}`);
+		const body = (await request.json().catch(() => ({}))) as Partial<DiscoverTestsRequest>;
+		const adapter = String(body.adapter || '').toLowerCase();
+		const workspaceAbs = resolveWorkspaceRoot(body.workspaceRoot);
 
-    // Mock test discovery
-    const tests = getMockTests(adapter);
+		const patterns: Record<string, RegExp> = {
+			jest: /\.(test|spec)\.(js|jsx|ts|tsx)$/i,
+			pytest: /(^test_.*\.py$|.*_test\.py$)/i,
+			gotest: /_test\.go$/i,
+		};
 
-    return NextResponse.json({
-      success: true,
-      tests
-    });
+		const filePattern = patterns[adapter];
+		if (!filePattern) {
+			return NextResponse.json(
+				{ success: false, error: 'UNSUPPORTED_ADAPTER', message: `Adapter não suportado: ${adapter}`, tests: [] },
+				{ status: 422 }
+			);
+		}
+
+		const ignoreDirs = new Set(['node_modules', '.git', '.next', 'dist', 'build', 'out', 'coverage']);
+		const maxFiles = 5000;
+		const maxHits = 2000;
+		let scanned = 0;
+		let hits = 0;
+		const tests: any[] = [];
+
+		async function walk(dir: string): Promise<void> {
+			if (scanned >= maxFiles || hits >= maxHits) return;
+			let entries: any[] = [];
+			try {
+				entries = await fs.readdir(dir, { withFileTypes: true });
+			} catch {
+				return;
+			}
+			for (const ent of entries) {
+				if (scanned >= maxFiles || hits >= maxHits) return;
+				const name = ent.name;
+				if (ent.isDirectory()) {
+					if (ignoreDirs.has(name)) continue;
+					await walk(path.join(dir, name));
+				} else if (ent.isFile()) {
+					scanned++;
+					if (!filePattern.test(name)) continue;
+					const abs = path.join(dir, name);
+					const rel = path.relative(workspaceAbs, abs).split(path.sep).join('/');
+					const uri = `file://${abs.split(path.sep).join('/')}`;
+					tests.push({
+						id: uri,
+						label: name,
+						type: 'file',
+						uri,
+						children: [],
+						parent: undefined,
+						relPath: rel,
+					});
+					hits++;
+				}
+			}
+		}
+
+		await walk(workspaceAbs);
+
+		return NextResponse.json({
+			success: true,
+			adapter,
+			workspaceRoot: workspaceAbs,
+			tests,
+			truncated: scanned >= maxFiles || hits >= maxHits,
+		});
   } catch (error) {
     console.error('Failed to discover tests:', error);
+		const mapped = apiErrorToResponse(error);
+		if (mapped) return mapped;
     return NextResponse.json(
       { success: false, error: 'Failed to discover tests' },
       { status: 500 }
@@ -28,125 +95,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getMockTests(adapter: string) {
-  if (adapter === 'jest') {
-    return [
-      {
-        id: 'file:src/utils.test.ts',
-        label: 'utils.test.ts',
-        type: 'file',
-        uri: 'file:///workspace/src/utils.test.ts',
-        children: [
-          {
-            id: 'suite:utils',
-            label: 'Utils',
-            type: 'suite',
-            parent: 'file:src/utils.test.ts',
-            children: [
-              {
-                id: 'test:utils:add',
-                label: 'should add two numbers',
-                type: 'test',
-                parent: 'suite:utils',
-                range: { start: { line: 5, character: 2 }, end: { line: 7, character: 4 } }
-              },
-              {
-                id: 'test:utils:subtract',
-                label: 'should subtract two numbers',
-                type: 'test',
-                parent: 'suite:utils',
-                range: { start: { line: 9, character: 2 }, end: { line: 11, character: 4 } }
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'file:src/api.test.ts',
-        label: 'api.test.ts',
-        type: 'file',
-        uri: 'file:///workspace/src/api.test.ts',
-        children: [
-          {
-            id: 'suite:api',
-            label: 'API',
-            type: 'suite',
-            parent: 'file:src/api.test.ts',
-            children: [
-              {
-                id: 'test:api:fetch',
-                label: 'should fetch data',
-                type: 'test',
-                parent: 'suite:api',
-                range: { start: { line: 10, character: 2 }, end: { line: 15, character: 4 } }
-              },
-              {
-                id: 'test:api:post',
-                label: 'should post data',
-                type: 'test',
-                parent: 'suite:api',
-                range: { start: { line: 17, character: 2 }, end: { line: 22, character: 4 } }
-              }
-            ]
-          }
-        ]
-      }
-    ];
-  }
-
-  if (adapter === 'pytest') {
-    return [
-      {
-        id: 'file:tests/test_utils.py',
-        label: 'test_utils.py',
-        type: 'file',
-        uri: 'file:///workspace/tests/test_utils.py',
-        children: [
-          {
-            id: 'test:test_add',
-            label: 'test_add',
-            type: 'test',
-            parent: 'file:tests/test_utils.py',
-            range: { start: { line: 3, character: 0 }, end: { line: 5, character: 0 } }
-          },
-          {
-            id: 'test:test_subtract',
-            label: 'test_subtract',
-            type: 'test',
-            parent: 'file:tests/test_utils.py',
-            range: { start: { line: 7, character: 0 }, end: { line: 9, character: 0 } }
-          }
-        ]
-      }
-    ];
-  }
-
-  if (adapter === 'gotest') {
-    return [
-      {
-        id: 'file:utils_test.go',
-        label: 'utils_test.go',
-        type: 'file',
-        uri: 'file:///workspace/utils_test.go',
-        children: [
-          {
-            id: 'test:TestAdd',
-            label: 'TestAdd',
-            type: 'test',
-            parent: 'file:utils_test.go',
-            range: { start: { line: 5, character: 0 }, end: { line: 10, character: 1 } }
-          },
-          {
-            id: 'test:TestSubtract',
-            label: 'TestSubtract',
-            type: 'test',
-            parent: 'file:utils_test.go',
-            range: { start: { line: 12, character: 0 }, end: { line: 17, character: 1 } }
-          }
-        ]
-      }
-    ];
-  }
-
-  return [];
-}

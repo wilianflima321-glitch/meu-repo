@@ -6,47 +6,47 @@
  */
 
 // ==================== Debug System ====================
-export * from './debug/debugger-system';
+export * as DebugSystem from './debug/debugger-system';
 
 // ==================== Extension System ====================
-export * from './extensions/extension-marketplace-system';
+export * as ExtensionSystem from './extensions/extension-marketplace-system';
 
 // ==================== Template System ====================
-export * from './templates/template-system';
+export * as TemplateSystemExports from './templates/template-system';
 
 // ==================== Snippet System ====================
-export * from './snippets/snippet-system';
+export * as SnippetSystemExports from './snippets/snippet-system';
 
 // ==================== Task System ====================
-export * from './tasks/task-runner-system';
+export * as TaskSystem from './tasks/task-runner-system';
 
 // ==================== Bridge System ====================
-export * from './bridge/unified-service-bridge';
+export * as BridgeSystem from './bridge/unified-service-bridge';
 
 // ==================== Engine Systems ====================
-export * from './engine';
-export * from './physics/physics-engine';
-export * from './render/webgpu-renderer';
-export * from './render/unified-render-pipeline';
-export * from './game-ai/game-ai-engine';
-export * from './visual-scripting/visual-scripting-engine';
-export * from './audio/audio-processing-engine';
-export * from './3d/scene-3d-engine';
-export * from './video/video-timeline-engine';
-export * from './image/image-layer-engine';
-export * from './text/text-typography-engine';
-export * from './vector/vector-processing-engine';
-export * from './websocket/websocket-service';
-export * from './collaboration/collaboration-engine';
-export * from './plugins/plugin-system';
-export * from './export/export-pipeline';
-export * from './preview/preview-engine';
-export * from './effects/effects-library';
-export * from './project/project-manager';
-export * from './assets/asset-manager';
-export * from './ai/ai-integration-layer';
-export * from './ai/asset-generation-ai';
-export * from './automation/workflow-automation-engine';
+export * as Engine from './engine';
+export * as Physics from './physics/physics-engine';
+export * as RenderWebGPU from './render/webgpu-renderer';
+export * as RenderPipeline from './render/unified-render-pipeline';
+export * as GameAI from './game-ai/game-ai-engine';
+export * as VisualScripting from './visual-scripting/visual-scripting-engine';
+export * as Audio from './audio/audio-processing-engine';
+export * as Scene3D from './3d/scene-3d-engine';
+export * as Video from './video/video-timeline-engine';
+export * as Image from './image/image-layer-engine';
+export * as Text from './text/text-typography-engine';
+export * as Vector from './vector/vector-processing-engine';
+export * as WebSocket from './websocket/websocket-service';
+export * as Collaboration from './collaboration/collaboration-engine';
+export * as Plugins from './plugins/plugin-system';
+export * as ExportPipelineExports from './export/export-pipeline';
+export * as Preview from './preview/preview-engine';
+export * as Effects from './effects/effects-library';
+export * as Project from './project/project-manager';
+export * as Assets from './assets/asset-manager';
+export * as AIIntegration from './ai/ai-integration-layer';
+export * as AssetGeneration from './ai/asset-generation-ai';
+export * as Automation from './automation/workflow-automation-engine';
 
 // ==================== Container Bindings ====================
 

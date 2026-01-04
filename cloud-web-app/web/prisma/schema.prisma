@@ -15,20 +15,46 @@ generator client {
 // ============================================
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  password  String
-  name      String?
-  plan      String    @default("free") // free, pro, team, enterprise
+  id               String  @id @default(cuid())
+  email            String  @unique
+  password         String
+  name             String?
+  avatar           String?
+  // Role do usuário (user|admin|super_admin). RBAC completo pode evoluir depois.
+  role             String  @default("user")
+  // Plano atual (ex: starter/basic/pro/studio/enterprise). Trial usa sufixo "_trial" (ex: starter_trial).
+  plan             String  @default("starter_trial")
   stripeCustomerId String? @unique
   
-  projects  Project[]
-  sessions  Session[]
+  // OAuth fields
+  oauthProvider    String?
+  oauthProviderId  String?
   
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  // Email verification
+  emailVerified          Boolean   @default(false)
+  verificationToken      String?
+  verificationTokenExpiry DateTime?
   
+  // Password reset
+  resetToken             String?
+  resetTokenExpiry       DateTime?
+
+  projects Project[]
+  sessions Session[]
+
+  chatThreads ChatThread[]
+  copilotWorkflows CopilotWorkflow[]
+
+  usageBuckets      UsageBucket[]
+  concurrencyLeases ConcurrencyLease[]
+
+  creditLedgerEntries CreditLedgerEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([email])
+  @@index([role])
 }
 
 model Session {
@@ -37,9 +63,9 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
   expiresAt DateTime
-  
+
   createdAt DateTime @default(now())
-  
+
   @@index([userId])
   @@index([token])
 }
@@ -49,20 +75,101 @@ model Session {
 // ============================================
 
 model Project {
-  id        String   @id @default(cuid())
-  name      String
-  template  String?  // platformer2d, fps3d, etc
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  files     File[]
-  assets    Asset[]
-  
+  id       String  @id @default(cuid())
+  name     String
+  template String? // platformer2d, fps3d, etc
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  files  File[]
+  assets Asset[]
+
+  chatThreads ChatThread[]
+  copilotWorkflows CopilotWorkflow[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([userId])
+  @@index([createdAt])
+}
+
+// ============================================
+// CHAT (PERSISTENTE POR CONTA)
+// ============================================
+
+model ChatThread {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Opcional: amarra a um projeto (threads por workspace).
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  title     String  @default("Chat")
+  archived  Boolean @default(false)
+
+  messages ChatMessage[]
+
+  workflow CopilotWorkflow?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([updatedAt])
+}
+
+// ============================================
+// COPILOT WORKFLOWS (FLUXO DE TRABALHO PERSISTENTE)
+// ============================================
+
+model CopilotWorkflow {
+  id        String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Workflow pode estar ligado a um chat (1:1 opcional).
+  chatThreadId String? @unique
+  chatThread   ChatThread? @relation(fields: [chatThreadId], references: [id], onDelete: SetNull)
+
+  title   String  @default("Workflow")
+  archived Boolean @default(false)
+
+  // Snapshot de contexto (seleções, live preview, arquivos abertos, etc)
+  context Json?
+  contextVersion Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastUsedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([archived])
+  @@index([lastUsedAt])
+}
+
+model ChatMessage {
+  id       String @id @default(cuid())
+  threadId String
+  thread   ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  role    String // user|assistant|system
+  content String @db.Text
+  model   String?
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([threadId])
   @@index([createdAt])
 }
 
@@ -71,17 +178,17 @@ model Project {
 // ============================================
 
 model File {
-  id        String   @id @default(cuid())
-  path      String   // /src/main.js
-  content   String   @db.Text
-  language  String?  // javascript, typescript, python, etc
-  
+  id       String  @id @default(cuid())
+  path     String // /src/main.js
+  content  String  @db.Text
+  language String? // javascript, typescript, python, etc
+
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([projectId, path])
   @@index([projectId])
 }
@@ -91,18 +198,18 @@ model File {
 // ============================================
 
 model Asset {
-  id        String   @id @default(cuid())
-  name      String
-  type      String   // image, 3d, audio, video
-  url       String   // S3 or CDN URL
-  size      Int      // bytes
-  mimeType  String?
-  
+  id       String  @id @default(cuid())
+  name     String
+  type     String // image, 3d, audio, video
+  url      String // S3 or CDN URL
+  size     Int // bytes
+  mimeType String?
+
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
-  
+
   @@index([projectId])
   @@index([type])
 }
@@ -112,32 +219,54 @@ model Asset {
 // ============================================
 
 model Subscription {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  stripeSubscriptionId String @unique
-  stripePriceId   String
-  status          String   // active, canceled, past_due
-  currentPeriodEnd DateTime
-  
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  stripeSubscriptionId String   @unique
+  stripePriceId        String
+  status               String // active, canceled, past_due
+  currentPeriodEnd     DateTime
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([status])
 }
 
 model Payment {
-  id              String   @id @default(cuid())
+  id              String @id @default(cuid())
   userId          String
-  stripePaymentId String   @unique
-  amount          Int      // cents
-  currency        String   @default("usd")
-  status          String   // succeeded, failed, pending
-  
+  stripePaymentId String @unique
+  amount          Int // cents
+  currency        String @default("usd")
+  status          String // succeeded, failed, pending
+
   createdAt DateTime @default(now())
-  
+
   @@index([userId])
   @@index([status])
+}
+
+// ============================================
+// WALLET / CREDITS LEDGER
+// ============================================
+
+model CreditLedgerEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Quantidade de créditos (inteiro). Negativo = débito, positivo = crédito.
+  amount    Int
+  currency  String   @default("credits")
+  entryType String
+  reference String?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entryType])
 }
 
 // ============================================
@@ -145,20 +274,35 @@ model Payment {
 // ============================================
 
 model MarketplaceItem {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
   title       String
-  description String   @db.Text
-  price       Int      // cents, 0 for free
-  category    String   // template, asset, plugin
+  description String @db.Text
+  price       Int // cents, 0 for free
+  category    String // template, asset, plugin
   authorId    String
-  downloads   Int      @default(0)
-  rating      Float    @default(0)
-  
+  downloads   Int    @default(0)
+  rating      Float  @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([category])
   @@index([authorId])
+}
+
+model InstalledExtension {
+  id          String   @id @default(cuid())
+  userId      String
+  extensionId String
+  projectId   String?
+
+  // Mantém sem FK para Project por enquanto (podemos evoluir depois)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, extensionId])
+  @@index([userId])
+  @@index([extensionId])
+  @@index([projectId])
 }
 
 // ============================================
@@ -166,15 +310,185 @@ model MarketplaceItem {
 // ============================================
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  action    String   // login, create_project, delete_file, etc
-  resource  String?  // project_id, file_id, etc
-  metadata  Json?
-  
+  id       String  @id @default(cuid())
+  userId   String?
+  action   String // login, create_project, delete_file, etc
+  resource String? // project_id, file_id, etc
+  metadata Json?
+
   createdAt DateTime @default(now())
-  
+
   @@index([userId])
   @@index([action])
+  @@index([createdAt])
+}
+
+// ============================================
+// METERING / RATE LIMITING (PER USER)
+// ============================================
+
+model UsageBucket {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Janela de agregação (hour/day/month) em UTC
+  window      String
+  windowStart DateTime
+  windowEnd   DateTime
+
+  requests Int @default(0)
+  tokens   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, window, windowStart])
+  @@index([userId, window, windowStart])
+  @@index([window, windowStart])
+}
+
+model ConcurrencyLease {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identifica a operação/rota que adquiriu o lease (diagnóstico)
+  key       String
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id       String  @id @default(cuid())
+  userId   String
+  type     String  // info, success, warning, error, system
+  title    String
+  message  String?
+  data     Json?
+  read     Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+// ============================================
+// FEATURE FLAGS
+// ============================================
+
+model FeatureFlag {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  name        String
+  description String?
+  type        String  @default("boolean") // boolean, percentage, variant, rule_based
+  enabled     Boolean @default(true)
+  
+  // Configuração por tipo
+  percentage   Int?
+  variants     Json?
+  rules        Json?
+  environments Json?
+  
+  // Targeting
+  allowedUsers String[]
+  blockedUsers String[]
+  
+  // Metadata
+  tags      String[]
+  createdBy String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([enabled])
+}
+
+// ============================================
+// BACKUPS
+// ============================================
+
+model Backup {
+  id          String  @id @default(cuid())
+  projectId   String
+  type        String  @default("manual") // manual, auto, scheduled
+  description String?
+  
+  // Snapshot info
+  filesCount  Int     @default(0)
+  assetsCount Int     @default(0)
+  size        Int     @default(0) // bytes
+  storageUrl  String? // URL do backup no storage
+  
+  // Status
+  status      String  @default("pending") // pending, completed, failed
+  
+  createdBy   String
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  @@index([projectId])
+  @@index([createdBy])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// COLLABORATION ROOMS
+// ============================================
+
+model CollaborationRoom {
+  id              String   @id @default(cuid())
+  name            String
+  type            String   @default("project") // project, file, voice
+  projectId       String?
+  fileId          String?
+  maxParticipants Int?
+  
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([createdBy])
+}
+
+// ============================================
+// ANALYTICS EVENTS
+// ============================================
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  sessionId  String?
+  event      String
+  category   String?
+  properties Json?
+  
+  // Context
+  projectId  String?
+  url        String?
+  userAgent  String?
+  ip         String?
+  
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([event])
+  @@index([category])
+  @@index([projectId])
   @@index([createdAt])
 }

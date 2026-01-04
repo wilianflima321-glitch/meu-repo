@@ -1,3 +1,3 @@
-// Auto-generated re-export stub: forward to compiled lib to satisfy imports during incremental dev
-// The compiled lib contains the canonical d.ts for this service
-export * from '../../lib/browser/llm-provider-service';
+// Re-export the browser implementation as the canonical service.
+// The ai-ide package keeps the concrete provider service in the browser layer.
+export * from '../browser/llm-provider-service';

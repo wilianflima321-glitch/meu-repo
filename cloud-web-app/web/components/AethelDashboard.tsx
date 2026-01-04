@@ -5,6 +5,7 @@ import { AethelAPIClient, APIError } from '@/lib/api'
 import type {
   BillingPlan,
   ChatMessage,
+  CopilotWorkflowSummary,
   ConnectivityResponse,
   PurchaseIntentResponse,
   TransferResponse,
@@ -387,6 +388,19 @@ const WALLET_KEY = 'wallet::summary'
 const CURRENT_PLAN_KEY = 'billing::current-plan'
 const CREDITS_KEY = 'billing::credits'
 
+const CHAT_THREAD_KEY_BASE = 'chat::activeThreadId'
+const COPILOT_WORKFLOW_KEY_BASE = 'copilot::activeWorkflowId'
+
+function getScopedKeys(projectId: string | null) {
+  const suffix = projectId ? `::${projectId}` : ''
+  return {
+    chatThreadKey: `${CHAT_THREAD_KEY_BASE}${suffix}`,
+    workflowKey: `${COPILOT_WORKFLOW_KEY_BASE}${suffix}`,
+    legacyChatThreadKey: CHAT_THREAD_KEY_BASE,
+    legacyWorkflowKey: COPILOT_WORKFLOW_KEY_BASE,
+  }
+}
+
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
 
@@ -414,6 +428,13 @@ export default function AethelDashboard() {
     }
     return resolveStoredChatHistory(window.localStorage.getItem(STORAGE_KEYS.chatHistory))
   })
+  const [activeChatThreadId, setActiveChatThreadId] = useState<string | null>(null)
+  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null)
+  const [copilotProjectId, setCopilotProjectId] = useState<string | null>(null)
+  const [copilotWorkflows, setCopilotWorkflows] = useState<CopilotWorkflowSummary[]>([])
+  const [copilotWorkflowsLoading, setCopilotWorkflowsLoading] = useState(false)
+  const [connectFromWorkflowId, setConnectFromWorkflowId] = useState<string>('')
+  const [connectBusy, setConnectBusy] = useState(false)
   const [chatMessage, setChatMessage] = useState('')
   const [livePreviewSuggestions, setLivePreviewSuggestions] = useState<string[]>([])
   const [settings, setSettings] = useState<DashboardSettings>(() => {
@@ -445,6 +466,13 @@ export default function AethelDashboard() {
   const [hasToken, setHasToken] = useState(false)
   const [authReady, setAuthReady] = useState(false)
   const [authError, setAuthError] = useState<Error | null>(null)
+
+  // Show toast notification (must be declared before callbacks that use it)
+  const showToastMessage = useCallback((message: string, type: ToastType = 'info') => {
+    setShowToast({ message, type })
+    const timeoutId = window.setTimeout(() => setShowToast(null), 3000)
+    return () => window.clearTimeout(timeoutId)
+  }, [])
 
   const walletKey = hasToken ? WALLET_KEY : null
   const currentPlanKey = hasToken ? CURRENT_PLAN_KEY : null
@@ -551,6 +579,331 @@ export default function AethelDashboard() {
     }
   }, [])
 
+  // Persistência do Chat por conta: restaura a última thread e salva mensagens no backend.
+  useEffect(() => {
+    if (!authReady || !hasToken) return
+    if (typeof window === 'undefined') return
+
+    let cancelled = false
+
+    void (async () => {
+      try {
+        const ctx = await AethelAPIClient.getCopilotContext().catch(() => ({ projectId: null as any }))
+        const projectId = typeof (ctx as any)?.projectId === 'string' ? String((ctx as any).projectId) : null
+        setCopilotProjectId(projectId)
+        const keys = getScopedKeys(projectId)
+
+        const refreshWorkflows = async () => {
+          setCopilotWorkflowsLoading(true)
+          try {
+            const workflows = await AethelAPIClient.listCopilotWorkflows().catch(() => ({ workflows: [] as any[] }))
+            const list = Array.isArray((workflows as any).workflows) ? ((workflows as any).workflows as CopilotWorkflowSummary[]) : []
+            setCopilotWorkflows(list)
+            return list
+          } finally {
+            setCopilotWorkflowsLoading(false)
+          }
+        }
+
+        const storedWorkflowId = window.localStorage.getItem(keys.workflowKey) || window.localStorage.getItem(keys.legacyWorkflowKey)
+        if (storedWorkflowId) {
+          const wf = await AethelAPIClient.getCopilotWorkflow(storedWorkflowId).catch(() => null)
+          const workflow = (wf as any)?.workflow
+          if (workflow?.id) {
+            setActiveWorkflowId(String(workflow.id))
+            window.localStorage.setItem(keys.workflowKey, String(workflow.id))
+            if (workflow.chatThreadId) {
+              window.localStorage.setItem(keys.chatThreadKey, String(workflow.chatThreadId))
+              setActiveChatThreadId(String(workflow.chatThreadId))
+            }
+          }
+        }
+
+        await refreshWorkflows().catch(() => null)
+
+        const storedThreadId = window.localStorage.getItem(keys.chatThreadKey) || window.localStorage.getItem(keys.legacyChatThreadKey)
+        const list = await AethelAPIClient.listChatThreads().catch(() => ({ threads: [] as any[] }))
+        const threads = Array.isArray((list as any).threads) ? (list as any).threads : []
+
+        let threadId: string | null = storedThreadId
+        if (threadId && !threads.find((t: any) => t?.id === threadId)) {
+          threadId = null
+        }
+        if (!threadId && threads.length > 0 && typeof threads[0]?.id === 'string') {
+          threadId = threads[0].id
+        }
+        if (!threadId) {
+          const created = await AethelAPIClient.createChatThread({ title: 'Chat' })
+          threadId = (created as any)?.thread?.id ?? null
+        }
+
+        if (!threadId) return
+        if (cancelled) return
+
+        window.localStorage.setItem(keys.chatThreadKey, threadId)
+        setActiveChatThreadId(threadId)
+
+        // Garante workflow persistente associado a essa thread.
+        if (!window.localStorage.getItem(keys.workflowKey) && !window.localStorage.getItem(keys.legacyWorkflowKey)) {
+          const createdWf = await AethelAPIClient.createCopilotWorkflow({
+            title: 'Workflow',
+            chatThreadId: threadId,
+          }).catch(() => null)
+          const wfId = (createdWf as any)?.workflow?.id
+          if (wfId) {
+            window.localStorage.setItem(keys.workflowKey, String(wfId))
+            setActiveWorkflowId(String(wfId))
+          }
+        }
+
+        const data = await AethelAPIClient.getChatMessages(threadId)
+        const raw = Array.isArray((data as any)?.messages) ? (data as any).messages : []
+        const restored: ChatMessage[] = raw
+          .filter((m: any) => m && typeof m.content === 'string')
+          .map((m: any) => ({ role: (m.role as any) || 'user', content: m.content }))
+
+        if (cancelled) return
+        if (restored.length) {
+          setChatHistory(restored)
+        }
+      } catch (e) {
+        console.warn('Chat persistence unavailable', e)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [authReady, hasToken])
+
+  const loadChatHistoryForThread = useCallback(async (threadId: string) => {
+    const data = await AethelAPIClient.getChatMessages(threadId)
+    const raw = Array.isArray((data as any)?.messages) ? (data as any).messages : []
+    const restored: ChatMessage[] = raw
+      .filter((m: any) => m && typeof m.content === 'string')
+      .map((m: any) => ({ role: (m.role as any) || 'user', content: m.content }))
+    setChatHistory(restored)
+  }, [])
+
+  const refreshCopilotWorkflows = useCallback(async () => {
+    setCopilotWorkflowsLoading(true)
+    try {
+      const res = await AethelAPIClient.listCopilotWorkflows().catch(() => ({ workflows: [] as any[] }))
+      const list = Array.isArray((res as any).workflows) ? ((res as any).workflows as CopilotWorkflowSummary[]) : []
+      setCopilotWorkflows(list)
+      return list
+    } finally {
+      setCopilotWorkflowsLoading(false)
+    }
+  }, [])
+
+  const switchCopilotWorkflow = useCallback(async (workflowId: string) => {
+    const got = await AethelAPIClient.getCopilotWorkflow(workflowId)
+    const wf = (got as any)?.workflow as CopilotWorkflowSummary | undefined
+    if (!wf?.id) return
+
+    const projectId = wf.projectId ? String(wf.projectId) : null
+    setCopilotProjectId(projectId)
+    const keys = getScopedKeys(projectId)
+
+    setActiveWorkflowId(String(wf.id))
+    if (typeof window !== 'undefined') window.localStorage.setItem(keys.workflowKey, String(wf.id))
+
+    let threadId: string | null = wf.chatThreadId ? String(wf.chatThreadId) : null
+    if (!threadId) {
+      const created = await AethelAPIClient.createChatThread({ title: wf.title || 'Chat' })
+      threadId = (created as any)?.thread?.id ?? null
+      if (threadId) {
+        await AethelAPIClient.updateCopilotWorkflow(String(wf.id), { chatThreadId: threadId }).catch(() => null)
+        await refreshCopilotWorkflows().catch(() => null)
+      }
+    }
+
+    if (!threadId) return
+    setActiveChatThreadId(threadId)
+    if (typeof window !== 'undefined') window.localStorage.setItem(keys.chatThreadKey, threadId)
+
+    await loadChatHistoryForThread(threadId).catch(() => null)
+  }, [loadChatHistoryForThread, refreshCopilotWorkflows])
+
+  const createCopilotWorkflow = useCallback(async () => {
+    const title = `Workflow ${new Date().toLocaleString()}`
+    const createdThread = await AethelAPIClient.createChatThread({ title, ...(copilotProjectId ? { projectId: copilotProjectId } : {}) })
+    const threadId = (createdThread as any)?.thread?.id as string | undefined
+    const createdWf = await AethelAPIClient.createCopilotWorkflow({
+      title,
+      ...(copilotProjectId ? { projectId: copilotProjectId } : {}),
+      ...(threadId ? { chatThreadId: threadId } : {}),
+    }).catch(() => null)
+    const wfId = (createdWf as any)?.workflow?.id as string | undefined
+    await refreshCopilotWorkflows().catch(() => null)
+    if (wfId) await switchCopilotWorkflow(String(wfId)).catch(() => null)
+  }, [copilotProjectId, refreshCopilotWorkflows, switchCopilotWorkflow])
+
+  const renameCopilotWorkflow = useCallback(async () => {
+    if (!activeWorkflowId) return
+    const current = copilotWorkflows.find((w) => String(w.id) === String(activeWorkflowId))
+    const nextTitle = window.prompt('Novo nome do trabalho (workflow):', current?.title || 'Workflow')
+    if (!nextTitle || !nextTitle.trim()) return
+    await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { title: nextTitle.trim() }).catch(() => null)
+    await refreshCopilotWorkflows().catch(() => null)
+    showToastMessage('Trabalho renomeado.', 'success')
+  }, [activeWorkflowId, copilotWorkflows, refreshCopilotWorkflows, showToastMessage])
+
+  const archiveCopilotWorkflow = useCallback(async () => {
+    if (!activeWorkflowId) return
+    const ok = window.confirm('Arquivar este trabalho (workflow)?')
+    if (!ok) return
+    await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { archived: true }).catch(() => null)
+    const list = await refreshCopilotWorkflows().catch(() => [])
+    const next = Array.isArray(list) ? (list as any[])[0]?.id : (copilotWorkflows[0]?.id ?? null)
+    if (next) await switchCopilotWorkflow(String(next)).catch(() => null)
+    else await createCopilotWorkflow().catch(() => null)
+    showToastMessage('Trabalho arquivado.', 'info')
+  }, [activeWorkflowId, copilotWorkflows, createCopilotWorkflow, refreshCopilotWorkflows, switchCopilotWorkflow, showToastMessage])
+
+  const copyHistoryFromWorkflow = useCallback(async () => {
+    if (!activeWorkflowId) return
+    if (!connectFromWorkflowId) {
+      showToastMessage('Selecione um trabalho para copiar o histórico.', 'error')
+      return
+    }
+
+    if (connectBusy) return
+    setConnectBusy(true)
+
+    try {
+      showToastMessage('Copiando histórico (server-side)…', 'info')
+      const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null)
+      const source = (sourceRes as any)?.workflow as any
+      const sourceThreadId = source?.chatThreadId ? String(source.chatThreadId) : null
+      if (!sourceThreadId) {
+        showToastMessage('Esse trabalho não tem histórico (thread) para copiar.', 'error')
+        return
+      }
+
+      const current = copilotWorkflows.find((w) => String(w.id) === String(activeWorkflowId))
+      const title = `${current?.title || 'Workflow'} (cópia)`
+
+      const created = await AethelAPIClient.cloneChatThread({ sourceThreadId, title }).catch(() => null)
+      const newThreadId = (created as any)?.thread?.id ? String((created as any).thread.id) : null
+      if (!newThreadId) {
+        showToastMessage('Falha ao clonar o histórico.', 'error')
+        return
+      }
+
+      await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { chatThreadId: newThreadId }).catch(() => null)
+      await refreshCopilotWorkflows().catch(() => null)
+      setConnectFromWorkflowId('')
+      await switchCopilotWorkflow(activeWorkflowId).catch(() => null)
+      showToastMessage('Histórico copiado para este trabalho.', 'success')
+    } finally {
+      setConnectBusy(false)
+    }
+  }, [activeWorkflowId, connectBusy, connectFromWorkflowId, copilotWorkflows, refreshCopilotWorkflows, switchCopilotWorkflow, showToastMessage])
+
+  const mergeFromWorkflow = useCallback(async () => {
+    if (!activeWorkflowId) return
+    if (!connectFromWorkflowId) {
+      showToastMessage('Selecione um trabalho para mesclar.', 'error')
+      return
+    }
+
+    if (connectBusy) return
+    setConnectBusy(true)
+
+    try {
+      showToastMessage('Mesclando trabalhos (server-side)…', 'info')
+
+      const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null)
+      const source = (sourceRes as any)?.workflow as any
+      const sourceThreadId = source?.chatThreadId ? String(source.chatThreadId) : null
+      if (!sourceThreadId) {
+        showToastMessage('Esse trabalho não tem histórico (thread) para mesclar.', 'error')
+        return
+      }
+
+      let targetThreadId: string | null = activeChatThreadId
+      if (!targetThreadId) {
+        const current = copilotWorkflows.find((w) => String(w.id) === String(activeWorkflowId))
+        const created = await AethelAPIClient.createChatThread({
+          title: current?.title || 'Chat',
+          ...(copilotProjectId ? { projectId: copilotProjectId } : {}),
+        })
+        targetThreadId = (created as any)?.thread?.id ?? null
+        if (targetThreadId) {
+          await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { chatThreadId: targetThreadId }).catch(() => null)
+        }
+      }
+
+      if (!targetThreadId) {
+        showToastMessage('Não foi possível determinar a thread de destino.', 'error')
+        return
+      }
+
+      await AethelAPIClient.mergeChatThreads({ sourceThreadId, targetThreadId }).catch(() => null)
+
+      const ctx = source?.context
+      if (ctx && typeof ctx === 'object') {
+        const patch: any = { workflowId: activeWorkflowId }
+        if ((ctx as any).livePreview) patch.livePreview = (ctx as any).livePreview
+        if ((ctx as any).editor) patch.editor = (ctx as any).editor
+        if (Array.isArray((ctx as any).openFiles)) patch.openFiles = (ctx as any).openFiles
+        await fetch('/api/copilot/context', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patch),
+        }).catch(() => null)
+      }
+
+      await AethelAPIClient.updateCopilotWorkflow(connectFromWorkflowId, { archived: true }).catch(() => null)
+      await refreshCopilotWorkflows().catch(() => null)
+      setConnectFromWorkflowId('')
+      setActiveChatThreadId(targetThreadId)
+      await loadChatHistoryForThread(targetThreadId).catch(() => null)
+      showToastMessage('Trabalhos mesclados. O trabalho de origem foi arquivado.', 'success')
+    } finally {
+      setConnectBusy(false)
+    }
+  }, [activeChatThreadId, activeWorkflowId, connectBusy, connectFromWorkflowId, copilotProjectId, copilotWorkflows, loadChatHistoryForThread, refreshCopilotWorkflows, showToastMessage])
+
+  const importContextFromWorkflow = useCallback(async () => {
+    if (!activeWorkflowId) return
+    if (!connectFromWorkflowId) {
+      showToastMessage('Selecione um trabalho para importar o contexto.', 'error')
+      return
+    }
+
+    const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null)
+    const source = (sourceRes as any)?.workflow as any
+    const ctx = source?.context
+    if (!ctx || typeof ctx !== 'object') {
+      showToastMessage('Esse trabalho não tem contexto salvo para importar.', 'error')
+      return
+    }
+
+    const patch: any = { workflowId: activeWorkflowId }
+    if ((ctx as any).livePreview) patch.livePreview = (ctx as any).livePreview
+    if ((ctx as any).editor) patch.editor = (ctx as any).editor
+    if (Array.isArray((ctx as any).openFiles)) patch.openFiles = (ctx as any).openFiles
+
+    if (connectBusy) return
+    setConnectBusy(true)
+    try {
+      showToastMessage('Importando contexto…', 'info')
+      await fetch('/api/copilot/context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      }).catch(() => null)
+
+      showToastMessage('Contexto importado para o trabalho atual.', 'success')
+      setConnectFromWorkflowId('')
+    } finally {
+      setConnectBusy(false)
+    }
+  }, [activeWorkflowId, connectBusy, connectFromWorkflowId, showToastMessage])
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return
@@ -579,13 +932,6 @@ export default function AethelDashboard() {
     })
   }, [])
 
-  // Show toast notification
-  const showToastMessage = useCallback((message: string, type: ToastType = 'info') => {
-    setShowToast({ message, type })
-    const timeoutId = window.setTimeout(() => setShowToast(null), 3000)
-    return () => window.clearTimeout(timeoutId)
-  }, [])
-
   // Create new session
   const createNewSession = useCallback(() => {
     setSessionHistory(prev => {
@@ -605,7 +951,34 @@ export default function AethelDashboard() {
     setLivePreviewSuggestions([])
     setActiveTab('ai-chat')
     showToastMessage('New session created!', 'success')
-  }, [settings, showToastMessage])
+
+    // Também cria uma nova thread persistida para a conta.
+    if (typeof window !== 'undefined' && isAuthenticated()) {
+      void (async () => {
+        try {
+          const created = await AethelAPIClient.createChatThread({ title: `Session ${new Date().toLocaleString()}` })
+          const threadId = (created as any)?.thread?.id
+          if (typeof threadId === 'string' && threadId) {
+            const keys = getScopedKeys(copilotProjectId)
+            window.localStorage.setItem(keys.chatThreadKey, threadId)
+            setActiveChatThreadId(threadId)
+
+            const createdWf = await AethelAPIClient.createCopilotWorkflow({
+              title: `Workflow ${new Date().toLocaleString()}`,
+              chatThreadId: threadId,
+            }).catch(() => null)
+            const wfId = (createdWf as any)?.workflow?.id
+            if (wfId) {
+              window.localStorage.setItem(keys.workflowKey, String(wfId))
+              setActiveWorkflowId(String(wfId))
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to create chat thread', e)
+        }
+      })()
+    }
+  }, [copilotProjectId, settings, showToastMessage])
 
   // Toggle favorite on session
   const toggleFavorite = (sessionId: string) => {
@@ -748,6 +1121,20 @@ export default function AethelDashboard() {
     const currentMessage = chatMessage
     setChatMessage('')
 
+    // Persistência: salva mensagem do usuário na thread ativa.
+    const threadId = activeChatThreadId
+    if (threadId) {
+      void AethelAPIClient.appendChatMessage(threadId, { role: 'user', content: userMessage.content, model: 'openai:gpt-4' })
+        .then(async () => {
+          // Se for o primeiro input da thread, tenta melhorar o título.
+          if (chatHistory.length === 0) {
+            const title = `Chat: ${String(userMessage.content).slice(0, 60)}`
+            await AethelAPIClient.updateChatThread(threadId, { title }).catch(() => null)
+          }
+        })
+        .catch(() => null)
+    }
+
     // Add streaming AI response placeholder
     const aiMessageId = Date.now().toString()
     const aiMessage: ChatMessage = { role: 'assistant', content: '' }
@@ -766,6 +1153,11 @@ export default function AethelDashboard() {
         setChatHistory(prev =>
           prev.map(msg => (msg === aiMessage ? { ...msg, content: accumulatedContent } : msg))
         )
+      }
+
+      // Persistência: salva mensagem final do assistente.
+      if (threadId) {
+        void AethelAPIClient.appendChatMessage(threadId, { role: 'assistant', content: accumulatedContent, model: 'openai:gpt-4' }).catch(() => null)
       }
 
       setAiActivity('AI responded')
@@ -818,13 +1210,63 @@ export default function AethelDashboard() {
   const handleMagicWandSelect = async (position: THREE.Vector3) => {
     setAiActivity('Analyzing selected area...')
     setIsGenerating(true)
-    // Simulate AI processing
-    setTimeout(() => {
-      const newSuggestion = `Improve lighting at position (${position.x.toFixed(1)}, ${position.y.toFixed(1)}, ${position.z.toFixed(1)})`
-      setLivePreviewSuggestions(prev => [...prev, newSuggestion])
+
+    try {
+      // Atualiza contexto do Copilot (snapshot mínimo do Live Preview).
+      // MVP: em memória no server; sem isso a IA perde precisão.
+      await fetch('/api/copilot/context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workflowId: activeWorkflowId,
+          livePreview: {
+            selectedPoint: { x: position.x, y: position.y, z: position.z },
+          },
+        }),
+      })
+    } catch (e) {
+      // Não bloqueia o fluxo de sugestão; apenas mantém real-or-fail.
+      console.warn('Failed to update copilot context', e)
+    }
+
+    const prompt =
+      `Live Preview context:\n` +
+      `Selected point: x=${position.x.toFixed(3)}, y=${position.y.toFixed(3)}, z=${position.z.toFixed(3)}\n\n` +
+      `Task: Suggest ONE concrete improvement for the scene at that point. ` +
+      `Return a single short sentence. No markdown. No bullet lists.`
+
+    try {
+      const messages: ChatMessage[] = [
+        {
+          role: 'system',
+          content:
+            'You are Aethel Copilot for Live Preview. Be precise, minimal, and avoid guessing. If you lack info, ask one question.',
+        },
+        { role: 'user', content: prompt },
+      ]
+
+      const data = await AethelAPIClient.chat({ model: 'openai:gpt-4', messages })
+      const content =
+        data?.choices?.[0]?.message?.content ||
+        data?.message?.content ||
+        ''
+
+      const suggestion = String(content).trim()
+      if (!suggestion) {
+        setAiActivity('No suggestion returned')
+        showToastMessage('AI não retornou sugestão para a área selecionada.', 'info')
+        return
+      }
+
+      setLivePreviewSuggestions(prev => [...prev, suggestion])
       setAiActivity('Generated suggestion for selected area')
+    } catch (error) {
+      console.error('Error generating live preview suggestion:', error)
+      setAiActivity('Suggestion unavailable')
+      showToastMessage('Sugestão indisponível (IA não configurada ou sem créditos).', 'error')
+    } finally {
       setIsGenerating(false)
-    }, 2000)
+    }
   }
 
   const handleSendSuggestion = async (suggestion: string) => {
@@ -856,8 +1298,8 @@ export default function AethelDashboard() {
     handleSendSuggestion(`Accept and apply: ${suggestion}`)
   }
 
-  const walletTransactions = walletData?.transactions ?? []
-  const connectivityServices = connectivityData?.services ?? []
+  const walletTransactions = useMemo(() => walletData?.transactions ?? [], [walletData?.transactions])
+  const connectivityServices = useMemo(() => connectivityData?.services ?? [], [connectivityData?.services])
   const lastWalletUpdate = walletTransactions.length > 0 ? walletTransactions[walletTransactions.length - 1].created_at : null
 
   const creditEntries = useMemo(() => walletTransactions.filter(entry => entry.entry_type === 'credit'), [walletTransactions])
@@ -920,9 +1362,9 @@ export default function AethelDashboard() {
 
     let pending = 0
     for (const entry of creditEntries) {
-      const rawStatus = entry.metadata['status'] as unknown
+      const rawStatus = entry.metadata?.['status'] as unknown
       const status = typeof rawStatus === 'string' ? rawStatus.toLowerCase() : ''
-      const rawSettled = entry.metadata['settled'] as unknown
+      const rawSettled = entry.metadata?.['settled'] as unknown
       const settledFlag = typeof rawSettled === 'boolean' ? rawSettled : undefined
       if (status === 'pending' || status === 'awaiting_settlement' || settledFlag === false) {
         pending += entry.amount
@@ -1000,9 +1442,9 @@ export default function AethelDashboard() {
       return
     }
     const amountInt = Number.parseInt(transferForm.amount, 10)
-    const targetId = Number.parseInt(transferForm.targetUserId, 10)
-    if (!Number.isFinite(amountInt) || amountInt <= 0 || !Number.isInteger(targetId)) {
-      setWalletActionError('Informe destinatário e valor válidos.')
+    const target = transferForm.targetUserId.trim()
+    if (!Number.isFinite(amountInt) || amountInt <= 0 || !target) {
+      setWalletActionError('Informe destinatário (userId/email) e valor válidos.')
       return
     }
     setWalletSubmitting(true)
@@ -1010,7 +1452,7 @@ export default function AethelDashboard() {
     setWalletActionError(null)
     try {
       const receipt = await AethelAPIClient.transferCredits({
-        target_user_id: targetId,
+        target_user_id: target,
         amount: amountInt,
         currency: transferForm.currency || 'credits',
         reference: transferForm.reference || undefined,
@@ -1051,6 +1493,11 @@ export default function AethelDashboard() {
     try {
       const response = await AethelAPIClient.subscribe(planId)
       setSubscribeMessage(`Plano atualizado: ${response.status}.`)
+
+      if (response.checkoutUrl) {
+        window.location.assign(response.checkoutUrl)
+        return
+      }
       if (currentPlanKey) {
         await mutate(currentPlanKey)
       }
@@ -1452,7 +1899,7 @@ export default function AethelDashboard() {
                               </div>
                               <div className="aethel-flex aethel-justify-between aethel-items-center aethel-mt-1">
                                 <span className="aethel-text-xs aethel-text-slate-400">
-                                  Saldo: {entry.balance_after.toLocaleString()} {entry.currency}
+                                  Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
                                 </span>
                                 <span className="aethel-text-xs aethel-text-slate-500">
                                   {new Date(entry.created_at).toLocaleString()}
@@ -1480,7 +1927,7 @@ export default function AethelDashboard() {
                           ? 'aethel-border-amber-500/30 aethel-bg-amber-500/20 aethel-text-amber-300'
                           : 'aethel-border-red-500/30 aethel-bg-red-500/20 aethel-text-red-300'
                       }`}>
-                        {connectivityData.overall_status.toUpperCase()}
+                        {(connectivityData.overall_status ?? 'unknown').toUpperCase()}
                       </span>
                     )}
                   </div>
@@ -1613,21 +2060,103 @@ export default function AethelDashboard() {
                     onClick={() => setChatMode('chat')}
                     className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'chat' ? 'aethel-bg-indigo-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
                   >
-                    💬 Chat
+                    Chat
                   </button>
                   <button
                     onClick={() => setChatMode('agent')}
                     className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'agent' ? 'aethel-bg-indigo-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
                   >
-                    🤖 Agent Mode
+                    Modo agente
                   </button>
                   <button
                     onClick={() => setChatMode('canvas')}
                     className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'canvas' ? 'aethel-bg-indigo-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
                   >
-                    🎨 Canvas
+                    Canvas
                   </button>
                 </div>
+              </div>
+
+              <div className="aethel-flex aethel-items-center aethel-gap-2 aethel-mb-4">
+                <span className="aethel-text-sm aethel-text-slate-400">Trabalho</span>
+                <select
+                  value={activeWorkflowId ?? ''}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    if (v === '__new__') {
+                      void createCopilotWorkflow()
+                      return
+                    }
+                    if (v) void switchCopilotWorkflow(v)
+                  }}
+                  className="aethel-input"
+                  disabled={copilotWorkflowsLoading || connectBusy}
+                >
+                  {copilotWorkflows.map((wf) => (
+                    <option key={String(wf.id)} value={String(wf.id)}>
+                      {wf.title || 'Workflow'}
+                    </option>
+                  ))}
+                  <option value="__new__">+ Novo trabalho</option>
+                </select>
+
+                <button
+                  onClick={() => void renameCopilotWorkflow()}
+                  className="aethel-button aethel-button-secondary"
+                  disabled={!activeWorkflowId}
+                >
+                  Renomear
+                </button>
+                <button
+                  onClick={() => void archiveCopilotWorkflow()}
+                  className="aethel-button aethel-button-secondary"
+                  disabled={!activeWorkflowId}
+                >
+                  Arquivar
+                </button>
+
+                <select
+                  value={connectFromWorkflowId}
+                  onChange={(e) => setConnectFromWorkflowId(e.target.value)}
+                  className="aethel-input"
+                  disabled={copilotWorkflowsLoading || connectBusy}
+                >
+                  <option value="">Conectar…</option>
+                  {copilotWorkflows
+                    .filter((w) => String(w.id) !== String(activeWorkflowId))
+                    .map((wf) => (
+                      <option key={String(wf.id)} value={String(wf.id)}>
+                        {wf.title || 'Workflow'}
+                      </option>
+                    ))}
+                </select>
+
+                <button
+                  onClick={() => void copyHistoryFromWorkflow()}
+                  className="aethel-button aethel-button-secondary"
+                  disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
+                  title="Copia o histórico do trabalho selecionado para o trabalho atual (clona a thread)"
+                >
+                  {connectBusy ? 'Processando…' : 'Copiar histórico'}
+                </button>
+
+                <button
+                  onClick={() => void importContextFromWorkflow()}
+                  className="aethel-button aethel-button-secondary"
+                  disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
+                  title="Importa contexto (livePreview/editor/openFiles) do trabalho selecionado"
+                >
+                  {connectBusy ? 'Processando…' : 'Importar contexto'}
+                </button>
+
+                <button
+                  onClick={() => void mergeFromWorkflow()}
+                  className="aethel-button aethel-button-secondary"
+                  disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
+                  title="Mescla histórico + contexto do trabalho selecionado e arquiva o trabalho de origem"
+                >
+                  {connectBusy ? 'Processando…' : 'Mesclar'}
+                </button>
               </div>
 
               {chatMode === 'chat' && (
@@ -1670,35 +2199,35 @@ export default function AethelDashboard() {
                   <div className="aethel-space-y-4 aethel-mb-4">
                     <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-4">
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">🔍 Research & Analysis</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Research & Analysis</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Gather information, analyze data, and provide insights</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">✍️ Content Creation</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Content Creation</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Generate articles, code, documentation, and creative content</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">⚙️ Automation</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Automation</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Build workflows, scripts, and automated processes</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">🎯 Problem Solving</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Problem Solving</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Debug code, optimize performance, solve complex issues</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">💻 Code Generation</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Code Generation</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Generate, debug, and optimize code across languages</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">📊 Data Analysis</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Data Analysis</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Analyze datasets, create visualizations, and extract insights</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">🎨 Creative Design</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Creative Design</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Design UI/UX, graphics, and creative concepts</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">💼 Business Strategy</h3>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Business Strategy</h3>
                         <p className="aethel-text-sm aethel-text-slate-400">Strategic planning, market analysis, and business development</p>
                       </button>
                     </div>
@@ -1716,7 +2245,7 @@ export default function AethelDashboard() {
                       onClick={sendChatMessage}
                       className="aethel-button aethel-button-primary"
                     >
-                      🚀 Execute
+                      Executar
                     </button>
                   </div>
                 </div>
@@ -1908,12 +2437,11 @@ export default function AethelDashboard() {
                     <form className="aethel-space-y-3" onSubmit={handleTransferSubmit}>
                       <h3 className="aethel-text-lg aethel-font-semibold">Transferir Créditos</h3>
                       <input
-                        type="number"
-                        min={1}
+                        type="text"
                         value={transferForm.targetUserId}
                         onChange={(e) => setTransferForm(prev => ({ ...prev, targetUserId: e.target.value }))}
                         className="aethel-input"
-                        placeholder="ID do usuário destinatário"
+                        placeholder="User ID ou email do destinatário"
                         required
                       />
                       <div className="aethel-flex aethel-gap-2">
@@ -1968,7 +2496,7 @@ export default function AethelDashboard() {
                             </div>
                             <div className="aethel-flex aethel-justify-between aethel-items-center aethel-mt-1">
                               <span className="aethel-text-xs aethel-text-slate-400">
-                                Saldo: {entry.balance_after.toLocaleString()} {entry.currency}
+                                Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
                               </span>
                               <span className="aethel-text-xs aethel-text-slate-500">
                                 {new Date(entry.created_at).toLocaleString()}
@@ -2027,9 +2555,9 @@ export default function AethelDashboard() {
                             </tr>
                           )}
                           {receivableSummary.recent.map(entry => {
-                            const rawStatus = entry.metadata['status'] as unknown
+                            const rawStatus = entry.metadata?.['status'] as unknown
                             const statusLabel = typeof rawStatus === 'string' ? rawStatus : 'confirmado'
-                            const invoice = entry.metadata['invoice_id'] as unknown
+                            const invoice = entry.metadata?.['invoice_id'] as unknown
                             const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
                             const amountLabel = `+${entry.amount.toLocaleString()} ${entry.currency}`
                             return (
@@ -2044,7 +2572,7 @@ export default function AethelDashboard() {
                                   {statusLabel}
                                 </td>
                                 <td className="aethel-py-2 aethel-pr-4 aethel-text-slate-400">
-                                  {entry.balance_after.toLocaleString()} {entry.currency}
+                                  {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
                                 </td>
                                 <td className="aethel-py-2 aethel-text-slate-400">
                                   {new Date(entry.created_at).toLocaleString()}
@@ -2081,11 +2609,11 @@ export default function AethelDashboard() {
                     <div>
                       <p className="aethel-text-sm aethel-text-slate-400">Status geral</p>
                       <p className="aethel-text-3xl aethel-font-bold">
-                        {connectivityData.overall_status.toUpperCase()}
+                        {(connectivityData.overall_status ?? 'unknown').toUpperCase()}
                       </p>
                     </div>
                     <div className="aethel-text-sm aethel-text-slate-400">
-                      Atualizado em {new Date(connectivityData.timestamp).toLocaleString()}
+                      Atualizado em {connectivityData.timestamp ? new Date(connectivityData.timestamp).toLocaleString() : '—'}
                     </div>
                   </div>
 
@@ -2283,9 +2811,9 @@ export default function AethelDashboard() {
                         </tr>
                       )}
                       {receivableSummary.recent.map(entry => {
-                        const rawStatus = entry.metadata['status'] as unknown
+                        const rawStatus = entry.metadata?.['status'] as unknown
                         const statusLabel = typeof rawStatus === 'string' ? rawStatus : 'confirmado'
-                        const invoice = entry.metadata['invoice_id'] as unknown
+                        const invoice = entry.metadata?.['invoice_id'] as unknown
                         const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
                         const amountLabel = `+${entry.amount.toLocaleString()} ${entry.currency}`
                         return (
@@ -2300,7 +2828,7 @@ export default function AethelDashboard() {
                               {statusLabel}
                             </td>
                             <td className="aethel-py-2 aethel-pr-4 aethel-text-slate-400">
-                              {entry.balance_after.toLocaleString()} {entry.currency}
+                              {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
                             </td>
                             <td className="aethel-py-2 aethel-text-slate-400">
                               {new Date(entry.created_at).toLocaleString()}
@@ -2422,7 +2950,7 @@ export default function AethelDashboard() {
                       onClick={() => handleDownload('windows')}
                       className="aethel-button aethel-button-primary aethel-w-full aethel-mt-4"
                     >
-                    📥 Download for Windows
+                    Download for Windows
                     </button>
                   </div>
                 </div>
@@ -2540,7 +3068,7 @@ export default function AethelDashboard() {
 
               <div className="aethel-text-center aethel-mt-8">
                 <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-6 aethel-max-w-2xl aethel-mx-auto">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-3">🚀 Quick Start</h3>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-3">Quick Start</h3>
                   <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 aethel-gap-4 aethel-text-sm">
                     <div className="aethel-text-center">
                     <div className="aethel-w-8 aethel-h-8 aethel-bg-indigo-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">1</div>
@@ -2665,7 +3193,7 @@ export default function AethelDashboard() {
 
               <div className="aethel-text-center aethel-mt-8">
                 <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-6 aethel-max-w-2xl aethel-mx-auto">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">🚀 Share Your Success</h3>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Share Your Success</h3>
                   <p className="aethel-text-slate-400 aethel-mb-4">
                     Built something amazing with Aethel? Share your use case with the community and inspire others!
                   </p>

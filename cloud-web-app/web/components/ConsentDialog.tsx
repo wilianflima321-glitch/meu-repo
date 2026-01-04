@@ -56,11 +56,11 @@ export default function ConsentDialog({
 
   const getRiskIcon = () => {
     switch (request.risk) {
-      case 'low': return '✅';
-      case 'medium': return '⚠️';
-      case 'high': return '🔶';
-      case 'critical': return '❌';
-      default: return 'ℹ️';
+      case 'low': return 'OK';
+      case 'medium': return 'WARN';
+      case 'high': return 'HIGH';
+      case 'critical': return 'CRIT';
+      default: return 'INFO';
     }
   };
 
@@ -149,7 +149,7 @@ export default function ConsentDialog({
               <div className="grid grid-cols-2 gap-3">
                 {request.resources.network && (
                   <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xl">🌐</span>
+                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">NET</span>
                     <div>
                       <div className="text-white font-medium">Network Access</div>
                       <div className="text-xs text-slate-400">Internet connection required</div>
@@ -158,7 +158,7 @@ export default function ConsentDialog({
                 )}
                 {request.resources.disk && (
                   <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xl">💾</span>
+                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">DISK</span>
                     <div>
                       <div className="text-white font-medium">Disk Space</div>
                       <div className="text-xs text-slate-400">{request.resources.disk} MB</div>
@@ -167,7 +167,7 @@ export default function ConsentDialog({
                 )}
                 {request.resources.cpu && (
                   <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xl">⚡</span>
+                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">CPU</span>
                     <div>
                       <div className="text-white font-medium">CPU Usage</div>
                       <div className="text-xs text-slate-400">Processing power required</div>
@@ -176,7 +176,7 @@ export default function ConsentDialog({
                 )}
                 {request.resources.memory && (
                   <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xl">🧠</span>
+                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">RAM</span>
                     <div>
                       <div className="text-white font-medium">Memory</div>
                       <div className="text-xs text-slate-400">{request.resources.memory} MB</div>

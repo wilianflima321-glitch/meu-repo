@@ -27,6 +27,44 @@ export interface TaskDetector {
   isAvailable(workspaceRoot: string): Promise<boolean>;
 }
 
+function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem('aethel-token');
+  } catch {
+    return null;
+  }
+}
+
+function normalizePath(path: string): string {
+  if (!path) return '/';
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return p.replace(/\\/g, '/');
+}
+
+async function readWorkspaceFile(path: string): Promise<string> {
+  const token = getAuthToken();
+  const url = `/api/files/read?path=${encodeURIComponent(normalizePath(path))}`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw Object.assign(new Error(text || `HTTP ${res.status}`), { status: res.status, path });
+  }
+
+  const data = (await res.json().catch(() => null)) as any;
+  if (!data || typeof data.content !== 'string') {
+    throw Object.assign(new Error('Resposta inválida ao ler arquivo.'), { status: 502, path });
+  }
+
+  return data.content;
+}
+
 /**
  * NPM Task Detector
  */
@@ -109,9 +147,7 @@ export class NPMTaskDetector implements TaskDetector {
   }
 
   private async readFile(path: string): Promise<string> {
-    // Mock implementation
-    console.log(`[NPM Detector] Reading: ${path}`);
-    return '{"scripts": {"build": "tsc", "test": "jest", "start": "node dist/index.js"}}';
+    return readWorkspaceFile(path);
   }
 }
 
@@ -177,8 +213,7 @@ export class MavenTaskDetector implements TaskDetector {
   }
 
   private async readFile(path: string): Promise<string> {
-    console.log(`[Maven Detector] Reading: ${path}`);
-    return '<project></project>';
+    return readWorkspaceFile(path);
   }
 }
 
@@ -247,8 +282,7 @@ export class GradleTaskDetector implements TaskDetector {
   }
 
   private async readFile(path: string): Promise<string> {
-    console.log(`[Gradle Detector] Reading: ${path}`);
-    return 'plugins { id "java" }';
+    return readWorkspaceFile(path);
   }
 }
 
@@ -331,8 +365,7 @@ export class GoTaskDetector implements TaskDetector {
   }
 
   private async readFile(path: string): Promise<string> {
-    console.log(`[Go Detector] Reading: ${path}`);
-    return 'module example.com/myapp';
+    return readWorkspaceFile(path);
   }
 }
 
@@ -426,8 +459,7 @@ export class CargoTaskDetector implements TaskDetector {
   }
 
   private async readFile(path: string): Promise<string> {
-    console.log(`[Cargo Detector] Reading: ${path}`);
-    return '[package]\nname = "myapp"';
+    return readWorkspaceFile(path);
   }
 }
 
@@ -504,8 +536,7 @@ export class MakefileTaskDetector implements TaskDetector {
   }
 
   private async readFile(path: string): Promise<string> {
-    console.log(`[Makefile Detector] Reading: ${path}`);
-    return 'all:\n\tgcc main.c\n\nclean:\n\trm -f *.o\n\ntest:\n\t./run_tests.sh';
+    return readWorkspaceFile(path);
   }
 }
 
@@ -569,8 +600,7 @@ export class PythonTaskDetector implements TaskDetector {
   }
 
   private async readFile(path: string): Promise<string> {
-    console.log(`[Python Detector] Reading: ${path}`);
-    return 'from setuptools import setup';
+    return readWorkspaceFile(path);
   }
 }
 

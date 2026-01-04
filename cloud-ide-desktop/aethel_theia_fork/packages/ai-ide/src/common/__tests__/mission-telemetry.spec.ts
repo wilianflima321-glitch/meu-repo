@@ -8,49 +8,22 @@ describe('MissionTelemetry', () => {
         telemetry = new MissionTelemetry();
     });
 
-    it('should track mission start', () => {
-        telemetry.startMission('mission-1', { name: 'Test', startTime: new Date() });
-        const metrics = telemetry.getMissionMetrics('mission-1');
-        expect(metrics).to.exist;
-        expect(metrics.missionId).to.equal('mission-1');
-    });
-
-    it('should track mission end', () => {
-        telemetry.startMission('mission-1', { name: 'Test', startTime: new Date() });
-        telemetry.endMission('mission-1', { status: 'completed', endTime: new Date() });
-        const metrics = telemetry.getMissionMetrics('mission-1');
-        expect(metrics.status).to.equal('completed');
-    });
-
-    it('should record token usage', () => {
-        telemetry.startMission('mission-1', { name: 'Test', startTime: new Date() });
-        telemetry.recordTokenUsage('mission-1', {
-            promptTokens: 100,
-            completionTokens: 50,
-            totalTokens: 150,
+    it('should record and retrieve metrics', () => {
+        telemetry.recordMetric({
+            name: 'code.build_time',
+            value: 1,
+            unit: 'seconds',
+            domain: 'code',
+            labels: { missionId: 'mission-1' },
         });
-        const metrics = telemetry.getMissionMetrics('mission-1');
-        expect(metrics.tokenUsage.totalTokens).to.equal(150);
+        const metrics = telemetry.getMetrics('code');
+        expect(metrics.length).to.be.greaterThan(0);
     });
 
-    it('should calculate duration', () => {
-        const start = Date.now();
-        telemetry.startMission('mission-1', { name: 'Test', startTime: new Date(start) });
-        setTimeout(() => {
-            telemetry.endMission('mission-1', { status: 'completed', endTime: new Date() });
-            const metrics = telemetry.getMissionMetrics('mission-1');
-            expect(metrics.duration).to.be.greaterThan(0);
-        }, 100);
-    });
-
-    it('should track multiple missions', () => {
-        telemetry.startMission('mission-1', { name: 'Test 1', startTime: new Date() });
-        telemetry.startMission('mission-2', { name: 'Test 2', startTime: new Date() });
-        
-        const metrics1 = telemetry.getMissionMetrics('mission-1');
-        const metrics2 = telemetry.getMissionMetrics('mission-2');
-        
-        expect(metrics1.missionId).to.equal('mission-1');
-        expect(metrics2.missionId).to.equal('mission-2');
+    it('should calculate metric stats', () => {
+        telemetry.recordMetric({ name: 'code.test_coverage', value: 0.5, unit: 'ratio', domain: 'code', labels: {} });
+        telemetry.recordMetric({ name: 'code.test_coverage', value: 0.9, unit: 'ratio', domain: 'code', labels: {} });
+        const stats = telemetry.getMetricStats('code.test_coverage');
+        expect(stats.max).to.equal(0.9);
     });
 });

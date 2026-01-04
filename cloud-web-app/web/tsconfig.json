@@ -8,8 +8,8 @@
     ],
     "allowJs": false,
     "skipLibCheck": true,
-  "strict": true,
-  "noImplicitAny": false,
+    "strict": true,
+    "noImplicitAny": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -18,18 +18,14 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "typeRoots": ["./types", "./node_modules/@types"],
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@/components/*": [
-        "components/*"
-      ],
-      "@/lib/*": [
-        "lib/*"
-      ],
-      "@/contexts/*": [
-        "contexts/*"
-      ]
+      "@/*": ["./*"],
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/contexts/*": ["./contexts/*"]
     },
     "plugins": [
       {

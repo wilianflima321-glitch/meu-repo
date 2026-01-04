@@ -1,0 +1,11 @@
+export declare const ClearFileChanges: any;
+export declare const GetProposedFileState: any;
+export declare const ReplaceContentInFileFunctionHelper: any;
+export declare const SuggestFileReplacements: any;
+export declare const SimpleSuggestFileReplacements: any;
+export declare const SuggestFileContent: any;
+export declare const WriteFileContent: any;
+export declare const WriteFileReplacements: any;
+export declare const SimpleWriteFileReplacements: any;
+export declare const FileChangeSetTitleProvider: any;
+export declare const DefaultFileChangeSetTitleProvider: any;

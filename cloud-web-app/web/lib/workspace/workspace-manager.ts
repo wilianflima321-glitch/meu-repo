@@ -349,7 +349,7 @@ export class WorkspaceManager {
       if (response.ok) {
         const content = await response.text();
         this.configuration = JSON.parse(content);
-        this.folders = this.configuration.folders;
+        this.folders = this.configuration?.folders ?? [];
       } else {
         // Single folder workspace
         this.folders = [{

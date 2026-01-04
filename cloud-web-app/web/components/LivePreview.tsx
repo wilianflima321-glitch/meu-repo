@@ -199,7 +199,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
         className={`absolute top-4 left-4 p-3 rounded-full ${magicWandActive ? 'bg-purple-600' : 'bg-gray-700'} hover:bg-purple-500 transition`}
         title="Magic Wand - Select areas to improve"
       >
-        🪄
+        <span className="text-xs font-semibold">Tools</span>
       </button>
 
       {/* Mini Chat Button */}
@@ -208,7 +208,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
         className="absolute top-4 right-4 p-3 rounded-full bg-blue-600 hover:bg-blue-700 transition"
         title="Open Mini Chat"
       >
-        💬
+        <span className="text-xs font-semibold">Chat</span>
       </button>
 
       {/* Mini Chat Panel */}

@@ -1,7 +1,7 @@
 # 🤖 FLUXO DE IA COMPLETO
 
 **Data**: 2025-11-27  
-**Status**: ⚠️ MOCK - PRONTO PARA API REAL
+**Status**: real-or-fail - PRONTO PARA API REAL
 
 ---
 
@@ -33,8 +33,8 @@
                │
                ▼
 ┌─────────────────────────────────────────────┐
-│      API de IA (MOCK)                       │
-│  ⚠️ Aguardando implementação real           │
+│      API de IA (real-or-fail)               │
+│  ⚠️ Exige backend/LLM configurado            │
 │  - Análise de código                        │
 │  - Geração de código                        │
 │  - Sugestões inteligentes                   │
@@ -148,7 +148,7 @@ globalContext.reset();
 
 #### **Integração com IA**
 ```javascript
-// Método askAI (mock)
+// Método askAI (real-or-fail)
 async function askAI(prompt, context = {}) {
   const fullContext = {
     project: IntegrationHub.state.currentProject,
@@ -157,12 +157,26 @@ async function askAI(prompt, context = {}) {
     ...context
   };
   
-  console.log('🤖 AI Request:', prompt, fullContext);
-  
-  // ⚠️ MOCK - Em produção, chamar API real
+  const agentType = String(context.agentType || 'coder');
+  const res = await fetch(`/api/agent/${agentType}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      input: `${prompt}\n\nContext:\n${JSON.stringify(fullContext, null, 2)}`,
+      workspaceId: String(context.workspaceId || 'local'),
+      userId: String(context.userId || 'local')
+    })
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error((data && (data.message || data.error)) ? (data.message || data.error) : `HTTP ${res.status}`);
+  }
+
   return {
-    response: 'AI response would go here',
-    suggestions: []
+    response: String(data && data.content ? data.content : ''),
+    suggestions: [],
+    metadata: data && data.metadata ? data.metadata : undefined
   };
 }
 ```
@@ -208,8 +222,9 @@ IntegrationHub.on('ai:response', (response) => {
      }
    }
    ↓
-4. ⚠️ MOCK: Retorna resposta simulada
-   (Em produção: Chama API real)
+4. Chama backend real: `POST /api/agent/:type`
+  - Se LLM não estiver configurado: falha explicitamente (ex.: 503 LLM_NOT_CONFIGURED)
+  - Se configurado: retorna conteúdo real
    ↓
 5. IntegrationHub emite evento 'ai:response'
    ↓
@@ -245,7 +260,7 @@ IntegrationHub.on('ai:response', (response) => {
      }
    }
    ↓
-5. ⚠️ MOCK: Retorna código simulado
+5. Recebe código real via backend (ou erro explícito se não configurado)
    ↓
 6. Editor insere código gerado
    ↓
@@ -289,55 +304,32 @@ IntegrationHub.on('ai:response', (response) => {
 
 ---
 
-## ⚠️ O QUE ESTÁ MOCK
+## ⚠️ O QUE AINDA NÃO ESTÁ COMPLETO (REAL-OR-FAIL)
 
 ### **1. API de IA**
 ```javascript
-// ATUAL (mock)
+// ATUAL (real-or-fail): chama o backend local, que por sua vez integra com o provedor LLM.
 async function askAI(prompt, context) {
-  console.log('🤖 AI Request:', prompt, context);
-  return {
-    response: 'AI response would go here',
-    suggestions: []
-  };
+  const response = await fetch(`/api/agent/${context.agentType || 'coder'}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ input: prompt, workspaceId: 'local', userId: 'local' })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || data.error || `HTTP ${response.status}`);
+  return data;
 }
 
-// FUTURO (real)
-async function askAI(prompt, context) {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful coding assistant...'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      context: context
-    })
-  });
-  
-  return await response.json();
-}
+// FUTURO: adicionar provedor/keys, rate limiting e melhores metadados (continua real-or-fail).
 ```
 
 ---
 
 ### **2. Botões de IA**
 ```javascript
-// ATUAL (mock)
+// ATUAL: se ainda não estiver conectado na UI, deve falhar explicitamente (não simular sucesso)
 function askAI() {
-  console.log('AI Help clicked');
-  alert('AI feature coming soon!');
+  throw new Error('NOT_IMPLEMENTED: UI de botões de IA ainda não está integrada ao backend.');
 }
 
 // FUTURO (real)
@@ -358,12 +350,10 @@ async function askAI() {
 
 ### **3. Sugestões Automáticas**
 ```javascript
-// ATUAL (mock)
-const suggestions = [
-  '• Adicionar física aos objetos',
-  '• Gerar animação básica',
-  '• Otimizar performance'
-];
+// ATUAL: não implementado sem backend/UX dedicado (real-or-fail)
+function getSuggestions() {
+  throw new Error('NOT_IMPLEMENTED: auto-suggestions ainda não implementado.');
+}
 
 // FUTURO (real)
 async function getAISuggestions() {
@@ -677,12 +667,12 @@ window.AIMetrics = new AIMetrics();
 - ✅ Context management robusto
 - ✅ Event system funcionando
 - ✅ Validação de consistência
-- ⚠️ API mock (aguardando implementação real)
+- ⚠️ Integração LLM real-or-fail (exige configuração; sem isso falha explicitamente)
 
-**Quando Implementar API Real**:
+**Para habilitar IA de verdade**:
 1. Obter API key
-2. Criar ai-service.js
-3. Atualizar IntegrationHub
+2. Configurar env vars no backend
+3. Validar `POST /api/agent/:type`
 4. Conectar botões
 5. Testar e validar
 

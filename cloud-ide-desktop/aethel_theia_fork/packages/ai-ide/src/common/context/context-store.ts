@@ -421,7 +421,8 @@ export class ContextStore {
     }
 
     for (const [id, versions] of Object.entries(parsed.versions as any)) {
-      this.versions.set(id, versions);
+      const typed = Array.isArray(versions) ? (versions as ContextVersion[]) : [];
+      this.versions.set(id, typed);
     }
 
     this.auditLog.push(...parsed.auditLog);

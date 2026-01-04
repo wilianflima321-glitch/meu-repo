@@ -4,12 +4,20 @@ node_modules/
 # Logs
 *.log
 
+# Tooling caches
+**/.eslintcache
+
 # Mac
 .DS_Store
 
 # Build and distribution
 dist/
 build/
+
+# Next.js
+**/.next/
+**/.turbo/
+**/.swc/
 
 # TypeScript build outputs
 # **/lib/ - DISABLED: We need lib/ for source code
@@ -39,3 +47,6 @@ test-results/
 # Local data
 data.json
 package-lock.json
+
+# Copilot/agent chat artifacts
+.zencoder/

@@ -3,39 +3,44 @@ import { ContextStore } from '../context/context-store';
 
 describe('ContextStore', () => {
     let store: ContextStore;
+    const userId = 'test-user';
+    const workspaceId = 'ws-1';
 
     beforeEach(() => {
         store = new ContextStore();
     });
 
-    it('should store and retrieve context', () => {
-        store.set('test-key', { data: 'value' });
-        const result = store.get('test-key');
-        expect(result).to.deep.equal({ data: 'value' });
+    it('should store and retrieve context', async () => {
+        const entry = await store.store({
+            workspaceId,
+            domain: 'code',
+            type: 'conversation',
+            content: { data: 'value' },
+        });
+        const result = await store.get(entry.id, userId);
+        expect(result?.content).to.deep.equal({ data: 'value' });
     });
 
-    it('should return undefined for missing keys', () => {
-        const result = store.get('non-existent');
+    it('should return undefined for missing ids', async () => {
+        const result = await store.get('non-existent', userId);
         expect(result).to.be.undefined;
     });
 
-    it('should delete context', () => {
-        store.set('test-key', { data: 'value' });
-        store.delete('test-key');
-        expect(store.get('test-key')).to.be.undefined;
+    it('should delete context', async () => {
+        const entry = await store.store({
+            workspaceId,
+            domain: 'code',
+            type: 'conversation',
+            content: { data: 'value' },
+        });
+        await store.delete(entry.id, userId);
+        expect(await store.get(entry.id, userId)).to.be.undefined;
     });
 
-    it('should clear all context', () => {
-        store.set('key1', { data: '1' });
-        store.set('key2', { data: '2' });
-        store.clear();
-        expect(store.get('key1')).to.be.undefined;
-        expect(store.get('key2')).to.be.undefined;
-    });
-
-    it('should check if key exists', () => {
-        store.set('test-key', { data: 'value' });
-        expect(store.has('test-key')).to.be.true;
-        expect(store.has('non-existent')).to.be.false;
+    it('should query contexts', async () => {
+        await store.store({ workspaceId, domain: 'code', type: 'conversation', content: { a: 1 } });
+        await store.store({ workspaceId, domain: 'code', type: 'conversation', content: { b: 2 } });
+        const results = await store.query({ workspaceId, domain: 'code' }, userId);
+        expect(results.length).to.be.greaterThan(0);
     });
 });

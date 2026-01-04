@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { assertWorkspacePath } from '@/lib/workspace';
+import { apiErrorToResponse } from '@/lib/api-errors';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface GitAddRequest {
   cwd: string;
@@ -11,8 +15,12 @@ interface GitAddRequest {
 
 export async function POST(request: NextRequest) {
   try {
+		const user = requireAuth(request);
+		await requireEntitlementsForUser(user.userId);
+
     const body: GitAddRequest = await request.json();
     const { cwd, paths } = body;
+		const safeCwd = assertWorkspacePath(cwd, 'cwd');
 
     if (!paths || paths.length === 0) {
       return NextResponse.json(
@@ -21,9 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Escape paths and add to staging
-    const escapedPaths = paths.map(p => `"${p}"`).join(' ');
-    await execAsync(`git add ${escapedPaths}`, { cwd });
+		await execFileAsync('git', ['add', '--', ...paths], { cwd: safeCwd });
 
     return NextResponse.json({
       success: true,
@@ -31,6 +37,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Git add failed:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     return NextResponse.json(
       { success: false, error: 'Failed to stage files' },
       { status: 500 }

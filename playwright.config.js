@@ -4,7 +4,17 @@ const { devices } = require('@playwright/test');
 module.exports = {
   testDir: '.',
   testMatch: ['*.spec.ts', 'examples/playwright/tests/*.spec.ts'],
-  testIgnore: ['**/node_modules/**', '**/lib/**'],
+  testIgnore: [
+    '**/node_modules/**',
+    '**/lib/**',
+    // Subprojetos/forks possuem muitos *.spec.ts que não são Playwright E2E
+    // (ex.: testes unitários com decorators, chai/mocha, etc.).
+    '**/cloud-ide-desktop/**',
+    '**/cloud-admin-ia/**',
+    '**/cloud-web-app/**',
+    // Cópia aninhada do repositório (evita duplicar/rodar specs errados)
+    '**/meu-repo/meu-repo/**'
+  ],
   timeout: 30000,
   retries: process.env.CI ? 2 : 0,
   reporter: [

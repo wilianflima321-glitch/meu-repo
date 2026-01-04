@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Command {
@@ -19,6 +19,262 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  const loadCommands = useCallback(() => {
+    const allCommands: Command[] = [
+      // File Commands
+      {
+        id: 'file.new',
+        title: 'New File',
+        category: 'File',
+        action: () => router.push('/editor?new=true'),
+        keybinding: 'Ctrl+N',
+        icon: ''
+      },
+      {
+        id: 'file.open',
+        title: 'Open File',
+        category: 'File',
+        action: () => {
+          const event = new CustomEvent('quick-open');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'Ctrl+O',
+        icon: ''
+      },
+      {
+        id: 'file.save',
+        title: 'Save File',
+        category: 'File',
+        action: () => {
+          const event = new CustomEvent('save-file');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'Ctrl+S',
+        icon: ''
+      },
+
+      // View Commands
+      {
+        id: 'view.terminal',
+        title: 'Toggle Terminal',
+        category: 'View',
+        action: () => router.push('/terminal'),
+        keybinding: 'Ctrl+`',
+        icon: ''
+      },
+      {
+        id: 'view.git',
+        title: 'Open Git Panel',
+        category: 'View',
+        action: () => router.push('/git'),
+        keybinding: 'Ctrl+Shift+G',
+        icon: ''
+      },
+      {
+        id: 'view.testing',
+        title: 'Open Test Explorer',
+        category: 'View',
+        action: () => router.push('/testing'),
+        keybinding: 'Ctrl+Shift+T',
+        icon: ''
+      },
+      {
+        id: 'view.debugger',
+        title: 'Open Debugger',
+        category: 'View',
+        action: () => router.push('/debugger'),
+        keybinding: 'Ctrl+Shift+D',
+        icon: ''
+      },
+      {
+        id: 'view.marketplace',
+        title: 'Open Extension Marketplace',
+        category: 'View',
+        action: () => router.push('/marketplace'),
+        keybinding: 'Ctrl+Shift+X',
+        icon: ''
+      },
+      {
+        id: 'view.explorer',
+        title: 'Open File Explorer',
+        category: 'View',
+        action: () => router.push('/explorer'),
+        keybinding: 'Ctrl+Shift+E',
+        icon: ''
+      },
+      {
+        id: 'view.search',
+        title: 'Open Search',
+        category: 'View',
+        action: () => router.push('/search'),
+        keybinding: 'Ctrl+Shift+F',
+        icon: ''
+      },
+
+      // Git Commands
+      {
+        id: 'git.commit',
+        title: 'Git: Commit',
+        category: 'Git',
+        action: () => {
+          const event = new CustomEvent('git-commit');
+          window.dispatchEvent(event);
+        },
+        icon: ''
+      },
+      {
+        id: 'git.push',
+        title: 'Git: Push',
+        category: 'Git',
+        action: () => {
+          const event = new CustomEvent('git-push');
+          window.dispatchEvent(event);
+        },
+        icon: ''
+      },
+      {
+        id: 'git.pull',
+        title: 'Git: Pull',
+        category: 'Git',
+        action: () => {
+          const event = new CustomEvent('git-pull');
+          window.dispatchEvent(event);
+        },
+        icon: ''
+      },
+      {
+        id: 'git.branch',
+        title: 'Git: Create Branch',
+        category: 'Git',
+        action: () => {
+          const event = new CustomEvent('git-create-branch');
+          window.dispatchEvent(event);
+        },
+        icon: ''
+      },
+
+      // Debug Commands
+      {
+        id: 'debug.start',
+        title: 'Start Debugging',
+        category: 'Debug',
+        action: () => {
+          const event = new CustomEvent('start-debugging');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'F5',
+        icon: ''
+      },
+      {
+        id: 'debug.stop',
+        title: 'Stop Debugging',
+        category: 'Debug',
+        action: () => {
+          const event = new CustomEvent('stop-debugging');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'Shift+F5',
+        icon: ''
+      },
+
+      // Test Commands
+      {
+        id: 'test.run',
+        title: 'Run Tests',
+        category: 'Test',
+        action: () => {
+          const event = new CustomEvent('run-tests');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'F6',
+        icon: ''
+      },
+      {
+        id: 'test.debug',
+        title: 'Debug Tests',
+        category: 'Test',
+        action: () => {
+          const event = new CustomEvent('debug-tests');
+          window.dispatchEvent(event);
+        },
+        icon: ''
+      },
+
+      // Edit Commands
+      {
+        id: 'edit.find',
+        title: 'Find',
+        category: 'Edit',
+        action: () => {
+          const event = new CustomEvent('find');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'Ctrl+F',
+        icon: ''
+      },
+      {
+        id: 'edit.replace',
+        title: 'Replace',
+        category: 'Edit',
+        action: () => {
+          const event = new CustomEvent('replace');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'Ctrl+H',
+        icon: ''
+      },
+      {
+        id: 'edit.format',
+        title: 'Format Document',
+        category: 'Edit',
+        action: () => {
+          const event = new CustomEvent('format-document');
+          window.dispatchEvent(event);
+        },
+        keybinding: 'Ctrl+Shift+F',
+        icon: ''
+      },
+
+      // Settings Commands
+      {
+        id: 'settings.open',
+        title: 'Open Settings',
+        category: 'Settings',
+        action: () => router.push('/settings'),
+        keybinding: 'Ctrl+,',
+        icon: ''
+      },
+      {
+        id: 'settings.keyboard',
+        title: 'Keyboard Shortcuts',
+        category: 'Settings',
+        action: () => router.push('/settings/keyboard'),
+        keybinding: 'Ctrl+K Ctrl+S',
+        icon: ''
+      }
+    ];
+
+    setCommands(allCommands);
+  }, [router]);
+
+  const filteredCommands = useMemo(() => {
+    return commands.filter(cmd => {
+      const searchText = `${cmd.title} ${cmd.category}`.toLowerCase();
+      return searchText.includes(query.toLowerCase());
+    });
+  }, [commands, query]);
+
+  const executeCommand = useCallback(async (command: Command) => {
+    if (!command) return;
+
+    try {
+      await command.action();
+      onClose();
+    } catch (error) {
+      console.error('Failed to execute command:', error);
+    }
+  }, [onClose]);
+
   useEffect(() => {
     if (isOpen) {
       setQuery('');
@@ -26,7 +282,7 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
       loadCommands();
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isOpen, loadCommands]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,261 +304,7 @@ export default function CommandPalette({ isOpen, onClose }: { isOpen: boolean; o
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedIndex, query]);
-
-  const loadCommands = () => {
-    const allCommands: Command[] = [
-      // File Commands
-      {
-        id: 'file.new',
-        title: 'New File',
-        category: 'File',
-        action: () => router.push('/editor?new=true'),
-        keybinding: 'Ctrl+N',
-        icon: '📄'
-      },
-      {
-        id: 'file.open',
-        title: 'Open File',
-        category: 'File',
-        action: () => {
-          const event = new CustomEvent('quick-open');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'Ctrl+O',
-        icon: '📂'
-      },
-      {
-        id: 'file.save',
-        title: 'Save File',
-        category: 'File',
-        action: () => {
-          const event = new CustomEvent('save-file');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'Ctrl+S',
-        icon: '💾'
-      },
-
-      // View Commands
-      {
-        id: 'view.terminal',
-        title: 'Toggle Terminal',
-        category: 'View',
-        action: () => router.push('/terminal'),
-        keybinding: 'Ctrl+`',
-        icon: '⌨️'
-      },
-      {
-        id: 'view.git',
-        title: 'Open Git Panel',
-        category: 'View',
-        action: () => router.push('/git'),
-        keybinding: 'Ctrl+Shift+G',
-        icon: '🔀'
-      },
-      {
-        id: 'view.testing',
-        title: 'Open Test Explorer',
-        category: 'View',
-        action: () => router.push('/testing'),
-        keybinding: 'Ctrl+Shift+T',
-        icon: '🧪'
-      },
-      {
-        id: 'view.debugger',
-        title: 'Open Debugger',
-        category: 'View',
-        action: () => router.push('/debugger'),
-        keybinding: 'Ctrl+Shift+D',
-        icon: '🐛'
-      },
-      {
-        id: 'view.marketplace',
-        title: 'Open Extension Marketplace',
-        category: 'View',
-        action: () => router.push('/marketplace'),
-        keybinding: 'Ctrl+Shift+X',
-        icon: '🧩'
-      },
-      {
-        id: 'view.explorer',
-        title: 'Open File Explorer',
-        category: 'View',
-        action: () => router.push('/explorer'),
-        keybinding: 'Ctrl+Shift+E',
-        icon: '📁'
-      },
-      {
-        id: 'view.search',
-        title: 'Open Search',
-        category: 'View',
-        action: () => router.push('/search'),
-        keybinding: 'Ctrl+Shift+F',
-        icon: '🔍'
-      },
-
-      // Git Commands
-      {
-        id: 'git.commit',
-        title: 'Git: Commit',
-        category: 'Git',
-        action: () => {
-          const event = new CustomEvent('git-commit');
-          window.dispatchEvent(event);
-        },
-        icon: '✅'
-      },
-      {
-        id: 'git.push',
-        title: 'Git: Push',
-        category: 'Git',
-        action: () => {
-          const event = new CustomEvent('git-push');
-          window.dispatchEvent(event);
-        },
-        icon: '⬆️'
-      },
-      {
-        id: 'git.pull',
-        title: 'Git: Pull',
-        category: 'Git',
-        action: () => {
-          const event = new CustomEvent('git-pull');
-          window.dispatchEvent(event);
-        },
-        icon: '⬇️'
-      },
-      {
-        id: 'git.branch',
-        title: 'Git: Create Branch',
-        category: 'Git',
-        action: () => {
-          const event = new CustomEvent('git-create-branch');
-          window.dispatchEvent(event);
-        },
-        icon: '🌿'
-      },
-
-      // Debug Commands
-      {
-        id: 'debug.start',
-        title: 'Start Debugging',
-        category: 'Debug',
-        action: () => {
-          const event = new CustomEvent('start-debugging');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'F5',
-        icon: '▶️'
-      },
-      {
-        id: 'debug.stop',
-        title: 'Stop Debugging',
-        category: 'Debug',
-        action: () => {
-          const event = new CustomEvent('stop-debugging');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'Shift+F5',
-        icon: '⏹️'
-      },
-
-      // Test Commands
-      {
-        id: 'test.run',
-        title: 'Run Tests',
-        category: 'Test',
-        action: () => {
-          const event = new CustomEvent('run-tests');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'F6',
-        icon: '🧪'
-      },
-      {
-        id: 'test.debug',
-        title: 'Debug Tests',
-        category: 'Test',
-        action: () => {
-          const event = new CustomEvent('debug-tests');
-          window.dispatchEvent(event);
-        },
-        icon: '🐛'
-      },
-
-      // Edit Commands
-      {
-        id: 'edit.find',
-        title: 'Find',
-        category: 'Edit',
-        action: () => {
-          const event = new CustomEvent('find');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'Ctrl+F',
-        icon: '🔍'
-      },
-      {
-        id: 'edit.replace',
-        title: 'Replace',
-        category: 'Edit',
-        action: () => {
-          const event = new CustomEvent('replace');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'Ctrl+H',
-        icon: '🔄'
-      },
-      {
-        id: 'edit.format',
-        title: 'Format Document',
-        category: 'Edit',
-        action: () => {
-          const event = new CustomEvent('format-document');
-          window.dispatchEvent(event);
-        },
-        keybinding: 'Ctrl+Shift+F',
-        icon: '✨'
-      },
-
-      // Settings Commands
-      {
-        id: 'settings.open',
-        title: 'Open Settings',
-        category: 'Settings',
-        action: () => router.push('/settings'),
-        keybinding: 'Ctrl+,',
-        icon: '⚙️'
-      },
-      {
-        id: 'settings.keyboard',
-        title: 'Keyboard Shortcuts',
-        category: 'Settings',
-        action: () => router.push('/settings/keyboard'),
-        keybinding: 'Ctrl+K Ctrl+S',
-        icon: '⌨️'
-      }
-    ];
-
-    setCommands(allCommands);
-  };
-
-  const filteredCommands = commands.filter(cmd => {
-    const searchText = `${cmd.title} ${cmd.category}`.toLowerCase();
-    return searchText.includes(query.toLowerCase());
-  });
-
-  const executeCommand = async (command: Command) => {
-    if (!command) return;
-    
-    try {
-      await command.action();
-      onClose();
-    } catch (error) {
-      console.error('Failed to execute command:', error);
-    }
-  };
+  }, [executeCommand, filteredCommands, isOpen, onClose, selectedIndex]);
 
   const groupedCommands = filteredCommands.reduce((acc, cmd) => {
     if (!acc[cmd.category]) {

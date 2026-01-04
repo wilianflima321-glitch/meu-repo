@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getTestManager, TestItem, TestResult, TestCoverage } from '@/lib/test/test-manager';
 
 export default function TestingPage() {
@@ -15,11 +15,7 @@ export default function TestingPage() {
 
   const testManager = getTestManager();
 
-  useEffect(() => {
-    discoverTests();
-  }, []);
-
-  const discoverTests = async () => {
+  const discoverTests = useCallback(async () => {
     setIsDiscovering(true);
     try {
       const discovered = await testManager.discoverTests('/workspace');
@@ -29,7 +25,11 @@ export default function TestingPage() {
     } finally {
       setIsDiscovering(false);
     }
-  };
+  }, [testManager]);
+
+  useEffect(() => {
+    discoverTests();
+  }, [discoverTests]);
 
   const runTests = async (testIds?: string[]) => {
     setIsRunning(true);
@@ -142,18 +142,18 @@ export default function TestingPage() {
     const isSelected = selectedTests.has(item.id);
 
     const getIcon = () => {
-      if (item.type === 'file') return '📄';
-      if (item.type === 'suite') return '📦';
-      if (!result) return '⚪';
-      if (result.state === 'passed') return '✅';
-      if (result.state === 'failed' || result.state === 'errored') return '❌';
-      if (result.state === 'skipped') return '⏭️';
-      return '⚪';
+      if (item.type === 'file') return 'FILE';
+      if (item.type === 'suite') return 'SUITE';
+      if (!result) return '';
+      if (result.state === 'passed') return 'OK';
+      if (result.state === 'failed' || result.state === 'errored') return 'ERR';
+      if (result.state === 'skipped') return 'SKIP';
+      return '';
     };
 
     const shouldShow = () => {
       if (filter === 'all') return true;
-      if (!result) return filter === 'all';
+      if (!result) return false;
       return result.state === filter;
     };
 
@@ -180,7 +180,7 @@ export default function TestingPage() {
               onClick={() => debugTest(item.id)}
               className="px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded"
             >
-              🐛 Debug
+              Debug
             </button>
           )}
         </div>
@@ -216,7 +216,7 @@ export default function TestingPage() {
               disabled={isDiscovering}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
             >
-              <span>🔍</span>
+              <span className="text-xs font-semibold">FIND</span>
               <span>{isDiscovering ? 'Discovering...' : 'Discover Tests'}</span>
             </button>
             <button
@@ -224,7 +224,7 @@ export default function TestingPage() {
               disabled={isRunning}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
             >
-              <span>▶️</span>
+              <span className="text-xs font-semibold">RUN</span>
               <span>{isRunning ? 'Running...' : 'Run All'}</span>
             </button>
             <button
@@ -232,7 +232,7 @@ export default function TestingPage() {
               disabled={isRunning || selectedTests.size === 0}
               className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
             >
-              <span>▶️</span>
+              <span className="text-xs font-semibold">RUN</span>
               <span>Run Selected ({selectedTests.size})</span>
             </button>
             <button
@@ -303,15 +303,15 @@ export default function TestingPage() {
                     <span className="text-white font-semibold">{stats.total}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-green-400">✅ Passed</span>
+                    <span className="text-green-400">Passed</span>
                     <span className="text-white font-semibold">{stats.passed}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-red-400">❌ Failed</span>
+                    <span className="text-red-400">Failed</span>
                     <span className="text-white font-semibold">{stats.failed}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-yellow-400">⏭️ Skipped</span>
+                    <span className="text-yellow-400">Skipped</span>
                     <span className="text-white font-semibold">{stats.skipped}</span>
                   </div>
                   <div className="pt-3 border-t border-slate-700">

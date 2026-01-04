@@ -55,8 +55,27 @@ export interface CreativeResponse {
     error?: string;
 }
 
+export interface PromptTemplate {
+    id: string;
+    template: string;
+}
+
 @injectable()
 export class CreativeAgent {
+    readonly id = 'creative';
+    readonly name = 'Creative Agent';
+    readonly description = 'Generates creative content and assets based on prompts.';
+    readonly promptTemplates: PromptTemplate[] = [
+        { id: 'content-generate', template: 'Generate creative content matching the requested style and constraints.' },
+        { id: 'story-narrative', template: 'Create a story/narrative structure with beats and arcs.' },
+        { id: 'design-concept', template: 'Propose design concepts and variations with rationale.' },
+        { id: 'brainstorm-ideas', template: 'Brainstorm multiple ideas and select top candidates.' },
+    ];
+
+    async invoke(request: any): Promise<any> {
+        return this.processRequest(request);
+    }
+
     constructor(
         @inject(TelemetryService) private telemetry: TelemetryService,
         @inject(ObservabilityService) private observability: ObservabilityService,

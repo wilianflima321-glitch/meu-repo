@@ -1,0 +1,274 @@
+## main...origin/main [ahead 1]
+ M .github/workflows/ci.yml
+ M .gitignore
+ M cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/CI.md
+ M cloud-ide-desktop/plugins/UE_IDE/Source/AethelPlugin/AethelPlugin.cpp
+ M cloud-ide-desktop/plugins/UE_IDE/Source/AethelPlugin/AethelPlugin.h
+ M cloud-ide-desktop/plugins/UE_IDE/aethel_unreal_plugin.uplugin
+ M cloud-web-app/web/__tests__/LanguageSwitcher.test.tsx
+ M cloud-web-app/web/__tests__/api/auth.test.ts
+ M cloud-web-app/web/app/(auth)/login/page.tsx
+ M cloud-web-app/web/app/admin/ai-demo/page.tsx
+ M cloud-web-app/web/app/admin/apis/ip-registry.tsx
+ M cloud-web-app/web/app/admin/ip-registry/page.tsx
+ M cloud-web-app/web/app/admin/marketplace/page.tsx
+ M cloud-web-app/web/app/admin/page.tsx
+ M cloud-web-app/web/app/admin/users/page.tsx
+ M cloud-web-app/web/app/api/assets/upload/route.ts
+ M cloud-web-app/web/app/api/auth/login/route.ts
+ M cloud-web-app/web/app/api/auth/profile/route.ts
+ M cloud-web-app/web/app/api/auth/register/route.ts
+ M cloud-web-app/web/app/api/billing/checkout/route.ts
+ M cloud-web-app/web/app/api/billing/plans/route.ts
+ M cloud-web-app/web/app/api/billing/webhook/route.ts
+ M cloud-web-app/web/app/api/dap/events/route.ts
+ M cloud-web-app/web/app/api/dap/request/route.ts
+ M cloud-web-app/web/app/api/dap/session/start/route.ts
+ M cloud-web-app/web/app/api/dap/session/stop/route.ts
+ M cloud-web-app/web/app/api/files/route.ts
+ M cloud-web-app/web/app/api/git/add/route.ts
+ M cloud-web-app/web/app/api/git/commit/route.ts
+ M cloud-web-app/web/app/api/git/pull/route.ts
+ M cloud-web-app/web/app/api/git/push/route.ts
+ M cloud-web-app/web/app/api/git/status/route.ts
+ M cloud-web-app/web/app/api/lsp/notification/route.ts
+ M cloud-web-app/web/app/api/lsp/request/route.ts
+ M cloud-web-app/web/app/api/marketplace/extensions/route.ts
+ M cloud-web-app/web/app/api/marketplace/install/route.ts
+ M cloud-web-app/web/app/api/marketplace/uninstall/route.ts
+ M cloud-web-app/web/app/api/projects/[id]/route.ts
+ M cloud-web-app/web/app/api/projects/route.ts
+ M cloud-web-app/web/app/api/tasks/detect/route.ts
+ M cloud-web-app/web/app/api/tasks/load/route.ts
+ M cloud-web-app/web/app/api/terminal/create/route.ts
+ M cloud-web-app/web/app/api/test/discover/route.ts
+ M cloud-web-app/web/app/api/test/run/route.ts
+ M cloud-web-app/web/app/billing/page.tsx
+ M cloud-web-app/web/app/marketplace/page.tsx
+ M cloud-web-app/web/app/testing/page.tsx
+ M cloud-web-app/web/components/AdminPanel.tsx
+ M cloud-web-app/web/components/AethelDashboard.tsx
+ M cloud-web-app/web/components/ChatComponent.tsx
+ M cloud-web-app/web/components/ClientLayout.tsx
+ M cloud-web-app/web/components/CommandPalette.tsx
+ M cloud-web-app/web/components/ConsentDialog.tsx
+ M cloud-web-app/web/components/Debugger.tsx
+ M cloud-web-app/web/components/FileExplorer.tsx
+ M cloud-web-app/web/components/FileTreeExplorer.tsx
+ M cloud-web-app/web/components/GitGraph.tsx
+ M cloud-web-app/web/components/GitPanel.tsx
+ M cloud-web-app/web/components/KeyboardShortcutsEditor.tsx
+ M cloud-web-app/web/components/LivePreview.tsx
+ M cloud-web-app/web/components/MergeConflictResolver.tsx
+ M cloud-web-app/web/components/NotificationCenter.tsx
+ M cloud-web-app/web/components/QuickOpen.tsx
+ M cloud-web-app/web/components/Settings.tsx
+ M cloud-web-app/web/components/SettingsEditor.tsx
+ M cloud-web-app/web/components/StatusBar.tsx
+ M cloud-web-app/web/components/Terminal.tsx
+ M cloud-web-app/web/components/VRPreview.tsx
+ M cloud-web-app/web/components/explorer/QuickOpen.tsx
+ M cloud-web-app/web/components/notifications/NotificationToast.tsx
+ M cloud-web-app/web/components/output/OutputPanel.tsx
+ M cloud-web-app/web/components/problems/ProblemsPanel.tsx
+ M cloud-web-app/web/jest.config.js
+ M cloud-web-app/web/jest.setup.js
+ M cloud-web-app/web/lib/ai/ai-enhanced-lsp.ts
+ M cloud-web-app/web/lib/api-client.ts
+ M cloud-web-app/web/lib/api.ts
+ M cloud-web-app/web/lib/api/index.ts
+ M cloud-web-app/web/lib/auth.ts
+ M cloud-web-app/web/lib/editor/multi-cursor-manager.ts
+ M cloud-web-app/web/lib/extensions/extension-loader.ts
+ M cloud-web-app/web/lib/extensions/vscode-api/window.ts
+ M cloud-web-app/web/lib/extensions/vscode-api/workspace.ts
+ M cloud-web-app/web/lib/git/git-client.ts
+ M cloud-web-app/web/lib/hooks/useTheiaSystemsHooks.ts
+ M cloud-web-app/web/lib/integration/debug-integration.ts
+ M cloud-web-app/web/lib/integration/ide-integration.ts
+ M cloud-web-app/web/lib/integration/index.ts
+ M cloud-web-app/web/lib/lsp/lsp-server-base.ts
+ M cloud-web-app/web/lib/lsp/servers/go-lsp.ts
+ M cloud-web-app/web/lib/lsp/servers/python-lsp.ts
+ M cloud-web-app/web/lib/lsp/servers/typescript-lsp.ts
+ M cloud-web-app/web/lib/output/output-manager.ts
+ M cloud-web-app/web/lib/refactoring/refactoring-manager.ts
+ M cloud-web-app/web/lib/search/search-manager.ts
+ M cloud-web-app/web/lib/settings/settings-manager.ts
+ M cloud-web-app/web/lib/statusbar/statusbar-manager.ts
+ M cloud-web-app/web/lib/terminal/problem-matcher.ts
+ M cloud-web-app/web/lib/terminal/task-detector.ts
+ M cloud-web-app/web/lib/terminal/terminal-manager.ts
+ M cloud-web-app/web/lib/terminal/terminal-profiles.ts
+ M cloud-web-app/web/lib/themes/theme-manager.ts
+ M cloud-web-app/web/lib/workspace/workspace-manager.ts
+ M cloud-web-app/web/package.json
+ M cloud-web-app/web/prisma/schema.prisma
+ M cloud-web-app/web/prisma/seed.ts
+ M cloud-web-app/web/tests/integration/ai-integration.test.ts
+ M cloud-web-app/web/tests/integration/debug-integration.test.ts
+ M cloud-web-app/web/tests/integration/editor-integration.test.ts
+ M cloud-web-app/web/tsconfig.json
+ M cloud-web-app/web/types/index.ts
+ M diagnostics/UNTRACKED_MANIFEST_2025-12-25.txt
+ M examples/browser-ide-app/ALINHAMENTO_INTERFACE_EXISTENTE.md
+ M examples/browser-ide-app/ANALISE_COMPLETA_COMPONENTES.md
+ M examples/browser-ide-app/FLUXO_IA_COMPLETO.md
+ M examples/browser-ide-app/GUIA_USO_COMPLETO.md
+ M examples/browser-ide-app/INVENTARIO_COMPLETO_FINAL.md
+ M examples/browser-ide-app/README_FINAL.md
+ M examples/browser-ide-app/STATUS_FINAL_COMPLETO.md
+ M examples/browser-ide-app/TESTE_FINAL.md
+ M examples/browser-ide-app/TESTE_INTEGRACAO_COMPLETO.md
+ M examples/browser-ide-app/VALIDACAO_FINAL.md
+ M examples/browser-ide-app/integration-hub.js
+ M examples/browser-ide-app/server.py
+?? EXECUCAO_DONO_2025-12-28.md
+?? STATUS_ATUAL_2025-12-30.md
+?? VARREDURA_ERROS_2025-12-28.md
+?? cloud-ide-desktop/aethel_theia_fork/playwright.config.ts
+?? cloud-ide-desktop/aethel_theia_fork/tools/dev-mock-backend/
+?? cloud-ide-desktop/aethel_theia_fork/tools/dev-scripts/
+?? cloud-ide-desktop/aethel_theia_fork/tools/scripts/
+?? cloud-ide-desktop/plugins/UE_IDE/Source/AethelPlugin/AethelPlugin.Build.cs
+?? cloud-web-app/web/ANALYSIS_REPORT_2025-12-30.md
+?? cloud-web-app/web/IMPLEMENTATION_REPORT_FINAL.md
+?? cloud-web-app/web/RELATORIO_COMPLETO_2025.md
+?? cloud-web-app/web/app/animation-blueprint/
+?? cloud-web-app/web/app/api/admin/
+?? cloud-web-app/web/app/api/ai/
+?? cloud-web-app/web/app/api/analytics/
+?? cloud-web-app/web/app/api/backup/
+?? cloud-web-app/web/app/api/chat/
+?? cloud-web-app/web/app/api/collaboration/
+?? cloud-web-app/web/app/api/copilot/
+?? cloud-web-app/web/app/api/email/
+?? cloud-web-app/web/app/api/experiments/
+?? cloud-web-app/web/app/api/feature-flags/
+?? cloud-web-app/web/app/api/files/read/
+?? cloud-web-app/web/app/api/health/live/
+?? cloud-web-app/web/app/api/health/metrics/
+?? cloud-web-app/web/app/api/health/ready/
+?? cloud-web-app/web/app/api/logs/
+?? cloud-web-app/web/app/api/notifications/
+?? cloud-web-app/web/app/api/onboarding/
+?? cloud-web-app/web/app/api/quotas/
+?? cloud-web-app/web/app/api/usage/
+?? cloud-web-app/web/app/api/workspace/
+?? cloud-web-app/web/app/blueprint-editor/
+?? cloud-web-app/web/app/editor-hub/
+?? cloud-web-app/web/app/landscape-editor/
+?? cloud-web-app/web/app/level-editor/
+?? cloud-web-app/web/app/niagara-editor/
+?? cloud-web-app/web/app/project-settings/
+?? cloud-web-app/web/components/Collaboration.tsx
+?? cloud-web-app/web/components/FeatureFlag.tsx
+?? cloud-web-app/web/components/Onboarding.tsx
+?? cloud-web-app/web/components/audio/
+?? cloud-web-app/web/components/editor/CodeEditor.tsx
+?? cloud-web-app/web/components/editor/MonacoEditor.tsx
+?? cloud-web-app/web/components/engine/
+?? cloud-web-app/web/components/image/
+?? cloud-web-app/web/components/materials/
+?? cloud-web-app/web/components/scene-editor/
+?? cloud-web-app/web/components/video/
+?? cloud-web-app/web/components/visual-scripting/
+?? cloud-web-app/web/jest.polyfills.js
+?? cloud-web-app/web/lib/advanced-input-system.ts
+?? cloud-web-app/web/lib/aethel-engine.ts
+?? cloud-web-app/web/lib/ai-agent-system.ts
+?? cloud-web-app/web/lib/ai-integration-total.ts
+?? cloud-web-app/web/lib/ai-service.ts
+?? cloud-web-app/web/lib/ai-tools-registry.ts
+?? cloud-web-app/web/lib/ai.ts
+?? cloud-web-app/web/lib/analytics.ts
+?? cloud-web-app/web/lib/api-errors.ts
+?? cloud-web-app/web/lib/asset-import-pipeline.ts
+?? cloud-web-app/web/lib/asset-pipeline.ts
+?? cloud-web-app/web/lib/audio-synthesis.ts
+?? cloud-web-app/web/lib/auth-server.ts
+?? cloud-web-app/web/lib/backup-system.ts
+?? cloud-web-app/web/lib/behavior-tree.ts
+?? cloud-web-app/web/lib/blueprint-system.ts
+?? cloud-web-app/web/lib/cache-system.ts
+?? cloud-web-app/web/lib/cloth-simulation.ts
+?? cloud-web-app/web/lib/collaboration-realtime.ts
+?? cloud-web-app/web/lib/copilot/
+?? cloud-web-app/web/lib/decal-system.ts
+?? cloud-web-app/web/lib/design-system.ts
+?? cloud-web-app/web/lib/destruction-system.ts
+?? cloud-web-app/web/lib/email-system.ts
+?? cloud-web-app/web/lib/entitlements.ts
+?? cloud-web-app/web/lib/env.ts
+?? cloud-web-app/web/lib/extensions/extension-host.ts
+?? cloud-web-app/web/lib/feature-flags.ts
+?? cloud-web-app/web/lib/foliage-system.ts
+?? cloud-web-app/web/lib/game-engine-core.ts
+?? cloud-web-app/web/lib/gameplay-ability-system.ts
+?? cloud-web-app/web/lib/git/git-manager.ts
+?? cloud-web-app/web/lib/health-check.ts
+?? cloud-web-app/web/lib/hot-reload-system.ts
+?? cloud-web-app/web/lib/i18n.ts
+?? cloud-web-app/web/lib/index.ts
+?? cloud-web-app/web/lib/keybindings/
+?? cloud-web-app/web/lib/level-serialization.ts
+?? cloud-web-app/web/lib/localization-system.ts
+?? cloud-web-app/web/lib/logging-system.ts
+?? cloud-web-app/web/lib/metering.ts
+?? cloud-web-app/web/lib/navigation-mesh.ts
+?? cloud-web-app/web/lib/networking-multiplayer.ts
+?? cloud-web-app/web/lib/notifications-system.ts
+?? cloud-web-app/web/lib/onboarding-system.ts
+?? cloud-web-app/web/lib/particle-system-real.ts
+?? cloud-web-app/web/lib/pbr-shader-pipeline.ts
+?? cloud-web-app/web/lib/permissions.ts
+?? cloud-web-app/web/lib/physics-engine-real.ts
+?? cloud-web-app/web/lib/plan-limits.ts
+?? cloud-web-app/web/lib/plans.ts
+?? cloud-web-app/web/lib/plugin-system.ts
+?? cloud-web-app/web/lib/post-process-volume.ts
+?? cloud-web-app/web/lib/prisma.ts
+?? cloud-web-app/web/lib/profiler-integrated.ts
+?? cloud-web-app/web/lib/rate-limiting.ts
+?? cloud-web-app/web/lib/ray-tracing.ts
+?? cloud-web-app/web/lib/save-load-system.ts
+?? cloud-web-app/web/lib/sequencer-cinematics.ts
+?? cloud-web-app/web/lib/skeletal-animation.ts
+?? cloud-web-app/web/lib/stripe.ts
+?? cloud-web-app/web/lib/tasks/
+?? cloud-web-app/web/lib/terrain-engine.ts
+?? cloud-web-app/web/lib/testing/
+?? cloud-web-app/web/lib/utils.ts
+?? cloud-web-app/web/lib/vfx-graph-editor.ts
+?? cloud-web-app/web/lib/video-encoder-real.ts
+?? cloud-web-app/web/lib/virtual-texture-system.ts
+?? cloud-web-app/web/lib/volumetric-clouds.ts
+?? cloud-web-app/web/lib/water-ocean-system.ts
+?? cloud-web-app/web/lib/workspace.ts
+?? cloud-web-app/web/lib/world-partition.ts
+?? cloud-web-app/web/middleware.ts
+?? cloud-web-app/web/scripts/
+?? cloud-web-app/web/tests/e2e/
+?? cloud-web-app/web/types/env.d.ts
+?? diagnostics/DUPLICATE_FILENAMES_2025-12-31.txt
+?? diagnostics/DUPLICATE_FILENAMES_PRODUCT_2025-12-31.txt
+?? diagnostics/EMPTY_DIRS_2025-12-31.txt
+?? diagnostics/deleted_tracked_files.zlist
+?? diagnostics/git_rm_untrack_eslintcache.txt
+?? diagnostics/git_rm_untrack_next.txt
+?? diagnostics/git_status_porcelain.txt
+?? diagnostics/git_status_porcelain_after_next.txt
+?? diagnostics/git_status_short.txt
+?? diagnostics/git_status_short_after_restore.txt
+?? diagnostics/staged_name_status.txt
+?? diagnostics/staged_stat.txt
+?? diagnostics/tracked_eslintcache.txt
+?? diagnostics/tracked_eslintcache_after.txt
+?? diagnostics/tracked_next_files.txt
+?? diagnostics/tracked_next_files_after.txt
+?? diagnostics/tracked_swc.txt
+?? diagnostics/tracked_turbo.txt
+?? docs/MATRIZ_ENTREGA_OWNER_2025-12-31.md
+?? docs/README.md
+?? docs/archive/
+?? eslint.config.cjs

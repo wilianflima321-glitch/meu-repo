@@ -4,8 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -34,6 +36,7 @@ const ALLOWED_TYPES = [
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+		const entitlements = await requireEntitlementsForUser(user.userId);
     const formData = await req.formData();
 
     const file = formData.get('file') as File;
@@ -82,6 +85,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Enforce storage limit (sum of asset sizes across user's projects)
+    if (entitlements.plan.limits.storage !== -1) {
+      const agg = await prisma.asset.aggregate({
+        _sum: { size: true },
+        where: {
+          project: { userId: user.userId },
+        },
+      });
+      const current = agg._sum.size || 0;
+      if (current + file.size > entitlements.plan.limits.storage) {
+        return NextResponse.json(
+          {
+            error: 'STORAGE_LIMIT_REACHED',
+            message: 'Limite de storage do plano atingido. Faça upgrade para enviar mais assets.',
+            plan: entitlements.plan.id,
+          },
+          { status: 402 }
+        );
+      }
+    }
+
     // Create upload directory if it doesn't exist
     if (!existsSync(UPLOAD_DIR)) {
       await mkdir(UPLOAD_DIR, { recursive: true });
@@ -95,8 +119,7 @@ export async function POST(req: NextRequest) {
 
     // Save file
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filepath, buffer);
+		await writeFile(filepath, new Uint8Array(bytes));
 
     // Create asset record
     const asset = await prisma.asset.create({
@@ -118,17 +141,9 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Upload error:', error);
 
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to upload file' },
-      { status: 500 }
-    );
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError('Failed to upload file');
   }
 }
 

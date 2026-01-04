@@ -40,10 +40,10 @@ export class AppTesterChatAgent extends AbstractStreamParsingChatAgent {
     @inject(PreferenceService)
     protected set preferenceService(v: PreferenceService) { this._preferenceService = v; }
     protected get preferenceService(): PreferenceService { if (!this._preferenceService) { throw new Error('AppTesterChatAgent: preferenceService not injected'); } return this._preferenceService; }
-    private _llmProviderService?: unknown;
+    private _llmProviderService?: LlmProviderService;
     @inject(LlmProviderService)
-    protected set llmProviderService(v: unknown) { this._llmProviderService = v; }
-    protected get llmProviderService(): unknown { if (this._llmProviderService === undefined) { throw new Error('AppTesterChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
+    protected set llmProviderService(v: LlmProviderService) { this._llmProviderService = v; }
+    protected get llmProviderService(): LlmProviderService { if (!this._llmProviderService) { throw new Error('AppTesterChatAgent: llmProviderService not injected'); } return this._llmProviderService; }
 
     override id: string = AppTesterChatAgentId;
     override name = AppTesterChatAgentId;

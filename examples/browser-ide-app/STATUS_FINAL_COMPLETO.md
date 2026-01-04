@@ -62,7 +62,7 @@
 | Componente | Status | Funcionalidade |
 |------------|--------|----------------|
 | server.js (Node) | ✅ | Express server |
-| server.py (Python) | ✅ | HTTP server |
+| server.py (Python) | ⚠️ | Legacy (desativado; era mock) |
 
 ---
 
@@ -223,30 +223,28 @@ Total: 32 arquivos | ~8500 linhas de código
 
 ---
 
-## ⚠️ O QUE ESTÁ MOCK
+## ⚠️ LIMITAÇÕES (REAL-OR-FAIL)
 
-### **1. API de IA** 🔄
+### **1. IA (LLM)** 🔄
 ```
-Status: Mock implementado
-Pronto para: Conectar API real (OpenAI, Anthropic, etc)
-Tempo estimado: 2-3 dias
+Status: real-or-fail
+Comportamento: sem chaves/configuração, endpoints retornam erro explícito (ex.: 503 LLM_NOT_CONFIGURED)
+Pronto para: configurar provedor (OpenAI/Anthropic/etc) e definir env vars
 Documentação: FLUXO_IA_COMPLETO.md
 ```
 
-### **2. Backend Real** 🔄
+### **2. Persistência/Colaboração (Servidor + DB)** 🔄
 ```
-Status: Servidor estático
-Pronto para: Backend com banco de dados
-Tempo estimado: 5-7 dias
-Necessário para: Persistência de projetos, colaboração
+Status: backend Node existe (Express + WS), mas persistência/colaboração completa pode exigir DB/FS
+Pronto para: adicionar storage real para projetos e sessões multi-usuário
+Necessário para: persistência robusta, colaboração em tempo real
 ```
 
 ### **3. Autenticação** 🔄
 ```
-Status: Não implementado
+Status: não implementado
 Pronto para: Firebase Auth, Auth0, etc
-Tempo estimado: 2-3 dias
-Necessário para: Multi-usuário, cloud save
+Necessário para: multi-usuário, permissões, cloud save
 ```
 
 ---
@@ -301,27 +299,21 @@ Necessário para: Multi-usuário, cloud save
 
 ### **1. Iniciar Servidor**
 
-#### **Opção A: Python**
-```bash
-cd examples/browser-ide-app
-python3 -m http.server 8080
-```
-
-#### **Opção B: Node.js**
+#### **Node.js (backend real-or-fail)**
 ```bash
 cd examples/browser-ide-app
 npm install
-node server.js
+npm start
 ```
 
 ### **2. Abrir no Navegador**
 ```
-http://localhost:8080/index.html
+http://localhost:3000/
 ```
 
 ### **3. Testar Integração**
 ```
-http://localhost:8080/test-integration.html
+http://localhost:3000/test-integration.html
 ```
 
 ---

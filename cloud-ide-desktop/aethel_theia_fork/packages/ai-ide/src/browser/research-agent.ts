@@ -42,8 +42,23 @@ export interface ResearchResponse {
     error?: string;
 }
 
+export interface PromptTemplate {
+    id: string;
+    template: string;
+}
+
 @injectable()
 export class ResearchAgent {
+    readonly id = 'research';
+    readonly name = 'Research Agent';
+    readonly description = 'Performs search, analysis, summarization, and fact-checking.';
+    readonly promptTemplates: PromptTemplate[] = [
+        { id: 'research-search', template: 'Search the web for relevant sources.' },
+        { id: 'research-analysis', template: 'Analyze and extract key points.' },
+        { id: 'research-summarize', template: 'Summarize content clearly and concisely.' },
+        { id: 'research-fact-verify', template: 'Fact-check claims and provide evidence.' },
+    ];
+
     constructor(
         @inject(TelemetryService) private telemetry: TelemetryService,
         @inject(ObservabilityService) private observability: ObservabilityService,
@@ -53,6 +68,10 @@ export class ResearchAgent {
         @inject(SecureFetch) private secureFetch: SecureFetch,
         @inject(MissionTelemetry) private missionTelemetry: MissionTelemetry
     ) {}
+
+    async invoke(request: ResearchRequest): Promise<ResearchResponse> {
+        return this.processRequest(request);
+    }
 
     async processRequest(request: ResearchRequest): Promise<ResearchResponse> {
         const startTime = Date.now();

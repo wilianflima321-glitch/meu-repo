@@ -473,13 +473,42 @@ class IntegrationHub {
       ...context,
     };
 
-    // Send to AI (mock for now)
-    console.log('🤖 AI Request:', prompt, fullContext);
-    
-    // In production, this would call the AI API
+    const agentType = String(context.agentType || 'coder');
+    const supported = new Set(['architect', 'coder', 'research']);
+    if (!supported.has(agentType)) {
+      const err = new Error(
+        `UNKNOWN_AGENT: '${agentType}'. Use: architect, coder, research (ai-dream e character-memory não estão implementados).`
+      );
+      err.code = 'UNKNOWN_AGENT';
+      throw err;
+    }
+
+    const payload = {
+      input: `${prompt}\n\nContext:\n${JSON.stringify(fullContext, null, 2)}`,
+      workspaceId: String(context.workspaceId || 'local'),
+      userId: String(context.userId || 'local'),
+    };
+
+    const res = await fetch(`/api/agent/${agentType}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const message =
+        (data && (data.message || data.error)) ? (data.message || data.error) : `HTTP ${res.status}`;
+      const err = new Error(message);
+      err.code = (data && data.error) ? data.error : 'AI_REQUEST_FAILED';
+      err.httpStatus = res.status;
+      throw err;
+    }
+
     return {
-      response: 'AI response would go here',
+      response: String(data && data.content ? data.content : ''),
       suggestions: [],
+      metadata: data && data.metadata ? data.metadata : undefined,
     };
   }
 
@@ -492,13 +521,10 @@ class IntegrationHub {
       return;
     }
 
-    // Generate share link (mock)
-    const shareId = btoa(this.state.currentProject.id);
-    const shareUrl = `${window.location.origin}/share/${shareId}`;
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      this.showToast('Share link copied to clipboard', 'success');
+    // real-or-fail: não gerar links “fake” sem backend/endpoint real.
+    this.showToast('Share não implementado (NOT_IMPLEMENTED).', 'error');
+    throw Object.assign(new Error('NOT_IMPLEMENTED: shareProject requer um endpoint backend real.'), {
+      code: 'NOT_IMPLEMENTED',
     });
   }
 

@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import { stopDapSession } from '@/lib/server/dap-runtime';
 
 interface StopSessionRequest {
   sessionId: string;
 }
 
-// Access the same session storage (would be shared module in production)
-declare global {
-  var activeSessions: Map<string, any> | undefined;
-}
-
 export async function POST(request: NextRequest) {
   try {
+    const user = requireAuth(request);
+		await requireFeatureForUser(user.userId, 'dap');
+
     const body: StopSessionRequest = await request.json();
     const { sessionId } = body;
 
@@ -21,14 +23,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Debug session stopped: ${sessionId}`);
+    console.log(`Debug session stop requested: ${sessionId}`);
+
+    const stopped = stopDapSession(sessionId);
 
     return NextResponse.json({
       success: true,
-      message: 'Debug session stopped'
+      stopped,
+      message: stopped ? 'Debug session stopped' : 'Session not found',
     });
   } catch (error) {
     console.error('Failed to stop debug session:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     return NextResponse.json(
       { success: false, error: 'Failed to stop session' },
       { status: 500 }

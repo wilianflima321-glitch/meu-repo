@@ -78,14 +78,3 @@ export default function AdminUsers() {
     </div>
   );
 }
-              <td className='p-3'>{user.plan}</td>
-              <td className='p-3'><input type='number' value={user.credits} onChange={(e) => handleEdit(user.id, 'credits', e.target.value)} /></td>
-              <td className='p-3'><button className='bg-red-500 text-white px-2 py-1 rounded'>Suspender</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button className='mt-4 bg-blue-500 text-white px-4 py-2 rounded'>Salvar Mudanças</button>
-    </div>
-  );
-}

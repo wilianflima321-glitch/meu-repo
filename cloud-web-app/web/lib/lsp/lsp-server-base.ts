@@ -8,9 +8,10 @@ import { EventEmitter } from 'events';
 export interface LSPServerConfig {
   command: string;
   args: string[];
-  env?: Record<string, string>;
+  env?: Record<string, string | undefined>;
   cwd?: string;
   initializationOptions?: any;
+  language?: string;
 }
 
 export interface InitializeParams {
@@ -145,6 +146,24 @@ export abstract class LSPServerBase extends EventEmitter {
     this.config = config;
   }
 
+  private getAuthToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      return window.localStorage.getItem('aethel-token');
+    } catch {
+      return null;
+    }
+  }
+
+  private resolveLanguage(): string {
+    if (this.config.language) return this.config.language;
+    const cmd = (this.config.command || '').toLowerCase();
+    if (cmd.includes('pylsp')) return 'python';
+    if (cmd.includes('typescript')) return 'typescript';
+    if (cmd.includes('gopls')) return 'go';
+    return this.config.command;
+  }
+
   /**
    * Start the LSP server process
    */
@@ -154,10 +173,9 @@ export abstract class LSPServerBase extends EventEmitter {
     }
 
     try {
-      // In browser environment, we'll use WebSocket or HTTP
-      // For now, emit ready event for mock implementation
+      // Client-side: o runtime real é via /api/lsp/* (server-side).
+      // Não inicializa processo aqui.
       this.emit('ready');
-      console.log(`[LSP] ${this.config.command} server started (mock mode)`);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -208,21 +226,54 @@ export abstract class LSPServerBase extends EventEmitter {
    */
   protected async sendRequest(method: string, params: any): Promise<any> {
     const id = ++this.messageId;
-    const message = {
-      jsonrpc: '2.0',
-      id,
-      method,
-      params,
-    };
 
     return new Promise((resolve, reject) => {
       this.pendingRequests.set(id, { resolve, reject });
-      
-      // Mock implementation - will be replaced with real communication
-      setTimeout(() => {
-        const mockResponse = this.getMockResponse(method, params);
-        this.handleResponse({ jsonrpc: '2.0', id, result: mockResponse });
-      }, 50);
+
+      const token = this.getAuthToken();
+      fetch('/api/lsp/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          language: this.resolveLanguage(),
+          method,
+          params,
+          id,
+        }),
+      })
+        .then(async (res) => {
+          const data = await res.json().catch(() => null);
+          // Sempre tenta respeitar o payload JSON-RPC.
+          if (data && typeof data === 'object' && (data as any).error) {
+            const errObj = (data as any).error;
+            const e = new Error(String(errObj.data || errObj.message || 'LSP error'));
+            (e as any).code = errObj.message;
+            throw e;
+          }
+          if (!res.ok) {
+            throw new Error(`LSP request failed (HTTP ${res.status})`);
+          }
+          return data;
+        })
+        .then((data) => {
+          // Endpoint retorna {jsonrpc,id,result} no sucesso.
+          if (data && typeof data === 'object' && (data as any).result !== undefined) {
+            this.handleResponse({ jsonrpc: '2.0', id, result: (data as any).result });
+            return;
+          }
+          // fallback
+          this.handleResponse({ jsonrpc: '2.0', id, result: data });
+        })
+        .catch((error) => {
+          const pending = this.pendingRequests.get(id);
+          if (pending) {
+            this.pendingRequests.delete(id);
+            pending.reject(error);
+          }
+        });
     });
   }
 
@@ -230,14 +281,29 @@ export abstract class LSPServerBase extends EventEmitter {
    * Send a notification to the LSP server
    */
   protected async sendNotification(method: string, params: any): Promise<void> {
-    const message = {
-      jsonrpc: '2.0',
-      method,
-      params,
-    };
+    const token = this.getAuthToken();
+    try {
+      const res = await fetch('/api/lsp/notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          language: this.resolveLanguage(),
+          method,
+          params,
+        }),
+      });
 
-    // Mock implementation
-    console.log(`[LSP] Notification: ${method}`, params);
+      // 501 é esperado enquanto não houver backend LSP real.
+      if (!res.ok && res.status !== 501) {
+        console.warn(`[LSP] Notification failed (${res.status}) for ${method}`);
+      }
+    } catch (error) {
+      // Não quebra o fluxo do editor por notification.
+      console.warn('[LSP] Notification error', error);
+    }
   }
 
   /**

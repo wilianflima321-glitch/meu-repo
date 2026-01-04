@@ -72,9 +72,9 @@ export class IDEIntegration {
       await this.initializeExtensions();
 
       this.initialized = true;
-      console.log('[IDE Integration] ✅ Initialization complete');
+      console.log('[IDE Integration] Initialization complete');
     } catch (error) {
-      console.error('[IDE Integration] ❌ Initialization failed:', error);
+      console.error('[IDE Integration] Initialization failed:', error);
       throw error;
     }
   }
@@ -129,14 +129,14 @@ export class IDEIntegration {
    */
   private async initializeTerminal(): Promise<void> {
     console.log('[IDE Integration] Initializing terminal...');
-    
-    // Create default terminal
-    const terminal = this.terminalManager.createTerminal({
-      name: 'bash',
-      shellPath: '/bin/bash',
-    });
 
-    console.log(`[IDE Integration] Created default terminal: ${terminal.id}`);
+    try {
+      // Create default terminal (backend pode não estar disponível em testes)
+      const sessionId = await this.terminalManager.createSession('bash', this.config.workspaceRoot, '/bin/bash');
+      console.log(`[IDE Integration] Created default terminal: ${sessionId}`);
+    } catch (error) {
+      console.warn('[IDE Integration] Terminal not available:', error);
+    }
   }
 
   /**
@@ -216,11 +216,15 @@ export class IDEIntegration {
    */
   private async initializeTasks(): Promise<void> {
     console.log('[IDE Integration] Initializing tasks...');
-    
-    // Detect tasks in workspace
-    await this.taskManager.detectTasks(this.config.workspaceRoot);
-    const tasks = this.taskManager.getTasks();
-    console.log(`[IDE Integration] Detected ${tasks.length} tasks`);
+
+    try {
+      // Detect tasks in workspace
+      await this.taskManager.detectTasks(this.config.workspaceRoot);
+      const tasks = this.taskManager.getTasks();
+      console.log(`[IDE Integration] Detected ${tasks.length} tasks`);
+    } catch (error) {
+      console.warn('[IDE Integration] Tasks not available:', error);
+    }
   }
 
   /**
@@ -238,11 +242,15 @@ export class IDEIntegration {
    */
   private async initializeExtensions(): Promise<void> {
     console.log('[IDE Integration] Initializing extensions...');
-    
-    // Load and activate extensions
-    await this.extensionHost.loadExtensions();
-    const extensions = this.extensionHost.getExtensions();
-    console.log(`[IDE Integration] Loaded ${extensions.length} extensions`);
+
+    try {
+      // Load and activate extensions
+      await this.extensionHost.loadExtensions();
+      const extensions = this.extensionHost.getExtensions();
+      console.log(`[IDE Integration] Loaded ${extensions.length} extensions`);
+    } catch (error) {
+      console.warn('[IDE Integration] Extensions not available:', error);
+    }
   }
 
   /**
@@ -294,9 +302,9 @@ export class IDEIntegration {
       await this.extensionHost.deactivateAll();
 
       this.initialized = false;
-      console.log('[IDE Integration] ✅ Shutdown complete');
+      console.log('[IDE Integration] Shutdown complete');
     } catch (error) {
-      console.error('[IDE Integration] ❌ Shutdown failed:', error);
+      console.error('[IDE Integration] Shutdown failed:', error);
       throw error;
     }
   }

@@ -217,6 +217,7 @@ async function callProviderChatCompletion(args: {
 export async function startServer(): Promise<void> {
   const app = express();
   const PORT = Number(process.env.PORT || 3000);
+  const HOST = String(process.env.HOST || '127.0.0.1');
 
   app.use(cors());
   app.use(express.json({ limit: '2mb' }));
@@ -453,9 +454,10 @@ export async function startServer(): Promise<void> {
     }
   });
 
-  // Serve index.html
+  // Serve a IDE (Monaco) como página inicial
+  // (o index.html atual é um dashboard/landing e não parece uma IDE real)
   app.get('/', (_req, res) => {
-    res.sendFile(path.join(rootDir, 'index.html'));
+    res.sendFile(path.join(rootDir, 'monaco-editor.html'));
   });
 
   // -----------------------------
@@ -692,12 +694,12 @@ export async function startServer(): Promise<void> {
       }
       reject(err);
     });
-    server.listen(PORT, () => {
-      const url = `http://localhost:${PORT}`;
+    server.listen(PORT, HOST, () => {
+      const url = `http://${HOST}:${PORT}`;
       // eslint-disable-next-line no-console
       console.log(`Aethel Browser IDE backend: ${url}`);
       // eslint-disable-next-line no-console
-      console.log(`WS: ws://localhost:${PORT}/ws`);
+      console.log(`WS: ws://${HOST}:${PORT}/ws`);
       resolve();
     });
   });

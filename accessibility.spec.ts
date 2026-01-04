@@ -280,7 +280,7 @@ function getAIIDEStyles(): string {
     :root {
       --ai-ide-font-stack: 'Inter', 'Segoe UI', Roboto, sans-serif;
       --ai-ide-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-      --ai-ide-brand-primary: #6366f1;
+      --ai-ide-brand-primary: #4f46e5;
       --ai-ide-brand-secondary: #ec4899;
       --ai-ide-brand-tertiary: #22d3ee;
       --ai-ide-surface: #1e293b;

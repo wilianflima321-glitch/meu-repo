@@ -5,94 +5,152 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import Stripe from 'stripe';
+import { requireEnv } from '@/lib/env';
+import { getStripe } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { type, data } = body;
+    const webhookSecret = requireEnv('STRIPE_WEBHOOK_SECRET');
+    const signature = req.headers.get('stripe-signature');
+    if (!signature) {
+      return NextResponse.json(
+        { error: 'MISSING_SIGNATURE', message: 'Header stripe-signature ausente.' },
+        { status: 400 }
+      );
+    }
 
-    // In production, verify webhook signature from Stripe
-    // const signature = req.headers.get('stripe-signature');
-    // const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    const rawBody = await req.text();
+    const stripe = getStripe();
 
-    switch (type) {
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    } catch (err) {
+      return NextResponse.json(
+        { error: 'INVALID_SIGNATURE', message: (err as Error).message },
+        { status: 400 }
+      );
+    }
+
+    switch (event.type) {
       case 'checkout.session.completed': {
-        const { sessionId, userId, planId } = data;
+        const session = event.data.object as Stripe.Checkout.Session;
 
-        await prisma.subscription.update({
+        const userId = String(session.metadata?.userId || session.client_reference_id || '');
+        const planId = String(session.metadata?.planId || '');
+        const subscriptionId = typeof session.subscription === 'string' ? session.subscription : '';
+
+        if (!userId || !subscriptionId) {
+          return NextResponse.json(
+            { error: 'MISSING_DATA', message: 'checkout.session.completed sem userId/subscription.' },
+            { status: 400 }
+          );
+        }
+
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+          expand: ['items.data.price'],
+        });
+
+        const priceId = subscription.items.data[0]?.price?.id;
+        if (!priceId) {
+          return NextResponse.json(
+            { error: 'MISSING_PRICE', message: 'Subscription sem price id.' },
+            { status: 400 }
+          );
+        }
+
+        await prisma.subscription.upsert({
           where: { userId },
-          data: {
-            status: 'active',
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          create: {
+            userId,
+            stripeSubscriptionId: subscription.id,
+            stripePriceId: priceId,
+            status: subscription.status,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          },
+          update: {
+            stripeSubscriptionId: subscription.id,
+            stripePriceId: priceId,
+            status: subscription.status,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
           },
         });
 
-        await prisma.payment.create({
-          data: {
-            userId,
-            amount: data.amount || 0,
-            currency: data.currency || 'USD',
-            status: 'succeeded',
-            stripePaymentIntentId: sessionId,
-          },
-        });
+        // Atualiza o plano do usuário para UX (enforcement deve checar Subscription.status)
+        if (planId) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { plan: planId },
+          });
+        }
 
         break;
       }
 
-      case 'subscription.updated': {
-        const { userId, status, currentPeriodEnd } = data;
-
-        await prisma.subscription.update({
-          where: { userId },
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await prisma.subscription.updateMany({
+          where: { stripeSubscriptionId: subscription.id },
           data: {
+            status: subscription.status,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          },
+        });
+        break;
+      }
+
+      case 'invoice.paid':
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const stripeCustomerId = typeof invoice.customer === 'string' ? invoice.customer : '';
+        if (!stripeCustomerId) break;
+
+        const user = await prisma.user.findFirst({ where: { stripeCustomerId } });
+        if (!user) break;
+
+        const stripePaymentId = invoice.id;
+        const amount = Number(invoice.amount_paid ?? invoice.amount_due ?? 0);
+        const currency = String(invoice.currency || 'usd');
+        const status = event.type === 'invoice.paid' ? 'succeeded' : 'failed';
+
+        await prisma.payment.upsert({
+          where: { stripePaymentId },
+          create: {
+            userId: user.id,
+            stripePaymentId,
+            amount,
+            currency,
             status,
-            currentPeriodEnd: new Date(currentPeriodEnd),
+          },
+          update: {
+            amount,
+            currency,
+            status,
           },
         });
-
-        break;
-      }
-
-      case 'subscription.deleted': {
-        const { userId } = data;
-
-        await prisma.subscription.update({
-          where: { userId },
-          data: {
-            status: 'canceled',
-          },
-        });
-
-        break;
-      }
-
-      case 'payment.failed': {
-        const { userId, paymentIntentId } = data;
-
-        await prisma.payment.create({
-          data: {
-            userId,
-            amount: data.amount || 0,
-            currency: data.currency || 'USD',
-            status: 'failed',
-            stripePaymentIntentId: paymentIntentId,
-          },
-        });
-
         break;
       }
 
       default:
-        console.log('Unhandled webhook event:', type);
+        // Eventos não necessários ainda
+        break;
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('Webhook error:', error);
+
+    if ((error as any)?.code === 'ENV_NOT_SET') {
+      return NextResponse.json(
+        { error: 'STRIPE_NOT_CONFIGURED', message: (error as Error).message },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

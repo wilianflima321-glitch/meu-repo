@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { getEditorIntegration } from '../../lib/integration';
+import { getLSPApiClient, getAIApiClient } from '../../lib/api/index';
 
 describe('Editor Integration', () => {
   let editor: ReturnType<typeof getEditorIntegration>;

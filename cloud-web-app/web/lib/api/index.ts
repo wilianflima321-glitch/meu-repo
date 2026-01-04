@@ -3,6 +3,10 @@
  * Central export for all API clients
  */
 
+import { getLSPApiClient } from './lsp-api';
+import { getDAPApiClient } from './dap-api';
+import { getAIApiClient } from './ai-api';
+
 export { LSPApiClient, getLSPApiClient } from './lsp-api';
 export type { LSPServerConfig, LSPRequest, LSPResponse, LSPNotification } from './lsp-api';
 

@@ -10,6 +10,9 @@ export interface OutputChannel {
   clear(): void;
   show(): void;
   hide(): void;
+  getContent(): string;
+  getLines(): string[];
+  isVisible(): boolean;
   dispose(): void;
 }
 

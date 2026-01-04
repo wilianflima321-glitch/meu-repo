@@ -498,17 +498,17 @@
 
 ### **1. API de IA** 🔄
 ```
-Status: Mock
-Impacto: Botões de IA não funcionam
-Solução: Conectar API real (2-3 dias)
+Status: real-or-fail
+Impacto: Sem chaves de LLM, endpoints retornam 503 (LLM_NOT_CONFIGURED)
+Solução: Configurar OPENAI_API_KEY / DEEPSEEK_API_KEY / ANTHROPIC_API_KEY / GOOGLE_API_KEY
 Prioridade: Alta
 ```
 
 ### **2. Backend Real** 🔄
 ```
-Status: Servidor estático
-Impacto: Projetos não persistem entre sessões
-Solução: Implementar backend (5-7 dias)
+Status: Implementado (Express + WebSocket)
+Impacto: Persistência pode ser limitada (in-memory/localStorage), depende do fluxo
+Solução: Adicionar persistência (DB/FS) conforme necessidade
 Prioridade: Média
 ```
 

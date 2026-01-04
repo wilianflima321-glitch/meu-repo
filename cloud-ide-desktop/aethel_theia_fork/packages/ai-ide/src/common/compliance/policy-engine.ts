@@ -99,6 +99,8 @@ interface PlanLimits {
     requiresApprovalAbove: number;
     tokensPerMonth: number;
     contextWindow: number;
+    prioritySupport?: boolean;
+    dedicatedInfra?: boolean;
   };
 }
 
@@ -906,30 +908,4 @@ export class PolicyEngine {
     return this.evaluate(policyContext);
   }
 
-  private containsSecrets(content: string): boolean {
-    if (!content) return false;
-
-    const secretPatterns = [
-      /api[_-]?key/i,
-      /secret[_-]?key/i,
-      /password/i,
-      /token/i,
-      /bearer\s+[a-zA-Z0-9_-]+/i,
-    ];
-
-    return secretPatterns.some(pattern => pattern.test(content));
-  }
-
-  private containsPII(content: string): boolean {
-    if (!content) return false;
-
-    const piiPatterns = [
-      /[\w.-]+@[\w.-]+\.\w+/, // Email
-      /\d{3}[-.]?\d{3}[-.]?\d{4}/, // Phone
-      /\d{3}-\d{2}-\d{4}/, // SSN
-      /\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}/, // Credit card
-    ];
-
-    return piiPatterns.some(pattern => pattern.test(content));
-  }
 }

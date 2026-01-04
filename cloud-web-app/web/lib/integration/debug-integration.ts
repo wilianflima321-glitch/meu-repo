@@ -357,3 +357,7 @@ export function getDebugIntegration(): DebugIntegration {
   }
   return debugIntegrationInstance;
 }
+
+export function resetDebugIntegration(): void {
+  debugIntegrationInstance = null;
+}

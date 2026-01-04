@@ -1,336 +1,196 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+
+// Extensões built-in do Aethel Engine
+const BUILTIN_EXTENSIONS = [
+  {
+    id: 'aethel.blueprint-editor',
+    name: 'Blueprint Visual Scripting',
+    description: 'Sistema de visual scripting estilo Unreal Engine para criar lógica de jogo sem código',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'editor',
+    downloads: 15420,
+    rating: 4.9,
+    price: 0,
+    icon: '/icons/blueprint.svg',
+    tags: ['visual-scripting', 'blueprints', 'nodes', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.niagara-vfx',
+    name: 'Niagara VFX Editor',
+    description: 'Editor avançado de partículas e efeitos visuais baseado no Niagara da Unreal',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'editor',
+    downloads: 12850,
+    rating: 4.8,
+    price: 0,
+    icon: '/icons/niagara.svg',
+    tags: ['vfx', 'particles', 'effects', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.ai-assistant',
+    name: 'AI Game Assistant',
+    description: 'Assistente de IA para criação de jogos - gera código, assets, e ajuda com gameplay',
+    version: '2.0.0',
+    author: 'Aethel Team',
+    category: 'ai',
+    downloads: 28900,
+    rating: 4.95,
+    price: 0,
+    icon: '/icons/ai.svg',
+    tags: ['ai', 'assistant', 'code-generation', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.landscape-editor',
+    name: 'Landscape & Terrain Editor',
+    description: 'Editor completo de terrenos com sculpting, painting, e foliage procedural',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'editor',
+    downloads: 9500,
+    rating: 4.7,
+    price: 0,
+    icon: '/icons/landscape.svg',
+    tags: ['terrain', 'landscape', 'sculpting', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.physics-engine',
+    name: 'Advanced Physics Engine',
+    description: 'Motor de física completo com rigid bodies, constraints, e simulação realista',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'engine',
+    downloads: 18200,
+    rating: 4.85,
+    price: 0,
+    icon: '/icons/physics.svg',
+    tags: ['physics', 'simulation', 'rigid-body', 'official'],
+    builtin: true,
+  },
+  {
+    id: 'aethel.multiplayer',
+    name: 'Multiplayer Networking',
+    description: 'Sistema completo de networking para jogos multiplayer com replicação e matchmaking',
+    version: '1.0.0',
+    author: 'Aethel Team',
+    category: 'networking',
+    downloads: 11300,
+    rating: 4.6,
+    price: 0,
+    icon: '/icons/multiplayer.svg',
+    tags: ['multiplayer', 'networking', 'replication', 'official'],
+    builtin: true,
+  },
+];
 
 export async function GET(request: NextRequest) {
-  const extensions = [
-    {
-      id: 'python-lsp',
-      name: 'python-lsp',
-      displayName: 'Python Language Server',
-      description: 'Full Python language support with IntelliSense, debugging, and refactoring powered by Pylance',
-      version: '1.0.0',
-      publisher: 'Aethel',
-      icon: '🐍',
-      downloads: 150000,
-      rating: 4.8,
-      categories: ['languages', 'debuggers'],
-      tags: ['python', 'lsp', 'intellisense', 'pylance'],
-      repository: 'https://github.com/aethel/python-lsp',
-      license: 'MIT',
-      installed: false,
-      size: '15.2 MB',
-      lastUpdated: '2025-12-01'
-    },
-    {
-      id: 'typescript-lsp',
-      name: 'typescript-lsp',
-      displayName: 'TypeScript Language Server',
-      description: 'TypeScript and JavaScript language support with advanced IntelliSense, refactoring, and type checking',
-      version: '2.1.0',
-      publisher: 'Aethel',
-      icon: '📘',
-      downloads: 200000,
-      rating: 4.9,
-      categories: ['languages'],
-      tags: ['typescript', 'javascript', 'lsp', 'tsserver'],
-      repository: 'https://github.com/aethel/typescript-lsp',
-      license: 'MIT',
-      installed: false,
-      size: '22.5 MB',
-      lastUpdated: '2025-12-05'
-    },
-    {
-      id: 'go-lsp',
-      name: 'go-lsp',
-      displayName: 'Go Language Server',
-      description: 'Go language support powered by gopls with code completion, navigation, and refactoring',
-      version: '1.5.0',
-      publisher: 'Aethel',
-      icon: '🐹',
-      downloads: 80000,
-      rating: 4.7,
-      categories: ['languages', 'debuggers'],
-      tags: ['go', 'golang', 'lsp', 'gopls'],
-      repository: 'https://github.com/aethel/go-lsp',
-      license: 'MIT',
-      installed: false,
-      size: '18.7 MB',
-      lastUpdated: '2025-11-28'
-    },
-    {
-      id: 'rust-analyzer',
-      name: 'rust-analyzer',
-      displayName: 'Rust Analyzer',
-      description: 'Rust language support with rust-analyzer providing fast and accurate code intelligence',
-      version: '0.3.0',
-      publisher: 'Aethel',
-      icon: '🦀',
-      downloads: 60000,
-      rating: 4.9,
-      categories: ['languages', 'debuggers'],
-      tags: ['rust', 'lsp', 'cargo', 'rust-analyzer'],
-      repository: 'https://github.com/aethel/rust-analyzer',
-      license: 'MIT',
-      installed: false,
-      size: '25.3 MB',
-      lastUpdated: '2025-12-03'
-    },
-    {
-      id: 'java-lsp',
-      name: 'java-lsp',
-      displayName: 'Java Language Server',
-      description: 'Java language support powered by Eclipse JDT.LS with Maven and Gradle integration',
-      version: '1.8.0',
-      publisher: 'Aethel',
-      icon: '☕',
-      downloads: 120000,
-      rating: 4.6,
-      categories: ['languages', 'debuggers'],
-      tags: ['java', 'lsp', 'maven', 'gradle'],
-      repository: 'https://github.com/aethel/java-lsp',
-      license: 'EPL-2.0',
-      installed: false,
-      size: '45.8 MB',
-      lastUpdated: '2025-11-30'
-    },
-    {
-      id: 'csharp-lsp',
-      name: 'csharp-lsp',
-      displayName: 'C# Language Server',
-      description: 'C# language support with OmniSharp providing IntelliSense and debugging for .NET',
-      version: '2.0.0',
-      publisher: 'Aethel',
-      icon: '🔷',
-      downloads: 95000,
-      rating: 4.7,
-      categories: ['languages', 'debuggers'],
-      tags: ['csharp', 'dotnet', 'lsp', 'omnisharp'],
-      repository: 'https://github.com/aethel/csharp-lsp',
-      license: 'MIT',
-      installed: false,
-      size: '32.1 MB',
-      lastUpdated: '2025-12-02'
-    },
-    {
-      id: 'cpp-lsp',
-      name: 'cpp-lsp',
-      displayName: 'C/C++ Language Server',
-      description: 'C and C++ language support powered by clangd with code completion and navigation',
-      version: '1.3.0',
-      publisher: 'Aethel',
-      icon: '⚙️',
-      downloads: 110000,
-      rating: 4.8,
-      categories: ['languages', 'debuggers'],
-      tags: ['cpp', 'c', 'lsp', 'clangd'],
-      repository: 'https://github.com/aethel/cpp-lsp',
-      license: 'MIT',
-      installed: false,
-      size: '28.9 MB',
-      lastUpdated: '2025-11-29'
-    },
-    {
-      id: 'php-lsp',
-      name: 'php-lsp',
-      displayName: 'PHP Language Server',
-      description: 'PHP language support with Intelephense providing code intelligence and refactoring',
-      version: '1.6.0',
-      publisher: 'Aethel',
-      icon: '🐘',
-      downloads: 70000,
-      rating: 4.5,
-      categories: ['languages'],
-      tags: ['php', 'lsp', 'intelephense'],
-      repository: 'https://github.com/aethel/php-lsp',
-      license: 'MIT',
-      installed: false,
-      size: '12.4 MB',
-      lastUpdated: '2025-11-27'
-    },
-    {
-      id: 'ai-code-assistant',
-      name: 'ai-code-assistant',
-      displayName: 'AI Code Assistant Pro',
-      description: 'Advanced AI-powered code completion, generation, and refactoring with multi-model support',
-      version: '3.0.0',
-      publisher: 'Aethel',
-      icon: '🤖',
-      downloads: 300000,
-      rating: 4.9,
-      categories: ['ai-tools', 'productivity'],
-      tags: ['ai', 'completion', 'generation', 'copilot'],
-      repository: 'https://github.com/aethel/ai-code-assistant',
-      license: 'MIT',
-      installed: true,
-      size: '8.5 MB',
-      lastUpdated: '2025-12-08'
-    },
-    {
-      id: 'theme-dracula',
-      name: 'theme-dracula',
-      displayName: 'Dracula Theme',
-      description: 'Dark theme with vibrant colors inspired by the Dracula color scheme',
-      version: '2.0.0',
-      publisher: 'Dracula',
-      icon: '🧛',
-      downloads: 500000,
-      rating: 4.8,
-      categories: ['themes'],
-      tags: ['theme', 'dark', 'dracula', 'color-scheme'],
-      repository: 'https://github.com/dracula/dracula-theme',
-      license: 'MIT',
-      installed: false,
-      size: '1.2 MB',
-      lastUpdated: '2025-11-25'
-    },
-    {
-      id: 'theme-nord',
-      name: 'theme-nord',
-      displayName: 'Nord Theme',
-      description: 'Arctic, north-bluish color palette with clean and elegant design',
-      version: '1.5.0',
-      publisher: 'Nord',
-      icon: '❄️',
-      downloads: 350000,
-      rating: 4.7,
-      categories: ['themes'],
-      tags: ['theme', 'dark', 'nord', 'minimal'],
-      repository: 'https://github.com/nordtheme/nord',
-      license: 'MIT',
-      installed: false,
-      size: '0.9 MB',
-      lastUpdated: '2025-11-20'
-    },
-    {
-      id: 'prettier-formatter',
-      name: 'prettier-formatter',
-      displayName: 'Prettier Code Formatter',
-      description: 'Opinionated code formatter supporting JavaScript, TypeScript, CSS, HTML, and more',
-      version: '5.0.0',
-      publisher: 'Prettier',
-      icon: '💅',
-      downloads: 800000,
-      rating: 4.7,
-      categories: ['formatters'],
-      tags: ['formatter', 'prettier', 'style', 'beautify'],
-      repository: 'https://github.com/prettier/prettier',
-      license: 'MIT',
-      installed: false,
-      size: '3.2 MB',
-      lastUpdated: '2025-12-04'
-    },
-    {
-      id: 'eslint-linter',
-      name: 'eslint-linter',
-      displayName: 'ESLint',
-      description: 'JavaScript and TypeScript linter with configurable rules and auto-fix capabilities',
-      version: '8.0.0',
-      publisher: 'ESLint',
-      icon: '🔍',
-      downloads: 900000,
-      rating: 4.6,
-      categories: ['linters'],
-      tags: ['linter', 'eslint', 'javascript', 'typescript'],
-      repository: 'https://github.com/eslint/eslint',
-      license: 'MIT',
-      installed: false,
-      size: '5.7 MB',
-      lastUpdated: '2025-12-06'
-    },
-    {
-      id: 'debugger-node',
-      name: 'debugger-node',
-      displayName: 'Node.js Debugger',
-      description: 'Debug Node.js applications with breakpoints, stepping, and variable inspection',
-      version: '1.2.0',
-      publisher: 'Aethel',
-      icon: '🐛',
-      downloads: 180000,
-      rating: 4.8,
-      categories: ['debuggers'],
-      tags: ['debugger', 'nodejs', 'dap', 'breakpoints'],
-      repository: 'https://github.com/aethel/debugger-node',
-      license: 'MIT',
-      installed: false,
-      size: '6.3 MB',
-      lastUpdated: '2025-12-01'
-    },
-    {
-      id: 'debugger-python',
-      name: 'debugger-python',
-      displayName: 'Python Debugger',
-      description: 'Debug Python applications with debugpy supporting breakpoints and remote debugging',
-      version: '1.4.0',
-      publisher: 'Aethel',
-      icon: '🐍',
-      downloads: 140000,
-      rating: 4.7,
-      categories: ['debuggers'],
-      tags: ['debugger', 'python', 'dap', 'debugpy'],
-      repository: 'https://github.com/aethel/debugger-python',
-      license: 'MIT',
-      installed: false,
-      size: '8.1 MB',
-      lastUpdated: '2025-11-28'
-    },
-    {
-      id: 'git-graph',
-      name: 'git-graph',
-      displayName: 'Git Graph',
-      description: 'Visualize git repository history with interactive graph and commit details',
-      version: '2.3.0',
-      publisher: 'Aethel',
-      icon: '🌳',
-      downloads: 220000,
-      rating: 4.9,
-      categories: ['productivity', 'scm'],
-      tags: ['git', 'graph', 'history', 'visualization'],
-      repository: 'https://github.com/aethel/git-graph',
-      license: 'MIT',
-      installed: false,
-      size: '4.5 MB',
-      lastUpdated: '2025-12-07'
-    },
-    {
-      id: 'vim-keybindings',
-      name: 'vim-keybindings',
-      displayName: 'Vim Keybindings',
-      description: 'Vim emulation with modal editing and customizable key mappings',
-      version: '3.1.0',
-      publisher: 'Vim',
-      icon: '⌨️',
-      downloads: 250000,
-      rating: 4.6,
-      categories: ['keymaps'],
-      tags: ['vim', 'keybindings', 'modal', 'editor'],
-      repository: 'https://github.com/vim/vim-keybindings',
-      license: 'MIT',
-      installed: false,
-      size: '2.8 MB',
-      lastUpdated: '2025-11-26'
-    },
-    {
-      id: 'live-share',
-      name: 'live-share',
-      displayName: 'Live Share',
-      description: 'Real-time collaborative editing with shared terminals and debugging sessions',
-      version: '1.7.0',
-      publisher: 'Aethel',
-      icon: '👥',
-      downloads: 190000,
-      rating: 4.8,
-      categories: ['productivity', 'collaboration'],
-      tags: ['collaboration', 'live-share', 'pair-programming'],
-      repository: 'https://github.com/aethel/live-share',
-      license: 'MIT',
-      installed: false,
-      size: '11.2 MB',
-      lastUpdated: '2025-12-05'
+  try {
+    const user = requireAuth(request);
+    await requireFeatureForUser(user.userId, 'marketplace');
+    
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
+    
+    // Busca items do marketplace no banco
+    const where: any = {};
+    if (category && category !== 'all') {
+      where.category = category;
     }
-  ];
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    
+    const [dbItems, total, installedRows] = await Promise.all([
+      prisma.marketplaceItem.findMany({
+        where,
+        orderBy: { downloads: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.marketplaceItem.count({ where }),
+      prisma.installedExtension.findMany({
+        where: { userId: user.userId },
+        select: { extensionId: true },
+      }),
+    ]);
 
-  return NextResponse.json({
-    success: true,
-    extensions,
-    total: extensions.length
-  });
+    const installedSet = new Set(installedRows.map(r => r.extensionId));
+    
+    // Converte items do DB para formato de extensão
+    const marketplaceExtensions = dbItems.map(item => ({
+      id: item.id,
+      name: item.title,
+      description: item.description,
+      version: '1.0.0',
+      author: item.authorId,
+      category: item.category,
+      downloads: item.downloads,
+      rating: item.rating,
+      price: item.price,
+      icon: '/icons/extension.svg',
+      tags: [],
+      builtin: false,
+      installed: installedSet.has(item.id),
+    }));
+    
+    // Combina built-in com marketplace
+    let allExtensions = [
+      ...BUILTIN_EXTENSIONS.map((ext) => ({ ...ext, installed: true })),
+      ...marketplaceExtensions,
+    ];
+    
+    // Filtra por categoria se especificado
+    if (category && category !== 'all') {
+      allExtensions = allExtensions.filter(ext => ext.category === category);
+    }
+    
+    // Filtra por busca se especificado
+    if (search) {
+      const searchLower = search.toLowerCase();
+      allExtensions = allExtensions.filter(ext => 
+        ext.name.toLowerCase().includes(searchLower) ||
+        ext.description.toLowerCase().includes(searchLower) ||
+        ext.tags.some(tag => tag.includes(searchLower))
+      );
+    }
+    
+    // Paginação
+    const startIndex = (page - 1) * limit;
+    const paginatedExtensions = allExtensions.slice(startIndex, startIndex + limit);
+    
+    return NextResponse.json({
+      success: true,
+      extensions: paginatedExtensions,
+      pagination: {
+        page,
+        limit,
+        total: allExtensions.length,
+        pages: Math.ceil(allExtensions.length / limit),
+      },
+      categories: ['all', 'editor', 'engine', 'ai', 'networking', 'tools', 'templates'],
+    });
+  } catch (error) {
+    console.error('Failed to list extensions:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
+  }
 }
+

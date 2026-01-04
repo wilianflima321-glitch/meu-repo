@@ -1,2 +1,13 @@
-// Auto-generated re-export stub: forward to compiled lib to satisfy imports during incremental dev
-export * from '../../lib/common/ai-ide-preferences';
+// Minimal preference schema for ai-ide.
+// The real Theia preference system accepts a JSON schema-like object.
+
+export const aiIdePreferenceSchema: any = {
+	type: 'object',
+	properties: {
+		'ai-ide.enabled': {
+			type: 'boolean',
+			default: true,
+			description: 'Enable/disable AI IDE features.'
+		}
+	}
+};

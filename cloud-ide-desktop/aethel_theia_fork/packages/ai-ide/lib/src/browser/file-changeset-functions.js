@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DefaultFileChangeSetTitleProvider = exports.FileChangeSetTitleProvider = exports.SimpleWriteFileReplacements = exports.WriteFileReplacements = exports.WriteFileContent = exports.SuggestFileContent = exports.SimpleSuggestFileReplacements = exports.SuggestFileReplacements = exports.ReplaceContentInFileFunctionHelper = exports.GetProposedFileState = exports.ClearFileChanges = void 0;
+exports.ClearFileChanges = {};
+exports.GetProposedFileState = {};
+exports.ReplaceContentInFileFunctionHelper = {};
+exports.SuggestFileReplacements = {};
+exports.SimpleSuggestFileReplacements = {};
+exports.SuggestFileContent = {};
+exports.WriteFileContent = {};
+exports.WriteFileReplacements = {};
+exports.SimpleWriteFileReplacements = {};
+exports.FileChangeSetTitleProvider = {};
+exports.DefaultFileChangeSetTitleProvider = {};

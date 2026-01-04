@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { assertWorkspacePath } from '@/lib/workspace';
+import { apiErrorToResponse } from '@/lib/api-errors';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface GitPushRequest {
   cwd: string;
@@ -13,16 +17,19 @@ interface GitPushRequest {
 
 export async function POST(request: NextRequest) {
   try {
+		const user = requireAuth(request);
+		await requireEntitlementsForUser(user.userId);
+
     const body: GitPushRequest = await request.json();
     const { cwd, remote = 'origin', branch, force = false } = body;
+		const safeCwd = assertWorkspacePath(cwd, 'cwd');
 
-    const forceFlag = force ? '--force' : '';
-    const branchArg = branch ? branch : '';
-    
-    await execAsync(
-      `git push ${forceFlag} ${remote} ${branchArg}`,
-      { cwd, timeout: 60000 }
-    );
+		const args = ['push'];
+		if (force) args.push('--force');
+		args.push(remote);
+		if (branch) args.push(branch);
+
+		await execFileAsync('git', args, { cwd: safeCwd, timeout: 60000 });
 
     return NextResponse.json({
       success: true,
@@ -30,6 +37,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Git push failed:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     return NextResponse.json(
       { 
         success: false, 

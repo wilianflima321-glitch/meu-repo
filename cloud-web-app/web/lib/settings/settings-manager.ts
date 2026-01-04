@@ -254,6 +254,11 @@ export class SettingsManager {
     }
   }
 
+  // Compat: alguns módulos ainda chamam o método antigo.
+  getAllSettings(): Partial<SettingsSchema> {
+    return this.getAll('effective');
+  }
+
   onChange(path: SettingsPath, listener: (value: any) => void): () => void {
     if (!this.listeners.has(path)) {
       this.listeners.set(path, new Set());

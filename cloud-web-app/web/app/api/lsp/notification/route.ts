@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import { getOrCreateLspSession } from '@/lib/server/lsp-runtime';
 
 interface LSPNotification {
   language: string;
@@ -8,6 +12,9 @@ interface LSPNotification {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = requireAuth(request);
+		await requireFeatureForUser(user.userId, 'lsp');
+
     const body: LSPNotification = await request.json();
     const { language, method, params } = body;
 
@@ -20,46 +27,26 @@ export async function POST(request: NextRequest) {
 
     console.log(`LSP Notification [${language}]: ${method}`);
 
-    // Handle notifications (no response expected)
-    await handleLSPNotification(language, method, params);
+    const workspaceRoot = process.env.AETHEL_WORKSPACE_ROOT || process.cwd();
+    const session = await getOrCreateLspSession({
+      userId: user.userId,
+      language,
+      workspaceRoot,
+    });
 
+    session.rpc.sendNotification(method, params ?? {});
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('LSP notification failed:', error);
-    return NextResponse.json(
-      { error: 'Notification failed' },
-      { status: 500 }
-    );
-  }
-}
-
-async function handleLSPNotification(language: string, method: string, params: any): Promise<void> {
-  switch (method) {
-    case 'initialized':
-      console.log(`LSP server initialized for ${language}`);
-      break;
-
-    case 'textDocument/didOpen':
-      console.log(`Document opened: ${params.textDocument.uri}`);
-      break;
-
-    case 'textDocument/didChange':
-      console.log(`Document changed: ${params.textDocument.uri}`);
-      break;
-
-    case 'textDocument/didClose':
-      console.log(`Document closed: ${params.textDocument.uri}`);
-      break;
-
-    case 'textDocument/didSave':
-      console.log(`Document saved: ${params.textDocument.uri}`);
-      break;
-
-    case 'exit':
-      console.log(`LSP server exiting for ${language}`);
-      break;
-
-    default:
-      console.warn(`Unhandled LSP notification: ${method}`);
+		const mapped = apiErrorToResponse(error);
+		if (mapped) return mapped;
+    const code = (error as any)?.code;
+    if (code === 'UNSUPPORTED_LSP_LANGUAGE') {
+      return NextResponse.json(
+        { success: false, error: 'UNSUPPORTED_LSP_LANGUAGE' },
+        { status: 422 }
+      );
+    }
+    return NextResponse.json({ error: 'Notification failed' }, { status: 500 });
   }
 }

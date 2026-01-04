@@ -9,6 +9,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
     const config: LSPServerConfig = {
       command: 'typescript-language-server',
+      language: 'typescript',
       args: ['--stdio'],
       cwd: workspaceRoot,
       env: {

@@ -211,7 +211,7 @@ export class StatusBarManager {
    */
   updateProblems(errors: number, warnings: number): void {
     if (errors > 0 || warnings > 0) {
-      const parts = [];
+      const parts: string[] = [];
       if (errors > 0) parts.push(`$(error) ${errors}`);
       if (warnings > 0) parts.push(`$(warning) ${warnings}`);
       

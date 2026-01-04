@@ -1646,7 +1646,15 @@ export class WorkflowAutomationEngine {
                 return {
                     status: response.status,
                     data: await response.json().catch(() => null),
-                    headers: Object.fromEntries(response.headers.entries()),
+                    headers: (() => {
+                        const out: Record<string, string> = {};
+                        try {
+                            (response.headers as any)?.forEach?.((v: string, k: string) => { out[k] = v; });
+                        } catch {
+                            // ignore
+                        }
+                        return out;
+                    })(),
                 };
             },
         });

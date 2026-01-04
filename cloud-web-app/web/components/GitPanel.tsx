@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getGitClient, GitStatus, GitFileStatus } from '@/lib/git/git-client';
 import { getConsentManager, createConsentRequest } from '@/lib/consent/consent-manager';
@@ -16,16 +16,10 @@ export default function GitPanel() {
   const [consentRequest, setConsentRequest] = useState<any>(null);
   const [consentChargeId, setConsentChargeId] = useState<string>('');
   
-  const gitClient = getGitClient('/workspace');
-  const consentManager = getConsentManager();
+  const gitClient = useMemo(() => getGitClient('/workspace'), []);
+  const consentManager = useMemo(() => getConsentManager(), []);
 
-  useEffect(() => {
-    fetchGitStatus();
-    const interval = setInterval(fetchGitStatus, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchGitStatus = async () => {
+  const fetchGitStatus = useCallback(async () => {
     try {
       const gitStatus = await gitClient.status();
       setStatus(gitStatus);
@@ -34,7 +28,13 @@ export default function GitPanel() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [gitClient]);
+
+  useEffect(() => {
+    fetchGitStatus();
+    const interval = setInterval(fetchGitStatus, 5000);
+    return () => clearInterval(interval);
+  }, [fetchGitStatus]);
 
   const handleStage = async (files: string[]) => {
     try {
@@ -147,14 +147,14 @@ export default function GitPanel() {
                 onClick={handlePull}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
-                ⬇️ Pull
+                Pull
               </button>
               <button
                 onClick={handlePush}
                 disabled={!status?.ahead || status.ahead === 0}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg transition-colors"
               >
-                ⬆️ Push ({status?.ahead || 0})
+                Push ({status?.ahead || 0})
               </button>
             </div>
           </div>
@@ -163,12 +163,12 @@ export default function GitPanel() {
           <div className="flex gap-4 text-sm">
             {status && status.ahead > 0 && (
               <div className="text-green-400">
-                ↑ {status.ahead} ahead
+                Ahead: {status.ahead}
               </div>
             )}
             {status && status.behind > 0 && (
               <div className="text-red-400">
-                ↓ {status.behind} behind
+                Behind: {status.behind}
               </div>
             )}
           </div>
@@ -265,7 +265,7 @@ export default function GitPanel() {
                     key={file.path}
                     className="flex items-center gap-2 p-2 bg-red-900/30 rounded"
                   >
-                    <span className="text-red-400">⚠️</span>
+                      <span className="text-red-400 text-xs font-semibold">WARN</span>
                     <span className="flex-1 text-red-300">{file.path}</span>
                     <button className="text-sm text-red-400 hover:text-red-300">
                       Resolve
@@ -321,43 +321,5 @@ function getStatusIcon(status: string): string {
     case 'renamed': return 'R';
     case 'copied': return 'C';
     default: return 'M';
-        </div>
-      )}
-
-      {status && Array.isArray(status.modified) && status.modified.length > 0 && (
-        <div className="mb-4">
-          <h3 className="font-semibold">Modified Files:</h3>
-          <ul className="list-disc list-inside">
-            {status.modified.map(file => <li key={file}>{file}</li>)}
-          </ul>
-        </div>
-      )}
-
-      {status && Array.isArray(status.untracked) && status.untracked.length > 0 && (
-        <div className="mb-4">
-          <h3 className="font-semibold">Untracked Files:</h3>
-          <ul className="list-disc list-inside">
-            {status.untracked.map(file => <li key={file}>{file}</li>)}
-          </ul>
-        </div>
-      )}
-
-      <div className="mt-4">
-        <textarea
-          value={commitMessage}
-          onChange={(e) => setCommitMessage(e.target.value)}
-          placeholder="Commit message..."
-          className="w-full p-2 border rounded"
-          rows={3}
-        />
-        <button
-          onClick={handleCommit}
-          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          disabled={!commitMessage.trim()}
-        >
-          Commit
-        </button>
-      </div>
-    </div>
-  );
+  }
 }

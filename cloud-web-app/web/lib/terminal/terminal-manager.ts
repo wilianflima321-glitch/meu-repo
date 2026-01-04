@@ -67,7 +67,7 @@ export interface ProblemPattern {
   endColumn?: number;
   severity?: number;
   code?: number;
-  message: number;
+  message?: number;
   loop?: boolean;
 }
 
@@ -145,6 +145,25 @@ export class TerminalManager {
     });
 
     this.sessions.delete(sessionId);
+  }
+
+  /**
+   * Dispose of all terminal sessions and related state.
+   * Best-effort: failures during remote close are ignored.
+   */
+  disposeAll(): void {
+    const sessionIds = Array.from(this.sessions.keys());
+
+    for (const sessionId of sessionIds) {
+      this.closeSession(sessionId).catch(() => {
+        // ignore - shutdown should be resilient in environments without backend
+      });
+    }
+
+    this.sessions.clear();
+    this.executions.clear();
+    this.tasks.clear();
+    this.launchConfigs.clear();
   }
 
   async sendInput(sessionId: string, data: string): Promise<void> {

@@ -3,7 +3,7 @@
  * Fuzzy file search dialog
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getQuickOpen, QuickOpenItem } from '../../lib/explorer/quick-open';
 
 interface QuickOpenProps {
@@ -17,7 +17,7 @@ export const QuickOpen: React.FC<QuickOpenProps> = ({ isOpen, onClose, onSelect 
   const [results, setResults] = useState<QuickOpenItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const quickOpen = getQuickOpen();
+  const quickOpen = useMemo(() => getQuickOpen(), []);
 
   // Search on query change
   useEffect(() => {
@@ -42,6 +42,13 @@ export const QuickOpen: React.FC<QuickOpenProps> = ({ isOpen, onClose, onSelect 
     }
   }, [isOpen]);
 
+  // Handle item selection
+  const handleSelect = useCallback((item: QuickOpenItem) => {
+    quickOpen.addRecent(item.path);
+    onSelect(item.path);
+    onClose();
+  }, [quickOpen, onSelect, onClose]);
+
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
@@ -59,14 +66,7 @@ export const QuickOpen: React.FC<QuickOpenProps> = ({ isOpen, onClose, onSelect 
       e.preventDefault();
       onClose();
     }
-  }, [results, selectedIndex, onClose]);
-
-  // Handle item selection
-  const handleSelect = useCallback((item: QuickOpenItem) => {
-    quickOpen.addRecent(item.path);
-    onSelect(item.path);
-    onClose();
-  }, [quickOpen, onSelect, onClose]);
+  }, [handleSelect, onClose, results, selectedIndex]);
 
   // Highlight matching characters
   const highlightMatch = (text: string, highlights?: number[]) => {

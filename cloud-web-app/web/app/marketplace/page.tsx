@@ -10,7 +10,7 @@ interface Extension {
   description: string;
   version: string;
   publisher: string;
-  icon: string;
+  icon?: string;
   downloads: number;
   rating: number;
   categories: string[];
@@ -24,6 +24,7 @@ export default function MarketplacePage() {
   const { t } = useTranslation();
   const [extensions, setExtensions] = useState<Extension[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'downloads' | 'rating' | 'name'>('downloads');
@@ -47,148 +48,41 @@ export default function MarketplacePage() {
 
   const loadExtensions = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const response = await fetch('/api/marketplace/extensions');
-      const data = await response.json();
-      setExtensions(data.extensions || getMockExtensions());
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message =
+          (data && typeof data === 'object' && 'message' in data && typeof (data as any).message === 'string')
+            ? (data as any).message
+            : 'Não foi possível carregar o marketplace de extensões.';
+        setExtensions([]);
+        setLoadError(message);
+        return;
+      }
+
+      const next = (data && typeof data === 'object' && Array.isArray((data as any).extensions))
+        ? ((data as any).extensions as Extension[])
+        : [];
+      setExtensions(next);
     } catch (error) {
       console.error('Failed to load extensions:', error);
-      setExtensions(getMockExtensions());
+      setExtensions([]);
+      setLoadError('Falha de rede ao carregar extensões.');
     } finally {
       setLoading(false);
     }
   };
 
-  const getMockExtensions = (): Extension[] => [
-    {
-      id: 'python-lsp',
-      name: 'python-lsp',
-      displayName: 'Python Language Server',
-      description: 'Full Python language support with IntelliSense, debugging, and refactoring',
-      version: '1.0.0',
-      publisher: 'Aethel',
-      icon: '🐍',
-      downloads: 150000,
-      rating: 4.8,
-      categories: ['languages', 'debuggers'],
-      tags: ['python', 'lsp', 'intellisense'],
-      repository: 'https://github.com/aethel/python-lsp',
-      license: 'MIT',
-      installed: false
-    },
-    {
-      id: 'typescript-lsp',
-      name: 'typescript-lsp',
-      displayName: 'TypeScript Language Server',
-      description: 'TypeScript and JavaScript language support with advanced features',
-      version: '2.1.0',
-      publisher: 'Aethel',
-      icon: '📘',
-      downloads: 200000,
-      rating: 4.9,
-      categories: ['languages'],
-      tags: ['typescript', 'javascript', 'lsp'],
-      repository: 'https://github.com/aethel/typescript-lsp',
-      license: 'MIT',
-      installed: false
-    },
-    {
-      id: 'go-lsp',
-      name: 'go-lsp',
-      displayName: 'Go Language Server',
-      description: 'Go language support powered by gopls',
-      version: '1.5.0',
-      publisher: 'Aethel',
-      icon: '🐹',
-      downloads: 80000,
-      rating: 4.7,
-      categories: ['languages', 'debuggers'],
-      tags: ['go', 'golang', 'lsp'],
-      repository: 'https://github.com/aethel/go-lsp',
-      license: 'MIT',
-      installed: false
-    },
-    {
-      id: 'rust-analyzer',
-      name: 'rust-analyzer',
-      displayName: 'Rust Analyzer',
-      description: 'Rust language support with rust-analyzer',
-      version: '0.3.0',
-      publisher: 'Aethel',
-      icon: '🦀',
-      downloads: 60000,
-      rating: 4.9,
-      categories: ['languages', 'debuggers'],
-      tags: ['rust', 'lsp', 'cargo'],
-      repository: 'https://github.com/aethel/rust-analyzer',
-      license: 'MIT',
-      installed: false
-    },
-    {
-      id: 'ai-code-assistant',
-      name: 'ai-code-assistant',
-      displayName: 'AI Code Assistant Pro',
-      description: 'Advanced AI-powered code completion and generation',
-      version: '3.0.0',
-      publisher: 'Aethel',
-      icon: '🤖',
-      downloads: 300000,
-      rating: 4.9,
-      categories: ['ai-tools', 'productivity'],
-      tags: ['ai', 'completion', 'generation'],
-      repository: 'https://github.com/aethel/ai-code-assistant',
-      license: 'MIT',
-      installed: true
-    },
-    {
-      id: 'theme-dracula',
-      name: 'theme-dracula',
-      displayName: 'Dracula Theme',
-      description: 'Dark theme with vibrant colors',
-      version: '2.0.0',
-      publisher: 'Dracula',
-      icon: '🧛',
-      downloads: 500000,
-      rating: 4.8,
-      categories: ['themes'],
-      tags: ['theme', 'dark', 'dracula'],
-      repository: 'https://github.com/dracula/dracula-theme',
-      license: 'MIT',
-      installed: false
-    },
-    {
-      id: 'prettier-formatter',
-      name: 'prettier-formatter',
-      displayName: 'Prettier Code Formatter',
-      description: 'Code formatter using Prettier',
-      version: '5.0.0',
-      publisher: 'Prettier',
-      icon: '💅',
-      downloads: 800000,
-      rating: 4.7,
-      categories: ['formatters'],
-      tags: ['formatter', 'prettier', 'style'],
-      repository: 'https://github.com/prettier/prettier',
-      license: 'MIT',
-      installed: false
-    },
-    {
-      id: 'eslint-linter',
-      name: 'eslint-linter',
-      displayName: 'ESLint',
-      description: 'JavaScript and TypeScript linter',
-      version: '8.0.0',
-      publisher: 'ESLint',
-      icon: '🔍',
-      downloads: 900000,
-      rating: 4.6,
-      categories: ['linters'],
-      tags: ['linter', 'eslint', 'javascript'],
-      repository: 'https://github.com/eslint/eslint',
-      license: 'MIT',
-      installed: false
-    }
-  ];
+  const getExtensionBadge = (ext: Extension): string => {
+    const base = (ext.displayName || ext.name || '').trim();
+    if (!base) return 'EXT';
+    const parts = base.split(/\s+/).filter(Boolean);
+    const initials = parts.slice(0, 2).map(part => part[0]?.toUpperCase() ?? '').join('');
+    return initials || base.slice(0, 3).toUpperCase();
+  };
 
   const handleInstall = async (extensionId: string) => {
     try {
@@ -256,6 +150,12 @@ export default function MarketplacePage() {
           <p className="text-slate-300">Discover and install extensions to enhance your IDE</p>
         </div>
 
+        {loadError && (
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 mb-6 border border-slate-700">
+            <p className="text-slate-200">{loadError}</p>
+          </div>
+        )}
+
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
@@ -311,7 +211,9 @@ export default function MarketplacePage() {
                 className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 hover:bg-slate-800/70 transition-colors"
               >
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="text-4xl">{ext.icon}</div>
+                  <div className="w-12 h-12 rounded bg-slate-700 flex items-center justify-center text-white font-semibold text-sm">
+                    {getExtensionBadge(ext)}
+                  </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-white mb-1">
                       {ext.displayName}
@@ -326,11 +228,11 @@ export default function MarketplacePage() {
 
                 <div className="flex items-center gap-4 mb-4 text-sm text-slate-400">
                   <div className="flex items-center gap-1">
-                    <span>⭐</span>
+                    <span className="text-slate-500">Rating</span>
                     <span>{ext.rating.toFixed(1)}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span>📥</span>
+                    <span className="text-slate-500">Downloads</span>
                     <span>{(ext.downloads / 1000).toFixed(0)}K</span>
                   </div>
                 </div>
@@ -356,7 +258,7 @@ export default function MarketplacePage() {
                         Uninstall
                       </button>
                       <button className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
-                        ⚙️
+                        Config
                       </button>
                     </>
                   ) : (

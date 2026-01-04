@@ -27,11 +27,11 @@ export const NotificationToast: React.FC = () => {
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
-      case 'success': return '✅';
-      case 'info': return 'ℹ️';
-      default: return 'ℹ️';
+      case 'error': return 'ERR';
+      case 'warning': return 'WARN';
+      case 'success': return 'OK';
+      case 'info': return 'INFO';
+      default: return 'INFO';
     }
   };
 

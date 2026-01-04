@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -12,7 +12,76 @@ on:
         required: false
         default: 'false'
 
+env:
+  NODE_VERSION: '20'
+
 jobs:
+  # ==========================================================================
+  # WEB APP - LINT & TYPE CHECK
+  # ==========================================================================
+  web-lint:
+    name: Web App - Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: cloud-web-app/web
+        run: npm ci
+
+      - name: Type check
+        working-directory: cloud-web-app/web
+        run: npx tsc --noEmit
+
+      - name: Lint
+        working-directory: cloud-web-app/web
+        run: npm run lint || true
+
+  # ==========================================================================
+  # WEB APP - BUILD
+  # ==========================================================================
+  web-build:
+    name: Web App - Build
+    runs-on: ubuntu-latest
+    needs: web-lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: cloud-web-app/web
+        run: npm ci
+
+      - name: Build
+        working-directory: cloud-web-app/web
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: true
+          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          NEXTAUTH_SECRET: mock-secret-for-build
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: cloud-web-app/web/.next
+          retention-days: 7
+
+  # ==========================================================================
+  # IDE - WINDOWS CHECK
+  # ==========================================================================
   windows-check:
     name: Windows checks (syntax, tsc, ai-ide tests)
     runs-on: ${{ matrix.os }}

@@ -546,16 +546,4 @@ export class ConfigService {
             }
         }
     }
-    async load(): Promise<void> {
-        if (typeof localStorage !== 'undefined') {
-            try {
-                const data = localStorage.getItem('ai-ide-config');
-                if (data) {
-                    await this.import(data);
-                }
-            } catch (error) {
-                console.error('Failed to load config:', error);
-            }
-        }
-    }
 }

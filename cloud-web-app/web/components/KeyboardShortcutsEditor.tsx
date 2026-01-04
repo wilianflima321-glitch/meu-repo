@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 interface KeyBinding {
   id: string;
@@ -72,31 +72,10 @@ export default function KeyboardShortcutsEditor() {
   const [recordedKeys, setRecordedKeys] = useState<string[]>([]);
   const [conflicts, setConflicts] = useState<Map<string, string[]>>(new Map());
 
-  // Load keybindings
-  useEffect(() => {
-    const stored = localStorage.getItem('keyboard-shortcuts');
-    if (stored) {
-      try {
-        setKeybindings(JSON.parse(stored));
-      } catch (error) {
-        setKeybindings(DEFAULT_KEYBINDINGS);
-      }
-    } else {
-      setKeybindings(DEFAULT_KEYBINDINGS);
-    }
-  }, []);
-
-  // Save keybindings
-  const saveKeybindings = (newKeybindings: KeyBinding[]) => {
-    localStorage.setItem('keyboard-shortcuts', JSON.stringify(newKeybindings));
-    setKeybindings(newKeybindings);
-    detectConflicts(newKeybindings);
-  };
-
   // Detect conflicts
-  const detectConflicts = (bindings: KeyBinding[]) => {
+  const detectConflicts = useCallback((bindings: KeyBinding[]) => {
     const conflictMap = new Map<string, string[]>();
-    
+
     bindings.forEach(binding => {
       const key = `${binding.key}${binding.when ? `|${binding.when}` : ''}`;
       const existing = conflictMap.get(key) || [];
@@ -112,7 +91,31 @@ export default function KeyboardShortcutsEditor() {
     });
 
     setConflicts(actualConflicts);
-  };
+  }, []);
+
+  // Load keybindings
+  useEffect(() => {
+    const stored = localStorage.getItem('keyboard-shortcuts');
+    let initial: KeyBinding[] = DEFAULT_KEYBINDINGS;
+
+    if (stored) {
+      try {
+        initial = JSON.parse(stored) as KeyBinding[];
+      } catch (error) {
+        initial = DEFAULT_KEYBINDINGS;
+      }
+    }
+
+    setKeybindings(initial);
+    detectConflicts(initial);
+  }, [detectConflicts]);
+
+  // Save keybindings
+  const saveKeybindings = useCallback((newKeybindings: KeyBinding[]) => {
+    localStorage.setItem('keyboard-shortcuts', JSON.stringify(newKeybindings));
+    setKeybindings(newKeybindings);
+    detectConflicts(newKeybindings);
+  }, [detectConflicts]);
 
   // Get categories
   const categories = useMemo(() => {
@@ -133,6 +136,14 @@ export default function KeyboardShortcutsEditor() {
       return matchesSearch && matchesCategory;
     });
   }, [keybindings, searchQuery, selectedCategory]);
+
+  // Update keybinding
+  const updateKeybinding = useCallback((id: string, newKey: string) => {
+    const updated = keybindings.map(kb =>
+      kb.id === id ? { ...kb, key: newKey, isCustom: true } : kb
+    );
+    saveKeybindings(updated);
+  }, [keybindings, saveKeybindings]);
 
   // Start recording key
   const startRecording = (id: string) => {
@@ -182,15 +193,7 @@ export default function KeyboardShortcutsEditor() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [recordingKey, recordedKeys, editingId]);
-
-  // Update keybinding
-  const updateKeybinding = (id: string, newKey: string) => {
-    const updated = keybindings.map(kb =>
-      kb.id === id ? { ...kb, key: newKey, isCustom: true } : kb
-    );
-    saveKeybindings(updated);
-  };
+  }, [recordingKey, recordedKeys, editingId, updateKeybinding]);
 
   // Reset keybinding
   const resetKeybinding = (id: string) => {
@@ -363,7 +366,7 @@ export default function KeyboardShortcutsEditor() {
           {/* Empty state */}
           {filteredKeybindings.length === 0 && (
             <div className="text-center py-12 text-gray-400">
-              <p>No shortcuts found matching "{searchQuery}"</p>
+              <p>No shortcuts found matching &quot;{searchQuery}&quot;</p>
             </div>
           )}
         </div>

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { assertWorkspacePath } from '@/lib/workspace';
+import { apiErrorToResponse } from '@/lib/api-errors';
 
 const execAsync = promisify(exec);
 
@@ -8,13 +12,22 @@ interface GitStatusRequest {
   cwd: string;
 }
 
+interface GitStatusFile {
+  path: string;
+  status: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
+		const user = requireAuth(request);
+		await requireEntitlementsForUser(user.userId);
+
     const body: GitStatusRequest = await request.json();
     const { cwd } = body;
+		const safeCwd = assertWorkspacePath(cwd, 'cwd');
 
     // Get current branch
-    const { stdout: branchOutput } = await execAsync('git rev-parse --abbrev-ref HEAD', { cwd });
+    const { stdout: branchOutput } = await execAsync('git rev-parse --abbrev-ref HEAD', { cwd: safeCwd });
     const branch = branchOutput.trim();
 
     // Get ahead/behind counts
@@ -22,7 +35,7 @@ export async function POST(request: NextRequest) {
     try {
       const { stdout: revListOutput } = await execAsync(
         `git rev-list --left-right --count HEAD...@{upstream}`,
-        { cwd }
+        { cwd: safeCwd }
       );
       const [aheadStr, behindStr] = revListOutput.trim().split('\t');
       ahead = parseInt(aheadStr) || 0;
@@ -32,12 +45,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get status
-    const { stdout: statusOutput } = await execAsync('git status --porcelain', { cwd });
+    const { stdout: statusOutput } = await execAsync('git status --porcelain', { cwd: safeCwd });
     
-    const staged = [];
-    const unstaged = [];
-    const untracked = [];
-    const conflicted = [];
+		const staged: GitStatusFile[] = [];
+		const unstaged: GitStatusFile[] = [];
+		const untracked: GitStatusFile[] = [];
+		const conflicted: GitStatusFile[] = [];
 
     for (const line of statusOutput.split('\n')) {
       if (!line) continue;
@@ -83,6 +96,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Git status failed:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     return NextResponse.json(
       { success: false, error: 'Failed to get git status' },
       { status: 500 }

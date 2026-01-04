@@ -45,6 +45,10 @@ export interface GitRemote {
 export interface GitDiff {
   path: string;
   oldPath?: string;
+  status?: string;
+  additions?: number;
+  deletions?: number;
+  patch?: string;
   hunks: GitDiffHunk[];
 }
 
@@ -105,9 +109,23 @@ export class GitClient {
   }
 
   /**
+   * Discard changes in working directory (git checkout -- <paths>)
+   */
+  async discardChanges(paths: string[]): Promise<void> {
+    await fetch('/api/git/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        cwd: this.workspaceRoot, 
+        paths,
+        action: 'discard'
+      })
+    });
+  }
+  /**
    * Stash operations
    */
-  async stash(message?: string): Promise<string> {
+  async stashSaveWithId(message?: string): Promise<string> {
     const response = await fetch('/api/git/stash', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -117,7 +135,7 @@ export class GitClient {
     return data.stashId;
   }
 
-  async stashPop(stashId?: string): Promise<void> {
+  async stashPopById(stashId?: string): Promise<void> {
     await fetch('/api/git/stash', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -141,7 +159,7 @@ export class GitClient {
     });
   }
 
-  async stashList(): Promise<Array<{ id: string; message: string; date: Date }>> {
+  async stashListById(): Promise<Array<{ id: string; message: string; date: Date }>> {
     const response = await fetch('/api/git/stash', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -165,7 +183,7 @@ export class GitClient {
   /**
    * Rebase operations
    */
-  async rebase(branch: string, interactive?: boolean): Promise<void> {
+  async rebaseLegacy(branch: string, interactive?: boolean): Promise<void> {
     await fetch('/api/git/rebase', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -200,7 +218,7 @@ export class GitClient {
   /**
    * Blame
    */
-  async blame(path: string): Promise<Array<{
+  async blameRaw(path: string): Promise<Array<{
     line: number;
     hash: string;
     author: string;
@@ -335,7 +353,7 @@ export class GitClient {
     await fetch('/api/git/bisect', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: this.workspaceRoot, paths })
+      body: JSON.stringify({ cwd: this.workspaceRoot, action: 'reset' })
     });
   }
 

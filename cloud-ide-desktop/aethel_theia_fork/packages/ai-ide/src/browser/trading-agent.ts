@@ -36,8 +36,23 @@ export interface TradingResponse {
     error?: string;
 }
 
+export interface PromptTemplate {
+    id: string;
+    template: string;
+}
+
 @injectable()
 export class TradingAgent {
+    readonly id = 'trading';
+    readonly name = 'Trading Agent';
+    readonly description = 'Backtests strategies, analyzes markets, and performs risk analysis.';
+    readonly promptTemplates: PromptTemplate[] = [
+        { id: 'trading-backtest', template: 'Backtest a strategy over historical data.' },
+        { id: 'trading-market-analysis', template: 'Analyze market regime and conditions.' },
+        { id: 'trading-risk-management', template: 'Assess and mitigate portfolio risks.' },
+        { id: 'trading-portfolio-optimization', template: 'Optimize allocation and parameters.' },
+    ];
+
     constructor(
         @inject(TelemetryService) private telemetry: TelemetryService,
         @inject(ObservabilityService) private observability: ObservabilityService,
@@ -46,6 +61,10 @@ export class TradingAgent {
         @inject(ContextStore) private contextStore: ContextStore,
         @inject(MissionTelemetry) private missionTelemetry: MissionTelemetry
     ) {}
+
+    async invoke(request: TradingRequest): Promise<TradingResponse> {
+        return this.processRequest(request);
+    }
 
     async processRequest(request: TradingRequest): Promise<TradingResponse> {
         const startTime = Date.now();

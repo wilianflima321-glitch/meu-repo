@@ -60,8 +60,9 @@ export class APIClient {
   private token: string | null = null;
 
   constructor() {
-    // Use Next.js API routes by default, or external API if configured
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
+    // O client-side deve falar somente com as rotas Next (/api/*),
+    // para garantir auth/entitlements/metering no server.
+    this.baseURL = '/api';
     
     // Load token from localStorage if available
     if (typeof window !== 'undefined') {
@@ -310,7 +311,7 @@ export class APIClient {
     file: File
   ): Promise<Asset> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file as unknown as Blob, (file as any)?.name ?? 'upload.bin');
     formData.append('projectId', projectId);
 
     const url = `${this.baseURL}/assets/upload`;

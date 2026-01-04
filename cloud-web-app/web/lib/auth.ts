@@ -1,71 +1,47 @@
 /**
- * Authentication Middleware
- * Verify JWT tokens and protect routes
+ * Auth helpers (Client)
+ * Mantém token do usuário no browser para chamadas à API.
+ *
+ * Observação: lógica de JWT/requireAuth para rotas do Next está em lib/auth-server.ts.
  */
 
-import { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { prisma } from './db';
+const TOKEN_STORAGE_KEY = 'aethel-token';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-export interface AuthUser {
-  userId: string;
-  email: string;
+function canUseLocalStorage(): boolean {
+	return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 }
 
-/**
- * Verify JWT token from request
- */
-export function verifyToken(token: string): AuthUser | null {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
-    return decoded;
-  } catch (error) {
-    return null;
-  }
+export function saveToken(value: unknown): void {
+	if (!canUseLocalStorage()) return;
+
+	let token: string | null = null;
+	if (typeof value === 'string') {
+		token = value;
+	} else if (value && typeof value === 'object') {
+		const v = value as any;
+		if (typeof v.access_token === 'string') token = v.access_token;
+		else if (typeof v.token === 'string') token = v.token;
+		else if (typeof v.accessToken === 'string') token = v.accessToken;
+	}
+
+	if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
 }
 
-/**
- * Get user from request Authorization header
- */
-export function getUserFromRequest(req: NextRequest): AuthUser | null {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-  return verifyToken(token);
+export function getToken(): string | null {
+	if (!canUseLocalStorage()) return null;
+	return localStorage.getItem(TOKEN_STORAGE_KEY);
 }
 
-/**
- * Require authentication - throws if not authenticated
- */
-export function requireAuth(req: NextRequest): AuthUser {
-  const user = getUserFromRequest(req);
-  if (!user) {
-    throw new Error('Unauthorized');
-  }
-  return user;
+export function clearToken(): void {
+	if (!canUseLocalStorage()) return;
+	localStorage.removeItem(TOKEN_STORAGE_KEY);
 }
 
-/**
- * Verify project ownership
- */
-export async function verifyProjectOwnership(
-  projectId: string,
-  userId: string
-): Promise<boolean> {
-  const project = await prisma.project.findFirst({
-    where: { id: projectId, userId },
-  });
-  return !!project;
+export function isAuthenticated(): boolean {
+	return !!getToken();
 }
 
-/**
- * Generate JWT token
- */
-export function generateToken(userId: string, email: string): string {
-  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '7d' });
+export function authHeaders(): Record<string, string> {
+	const token = getToken();
+	return token ? { Authorization: `Bearer ${token}` } : {};
 }

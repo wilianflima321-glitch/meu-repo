@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getGitClient, GitConflict } from '@/lib/git/git-client';
 
 interface ConflictSection {
@@ -17,13 +17,10 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
   const [manualContent, setManualContent] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const gitClient = getGitClient('/workspace');
+  const gitClient = useMemo(() => getGitClient('/workspace'), []);
 
-  useEffect(() => {
-    loadConflict();
-  }, [filePath]);
-
-  const loadConflict = async () => {
+  const loadConflict = useCallback(async () => {
+    setLoading(true);
     try {
       const conflicts = await gitClient.getConflicts();
       const fileConflict = conflicts.find(c => c.path === filePath);
@@ -32,13 +29,21 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
         setConflict(fileConflict);
         parseSections(fileConflict);
         setManualContent(fileConflict.ours); // Start with ours
+      } else {
+        setConflict(null);
+        setSections([]);
+        setManualContent('');
       }
     } catch (error) {
       console.error('Failed to load conflict:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filePath, gitClient]);
+
+  useEffect(() => {
+    loadConflict();
+  }, [loadConflict]);
 
   const parseSections = (conflict: GitConflict) => {
     const sections: ConflictSection[] = [];

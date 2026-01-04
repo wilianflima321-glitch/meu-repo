@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_BASE } from '@/lib/api'
 
 interface LicenseEntry {
@@ -22,7 +22,7 @@ export default function AdminIpRegistryPage() {
   const [error, setError] = useState<string | null>(null);
   const apiUrl = API_BASE;
 
-  const fetchRegistry = async () => {
+  const fetchRegistry = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -35,11 +35,11 @@ export default function AdminIpRegistryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl]);
 
   useEffect(() => {
     fetchRegistry();
-  }, []);
+  }, [fetchRegistry]);
 
   const saveRegistry = async () => {
     if (!data) return;

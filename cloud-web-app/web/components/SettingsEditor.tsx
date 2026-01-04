@@ -30,7 +30,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'editor',
     label: 'Editor',
-    icon: '📝',
+    icon: '',
     settings: [
       {
         key: 'editor.fontSize',
@@ -102,7 +102,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'workbench',
     label: 'Workbench',
-    icon: '🎨',
+    icon: '',
     settings: [
       {
         key: 'workbench.colorTheme',
@@ -148,7 +148,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'files',
     label: 'Files',
-    icon: '📁',
+    icon: '',
     settings: [
       {
         key: 'files.autoSave',
@@ -228,7 +228,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'git',
     label: 'Git',
-    icon: '🔀',
+    icon: '',
     settings: [
       {
         key: 'git.enabled',
@@ -262,7 +262,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'ai',
     label: 'AI Features',
-    icon: '🤖',
+    icon: '',
     settings: [
       {
         key: 'ai.enabled',
@@ -307,29 +307,27 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
 
 export default function SettingsEditor() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('editor');
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [modifiedSettings, setModifiedSettings] = useState<Set<string>>(new Set());
   const [scope, setScope] = useState<'user' | 'workspace'>('user');
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    SETTINGS_DEFINITIONS[0]?.id ?? 'general'
+  );
 
   // Load settings from localStorage
   useEffect(() => {
-    const loadSettings = () => {
-      const stored = localStorage.getItem('ide-settings');
-      if (stored) {
-        try {
-          setSettings(JSON.parse(stored));
-        } catch (error) {
-          console.error('Failed to load settings:', error);
-        }
+    const stored = localStorage.getItem('ide-settings');
+    if (stored) {
+      try {
+        setSettings(JSON.parse(stored));
+      } catch (error) {
+        console.error('Failed to load settings:', error);
       }
-    };
-    loadSettings();
+    }
   }, []);
 
   // Save settings to localStorage
   const saveSettings = (newSettings: Record<string, any>) => {
-    localStorage.setItem('ide-settings', JSON.stringify(newSettings));
     setSettings(newSettings);
   };
 
@@ -588,7 +586,7 @@ export default function SettingsEditor() {
           {/* Empty state */}
           {currentCategory?.settings.length === 0 && (
             <div className="text-center py-12 text-gray-400">
-              <p>No settings found matching "{searchQuery}"</p>
+              <p>No settings found matching &quot;{searchQuery}&quot;</p>
             </div>
           )}
         </div>

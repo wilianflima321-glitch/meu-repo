@@ -4,25 +4,35 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  console.log('Seeding database...');
 
-  // Create demo user
-  const hashedPassword = await bcrypt.hash('demo123', 10);
-  
+  const shouldSeedDemo = process.env.SEED_DEMO_USER === '1';
+  if (!shouldSeedDemo) {
+    console.log('Seed completed (demo user skipped). Set SEED_DEMO_USER=1 to create a demo account.');
+    return;
+  }
+
+  const demoEmail = process.env.SEED_DEMO_EMAIL || 'demo@aethel.ai';
+  const demoPassword = process.env.SEED_DEMO_PASSWORD;
+  if (!demoPassword) {
+    throw new Error('SEED_DEMO_PASSWORD is required when SEED_DEMO_USER=1');
+  }
+
+  const hashedPassword = await bcrypt.hash(demoPassword, 10);
+
   const user = await prisma.user.upsert({
-    where: { email: 'demo@aethel.ai' },
+    where: { email: demoEmail },
     update: {},
     create: {
-      email: 'demo@aethel.ai',
+      email: demoEmail,
       password: hashedPassword,
       name: 'Demo User',
       plan: 'pro',
     },
   });
 
-  console.log('✅ Created demo user:', user.email);
+  console.log('Created demo user:', user.email);
 
-  // Create demo project
   const project = await prisma.project.create({
     data: {
       name: 'My First Game',
@@ -88,18 +98,13 @@ export default Player;`,
     },
   });
 
-  console.log('✅ Created demo project:', project.name);
-
-  console.log('🎉 Seeding completed!');
-  console.log('');
-  console.log('Demo credentials:');
-  console.log('  Email: demo@aethel.ai');
-  console.log('  Password: demo123');
+  console.log('Created demo project:', project.name);
+  console.log('Seed completed.');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seeding failed:', e);
+    console.error('Seeding failed:', e);
     process.exit(1);
   })
   .finally(async () => {

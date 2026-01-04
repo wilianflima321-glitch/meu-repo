@@ -3,13 +3,67 @@
  * End-to-end tests for debugging features with DAP and AI
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { getDebugIntegration } from '../../lib/integration';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { getDebugIntegration, resetDebugIntegration } from '../../lib/integration';
 
 describe('Debug Integration', () => {
   let debug: ReturnType<typeof getDebugIntegration>;
 
   beforeEach(() => {
+    resetDebugIntegration();
+
+    let sessionSeq = 0;
+
+    globalThis.fetch = jest.fn(async (input: any, init?: any) => {
+      const url = typeof input === 'string' ? input : String(input?.url ?? input);
+
+      const okJson = (value: any) => ({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => value,
+      });
+
+      // Start/stop adapter
+      if (url.includes('/api/dap/start')) {
+
+        sessionSeq += 1;
+        return okJson({ sessionId: `sess-${sessionSeq}` });
+      }
+      if (url.includes('/api/dap/stop/')) {
+        return okJson({});
+      }
+
+      // Generic request endpoint
+      if (url.includes('/api/dap/request/')) {
+        const bodyRaw = init?.body ? JSON.parse(init.body) : {};
+        const command = bodyRaw?.command;
+
+        let responseBody: any = {};
+        if (command === 'stackTrace') {
+          responseBody = {
+            stackFrames: [
+              { id: 1, name: 'main', source: { path: '/test/app.js' }, line: 10, column: 1 },
+            ],
+          };
+        } else if (command === 'scopes') {
+          responseBody = { scopes: [{ name: 'Locals', variablesReference: 1 }] };
+        } else if (command === 'variables') {
+          responseBody = { variables: [{ name: 'x', value: '1', type: 'number', variablesReference: 0 }] };
+        } else if (command === 'evaluate') {
+          responseBody = { result: '2', variablesReference: 0 };
+        } else if (command === 'setBreakpoints') {
+          const requested = bodyRaw?.arguments?.breakpoints ?? [];
+          responseBody = { breakpoints: requested.map(() => ({ verified: true })) };
+        }
+
+        return okJson({ success: true, body: responseBody });
+      }
+
+      // Fallback: não deixa a suíte explodir por URLs inesperadas.
+      return okJson({});
+    }) as any;
+
     debug = getDebugIntegration();
   });
 

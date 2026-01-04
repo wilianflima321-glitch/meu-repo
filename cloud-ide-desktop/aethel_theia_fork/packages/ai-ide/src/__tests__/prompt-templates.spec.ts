@@ -91,7 +91,7 @@ describe('Prompt Templates', () => {
     });
 
     describe('Prompt Snapshots', () => {
-        const snapshots = {
+        const snapshots: Record<string, { version: string; length: number; firstLine: string }> = {
             [ORCHESTRATOR_PROMPT_ID]: {
                 version: '1.0.0',
                 length: 1234,

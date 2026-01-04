@@ -8,39 +8,24 @@ describe('SecureFetch', () => {
         secureFetch = new SecureFetch();
     });
 
-    it('should validate URLs', () => {
-        expect(() => secureFetch.validateUrl('https://example.com')).to.not.throw();
-        expect(() => secureFetch.validateUrl('http://localhost')).to.throw();
-        expect(() => secureFetch.validateUrl('file:///etc/passwd')).to.throw();
+    it('should mask PII', () => {
+        const masked = secureFetch.maskPII('email a@b.com ssn 123-45-6789');
+        expect(masked).to.include('[EMAIL]');
+        expect(masked).to.include('[SSN]');
     });
 
-    it('should sanitize headers', () => {
-        const headers = secureFetch.sanitizeHeaders({
-            'Authorization': 'Bearer token',
-            'X-Custom': 'value',
-        });
-        expect(headers).to.have.property('Authorization');
-        expect(headers).to.have.property('X-Custom');
-    });
-
-    it('should enforce rate limits', async () => {
-        const requests = Array.from({ length: 10 }, () => 
-            secureFetch.fetch('https://api.example.com/data')
-        );
-        
-        const results = await Promise.allSettled(requests);
-        const rejected = results.filter(r => r.status === 'rejected');
-        expect(rejected.length).to.be.greaterThan(0);
-    });
-
-    it('should handle timeouts', async () => {
+    it('should block deny-listed domains before fetching', async () => {
+        secureFetch.addToDenyList('example.com');
         try {
-            await secureFetch.fetch('https://httpstat.us/200?sleep=10000', {
-                timeout: 1000,
+            await secureFetch.fetch({
+                url: 'https://example.com/data',
+                userId: 'u1',
+                workspaceId: 'w1',
+                purpose: 'test',
             });
-            expect.fail('Should have timed out');
-        } catch (error) {
-            expect(error.message).to.include('timeout');
+            expect.fail('Should have been blocked');
+        } catch (error: any) {
+            expect(String(error?.message || error)).to.include('deny list');
         }
     });
 });

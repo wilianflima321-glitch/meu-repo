@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { assertWorkspacePath } from '@/lib/workspace';
+import { apiErrorToResponse } from '@/lib/api-errors';
 
 interface LoadTasksRequest {
   workspaceRoot: string;
@@ -8,11 +12,15 @@ interface LoadTasksRequest {
 
 export async function POST(request: NextRequest) {
   try {
+		const user = requireAuth(request);
+		await requireEntitlementsForUser(user.userId);
+
     const body: LoadTasksRequest = await request.json();
     const { workspaceRoot } = body;
+		const safeRoot = assertWorkspacePath(workspaceRoot, 'workspaceRoot');
 
     // Try to load .vscode/tasks.json
-    const tasksPath = join(workspaceRoot, '.vscode', 'tasks.json');
+    const tasksPath = join(safeRoot, '.vscode', 'tasks.json');
     
     try {
       const content = await readFile(tasksPath, 'utf-8');
@@ -31,6 +39,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Failed to load tasks:', error);
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+
     return NextResponse.json(
       { success: false, error: 'Failed to load tasks' },
       { status: 500 }

@@ -9,6 +9,7 @@ export class PythonLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
     const config: LSPServerConfig = {
       command: 'pylsp',
+      language: 'python',
       args: [],
       cwd: workspaceRoot,
       env: {

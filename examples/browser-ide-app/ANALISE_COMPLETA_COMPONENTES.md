@@ -136,7 +136,7 @@ Problemas: Nenhum
 
 ### **8. ai-context-manager.js** ✅
 ```javascript
-Status: COMPLETO (mock)
+Status: COMPLETO (real-or-fail)
 Funcionalidade:
 - Context collection
 - Code analysis
@@ -145,7 +145,7 @@ Funcionalidade:
 
 Dependências: IntegrationHub
 Usado por: Todos os editores
-Problemas: ⚠️ API não conectada (esperando implementação)
+Problemas: ⚠️ LLM/provedor não configurado (sem chaves retorna erro explícito)
 ```
 
 ### **9. navbar.js** 🆕
@@ -224,8 +224,8 @@ Problemas: Nenhum
 
 ### **3. Fluxo de IA Incompleto**
 ```
-⚠️ ai-context-manager.js está mock
-⚠️ Nenhuma chamada real de API
+⚠️ Integração LLM é real-or-fail (depende de backend/LLM configurado)
+⚠️ Sem configuração/chaves, chamadas retornam erro explícito
 ⚠️ Botões de IA não funcionam
 ```
 

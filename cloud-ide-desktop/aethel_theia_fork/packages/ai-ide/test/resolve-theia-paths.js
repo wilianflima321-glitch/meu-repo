@@ -99,6 +99,19 @@ Module._resolveFilename = function(request, parent, isMain, options) {
     if (m) {
       const pkg = m[1];
       const sub = m[2] || '';
+      // Special-case: @theia/core must resolve to lib/index.js in this workspace.
+      // The common/browser entrypoints do not re-export tokens like PreferenceService
+      // which are referenced at runtime by ai-ide compiled code.
+      if (!sub && pkg === 'core') {
+        const coreIndex = path.join(workspaceRoot, 'packages', 'core', 'lib', 'index.js');
+        try {
+          if (fs.existsSync(coreIndex) && fs.statSync(coreIndex).isFile()) {
+            return coreIndex;
+          }
+        } catch (e) {
+          // fall through
+        }
+      }
       // Special-case: many compiled files import deep ESM subpaths of
       // @theia/monaco-editor-core like '@theia/monaco-editor-core/esm/vs/editor/..'
       // or simply '@theia/monaco-editor-core'. The workspace provides a built
@@ -227,30 +240,17 @@ Module._resolveFilename = function(request, parent, isMain, options) {
           // ignore
         }
       }
-      // Special-case @theia/core and similar packages that publish multiple entry points under lib/<flavor>/
-      if (!sub && pkg === 'core') {
-        const variants = [
-          path.join(workspaceRoot, 'packages', 'core', 'lib', 'common', 'index.js'),
-          path.join(workspaceRoot, 'packages', 'core', 'lib', 'browser', 'index.js'),
-          path.join(workspaceRoot, 'packages', 'core', 'lib', 'node', 'index.js'),
-          path.join(workspaceRoot, 'packages', 'core', 'lib', 'index.js')
-        ];
-        for (const v of variants) {
-            if (fs.existsSync(v) && fs.statSync(v).isFile()) {
-              // debug: which core variant we picked
-              // console.debug('resolve-theia-paths: @theia/core ->', v);
-              return v;
-            }
-        }
-      }
     }
-    // If it's a bare package import (not a relative or absolute path and not an @theia scoped import),
-    // prefer resolving it from the workspace node_modules folder. This helps ensure packages that
-    // compiled code expects (like async-mutex, valid-filename, etc.) are found in the workspace
-    // even when parent resolution paths are unusual.
+    // If it's a bare package import (not relative/absolute and not @theia scoped),
+    // prefer resolving from workspace node_modules. IMPORTANT: do NOT call
+    // require.resolve() here because it re-enters Module._resolveFilename (this hook)
+    // and can cause infinite recursion / OOM for packages like 'jsdom'.
     if (typeof request === 'string' && !request.startsWith('.') && !request.startsWith('/') && !request.startsWith('@theia/')) {
       try {
-        return require.resolve(request, { paths: [workspaceRoot, path.join(workspaceRoot, 'node_modules')] });
+        const nextOptions = Object.assign({}, options || {}, {
+          paths: [workspaceRoot, path.join(workspaceRoot, 'node_modules')]
+        });
+        return originalResolve.call(this, request, parent, isMain, nextOptions);
       } catch (e) {
         // fall back to default resolver
       }

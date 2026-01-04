@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type NotificationSeverity = 'info' | 'success' | 'warning' | 'error';
 
@@ -22,6 +22,29 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | NotificationSeverity>('all');
 
+  const saveNotifications = useCallback((notifs: Notification[]) => {
+    localStorage.setItem('notifications', JSON.stringify(notifs));
+  }, []);
+
+  const loadNotifications = useCallback(() => {
+    const stored = localStorage.getItem('notifications');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setNotifications(parsed.map((n: any) => ({
+        ...n,
+        timestamp: new Date(n.timestamp)
+      })));
+    }
+  }, []);
+
+  const addNotification = useCallback((notification: Notification) => {
+    setNotifications(prev => {
+      const next = [notification, ...prev];
+      saveNotifications(next);
+      return next;
+    });
+  }, [saveNotifications]);
+
   useEffect(() => {
     loadNotifications();
     
@@ -32,29 +55,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
     
     window.addEventListener('notification' as any, handleNotification);
     return () => window.removeEventListener('notification' as any, handleNotification);
-  }, []);
-
-  const loadNotifications = () => {
-    // Load from localStorage
-    const stored = localStorage.getItem('notifications');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setNotifications(parsed.map((n: any) => ({
-        ...n,
-        timestamp: new Date(n.timestamp)
-      })));
-    }
-  };
-
-  const saveNotifications = (notifs: Notification[]) => {
-    localStorage.setItem('notifications', JSON.stringify(notifs));
-  };
-
-  const addNotification = (notification: Notification) => {
-    const newNotifications = [notification, ...notifications];
-    setNotifications(newNotifications);
-    saveNotifications(newNotifications);
-  };
+  }, [addNotification, loadNotifications]);
 
   const markAsRead = (id: string) => {
     const updated = notifications.map(n => 
@@ -83,10 +84,10 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
 
   const getSeverityIcon = (severity: NotificationSeverity): string => {
     switch (severity) {
-      case 'info': return 'ℹ️';
-      case 'success': return '✅';
-      case 'warning': return '⚠️';
-      case 'error': return '❌';
+      case 'info': return 'INFO';
+      case 'success': return 'OK';
+      case 'warning': return 'WARN';
+      case 'error': return 'ERR';
     }
   };
 

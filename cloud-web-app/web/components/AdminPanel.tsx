@@ -143,11 +143,11 @@ export default function AdminPanel() {
       {/* Admin Navigation */}
       <div className="aethel-flex aethel-space-x-1 aethel-bg-slate-800 aethel-p-1 aethel-rounded-lg aethel-max-w-2xl aethel-mx-auto">
         {[
-          { id: 'overview', label: 'Overview', icon: '📊' },
-          { id: 'users', label: 'Users', icon: '👥' },
-          { id: 'credits', label: 'Credits', icon: '💰' },
-          { id: 'financial', label: 'Financial', icon: '📈' },
-          { id: 'system', label: 'System', icon: '⚙️' }
+          { id: 'overview', label: 'Overview', icon: '' },
+          { id: 'users', label: 'Users', icon: '' },
+          { id: 'credits', label: 'Credits', icon: '' },
+          { id: 'financial', label: 'Financial', icon: '' },
+          { id: 'system', label: 'System', icon: '' }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -158,7 +158,7 @@ export default function AdminPanel() {
                 : 'aethel-text-slate-400 hover:aethel-text-white hover:aethel-bg-slate-700'
             }`}
           >
-            {tab.icon} {tab.label}
+            {tab.label}
           </button>
         ))}
       </div>

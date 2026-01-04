@@ -3,6 +3,7 @@
   "compilerOptions": {
   "composite": true,
   "rootDir": ".",
+    "baseUrl": ".",
     "outDir": "lib",
   "target": "es2022",
   "lib": ["es2022", "dom"],
@@ -28,9 +29,5 @@
     "src",
     "src/common/types/*.d.ts",
     "jest.setup.ts"
-  ],
-  "exclude": [
-    "**/*.spec.ts",
-    "**/*.test.ts"
   ]
 }

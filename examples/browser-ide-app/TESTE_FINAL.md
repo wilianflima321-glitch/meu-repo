@@ -26,16 +26,15 @@ ls -la *.html *.js *.css
 ### **2. Iniciar Servidor** 🔄
 
 ```bash
-# Opção 1: Python
-python3 -m http.server 8080
-
-# Opção 2: Node.js
-node server.js
+# Node.js (backend real-or-fail)
+cd examples/browser-ide-app
+npm install
+npm start
 ```
 
 **Resultado Esperado**:
 - ✅ Servidor inicia sem erros
-- ✅ Porta 8080 ou 3000 disponível
+- ✅ Porta 3000 disponível (ou PORT custom)
 
 **Status**: 🔄 AGUARDANDO TESTE
 
@@ -45,7 +44,7 @@ node server.js
 
 #### **3.1 index.html**
 ```
-URL: http://localhost:8080/index.html
+URL: http://localhost:3000/
 ```
 
 **Verificar**:
@@ -68,7 +67,7 @@ URL: http://localhost:8080/index.html
 
 #### **3.2 project-manager.html**
 ```
-URL: http://localhost:8080/project-manager.html
+URL: http://localhost:3000/project-manager.html
 ```
 
 **Verificar**:
@@ -91,7 +90,7 @@ URL: http://localhost:8080/project-manager.html
 
 #### **3.3 monaco-editor.html**
 ```
-URL: http://localhost:8080/monaco-editor.html
+URL: http://localhost:3000/monaco-editor.html
 ```
 
 **Verificar**:
@@ -117,7 +116,7 @@ URL: http://localhost:8080/monaco-editor.html
 
 #### **3.4 visual-scripting.html**
 ```
-URL: http://localhost:8080/visual-scripting.html
+URL: http://localhost:3000/visual-scripting.html
 ```
 
 **Verificar**:
@@ -142,7 +141,7 @@ URL: http://localhost:8080/visual-scripting.html
 
 #### **3.5 3d-viewport.html**
 ```
-URL: http://localhost:8080/3d-viewport.html
+URL: http://localhost:3000/3d-viewport.html
 ```
 
 **Verificar**:
@@ -169,7 +168,7 @@ URL: http://localhost:8080/3d-viewport.html
 
 #### **3.6 asset-manager.html**
 ```
-URL: http://localhost:8080/asset-manager.html
+URL: http://localhost:3000/asset-manager.html
 ```
 
 **Verificar**:
@@ -193,7 +192,7 @@ URL: http://localhost:8080/asset-manager.html
 
 #### **3.7 test-integration.html**
 ```
-URL: http://localhost:8080/test-integration.html
+URL: http://localhost:3000/test-integration.html
 ```
 
 **Verificar**:
@@ -392,7 +391,8 @@ URL: http://localhost:8080/test-integration.html
 ### **Iniciar Servidor**
 ```bash
 cd examples/browser-ide-app
-python3 -m http.server 8080
+npm install
+npm start
 ```
 
 ### **Verificar Erros de Sintaxe**

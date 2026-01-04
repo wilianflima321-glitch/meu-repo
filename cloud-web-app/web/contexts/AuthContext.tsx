@@ -10,6 +10,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => void;
   error: string | null;
 }
@@ -28,9 +29,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (storedToken) {
         apiClient.setToken(storedToken);
         setToken(storedToken);
-        // TODO: Add a apiClient.getProfile() method to verify the token and get user data
-        // For now, we'll assume the token is valid if it exists.
-        // In a real app, you'd fetch the user profile here.
+        try {
+          const profile = await apiClient.getProfile();
+          setUser(profile);
+        } catch (e) {
+          // Token inválido/expirado -> limpa e segue como não autenticado.
+          console.warn('Failed to load profile, clearing token', e);
+          apiClient.logout();
+          setUser(null);
+          setToken(null);
+        }
       }
       setIsLoading(false);
     };
@@ -58,6 +66,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const register = async (email: string, password: string, name?: string) => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      const { access_token, user } = await apiClient.register(email, password, name);
+      setUser(user);
+      setToken(access_token);
+    } catch (err) {
+      if (err instanceof APIError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     apiClient.logout();
     setUser(null);
@@ -65,7 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, error }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout, error }}>
       {children}
     </AuthContext.Provider>
   );

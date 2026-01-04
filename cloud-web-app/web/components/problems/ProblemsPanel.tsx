@@ -58,10 +58,10 @@ export const ProblemsPanel: React.FC = () => {
   // Get severity icon
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
-      case 'info': return 'ℹ️';
-      case 'hint': return '💡';
+      case 'error': return 'ERR';
+      case 'warning': return 'WARN';
+      case 'info': return 'INFO';
+      case 'hint': return 'HINT';
       default: return '•';
     }
   };
@@ -88,8 +88,8 @@ export const ProblemsPanel: React.FC = () => {
         <div className="problems-title">
           <span>Problems</span>
           <span className="problems-count">
-            {stats.errors > 0 && <span className="error-count">{stats.errors} ❌</span>}
-            {stats.warnings > 0 && <span className="warning-count">{stats.warnings} ⚠️</span>}
+            {stats.errors > 0 && <span className="error-count">{stats.errors} ERR</span>}
+            {stats.warnings > 0 && <span className="warning-count">{stats.warnings} WARN</span>}
           </span>
         </div>
 

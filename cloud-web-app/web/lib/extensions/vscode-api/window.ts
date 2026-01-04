@@ -60,9 +60,9 @@ export interface SaveDialogOptions {
 }
 
 class WindowAPI {
-  private activeTextEditor: any = null;
-  private visibleTextEditors: any[] = [];
-  private terminals: any[] = [];
+  private _activeTextEditor: any = null;
+  private _visibleTextEditors: any[] = [];
+  private _terminals: any[] = [];
   private messageListeners: Array<(message: any) => void> = [];
 
   /**
@@ -212,7 +212,7 @@ class WindowAPI {
    */
   createTerminal(name?: string, shellPath?: string, shellArgs?: string[]): any {
     const terminal = {
-      name: name || `Terminal ${this.terminals.length + 1}`,
+      name: name || `Terminal ${this._terminals.length + 1}`,
       processId: Promise.resolve(Math.floor(Math.random() * 10000)),
       sendText: (text: string, addNewLine?: boolean) => {
         console.log(`[Terminal:${terminal.name}] Send text:`, text);
@@ -224,15 +224,15 @@ class WindowAPI {
         console.log(`[Terminal:${terminal.name}] Hidden`);
       },
       dispose: () => {
-        const index = this.terminals.indexOf(terminal);
+        const index = this._terminals.indexOf(terminal);
         if (index > -1) {
-          this.terminals.splice(index, 1);
+          this._terminals.splice(index, 1);
         }
         console.log(`[Terminal:${terminal.name}] Disposed`);
       },
     };
 
-    this.terminals.push(terminal);
+    this._terminals.push(terminal);
     console.log('[Window] Created terminal:', terminal.name);
 
     return terminal;
@@ -311,35 +311,35 @@ class WindowAPI {
    * Get active text editor
    */
   get activeTextEditor(): any {
-    return this.activeTextEditor;
+    return this._activeTextEditor;
   }
 
   /**
    * Set active text editor
    */
   setActiveTextEditor(editor: any): void {
-    this.activeTextEditor = editor;
+    this._activeTextEditor = editor;
   }
 
   /**
    * Get visible text editors
    */
   get visibleTextEditors(): any[] {
-    return this.visibleTextEditors;
+    return this._visibleTextEditors;
   }
 
   /**
    * Get terminals
    */
   get terminals(): any[] {
-    return this.terminals;
+    return this._terminals;
   }
 
   /**
    * Get active terminal
    */
   get activeTerminal(): any | undefined {
-    return this.terminals[this.terminals.length - 1];
+    return this._terminals[this._terminals.length - 1];
   }
 
   /**

@@ -4,8 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
+import { optionalEnv } from '@/lib/env';
+import { getStripe, getStripePriceIdForPlan } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,46 +41,54 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Plan pricing (USD) - Margem mínima 89%
-    const planPrices: Record<string, number> = {
-      starter: 3,     // $3/mês - R$15
-      basic: 9,       // $9/mês - R$45
-      pro: 29,        // $29/mês - R$149
-      studio: 79,     // $79/mês - R$399
-      enterprise: 199 // $199/mês - R$999
-    };
+    // Stripe (real-or-fail)
+    const stripe = getStripe();
+    const priceId = getStripePriceIdForPlan(planId);
 
-    // For paid plans, create a mock checkout session
-    // In production, integrate with Stripe:
-    // const session = await stripe.checkout.sessions.create({...})
+    const dbUser = await prisma.user.findUnique({ where: { id: user.userId } });
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
-    const checkoutSessionId = `cs_mock_${Date.now()}_${user.userId}`;
+    // Ensure Stripe customer
+    let stripeCustomerId = dbUser.stripeCustomerId || null;
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: dbUser.email,
+        metadata: { userId: dbUser.id },
+      });
+      stripeCustomerId = customer.id;
+      await prisma.user.update({
+        where: { id: dbUser.id },
+        data: { stripeCustomerId },
+      });
+    }
 
-    // Store pending subscription
-    await prisma.subscription.upsert({
-      where: { userId: user.userId },
-      create: {
-        userId: user.userId,
-        plan: planId,
-        status: 'pending',
-        stripeCustomerId: `cus_mock_${user.userId}`,
-        stripeSubscriptionId: checkoutSessionId,
-      },
-      update: {
-        plan: planId,
-        status: 'pending',
-        stripeSubscriptionId: checkoutSessionId,
-      },
+    const appUrl = optionalEnv('NEXT_PUBLIC_APP_URL') || 'http://localhost:3000';
+    const resolvedSuccessUrl = successUrl || `${appUrl}/billing/success?plan=${encodeURIComponent(planId)}`;
+    const resolvedCancelUrl = cancelUrl || `${appUrl}/billing/cancel`;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer: stripeCustomerId,
+      client_reference_id: dbUser.id,
+      metadata: { userId: dbUser.id, planId },
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: resolvedSuccessUrl,
+      cancel_url: resolvedCancelUrl,
     });
 
-    // Mock checkout URL
-    const checkoutUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/billing/checkout/${checkoutSessionId}`;
+    if (!session.url) {
+      return NextResponse.json(
+        { error: 'STRIPE_SESSION_NO_URL', message: 'Stripe retornou sessão sem URL.' },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      checkoutUrl,
-      sessionId: checkoutSessionId,
-      message: 'Checkout session created (mock)',
+      checkoutUrl: session.url,
+      sessionId: session.id,
     });
   } catch (error) {
     console.error('Checkout error:', error);
@@ -87,6 +97,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    if ((error as any)?.code === 'ENV_NOT_SET') {
+      return NextResponse.json(
+        {
+          error: 'STRIPE_NOT_CONFIGURED',
+          message: (error as Error).message,
+          required: ['STRIPE_SECRET_KEY', 'STRIPE_PRICE_STARTER', 'STRIPE_PRICE_BASIC', 'STRIPE_PRICE_PRO', 'STRIPE_PRICE_STUDIO', 'STRIPE_PRICE_ENTERPRISE'],
+        },
+        { status: 503 }
+      );
+    }
+
+    if ((error as any)?.code === 'INVALID_PLAN') {
+      return NextResponse.json(
+        { error: 'Invalid plan ID. Valid plans: starter, basic, pro, studio, enterprise' },
+        { status: 400 }
       );
     }
 

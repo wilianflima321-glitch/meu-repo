@@ -24,7 +24,7 @@ export interface ProblemPattern {
   endColumn?: number;
   severity?: number;
   code?: number;
-  message: number;
+  message?: number;
 }
 
 export interface ProblemMatcher {

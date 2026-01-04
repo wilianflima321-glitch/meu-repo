@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { generateTokenWithRole } from '@/lib/auth-server';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,12 +39,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Generate JWT token (real-or-fail)
+    const token = generateTokenWithRole(user.id, user.email, (user as any).role || 'user');
 
     // Create session
     await prisma.session.create({
@@ -55,7 +52,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Return user data (without password)
-    return NextResponse.json({
+    const response = NextResponse.json({
       access_token: token,
       user: {
         id: user.id,
@@ -64,11 +61,21 @@ export async function POST(req: NextRequest) {
         plan: user.plan,
       },
     });
+
+    // Set cookie for middleware
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }

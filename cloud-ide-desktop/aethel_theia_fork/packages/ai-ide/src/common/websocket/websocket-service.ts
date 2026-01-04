@@ -255,7 +255,11 @@ export class WebSocketService {
  */
 @injectable()
 export class MissionWebSocketClient {
-    constructor(private wsService: WebSocketService) {}
+    private readonly wsService: WebSocketService;
+
+    constructor(wsService?: WebSocketService) {
+        this.wsService = wsService ?? new WebSocketService();
+    }
 
     /**
      * Connect to the Mission WS. Default keeps existing local-dev behavior.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getGitClient, GitCommit } from '@/lib/git/git-client';
 
 interface GitGraphNode {
@@ -18,21 +18,9 @@ export default function GitGraph() {
   const [selectedCommit, setSelectedCommit] = useState<GitCommit | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  const gitClient = getGitClient('/workspace');
+  const gitClient = useMemo(() => getGitClient('/workspace'), []);
 
-  useEffect(() => {
-    loadCommits();
-  }, []);
-
-  useEffect(() => {
-    if (commits.length > 0) {
-      const graphNodes = calculateGraphLayout(commits);
-      setNodes(graphNodes);
-      drawGraph(graphNodes);
-    }
-  }, [commits]);
-
-  const loadCommits = async () => {
+  const loadCommits = useCallback(async () => {
     try {
       const log = await gitClient.log(100);
       setCommits(log);
@@ -41,7 +29,19 @@ export default function GitGraph() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [gitClient]);
+
+  useEffect(() => {
+    loadCommits();
+  }, [loadCommits]);
+
+  useEffect(() => {
+    if (commits.length > 0) {
+      const graphNodes = calculateGraphLayout(commits);
+      setNodes(graphNodes);
+      drawGraph(graphNodes);
+    }
+  }, [commits]);
 
   const calculateGraphLayout = (commits: GitCommit[]): GitGraphNode[] => {
     const nodes: GitGraphNode[] = [];

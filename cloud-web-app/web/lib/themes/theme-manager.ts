@@ -203,31 +203,31 @@ const BUILTIN_ICON_THEMES: IconTheme[] = [
     id: 'vs-seti',
     name: 'Seti (Visual Studio Code)',
     icons: {
-      'file': '📄',
-      'folder': '📁',
-      'folder-open': '📂',
-      'typescript': '🔷',
-      'javascript': '🟨',
-      'python': '🐍',
-      'go': '🐹',
-      'rust': '🦀',
-      'java': '☕',
-      'csharp': '#️⃣',
-      'cpp': '⚙️',
+      'file': 'FILE',
+      'folder': 'DIR',
+      'folder-open': 'DIR',
+      'typescript': 'TS',
+      'javascript': 'JS',
+      'python': 'PY',
+      'go': 'GO',
+      'rust': 'RS',
+      'java': 'JAVA',
+      'csharp': 'CS',
+      'cpp': 'CPP',
       'json': '{}',
-      'markdown': '📝',
-      'html': '🌐',
-      'css': '🎨',
-      'git': '🔀',
+      'markdown': 'MD',
+      'html': 'HTML',
+      'css': 'CSS',
+      'git': 'GIT',
     },
   },
   {
     id: 'vs-minimal',
     name: 'Minimal (Visual Studio Code)',
     icons: {
-      'file': '📄',
-      'folder': '📁',
-      'folder-open': '📂',
+      'file': 'FILE',
+      'folder': 'DIR',
+      'folder-open': 'DIR',
     },
   },
 ];
@@ -524,7 +524,7 @@ export class ThemeManager {
     };
 
     const iconKey = iconMap[ext || ''] || 'file';
-    return this.currentIconTheme.icons[iconKey] || this.currentIconTheme.icons['file'] || '📄';
+    return this.currentIconTheme.icons[iconKey] || this.currentIconTheme.icons['file'] || 'FILE';
   }
 
   /**
@@ -532,7 +532,7 @@ export class ThemeManager {
    */
   getFolderIcon(isOpen: boolean = false): string {
     const key = isOpen ? 'folder-open' : 'folder';
-    return this.currentIconTheme.icons[key] || '📁';
+    return this.currentIconTheme.icons[key] || 'DIR';
   }
 }
 

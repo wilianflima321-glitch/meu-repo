@@ -277,8 +277,7 @@ export class SearchManager {
     includePatterns: string[],
     excludePatterns: string[]
   ): Promise<string[]> {
-    // This would call backend API to get file list
-    // For now, return mock data
+    // This calls the backend API to get the workspace file list
     const response = await fetch('/api/files/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

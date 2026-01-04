@@ -56,23 +56,15 @@ Uma IDE completa baseada em navegador com editor de código, visual scripting, v
 
 ### **1. Iniciar Servidor**
 
-#### Opção A: Python
-```bash
-cd examples/browser-ide-app
-python3 -m http.server 8080
-```
-
-#### Opção B: Node.js
+#### Node.js (backend real-or-fail)
 ```bash
 cd examples/browser-ide-app
 npm install
-node server.js
+npm start
 ```
 
 ### **2. Abrir no Navegador**
-```
-http://localhost:8080/index.html
-```
+http://localhost:3000/
 
 ### **3. Começar a Usar**
 1. Clique em "Projects" no navbar
@@ -110,7 +102,7 @@ examples/browser-ide-app/
 │   ├── file-explorer.js              # Explorador de arquivos
 │   ├── console-panel.js              # Console/logs
 │   ├── init.js                       # Inicialização
-│   └── server.js                     # Servidor Node.js
+│   └── server.js                     # Servidor Node.js (backend real)
 │
 ├── 🎨 Design System
 │   └── design-system.css             # Sistema de design completo
@@ -188,7 +180,7 @@ examples/browser-ide-app/
 
 ### **Testes Automatizados**
 ```
-http://localhost:8080/test-integration.html
+http://localhost:3000/test-integration.html
 ```
 
 25+ testes cobrindo todos os componentes principais.
@@ -242,12 +234,12 @@ Alternar: Clique no botão 🌙/☀️ no navbar
 
 ## 🤖 IA (Em Desenvolvimento)
 
-O sistema de IA está preparado mas aguarda conexão com API real:
+O sistema de IA está preparado, mas depende de backend/LLM configurado (real-or-fail):
 
 - ✅ Context Manager implementado
 - ✅ Validation rules
 - ✅ Fact management
-- ⚠️ API mock (aguardando OpenAI/Anthropic)
+- ⚠️ Integração LLM não configurada (sem chaves retorna erro explícito)
 
 Ver `FLUXO_IA_COMPLETO.md` para detalhes de implementação.
 
@@ -257,7 +249,7 @@ Ver `FLUXO_IA_COMPLETO.md` para detalhes de implementação.
 
 ### **Página não carrega**
 1. Verifique se servidor está rodando
-2. Confirme URL: `http://localhost:8080/index.html`
+2. Confirme URL: `http://localhost:3000/`
 3. Limpe cache (Ctrl+Shift+R)
 
 ### **Scripts não carregam**

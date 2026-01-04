@@ -1,2 +1,4 @@
-// Auto-generated re-export stub: forward to compiled lib to satisfy imports during incremental dev
-export * from '../../lib/browser/app-tester-chat-functions';
+export const CloseBrowserProvider = Symbol('CloseBrowserProvider');
+export const IsBrowserRunningProvider = Symbol('IsBrowserRunningProvider');
+export const LaunchBrowserProvider = Symbol('LaunchBrowserProvider');
+export const QueryDomProvider = Symbol('QueryDomProvider');

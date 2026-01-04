@@ -9,6 +9,7 @@ export class GoLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
     const config: LSPServerConfig = {
       command: 'gopls',
+      language: 'go',
       args: ['serve'],
       cwd: workspaceRoot,
       env: {

@@ -11,6 +11,13 @@
             font-family: Arial, sans-serif;
             background: #1e1e1e;
         }
+
+        #layout {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
         
         #toolbar {
             background: #252526;
@@ -48,6 +55,80 @@
             width: 100%;
             height: calc(100vh - 50px);
         }
+
+        /* Chat dock (direita) */
+        #chat-dock {
+            width: 360px;
+            height: 100%;
+            background: #252526;
+            border-left: 1px solid #3e3e42;
+            display: none;
+            flex-direction: column;
+        }
+
+        #chat-dock.show {
+            display: flex;
+        }
+
+        #chat-header {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            color: #ffffff;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow: auto;
+            padding: 12px;
+        }
+
+        .chat-msg {
+            margin: 0 0 10px 0;
+            padding: 10px;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            color: #d4d4d4;
+            background: #1e1e1e;
+        }
+
+        .chat-msg.user {
+            border-color: #0e639c;
+        }
+
+        .chat-msg.assistant {
+            border-color: #3e3e42;
+        }
+
+        #chat-input-area {
+            border-top: 1px solid #3e3e42;
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            background: #252526;
+        }
+
+        #chat-input {
+            flex: 1;
+            resize: none;
+            height: 70px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #3e3e42;
+            outline: none;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        #chat-send {
+            white-space: nowrap;
+        }
         
         #status {
             position: fixed;
@@ -62,25 +143,45 @@
     </style>
 </head>
 <body>
-    <div id="toolbar">
-        <button onclick="runCode()">▶️ Run</button>
-        <button onclick="formatCode()">🎨 Format</button>
-        <button onclick="askAI()">🤖 AI Help</button>
-        <button onclick="saveCode()">💾 Save</button>
-        <select id="language-select" onchange="changeLanguage()">
-            <option value="typescript">TypeScript</option>
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="go">Go</option>
-            <option value="rust">Rust</option>
-        </select>
-        <span style="margin-left: auto; font-size: 12px;">
-            Monaco Editor | AI-Powered IDE
-        </span>
+    <div id="layout">
+        <div style="flex:1; min-width: 0; display:flex; flex-direction:column;">
+            <div id="toolbar">
+                <button onclick="runCode()">▶️ Run</button>
+                <button onclick="formatCode()">🎨 Format</button>
+                <button onclick="toggleChat(true)">💬 Chat</button>
+                <button onclick="askAI()">🤖 AI Help</button>
+                <button onclick="saveCode()">💾 Save</button>
+                <select id="language-select" onchange="changeLanguage()">
+                    <option value="typescript">TypeScript</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
+                </select>
+                <span style="margin-left: auto; font-size: 12px;">
+                    Monaco Editor | AI-Powered IDE
+                </span>
+            </div>
+
+            <div id="editor-container"></div>
+        </div>
+
+        <aside id="chat-dock" aria-label="AI Chat">
+            <div id="chat-header">
+                <span>AI Chat</span>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="clearChat()" title="Clear">🧹</button>
+                    <button onclick="toggleChat(false)" title="Close">×</button>
+                </div>
+            </div>
+            <div id="chat-messages"></div>
+            <div id="chat-input-area">
+                <textarea id="chat-input" placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para quebrar linha)"></textarea>
+                <button id="chat-send" onclick="sendChat()">Enviar</button>
+            </div>
+        </aside>
     </div>
-    
-    <div id="editor-container"></div>
     
     <div id="status">
         Ready | Line 1, Col 1 | UTF-8 | TypeScript
@@ -89,6 +190,104 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <script>
         let editor;
+        let chatOpen = false;
+        const CHAT_STORAGE_KEY = 'aethel_chat_history_v1';
+        const chatHistory = [];
+
+        function loadChatHistory() {
+            try {
+                const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    for (const m of parsed) {
+                        if (m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string') {
+                            chatHistory.push({ role: m.role, content: m.content });
+                        }
+                    }
+                }
+            } catch {}
+        }
+
+        function persistChatHistory() {
+            try {
+                localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatHistory.slice(-50)));
+            } catch {}
+        }
+
+        function renderChat() {
+            const root = document.getElementById('chat-messages');
+            if (!root) return;
+            root.innerHTML = '';
+            for (const msg of chatHistory) {
+                const div = document.createElement('div');
+                div.className = `chat-msg ${msg.role}`;
+                div.textContent = msg.content;
+                root.appendChild(div);
+            }
+            root.scrollTop = root.scrollHeight;
+        }
+
+        function toggleChat(forceOpen) {
+            const dock = document.getElementById('chat-dock');
+            if (!dock) return;
+            chatOpen = typeof forceOpen === 'boolean' ? forceOpen : !chatOpen;
+            if (chatOpen) {
+                dock.classList.add('show');
+                setTimeout(() => {
+                    const input = document.getElementById('chat-input');
+                    if (input) input.focus();
+                    if (editor) editor.layout();
+                }, 0);
+            } else {
+                dock.classList.remove('show');
+                if (editor) editor.layout();
+            }
+        }
+
+        function pushChat(role, content) {
+            chatHistory.push({ role, content });
+            persistChatHistory();
+            renderChat();
+        }
+
+        async function sendChat() {
+            const inputEl = document.getElementById('chat-input');
+            if (!inputEl) return;
+            const text = String(inputEl.value || '').trim();
+            if (!text) return;
+
+            inputEl.value = '';
+            pushChat('user', text);
+
+            const selection = editor ? editor.getSelection() : null;
+            const selectedText = (editor && selection) ? editor.getModel().getValueInRange(selection) : '';
+            const code = selectedText || (editor ? editor.getValue() : '');
+            const prompt = selectedText
+                ? `${text}\n\nTrecho selecionado:\n${code}`
+                : `${text}\n\nContexto (arquivo atual):\n${code}`;
+
+            try {
+                const response = await fetch('/api/agent/coder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ input: prompt, workspaceId: 'local', userId: 'local' })
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(result && (result.message || result.error) ? (result.message || result.error) : `HTTP ${response.status}`);
+                }
+                pushChat('assistant', result.content || 'Sem resposta do agente.');
+            } catch (error) {
+                pushChat('assistant', '❌ Erro ao chamar a IA: ' + (error && error.message ? error.message : String(error)));
+            }
+        }
+
+        function clearChat() {
+            chatHistory.splice(0, chatHistory.length);
+            persistChatHistory();
+            renderChat();
+        }
         
         require.config({ 
             paths: { 
@@ -173,49 +372,34 @@ console.log(\`Email valid: \${validateEmail(user.email)}\`);
                 document.getElementById('language-select').value = savedLang;
                 monaco.editor.setModelLanguage(editor.getModel(), savedLang);
             }
+
+            // Chat init
+            loadChatHistory();
+            renderChat();
+
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) {
+                chatInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendChat();
+                    }
+                });
+            }
             
             console.log('Monaco Editor loaded successfully!');
         });
         
         function runCode() {
-            const code = editor.getValue();
-            const lang = editor.getModel().getLanguageId();
-            
-            console.log('='.repeat(50));
-            console.log('Running code:', lang);
-            console.log('='.repeat(50));
-            
-            if (lang === 'javascript' || lang === 'typescript') {
-                try {
-                    eval(code);
-                    alert('✅ Code executed successfully! Check console for output.');
-                } catch (error) {
-                    alert('❌ Error: ' + error.message);
-                    console.error(error);
-                }
-            } else {
-                alert(`Running ${lang} code requires a backend. For now, check the console.`);
-                console.log(code);
-            }
-        }
-        
-        function formatCode() {
-            editor.getAction('editor.action.formatDocument').run();
-            alert('✅ Code formatted!');
-        }
-        
-        async function askAI() {
+            // Converte o antigo prompt/alert em chat dock.
+            toggleChat(true);
             const selection = editor.getSelection();
             const selectedText = editor.getModel().getValueInRange(selection);
-            const prompt = window.prompt('Ask AI about your code:', selectedText ? 'Explain this code' : 'Help me write...');
-            
-            if (!prompt) return;
-            
-            const code = selectedText || editor.getValue();
-            
-            try {
-                    const response = await fetch('/api/agent/coder', {
-                    method: 'POST',
+            const inputEl = document.getElementById('chat-input');
+            if (inputEl) {
+                inputEl.value = selectedText ? 'Explique este trecho e sugira melhorias.' : 'Me ajude com este código.';
+                inputEl.focus();
+            }
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                             input: `${prompt}\n\nCode:\n${code}`,

@@ -1,4 +1,5 @@
 import { injectable } from 'inversify';
+import { MissionTelemetry } from '../telemetry/mission-telemetry';
 
 /**
  * Multi-Agent Orchestration with Scheduler and QoS
@@ -7,6 +8,8 @@ import { injectable } from 'inversify';
 
 export interface AgentCapability {
     agentId: string;
+    name?: string;
+    invoke?: (payload: any) => Promise<any>;
     capabilities: string[]; // ['code', 'trading', 'research', 'creative']
     costPerRequest: number; // USD
     avgLatency: number; // ms
@@ -69,8 +72,23 @@ export class AgentScheduler {
     /**
      * Register agent with capabilities
      */
-    registerAgent(capability: AgentCapability): void {
-        this.agents.set(capability.agentId, capability);
+    registerAgent(capability: any): void {
+        const agentId = capability.agentId ?? capability.id;
+        if (!agentId) {
+            throw new Error('Agent must have agentId or id');
+        }
+        const normalized: AgentCapability = {
+            agentId,
+            name: (capability as any).name,
+            invoke: (capability as any).invoke,
+            capabilities: capability.capabilities ?? ['code', 'trading', 'research', 'creative'],
+            costPerRequest: capability.costPerRequest ?? 0,
+            avgLatency: capability.avgLatency ?? 0,
+            qualityScore: capability.qualityScore ?? 1,
+            maxConcurrent: capability.maxConcurrent ?? 1,
+            currentLoad: capability.currentLoad ?? 0,
+        };
+        this.agents.set(normalized.agentId, normalized);
     }
 
     /**
@@ -202,14 +220,6 @@ export class AgentScheduler {
     /**
      * Cancel mission
      */
-    async cancelMission(missionId: string): Promise<void> {
-        // Remove from queue
-        this.queue = this.queue.filter(r => r.id !== missionId);
-        
-        // Remove from executing
-        this.executing.delete(missionId);
-    }
-
     /**
      * Complete mission
      */
@@ -279,6 +289,7 @@ export class AgentScheduler {
         }
 
         (request as any).actualCost = ((request as any).actualCost || 0) + cost;
+        MissionTelemetry.recordMissionCost(missionId, cost);
     }
 
     /**
@@ -295,11 +306,19 @@ export class AgentScheduler {
             throw new Error(`Agent ${agentId} not found`);
         }
 
-        // Real-or-fail: this scheduler does not execute agents locally.
-        // Execution must be delegated to a real orchestrator/backend.
-        throw new Error(
-            `NOT_IMPLEMENTED: Agent execution requires a configured orchestrator backend (missionId=${missionId}, agentId=${agent.agentId}).`
-        );
+        if (typeof agent.invoke !== 'function') {
+            throw new Error(`Agent ${agentId} does not support invoke()`);
+        }
+
+        const timeoutMs = (request.payload && typeof request.payload.timeout === 'number') ? request.payload.timeout : undefined;
+        if (!timeoutMs) {
+            return await agent.invoke(request.payload);
+        }
+
+        return await Promise.race([
+            agent.invoke(request.payload),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Agent invocation timeout')), timeoutMs)),
+        ]);
     }
 
     /**
@@ -365,20 +384,6 @@ export class AgentScheduler {
     /**
      * Register agent (simplified)
      */
-    registerAgent(agent: any): void {
-        const capability: AgentCapability = {
-            agentId: agent.id,
-            capabilities: [agent.id],
-            costPerRequest: 0.01,
-            avgLatency: 1000,
-            qualityScore: 0.8,
-            maxConcurrent: 5,
-            currentLoad: 0,
-        };
-
-        this.agents.set(agent.id, capability);
-    }
-
     /**
      * Event emitters (simplified)
      */
@@ -433,7 +438,7 @@ export class AgentScheduler {
 
         for (const agent of this.agents.values()) {
             // Check if agent supports mission type
-            if (!agent.capabilities.includes(request.type)) {
+            if (!agent.capabilities?.includes(request.type)) {
                 continue;
             }
 

@@ -1,42 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import jwt from 'jsonwebtoken';
+import { requireAuth } from '@/lib/auth-server';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    // Get token from Authorization header
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7);
-
-    // Verify token
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
+    const authUser = requireAuth(req);
 
     // Get user
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: authUser.userId },
       select: {
         id: true,
         email: true,
         name: true,
         plan: true,
         createdAt: true,
+        // Em alguns schemas, role existe; manter compatibilidade.
+        // Se não existir, Prisma vai acusar em build/typecheck (mas neste repo já usamos role no token).
+        role: true as any,
       },
     });
 
@@ -47,12 +31,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(user);
+    return NextResponse.json({
+      id: user.id,
+      email: user.email,
+      name: user.name ?? undefined,
+      plan: user.plan ?? undefined,
+      role: (user as any).role ?? undefined,
+    });
   } catch (error) {
     console.error('Profile error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+		const mapped = apiErrorToResponse(error);
+		if (mapped) return mapped;
+		return apiInternalError();
   }
 }

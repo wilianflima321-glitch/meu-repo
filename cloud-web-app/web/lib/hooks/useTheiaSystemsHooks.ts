@@ -976,7 +976,7 @@ async function streamAIBackend(
 
 // ==================== Export All ====================
 
-export default {
+const theiaSystemsHooks = {
     useSearch,
     useTheme,
     useKeybinding,
@@ -984,3 +984,5 @@ export default {
     useCommandPalette,
     useAI,
 };
+
+export default theiaSystemsHooks;

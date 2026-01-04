@@ -1,7 +1,6 @@
 import '../styles/globals.css'
 import type { ReactNode } from 'react'
 import ClientLayout from '../components/ClientLayout'
-import AethelHeader from '../components/AethelHeader'
 
 export const metadata = {
   title: 'Aethel IDE - Professional Development Environment',
@@ -18,7 +17,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="antialiased">
         <div id="root" className="min-h-screen bg-slate-900 text-slate-100">
           <ClientLayout>
-            <AethelHeader />
             {children}
           </ClientLayout>
         </div>

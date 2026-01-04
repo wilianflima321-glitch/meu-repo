@@ -373,8 +373,27 @@ export class AIEnhancedLSP {
    * Get code in range (mock implementation)
    */
   private async getCodeInRange(uri: string, range: Range): Promise<string> {
-    // TODO: Implement actual file reading
-    return `// Code at ${uri} lines ${range.start.line}-${range.end.line}`;
+    try {
+      // uri pode vir como file:///...; aqui usamos o path como chave do projeto.
+      const path = uri.startsWith('file://') ? uri.replace(/^file:\/\//, '') : uri;
+      const res = await fetch(`/api/files/read?path=${encodeURIComponent(path)}`, {
+        cache: 'no-store',
+      });
+      if (!res.ok) {
+        return '';
+      }
+      const data = await res.json().catch(() => null);
+      const content = data && typeof data === 'object' ? String((data as any).content ?? '') : '';
+      if (!content) return '';
+
+      const lines = content.split(/\r?\n/);
+      const start = Math.max(0, range.start.line);
+      const end = Math.min(lines.length - 1, range.end.line);
+      if (end < start) return '';
+      return lines.slice(start, end + 1).join('\n');
+    } catch {
+      return '';
+    }
   }
 }
 

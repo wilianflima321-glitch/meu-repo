@@ -1,0 +1,125 @@
+# Status bucket summary (2025-12-31)
+
+## Untracked by area
+- cloud-web-app/web: 119
+- diagnostics: 20
+- cloud-ide-desktop/aethel_theia_fork: 4
+- docs: 3
+- cloud-ide-desktop/plugins: 1
+- eslint.config.cjs: 1
+- EXECUCAO_DONO_2025-12-28.md: 1
+- STATUS_ATUAL_2025-12-30.md: 1
+- VARREDURA_ERROS_2025-12-28.md: 1
+
+## Modified by area
+- cloud-web-app/web: 105
+- examples: 12
+- cloud-ide-desktop/plugins: 3
+- .github: 1
+- .gitignore: 1
+- cloud-ide-desktop/aethel_theia_fork: 1
+- diagnostics: 1
+
+## Sample (first 50) untracked
+- EXECUCAO_DONO_2025-12-28.md
+- STATUS_ATUAL_2025-12-30.md
+- VARREDURA_ERROS_2025-12-28.md
+- cloud-ide-desktop/aethel_theia_fork/playwright.config.ts
+- cloud-ide-desktop/aethel_theia_fork/tools/dev-mock-backend/
+- cloud-ide-desktop/aethel_theia_fork/tools/dev-scripts/
+- cloud-ide-desktop/aethel_theia_fork/tools/scripts/
+- cloud-ide-desktop/plugins/UE_IDE/Source/AethelPlugin/AethelPlugin.Build.cs
+- cloud-web-app/web/ANALYSIS_REPORT_2025-12-30.md
+- cloud-web-app/web/IMPLEMENTATION_REPORT_FINAL.md
+- cloud-web-app/web/RELATORIO_COMPLETO_2025.md
+- cloud-web-app/web/app/animation-blueprint/
+- cloud-web-app/web/app/api/admin/
+- cloud-web-app/web/app/api/ai/
+- cloud-web-app/web/app/api/analytics/
+- cloud-web-app/web/app/api/backup/
+- cloud-web-app/web/app/api/chat/
+- cloud-web-app/web/app/api/collaboration/
+- cloud-web-app/web/app/api/copilot/
+- cloud-web-app/web/app/api/email/
+- cloud-web-app/web/app/api/experiments/
+- cloud-web-app/web/app/api/feature-flags/
+- cloud-web-app/web/app/api/files/read/
+- cloud-web-app/web/app/api/health/live/
+- cloud-web-app/web/app/api/health/metrics/
+- cloud-web-app/web/app/api/health/ready/
+- cloud-web-app/web/app/api/logs/
+- cloud-web-app/web/app/api/notifications/
+- cloud-web-app/web/app/api/onboarding/
+- cloud-web-app/web/app/api/quotas/
+- cloud-web-app/web/app/api/usage/
+- cloud-web-app/web/app/api/workspace/
+- cloud-web-app/web/app/blueprint-editor/
+- cloud-web-app/web/app/editor-hub/
+- cloud-web-app/web/app/landscape-editor/
+- cloud-web-app/web/app/level-editor/
+- cloud-web-app/web/app/niagara-editor/
+- cloud-web-app/web/app/project-settings/
+- cloud-web-app/web/components/Collaboration.tsx
+- cloud-web-app/web/components/FeatureFlag.tsx
+- cloud-web-app/web/components/Onboarding.tsx
+- cloud-web-app/web/components/audio/
+- cloud-web-app/web/components/editor/CodeEditor.tsx
+- cloud-web-app/web/components/editor/MonacoEditor.tsx
+- cloud-web-app/web/components/engine/
+- cloud-web-app/web/components/image/
+- cloud-web-app/web/components/materials/
+- cloud-web-app/web/components/scene-editor/
+- cloud-web-app/web/components/video/
+- cloud-web-app/web/components/visual-scripting/
+
+## Sample (first 50) modified
+- .github/workflows/ci.yml
+- .gitignore
+- cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/CI.md
+- cloud-ide-desktop/plugins/UE_IDE/Source/AethelPlugin/AethelPlugin.cpp
+- cloud-ide-desktop/plugins/UE_IDE/Source/AethelPlugin/AethelPlugin.h
+- cloud-ide-desktop/plugins/UE_IDE/aethel_unreal_plugin.uplugin
+- cloud-web-app/web/__tests__/LanguageSwitcher.test.tsx
+- cloud-web-app/web/__tests__/api/auth.test.ts
+- cloud-web-app/web/app/(auth)/login/page.tsx
+- cloud-web-app/web/app/admin/ai-demo/page.tsx
+- cloud-web-app/web/app/admin/apis/ip-registry.tsx
+- cloud-web-app/web/app/admin/ip-registry/page.tsx
+- cloud-web-app/web/app/admin/marketplace/page.tsx
+- cloud-web-app/web/app/admin/page.tsx
+- cloud-web-app/web/app/admin/users/page.tsx
+- cloud-web-app/web/app/api/assets/upload/route.ts
+- cloud-web-app/web/app/api/auth/login/route.ts
+- cloud-web-app/web/app/api/auth/profile/route.ts
+- cloud-web-app/web/app/api/auth/register/route.ts
+- cloud-web-app/web/app/api/billing/checkout/route.ts
+- cloud-web-app/web/app/api/billing/plans/route.ts
+- cloud-web-app/web/app/api/billing/webhook/route.ts
+- cloud-web-app/web/app/api/dap/events/route.ts
+- cloud-web-app/web/app/api/dap/request/route.ts
+- cloud-web-app/web/app/api/dap/session/start/route.ts
+- cloud-web-app/web/app/api/dap/session/stop/route.ts
+- cloud-web-app/web/app/api/files/route.ts
+- cloud-web-app/web/app/api/git/add/route.ts
+- cloud-web-app/web/app/api/git/commit/route.ts
+- cloud-web-app/web/app/api/git/pull/route.ts
+- cloud-web-app/web/app/api/git/push/route.ts
+- cloud-web-app/web/app/api/git/status/route.ts
+- cloud-web-app/web/app/api/lsp/notification/route.ts
+- cloud-web-app/web/app/api/lsp/request/route.ts
+- cloud-web-app/web/app/api/marketplace/extensions/route.ts
+- cloud-web-app/web/app/api/marketplace/install/route.ts
+- cloud-web-app/web/app/api/marketplace/uninstall/route.ts
+- cloud-web-app/web/app/api/projects/[id]/route.ts
+- cloud-web-app/web/app/api/projects/route.ts
+- cloud-web-app/web/app/api/tasks/detect/route.ts
+- cloud-web-app/web/app/api/tasks/load/route.ts
+- cloud-web-app/web/app/api/terminal/create/route.ts
+- cloud-web-app/web/app/api/test/discover/route.ts
+- cloud-web-app/web/app/api/test/run/route.ts
+- cloud-web-app/web/app/billing/page.tsx
+- cloud-web-app/web/app/marketplace/page.tsx
+- cloud-web-app/web/app/testing/page.tsx
+- cloud-web-app/web/components/AdminPanel.tsx
+- cloud-web-app/web/components/AethelDashboard.tsx
+- cloud-web-app/web/components/ChatComponent.tsx

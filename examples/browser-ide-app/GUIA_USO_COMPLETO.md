@@ -10,22 +10,16 @@
 
 ### **1. Iniciar a Plataforma**
 
-#### **Opção A: Python (Recomendado)**
-```bash
-cd examples/browser-ide-app
-python3 -m http.server 8080
-```
-
-#### **Opção B: Node.js**
+#### **Node.js (backend real-or-fail)**
 ```bash
 cd examples/browser-ide-app
 npm install
-node server.js
+npm start
 ```
 
 ### **2. Abrir no Navegador**
 ```
-http://localhost:8080/index.html
+http://localhost:3000/
 ```
 
 ### **3. Primeira Vez?**
@@ -582,8 +576,8 @@ IA: "Baseado no seu projeto, sugiro:
 
 1. Abra o projeto
 2. Clique em **🔗 Share** no navbar
-3. Link é copiado para clipboard
-4. Compartilhe com outros
+3. **Status**: real-or-fail — recurso não implementado (retorna erro explícito)
+4. (Futuro) Compartilhe com outros quando houver endpoint backend real
 
 ### **Colaboração** (Em Breve)
 
@@ -602,7 +596,7 @@ IA: "Baseado no seu projeto, sugiro:
 
 **Solução**:
 1. Verifique se servidor está rodando
-2. Confirme URL: `http://localhost:8080/index.html`
+2. Confirme URL: `http://localhost:3000/`
 3. Limpe cache do navegador (Ctrl+Shift+R)
 4. Tente outro navegador
 

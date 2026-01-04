@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface FileItem {
@@ -16,8 +16,79 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
   const [files, setFiles] = useState<FileItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const openFile = useCallback((file: FileItem | undefined) => {
+    if (!file) return;
+    
+    if (file.type === 'file') {
+      router.push(`/editor?file=${encodeURIComponent(file.path)}`);
+      onClose();
+    }
+  }, [onClose, router]);
+
+  const fuzzyMatch = useCallback((str: string, pattern: string): boolean => {
+    const patternLower = pattern.toLowerCase();
+    const strLower = str.toLowerCase();
+    
+    let patternIdx = 0;
+    let strIdx = 0;
+    
+    while (patternIdx < patternLower.length && strIdx < strLower.length) {
+      if (patternLower[patternIdx] === strLower[strIdx]) {
+        patternIdx++;
+      }
+      strIdx++;
+    }
+    
+    return patternIdx === patternLower.length;
+  }, []);
+
+  const filteredFiles = useMemo(() => {
+    return files
+      .filter(file => {
+        if (!query) return true;
+        return fuzzyMatch(file.name, query) || fuzzyMatch(file.path, query);
+      })
+      .sort((a, b) => {
+        // Prioritize exact matches
+        const aExact = a.name.toLowerCase().startsWith(query.toLowerCase());
+        const bExact = b.name.toLowerCase().startsWith(query.toLowerCase());
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+        return a.name.localeCompare(b.name);
+      });
+  }, [files, fuzzyMatch, query]);
+
+  const loadFiles = useCallback(async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await fetch('/api/workspace/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: '/workspace' })
+      });
+      if (!response.ok) {
+        throw new Error(`Workspace files request failed (${response.status})`);
+      }
+      const data = await response.json();
+      if (Array.isArray(data?.files)) {
+        setFiles(data.files);
+      } else {
+        setFiles([]);
+        setErrorMessage('Lista de arquivos indisponível (resposta inválida do backend).');
+      }
+    } catch (error) {
+      console.error('Failed to load files:', error);
+      setFiles([]);
+      setErrorMessage('Não foi possível carregar arquivos. Verifique o endpoint /api/workspace/files.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -26,7 +97,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
       loadFiles();
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isOpen, loadFiles]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,108 +119,37 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedIndex, query]);
-
-  const loadFiles = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/workspace/files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: '/workspace' })
-      });
-      const data = await response.json();
-      setFiles(data.files || getMockFiles());
-    } catch (error) {
-      console.error('Failed to load files:', error);
-      setFiles(getMockFiles());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getMockFiles = (): FileItem[] => [
-    { path: '/workspace/src/index.ts', name: 'index.ts', type: 'file', size: 1024 },
-    { path: '/workspace/src/app.tsx', name: 'app.tsx', type: 'file', size: 2048 },
-    { path: '/workspace/src/components/Button.tsx', name: 'Button.tsx', type: 'file', size: 512 },
-    { path: '/workspace/src/utils/helpers.ts', name: 'helpers.ts', type: 'file', size: 768 },
-    { path: '/workspace/package.json', name: 'package.json', type: 'file', size: 1536 },
-    { path: '/workspace/tsconfig.json', name: 'tsconfig.json', type: 'file', size: 256 },
-    { path: '/workspace/README.md', name: 'README.md', type: 'file', size: 2048 },
-    { path: '/workspace/src/styles/main.css', name: 'main.css', type: 'file', size: 4096 },
-    { path: '/workspace/tests/app.test.ts', name: 'app.test.ts', type: 'file', size: 1024 },
-    { path: '/workspace/.gitignore', name: '.gitignore', type: 'file', size: 128 }
-  ];
-
-  const fuzzyMatch = (str: string, pattern: string): boolean => {
-    const patternLower = pattern.toLowerCase();
-    const strLower = str.toLowerCase();
-    
-    let patternIdx = 0;
-    let strIdx = 0;
-    
-    while (patternIdx < patternLower.length && strIdx < strLower.length) {
-      if (patternLower[patternIdx] === strLower[strIdx]) {
-        patternIdx++;
-      }
-      strIdx++;
-    }
-    
-    return patternIdx === patternLower.length;
-  };
-
-  const filteredFiles = files
-    .filter(file => {
-      if (!query) return true;
-      return fuzzyMatch(file.name, query) || fuzzyMatch(file.path, query);
-    })
-    .sort((a, b) => {
-      // Prioritize exact matches
-      const aExact = a.name.toLowerCase().startsWith(query.toLowerCase());
-      const bExact = b.name.toLowerCase().startsWith(query.toLowerCase());
-      if (aExact && !bExact) return -1;
-      if (!aExact && bExact) return 1;
-      return a.name.localeCompare(b.name);
-    });
-
-  const openFile = (file: FileItem | undefined) => {
-    if (!file) return;
-    
-    if (file.type === 'file') {
-      router.push(`/editor?file=${encodeURIComponent(file.path)}`);
-      onClose();
-    }
-  };
+  }, [filteredFiles, isOpen, onClose, openFile, query, selectedIndex]);
 
   const getFileIcon = (fileName: string): string => {
     const ext = fileName.split('.').pop()?.toLowerCase();
     const iconMap: Record<string, string> = {
-      'ts': '📘',
-      'tsx': '⚛️',
-      'js': '📜',
-      'jsx': '⚛️',
-      'json': '📋',
-      'md': '📝',
-      'css': '🎨',
-      'html': '🌐',
-      'py': '🐍',
-      'go': '🐹',
-      'rs': '🦀',
-      'java': '☕',
-      'cpp': '⚙️',
-      'c': '⚙️',
-      'php': '🐘',
-      'rb': '💎',
-      'sh': '🔧',
-      'yml': '⚙️',
-      'yaml': '⚙️',
-      'xml': '📄',
-      'svg': '🖼️',
-      'png': '🖼️',
-      'jpg': '🖼️',
-      'gif': '🖼️'
+      ts: 'TS',
+      tsx: 'TSX',
+      js: 'JS',
+      jsx: 'JSX',
+      json: 'JSON',
+      md: 'MD',
+      css: 'CSS',
+      html: 'HTML',
+      py: 'PY',
+      go: 'GO',
+      rs: 'RS',
+      java: 'JAVA',
+      cpp: 'CPP',
+      c: 'C',
+      php: 'PHP',
+      rb: 'RB',
+      sh: 'SH',
+      yml: 'YML',
+      yaml: 'YAML',
+      xml: 'XML',
+      svg: 'IMG',
+      png: 'IMG',
+      jpg: 'IMG',
+      gif: 'IMG'
     };
-    return iconMap[ext || ''] || '📄';
+    return iconMap[ext || ''] || 'FILE';
   };
 
   const formatSize = (bytes: number): string => {
@@ -198,7 +198,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
         {/* Search Input */}
         <div className="p-4 border-b border-slate-700">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🔍</span>
+            <span className="text-xs font-semibold text-slate-400 w-10 text-center">FIND</span>
             <input
               ref={inputRef}
               type="text"
@@ -220,9 +220,13 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
               <p className="text-slate-400 mt-2">Loading files...</p>
             </div>
+          ) : errorMessage ? (
+            <div className="p-8 text-center text-slate-400">
+              {errorMessage}
+            </div>
           ) : filteredFiles.length === 0 ? (
             <div className="p-8 text-center text-slate-400">
-              No files found
+              Nenhum arquivo encontrado
             </div>
           ) : (
             <div className="p-2">
@@ -241,7 +245,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                     }`}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-2xl flex-shrink-0">{getFileIcon(file.name)}</span>
+                      <span className={`text-xs font-semibold w-10 text-center flex-shrink-0 ${isSelected ? 'text-white' : 'text-slate-400'}`}>{getFileIcon(file.name)}</span>
                       <div className="flex-1 min-w-0 text-left">
                         <div className="font-medium truncate">
                           {highlightMatch(file.name, query)}
@@ -266,9 +270,9 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
         {/* Footer */}
         <div className="p-3 border-t border-slate-700 flex items-center justify-between text-xs text-slate-400">
           <div className="flex gap-4">
-            <span>↑↓ Navigate</span>
-            <span>↵ Open</span>
-            <span>Esc Close</span>
+            <span>Setas: navegar</span>
+            <span>Enter: abrir</span>
+            <span>Esc: fechar</span>
           </div>
           <div>
             {filteredFiles.length} file{filteredFiles.length !== 1 ? 's' : ''}

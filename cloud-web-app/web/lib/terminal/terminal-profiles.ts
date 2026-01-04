@@ -49,7 +49,7 @@ export class TerminalProfileManager {
         name: 'Bash',
         shellPath: '/bin/bash',
         shellArgs: ['--login'],
-        icon: '🐚',
+        icon: 'SH',
         color: '#4EAA25',
         isDefault: true,
       });
@@ -60,7 +60,7 @@ export class TerminalProfileManager {
         name: 'Zsh',
         shellPath: '/bin/zsh',
         shellArgs: ['--login'],
-        icon: '⚡',
+        icon: 'SH',
         color: '#89E051',
       });
 
@@ -69,7 +69,7 @@ export class TerminalProfileManager {
         id: 'fish',
         name: 'Fish',
         shellPath: '/usr/bin/fish',
-        icon: '🐟',
+        icon: 'SH',
         color: '#00D0D0',
       });
 
@@ -78,7 +78,7 @@ export class TerminalProfileManager {
         id: 'powershell',
         name: 'PowerShell',
         shellPath: 'pwsh',
-        icon: '⚙️',
+        icon: 'PS',
         color: '#012456',
       });
 
@@ -87,7 +87,7 @@ export class TerminalProfileManager {
         id: 'node',
         name: 'Node.js',
         shellPath: 'node',
-        icon: '📗',
+        icon: 'NODE',
         color: '#68A063',
       });
 
@@ -97,7 +97,7 @@ export class TerminalProfileManager {
         name: 'Python',
         shellPath: 'python3',
         shellArgs: ['-i'],
-        icon: '🐍',
+        icon: 'PY',
         color: '#3776AB',
       });
     }

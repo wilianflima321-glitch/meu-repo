@@ -1,0 +1,670 @@
+# .eslintcache (count=79)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\application-manager\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\application-package\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\cli\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\ffmpeg\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\localization-manager\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\native-webpack-plugin\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\ovsx-client\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\private-re-exports\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\dev-packages\request\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\api-provider-sample\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\api-samples\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-anthropic\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-chat-ui\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-chat\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-code-completion\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-core-ui\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-editor\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-google\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-history\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-hugging-face\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-llamafile\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-mcp-ui\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-mcp\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ollama\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-openai\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-scanoss\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-terminal\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-vercel-ai\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\bulk-edit\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\callhierarchy\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\collaboration\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\console\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\core\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\debug\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\dev-container\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\editor-preview\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\editor\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\external-terminal\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\file-search\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\getting-started\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\git\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\keymaps\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\markers\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\memory-inspector\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\messages\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\metrics\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\mini-browser\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\monaco\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\navigator\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\notebook\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\outline-view\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\output\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\plugin-dev\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\plugin-ext-headless\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\plugin-ext-vscode\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\plugin-ext\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\plugin-metrics\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\plugin\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\preferences\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\preview\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\process\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\property-view\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\remote-wsl\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\remote\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\scanoss\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\scm-extra\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\scm\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\search-in-workspace\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\secondary-window\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\task\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\terminal\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\test\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\timeline\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\toolbar\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\typehierarchy\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\userstorage\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\variable-resolver\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\vsx-registry\.eslintcache
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\workspace\.eslintcache
+
+# route.ts (count=68)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\admin\audit\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\admin\dashboard\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\admin\stats\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\admin\users\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\ai\chat-advanced\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\ai\chat\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\ai\query\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\ai\stream\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\analytics\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\assets\upload\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\auth\login\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\auth\profile\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\auth\register\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\backup\restore\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\backup\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\billing\checkout\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\billing\plans\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\billing\webhook\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\chat\orchestrator\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\chat\threads\[id]\messages\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\chat\threads\[id]\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\chat\threads\clone\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\chat\threads\merge\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\chat\threads\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\collaboration\rooms\[id]\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\collaboration\rooms\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\copilot\action\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\copilot\context\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\copilot\workflows\[id]\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\copilot\workflows\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\dap\events\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\dap\request\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\dap\session\start\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\dap\session\stop\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\email\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\experiments\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\feature-flags\[key]\toggle\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\feature-flags\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\files\read\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\files\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\git\add\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\git\commit\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\git\pull\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\git\push\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\git\status\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\health\live\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\health\metrics\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\health\ready\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\health\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\logs\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\lsp\notification\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\lsp\request\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\marketplace\extensions\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\marketplace\install\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\marketplace\uninstall\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\notifications\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\onboarding\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\projects\[id]\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\projects\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\quotas\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\tasks\detect\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\tasks\load\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\terminal\create\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\test\discover\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\test\run\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\usage\status\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\workspace\files\route.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\api\workspace\tree\route.ts
+
+# page.tsx (count=65)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\(auth)\login\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ai-agents\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ai-demo\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ai-enhancements\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ai-evolution\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ai-training\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ai-upgrades\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ai\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\analytics\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\apis\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\arpu-churn\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\audit-logs\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\automation\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\backup\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\banking\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\bias-detection\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\chat\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\collaboration\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\compliance\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\cost-optimization\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\deploy\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\feedback\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\fine-tuning\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ide-settings\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\indexing\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\ip-registry\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\marketplace\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\multi-tenancy\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\notifications\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\onboarding\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\payments\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\promotions\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\rate-limiting\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\real-time\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\roles\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\scalability\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\security\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\subscriptions\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\support\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\updates\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\admin\users\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\animation-blueprint\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\billing\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\blueprint-editor\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\chat\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\dashboard\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\debugger\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\download\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\editor-hub\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\explorer\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\git\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\health\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\landscape-editor\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\level-editor\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\marketplace\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\niagara-editor\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\project-settings\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\search\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\settings\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\terminal\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\terms\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\testing\page.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\vr-preview\page.tsx
+
+# README.md (count=24)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\diagnostics\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\infra-playwright-ci-agent\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\browser\style\fonts\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ci\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\gdextension\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\test\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\ThirdParty\Imgui\Docs\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\ThirdParty\ImPlot\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\public\downloads\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\diagnostics\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\docs\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\browser-ide-app\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\infra-playwright-ci-agent\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ci\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\playwright\README.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\README.md
+
+# index.ts (count=18)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\browser\llm-providers\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\engine\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\engine\subsystems\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\prompts\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\engine\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\api\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\integration\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\types\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\agent-system\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\credentials\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\llm\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\media\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\supreme-ai\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\supreme-orchestrator\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\trading\core\index.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\workflows\index.ts
+
+# package.json (count=9)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\infra-playwright-ci-agent\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\core\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\browser-ide-app\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\infra-playwright-ci-agent\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\package.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\package.json
+
+# .gitignore (count=8)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.gitignore
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.gitignore
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\infra-playwright-ci-agent\.gitignore
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\.gitignore
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\test\.gitignore
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\.gitignore
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\.gitignore
+- C:\Users\omega\Desktop\aethel engine\meu-repo\infra-playwright-ci-agent\.gitignore
+
+# index.html (count=7)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ci\dashboard\index.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\test_site\index.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\index.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\browser-ide-app\index.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\public\index.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ci\dashboard\index.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\test_site\index.html
+
+# index.d.ts (count=6)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-chat-ui\index.d.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-chat\index.d.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-core\index.d.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-core\lib\common\index.d.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-mcp\index.d.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\core\index.d.ts
+
+# common.json (count=6)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\public\locales\en\common.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\public\locales\es\common.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\public\locales\fr\common.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\public\locales\ja\common.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\public\locales\pt-BR\common.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\public\locales\zh\common.json
+
+# server.js (count=6)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\server.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\dev-mock-backend\server.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\server.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\browser-ide-app\server.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\server.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\server.js
+
+# ci-playwright.yml (count=4)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\workflows\ci-playwright.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\ci-playwright.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\workflows\ci-playwright.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\ci-playwright.yml
+
+# proxy-shim.js (count=4)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\proxy-shim.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ci\proxy-shim.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\proxy-shim.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ci\proxy-shim.js
+
+# soft-warn-e2e.spec.ts (count=4)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\playwright\tests\soft-warn-e2e.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\soft-warn-e2e.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\playwright\tests\soft-warn-e2e.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\soft-warn-e2e.spec.ts
+
+# soft-warn.spec.ts (count=4)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\playwright\tests\soft-warn.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\soft-warn.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\playwright\tests\soft-warn.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\soft-warn.spec.ts
+
+# ci.yml (count=4)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\workflows\ci.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\ci.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\workflows\ci.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\ci.yml
+
+# tsconfig.json (count=4)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\tsconfig.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\tsconfig.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\tsconfig.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tsconfig.json
+
+# action.yml (count=3)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\.github\actions\godot-cache-restore\action.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\.github\actions\godot-cache-save\action.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\.github\actions\setup-godot-cpp\action.yml
+
+# context-store.ts (count=3)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\context\context-store.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\copilot\context-store.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\context\context-store.ts
+
+# templates.js (count=3)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\comments\templates.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\comments\templates.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\browser-ide-app\templates.js
+
+# package-lock.json (count=3)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\package-lock.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\browser-ide-app\package-lock.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\package-lock.json
+
+# PR_DRAFT.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\PR_DRAFT.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\docs\archive\PR_DRAFT.md
+
+# PR_DIAGNOSTICS_COMMENT.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ci\PR_DIAGNOSTICS_COMMENT.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ci\PR_DIAGNOSTICS_COMMENT.md
+
+# PR_BODY.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\PR_BODY.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\PR_BODY.md
+
+# policy-engine.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\compliance\policy-engine.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\compliance\policy-engine.ts
+
+# plugin-system.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\plugins\plugin-system.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\plugin-system.ts
+
+# PLAYWRIGHT_SUMMARY.txt (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\diagnostics\PLAYWRIGHT_SUMMARY.txt
+- C:\Users\omega\Desktop\aethel engine\meu-repo\diagnostics\PLAYWRIGHT_SUMMARY.txt
+
+# QuickOpen.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\explorer\QuickOpen.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\QuickOpen.tsx
+
+# physics.test.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\__tests__\physics.test.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\__tests__\physics.test.js
+
+# physics.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\physics.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\physics.js
+
+# physics_adv.test.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\physics_adv.test.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\physics_adv.test.js
+
+# pages.json (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\pages.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\pages.json
+
+# verifier-debug.json (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\diagnostics\verifier-debug.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\diagnostics\verifier-debug.json
+
+# README.DEV.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\README.DEV.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\README.DEV.md
+
+# verifier_additional.test.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\__tests__\verifier_additional.test.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\__tests__\verifier_additional.test.js
+
+# verifier_magic.test.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\__tests__\verifier_magic.test.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\__tests__\verifier_magic.test.js
+
+# verifier_extra3.test.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\__tests__\verifier_extra3.test.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\__tests__\verifier_extra3.test.js
+
+# ui-audit.yml (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\workflows\ui-audit.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\workflows\ui-audit.yml
+
+# ui-root.spec.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\playwright\tests\ui-root.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\playwright\tests\ui-root.spec.ts
+
+# run_audit.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\run_audit.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\run_audit.js
+
+# SConstruct (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\SConstruct
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\test\SConstruct
+
+# secure-fetch.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\data\secure-fetch.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\data\secure-fetch.ts
+
+# settings.html (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\test_site\settings.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\test_site\settings.html
+
+# static_server.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\static_server.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\static_server.js
+
+# StatusBar.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\StatusBar.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\statusbar\StatusBar.tsx
+
+# test-manager.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\test\test-manager.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\testing\test-manager.ts
+
+# ui-proxy.spec.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\playwright\tests\ui-proxy.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\playwright\tests\ui-proxy.spec.ts
+
+# toolchain-registry.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\toolchains\toolchain-registry.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\toolchains\toolchain-registry.ts
+
+# tsconfig.tsbuildinfo (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\lib\tsconfig.tsbuildinfo
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\tsconfig.tsbuildinfo
+
+# verifier_more_cases.test.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\__tests__\verifier_more_cases.test.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\__tests__\verifier_more_cases.test.js
+
+# OutputPanel.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\output\OutputPanel.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\OutputPanel.tsx
+
+# mission-control.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\browser\missions\mission-control.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\browser\missions\mission-control.tsx
+
+# my-agent.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\agents\my-agent.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\agents\my-agent.md
+
+# example.cpp (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\test\src\example.cpp
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Examples\Example.cpp
+
+# ensemble.spec.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\playwright\tests\ensemble.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\playwright\tests\ensemble.spec.ts
+
+# ensemble-warnings.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\docs\ensemble-warnings.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\docs\ensemble-warnings.md
+
+# ensemble-runtime.spec.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\examples\playwright\tests\ensemble-runtime.spec.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\examples\playwright\tests\ensemble-runtime.spec.ts
+
+# editor.html (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\test_site\editor.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\test_site\editor.html
+
+# Dockerfile (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.devcontainer\Dockerfile
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\Dockerfile
+
+# dev-mock-health.sh (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ci\dev-mock-health.sh
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ci\dev-mock-health.sh
+
+# CommandPalette.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\CommandPalette.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\components\CommandPalette.tsx
+
+# example.h (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\test\src\example.h
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Examples\Example.h
+
+# collect_metrics.ps1 (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ci\collect_metrics.ps1
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ci\collect_metrics.ps1
+
+# ci-mock.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ci\ci-mock.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ci\ci-mock.js
+
+# ci-metrics-aggregate.yml (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\workflows\ci-metrics-aggregate.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\workflows\ci-metrics-aggregate.yml
+
+# ci-agent.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\infra-playwright-ci-agent\scripts\ci-agent.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\infra-playwright-ci-agent\scripts\ci-agent.js
+
+# CHANGELOG.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\CHANGELOG.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\CHANGELOG.md
+
+# BlueprintEditor.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\engine\BlueprintEditor.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\components\unreal\BlueprintEditor.tsx
+
+# analyze-logs.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\infra-playwright-ci-agent\scripts\analyze-logs.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\infra-playwright-ci-agent\scripts\analyze-logs.js
+
+# advanced-input-system.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\input\advanced-input-system.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\advanced-input-system.ts
+
+# .gitmodules (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.gitmodules
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\.gitmodules
+
+# CMakeLists.txt (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\CMakeLists.txt
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_visual_scripting\aethel_godot_cpp_fork\test\CMakeLists.txt
+
+# NotificationCenter.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\browser\notifications\NotificationCenter.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\NotificationCenter.tsx
+
+# gemini-example.json (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\providers\gemini-example.json
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\providers\gemini-example.json
+
+# ImguiDetailCustomization.h (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\UEImgui\Public\Services\ImguiDetailCustomization.h
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\UEImguiEditor\Private\Customize\ImguiDetailCustomization.h
+
+# MonacoEditor.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\editor\MonacoEditor.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\components\MonacoEditor.tsx
+
+# mission-telemetry.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\telemetry\mission-telemetry.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\observability\mission-telemetry.ts
+
+# verifier.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\verifier.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\verifier.js
+
+# mission-control.css (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\browser\missions\mission-control.css
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\browser\missions\mission-control.css
+
+# main.yml (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\workflows\main.yml
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\workflows\main.yml
+
+# Logging.h (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\UEImgui\Private\Logging.h
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\UEImguiEditor\Private\Logging.h
+
+# Logging.cpp (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\UEImgui\Private\Logging.cpp
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\UEImguiEditor\Private\Logging.cpp
+
+# logger_gating.test.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\llm-mock\__tests__\logger_gating.test.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\llm-mock\__tests__\logger_gating.test.js
+
+# globals.css (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\globals.css
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\styles\globals.css
+
+# localization-system.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\i18n\localization-system.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\localization-system.ts
+
+# llm-provider-service.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\browser\llm-provider-service.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\llm-provider-service.ts
+
+# llm_provider_service_smoke.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\tests\llm_provider_service_smoke.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\tests\llm_provider_service_smoke.js
+
+# live.html (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\tools\ide\ui-audit\test_site\live.html
+- C:\Users\omega\Desktop\aethel engine\meu-repo\tools\ide\ui-audit\test_site\live.html
+
+# LICENSE (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\LICENSE
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\plugins\UE_IDE\Source\ThirdParty\ImPlot\LICENSE
+
+# LevelEditor.tsx (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\components\engine\LevelEditor.tsx
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\components\unreal\LevelEditor.tsx
+
+# jest.config.js (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\jest.config.js
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\tests\integration\jest.config.js
+
+# infra-playwright-ci.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\.github\PULL_REQUEST_TEMPLATE\infra-playwright-ci.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\.github\PULL_REQUEST_TEMPLATE\infra-playwright-ci.md
+
+# IMPLEMENTATION_SUMMARY.md (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\docs\IMPLEMENTATION_SUMMARY.md
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\trading\IMPLEMENTATION_SUMMARY.md
+
+# llm-router.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-ide-desktop\aethel_theia_fork\packages\ai-ide\src\common\llm\llm-router.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\llm\llm-router.ts
+
+# workspace.ts (count=2)
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\extensions\vscode-api\workspace.ts
+- C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\lib\workspace.ts
+

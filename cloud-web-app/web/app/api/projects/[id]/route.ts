@@ -1,23 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-function getUserIdFromToken(req: NextRequest): string | null {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-  try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    return decoded.userId;
-  } catch (error) {
-    return null;
-  }
-}
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 // GET /api/projects/[id] - Get single project
 export async function GET(
@@ -25,15 +10,13 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = getUserIdFromToken(req);
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = requireAuth(req);
+		await requireEntitlementsForUser(user.userId);
 
     const project = await prisma.project.findFirst({
       where: {
         id: params.id,
-        userId,
+        userId: user.userId,
       },
       include: {
         files: true,
@@ -48,10 +31,10 @@ export async function GET(
     return NextResponse.json(project);
   } catch (error) {
     console.error('Get project error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }
 
@@ -61,16 +44,14 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = getUserIdFromToken(req);
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = requireAuth(req);
+		await requireEntitlementsForUser(user.userId);
 
     const data = await req.json();
 
     // Verify ownership
     const existing = await prisma.project.findFirst({
-      where: { id: params.id, userId },
+      where: { id: params.id, userId: user.userId },
     });
 
     if (!existing) {
@@ -88,10 +69,10 @@ export async function PATCH(
     return NextResponse.json(project);
   } catch (error) {
     console.error('Update project error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }
 
@@ -101,14 +82,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = getUserIdFromToken(req);
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = requireAuth(req);
+		await requireEntitlementsForUser(user.userId);
 
     // Verify ownership
     const existing = await prisma.project.findFirst({
-      where: { id: params.id, userId },
+      where: { id: params.id, userId: user.userId },
     });
 
     if (!existing) {
@@ -122,9 +101,9 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Delete project error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }

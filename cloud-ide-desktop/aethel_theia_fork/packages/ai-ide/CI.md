@@ -56,10 +56,11 @@ File: `.github/workflows/ci-playwright.yml`
 
 ### Test Configuration
 
-File: `playwright.config.js`
+File: `playwright.config.ts`
 
-```javascript
-{
+```ts
+// See repository root: playwright.config.ts
+export default {
   testDir: '.',
   testMatch: ['*.spec.ts', 'examples/playwright/tests/*.spec.ts'],
   testIgnore: ['**/node_modules/**', '**/lib/**'],
@@ -70,7 +71,7 @@ File: `playwright.config.js`
     ['html', { outputFolder: 'playwright-report' }],
     ['json', { outputFile: 'test-results/playwright.json' }]
   ]
-}
+};
 ```
 
 ## Flakiness Investigation

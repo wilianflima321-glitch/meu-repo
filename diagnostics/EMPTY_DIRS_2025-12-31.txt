@@ -1,0 +1,7 @@
+C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\.swc\plugins\v7_windows_x86_64_0.106.15
+C:\Users\omega\Desktop\aethel engine\meu-repo\cloud-web-app\web\app\login
+C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\core
+C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\monitoring
+C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\notifications
+C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\scheduler
+C:\Users\omega\Desktop\aethel engine\meu-repo\src\common\storage

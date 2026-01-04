@@ -1,10 +1,63 @@
+"use client"
 import Link from 'next/link';
+import useSWR from 'swr';
+import { API_BASE } from '@/lib/api';
+import { getToken } from '@/lib/auth';
+
+const fetcher = (url: string) => fetch(url, {
+  headers: { 'Authorization': `Bearer ${getToken()}` }
+}).then(r => r.json());
 
 export default function Admin() {
+  const { data, error, isLoading } = useSWR(`${API_BASE}/admin/users`, fetcher);
+
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <h1 className='text-3xl font-bold mb-6'>Painel de Administração - Aethel IDE</h1>
       <p className='mb-4 text-gray-600'>Gerencie usuários, IA, assinaturas e mais. Tudo seguro e modular.</p>
+
+      {/* User Stats Section */}
+      <div className="mb-8 bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-bold mb-4">Usuários Recentes</h2>
+        {isLoading ? (
+          <p>Carregando usuários...</p>
+        ) : error ? (
+          <p className="text-red-500">Erro ao carregar usuários. Verifique suas permissões.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-2">Nome</th>
+                  <th className="p-2">Email</th>
+                  <th className="p-2">Plano</th>
+                  <th className="p-2">Projetos</th>
+                  <th className="p-2">Data Cadastro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.users?.map((user: any) => (
+                  <tr key={user.id} className="border-b hover:bg-gray-50">
+                    <td className="p-2 font-medium">{user.name || 'Sem nome'}</td>
+                    <td className="p-2 text-gray-600">{user.email}</td>
+                    <td className="p-2">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        user.plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                        user.plan === 'pro' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {user.plan}
+                      </span>
+                    </td>
+                    <td className="p-2">{user._count.projects}</td>
+                    <td className="p-2 text-gray-500">{new Date(user.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
         {/* Links existentes mantidos para brevidade */}

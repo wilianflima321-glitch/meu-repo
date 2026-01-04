@@ -30,8 +30,27 @@ export interface CodeResponse {
     error?: string;
 }
 
+export interface PromptTemplate {
+    id: string;
+    template: string;
+}
+
 @injectable()
 export class CoderAgent {
+    readonly id = 'coder';
+    readonly name = 'Coder';
+    readonly description = 'Assists with code writing, refactoring, and debugging.';
+    readonly promptTemplates: PromptTemplate[] = [
+        { id: 'code-generate', template: 'Generate code based on requirements and context.' },
+        { id: 'code-refactor', template: 'Refactor code while preserving behavior and improving clarity.' },
+        { id: 'code-debug', template: 'Debug issues, identify root cause, and propose a fix.' },
+        { id: 'code-test', template: 'Generate tests to validate behavior and edge cases.' },
+    ];
+
+    async invoke(request: any): Promise<any> {
+        return this.processRequest(request);
+    }
+
     constructor(
         @inject(TelemetryService) private telemetry: TelemetryService,
         @inject(ObservabilityService) private observability: ObservabilityService,

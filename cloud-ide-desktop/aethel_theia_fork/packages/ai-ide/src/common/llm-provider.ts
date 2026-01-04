@@ -1,2 +1,14 @@
-// Re-export compiled definitions so source-level imports resolve during incremental checks
-export * from '../../lib/common/llm-provider';
+export interface SendRequestOptions {
+	input: string;
+	settings?: any;
+}
+
+export interface LlmProviderResponse {
+	status: number;
+	body: any;
+}
+
+export interface ILlmProvider {
+	id: string;
+	sendRequest(options: SendRequestOptions): Promise<LlmProviderResponse>;
+}

@@ -300,7 +300,7 @@ Features:
   ✅ Contradiction detection
   ✅ Memory system (1000 entries)
   ✅ Export/Import
-  ✅ API ready structure (mock)
+  ✅ Estrutura pronta para API (real-or-fail: exige backend/LLM configurado)
 Usado por: Todos os editores
 Status: COMPLETO (aguardando API real)
 ```
@@ -436,7 +436,7 @@ Status: COMPLETO
 #### **FLUXO_IA_COMPLETO.md** ✅
 ```
 Linhas: ~800
-Conteúdo: Arquitetura de IA, mock e implementação real
+Conteúdo: Arquitetura de IA e integração real-or-fail
 Status: COMPLETO
 ```
 
@@ -582,8 +582,10 @@ Status: COMPLETO
 15. Templates (20+ templates prontos)
 
 ### **90% Funcional** ⚠️
-1. AI Context Manager (mock, aguardando API real)
+1. AI Context Manager (real-or-fail; aguardando configuração de LLM)
 2. Console Panel (criado, precisa ser integrado nas páginas)
+ 
+Observação: IA é real-or-fail (sem provedor/chaves, falha explicitamente).
 
 ### **Não Implementado** ❌
 1. Terminal integrado
@@ -631,7 +633,9 @@ Status: COMPLETO
 ### **Testar Tudo** (2-3 horas)
 ```bash
 # Iniciar servidor
-python3 -m http.server 8080
+cd examples/browser-ide-app
+npm install
+npm start
 
 # Testar cada página
 # Verificar console para erros

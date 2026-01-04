@@ -23,10 +23,41 @@ export default function Billing() {
     return tokens.toString()
   }
 
-  const handleSubscribe = (planId: string) => {
+  const handleSubscribe = async (planId: string) => {
     setSelectedPlan(planId)
-    // TODO: Integrar com Stripe
-    alert(`Checkout para ${planId} em breve! Stripe integration pendente.`)
+    
+    try {
+      const token = localStorage.getItem('aethel-token'); // Or use getToken() from lib/auth
+      if (!token) {
+        alert('Por favor, faça login para assinar.');
+        window.location.href = '/login';
+        return;
+      }
+
+      const res = await fetch(`${API}/billing/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ planId })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro ao iniciar checkout');
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error('URL de checkout não retornada');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao processar assinatura. Tente novamente.');
+    }
   }
 
   if (isLoading) {

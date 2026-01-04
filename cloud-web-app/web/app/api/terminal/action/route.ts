@@ -1,0 +1,125 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import { 
+  getTerminalPtyManager, 
+  writeToTerminal,
+  resizeTerminal,
+  killTerminalSession,
+} from '@/lib/server/terminal-pty-runtime';
+
+interface TerminalActionRequest {
+  sessionId: string;
+  action: 'write' | 'resize' | 'kill' | 'signal' | 'clear' | 'list';
+  data?: string;
+  cols?: number;
+  rows?: number;
+  signal?: string;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+    await requireEntitlementsForUser(user.userId);
+
+    const body: TerminalActionRequest = await request.json();
+    const { sessionId, action, data, cols, rows, signal } = body;
+
+    const manager = getTerminalPtyManager();
+
+    switch (action) {
+      case 'write': {
+        if (!sessionId || !data) {
+          return NextResponse.json(
+            { success: false, error: 'sessionId and data required' },
+            { status: 400 }
+          );
+        }
+        
+        const success = writeToTerminal(sessionId, data);
+        return NextResponse.json({ success });
+      }
+
+      case 'resize': {
+        if (!sessionId || !cols || !rows) {
+          return NextResponse.json(
+            { success: false, error: 'sessionId, cols and rows required' },
+            { status: 400 }
+          );
+        }
+
+        const success = resizeTerminal(sessionId, cols, rows);
+        return NextResponse.json({ success });
+      }
+
+      case 'kill': {
+        if (!sessionId) {
+          return NextResponse.json(
+            { success: false, error: 'sessionId required' },
+            { status: 400 }
+          );
+        }
+
+        const success = await killTerminalSession(sessionId);
+        return NextResponse.json({ success });
+      }
+
+      case 'signal': {
+        if (!sessionId || !signal) {
+          return NextResponse.json(
+            { success: false, error: 'sessionId and signal required' },
+            { status: 400 }
+          );
+        }
+
+        const success = manager.sendSignal(sessionId, signal);
+        return NextResponse.json({ success });
+      }
+
+      case 'clear': {
+        if (!sessionId) {
+          return NextResponse.json(
+            { success: false, error: 'sessionId required' },
+            { status: 400 }
+          );
+        }
+
+        const success = manager.clearScreen(sessionId);
+        return NextResponse.json({ success });
+      }
+
+      case 'list': {
+        const sessions = manager.getSessionsByUser(user.userId);
+        return NextResponse.json({
+          success: true,
+          sessions: sessions.map(s => ({
+            id: s.id,
+            name: s.name,
+            cwd: s.cwd,
+            shell: s.shell,
+            isAlive: s.isAlive,
+            createdAt: s.createdAt,
+            lastActivity: s.lastActivity,
+          })),
+        });
+      }
+
+      default:
+        return NextResponse.json(
+          { success: false, error: `Unknown action: ${action}` },
+          { status: 400 }
+        );
+    }
+  } catch (error) {
+    console.error('Terminal action failed:', error);
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Action failed' },
+      { status: 500 }
+    );
+  }
+}

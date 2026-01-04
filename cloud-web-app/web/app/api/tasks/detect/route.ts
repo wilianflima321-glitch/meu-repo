@@ -1,21 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile, access } from 'fs/promises';
 import { join } from 'path';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { assertWorkspacePath } from '@/lib/workspace';
+import { apiErrorToResponse } from '@/lib/api-errors';
 
 interface DetectTasksRequest {
   workspaceRoot: string;
 }
 
+type DetectedTask = {
+  label: string;
+  type: string;
+  command: string;
+  args: string[];
+  problemMatcher: string[];
+  presentation?: {
+    reveal: string;
+    panel: string;
+  };
+};
+
 export async function POST(request: NextRequest) {
   try {
+		const user = requireAuth(request);
+		await requireEntitlementsForUser(user.userId);
+
     const body: DetectTasksRequest = await request.json();
     const { workspaceRoot } = body;
+		const safeRoot = assertWorkspacePath(workspaceRoot, 'workspaceRoot');
 
-    const detectedTasks = [];
+		const detectedTasks: DetectedTask[] = [];
 
     // Detect npm/yarn tasks
     try {
-      const packageJsonPath = join(workspaceRoot, 'package.json');
+      const packageJsonPath = join(safeRoot, 'package.json');
       await access(packageJsonPath);
       const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
       
@@ -40,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     // Detect Maven tasks
     try {
-      const pomPath = join(workspaceRoot, 'pom.xml');
+      const pomPath = join(safeRoot, 'pom.xml');
       await access(pomPath);
       
       detectedTasks.push(
@@ -79,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     // Detect Gradle tasks
     try {
-      const gradlePath = join(workspaceRoot, 'build.gradle');
+      const gradlePath = join(safeRoot, 'build.gradle');
       await access(gradlePath);
       
       detectedTasks.push(
@@ -111,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     // Detect Go tasks
     try {
-      const goModPath = join(workspaceRoot, 'go.mod');
+      const goModPath = join(safeRoot, 'go.mod');
       await access(goModPath);
       
       detectedTasks.push(
@@ -143,7 +163,7 @@ export async function POST(request: NextRequest) {
 
     // Detect Rust tasks
     try {
-      const cargoPath = join(workspaceRoot, 'Cargo.toml');
+      const cargoPath = join(safeRoot, 'Cargo.toml');
       await access(cargoPath);
       
       detectedTasks.push(
@@ -182,7 +202,7 @@ export async function POST(request: NextRequest) {
 
     // Detect Python tasks
     try {
-      const requirementsPath = join(workspaceRoot, 'requirements.txt');
+      const requirementsPath = join(safeRoot, 'requirements.txt');
       await access(requirementsPath);
       
       detectedTasks.push(
@@ -199,7 +219,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const setupPyPath = join(workspaceRoot, 'setup.py');
+      const setupPyPath = join(safeRoot, 'setup.py');
       await access(setupPyPath);
       
       detectedTasks.push(
@@ -217,7 +237,7 @@ export async function POST(request: NextRequest) {
 
     // Detect Makefile tasks
     try {
-      const makefilePath = join(workspaceRoot, 'Makefile');
+      const makefilePath = join(safeRoot, 'Makefile');
       await access(makefilePath);
       
       detectedTasks.push(
@@ -253,6 +273,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Failed to detect tasks:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     return NextResponse.json(
       { success: false, error: 'Failed to detect tasks' },
       { status: 500 }

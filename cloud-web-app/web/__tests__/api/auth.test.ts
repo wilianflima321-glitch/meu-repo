@@ -2,12 +2,13 @@
  * Authentication API Tests
  */
 
-import { verifyToken, generateToken } from '@/lib/auth';
+import { verifyToken, generateTokenWithRole } from '@/lib/auth-server';
 
 describe('Authentication', () => {
   describe('generateToken', () => {
     it('should generate a valid JWT token', () => {
-      const token = generateToken('user123', 'test@example.com');
+      process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
+      const token = generateTokenWithRole('user123', 'test@example.com', 'user');
       expect(token).toBeTruthy();
       expect(typeof token).toBe('string');
     });
@@ -15,12 +16,14 @@ describe('Authentication', () => {
 
   describe('verifyToken', () => {
     it('should verify a valid token', () => {
-      const token = generateToken('user123', 'test@example.com');
+      process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
+      const token = generateTokenWithRole('user123', 'test@example.com', 'user');
       const decoded = verifyToken(token);
       
       expect(decoded).toBeTruthy();
       expect(decoded?.userId).toBe('user123');
       expect(decoded?.email).toBe('test@example.com');
+      expect(decoded?.role).toBe('user');
     });
 
     it('should reject an invalid token', () => {

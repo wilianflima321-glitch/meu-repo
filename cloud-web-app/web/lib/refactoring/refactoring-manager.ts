@@ -457,7 +457,7 @@ export class RefactoringManager {
       return lines[range.start.line].substring(range.start.character, range.end.character);
     }
     
-    const selected = [];
+    const selected: string[] = [];
     selected.push(lines[range.start.line].substring(range.start.character));
     for (let i = range.start.line + 1; i < range.end.line; i++) {
       selected.push(lines[i]);

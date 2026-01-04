@@ -1,2 +1,3 @@
-// Auto-generated re-export stub: forward to compiled lib to satisfy imports during incremental dev
-export * from '../../../lib/browser/ai-configuration/token-usage-configuration-widget';
+export class AITokenUsageConfigurationWidget {
+	static readonly ID = 'ai-token-usage-configuration-widget';
+}

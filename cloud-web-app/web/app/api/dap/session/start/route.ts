@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
+import { requireAuth } from '@/lib/auth-server';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { apiErrorToResponse } from '@/lib/api-errors';
+import { startDapSession } from '@/lib/server/dap-runtime';
 
 interface StartSessionRequest {
   type: string;
@@ -13,15 +16,11 @@ interface StartSessionRequest {
   host?: string;
 }
 
-// In-memory session storage (in production, use Redis or database)
-const activeSessions = new Map<string, {
-  config: StartSessionRequest;
-  events: any[];
-  createdAt: Date;
-}>();
-
 export async function POST(request: NextRequest) {
   try {
+    const user = requireAuth(request);
+		await requireFeatureForUser(user.userId, 'dap');
+
     const config: StartSessionRequest = await request.json();
 
     if (!config.type || !config.request) {
@@ -31,34 +30,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sessionId = randomUUID();
-
-    activeSessions.set(sessionId, {
-      config,
-      events: [],
-      createdAt: new Date()
+    const session = await startDapSession({
+      userId: user.userId,
+      type: config.type,
+      workspaceRoot: config.cwd,
+      cwd: config.cwd,
+      env: config.env,
+      adapter: (config as any).adapter,
     });
-
-    console.log(`Debug session started: ${sessionId} (${config.type})`);
-
-    // Simulate initialization event
-    setTimeout(() => {
-      const session = activeSessions.get(sessionId);
-      if (session) {
-        session.events.push({
-          type: 'initialized',
-          timestamp: new Date().toISOString()
-        });
-      }
-    }, 100);
 
     return NextResponse.json({
       success: true,
-      sessionId,
-      message: 'Debug session started'
+      sessionId: session.sessionId,
+      message: 'Debug session started',
     });
   } catch (error) {
     console.error('Failed to start debug session:', error);
+    const code = (error as any)?.code;
+    if (code === 'DAP_UNSUPPORTED_TYPE') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'DAP_UNSUPPORTED_TYPE',
+          message:
+            'Tipo de DAP não suportado/sem adapter configurado. Configure AETHEL_DAP_NODE_CMD/AETHEL_DAP_NODE_ARGS (Node) ou instale/configure o adapter correspondente.'
+        },
+        { status: 422 }
+      );
+    }
+
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     return NextResponse.json(
       { success: false, error: 'Failed to start session' },
       { status: 500 }
