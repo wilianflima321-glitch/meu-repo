@@ -1,5 +1,13 @@
 version: '3.8'
 
+# =============================================================================
+# Aethel Engine - Docker Compose
+# =============================================================================
+# IMPORTANTE: Antes de usar, configure as variáveis de ambiente:
+#   1. Copie .env.template para .env
+#   2. OU execute: ./scripts/setup-secrets.sh dev
+# =============================================================================
+
 services:
   # PostgreSQL Database
   postgres:
@@ -7,9 +15,9 @@ services:
     container_name: aethel-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: aethel
-      POSTGRES_PASSWORD: aethel_dev_password
-      POSTGRES_DB: aethel_db
+      POSTGRES_USER: ${POSTGRES_USER:?Configure POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-aethel_db}
     ports:
       - "5432:5432"
     volumes:
@@ -45,10 +53,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://aethel:aethel_dev_password@postgres:5432/aethel_db
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-aethel_db}
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET no .env}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     depends_on:
       postgres:

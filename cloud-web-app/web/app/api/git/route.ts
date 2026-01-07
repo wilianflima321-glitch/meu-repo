@@ -2,13 +2,23 @@
  * Aethel Engine - Git API Routes
  * 
  * API REST para operações Git.
+ * 
+ * TODAS as operações requerem autenticação.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getGitService } from '@/lib/server/git-service';
+import { requireAuth } from '@/lib/auth-server';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { assertWorkspacePath } from '@/lib/workspace';
+import { apiErrorToResponse } from '@/lib/api-errors';
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Autenticação obrigatória
+    const user = requireAuth(request);
+    await requireEntitlementsForUser(user.userId);
+
     const body = await request.json();
     const { action, repoPath, ...params } = body;
     
@@ -19,7 +29,9 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const git = getGitService(repoPath);
+    // SECURITY: Validar que o path está dentro do workspace permitido
+    const safeRepoPath = assertWorkspacePath(repoPath, 'repoPath');
+    const git = getGitService(safeRepoPath);
     
     switch (action) {
       // Status & Info
@@ -346,8 +358,18 @@ export async function GET(request: NextRequest) {
     }
   } catch (error: any) {
     console.error('Git API error:', error);
+    
+    // SECURITY: Mapear erros conhecidos, não expor detalhes internos
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    
+    // Erros genéricos não devem vazar stack trace
+    const safeMessage = error?.code === 'WORKSPACE_ROOT_OUT_OF_BOUNDS' 
+      ? 'Access denied: path outside workspace'
+      : 'Git operation failed';
+    
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: safeMessage, success: false },
       { status: 500 }
     );
   }

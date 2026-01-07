@@ -831,10 +831,12 @@ export class ShaderGraphCompiler {
 
 export const shaderGraphCompiler = new ShaderGraphCompiler();
 
-export default {
+const aaaMaterialSystem = {
   AdvancedPBRMaterial,
   MaterialLibrary,
   ShaderGraphCompiler,
   shaderGraphCompiler,
   DEFAULT_PBR_PARAMS,
 };
+
+export default aaaMaterialSystem;

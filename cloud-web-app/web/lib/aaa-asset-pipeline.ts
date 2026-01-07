@@ -1126,7 +1126,7 @@ export const assetDatabase = new AssetDatabase();
 export const assetOptimizer = new AssetOptimizer();
 export const assetStreamer = new AssetStreamer();
 
-export default {
+const aaaAssetPipeline = {
   AssetImporter,
   AssetDatabase,
   AssetOptimizer,
@@ -1137,3 +1137,5 @@ export default {
   assetStreamer,
   DEFAULT_IMPORT_OPTIONS,
 };
+
+export default aaaAssetPipeline;

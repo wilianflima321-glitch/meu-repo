@@ -3,6 +3,8 @@
 
 export { DashboardSidebar, type DashboardTab } from './DashboardSidebar'
 export { DashboardLayout } from './DashboardLayout'
+export { NewProjectWizard } from './NewProjectWizard'
+export { ProjectsDashboard } from './ProjectsDashboard'
 
 // Tabs
 export { OverviewTab } from './tabs/OverviewTab'

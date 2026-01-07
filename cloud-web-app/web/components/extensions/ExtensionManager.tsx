@@ -14,7 +14,7 @@
  * - Categories & Filters
  */
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import {
   Search,
   Package,
@@ -52,7 +52,9 @@ import {
   MoreHorizontal,
   ToggleLeft,
   ToggleRight,
+  Loader2,
 } from 'lucide-react'
+import { useExtensions, type Extension as HookExtension } from '@/lib/hooks/useExtensions'
 
 // ============= Types =============
 
@@ -364,13 +366,34 @@ function formatDate(date: Date): string {
 // ============= Main Component =============
 
 export default function ExtensionManager({
-  extensions = MOCK_EXTENSIONS,
-  onInstall,
-  onUninstall,
-  onEnable,
-  onDisable,
+  extensions: propExtensions,
+  onInstall: propOnInstall,
+  onUninstall: propOnUninstall,
+  onEnable: propOnEnable,
+  onDisable: propOnDisable,
   onOpenSettings,
 }: ExtensionManagerProps) {
+  // Use the hook to fetch real extensions from API
+  const {
+    extensions: apiExtensions,
+    isLoading: apiLoading,
+    error: apiError,
+    search: apiSearch,
+    refresh: apiRefresh,
+    install: apiInstall,
+    uninstall: apiUninstall,
+    enable: apiEnable,
+    disable: apiDisable,
+  } = useExtensions({ autoLoad: !propExtensions })
+  
+  // Use prop extensions if provided, otherwise use API extensions
+  // Fall back to MOCK_EXTENSIONS only if both are empty (for demo/offline)
+  const extensions = useMemo(() => {
+    if (propExtensions && propExtensions.length > 0) return propExtensions
+    if (apiExtensions.length > 0) return apiExtensions as Extension[]
+    return MOCK_EXTENSIONS
+  }, [propExtensions, apiExtensions])
+  
   const [activeView, setActiveView] = useState<'installed' | 'marketplace' | 'recommended'>('installed')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<ExtensionCategory | 'all'>('all')
@@ -430,31 +453,65 @@ export default function ExtensionManager({
   const handleInstall = useCallback(async (ext: Extension) => {
     setIsLoading(ext.id)
     try {
-      await onInstall?.(ext.id)
+      // Use prop callback if provided, otherwise use API
+      if (propOnInstall) {
+        await propOnInstall(ext.id)
+      } else {
+        await apiInstall(ext.id)
+      }
     } finally {
       setIsLoading(null)
     }
-  }, [onInstall])
+  }, [propOnInstall, apiInstall])
   
   // Handle uninstall
   const handleUninstall = useCallback(async (ext: Extension) => {
     if (!confirm(`Uninstall "${ext.displayName}"?`)) return
     setIsLoading(ext.id)
     try {
-      await onUninstall?.(ext.id)
+      // Use prop callback if provided, otherwise use API
+      if (propOnUninstall) {
+        await propOnUninstall(ext.id)
+      } else {
+        await apiUninstall(ext.id)
+      }
     } finally {
       setIsLoading(null)
     }
-  }, [onUninstall])
+  }, [propOnUninstall, apiUninstall])
   
   // Handle toggle
   const handleToggle = useCallback((ext: Extension) => {
     if (ext.isEnabled) {
-      onDisable?.(ext.id)
+      // Use prop callback if provided, otherwise use API
+      if (propOnDisable) {
+        propOnDisable(ext.id)
+      } else {
+        apiDisable(ext.id)
+      }
     } else {
-      onEnable?.(ext.id)
+      // Use prop callback if provided, otherwise use API
+      if (propOnEnable) {
+        propOnEnable(ext.id)
+      } else {
+        apiEnable(ext.id)
+      }
     }
-  }, [onEnable, onDisable])
+  }, [propOnEnable, propOnDisable, apiEnable, apiDisable])
+  
+  // Handle search with API
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query)
+    // Debounced API search for marketplace
+    if (activeView === 'marketplace' && query.length >= 2) {
+      apiSearch(query)
+    }
+  }, [activeView, apiSearch])
+  
+  // Handle refresh
+  const handleRefresh = useCallback(() => {
+    apiRefresh()
+  }, [apiRefresh])
   
   // Count by status
   const counts = useMemo(() => ({

@@ -90,7 +90,12 @@ async function resolveProjectId(userId: string, request: NextRequest, body: any)
   if (typeof candidate === 'string' && candidate.trim()) return candidate;
 
   const project = await prisma.project.findFirst({
-    where: { userId },
+    where: {
+      OR: [
+        { userId },
+        { members: { some: { userId } } },
+      ],
+    },
     orderBy: { updatedAt: 'desc' },
     select: { id: true },
   });
@@ -110,9 +115,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ tree: [] satisfies WorkspaceTreeNode[] });
     }
 
-    // Verifica ownership
     const project = await prisma.project.findFirst({
-      where: { id: projectId, userId: user.userId },
+      where: {
+        id: projectId,
+        OR: [
+          { userId: user.userId },
+          { members: { some: { userId: user.userId } } },
+        ],
+      },
       select: { id: true },
     });
 

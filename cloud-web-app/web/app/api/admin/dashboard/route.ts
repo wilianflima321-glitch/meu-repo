@@ -14,8 +14,18 @@ export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
     
-    // TODO: Verificar se é admin
-    // Por enquanto, qualquer autenticado pode ver
+    // Verificar se é admin
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { role: true },
+    });
+    
+    if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'super_admin')) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: Admin access required' },
+        { status: 403 }
+      );
+    }
     
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);

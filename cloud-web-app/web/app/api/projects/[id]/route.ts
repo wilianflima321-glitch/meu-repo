@@ -16,7 +16,10 @@ export async function GET(
     const project = await prisma.project.findFirst({
       where: {
         id: params.id,
-        userId: user.userId,
+        OR: [
+          { userId: user.userId },
+          { members: { some: { userId: user.userId } } },
+        ],
       },
       include: {
         files: true,

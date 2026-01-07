@@ -1,6 +1,9 @@
 /**
  * Base class for DAP (Debug Adapter Protocol) implementations
- * Handles process lifecycle, communication, and common debug operations
+ * 
+ * @deprecated Use DAPClient from './dap-client' instead.
+ * This class is kept for backwards compatibility but uses HTTP API for real communication.
+ * The mock methods are only used as fallback when API is unavailable.
  */
 
 import { EventEmitter } from 'events';
@@ -125,10 +128,13 @@ export abstract class DAPAdapterBase extends EventEmitter {
   protected initialized = false;
   protected capabilities: Capabilities = {};
   protected sessionActive = false;
+  protected sessionId: string | null = null;
+  protected useRealAPI = true; // Try real API first
 
   constructor(config: DAPAdapterConfig) {
     super();
     this.config = config;
+    console.warn('[DAP] DAPAdapterBase is deprecated. Use DAPClient from @/lib/dap instead.');
   }
 
   /**
@@ -140,10 +146,38 @@ export abstract class DAPAdapterBase extends EventEmitter {
     }
 
     try {
-      // In browser environment, we'll use WebSocket or HTTP
-      // For now, emit ready event for mock implementation
+      // Try to start real session via API
+      if (this.useRealAPI && typeof fetch !== 'undefined') {
+        try {
+          const response = await fetch('/api/dap/session/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: this.getAdapterID(),
+              request: 'launch',
+              name: `Debug ${this.getAdapterID()}`,
+              cwd: this.config.cwd,
+            }),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.sessionId) {
+              this.sessionId = data.sessionId;
+              this.emit('ready');
+              console.log(`[DAP] ${this.config.command} adapter started (real API, session: ${this.sessionId})`);
+              return;
+            }
+          }
+        } catch (apiError) {
+          console.warn('[DAP] API unavailable, falling back to mock mode:', apiError);
+          this.useRealAPI = false;
+        }
+      }
+
+      // Fallback to mock mode
       this.emit('ready');
-      console.log(`[DAP] ${this.config.command} adapter started (mock mode)`);
+      console.log(`[DAP] ${this.config.command} adapter started (mock mode - API unavailable)`);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -154,16 +188,27 @@ export abstract class DAPAdapterBase extends EventEmitter {
    * Stop the debug adapter process
    */
   async stop(): Promise<void> {
-    if (!this.process) {
-      return;
-    }
-
     try {
       if (this.sessionActive) {
         await this.disconnect();
       }
+      
+      // Stop real session if exists
+      if (this.sessionId && this.useRealAPI && typeof fetch !== 'undefined') {
+        try {
+          await fetch('/api/dap/session/stop', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: this.sessionId }),
+          });
+        } catch (e) {
+          console.warn('[DAP] Failed to stop session via API:', e);
+        }
+      }
+      
       this.process = null;
       this.initialized = false;
+      this.sessionId = null;
       this.emit('stopped');
       console.log(`[DAP] ${this.config.command} adapter stopped`);
     } catch (error) {
@@ -347,17 +392,38 @@ export abstract class DAPAdapterBase extends EventEmitter {
    */
   protected async sendRequest(command: string, args: any): Promise<any> {
     const seq = ++this.messageId;
-    const message = {
-      type: 'request',
-      seq,
-      command,
-      arguments: args,
-    };
+    
+    // Try real API if session is active
+    if (this.useRealAPI && this.sessionId && typeof fetch !== 'undefined') {
+      try {
+        const response = await fetch('/api/dap/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: this.sessionId,
+            command,
+            arguments: args,
+            seq,
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success !== false) {
+            return data.body || {};
+          }
+          throw new Error(data.message || 'DAP request failed');
+        }
+      } catch (apiError) {
+        console.warn(`[DAP] API request failed for ${command}, using mock:`, apiError);
+      }
+    }
 
+    // Fallback to mock response
     return new Promise((resolve, reject) => {
       this.pendingRequests.set(seq, { resolve, reject });
       
-      // Mock implementation - will be replaced with real communication
+      // Mock implementation fallback
       setTimeout(() => {
         const mockResponse = this.getMockResponse(command, args);
         this.handleResponse({

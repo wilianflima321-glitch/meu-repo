@@ -3,10 +3,288 @@
  * 
  * Servidor MCP nativo do Aethel IDE com todas as ferramentas
  * de desenvolvimento, engine e IA integradas.
+ * 
+ * Suporta dois modos:
+ * - REAL_FS: Usa filesystem real (Node.js fs)
+ * - PRISMA_DB: Usa banco de dados Prisma (para cloud/serverless)
  */
 
 import { MCPServer, MCPTool, MCPToolResult, MCPResource, MCPPrompt } from './mcp-core';
 import { prisma } from '@/lib/db';
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+
+// Verifica se deve usar filesystem real ou Prisma
+const USE_REAL_FILESYSTEM = typeof process !== 'undefined' && 
+  process.env.USE_REAL_FILESYSTEM === 'true';
+
+// Workspace root para operações de filesystem real
+const WORKSPACE_ROOT = typeof process !== 'undefined' 
+  ? process.env.WORKSPACE_ROOT || process.cwd()
+  : '/workspace';
+
+// Helper para resolver paths seguros
+function resolveSecurePath(basePath: string, relativePath: string): string | null {
+  const path = typeof require !== 'undefined' ? require('path') : null;
+  if (!path) return null;
+  
+  const resolved = path.resolve(basePath, relativePath);
+  // Previne path traversal
+  if (!resolved.startsWith(basePath)) {
+    return null;
+  }
+  return resolved;
+}
+
+// ============================================================================
+// FILESYSTEM ABSTRACTION LAYER
+// ============================================================================
+
+interface FileSystemAdapter {
+  readFile(filePath: string, options?: { startLine?: number; endLine?: number }): Promise<{ content: string; language?: string } | null>;
+  writeFile(filePath: string, content: string): Promise<boolean>;
+  deleteFile(filePath: string): Promise<boolean>;
+  listDirectory(dirPath: string, recursive?: boolean): Promise<string[]>;
+  exists(filePath: string): Promise<boolean>;
+  mkdir(dirPath: string): Promise<boolean>;
+}
+
+// Real Filesystem Adapter (Node.js)
+async function createRealFSAdapter(): Promise<FileSystemAdapter | null> {
+  if (typeof require === 'undefined') return null;
+  
+  try {
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    return {
+      async readFile(filePath, options) {
+        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
+        if (!fullPath) return null;
+        
+        try {
+          let content = await fs.readFile(fullPath, 'utf-8');
+          
+          if (options?.startLine || options?.endLine) {
+            const lines = content.split('\n');
+            const start = Math.max(0, (options.startLine || 1) - 1);
+            const end = Math.min(lines.length, options.endLine || lines.length);
+            content = lines.slice(start, end).join('\n');
+          }
+          
+          // Inferir linguagem pela extensão
+          const ext = path.extname(filePath).toLowerCase();
+          const langMap: Record<string, string> = {
+            '.ts': 'typescript', '.tsx': 'typescript',
+            '.js': 'javascript', '.jsx': 'javascript',
+            '.json': 'json', '.css': 'css', '.html': 'html',
+            '.py': 'python', '.rs': 'rust', '.go': 'go',
+            '.md': 'markdown', '.yaml': 'yaml', '.yml': 'yaml',
+          };
+          
+          return { content, language: langMap[ext] };
+        } catch {
+          return null;
+        }
+      },
+      
+      async writeFile(filePath, content) {
+        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
+        if (!fullPath) return false;
+        
+        try {
+          const dir = path.dirname(fullPath);
+          await fs.mkdir(dir, { recursive: true });
+          await fs.writeFile(fullPath, content, 'utf-8');
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      
+      async deleteFile(filePath) {
+        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
+        if (!fullPath) return false;
+        
+        try {
+          await fs.unlink(fullPath);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      
+      async listDirectory(dirPath, recursive = false) {
+        const fullPath = resolveSecurePath(WORKSPACE_ROOT, dirPath);
+        if (!fullPath) return [];
+        
+        try {
+          if (recursive) {
+            const results: string[] = [];
+            async function walk(dir: string, base: string) {
+              const entries = await fs.readdir(dir, { withFileTypes: true });
+              for (const entry of entries) {
+                const rel = path.join(base, entry.name);
+                results.push(rel);
+                if (entry.isDirectory()) {
+                  await walk(path.join(dir, entry.name), rel);
+                }
+              }
+            }
+            await walk(fullPath, dirPath);
+            return results;
+          } else {
+            const entries = await fs.readdir(fullPath, { withFileTypes: true });
+            return entries.map(e => path.join(dirPath, e.name + (e.isDirectory() ? '/' : '')));
+          }
+        } catch {
+          return [];
+        }
+      },
+      
+      async exists(filePath) {
+        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
+        if (!fullPath) return false;
+        
+        try {
+          await fs.access(fullPath);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      
+      async mkdir(dirPath) {
+        const fullPath = resolveSecurePath(WORKSPACE_ROOT, dirPath);
+        if (!fullPath) return false;
+        
+        try {
+          await fs.mkdir(fullPath, { recursive: true });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Prisma Database Adapter
+const prismaAdapter: FileSystemAdapter = {
+  async readFile(filePath, options) {
+    try {
+      const file = await prisma.file.findFirst({
+        where: { path: { contains: filePath } },
+        select: { content: true, language: true },
+      });
+      
+      if (!file) return null;
+      
+      let content = file.content || '';
+      
+      if (options?.startLine || options?.endLine) {
+        const lines = content.split('\n');
+        const start = Math.max(0, (options.startLine || 1) - 1);
+        const end = Math.min(lines.length, options.endLine || lines.length);
+        content = lines.slice(start, end).join('\n');
+      }
+      
+      return { content, language: file.language || undefined };
+    } catch {
+      return null;
+    }
+  },
+  
+  async writeFile(filePath, content) {
+    try {
+      await prisma.file.upsert({
+        where: { id: filePath },
+        create: { path: filePath, content, projectId: 'default' },
+        update: { content },
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  
+  async deleteFile(filePath) {
+    try {
+      await prisma.file.deleteMany({ where: { path: filePath } });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  
+  async listDirectory(dirPath, recursive = false) {
+    try {
+      const files = await prisma.file.findMany({
+        where: { path: { startsWith: dirPath } },
+        select: { path: true },
+      });
+      
+      const items = files.map(f => f.path);
+      
+      if (!recursive) {
+        const depth = dirPath.split('/').filter(Boolean).length;
+        return items.filter(p => p.split('/').filter(Boolean).length === depth + 1);
+      }
+      
+      return items;
+    } catch {
+      return [];
+    }
+  },
+  
+  async exists(filePath) {
+    try {
+      const file = await prisma.file.findFirst({ where: { path: filePath } });
+      return !!file;
+    } catch {
+      return false;
+    }
+  },
+  
+  async mkdir() {
+    // Prisma não precisa criar diretórios
+    return true;
+  },
+};
+
+// Get the appropriate adapter
+let fsAdapter: FileSystemAdapter = prismaAdapter;
+
+// Initialize real FS adapter if enabled
+if (USE_REAL_FILESYSTEM) {
+  createRealFSAdapter().then(adapter => {
+    if (adapter) {
+      fsAdapter = adapter;
+      console.log('[MCP] Using real filesystem adapter');
+    } else {
+      console.log('[MCP] Falling back to Prisma adapter');
+    }
+  });
+}
+
+// Export for external use
+export function getFileSystemAdapter(): FileSystemAdapter {
+  return fsAdapter;
+}
+
+export function setFileSystemMode(useRealFS: boolean): void {
+  if (useRealFS) {
+    createRealFSAdapter().then(adapter => {
+      if (adapter) fsAdapter = adapter;
+    });
+  } else {
+    fsAdapter = prismaAdapter;
+  }
+}
 
 // ============================================================================
 // AETHEL MCP SERVER INSTANCE
@@ -36,25 +314,13 @@ aethelMCPServer.registerTool(
     const { path, startLine, endLine } = args as { path: string; startLine?: number; endLine?: number };
     
     try {
-      const file = await prisma.file.findFirst({
-        where: { path: { contains: path } },
-        select: { content: true, language: true },
-      });
+      const result = await fsAdapter.readFile(path, { startLine, endLine });
       
-      if (!file) {
+      if (!result) {
         return { content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], isError: true };
       }
       
-      let content = file.content || '';
-      
-      if (startLine !== undefined || endLine !== undefined) {
-        const lines = content.split('\n');
-        const start = Math.max(0, (startLine || 1) - 1);
-        const end = Math.min(lines.length, endLine || lines.length);
-        content = lines.slice(start, end).join('\n');
-      }
-      
-      return { content: [{ type: 'text', text: content }] };
+      return { content: [{ type: 'text', text: result.content }] };
     } catch (error) {
       return { 
         content: [{ type: 'text', text: `Erro ao ler arquivo: ${error}` }], 
@@ -81,16 +347,107 @@ aethelMCPServer.registerTool(
     const { path, content } = args as { path: string; content: string };
     
     try {
-      await prisma.file.upsert({
-        where: { id: path },
-        create: { path, content, projectId: 'default' },
-        update: { content },
-      });
+      const success = await fsAdapter.writeFile(path, content);
+      
+      if (!success) {
+        return { content: [{ type: 'text', text: `Erro ao salvar arquivo: ${path}` }], isError: true };
+      }
       
       return { content: [{ type: 'text', text: `Arquivo salvo: ${path}` }] };
     } catch (error) {
       return { 
         content: [{ type: 'text', text: `Erro ao salvar arquivo: ${error}` }], 
+        isError: true 
+      };
+    }
+  }
+);
+
+aethelMCPServer.registerTool(
+  {
+    name: 'delete_file',
+    description: 'Deleta um arquivo do projeto',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', description: 'Caminho do arquivo' },
+      },
+      required: ['path'],
+    },
+  },
+  async (args): Promise<MCPToolResult> => {
+    const { path } = args as { path: string };
+    
+    try {
+      const success = await fsAdapter.deleteFile(path);
+      
+      if (!success) {
+        return { content: [{ type: 'text', text: `Erro ao deletar arquivo: ${path}` }], isError: true };
+      }
+      
+      return { content: [{ type: 'text', text: `Arquivo deletado: ${path}` }] };
+    } catch (error) {
+      return { 
+        content: [{ type: 'text', text: `Erro ao deletar arquivo: ${error}` }], 
+        isError: true 
+      };
+    }
+  }
+);
+
+aethelMCPServer.registerTool(
+  {
+    name: 'create_directory',
+    description: 'Cria um diretório no projeto',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', description: 'Caminho do diretório' },
+      },
+      required: ['path'],
+    },
+  },
+  async (args): Promise<MCPToolResult> => {
+    const { path } = args as { path: string };
+    
+    try {
+      const success = await fsAdapter.mkdir(path);
+      
+      if (!success) {
+        return { content: [{ type: 'text', text: `Erro ao criar diretório: ${path}` }], isError: true };
+      }
+      
+      return { content: [{ type: 'text', text: `Diretório criado: ${path}` }] };
+    } catch (error) {
+      return { 
+        content: [{ type: 'text', text: `Erro ao criar diretório: ${error}` }], 
+        isError: true 
+      };
+    }
+  }
+);
+
+aethelMCPServer.registerTool(
+  {
+    name: 'file_exists',
+    description: 'Verifica se um arquivo existe',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', description: 'Caminho do arquivo' },
+      },
+      required: ['path'],
+    },
+  },
+  async (args): Promise<MCPToolResult> => {
+    const { path } = args as { path: string };
+    
+    try {
+      const exists = await fsAdapter.exists(path);
+      return { content: [{ type: 'text', text: exists ? 'true' : 'false' }] };
+    } catch (error) {
+      return { 
+        content: [{ type: 'text', text: `Erro: ${error}` }], 
         isError: true 
       };
     }
@@ -125,12 +482,12 @@ aethelMCPServer.registerTool(
     };
     
     try {
-      const file = await prisma.file.findFirst({ where: { path: { contains: path } } });
+      const file = await fsAdapter.readFile(path);
       if (!file) {
         return { content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], isError: true };
       }
       
-      let content = file.content || '';
+      let content = file.content;
       const index = content.indexOf(search);
       
       if (index === -1) {
@@ -152,7 +509,10 @@ aethelMCPServer.registerTool(
           break;
       }
       
-      await prisma.file.update({ where: { id: file.id }, data: { content } });
+      const success = await fsAdapter.writeFile(path, content);
+      if (!success) {
+        return { content: [{ type: 'text', text: `Erro ao salvar edição` }], isError: true };
+      }
       
       return { content: [{ type: 'text', text: `Arquivo editado: ${path}` }] };
     } catch (error) {
@@ -178,21 +538,8 @@ aethelMCPServer.registerTool(
     const { path, recursive } = args as { path: string; recursive?: boolean };
     
     try {
-      const files = await prisma.file.findMany({
-        where: { path: { startsWith: path } },
-        select: { path: true },
-      });
-      
-      const items = files.map(f => f.path);
-      
-      if (!recursive) {
-        // Filter to immediate children only
-        const depth = path.split('/').length;
-        const filtered = items.filter(p => p.split('/').length === depth + 1);
-        return { content: [{ type: 'text', text: filtered.join('\n') }] };
-      }
-      
-      return { content: [{ type: 'text', text: items.join('\n') }] };
+      const items = await fsAdapter.listDirectory(path, recursive);
+      return { content: [{ type: 'text', text: items.join('\n') || 'Diretório vazio' }] };
     } catch (error) {
       return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
     }
@@ -792,6 +1139,151 @@ aethelMCPServer.registerPrompt(
 3. Inclua mocks quando necessário
 4. Teste tanto casos de sucesso quanto de erro
 5. Adicione descrições claras para cada teste`;
+  }
+);
+
+// ============================================================================
+// DELETE FILE TOOL (NEW!)
+// ============================================================================
+
+aethelMCPServer.registerTool(
+  {
+    name: 'delete_file',
+    description: 'Deleta um arquivo ou diretório do projeto',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', description: 'Caminho do arquivo/diretório a deletar' },
+        recursive: { type: 'boolean', description: 'Deletar recursivamente (para diretórios)' },
+      },
+      required: ['path'],
+    },
+  },
+  async (args): Promise<MCPToolResult> => {
+    const { path, recursive } = args as { path: string; recursive?: boolean };
+    
+    try {
+      // Try database first
+      const file = await prisma.file.findFirst({ 
+        where: { path: { contains: path } } 
+      });
+      
+      if (file) {
+        await prisma.file.delete({ where: { id: file.id } });
+        return { content: [{ type: 'text', text: `Arquivo deletado: ${path}` }] };
+      }
+      
+      // If recursive, delete all files in directory
+      if (recursive) {
+        const deleted = await prisma.file.deleteMany({
+          where: { path: { startsWith: path } }
+        });
+        return { 
+          content: [{ 
+            type: 'text', 
+            text: `Diretório deletado: ${path} (${deleted.count} arquivos)` 
+          }] 
+        };
+      }
+      
+      return { 
+        content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], 
+        isError: true 
+      };
+    } catch (error) {
+      return { 
+        content: [{ type: 'text', text: `Erro ao deletar: ${error}` }], 
+        isError: true 
+      };
+    }
+  }
+);
+
+// ============================================================================
+// CREATE DIRECTORY TOOL (NEW!)
+// ============================================================================
+
+aethelMCPServer.registerTool(
+  {
+    name: 'create_directory',
+    description: 'Cria um novo diretório no projeto',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', description: 'Caminho do diretório a criar' },
+      },
+      required: ['path'],
+    },
+  },
+  async (args): Promise<MCPToolResult> => {
+    const { path } = args as { path: string };
+    
+    try {
+      // Create a placeholder file to represent directory
+      await prisma.file.create({
+        data: {
+          path: `${path}/.gitkeep`,
+          content: '',
+          projectId: 'default',
+        }
+      });
+      
+      return { content: [{ type: 'text', text: `Diretório criado: ${path}` }] };
+    } catch (error) {
+      return { 
+        content: [{ type: 'text', text: `Erro ao criar diretório: ${error}` }], 
+        isError: true 
+      };
+    }
+  }
+);
+
+// ============================================================================
+// RENAME/MOVE FILE TOOL (NEW!)
+// ============================================================================
+
+aethelMCPServer.registerTool(
+  {
+    name: 'rename_file',
+    description: 'Renomeia ou move um arquivo',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        oldPath: { type: 'string', description: 'Caminho atual do arquivo' },
+        newPath: { type: 'string', description: 'Novo caminho do arquivo' },
+      },
+      required: ['oldPath', 'newPath'],
+    },
+  },
+  async (args): Promise<MCPToolResult> => {
+    const { oldPath, newPath } = args as { oldPath: string; newPath: string };
+    
+    try {
+      const file = await prisma.file.findFirst({ 
+        where: { path: { contains: oldPath } } 
+      });
+      
+      if (!file) {
+        return { 
+          content: [{ type: 'text', text: `Arquivo não encontrado: ${oldPath}` }], 
+          isError: true 
+        };
+      }
+      
+      await prisma.file.update({
+        where: { id: file.id },
+        data: { path: newPath }
+      });
+      
+      return { 
+        content: [{ type: 'text', text: `Arquivo movido: ${oldPath} -> ${newPath}` }] 
+      };
+    } catch (error) {
+      return { 
+        content: [{ type: 'text', text: `Erro ao mover: ${error}` }], 
+        isError: true 
+      };
+    }
   }
 );
 

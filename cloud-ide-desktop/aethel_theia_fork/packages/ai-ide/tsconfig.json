@@ -20,7 +20,7 @@
   "strictPropertyInitialization": true,
   "useUnknownInCatchVariables": false,
     "types": ["node", "mocha"],
-    "ignoreDeprecations": "5.0",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@theia/*": ["../../packages/*"]
     }

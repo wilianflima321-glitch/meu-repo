@@ -1210,7 +1210,7 @@ export function SettingsUI({
               {filteredSettings.length === 0 && (
                 <div className="text-center py-12 text-slate-500">
                   <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No settings found matching "{searchQuery}"</p>
+                  <p>No settings found matching {`"${searchQuery}"`}</p>
                 </div>
               )}
             </div>

@@ -896,7 +896,7 @@ export function getTabPanelProps(index: number, tabId: string, isSelected: boole
   };
 }
 
-export default {
+const a11yExports = {
   announce,
   clearAnnouncements,
   getFocusableElements,
@@ -924,3 +924,5 @@ export default {
   getTabProps,
   getTabPanelProps,
 };
+
+export default a11yExports;

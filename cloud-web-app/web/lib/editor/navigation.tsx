@@ -201,6 +201,7 @@ export function NavigationProvider({
         currentUri: uri,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider, goTo]);
 
   const findReferences = useCallback(async () => {
@@ -236,6 +237,7 @@ export function NavigationProvider({
       position: { x: 0, y: 0 },
       currentUri: uri,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider, getFileContent]);
 
   const showPeek = useCallback((config: PeekConfig) => {
@@ -456,6 +458,7 @@ export function ReferencesPanel({
   // Auto-expand all files initially
   useEffect(() => {
     setExpandedFiles(new Set(Object.keys(groupedRefs)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [references]);
 
   const toggleFile = (uri: string) => {

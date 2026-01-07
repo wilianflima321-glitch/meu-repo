@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aethel-web
+  annotations:
+    # Produção: Domínio real
+    external-dns.alpha.kubernetes.io/hostname: aethel.io
+spec:
+  tls:
+    - hosts:
+        - aethel.io
+        - www.aethel.io
+        - app.aethel.io
+      secretName: aethel-prod-tls
+  rules:
+    - host: aethel.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aethel-web
+                port:
+                  name: http
+    - host: www.aethel.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aethel-web
+                port:
+                  name: http
+    - host: app.aethel.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aethel-web
+                port:
+                  name: http

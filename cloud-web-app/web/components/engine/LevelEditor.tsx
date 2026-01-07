@@ -5,6 +5,11 @@
  * os sistemas: Scene, World Outliner, Details, etc.
  * 
  * NÃO É MOCK - Sistema real e funcional!
+ * 
+ * FEATURES:
+ * - Save/Load via API + localStorage
+ * - Play Mode com Physics real
+ * - Undo/Redo (em desenvolvimento)
  */
 
 'use client';
@@ -25,6 +30,53 @@ import {
   useHelper,
 } from '@react-three/drei';
 import * as THREE from 'three';
+
+// ============================================================================
+// PHYSICS RUNTIME (Simplified for Play Mode)
+// ============================================================================
+
+interface PhysicsState {
+  velocities: Map<string, [number, number, number]>;
+  angularVelocities: Map<string, [number, number, number]>;
+}
+
+const GRAVITY = -9.81;
+const GROUND_Y = 0.05; // Floor height
+
+function simulatePhysics(
+  objects: LevelObject[],
+  physicsState: PhysicsState,
+  deltaTime: number
+): LevelObject[] {
+  return objects.map(obj => {
+    // Only simulate dynamic objects (not floor)
+    if (obj.id === 'floor' || obj.locked) return obj;
+    
+    const velocity = physicsState.velocities.get(obj.id) || [0, 0, 0];
+    
+    // Apply gravity
+    velocity[1] += GRAVITY * deltaTime;
+    
+    // Update position
+    const newPos: [number, number, number] = [
+      obj.position[0] + velocity[0] * deltaTime,
+      obj.position[1] + velocity[1] * deltaTime,
+      obj.position[2] + velocity[2] * deltaTime,
+    ];
+    
+    // Ground collision
+    const halfHeight = obj.scale[1] / 2;
+    if (newPos[1] - halfHeight < GROUND_Y) {
+      newPos[1] = GROUND_Y + halfHeight;
+      velocity[1] = -velocity[1] * 0.5; // Bounce with damping
+      if (Math.abs(velocity[1]) < 0.5) velocity[1] = 0;
+    }
+    
+    physicsState.velocities.set(obj.id, velocity);
+    
+    return { ...obj, position: newPos };
+  });
+}
 
 // ============================================================================
 // TYPES
@@ -958,6 +1010,65 @@ export default function LevelEditor() {
   const [showStats, setShowStats] = useState(false);
   const [environment] = useState<EnvironmentSettings>(defaultEnvironment);
   
+  // Play Mode state
+  const [savedObjects, setSavedObjects] = useState<LevelObject[] | null>(null);
+  const physicsStateRef = useRef<PhysicsState>({
+    velocities: new Map(),
+    angularVelocities: new Map(),
+  });
+  const lastTimeRef = useRef<number>(0);
+  const animationFrameRef = useRef<number>(0);
+  
+  // Play Mode loop
+  useEffect(() => {
+    if (!isPlaying) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
+    
+    lastTimeRef.current = performance.now();
+    
+    const gameLoop = (currentTime: number) => {
+      const deltaTime = Math.min((currentTime - lastTimeRef.current) / 1000, 0.05);
+      lastTimeRef.current = currentTime;
+      
+      setObjects(prev => simulatePhysics(prev, physicsStateRef.current, deltaTime));
+      
+      if (isPlaying) {
+        animationFrameRef.current = requestAnimationFrame(gameLoop);
+      }
+    };
+    
+    animationFrameRef.current = requestAnimationFrame(gameLoop);
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isPlaying]);
+  
+  // Handle Play/Pause
+  const handlePlayPause = useCallback(() => {
+    if (!isPlaying) {
+      // Starting play - save current state
+      setSavedObjects(JSON.parse(JSON.stringify(objects)));
+      physicsStateRef.current = {
+        velocities: new Map(),
+        angularVelocities: new Map(),
+      };
+    } else {
+      // Stopping play - restore saved state
+      if (savedObjects) {
+        setObjects(savedObjects);
+        setSavedObjects(null);
+      }
+    }
+    setIsPlaying(!isPlaying);
+  }, [isPlaying, objects, savedObjects]);
+  
   const selectedObject = useMemo(
     () => objects.find(o => o.id === selectedId) || null,
     [objects, selectedId]
@@ -1057,7 +1168,7 @@ export default function LevelEditor() {
     if (selectedId === id) setSelectedId(null);
   }, [selectedId]);
   
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const levelData: LevelData = {
       id: 'level_1',
       name: 'Main Level',
@@ -1067,9 +1178,62 @@ export default function LevelEditor() {
       navmeshSettings: { agentRadius: 0.5, agentHeight: 2, maxSlope: 45, stepHeight: 0.4, cellSize: 0.3 },
     };
     
+    // Save to localStorage for immediate access
     localStorage.setItem('aethel_level_data', JSON.stringify(levelData));
+    
+    // Also save to API if available
+    try {
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: 'default',
+          path: 'levels/main.level.json',
+          content: JSON.stringify(levelData, null, 2),
+          language: 'json'
+        })
+      });
+      if (response.ok) {
+        console.log('Level saved to server:', levelData.name);
+      }
+    } catch (e) {
+      console.log('Server save failed, using localStorage only');
+    }
+    
     console.log('Level saved:', levelData);
   }, [objects, environment]);
+  
+  // Load level on mount
+  useEffect(() => {
+    const loadLevel = async () => {
+      // Try localStorage first
+      const cached = localStorage.getItem('aethel_level_data');
+      if (cached) {
+        try {
+          const data = JSON.parse(cached) as LevelData;
+          setObjects(data.objects || defaultObjects);
+          return;
+        } catch (e) {
+          console.warn('Failed to parse cached level');
+        }
+      }
+      
+      // Try API
+      try {
+        const response = await fetch('/api/files/read?path=levels/main.level.json');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.content) {
+            const levelData = JSON.parse(data.content) as LevelData;
+            setObjects(levelData.objects || defaultObjects);
+          }
+        }
+      } catch (e) {
+        console.log('No saved level found, using defaults');
+      }
+    };
+    loadLevel();
+  }, []);
   
   const handleBuild = useCallback(() => {
     console.log('Building level...');
@@ -1078,6 +1242,25 @@ export default function LevelEditor() {
   
   return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#1a1a1a', color: '#fff' }}>
+      {/* Play Mode Indicator */}
+      {isPlaying && (
+        <div style={{
+          position: 'absolute',
+          top: '50px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#22c55e',
+          color: '#000',
+          padding: '4px 16px',
+          borderRadius: '0 0 8px 8px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          zIndex: 100,
+        }}>
+          ▶ PLAY MODE - Press ESC or click Stop to exit
+        </div>
+      )}
+      
       {/* Toolbar */}
       <Toolbar
         transformMode={transformMode}
@@ -1089,7 +1272,7 @@ export default function LevelEditor() {
         gridSize={gridSize}
         onGridSizeChange={setGridSize}
         isPlaying={isPlaying}
-        onPlayPause={() => setIsPlaying(!isPlaying)}
+        onPlayPause={handlePlayPause}
         onSave={handleSave}
         onBuild={handleBuild}
       />

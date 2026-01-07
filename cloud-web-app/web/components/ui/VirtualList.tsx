@@ -27,7 +27,7 @@ export interface VirtualListItem {
   height?: number;
 }
 
-interface VirtualListProps<T extends VirtualListItem> {
+export interface VirtualListProps<T extends VirtualListItem> {
   /** Array of items to render */
   items: T[];
   /** Default height for items (used for estimation) */

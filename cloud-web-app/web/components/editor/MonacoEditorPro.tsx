@@ -166,6 +166,7 @@ export function MonacoEditorPro({
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
   const decorationsRef = useRef<string[]>([]);
+  const lspDisposablesRef = useRef<monacoEditor.IDisposable[]>([]);
   
   // Inline edit integration
   const { isOpen, selection, openInlineEdit, closeInlineEdit } = useInlineEdit();
@@ -182,6 +183,17 @@ export function MonacoEditorPro({
     // Register custom theme
     monaco.editor.defineTheme('aethel-dark', AETHEL_DARK_THEME);
     monaco.editor.setTheme('aethel-dark');
+    
+    // Register LSP providers for supported languages
+    const lspLanguages = ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'];
+    if (lspLanguages.includes(language)) {
+      // Dynamically import to avoid SSR issues
+      import('@/lib/monaco-lsp-http').then(({ registerLspProviders }) => {
+        lspDisposablesRef.current = registerLspProviders(monaco as any, language);
+      }).catch(err => {
+        console.warn('[MonacoEditorPro] Failed to register LSP providers:', err);
+      });
+    }
     
     // Configure editor
     editor.updateOptions({
@@ -284,7 +296,15 @@ export function MonacoEditorPro({
     
     // Call user's onMount
     onMountProp?.(editor, monaco);
-  }, [fontSize, tabSize, minimap, lineNumbers, wordWrap, readOnly, enableAISuggestions, onCursorChange, onSelectionChange, onMountProp]);
+  }, [fontSize, tabSize, minimap, lineNumbers, wordWrap, readOnly, enableAISuggestions, language, onCursorChange, onSelectionChange, onMountProp]);
+
+  // Cleanup LSP disposables on unmount
+  useEffect(() => {
+    return () => {
+      lspDisposablesRef.current.forEach((d) => d.dispose());
+      lspDisposablesRef.current = [];
+    };
+  }, []);
 
   // Register keybindings
   const registerKeybindings = useCallback((

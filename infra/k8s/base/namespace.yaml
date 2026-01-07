@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aethel
+  labels:
+    app.kubernetes.io/name: aethel-engine
+    istio-injection: enabled  # Se usar Istio service mesh

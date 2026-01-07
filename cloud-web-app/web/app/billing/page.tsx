@@ -2,18 +2,20 @@
 import useSWR from 'swr'
 import { API_BASE } from '@/lib/api'
 import { useState } from 'react'
+import { UsageDashboard } from '@/components/billing/UsageDashboard'
 
 const API = API_BASE
 const fetcher = (u: string) => fetch(u).then(r => r.json())
 
 /**
- * Billing Page - Seleção de Planos
+ * Billing Page - Seleção de Planos + Consumo
  * UI otimizada para experiência do usuário
  */
 export default function Billing() {
   const { data, isLoading } = useSWR(`${API}/billing/plans`, fetcher)
   const [currency, setCurrency] = useState<'USD' | 'BRL'>('BRL')
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [showUsage, setShowUsage] = useState(true)
 
   const plans = data?.plans || []
 
@@ -70,6 +72,20 @@ export default function Billing() {
 
   return (
     <div className="aethel-p-6 aethel-max-w-7xl aethel-mx-auto">
+      {/* Usage Dashboard */}
+      <div className="aethel-mb-8">
+        <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-4">
+          <h2 className="aethel-text-xl aethel-font-bold">Consumo Atual</h2>
+          <button
+            onClick={() => setShowUsage(!showUsage)}
+            className="aethel-text-sm aethel-text-slate-400 hover:aethel-text-white"
+          >
+            {showUsage ? 'Ocultar' : 'Mostrar'} detalhes
+          </button>
+        </div>
+        {showUsage && <UsageDashboard />}
+      </div>
+
       {/* Header */}
       <div className="aethel-text-center aethel-mb-8">
         <h1 className="aethel-text-3xl aethel-font-bold aethel-mb-2">

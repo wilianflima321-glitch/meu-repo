@@ -26,7 +26,19 @@ export {
 } from './useCollaboration';
 
 // ============================================================================
+// Extensions
+// ============================================================================
+
+export {
+  useExtensions,
+  type Extension,
+  type ExtensionCategory,
+  type UseExtensionsOptions,
+  type UseExtensionsReturn,
+} from './useExtensions';
+
+// ============================================================================
 // Re-export de hooks existentes
 // ============================================================================
 
-// Se existirem outros hooks, adicione-os aqui
+// Todos os hooks estão exportados acima

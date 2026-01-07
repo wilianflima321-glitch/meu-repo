@@ -11,7 +11,12 @@ export async function GET(req: NextRequest) {
 		await requireEntitlementsForUser(user.userId);
 
     const projects = await prisma.project.findMany({
-      where: { userId: user.userId },
+			where: {
+				OR: [
+					{ userId: user.userId },
+					{ members: { some: { userId: user.userId } } },
+				],
+			},
       orderBy: { updatedAt: 'desc' },
       include: {
         _count: {

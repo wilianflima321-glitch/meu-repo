@@ -3,6 +3,9 @@
  * GET /api/notifications - Lista notificações do usuário
  * POST /api/notifications - Cria notificação
  * PATCH /api/notifications - Marca como lida
+ * DELETE /api/notifications - Remove notificações
+ * 
+ * IMPLEMENTAÇÃO REAL com persistência no banco de dados.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,16 +20,38 @@ export async function GET(request: NextRequest) {
     const user = requireAuth(request);
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
+    const cursor = searchParams.get('cursor');
     
-    // Em produção, buscar do banco de dados
-    // Por enquanto, retorna lista vazia
-    const notifications: any[] = [];
+    // Buscar notificações do banco de dados
+    const notifications = await prisma.notification.findMany({
+      where: {
+        userId: user.userId,
+        ...(unreadOnly ? { read: false } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit + 1, // +1 para verificar se há mais
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    });
+    
+    const hasMore = notifications.length > limit;
+    const results = hasMore ? notifications.slice(0, limit) : notifications;
+    const nextCursor = hasMore ? results[results.length - 1]?.id : null;
+    
+    // Contar não lidas
+    const unreadCount = await prisma.notification.count({
+      where: {
+        userId: user.userId,
+        read: false,
+      },
+    });
     
     return NextResponse.json({
       success: true,
-      notifications,
-      unreadCount: notifications.filter(n => !n.read).length,
+      notifications: results,
+      unreadCount,
+      hasMore,
+      nextCursor,
     });
   } catch (error) {
     console.error('Failed to get notifications:', error);
@@ -49,18 +74,20 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const notification = {
-      id: `notif_${Date.now()}`,
-      type: type || 'info',
-      title,
-      message,
-      data,
-      userId: userId || user.userId,
-      read: false,
-      createdAt: new Date(),
-    };
+    // Criar notificação no banco de dados
+    const notification = await prisma.notification.create({
+      data: {
+        type: type || 'info',
+        title,
+        message: message || null,
+        data: data || null,
+        userId: userId || user.userId,
+        read: false,
+      },
+    });
     
-    // Em produção, salvar no banco e enviar via WebSocket
+    // TODO: Enviar via WebSocket para notificação em tempo real
+    // await websocket.emit(`user:${notification.userId}`, 'notification', notification);
     
     return NextResponse.json({
       success: true,
@@ -82,10 +109,33 @@ export async function PATCH(request: NextRequest) {
     
     if (markAllRead) {
       // Marca todas como lidas
-      console.log(`[Notifications] Mark all as read for ${user.userId}`);
-    } else if (ids && Array.isArray(ids)) {
+      await prisma.notification.updateMany({
+        where: {
+          userId: user.userId,
+          read: false,
+        },
+        data: {
+          read: true,
+          readAt: new Date(),
+        },
+      });
+    } else if (ids && Array.isArray(ids) && ids.length > 0) {
       // Marca específicas como lidas
-      console.log(`[Notifications] Mark ${ids.length} as read for ${user.userId}`);
+      await prisma.notification.updateMany({
+        where: {
+          id: { in: ids },
+          userId: user.userId, // Garantir que só pode atualizar as próprias
+        },
+        data: {
+          read: true,
+          readAt: new Date(),
+        },
+      });
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Provide ids array or markAllRead: true' },
+        { status: 400 }
+      );
     }
     
     return NextResponse.json({
@@ -94,6 +144,54 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error('Failed to update notifications:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const deleteAll = searchParams.get('all') === 'true';
+    const deleteRead = searchParams.get('read') === 'true';
+    
+    if (deleteAll) {
+      // Deletar todas
+      await prisma.notification.deleteMany({
+        where: { userId: user.userId },
+      });
+    } else if (deleteRead) {
+      // Deletar apenas as lidas
+      await prisma.notification.deleteMany({
+        where: {
+          userId: user.userId,
+          read: true,
+        },
+      });
+    } else if (id) {
+      // Deletar específica
+      await prisma.notification.delete({
+        where: {
+          id,
+          userId: user.userId,
+        },
+      });
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Provide id, all=true, or read=true' },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json({
+      success: true,
+      deletedAt: new Date(),
+    });
+  } catch (error) {
+    console.error('Failed to delete notifications:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

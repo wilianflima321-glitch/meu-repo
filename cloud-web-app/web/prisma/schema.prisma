@@ -39,7 +39,24 @@ model User {
   resetToken             String?
   resetTokenExpiry       DateTime?
 
+  // Shadow Ban System - usuário continua "usando" mas sem impacto real
+  isShadowBanned    Boolean   @default(false)
+  shadowBanReason   String?
+  shadowBannedAt    DateTime?
+  shadowBannedBy    String?   // ID do admin que aplicou
+  
+  // Multi-Factor Authentication
+  mfaEnabled        Boolean   @default(false)
+  mfaSecret         String?   // TOTP secret (encrypted)
+  mfaBackupCodes    String?   // JSON array of hashed backup codes
+  
+  // Admin-specific fields
+  adminRole         String?   // owner|super_admin|admin|moderator|support
+  adminPermissions  String?   // JSON array de permissões customizadas
+  lastAdminAction   DateTime?
+
   projects Project[]
+  projectMemberships ProjectMember[]
   sessions Session[]
 
   chatThreads ChatThread[]
@@ -49,12 +66,15 @@ model User {
   concurrencyLeases ConcurrencyLease[]
 
   creditLedgerEntries CreditLedgerEntry[]
+  auditLogs           AuditLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([email])
   @@index([role])
+  @@index([isShadowBanned])
+  @@index([adminRole])
 }
 
 model Session {
@@ -85,6 +105,8 @@ model Project {
   files  File[]
   assets Asset[]
 
+  members ProjectMember[]
+
   chatThreads ChatThread[]
   copilotWorkflows CopilotWorkflow[]
 
@@ -93,6 +115,26 @@ model Project {
 
   @@index([userId])
   @@index([createdAt])
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Roles: viewer|editor. Owner é o Project.userId.
+  role String @default("viewer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([role])
 }
 
 // ============================================
@@ -194,24 +236,69 @@ model File {
 }
 
 // ============================================
-// ASSETS
+// ASSETS - Game Engine Assets (Textures, Models, Audio, etc)
 // ============================================
 
 model Asset {
-  id       String  @id @default(cuid())
-  name     String
-  type     String // image, 3d, audio, video
-  url      String // S3 or CDN URL
-  size     Int // bytes
-  mimeType String?
+  id          String  @id @default(cuid())
+  name        String
+  type        String  // mesh, texture, material, audio, video, blueprint, animation, prefab, level, script, other
+  extension   String  @default("")
+  path        String  // Virtual path: /Content/Characters/Hero.fbx
+  storagePath String? // S3 key: projects/{projectId}/Content/{assetId}/Hero.fbx
+  url         String? // Public CDN URL (if applicable)
+  
+  size        Int     @default(0) // bytes
+  mimeType    String?
+  thumbnail   String? // Thumbnail URL/path
+  
+  // Extended metadata (vertices, triangles, duration, dimensions, etc)
+  metadata    Json?
+  tags        String[] @default([])
+  
+  // Status tracking for async uploads
+  status      String  @default("ready") // pending, ready, processing, failed, deleted
+  
+  // Favorites for quick access
+  isFavorite  Boolean @default(false)
+  
+  // Upload tracking
+  uploaderId  String?
+  
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([projectId])
-  @@index([type])
+  @@index([projectId, path])
+  @@index([projectId, type])
+  @@index([projectId, status])
+  @@index([projectId, isFavorite])
+  @@index([uploaderId])
+}
+
+// ============================================
+// FOLDERS - Virtual folder structure for assets
+// ============================================
+
+model Folder {
+  id          String  @id @default(cuid())
+  name        String
+  path        String  // Full path: /Content/Characters
+  parentPath  String  // Parent path: /Content
+  color       String? // Custom folder color
+  
+  projectId   String
+  createdById String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectId, path])
+  @@index([projectId])
+  @@index([projectId, parentPath])
 }
 
 // ============================================
@@ -462,8 +549,30 @@ model CollaborationRoom {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  participants CollaborationRoomParticipant[]
+
   @@index([projectId])
   @@index([createdBy])
+}
+
+model CollaborationRoomParticipant {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      CollaborationRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId String
+
+  status   String   @default("online") // online, away, offline
+  lastSeen DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@index([status])
+  @@index([lastSeen])
 }
 
 // ============================================
@@ -491,4 +600,176 @@ model AnalyticsEvent {
   @@index([category])
   @@index([projectId])
   @@index([createdAt])
+}
+
+// ============================================
+// AUDIT LOG - Admin Actions Tracking
+// ============================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  
+  // Who performed the action
+  adminId     String
+  admin       User     @relation(fields: [adminId], references: [id])
+  adminEmail  String   // Snapshot para histórico
+  adminRole   String   // Snapshot do role no momento da ação
+  
+  // What action was performed
+  action      String   // shadow_ban, emergency_activate, user_delete, etc.
+  category    String   // moderation, finance, security, system
+  severity    String   @default("info") // info, warning, critical
+  
+  // Target of the action
+  targetType  String?  // user, project, system, ai_agent
+  targetId    String?  // ID do alvo (userId, projectId, etc)
+  targetEmail String?  // Email do usuário alvo (se aplicável)
+  
+  // Details
+  reason      String?  // Motivo da ação
+  metadata    Json?    // Dados extras (old value, new value, etc)
+  
+  // Request context
+  ipAddress   String?
+  userAgent   String?
+  requestId   String?  // Para correlacionar logs
+  
+  createdAt   DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([category])
+  @@index([severity])
+  @@index([targetId])
+  @@index([targetType])
+  @@index([createdAt])
+}
+
+// ============================================
+// EMERGENCY MODE STATE
+// ============================================
+
+model EmergencyState {
+  id              String   @id @default("singleton")
+  
+  level           String   @default("normal") // normal, warning, critical, shutdown
+  reason          String?
+  activatedBy     String?  // Admin ID
+  activatedAt     DateTime?
+  
+  // Budget tracking
+  dailyBudget     Float    @default(1000)
+  hourlyBudget    Float    @default(100)
+  monthlyBudget   Float    @default(25000)
+  currentDailySpend   Float @default(0)
+  currentHourlySpend  Float @default(0)
+  currentMonthlySpend Float @default(0)
+  
+  // Model restrictions during emergency
+  allowedModels   String?  // JSON array of allowed model IDs
+  maxTokensPerRequest Int  @default(4096)
+  
+  // Notification settings
+  webhookUrl      String?
+  alertEmails     String?  // JSON array of emails
+  
+  lastResetDaily  DateTime @default(now())
+  lastResetHourly DateTime @default(now())
+  lastResetMonthly DateTime @default(now())
+  
+  updatedAt       DateTime @updatedAt
+}
+
+// ============================================
+// MODERATION QUEUE
+// ============================================
+
+model ModerationItem {
+  id          String   @id @default(cuid())
+  
+  // Type of content being moderated
+  type        String   // user_report, ai_output, project_content, asset
+  status      String   @default("pending") // pending, approved, rejected, escalated
+  priority    String   @default("normal") // low, normal, high, urgent
+  
+  // Reporter (if user-reported)
+  reporterId  String?
+  reporterEmail String?
+  
+  // Target content
+  targetType  String   // user, project, asset, ai_generation
+  targetId    String
+  targetOwnerId String?
+  
+  // Content snapshot (para não depender do original)
+  contentSnapshot Json?
+  
+  // Moderation details
+  reason      String?
+  category    String?  // spam, abuse, inappropriate, copyright, other
+  notes       String?  // Notas do moderador
+  
+  // Resolution
+  resolvedBy  String?  // Admin ID
+  resolvedAt  DateTime?
+  resolution  String?  // Ação tomada
+  
+  // Auto-detection scores (se aplicável)
+  autoScore   Float?   // 0-1 confidence de violação
+  autoFlags   String?  // JSON array of detected issues
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([priority])
+  @@index([type])
+  @@index([targetId])
+  @@index([createdAt])
+}
+
+// ============================================
+// LIVE SESSIONS (God View)
+// ============================================
+
+model LiveSession {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  userEmail   String   // Snapshot
+  userName    String?  // Snapshot
+  
+  projectId   String?
+  projectName String?  // Snapshot
+  
+  // Connection info
+  socketId    String?  @unique
+  ipAddress   String?
+  userAgent   String?
+  country     String?  // GeoIP
+  city        String?  // GeoIP
+  
+  // Activity tracking
+  currentPage String?  // Página/view atual
+  currentTool String?  // Ferramenta ativa no editor
+  lastAction  String?  // Última ação
+  
+  // AI usage in session
+  aiCallsCount    Int   @default(0)
+  aiTokensUsed    Int   @default(0)
+  aiCostIncurred  Float @default(0)
+  
+  // Timing
+  startedAt   DateTime @default(now())
+  lastPingAt  DateTime @default(now())
+  endedAt     DateTime?
+  
+  // Status
+  isActive    Boolean  @default(true)
+  
+  @@index([userId])
+  @@index([projectId])
+  @@index([isActive])
+  @@index([startedAt])
+  @@index([lastPingAt])
 }

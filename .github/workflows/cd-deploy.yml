@@ -1,0 +1,354 @@
+# Continuous Deployment Pipeline - Aethel Engine
+# Deploy automático para staging e production
+# Trigger: push para main (staging) ou tags v* (production)
+
+name: CD - Deploy
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  CLUSTER_NAME: aethel-cluster
+  CLUSTER_ZONE: us-central1-a
+
+jobs:
+  # ============================================================================
+  # BUILD & PUSH DOCKER IMAGE
+  # ============================================================================
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.build.outputs.digest }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./cloud-web-app/web
+          file: ./cloud-web-app/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            NEXT_TELEMETRY_DISABLED=1
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+
+  # ============================================================================
+  # SECURITY SCAN
+  # ============================================================================
+  security-scan:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image_digest }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ============================================================================
+  # DEPLOY TO STAGING
+  # ============================================================================
+  deploy-staging:
+    needs: [build, security-scan]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.aethel.dev
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region us-east-1
+
+      - name: Create/Update Secrets from Vault
+        run: |
+          kubectl create secret generic aethel-secrets \
+            --namespace=aethel-staging \
+            --from-literal=DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}" \
+            --from-literal=REDIS_URL="${{ secrets.STAGING_REDIS_URL }}" \
+            --from-literal=OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            --from-literal=ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
+            --from-literal=STRIPE_SECRET_KEY="${{ secrets.STAGING_STRIPE_SECRET_KEY }}" \
+            --from-literal=STRIPE_WEBHOOK_SECRET="${{ secrets.STAGING_STRIPE_WEBHOOK_SECRET }}" \
+            --from-literal=NEXTAUTH_SECRET="${{ secrets.STAGING_NEXTAUTH_SECRET }}" \
+            --from-literal=SENTRY_DSN="${{ secrets.SENTRY_DSN }}" \
+            --from-literal=ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" \
+            --from-literal=MESHY_API_KEY="${{ secrets.MESHY_API_KEY }}" \
+            --from-literal=SUNO_API_KEY="${{ secrets.SUNO_API_KEY }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to Staging
+        run: |
+          cd infra/k8s
+          
+          # Update image tag in kustomization
+          cd overlays/staging
+          kustomize edit set image aethel-web=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image_digest }}
+          
+          # Apply with kustomize
+          kubectl apply -k .
+          
+          # Wait for rollout
+          kubectl rollout status deployment/aethel-web -n aethel-staging --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n aethel-staging
+          kubectl get services -n aethel-staging
+
+      - name: Run smoke tests
+        run: |
+          STAGING_URL="https://staging.aethel.dev"
+          
+          # Health check
+          curl -f "$STAGING_URL/api/health" || exit 1
+          
+          # Ready check
+          curl -f "$STAGING_URL/api/health/ready" || exit 1
+          
+          echo "✅ Smoke tests passed"
+
+      - name: Notify Slack on success
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ Deploy to Staging successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*✅ Aethel Engine deployed to Staging*\n\n• Commit: ${{ github.sha }}\n• Image: ${{ needs.build.outputs.image_digest }}\n• URL: https://staging.aethel.dev"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================================================
+  # DEPLOY TO PRODUCTION
+  # ============================================================================
+  deploy-production:
+    needs: [build, security-scan, deploy-staging]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://aethel.dev
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }}-prod --region us-east-1
+
+      - name: Create/Update Production Secrets
+        run: |
+          kubectl create secret generic aethel-secrets \
+            --namespace=aethel-production \
+            --from-literal=DATABASE_URL="${{ secrets.PROD_DATABASE_URL }}" \
+            --from-literal=REDIS_URL="${{ secrets.PROD_REDIS_URL }}" \
+            --from-literal=OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            --from-literal=ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
+            --from-literal=STRIPE_SECRET_KEY="${{ secrets.PROD_STRIPE_SECRET_KEY }}" \
+            --from-literal=STRIPE_WEBHOOK_SECRET="${{ secrets.PROD_STRIPE_WEBHOOK_SECRET }}" \
+            --from-literal=NEXTAUTH_SECRET="${{ secrets.PROD_NEXTAUTH_SECRET }}" \
+            --from-literal=SENTRY_DSN="${{ secrets.SENTRY_DSN }}" \
+            --from-literal=ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" \
+            --from-literal=MESHY_API_KEY="${{ secrets.MESHY_API_KEY }}" \
+            --from-literal=SUNO_API_KEY="${{ secrets.SUNO_API_KEY }}" \
+            --from-literal=RESEND_API_KEY="${{ secrets.RESEND_API_KEY }}" \
+            --from-literal=CRISP_WEBSITE_ID="${{ secrets.CRISP_WEBSITE_ID }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Blue-Green Deploy to Production
+        run: |
+          cd infra/k8s/overlays/production
+          
+          # Update image
+          kustomize edit set image aethel-web=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image_digest }}
+          
+          # Deploy new version (blue)
+          kubectl apply -k .
+          
+          # Wait for new pods to be ready
+          kubectl rollout status deployment/aethel-web -n aethel-production --timeout=600s
+
+      - name: Run production smoke tests
+        run: |
+          PROD_URL="https://aethel.dev"
+          
+          # Health checks
+          curl -f "$PROD_URL/api/health" || exit 1
+          curl -f "$PROD_URL/api/health/ready" || exit 1
+          curl -f "$PROD_URL/api/health/live" || exit 1
+          
+          echo "✅ Production smoke tests passed"
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          files: |
+            CHANGELOG.md
+
+      - name: Notify Slack on production deploy
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 Production deploy successful!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*🚀 Aethel Engine deployed to PRODUCTION*\n\n• Version: ${{ github.ref_name }}\n• Commit: ${{ github.sha }}\n• URL: https://aethel.dev"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================================================
+  # ROLLBACK (Manual trigger)
+  # ============================================================================
+  rollback:
+    if: github.event_name == 'workflow_dispatch' && failure()
+    needs: [deploy-production]
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Rollback deployment
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }}-prod --region us-east-1
+          kubectl rollout undo deployment/aethel-web -n aethel-production
+          kubectl rollout status deployment/aethel-web -n aethel-production
+
+      - name: Notify rollback
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "⚠️ Production rollback executed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*⚠️ ROLLBACK executed on Production*\n\nPrevious deployment failed. Rolled back to last stable version."
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as os from 'os';
+import { requireAuth, AuthUser } from '@/lib/auth-server';
 
 const execAsync = promisify(exec);
 
@@ -12,44 +13,135 @@ const execAsync = promisify(exec);
  * 
  * REAL terminal execution with proper PTY support.
  * Features:
+ * - AUTHENTICATION REQUIRED
  * - Real command execution via child_process
  * - Security: blocked dangerous commands
  * - Rate limiting per session
  * - Working directory validation
- * - Environment isolation
+ * - Environment isolation (NO SECRETS EXPOSED)
  * - Output streaming support
  * - Cross-platform support (Windows/Linux/macOS)
  */
 
-// Rate limiting
+// Rate limiting per user
 const rateLimiter = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 100; // commands per minute
 const RATE_WINDOW = 60000; // 1 minute
 
 // Security: blocked commands that could be dangerous
 const BLOCKED_COMMANDS = new Set([
+  // Destructive file operations
   'rm -rf /',
   'rm -rf /*',
   'rm -rf ~',
-  'dd if=/dev/zero',
-  'mkfs',
-  ':(){:|:&};:',
-  'chmod -R 777 /',
-  'chown -R',
-  'format c:',
   'del /f /s /q c:\\*',
   'rd /s /q c:\\',
+  'format c:',
+  
+  // Disk operations
+  'dd if=/dev/zero',
+  'mkfs',
+  
+  // Fork bomb
+  ':(){:|:&};:',
+  
+  // Permission changes
+  'chmod -R 777 /',
+  'chown -R',
+  
+  // Privilege escalation
+  'sudo',
+  'su -',
+  'su root',
+  'doas',
+  
+  // Container/VM escape attempts
+  'docker run',
+  'docker exec',
+  'kubectl exec',
+  'kubectl run',
+  'podman run',
+  'lxc-attach',
+  
+  // System control
+  'systemctl',
+  'service',
+  'init',
+  'shutdown',
+  'reboot',
+  'halt',
+  'poweroff',
+  
+  // Scheduled tasks
+  'crontab -e',
+  'crontab -r',
+  'at',
+  
+  // Network attacks
+  'nc -l',
+  'ncat -l',
+  'socat',
+  
+  // Process injection
+  'ptrace',
+  'gdb -p',
+  'strace -p',
+  
+  // Jail escape
+  'chroot',
+  'unshare',
+  'nsenter',
 ]);
 
 // Blocked command patterns (regex)
 const BLOCKED_PATTERNS = [
+  // Destructive operations
   /rm\s+-rf\s+\/(?!\w)/i,
   /rm\s+-rf\s+\/\*/i,
+  /rm\s+-rf\s+--no-preserve-root/i,
   />\s*\/dev\/sd[a-z]/i,
   /dd\s+if=.*of=\/dev/i,
+  
+  // Remote code execution via pipe
   /wget.*\|\s*sh/i,
+  /wget.*\|\s*bash/i,
   /curl.*\|\s*sh/i,
   /curl.*\|\s*bash/i,
+  /curl.*\|\s*python/i,
+  /curl.*\|\s*node/i,
+  
+  // Reverse shells
+  /bash\s+-i\s+>&\s*\/dev\/tcp/i,
+  /nc\s+-e\s+\/bin/i,
+  /python.*socket.*connect/i,
+  /php\s+-r.*fsockopen/i,
+  /perl.*socket.*connect/i,
+  
+  // Privilege escalation patterns
+  /sudo\s+/i,
+  /su\s+-/i,
+  /pkexec/i,
+  /doas\s+/i,
+  
+  // Container escape patterns
+  /docker\s+(run|exec)/i,
+  /kubectl\s+(exec|run|apply)/i,
+  /podman\s+(run|exec)/i,
+  
+  // System modification
+  /systemctl\s+(start|stop|enable|disable|restart)/i,
+  /service\s+\w+\s+(start|stop|restart)/i,
+  
+  // Cron manipulation
+  /crontab\s+-[er]/i,
+  /echo.*>>\s*\/etc\/cron/i,
+  
+  // SSH key injection
+  /echo.*>>\s*.*\.ssh\/authorized_keys/i,
+  /cat.*>>\s*.*\.ssh\/authorized_keys/i,
+  
+  // Environment variable injection
+  /export\s+(PATH|LD_PRELOAD|LD_LIBRARY_PATH)\s*=/i,
 ];
 
 // Session storage for persistent shells
@@ -128,26 +220,94 @@ function getShellCommand(): { shell: string; shellArgs: string[] } {
   };
 }
 
-function buildEnvironment(sessionEnv: Record<string, string>): Record<string, string> {
+// SECURITY: Safe environment variables allowlist
+// NEVER expose API keys, secrets, or sensitive data to user terminals
+const SAFE_ENV_VARS = new Set([
+  'PATH',
+  'HOME',
+  'USER',
+  'SHELL',
+  'TERM',
+  'COLORTERM',
+  'LANG',
+  'LC_ALL',
+  'TZ',
+  'EDITOR',
+  'VISUAL',
+  'PAGER',
+  'TMPDIR',
+  'TEMP',
+  'TMP',
+  // Node/npm
+  'NODE_ENV',
+  'NPM_CONFIG_PREFIX',
+  // Windows specific
+  'COMSPEC',
+  'SYSTEMROOT',
+  'WINDIR',
+  'PROGRAMFILES',
+  'PROGRAMFILES(X86)',
+  'APPDATA',
+  'LOCALAPPDATA',
+  'USERPROFILE',
+  // Git
+  'GIT_AUTHOR_NAME',
+  'GIT_AUTHOR_EMAIL',
+  'GIT_COMMITTER_NAME',
+  'GIT_COMMITTER_EMAIL',
+]);
+
+function buildEnvironment(sessionEnv: Record<string, string>, user: AuthUser): Record<string, string> {
+  // Start with ONLY safe environment variables
+  const safeEnv: Record<string, string> = {};
+  
+  for (const key of SAFE_ENV_VARS) {
+    if (process.env[key]) {
+      safeEnv[key] = process.env[key]!;
+    }
+  }
+  
+  // Add user-provided env (limited)
+  const userAllowedKeys = ['NODE_ENV', 'DEBUG', 'VERBOSE'];
+  for (const key of userAllowedKeys) {
+    if (sessionEnv[key]) {
+      safeEnv[key] = sessionEnv[key];
+    }
+  }
+  
+  // Add Aethel-specific vars
   return {
-    ...process.env,
-    ...sessionEnv,
+    ...safeEnv,
     TERM: 'xterm-256color',
     COLORTERM: 'truecolor',
     AETHEL_IDE: 'true',
     AETHEL_VERSION: '2.0.0',
-  } as Record<string, string>;
+    AETHEL_USER_ID: user.userId, // For audit logging
+  };
 }
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+  
+  // SECURITY: Require authentication
+  let user: AuthUser;
+  try {
+    user = requireAuth(req);
+  } catch (error) {
+    return NextResponse.json({
+      output: '',
+      error: 'Authentication required. Please log in.',
+      exitCode: 401,
+      cwd: os.homedir(),
+    }, { status: 401 });
+  }
   
   try {
     const body = await req.json();
     const { 
       command, 
       cwd: requestCwd, 
-      sessionId = 'default',
+      sessionId = `user-${user.userId}`, // Session tied to user
       timeout = 30000,
       env: customEnv = {},
     } = body;
@@ -162,8 +322,8 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
     
-    // Rate limiting
-    if (!checkRateLimit(sessionId)) {
+    // Rate limiting per user (not session)
+    if (!checkRateLimit(user.userId)) {
       return NextResponse.json({
         output: '',
         error: 'Rate limit exceeded. Please wait before sending more commands.',
@@ -174,6 +334,8 @@ export async function POST(req: NextRequest) {
     
     // Security check
     if (isCommandBlocked(command)) {
+      // Log blocked command attempt for audit
+      console.warn(`[SECURITY] User ${user.userId} attempted blocked command: ${command}`);
       return NextResponse.json({
         output: '',
         error: 'Command blocked for security reasons.',
@@ -182,15 +344,16 @@ export async function POST(req: NextRequest) {
       }, { status: 403 });
     }
     
-    // Get or create session
-    let session = sessions.get(sessionId);
+    // Get or create session (scoped to user)
+    const userSessionId = `${user.userId}:${sessionId}`;
+    let session = sessions.get(userSessionId);
     if (!session) {
       session = {
         cwd: os.homedir(),
         env: {},
         history: [],
       };
-      sessions.set(sessionId, session);
+      sessions.set(userSessionId, session);
     }
     
     // Validate and set working directory
@@ -260,7 +423,7 @@ export async function POST(req: NextRequest) {
     
     // Execute real command
     const { shell, shellArgs } = getShellCommand();
-    const environment = buildEnvironment({ ...session.env, ...customEnv });
+    const environment = buildEnvironment({ ...session.env, ...customEnv }, user);
     
     return new Promise((resolve) => {
       let output = '';

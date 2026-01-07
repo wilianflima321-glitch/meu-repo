@@ -2,13 +2,21 @@
  * Backup API - Aethel Engine
  * GET /api/backup - Lista backups do projeto
  * POST /api/backup - Cria backup
- * POST /api/backup/restore - Restaura backup
+ * DELETE /api/backup - Deleta backup
+ * 
+ * IMPLEMENTAÇÃO REAL - Usa S3/MinIO para storage
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
-import { prisma } from '@/lib/db';
+import { 
+  createBackup, 
+  listBackups, 
+  deleteBackup, 
+  getBackupDetails,
+  verifyBackupIntegrity 
+} from '@/lib/backup-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +25,8 @@ export async function GET(request: NextRequest) {
     const user = requireAuth(request);
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
+    const backupId = searchParams.get('backupId');
+    const action = searchParams.get('action');
     
     if (!projectId) {
       return NextResponse.json(
@@ -25,26 +35,32 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Verifica se projeto pertence ao usuário
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, userId: user.userId },
-    });
-    
-    if (!project) {
-      return NextResponse.json(
-        { success: false, error: 'Project not found' },
-        { status: 404 }
-      );
+    // Se backupId fornecido, retornar detalhes específicos
+    if (backupId) {
+      // Verificar integridade se solicitado
+      if (action === 'verify') {
+        const result = await verifyBackupIntegrity(backupId, projectId, user.userId);
+        return NextResponse.json({ success: true, ...result });
+      }
+      
+      const backup = await getBackupDetails(backupId, projectId, user.userId);
+      if (!backup) {
+        return NextResponse.json(
+          { success: false, error: 'Backup not found' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ success: true, backup });
     }
     
-    // Em produção, buscar backups do storage
-    // Por enquanto, retorna lista vazia
-    const backups: any[] = [];
+    // Listar todos os backups do projeto
+    const backups = await listBackups(projectId, user.userId);
     
     return NextResponse.json({
       success: true,
       projectId,
       backups,
+      count: backups.length,
     });
   } catch (error) {
     console.error('Failed to list backups:', error);
@@ -67,53 +83,73 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Verifica se projeto pertence ao usuário
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, userId: user.userId },
-      include: {
-        files: true,
-        assets: true,
-      },
-    });
+    // Validar tipo de backup
+    if (!['manual', 'auto'].includes(type)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid backup type. Use "manual" or "auto"' },
+        { status: 400 }
+      );
+    }
     
-    if (!project) {
+    // Criar backup real usando o serviço
+    const backup = await createBackup(
+      projectId, 
+      user.userId, 
+      type as 'manual' | 'auto', 
+      description
+    );
+    
+    return NextResponse.json({
+      success: true,
+      backup,
+      message: `Backup created successfully. ${backup.filesCount} files, ${backup.assetsCount} assets backed up.`,
+    });
+  } catch (error: any) {
+    console.error('Failed to create backup:', error);
+    
+    if (error.message === 'Project not found or access denied') {
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
       );
     }
     
-    // Cria backup snapshot
-    const backup = {
-      id: `backup_${Date.now()}`,
-      projectId,
-      type,
-      description: description || `Backup ${type} - ${new Date().toISOString()}`,
-      filesCount: project.files.length,
-      assetsCount: project.assets.length,
-      size: project.files.reduce((acc, f) => acc + f.content.length, 0),
-      createdAt: new Date(),
-      createdBy: user.userId,
-    };
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = requireAuth(request);
+    const { searchParams } = new URL(request.url);
+    const projectId = searchParams.get('projectId');
+    const backupId = searchParams.get('backupId');
     
-    // Em produção, salvar snapshot real em storage
+    if (!projectId || !backupId) {
+      return NextResponse.json(
+        { success: false, error: 'Project ID and Backup ID are required' },
+        { status: 400 }
+      );
+    }
     
-    // Log de auditoria
-    await prisma.auditLog.create({
-      data: {
-        userId: user.userId,
-        action: 'backup_create',
-        resource: projectId,
-        metadata: { backupId: backup.id, type },
-      },
-    });
+    await deleteBackup(backupId, projectId, user.userId);
     
     return NextResponse.json({
       success: true,
-      backup,
+      message: 'Backup deleted successfully',
     });
-  } catch (error) {
-    console.error('Failed to create backup:', error);
+  } catch (error: any) {
+    console.error('Failed to delete backup:', error);
+    
+    if (error.message === 'Project not found or access denied') {
+      return NextResponse.json(
+        { success: false, error: 'Project not found' },
+        { status: 404 }
+      );
+    }
+    
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

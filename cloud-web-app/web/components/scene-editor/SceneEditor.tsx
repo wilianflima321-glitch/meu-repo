@@ -22,6 +22,7 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { World, Entity, TransformComponent, MeshComponent, getWorld } from '@/lib/game-engine-core';
+import { GameSimulation } from './GameSimulation';
 
 // ============================================================================
 // TIPOS
@@ -97,7 +98,7 @@ function SceneObjectMesh({
   }, [object.position, object.rotation, object.scale]);
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} name={object.id}>
       {isSelected && (
         <PivotControls
           scale={0.75}
@@ -268,14 +269,16 @@ function CameraObject({ object, isSelected, onSelect }: CameraObjectProps) {
 // SCENE CANVAS
 // ============================================================================
 
-interface SceneCanvasProps {
-  objects: SceneObject[];
-  selectedId: string | null;
-  transformMode: TransformMode;
+import { AAAPostProcessing } from './AAAPostProcessing';
+
+// ============================================================================
+// SCENE CANVAS
+// ============================================================================
   onSelect: (id: string | null) => void;
   onTransformChange: (id: string, position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => void;
   showGrid: boolean;
   showStats: boolean;
+  isPlaying?: boolean;
 }
 
 function SceneCanvas({ 
@@ -285,6 +288,7 @@ function SceneCanvas({
   onSelect, 
   onTransformChange,
   showGrid,
+  isPlaying = false
 }: SceneCanvasProps) {
   const { camera } = useThree();
 
@@ -295,6 +299,7 @@ function SceneCanvas({
 
   return (
     <>
+      {isPlaying && <GameSimulation objects={objects} />}
       {/* Lights */}
       <ambientLight intensity={0.4} />
       <directionalLight position={[10, 10, 5]} intensity={0.8} castShadow />
@@ -372,6 +377,9 @@ function SceneCanvas({
 
       {/* Environment */}
       <Environment preset="city" background blur={0.5} />
+      
+      {/* AAA Post Processing */}
+      <AAAPostProcessing />
     </>
   );
 }
@@ -786,54 +794,109 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
 
       {/* Type-specific properties */}
       {object.type === 'mesh' && (
-        <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
-          <h4 style={{ margin: '0 0 12px 0', color: '#888', fontSize: '12px' }}>
-            MESH
-          </h4>
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
-              Geometry
+        <>
+          <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
+            <h4 style={{ margin: '0 0 12px 0', color: '#888', fontSize: '12px' }}>
+              MESH
+            </h4>
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+                Geometry
+              </div>
+              <select
+                value={(object.properties.geometry as string) || 'box'}
+                onChange={(e) => onChange({ 
+                  properties: { ...object.properties, geometry: e.target.value } 
+                })}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  background: '#333',
+                  border: '1px solid #444',
+                  borderRadius: '4px',
+                  color: '#fff',
+                }}
+              >
+                {Object.keys(PRIMITIVE_GEOMETRIES).map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
             </div>
-            <select
-              value={(object.properties.geometry as string) || 'box'}
-              onChange={(e) => onChange({ 
-                properties: { ...object.properties, geometry: e.target.value } 
-              })}
-              style={{
-                width: '100%',
-                padding: '8px',
-                background: '#333',
-                border: '1px solid #444',
-                borderRadius: '4px',
-                color: '#fff',
-              }}
-            >
-              {Object.keys(PRIMITIVE_GEOMETRIES).map(g => (
-                <option key={g} value={g}>{g}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
-              Color
+            <div>
+              <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+                Color
+              </div>
+              <input
+                type="color"
+                value={`#${((object.properties.color as number) || 0x4a90d9).toString(16).padStart(6, '0')}`}
+                onChange={(e) => onChange({
+                  properties: { ...object.properties, color: parseInt(e.target.value.slice(1), 16) }
+                })}
+                style={{
+                  width: '100%',
+                  height: '32px',
+                  padding: '0',
+                  border: '1px solid #444',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+              />
             </div>
-            <input
-              type="color"
-              value={`#${((object.properties.color as number) || 0x4a90d9).toString(16).padStart(6, '0')}`}
-              onChange={(e) => onChange({
-                properties: { ...object.properties, color: parseInt(e.target.value.slice(1), 16) }
-              })}
-              style={{
-                width: '100%',
-                height: '32px',
-                padding: '0',
-                border: '1px solid #444',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            />
           </div>
-        </div>
+
+          {/* PHYSICS PANEL */}
+          <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
+             <h4 style={{ margin: '0 0 12px 0', color: '#888', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
+               PHYSICS
+               <input 
+                 type="checkbox" 
+                 checked={!!object.properties.rigidbody}
+                 onChange={(e) => {
+                   if (e.target.checked) {
+                     onChange({ properties: { ...object.properties, rigidbody: { mass: 1, type: 'dynamic' } } });
+                   } else {
+                     const { rigidbody, ...rest } = object.properties;
+                     onChange({ properties: rest });
+                   }
+                 }}
+               />
+             </h4>
+             
+             {object.properties.rigidbody && (
+               <>
+                 <div style={{ marginBottom: '8px' }}>
+                   <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>Type</div>
+                   <select
+                     value={(object.properties.rigidbody as any).type || 'dynamic'}
+                     onChange={(e) => {
+                       const rb = object.properties.rigidbody as any;
+                       onChange({ properties: { ...object.properties, rigidbody: { ...rb, type: e.target.value } } });
+                     }}
+                     style={{ width: '100%', background: '#333', color: '#fff', border: '1px solid #444', padding: '4px' }}
+                   >
+                     <option value="dynamic">Dynamic</option>
+                     <option value="static">Static (Floor)</option>
+                     <option value="kinematic">Kinematic</option>
+                   </select>
+                 </div>
+
+                 <div style={{ marginBottom: '8px' }}>
+                   <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>Mass</div>
+                   <input
+                     type="number"
+                     step="0.1"
+                     value={(object.properties.rigidbody as any).mass || 1}
+                     onChange={(e) => {
+                        const rb = object.properties.rigidbody as any;
+                        onChange({ properties: { ...object.properties, rigidbody: { ...rb, mass: parseFloat(e.target.value) } } });
+                     }}
+                     style={{ width: '100%', background: '#333', color: '#fff', border: '1px solid #444', padding: '4px' }}
+                   />
+                 </div>
+               </>
+             )}
+          </div>
+        </>
       )}
 
       {object.type === 'light' && (
@@ -1119,6 +1182,7 @@ export function SceneEditor({ initialScene = [], onChange, onSelect }: SceneEdit
                 selectedId={selectedId}
                 transformMode={transformMode}
                 onSelect={setSelectedId}
+                isPlaying={isPlaying}
                 onTransformChange={handleTransformChange}
                 showGrid={showGrid}
                 showStats={false}

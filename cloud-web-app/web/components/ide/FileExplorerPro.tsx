@@ -471,7 +471,7 @@ export default function FileExplorerPro({
         
         {filteredFiles.length === 0 && searchQuery && (
           <div className="text-center py-8 text-slate-500 text-sm">
-            No files matching "{searchQuery}"
+            No files matching {`"${searchQuery}"`}
           </div>
         )}
       </div>

@@ -20,6 +20,15 @@ const TOO_MANY_REQUESTS_CODES = new Set([
 	'RATE_LIMITED',
 ]);
 
+const FORBIDDEN_CODES = new Set([
+	'PROJECT_ACCESS_DENIED',
+]);
+
+const NOT_FOUND_CODES = new Set([
+	'PROJECT_NOT_FOUND',
+	'ROOM_NOT_FOUND',
+]);
+
 export function apiErrorToResponse(error: unknown): NextResponse | null {
 	// Auth not configured is a server-side misconfig, not a 401.
 	if ((error as any)?.code === 'AUTH_NOT_CONFIGURED') {
@@ -35,6 +44,20 @@ export function apiErrorToResponse(error: unknown): NextResponse | null {
 
 	const code = (error as any)?.code;
 	if (typeof code === 'string') {
+		if (FORBIDDEN_CODES.has(code)) {
+			return NextResponse.json(
+				{ error: code, message: (error as Error).message },
+				{ status: 403 }
+			);
+		}
+
+		if (NOT_FOUND_CODES.has(code)) {
+			return NextResponse.json(
+				{ error: code, message: (error as Error).message },
+				{ status: 404 }
+			);
+		}
+
 		if (TOO_MANY_REQUESTS_CODES.has(code)) {
 			const retryAfterSeconds = Number((error as any)?.retryAfterSeconds);
 			const resetAt = String((error as any)?.resetAt || '');

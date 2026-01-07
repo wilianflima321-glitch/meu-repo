@@ -361,7 +361,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
           
           {conflict && (
             <div style={styles.conflictWarning}>
-              ⚠️ Conflito: Este atalho já está sendo usado por "{conflict.command}"
+              ⚠️ Conflito: Este atalho já está sendo usado por {`"${conflict.command}"`}
             </div>
           )}
         </div>

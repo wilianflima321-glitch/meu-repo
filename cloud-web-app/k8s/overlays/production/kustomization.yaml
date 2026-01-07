@@ -1,0 +1,110 @@
+# Kustomization for production environment
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: aethel-engine
+
+resources:
+  - ../../base
+
+namePrefix: prod-
+
+commonLabels:
+  environment: production
+
+commonAnnotations:
+  app.kubernetes.io/instance: aethel-prod
+
+replicas:
+  - name: aethel-web
+    count: 5
+  - name: aethel-runtime
+    count: 4
+
+images:
+  - name: ghcr.io/aethel-engine/web
+    newTag: v1.0.0  # Pin to specific version in prod
+  - name: ghcr.io/aethel-engine/runtime
+    newTag: v1.0.0
+
+patches:
+  # Production resource limits
+  - target:
+      kind: Deployment
+      name: aethel-web
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "500m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "1Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "2000m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "4Gi"
+  
+  - target:
+      kind: Deployment
+      name: aethel-runtime
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "1000m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "2Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "4000m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "8Gi"
+
+  # Production HPA settings
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: aethel-web-hpa
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 5
+      - op: replace
+        path: /spec/maxReplicas
+        value: 50
+
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: aethel-runtime-hpa
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 4
+      - op: replace
+        path: /spec/maxReplicas
+        value: 100
+
+  # Production ingress
+  - target:
+      kind: Ingress
+      name: aethel-ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts
+        value:
+          - aethel.io
+          - "*.aethel.io"
+      - op: replace
+        path: /spec/rules/0/host
+        value: aethel.io
+      - op: replace
+        path: /spec/rules/1/host
+        value: api.aethel.io
+      - op: replace
+        path: /spec/rules/2/host
+        value: ws.aethel.io
+      - op: replace
+        path: /spec/rules/3/host
+        value: runtime.aethel.io

@@ -225,19 +225,28 @@ class TerminalWebSocket {
   private reconnectDelay = 1000;
   private messageQueue: string[] = [];
   private isConnected = false;
+  private runtimeUrl: string = '';
   
   onData: ((data: string) => void) | null = null;
   onConnect: (() => void) | null = null;
   onDisconnect: (() => void) | null = null;
   onError: ((error: Event) => void) | null = null;
   
+  setRuntimeUrl(url: string): void {
+    this.runtimeUrl = url;
+  }
+  
   connect(sessionId: string): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
       return;
     }
     
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/api/ws/terminal/${sessionId}`;
+    // Use runtime URL if provided, otherwise fallback to env or default
+    const baseUrl = this.runtimeUrl || 
+      process.env.NEXT_PUBLIC_WS_URL || 
+      (typeof window !== 'undefined' ? 'ws://localhost:3001' : '');
+    
+    const wsUrl = `${baseUrl}/terminal/${sessionId}`;
     
     try {
       this.ws = new WebSocket(wsUrl);
@@ -792,8 +801,9 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            name: `Terminal ${sessions.length + 1}`,
             cwd: cwd || initialCwd,
-            shell: shell || initialShell,
+            shellPath: shell || initialShell,
           }),
         });
         
@@ -815,8 +825,8 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
         setSessions((prev) => [...prev, newSession]);
         setActiveSessionId(newSession.id);
         
-        // Connect to the new session
-        connectToSession(newSession.id);
+        // Connect to the new session with the websocket URL from server
+        connectToSession(newSession.id, data.websocketUrl);
         
         return newSession;
       } catch (error) {
@@ -832,7 +842,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
     }, [sessions, initialCwd, initialShell]);
     
     // Connect to existing session
-    const connectToSession = useCallback((sessionId: string) => {
+    const connectToSession = useCallback((sessionId: string, websocketUrl?: string) => {
       if (!terminalRef.current) return;
       
       // Disconnect from previous session
@@ -843,6 +853,11 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
       
       // Create new WebSocket connection
       const ws = new TerminalWebSocket();
+      
+      // Set runtime URL if provided
+      if (websocketUrl) {
+        ws.setRuntimeUrl(websocketUrl);
+      }
       
       ws.onData = (data) => {
         terminalRef.current?.write(data);

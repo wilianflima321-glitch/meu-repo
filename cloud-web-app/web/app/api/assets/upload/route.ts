@@ -11,32 +11,16 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { AssetProcessor } from '@/lib/server/asset-processor';
 
 export const dynamic = 'force-dynamic';
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
-const ALLOWED_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-  'audio/mpeg',
-  'audio/wav',
-  'audio/ogg',
-  'video/mp4',
-  'video/webm',
-  'model/gltf-binary',
-  'model/gltf+json',
-  'application/json',
-  'text/plain',
-];
 
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
-		const entitlements = await requireEntitlementsForUser(user.userId);
+    const entitlements = await requireEntitlementsForUser(user.userId);
     const formData = await req.formData();
 
     const file = formData.get('file') as File;
@@ -44,17 +28,11 @@ export async function POST(req: NextRequest) {
     const assetType = formData.get('type') as string;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     if (!projectId) {
-      return NextResponse.json(
-        { error: 'Project ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
     // Verify project ownership
@@ -63,29 +41,16 @@ export async function POST(req: NextRequest) {
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: 'Project not found or access denied' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 });
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024} MB` },
-        { status: 400 }
-      );
+    // 1. Validation Logic (AssetProcessor)
+    const validation = AssetProcessor.validate(file);
+    if (!validation.valid) {
+        return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-
-    // Validate file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'File type not allowed' },
-        { status: 400 }
-      );
-    }
-
-    // Enforce storage limit (sum of asset sizes across user's projects)
+    
+    // 2. Storage Enforcements
     if (entitlements.plan.limits.storage !== -1) {
       const agg = await prisma.asset.aggregate({
         _sum: { size: true },
@@ -106,20 +71,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create upload directory if it doesn't exist
     if (!existsSync(UPLOAD_DIR)) {
       await mkdir(UPLOAD_DIR, { recursive: true });
     }
 
-    // Generate unique filename
+    // 3. Asset Processing (Compression/Optimization)
+    const rawBuffer = await file.arrayBuffer();
+    // Assuming processImage returns a Buffer. For non-images it might just filter through
+    let finalBuffer: Buffer;
+    
+    if (file.type.startsWith('image/')) {
+       finalBuffer = await AssetProcessor.processImage(rawBuffer, file.type);
+    } else {
+       finalBuffer = Buffer.from(rawBuffer);
+    }
+
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const filename = `${timestamp}_${sanitizedName}`;
     const filepath = join(UPLOAD_DIR, filename);
 
-    // Save file
-    const bytes = await file.arrayBuffer();
-		await writeFile(filepath, new Uint8Array(bytes));
+    // Save processed file
+    await writeFile(filepath, new Uint8Array(finalBuffer));
 
     // Create asset record
     const asset = await prisma.asset.create({
@@ -128,7 +101,7 @@ export async function POST(req: NextRequest) {
         name: file.name,
         type: assetType || detectAssetType(file.type),
         url: `/uploads/${filename}`,
-        size: file.size,
+        size: finalBuffer.byteLength, // Use optimized size
         mimeType: file.type,
       },
     });
@@ -136,11 +109,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       asset,
-      message: 'File uploaded successfully',
+      message: 'File uploaded and optimized successfully',
+      optimization: {
+          original: file.size,
+          optimized: finalBuffer.byteLength,
+          ratio: (finalBuffer.byteLength / file.size).toFixed(2)
+      }
     });
+
   } catch (error) {
     console.error('Upload error:', error);
-
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError('Failed to upload file');

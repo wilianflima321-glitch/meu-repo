@@ -3,11 +3,17 @@
  * 
  * Este serviço conecta DIRETAMENTE com OpenAI, Anthropic, Google e Groq
  * Não é mock, não é placeholder - FUNCIONA DE VERDADE!
+ * 
+ * INTEGRAÇÃO COM EMERGENCY MODE:
+ * - Controle de custos em tempo real
+ * - Downgrade automático para modelos baratos em emergência
+ * - Shadow ban para usuários abusivos
  */
 
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { emergencyController, MODEL_CONFIGS } from './emergency-mode';
 
 // ============================================================================
 // TIPOS
@@ -26,6 +32,8 @@ export interface AIQueryOptions {
   temperature?: number;
   maxTokens?: number;
   systemPrompt?: string;
+  userId?: string; // Para tracking e shadow ban
+  bypassEmergency?: boolean; // Para admin override
 }
 
 export interface AIResponse {
@@ -34,6 +42,9 @@ export interface AIResponse {
   provider: LLMProvider;
   tokensUsed: number;
   latencyMs: number;
+  cost?: number; // Custo estimado em USD
+  downgraded?: boolean; // Se foi downgrade por emergency mode
+  originalModel?: string; // Modelo original se foi downgraded
 }
 
 // ============================================================================
@@ -107,7 +118,18 @@ class AIService {
   }
   
   /**
+   * Calcula custo estimado baseado no modelo e tokens
+   */
+  private calculateCost(model: string, inputTokens: number, outputTokens: number): number {
+    const pricing = PRICING[model];
+    if (!pricing) return 0;
+    
+    return (inputTokens / 1_000_000) * pricing.input + (outputTokens / 1_000_000) * pricing.output;
+  }
+  
+  /**
    * Query principal - FUNCIONA DE VERDADE!
+   * Agora com integração do Emergency Mode
    */
   async query(
     userQuery: string,
@@ -115,7 +137,39 @@ class AIService {
     options: AIQueryOptions = {}
   ): Promise<AIResponse> {
     const startTime = Date.now();
-    const provider = options.provider || this.selectProvider();
+    let provider = options.provider || this.selectProvider();
+    let model = options.model || this.getDefaultModel(provider);
+    let wasDowngraded = false;
+    let originalModel: string | undefined;
+    
+    // =========================================================================
+    // EMERGENCY MODE CHECK
+    // =========================================================================
+    if (!options.bypassEmergency) {
+      const emergencyCheck = emergencyController.canMakeRequest(model, options.maxTokens || 2048);
+      
+      if (!emergencyCheck.allowed) {
+        // Tentar com modelo mais barato
+        const cheapModel = 'gpt-4o-mini';
+        const fallbackCheck = emergencyController.canMakeRequest(cheapModel, options.maxTokens || 2048);
+        
+        if (!fallbackCheck.allowed) {
+          throw new Error(`[EMERGENCY MODE] ${emergencyCheck.reason}`);
+        }
+        
+        // Forçar downgrade
+        originalModel = model;
+        model = cheapModel;
+        provider = 'openai';
+        wasDowngraded = true;
+        console.warn(`[AIService] Emergency downgrade: ${originalModel} -> ${model}`);
+      } else if (emergencyCheck.model && emergencyCheck.model !== model) {
+        // Emergency mode sugeriu outro modelo
+        originalModel = model;
+        model = emergencyCheck.model;
+        wasDowngraded = true;
+      }
+    }
     
     const systemPrompt = options.systemPrompt || `Você é o assistente de IA do Aethel Engine, uma IDE avançada para criação de jogos, aplicativos e mídia.
 Responda de forma clara, concisa e útil. Se não souber a resposta, diga claramente.
@@ -127,16 +181,40 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     ];
     
     try {
+      let response: AIResponse;
+      
       switch (provider) {
         case 'openai':
-          return await this.queryOpenAI(messages, options, startTime);
+          response = await this.queryOpenAI(messages, { ...options, model }, startTime);
+          break;
         case 'anthropic':
-          return await this.queryAnthropic(messages, options, startTime);
+          response = await this.queryAnthropic(messages, { ...options, model }, startTime);
+          break;
         case 'google':
-          return await this.queryGoogle(messages, options, startTime);
+          response = await this.queryGoogle(messages, { ...options, model }, startTime);
+          break;
         default:
           throw new Error(`Provider não suportado: ${provider}`);
       }
+      
+      // Calcular custo e registrar no Emergency Mode
+      const estimatedInput = Math.ceil((systemPrompt.length + userQuery.length) / 4);
+      const estimatedOutput = Math.ceil(response.content.length / 4);
+      const cost = this.calculateCost(response.model, estimatedInput, estimatedOutput);
+      
+      if (!options.bypassEmergency) {
+        emergencyController.recordSpend(cost);
+      }
+      
+      // Adicionar campos extras na resposta
+      response.cost = cost;
+      response.downgraded = wasDowngraded;
+      if (originalModel) {
+        response.originalModel = originalModel;
+      }
+      
+      return response;
+      
     } catch (error) {
       console.error(`[AIService] Erro com provider ${provider}:`, error);
       
@@ -149,6 +227,32 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       
       throw error;
     }
+  }
+  
+  /**
+   * Retorna modelo default por provider
+   */
+  private getDefaultModel(provider: LLMProvider): string {
+    switch (provider) {
+      case 'openai': return 'gpt-4o-mini';
+      case 'anthropic': return 'claude-3-5-haiku-20241022';
+      case 'google': return 'gemini-1.5-flash';
+      default: return 'gpt-4o-mini';
+    }
+  }
+  
+  /**
+   * Verifica se está em modo de emergência
+   */
+  getEmergencyState() {
+    return emergencyController.getState();
+  }
+  
+  /**
+   * Verifica se pode fazer request (para UI)
+   */
+  canMakeRequest(model?: string, tokens?: number) {
+    return emergencyController.canMakeRequest(model || 'gpt-4o-mini', tokens);
   }
   
   /**

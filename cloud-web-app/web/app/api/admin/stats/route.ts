@@ -14,7 +14,18 @@ export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
     
-    // TODO: Verificar se é admin
+    // SECURITY: Verificar se é admin
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { role: true },
+    });
+    
+    if (!dbUser || dbUser.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden: Admin access required' },
+        { status: 403 }
+      );
+    }
     
     // Database stats
     const dbStats = {

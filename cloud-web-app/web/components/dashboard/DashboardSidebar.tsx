@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import { CreditDisplay } from './CreditDisplay'
 
 export type DashboardTab =
   | 'overview'
@@ -129,22 +130,8 @@ export function DashboardSidebar({
         })}
       </nav>
 
-      {/* Footer - Storage/Usage */}
-      {!collapsed && (
-        <div className="p-4 border-t border-slate-800">
-          <div className="text-xs text-slate-500 mb-2">Uso do mês</div>
-          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-              style={{ width: '45%' }}
-            />
-          </div>
-          <div className="flex justify-between mt-2 text-xs text-slate-400">
-            <span>450 requests</span>
-            <span>1000 limit</span>
-          </div>
-        </div>
-      )}
+      {/* Footer - Credit Display */}
+      <CreditDisplay collapsed={collapsed} />
     </aside>
   )
 }

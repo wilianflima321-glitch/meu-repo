@@ -6,6 +6,8 @@
  */
 
 import { EventEmitter } from 'events';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // ============================================================================
 // Types & Interfaces
@@ -159,7 +161,7 @@ class TextureLoader implements AssetLoader<TextureData> {
 
 class ModelLoader implements AssetLoader<ModelData> {
   type: AssetType = 'model';
-  extensions = ['.obj', '.gltf', '.glb', '.fbx'];
+  extensions = ['.obj', '.gltf', '.glb'];
 
   async load(path: string): Promise<ModelData> {
     const response = await fetch(path);
@@ -167,11 +169,18 @@ class ModelLoader implements AssetLoader<ModelData> {
 
     if (ext === 'obj') {
       return this.parseOBJ(await response.text());
-    } else if (ext === 'gltf' || ext === 'glb') {
-      return this.parseGLTF(await response.arrayBuffer());
+    } else if (ext === 'gltf') {
+      return await this.parseGLTF(await response.text(), this.getBasePath(path));
+    } else if (ext === 'glb') {
+      return await this.parseGLTF(await response.arrayBuffer(), this.getBasePath(path));
     }
-
     throw new Error(`Unsupported model format: ${ext}`);
+  }
+
+  private getBasePath(path: string): string {
+    const idx = path.lastIndexOf('/');
+    if (idx >= 0) return path.slice(0, idx + 1);
+    return '';
   }
 
   private parseOBJ(text: string): ModelData {
@@ -264,12 +273,93 @@ class ModelLoader implements AssetLoader<ModelData> {
     }
   }
 
-  private parseGLTF(_buffer: ArrayBuffer): ModelData {
-    // Simplified GLTF parsing - in production use a proper library
-    // This is a placeholder
+  private async parseGLTF(data: ArrayBuffer | string, basePath: string): Promise<ModelData> {
+    // GLTF parsing real via Three.js GLTFLoader
+    // Extrai geometria (positions/indices/normals/uvs) em buffers planos.
+
+    // GLTFLoader depende de APIs de browser. Se este loader for chamado no servidor, falhar explicitamente.
+    if (typeof window === 'undefined') {
+      throw new Error('GLTF parsing requires browser runtime (window undefined).');
+    }
+
+    const loader = new GLTFLoader();
+
+    const gltf = await new Promise<import('three/examples/jsm/loaders/GLTFLoader.js').GLTF>((resolve, reject) => {
+      loader.parse(
+        data as any,
+        basePath,
+        (parsed) => resolve(parsed),
+        (err) => reject(err instanceof Error ? err : new Error('Failed to parse GLTF'))
+      );
+    });
+
+    const vertices: number[] = [];
+    const normals: number[] = [];
+    const uvs: number[] = [];
+    const indices: number[] = [];
+
+    let vertexOffset = 0;
+
+    gltf.scene.updateMatrixWorld(true);
+    const normalMatrix = new THREE.Matrix3();
+
+    gltf.scene.traverse((obj) => {
+      if (!(obj instanceof THREE.Mesh)) return;
+      const mesh = obj as THREE.Mesh;
+      const geom = mesh.geometry as THREE.BufferGeometry;
+      if (!geom) return;
+
+      const positionAttr = geom.getAttribute('position') as THREE.BufferAttribute | undefined;
+      if (!positionAttr) return;
+
+      const normalAttr = geom.getAttribute('normal') as THREE.BufferAttribute | undefined;
+      const uvAttr = geom.getAttribute('uv') as THREE.BufferAttribute | undefined;
+
+      mesh.updateWorldMatrix(true, false);
+      normalMatrix.getNormalMatrix(mesh.matrixWorld);
+
+      for (let i = 0; i < positionAttr.count; i++) {
+        const v = new THREE.Vector3().fromBufferAttribute(positionAttr, i).applyMatrix4(mesh.matrixWorld);
+        vertices.push(v.x, v.y, v.z);
+
+        if (normalAttr) {
+          const n = new THREE.Vector3().fromBufferAttribute(normalAttr, i).applyMatrix3(normalMatrix).normalize();
+          normals.push(n.x, n.y, n.z);
+        }
+
+        if (uvAttr) {
+          const u = new THREE.Vector2().fromBufferAttribute(uvAttr, i);
+          uvs.push(u.x, u.y);
+        }
+      }
+
+      if (geom.index) {
+        const idx = geom.index;
+        for (let i = 0; i < idx.count; i++) {
+          indices.push(vertexOffset + idx.getX(i));
+        }
+      } else {
+        // Non-indexed: cria triângulos sequenciais
+        for (let i = 0; i < positionAttr.count; i++) {
+          indices.push(vertexOffset + i);
+        }
+      }
+
+      vertexOffset += positionAttr.count;
+    });
+
+    const vertexArray = new Float32Array(vertices);
+    const normalArray = normals.length ? new Float32Array(normals) : undefined;
+    const uvArray = uvs.length ? new Float32Array(uvs) : undefined;
+
+    const useUint32 = vertexOffset > 65535;
+    const indexArray = useUint32 ? new Uint32Array(indices) : new Uint16Array(indices);
+
     return {
-      vertices: new Float32Array([]),
-      indices: new Uint16Array([]),
+      vertices: vertexArray,
+      indices: indexArray,
+      normals: normalArray,
+      uvs: uvArray,
     };
   }
 }

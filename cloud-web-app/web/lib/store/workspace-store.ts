@@ -785,7 +785,26 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           }),
           
           refreshFileTree: async () => {
-            // TODO: Implement file tree refresh via API
+            const state = get();
+            if (!state.workspacePath) return;
+            
+            try {
+              const response = await fetch('/api/files/tree', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: state.workspacePath }),
+              });
+              
+              if (!response.ok) {
+                console.error('[FileTree] Failed to refresh:', response.status);
+                return;
+              }
+              
+              const tree = await response.json();
+              set((s) => { s.fileTree = tree; });
+            } catch (error) {
+              console.error('[FileTree] Error refreshing:', error);
+            }
           },
           
           // Search Actions
@@ -798,12 +817,52 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           }),
           
           executeSearch: async () => {
-            // TODO: Implement search via API
-            set(state => { state.search.isSearching = true; });
-            // Simulate search
-            setTimeout(() => {
-              set(state => { state.search.isSearching = false; });
-            }, 500);
+            const state = get();
+            if (!state.search.query.trim()) {
+              set((s) => { s.search.results = []; });
+              return;
+            }
+            
+            set((s) => { s.search.isSearching = true; });
+            
+            try {
+              const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  query: state.search.query,
+                  workspacePath: state.workspacePath,
+                  options: {
+                    isRegex: state.search.isRegex,
+                    isCaseSensitive: state.search.isCaseSensitive,
+                    isWholeWord: state.search.isWholeWord,
+                    includePattern: state.search.includePattern,
+                    excludePattern: state.search.excludePattern,
+                  },
+                }),
+              });
+              
+              if (!response.ok) {
+                console.error('[Search] Failed:', response.status);
+                set((s) => { 
+                  s.search.isSearching = false;
+                  s.search.results = [];
+                });
+                return;
+              }
+              
+              const results = await response.json();
+              set((s) => { 
+                s.search.isSearching = false;
+                s.search.results = results.matches || [];
+              });
+            } catch (error) {
+              console.error('[Search] Error:', error);
+              set((s) => { 
+                s.search.isSearching = false;
+                s.search.results = [];
+              });
+            }
           },
           
           clearSearch: () => set(state => {
@@ -833,9 +892,51 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             state.debug.status = 'running';
           }),
           
-          stepOver: () => { /* TODO: Implement */ },
-          stepInto: () => { /* TODO: Implement */ },
-          stepOut: () => { /* TODO: Implement */ },
+          stepOver: () => {
+            const state = get();
+            if (state.debug.status !== 'paused' || !state.debug.currentSession) return;
+            
+            fetch('/api/dap/request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: state.debug.currentSession,
+                command: 'next',
+                arguments: { threadId: 1 },
+                seq: Date.now(),
+              }),
+            }).catch(console.error);
+          },
+          stepInto: () => {
+            const state = get();
+            if (state.debug.status !== 'paused' || !state.debug.currentSession) return;
+            
+            fetch('/api/dap/request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: state.debug.currentSession,
+                command: 'stepIn',
+                arguments: { threadId: 1 },
+                seq: Date.now(),
+              }),
+            }).catch(console.error);
+          },
+          stepOut: () => {
+            const state = get();
+            if (state.debug.status !== 'paused' || !state.debug.currentSession) return;
+            
+            fetch('/api/dap/request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: state.debug.currentSession,
+                command: 'stepOut',
+                arguments: { threadId: 1 },
+                seq: Date.now(),
+              }),
+            }).catch(console.error);
+          },
           
           toggleBreakpoint: (path, line) => set(state => {
             const breakpoints = state.debug.breakpoints.get(path) || [];
@@ -870,11 +971,38 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           
           // Git Actions
           refreshGitStatus: async () => {
-            set(state => { state.git.isLoading = true; });
-            // TODO: Implement via git service
-            setTimeout(() => {
-              set(state => { state.git.isLoading = false; });
-            }, 300);
+            const state = get();
+            if (!state.workspacePath) return;
+            
+            set((s) => { s.git.isLoading = true; });
+            
+            try {
+              const response = await fetch('/api/git/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cwd: state.workspacePath }),
+              });
+              
+              if (!response.ok) {
+                console.error('[Git] Status failed:', response.status);
+                set((s) => { s.git.isLoading = false; });
+                return;
+              }
+              
+              const status = await response.json();
+              set((s) => {
+                s.git.isLoading = false;
+                s.git.currentBranch = status.branch || 'main';
+                s.git.branches = status.branches || [];
+                s.git.stagedFiles = (status.staged || []).map((f: any) => f.path || f);
+                s.git.unstagedFiles = (status.unstaged || []).map((f: any) => f.path || f);
+                s.git.untrackedFiles = (status.untracked || []).map((f: any) => f.path || f);
+                s.git.hasConflicts = (status.conflicted?.length || 0) > 0;
+              });
+            } catch (error) {
+              console.error('[Git] Status error:', error);
+              set((s) => { s.git.isLoading = false; });
+            }
           },
           
           stageFile: (path) => set(state => {
@@ -909,16 +1037,86 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             state.git.stagedFiles = [];
           }),
           
-          commit: async (_message) => {
-            // TODO: Implement via git service
+          commit: async (message) => {
+            const state = get();
+            if (!state.workspacePath || !message.trim()) return;
+            
+            try {
+              const response = await fetch('/api/git/commit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  cwd: state.workspacePath,
+                  message: message.trim(),
+                }),
+              });
+              
+              if (!response.ok) {
+                const error = await response.json().catch(() => ({ message: 'Commit failed' }));
+                throw new Error(error.message || error.error);
+              }
+              
+              // Refresh status after commit
+              await get().refreshGitStatus();
+            } catch (error) {
+              console.error('[Git] Commit error:', error);
+              throw error;
+            }
           },
-          
-          checkout: async (_branch) => {
-            // TODO: Implement via git service
+
+          checkout: async (branch) => {
+            const state = get();
+            if (!state.workspacePath || !branch.trim()) return;
+            
+            try {
+              const response = await fetch('/api/git/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  cwd: state.workspacePath,
+                  branch: branch.trim(),
+                }),
+              });
+              
+              if (!response.ok) {
+                const error = await response.json().catch(() => ({ message: 'Checkout failed' }));
+                throw new Error(error.message || error.error);
+              }
+              
+              // Refresh status after checkout
+              await get().refreshGitStatus();
+              await get().refreshFileTree();
+            } catch (error) {
+              console.error('[Git] Checkout error:', error);
+              throw error;
+            }
           },
-          
-          createBranch: async (_name) => {
-            // TODO: Implement via git service
+
+          createBranch: async (name) => {
+            const state = get();
+            if (!state.workspacePath || !name.trim()) return;
+            
+            try {
+              const response = await fetch('/api/git/branch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  cwd: state.workspacePath,
+                  name: name.trim(),
+                }),
+              });
+              
+              if (!response.ok) {
+                const error = await response.json().catch(() => ({ message: 'Create branch failed' }));
+                throw new Error(error.message || error.error);
+              }
+              
+              // Refresh status after creating branch
+              await get().refreshGitStatus();
+            } catch (error) {
+              console.error('[Git] Create branch error:', error);
+              throw error;
+            }
           },
           
           // Problems Actions

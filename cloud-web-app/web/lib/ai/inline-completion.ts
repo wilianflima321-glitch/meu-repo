@@ -26,29 +26,34 @@ interface AICompletionResponse {
   text: string;
 }
 
-// Mock AI service for now
-const mockAIService = {
-  async complete(request: AICompletionRequest, _signal: AbortSignal): Promise<AICompletionResponse> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    // Return mock completion based on context
-    const prompt = request.prompt;
-    if (prompt.includes('function')) {
-      return { text: '{\n  // TODO: implement\n}' };
+const remoteAIService = {
+  async complete(request: AICompletionRequest, signal: AbortSignal): Promise<AICompletionResponse> {
+    const res = await fetch('/api/ai/inline-completion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      signal,
+      body: JSON.stringify({
+        prompt: request.prompt,
+        maxTokens: request.maxTokens,
+        temperature: request.temperature,
+        provider: undefined,
+        model: undefined,
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Inline completion request failed: ${res.status} ${text}`);
     }
-    if (prompt.includes('const ')) {
-      return { text: ' = null;' };
-    }
-    if (prompt.includes('if (')) {
-      return { text: ') {\n  \n}' };
-    }
-    return { text: '' };
-  }
+
+    const data = (await res.json().catch(() => null)) as { text?: string } | null;
+    return { text: (data?.text || '').toString() };
+  },
 };
 
 function getAIService(_provider: string) {
-  return mockAIService;
+  return remoteAIService;
 }
 
 // Completion cache entry

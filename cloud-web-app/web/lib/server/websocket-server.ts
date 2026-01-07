@@ -3,12 +3,15 @@
  * 
  * Servidor WebSocket central para terminal, colaboração e file watching.
  * Implementação real com suporte a múltiplas conexões e rooms.
+ * 
+ * SECURITY: All connections require JWT authentication
  */
 
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import { EventEmitter } from 'events';
 import { createServer, IncomingMessage, Server as HttpServer } from 'http';
 import { parse as parseUrl } from 'url';
+import jwt from 'jsonwebtoken';
 import { 
   getTerminalPtyManager, 
   TerminalPtyManager,
@@ -329,25 +332,84 @@ export class AethelWebSocketServer extends EventEmitter {
   // Authentication
   // ==========================================================================
   
+  private getJwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (!secret || secret === 'your-secret-key-change-in-production') {
+      throw new Error('JWT_SECRET not configured');
+    }
+    return secret;
+  }
+  
+  private verifyJwtToken(token: string): { userId: string; email?: string; role?: string } | null {
+    try {
+      const secret = this.getJwtSecret();
+      const decoded = jwt.verify(token, secret) as any;
+      return {
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
+      };
+    } catch (error) {
+      console.warn('[WebSocket] JWT verification failed:', error);
+      return null;
+    }
+  }
+
   private handleAuth(client: WsClient, payload: any): void {
-    const { token, userId } = payload;
+    const { token } = payload;
     
-    // TODO: Validate token with auth service
-    // For now, accept any userId
-    if (userId) {
-      client.userId = userId;
-      this.sendToClient(client, {
-        type: WS_MESSAGE_TYPES.AUTH_SUCCESS,
-        channel: 'system',
-        payload: { userId },
-      });
-    } else {
+    if (!token) {
       this.sendToClient(client, {
         type: WS_MESSAGE_TYPES.AUTH_ERROR,
         channel: 'system',
-        payload: { error: 'Invalid credentials' },
+        payload: { error: 'Token required' },
       });
+      // Close connection after failed auth
+      setTimeout(() => client.ws.close(4001, 'Authentication required'), 100);
+      return;
     }
+    
+    // REAL JWT verification
+    const decoded = this.verifyJwtToken(token);
+    
+    if (!decoded || !decoded.userId) {
+      this.sendToClient(client, {
+        type: WS_MESSAGE_TYPES.AUTH_ERROR,
+        channel: 'system',
+        payload: { error: 'Invalid or expired token' },
+      });
+      // Close connection after failed auth
+      setTimeout(() => client.ws.close(4001, 'Invalid token'), 100);
+      return;
+    }
+    
+    // Authentication successful
+    client.userId = decoded.userId;
+    client.metadata.email = decoded.email;
+    client.metadata.role = decoded.role;
+    client.metadata.authenticatedAt = Date.now();
+    
+    console.log(`[WebSocket] Client ${client.id} authenticated as user ${decoded.userId}`);
+    
+    this.sendToClient(client, {
+      type: WS_MESSAGE_TYPES.AUTH_SUCCESS,
+      channel: 'system',
+      payload: { 
+        userId: decoded.userId,
+        role: decoded.role,
+      },
+    });
+    
+    this.emit('authenticated', { clientId: client.id, userId: decoded.userId });
+  }
+  
+  // Middleware to check authentication before processing sensitive messages
+  private requireAuth(client: WsClient): boolean {
+    if (!client.userId) {
+      this.sendError(client, 'Authentication required. Please send auth message with valid JWT token.');
+      return false;
+    }
+    return true;
   }
   
   // ==========================================================================
@@ -414,8 +476,7 @@ export class AethelWebSocketServer extends EventEmitter {
   // ==========================================================================
   
   private async handleTerminalCreate(client: WsClient, payload: any): Promise<void> {
-    if (!client.userId) {
-      this.sendError(client, 'Authentication required');
+    if (!this.requireAuth(client)) {
       return;
     }
     

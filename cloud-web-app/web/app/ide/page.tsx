@@ -98,7 +98,7 @@ function MonacoPlaceholder() {
           <span className="text-cyan-400 ml-1">useState</span>
           <span className="text-white">{'}'}</span>
           <span className="text-purple-400 ml-2">from</span>
-          <span className="text-emerald-400 ml-2">'react'</span>
+          <span className="text-emerald-400 ml-2">{`'react'`}</span>
         </div>
         <div className="flex">
           <span className="w-12 text-slate-600 select-none">2</span>

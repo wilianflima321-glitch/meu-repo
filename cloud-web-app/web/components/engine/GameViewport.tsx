@@ -2,28 +2,31 @@
 
 import React, { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment, useGLTF, TransformControls } from '@react-three/drei';
-import { Physics, useBox, usePlane } from '@react-three/cannon';
+import { OrbitControls, Grid, Environment } from '@react-three/drei';
+import { Physics, RigidBody } from '@react-three/rapier';
 
-// --- Physics Components ---
+// --- Physics Components (Updated to Rapier AAA) ---
 
 function Ground() {
-  const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], position: [0, -0.5, 0] }));
   return (
-    <mesh ref={ref as any} receiveShadow>
-      <planeGeometry args={[100, 100]} />
-      <meshStandardMaterial color="#303030" transparent opacity={0.5} />
-    </mesh>
+    <RigidBody type="fixed" colliders="cuboid">
+      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial color="#303030" transparent opacity={0.5} />
+      </mesh>
+    </RigidBody>
   );
 }
 
 function PhysicsBox({ position }: { position: [number, number, number] }) {
-  const [ref] = useBox(() => ({ mass: 1, position }));
+  // Rapier physics box
   return (
-    <mesh ref={ref as any} castShadow receiveShadow>
-      <boxGeometry />
-      <meshStandardMaterial color="orange" />
-    </mesh>
+    <RigidBody position={position} colliders="cuboid" restitution={0.7}>
+      <mesh castShadow receiveShadow>
+        <boxGeometry />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+    </RigidBody>
   );
 }
 
@@ -53,6 +56,10 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
         <div className="bg-slate-800/80 backdrop-blur p-2 rounded border border-slate-700 text-xs text-white">
           Mode: <span className="font-bold text-indigo-400 uppercase">{mode}</span>
         </div>
+        <div className="bg-slate-800/80 backdrop-blur p-2 rounded border border-slate-700 text-xs text-green-400 flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/> 
+          Rapier Physics v3
+        </div>
         <button 
           onClick={() => setBoxes(prev => [...prev, [(Math.random() - 0.5) * 5, 10, (Math.random() - 0.5) * 5]])}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs font-bold transition"
@@ -77,7 +84,7 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
           {mode === 'edit' && <Grid infiniteGrid fadeDistance={50} sectionColor="#4f4f4f" cellColor="#303030" />}
           <OrbitControls makeDefault />
 
-          {/* Physics World */}
+          {/* Physics World (Rapier) */}
           <Physics gravity={[0, -9.81, 0]}>
             <Ground />
             {boxes.map((pos, i) => (

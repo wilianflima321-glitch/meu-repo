@@ -670,6 +670,148 @@ aiTools.register({
 // ============================================================================
 
 aiTools.register({
+  name: 'query_assets',
+  description: 'Busca e lista assets do projeto atual. Use para encontrar modelos 3D, texturas, áudio, scripts e outros recursos.',
+  category: 'asset',
+  parameters: [
+    { name: 'search', type: 'string', description: 'Termo de busca (nome, tag)', required: false },
+    { name: 'type', type: 'string', description: 'Filtrar por tipo de asset', required: false, enum: ['mesh', 'texture', 'material', 'audio', 'video', 'blueprint', 'animation', 'prefab', 'level', 'script', 'all'] },
+    { name: 'path', type: 'string', description: 'Filtrar por pasta (ex: /Content/Characters)', required: false },
+    { name: 'limit', type: 'number', description: 'Máximo de resultados', required: false, default: 50 },
+    { name: 'favorites', type: 'boolean', description: 'Apenas favoritos', required: false, default: false },
+  ],
+  returns: 'Lista de assets com id, nome, tipo, caminho, tamanho e metadados',
+  execute: async (params) => {
+    try {
+      const ctx = getContext(params);
+      if (!ctx.projectId) return { success: false, error: 'Nenhum projeto selecionado' };
+      
+      const whereClause: any = { projectId: ctx.projectId, status: 'ready' };
+      
+      if ((params as any).search) {
+        whereClause.name = { contains: (params as any).search, mode: 'insensitive' };
+      }
+      if ((params as any).type && (params as any).type !== 'all') {
+        whereClause.type = (params as any).type;
+      }
+      if ((params as any).path) {
+        whereClause.path = { startsWith: (params as any).path };
+      }
+      if ((params as any).favorites) {
+        whereClause.isFavorite = true;
+      }
+
+      const assets = await prisma.asset.findMany({
+        where: whereClause,
+        take: (params as any).limit || 50,
+        orderBy: [{ isFavorite: 'desc' }, { updatedAt: 'desc' }],
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          path: true,
+          extension: true,
+          size: true,
+          thumbnail: true,
+          metadata: true,
+          isFavorite: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return {
+        success: true,
+        data: {
+          count: assets.length,
+          assets: assets.map(a => ({
+            id: a.id,
+            name: a.name,
+            type: a.type,
+            path: a.path,
+            extension: a.extension,
+            size: formatBytes(a.size),
+            sizeBytes: a.size,
+            thumbnail: a.thumbnail,
+            metadata: a.metadata,
+            isFavorite: a.isFavorite,
+            modifiedAt: a.updatedAt.toISOString(),
+          })),
+        },
+      };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Erro ao buscar assets' };
+    }
+  },
+});
+
+// Helper function for file size formatting
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
+
+aiTools.register({
+  name: 'get_asset_details',
+  description: 'Obtém detalhes completos de um asset específico pelo ID ou caminho',
+  category: 'asset',
+  parameters: [
+    { name: 'assetId', type: 'string', description: 'ID do asset', required: false },
+    { name: 'assetPath', type: 'string', description: 'Caminho completo do asset', required: false },
+  ],
+  returns: 'Detalhes completos do asset incluindo metadados técnicos',
+  execute: async (params) => {
+    try {
+      const ctx = getContext(params);
+      if (!ctx.projectId) return { success: false, error: 'Nenhum projeto selecionado' };
+      
+      const assetId = (params as any).assetId;
+      const assetPath = (params as any).assetPath;
+      
+      if (!assetId && !assetPath) {
+        return { success: false, error: 'Forneça assetId ou assetPath' };
+      }
+
+      const whereClause: any = { projectId: ctx.projectId };
+      if (assetId) whereClause.id = assetId;
+      if (assetPath) whereClause.path = assetPath;
+
+      const asset = await prisma.asset.findFirst({
+        where: whereClause,
+      });
+
+      if (!asset) return { success: false, error: 'Asset não encontrado' };
+
+      return {
+        success: true,
+        data: {
+          id: asset.id,
+          name: asset.name,
+          type: asset.type,
+          path: asset.path,
+          extension: asset.extension,
+          size: formatBytes(asset.size),
+          sizeBytes: asset.size,
+          mimeType: asset.mimeType,
+          thumbnail: asset.thumbnail,
+          metadata: asset.metadata,
+          isFavorite: asset.isFavorite,
+          status: asset.status,
+          storagePath: asset.storagePath,
+          createdAt: asset.createdAt.toISOString(),
+          updatedAt: asset.updatedAt.toISOString(),
+        },
+      };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Erro ao buscar asset' };
+    }
+  },
+});
+
+aiTools.register({
   name: 'generate_3d_model',
   description: 'Gera modelo 3D usando IA',
   category: 'asset',

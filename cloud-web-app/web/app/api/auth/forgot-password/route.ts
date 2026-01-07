@@ -2,15 +2,48 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import * as crypto from 'crypto';
 import { emailService } from '@/lib/email-system';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 export const dynamic = 'force-dynamic';
+
+// Rate limit: 3 requests per hour per IP (prevent bruteforce enumeration)
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, '1 h'),
+  analytics: true,
+  prefix: 'aethel:forgot-password',
+});
 
 /**
  * POST /api/auth/forgot-password
  * Sends password reset email with token
+ * 
+ * SECURITY: Rate limited to 3 requests/hour per IP
  */
 export async function POST(req: NextRequest) {
   try {
+    // SECURITY: Rate limiting por IP
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? 
+               req.headers.get('x-real-ip') ?? 
+               'anonymous';
+    
+    const { success, limit, reset, remaining } = await ratelimit.limit(`forgot:${ip}`);
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many password reset requests. Please try again later.' },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+          },
+        }
+      );
+    }
+
     const { email } = await req.json();
 
     if (!email) {

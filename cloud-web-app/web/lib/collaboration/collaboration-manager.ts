@@ -6,14 +6,30 @@
  * - Cursor and selection sharing
  * - Presence (who's online, where they are)
  * - Session management (create, join, leave)
+ * 
+ * Dependencies:
+ * - yjs: CRDT implementation
+ * - y-websocket: WebSocket provider for Yjs
+ * - y-monaco: Monaco editor binding (optional, with fallback)
  */
 
 import { EventEmitter } from 'events';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
-// Note: y-monaco requires installation: npm install y-monaco
-// import { MonacoBinding } from 'y-monaco';
 import * as monaco from 'monaco-editor';
+
+// Dynamic import for y-monaco (optional dependency)
+let MonacoBinding: typeof import('y-monaco').MonacoBinding | null = null;
+
+// Try to load y-monaco if available
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const yMonaco = require('y-monaco');
+  MonacoBinding = yMonaco.MonacoBinding;
+  console.log('[Collaboration] y-monaco loaded successfully');
+} catch {
+  console.log('[Collaboration] y-monaco not available, using fallback sync');
+}
 
 // Types
 export interface Collaborator {
@@ -288,19 +304,71 @@ export class CollaborationManager extends EventEmitter {
     // Get or create Y.Text for this file
     const yText = this.ydoc.getText(uri);
 
-    // Store binding info for cleanup
-    // Note: Full MonacoBinding requires y-monaco package
-    // For now, we'll do manual sync
-    const bindingInfo = {
-      yText,
-      editor,
-      uri,
-      destroy: () => {
-        // Cleanup listeners
-      }
-    };
+    // Use real MonacoBinding if y-monaco is available
+    if (MonacoBinding) {
+      const binding = new MonacoBinding(
+        yText,
+        editor.getModel()!,
+        new Set([editor]),
+        this.wsProvider.awareness
+      );
 
-    this.monacoBindings.set(uri, bindingInfo as unknown as { destroy: () => void });
+      this.monacoBindings.set(uri, {
+        destroy: () => binding.destroy()
+      });
+
+      console.log(`[Collaboration] Monaco binding created for ${uri} (y-monaco)`);
+    } else {
+      // Fallback: Manual sync without y-monaco
+      const disposables: monaco.IDisposable[] = [];
+
+      // Sync initial content
+      const model = editor.getModel();
+      if (model && yText.toString() === '') {
+        yText.insert(0, model.getValue());
+      }
+
+      // Listen for local changes
+      const localChangeHandler = model?.onDidChangeContent((e) => {
+        this.ydoc?.transact(() => {
+          e.changes.forEach(change => {
+            const offset = model.getOffsetAt({
+              lineNumber: change.range.startLineNumber,
+              column: change.range.startColumn
+            });
+            
+            if (change.rangeLength > 0) {
+              yText.delete(offset, change.rangeLength);
+            }
+            if (change.text) {
+              yText.insert(offset, change.text);
+            }
+          });
+        }, this);
+      });
+
+      if (localChangeHandler) {
+        disposables.push(localChangeHandler);
+      }
+
+      // Listen for remote changes
+      const remoteChangeHandler = () => {
+        const currentContent = yText.toString();
+        if (model && model.getValue() !== currentContent) {
+          model.setValue(currentContent);
+        }
+      };
+      yText.observe(remoteChangeHandler);
+
+      this.monacoBindings.set(uri, {
+        destroy: () => {
+          disposables.forEach(d => d.dispose());
+          yText.unobserve(remoteChangeHandler);
+        }
+      });
+
+      console.log(`[Collaboration] Monaco binding created for ${uri} (fallback sync)`);
+    }
 
     // Track cursor/selection changes
     editor.onDidChangeCursorPosition((e) => {

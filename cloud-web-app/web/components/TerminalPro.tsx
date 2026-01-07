@@ -368,7 +368,7 @@ Press Ctrl+C to cancel running command
       >
         {lines.length === 0 && (
           <div className="text-slate-500">
-            Terminal ready. Type 'help' for available commands.
+            Terminal ready. Type {`'help'`} for available commands.
           </div>
         )}
         

@@ -728,57 +728,114 @@ export class AutonomousAgent extends EventEmitter {
   }
   
   private getAvailableTools(): Array<{ name: string; description: string; inputSchema: any }> {
-    // Get tools from registry
+    // Get tools from registry dynamically
     const registeredTools: Array<{ name: string; description: string; inputSchema: any }> = [];
     
-    // Core tools always available
-    registeredTools.push(
-      { 
-        name: 'read_file', 
-        description: 'Lê conteúdo de um arquivo',
-        inputSchema: { path: 'string' }
-      },
-      { 
-        name: 'write_file', 
-        description: 'Escreve conteúdo em um arquivo',
-        inputSchema: { path: 'string', content: 'string' }
-      },
-      { 
-        name: 'edit_file', 
-        description: 'Edita parte de um arquivo',
-        inputSchema: { path: 'string', search: 'string', replace: 'string' }
-      },
-      { 
-        name: 'run_command', 
-        description: 'Executa comando no terminal',
-        inputSchema: { command: 'string' }
-      },
-      { 
-        name: 'search_code', 
-        description: 'Busca texto nos arquivos',
-        inputSchema: { query: 'string' }
-      },
-      { 
-        name: 'web_search', 
-        description: 'Pesquisa na internet',
-        inputSchema: { query: 'string' }
-      },
-      { 
-        name: 'list_directory', 
-        description: 'Lista arquivos em um diretório',
-        inputSchema: { path: 'string' }
-      },
-      { 
-        name: 'git_status', 
-        description: 'Mostra status do Git',
-        inputSchema: {}
-      },
-      { 
-        name: 'git_commit', 
-        description: 'Cria um commit',
-        inputSchema: { message: 'string' }
-      },
-    );
+    // Try to get tools from MCP server if available
+    try {
+      // Dynamically import MCP server tools
+      const mcpTools = toolsRegistry?.getTools?.() || [];
+      for (const tool of mcpTools) {
+        registeredTools.push({
+          name: tool.name,
+          description: tool.description,
+          inputSchema: tool.inputSchema || {}
+        });
+      }
+    } catch {
+      // MCP not available, use core tools
+    }
+    
+    // Core tools always available (fallback)
+    if (registeredTools.length === 0) {
+      registeredTools.push(
+        { 
+          name: 'read_file', 
+          description: 'Lê conteúdo de um arquivo do projeto',
+          inputSchema: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] }
+        },
+        { 
+          name: 'write_file', 
+          description: 'Escreve/cria um arquivo no projeto',
+          inputSchema: { type: 'object', properties: { path: { type: 'string' }, content: { type: 'string' } }, required: ['path', 'content'] }
+        },
+        { 
+          name: 'edit_file', 
+          description: 'Edita parte específica de um arquivo (replace, insert)',
+          inputSchema: { type: 'object', properties: { path: { type: 'string' }, operation: { type: 'string' }, search: { type: 'string' }, replace: { type: 'string' } }, required: ['path', 'operation', 'search'] }
+        },
+        { 
+          name: 'delete_file', 
+          description: 'Deleta um arquivo ou diretório',
+          inputSchema: { type: 'object', properties: { path: { type: 'string' }, recursive: { type: 'boolean' } }, required: ['path'] }
+        },
+        { 
+          name: 'create_directory', 
+          description: 'Cria um novo diretório',
+          inputSchema: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] }
+        },
+        { 
+          name: 'rename_file', 
+          description: 'Renomeia ou move um arquivo',
+          inputSchema: { type: 'object', properties: { oldPath: { type: 'string' }, newPath: { type: 'string' } }, required: ['oldPath', 'newPath'] }
+        },
+        { 
+          name: 'run_command', 
+          description: 'Executa comando no terminal (com segurança)',
+          inputSchema: { type: 'object', properties: { command: { type: 'string' } }, required: ['command'] }
+        },
+        { 
+          name: 'search_code', 
+          description: 'Busca texto/regex nos arquivos do projeto',
+          inputSchema: { type: 'object', properties: { query: { type: 'string' }, isRegex: { type: 'boolean' } }, required: ['query'] }
+        },
+        { 
+          name: 'web_search', 
+          description: 'Pesquisa na internet via DuckDuckGo',
+          inputSchema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] }
+        },
+        { 
+          name: 'fetch_url', 
+          description: 'Busca conteúdo de uma URL',
+          inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] }
+        },
+        { 
+          name: 'list_directory', 
+          description: 'Lista arquivos e pastas em um diretório',
+          inputSchema: { type: 'object', properties: { path: { type: 'string' }, recursive: { type: 'boolean' } }, required: ['path'] }
+        },
+        { 
+          name: 'git_status', 
+          description: 'Mostra status atual do Git',
+          inputSchema: { type: 'object', properties: {} }
+        },
+        { 
+          name: 'git_diff', 
+          description: 'Mostra diferenças de arquivos',
+          inputSchema: { type: 'object', properties: { file: { type: 'string' } } }
+        },
+        { 
+          name: 'git_commit', 
+          description: 'Cria um commit com mensagem',
+          inputSchema: { type: 'object', properties: { message: { type: 'string' }, files: { type: 'array' } }, required: ['message'] }
+        },
+        { 
+          name: 'get_definitions', 
+          description: 'Encontra definições de funções/classes/variáveis',
+          inputSchema: { type: 'object', properties: { symbol: { type: 'string' } }, required: ['symbol'] }
+        },
+        { 
+          name: 'create_blueprint', 
+          description: 'Cria um blueprint visual para jogo',
+          inputSchema: { type: 'object', properties: { name: { type: 'string' }, type: { type: 'string' } }, required: ['name', 'type'] }
+        },
+        { 
+          name: 'create_level', 
+          description: 'Cria um novo level/cena de jogo',
+          inputSchema: { type: 'object', properties: { name: { type: 'string' }, template: { type: 'string' } }, required: ['name'] }
+        },
+      );
+    }
     
     return registeredTools;
   }

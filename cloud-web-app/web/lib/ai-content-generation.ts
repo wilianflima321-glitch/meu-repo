@@ -811,7 +811,7 @@ export const proceduralMeshGenerator = new ProceduralMeshGenerator();
 export const aiTextureGenerator = new AITextureGenerator();
 export const levelGenerator = new ProceduralLevelGenerator();
 
-export default {
+const aiContentGeneration = {
   ProceduralMeshGenerator,
   AITextureGenerator,
   ProceduralLevelGenerator,
@@ -820,3 +820,5 @@ export default {
   levelGenerator,
   DEFAULT_AI_CONFIG,
 };
+
+export default aiContentGeneration;

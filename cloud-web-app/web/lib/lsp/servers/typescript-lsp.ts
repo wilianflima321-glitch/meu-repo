@@ -1,11 +1,16 @@
 /**
  * TypeScript/JavaScript LSP Server Implementation
  * Uses typescript-language-server with tsserver
+ * 
+ * NOTA: Este server usa a API /api/lsp/* que conecta ao lsp-runtime.ts
+ * Os mocks são fallbacks quando o servidor real não está disponível
  */
 
 import { LSPServerBase, LSPServerConfig } from '../lsp-server-base';
 
 export class TypeScriptLSPServer extends LSPServerBase {
+  private useRealServer: boolean = true; // Tenta usar servidor real primeiro
+
   constructor(workspaceRoot: string) {
     const config: LSPServerConfig = {
       command: 'typescript-language-server',
@@ -31,7 +36,19 @@ export class TypeScriptLSPServer extends LSPServerBase {
     super(config);
   }
 
+  /**
+   * Desativa servidor real e usa mocks (para ambientes sem LSP instalado)
+   */
+  setMockMode(useMock: boolean): void {
+    this.useRealServer = !useMock;
+  }
+
   protected getMockResponse(method: string, params: any): any {
+    // Se está usando servidor real, retorna null para deixar a base class fazer o request
+    if (this.useRealServer) {
+      return null;
+    }
+
     switch (method) {
       case 'initialize':
         return {

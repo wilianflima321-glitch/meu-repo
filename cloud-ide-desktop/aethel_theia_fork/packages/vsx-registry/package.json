@@ -1,0 +1,31 @@
+{
+  "name": "@aethel/vsx-registry",
+  "version": "1.0.0",
+  "description": "VSX Registry integration for Aethel IDE (Extensions Marketplace)",
+  "keywords": [
+    "theia-extension"
+  ],
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "latest",
+    "@theia/plugin-ext": "latest",
+    "inversify": "^6.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "rimraf": "^5.0.5"
+  },
+  "scripts": {
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/vsx-registry-frontend-module"
+    }
+  ]
+}

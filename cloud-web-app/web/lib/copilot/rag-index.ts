@@ -650,6 +650,7 @@ export function useRAGIndex(options: {
   // Initialize index
   useEffect(() => {
     indexRef.current = new RAGIndex(options)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
   // Index files

@@ -93,8 +93,11 @@ const config: Config = {
         'slide-in-down': 'slideInDown 300ms ease-out',
         'shimmer': 'shimmer 2s linear infinite',
         'bounce-subtle': 'bounceSubtle 1s ease infinite',
+        'bounce-slow': 'bounceSlow 2s ease-in-out infinite',
         'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
         'typing': 'typing 1s steps(3) infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'gradient-x': 'gradientX 3s ease infinite',
       },
       keyframes: {
         fadeIn: {
@@ -145,6 +148,18 @@ const config: Config = {
           '0%': { content: '.' },
           '33%': { content: '..' },
           '66%': { content: '...' },
+        },
+        bounceSlow: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-10px) rotate(1deg)' },
+        },
+        gradientX: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
         },
       },
 

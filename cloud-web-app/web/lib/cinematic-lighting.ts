@@ -716,7 +716,7 @@ LightingPresets.initialize();
 // EXPORTS
 // ============================================================================
 
-export default {
+const cinematicLighting = {
   CinematicLight,
   ThreePointLighting,
   TimeOfDaySystem,
@@ -724,3 +724,5 @@ export default {
   LightingPresets,
   DEFAULT_LIGHT_CONFIG,
 };
+
+export default cinematicLighting;

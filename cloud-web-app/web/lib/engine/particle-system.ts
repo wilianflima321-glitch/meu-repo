@@ -773,22 +773,22 @@ export class ParticleEmitter extends EventEmitter {
   }
 
   private applyVelocityModule(particle: Particle, _dt: number): void {
-    const module = this.config.velocityModule!;
+    const velocityMod = this.config.velocityModule!;
     
     // Linear velocity
-    if (module.linear) {
-      particle.velocity = Vec3.add(particle.velocity, module.linear);
+    if (velocityMod.linear) {
+      particle.velocity = Vec3.add(particle.velocity, velocityMod.linear);
     }
     
     // Orbital velocity
-    if (module.orbital) {
+    if (velocityMod.orbital) {
       const toCenter = Vec3.sub(this.position, particle.position);
       const tangent = Vec3.normalize({
-        x: -toCenter.z * module.orbital.y,
-        y: toCenter.x * module.orbital.z - toCenter.z * module.orbital.x,
-        z: toCenter.x * module.orbital.y,
+        x: -toCenter.z * velocityMod.orbital.y,
+        y: toCenter.x * velocityMod.orbital.z - toCenter.z * velocityMod.orbital.x,
+        z: toCenter.x * velocityMod.orbital.y,
       });
-      const orbitalSpeed = Vec3.length(module.orbital);
+      const orbitalSpeed = Vec3.length(velocityMod.orbital);
       particle.velocity = Vec3.add(
         particle.velocity,
         Vec3.scale(tangent, orbitalSpeed)
@@ -796,49 +796,49 @@ export class ParticleEmitter extends EventEmitter {
     }
     
     // Radial velocity
-    if (module.radial) {
+    if (velocityMod.radial) {
       const fromCenter = Vec3.sub(particle.position, this.position);
       const dir = Vec3.normalize(fromCenter);
       particle.velocity = Vec3.add(
         particle.velocity,
-        Vec3.scale(dir, module.radial)
+        Vec3.scale(dir, velocityMod.radial)
       );
     }
   }
 
   private applyNoiseModule(particle: Particle, dt: number): void {
-    const module = this.config.noiseModule!;
-    const time = this.elapsed * module.scrollSpeed;
+    const noiseMod = this.config.noiseModule!;
+    const time = this.elapsed * noiseMod.scrollSpeed;
     
     const noiseX = this.noise.noise3D(
-      particle.position.x * module.frequency,
-      particle.position.y * module.frequency,
+      particle.position.x * noiseMod.frequency,
+      particle.position.y * noiseMod.frequency,
       time
     );
     const noiseY = this.noise.noise3D(
-      particle.position.y * module.frequency,
-      particle.position.z * module.frequency,
+      particle.position.y * noiseMod.frequency,
+      particle.position.z * noiseMod.frequency,
       time + 100
     );
     const noiseZ = this.noise.noise3D(
-      particle.position.z * module.frequency,
-      particle.position.x * module.frequency,
+      particle.position.z * noiseMod.frequency,
+      particle.position.x * noiseMod.frequency,
       time + 200
     );
     
     particle.velocity = Vec3.add(particle.velocity, {
-      x: noiseX * module.strength * dt,
-      y: noiseY * module.strength * dt,
-      z: noiseZ * module.strength * dt,
+      x: noiseX * noiseMod.strength * dt,
+      y: noiseY * noiseMod.strength * dt,
+      z: noiseZ * noiseMod.strength * dt,
     });
   }
 
   private applyCollisionModule(particle: Particle, _dt: number): void {
-    const module = this.config.collisionModule!;
+    const collisionMod = this.config.collisionModule!;
     
-    if (!module.planes) return;
+    if (!collisionMod.planes) return;
     
-    for (const plane of module.planes) {
+    for (const plane of collisionMod.planes) {
       const dist = Vec3.dot(particle.position, plane.normal) - plane.distance;
       
       if (dist < 0) {
@@ -859,11 +859,11 @@ export class ParticleEmitter extends EventEmitter {
         // Apply bounce and dampen
         particle.velocity = Vec3.scale(
           particle.velocity,
-          module.bounce * (1 - module.dampen)
+          collisionMod.bounce * (1 - collisionMod.dampen)
         );
         
         // Reduce lifetime
-        particle.life -= particle.maxLife * module.lifetimeLoss;
+        particle.life -= particle.maxLife * collisionMod.lifetimeLoss;
         
         this.emit('collision', particle, plane);
       }

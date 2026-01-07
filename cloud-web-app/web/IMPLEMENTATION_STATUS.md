@@ -27,13 +27,13 @@ Nesta sessão de desenvolvimento intensivo, implementamos **todas as funcionalid
 ## 📁 Arquivos Criados/Atualizados
 
 ### 📚 Documentação (7 arquivos)
-- [docs/gaps/00_ROADMAP_MASTER.md](docs/gaps/00_ROADMAP_MASTER.md) - Roadmap executivo 16 semanas
-- [docs/gaps/01_IDE_CORE_GAPS.md](docs/gaps/01_IDE_CORE_GAPS.md) - Gap analysis IDE
-- [docs/gaps/02_GAME_ENGINE_GAPS.md](docs/gaps/02_GAME_ENGINE_GAPS.md) - Gap analysis Engine
-- [docs/gaps/03_PLATAFORMA_CLOUD_GAPS.md](docs/gaps/03_PLATAFORMA_CLOUD_GAPS.md) - Gap analysis Cloud
-- [docs/gaps/04_PORTAL_WEB_GAPS.md](docs/gaps/04_PORTAL_WEB_GAPS.md) - Gap analysis Portal
-- [docs/gaps/05_SISTEMA_IA_GAPS.md](docs/gaps/05_SISTEMA_IA_GAPS.md) - Gap analysis IA
-- [docs/gaps/06_INFRAESTRUTURA_GAPS.md](docs/gaps/06_INFRAESTRUTURA_GAPS.md) - Gap analysis Infra
+- [../../docs/gaps/00_ROADMAP_MASTER.md](../../docs/gaps/00_ROADMAP_MASTER.md) - Roadmap executivo 16 semanas
+- [../../docs/gaps/01_IDE_CORE_GAPS.md](../../docs/gaps/01_IDE_CORE_GAPS.md) - Gap analysis IDE
+- [../../docs/gaps/02_GAME_ENGINE_GAPS.md](../../docs/gaps/02_GAME_ENGINE_GAPS.md) - Gap analysis Engine
+- [../../docs/gaps/03_PLATAFORMA_CLOUD_GAPS.md](../../docs/gaps/03_PLATAFORMA_CLOUD_GAPS.md) - Gap analysis Cloud
+- [../../docs/gaps/04_PORTAL_WEB_GAPS.md](../../docs/gaps/04_PORTAL_WEB_GAPS.md) - Gap analysis Portal
+- [../../docs/gaps/05_SISTEMA_IA_GAPS.md](../../docs/gaps/05_SISTEMA_IA_GAPS.md) - Gap analysis IA
+- [../../docs/gaps/06_INFRAESTRUTURA_GAPS.md](../../docs/gaps/06_INFRAESTRUTURA_GAPS.md) - Gap analysis Infra
 
 ### 🐳 Infraestrutura Docker (4 arquivos)
 - [Dockerfile](Dockerfile) - Multi-stage production build (5 stages)
@@ -257,7 +257,7 @@ npm install yjs y-websocket y-monaco  # Colaboração
 ### Serviços Externos
 - **LSP Server:** Necessário para funcionalidade completa do LSP
 - **DAP Server:** Necessário para debugging
-- **AI Backend:** Mock implementado, substituir por API real
+- **AI Backend:** Implementação real via providers (OpenAI/Anthropic/Google) usando `OPENAI_API_KEY`/`ANTHROPIC_API_KEY`/`GOOGLE_API_KEY`. Para runtime externo, o proxy `/api/ai/chat` pode encaminhar para `NEXT_PUBLIC_API_URL`.
 
 ---
 

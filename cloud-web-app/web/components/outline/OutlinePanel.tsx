@@ -681,7 +681,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           <div className="flex flex-col items-center justify-center h-32 text-gray-500 text-sm">
             <LayoutList size={32} className="mb-2 opacity-50" />
             {searchQuery ? (
-              <span>No symbols match "{searchQuery}"</span>
+              <span>No symbols match {`"${searchQuery}"`}</span>
             ) : symbols.length === 0 ? (
               <span>No symbols found in this file</span>
             ) : (

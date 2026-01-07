@@ -416,7 +416,7 @@ export function BreakpointsPanel({
                     )}
                     {bp.logMessage && (
                       <span className="text-xs text-amber-400 truncate">
-                        "{bp.logMessage}"
+                        {`"${bp.logMessage}"`}
                       </span>
                     )}
                     {bp.hitCondition && (

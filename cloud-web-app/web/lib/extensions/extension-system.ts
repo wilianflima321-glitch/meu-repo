@@ -539,12 +539,12 @@ export class ExtensionHost extends EventEmitter {
       
       if (ext.manifest.browser) {
         // Browser extension
-        const module = await import(/* webpackIgnore: true */ `${ext.context.extensionPath}/${ext.manifest.browser}`);
-        api = module.default || module;
+        const extModule = await import(/* webpackIgnore: true */ `${ext.context.extensionPath}/${ext.manifest.browser}`);
+        api = extModule.default || extModule;
       } else if (ext.manifest.main) {
         // Node.js extension
-        const module = await import(/* webpackIgnore: true */ `${ext.context.extensionPath}/${ext.manifest.main}`);
-        api = module.default || module;
+        const extModule = await import(/* webpackIgnore: true */ `${ext.context.extensionPath}/${ext.manifest.main}`);
+        api = extModule.default || extModule;
       } else {
         // No entry point - contribution-only extension
         ext.status = 'active';

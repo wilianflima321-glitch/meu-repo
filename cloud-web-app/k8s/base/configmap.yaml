@@ -1,0 +1,39 @@
+# Aethel Engine - ConfigMap
+# Non-sensitive configuration values
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aethel-config
+  namespace: aethel-engine
+data:
+  # App Configuration
+  NODE_ENV: "production"
+  NEXT_TELEMETRY_DISABLED: "1"
+  
+  # Server Configuration
+  WEB_PORT: "3000"
+  RUNTIME_PORT: "3001"
+  WS_PORT: "3001"
+  
+  # Feature Flags
+  ENABLE_AI_AGENT: "true"
+  ENABLE_COLLABORATION: "true"
+  ENABLE_TERMINAL: "true"
+  ENABLE_LSP: "true"
+  ENABLE_DAP: "true"
+  
+  # Rate Limiting
+  RATE_LIMIT_REQUESTS: "100"
+  RATE_LIMIT_WINDOW: "60"
+  
+  # Workspace Configuration
+  WORKSPACE_BASE_PATH: "/workspace/projects"
+  MAX_FILE_SIZE: "10485760"
+  MAX_PROJECT_SIZE: "1073741824"
+  
+  # Health Check
+  HEALTH_CHECK_INTERVAL: "30"
+  
+  # Logging
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"

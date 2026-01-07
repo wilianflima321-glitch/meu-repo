@@ -147,9 +147,73 @@ async function resolveTsLsEntry(workspaceRoot: string): Promise<string | null> {
 
 function normalizeLanguage(language: string): string {
   const l = String(language || '').toLowerCase();
-  if (l === 'javascript') return 'typescript';
-  if (l === 'typescript') return 'typescript';
+  if (l === 'javascript' || l === 'javascriptreact') return 'typescript';
+  if (l === 'typescript' || l === 'typescriptreact') return 'typescript';
+  if (l === 'python' || l === 'py') return 'python';
+  if (l === 'go' || l === 'golang') return 'go';
+  if (l === 'rust' || l === 'rs') return 'rust';
+  if (l === 'c' || l === 'cpp' || l === 'c++') return 'cpp';
+  if (l === 'java') return 'java';
+  if (l === 'csharp' || l === 'c#' || l === 'cs') return 'csharp';
   return l;
+}
+
+// LSP Server configurations per language
+interface LspServerConfig {
+  command: string;
+  args: string[];
+  localPath?: (workspaceRoot: string) => Promise<string | null>;
+}
+
+const LSP_CONFIGS: Record<string, LspServerConfig> = {
+  typescript: {
+    command: 'typescript-language-server',
+    args: ['--stdio'],
+    localPath: async (workspaceRoot) => {
+      const candidate = path.join(workspaceRoot, 'node_modules', 'typescript-language-server', 'lib', 'cli.js');
+      return await fs.stat(candidate).then(() => candidate).catch(() => null);
+    },
+  },
+  python: {
+    command: 'pyright-langserver',
+    args: ['--stdio'],
+  },
+  go: {
+    command: 'gopls',
+    args: ['serve'],
+  },
+  rust: {
+    command: 'rust-analyzer',
+    args: [],
+  },
+  cpp: {
+    command: 'clangd',
+    args: ['--background-index'],
+  },
+  java: {
+    command: 'jdtls',
+    args: [],
+  },
+  csharp: {
+    command: 'OmniSharp',
+    args: ['-lsp'],
+  },
+};
+
+const SUPPORTED_LANGUAGES = Object.keys(LSP_CONFIGS);
+
+async function findExecutable(command: string): Promise<string | null> {
+  const { execSync } = require('child_process');
+  try {
+    const isWindows = process.platform === 'win32';
+    const result = execSync(isWindows ? `where ${command}` : `which ${command}`, { 
+      encoding: 'utf-8',
+      timeout: 5000,
+    });
+    return result.trim().split('\n')[0] || null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getOrCreateLspSession(opts: {
@@ -158,8 +222,12 @@ export async function getOrCreateLspSession(opts: {
   workspaceRoot: string;
 }): Promise<LspSession> {
   const language = normalizeLanguage(opts.language);
-  if (language !== 'typescript') {
-    throw Object.assign(new Error(`UNSUPPORTED_LSP_LANGUAGE: ${language}`), { code: 'UNSUPPORTED_LSP_LANGUAGE' });
+  
+  if (!SUPPORTED_LANGUAGES.includes(language)) {
+    throw Object.assign(
+      new Error(`UNSUPPORTED_LSP_LANGUAGE: ${language}. Supported: ${SUPPORTED_LANGUAGES.join(', ')}`), 
+      { code: 'UNSUPPORTED_LSP_LANGUAGE' }
+    );
   }
 
   const workspaceRootAbs = resolveWorkspaceRoot(opts.workspaceRoot);
@@ -172,18 +240,52 @@ export async function getOrCreateLspSession(opts: {
     return existing;
   }
 
-  const entry = await resolveTsLsEntry(workspaceRootAbs);
-  if (!entry) {
+  const config = LSP_CONFIGS[language];
+  let execPath: string | null = null;
+  let execArgs: string[] = config.args;
+
+  // Try local installation first (for Node-based LSPs)
+  if (config.localPath) {
+    const localEntry = await config.localPath(workspaceRootAbs);
+    if (localEntry) {
+      execPath = process.execPath; // node
+      execArgs = [localEntry, ...config.args];
+    }
+  }
+
+  // Fall back to global installation
+  if (!execPath) {
+    const globalPath = await findExecutable(config.command);
+    if (globalPath) {
+      execPath = globalPath;
+    }
+  }
+
+  if (!execPath) {
     throw Object.assign(
-      new Error('TYPESCRIPT_LANGUAGE_SERVER_NOT_INSTALLED'),
-      { code: 'TYPESCRIPT_LANGUAGE_SERVER_NOT_INSTALLED' }
+      new Error(`${language.toUpperCase()}_LANGUAGE_SERVER_NOT_INSTALLED: Install ${config.command}`),
+      { code: `${language.toUpperCase()}_LANGUAGE_SERVER_NOT_INSTALLED` }
     );
   }
 
-  const child = spawn(process.execPath, [entry, '--stdio'], {
+  console.log(`[LSP] Starting ${language} server: ${execPath} ${execArgs.join(' ')}`);
+
+  const child = spawn(execPath, execArgs, {
     cwd: workspaceRootAbs,
-    env: process.env,
+    env: {
+      ...process.env,
+      // Specific env vars for some LSPs
+      ...(language === 'rust' ? { RUST_ANALYZER_SERVER: 'true' } : {}),
+    },
     stdio: 'pipe',
+  });
+
+  child.on('error', (err) => {
+    console.error(`[LSP] ${language} server error:`, err);
+  });
+
+  child.stderr?.on('data', (data: Buffer) => {
+    console.log(`[LSP ${language}] stderr:`, data.toString());
   });
 
   const rpc = new JsonRpcStdioClient(child);

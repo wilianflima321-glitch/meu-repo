@@ -1,0 +1,8 @@
+# Aethel Engine - Kubernetes Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aethel-engine
+  labels:
+    app.kubernetes.io/name: aethel-engine
+    app.kubernetes.io/part-of: aethel-platform

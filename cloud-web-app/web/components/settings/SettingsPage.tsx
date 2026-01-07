@@ -1204,7 +1204,7 @@ export default function SettingsPage() {
           )}
           {searchQuery && (
             <p className="text-sm text-slate-500 mt-1">
-              {filteredSettings.length} results for "{searchQuery}"
+              {filteredSettings.length} results for {`"${searchQuery}"`}
             </p>
           )}
         </div>

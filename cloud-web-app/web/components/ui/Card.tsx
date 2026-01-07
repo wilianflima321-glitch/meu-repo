@@ -3,30 +3,70 @@
 import { type ReactNode, type HTMLAttributes } from 'react'
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated' | 'bordered' | 'gradient'
-  padding?: 'none' | 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'elevated' | 'bordered' | 'gradient' | 'glass' | 'glow'
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   hoverable?: boolean
+  rounded?: 'md' | 'lg' | 'xl' | '2xl'
   children: ReactNode
 }
 
 const variantClasses: Record<string, string> = {
-  default: 'bg-slate-800/50 border border-slate-700/50',
-  elevated: 'bg-slate-800 shadow-xl shadow-black/20 border border-slate-700/30',
-  bordered: 'bg-transparent border-2 border-slate-600',
-  gradient: 'bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50',
+  default: `
+    bg-slate-900/70 
+    border border-slate-800/80 
+    shadow-lg shadow-black/10
+  `,
+  elevated: `
+    bg-gradient-to-b from-slate-800/90 to-slate-900/90 
+    shadow-2xl shadow-black/30 
+    border border-slate-700/40
+  `,
+  bordered: `
+    bg-slate-900/40 
+    border-2 border-slate-700/60 
+    hover:border-slate-600/80
+  `,
+  gradient: `
+    bg-gradient-to-br from-slate-800/80 via-slate-850/80 to-slate-900/90 
+    border border-slate-700/50
+    shadow-xl shadow-black/20
+  `,
+  glass: `
+    bg-slate-900/40 
+    backdrop-blur-xl backdrop-saturate-150 
+    border border-slate-700/30
+    shadow-2xl shadow-black/20
+  `,
+  glow: `
+    bg-gradient-to-b from-slate-800/90 to-slate-900/90 
+    border border-indigo-500/20
+    shadow-[0_0_30px_rgba(99,102,241,0.15)]
+    hover:shadow-[0_0_40px_rgba(99,102,241,0.25)]
+    hover:border-indigo-500/40
+  `,
 }
 
 const paddingClasses: Record<string, string> = {
   none: '',
+  xs: 'p-3',
   sm: 'p-4',
   md: 'p-6',
   lg: 'p-8',
+  xl: 'p-10',
+}
+
+const roundedClasses: Record<string, string> = {
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  xl: 'rounded-xl',
+  '2xl': 'rounded-2xl',
 }
 
 export function Card({
   variant = 'default',
   padding = 'md',
   hoverable = false,
+  rounded = 'xl',
   children,
   className = '',
   ...props
@@ -34,10 +74,17 @@ export function Card({
   return (
     <div
       className={`
-        rounded-xl transition-all duration-300
+        ${roundedClasses[rounded]}
+        transition-all duration-300 ease-out
         ${variantClasses[variant]}
         ${paddingClasses[padding]}
-        ${hoverable ? 'hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 cursor-pointer' : ''}
+        ${hoverable ? `
+          hover:translate-y-[-2px] 
+          hover:shadow-2xl hover:shadow-indigo-500/10 
+          hover:border-indigo-500/30 
+          cursor-pointer
+          active:translate-y-0 active:shadow-xl
+        ` : ''}
         ${className}
       `}
       {...props}
@@ -51,30 +98,89 @@ export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
   title: string
   description?: string
   action?: ReactNode
+  icon?: ReactNode
+  size?: 'sm' | 'md' | 'lg'
 }
 
-export function CardHeader({ title, description, action, className = '', ...props }: CardHeaderProps) {
+const headerSizes = {
+  sm: { title: 'text-base font-semibold', desc: 'text-xs' },
+  md: { title: 'text-lg font-semibold', desc: 'text-sm' },
+  lg: { title: 'text-xl font-bold', desc: 'text-sm' },
+}
+
+export function CardHeader({ 
+  title, 
+  description, 
+  action, 
+  icon,
+  size = 'md',
+  className = '', 
+  ...props 
+}: CardHeaderProps) {
   return (
-    <div className={`flex items-start justify-between mb-4 ${className}`} {...props}>
-      <div>
-        <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
-        {description && <p className="mt-1 text-sm text-slate-400">{description}</p>}
+    <div className={`flex items-start justify-between gap-4 mb-5 ${className}`} {...props}>
+      <div className="flex items-start gap-3 min-w-0">
+        {icon && (
+          <div className="flex-shrink-0 p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+            {icon}
+          </div>
+        )}
+        <div className="min-w-0">
+          <h3 className={`${headerSizes[size].title} text-slate-100 leading-tight`}>
+            {title}
+          </h3>
+          {description && (
+            <p className={`mt-1 ${headerSizes[size].desc} text-slate-400 leading-relaxed`}>
+              {description}
+            </p>
+          )}
+        </div>
       </div>
-      {action && <div className="flex-shrink-0 ml-4">{action}</div>}
+      {action && <div className="flex-shrink-0">{action}</div>}
     </div>
   )
 }
 
 export interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
+  justify?: 'start' | 'end' | 'between' | 'center'
 }
 
-export function CardFooter({ children, className = '', ...props }: CardFooterProps) {
+const justifyClasses = {
+  start: 'justify-start',
+  end: 'justify-end',
+  between: 'justify-between',
+  center: 'justify-center',
+}
+
+export function CardFooter({ 
+  children, 
+  justify = 'end',
+  className = '', 
+  ...props 
+}: CardFooterProps) {
   return (
     <div
-      className={`mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-end gap-3 ${className}`}
+      className={`
+        mt-6 pt-5 
+        border-t border-slate-800/80 
+        flex items-center ${justifyClasses[justify]} gap-3 
+        ${className}
+      `}
       {...props}
     >
+      {children}
+    </div>
+  )
+}
+
+export interface CardContentProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+}
+
+export function CardContent({ children, className = '', ...props }: CardContentProps) {
+  return (
+    <div className={`text-slate-300 ${className}`} {...props}>
       {children}
     </div>
   )

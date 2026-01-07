@@ -23,8 +23,71 @@ import {
   Paperclip,
   Image,
   Mic,
+  MicOff,
   StopCircle,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  History,
+  Clock,
+  Wand2,
+  Brain,
+  Layers,
+  Terminal,
+  ChevronRight,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  Radio,
+  Phone,
+  PhoneOff,
+  MessageCircle,
+  Plus,
+  MoreHorizontal,
+  Archive,
+  Search,
+  X,
+  Upload,
+  File,
+  ImageIcon,
 } from 'lucide-react'
+
+// ============= Web Speech API Type Declarations =============
+
+// TypeScript declarations for Web Speech API (not fully standardized yet)
+interface SpeechRecognitionResult {
+  isFinal: boolean
+  [index: number]: SpeechRecognitionAlternative
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string
+  confidence: number
+}
+
+interface SpeechRecognitionResultList {
+  length: number
+  item(index: number): SpeechRecognitionResult
+  [index: number]: SpeechRecognitionResult
+}
+
+interface SpeechRecognitionEventExtended extends Event {
+  results: SpeechRecognitionResultList
+  resultIndex: number
+}
+
+interface SpeechRecognitionInstance extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start(): void
+  stop(): void
+  abort(): void
+  onresult: ((event: SpeechRecognitionEventExtended) => void) | null
+  onerror: ((event: Event) => void) | null
+  onend: (() => void) | null
+}
 
 // ============= Types =============
 
@@ -36,12 +99,44 @@ interface Message {
   model?: string
   tokens?: number
   codeBlocks?: CodeBlock[]
+  isVoice?: boolean
+  audioUrl?: string
+  thinking?: string
+  toolCalls?: ToolCall[]
+  attachments?: Attachment[]
+}
+
+interface Attachment {
+  id: string
+  type: 'file' | 'image' | 'code'
+  name: string
+  size?: number
+  url?: string
+  preview?: string
+}
+
+interface ToolCall {
+  id: string
+  name: string
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  args?: Record<string, unknown>
+  result?: string
+  duration?: number
 }
 
 interface CodeBlock {
   language: string
   code: string
   filename?: string
+}
+
+interface ChatThread {
+  id: string
+  title: string
+  lastMessage: string
+  updatedAt: Date
+  messageCount: number
+  isArchived?: boolean
 }
 
 interface AIChatPanelProps {
@@ -56,12 +151,26 @@ interface AIChatPanelProps {
   isLoading?: boolean
   streamingContent?: string
   className?: string
+  // New props for advanced features
+  threads?: ChatThread[]
+  activeThreadId?: string
+  onSelectThread?: (threadId: string) => void
+  onCreateThread?: () => void
+  onArchiveThread?: (threadId: string) => void
+  onDeleteThread?: (threadId: string) => void
+  showHistory?: boolean
+  onToggleHistory?: () => void
+  // Live mode props
+  isLiveMode?: boolean
+  onToggleLiveMode?: () => void
+  liveStatus?: 'idle' | 'listening' | 'thinking' | 'speaking'
 }
 
 interface MessageContext {
   files?: string[]
   selection?: string
   image?: string
+  attachments?: Attachment[]
 }
 
 interface ModelOption {
@@ -70,16 +179,19 @@ interface ModelOption {
   provider: string
   description?: string
   maxTokens?: number
+  supportsVision?: boolean
+  supportsVoice?: boolean
 }
 
 // ============= Constants =============
 
 const DEFAULT_MODELS: ModelOption[] = [
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', description: 'Most capable model', maxTokens: 128000 },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', description: 'Fast and efficient', maxTokens: 128000 },
-  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'Anthropic', description: 'Balanced performance', maxTokens: 200000 },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'Google', description: 'Multimodal', maxTokens: 1000000 },
-  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'DeepSeek', description: 'Budget-friendly', maxTokens: 32000 },
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', description: 'Most capable model', maxTokens: 128000, supportsVision: true, supportsVoice: true },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', description: 'Fast and efficient', maxTokens: 128000, supportsVision: true },
+  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'Anthropic', description: 'Balanced performance', maxTokens: 200000, supportsVision: true },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'Google', description: 'Live multimodal', maxTokens: 1000000, supportsVision: true, supportsVoice: true },
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'Google', description: 'Multimodal', maxTokens: 1000000, supportsVision: true },
+  { id: 'deepseek-chat', name: 'DeepSeek R1', provider: 'DeepSeek', description: 'Reasoning model', maxTokens: 64000 },
 ]
 
 const QUICK_PROMPTS = [
@@ -87,7 +199,429 @@ const QUICK_PROMPTS = [
   { icon: Bug, label: 'Find Bugs', prompt: 'Find bugs in this code:' },
   { icon: Zap, label: 'Optimize', prompt: 'Optimize this code for performance:' },
   { icon: Lightbulb, label: 'Suggest', prompt: 'Suggest improvements for:' },
+  { icon: Terminal, label: 'Generate', prompt: 'Generate code for:' },
+  { icon: Wand2, label: 'Refactor', prompt: 'Refactor this code:' },
+  { icon: Brain, label: 'Explain Error', prompt: 'Explain this error and how to fix it:' },
+  { icon: Layers, label: 'Add Tests', prompt: 'Generate unit tests for:' },
 ]
+
+// ============= Tool Call Component =============
+
+function ToolCallDisplay({ toolCall }: { toolCall: ToolCall }) {
+  const [expanded, setExpanded] = useState(false)
+  
+  const statusIcon = {
+    pending: <Clock className="w-3.5 h-3.5 text-slate-400" />,
+    running: <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />,
+    completed: <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />,
+    failed: <XCircle className="w-3.5 h-3.5 text-red-400" />,
+  }
+
+  const statusColor = {
+    pending: 'border-slate-600',
+    running: 'border-blue-500 bg-blue-500/5',
+    completed: 'border-emerald-500/50 bg-emerald-500/5',
+    failed: 'border-red-500/50 bg-red-500/5',
+  }
+
+  return (
+    <div className={`rounded-lg border ${statusColor[toolCall.status]} overflow-hidden my-2`}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/5"
+      >
+        {statusIcon[toolCall.status]}
+        <span className="flex-1 text-sm font-mono text-slate-300">{toolCall.name}</span>
+        {toolCall.duration && (
+          <span className="text-xs text-slate-500">{toolCall.duration}ms</span>
+        )}
+        <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+      </button>
+      
+      {expanded && (
+        <div className="px-3 py-2 border-t border-slate-700/50 bg-slate-900/50">
+          {toolCall.args && (
+            <div className="mb-2">
+              <span className="text-xs text-slate-500">Arguments:</span>
+              <pre className="mt-1 text-xs text-slate-400 overflow-x-auto">
+                {JSON.stringify(toolCall.args, null, 2)}
+              </pre>
+            </div>
+          )}
+          {toolCall.result && (
+            <div>
+              <span className="text-xs text-slate-500">Result:</span>
+              <pre className="mt-1 text-xs text-slate-400 overflow-x-auto max-h-32">
+                {toolCall.result}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============= Thinking Display Component =============
+
+function ThinkingDisplay({ thinking, isExpanded, onToggle }: { thinking: string; isExpanded: boolean; onToggle: () => void }) {
+  return (
+    <div className="my-2 rounded-lg border border-purple-500/30 bg-purple-500/5 overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/5"
+      >
+        <Brain className="w-3.5 h-3.5 text-purple-400" />
+        <span className="flex-1 text-sm text-purple-300">Thinking...</span>
+        <ChevronRight className={`w-4 h-4 text-purple-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+      </button>
+      
+      {isExpanded && (
+        <div className="px-3 py-2 border-t border-purple-500/20 bg-purple-900/20">
+          <p className="text-sm text-purple-200/80 whitespace-pre-wrap">{thinking}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============= Live Mode Indicator =============
+
+function LiveModeIndicator({ status, onEnd }: { status: 'idle' | 'listening' | 'thinking' | 'speaking'; onEnd: () => void }) {
+  const statusConfig = {
+    idle: { color: 'bg-slate-500', pulse: false, text: 'Ready' },
+    listening: { color: 'bg-red-500', pulse: true, text: 'Listening...' },
+    thinking: { color: 'bg-amber-500', pulse: true, text: 'Thinking...' },
+    speaking: { color: 'bg-emerald-500', pulse: true, text: 'Speaking...' },
+  }
+  
+  const config = statusConfig[status]
+  
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border-b border-indigo-500/30">
+      <div className="relative">
+        <div className={`w-3 h-3 rounded-full ${config.color} ${config.pulse ? 'animate-pulse' : ''}`} />
+        {config.pulse && (
+          <div className={`absolute inset-0 w-3 h-3 rounded-full ${config.color} animate-ping opacity-75`} />
+        )}
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <Radio className="w-4 h-4 text-indigo-400" />
+          <span className="text-sm font-medium text-white">Live Mode</span>
+        </div>
+        <span className="text-xs text-slate-400">{config.text}</span>
+      </div>
+      <button
+        onClick={onEnd}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-full text-red-400 text-sm"
+      >
+        <PhoneOff className="w-3.5 h-3.5" />
+        End
+      </button>
+    </div>
+  )
+}
+
+// ============= Chat History Sidebar =============
+
+function ChatHistorySidebar({
+  threads,
+  activeThreadId,
+  onSelectThread,
+  onCreateThread,
+  onArchiveThread,
+  onDeleteThread,
+  onClose,
+}: {
+  threads: ChatThread[]
+  activeThreadId?: string
+  onSelectThread: (id: string) => void
+  onCreateThread: () => void
+  onArchiveThread: (id: string) => void
+  onDeleteThread: (id: string) => void
+  onClose: () => void
+}) {
+  const [searchQuery, setSearchQuery] = useState('')
+  
+  const filteredThreads = threads.filter(t => 
+    t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+  
+  const activeThreads = filteredThreads.filter(t => !t.isArchived)
+  const archivedThreads = filteredThreads.filter(t => t.isArchived)
+
+  return (
+    <div className="w-72 h-full flex flex-col border-r border-slate-700 bg-slate-900">
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+        <div className="flex items-center gap-2">
+          <History className="w-4 h-4 text-slate-400" />
+          <span className="text-sm font-medium text-white">Chat History</span>
+        </div>
+        <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded">
+          <X className="w-4 h-4 text-slate-400" />
+        </button>
+      </div>
+      
+      {/* Search & New Chat */}
+      <div className="p-2 space-y-2 border-b border-slate-800">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search conversations..."
+            className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+        <button
+          onClick={onCreateThread}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm text-white font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          New Chat
+        </button>
+      </div>
+      
+      {/* Thread List */}
+      <div className="flex-1 overflow-y-auto">
+        {activeThreads.length > 0 && (
+          <div className="p-2">
+            {activeThreads.map(thread => (
+              <ThreadItem
+                key={thread.id}
+                thread={thread}
+                isActive={thread.id === activeThreadId}
+                onSelect={() => onSelectThread(thread.id)}
+                onArchive={() => onArchiveThread(thread.id)}
+                onDelete={() => onDeleteThread(thread.id)}
+              />
+            ))}
+          </div>
+        )}
+        
+        {archivedThreads.length > 0 && (
+          <div className="p-2 border-t border-slate-800">
+            <div className="flex items-center gap-2 px-2 py-1 text-xs text-slate-500">
+              <Archive className="w-3 h-3" />
+              Archived
+            </div>
+            {archivedThreads.map(thread => (
+              <ThreadItem
+                key={thread.id}
+                thread={thread}
+                isActive={thread.id === activeThreadId}
+                onSelect={() => onSelectThread(thread.id)}
+                onArchive={() => onArchiveThread(thread.id)}
+                onDelete={() => onDeleteThread(thread.id)}
+              />
+            ))}
+          </div>
+        )}
+        
+        {filteredThreads.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-center p-4">
+            <MessageCircle className="w-8 h-8 text-slate-600 mb-2" />
+            <p className="text-sm text-slate-500">No conversations found</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ThreadItem({
+  thread,
+  isActive,
+  onSelect,
+  onArchive,
+  onDelete,
+}: {
+  thread: ChatThread
+  isActive: boolean
+  onSelect: () => void
+  onArchive: () => void
+  onDelete: () => void
+}) {
+  const [showMenu, setShowMenu] = useState(false)
+  
+  return (
+    <div
+      className={`group relative rounded-lg cursor-pointer mb-1 ${
+        isActive ? 'bg-indigo-600/20 border border-indigo-500/30' : 'hover:bg-slate-800'
+      }`}
+    >
+      <button onClick={onSelect} className="w-full text-left p-2.5">
+        <div className="font-medium text-sm text-white truncate">{thread.title}</div>
+        <div className="text-xs text-slate-400 truncate mt-0.5">{thread.lastMessage}</div>
+        <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+          <Clock className="w-3 h-3" />
+          {formatRelativeTime(thread.updatedAt)}
+          <span>·</span>
+          <span>{thread.messageCount} msgs</span>
+        </div>
+      </button>
+      
+      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu) }}
+          className="p-1 hover:bg-slate-700 rounded"
+        >
+          <MoreHorizontal className="w-4 h-4 text-slate-400" />
+        </button>
+        
+        {showMenu && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+            <div className="absolute right-0 top-full mt-1 z-50 w-32 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
+              <button
+                onClick={() => { onArchive(); setShowMenu(false) }}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm text-slate-300 hover:bg-slate-700"
+              >
+                <Archive className="w-3.5 h-3.5" />
+                Archive
+              </button>
+              <button
+                onClick={() => { onDelete(); setShowMenu(false) }}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm text-red-400 hover:bg-slate-700"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============= Attachment Preview =============
+
+function AttachmentPreview({ attachment, onRemove }: { attachment: Attachment; onRemove: () => void }) {
+  return (
+    <div className="relative group">
+      {attachment.type === 'image' && attachment.preview ? (
+        <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
+          <img src={attachment.preview} alt={attachment.name} className="w-full h-full object-cover" />
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
+          {attachment.type === 'code' ? (
+            <FileCode className="w-4 h-4 text-indigo-400" />
+          ) : (
+            <File className="w-4 h-4 text-slate-400" />
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-white truncate max-w-24">{attachment.name}</div>
+            {attachment.size && (
+              <div className="text-xs text-slate-500">{formatBytes(attachment.size)}</div>
+            )}
+          </div>
+        </div>
+      )}
+      <button
+        onClick={onRemove}
+        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 hover:bg-red-400 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <X className="w-3 h-3 text-white" />
+      </button>
+    </div>
+  )
+}
+
+// ============= Voice Recording Hook =============
+
+function useVoiceRecording() {
+  const [isRecording, setIsRecording] = useState(false)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [transcript, setTranscript] = useState('')
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+
+  const startRecording = useCallback(async () => {
+    try {
+      // Try Web Speech API first for real-time transcription
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+        recognitionRef.current = new SpeechRecognitionAPI() as SpeechRecognitionInstance
+        recognitionRef.current.continuous = true
+        recognitionRef.current.interimResults = true
+        recognitionRef.current.lang = 'pt-BR'
+        
+        recognitionRef.current.onresult = (event: SpeechRecognitionEventExtended) => {
+          let interimTranscript = ''
+          let finalTranscript = ''
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i]
+            if (result.isFinal) {
+              finalTranscript += result[0].transcript
+            } else {
+              interimTranscript += result[0].transcript
+            }
+          }
+          
+          setTranscript(finalTranscript || interimTranscript)
+        }
+        
+        recognitionRef.current.start()
+      }
+
+      // Also record audio for potential server-side transcription
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      mediaRecorderRef.current = new MediaRecorder(stream)
+      chunksRef.current = []
+
+      mediaRecorderRef.current.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data)
+        }
+      }
+
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+        setAudioBlob(blob)
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      mediaRecorderRef.current.start()
+      setIsRecording(true)
+    } catch (error) {
+      console.error('Error starting recording:', error)
+    }
+  }, [])
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+    }
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+    }
+  }, [isRecording])
+
+  const clearRecording = useCallback(() => {
+    setAudioBlob(null)
+    setTranscript('')
+  }, [])
+
+  return {
+    isRecording,
+    audioBlob,
+    transcript,
+    isTranscribing,
+    startRecording,
+    stopRecording,
+    clearRecording,
+  }
+}
 
 // ============= Demo Data =============
 
@@ -112,6 +646,7 @@ interface MessageBubbleProps {
 
 function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
+  const [showThinking, setShowThinking] = useState(false)
   const isUser = message.role === 'user'
 
   const handleCopy = () => {
@@ -182,6 +717,44 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
 
       {/* Content */}
       <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
+        {/* Voice indicator */}
+        {message.isVoice && (
+          <div className="flex items-center gap-1 mb-1 text-xs text-indigo-400">
+            <Mic className="w-3 h-3" />
+            Voice message
+          </div>
+        )}
+        
+        {/* Attachments */}
+        {message.attachments && message.attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {message.attachments.map(att => (
+              <div key={att.id} className="flex items-center gap-2 px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300">
+                {att.type === 'image' ? <ImageIcon className="w-3 h-3" /> : <File className="w-3 h-3" />}
+                {att.name}
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Thinking display */}
+        {message.thinking && (
+          <ThinkingDisplay
+            thinking={message.thinking}
+            isExpanded={showThinking}
+            onToggle={() => setShowThinking(!showThinking)}
+          />
+        )}
+        
+        {/* Tool calls */}
+        {message.toolCalls && message.toolCalls.length > 0 && (
+          <div className="mb-2">
+            {message.toolCalls.map(tc => (
+              <ToolCallDisplay key={tc.id} toolCall={tc} />
+            ))}
+          </div>
+        )}
+
         <div className={`
           inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
           ${isUser 
@@ -198,6 +771,12 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             <span className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               {message.model}
+            </span>
+          )}
+          {message.tokens && (
+            <span className="flex items-center gap-1">
+              <Zap className="w-3 h-3" />
+              {message.tokens} tokens
             </span>
           )}
           <span>{formatTime(message.timestamp)}</span>
@@ -254,13 +833,34 @@ export default function AIChatPanelPro({
   isLoading = false,
   streamingContent = '',
   className = '',
+  // New props
+  threads = [],
+  activeThreadId,
+  onSelectThread,
+  onCreateThread,
+  onArchiveThread,
+  onDeleteThread,
+  showHistory = false,
+  onToggleHistory,
+  isLiveMode = false,
+  onToggleLiveMode,
+  liveStatus = 'idle',
 }: AIChatPanelProps) {
   const [input, setInput] = useState('')
   const [showModelSelector, setShowModelSelector] = useState(false)
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([])
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [showHistorySidebar, setShowHistorySidebar] = useState(showHistory)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  
+  // Voice recording
+  const { isRecording, transcript, startRecording, stopRecording, clearRecording } = useVoiceRecording()
+  
+  // Text-to-speech
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -274,6 +874,33 @@ export default function AIChatPanelPro({
       inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + 'px'
     }
   }, [input])
+  
+  // Update input with transcript
+  useEffect(() => {
+    if (transcript) {
+      setInput(prev => prev + ' ' + transcript)
+    }
+  }, [transcript])
+  
+  // Speak last assistant message
+  const speakMessage = useCallback((text: string) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+      speechSynthRef.current = new SpeechSynthesisUtterance(text)
+      speechSynthRef.current.lang = 'pt-BR'
+      speechSynthRef.current.onend = () => setIsSpeaking(false)
+      speechSynthRef.current.onerror = () => setIsSpeaking(false)
+      window.speechSynthesis.speak(speechSynthRef.current)
+      setIsSpeaking(true)
+    }
+  }, [])
+  
+  const stopSpeaking = useCallback(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+    }
+  }, [])
 
   // Handle send
   const handleSend = useCallback((e?: FormEvent) => {
@@ -281,11 +908,12 @@ export default function AIChatPanelPro({
     if (!input.trim() || isLoading) return
     
     onSendMessage?.(input, {
-      files: attachedFiles.length > 0 ? attachedFiles : undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
     })
     setInput('')
-    setAttachedFiles([])
-  }, [input, isLoading, attachedFiles, onSendMessage])
+    setAttachments([])
+    clearRecording()
+  }, [input, isLoading, attachments, onSendMessage, clearRecording])
 
   // Handle keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -299,6 +927,41 @@ export default function AIChatPanelPro({
   const handleFileAttach = () => {
     fileInputRef.current?.click()
   }
+  
+  // Handle image attach
+  const handleImageAttach = () => {
+    imageInputRef.current?.click()
+  }
+  
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image') => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const attachment: Attachment = {
+        id: crypto.randomUUID(),
+        type,
+        name: file.name,
+        size: file.size,
+      }
+      
+      if (type === 'image') {
+        const reader = new FileReader()
+        reader.onload = (ev) => {
+          attachment.preview = ev.target?.result as string
+          setAttachments(prev => [...prev, attachment])
+        }
+        reader.readAsDataURL(file)
+      } else {
+        setAttachments(prev => [...prev, attachment])
+      }
+    }
+    e.target.value = ''
+  }
+  
+  // Remove attachment
+  const removeAttachment = (id: string) => {
+    setAttachments(prev => prev.filter(a => a.id !== id))
+  }
 
   // Handle quick prompt
   const handleQuickPrompt = (prompt: string) => {
@@ -310,100 +973,177 @@ export default function AIChatPanelPro({
   const handleCopy = async (content: string) => {
     await navigator.clipboard.writeText(content)
   }
+  
+  // Toggle voice recording
+  const handleVoiceToggle = () => {
+    if (isRecording) {
+      stopRecording()
+    } else {
+      startRecording()
+    }
+  }
 
   const selectedModel = models.find(m => m.id === currentModel) || models[0]
 
   return (
-    <div className={`h-full flex flex-col ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
-        {/* Model Selector */}
-        <div className="relative">
-          <button
-            onClick={() => setShowModelSelector(!showModelSelector)}
-            className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-800 text-sm"
-          >
-            <Sparkles className="w-4 h-4 text-indigo-400" />
-            <span>{selectedModel.name}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-          </button>
+    <div className={`h-full flex ${className}`}>
+      {/* History Sidebar */}
+      {showHistorySidebar && threads.length > 0 && onSelectThread && onCreateThread && onArchiveThread && onDeleteThread && (
+        <ChatHistorySidebar
+          threads={threads}
+          activeThreadId={activeThreadId}
+          onSelectThread={onSelectThread}
+          onCreateThread={onCreateThread}
+          onArchiveThread={onArchiveThread}
+          onDeleteThread={onDeleteThread}
+          onClose={() => setShowHistorySidebar(false)}
+        />
+      )}
+      
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Live Mode Indicator */}
+        {isLiveMode && onToggleLiveMode && (
+          <LiveModeIndicator status={liveStatus} onEnd={onToggleLiveMode} />
+        )}
+        
+        {/* Header */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+          {/* Left: History + Model */}
+          <div className="flex items-center gap-2">
+            {threads.length > 0 && (
+              <button
+                onClick={() => setShowHistorySidebar(!showHistorySidebar)}
+                className={`p-1.5 rounded hover:bg-slate-800 ${showHistorySidebar ? 'bg-slate-800 text-indigo-400' : 'text-slate-400'}`}
+                title="Chat History"
+              >
+                <History className="w-4 h-4" />
+              </button>
+            )}
+            
+            {/* Model Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setShowModelSelector(!showModelSelector)}
+                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-800 text-sm"
+              >
+                <Sparkles className="w-4 h-4 text-indigo-400" />
+                <span>{selectedModel.name}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
 
-          {showModelSelector && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
-              <div className="absolute left-0 top-full mt-1 z-50 min-w-64 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
-                {models.map(model => (
+              {showModelSelector && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
+                  <div className="absolute left-0 top-full mt-1 z-50 min-w-72 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
+                    {models.map(model => (
+                      <button
+                        key={model.id}
+                        onClick={() => {
+                          onModelChange?.(model.id)
+                          setShowModelSelector(false)
+                        }}
+                        className={`
+                          w-full flex items-start gap-3 px-3 py-2 text-left
+                          ${model.id === currentModel ? 'bg-indigo-500/20' : 'hover:bg-slate-700'}
+                        `}
+                      >
+                        <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-indigo-400' : 'text-slate-500'}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-medium text-white">{model.name}</span>
+                            <span className="text-xs text-slate-500">{model.provider}</span>
+                            {model.supportsVision && (
+                              <span className="px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded">Vision</span>
+                            )}
+                            {model.supportsVoice && (
+                              <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded">Voice</span>
+                            )}
+                          </div>
+                          {model.description && (
+                            <span className="text-xs text-slate-400">{model.description}</span>
+                          )}
+                        </div>
+                        {model.id === currentModel && <Check className="w-4 h-4 text-indigo-400" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1">
+            {/* Live Mode Toggle */}
+            {selectedModel.supportsVoice && onToggleLiveMode && (
+              <button
+                onClick={onToggleLiveMode}
+                className={`p-1.5 rounded ${isLiveMode ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+                title={isLiveMode ? 'Exit Live Mode' : 'Enter Live Mode (Gemini Live style)'}
+              >
+                <Radio className="w-4 h-4" />
+              </button>
+            )}
+            
+            {/* TTS Toggle */}
+            <button
+              onClick={isSpeaking ? stopSpeaking : () => {
+                const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
+                if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
+              }}
+              className={`p-1.5 rounded ${isSpeaking ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+              title={isSpeaking ? 'Stop speaking' : 'Read last response'}
+            >
+              {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+            
+            <button
+              onClick={onClearChat}
+              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+              title="Clear chat"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button
+              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4">
+                <Bot className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">AI Assistant</h3>
+              <p className="text-sm text-slate-400 max-w-sm mb-6">
+                Ask me anything about your code. I can explain, debug, optimize, and generate code.
+              </p>
+              {selectedModel.supportsVoice && (
+                <p className="text-xs text-indigo-400 mb-4 flex items-center gap-1">
+                  <Radio className="w-3 h-3" />
+                  This model supports Live Mode for real-time voice chat
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
                   <button
-                    key={model.id}
-                    onClick={() => {
-                      onModelChange?.(model.id)
-                      setShowModelSelector(false)
-                    }}
-                    className={`
-                      w-full flex items-start gap-3 px-3 py-2 text-left
-                      ${model.id === currentModel ? 'bg-indigo-500/20' : 'hover:bg-slate-700'}
-                    `}
+                    key={label}
+                    onClick={() => handleQuickPrompt(prompt)}
+                    className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-300"
                   >
-                    <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-indigo-400' : 'text-slate-500'}`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white">{model.name}</span>
-                        <span className="text-xs text-slate-500">{model.provider}</span>
-                      </div>
-                      {model.description && (
-                        <span className="text-xs text-slate-400">{model.description}</span>
-                      )}
-                    </div>
-                    {model.id === currentModel && <Check className="w-4 h-4 text-indigo-400" />}
+                    <Icon className="w-4 h-4" />
+                    {label}
                   </button>
                 ))}
               </div>
-            </>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={onClearChat}
-            className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-            title="Clear chat"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-          <button
-            className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-            title="Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4">
-              <Bot className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-white mb-2">AI Assistant</h3>
-            <p className="text-sm text-slate-400 max-w-sm mb-6">
-              Ask me anything about your code. I can explain, debug, optimize, and generate code.
-            </p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
-                <button
-                  key={label}
-                  onClick={() => handleQuickPrompt(prompt)}
-                  className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-300"
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
         )}
 
         {messages.map(message => (
@@ -466,21 +1206,31 @@ export default function AIChatPanelPro({
 
       {/* Input area */}
       <form onSubmit={handleSend} className="p-3 border-t border-slate-800">
-        {/* Attached files */}
-        {attachedFiles.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2">
-            {attachedFiles.map(file => (
-              <div key={file} className="flex items-center gap-1 px-2 py-1 bg-slate-800 rounded text-xs text-slate-300">
-                <FileCode className="w-3 h-3" />
-                {file}
-                <button
-                  onClick={() => setAttachedFiles(prev => prev.filter(f => f !== file))}
-                  className="p-0.5 hover:bg-slate-700 rounded"
-                >
-                  <MessageSquare className="w-3 h-3" />
-                </button>
-              </div>
+        {/* Attachments preview */}
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {attachments.map(att => (
+              <AttachmentPreview
+                key={att.id}
+                attachment={att}
+                onRemove={() => removeAttachment(att.id)}
+              />
             ))}
+          </div>
+        )}
+        
+        {/* Voice recording indicator */}
+        {isRecording && (
+          <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="flex-1 text-sm text-red-400">Recording... {transcript && `"${transcript}"`}</span>
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 rounded text-xs text-red-400"
+            >
+              Stop
+            </button>
           </div>
         )}
 
@@ -495,12 +1245,23 @@ export default function AIChatPanelPro({
             >
               <Paperclip className="w-4 h-4" />
             </button>
+            {selectedModel.supportsVision && (
+              <button
+                type="button"
+                onClick={handleImageAttach}
+                className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+                title="Attach image"
+              >
+                <ImageIcon className="w-4 h-4" />
+              </button>
+            )}
             <button
               type="button"
-              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-              title="Attach image"
+              onClick={handleVoiceToggle}
+              className={`p-1.5 rounded ${isRecording ? 'bg-red-500 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+              title={isRecording ? 'Stop recording' : 'Voice input'}
             >
-              <Image className="w-4 h-4" />
+              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
           </div>
 
@@ -511,7 +1272,7 @@ export default function AIChatPanelPro({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask AI..."
+              placeholder={isRecording ? 'Listening...' : 'Ask AI...'}
               disabled={isLoading}
               className="w-full px-4 py-2.5 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none min-h-[44px] max-h-[200px]"
               rows={1}
@@ -536,18 +1297,23 @@ export default function AIChatPanelPro({
           </div>
         </div>
 
+        {/* Hidden file inputs */}
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) {
-              setAttachedFiles(prev => [...prev, file.name])
-            }
-          }}
+          accept=".ts,.tsx,.js,.jsx,.json,.md,.txt,.py,.css,.html"
+          onChange={(e) => handleFileSelect(e, 'file')}
+        />
+        <input
+          ref={imageInputRef}
+          type="file"
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => handleFileSelect(e, 'image')}
         />
       </form>
+      </div>
     </div>
   )
 }
@@ -560,4 +1326,24 @@ function formatTime(date: Date): string {
     minute: '2-digit',
     hour12: true,
   })
+}
+
+function formatRelativeTime(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+  
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays < 7) return `${diffDays}d ago`
+  return date.toLocaleDateString()
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }

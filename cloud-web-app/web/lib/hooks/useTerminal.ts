@@ -296,6 +296,7 @@ export function useTerminal(options: UseTerminalOptions = {}): UseTerminalReturn
       client.off(WS_MESSAGE_TYPES.TERMINAL_EXIT, handleTerminalExit);
       client.off(WS_MESSAGE_TYPES.TERMINAL_ERROR, handleError);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSessionId, name, cwd, shell, onData, onResize, onExit, onError]);
   
   // ==========================================================================

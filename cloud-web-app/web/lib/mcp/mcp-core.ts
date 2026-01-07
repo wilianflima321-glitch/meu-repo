@@ -556,4 +556,5 @@ export const mcpClient = new MCPClient();
 // EXPORTS
 // ============================================================================
 
-export default { MCPServer, MCPClient, mcpClient };
+const mcpExports = { MCPServer, MCPClient, mcpClient };
+export default mcpExports;
