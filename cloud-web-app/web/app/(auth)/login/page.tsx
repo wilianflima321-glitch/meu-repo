@@ -27,11 +27,33 @@ const DiscordIcon = () => (
   </svg>
 );
 
+// Feature icons for the left side
+const FeatureIcon1 = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>
+);
+
+const FeatureIcon2 = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  </svg>
+);
+
+const FeatureIcon3 = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+  </svg>
+);
+
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <div className="animate-spin h-8 w-8 border-2 border-violet-500 border-t-transparent rounded-full" />
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-violet-500/20 rounded-full" />
+          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+        </div>
       </div>
     }>
       <LoginForm />
@@ -63,154 +85,288 @@ function LoginForm() {
     window.location.href = `/api/auth/oauth/${provider}`;
   };
 
+  // DEV MODE: Acesso direto sem login (remover em produção)
+  const handleDevAccess = () => {
+    router.push('/dashboard');
+  };
+
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/60 shadow-[0_24px_80px_-48px_rgba(124,58,237,0.7)]">
-          {/* Logo & Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/25">
-              <span className="text-2xl font-bold">A</span>
-            </div>
-            <h1 className="text-2xl font-bold">Bem-vindo de volta</h1>
-            <p className="text-slate-400 mt-1">Entre na sua conta Aethel</p>
-          </div>
+    <div className="relative min-h-screen overflow-hidden bg-black text-white">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/50 via-black to-purple-950/30" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-[128px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px] animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/10 rounded-full blur-[200px]" />
+        {/* Grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)`,
+            backgroundSize: '50px 50px'
+          }}
+        />
+      </div>
 
-          {/* OAuth Error */}
-          {oauthError && (
-            <div className="mb-6 p-3 text-sm text-center text-red-400 bg-red-900/20 border border-red-500/20 rounded-lg">
-              {oauthError === 'invalid_state' && 'Sessão expirada. Tente novamente.'}
-              {oauthError === 'no_email' && 'Não foi possível obter o e-mail do provedor.'}
-              {oauthError === 'oauth_failed' && 'Falha na autenticação OAuth. Tente novamente.'}
-              {!['invalid_state', 'no_email', 'oauth_failed'].includes(oauthError) && `Erro: ${oauthError}`}
-            </div>
-          )}
-
-          {/* OAuth Buttons */}
-          <div className="space-y-3 mb-6">
-            <button
-              onClick={() => handleOAuthLogin('github')}
-              className="flex h-11 items-center justify-center gap-3 w-full px-4 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl text-white text-sm font-semibold transition-all"
-            >
-              <GitHubIcon />
-              Continuar com GitHub
-            </button>
-            <button
-              onClick={() => handleOAuthLogin('google')}
-              className="flex h-11 items-center justify-center gap-3 w-full px-4 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl text-white text-sm font-semibold transition-all"
-            >
-              <GoogleIcon />
-              Continuar com Google
-            </button>
-            <button
-              onClick={() => handleOAuthLogin('discord')}
-              className="flex h-11 items-center justify-center gap-3 w-full px-4 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl text-white text-sm font-semibold transition-all"
-            >
-              <DiscordIcon />
-              Continuar com Discord
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-600/50"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-slate-800/50 text-slate-400">ou continue com e-mail</span>
-            </div>
-          </div>
-
-          {/* Email/Password Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                E-mail
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                className="w-full h-11 px-4 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/60 transition-all"
-              />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-medium text-slate-300">
-                  Senha
-                </label>
-                <Link href="/forgot-password" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
-                  Esqueceu a senha?
-                </Link>
-              </div>
+      {/* Main Content */}
+      <div className="relative z-10 flex min-h-screen">
+        {/* Left Side - Branding & Features */}
+        <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-16 xl:px-24">
+          <div className="max-w-lg">
+            {/* Logo */}
+            <div className="flex items-center gap-4 mb-12">
               <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full h-11 px-4 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/60 transition-all pr-12"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                >
-                  {showPassword ? '🙈' : '👁️'}
-                </button>
+                <div className="w-14 h-14 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-violet-500/40">
+                  <span className="text-2xl font-black tracking-tight">A</span>
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl blur opacity-40 -z-10" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-violet-200 to-purple-200 bg-clip-text text-transparent">
+                  Aethel Engine
+                </h1>
+                <p className="text-sm text-violet-300/80 font-medium">Game Development Studio</p>
               </div>
             </div>
 
-            {error && (
-              <div className="p-3 text-sm text-center text-red-400 bg-red-900/20 border border-red-500/20 rounded-lg">
-                {error}
+            {/* Tagline */}
+            <h2 className="text-4xl xl:text-5xl font-bold leading-tight mb-6">
+              Crie jogos{' '}
+              <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                incríveis
+              </span>
+              <br />
+              sem limites
+            </h2>
+            <p className="text-lg text-slate-400 mb-12 leading-relaxed">
+              A plataforma completa para desenvolvedores de jogos. Editor visual, 
+              IA integrada, colaboração em tempo real e muito mais.
+            </p>
+
+            {/* Features */}
+            <div className="space-y-6">
+              <div className="flex items-start gap-4 group">
+                <div className="w-12 h-12 bg-violet-500/10 border border-violet-500/20 rounded-xl flex items-center justify-center text-violet-400 group-hover:bg-violet-500/20 group-hover:border-violet-500/40 transition-all">
+                  <FeatureIcon1 />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white mb-1">Motor de Alta Performance</h3>
+                  <p className="text-sm text-slate-400">Renderização AAA com ray tracing e física avançada</p>
+                </div>
               </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-11 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Entrando...
-                </>
-              ) : (
-                'Entrar'
-              )}
-            </button>
-          </form>
-
-          {/* Sign up link */}
-          <p className="mt-6 text-center text-slate-400 text-sm">
-            Não tem uma conta?{' '}
-            <Link href="/register" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
-              Cadastre-se grátis
-            </Link>
-          </p>
+              <div className="flex items-start gap-4 group">
+                <div className="w-12 h-12 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 group-hover:bg-purple-500/20 group-hover:border-purple-500/40 transition-all">
+                  <FeatureIcon2 />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white mb-1">IDE Completa na Nuvem</h3>
+                  <p className="text-sm text-slate-400">Monaco Editor, terminal, debugger e Git integrados</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 group">
+                <div className="w-12 h-12 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl flex items-center justify-center text-fuchsia-400 group-hover:bg-fuchsia-500/20 group-hover:border-fuchsia-500/40 transition-all">
+                  <FeatureIcon3 />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white mb-1">Colaboração em Tempo Real</h3>
+                  <p className="text-sm text-slate-400">Trabalhe com sua equipe simultaneamente no mesmo projeto</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Footer */}
-        <p className="mt-6 text-center text-slate-500 text-xs">
-          Ao continuar, você concorda com nossos{' '}
-          <Link href="/terms" className="text-slate-400 hover:text-white">Termos de Serviço</Link>
-          {' '}e{' '}
-          <Link href="/privacy" className="text-slate-400 hover:text-white">Política de Privacidade</Link>
-        </p>
+        {/* Right Side - Login Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-md">
+            {/* Mobile Logo */}
+            <div className="lg:hidden text-center mb-10">
+              <div className="inline-flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
+                  <span className="text-xl font-black">A</span>
+                </div>
+                <span className="text-2xl font-black">Aethel Engine</span>
+              </div>
+            </div>
+
+            {/* Login Card */}
+            <div className="relative">
+              <div className="absolute -inset-px bg-gradient-to-b from-violet-500/20 via-transparent to-purple-500/20 rounded-3xl" />
+              <div className="relative bg-slate-950/80 backdrop-blur-2xl rounded-3xl p-8 border border-white/5">
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold mb-2">Bem-vindo de volta</h2>
+                  <p className="text-slate-400">Entre para continuar criando</p>
+                </div>
+
+                {/* DEV MODE Button - Remover depois */}
+                <button
+                  onClick={handleDevAccess}
+                  className="w-full mb-6 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  🚀 Acesso Direto (Dev Mode)
+                </button>
+
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="px-3 bg-slate-950 text-xs text-slate-500 uppercase tracking-wider">ou faça login</span>
+                  </div>
+                </div>
+
+                {/* OAuth Error */}
+                {oauthError && (
+                  <div className="mb-6 p-4 text-sm text-center text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl backdrop-blur">
+                    {oauthError === 'invalid_state' && 'Sessão expirada. Tente novamente.'}
+                    {oauthError === 'no_email' && 'Não foi possível obter o e-mail do provedor.'}
+                    {oauthError === 'oauth_failed' && 'Falha na autenticação. Tente novamente.'}
+                    {!['invalid_state', 'no_email', 'oauth_failed'].includes(oauthError) && `Erro: ${oauthError}`}
+                  </div>
+                )}
+
+                {/* OAuth Buttons */}
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  <button
+                    onClick={() => handleOAuthLogin('github')}
+                    className="flex items-center justify-center h-12 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all group"
+                    title="Continuar com GitHub"
+                  >
+                    <GitHubIcon />
+                  </button>
+                  <button
+                    onClick={() => handleOAuthLogin('google')}
+                    className="flex items-center justify-center h-12 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all group"
+                    title="Continuar com Google"
+                  >
+                    <GoogleIcon />
+                  </button>
+                  <button
+                    onClick={() => handleOAuthLogin('discord')}
+                    className="flex items-center justify-center h-12 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all group"
+                    title="Continuar com Discord"
+                  >
+                    <DiscordIcon />
+                  </button>
+                </div>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="px-3 bg-slate-950 text-xs text-slate-500">ou continue com e-mail</span>
+                  </div>
+                </div>
+
+                {/* Email/Password Form */}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
+                      E-mail
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+                        Senha
+                      </label>
+                      <Link href="/forgot-password" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
+                        Esqueceu?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                      >
+                        {showPassword ? (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="p-4 text-sm text-center text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl">
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="relative w-full h-12 px-4 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:via-purple-500 hover:to-fuchsia-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Entrando...
+                      </>
+                    ) : (
+                      'Entrar'
+                    )}
+                  </button>
+                </form>
+
+                {/* Sign up link */}
+                <p className="mt-8 text-center text-slate-400 text-sm">
+                  Novo por aqui?{' '}
+                  <Link href="/register" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
+                    Crie sua conta grátis
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <p className="mt-8 text-center text-slate-600 text-xs">
+              Ao continuar, você concorda com nossos{' '}
+              <Link href="/terms" className="text-slate-500 hover:text-white transition-colors">Termos</Link>
+              {' '}e{' '}
+              <Link href="/privacy" className="text-slate-500 hover:text-white transition-colors">Privacidade</Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

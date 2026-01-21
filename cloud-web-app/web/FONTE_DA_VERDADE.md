@@ -1,6 +1,6 @@
 # 📋 AETHEL ENGINE - FONTE DA VERDADE
-**Última atualização:** 21 de Janeiro de 2026, 08:30 UTC-3  
-**Versão:** 0.2.0  
+**Última atualização:** 21 de Janeiro de 2026, 22:00 UTC-3  
+**Versão:** 0.3.0  
 **Branch:** main
 
 ---
@@ -169,14 +169,74 @@ npm run build
 
 ## 📁 ARQUIVOS MODIFICADOS RECENTEMENTE
 
-### Sessão 21/01/2026
+### Sessão 21/01/2026 - Design AAA Upgrade
+1. `app/(auth)/register/page.tsx` - CRIADO - Novo registro AAA com OAuth, split-screen
+2. `app/pricing/page.tsx` - REESCRITO - Pricing AAA com tabela comparativa
+3. `app/globals.css` - EXPANDIDO - Sistema de design `.aethel-*` (+400 linhas)
+4. `app/not-found.tsx` - CRIADO - Página 404 profissional
+5. `app/contact-sales/page.tsx` - CRIADO - Formulário enterprise sales
+6. `app/status/page.tsx` - CRIADO - Página de status do sistema
+7. `app/(landing)/page.tsx` - REESCRITO - Landing page AAA studio-grade
+8. `app/(auth)/login/page.tsx` - REESCRITO - Login AAA com Dev Mode
+
+### Sessão 21/01/2026 - Manhã
 1. `app/api/projects/[id]/commits/route.ts` - CRIADO (movido de [projectId])
 2. `app/api/projects/[projectId]/` - REMOVIDO (conflito de rotas)
 3. `lib/rate-limiting.ts` - Removido useQuota hook
 4. `lib/hooks/use-quota.ts` - CRIADO (hook client-side)
 5. `tsconfig.json` - Adicionado excludes para tests
-6. `app/register/page.tsx` - Adicionado OAuth + validação senha
-7. `app/(landing)/page.tsx` - Adicionado id="demo" e melhorada demo
+
+---
+
+## 🎨 DESIGN SYSTEM AAA
+
+### Classes CSS Globais
+O arquivo `app/globals.css` contém um sistema de design profissional:
+
+```css
+/* Layouts */
+.aethel-dashboard    /* Dashboard container */
+.aethel-sidebar      /* Sidebar navigation */
+.aethel-header       /* Header com glassmorphism */
+.aethel-content-area /* Área de conteúdo principal */
+
+/* Cards */
+.aethel-card              /* Card base */
+.aethel-card-hover        /* Card com hover effect */
+.aethel-card-interactive  /* Card clicável */
+
+/* Buttons */
+.aethel-button-primary   /* Botão principal violet */
+.aethel-button-secondary /* Botão secundário */
+.aethel-button-ghost     /* Botão transparente */
+.aethel-button-danger    /* Botão destrutivo */
+
+/* Badges */
+.aethel-badge-primary/success/warning/error
+
+/* Inputs */
+.aethel-input     /* Input padrão */
+.aethel-input-lg  /* Input grande */
+
+/* Componentes */
+.aethel-tabs       /* Navegação por tabs */
+.aethel-table      /* Tabela de dados */
+.aethel-modal      /* Modal overlay */
+.aethel-dropdown   /* Dropdown menu */
+.aethel-toast      /* Notificação toast */
+.aethel-tooltip    /* Tooltip */
+.aethel-progress   /* Barra de progresso */
+
+/* Animações */
+fadeInUp, shimmer, pulse-glow
+```
+
+### Padrão Visual AAA
+- Background: `bg-black` ou `bg-slate-900`
+- Gradientes: `violet-500 → fuchsia-600`
+- Glassmorphism: `bg-black/80 backdrop-blur-xl border-white/5`
+- Orbs animados: `blur-[150px]` com cores suaves
+- Text: `text-white` com `text-slate-400` para secundário
 
 ---
 
@@ -292,12 +352,29 @@ S3_BUCKET=xxx
 
 ## 🏷️ TAGS E VERSÕES
 
-- **Versão Atual:** 0.2.0
+- **Versão Atual:** 0.3.0
 - **Node.js:** 18+
 - **npm:** 9+
 - **Next.js:** 14.2.35
 - **React:** 18
 - **TypeScript:** 5.x
+
+---
+
+## 🎯 PÁGINAS AAA PRONTAS
+
+| Página | Arquivo | Status |
+|--------|---------|--------|
+| Landing | `app/(landing)/page.tsx` | ✅ AAA |
+| Login | `app/(auth)/login/page.tsx` | ✅ AAA |
+| Register | `app/(auth)/register/page.tsx` | ✅ AAA |
+| Pricing | `app/pricing/page.tsx` | ✅ AAA |
+| 404 | `app/not-found.tsx` | ✅ AAA |
+| Status | `app/status/page.tsx` | ✅ AAA |
+| Contact Sales | `app/contact-sales/page.tsx` | ✅ AAA |
+| Dashboard | `components/AethelDashboard.tsx` | ⚠️ Funcional |
+| Profile | `app/profile/page.tsx` | ⚠️ Funcional |
+| Settings | `app/settings/page.tsx` | ⚠️ Básico |
 
 ---
 
