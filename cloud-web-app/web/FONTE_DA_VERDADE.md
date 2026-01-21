@@ -375,9 +375,10 @@ S3_BUCKET=xxx
 | 404 | `app/not-found.tsx` | ✅ AAA |
 | Status | `app/status/page.tsx` | ✅ AAA |
 | Contact Sales | `app/contact-sales/page.tsx` | ✅ AAA |
+| Settings | `app/settings/page.tsx` | ✅ AAA |
+| Download | `app/download/page.tsx` | ✅ AAA |
 | Dashboard | `components/AethelDashboard.tsx` | ⚠️ Funcional |
 | Profile | `app/profile/page.tsx` | ⚠️ Funcional |
-| Settings | `app/settings/page.tsx` | ⚠️ Básico |
 
 ---
 
