@@ -261,6 +261,31 @@ export async function finalizeBuildUsage(
 }
 
 /**
+ * Deduz minutos diretamente (compatibilidade)
+ */
+export async function deductBuildMinutes(
+  userId: string,
+  minutes: number,
+  _options?: { type?: string; projectId?: string; platform?: string }
+): Promise<{ success: boolean; available: number; reservationId?: string }> {
+  const quota = await checkBuildQuota(userId, 'production');
+  if (!quota.allowed) {
+    return { success: false, available: quota.minutesRemaining };
+  }
+
+  const reservation = await reserveBuildMinutes(userId, minutes);
+  if (!reservation) {
+    return { success: false, available: quota.minutesRemaining };
+  }
+
+  return {
+    success: true,
+    available: quota.minutesRemaining,
+    reservationId: reservation.reservationId,
+  };
+}
+
+/**
  * Determina plano necessário para quota desejada
  */
 function getSuggestedBuildPlan(requiredMinutes: number): string {

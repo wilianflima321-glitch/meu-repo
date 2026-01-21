@@ -2,6 +2,7 @@
  * Authentication API Tests
  */
 
+import { describe, it, expect, beforeEach } from 'vitest';
 import { verifyToken, generateTokenWithRole } from '@/lib/auth-server';
 
 describe('Authentication', () => {

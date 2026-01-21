@@ -48,6 +48,47 @@ export const DEFAULT_PIPELINE_CONFIG: RenderPipelineConfig = {
   outputColorSpace: THREE.SRGBColorSpace,
 };
 
+/**
+ * LITE MODE PIPELINE CONFIG
+ * 
+ * Optimized for mid-range GPUs (GTX 1060, RX 580, etc.)
+ * Reduces VRAM usage from ~200MB to ~50MB for G-Buffer
+ * Maintains visual quality with forward rendering
+ */
+export const LITE_PIPELINE_CONFIG: RenderPipelineConfig = {
+  type: 'forward', // Skip deferred, lower VRAM
+  hdr: true, // Keep HDR for quality
+  multisampling: false, // No MSAA, use FXAA instead
+  samples: 1,
+  toneMapping: THREE.ACESFilmicToneMapping,
+  toneMappingExposure: 1.0,
+  shadowMapEnabled: true,
+  shadowMapType: THREE.BasicShadowMap, // Fastest shadow type
+  shadowMapSize: 1024, // Half resolution
+  physicallyCorrectLights: true,
+  outputColorSpace: THREE.SRGBColorSpace,
+};
+
+/**
+ * MOBILE PIPELINE CONFIG
+ * 
+ * For WebGL on mobile devices and integrated GPUs
+ * Minimal VRAM footprint, battery-friendly
+ */
+export const MOBILE_PIPELINE_CONFIG: RenderPipelineConfig = {
+  type: 'forward',
+  hdr: false, // Disable HDR
+  multisampling: false,
+  samples: 1,
+  toneMapping: THREE.LinearToneMapping,
+  toneMappingExposure: 1.0,
+  shadowMapEnabled: true,
+  shadowMapType: THREE.BasicShadowMap,
+  shadowMapSize: 512, // Very low resolution
+  physicallyCorrectLights: false, // Faster lighting
+  outputColorSpace: THREE.SRGBColorSpace,
+};
+
 // ============================================================================
 // G-BUFFER LAYOUT (Deferred Rendering)
 // ============================================================================
@@ -97,6 +138,45 @@ export const DEFAULT_GI_CONFIG: GlobalIlluminationConfig = {
   rtgiDenoiser: true,
   voxelResolution: 128,
   voxelBounce: 1,
+};
+
+/**
+ * LITE GI CONFIG
+ * 
+ * Light probes instead of SSGI for better performance
+ * Suitable for GTX 1060 / RX 580 class GPUs
+ */
+export const LITE_GI_CONFIG: GlobalIlluminationConfig = {
+  method: 'lightProbes', // Pre-baked, no real-time cost
+  intensity: 0.85,
+  bounces: 0,
+  probeResolution: 8, // Lower resolution probes
+  probeSpacing: 4, // Fewer probes
+  ssgiSamples: 0, // Disabled
+  ssgiRadius: 0,
+  rtgiRaysPerPixel: 0,
+  rtgiDenoiser: false,
+  voxelResolution: 64,
+  voxelBounce: 0,
+};
+
+/**
+ * MOBILE GI CONFIG
+ * 
+ * Minimal GI for mobile/low-end devices
+ */
+export const MOBILE_GI_CONFIG: GlobalIlluminationConfig = {
+  method: 'none',
+  intensity: 0,
+  bounces: 0,
+  probeResolution: 4,
+  probeSpacing: 8,
+  ssgiSamples: 0,
+  ssgiRadius: 0,
+  rtgiRaysPerPixel: 0,
+  rtgiDenoiser: false,
+  voxelResolution: 32,
+  voxelBounce: 0,
 };
 
 // ============================================================================

@@ -1,21 +1,25 @@
 /**
- * StatusBar Pro - Métricas em Tempo Real
+ * StatusBar Pro - Métricas em Tempo Real (Versão Polida)
  * 
  * Exibe métricas críticas de performance e billing:
  * - FPS (frames por segundo do renderer)
  * - VRAM (uso de memória de vídeo)
  * - Latência (ping para servidor)
- * - Créditos de IA restantes
+ * - Créditos de IA restantes (com mini-widget integrado)
  * - Storage usado
  * - Conexão WebSocket status
+ * - Git branch ativo
+ * 
+ * Integrado com AethelProvider para estado centralizado.
  * 
  * @module components/statusbar/StatusBarPro
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import useSWR from 'swr';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Gauge,
   HardDrive,
@@ -28,7 +32,15 @@ import {
   Cloud,
   Clock,
   ChevronUp,
+  Zap,
+  TrendingDown,
+  TrendingUp,
+  GitBranch,
+  CheckCircle2,
+  XCircle,
+  Loader2,
 } from 'lucide-react';
+import { useWallet, useNotifications } from '@/lib/providers/AethelProvider';
 
 // ============================================================================
 // TIPOS
@@ -282,7 +294,11 @@ export function StatusBarPro() {
   const latency = useLatency();
   const connected = useConnectionStatus();
 
-  // Billing metrics
+  // Aethel Provider - Wallet
+  const { wallet } = useWallet();
+  const { showNotification } = useNotifications();
+
+  // Billing metrics (fallback para SWR se provider não disponível)
   const { data: usageData } = useSWR<{
     quotas: Array<{
       resource: string;
@@ -295,13 +311,35 @@ export function StatusBarPro() {
   const { data: walletData } = useSWR<{
     balance: number;
     currency: string;
-  }>('/api/wallet/summary', fetcher, { refreshInterval: 30000 });
+  }>('/api/wallet/summary', fetcher, { 
+    refreshInterval: 30000,
+    isPaused: () => wallet !== null && wallet.balance > 0, // Usa provider quando disponível
+  });
+
+  // Estado combinado de wallet
+  const currentBalance = wallet?.balance ?? walletData?.balance ?? 0;
+  const [previousBalance, setPreviousBalance] = useState(currentBalance);
+  const [balanceDelta, setBalanceDelta] = useState<number | null>(null);
+
+  // Detectar mudanças no saldo
+  useEffect(() => {
+    if (previousBalance !== currentBalance && previousBalance > 0) {
+      const delta = currentBalance - previousBalance;
+      setBalanceDelta(delta);
+      
+      // Limpar indicador após 3 segundos
+      const timer = setTimeout(() => setBalanceDelta(null), 3000);
+      return () => clearTimeout(timer);
+    }
+    setPreviousBalance(currentBalance);
+  }, [currentBalance, previousBalance]);
 
   // Editor state
   const [lineCol, setLineCol] = useState({ line: 1, col: 1 });
   const [language, setLanguage] = useState('TypeScript');
   const [encoding, setEncoding] = useState('UTF-8');
   const [branch, setBranch] = useState<string | null>('main');
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('synced');
 
   // Calculate metrics
   const getFpsColor = (fps: number): 'green' | 'yellow' | 'red' => {
@@ -341,6 +379,11 @@ export function StatusBarPro() {
     return `${Math.round(mb)}MB`;
   };
 
+  // Handler para clicar em créditos
+  const handleCreditsClick = useCallback(() => {
+    window.location.href = '/dashboard?tab=billing';
+  }, []);
+
   return (
     <div className="statusbar-pro">
       {/* Left side - Performance */}
@@ -351,7 +394,7 @@ export function StatusBarPro() {
           label=""
           value={connected ? 'Online' : 'Offline'}
           color={connected ? 'green' : 'red'}
-          tooltip={connected ? 'Conectado ao servidor' : 'Sem conexão'}
+          tooltip={connected ? 'Conectado ao servidor Aethel' : 'Sem conexão - tentando reconectar...'}
         />
 
         {/* FPS */}
@@ -360,7 +403,7 @@ export function StatusBarPro() {
           label="FPS"
           value={fps.toString()}
           color={getFpsColor(fps)}
-          tooltip={`Frames por segundo: ${fps}\nIdeal: 60+`}
+          tooltip={`Frames por segundo: ${fps}\n✓ Ideal: 60+\n⚠ Aceitável: 30-59\n✗ Lento: <30`}
         />
 
         {/* VRAM */}
@@ -369,7 +412,7 @@ export function StatusBarPro() {
           label="VRAM"
           value={`${Math.round(vram.used)}/${vram.total}MB`}
           color={vram.used / vram.total > 0.8 ? 'yellow' : 'green'}
-          tooltip={`Memória de vídeo: ${vram.used}MB de ${vram.total}MB`}
+          tooltip={`Memória de vídeo:\n${vram.used}MB usados de ${vram.total}MB\n${Math.round((vram.used / vram.total) * 100)}% em uso`}
         />
 
         {/* Latency */}
@@ -378,44 +421,96 @@ export function StatusBarPro() {
           label="Ping"
           value={latency < 0 ? 'ERR' : `${latency}ms`}
           color={getLatencyColor(latency)}
-          tooltip={latency < 0 ? 'Erro de conexão' : `Latência: ${latency}ms`}
+          tooltip={latency < 0 ? 'Erro de conexão com servidor' : `Latência: ${latency}ms\n✓ Ótimo: <100ms\n⚠ Aceitável: 100-300ms`}
         />
+
+        {/* Divider */}
+        <div className="statusbar-divider" />
 
         {/* Git branch */}
         {branch && (
           <MetricItem
-            icon={<Cloud size={12} />}
+            icon={<GitBranch size={12} />}
             label=""
             value={branch}
             color="blue"
-            tooltip={`Branch: ${branch}`}
+            tooltip={`Branch Git: ${branch}`}
           />
         )}
+
+        {/* Sync status */}
+        <div className="sync-indicator" title={
+          syncStatus === 'synced' ? 'Projeto sincronizado' :
+          syncStatus === 'syncing' ? 'Sincronizando...' :
+          'Erro de sincronização'
+        }>
+          {syncStatus === 'synced' && <CheckCircle2 size={12} className="text-emerald-400" />}
+          {syncStatus === 'syncing' && <Loader2 size={12} className="text-blue-400 animate-spin" />}
+          {syncStatus === 'error' && <XCircle size={12} className="text-red-400" />}
+        </div>
       </div>
 
-      {/* Center - Notifications (opcional) */}
+      {/* Center - Notifications/Status */}
       <div className="statusbar-center">
-        {!connected && (
-          <div className="statusbar-warning">
-            <AlertTriangle size={12} />
-            <span>Reconectando...</span>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {!connected && (
+            <motion.div 
+              className="statusbar-warning"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+            >
+              <Loader2 size={12} className="animate-spin" />
+              <span>Reconectando ao servidor...</span>
+            </motion.div>
+          )}
+          {balanceDelta !== null && (
+            <motion.div 
+              className={`balance-delta ${balanceDelta >= 0 ? 'positive' : 'negative'}`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+            >
+              {balanceDelta >= 0 ? (
+                <>
+                  <TrendingUp size={12} />
+                  <span>+{formatCredits(balanceDelta)} créditos</span>
+                </>
+              ) : (
+                <>
+                  <TrendingDown size={12} />
+                  <span>{formatCredits(balanceDelta)} créditos</span>
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Right side - Billing & Editor */}
       <div className="statusbar-right">
-        {/* AI Credits */}
-        {walletData && (
-          <MetricItem
-            icon={<Sparkles size={12} />}
-            label="Credits"
-            value={formatCredits(walletData.balance)}
-            color={getCreditsColor(walletData.balance)}
-            tooltip={`Créditos de IA: ${walletData.balance.toLocaleString()}`}
-            onClick={() => window.location.href = '/dashboard/billing'}
-          />
-        )}
+        {/* AI Credits - Enhanced */}
+        <motion.div 
+          className="credits-widget"
+          onClick={handleCreditsClick}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Sparkles size={12} className={getCreditsColor(currentBalance) === 'green' ? 'text-emerald-400' : getCreditsColor(currentBalance) === 'yellow' ? 'text-amber-400' : 'text-red-400'} />
+          <span className="credits-label">Credits</span>
+          <span className={`credits-value ${getCreditsColor(currentBalance)}`}>
+            {!wallet && !walletData ? (
+              <Loader2 size={10} className="animate-spin" />
+            ) : (
+              formatCredits(currentBalance)
+            )}
+          </span>
+          {currentBalance < 100 && (
+            <span title="Saldo baixo!">
+              <Zap size={10} className="text-amber-400 ml-1" />
+            </span>
+          )}
+        </motion.div>
 
         {/* Storage */}
         {storageQuota && (
@@ -424,10 +519,13 @@ export function StatusBarPro() {
             label="Storage"
             value={`${storageQuota.percentage}%`}
             color={getStorageColor(storageQuota.percentage)}
-            tooltip={`Storage: ${formatStorage(storageQuota.used)} de ${formatStorage(storageQuota.limit)}`}
-            onClick={() => window.location.href = '/dashboard/storage'}
+            tooltip={`Storage: ${formatStorage(storageQuota.used)} de ${formatStorage(storageQuota.limit)}\n${storageQuota.percentage}% utilizado`}
+            onClick={() => window.location.href = '/dashboard?tab=storage'}
           />
         )}
+
+        {/* Divider */}
+        <div className="statusbar-divider" />
 
         {/* Line:Col */}
         <MetricItem
@@ -460,11 +558,12 @@ export function StatusBarPro() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          height: 22px;
-          background: var(--statusbar-bg, #18181b);
-          border-top: 1px solid var(--panel-border, #27272a);
-          padding: 0 4px;
+          height: 24px;
+          background: linear-gradient(180deg, #18181b 0%, #0f0f12 100%);
+          border-top: 1px solid rgba(99, 102, 241, 0.2);
+          padding: 0 8px;
           user-select: none;
+          font-family: 'JetBrains Mono', 'Fira Code', monospace;
         }
 
         .statusbar-left,
@@ -473,11 +572,19 @@ export function StatusBarPro() {
           display: flex;
           align-items: center;
           height: 100%;
+          gap: 2px;
         }
 
         .statusbar-center {
           flex: 1;
           justify-content: center;
+        }
+
+        .statusbar-divider {
+          width: 1px;
+          height: 14px;
+          background: rgba(255, 255, 255, 0.1);
+          margin: 0 6px;
         }
 
         .statusbar-warning {
@@ -486,12 +593,66 @@ export function StatusBarPro() {
           gap: 6px;
           color: #f59e0b;
           font-size: 11px;
-          animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+        .balance-delta {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 11px;
+          padding: 2px 8px;
+          border-radius: 4px;
+        }
+
+        .balance-delta.positive {
+          color: #10b981;
+          background: rgba(16, 185, 129, 0.1);
+        }
+
+        .balance-delta.negative {
+          color: #f59e0b;
+          background: rgba(245, 158, 11, 0.1);
+        }
+
+        .sync-indicator {
+          display: flex;
+          align-items: center;
+          padding: 0 4px;
+        }
+
+        .credits-widget {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 2px 8px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background 0.2s;
+          font-size: 11px;
+        }
+
+        .credits-widget:hover {
+          background: rgba(99, 102, 241, 0.1);
+        }
+
+        .credits-label {
+          color: #71717a;
+        }
+
+        .credits-value {
+          font-weight: 600;
+        }
+
+        .credits-value.green {
+          color: #10b981;
+        }
+
+        .credits-value.yellow {
+          color: #f59e0b;
+        }
+
+        .credits-value.red {
+          color: #ef4444;
         }
       `}</style>
     </div>

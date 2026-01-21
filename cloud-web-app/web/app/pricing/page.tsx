@@ -12,7 +12,7 @@ import {
 
 const plans = [
   {
-    name: 'Free',
+    name: 'Gratuito',
     description: 'Para começar e experimentar a plataforma',
     price: 0,
     priceNote: 'Grátis para sempre',
@@ -23,8 +23,8 @@ const plans = [
       { text: '3 projetos ativos', included: true },
       { text: '100MB de armazenamento', included: true },
       { text: 'Editor completo', included: true },
-      { text: '1.000 execuções AI/mês', included: true },
-      { text: 'Suporte por email', included: true },
+      { text: '1.000 execuções de IA/mês', included: true },
+      { text: 'Suporte por e-mail', included: true },
       { text: 'Colaboração básica', included: true },
       { text: 'Templates básicos', included: true },
       { text: 'Projetos privados', included: false },
@@ -44,17 +44,17 @@ const plans = [
       { text: 'Projetos ilimitados', included: true },
       { text: '50GB de armazenamento', included: true },
       { text: 'Editor completo + extensões', included: true },
-      { text: '50.000 execuções AI/mês', included: true },
+      { text: '50.000 execuções de IA/mês', included: true },
       { text: 'Suporte prioritário', included: true },
       { text: 'Colaboração em tempo real', included: true },
       { text: 'Templates premium', included: true },
       { text: 'Projetos privados', included: true },
       { text: 'Deploy automatizado', included: true },
-      { text: 'Analytics avançado', included: true },
+      { text: 'Análises avançadas', included: true },
     ],
   },
   {
-    name: 'Enterprise',
+    name: 'Empresarial',
     description: 'Para grandes organizações',
     price: null,
     priceNote: 'Preço personalizado',
@@ -64,11 +64,11 @@ const plans = [
     features: [
       { text: 'Tudo do Pro, mais:', included: true },
       { text: 'Armazenamento ilimitado', included: true },
-      { text: 'AI ilimitada', included: true },
+      { text: 'IA ilimitada', included: true },
       { text: 'SSO/SAML', included: true },
       { text: 'SLA garantido de 99.9%', included: true },
-      { text: 'Audit logs', included: true },
-      { text: 'Self-hosted option', included: true },
+      { text: 'Logs de auditoria', included: true },
+      { text: 'Opção self-hosted', included: true },
       { text: 'Gerente de conta dedicado', included: true },
       { text: 'Onboarding personalizado', included: true },
       { text: 'Suporte 24/7', included: true },
@@ -94,7 +94,7 @@ const additionalFeatures = [
   },
   {
     icon: Clock,
-    title: '99.9% Uptime',
+    title: '99,9% de uptime',
     description: 'Infraestrutura redundante e confiável',
   },
 ]
@@ -109,8 +109,8 @@ const faqs = [
     answer: 'Aceitamos cartões de crédito (Visa, Mastercard, American Express), PIX, boleto bancário e transferência bancária para planos anuais.',
   },
   {
-    question: 'O que acontece quando acabo minhas execuções de AI?',
-    answer: 'Você pode continuar usando a plataforma normalmente. As funcionalidades de AI ficam pausadas até o próximo ciclo de cobrança, ou você pode comprar créditos adicionais.',
+    question: 'O que acontece quando acabo minhas execuções de IA?',
+    answer: 'Você pode continuar usando a plataforma normalmente. As funcionalidades de IA ficam pausadas até o próximo ciclo de cobrança, ou você pode comprar créditos adicionais.',
   },
   {
     question: 'Existe desconto para planos anuais?',

@@ -2,6 +2,7 @@
  * Testes para Auto-LOD Pipeline
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 import {
   AutoLODPipeline,
@@ -134,9 +135,9 @@ describe('Auto-LOD Pipeline', () => {
     });
 
     it('deve suportar event handlers', () => {
-      const onProgress = jest.fn();
-      const onComplete = jest.fn();
-      const onError = jest.fn();
+      const onProgress = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
 
       pipeline.on('progress', onProgress);
       pipeline.on('complete', onComplete);

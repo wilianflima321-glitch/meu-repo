@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   Folder,
   FolderOpen,
@@ -41,6 +41,7 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
+import AssetPreviewPanel from './AssetPreviewPanel';
 
 // ============================================================================
 // TYPES
@@ -99,9 +100,17 @@ interface ContentBrowserProps {
   onAssetDrop?: (asset: Asset, targetPath: string) => void;
   onAssetDelete?: (asset: Asset) => void;
   onAssetRename?: (asset: Asset, newName: string) => void;
+  onAssetExport?: (asset: Asset) => void;
+  onAssetDuplicate?: (asset: Asset) => void;
   onUpload?: (files: FileList) => void;
   onCreateFolder?: (path: string, name: string) => void;
   onRefresh?: () => void;
+  searchValue?: string;
+  filterTypeValue?: AssetType | 'all';
+  selectedPathValue?: string | null;
+  onSearchChange?: (value: string) => void;
+  onFilterChange?: (value: AssetType | 'all') => void;
+  onPathChange?: (value: string | null) => void;
 }
 
 // ============================================================================
@@ -477,25 +486,52 @@ const MenuButton: React.FC<{
 // ============================================================================
 
 export const ContentBrowser: React.FC<ContentBrowserProps> = ({
-  assets = DEMO_ASSETS,
+  assets = [],
   onAssetSelect,
   onAssetDragStart,
   onAssetDrop,
   onAssetDelete,
   onAssetRename,
+  onAssetExport,
+  onAssetDuplicate,
   onUpload,
   onCreateFolder,
   onRefresh,
+  searchValue,
+  filterTypeValue,
+  selectedPathValue,
+  onSearchChange,
+  onFilterChange,
+  onPathChange,
 }) => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [search, setSearch] = useState('');
-  const [selectedPath, setSelectedPath] = useState<string | null>('/Content');
+  const [search, setSearch] = useState(searchValue ?? '');
+  const [selectedPath, setSelectedPath] = useState<string | null>(selectedPathValue ?? '/Content');
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; asset: Asset } | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['/Content']));
-  const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
+  const [filterType, setFilterType] = useState<AssetType | 'all'>(filterTypeValue ?? 'all');
+  const [lowPolyPreview, setLowPolyPreview] = useState(true);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchValue !== undefined) {
+      setSearch(searchValue);
+    }
+  }, [searchValue]);
+
+  useEffect(() => {
+    if (filterTypeValue !== undefined) {
+      setFilterType(filterTypeValue);
+    }
+  }, [filterTypeValue]);
+
+  useEffect(() => {
+    if (selectedPathValue !== undefined) {
+      setSelectedPath(selectedPathValue);
+    }
+  }, [selectedPathValue]);
 
   // Organize assets into folder structure
   const folderStructure = useMemo((): AssetFolder => {
@@ -577,8 +613,14 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
         const newName = prompt('Novo nome:', asset.name);
         if (newName) onAssetRename?.(asset, newName);
         break;
+      case 'duplicate':
+        onAssetDuplicate?.(asset);
+        break;
       case 'preview':
         onAssetSelect?.(asset);
+        break;
+      case 'export':
+        onAssetExport?.(asset);
         break;
     }
 
@@ -639,13 +681,16 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           folder={folderStructure}
           level={0}
           selectedPath={selectedPath}
-          onSelect={setSelectedPath}
+          onSelect={(path) => {
+            setSelectedPath(path);
+            onPathChange?.(path);
+          }}
           onToggle={toggleFolder}
         />
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Toolbar */}
         <div
           style={{
@@ -671,7 +716,10 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                onSearchChange?.(e.target.value);
+              }}
               placeholder="Search assets..."
               style={{
                 width: '100%',
@@ -689,7 +737,11 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           {/* Filter */}
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as AssetType | 'all')}
+            onChange={(e) => {
+              const value = e.target.value as AssetType | 'all';
+              setFilterType(value);
+              onFilterChange?.(value);
+            }}
             style={{
               padding: '6px 24px 6px 8px',
               background: colors.surface,
@@ -901,6 +953,47 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
         </div>
       </div>
 
+      {/* Preview Panel */}
+      <div
+        style={{
+          width: '320px',
+          borderLeft: `1px solid ${colors.border}`,
+          background: colors.surface,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${colors.border}`,
+          }}
+        >
+          <div style={{ fontWeight: 600, color: colors.text }}>Preview</div>
+          <button
+            onClick={() => setLowPolyPreview((prev) => !prev)}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '999px',
+              border: `1px solid ${colors.border}`,
+              background: lowPolyPreview ? colors.surfaceActive : 'transparent',
+              color: lowPolyPreview ? colors.text : colors.textMuted,
+              fontSize: '11px',
+              cursor: 'pointer',
+            }}
+          >
+            Low-Poly {lowPolyPreview ? 'ON' : 'OFF'}
+          </button>
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          <AssetPreviewPanel asset={selectedAsset} lowPoly={lowPolyPreview} />
+        </div>
+      </div>
+
       {/* Context Menu */}
       {contextMenu && (
         <ContextMenu
@@ -915,51 +1008,5 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
   );
 };
 
-// ============================================================================
-// DEMO DATA
-// ============================================================================
-
-const DEMO_ASSETS: (Asset | AssetFolder)[] = [
-  {
-    id: 'folder-meshes',
-    name: 'Meshes',
-    path: '/Content/Meshes',
-    children: [
-      { id: 'mesh-1', name: 'Character_Hero.fbx', type: 'mesh', path: '/Content/Meshes/Character_Hero.fbx', size: 2048000, metadata: { vertices: 12500, triangles: 24000 } },
-      { id: 'mesh-2', name: 'Weapon_Sword.fbx', type: 'mesh', path: '/Content/Meshes/Weapon_Sword.fbx', size: 512000 },
-      { id: 'mesh-3', name: 'Environment_Rock.fbx', type: 'mesh', path: '/Content/Meshes/Environment_Rock.fbx', size: 256000 },
-    ],
-  },
-  {
-    id: 'folder-textures',
-    name: 'Textures',
-    path: '/Content/Textures',
-    children: [
-      { id: 'tex-1', name: 'Hero_Diffuse.png', type: 'texture', path: '/Content/Textures/Hero_Diffuse.png', size: 4096000, metadata: { width: 2048, height: 2048 } },
-      { id: 'tex-2', name: 'Hero_Normal.png', type: 'texture', path: '/Content/Textures/Hero_Normal.png', size: 4096000 },
-      { id: 'tex-3', name: 'Ground_Grass.png', type: 'texture', path: '/Content/Textures/Ground_Grass.png', size: 1024000 },
-    ],
-  },
-  {
-    id: 'folder-blueprints',
-    name: 'Blueprints',
-    path: '/Content/Blueprints',
-    children: [
-      { id: 'bp-1', name: 'BP_PlayerController.blueprint', type: 'blueprint', path: '/Content/Blueprints/BP_PlayerController.blueprint', isFavorite: true },
-      { id: 'bp-2', name: 'BP_EnemyAI.blueprint', type: 'blueprint', path: '/Content/Blueprints/BP_EnemyAI.blueprint' },
-    ],
-  },
-  {
-    id: 'folder-audio',
-    name: 'Audio',
-    path: '/Content/Audio',
-    children: [
-      { id: 'audio-1', name: 'Music_Battle.wav', type: 'audio', path: '/Content/Audio/Music_Battle.wav', size: 8192000, metadata: { duration: 180 } },
-      { id: 'audio-2', name: 'SFX_Sword_Swing.wav', type: 'audio', path: '/Content/Audio/SFX_Sword_Swing.wav', size: 256000 },
-    ],
-  },
-  { id: 'mat-1', name: 'M_Character.material', type: 'material', path: '/Content/M_Character.material' },
-  { id: 'prefab-1', name: 'Prefab_Enemy.prefab', type: 'prefab', path: '/Content/Prefab_Enemy.prefab' },
-];
-
 export default ContentBrowser;
+

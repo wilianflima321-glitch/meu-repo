@@ -137,6 +137,9 @@ export type DapSession = {
   sessionId: DapSessionId;
   userId: string;
   type: string;
+  pid?: number | null;
+  adapterCommand?: string;
+  adapterArgs?: string[];
   workspaceRoot: string;
   createdAt: number;
   lastUsedAt: number;
@@ -224,6 +227,9 @@ export async function startDapSession(opts: {
     sessionId,
     userId: opts.userId,
     type: String(opts.type || ''),
+    pid: child.pid ?? null,
+    adapterCommand: command,
+    adapterArgs: adapter.args,
     workspaceRoot: workspaceRootAbs,
     createdAt: Date.now(),
     lastUsedAt: Date.now(),
@@ -245,6 +251,13 @@ export async function startDapSession(opts: {
 export function getDapSession(sessionId: string): DapSession | null {
   const sessions = getGlobalSessions();
   return sessions.get(sessionId) ?? null;
+}
+
+export function listDapSessions(userId?: string): DapSession[] {
+  const sessions = getGlobalSessions();
+  const all = Array.from(sessions.values());
+  if (!userId) return all;
+  return all.filter((s) => s.userId === userId);
 }
 
 export function stopDapSession(sessionId: string): boolean {

@@ -137,13 +137,13 @@ export async function GET(
 
     // Merge database assets with filesystem (DB takes priority)
     // Note: path, thumbnail, metadata, isFavorite, updatedAt require prisma generate
-    const dbAssetPaths = new Set(dbAssets.map(a => a.url)); // Use url as path for now
+    const dbAssetPaths = new Set(dbAssets.map(a => a.url || '')); // Use url as path for now
     const mergedAssets = [
       ...dbAssets.map(a => ({
         id: a.id,
         name: a.name,
         type: a.type,
-        path: a.url, // TODO: Use a.path after prisma generate
+        path: a.url || '', // TODO: Use a.path after prisma generate
         extension: extname(a.name),
         size: a.size || 0,
         thumbnail: undefined as string | undefined, // TODO: Use a.thumbnail after prisma generate

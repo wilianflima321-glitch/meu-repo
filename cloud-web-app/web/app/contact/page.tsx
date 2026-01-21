@@ -34,16 +34,31 @@ export default function ContactPage() {
   })
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
-    // Simular envio
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
 
-    setSubmitted(true)
-    setLoading(false)
+      const data = await res.json().catch(() => null)
+      if (!res.ok || data?.success === false) {
+        throw new Error(data?.error || 'Falha ao enviar mensagem')
+      }
+
+      setSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao enviar mensagem')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleChange = (
@@ -186,6 +201,11 @@ export default function ContactPage() {
           <div>
             <Card variant="elevated" padding="lg">
               <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                  <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
+                    {error}
+                  </div>
+                )}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Input
                     label="Nome"

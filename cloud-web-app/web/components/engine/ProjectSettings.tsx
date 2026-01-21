@@ -10,6 +10,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useToast } from '@/components/ui/Toast';
 
 // ============================================================================
 // TYPES
@@ -687,6 +688,7 @@ function SettingEditor({ setting, value, onChange }: SettingEditorProps) {
 // ============================================================================
 
 export default function ProjectSettings() {
+  const toast = useToast();
   const [categories] = useState<SettingCategory[]>(defaultSettings);
   const [selectedCategory, setSelectedCategory] = useState<string>('project');
   const [settings, setSettings] = useState<Record<string, unknown>>(() => {
@@ -778,7 +780,7 @@ export default function ProjectSettings() {
           setSettings((prev) => ({ ...prev, ...imported }));
           setHasChanges(true);
         } catch {
-          alert('Invalid settings file');
+          toast.error('Invalid settings file');
         }
       }
     };

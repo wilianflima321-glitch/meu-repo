@@ -23,8 +23,7 @@ import * as THREE from 'three';
 
 // Import dos sistemas reais
 import { 
-  PhysicsWorld, 
-  CharacterController,
+  PhysicsWorld,
 } from './physics-engine-real';
 
 import {

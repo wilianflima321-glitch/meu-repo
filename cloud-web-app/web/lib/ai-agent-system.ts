@@ -5,10 +5,48 @@
  * para completar tarefas complexas de forma autônoma.
  * 
  * DIFERENCIAL: IA que REALMENTE controla o editor, não apenas sugere código.
+ * 
+ * SEGURANÇA (2026-01-13):
+ * - Scripts de usuário agora rodam em sandbox isolado (Web Worker)
+ * - Validação de código antes da execução
+ * - APIs whitelisted para scripts
  */
 
 import { aiTools, AITool, ToolResult, Artifact } from './ai-tools-registry';
 import { aiService } from './ai-service';
+import { getSandbox, safeExecute, AethelGameAPIs, type SandboxResult } from './sandbox';
+
+// ============================================================================
+// SANDBOX INTEGRATION
+// ============================================================================
+
+/**
+ * Executa código de usuário de forma segura via sandbox
+ */
+export async function executeUserScript(
+  code: string,
+  context?: Record<string, unknown>
+): Promise<SandboxResult> {
+  // Injetar APIs de jogo do Aethel
+  const enrichedContext = {
+    ...context,
+    Aethel: AethelGameAPIs,
+  };
+  
+  return safeExecute(code, enrichedContext, {
+    timeout: 10000, // 10s para scripts de jogo
+    allowedAPIs: ['console', 'math', 'json', 'array', 'string', 'aethel-game'],
+    mode: 'strict',
+  });
+}
+
+/**
+ * Valida código antes de qualquer execução
+ */
+export function validateUserCode(code: string): { valid: boolean; issues: string[] } {
+  const sandbox = getSandbox();
+  return sandbox.validateCode(code);
+}
 
 // ============================================================================
 // TIPOS

@@ -21,9 +21,10 @@ function useTabsContext() {
    Tabs Root Component
 ============================================ */
 export interface TabsProps {
-  defaultValue: string
+  defaultValue?: string
   value?: string
   onChange?: (value: string) => void
+  onValueChange?: (value: string) => void
   children: ReactNode
   className?: string
 }
@@ -32,15 +33,17 @@ export function Tabs({
   defaultValue, 
   value, 
   onChange, 
+  onValueChange,
   children, 
   className = '' 
 }: TabsProps) {
-  const [internalValue, setInternalValue] = useState(defaultValue)
+  const [internalValue, setInternalValue] = useState(defaultValue ?? value ?? '')
   
   const activeTab = value ?? internalValue
   const setActiveTab = (tab: string) => {
     setInternalValue(tab)
     onChange?.(tab)
+    onValueChange?.(tab)
   }
 
   return (

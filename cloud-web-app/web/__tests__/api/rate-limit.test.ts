@@ -2,6 +2,7 @@
  * Rate Limiting Tests
  */
 
+import { describe, it, expect } from 'vitest';
 import { NextRequest } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limit';
 

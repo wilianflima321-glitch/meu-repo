@@ -27,6 +27,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import * as THREE from 'three';
+import { useToast } from '@/components/ui/Toast';
 
 // ============================================================================
 // TIPOS
@@ -970,6 +971,7 @@ const nodeTypes = {
 };
 
 export function MaterialEditor() {
+  const toast = useToast();
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<MaterialNodeData>>([
     // Default output node
     {
@@ -1034,8 +1036,8 @@ export function MaterialEditor() {
     const compiler = new ShaderCompiler(graph);
     const glsl = compiler.generateGLSL();
     console.log('Generated GLSL:\n', glsl);
-    alert('Shader compiled! Check console for GLSL output.');
-  }, [nodes, edges]);
+    toast.success('Shader compiled! Check console for GLSL output.');
+  }, [nodes, edges, toast]);
 
   return (
     <div className="w-full h-full bg-gray-800">

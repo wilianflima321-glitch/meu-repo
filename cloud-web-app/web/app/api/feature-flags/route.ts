@@ -5,9 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { withAdminAuth } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,12 +44,15 @@ const defaultFlags = [
 export async function GET(request: NextRequest) {
   try {
     // Flags podem ser públicas para o cliente avaliar
-    // Em produção, buscar do banco de dados
-    
-    // Por enquanto, retorna flags default
+    const flags = await prisma.featureFlag.findMany({
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    const data = flags.length > 0 ? flags : defaultFlags;
+
     return NextResponse.json({
       success: true,
-      flags: defaultFlags,
+      flags: data,
       environment: process.env.NODE_ENV || 'development',
     });
   } catch (error) {
@@ -58,46 +61,53 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const user = requireAuth(request);
-    
-    // Apenas admins podem criar/editar flags
-    // TODO: Verificar role de admin
-    
-    const body = await request.json();
-    const { key, name, enabled, type, percentage, rules, environments } = body;
-    
-    if (!key || !name) {
-      return NextResponse.json(
-        { success: false, error: 'Key and name are required' },
-        { status: 400 }
-      );
+export const POST = withAdminAuth(
+  async (request, { user }) => {
+    try {
+      const body = await request.json();
+      const { key, name, enabled, type, percentage, rules, environments, description } = body;
+
+      if (!key || !name) {
+        return NextResponse.json(
+          { success: false, error: 'Key and name are required' },
+          { status: 400 }
+        );
+      }
+
+      const flag = await prisma.featureFlag.upsert({
+        where: { key },
+        create: {
+          key,
+          name,
+          description: description || null,
+          enabled: enabled ?? true,
+          type: type || 'boolean',
+          percentage: typeof percentage === 'number' ? percentage : null,
+          rules: rules ?? null,
+          environments: environments ?? null,
+          createdBy: user.id,
+        },
+        update: {
+          name,
+          description: description || null,
+          enabled: enabled ?? true,
+          type: type || 'boolean',
+          percentage: typeof percentage === 'number' ? percentage : null,
+          rules: rules ?? null,
+          environments: environments ?? null,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        flag,
+      });
+    } catch (error) {
+      console.error('Failed to create feature flag:', error);
+      const mapped = apiErrorToResponse(error);
+      if (mapped) return mapped;
+      return apiInternalError();
     }
-    
-    // Em produção, salvar no banco de dados
-    // Por enquanto, apenas retorna o que foi enviado
-    const flag = {
-      key,
-      name,
-      enabled: enabled ?? true,
-      type: type || 'boolean',
-      percentage,
-      rules,
-      environments,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: user.userId,
-    };
-    
-    return NextResponse.json({
-      success: true,
-      flag,
-    });
-  } catch (error) {
-    console.error('Failed to create feature flag:', error);
-    const mapped = apiErrorToResponse(error);
-    if (mapped) return mapped;
-    return apiInternalError();
-  }
-}
+  },
+  'ops:settings:feature_flags'
+);

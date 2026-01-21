@@ -10,36 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
-
-// Lazy load AWS SDK
-let S3Client: any, DeleteObjectCommand: any;
-
-async function loadAwsSdk() {
-  if (!S3Client) {
-    try {
-      const s3 = await import('@aws-sdk/client-s3');
-      S3Client = s3.S3Client;
-      DeleteObjectCommand = s3.DeleteObjectCommand;
-    } catch {
-      // AWS SDK not available - S3 deletion will be skipped
-    }
-  }
-}
-
-function getS3Client() {
-  if (!S3Client) return null;
-  return new S3Client({
-    region: process.env.AWS_REGION || 'us-east-1',
-    endpoint: process.env.S3_ENDPOINT,
-    forcePathStyle: !!process.env.S3_ENDPOINT,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-    },
-  });
-}
-
-const BUCKET_NAME = process.env.S3_BUCKET || 'aethel-assets';
+import { deleteObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 
 // ============================================================================
 // HELPER - Verify Asset Access
@@ -184,15 +155,15 @@ export async function DELETE(
     }
 
     // Try to delete from S3 if SDK is available
-    await loadAwsSdk();
-    const s3 = getS3Client();
+    const s3Available = await isS3Available();
     
-    if (s3 && asset.url) {
+    if (s3Available && asset.url) {
       try {
-        await s3.send(new DeleteObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: asset.url,
-        }));
+        // Extract S3 key from URL if needed
+        const s3Key = asset.url.startsWith(`s3://${S3_BUCKET}/`) 
+          ? asset.url.replace(`s3://${S3_BUCKET}/`, '')
+          : asset.url;
+        await deleteObject(s3Key);
       } catch (s3Error) {
         console.error('S3 delete error:', s3Error);
         // Continue even if S3 delete fails - DB is source of truth

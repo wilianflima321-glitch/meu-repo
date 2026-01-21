@@ -17,9 +17,9 @@ export const GET = withAdminAuth(
       // Busca entradas recentes
       const entries = await prisma.creditLedgerEntry.findMany({
         where: {
-          operationType: { in: ['ai_chat', 'ai_generation'] },
+          entryType: { in: ['ai_chat', 'ai_generation'] },
         },
-        orderBy: { timestamp: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: limit * 2, // Pega mais para filtrar depois
         include: {
           user: {
@@ -61,9 +61,9 @@ export const GET = withAdminAuth(
             status: metadata?.status || 'success',
             prompt: metadata?.prompt || '[Not recorded]',
             response: metadata?.response || '[Not recorded]',
-            timestamp: entry.timestamp.toISOString(),
+            timestamp: entry.createdAt.toISOString(),
             projectId: metadata?.projectId,
-            operation: metadata?.operation || entry.operationType,
+            operation: metadata?.operation || entry.entryType,
           };
         });
       

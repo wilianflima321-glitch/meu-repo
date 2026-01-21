@@ -1,39 +1,85 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+
+type FileEntry = { id: string; name: string; path: string; indexed: boolean; context: string; size: number };
 
 export default function IndexingPage() {
-  type FileEntry = { id: number; name: string; path: string; indexed: boolean; context: string };
-  const [files, setFiles] = useState<FileEntry[]>([
-    { id: 1, name: 'main.py', path: '/project/src/main.py', indexed: true, context: 'Function definitions' },
-    { id: 2, name: 'utils.js', path: '/project/utils.js', indexed: false, context: 'Helper functions' }
-  ]);
-
+  const [files, setFiles] = useState<FileEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<FileEntry[]>([]);
+  const [depthLevel, setDepthLevel] = useState(3);
+  const [maxFileSizeMb, setMaxFileSizeMb] = useState(10);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = () => {
-    if (searchQuery) {
-      const results = files.filter(file => 
-        file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        file.context.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setSearchResults(results);
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const query = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : '';
+      const res = await fetch(`/api/admin/indexing${query}`);
+      if (!res.ok) throw new Error('Falha ao carregar indexação');
+      const json = await res.json();
+      setFiles(json.files || []);
+      setDepthLevel(json.config?.depthLevel ?? 3);
+      setMaxFileSizeMb(json.config?.maxFileSizeMb ?? 10);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar indexação');
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const updateConfig = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch('/api/admin/indexing', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ depthLevel, maxFileSizeMb }),
+      });
+      if (!res.ok) throw new Error('Falha ao atualizar configuração');
+      await fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar configuração');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const toggleIndex = (id: number) => {
-    setFiles(files.map(file => 
-      file.id === id ? { ...file, indexed: !file.indexed } : file
-    ));
+  const toggleIndex = async (file: FileEntry) => {
+    try {
+      const res = await fetch('/api/admin/indexing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId: file.id, indexed: !file.indexed, context: file.context }),
+      });
+      if (!res.ok) throw new Error('Falha ao atualizar indexação');
+      await fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar indexação');
+    }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Indexing Avançado</h1>
-      
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Indexação avançada</h1>
+          <p className="text-sm text-gray-500">Controle de indexação RAG com auditoria.</p>
+        </div>
+        <button onClick={fetchData} className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm">Atualizar</button>
+      </div>
+
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4">{error}</div>}
+
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Busca Projeto-Wide</h2>
+        <h2 className="text-lg font-semibold mb-4">Busca no projeto</h2>
         <div className="flex gap-4">
           <input
             type="text"
@@ -42,51 +88,48 @@ export default function IndexingPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="border p-2 flex-1"
           />
-          <button onClick={handleSearch} className="bg-blue-500 text-white px-4 py-2 rounded">Buscar</button>
+          <button onClick={fetchData} className="bg-blue-600 text-white px-4 py-2 rounded">Buscar</button>
         </div>
-        {searchResults.length > 0 && (
-          <ul className="mt-4">
-            {searchResults.map(result => (
-              <li key={result.id} className="p-2 border-b">
-                <strong>{result.name}</strong> - {result.path} ({result.context})
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Configurações de Context Awareness</h2>
+        <h2 className="text-lg font-semibold mb-4">Configurações de contexto</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium">Depth Level</label>
-            <input type="number" defaultValue={3} className="border p-2 w-full" />
+            <label className="block text-sm font-medium">Nível de profundidade</label>
+            <input type="number" value={depthLevel} onChange={(e) => setDepthLevel(Number(e.target.value))} className="border p-2 w-full" />
           </div>
           <div>
-            <label className="block text-sm font-medium">Max File Size</label>
-            <input type="text" defaultValue="10MB" className="border p-2 w-full" />
+            <label className="block text-sm font-medium">Tamanho máximo (MB)</label>
+            <input type="number" value={maxFileSizeMb} onChange={(e) => setMaxFileSizeMb(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
-        <button className="mt-4 bg-green-500 text-white px-4 py-2 rounded">Atualizar Configurações</button>
+        <button onClick={updateConfig} disabled={saving} className="mt-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50">
+          {saving ? 'Salvando...' : 'Atualizar configurações'}
+        </button>
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Arquivos Indexados</h2>
-        <ul>
-          {files.map(file => (
-            <li key={file.id} className="flex justify-between items-center p-2 border-b">
-              <div>
-                <h3 className="font-semibold">{file.name}</h3>
-                <p className="text-sm text-gray-600">{file.path}</p>
-                <p className="text-sm">{file.context}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-1 rounded">{file.indexed ? 'Indexado' : 'Não Indexado'}</span>
-                <button onClick={() => toggleIndex(file.id)} className="bg-yellow-500 text-white px-3 py-1 rounded text-sm">Toggle</button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        {loading ? (
+          <p className="text-sm text-gray-500">Carregando arquivos...</p>
+        ) : (
+          <ul>
+            {files.map(file => (
+              <li key={file.id} className="flex justify-between items-center p-2 border-b">
+                <div>
+                  <h3 className="font-semibold">{file.name}</h3>
+                  <p className="text-sm text-gray-600">{file.path}</p>
+                  <p className="text-sm">{file.context || 'Sem contexto'}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-1 rounded text-xs bg-gray-100">{file.indexed ? 'Indexado' : 'Não Indexado'}</span>
+                  <button onClick={() => toggleIndex(file)} className="bg-yellow-500 text-white px-3 py-1 rounded text-sm">Alternar</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

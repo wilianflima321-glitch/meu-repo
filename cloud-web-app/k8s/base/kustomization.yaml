@@ -16,6 +16,7 @@ resources:
   - secrets.template.yaml  # Replace with sealed-secret in production
   - web-deployment.yaml
   - runtime-deployment.yaml
+  - worker-deployment.yaml
   - services.yaml
   - ingress.yaml
   - hpa.yaml
@@ -24,6 +25,8 @@ images:
   - name: ghcr.io/aethel-engine/web
     newTag: latest
   - name: ghcr.io/aethel-engine/runtime
+    newTag: latest
+  - name: ghcr.io/aethel-engine/worker
     newTag: latest
 
 commonAnnotations:

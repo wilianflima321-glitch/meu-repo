@@ -15,13 +15,13 @@ export const GET = withAdminAuth(
       // Busca entradas de AI na ledger
       const entries = await prisma.creditLedgerEntry.findMany({
         where: {
-          timestamp: { gte: last24h },
-          operationType: { in: ['ai_chat', 'ai_generation', 'usage'] },
+          createdAt: { gte: last24h },
+          entryType: { in: ['ai_chat', 'ai_generation', 'usage'] },
         },
         select: {
           amount: true,
           metadata: true,
-          operationType: true,
+          entryType: true,
         },
       });
       

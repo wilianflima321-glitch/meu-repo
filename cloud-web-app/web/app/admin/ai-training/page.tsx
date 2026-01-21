@@ -1,74 +1,156 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+type TrainingJob = {
+  id: string;
+  model: string;
+  status: string;
+  cost: number;
+  efficiency: number;
+  filters?: string | null;
+  auxAI?: string | null;
+  optimization?: string | null;
+  createdAt: string;
+};
 
 export default function AITraining() {
-  const [trainingJobs, setTrainingJobs] = useState([
-    { id: 1, model: 'Aethel-GPT', status: 'Em Andamento', cost: 250, efficiency: 95, filters: 'Bias Detection Enabled' },
-    { id: 2, model: 'Aethel-Code', status: 'Concluído', cost: 150, efficiency: 98, filters: 'Error-Free Training' },
-  ]);
+  const [jobs, setJobs] = useState<TrainingJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    model: 'Aethel-GPT',
+    auxAI: 'GPT-4 para dados sintéticos',
+    optimization: 'Quantização + transferência de aprendizado',
+    filters: 'Detecção de viés habilitada',
+  });
+  const [saving, setSaving] = useState(false);
 
-  const [auxAI, setAuxAI] = useState('GPT-4 para dados sintéticos');
-  const [optimization, setOptimization] = useState('Quantization + Transfer Learning');
+  const statusLabels: Record<string, string> = {
+    queued: 'na fila',
+    running: 'em execução',
+    completed: 'concluído',
+    failed: 'falhou',
+    paused: 'pausado',
+  };
+
+  const fetchJobs = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/admin/ai/training');
+      if (!res.ok) throw new Error('Falha ao carregar tarefas');
+      const json = await res.json();
+      setJobs(json.items || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar tarefas');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Simulação de atualização em tempo real
-    const interval = setInterval(() => {
-      setTrainingJobs(jobs => jobs.map(job => 
-        job.status === 'Em Andamento' ? { ...job, cost: job.cost + 10 } : job
-      ));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    fetchJobs();
+  }, [fetchJobs]);
+
+  const handleCreate = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch('/api/admin/ai/training', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Falha ao iniciar treinamento');
+      await fetchJobs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao iniciar treinamento');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className='p-6 max-w-4xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-6'>Treinamento de IA Aethel</h1>
-      <p className='mb-4 text-gray-600'>Otimize fine-tuning com IAs auxiliares, filtros para eficiência e custo-eficiência.</p>
+      <div className='flex items-center justify-between mb-6'>
+        <div>
+          <h1 className='text-3xl font-bold'>Treinamento de IA</h1>
+          <p className='text-sm text-gray-500'>Crie tarefas e acompanhe status, custos e eficiência.</p>
+        </div>
+        <button onClick={fetchJobs} className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'>
+          Atualizar
+        </button>
+      </div>
 
-      <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>Configurações de Treinamento</h2>
+      {error && (
+        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+          {error}
+        </div>
+      )}
+
+      <div className='mb-6 bg-white p-6 rounded-lg shadow'>
+        <h2 className='text-xl font-semibold mb-4'>Nova tarefa de treinamento</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
-            <label className='block text-sm font-medium'>IA Auxiliar:</label>
-            <select value={auxAI} onChange={(e) => setAuxAI(e.target.value)} className='mt-1 block w-full p-2 border rounded'>
-              <option>GPT-4 para dados sintéticos</option>
-              <option>Mistral para compressão</option>
-              <option>Gemma para fine-tuning</option>
-            </select>
+            <label className='block text-sm font-medium'>Modelo</label>
+            <input
+              value={form.model}
+              onChange={(e) => setForm((prev) => ({ ...prev, model: e.target.value }))}
+              className='mt-1 block w-full p-2 border rounded'
+            />
           </div>
           <div>
-            <label className='block text-sm font-medium'>Técnicas de Otimização:</label>
-            <select value={optimization} onChange={(e) => setOptimization(e.target.value)} className='mt-1 block w-full p-2 border rounded'>
-              <option>Quantization + Transfer Learning</option>
-              <option>Knowledge Distillation</option>
-              <option>Model Pruning</option>
-            </select>
+            <label className='block text-sm font-medium'>IA Auxiliar</label>
+            <input
+              value={form.auxAI}
+              onChange={(e) => setForm((prev) => ({ ...prev, auxAI: e.target.value }))}
+              className='mt-1 block w-full p-2 border rounded'
+            />
+          </div>
+          <div>
+            <label className='block text-sm font-medium'>Otimização</label>
+            <input
+              value={form.optimization}
+              onChange={(e) => setForm((prev) => ({ ...prev, optimization: e.target.value }))}
+              className='mt-1 block w-full p-2 border rounded'
+            />
+          </div>
+          <div>
+            <label className='block text-sm font-medium'>Filtros</label>
+            <input
+              value={form.filters}
+              onChange={(e) => setForm((prev) => ({ ...prev, filters: e.target.value }))}
+              className='mt-1 block w-full p-2 border rounded'
+            />
           </div>
         </div>
-        <button className='mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'>Iniciar Treinamento</button>
+        <button
+          onClick={handleCreate}
+          disabled={saving}
+          className='mt-4 bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50'
+        >
+          {saving ? 'Iniciando...' : 'Iniciar treinamento'}
+        </button>
       </div>
 
       <div>
-        <h2 className='text-xl font-semibold mb-4'>Jobs de Treinamento Ativos</h2>
-        <div className='space-y-4'>
-          {trainingJobs.map(job => (
-            <div key={job.id} className='p-4 bg-white rounded-lg shadow'>
-              <h3 className='text-lg font-semibold'>{job.model}</h3>
-              <p>Status: {job.status} | Custo:  | Eficiência: {job.efficiency}%</p>
-              <p>Filtros: {job.filters}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className='mt-6 p-4 bg-yellow-100 rounded-lg'>
-        <h3 className='font-semibold'>Dicas de Eficiência:</h3>
-        <ul className='list-disc ml-5'>
-          <li>Use dados sintéticos gerados por GPT-4 para reduzir custos iniciais.</li>
-          <li>Aplique quantization para economizar 50% em GPU.</li>
-          <li>Filtros automáticos evitam erros e vieses.</li>
-        </ul>
+        <h2 className='text-xl font-semibold mb-4'>Tarefas recentes</h2>
+        {loading ? (
+          <p className='text-sm text-gray-500'>Carregando tarefas...</p>
+        ) : jobs.length === 0 ? (
+          <p className='text-sm text-gray-500'>Nenhuma tarefa encontrada.</p>
+        ) : (
+          <div className='space-y-4'>
+            {jobs.map((job) => (
+              <div key={job.id} className='p-4 bg-white rounded-lg shadow'>
+                <h3 className='text-lg font-semibold'>{job.model}</h3>
+                <p className='text-sm text-gray-600'>Status: {statusLabels[job.status] ?? job.status} • Custo: ${job.cost.toFixed(2)} • Eficiência: {job.efficiency.toFixed(0)}%</p>
+                <p className='text-sm text-gray-600'>Auxiliar: {job.auxAI || '—'} • Otimização: {job.optimization || '—'}</p>
+                <p className='text-sm text-gray-600'>Filtros: {job.filters || '—'}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

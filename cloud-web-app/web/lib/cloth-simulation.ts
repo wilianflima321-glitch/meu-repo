@@ -844,6 +844,14 @@ export class ClothSimulation {
       });
     }
   }
+
+  get particles(): ClothParticle[] {
+    return this.particleSystem.particles;
+  }
+
+  get constraints(): ClothConstraint[] {
+    return this.particleSystem.constraints;
+  }
   
   update(dt: number): void {
     // Limit dt for stability
@@ -875,6 +883,51 @@ export class ClothSimulation {
     
     // Update mesh geometry
     this.clothMesh.updateGeometry();
+  }
+
+  updateConfig(config: Partial<ClothConfig>): void {
+    if (typeof config.damping === 'number') {
+      this.config.damping = config.damping;
+      this.integrator.setDamping(config.damping);
+    }
+    if (config.gravity) {
+      this.config.gravity.copy(config.gravity);
+      this.integrator.setGravity(config.gravity);
+    }
+    if (config.wind) {
+      this.setWind(config.wind);
+    }
+    if (typeof config.windVariation === 'number') {
+      this.setWindVariation(config.windVariation);
+    }
+    if (typeof config.stiffness === 'number') {
+      this.setStiffness(config.stiffness);
+    }
+    if (typeof config.iterations === 'number') {
+      this.config.iterations = config.iterations;
+      this.constraintSolver.setIterations(config.iterations);
+    }
+    if (typeof config.tearThreshold === 'number') {
+      this.config.tearThreshold = config.tearThreshold;
+      this.constraintSolver.setTearThreshold(config.tearThreshold);
+    }
+    if (typeof config.selfCollision === 'boolean') {
+      this.config.selfCollision = config.selfCollision;
+      this.selfCollisionHandler.setEnabled(config.selfCollision);
+    }
+    if (typeof config.groundPlane === 'boolean') {
+      this.config.groundPlane = config.groundPlane;
+    }
+    if (typeof config.groundHeight === 'number') {
+      this.config.groundHeight = config.groundHeight;
+    }
+  }
+
+  setColliders(colliders: ClothCollider[]): void {
+    this.collisionHandler.clearColliders();
+    for (const collider of colliders) {
+      this.collisionHandler.addCollider(collider);
+    }
   }
   
   // Pin methods

@@ -695,39 +695,11 @@ export const ProjectsDashboard: React.FC = () => {
   // Fetch projects
   const { data: projectsData, mutate } = useSWR<{ success: boolean; data: Project[] }>(
     '/api/projects',
-    fetcher,
-    {
-      fallbackData: {
-        success: true,
-        data: [
-          // Mock data para demonstração
-          {
-            id: '1',
-            name: 'My First Game',
-            description: 'An epic RPG adventure',
-            type: 'game',
-            status: 'active',
-            lastModified: new Date().toISOString(),
-            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            isFavorite: true,
-            membersCount: 3,
-            progress: 45,
-          },
-          {
-            id: '2',
-            name: 'Portfolio Website',
-            description: 'Personal portfolio',
-            type: 'web',
-            status: 'active',
-            lastModified: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-            isFavorite: false,
-            membersCount: 1,
-          },
-        ],
-      },
-    }
+    fetcher
   );
+
+  const { data: usageStatus } = useSWR<any>('/api/usage/status', fetcher);
+  const { data: quotasData } = useSWR<any>('/api/quotas', fetcher);
 
   const projects = projectsData?.data || [];
 
@@ -739,11 +711,19 @@ export const ProjectsDashboard: React.FC = () => {
   });
 
   // Stats
+  const storageQuota = Array.isArray(quotasData?.quotas)
+    ? quotasData.quotas.find((q: any) => q.resource === 'storage_mb')
+    : null;
+  const storageUsedMb = Number(storageQuota?.used ?? 0);
+  const storageDisplay = storageUsedMb >= 1024
+    ? `${(storageUsedMb / 1024).toFixed(1)} GB`
+    : `${Math.round(storageUsedMb)} MB`;
+
   const stats: DashboardStats = {
     totalProjects: projects.length,
     activeProjects: projects.filter((p) => p.status === 'active').length,
-    totalStorage: '2.4 GB',
-    aiTokensUsed: 45000,
+    totalStorage: storageDisplay,
+    aiTokensUsed: Number(usageStatus?.data?.usage?.tokens?.used ?? 0),
   };
 
   // Handlers
@@ -820,7 +800,7 @@ export const ProjectsDashboard: React.FC = () => {
           <StatCard icon={<FolderOpen size={20} />} label="Total de Projetos" value={stats.totalProjects} />
           <StatCard icon={<Zap size={20} />} label="Projetos Ativos" value={stats.activeProjects} color={colors.success} />
           <StatCard icon={<Archive size={20} />} label="Storage Usado" value={stats.totalStorage} color={colors.accent} />
-          <StatCard icon={<Sparkles size={20} />} label="Tokens AI Usados" value={stats.aiTokensUsed.toLocaleString()} trend={12} color={colors.warning} />
+          <StatCard icon={<Sparkles size={20} />} label="Tokens AI Usados" value={stats.aiTokensUsed.toLocaleString()} color={colors.warning} />
         </div>
       </div>
 

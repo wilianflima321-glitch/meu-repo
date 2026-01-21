@@ -108,7 +108,7 @@ export class AethelEngine {
     
     // Initialize all systems
     this.physics = new PhysicsWorld();
-    this.physics.gravity.set(0, -9.81, 0);
+    this.physics.setGravity(new THREE.Vector3(0, -9.81, 0));
     this.navmesh = new NavigationMesh();
     this.navAgents = createNavAgentSystem(this.navmesh);
     this.particles = new ParticleSystemManager(this.scene);

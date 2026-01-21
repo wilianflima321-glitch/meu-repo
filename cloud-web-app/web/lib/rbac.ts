@@ -352,14 +352,16 @@ export async function logAdminAction(entry: AuditLogEntry): Promise<void> {
     await prisma.auditLog.create({
       data: {
         action: entry.action,
-        actorId: entry.actorId,
-        actorEmail: entry.actorEmail,
+        category: 'security',
+        severity: 'info',
+        adminId: entry.actorId,
+        adminEmail: entry.actorEmail,
+        adminRole: 'admin',
         targetId: entry.targetId,
         targetType: entry.targetType,
-        details: entry.details as any,
+        metadata: entry.details as any,
         ipAddress: entry.ipAddress,
         userAgent: entry.userAgent,
-        timestamp: entry.timestamp,
       },
     });
   } catch (error) {

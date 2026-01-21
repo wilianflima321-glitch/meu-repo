@@ -3,30 +3,74 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';
-import { Physics, RigidBody } from '@react-three/rapier';
 
-// --- Physics Components (Updated to Rapier AAA) ---
+// Rapier physics é opcional - usar fallback quando não disponível
+let Physics: React.ComponentType<any> | null = null;
+let RigidBody: React.ComponentType<any> | null = null;
+let rapierLoaded = false;
+
+// Tenta carregar rapier dinamicamente
+async function loadRapier() {
+  if (rapierLoaded) return;
+  rapierLoaded = true;
+  
+  if (typeof window !== 'undefined') {
+    try {
+      // Usa eval para evitar que webpack tente bundlar o módulo
+      const mod = await eval('import("@react-three/rapier")');
+      Physics = mod.Physics;
+      RigidBody = mod.RigidBody;
+    } catch {
+      // Rapier não instalado - usar fallback sem física
+      console.log('[GameViewport] @react-three/rapier not available, using fallback');
+    }
+  }
+}
+
+// Inicia o carregamento
+loadRapier();
+
+// --- Physics Components (with fallback) ---
 
 function Ground() {
+  if (RigidBody) {
+    const RB = RigidBody;
+    return (
+      <RB type="fixed" colliders="cuboid">
+        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+          <planeGeometry args={[100, 100]} />
+          <meshStandardMaterial color="#303030" transparent opacity={0.5} />
+        </mesh>
+      </RB>
+    );
+  }
+  // Fallback sem física
   return (
-    <RigidBody type="fixed" colliders="cuboid">
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#303030" transparent opacity={0.5} />
-      </mesh>
-    </RigidBody>
+    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+      <planeGeometry args={[100, 100]} />
+      <meshStandardMaterial color="#303030" transparent opacity={0.5} />
+    </mesh>
   );
 }
 
 function PhysicsBox({ position }: { position: [number, number, number] }) {
-  // Rapier physics box
+  if (RigidBody) {
+    const RB = RigidBody;
+    return (
+      <RB position={position} colliders="cuboid" restitution={0.7}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry />
+          <meshStandardMaterial color="orange" />
+        </mesh>
+      </RB>
+    );
+  }
+  // Fallback sem física
   return (
-    <RigidBody position={position} colliders="cuboid" restitution={0.7}>
-      <mesh castShadow receiveShadow>
-        <boxGeometry />
-        <meshStandardMaterial color="orange" />
-      </mesh>
-    </RigidBody>
+    <mesh castShadow receiveShadow position={position}>
+      <boxGeometry />
+      <meshStandardMaterial color="orange" />
+    </mesh>
   );
 }
 
@@ -58,7 +102,7 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
         </div>
         <div className="bg-slate-800/80 backdrop-blur p-2 rounded border border-slate-700 text-xs text-green-400 flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/> 
-          Rapier Physics v3
+          {Physics ? 'Rapier Physics v3' : 'No Physics (Rapier not installed)'}
         </div>
         <button 
           onClick={() => setBoxes(prev => [...prev, [(Math.random() - 0.5) * 5, 10, (Math.random() - 0.5) * 5]])}
@@ -84,13 +128,22 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
           {mode === 'edit' && <Grid infiniteGrid fadeDistance={50} sectionColor="#4f4f4f" cellColor="#303030" />}
           <OrbitControls makeDefault />
 
-          {/* Physics World (Rapier) */}
-          <Physics gravity={[0, -9.81, 0]}>
-            <Ground />
-            {boxes.map((pos, i) => (
-              <PhysicsBox key={i} position={pos} />
-            ))}
-          </Physics>
+          {/* Physics World (Rapier) - com fallback */}
+          {Physics ? (
+            <Physics gravity={[0, -9.81, 0]}>
+              <Ground />
+              {boxes.map((pos, i) => (
+                <PhysicsBox key={i} position={pos} />
+              ))}
+            </Physics>
+          ) : (
+            <>
+              <Ground />
+              {boxes.map((pos, i) => (
+                <PhysicsBox key={i} position={pos} />
+              ))}
+            </>
+          )}
 
         </Suspense>
       </Canvas>

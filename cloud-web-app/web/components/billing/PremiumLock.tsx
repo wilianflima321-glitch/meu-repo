@@ -42,7 +42,7 @@ export type FeatureKey =
 
 export type PlanId = 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
 
-interface PremiumLockProps {
+export interface PremiumLockProps {
   /** Feature que requer acesso premium */
   feature: FeatureKey;
   /** Plano mínimo necessário para acessar */

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth, logAdminAction, applyShadowBan } from '@/lib/rbac';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { withAdminAuth, logAdminAction, applyShadowBan, AdminUser } from '@/lib/rbac';
 
 // =============================================================================
 // MODERATION ACTION API
@@ -10,15 +8,15 @@ import { authOptions } from '@/lib/auth';
 
 async function actionHandler(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { user }: { user: AdminUser }
 ) {
-  const { id } = await params;
+  const url = new URL(req.url);
+  const id = url.pathname.split('/').pop() || '';
   const body = await req.json();
   const { action, notes } = body;
   
-  const session = await getServerSession(authOptions);
-  const adminId = session?.user?.id;
-  const adminEmail = session?.user?.email || 'unknown';
+  const adminId = user.id;
+  const adminEmail = user.email || 'unknown';
   
   if (!adminId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -76,8 +74,8 @@ async function actionHandler(
         if (item.targetOwnerId) {
           await applyShadowBan(
             item.targetOwnerId,
-            `Moderation action: ${item.reason || 'Policy violation'}`,
-            adminId
+            adminId,
+            `Moderation action: ${item.reason || 'Policy violation'}`
           );
           
           newStatus = 'rejected';
@@ -85,14 +83,13 @@ async function actionHandler(
           
           // Log the shadow ban
           await logAdminAction({
-            adminId,
             action: 'shadow_ban',
-            category: 'moderation',
-            severity: 'warning',
+            actorId: adminId,
+            actorEmail: adminEmail,
             targetType: 'user',
             targetId: item.targetOwnerId,
-            reason: `Via moderation item ${id}: ${item.reason}`,
-            metadata: { moderationItemId: id },
+            details: { reason: `Via moderation item ${id}: ${item.reason}`, moderationItemId: id },
+            timestamp: new Date(),
           });
         } else {
           return NextResponse.json(
@@ -143,18 +140,19 @@ async function actionHandler(
     
     // Log the moderation action
     await logAdminAction({
-      adminId,
       action: `moderation_${action}`,
-      category: 'moderation',
-      severity: action === 'shadowban' || action === 'delete' ? 'warning' : 'info',
+      actorId: adminId,
+      actorEmail: adminEmail,
       targetType: item.targetType,
       targetId: item.targetId,
-      reason: resolution,
-      metadata: {
+      details: {
+        resolution,
+        severity: action === 'shadowban' || action === 'delete' ? 'warning' : 'info',
         moderationItemId: id,
         originalReason: item.reason,
         originalCategory: item.category,
       },
+      timestamp: new Date(),
     });
     
     return NextResponse.json({
@@ -173,4 +171,4 @@ async function actionHandler(
   }
 }
 
-export const POST = withAdminAuth(actionHandler, 'ops:moderation:write');
+export const POST = withAdminAuth(actionHandler, 'ops:moderation:ban');

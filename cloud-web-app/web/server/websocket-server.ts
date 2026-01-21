@@ -19,6 +19,8 @@ import http from 'http';
 import * as Y from 'yjs';
 import { EventEmitter } from 'events';
 
+import { getQueueRedis } from '../lib/redis-queue';
+
 // y-websocket setup - dynamic import for compatibility
 let setupWSConnection: ((conn: any, req: http.IncomingMessage, options?: any) => void) | null = null;
 
@@ -79,7 +81,7 @@ const HOST = process.env.WS_HOST || '0.0.0.0';
 
 interface ConnectionInfo {
   id: string;
-  type: 'collaboration' | 'terminal' | 'lsp' | 'ai' | 'dap' | 'general';
+  type: 'collaboration' | 'terminal' | 'lsp' | 'ai' | 'dap' | 'export' | 'general';
   userId?: string;
   sessionId?: string;
   createdAt: number;
@@ -163,6 +165,8 @@ wss.on('connection', (ws: WebSocket, req) => {
     connectionType = 'ai';
   } else if (path.startsWith('/dap')) {
     connectionType = 'dap';
+  } else if (path.startsWith('/export')) {
+    connectionType = 'export';
   }
 
   // Store connection info
@@ -194,6 +198,9 @@ wss.on('connection', (ws: WebSocket, req) => {
     case 'dap':
       handleDAPConnection(ws, connectionInfo);
       break;
+    case 'export':
+      handleExportConnection(ws, url);
+      break;
     default:
       handleGeneralConnection(ws, connectionInfo);
   }
@@ -216,6 +223,90 @@ wss.on('connection', (ws: WebSocket, req) => {
     console.error(`[WS] Connection error: ${connectionId}`, error.message);
   });
 });
+
+// ============================================================================
+// EXPORT STATUS HANDLER
+// ============================================================================
+
+function handleExportConnection(ws: WebSocket, url: URL) {
+  // Path expected: /export/:exportId
+  const pathParts = url.pathname.split('/').filter(Boolean);
+  const exportId = pathParts[1];
+
+  if (!exportId) {
+    ws.send(JSON.stringify({ type: 'error', error: 'Missing exportId in path (/export/:exportId)' }));
+    ws.close(1008, 'Missing exportId');
+    return;
+  }
+
+  const pollMs = parseInt(process.env.EXPORT_WS_POLL_MS || '1000', 10);
+  let lastRawState: string | null = null;
+  let stopped = false;
+  let timer: NodeJS.Timeout | null = null;
+
+  ws.send(JSON.stringify({ type: 'ready', exportId, pollMs }));
+
+  const stop = () => {
+    stopped = true;
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  };
+
+  ws.on('close', stop);
+  ws.on('error', stop);
+
+  (async () => {
+    try {
+      const redis = await getQueueRedis();
+      const key = `export:${exportId}`;
+
+      const sendState = (raw: string | null) => {
+        if (stopped || ws.readyState !== WebSocket.OPEN) return;
+        if (raw === null) {
+          ws.send(JSON.stringify({ type: 'export-status', exportId, state: null }));
+          return;
+        }
+
+        // Avoid spamming identical payloads
+        if (raw === lastRawState) return;
+        lastRawState = raw;
+
+        try {
+          const parsed = JSON.parse(raw);
+          ws.send(JSON.stringify({ type: 'export-status', exportId, state: parsed }));
+
+          const status = parsed?.status;
+          if (status === 'completed' || status === 'failed' || status === 'canceled') {
+            stop();
+          }
+        } catch {
+          ws.send(JSON.stringify({ type: 'export-status', exportId, state: raw }));
+        }
+      };
+
+      // Send immediately, then poll
+      const initial = await redis.get(key);
+      sendState(initial);
+
+      timer = setInterval(async () => {
+        if (stopped) return;
+        try {
+          const raw = await redis.get(key);
+          sendState(raw);
+        } catch (error: any) {
+          if (stopped || ws.readyState !== WebSocket.OPEN) return;
+          ws.send(JSON.stringify({ type: 'error', error: error?.message || 'Failed to read export state' }));
+        }
+      }, Math.max(250, Number.isFinite(pollMs) ? pollMs : 1000));
+    } catch (error: any) {
+      if (stopped || ws.readyState !== WebSocket.OPEN) return;
+      ws.send(JSON.stringify({ type: 'error', error: error?.message || 'Failed to init Redis for export status' }));
+      ws.close(1011, 'Export status unavailable');
+    }
+  })();
+}
 
 // ============================================================================
 // COLLABORATION HANDLER (Yjs/y-websocket)

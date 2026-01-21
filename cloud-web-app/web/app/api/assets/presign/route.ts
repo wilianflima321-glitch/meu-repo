@@ -19,39 +19,12 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { randomUUID } from 'crypto';
 import { checkStorageQuota, createQuotaExceededResponse } from '@/lib/storage-quota';
-
-// Lazy import AWS SDK to allow build without it
-let S3Client: any, PutObjectCommand: any, getSignedUrl: any, createPresignedPost: any;
-
-async function loadAwsSdk() {
-  if (!S3Client) {
-    try {
-      const s3 = await import('@aws-sdk/client-s3');
-      const presigner = await import('@aws-sdk/s3-request-presigner');
-      const presignedPost = await import('@aws-sdk/s3-presigned-post');
-      S3Client = s3.S3Client;
-      PutObjectCommand = s3.PutObjectCommand;
-      getSignedUrl = presigner.getSignedUrl;
-      createPresignedPost = presignedPost.createPresignedPost;
-    } catch {
-      throw new Error('AWS SDK not installed. Run: npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner @aws-sdk/s3-presigned-post');
-    }
-  }
-}
-
-function getS3Client() {
-  return new S3Client({
-    region: process.env.AWS_REGION || 'us-east-1',
-    endpoint: process.env.S3_ENDPOINT,
-    forcePathStyle: !!process.env.S3_ENDPOINT,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-    },
-  });
-}
-
-const BUCKET_NAME = process.env.S3_BUCKET || 'aethel-assets';
+import { 
+  generateUploadUrl, 
+  generateDownloadUrl, 
+  isS3Available, 
+  S3_BUCKET 
+} from '@/lib/storage/s3-client';
 
 // ============================================================================
 // FILE SIZE LIMITS
@@ -152,8 +125,15 @@ function getAssetType(fileName: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    await loadAwsSdk();
-    
+    // Check if S3 is available
+    const s3Available = await isS3Available();
+    if (!s3Available) {
+      return NextResponse.json(
+        { error: 'S3 storage not configured. Install @aws-sdk/client-s3 and set environment variables.' },
+        { status: 503 }
+      );
+    }
+
     // 1. Authenticate
     const user = requireAuth(request);
 
@@ -216,9 +196,11 @@ export async function POST(request: NextRequest) {
     // 8. Generate unique asset ID and S3 key
     const assetId = randomUUID();
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const s3Key = `projects/${projectId}${path}/${assetId}/${sanitizedFileName}`;
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    const assetPath = `${normalizedPath.replace(/\/$/, '')}/${sanitizedFileName}`;
+    const s3Key = `projects/${projectId}${normalizedPath}/${assetId}/${sanitizedFileName}`;
 
-    // 8. Create pending asset record in database
+    // 9. Create pending asset record in database
     const assetType = getAssetType(fileName);
 
     await prisma.asset.create({
@@ -227,35 +209,26 @@ export async function POST(request: NextRequest) {
         projectId,
         name: fileName,
         type: assetType,
-        url: s3Key, // Store S3 key in url field for now
+        path: assetPath,
+        storagePath: s3Key,
+        url: `s3://${S3_BUCKET}/${s3Key}`, // Store full S3 URI
         size: fileSize,
         mimeType: fileType || 'application/octet-stream',
       },
     });
 
-    // 9. Generate presigned POST URL
+    // 10. Generate presigned PUT URL
     const expiresIn = 3600; // 1 hour
-    const s3 = getS3Client();
+    const uploadUrl = await generateUploadUrl(
+      s3Key,
+      fileType || 'application/octet-stream',
+      { expiresIn }
+    );
 
-    // Use presigned POST for browser compatibility
-    const presignedPost = await createPresignedPost(s3, {
-      Bucket: BUCKET_NAME,
-      Key: s3Key,
-      Conditions: [
-        ['content-length-range', MIN_FILE_SIZE, MAX_FILE_SIZE],
-        { 'Content-Type': fileType || 'application/octet-stream' },
-      ],
-      Fields: {
-        'Content-Type': fileType || 'application/octet-stream',
-      },
-      Expires: expiresIn,
-    });
-
-    // 10. Return presigned data
+    // 11. Return presigned data
     return NextResponse.json({
       assetId,
-      uploadUrl: presignedPost.url,
-      fields: presignedPost.fields,
+      uploadUrl,
       key: s3Key,
       expiresIn,
       maxSize: MAX_FILE_SIZE,
@@ -278,7 +251,14 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    await loadAwsSdk();
+    const s3Available = await isS3Available();
+    if (!s3Available) {
+      return NextResponse.json(
+        { error: 'S3 storage not configured' },
+        { status: 503 }
+      );
+    }
+
     const user = requireAuth(request);
 
     const { searchParams } = new URL(request.url);
@@ -302,7 +282,7 @@ export async function GET(request: NextRequest) {
           ],
         },
       },
-      select: { url: true, name: true },
+      select: { url: true, name: true, mimeType: true },
     });
 
     if (!asset) {
@@ -312,14 +292,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Generate presigned GET URL
-    const s3 = getS3Client();
-    const command = new PutObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: asset.url,
-    });
+    // Extract S3 key from URL
+    if (!asset.url) {
+      return NextResponse.json(
+        { error: 'Asset URL missing' },
+        { status: 404 }
+      );
+    }
 
-    const downloadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    const s3Key = asset.url.startsWith(`s3://${S3_BUCKET}/`) 
+      ? asset.url.replace(`s3://${S3_BUCKET}/`, '')
+      : asset.url;
+
+    // Generate presigned GET URL
+    const downloadUrl = await generateDownloadUrl(s3Key, {
+      expiresIn: 3600,
+      fileName: asset.name,
+      contentType: asset.mimeType || 'application/octet-stream',
+    });
 
     return NextResponse.json({
       downloadUrl,

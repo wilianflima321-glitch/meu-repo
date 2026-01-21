@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import React, { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -12,6 +12,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean
   rounded?: 'default' | 'full'
   glow?: boolean
+  asChild?: boolean
 }
 
 const variantClasses: Record<string, string> = {
@@ -98,6 +99,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       fullWidth = false,
       rounded = 'default',
       glow = false,
+      asChild = false,
       disabled,
       className = '',
       ...props
@@ -107,23 +109,32 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const isDisabled = disabled || loading
     const roundedClass = rounded === 'full' ? 'rounded-full' : 'rounded-lg'
 
+    const computedClassName = `
+      inline-flex items-center justify-center 
+      ${roundedClass}
+      transition-all duration-200 ease-out
+      transform active:scale-[0.98]
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
+      ${variantClasses[variant]}
+      ${sizeClasses[size]}
+      ${fullWidth ? 'w-full' : ''}
+      ${glow && !isDisabled ? 'hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]' : ''}
+      ${className}
+    `
+
+    if (asChild && typeof children !== 'string' && children && (children as any).type) {
+      return React.cloneElement(children as React.ReactElement, {
+        className: `${computedClassName} ${(children as React.ReactElement).props?.className || ''}`,
+        ...props,
+      })
+    }
+
     return (
       <button
         ref={ref}
         disabled={isDisabled}
-        className={`
-          inline-flex items-center justify-center 
-          ${roundedClass}
-          transition-all duration-200 ease-out
-          transform active:scale-[0.98]
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
-          disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
-          ${variantClasses[variant]}
-          ${sizeClasses[size]}
-          ${fullWidth ? 'w-full' : ''}
-          ${glow && !isDisabled ? 'hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]' : ''}
-          ${className}
-        `}
+        className={computedClassName}
         {...props}
       >
         {loading ? (

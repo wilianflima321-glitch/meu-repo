@@ -42,6 +42,19 @@ export default function MarketplacePage() {
     'productivity'
   ];
 
+  const categoryLabels: Record<string, string> = {
+    all: 'Todos',
+    languages: 'Linguagens',
+    themes: 'Temas',
+    debuggers: 'Depuradores',
+    formatters: 'Formatadores',
+    linters: 'Linters',
+    snippets: 'Snippets',
+    keymaps: 'Mapas de teclas',
+    'ai-tools': 'Ferramentas de IA',
+    productivity: 'Produtividade',
+  };
+
   useEffect(() => {
     loadExtensions();
   }, []);
@@ -146,8 +159,8 @@ export default function MarketplacePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Extension Marketplace</h1>
-          <p className="text-slate-300">Discover and install extensions to enhance your IDE</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Marketplace de extensões</h1>
+          <p className="text-slate-300">Descubra e instale extensões para aprimorar sua IDE</p>
         </div>
 
         {loadError && (
@@ -161,7 +174,7 @@ export default function MarketplacePage() {
             <div className="md:col-span-2">
               <input
                 type="text"
-                placeholder="Search extensions..."
+                placeholder="Buscar extensões..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -174,9 +187,9 @@ export default function MarketplacePage() {
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full px-4 py-2 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="downloads">Most Downloaded</option>
-                <option value="rating">Highest Rated</option>
-                <option value="name">Name (A-Z)</option>
+                <option value="downloads">Mais baixadas</option>
+                <option value="rating">Melhor avaliadas</option>
+                <option value="name">Nome (A-Z)</option>
               </select>
             </div>
           </div>
@@ -192,7 +205,7 @@ export default function MarketplacePage() {
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
-                {category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' ')}
+                {categoryLabels[category] ?? category}
               </button>
             ))}
           </div>
@@ -201,7 +214,7 @@ export default function MarketplacePage() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-            <p className="text-slate-300 mt-4">Loading extensions...</p>
+            <p className="text-slate-300 mt-4">Carregando extensões...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -219,7 +232,7 @@ export default function MarketplacePage() {
                       {ext.displayName}
                     </h3>
                     <p className="text-sm text-slate-400">
-                      by {ext.publisher} • v{ext.version}
+                      por {ext.publisher} • v{ext.version}
                     </p>
                   </div>
                 </div>
@@ -228,7 +241,7 @@ export default function MarketplacePage() {
 
                 <div className="flex items-center gap-4 mb-4 text-sm text-slate-400">
                   <div className="flex items-center gap-1">
-                    <span className="text-slate-500">Rating</span>
+                    <span className="text-slate-500">Avaliação</span>
                     <span>{ext.rating.toFixed(1)}</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -255,10 +268,10 @@ export default function MarketplacePage() {
                         onClick={() => handleUninstall(ext.id)}
                         className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                       >
-                        Uninstall
+                        Desinstalar
                       </button>
                       <button className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
-                        Config
+                        Configurar
                       </button>
                     </>
                   ) : (
@@ -266,7 +279,7 @@ export default function MarketplacePage() {
                       onClick={() => handleInstall(ext.id)}
                       className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                     >
-                      Install
+                      Instalar
                     </button>
                   )}
                 </div>
@@ -277,8 +290,8 @@ export default function MarketplacePage() {
 
         {!loading && filteredExtensions.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-slate-400 text-lg">No extensions found</p>
-            <p className="text-slate-500 mt-2">Try adjusting your search or filters</p>
+            <p className="text-slate-400 text-lg">Nenhuma extensão encontrada</p>
+            <p className="text-slate-500 mt-2">Ajuste sua busca ou filtros</p>
           </div>
         )}
       </div>

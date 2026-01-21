@@ -71,7 +71,7 @@ export type AIOperationType =
 // ============================================================================
 
 // Créditos por 1K tokens (para operações de texto)
-const CREDITS_PER_1K_TOKENS: Record<string, number> = {
+export const CREDITS_PER_1K_TOKENS: Record<string, number> = {
   chat: 1,
   chat_advanced: 2,
   code_generation: 3,
@@ -81,7 +81,7 @@ const CREDITS_PER_1K_TOKENS: Record<string, number> = {
 };
 
 // Créditos fixos por unidade (para operações não-texto)
-const FIXED_CREDITS: Record<string, number> = {
+export const CREDITS_FIXED_COST: Record<string, number> = {
   image_generation: 10,      // por imagem
   audio_generation: 5,       // por minuto
   music_generation: 8,       // por minuto
@@ -93,10 +93,23 @@ const FIXED_CREDITS: Record<string, number> = {
 // FUNÇÕES DE CRÉDITO
 // ============================================================================
 
+const clampNonNegative = (value: number): number => {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, value);
+};
+
+const ensurePositiveAmount = (value: number, label: string): number => {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(`${label} must be a positive number`);
+  }
+  return value;
+};
+
 /**
  * Obtém saldo atual de créditos do usuário
  */
 export async function getCreditBalance(userId: string): Promise<number> {
+  if (!userId) return 0;
   const result = await prisma.creditLedgerEntry.aggregate({
     where: {
       userId,
@@ -113,6 +126,33 @@ export async function getCreditBalance(userId: string): Promise<number> {
   return result._sum?.amount ?? 0;
 }
 
+export function calculateTokenCost(operationType: AIOperationType, tokens: number): number {
+  if (!Number.isFinite(tokens) || tokens <= 0) return 0;
+  const per1k = CREDITS_PER_1K_TOKENS[operationType];
+  if (!per1k) return 0;
+  const rawCost = (tokens / 1000) * per1k;
+  if (per1k < 1) {
+    return Math.round(rawCost * 1000) / 1000;
+  }
+  return Math.ceil(clampNonNegative(rawCost));
+}
+
+export function calculateEstimatedCost(
+  operationType: AIOperationType,
+  params: { count?: number; minutes?: number; tokens?: number }
+): number {
+  if (params.tokens && CREDITS_PER_1K_TOKENS[operationType]) {
+    return calculateTokenCost(operationType, params.tokens);
+  }
+
+  if (CREDITS_FIXED_COST[operationType]) {
+    const multiplier = clampNonNegative(params.count || params.minutes || 1);
+    return CREDITS_FIXED_COST[operationType] * multiplier;
+  }
+
+  return 1;
+}
+
 /**
  * Estima custo em créditos para uma operação
  */
@@ -127,13 +167,13 @@ export function estimateCreditCost(
 ): number {
   // Operações de texto
   if (CREDITS_PER_1K_TOKENS[operationType] && params.estimatedTokens) {
-    return Math.ceil((params.estimatedTokens / 1000) * CREDITS_PER_1K_TOKENS[operationType]);
+    return Math.ceil(clampNonNegative((params.estimatedTokens / 1000) * CREDITS_PER_1K_TOKENS[operationType]));
   }
 
   // Operações fixas
-  if (FIXED_CREDITS[operationType]) {
-    const multiplier = params.imageCount || params.audioMinutes || params.assetCount || 1;
-    return FIXED_CREDITS[operationType] * multiplier;
+  if (CREDITS_FIXED_COST[operationType]) {
+    const multiplier = clampNonNegative(params.imageCount || params.audioMinutes || params.assetCount || 1);
+    return CREDITS_FIXED_COST[operationType] * multiplier;
   }
 
   // Fallback
@@ -148,15 +188,16 @@ export async function checkCreditQuota(
   operationType: AIOperationType,
   estimatedCost: number
 ): Promise<CreditCheckResult> {
+  const normalizedCost = clampNonNegative(estimatedCost);
   const balance = await getCreditBalance(userId);
 
-  if (balance < estimatedCost) {
+  if (balance < normalizedCost) {
     return {
       allowed: false,
       balance,
-      estimatedCost,
+      estimatedCost: normalizedCost,
       remaining: balance,
-      reason: `Saldo insuficiente. Necessário: ${estimatedCost} créditos. Saldo: ${balance} créditos.`,
+      reason: `Saldo insuficiente. Necessário: ${normalizedCost} créditos. Saldo: ${balance} créditos.`,
       upgradeRequired: balance <= 0,
     };
   }
@@ -164,8 +205,8 @@ export async function checkCreditQuota(
   return {
     allowed: true,
     balance,
-    estimatedCost,
-    remaining: balance - estimatedCost,
+    estimatedCost: normalizedCost,
+    remaining: balance - normalizedCost,
   };
 }
 
@@ -178,7 +219,12 @@ export async function reserveCredits(
   estimatedCost: number,
   reference?: string
 ): Promise<CreditReservation | null> {
-  const check = await checkCreditQuota(userId, operationType, estimatedCost);
+  const normalizedCost = clampNonNegative(estimatedCost);
+  if (normalizedCost <= 0) {
+    return null;
+  }
+
+  const check = await checkCreditQuota(userId, operationType, normalizedCost);
   
   if (!check.allowed) {
     return null;
@@ -192,7 +238,7 @@ export async function reserveCredits(
   await prisma.creditLedgerEntry.create({
     data: {
       userId,
-      amount: -estimatedCost,
+      amount: -normalizedCost,
       currency: 'credits',
       entryType: 'RESERVATION',
       reference: reservationId,
@@ -208,7 +254,7 @@ export async function reserveCredits(
   return {
     reservationId,
     userId,
-    amount: estimatedCost,
+    amount: normalizedCost,
     operationType,
     createdAt: now,
     expiresAt,
@@ -223,6 +269,7 @@ export async function settleCredits(
   actualCost: number,
   metadata?: Record<string, any>
 ): Promise<void> {
+  const normalizedCost = clampNonNegative(actualCost);
   // Buscar reserva
   const reservation = await prisma.creditLedgerEntry.findFirst({
     where: {
@@ -237,7 +284,7 @@ export async function settleCredits(
   }
 
   const reservedAmount = Math.abs(reservation.amount);
-  const difference = actualCost - reservedAmount;
+  const difference = normalizedCost - reservedAmount;
 
   // Atualizar reserva para settled
   await prisma.$transaction([
@@ -248,7 +295,7 @@ export async function settleCredits(
         metadata: {
           ...(reservation.metadata as object || {}),
           settled: true,
-          actualCost,
+          actualCost: normalizedCost,
           settledAt: new Date().toISOString(),
           ...metadata,
         },
@@ -283,6 +330,10 @@ export async function cancelReservation(reservationId: string): Promise<void> {
     where: {
       reference: reservationId,
       entryType: 'RESERVATION',
+      metadata: {
+        path: ['settled'],
+        equals: false,
+      },
     },
   });
 
@@ -298,6 +349,7 @@ export async function cancelReservation(reservationId: string): Promise<void> {
  * Deduz créditos diretamente (sem reserva prévia)
  */
 export async function deductCredits(params: CreditDeduction): Promise<boolean> {
+  if (clampNonNegative(params.amount) <= 0) return false;
   const check = await checkCreditQuota(params.userId, params.operationType, params.amount);
   
   if (!check.allowed) {
@@ -332,6 +384,7 @@ export async function addCredits(
   reference?: string,
   metadata?: Record<string, any>
 ): Promise<void> {
+  ensurePositiveAmount(amount, 'amount');
   await prisma.creditLedgerEntry.create({
     data: {
       userId,
@@ -380,6 +433,210 @@ export async function cleanupExpiredReservations(): Promise<number> {
 }
 
 // ============================================================================
+// CLASS WRAPPER (legacy compatibility)
+// ============================================================================
+
+export class CreditWallet {
+  async getBalance(userId: string): Promise<{ total: number; reserved: number; available: number }> {
+    const prismaAny = prisma as any;
+    const user = await prismaAny.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return { total: 0, reserved: 0, available: 0 };
+    }
+
+    const total = typeof user.credits === 'number' ? user.credits : await getCreditBalance(userId);
+    const reserved = typeof user.reservedCredits === 'number' ? user.reservedCredits : 0;
+    return { total, reserved, available: total - reserved };
+  }
+
+  async checkBalance(userId: string, operationType: AIOperationType, estimatedCost: number): Promise<CreditCheckResult> {
+    const prismaAny = prisma as any;
+    const user = await prismaAny.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return {
+        allowed: false,
+        balance: 0,
+        estimatedCost,
+        remaining: 0,
+        reason: 'User not found',
+      };
+    }
+
+    const total = typeof user.credits === 'number' ? user.credits : await getCreditBalance(userId);
+    const reserved = typeof user.reservedCredits === 'number' ? user.reservedCredits : 0;
+    const available = total - reserved;
+
+    if (available < estimatedCost) {
+      const plan = typeof user.plan === 'string' ? user.plan : '';
+      return {
+        allowed: false,
+        balance: available,
+        estimatedCost,
+        remaining: available,
+        reason: 'Insufficient credits',
+        upgradeRequired: plan.includes('free') || plan.includes('trial') || available <= 0,
+      };
+    }
+
+    return {
+      allowed: true,
+      balance: available,
+      estimatedCost,
+      remaining: available - estimatedCost,
+    };
+  }
+
+  async reserveCredits(userId: string, operationType: AIOperationType, amount: number): Promise<CreditReservation | null> {
+    const check = await this.checkBalance(userId, operationType, amount);
+    if (!check.allowed) return null;
+
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 5 * 60 * 1000);
+
+    const result = await prisma.$transaction(async (tx) => {
+      const txAny = tx as any;
+      const reservation = await txAny.creditReservation?.create?.({
+        data: {
+          userId,
+          amount,
+          operationType,
+          createdAt: now,
+          expiresAt,
+        },
+      }) ?? {
+        id: `res_${userId}_${Date.now()}`,
+        userId,
+        amount,
+        operationType,
+        createdAt: now,
+        expiresAt,
+      };
+
+      if (txAny.user?.update) {
+        await txAny.user.update({
+          where: { id: userId },
+          data: { reservedCredits: { increment: amount } },
+        });
+      }
+
+      return { reservation };
+    });
+
+    return {
+      reservationId: result.reservation.id,
+      userId,
+      amount,
+      operationType,
+      createdAt: result.reservation.createdAt ?? now,
+      expiresAt: result.reservation.expiresAt ?? expiresAt,
+    };
+  }
+
+  async deductCredits(params: CreditDeduction & { reservationId?: string }): Promise<{ success: boolean; newBalance?: number; error?: string }> {
+    const prismaAny = prisma as any;
+    const existingUser = await prismaAny.user?.findUnique?.({ where: { id: params.userId } });
+    if (existingUser) {
+      const check = await this.checkBalance(params.userId, params.operationType, params.amount);
+      if (!check.allowed) {
+        return { success: false, error: check.reason || 'Insufficient credits' };
+      }
+    }
+
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const txAny = tx as any;
+        if (params.reservationId && txAny.creditReservation?.delete) {
+          await txAny.creditReservation.delete({ where: { id: params.reservationId } });
+        }
+
+        const user = await txAny.user?.update?.({
+          where: { id: params.userId },
+          data: { credits: { decrement: params.amount } },
+        });
+
+        await txAny.creditLedgerEntry?.create?.({
+          data: {
+            userId: params.userId,
+            amount: -params.amount,
+            entryType: 'USAGE',
+            reference: params.reference || `usage_${Date.now()}`,
+            metadata: {
+              operationType: params.operationType,
+            },
+          },
+        });
+
+        return { user };
+      });
+
+      return { success: true, newBalance: result.user?.credits };
+    } catch (error: any) {
+      return { success: false, error: error?.message || 'Failed to deduct credits' };
+    }
+  }
+
+  async refundCredits(params: { userId: string; amount: number; reason?: string; originalReference?: string }): Promise<{ success: boolean; newBalance?: number; error?: string }> {
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const txAny = tx as any;
+        const user = await txAny.user?.update?.({
+          where: { id: params.userId },
+          data: { credits: { increment: params.amount } },
+        });
+
+        await txAny.creditLedgerEntry?.create?.({
+          data: {
+            userId: params.userId,
+            amount: Math.abs(params.amount),
+            entryType: 'REFUND',
+            reference: params.originalReference || `refund_${Date.now()}`,
+            metadata: {
+              reason: params.reason,
+              originalReference: params.originalReference,
+            },
+          },
+        });
+
+        return { user };
+      });
+
+      return { success: true, newBalance: result.user?.credits };
+    } catch (error: any) {
+      return { success: false, error: error?.message || 'Failed to refund credits' };
+    }
+  }
+
+  async cleanupExpiredReservations(): Promise<number> {
+    const prismaAny = prisma as any;
+    const result = await prismaAny.creditReservation?.deleteMany?.({
+      where: { expiresAt: { lt: new Date() } },
+    });
+    return result?.count || 0;
+  }
+
+  async getLedgerHistory(userId: string, params: { page: number; limit: number; operationType?: string; startDate?: Date; endDate?: Date }): Promise<{ entries: any[] }> {
+    const { page, limit, operationType, startDate, endDate } = params;
+    const where: any = { userId };
+    if (operationType) where.operationType = operationType;
+    if (startDate || endDate) {
+      where.createdAt = {
+        ...(startDate ? { gte: startDate } : {}),
+        ...(endDate ? { lte: endDate } : {}),
+      };
+    }
+
+    const entries = await prisma.creditLedgerEntry.findMany({
+      where: where as any,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+
+    return { entries };
+  }
+}
+
+// ============================================================================
 // API RESPONSE HELPERS
 // ============================================================================
 
@@ -414,11 +671,25 @@ export async function withCreditControl<T>(
   operation: () => Promise<{ result: T; actualTokens?: number; actualCost?: number }>,
   reference?: string
 ): Promise<{ success: boolean; result?: T; error?: any; creditsUsed?: number }> {
+  const normalizedCost = clampNonNegative(estimatedCost);
+  if (normalizedCost <= 0) {
+    const { result, actualTokens, actualCost } = await operation();
+    const finalCost = actualCost ?? (actualTokens
+      ? estimateCreditCost(operationType, { estimatedTokens: actualTokens })
+      : 0);
+
+    return {
+      success: true,
+      result,
+      creditsUsed: clampNonNegative(finalCost),
+    };
+  }
+
   // 1. Reservar créditos
-  const reservation = await reserveCredits(userId, operationType, estimatedCost, reference);
+  const reservation = await reserveCredits(userId, operationType, normalizedCost, reference);
   
   if (!reservation) {
-    const check = await checkCreditQuota(userId, operationType, estimatedCost);
+    const check = await checkCreditQuota(userId, operationType, normalizedCost);
     return {
       success: false,
       error: createInsufficientCreditsResponse(check),
@@ -433,11 +704,11 @@ export async function withCreditControl<T>(
     const finalCost = actualCost ?? (
       actualTokens 
         ? estimateCreditCost(operationType, { estimatedTokens: actualTokens })
-        : estimatedCost
+        : normalizedCost
     );
 
     // 4. Settle reserva
-    await settleCredits(reservation.reservationId, finalCost, { actualTokens });
+    await settleCredits(reservation.reservationId, clampNonNegative(finalCost), { actualTokens });
 
     return {
       success: true,

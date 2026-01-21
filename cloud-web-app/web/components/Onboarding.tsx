@@ -43,6 +43,24 @@ interface OnboardingState {
   stats: Record<string, number>;
 }
 
+interface DependencyInfo {
+  name: string;
+  status: 'healthy' | 'degraded' | 'unhealthy' | 'unknown' | 'checking';
+  required: boolean;
+  installCommand?: string;
+  installUrl?: string;
+  errorMessage?: string;
+}
+
+interface SystemHealthReport {
+  overall: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+  dependencies: DependencyInfo[];
+  canRunFullFeatures?: boolean;
+  canRunBasicFeatures?: boolean;
+  missingRequired?: string[];
+  missingOptional?: string[];
+}
+
 interface OnboardingContextType {
   state: OnboardingState | null;
   loading: boolean;
@@ -264,6 +282,12 @@ export function WelcomeModal() {
 
 const CHECKLIST_ITEMS: OnboardingStep[] = [
   {
+    id: 'dependency_check',
+    title: 'Verificar dependências locais',
+    description: 'Blender, Ollama, FFMPEG e ambiente de runtime',
+    completed: false,
+  },
+  {
     id: 'profile_setup',
     title: 'Complete seu perfil',
     description: 'Adicione foto e informações',
@@ -304,13 +328,64 @@ const CHECKLIST_ITEMS: OnboardingStep[] = [
 export function OnboardingChecklist() {
   const { state, completeStep } = useOnboarding();
   const [isOpen, setIsOpen] = useState(true);
+  const [health, setHealth] = useState<SystemHealthReport | null>(null);
+  const [healthLoading, setHealthLoading] = useState(false);
+  const [healthError, setHealthError] = useState<string | null>(null);
+
+  const fetchHealth = async () => {
+    setHealthLoading(true);
+    setHealthError(null);
+    try {
+      const res = await fetch('/api/system-health', { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`system health failed (${res.status})`);
+      }
+      const data = (await res.json()) as SystemHealthReport;
+      setHealth(data);
+    } catch (error) {
+      setHealthError(error instanceof Error ? error.message : 'Falha ao checar dependências');
+    } finally {
+      setHealthLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHealth();
+  }, []);
+
+  useEffect(() => {
+    if (!health || !state) return;
+    if (health.canRunBasicFeatures && !state.completedSteps.includes('dependency_check')) {
+      completeStep('dependency_check');
+    }
+  }, [health, state, completeStep]);
 
   if (!state || state.currentStep === 'completed') return null;
 
-  const items = CHECKLIST_ITEMS.map(item => ({
-    ...item,
-    completed: state.completedSteps.includes(item.id),
-  }));
+  const dependencySummary = (() => {
+    if (!health) return 'Aguardando verificação de dependências...';
+    const total = health.dependencies?.length || 0;
+    const ok = health.dependencies?.filter(dep => dep.status === 'healthy').length || 0;
+    const requiredMissing = health.missingRequired?.length || 0;
+    if (requiredMissing > 0) {
+      return `Faltam ${requiredMissing} dependências críticas`;
+    }
+    return `${ok}/${total} dependências ok`;
+  })();
+
+  const items = CHECKLIST_ITEMS.map(item => {
+    if (item.id === 'dependency_check') {
+      return {
+        ...item,
+        description: dependencySummary,
+        completed: state.completedSteps.includes(item.id),
+      };
+    }
+    return {
+      ...item,
+      completed: state.completedSteps.includes(item.id),
+    };
+  });
 
   const completedCount = items.filter(i => i.completed).length;
   const progress = Math.round((completedCount / items.length) * 100);
@@ -344,6 +419,68 @@ export function OnboardingChecklist() {
 
           {/* Items */}
           <div className="p-2 max-h-64 overflow-y-auto">
+            <div className="px-2 pb-3">
+              <div className="flex items-center justify-between text-xs text-neutral-400">
+                <span>Dependências do sistema</span>
+                <button
+                  onClick={fetchHealth}
+                  className="text-purple-400 hover:text-purple-300 transition-colors"
+                >
+                  {healthLoading ? 'Verificando...' : 'Reverificar'}
+                </button>
+              </div>
+              {healthError && (
+                <div className="mt-2 text-xs text-red-400">
+                  {healthError}
+                </div>
+              )}
+              {health && (
+                <div className="mt-2 space-y-1 text-xs text-neutral-300">
+                  <div className="flex items-center justify-between">
+                    <span>Status geral</span>
+                    <span className={
+                      health.overall === 'healthy'
+                        ? 'text-green-400'
+                        : health.overall === 'degraded'
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
+                    }>
+                      {health.overall}
+                    </span>
+                  </div>
+                  {health.missingRequired && health.missingRequired.length > 0 && (
+                    <div className="text-red-400">
+                      Críticas: {health.missingRequired.join(', ')}
+                    </div>
+                  )}
+                  {health.missingOptional && health.missingOptional.length > 0 && (
+                    <div className="text-neutral-400">
+                      Opcionais: {health.missingOptional.join(', ')}
+                    </div>
+                  )}
+                  {health.dependencies && health.dependencies.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {health.dependencies
+                        .filter(dep => dep.status === 'unhealthy' || dep.status === 'degraded')
+                        .slice(0, 6)
+                        .map(dep => (
+                          <div key={dep.name} className="text-xs text-neutral-400">
+                            <span className={dep.status === 'unhealthy' ? 'text-red-400' : 'text-yellow-400'}>
+                              {dep.name}
+                            </span>
+                            {dep.installCommand && (
+                              <span className="text-neutral-500"> · {dep.installCommand}</span>
+                            )}
+                            {dep.installUrl && !dep.installCommand && (
+                              <span className="text-neutral-500"> · {dep.installUrl}</span>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             {items.map(item => (
               <button
                 key={item.id}

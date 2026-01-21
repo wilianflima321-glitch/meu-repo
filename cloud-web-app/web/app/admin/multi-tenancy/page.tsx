@@ -1,83 +1,122 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+type Tenant = {
+  id: string;
+  domain: string;
+  users: number;
+  storageBytes: number;
+  lastActiveAt: string | null;
+  status: 'active' | 'inactive';
+};
+
+function formatStorage(bytes: number) {
+  if (!bytes) return '0 MB';
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
+  return `${mb.toFixed(1)} MB`;
+}
 
 export default function MultiTenancyPage() {
-  const [tenants, setTenants] = useState([
-    { id: 1, name: 'Empresa A', domain: 'empresaA.aethel.com', users: 150, storage: '500GB', status: 'Active' },
-    { id: 2, name: 'Empresa B', domain: 'empresaB.aethel.com', users: 75, storage: '250GB', status: 'Inactive' },
-    { id: 3, name: 'Empresa C', domain: 'empresaC.aethel.com', users: 300, storage: '1TB', status: 'Active' }
-  ]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [newTenant, setNewTenant] = useState({ name: '', domain: '', storage: '' });
-
-  const handleCreate = () => {
-    if (newTenant.name && newTenant.domain) {
-      setTenants([...tenants, {
-        id: tenants.length + 1,
-        name: newTenant.name,
-        domain: newTenant.domain,
-        users: 0,
-        storage: newTenant.storage || '100GB',
-        status: 'Active'
-      }]);
-      setNewTenant({ name: '', domain: '', storage: '' });
+  const fetchTenants = useCallback(async () => {
+    try {
+      setError(null);
+      const res = await fetch('/api/admin/tenants');
+      if (!res.ok) {
+        throw new Error('Falha ao carregar tenants');
+      }
+      const data = await res.json();
+      setTenants(Array.isArray(data?.tenants) ? data.tenants : []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const toggleStatus = (id) => {
-    setTenants(tenants.map(tenant => 
-      tenant.id === id ? { ...tenant, status: tenant.status === 'Active' ? 'Inactive' : 'Active' } : tenant
-    ));
-  };
+  useEffect(() => {
+    fetchTenants();
+  }, [fetchTenants]);
+
+  const summary = useMemo(() => {
+    const totalUsers = tenants.reduce((sum, tenant) => sum + tenant.users, 0);
+    const totalStorage = tenants.reduce((sum, tenant) => sum + tenant.storageBytes, 0);
+    return { totalUsers, totalStorage };
+  }, [tenants]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Multi-Tenancy</h1>
-      
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Criar Novo Tenant</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Nome da Empresa"
-            value={newTenant.name}
-            onChange={(e) => setNewTenant({ ...newTenant, name: e.target.value })}
-            className="border p-2"
-          />
-          <input
-            type="text"
-            placeholder="Domínio Customizado"
-            value={newTenant.domain}
-            onChange={(e) => setNewTenant({ ...newTenant, domain: e.target.value })}
-            className="border p-2"
-          />
-          <input
-            type="text"
-            placeholder="Storage (ex: 100GB)"
-            value={newTenant.storage}
-            onChange={(e) => setNewTenant({ ...newTenant, storage: e.target.value })}
-            className="border p-2"
-          />
-          <button onClick={handleCreate} className="bg-blue-500 text-white px-4 py-2 rounded col-span-3">Criar Tenant</button>
+    <div className="p-6 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Multilocação</h1>
+          <p className="text-sm text-gray-600">
+            Visão por domínio (derivado de usuários reais). Gestão manual de locatários não está habilitada.
+          </p>
+        </div>
+        <button
+          onClick={fetchTenants}
+          className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+        >
+          Atualizar
+        </button>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="text-center">
+          <h3 className="text-sm font-semibold">Locatários detectados</h3>
+          <p className="text-2xl font-bold text-blue-600">{tenants.length}</p>
+        </div>
+        <div className="text-center">
+          <h3 className="text-sm font-semibold">Usuários totais</h3>
+          <p className="text-2xl font-bold text-gray-700">{summary.totalUsers}</p>
+        </div>
+        <div className="text-center">
+          <h3 className="text-sm font-semibold">Armazenamento agregado</h3>
+          <p className="text-2xl font-bold text-gray-700">{formatStorage(summary.totalStorage)}</p>
         </div>
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Tenants Existentes</h2>
-        <ul>
-          {tenants.map(tenant => (
-            <li key={tenant.id} className="p-4 border-b">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">{tenant.name}</h3>
-                <span className="px-2 py-1 rounded">{tenant.status}</span>
-              </div>
-              <p className="text-sm text-gray-600">Domínio: {tenant.domain}</p>
-              <p className="text-sm text-gray-600">Usuários: {tenant.users} | Storage: {tenant.storage}</p>
-              <button onClick={() => toggleStatus(tenant.id)} className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-sm">Toggle Status</button>
-            </li>
-          ))}
-        </ul>
+        <h2 className="text-lg font-semibold mb-4">Locatários existentes</h2>
+        {loading ? (
+          <p className="text-sm text-gray-500">Carregando locatários...</p>
+        ) : error ? (
+          <p className="text-sm text-red-600">{error}</p>
+        ) : tenants.length === 0 ? (
+          <p className="text-sm text-gray-500">Nenhum locatário encontrado.</p>
+        ) : (
+          <ul>
+            {tenants.map((tenant) => (
+              <li key={tenant.id} className="p-4 border-b">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                  <div>
+                    <h3 className="font-semibold">{tenant.domain}</h3>
+                    <p className="text-sm text-gray-600">
+                      Usuários: {tenant.users} | Armazenamento: {formatStorage(tenant.storageBytes)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Última atividade: {tenant.lastActiveAt ? new Date(tenant.lastActiveAt).toLocaleString() : 'N/D'}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-semibold ${
+                      tenant.status === 'active'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {tenant.status === 'active' ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

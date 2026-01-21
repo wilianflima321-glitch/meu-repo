@@ -4,23 +4,21 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { withAdminAuth } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
-    const user = requireAuth(request);
-    
-    // TODO: Verificar se é admin
-    
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const userId = searchParams.get('userId');
     const action = searchParams.get('action');
+    const adminEmail = searchParams.get('adminEmail');
+    const severity = searchParams.get('severity');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     
@@ -28,6 +26,8 @@ export async function GET(request: NextRequest) {
     
     if (userId) where.userId = userId;
     if (action) where.action = { contains: action };
+    if (adminEmail) where.adminEmail = { contains: adminEmail };
+    if (severity) where.severity = severity;
     if (startDate) where.createdAt = { ...where.createdAt, gte: new Date(startDate) };
     if (endDate) where.createdAt = { ...where.createdAt, lte: new Date(endDate) };
     
@@ -58,3 +58,5 @@ export async function GET(request: NextRequest) {
     return apiInternalError();
   }
 }
+
+export const GET = withAdminAuth(getHandler, 'ops:dashboard:metrics');

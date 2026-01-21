@@ -159,6 +159,19 @@ export class RateLimiter {
     this.storage = storage || new MemoryStorage();
     this.setupDefaultConfigs();
   }
+
+  listConfigs(): RateLimitConfig[] {
+    return Array.from(this.configs.values()).map((config) => ({
+      name: config.name,
+      algorithm: config.algorithm,
+      limit: config.limit,
+      window: config.window,
+      identifier: config.identifier,
+      keyPrefix: config.keyPrefix,
+      skipFailedRequests: config.skipFailedRequests,
+      skipSuccessfulRequests: config.skipSuccessfulRequests,
+    }));
+  }
   
   /**
    * Configura limiters padrão
@@ -928,46 +941,6 @@ export class DDoSProtection {
 }
 
 // ============================================================================
-// REACT HOOK
-// ============================================================================
-
-import { useState, useEffect, useCallback, useMemo } from 'react';
-
-export function useQuota(quotaName: string, userId: string) {
-  const [usage, setUsage] = useState<QuotaUsage | null>(null);
-  const [loading, setLoading] = useState(true);
-  const manager = useMemo(() => new QuotaManager(), []);
-  
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await manager.getUsage(quotaName, userId);
-      setUsage(data);
-    } finally {
-      setLoading(false);
-    }
-  }, [manager, quotaName, userId]);
-  
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-  
-  const consume = useCallback(async (amount: number = 1) => {
-    const newUsage = await manager.consume(quotaName, userId, amount);
-    setUsage(newUsage);
-    return newUsage;
-  }, [manager, quotaName, userId]);
-  
-  return {
-    usage,
-    loading,
-    refresh,
-    consume,
-    canUse: (amount: number = 1) => usage ? usage.remaining >= amount : false,
-  };
-}
-
-// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -975,13 +948,14 @@ export const rateLimiter = new RateLimiter();
 export const quotaManager = new QuotaManager();
 export const ddosProtection = new DDoSProtection();
 
+// NOTE: useQuota hook moved to @/lib/hooks/use-quota.ts for client-side usage
+
 const rateLimitingModule = {
   RateLimiter,
   QuotaManager,
   DDoSProtection,
   rateLimitMiddleware,
   withRateLimit,
-  useQuota,
 };
 
 export default rateLimitingModule;

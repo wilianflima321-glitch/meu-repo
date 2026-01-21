@@ -23,8 +23,7 @@ let MonacoBinding: typeof import('y-monaco').MonacoBinding | null = null;
 
 // Try to load y-monaco if available
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const yMonaco = require('y-monaco');
+  const yMonaco = require('y-monaco') as { MonacoBinding: typeof import('y-monaco').MonacoBinding };
   MonacoBinding = yMonaco.MonacoBinding;
   console.log('[Collaboration] y-monaco loaded successfully');
 } catch {

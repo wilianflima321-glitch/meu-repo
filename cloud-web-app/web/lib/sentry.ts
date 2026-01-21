@@ -131,7 +131,7 @@ export const sentryConfig: Sentry.BrowserOptions = {
         /^https:\/\/.*\.aethel\.dev/,
         /^https:\/\/aethel\.dev/,
       ],
-    }),
+    } as any),
     Sentry.replayIntegration({
       maskAllText: false,
       blockAllMedia: false,

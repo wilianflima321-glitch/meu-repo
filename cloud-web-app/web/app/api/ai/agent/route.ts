@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AutonomousAgent } from '@/lib/ai/agent-mode';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
-import { getEntitlements } from '@/lib/billing/entitlements';
-import { consumeMeteredUsage } from '@/lib/billing/metering';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { consumeMeteredUsage } from '@/lib/metering';
 
 /**
  * API Route: Agent Mode Execution
@@ -35,10 +35,12 @@ export async function POST(req: NextRequest) {
     const auth = requireAuth(req);
     
     // Verificar entitlements do usuário
-    const entitlements = await getEntitlements(auth.userId);
+    const entitlements = await requireEntitlementsForUser(auth.userId);
     
     // Verificar se pode usar agent mode (feature do plano)
-    if (!entitlements.plan.limits.agentMode) {
+    const hasAgentAccess = Array.isArray(entitlements.plan.allowedAgents)
+      && entitlements.plan.allowedAgents.length > 0;
+    if (!hasAgentAccess) {
       return NextResponse.json(
         { error: 'Agent mode not available in your plan. Please upgrade.' },
         { status: 403 }
@@ -63,7 +65,7 @@ export async function POST(req: NextRequest) {
         const userAgents = Array.from(activeAgents.entries())
           .filter(([_, v]) => v.userId === auth.userId);
         
-        const maxConcurrentAgents = entitlements.plan.limits.maxConcurrentAgents || 3;
+        const maxConcurrentAgents = entitlements.plan.limits.concurrent || 1;
         if (userAgents.length >= maxConcurrentAgents) {
           return NextResponse.json(
             { error: `Maximum concurrent agents (${maxConcurrentAgents}) reached. Stop an existing agent first.` },
@@ -73,17 +75,20 @@ export async function POST(req: NextRequest) {
         
         // Consumir quota de tokens (estimativa para task)
         const estimatedTokens = (task?.length || 0) * 2 + 1000; // Base + task size
-        const decision = await consumeMeteredUsage({
-          userId: auth.userId,
-          limits: entitlements.plan.limits,
-          cost: { requests: 1, tokens: estimatedTokens },
-        });
-        
-        if (!decision.allowed) {
-          return NextResponse.json(
-            { error: `Rate limit exceeded: ${decision.reason}`, code: decision.limitType },
-            { status: 429 }
-          );
+        try {
+          await consumeMeteredUsage({
+            userId: auth.userId,
+            limits: entitlements.plan.limits,
+            cost: { requests: 1, tokens: estimatedTokens },
+          });
+        } catch (error: any) {
+          if (error?.code === 'RATE_LIMITED') {
+            return NextResponse.json(
+              { error: error.message || 'Rate limit exceeded', code: error.limitType },
+              { status: 429 }
+            );
+          }
+          throw error;
         }
         
         // Create new agent

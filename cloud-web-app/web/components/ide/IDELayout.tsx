@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import {
   Files,
   Search,
@@ -39,6 +39,24 @@ import {
   PanelLeft,
   PanelBottom,
   Layout,
+  FolderOpen,
+  Save,
+  FileText,
+  FolderPlus,
+  Download,
+  Upload,
+  Copy,
+  Scissors,
+  Clipboard,
+  Undo,
+  Redo,
+  ZoomIn,
+  ZoomOut,
+  Maximize,
+  HelpCircle,
+  Info,
+  ExternalLink,
+  RefreshCw,
 } from 'lucide-react'
 
 // ============= Types =============
@@ -76,6 +94,19 @@ interface PanelState {
   bottomPanel: boolean
 }
 
+interface MenuItem {
+  label: string
+  shortcut?: string
+  action?: () => void
+  disabled?: boolean
+  separator?: boolean
+}
+
+interface MenuConfig {
+  label: string
+  items: MenuItem[]
+}
+
 interface IDELayoutProps {
   children?: ReactNode
   // Injeção de componentes externos
@@ -90,38 +121,56 @@ interface IDELayoutProps {
   outputPanel?: ReactNode
   problemsPanel?: ReactNode
   statusBar?: ReactNode
+  // Callbacks de ações do IDE
+  onNewFile?: () => void
+  onNewFolder?: () => void
+  onOpenFile?: () => void
+  onOpenFolder?: () => void
+  onSaveFile?: () => void
+  onSaveAll?: () => void
+  onExport?: () => void
+  onUndo?: () => void
+  onRedo?: () => void
+  onCut?: () => void
+  onCopy?: () => void
+  onPaste?: () => void
+  onFind?: () => void
+  onReplace?: () => void
+  onRunProject?: () => void
+  onBuildProject?: () => void
+  onDebugProject?: () => void
 }
 
 // ============= Sidebar Tabs Config =============
 
 const SIDEBAR_TABS = [
-  { id: 'explorer' as const, icon: Files, label: 'Explorer', shortcut: '⇧⌘E' },
-  { id: 'search' as const, icon: Search, label: 'Search', shortcut: '⇧⌘F' },
-  { id: 'git' as const, icon: GitBranch, label: 'Source Control', shortcut: '⌃⇧G' },
-  { id: 'debug' as const, icon: Bug, label: 'Run and Debug', shortcut: '⇧⌘D' },
-  { id: 'extensions' as const, icon: Boxes, label: 'Extensions', shortcut: '⇧⌘X' },
-  { id: 'ai-chat' as const, icon: MessageSquare, label: 'AI Chat', shortcut: '⌘I' },
-  { id: 'ai-agents' as const, icon: Bot, label: 'AI Agents', shortcut: '⌃⇧A' },
+  { id: 'explorer' as const, icon: Files, label: 'Explorador', shortcut: '⇧⌘E' },
+  { id: 'search' as const, icon: Search, label: 'Buscar', shortcut: '⇧⌘F' },
+  { id: 'git' as const, icon: GitBranch, label: 'Controle de Versão', shortcut: '⌃⇧G' },
+  { id: 'debug' as const, icon: Bug, label: 'Executar e Depurar', shortcut: '⇧⌘D' },
+  { id: 'extensions' as const, icon: Boxes, label: 'Extensões', shortcut: '⇧⌘X' },
+  { id: 'ai-chat' as const, icon: MessageSquare, label: 'Chat IA', shortcut: '⌘I' },
+  { id: 'ai-agents' as const, icon: Bot, label: 'Agentes IA', shortcut: '⌃⇧A' },
 ]
 
 const BOTTOM_TABS = [
   { id: 'terminal' as const, icon: TerminalIcon, label: 'Terminal' },
-  { id: 'output' as const, icon: Layout, label: 'Output' },
-  { id: 'problems' as const, icon: Bug, label: 'Problems', badge: 0 },
-  { id: 'debug-console' as const, icon: Play, label: 'Debug Console' },
+  { id: 'output' as const, icon: Layout, label: 'Saída' },
+  { id: 'problems' as const, icon: Bug, label: 'Problemas', badge: 0 },
+  { id: 'debug-console' as const, icon: Play, label: 'Console de Depuração' },
 ]
 
 const EDITOR_TOOLS = [
-  { id: 'code-editor' as const, icon: Files, label: 'Code Editor', category: 'Core' },
-  { id: 'visual-scripting' as const, icon: Workflow, label: 'Visual Scripting', category: 'Engine' },
-  { id: '3d-viewport' as const, icon: Boxes, label: '3D Viewport', category: 'Engine' },
-  { id: 'level-editor' as const, icon: Layers, label: 'Level Editor', category: 'Engine' },
-  { id: 'material-editor' as const, icon: Palette, label: 'Material Editor', category: 'Engine' },
-  { id: 'animation-editor' as const, icon: Clapperboard, label: 'Animation', category: 'Engine' },
-  { id: 'particle-editor' as const, icon: Sparkles, label: 'Particles (Niagara)', category: 'Engine' },
-  { id: 'landscape-editor' as const, icon: Mountain, label: 'Landscape', category: 'Engine' },
-  { id: 'sequencer' as const, icon: Clock, label: 'Sequencer', category: 'Engine' },
-  { id: 'settings' as const, icon: Settings, label: 'Settings', category: 'System' },
+  { id: 'code-editor' as const, icon: Files, label: 'Editor de Código', category: 'Core' },
+  { id: 'visual-scripting' as const, icon: Workflow, label: 'Script Visual', category: 'Engine' },
+  { id: '3d-viewport' as const, icon: Boxes, label: 'Viewport 3D', category: 'Engine' },
+  { id: 'level-editor' as const, icon: Layers, label: 'Editor de Níveis', category: 'Engine' },
+  { id: 'material-editor' as const, icon: Palette, label: 'Editor de Materiais', category: 'Engine' },
+  { id: 'animation-editor' as const, icon: Clapperboard, label: 'Animação', category: 'Engine' },
+  { id: 'particle-editor' as const, icon: Sparkles, label: 'Partículas (Niagara)', category: 'Engine' },
+  { id: 'landscape-editor' as const, icon: Mountain, label: 'Paisagem', category: 'Engine' },
+  { id: 'sequencer' as const, icon: Clock, label: 'Sequenciador', category: 'Engine' },
+  { id: 'settings' as const, icon: Settings, label: 'Configurações', category: 'Sistema' },
 ]
 
 // ============= Main Component =============
@@ -139,6 +188,23 @@ export default function IDELayout({
   outputPanel,
   problemsPanel,
   statusBar,
+  onNewFile,
+  onNewFolder,
+  onOpenFile,
+  onOpenFolder,
+  onSaveFile,
+  onSaveAll,
+  onExport,
+  onUndo,
+  onRedo,
+  onCut,
+  onCopy,
+  onPaste,
+  onFind,
+  onReplace,
+  onRunProject,
+  onBuildProject,
+  onDebugProject,
 }: IDELayoutProps) {
   // State
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>('explorer')
@@ -154,6 +220,104 @@ export default function IDELayout({
   const [isDarkTheme, setIsDarkTheme] = useState(true)
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [problemsCount, setProblemCount] = useState(0)
+  const [activeMenu, setActiveMenu] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setActiveMenu(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Menu configurations
+  const menuConfigs: MenuConfig[] = [
+    {
+      label: 'Arquivo',
+      items: [
+        { label: 'Novo Arquivo', shortcut: '⌘N', action: onNewFile },
+        { label: 'Nova Pasta', shortcut: '⇧⌘N', action: onNewFolder },
+        { separator: true, label: '' },
+        { label: 'Abrir...', shortcut: '⌘O', action: onOpenFile },
+        { label: 'Abrir Pasta...', shortcut: '⇧⌘O', action: onOpenFolder },
+        { separator: true, label: '' },
+        { label: 'Salvar', shortcut: '⌘S', action: onSaveFile },
+        { label: 'Salvar Tudo', shortcut: '⌥⌘S', action: onSaveAll },
+        { separator: true, label: '' },
+        { label: 'Exportar Projeto...', action: onExport },
+      ],
+    },
+    {
+      label: 'Editar',
+      items: [
+        { label: 'Desfazer', shortcut: '⌘Z', action: onUndo },
+        { label: 'Refazer', shortcut: '⇧⌘Z', action: onRedo },
+        { separator: true, label: '' },
+        { label: 'Recortar', shortcut: '⌘X', action: onCut },
+        { label: 'Copiar', shortcut: '⌘C', action: onCopy },
+        { label: 'Colar', shortcut: '⌘V', action: onPaste },
+        { separator: true, label: '' },
+        { label: 'Buscar', shortcut: '⌘F', action: onFind },
+        { label: 'Substituir', shortcut: '⌥⌘F', action: onReplace },
+      ],
+    },
+    {
+      label: 'Ver',
+      items: [
+        { label: 'Paleta de Comandos', shortcut: '⌘K', action: () => setShowCommandPalette(true) },
+        { separator: true, label: '' },
+        { label: 'Barra Lateral', shortcut: '⌘B', action: () => toggleLeftSidebar() },
+        { label: 'Painel', shortcut: '⌘J', action: () => toggleBottomPanel() },
+        { separator: true, label: '' },
+        { label: 'Explorador', shortcut: '⇧⌘E', action: () => { setActiveSidebarTab('explorer'); setPanels(p => ({ ...p, leftSidebar: true })) } },
+        { label: 'Buscar', shortcut: '⇧⌘F', action: () => { setActiveSidebarTab('search'); setPanels(p => ({ ...p, leftSidebar: true })) } },
+        { label: 'Controle de Versão', shortcut: '⌃⇧G', action: () => { setActiveSidebarTab('git'); setPanels(p => ({ ...p, leftSidebar: true })) } },
+        { label: 'Depuração', shortcut: '⇧⌘D', action: () => { setActiveSidebarTab('debug'); setPanels(p => ({ ...p, leftSidebar: true })) } },
+      ],
+    },
+    {
+      label: 'Ir',
+      items: [
+        { label: 'Ir para Arquivo...', shortcut: '⌘P', action: () => setShowCommandPalette(true) },
+        { label: 'Ir para Símbolo...', shortcut: '⇧⌘O', action: () => setShowCommandPalette(true) },
+        { separator: true, label: '' },
+        { label: 'Voltar', shortcut: '⌃-', action: () => window.history.back() },
+        { label: 'Avançar', shortcut: '⌃⇧-', action: () => window.history.forward() },
+      ],
+    },
+    {
+      label: 'Executar',
+      items: [
+        { label: 'Executar Projeto', shortcut: 'F5', action: onRunProject },
+        { label: 'Compilar Projeto', shortcut: '⇧⌘B', action: onBuildProject },
+        { separator: true, label: '' },
+        { label: 'Iniciar Depuração', shortcut: 'F5', action: onDebugProject },
+        { label: 'Executar sem Depuração', shortcut: '⌃F5', action: onRunProject },
+      ],
+    },
+    {
+      label: 'Terminal',
+      items: [
+        { label: 'Novo Terminal', shortcut: '⌃`', action: () => { setActiveBottomTab('terminal'); setPanels(p => ({ ...p, bottomPanel: true })) } },
+        { label: 'Dividir Terminal', action: () => { setActiveBottomTab('terminal'); setPanels(p => ({ ...p, bottomPanel: true })) } },
+        { separator: true, label: '' },
+        { label: 'Limpar Terminal', action: () => {} },
+      ],
+    },
+    {
+      label: 'Ajuda',
+      items: [
+        { label: 'Documentação', action: () => window.open('https://docs.aethel.dev', '_blank') },
+        { label: 'Atalhos de Teclado', shortcut: '⌘K ⌘S', action: () => setShowCommandPalette(true) },
+        { separator: true, label: '' },
+        { label: 'Sobre Aethel Engine', action: () => {} },
+      ],
+    },
+  ]
 
   // Toggle functions
   const toggleLeftSidebar = useCallback(() => {
@@ -263,14 +427,52 @@ export default function IDELayout({
           </div>
 
           {/* Menu */}
-          <nav className="hidden md:flex items-center gap-1 text-sm">
-            {['File', 'Edit', 'View', 'Go', 'Run', 'Terminal', 'Help'].map(item => (
-              <button
-                key={item}
-                className={`px-2 py-1 rounded hover:${isDarkTheme ? 'bg-slate-800' : 'bg-gray-200'} transition-colors`}
-              >
-                {item}
-              </button>
+          <nav ref={menuRef} className="hidden md:flex items-center gap-1 text-sm relative">
+            {menuConfigs.map((menu) => (
+              <div key={menu.label} className="relative">
+                <button
+                  onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
+                  className={`px-2 py-1 rounded transition-colors ${
+                    activeMenu === menu.label 
+                      ? isDarkTheme ? 'bg-slate-700' : 'bg-gray-300'
+                      : isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'
+                  }`}
+                >
+                  {menu.label}
+                </button>
+                {activeMenu === menu.label && (
+                  <div className={`absolute top-full left-0 mt-1 w-56 py-1 rounded-lg shadow-xl z-50 ${
+                    isDarkTheme ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-200'
+                  }`}>
+                    {menu.items.map((item, idx) => (
+                      item.separator ? (
+                        <div key={idx} className={`my-1 border-t ${isDarkTheme ? 'border-slate-700' : 'border-gray-200'}`} />
+                      ) : (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            item.action?.()
+                            setActiveMenu(null)
+                          }}
+                          disabled={item.disabled}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 text-sm ${
+                            item.disabled 
+                              ? 'opacity-50 cursor-not-allowed'
+                              : isDarkTheme ? 'hover:bg-slate-700' : 'hover:bg-gray-100'
+                          }`}
+                        >
+                          <span>{item.label}</span>
+                          {item.shortcut && (
+                            <span className={`text-xs ${isDarkTheme ? 'text-slate-500' : 'text-gray-400'}`}>
+                              {item.shortcut}
+                            </span>
+                          )}
+                        </button>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
         </div>
@@ -286,21 +488,21 @@ export default function IDELayout({
                 : 'bg-white border-gray-300'
             }`}
           >
-            <optgroup label="Core">
-              <option value="code-editor">Code Editor</option>
+            <optgroup label="Principal">
+              <option value="code-editor">Editor de Código</option>
             </optgroup>
-            <optgroup label="Engine Tools">
-              <option value="visual-scripting">Visual Scripting</option>
-              <option value="3d-viewport">3D Viewport</option>
-              <option value="level-editor">Level Editor</option>
-              <option value="material-editor">Material Editor</option>
-              <option value="animation-editor">Animation</option>
-              <option value="particle-editor">Particles (Niagara)</option>
-              <option value="landscape-editor">Landscape</option>
-              <option value="sequencer">Sequencer</option>
+            <optgroup label="Ferramentas Engine">
+              <option value="visual-scripting">Script Visual</option>
+              <option value="3d-viewport">Viewport 3D</option>
+              <option value="level-editor">Editor de Níveis</option>
+              <option value="material-editor">Editor de Materiais</option>
+              <option value="animation-editor">Animação</option>
+              <option value="particle-editor">Partículas (Niagara)</option>
+              <option value="landscape-editor">Paisagem</option>
+              <option value="sequencer">Sequenciador</option>
             </optgroup>
-            <optgroup label="System">
-              <option value="settings">Settings</option>
+            <optgroup label="Sistema">
+              <option value="settings">Configurações</option>
             </optgroup>
           </select>
 
@@ -332,7 +534,7 @@ export default function IDELayout({
             }`}
           >
             <Search className="w-4 h-4" />
-            <span className="hidden sm:inline">Search</span>
+            <span className="hidden sm:inline">Buscar</span>
             <kbd className="hidden sm:flex items-center gap-0.5 text-xs opacity-60">
               <Command className="w-3 h-3" />K
             </kbd>
@@ -342,14 +544,14 @@ export default function IDELayout({
           <button
             onClick={toggleLeftSidebar}
             className={`p-1.5 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'} ${panels.leftSidebar ? 'text-indigo-400' : ''}`}
-            title="Toggle Sidebar (⌘B)"
+            title="Alternar Barra Lateral (⌘B)"
           >
             <PanelLeft className="w-4 h-4" />
           </button>
           <button
             onClick={toggleBottomPanel}
             className={`p-1.5 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'} ${panels.bottomPanel ? 'text-indigo-400' : ''}`}
-            title="Toggle Panel (⌘J)"
+            title="Alternar Painel (⌘J)"
           >
             <PanelBottom className="w-4 h-4" />
           </button>

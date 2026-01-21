@@ -364,6 +364,27 @@ export class CodeValidator {
     return { errors, warnings, autoFixable };
   }
 
+  async runESLintAutoFix(content: string, filePath: string): Promise<string> {
+    if (!this.eslintPath) {
+      return content;
+    }
+
+    try {
+      await fs.writeFile(filePath, content, 'utf8');
+      await execFileAsync(
+        this.eslintPath,
+        ['--fix', filePath],
+        {
+          cwd: this.config.workspacePath,
+          timeout: this.config.timeout,
+        }
+      );
+      return await fs.readFile(filePath, 'utf8');
+    } catch {
+      return content;
+    }
+  }
+
   private async runESLintProject(): Promise<{
     errors: ValidationError[];
     warnings: ValidationError[];

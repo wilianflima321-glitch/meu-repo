@@ -24,7 +24,7 @@ function TerminalSkeleton() {
     <div className="h-full bg-slate-950 p-4">
       <div className="flex items-center gap-2 text-slate-600">
         <div className="w-2 h-4 bg-slate-700 animate-pulse" />
-        <span>Loading terminal...</span>
+        <span>Carregando terminal...</span>
       </div>
     </div>
   )
@@ -33,7 +33,7 @@ function TerminalSkeleton() {
 function EditorSkeleton() {
   return (
     <div className="h-full bg-slate-950 flex items-center justify-center">
-      <div className="text-slate-500 animate-pulse">Loading editor...</div>
+      <div className="text-slate-500 animate-pulse">Carregando editor...</div>
     </div>
   )
 }

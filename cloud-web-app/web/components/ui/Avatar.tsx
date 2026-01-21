@@ -11,6 +11,31 @@ export interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
   status?: 'online' | 'offline' | 'busy' | 'away'
 }
 
+export interface AvatarImageProps extends HTMLAttributes<HTMLImageElement> {
+  src?: string | null
+  alt?: string
+}
+
+export function AvatarImage({ src, alt = 'Avatar', className = '', ...props }: AvatarImageProps) {
+  if (!src) return null;
+  return <img src={src} alt={alt} className={`h-full w-full object-cover ${className}`} {...props} />;
+}
+
+export interface AvatarFallbackProps extends HTMLAttributes<HTMLDivElement> {
+  children?: string
+}
+
+export function AvatarFallback({ children = '?', className = '', ...props }: AvatarFallbackProps) {
+  return (
+    <div
+      className={`flex h-full w-full items-center justify-center text-sm font-medium text-white ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
 const sizeClasses: Record<string, { container: string; text: string; status: string }> = {
   xs: { container: 'w-6 h-6', text: 'text-xs', status: 'w-2 h-2' },
   sm: { container: 'w-8 h-8', text: 'text-sm', status: 'w-2.5 h-2.5' },

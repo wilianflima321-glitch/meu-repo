@@ -10,34 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
-
-// ============================================================================
-// LAZY S3 CLIENT (optional dependency)
-// ============================================================================
-
-let s3ClientInstance: any = null;
-
-async function getS3Client() {
-  if (s3ClientInstance) return s3ClientInstance;
-  
-  try {
-    const { S3Client } = await import('@aws-sdk/client-s3');
-    s3ClientInstance = new S3Client({
-      region: process.env.AWS_REGION || 'us-east-1',
-      endpoint: process.env.S3_ENDPOINT,
-      forcePathStyle: !!process.env.S3_ENDPOINT,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-      },
-    });
-    return s3ClientInstance;
-  } catch {
-    return null;
-  }
-}
-
-const BUCKET_NAME = process.env.S3_BUCKET || 'aethel-assets';
+import { generateDownloadUrl, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 
 // ============================================================================
 // GET - Generate Download URL
@@ -65,6 +38,7 @@ export async function GET(
         id: true,
         name: true,
         url: true,
+        storagePath: true,
         mimeType: true,
         size: true,
       },
@@ -77,26 +51,26 @@ export async function GET(
       );
     }
 
-    // If S3 is configured, generate presigned URL
-    const s3Client = await getS3Client();
-    
-    if (s3Client && asset.url.startsWith('s3://')) {
-      try {
-        const { GetObjectCommand } = await import('@aws-sdk/client-s3');
-        const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
-        
-        // Extract key from s3:// URL
-        const s3Key = asset.url.replace(`s3://${BUCKET_NAME}/`, '');
-        
-        const command = new GetObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: s3Key,
-          ResponseContentDisposition: `attachment; filename="${encodeURIComponent(asset.name)}"`,
-          ResponseContentType: asset.mimeType || 'application/octet-stream',
-        });
+    if (!asset.url && !asset.storagePath) {
+      return NextResponse.json(
+        { error: 'Asset URL missing' },
+        { status: 404 }
+      );
+    }
 
-        const downloadUrl = await getSignedUrl(s3Client, command, {
-          expiresIn: 3600, // 1 hour
+    // If S3 is configured, generate presigned URL
+    const s3Available = await isS3Available();
+    
+    if (s3Available && (asset.storagePath || asset.url?.startsWith('s3://'))) {
+      try {
+        const s3Key = asset.storagePath
+          ? asset.storagePath
+          : asset.url!.replace(`s3://${S3_BUCKET}/`, '');
+        
+        const downloadUrl = await generateDownloadUrl(s3Key, {
+          expiresIn: 3600,
+          fileName: asset.name,
+          contentType: asset.mimeType || 'application/octet-stream',
         });
 
         return NextResponse.json({
@@ -179,32 +153,35 @@ export async function POST(
         id: true,
         name: true,
         url: true,
+        storagePath: true,
         mimeType: true,
         size: true,
       },
     });
 
-    const s3Client = await getS3Client();
+    const s3Available = await isS3Available();
 
     // Generate URLs for each asset
     const downloads = await Promise.all(
       assets.map(async (asset) => {
-        // If S3 URL and client available, generate presigned URL
-        if (s3Client && asset.url.startsWith('s3://')) {
-          try {
-            const { GetObjectCommand } = await import('@aws-sdk/client-s3');
-            const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
-            
-            const s3Key = asset.url.replace(`s3://${BUCKET_NAME}/`, '');
-            
-            const command = new GetObjectCommand({
-              Bucket: BUCKET_NAME,
-              Key: s3Key,
-              ResponseContentDisposition: `attachment; filename="${encodeURIComponent(asset.name)}"`,
-            });
+        if (!asset.url && !asset.storagePath) {
+          return {
+            assetId: asset.id,
+            fileName: asset.name,
+            error: 'Asset URL missing',
+          };
+        }
 
-            const downloadUrl = await getSignedUrl(s3Client, command, {
+        // If S3 URL and client available, generate presigned URL
+        if (s3Available && (asset.storagePath || asset.url?.startsWith('s3://'))) {
+          try {
+            const s3Key = asset.storagePath
+              ? asset.storagePath
+              : asset.url!.replace(`s3://${S3_BUCKET}/`, '');
+            
+            const downloadUrl = await generateDownloadUrl(s3Key, {
               expiresIn: 3600,
+              fileName: asset.name,
             });
 
             return {

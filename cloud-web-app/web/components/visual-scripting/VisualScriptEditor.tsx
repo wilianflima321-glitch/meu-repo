@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import {
   ReactFlow,
   Node,
@@ -24,6 +24,7 @@ import {
   Position,
   Panel,
   MarkerType,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -192,9 +193,9 @@ export const NODE_CATALOG: NodeDefinition[] = [
     color: '#3498db',
   },
 
-  // === CONDIÇÕES ===
+  // === FLOW CONTROL (Unreal-Style) ===
   {
-    type: 'condition_branch',
+    type: 'flow_branch',
     category: 'flow',
     label: 'Branch',
     description: 'If/Else condicional',
@@ -208,6 +209,181 @@ export const NODE_CATALOG: NodeDefinition[] = [
     ],
     color: '#9b59b6',
   },
+  {
+    type: 'flow_sequence',
+    category: 'flow',
+    label: 'Sequence',
+    description: 'Executa múltiplas saídas em sequência',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+    ],
+    outputs: [
+      { id: 'then_0', label: 'Then 0', type: 'exec' },
+      { id: 'then_1', label: 'Then 1', type: 'exec' },
+      { id: 'then_2', label: 'Then 2', type: 'exec' },
+      { id: 'then_3', label: 'Then 3', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_for_loop',
+    category: 'flow',
+    label: 'For Loop',
+    description: 'Loop com índice de iteração',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'first', label: 'First Index', type: 'number', default: 0 },
+      { id: 'last', label: 'Last Index', type: 'number', default: 10 },
+    ],
+    outputs: [
+      { id: 'loop', label: 'Loop Body', type: 'exec' },
+      { id: 'index', label: 'Index', type: 'number' },
+      { id: 'completed', label: 'Completed', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_for_each',
+    category: 'flow',
+    label: 'For Each',
+    description: 'Loop sobre elementos de array',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'array', label: 'Array', type: 'any' },
+    ],
+    outputs: [
+      { id: 'loop', label: 'Loop Body', type: 'exec' },
+      { id: 'element', label: 'Element', type: 'any' },
+      { id: 'index', label: 'Index', type: 'number' },
+      { id: 'completed', label: 'Completed', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_while',
+    category: 'flow',
+    label: 'While Loop',
+    description: 'Executa enquanto condição for verdadeira',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'condition', label: 'Condition', type: 'boolean' },
+    ],
+    outputs: [
+      { id: 'loop', label: 'Loop Body', type: 'exec' },
+      { id: 'completed', label: 'Completed', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_do_once',
+    category: 'flow',
+    label: 'Do Once',
+    description: 'Executa apenas uma vez até ser resetado',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'reset', label: 'Reset', type: 'exec' },
+    ],
+    outputs: [
+      { id: 'completed', label: 'Completed', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_do_n',
+    category: 'flow',
+    label: 'Do N',
+    description: 'Executa N vezes, depois para',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'n', label: 'N', type: 'number', default: 3 },
+      { id: 'reset', label: 'Reset', type: 'exec' },
+    ],
+    outputs: [
+      { id: 'exit', label: 'Exit', type: 'exec' },
+      { id: 'counter', label: 'Counter', type: 'number' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_gate',
+    category: 'flow',
+    label: 'Gate',
+    description: 'Portão que pode ser aberto/fechado',
+    inputs: [
+      { id: 'exec', label: 'Enter', type: 'exec' },
+      { id: 'open', label: 'Open', type: 'exec' },
+      { id: 'close', label: 'Close', type: 'exec' },
+      { id: 'toggle', label: 'Toggle', type: 'exec' },
+    ],
+    outputs: [
+      { id: 'exit', label: 'Exit', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_flip_flop',
+    category: 'flow',
+    label: 'Flip Flop',
+    description: 'Alterna entre duas saídas',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+    ],
+    outputs: [
+      { id: 'a', label: 'A', type: 'exec' },
+      { id: 'b', label: 'B', type: 'exec' },
+      { id: 'is_a', label: 'Is A', type: 'boolean' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_delay',
+    category: 'flow',
+    label: 'Delay',
+    description: 'Aguarda tempo antes de continuar',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'duration', label: 'Duration (s)', type: 'number', default: 1 },
+    ],
+    outputs: [
+      { id: 'completed', label: 'Completed', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_retriggerable_delay',
+    category: 'flow',
+    label: 'Retriggerable Delay',
+    description: 'Delay que reseta ao receber nova entrada',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'duration', label: 'Duration (s)', type: 'number', default: 1 },
+    ],
+    outputs: [
+      { id: 'completed', label: 'Completed', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+  {
+    type: 'flow_multi_gate',
+    category: 'flow',
+    label: 'Multi Gate',
+    description: 'Distribui execução entre múltiplas saídas',
+    inputs: [
+      { id: 'exec', label: '', type: 'exec' },
+      { id: 'reset', label: 'Reset', type: 'exec' },
+      { id: 'loop', label: 'Loop', type: 'boolean', default: false },
+      { id: 'random', label: 'Random', type: 'boolean', default: false },
+    ],
+    outputs: [
+      { id: 'out_0', label: 'Out 0', type: 'exec' },
+      { id: 'out_1', label: 'Out 1', type: 'exec' },
+      { id: 'out_2', label: 'Out 2', type: 'exec' },
+      { id: 'out_3', label: 'Out 3', type: 'exec' },
+    ],
+    color: '#9b59b6',
+  },
+
+  // === CONDIÇÕES ===
   {
     type: 'condition_compare',
     category: 'condition',
@@ -736,6 +912,222 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
 }
 
 // ============================================================================
+// CONTEXT MENU - Clique direito para criar nodes
+// ============================================================================
+
+interface ContextMenuProps {
+  x: number;
+  y: number;
+  flowPosition: { x: number; y: number };
+  onClose: () => void;
+  onAddNode: (definition: NodeDefinition, position: { x: number; y: number }) => void;
+}
+
+function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedCategory, setExpandedCategory] = useState<NodeCategory | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  // Close on click outside
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && e.target && !menuRef.current.contains(e.target as globalThis.Node)) {
+        onClose();
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [onClose]);
+
+  const categories = useMemo(() => {
+    const cats = new Map<NodeCategory, NodeDefinition[]>();
+    NODE_CATALOG.forEach((node) => {
+      const existing = cats.get(node.category) || [];
+      existing.push(node);
+      cats.set(node.category, existing);
+    });
+    return cats;
+  }, []);
+
+  const categoryLabels: Record<NodeCategory, string> = {
+    event: '🎯 Eventos',
+    action: '⚡ Ações',
+    condition: '❓ Condições',
+    variable: '📦 Variáveis',
+    math: '🔢 Matemática',
+    flow: '🔀 Fluxo',
+    input: '🎮 Input',
+    physics: '🔮 Física',
+    audio: '🔊 Áudio',
+    ui: '🖼️ UI',
+  };
+
+  const filteredNodes = useMemo(() => {
+    if (!searchTerm) return null;
+    return NODE_CATALOG.filter(
+      (n) =>
+        n.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        n.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm]);
+
+  const handleAddNode = (node: NodeDefinition) => {
+    onAddNode(node, flowPosition);
+    onClose();
+  };
+
+  return (
+    <div
+      ref={menuRef}
+      style={{
+        position: 'fixed',
+        left: x,
+        top: y,
+        width: '280px',
+        maxHeight: '400px',
+        background: '#1e1e1e',
+        border: '1px solid #444',
+        borderRadius: '8px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+        overflow: 'hidden',
+        zIndex: 1000,
+      }}
+    >
+      {/* Header */}
+      <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Buscar nó para criar..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            background: '#2a2a2a',
+            border: '1px solid #444',
+            borderRadius: '6px',
+            color: '#fff',
+            fontSize: '14px',
+            outline: 'none',
+          }}
+        />
+        <div style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>
+          Clique direito no canvas para abrir este menu
+        </div>
+      </div>
+
+      {/* Results */}
+      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+        {filteredNodes ? (
+          // Search results
+          <div style={{ padding: '8px' }}>
+            {filteredNodes.length === 0 ? (
+              <div style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
+                Nenhum nó encontrado
+              </div>
+            ) : (
+              filteredNodes.map((node) => (
+                <button
+                  key={node.type}
+                  onClick={() => handleAddNode(node)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    marginBottom: '4px',
+                    background: node.color,
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#fff',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span style={{ fontWeight: 600 }}>{node.label}</span>
+                  <span style={{ fontSize: '11px', opacity: 0.8 }}>{node.description}</span>
+                </button>
+              ))
+            )}
+          </div>
+        ) : (
+          // Category view
+          Array.from(categories).map(([category, nodes]) => (
+            <div key={category}>
+              <button
+                onClick={() =>
+                  setExpandedCategory(expandedCategory === category ? null : category)
+                }
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  background: expandedCategory === category ? '#2a2a2a' : 'transparent',
+                  border: 'none',
+                  borderBottom: '1px solid #2a2a2a',
+                  color: '#fff',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span>{categoryLabels[category]}</span>
+                <span style={{ color: '#666' }}>{nodes.length}</span>
+              </button>
+
+              {expandedCategory === category && (
+                <div style={{ padding: '6px 10px', background: '#181818' }}>
+                  {nodes.map((node) => (
+                    <button
+                      key={node.type}
+                      onClick={() => handleAddNode(node)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        marginBottom: '4px',
+                        background: node.color,
+                        border: 'none',
+                        borderRadius: '4px',
+                        color: '#fff',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                      }}
+                      title={node.description}
+                    >
+                      {node.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // VISUAL SCRIPT EDITOR
 // ============================================================================
 
@@ -762,6 +1154,14 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
 
 	const [nodes, setNodes, onNodesChange] = useNodesState<VisualNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    flowPosition: { x: number; y: number };
+  } | null>(null);
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -790,6 +1190,44 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     [setNodes]
   );
 
+  // Handler para adicionar node via context menu na posição correta
+  const handleAddNodeAtPosition = useCallback(
+    (definition: NodeDefinition, position: { x: number; y: number }) => {
+      const newNode: VisualNodeType = {
+        id: `node-${Date.now()}`,
+        type: 'visual',
+        position,
+        data: { definition },
+      };
+      setNodes((nds) => [...nds, newNode]);
+    },
+    [setNodes]
+  );
+
+  // Handler para context menu (clique direito)
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      
+      if (!reactFlowWrapper.current) return;
+      
+      const bounds = reactFlowWrapper.current.getBoundingClientRect();
+      const x = event.clientX;
+      const y = event.clientY;
+      
+      // Calcular posição no flow (aproximada, sem acesso ao viewport transform)
+      const flowX = event.clientX - bounds.left;
+      const flowY = event.clientY - bounds.top;
+      
+      setContextMenu({
+        x,
+        y,
+        flowPosition: { x: flowX, y: flowY },
+      });
+    },
+    []
+  );
+
   // Compilar script para JSON
   const compileScript = useCallback((): VisualScript => {
     return {
@@ -810,7 +1248,11 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     <div style={{ display: 'flex', height: '100%', width: '100%' }}>
       <NodePalette onAddNode={handleAddNode} />
 
-      <div style={{ flex: 1 }}>
+      <div 
+        ref={reactFlowWrapper}
+        style={{ flex: 1 }}
+        onContextMenu={handleContextMenu}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -822,6 +1264,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
           snapToGrid
           snapGrid={[16, 16]}
           style={{ background: '#0d0d0d' }}
+          onPaneClick={() => setContextMenu(null)}
         >
           <Background color="#333" gap={16} />
           <Controls />
@@ -873,6 +1316,17 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
           </Panel>
         </ReactFlow>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          flowPosition={contextMenu.flowPosition}
+          onClose={() => setContextMenu(null)}
+          onAddNode={handleAddNodeAtPosition}
+        />
+      )}
     </div>
   );
 }

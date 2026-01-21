@@ -584,6 +584,7 @@ export async function getUserSupportPreferences(userId: string): Promise<UserPre
     select: {
       supportChannel: true,
       emailNotifications: true,
+      chatNotifications: true,
       language: true,
     },
   });
@@ -591,7 +592,7 @@ export async function getUserSupportPreferences(userId: string): Promise<UserPre
   return {
     preferredChannel: (prefs?.supportChannel as 'chat' | 'email' | 'both') || 'both',
     emailNotifications: prefs?.emailNotifications ?? true,
-    chatNotifications: true,
+    chatNotifications: prefs?.chatNotifications ?? true,
     language: prefs?.language || 'pt-BR',
   };
 }
@@ -609,11 +610,13 @@ export async function updateUserSupportPreferences(
       userId,
       supportChannel: preferences.preferredChannel || 'both',
       emailNotifications: preferences.emailNotifications ?? true,
+      chatNotifications: preferences.chatNotifications ?? true,
       language: preferences.language || 'pt-BR',
     },
     update: {
       ...(preferences.preferredChannel && { supportChannel: preferences.preferredChannel }),
       ...(preferences.emailNotifications !== undefined && { emailNotifications: preferences.emailNotifications }),
+      ...(preferences.chatNotifications !== undefined && { chatNotifications: preferences.chatNotifications }),
       ...(preferences.language && { language: preferences.language }),
     },
   });

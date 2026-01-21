@@ -8,9 +8,30 @@
  * - Rate limiting global
  * 
  * Suporta fallback para cache in-memory se Redis não estiver disponível.
+ * 
+ * DEPENDÊNCIAS OPCIONAIS:
+ * npm install ioredis
  */
 
-import IORedis, { Redis } from 'ioredis';
+// ============================================================================
+// LAZY LOAD - Dependências opcionais
+// ============================================================================
+
+let IORedisModule: any = null;
+let loadAttempted = false;
+
+async function loadIORedis(): Promise<any | null> {
+  if (loadAttempted) return IORedisModule;
+  loadAttempted = true;
+  
+  try {
+    IORedisModule = await eval('import("ioredis")').then((m: any) => m.default || m);
+    return IORedisModule;
+  } catch {
+    console.warn('[RedisCache] ioredis not installed. Using in-memory fallback.');
+    return null;
+  }
+}
 
 // ============================================================================
 // CONFIGURAÇÃO
@@ -140,9 +161,11 @@ class MemoryCache {
 // ============================================================================
 
 class RedisCache {
-  private redis: Redis | null = null;
+  private redis: any | null = null;
   private fallback: MemoryCache;
+  private fallbackSortedSets: Map<string, Array<{ score: number; value: string }>> = new Map();
   private isConnected = false;
+  private connectAttempted = false;
   private stats: CacheStats = {
     hits: 0,
     misses: 0,
@@ -155,15 +178,23 @@ class RedisCache {
   
   constructor() {
     this.fallback = new MemoryCache();
-    this.connect();
   }
   
   /**
-   * Conecta ao Redis
+   * Conecta ao Redis (lazy)
    */
-  private connect(): void {
+  private async connect(): Promise<void> {
+    if (this.connectAttempted) return;
+    this.connectAttempted = true;
+    
     if (process.env.SKIP_REDIS === 'true') {
       console.log('[RedisCache] Redis disabled, using memory fallback');
+      return;
+    }
+    
+    const IORedis = await loadIORedis();
+    if (!IORedis) {
+      console.log('[RedisCache] ioredis not available, using memory fallback');
       return;
     }
     
@@ -173,7 +204,7 @@ class RedisCache {
         port: config.port,
         password: config.password,
         keyPrefix: config.keyPrefix,
-        retryStrategy: (times) => {
+        retryStrategy: (times: number) => {
           if (times > 3) {
             console.log('[RedisCache] Max retries reached, using memory fallback');
             return null;
@@ -189,7 +220,7 @@ class RedisCache {
         console.log('[RedisCache] Connected to Redis');
       });
       
-      this.redis.on('error', (error) => {
+      this.redis.on('error', (error: any) => {
         console.error('[RedisCache] Redis error:', error.message);
         this.isConnected = false;
         this.stats.isRedisConnected = false;
@@ -202,7 +233,7 @@ class RedisCache {
       });
       
       // Tenta conectar
-      this.redis.connect().catch((err) => {
+      await this.redis.connect().catch((err: any) => {
         console.error('[RedisCache] Failed to connect:', err.message);
       });
       
@@ -215,6 +246,8 @@ class RedisCache {
    * Obtém valor do cache
    */
   async get<T = unknown>(key: string): Promise<T | null> {
+    await this.connect();
+    
     try {
       let value: string | null;
       
@@ -243,6 +276,8 @@ class RedisCache {
    * Define valor no cache
    */
   async set<T>(key: string, value: T, options?: CacheOptions): Promise<boolean> {
+    await this.connect();
+    
     try {
       const ttl = options?.ttl || config.defaultTTL;
       const serialized = JSON.stringify(value);
@@ -273,6 +308,8 @@ class RedisCache {
    * Remove valor do cache
    */
   async delete(key: string): Promise<boolean> {
+    await this.connect();
+    
     try {
       if (this.isConnected && this.redis) {
         await this.redis.del(key);
@@ -293,6 +330,8 @@ class RedisCache {
    * Remove múltiplas chaves por pattern
    */
   async deletePattern(pattern: string): Promise<number> {
+    await this.connect();
+    
     try {
       let count = 0;
       
@@ -300,7 +339,7 @@ class RedisCache {
         const keys = await this.redis.keys(pattern);
         if (keys.length > 0) {
           // Remove o prefixo para o del funcionar
-          const keysWithoutPrefix = keys.map(k => k.replace(config.keyPrefix, ''));
+          const keysWithoutPrefix = keys.map((k: string) => k.replace(config.keyPrefix, ''));
           count = await this.redis.del(...keysWithoutPrefix);
         }
       } else {
@@ -316,6 +355,70 @@ class RedisCache {
       
     } catch (error) {
       console.error('[RedisCache] DeletePattern error:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Sorted set: adiciona membro com score
+   */
+  async zadd(key: string, score: number, member: string): Promise<number> {
+    await this.connect();
+
+    try {
+      if (this.isConnected && this.redis) {
+        return await this.redis.zadd(key, score, member);
+      }
+
+      const items = this.fallbackSortedSets.get(key) || [];
+      const existingIndex = items.findIndex((item) => item.value === member);
+      if (existingIndex >= 0) {
+        items.splice(existingIndex, 1);
+      }
+      items.push({ score, value: member });
+      items.sort((a, b) => a.score - b.score);
+      this.fallbackSortedSets.set(key, items);
+      return 1;
+    } catch (error) {
+      console.error('[RedisCache] ZADD error:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Sorted set: retorna range reverso
+   */
+  async zrevrange(key: string, start: number, stop: number): Promise<string[]> {
+    await this.connect();
+
+    try {
+      if (this.isConnected && this.redis) {
+        return await this.redis.zrevrange(key, start, stop);
+      }
+
+      const items = this.fallbackSortedSets.get(key) || [];
+      const sorted = [...items].sort((a, b) => b.score - a.score);
+      return sorted.slice(start, stop + 1).map((item) => item.value);
+    } catch (error) {
+      console.error('[RedisCache] ZREVRANGE error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Sorted set: conta membros
+   */
+  async zcard(key: string): Promise<number> {
+    await this.connect();
+
+    try {
+      if (this.isConnected && this.redis) {
+        return await this.redis.zcard(key);
+      }
+
+      return (this.fallbackSortedSets.get(key) || []).length;
+    } catch (error) {
+      console.error('[RedisCache] ZCARD error:', error);
       return 0;
     }
   }

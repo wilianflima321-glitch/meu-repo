@@ -49,9 +49,9 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.validator = new CodeValidator({
-      projectRoot: process.cwd(),
-      enableESLint: true,
-      enableTypeScript: true,
+      workspacePath: process.cwd(),
+      enableLint: true,
+      enableTypeCheck: true,
       enableTests: false, // Tests on-demand only
       autoFix: this.config.autoFix,
     });
@@ -110,7 +110,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
       attempts++;
 
       // Validate
-      lastValidation = await this.validator.validateContent(currentContent, filePath);
+      lastValidation = await this.validator.validateFile(filePath);
 
       this.emit('validation:result', { 
         filePath, 
@@ -124,7 +124,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
       this.validationHistory.set(filePath, history.slice(-10));
 
       // Check if clean
-      if (lastValidation.isClean) {
+      if (lastValidation.success) {
         console.log(`[CodeValidation] ✅ ${filePath} is clean after ${attempts} attempt(s)`);
         this.emit('validation:success', { filePath, attempts });
         return { 
@@ -190,7 +190,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
     agent: AutonomousAgent
   ): Promise<string | null> {
     // First try ESLint auto-fix
-    if (validation.eslintErrors.length > 0) {
+    if (validation.autoFixable.length > 0) {
       const eslintFixed = await this.validator.runESLintAutoFix(content, filePath);
       if (eslintFixed !== content) {
         return eslintFixed;
@@ -266,8 +266,11 @@ CÓDIGO CORRIGIDO:`;
   /**
    * Valida todo o workspace
    */
-  async validateWorkspace(paths?: string[]): Promise<Map<string, ValidationResult>> {
-    return this.validator.validateWorkspace(paths);
+  async validateWorkspace(paths?: string[]): Promise<ValidationResult> {
+    if (paths && paths.length > 0) {
+      return this.validator.validateFiles(paths);
+    }
+    return this.validator.validateWorkspace();
   }
 
   /**
@@ -294,15 +297,15 @@ CÓDIGO CORRIGIDO:`;
     this.validationHistory.forEach((results) => {
       results.forEach((result, index) => {
         totalValidations++;
-        if (result.isClean) {
+        if (result.success) {
           successCount++;
         }
-        if (index === results.length - 1 && result.isClean) {
+        if (index === results.length - 1 && result.success) {
           totalAttempts += results.length;
         }
 
         result.errors.forEach((error) => {
-          const code = error.rule || error.code || 'unknown';
+          const code = error.rule || 'unknown';
           errorCounts.set(code, (errorCounts.get(code) || 0) + 1);
         });
       });

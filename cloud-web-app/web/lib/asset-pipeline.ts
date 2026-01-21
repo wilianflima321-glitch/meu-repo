@@ -6,6 +6,7 @@
  */
 
 import * as THREE from 'three';
+import type { LODConfig } from './engine/lod/auto-lod-pipeline';
 
 // ============================================================================
 // TIPOS
@@ -662,7 +663,69 @@ export class AssetPipeline {
     const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync(asset.path);
+    if (asset.importSettings?.optimizeMesh) {
+      await this.applyAutoLOD(gltf.scene, {
+        minTriangles: 5000,
+        maxMeshes: 50,
+      });
+    }
     return gltf.scene;
+  }
+
+  private async applyAutoLOD(
+    scene: THREE.Group,
+    options: {
+      minTriangles?: number;
+      maxMeshes?: number;
+      config?: Partial<LODConfig>;
+    } = {}
+  ): Promise<void> {
+    const { AutoLODPipeline, DEFAULT_LOD_CONFIG } = await import('./engine/lod/auto-lod-pipeline');
+    const pipeline = new AutoLODPipeline(options.config ?? DEFAULT_LOD_CONFIG);
+    const minTriangles = options.minTriangles ?? 5000;
+    const maxMeshes = options.maxMeshes ?? Infinity;
+
+    const meshes: THREE.Mesh[] = [];
+    scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if ((mesh as any).isSkinnedMesh || (mesh as any).isInstancedMesh) return;
+      meshes.push(mesh);
+    });
+
+    let processed = 0;
+
+    for (const mesh of meshes) {
+      if (processed >= maxMeshes) break;
+
+      const geometry = mesh.geometry as THREE.BufferGeometry;
+      const index = geometry.getIndex();
+      const triangleCount = index ? index.count / 3 : geometry.getAttribute('position')?.count / 3;
+
+      if (!triangleCount || triangleCount < minTriangles || !index) {
+        continue;
+      }
+
+      try {
+        const result = await pipeline.processAsset(geometry.clone());
+        const material = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+        const lod = pipeline.createLODObject(result, material as THREE.Material);
+        lod.name = mesh.name ? `${mesh.name}_LOD` : 'LOD';
+        lod.position.copy(mesh.position);
+        lod.rotation.copy(mesh.rotation);
+        lod.scale.copy(mesh.scale);
+        lod.userData = { ...mesh.userData, lodGenerated: true };
+
+        if (mesh.parent) {
+          mesh.parent.add(lod);
+          mesh.parent.remove(mesh);
+        }
+
+        processed += 1;
+      } catch (error) {
+        console.warn('Auto-LOD generation failed:', error);
+      }
+    }
   }
 
   private async loadVideo(asset: Asset): Promise<HTMLVideoElement> {

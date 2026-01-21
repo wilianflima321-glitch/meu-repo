@@ -126,6 +126,7 @@ export {
 export {
   startDapSession,
   getDapSession,
+  listDapSessions,
   stopDapSession,
   drainDapEvents,
   dapRequest,

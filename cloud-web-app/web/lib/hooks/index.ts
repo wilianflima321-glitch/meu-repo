@@ -38,7 +38,82 @@ export {
 } from './useExtensions';
 
 // ============================================================================
-// Re-export de hooks existentes
+// Multiplayer Networking
 // ============================================================================
 
-// Todos os hooks estão exportados acima
+export {
+  useMultiplayerNetworking,
+  type UseMultiplayerOptions,
+  type ChatMessage,
+  type UseMultiplayerResult,
+} from './useMultiplayerNetworking';
+
+// ============================================================================
+// Gameplay Ability System
+// ============================================================================
+
+export {
+  useGameplayAbilitySystem,
+  PRESET_ABILITIES,
+  type AbilityState,
+  type EffectState,
+  type AttributeState,
+  type GASStats,
+  type UseGASOptions,
+  type UseGASReturn,
+} from './useGameplayAbilitySystem';
+
+// ============================================================================
+// Render Pipeline
+// ============================================================================
+
+export {
+  useRenderPipeline,
+  detectOptimalQuality,
+  type QualityPreset,
+  type RenderStats,
+  type GPUCapabilities,
+  type DynamicQualityConfig,
+  type UseRenderPipelineOptions,
+  type UseRenderPipelineReturn,
+} from './useRenderPipeline';
+
+// ============================================================================
+// Render Progress (WebSocket)
+// ============================================================================
+
+export {
+  useRenderProgress,
+  type RenderJob,
+  type RenderJobStatus,
+  type RenderProgressEvent,
+  type UseRenderProgressOptions,
+  type UseRenderProgressReturn,
+} from './useRenderProgress';
+
+// ============================================================================
+// System Health (WebSocket)
+// ============================================================================
+
+export {
+  useSystemHealth,
+  formatBytes,
+  formatUptime,
+  getStatusColor,
+  type SystemHealthData,
+  type CPUMetrics,
+  type MemoryMetrics,
+  type GPUMetrics,
+  type DiskMetrics,
+  type NetworkMetrics,
+  type ServiceHealth,
+  type HealthStatus,
+  type UseSystemHealthOptions,
+  type UseSystemHealthReturn,
+} from './useSystemHealth';
+
+// ============================================================================
+// Session Tracker
+// ============================================================================
+
+export { useSessionTracker } from './use-session-tracker';

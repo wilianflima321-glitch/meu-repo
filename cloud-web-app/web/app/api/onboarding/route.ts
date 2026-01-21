@@ -26,6 +26,7 @@ const onboardingProgress = new Map<string, {
 
 const ONBOARDING_STEPS = [
   'welcome',
+  'dependency_check',
   'profile_setup',
   'first_project',
   'explore_editor',

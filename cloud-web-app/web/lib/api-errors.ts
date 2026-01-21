@@ -22,11 +22,13 @@ const TOO_MANY_REQUESTS_CODES = new Set([
 
 const FORBIDDEN_CODES = new Set([
 	'PROJECT_ACCESS_DENIED',
+	'FORBIDDEN',
 ]);
 
 const NOT_FOUND_CODES = new Set([
 	'PROJECT_NOT_FOUND',
 	'ROOM_NOT_FOUND',
+	'USER_NOT_FOUND',
 ]);
 
 export function apiErrorToResponse(error: unknown): NextResponse | null {
@@ -106,4 +108,16 @@ export function apiErrorToResponse(error: unknown): NextResponse | null {
 
 export function apiInternalError(message = 'Internal server error', status = 500): NextResponse {
 	return NextResponse.json({ error: message }, { status });
+}
+
+/**
+ * Cria um erro de API com código e mensagem
+ */
+export function createAPIError(code: string, message: string, details?: Record<string, unknown>): Error {
+	const error = new Error(message);
+	(error as any).code = code;
+	if (details) {
+		Object.assign(error, details);
+	}
+	return error;
 }

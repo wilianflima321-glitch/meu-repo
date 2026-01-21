@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useEffect, useRef, useCallback, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 // =============================================================================
 // LIVE SESSION TRACKER
@@ -34,7 +34,7 @@ export function useSessionTracker(options: SessionTrackerOptions = {}) {
     projectName,
   } = options;
   
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const pathname = usePathname();
   const sessionIdRef = useRef<string>('');
   const lastActionRef = useRef<string>('');
@@ -54,17 +54,21 @@ export function useSessionTracker(options: SessionTrackerOptions = {}) {
   
   // Send ping to server
   const sendPing = useCallback(async () => {
-    if (!session?.user?.id || !sessionIdRef.current) return;
+    if (!user?.id || !sessionIdRef.current) return;
     
     try {
       await fetch('/api/admin/god-view/sessions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
         body: JSON.stringify({
           sessionId: sessionIdRef.current,
-          userId: session.user.id,
-          userEmail: session.user.email,
-          userName: session.user.name,
+          userId: user.id,
+          userEmail: user.email,
+          userName: (user as { name?: string; full_name?: string }).name || (user as { name?: string; full_name?: string }).full_name,
           projectId,
           projectName,
           currentPage: pathname,
@@ -82,11 +86,11 @@ export function useSessionTracker(options: SessionTrackerOptions = {}) {
     } catch (error) {
       console.error('Session ping failed:', error);
     }
-  }, [session, projectId, projectName, pathname]);
+  }, [user, token, projectId, projectName, pathname]);
   
   // Set up ping interval
   useEffect(() => {
-    if (!enabled || !session?.user?.id) return;
+    if (!enabled || !user?.id) return;
     
     // Initial ping
     sendPing();
@@ -112,7 +116,7 @@ export function useSessionTracker(options: SessionTrackerOptions = {}) {
       window.removeEventListener('beforeunload', handleUnload);
       handleUnload();
     };
-  }, [enabled, session, sendPing, pingInterval]);
+  }, [enabled, user, sendPing, pingInterval]);
   
   // Track actions
   const trackAction = useCallback((action: string) => {
@@ -148,9 +152,9 @@ export function SessionTrackerProvider({
   children,
   enabled = true
 }: { 
-  children: React.ReactNode;
+  children: ReactNode;
   enabled?: boolean;
 }) {
   useSessionTracker({ enabled });
-  return <>{children}</>;
+  return children;
 }

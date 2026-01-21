@@ -421,7 +421,7 @@ function formatUptime(seconds: number): string {
 // ============================================================================
 
 export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
-  processes = DEMO_PROCESSES,
+  processes,
   attachedProcessId,
   onAttach,
   onDetach,
@@ -432,10 +432,43 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<ProcessType | 'all'>('all');
   const [attachingId, setAttachingId] = useState<string | null>(null);
-  const [showConfig, setShowConfig] = useState(false);
+  const [localProcesses, setLocalProcesses] = useState<AttachableProcess[]>([]);
+  const [localAttachedProcessId, setLocalAttachedProcessId] = useState<string | null>(null);
+  const [localRefreshing, setLocalRefreshing] = useState(false);
+
+  const resolvedProcesses = processes ?? localProcesses;
+  const resolvedAttachedId = attachedProcessId ?? localAttachedProcessId;
+  const resolvedRefreshing = isRefreshing || localRefreshing;
+
+  const refreshProcesses = useCallback(async () => {
+    if (onRefresh) {
+      await onRefresh();
+      return;
+    }
+
+    try {
+      setLocalRefreshing(true);
+      const res = await fetch('/api/dap/processes');
+      if (!res.ok) throw new Error('Failed to load processes');
+      const data = await res.json();
+      const list = Array.isArray(data?.processes) ? data.processes : [];
+      setLocalProcesses(list);
+    } catch (error) {
+      console.error('Failed to refresh processes:', error);
+      setLocalProcesses([]);
+    } finally {
+      setLocalRefreshing(false);
+    }
+  }, [onRefresh]);
+
+  useEffect(() => {
+    if (!processes) {
+      refreshProcesses();
+    }
+  }, [processes, refreshProcesses]);
 
   // Filter processes
-  const filteredProcesses = processes.filter((p) => {
+  const filteredProcesses = resolvedProcesses.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.pid.toString().includes(search);
@@ -454,7 +487,10 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
   );
 
   const handleAttach = async (process: AttachableProcess) => {
-    if (!onAttach) return;
+    if (!onAttach) {
+      setLocalAttachedProcessId(process.id);
+      return;
+    }
     setAttachingId(process.id);
     try {
       await onAttach(process);
@@ -464,8 +500,35 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
   };
 
   const handleDetach = async (processId: string) => {
-    if (!onDetach) return;
+    if (!onDetach) {
+      setLocalAttachedProcessId(null);
+      return;
+    }
     await onDetach(processId);
+  };
+
+  const handleQuickConnect = async (config: DebugConfiguration) => {
+    if (onCreateConfiguration) {
+      onCreateConfiguration(config);
+      return;
+    }
+
+    try {
+      await fetch('/api/dap/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: config.protocol === 'node' ? 'node' : 'python',
+          request: 'attach',
+          name: config.name,
+          host: config.host,
+          port: config.port,
+        }),
+      });
+      await refreshProcesses();
+    } catch (error) {
+      console.error('Quick connect failed:', error);
+    }
   };
 
   return (
@@ -506,8 +569,8 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
 
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
-            onClick={onRefresh}
-            disabled={isRefreshing}
+            onClick={refreshProcesses}
+            disabled={resolvedRefreshing}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -518,10 +581,10 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
               borderRadius: '6px',
               color: colors.text,
               fontSize: '12px',
-              cursor: isRefreshing ? 'wait' : 'pointer',
+              cursor: resolvedRefreshing ? 'wait' : 'pointer',
             }}
           >
-            <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={resolvedRefreshing ? 'animate-spin' : ''} />
             Refresh
           </button>
         </div>
@@ -607,19 +670,37 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
             icon={<Gamepad2 size={14} />}
             label="Game (9222)"
             color={colors.success}
-            onClick={() => {}}
+            onClick={() => handleQuickConnect({
+              name: 'Game (Chrome)',
+              type: 'game',
+              protocol: 'chrome',
+              host: 'localhost',
+              port: 9222,
+            })}
           />
           <QuickConnectButton
             icon={<Server size={14} />}
             label="Server (9229)"
             color={colors.primary}
-            onClick={() => {}}
+            onClick={() => handleQuickConnect({
+              name: 'Server (Node)',
+              type: 'server',
+              protocol: 'node',
+              host: 'localhost',
+              port: 9229,
+            })}
           />
           <QuickConnectButton
             icon={<Terminal size={14} />}
             label="Node (9230)"
             color={colors.warning}
-            onClick={() => {}}
+            onClick={() => handleQuickConnect({
+              name: 'Node (V8)',
+              type: 'external',
+              protocol: 'v8',
+              host: 'localhost',
+              port: 9230,
+            })}
           />
         </div>
       </div>
@@ -681,7 +762,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
                   <ProcessItem
                     key={process.id}
                     process={process}
-                    isAttached={attachedProcessId === process.id}
+                    isAttached={resolvedAttachedId === process.id}
                     isAttaching={attachingId === process.id}
                     onAttach={() => handleAttach(process)}
                     onDetach={() => handleDetach(process.id)}
@@ -694,7 +775,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
       </div>
 
       {/* Status Bar */}
-      {attachedProcessId && (
+      {resolvedAttachedId && (
         <div
           style={{
             display: 'flex',
@@ -709,11 +790,11 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
             <CheckCircle2 size={14} color={colors.success} />
             <span style={{ fontSize: '12px', color: colors.success }}>
               Debugger attached to{' '}
-              {processes.find((p) => p.id === attachedProcessId)?.name}
+              {resolvedProcesses.find((p) => p.id === resolvedAttachedId)?.name}
             </span>
           </div>
           <button
-            onClick={() => handleDetach(attachedProcessId)}
+            onClick={() => handleDetach(resolvedAttachedId)}
             style={{
               padding: '4px 8px',
               background: 'transparent',
@@ -761,72 +842,5 @@ const QuickConnectButton: React.FC<{
     {label}
   </button>
 );
-
-// ============================================================================
-// DEMO DATA
-// ============================================================================
-
-const DEMO_PROCESSES: AttachableProcess[] = [
-  {
-    id: 'game-1',
-    pid: 12345,
-    name: 'AethelGame.exe',
-    type: 'game',
-    status: 'running',
-    port: 9222,
-    protocol: 'chrome',
-    memory: 512,
-    cpu: 15.2,
-    uptime: 3600,
-    command: 'AethelGame.exe --debug --port=9222',
-  },
-  {
-    id: 'server-1',
-    pid: 12346,
-    name: 'GameServer',
-    type: 'server',
-    status: 'running',
-    port: 9229,
-    host: 'localhost',
-    protocol: 'node',
-    memory: 256,
-    cpu: 5.1,
-    uptime: 7200,
-    command: 'node --inspect=9229 server.js',
-  },
-  {
-    id: 'editor-1',
-    pid: 12347,
-    name: 'AethelEditor',
-    type: 'editor',
-    status: 'paused',
-    port: 9230,
-    protocol: 'dap',
-    memory: 1024,
-    cpu: 0.5,
-    uptime: 1800,
-    debuggerAttached: true,
-  },
-  {
-    id: 'worker-1',
-    pid: 12348,
-    name: 'AssetCompiler',
-    type: 'worker',
-    status: 'running',
-    protocol: 'node',
-    memory: 128,
-    cpu: 45.0,
-    uptime: 120,
-  },
-  {
-    id: 'worker-2',
-    pid: 12349,
-    name: 'ShaderCompiler',
-    type: 'worker',
-    status: 'stopped',
-    memory: 0,
-    cpu: 0,
-  },
-];
 
 export default DebugAttachUI;

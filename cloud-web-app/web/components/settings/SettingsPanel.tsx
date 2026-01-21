@@ -106,7 +106,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
               }}
             />
             <span style={{ color: colors.text }}>
-              {value ? 'Enabled' : 'Disabled'}
+              {value ? 'Ativado' : 'Desativado'}
             </span>
           </label>
         );
@@ -219,12 +219,12 @@ const SettingInput: React.FC<SettingInputProps> = ({
                 borderRadius: '4px',
                 fontSize: '11px',
               }}>
-                Modified
+                Modificado
               </span>
             )}
           </div>
           <p style={{ color: colors.subtext0, fontSize: '13px', margin: '4px 0 0' }}>
-            {definition?.description || 'No description'}
+            {definition?.description || 'Sem descrição'}
           </p>
         </div>
         
@@ -245,7 +245,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
             }}
           >
             <Undo size={12} />
-            Reset
+            Resetar
           </button>
         )}
       </div>
@@ -314,7 +314,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate
               borderRadius: '4px',
               fontSize: '12px',
             }}>
-              Active
+              Ativo
             </span>
           )}
           
@@ -476,7 +476,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
           <Settings size={24} color={colors.blue} />
-          <h2 style={{ margin: 0, fontSize: '18px' }}>Settings</h2>
+          <h2 style={{ margin: 0, fontSize: '18px' }}>Configurações</h2>
         </div>
         
         {/* Search */}
@@ -493,7 +493,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           <Search size={16} color={colors.subtext0} />
           <input
             type="text"
-            placeholder="Search settings..."
+            placeholder="Buscar configurações..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -529,9 +529,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           }}
         >
           {[
-            { id: 'settings' as const, label: 'Settings', icon: Settings },
-            { id: 'profiles' as const, label: 'Profiles', icon: User },
-            { id: 'sync' as const, label: 'Sync', icon: Cloud },
+            { id: 'settings' as const, label: 'Configurações', icon: Settings },
+            { id: 'profiles' as const, label: 'Perfis', icon: User },
+            { id: 'sync' as const, label: 'Sincronizar', icon: Cloud },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -648,12 +648,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
             >
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ margin: '0 0 8px', fontSize: '14px', color: colors.subtext0 }}>
-                  Create New Profile
+                  Criar Novo Perfil
                 </h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <input
                     type="text"
-                    placeholder="Profile name..."
+                    placeholder="Nome do perfil..."
                     value={newProfileName}
                     onChange={(e) => setNewProfileName(e.target.value)}
                     style={{
@@ -682,20 +682,20 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     }}
                   >
                     <Plus size={16} />
-                    Create
+                    Criar
                   </button>
                 </div>
               </div>
               
               <div>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
-                  Your Profiles
+                  Seus Perfis
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <ProfileCard
                     profile={{
                       id: 'default',
-                      name: 'Default Profile',
+                      name: 'Perfil Padrão',
                       settings: {},
                       extensions: [],
                       keybindings: [],
@@ -749,12 +749,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     )}
                     <div>
                       <div style={{ fontWeight: 500, fontSize: '16px' }}>
-                        {syncState.enabled ? 'Sync Enabled' : 'Sync Disabled'}
+                        {syncState.enabled ? 'Sincronização Ativada' : 'Sincronização Desativada'}
                       </div>
                       <div style={{ color: colors.subtext0, fontSize: '13px' }}>
                         {syncState.lastSync
-                          ? `Last synced: ${new Date(syncState.lastSync).toLocaleString()}`
-                          : 'Never synced'}
+                          ? `Última sincronização: ${new Date(syncState.lastSync).toLocaleString()}`
+                          : 'Nunca sincronizado'}
                       </div>
                     </div>
                   </div>
@@ -783,7 +783,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                               animation: syncState.status === 'syncing' ? 'spin 1s linear infinite' : 'none',
                             }}
                           />
-                          {syncState.status === 'syncing' ? 'Syncing...' : 'Sync Now'}
+                          {syncState.status === 'syncing' ? 'Sincronizando...' : 'Sincronizar Agora'}
                         </button>
                         <button
                           onClick={handleDisableSync}
@@ -796,7 +796,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                             cursor: 'pointer',
                           }}
                         >
-                          Turn Off
+                          Desativar
                         </button>
                       </>
                     ) : (
@@ -812,7 +812,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                           fontWeight: 500,
                         }}
                       >
-                        Turn On Sync
+                        Ativar Sincronização
                       </button>
                     )}
                   </div>
@@ -837,11 +837,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                 )}
               </div>
               
-              {/* Synced Items */}
+              {/* Itens Sincronizados */}
               {syncState.enabled && (
                 <div style={{ marginBottom: '24px' }}>
                   <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
-                    Synced Items
+                    Itens Sincronizados
                   </h3>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {['settings', 'extensions', 'keybindings', 'snippets', 'tasks', 'profiles'].map((item) => (
@@ -873,10 +873,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                 </div>
               )}
               
-              {/* Import/Export */}
+              {/* Importar / Exportar */}
               <div>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
-                  Import / Export
+                  Importar / Exportar
                 </h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
@@ -894,7 +894,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     }}
                   >
                     <Download size={16} />
-                    Export Settings
+                    Exportar Configurações
                   </button>
                   <button
                     onClick={handleImport}
@@ -911,11 +911,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     }}
                   >
                     <Upload size={16} />
-                    Import Settings
+                    Importar Configurações
                   </button>
                 </div>
                 <p style={{ marginTop: '8px', fontSize: '13px', color: colors.subtext0 }}>
-                  Export your settings to a JSON file to backup or share with others.
+                  Exporte suas configurações para um arquivo JSON para backup ou compartilhar.
                 </p>
               </div>
             </motion.div>

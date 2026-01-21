@@ -310,7 +310,7 @@ export const AethelAPIClient = {
 	// ========== Profile ==========
 	
 	getProfile: async () => {
-		return requestJSON<{ profile: any }>('/auth/me');
+		return requestJSON<{ profile: any }>('/auth/profile');
 	},
 	
 	updateProfile: async (updates: Record<string, unknown>) => {

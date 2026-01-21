@@ -109,4 +109,4 @@ async function getQueueHandler(req: NextRequest) {
   }
 }
 
-export const GET = withAdminAuth(getQueueHandler, 'ops:moderation:read');
+export const GET = withAdminAuth(getQueueHandler, 'ops:moderation:view');

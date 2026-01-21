@@ -3,6 +3,8 @@
  */
 
 import '@testing-library/jest-dom';
+import { TextDecoder, TextEncoder } from 'util';
+import { ReadableStream } from 'stream/web';
 
 // Mock para Next.js router
 jest.mock('next/navigation', () => ({
@@ -104,6 +106,38 @@ global.fetch = jest.fn(() =>
     blob: () => Promise.resolve(new Blob()),
   })
 ) as jest.Mock;
+
+// Polyfills para NextRequest/Response em ambiente de teste
+if (!(globalThis as any).TextEncoder) {
+  (globalThis as any).TextEncoder = TextEncoder;
+}
+if (!(globalThis as any).TextDecoder) {
+  (globalThis as any).TextDecoder = TextDecoder;
+}
+if (!(globalThis as any).ReadableStream) {
+  (globalThis as any).ReadableStream = ReadableStream;
+}
+
+const { Request: UndiciRequest, Headers: UndiciHeaders, Response: UndiciResponse } = require('undici');
+
+if (!(globalThis as any).Request) {
+  (globalThis as any).Request = UndiciRequest;
+}
+if (!(globalThis as any).Headers) {
+  (globalThis as any).Headers = UndiciHeaders;
+}
+if (!(globalThis as any).Response) {
+  (globalThis as any).Response = UndiciResponse;
+}
+
+if (typeof URL !== 'undefined') {
+  if (!(URL as any).createObjectURL) {
+    (URL as any).createObjectURL = () => 'blob:mock';
+  }
+  if (!(URL as any).revokeObjectURL) {
+    (URL as any).revokeObjectURL = () => {};
+  }
+}
 
 // Suppress console errors in tests (optional)
 const originalError = console.error;

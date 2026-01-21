@@ -11,11 +11,40 @@ const config: Config = {
     extend: {
       /* ========== COLORS ========== */
       colors: {
-        // Extend slate with our custom 950
+        // AETHEL DESIGN SYSTEM - Deep Space Dark Mode
+        // Reference: AETHEL_WEB_INTERFACE_STANDARD.md
+        
+        // Base backgrounds (Zinc scale for Dark Space mode)
+        background: {
+          DEFAULT: '#09090b', // Zinc 950 - Main background
+          surface: '#18181b', // Zinc 900 - Cards/Surfaces
+          elevated: '#27272a', // Zinc 800 - Elevated surfaces
+          hover: '#3f3f46',   // Zinc 700 - Hover states
+        },
+        
+        // Borders
+        border: {
+          DEFAULT: '#27272a', // Zinc 800 - Subtle borders
+          muted: '#1f1f23',   // Darker border
+          focus: '#6366f1',   // Primary color for focus rings
+        },
+        
+        // Text colors
+        foreground: {
+          DEFAULT: '#fafafa', // Zinc 50 - Primary text
+          muted: '#a1a1aa',   // Zinc 400 - Secondary text
+          dim: '#71717a',     // Zinc 500 - Tertiary text
+        },
+        
+        // Extend slate/zinc with custom values
         slate: {
           950: '#020617',
         },
-        // Primary brand colors
+        zinc: {
+          950: '#09090b',
+        },
+        
+        // Primary brand colors (Indigo)
         primary: {
           50: '#eef2ff',
           100: '#e0e7ff',
@@ -29,11 +58,30 @@ const config: Config = {
           900: '#312e81',
           950: '#1e1b4b',
         },
-        // Accent colors
+        
+        // Accent colors (Purple)
         accent: {
           400: '#c084fc',
           500: '#a855f7',
           600: '#9333ea',
+        },
+        
+        // Semantic colors
+        success: {
+          DEFAULT: '#22c55e',
+          muted: '#166534',
+        },
+        warning: {
+          DEFAULT: '#f59e0b',
+          muted: '#92400e',
+        },
+        error: {
+          DEFAULT: '#ef4444',
+          muted: '#991b1b',
+        },
+        info: {
+          DEFAULT: '#3b82f6',
+          muted: '#1e40af',
         },
       },
 

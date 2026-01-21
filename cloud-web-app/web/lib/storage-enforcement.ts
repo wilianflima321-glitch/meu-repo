@@ -6,7 +6,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { PLAN_LIMITS, PlanType } from '@/lib/plans';
+import type { PlanId } from '@/lib/plans';
 
 // ============================================================================
 // TYPES
@@ -42,6 +42,8 @@ export interface StorageQuotaCheck {
 // ============================================================================
 // STORAGE LIMITS BY PLAN (in bytes)
 // ============================================================================
+
+type PlanType = PlanId | 'free';
 
 const STORAGE_LIMITS: Record<PlanType, number> = {
   free: 100 * 1024 * 1024,        // 100 MB

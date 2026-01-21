@@ -18,6 +18,7 @@ export { default as NiagaraVFX } from './NiagaraVFX';
 export { default as ProjectSettings } from './ProjectSettings';
 export { default as GameViewport } from './GameViewport';
 export { default as BlueprintEditor } from './BlueprintEditor';
+export { default as AbilityEditor } from './AbilityEditor'; // GAS Editor
 
 // ============================================================================
 // TYPES RE-EXPORTS

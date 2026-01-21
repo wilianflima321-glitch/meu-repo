@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, type ReactNode } from 'react'
+import { useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
 import {
   ChevronRight,
   ChevronDown,
@@ -79,77 +79,26 @@ function getFileIcon(name: string, isOpen = false) {
   return FILE_ICONS[ext] || { icon: File, color: 'text-slate-400' }
 }
 
-// ============= Demo Data =============
+// ============= Workspace Tree =============
 
-const DEMO_FILES: FileNode[] = [
-  {
-    id: '1',
-    name: 'src',
-    type: 'folder',
-    path: '/src',
-    children: [
-      {
-        id: '1-1',
-        name: 'components',
-        type: 'folder',
-        path: '/src/components',
-        children: [
-          { id: '1-1-1', name: 'Button.tsx', type: 'file', path: '/src/components/Button.tsx', extension: 'tsx' },
-          { id: '1-1-2', name: 'Card.tsx', type: 'file', path: '/src/components/Card.tsx', extension: 'tsx' },
-          { id: '1-1-3', name: 'Input.tsx', type: 'file', path: '/src/components/Input.tsx', extension: 'tsx' },
-          { id: '1-1-4', name: 'Modal.tsx', type: 'file', path: '/src/components/Modal.tsx', extension: 'tsx', modified: true },
-        ],
-      },
-      {
-        id: '1-2',
-        name: 'hooks',
-        type: 'folder',
-        path: '/src/hooks',
-        children: [
-          { id: '1-2-1', name: 'useAuth.ts', type: 'file', path: '/src/hooks/useAuth.ts', extension: 'ts' },
-          { id: '1-2-2', name: 'useTheme.ts', type: 'file', path: '/src/hooks/useTheme.ts', extension: 'ts' },
-        ],
-      },
-      {
-        id: '1-3',
-        name: 'services',
-        type: 'folder',
-        path: '/src/services',
-        children: [
-          { id: '1-3-1', name: 'api.ts', type: 'file', path: '/src/services/api.ts', extension: 'ts' },
-          { id: '1-3-2', name: 'llm-router.ts', type: 'file', path: '/src/services/llm-router.ts', extension: 'ts' },
-        ],
-      },
-      { id: '1-4', name: 'App.tsx', type: 'file', path: '/src/App.tsx', extension: 'tsx' },
-      { id: '1-5', name: 'index.tsx', type: 'file', path: '/src/index.tsx', extension: 'tsx' },
-      { id: '1-6', name: 'styles.css', type: 'file', path: '/src/styles.css', extension: 'css' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'public',
-    type: 'folder',
-    path: '/public',
-    children: [
-      { id: '2-1', name: 'index.html', type: 'file', path: '/public/index.html', extension: 'html' },
-      { id: '2-2', name: 'favicon.svg', type: 'file', path: '/public/favicon.svg', extension: 'svg' },
-    ],
-  },
-  {
-    id: '3',
-    name: 'engine',
-    type: 'folder',
-    path: '/engine',
-    children: [
-      { id: '3-1', name: 'physics.ts', type: 'file', path: '/engine/physics.ts', extension: 'ts' },
-      { id: '3-2', name: 'renderer.ts', type: 'file', path: '/engine/renderer.ts', extension: 'ts' },
-      { id: '3-3', name: 'particles.ts', type: 'file', path: '/engine/particles.ts', extension: 'ts' },
-    ],
-  },
-  { id: '4', name: 'package.json', type: 'file', path: '/package.json', extension: 'json' },
-  { id: '5', name: 'tsconfig.json', type: 'file', path: '/tsconfig.json', extension: 'json' },
-  { id: '6', name: 'README.md', type: 'file', path: '/README.md', extension: 'md' },
-]
+type WorkspaceTreeNode = {
+  name: string
+  path: string
+  type: 'file' | 'directory'
+  children?: WorkspaceTreeNode[]
+}
+
+function mapWorkspaceNode(node: WorkspaceTreeNode): FileNode {
+  const extension = node.type === 'file' ? node.name.split('.').pop()?.toLowerCase() : undefined
+  return {
+    id: node.path,
+    name: node.name,
+    type: node.type === 'directory' ? 'folder' : 'file',
+    path: node.path,
+    extension,
+    children: node.children?.map(mapWorkspaceNode),
+  }
+}
 
 // ============= File Tree Node Component =============
 
@@ -309,7 +258,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
 // ============= Main Component =============
 
 export default function FileExplorerPro({
-  files = DEMO_FILES,
+  files,
   onFileSelect,
   onFileCreate,
   onFileDelete,
@@ -319,14 +268,47 @@ export default function FileExplorerPro({
   className = '',
 }: FileExplorerProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['1', '1-1']))
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [internalFiles, setInternalFiles] = useState<FileNode[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<{
     x: number
     y: number
     file: FileNode
   } | null>(null)
+
+  const resolvedFiles = files ?? internalFiles
+
+  const fetchWorkspaceTree = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setLoadError(null)
+      const res = await fetch('/api/workspace/tree', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      if (!res.ok) throw new Error('Falha ao carregar workspace')
+      const data = await res.json()
+      const tree = Array.isArray(data?.tree) ? data.tree : []
+      const mapped = tree.map(mapWorkspaceNode)
+      setInternalFiles(mapped)
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Erro ao carregar arquivos')
+      setInternalFiles([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!files) {
+      fetchWorkspaceTree()
+    }
+  }, [files, fetchWorkspaceTree])
 
   // Toggle folder expansion
   const toggleFolder = useCallback((folderId: string) => {
@@ -373,9 +355,16 @@ export default function FileExplorerPro({
     }
   }, [contextMenu, onFileDelete, onFileCreate])
 
+  const handleRefresh = useCallback(() => {
+    if (onRefresh) return onRefresh()
+    if (!files) {
+      return fetchWorkspaceTree()
+    }
+  }, [onRefresh, files, fetchWorkspaceTree])
+
   // Filter files based on search
   const filteredFiles = useMemo(() => {
-    if (!searchQuery) return files
+    if (!searchQuery) return resolvedFiles
     
     const filterNode = (node: FileNode): FileNode | null => {
       if (node.type === 'file') {
@@ -393,10 +382,10 @@ export default function FileExplorerPro({
       return node.name.toLowerCase().includes(searchQuery.toLowerCase()) ? node : null
     }
     
-    return files
+    return resolvedFiles
       .map(f => filterNode(f))
       .filter((f): f is FileNode => f !== null)
-  }, [files, searchQuery])
+  }, [resolvedFiles, searchQuery])
 
   return (
     <div className={`h-full flex flex-col ${className}`}>
@@ -428,7 +417,7 @@ export default function FileExplorerPro({
             <FolderPlus className="w-4 h-4" />
           </button>
           <button
-            onClick={onRefresh}
+            onClick={handleRefresh}
             className="p-1 rounded hover:bg-slate-800 text-slate-400"
             title="Refresh"
           >
@@ -456,6 +445,14 @@ export default function FileExplorerPro({
 
       {/* File Tree */}
       <div className="flex-1 overflow-y-auto py-1">
+        {loadError && (
+          <div className="px-3 py-2 text-xs text-red-400">
+            {loadError}
+          </div>
+        )}
+        {isLoading && !loadError && (
+          <div className="px-3 py-2 text-xs text-slate-500">Carregando arquivos...</div>
+        )}
         {filteredFiles.map(node => (
           <FileTreeNode
             key={node.id}

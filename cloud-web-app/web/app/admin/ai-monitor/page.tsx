@@ -168,9 +168,9 @@ function AICallRow({ call, expanded, onToggle }: { call: AICall; expanded: boole
       {expanded && (
         <div className="px-10 pb-4 space-y-3 bg-zinc-900/50">
           <div className="flex items-center gap-4 text-xs text-zinc-500">
-            <span>User: {call.userId}</span>
-            <span>Operation: {call.operation}</span>
-            {call.projectId && <span>Project: {call.projectId}</span>}
+            <span>Usuário: {call.userId}</span>
+            <span>Operação: {call.operation}</span>
+            {call.projectId && <span>Projeto: {call.projectId}</span>}
           </div>
           
           {/* Prompt */}
@@ -204,7 +204,7 @@ function AICallRow({ call, expanded, onToggle }: { call: AICall; expanded: boole
           {/* Response */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-zinc-400">Response ({call.outputTokens} tokens)</span>
+              <span className="text-xs font-medium text-zinc-400">Resposta ({call.outputTokens} tokens)</span>
               <button 
                 onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(call.response); }}
                 className="text-xs text-zinc-500 hover:text-white"
@@ -232,6 +232,7 @@ export default function AgentMonitorPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [modelFilter, setModelFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   // Fetch metrics
   const { data: metricsData, error: metricsError } = useSWR(
@@ -254,13 +255,45 @@ export default function AgentMonitorPage() {
   const metrics: AIMetrics | null = metricsData?.metrics || null;
   const calls: AICall[] = callsData?.calls || [];
   const emergencyState = emergencyData?.data;
+
+  React.useEffect(() => {
+    if (metrics || calls.length > 0) {
+      setLastUpdated(new Date());
+    }
+  }, [metrics, calls.length]);
   
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">AI Agent Monitor</h1>
+          <h1 className="text-2xl font-semibold text-white">Monitor de Agentes</h1>
+          {lastUpdated && (
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
+              isPaused ? 'border-zinc-700 text-zinc-400' : 'border-green-500/30 bg-green-500/10 text-green-400'
+            }`}
+          >
+            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+            {isPaused ? 'Retomar' : 'Pausado? Não'}
+          </button>
+          <button
+            onClick={() => refreshCalls()}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Atualizar
+          </button>
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Monitor de Agentes de IA</h1>
           <p className="text-sm text-zinc-500">Raio-X em tempo real dos agentes de IA</p>
         </div>
         
@@ -274,7 +307,7 @@ export default function AgentMonitorPage() {
             }`}
           >
             {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-            {isPaused ? 'Resume' : 'Pause'}
+            {isPaused ? 'Retomar' : 'Pausar'}
           </button>
           
           <button
@@ -282,7 +315,7 @@ export default function AgentMonitorPage() {
             className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-300"
           >
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            Atualizar
           </button>
         </div>
       </div>
@@ -302,7 +335,7 @@ export default function AgentMonitorPage() {
             <AlertTriangle className="w-5 h-5 text-red-400" />
             <div>
               <p className="font-medium text-white">
-                Emergency Mode: {emergencyState.level.toUpperCase()}
+                Modo de emergência: {emergencyState.level.toUpperCase()}
               </p>
               <p className="text-sm text-zinc-400">{emergencyState.reason}</p>
             </div>
@@ -311,7 +344,7 @@ export default function AgentMonitorPage() {
             href="/admin/emergency" 
             className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-sm text-white"
           >
-            Manage
+            Gerenciar
           </a>
         </div>
       )}
@@ -321,29 +354,29 @@ export default function AgentMonitorPage() {
         <div className="grid grid-cols-5 gap-4">
           <MetricCard
             icon={Brain}
-            label="Total Calls (24h)"
+            label="Total de chamadas (24h)"
             value={metrics.totalCalls.toLocaleString()}
           />
           <MetricCard
             icon={Zap}
-            label="Total Tokens"
+            label="Total de tokens"
             value={`${(metrics.totalTokens / 1000).toFixed(1)}K`}
           />
           <MetricCard
             icon={DollarSign}
-            label="Total Cost"
+            label="Custo total"
             value={`$${metrics.totalCost.toFixed(2)}`}
             alert={metrics.totalCost > 50}
           />
           <MetricCard
             icon={Clock}
-            label="Avg Latency"
+            label="Latência média"
             value={`${metrics.avgLatency}ms`}
             alert={metrics.avgLatency > 3000}
           />
           <MetricCard
             icon={AlertTriangle}
-            label="Error Rate"
+            label="Taxa de erro"
             value={`${(metrics.errorRate * 100).toFixed(1)}%`}
             alert={metrics.errorRate > 0.05}
           />
@@ -353,12 +386,12 @@ export default function AgentMonitorPage() {
       {/* Model Breakdown */}
       {metrics?.modelBreakdown && (
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-          <h3 className="text-sm font-medium text-zinc-400 mb-3">Usage by Model</h3>
+          <h3 className="text-sm font-medium text-zinc-400 mb-3">Uso por modelo</h3>
           <div className="flex flex-wrap gap-4">
             {Object.entries(metrics.modelBreakdown).map(([model, data]) => (
               <div key={model} className="flex items-center gap-3 px-4 py-2 bg-zinc-800 rounded-lg">
                 <span className="text-sm font-medium text-white">{model}</span>
-                <span className="text-xs text-zinc-500">{data.calls} calls</span>
+                <span className="text-xs text-zinc-500">{data.calls} chamadas</span>
                 <span className="text-xs text-zinc-500">${data.cost.toFixed(2)}</span>
               </div>
             ))}
@@ -370,7 +403,7 @@ export default function AgentMonitorPage() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-zinc-500" />
-          <span className="text-sm text-zinc-500">Filters:</span>
+          <span className="text-sm text-zinc-500">Filtros:</span>
         </div>
         
         <select
@@ -378,7 +411,7 @@ export default function AgentMonitorPage() {
           onChange={(e) => setModelFilter(e.target.value)}
           className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
         >
-          <option value="all">All Models</option>
+          <option value="all">Todos os modelos</option>
           <option value="gpt-4o">GPT-4o</option>
           <option value="gpt-4o-mini">GPT-4o Mini</option>
           <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
@@ -390,30 +423,30 @@ export default function AgentMonitorPage() {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
         >
-          <option value="all">All Status</option>
-          <option value="success">Success</option>
-          <option value="error">Error</option>
-          <option value="timeout">Timeout</option>
+          <option value="all">Todos os status</option>
+          <option value="success">Sucesso</option>
+          <option value="error">Erro</option>
+          <option value="timeout">Tempo esgotado</option>
         </select>
       </div>
       
       {/* Calls Table */}
       <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-          <h3 className="text-sm font-medium text-white">Recent AI Calls</h3>
-          <span className="text-xs text-zinc-500">{calls.length} calls</span>
+          <h3 className="text-sm font-medium text-white">Chamadas recentes de IA</h3>
+          <span className="text-xs text-zinc-500">{calls.length} chamadas</span>
         </div>
         
         {/* Header */}
         <div className="flex items-center gap-4 px-4 py-2 bg-zinc-800/50 text-xs text-zinc-500 font-medium">
           <span className="w-8"></span>
           <span className="w-4"></span>
-          <span className="w-20">Time</span>
-          <span className="w-32">Model</span>
-          <span className="flex-1">User</span>
+          <span className="w-20">Hora</span>
+          <span className="w-32">Modelo</span>
+          <span className="flex-1">Usuário</span>
           <span className="w-24 text-right">Tokens</span>
-          <span className="w-20 text-right">Latency</span>
-          <span className="w-16 text-right">Cost</span>
+          <span className="w-20 text-right">Latência</span>
+          <span className="w-16 text-right">Custo</span>
         </div>
         
         {/* Rows */}
@@ -430,7 +463,7 @@ export default function AgentMonitorPage() {
           {calls.length === 0 && (
             <div className="p-8 text-center text-zinc-500">
               <Brain className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>No AI calls in the selected period</p>
+              <p>Nenhuma chamada de IA no período selecionado</p>
             </div>
           )}
         </div>

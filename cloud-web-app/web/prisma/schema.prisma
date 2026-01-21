@@ -25,6 +25,11 @@ model User {
   // Plano atual (ex: starter/basic/pro/studio/enterprise). Trial usa sufixo "_trial" (ex: starter_trial).
   plan             String  @default("starter_trial")
   stripeCustomerId String? @unique
+  stripeSubscriptionId String?
+  trialEndsAt       DateTime?
+
+  // Storage enforcement / metering
+  storageUsed       Int     @default(0) // bytes (cacheado); fonte real vem de agregações
   
   // OAuth fields
   oauthProvider    String?
@@ -49,6 +54,9 @@ model User {
   mfaEnabled        Boolean   @default(false)
   mfaSecret         String?   // TOTP secret (encrypted)
   mfaBackupCodes    String?   // JSON array of hashed backup codes
+
+  // Legacy/compat: alguns módulos usam `twoFactorEnabled`
+  twoFactorEnabled  Boolean   @default(false)
   
   // Admin-specific fields
   adminRole         String?   // owner|super_admin|admin|moderator|support
@@ -67,6 +75,10 @@ model User {
 
   creditLedgerEntries CreditLedgerEntry[]
   auditLogs           AuditLog[]
+
+  supportTickets   SupportTicket[]
+  supportMessages  SupportMessage[]
+  userPreferences  UserPreferences?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,6 +111,14 @@ model Project {
   name     String
   template String? // platformer2d, fps3d, etc
 
+  description String?
+
+  // Project-level settings (render presets, editor prefs, etc)
+  settings Json?
+
+  // Build tracking
+  lastBuildAt DateTime?
+
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -106,6 +126,7 @@ model Project {
   assets Asset[]
 
   members ProjectMember[]
+  adminState ProjectAdminState?
 
   chatThreads ChatThread[]
   copilotWorkflows CopilotWorkflow[]
@@ -115,6 +136,19 @@ model Project {
 
   @@index([userId])
   @@index([createdAt])
+}
+
+model ProjectAdminState {
+  id        String   @id @default(cuid())
+  projectId String   @unique
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status    String   @default("active") // active, paused
+  reason    String?
+  updatedBy String?
+
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
 }
 
 model ProjectMember {
@@ -206,7 +240,6 @@ model ChatMessage {
 
   role    String // user|assistant|system
   content String @db.Text
-  model   String?
   metadata Json?
 
   createdAt DateTime @default(now())
@@ -225,8 +258,13 @@ model File {
   content  String  @db.Text
   language String? // javascript, typescript, python, etc
 
+  // Used for quota/storage aggregation
+  size     Int     @default(0)
+
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  indexingEntry IndexingEntry?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -393,22 +431,10 @@ model InstalledExtension {
 }
 
 // ============================================
-// ADMIN
+// ADMIN - Audit Log (moved to full version below)
 // ============================================
 
-model AuditLog {
-  id       String  @id @default(cuid())
-  userId   String?
-  action   String // login, create_project, delete_file, etc
-  resource String? // project_id, file_id, etc
-  metadata Json?
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([action])
-  @@index([createdAt])
-}
+// AuditLog model with full admin tracking is defined later in the schema
 
 // ============================================
 // METERING / RATE LIMITING (PER USER)
@@ -505,6 +531,108 @@ model FeatureFlag {
 }
 
 // ============================================
+// A/B EXPERIMENTS
+// ============================================
+
+model Experiment {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("draft") // draft, running, paused, completed
+  startDate   DateTime?
+  endDate     DateTime?
+  createdBy   String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  variants    ExperimentVariant[]
+  enrollments ExperimentEnrollment[]
+  conversions ExperimentConversion[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ExperimentVariant {
+  id           String   @id @default(cuid())
+  experimentId String
+  name         String
+  weight       Float    @default(50) // Percentage weight for allocation
+  
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  enrollments  ExperimentEnrollment[]
+  conversions  ExperimentConversion[]
+  
+  @@unique([experimentId, name])
+  @@index([experimentId])
+}
+
+model ExperimentEnrollment {
+  id           String   @id @default(cuid())
+  userId       String
+  experimentId String
+  variantId    String
+  enrolledAt   DateTime @default(now())
+  
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  variant      ExperimentVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, experimentId])
+  @@index([experimentId])
+  @@index([userId])
+}
+
+model ExperimentConversion {
+  id           String   @id @default(cuid())
+  userId       String
+  experimentId String
+  variantId    String
+  value        Float?
+  convertedAt  DateTime @default(now())
+  
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  variant      ExperimentVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  
+  @@index([experimentId, variantId])
+  @@index([userId])
+}
+
+// ============================================
+// ONBOARDING PROGRESS
+// ============================================
+
+model OnboardingProgress {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  currentStep     String   @default("welcome")
+  completedSteps  String[] @default([])
+  completedTours  String[] @default([])
+  achievements    String[] @default([])
+  stats           Json     @default("{}")
+  startedAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================
+// QUOTA USAGE
+// ============================================
+
+model QuotaUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  resource  String
+  period    String   // "2026-01" formato ano-mês
+  used      Int      @default(0)
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, resource, period])
+  @@index([userId, period])
+}
+
+// ============================================
 // BACKUPS
 // ============================================
 
@@ -530,6 +658,25 @@ model Backup {
   @@index([projectId])
   @@index([createdBy])
   @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// DEPLOYMENT PIPELINES
+// ============================================
+
+model DeploymentPipeline {
+  id        String   @id @default(cuid())
+  name      String
+  provider  String   @default("internal") // github, gitlab, internal
+  status    String   @default("idle") // idle, running, success, failed
+  lastRunAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([provider])
   @@index([createdAt])
 }
 
@@ -610,20 +757,26 @@ model AuditLog {
   id          String   @id @default(cuid())
   
   // Who performed the action
-  adminId     String
-  admin       User     @relation(fields: [adminId], references: [id])
-  adminEmail  String   // Snapshot para histórico
-  adminRole   String   // Snapshot do role no momento da ação
+  adminId     String?
+  admin       User?     @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  adminEmail  String?   // Snapshot para histórico
+  adminRole   String?   // Snapshot do role no momento da ação
+
+  // Optional user actor (non-admin/system flows)
+  userId      String?
   
   // What action was performed
   action      String   // shadow_ban, emergency_activate, user_delete, etc.
-  category    String   // moderation, finance, security, system
+  category    String   @default("system") // moderation, finance, security, system
   severity    String   @default("info") // info, warning, critical
   
   // Target of the action
   targetType  String?  // user, project, system, ai_agent
   targetId    String?  // ID do alvo (userId, projectId, etc)
   targetEmail String?  // Email do usuário alvo (se aplicável)
+
+  // Legacy/compat: alguns fluxos usam `resource` como filtro/identificador
+  resource    String?
   
   // Details
   reason      String?  // Motivo da ação
@@ -637,12 +790,111 @@ model AuditLog {
   createdAt   DateTime @default(now())
 
   @@index([adminId])
+  @@index([userId])
   @@index([action])
   @@index([category])
   @@index([severity])
   @@index([targetId])
   @@index([targetType])
+  @@index([resource])
   @@index([createdAt])
+}
+
+// ============================================
+// SUPPORT SYSTEM (Tickets + Messages + Preferences)
+// ============================================
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Snapshot/compat: alguns fluxos persistem email do solicitante
+  email       String?
+
+  subject     String
+  message     String   @db.Text
+  category    String   @default("other")
+  status      String   @default("open") // open, pending, resolved, closed
+  priority    String   @default("normal") // low, normal, high, urgent
+
+  // Canal de entrada do ticket
+  channel     String   @default("web") // email, chat, web
+
+  // Atendente atual (se houver)
+  assignedTo  String?
+
+  metadata    Json?
+
+  messages    SupportMessage[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+model SupportMessage {
+  id        String   @id @default(cuid())
+
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // Actor (optional for system messages)
+  senderId  String?
+  sender    User?    @relation(fields: [senderId], references: [id], onDelete: SetNull)
+
+  senderType String   @default("user") // user, support, system, agent
+  content   String   @db.Text
+  attachments String[] @default([])
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+model UserPreferences {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Campos explícitos usados pelo app
+  supportChannel      String   @default("both") // chat, email, both
+  emailNotifications  Boolean  @default(true)
+  chatNotifications   Boolean  @default(true)
+  language            String   @default("pt-BR")
+
+  // Extensível (chaves adicionais)
+  preferences         Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// IDE GLOBAL SETTINGS (ADMIN)
+// ============================================
+
+model IdeSetting {
+  id        String   @id @default(cuid())
+  key       String
+  value     Json
+  scope     String   @default("global") // global, staging, production
+  updatedBy String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, scope])
+  @@index([key])
+  @@index([scope])
 }
 
 // ============================================
@@ -729,6 +981,128 @@ model ModerationItem {
 }
 
 // ============================================
+// IP REGISTRY
+// ============================================
+
+model IpRegistryAllowed {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model IpRegistryLicense {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  status    String   @default("licensed") // licensed, owned, restricted
+  holder    String?
+  since     DateTime?
+  until     DateTime?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ============================================
+// AI ENHANCEMENTS & TRAINING
+// ============================================
+
+model AiEnhancement {
+  id          String   @id @default(cuid())
+  name        String
+  status      String   @default("planned") // planned, partial, applied, missing
+  description String?
+  applied     Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model AiTrainingJob {
+  id          String   @id @default(cuid())
+  model       String
+  status      String   @default("queued") // queued, running, completed, failed
+  cost        Float    @default(0)
+  efficiency  Float    @default(0)
+  filters     String?
+  auxAI       String?
+  optimization String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// FINE TUNING DATASETS & JOBS
+// ============================================
+
+model FineTuneDataset {
+  id          String   @id @default(cuid())
+  name        String
+  size        Int      @default(0)
+  status      String   @default("pending_upload") // pending_upload, uploaded, failed, storage_unavailable
+  contentType String?
+  storageKey  String?
+  jobs        FineTuneJob[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model FineTuneJob {
+  id           String   @id @default(cuid())
+  datasetId    String
+  dataset      FineTuneDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  epochs       Int      @default(1)
+  learningRate Float    @default(0.001)
+  status       String   @default("queued") // queued, running, completed, failed
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([datasetId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// INDEXING (RAG)
+// ============================================
+
+model IndexingConfig {
+  id            String   @id @default("singleton")
+  depthLevel    Int      @default(3)
+  maxFileSizeMb Int      @default(10)
+  updatedBy     String?
+  updatedAt     DateTime @updatedAt
+}
+
+model IndexingEntry {
+  id        String   @id @default(cuid())
+  fileId    String   @unique
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  filePath  String
+  context   String?
+  indexed   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([filePath])
+  @@index([indexed])
+  @@index([createdAt])
+}
+
+// ============================================
 // LIVE SESSIONS (God View)
 // ============================================
 
@@ -772,4 +1146,106 @@ model LiveSession {
   @@index([isActive])
   @@index([startedAt])
   @@index([lastPingAt])
+}
+
+// ============================================
+// TWO-FACTOR AUTHENTICATION
+// ============================================
+
+model TwoFactorSetup {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  
+  secret      String   // Base64 encoded TOTP secret
+  backupCodes String[] // Array of hashed backup codes
+  
+  verified    Boolean  @default(false)
+  verifiedAt  DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model PendingTwoFactorSession {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  
+  createdAt DateTime @default(now())
+  
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ============================================
+// EXPORT JOBS
+// ============================================
+
+model ExportJob {
+  id            String   @id @default(cuid())
+  projectId     String
+  userId        String
+  
+  platform      String   // windows, macos, linux, web, ios, android, source
+  configuration String   // debug, release, distribution
+  options       Json?    // Platform-specific options
+  
+  status        String   @default("queued") // queued, preparing, building, packaging, uploading, completed, failed
+  progress      Int      @default(0)
+  currentStep   String?
+  
+  downloadUrl   String?
+  downloadExpiresAt DateTime?
+  fileSize      Int?     // bytes
+  
+  buildMinutesUsed Int?
+  error         String?
+  
+  createdAt     DateTime @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+  
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// MULTIPLAYER LOBBIES (persistent tracking)
+// ============================================
+
+model LobbySession {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  
+  gameId      String
+  hostId      String
+  
+  name        String
+  maxPlayers  Int      @default(8)
+  isPublic    Boolean  @default(true)
+  hasPassword Boolean  @default(false)
+  region      String
+  gameMode    String?
+  settings    Json?
+  
+  status      String   @default("waiting") // waiting, starting, in-game, finished
+  
+  peakPlayers Int      @default(0)
+  totalJoins  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  endedAt     DateTime?
+  
+  @@index([gameId])
+  @@index([hostId])
+  @@index([status])
+  @@index([createdAt])
 }

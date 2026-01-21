@@ -14,7 +14,7 @@ export default function Page() {
         <header className="mb-10">
           <h1 className="text-4xl font-semibold tracking-tight">Aethel</h1>
           <p className="mt-3 text-lg text-gray-300">
-            Portal profissional: projetos, billing, uso/quotas, chat e acesso à IDE.
+            Portal profissional: projetos, faturamento, uso/quotas, chat e acesso à IDE.
           </p>
         </header>
 
@@ -43,7 +43,7 @@ export default function Page() {
           <div className="rounded-lg border border-gray-800 bg-gray-900/30 p-5">
             <h2 className="text-base font-semibold">Área do usuário</h2>
             <p className="mt-2 text-sm text-gray-300">
-              Dashboard, projetos, histórico, uso/quotas e recursos internos.
+              Painel, projetos, histórico, uso/quotas e recursos internos.
             </p>
             <div className="mt-4">
               <Link href="/login" className="text-sm text-indigo-400 hover:text-indigo-300">
@@ -59,7 +59,7 @@ export default function Page() {
             </p>
             <div className="mt-4">
               <p className="text-xs text-gray-400">
-                (Integração 1-click para abrir a IDE via rota interna é parte do checklist.)
+                (Integração de um clique para abrir a IDE via rota interna é parte do checklist.)
               </p>
             </div>
           </div>

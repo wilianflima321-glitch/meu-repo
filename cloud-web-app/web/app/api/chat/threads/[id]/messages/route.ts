@@ -32,7 +32,6 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
         id: true,
         role: true,
         content: true,
-        model: true,
         metadata: true,
         createdAt: true,
       },
@@ -73,7 +72,6 @@ export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
 
     const role = typeof (body as any).role === 'string' ? String((body as any).role) : '';
     const content = typeof (body as any).content === 'string' ? String((body as any).content) : '';
-    const model = typeof (body as any).model === 'string' ? String((body as any).model) : null;
     const metadata = (body as any).metadata;
 
     const allowedRoles = new Set(['user', 'assistant', 'system']);
@@ -90,14 +88,12 @@ export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
         threadId,
         role,
         content,
-        model,
         metadata: metadata ?? undefined,
       },
       select: {
         id: true,
         role: true,
         content: true,
-        model: true,
         metadata: true,
         createdAt: true,
       },

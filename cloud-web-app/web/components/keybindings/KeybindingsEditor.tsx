@@ -34,6 +34,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { getKeybindingManager, Keybinding as ManagerKeybinding } from '@/lib/keybindings/keybinding-manager'
+import { useToast } from '@/components/ui/Toast'
 
 // ============= Types =============
 
@@ -233,6 +234,7 @@ export default function KeybindingsEditor({
   onSave,
   onClose,
 }: KeybindingsEditorProps) {
+  const toast = useToast()
   const [keybindings, setKeybindings] = useState<Keybinding[]>(
     initialKeybindings || DEFAULT_KEYBINDINGS
   )
@@ -422,7 +424,7 @@ export default function KeybindingsEditor({
           setKeybindings(imported)
           setHasChanges(true)
         } catch (err) {
-          alert('Invalid keybindings file')
+          toast.error('Invalid keybindings file')
         }
       }
       reader.readAsText(file)

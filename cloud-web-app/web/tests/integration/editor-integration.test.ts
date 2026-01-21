@@ -3,7 +3,7 @@
  * End-to-end tests for editor features with LSP and AI
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { getEditorIntegration } from '../../lib/integration';
 import { getLSPApiClient, getAIApiClient } from '../../lib/api/index';
 

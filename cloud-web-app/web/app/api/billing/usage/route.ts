@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth-server';
+import { getBuildMinutesUsed } from '@/lib/build-minutes';
 
 interface UsageHistoryItem {
   date: string;
@@ -40,11 +41,6 @@ export async function GET(req: NextRequest) {
         { status: 404 }
       );
     }
-
-    // Buscar uso do mês atual
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
 
     // Agregar uso de diferentes fontes (UsageBucket, se existir)
     let tokensUsed = 0;
@@ -92,11 +88,18 @@ export async function GET(req: NextRequest) {
       storageUsed = 0;
     }
 
-    // Gerar histórico dos últimos 30 dias
-    const history = generateUsageHistory(30);
+    // Histórico (sem dados agregados ainda)
+    const history: UsageHistoryItem[] = [];
 
     // Calcular data de renovação
     const renewsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    let buildMinutesUsed = 0;
+    try {
+      buildMinutesUsed = await getBuildMinutesUsed(userId);
+    } catch {
+      buildMinutesUsed = 0;
+    }
 
     const response = {
       success: true,
@@ -108,7 +111,7 @@ export async function GET(req: NextRequest) {
         },
         usage: {
           aiTokens: {
-            used: tokensUsed || Math.floor(Math.random() * 50000),
+            used: tokensUsed || 0,
             limit: planLimits.aiTokens,
           },
           storage: {
@@ -116,15 +119,15 @@ export async function GET(req: NextRequest) {
             limit: planLimits.storage,
           },
           buildMinutes: {
-            used: Math.floor(Math.random() * 100),
+            used: buildMinutesUsed,
             limit: planLimits.buildMinutes,
           },
           gpuHours: {
-            used: Math.floor(Math.random() * 10),
+            used: 0,
             limit: planLimits.gpuHours,
           },
           apiCalls: {
-            used: requestsUsed || Math.floor(Math.random() * 5000),
+            used: requestsUsed || 0,
             limit: planLimits.apiCalls,
           },
           collaborators: {
@@ -227,21 +230,4 @@ function getPlanName(planId: string): string {
   return names[planId] || 'Free';
 }
 
-function generateUsageHistory(days: number): UsageHistoryItem[] {
-  const history: UsageHistoryItem[] = [];
-  const now = new Date();
-  
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    
-    history.push({
-      date: date.toISOString().split('T')[0],
-      aiTokens: Math.floor(Math.random() * 5000 + 1000),
-      storage: Math.floor(Math.random() * 100 + 50),
-      buildMinutes: Math.floor(Math.random() * 30 + 5),
-    });
-  }
-  
-  return history;
-}
+// Histórico ainda não agregado; retornar vazio até termos agregações reais.

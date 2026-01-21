@@ -26,6 +26,8 @@ images:
     newTag: v1.0.0  # Pin to specific version in prod
   - name: ghcr.io/aethel-engine/runtime
     newTag: v1.0.0
+  - name: ghcr.io/aethel-engine/worker
+    newTag: v1.0.0
 
 patches:
   # Production resource limits

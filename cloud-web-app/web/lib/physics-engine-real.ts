@@ -282,6 +282,14 @@ export class PhysicsWorld {
     this.eventQueue = new RAPIER.EventQueue(true);
   }
 
+  setGravity(gravity: THREE.Vector3): void {
+    if (!this.rawWorld) {
+      this.init(gravity);
+      return;
+    }
+    this.rawWorld.gravity = { x: gravity.x, y: gravity.y, z: gravity.z };
+  }
+
   step(dt: number): void {
     if (!this.rawWorld || !this.eventQueue) return;
 

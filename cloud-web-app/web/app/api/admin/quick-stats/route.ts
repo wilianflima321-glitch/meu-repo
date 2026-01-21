@@ -29,7 +29,7 @@ export const GET = withAdminAuth(
       // Requests hoje (baseado em logs ou metering)
       prisma.creditLedgerEntry.count({
         where: {
-          timestamp: { gte: todayStart },
+          createdAt: { gte: todayStart },
         },
       }),
       

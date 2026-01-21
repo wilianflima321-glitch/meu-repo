@@ -84,15 +84,19 @@ const MODEL_COSTS: Record<string, { input: number; output: number }> = {
   'gemini-1.5-flash': { input: 0.000075, output: 0.0003 },
 };
 
-// Infrastructure cost estimates (daily)
+const numberFromEnv = (value?: string) => {
+  if (!value) return 0;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 const INFRA_COSTS = {
-  database: 15, // Managed PostgreSQL
-  redis: 8,     // Redis cluster
-  storage: 5,   // S3/Blob storage
-  cdn: 12,      // CloudFront/CDN
-  compute: 45,  // Kubernetes/containers
-  monitoring: 5, // Logs, APM
-  total: 90,
+  database: numberFromEnv(process.env.FINANCE_COST_DATABASE),
+  redis: numberFromEnv(process.env.FINANCE_COST_REDIS),
+  storage: numberFromEnv(process.env.FINANCE_COST_STORAGE),
+  cdn: numberFromEnv(process.env.FINANCE_COST_CDN),
+  compute: numberFromEnv(process.env.FINANCE_COST_COMPUTE),
+  monitoring: numberFromEnv(process.env.FINANCE_COST_MONITORING),
 };
 
 async function handler(req: NextRequest) {
@@ -116,6 +120,8 @@ async function handler(req: NextRequest) {
     default: // today
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }
+  const daysInRange = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)));
+  const previousStartDate = new Date(startDate.getTime() - daysInRange * 24 * 60 * 60 * 1000);
   
   try {
     // Get active paying users by plan
@@ -128,6 +134,16 @@ async function handler(req: NextRequest) {
         },
       },
     });
+
+    const [activeSubscriptions, churnedSubscriptions] = await prisma.$transaction([
+      prisma.subscription.count({ where: { status: 'active' } }),
+      prisma.subscription.count({
+        where: {
+          status: 'canceled',
+          updatedAt: { gte: startDate },
+        },
+      }),
+    ]);
     
     // Calculate MRR
     let mrr = 0;
@@ -157,7 +173,7 @@ async function handler(req: NextRequest) {
     const aiUsage = await prisma.creditLedgerEntry.findMany({
       where: {
         createdAt: { gte: startDate },
-        type: { in: ['ai_generation', 'usage'] },
+        entryType: { in: ['ai_generation', 'usage'] },
       },
       select: {
         amount: true,
@@ -175,9 +191,9 @@ async function handler(req: NextRequest) {
       const model = metadata?.model || 'unknown';
       const tokens = Math.abs(entry.amount);
       
-      const costs = MODEL_COSTS[model] || MODEL_COSTS['gpt-4o-mini'];
+      const costs = MODEL_COSTS[model];
       // Assume 70% input, 30% output tokens
-      const cost = (tokens * 0.7 * costs.input + tokens * 0.3 * costs.output) / 1000;
+      const cost = costs ? (tokens * 0.7 * costs.input + tokens * 0.3 * costs.output) / 1000 : 0;
       
       if (!modelUsage[model]) {
         modelUsage[model] = { cost: 0, calls: 0 };
@@ -212,39 +228,59 @@ async function handler(req: NextRequest) {
     
     const recentTransactions: FinanceMetrics['recentTransactions'] = recentEntries.map(entry => ({
       id: entry.id,
-      type: entry.type === 'purchase' ? 'subscription' : 
-            entry.type === 'refund' ? 'refund' :
-            entry.type === 'bonus' ? 'credit' : 'usage',
+      type: entry.entryType === 'purchase' ? 'subscription' : 
+            entry.entryType === 'refund' ? 'refund' :
+            entry.entryType === 'bonus' ? 'credit' : 'usage',
       amount: entry.amount,
       userId: entry.userId,
       userEmail: entry.user.email,
-      description: entry.description,
+      description: (entry.metadata as any)?.description || entry.reference || undefined,
       createdAt: entry.createdAt.toISOString(),
     }));
     
+    const [currentRevenueAgg, previousRevenueAgg] = await prisma.$transaction([
+      prisma.payment.aggregate({
+        where: {
+          status: 'succeeded',
+          createdAt: { gte: startDate, lt: now },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.payment.aggregate({
+        where: {
+          status: 'succeeded',
+          createdAt: { gte: previousStartDate, lt: startDate },
+        },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    const revenueInRange = (currentRevenueAgg._sum?.amount ?? 0) / 100;
+    const revenuePreviousRange = (previousRevenueAgg._sum?.amount ?? 0) / 100;
+    const infraCostsTotal = Object.values(INFRA_COSTS).reduce((sum, value) => sum + value, 0);
+    const infraOverride = numberFromEnv(process.env.FINANCE_INFRA_DAILY_TOTAL);
+
     // Calculate daily metrics
-    const daysInRange = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)));
     const dailyAICost = totalAICost / daysInRange;
-    const dailyInfraCost = INFRA_COSTS.total;
-    const dailyRevenue = mrr / 30; // Approximate daily from MRR
+    const dailyInfraCost = infraOverride > 0 ? infraOverride : infraCostsTotal;
+    const dailyRevenue = revenueInRange / daysInRange;
     const dailyProfit = dailyRevenue - dailyAICost - dailyInfraCost;
     const profitMargin = dailyRevenue > 0 ? (dailyProfit / dailyRevenue) * 100 : 0;
     
-    // Calculate churn (users who downgraded or cancelled in last 30 days)
-    // This is a simplified calculation
     const totalPaidUsers = usersByPlan.reduce((sum, g) => sum + g._count.id, 0);
-    const estimatedChurn = Math.max(0, totalPaidUsers * 0.03); // 3% estimate
-    const churnRate = totalPaidUsers > 0 ? (estimatedChurn / totalPaidUsers) * 100 : 0;
+    const churnBase = activeSubscriptions + churnedSubscriptions;
+    const churnRate = churnBase > 0 ? (churnedSubscriptions / churnBase) * 100 : 0;
+    const paidAccounts = activeSubscriptions > 0 ? activeSubscriptions : totalPaidUsers;
     
     // Unit economics
-    const ltv = mrr > 0 ? (mrr / Math.max(totalPaidUsers, 1)) * 24 : 0; // 24 month average lifespan
-    const cac = 50; // Placeholder - would need marketing data
+    const ltv = mrr > 0 ? (mrr / Math.max(paidAccounts, 1)) * 24 : 0; // 24 month average lifespan
+    const cac = numberFromEnv(process.env.FINANCE_CAC);
     
     // Burn rate and runway
     const totalDailyCost = dailyAICost + dailyInfraCost;
     const burnRate = Math.max(0, totalDailyCost - dailyRevenue);
-    const cashReserves = 100000; // Would come from actual finance data
-    const runway = burnRate > 0 ? Math.floor(cashReserves / (burnRate * 30)) : 999;
+    const cashReserves = numberFromEnv(process.env.FINANCE_CASH_RESERVES);
+    const runway = burnRate > 0 && cashReserves > 0 ? Math.floor(cashReserves / (burnRate * 30)) : 0;
     
     // Generate alerts
     const alerts: FinanceMetrics['alerts'] = [];
@@ -290,7 +326,9 @@ async function handler(req: NextRequest) {
     }
     
     // Previous period MRR for growth calculation (simplified)
-    const mrrGrowth = 8.5; // Would need historical data
+    const mrrGrowth = revenuePreviousRange > 0
+      ? ((revenueInRange - revenuePreviousRange) / revenuePreviousRange) * 100
+      : (revenueInRange > 0 ? 100 : 0);
     
     const metrics: FinanceMetrics = {
       mrr,
@@ -306,7 +344,7 @@ async function handler(req: NextRequest) {
       burnRate,
       runway,
       
-      activeSubscriptions: totalPaidUsers,
+      activeSubscriptions: paidAccounts,
       churnRate,
       ltv,
       cac,
@@ -328,4 +366,4 @@ async function handler(req: NextRequest) {
   }
 }
 
-export const GET = withAdminAuth(handler, 'ops:finance:read');
+export const GET = withAdminAuth(handler, 'ops:finance:view');

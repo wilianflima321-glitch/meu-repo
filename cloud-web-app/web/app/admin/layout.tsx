@@ -59,7 +59,7 @@ interface QuickStats {
 
 const navItems = [
   {
-    title: 'Dashboard',
+    title: 'Painel',
     href: '/admin',
     icon: LayoutDashboard,
     permission: 'ops:dashboard:view',
@@ -78,11 +78,11 @@ const navItems = [
     permission: 'ops:users:view',
   },
   {
-    title: 'AI Monitor',
+    title: 'Monitor de IA',
     href: '/admin/ai-monitor',
     icon: Brain,
     permission: 'ops:agents:view',
-    badge: 'Live',
+    badge: 'Ao vivo',
   },
   {
     title: 'Infraestrutura',
@@ -97,7 +97,7 @@ const navItems = [
     permission: 'ops:moderation:view',
   },
   {
-    title: 'Analytics',
+    title: 'Análises',
     href: '/admin/analytics',
     icon: TrendingUp,
     permission: 'ops:dashboard:metrics',
@@ -284,7 +284,7 @@ function Header({
             </div>
             <div className="flex items-center gap-1.5">
               <StatusIndicator status={systemStatus.ai} />
-              <span className="text-zinc-500">AI</span>
+              <span className="text-zinc-500">IA</span>
             </div>
           </div>
         )}
@@ -305,14 +305,14 @@ function Header({
           />
           <QuickStatCard 
             icon={CreditCard} 
-            label="AI Cost Today" 
+            label="Custo de IA hoje" 
             value={`$${quickStats.aiCostToday.toFixed(2)}`}
             alert={quickStats.aiCostToday > 50}
           />
           {quickStats.emergencyLevel !== 'normal' && (
             <QuickStatCard 
               icon={AlertTriangle} 
-              label="Emergency" 
+              label="Emergência" 
               value={quickStats.emergencyLevel.toUpperCase()}
               alert
             />

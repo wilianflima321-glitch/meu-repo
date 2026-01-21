@@ -95,11 +95,12 @@ export function Card({
 }
 
 export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
-  title: string
+  title?: string
   description?: string
   action?: ReactNode
   icon?: ReactNode
   size?: 'sm' | 'md' | 'lg'
+  children?: ReactNode
 }
 
 const headerSizes = {
@@ -114,31 +115,48 @@ export function CardHeader({
   action, 
   icon,
   size = 'md',
+  children,
   className = '', 
   ...props 
 }: CardHeaderProps) {
   return (
     <div className={`flex items-start justify-between gap-4 mb-5 ${className}`} {...props}>
-      <div className="flex items-start gap-3 min-w-0">
-        {icon && (
-          <div className="flex-shrink-0 p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-            {icon}
+      {children ? (
+        children
+      ) : (
+        <>
+          <div className="flex items-start gap-3 min-w-0">
+            {icon && (
+              <div className="flex-shrink-0 p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                {icon}
+              </div>
+            )}
+            <div className="min-w-0">
+              {title && (
+                <h3 className={`${headerSizes[size].title} text-slate-100 leading-tight`}>
+                  {title}
+                </h3>
+              )}
+              {description && (
+                <p className={`mt-1 ${headerSizes[size].desc} text-slate-400 leading-relaxed`}>
+                  {description}
+                </p>
+              )}
+            </div>
           </div>
-        )}
-        <div className="min-w-0">
-          <h3 className={`${headerSizes[size].title} text-slate-100 leading-tight`}>
-            {title}
-          </h3>
-          {description && (
-            <p className={`mt-1 ${headerSizes[size].desc} text-slate-400 leading-relaxed`}>
-              {description}
-            </p>
-          )}
-        </div>
-      </div>
-      {action && <div className="flex-shrink-0">{action}</div>}
+          {action && <div className="flex-shrink-0">{action}</div>}
+        </>
+      )}
     </div>
   )
+}
+
+export function CardTitle({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <h3 className={`text-lg font-semibold text-slate-100 ${className}`}>{children}</h3>;
+}
+
+export function CardDescription({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <p className={`text-sm text-slate-400 ${className}`}>{children}</p>;
 }
 
 export interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {

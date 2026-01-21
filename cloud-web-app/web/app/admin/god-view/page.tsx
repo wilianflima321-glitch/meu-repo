@@ -122,19 +122,19 @@ function StatsOverview({ stats }: { stats: GodViewStats }) {
     <div className="grid grid-cols-4 gap-4 mb-6">
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">Live Users</span>
+          <span className="text-xs text-gray-400 uppercase">Usuários ao vivo</span>
           <Users className="w-4 h-4 text-green-400" />
         </div>
         <p className="text-3xl font-bold text-white">{stats.totalActive}</p>
         <div className="flex items-center gap-2 mt-2">
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs text-green-400">Live</span>
+          <span className="text-xs text-green-400">Ao vivo</span>
         </div>
       </div>
       
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">AI Calls</span>
+          <span className="text-xs text-gray-400 uppercase">Chamadas de IA</span>
           <Bot className="w-4 h-4 text-blue-400" />
         </div>
         <p className="text-3xl font-bold text-white">{stats.totalAICalls.toLocaleString()}</p>
@@ -143,23 +143,23 @@ function StatsOverview({ stats }: { stats: GodViewStats }) {
       
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">AI Cost (Live)</span>
+          <span className="text-xs text-gray-400 uppercase">Custo de IA (ao vivo)</span>
           <DollarSign className="w-4 h-4 text-yellow-400" />
         </div>
         <p className="text-3xl font-bold text-white">${stats.totalAICost.toFixed(2)}</p>
-        <p className="text-xs text-gray-500 mt-2">Current sessions</p>
+        <p className="text-xs text-gray-500 mt-2">Sessões atuais</p>
       </div>
       
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">Top Region</span>
+          <span className="text-xs text-gray-400 uppercase">Região principal</span>
           <Globe className="w-4 h-4 text-purple-400" />
         </div>
         <p className="text-3xl font-bold text-white">
-          {stats.byCountry[0]?.country || 'N/A'}
+          {stats.byCountry[0]?.country || 'N/D'}
         </p>
         <p className="text-xs text-gray-500 mt-2">
-          {stats.byCountry[0]?.count || 0} users
+          {stats.byCountry[0]?.count || 0} usuários
         </p>
       </div>
     </div>
@@ -226,7 +226,7 @@ function SessionCard({
           {/* Quick Stats */}
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <p className="text-xs text-gray-400">Duration</p>
+              <p className="text-xs text-gray-400">Duração</p>
               <p className="text-sm text-white flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {formatDuration(session.duration)}
@@ -234,7 +234,7 @@ function SessionCard({
             </div>
             
             <div className="text-right">
-              <p className="text-xs text-gray-400">AI Calls</p>
+              <p className="text-xs text-gray-400">Chamadas de IA</p>
               <p className="text-sm text-white flex items-center gap-1">
                 <Bot className="w-3 h-3" />
                 {session.aiCallsCount}
@@ -242,7 +242,7 @@ function SessionCard({
             </div>
             
             <div className="text-right">
-              <p className="text-xs text-gray-400">Cost</p>
+              <p className="text-xs text-gray-400">Custo</p>
               <p className={`text-sm font-medium flex items-center gap-1 ${
                 session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-white'
               }`}>
@@ -266,21 +266,21 @@ function SessionCard({
           <div className="grid grid-cols-3 gap-4">
             {/* Activity */}
             <div className="space-y-3">
-              <h4 className="text-xs text-gray-400 uppercase">Current Activity</h4>
+              <h4 className="text-xs text-gray-400 uppercase">Atividade atual</h4>
               
               <div className="flex items-center gap-2">
                 <MousePointer className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-gray-400">Page</p>
-                  <p className="text-sm text-white">{session.currentPage || 'Unknown'}</p>
+                  <p className="text-xs text-gray-400">Página</p>
+                  <p className="text-sm text-white">{session.currentPage || 'Desconhecida'}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
                 <ToolIcon className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-gray-400">Active Tool</p>
-                  <p className="text-sm text-white">{session.currentTool || 'None'}</p>
+                  <p className="text-xs text-gray-400">Ferramenta ativa</p>
+                  <p className="text-sm text-white">{session.currentTool || 'Nenhuma'}</p>
                 </div>
               </div>
               
@@ -288,7 +288,7 @@ function SessionCard({
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-gray-500" />
                   <div>
-                    <p className="text-xs text-gray-400">Last Action</p>
+                    <p className="text-xs text-gray-400">Última ação</p>
                     <p className="text-sm text-white">{session.lastAction}</p>
                   </div>
                 </div>
@@ -297,31 +297,31 @@ function SessionCard({
             
             {/* Technical */}
             <div className="space-y-3">
-              <h4 className="text-xs text-gray-400 uppercase">Technical</h4>
+              <h4 className="text-xs text-gray-400 uppercase">Técnico</h4>
               
               <div>
-                <p className="text-xs text-gray-400">Session ID</p>
+                <p className="text-xs text-gray-400">ID da sessão</p>
                 <p className="text-sm text-white font-mono">{session.id.slice(0, 12)}...</p>
               </div>
               
               <div>
-                <p className="text-xs text-gray-400">IP Address</p>
-                <p className="text-sm text-white font-mono">{session.ipAddress || 'Unknown'}</p>
+                <p className="text-xs text-gray-400">Endereço IP</p>
+                <p className="text-sm text-white font-mono">{session.ipAddress || 'Desconhecido'}</p>
               </div>
               
               <div>
-                <p className="text-xs text-gray-400">Browser</p>
-                <p className="text-sm text-white">{session.browser || 'Unknown'}</p>
+                <p className="text-xs text-gray-400">Navegador</p>
+                <p className="text-sm text-white">{session.browser || 'Desconhecido'}</p>
               </div>
             </div>
             
             {/* AI Usage */}
             <div className="space-y-3">
-              <h4 className="text-xs text-gray-400 uppercase">AI Usage</h4>
+              <h4 className="text-xs text-gray-400 uppercase">Uso de IA</h4>
               
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-[#252525] rounded p-2">
-                  <p className="text-xs text-gray-400">Calls</p>
+                  <p className="text-xs text-gray-400">Chamadas</p>
                   <p className="text-lg font-medium text-white">{session.aiCallsCount}</p>
                 </div>
                 
@@ -334,7 +334,7 @@ function SessionCard({
               </div>
               
               <div className="bg-[#252525] rounded p-2">
-                <p className="text-xs text-gray-400">Session Cost</p>
+                <p className="text-xs text-gray-400">Custo da sessão</p>
                 <p className={`text-xl font-bold ${
                   session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-green-400'
                 }`}>
@@ -357,7 +357,7 @@ function WorldMap({ byCountry }: { byCountry: { country: string; count: number }
     <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
       <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
         <Globe className="w-4 h-4" />
-        Active by Region
+        Ativos por região
       </h3>
       
       <div className="space-y-2">
@@ -404,7 +404,7 @@ export default function GodViewPage() {
     
     try {
       const res = await fetch('/api/admin/god-view/sessions');
-      if (!res.ok) throw new Error('Failed to fetch');
+      if (!res.ok) throw new Error('Falha ao buscar');
       const data = await res.json();
       
       // Enrich sessions with derived data
@@ -417,7 +417,7 @@ export default function GodViewPage() {
       setSessions(enriched);
       setStats(data.stats);
     } catch (error) {
-      console.error('Failed to fetch sessions:', error);
+      console.error('Falha ao buscar sessões:', error);
     } finally {
       setLoading(false);
     }
@@ -464,16 +464,16 @@ export default function GodViewPage() {
         <div>
           <h1 className="text-xl font-semibold text-white flex items-center gap-2">
             <Eye className="w-6 h-6" />
-            God View
+            Visão total
             {!paused && (
               <span className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                LIVE
+                AO VIVO
               </span>
             )}
           </h1>
           <p className="text-sm text-gray-400">
-            Real-time view of all active user sessions
+            Visão em tempo real de todas as sessões ativas
           </p>
         </div>
         
@@ -483,7 +483,7 @@ export default function GodViewPage() {
             <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search users, projects..."
+              placeholder="Buscar usuários, projetos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm text-white placeholder-gray-500 w-64"
@@ -496,9 +496,9 @@ export default function GodViewPage() {
             onChange={(e) => setSortBy(e.target.value as any)}
             className="px-3 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm text-white"
           >
-            <option value="duration">Sort by Duration</option>
-            <option value="cost">Sort by AI Cost</option>
-            <option value="ai">Sort by AI Calls</option>
+            <option value="duration">Ordenar por duração</option>
+            <option value="cost">Ordenar por custo de IA</option>
+            <option value="ai">Ordenar por chamadas de IA</option>
           </select>
           
           {/* Pause/Play */}
@@ -509,7 +509,7 @@ export default function GodViewPage() {
                 ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400' 
                 : 'border-[#333] text-gray-400 hover:text-white'
             }`}
-            title={paused ? 'Resume live updates' : 'Pause live updates'}
+            title={paused ? 'Retomar atualizações ao vivo' : 'Pausar atualizações ao vivo'}
           >
             {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
           </button>
@@ -533,14 +533,14 @@ export default function GodViewPage() {
         <div className="col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium text-gray-400">
-              {filteredSessions.length} Active Sessions
+              {filteredSessions.length} sessões ativas
             </h2>
           </div>
           
           {filteredSessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 bg-[#1a1a1a] border border-[#333] rounded-lg">
               <Users className="w-12 h-12 text-gray-600 mb-4" />
-              <p className="text-gray-400">No active sessions</p>
+              <p className="text-gray-400">Nenhuma sessão ativa</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -564,7 +564,7 @@ export default function GodViewPage() {
           <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
             <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
               <Monitor className="w-4 h-4" />
-              Device Types
+              Tipos de dispositivo
             </h3>
             
             <div className="space-y-3">
@@ -589,11 +589,11 @@ export default function GodViewPage() {
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm font-medium text-yellow-400">High AI Usage</span>
+                <span className="text-sm font-medium text-yellow-400">Uso elevado de IA</span>
               </div>
               <p className="text-xs text-gray-400">
-                {filteredSessions.filter(s => s.aiCostIncurred > 1).length} session(s) 
-                have exceeded $1 in AI costs this session.
+                {filteredSessions.filter(s => s.aiCostIncurred > 1).length} sessão(ões) 
+                ultrapassaram $1 em custos de IA nesta sessão.
               </p>
             </div>
           )}

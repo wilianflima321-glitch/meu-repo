@@ -3,6 +3,7 @@ import useSWR from 'swr'
 import { API_BASE } from '@/lib/api'
 import { useState } from 'react'
 import { UsageDashboard } from '@/components/billing/UsageDashboard'
+import { useToast } from '@/components/ui/Toast'
 
 const API = API_BASE
 const fetcher = (u: string) => fetch(u).then(r => r.json())
@@ -12,6 +13,7 @@ const fetcher = (u: string) => fetch(u).then(r => r.json())
  * UI otimizada para experiência do usuário
  */
 export default function Billing() {
+  const toast = useToast()
   const { data, isLoading } = useSWR(`${API}/billing/plans`, fetcher)
   const [currency, setCurrency] = useState<'USD' | 'BRL'>('BRL')
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
@@ -31,7 +33,7 @@ export default function Billing() {
     try {
       const token = localStorage.getItem('aethel-token'); // Or use getToken() from lib/auth
       if (!token) {
-        alert('Por favor, faça login para assinar.');
+        toast.warning('Por favor, faça login para assinar.')
         window.location.href = '/login';
         return;
       }
@@ -58,7 +60,7 @@ export default function Billing() {
       }
     } catch (err) {
       console.error(err);
-      alert('Erro ao processar assinatura. Tente novamente.');
+      toast.error('Erro ao processar assinatura. Tente novamente.')
     }
   }
 

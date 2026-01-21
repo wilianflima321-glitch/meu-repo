@@ -1,90 +1,114 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+
+type RoleSummary = { role: string | null; count: number };
 
 export default function RolesPage() {
-  type Role = { id: number; name: string; permissions: string[]; users: number };
-  const [roles, setRoles] = useState<Role[]>([
-    { id: 1, name: 'Admin', permissions: ['all'], users: 5 },
-    { id: 2, name: 'Editor', permissions: ['edit_ai', 'view_ide'], users: 20 },
-    { id: 3, name: 'Viewer', permissions: ['view_only'], users: 100 }
-  ]);
+  const [roles, setRoles] = useState<RoleSummary[]>([]);
+  const [adminRoles, setAdminRoles] = useState<RoleSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const [newRole, setNewRole] = useState<{ name: string; permissions: string[] }>({ name: '', permissions: [] });
-
-  const permissionsList: string[] = ['all', 'edit_ai', 'view_ide', 'manage_users', 'view_only'];
-
-  const handleCreate = () => {
-    if (newRole.name) {
-      setRoles([...roles, {
-        id: roles.length + 1,
-        name: newRole.name,
-        permissions: newRole.permissions,
-        users: 0
-      }]);
-      setNewRole({ name: '', permissions: [] });
+  const fetchRoles = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/admin/roles');
+      if (!res.ok) throw new Error('Falha ao carregar funções');
+      const data = await res.json();
+      setRoles(Array.isArray(data?.roles) ? data.roles : []);
+      setAdminRoles(Array.isArray(data?.adminRoles) ? data.adminRoles : []);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar funções');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const togglePermission = (perm: string) => {
-    setNewRole({
-      ...newRole,
-      permissions: newRole.permissions.includes(perm)
-        ? newRole.permissions.filter(p => p !== perm)
-        : [...newRole.permissions, perm]
-    });
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
+  const summary = {
+    totalUsers: roles.reduce((sum, role) => sum + role.count, 0),
+    totalAdmins: adminRoles.reduce((sum, role) => sum + role.count, 0),
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Roles e Permissões Detalhadas</h1>
-      
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Criar Novo Role</h2>
-        <div className="space-y-4">
-          <input
-            type="text"
-            placeholder="Nome do Role"
-            value={newRole.name}
-            onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
-            className="border p-2 w-full"
-          />
-          <div>
-            <label className="block text-sm font-medium mb-2">Permissões</label>
-            <div className="grid grid-cols-2 gap-2">
-              {permissionsList.map(perm => (
-                <label key={perm} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={newRole.permissions.includes(perm)}
-                    onChange={() => togglePermission(perm)}
-                    className="mr-2"
-                  />
-                  {perm}
-                </label>
-              ))}
-            </div>
-          </div>
-          <button onClick={handleCreate} className="bg-blue-500 text-white px-4 py-2 rounded">Criar Role</button>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Funções e permissões detalhadas</h1>
+          {lastUpdated && (
+            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+          )}
+        </div>
+        <button
+          onClick={fetchRoles}
+          className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+        >
+          Atualizar
+        </button>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="text-center">
+          <h3 className="text-sm font-semibold">Usuários totais</h3>
+          <p className="text-2xl font-bold text-blue-600">{summary.totalUsers}</p>
+        </div>
+        <div className="text-center">
+          <h3 className="text-sm font-semibold">Administradores totais</h3>
+          <p className="text-2xl font-bold text-purple-600">{summary.totalAdmins}</p>
         </div>
       </div>
 
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 className="text-lg font-semibold mb-4">Distribuição de funções</h2>
+        {loading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="h-10 bg-gray-100 rounded animate-pulse" />
+            ))}
+          </div>
+        ) : error ? (
+          <p className="text-sm text-red-500">{error}</p>
+        ) : roles.length === 0 ? (
+          <p className="text-sm text-gray-500">Nenhuma função encontrada.</p>
+        ) : (
+          <ul>
+            {roles.map((role) => (
+              <li key={role.role ?? 'unknown'} className="p-3 border-b flex justify-between">
+                <span>{role.role ?? 'sem função'}</span>
+                <span className="text-sm text-gray-600">{role.count} usuários</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Roles Existentes</h2>
-        <ul>
-          {roles.map(role => (
-            <li key={role.id} className="p-4 border-b">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">{role.name}</h3>
-                <span className="text-sm text-gray-600">{role.users} usuários</span>
-              </div>
-              <div>
-                <strong>Permissões:</strong> {role.permissions.join(', ')}
-              </div>
-              <button className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-sm">Editar</button>
-            </li>
-          ))}
-        </ul>
+        <h2 className="text-lg font-semibold mb-4">Funções administrativas</h2>
+        {loading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={index} className="h-10 bg-gray-100 rounded animate-pulse" />
+            ))}
+          </div>
+        ) : adminRoles.length === 0 ? (
+          <p className="text-sm text-gray-500">Nenhuma função administrativa definida.</p>
+        ) : (
+          <ul>
+            {adminRoles.map((role) => (
+              <li key={role.role ?? 'admin-unknown'} className="p-3 border-b flex justify-between">
+                <span>{role.role ?? 'sem função administrativa'}</span>
+                <span className="text-sm text-gray-600">{role.count} usuários</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

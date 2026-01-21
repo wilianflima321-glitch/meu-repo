@@ -65,11 +65,32 @@ services:
         condition: service_healthy
     volumes:
       - ./cloud-web-app/web/public/uploads:/app/public/uploads
+      - ./cloud-web-app/web/public/exports:/app/public/exports
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # Build Queue Worker (consome build-queue)
+  worker:
+    build:
+      context: ./cloud-web-app/web
+      dockerfile: Dockerfile
+      target: worker
+    container_name: aethel-worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-aethel_db}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./cloud-web-app/web/public/exports:/app/public/exports
 
   # Nginx Reverse Proxy (optional)
   nginx:

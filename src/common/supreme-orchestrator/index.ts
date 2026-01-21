@@ -575,30 +575,30 @@ export class SupremeOrchestrator extends EventEmitter {
   private setupTradingListeners(): void {
     if (!this.scalpingEngine) return;
     
-    this.scalpingEngine.on('trade_opened', (data) => {
+    this.scalpingEngine.on('trade:opened', (data: ScalpingTrade) => {
       this.emit('trade_opened', data);
       this.recordExperience({
         id: 'trade',
         type: 'trading',
         description: 'Trade opened',
-        parameters: { trade: data.trade },
+        parameters: { trade: data },
         priority: 'high',
         status: 'completed',
-        result: data.trade,
+        result: data,
       }, true);
     });
     
-    this.scalpingEngine.on('trade_closed', (data) => {
+    this.scalpingEngine.on('trade:closed', (data: ScalpingTrade) => {
       this.emit('trade_closed', data);
-      const success = (data.trade.pnl || 0) > 0;
+      const success = (data.pnl || 0) > 0;
       this.recordExperience({
         id: 'trade',
         type: 'trading',
         description: 'Trade closed',
-        parameters: { trade: data.trade },
+        parameters: { trade: data },
         priority: 'high',
         status: 'completed',
-        result: data.trade,
+        result: data,
       }, success);
     });
   }
@@ -648,9 +648,9 @@ export class SupremeOrchestrator extends EventEmitter {
       
       trading: {
         enabled: this.config.enableTrading,
-        running: tradingStatus?.running || false,
-        activeTrades: tradingStatus?.trades.total || 0,
-        todayPnL: tradingStatus?.pnl.today || 0,
+        running: tradingStatus?.isRunning || false,
+        activeTrades: tradingStatus?.activeTrades || 0,
+        todayPnL: tradingStatus?.totalPnl || 0,
       },
       
       accounts: {

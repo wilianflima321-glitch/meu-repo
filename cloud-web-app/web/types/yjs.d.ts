@@ -86,6 +86,9 @@ declare module 'yjs' {
     clone(): YMap<T>;
   }
 
+  // Aliases compatíveis com uso `new Y.Map()`
+  export class Map<T = any> extends YMap<T> {}
+
   export interface YArrayEvent<T> {
     target: YArray<T>;
     changes: {
@@ -142,6 +145,9 @@ declare module 'yjs' {
     toJSON(): string;
     clone(): YText;
   }
+
+  // Alias compatível com uso `new Y.Text()`
+  export class Text extends YText {}
 
   export interface YXmlEvent {
     target: YXmlElement | YXmlFragment;
@@ -226,6 +232,8 @@ declare module 'yjs' {
 
   /** Undo Manager */
   export class UndoManager {
+      undoStack: any[];
+      redoStack: any[];
     constructor(
       typeScope: AbstractType<any> | AbstractType<any>[],
       options?: {
@@ -259,7 +267,8 @@ declare module 'yjs' {
 }
 
 declare module 'y-websocket' {
-  import { Doc, Awareness } from 'yjs';
+  import { Doc } from 'yjs';
+  import type { Awareness } from 'y-protocols/awareness';
 
   export interface WebsocketProviderOptions {
     awareness?: Awareness;

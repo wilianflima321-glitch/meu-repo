@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import os from 'node:os';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
-import { cacheManager } from '@/lib/redis-cache';
-import { queueManager } from '@/lib/queue-system';
+import cache from '@/lib/redis-cache';
+import queueManager from '@/lib/queue-system';
 
 // =============================================================================
 // INFRASTRUCTURE STATUS API
@@ -35,7 +36,6 @@ async function checkServiceHealth(
       name,
       status: result.latency < 500 ? 'healthy' : 'degraded',
       latency: result.latency,
-      uptime: 99.9, // Would track this historically
       lastCheck: new Date().toISOString(),
       details: result.details,
     };
@@ -44,7 +44,6 @@ async function checkServiceHealth(
       name,
       status: 'down',
       latency: Date.now() - startTime,
-      uptime: 0,
       lastCheck: new Date().toISOString(),
       details: error instanceof Error ? error.message : 'Unknown error',
     };
@@ -61,6 +60,7 @@ async function handler(req: NextRequest) {
       websocketHealth,
       storageHealth,
       emailHealth,
+      localRuntimeHealth,
     ] = await Promise.all([
       // Database
       checkServiceHealth('PostgreSQL', async () => {
@@ -72,10 +72,10 @@ async function handler(req: NextRequest) {
       // Redis
       checkServiceHealth('Redis', async () => {
         const start = Date.now();
-        const stats = await cacheManager.getStats();
+        const stats = await cache.getStats();
         return { 
           latency: Date.now() - start,
-          details: `Keys: ${stats.keys}, Memory: ${(stats.memory / 1024 / 1024).toFixed(1)}MB`
+          details: `Hits: ${stats.hits}, Misses: ${stats.misses}`
         };
       }),
       
@@ -106,7 +106,7 @@ async function handler(req: NextRequest) {
       // Storage (S3/Local)
       checkServiceHealth('Storage', async () => {
         const start = Date.now();
-        const hasS3 = !!process.env.AWS_S3_BUCKET;
+        const hasS3 = !!(process.env.S3_BUCKET || process.env.AWS_S3_BUCKET);
         return {
           latency: Date.now() - start,
           details: hasS3 ? 'S3 configured' : 'Local storage'
@@ -122,6 +122,17 @@ async function handler(req: NextRequest) {
           details: hasResend ? 'Resend configured' : 'Email disabled'
         };
       }),
+
+      // Local Runtime (Aethel Engine Server)
+      checkServiceHealth('Local Runtime', async () => {
+        const start = Date.now();
+        const baseUrl = (process.env.AETHEL_SERVER_URL || process.env.NEXT_PUBLIC_AETHEL_SERVER_URL || 'http://localhost:1234').replace(/\/$/, '');
+        const res = await fetch(`${baseUrl}/api/health/system`, { cache: 'no-store' }).catch(() => null);
+        return {
+          latency: Date.now() - start,
+          details: res?.ok ? 'Local server healthy' : 'Local server unreachable'
+        };
+      }),
     ]);
     
     // Get queue stats
@@ -132,53 +143,71 @@ async function handler(req: NextRequest) {
       active: stats.active,
       completed: stats.completed,
       failed: stats.failed,
-      isPaused: stats.paused,
+      isPaused: false,
     }));
     
     // Get database connection stats
-    const dbMetrics = await prisma.$metrics.json() as any;
+    const dbMetrics = await (prisma as any).$metrics?.json?.() as any;
     const dbConnections = {
       active: dbMetrics?.counters?.find((c: any) => c.key === 'prisma_client_queries_active')?.value || 0,
-      idle: 5, // Would get from connection pool
-      max: 20, // Default Prisma pool size
+      idle: dbMetrics?.gauges?.find((g: any) => g.key === 'prisma_pool_connections_idle')?.value || 0,
+      max: dbMetrics?.gauges?.find((g: any) => g.key === 'prisma_pool_connections_max')?.value || 0,
     };
     
     // Estimate query time from recent queries
-    const dbQueryTime = dbMetrics?.histograms?.find((h: any) => h.key === 'prisma_client_queries_duration_histogram_ms')?.value?.mean || 15;
+    const dbQueryTime = dbMetrics?.histograms?.find((h: any) => h.key === 'prisma_client_queries_duration_histogram_ms')?.value?.mean || 0;
     
     // Get Redis stats
-    const cacheStats = await cacheManager.getStats();
-    const cacheHitRate = cacheStats.hits > 0 
-      ? (cacheStats.hits / (cacheStats.hits + cacheStats.misses)) * 100 
-      : 95; // Default estimate
+    const cacheStats = await cache.getStats();
+    const cacheHitRate = cacheStats.hits + cacheStats.misses > 0
+      ? (cacheStats.hits / (cacheStats.hits + cacheStats.misses)) * 100
+      : 0;
     
-    // Simulated resource metrics (in production would come from monitoring system)
+    // Resource metrics (derived from runtime)
+    const cpuCores = Math.max(1, os.cpus().length || 1);
+    const cpuLoad = Array.isArray(os.loadavg()) ? os.loadavg()[0] : 0;
+    const cpuUsage = Math.min(100, Math.max(0, (cpuLoad / cpuCores) * 100));
+
+    const totalMemBytes = os.totalmem();
+    const freeMemBytes = os.freemem();
+    const usedMemBytes = Math.max(0, totalMemBytes - freeMemBytes);
+    const totalMemGB = totalMemBytes / (1024 * 1024 * 1024);
+    const usedMemGB = usedMemBytes / (1024 * 1024 * 1024);
+
+    const diskTotalEnv = Number(process.env.AETHEL_DISK_TOTAL_GB || 0);
+    const diskUsedEnv = Number(process.env.AETHEL_DISK_USED_GB || 0);
+    const diskTotal = Number.isFinite(diskTotalEnv) && diskTotalEnv > 0 ? diskTotalEnv : 0;
+    const diskUsed = Number.isFinite(diskUsedEnv) && diskUsedEnv >= 0 ? Math.min(diskUsedEnv, diskTotal || diskUsedEnv) : 0;
+    const diskPercentage = diskTotal > 0 ? (diskUsed / diskTotal) * 100 : 0;
+
+    const networkIn = Number(process.env.AETHEL_NETWORK_IN_BPS || 0);
+    const networkOut = Number(process.env.AETHEL_NETWORK_OUT_BPS || 0);
+
     const resources = {
       cpu: {
-        usage: 35 + Math.random() * 20, // Simulated
-        cores: 4,
+        usage: cpuUsage,
+        cores: cpuCores,
       },
       memory: {
-        used: 2.5 + Math.random() * 0.5,
-        total: 8,
-        percentage: 0,
+        used: usedMemGB,
+        total: totalMemGB,
+        percentage: totalMemGB > 0 ? (usedMemGB / totalMemGB) * 100 : 0,
       },
       disk: {
-        used: 45,
-        total: 100,
-        percentage: 45,
+        used: diskUsed,
+        total: diskTotal,
+        percentage: diskPercentage,
       },
       network: {
-        in: (50 + Math.random() * 30) * 1024 * 1024, // bytes/s
-        out: (30 + Math.random() * 20) * 1024 * 1024,
+        in: Number.isFinite(networkIn) ? networkIn : 0,
+        out: Number.isFinite(networkOut) ? networkOut : 0,
       },
     };
-    resources.memory.percentage = (resources.memory.used / resources.memory.total) * 100;
-    
-    // Request metrics (would come from actual monitoring)
-    const requestsPerMinute = 150 + Math.floor(Math.random() * 100);
-    const activeConnections = 45 + Math.floor(Math.random() * 30);
-    const errorRate = 0.1 + Math.random() * 0.3;
+
+    // Request/session metrics
+    const activeConnections = await prisma.liveSession.count({ where: { isActive: true } });
+    const requestsPerMinute = 0;
+    const errorRate = 0;
     
     return NextResponse.json({
       services: [
@@ -188,6 +217,7 @@ async function handler(req: NextRequest) {
         websocketHealth,
         storageHealth,
         emailHealth,
+        localRuntimeHealth,
       ],
       resources,
       queues,
@@ -197,7 +227,7 @@ async function handler(req: NextRequest) {
       dbConnections,
       dbQueryTime,
       cacheHitRate,
-      cacheMemory: cacheStats.memory,
+      cacheMemory: cacheStats.memoryUsage,
     });
     
   } catch (error) {
@@ -209,4 +239,4 @@ async function handler(req: NextRequest) {
   }
 }
 
-export const GET = withAdminAuth(handler, 'ops:infrastructure:read');
+export const GET = withAdminAuth(handler, 'ops:infra:view');

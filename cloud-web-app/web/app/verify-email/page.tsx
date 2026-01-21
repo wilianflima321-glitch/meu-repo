@@ -4,8 +4,10 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, CheckCircle, Loader2, XCircle, RefreshCw } from 'lucide-react'
+import { useToast } from '@/components/ui/Toast'
 
 function VerifyEmailContent() {
+  const toast = useToast()
   const searchParams = useSearchParams()
   const router = useRouter()
   
@@ -29,7 +31,7 @@ function VerifyEmailContent() {
         const data = await res.json()
 
         if (!res.ok) {
-          setError(data.error || 'Verification failed')
+          setError(data.error || 'Falha na verificação')
           return
         }
 
@@ -40,7 +42,7 @@ function VerifyEmailContent() {
           router.push('/dashboard')
         }, 3000)
       } catch (err) {
-        setError('Network error. Please try again.')
+        setError('Erro de rede. Tente novamente.')
       } finally {
         setIsLoading(false)
       }
@@ -63,14 +65,14 @@ function VerifyEmailContent() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Failed to resend verification email')
+        setError(data.error || 'Falha ao reenviar o e-mail de verificação')
         return
       }
 
       setError('')
-      alert('Verification email sent! Check your inbox.')
+      toast.success('E-mail de verificação enviado! Confira sua caixa de entrada.')
     } catch (err) {
-      setError('Network error. Please try again.')
+      setError('Erro de rede. Tente novamente.')
     } finally {
       setIsResending(false)
     }
@@ -82,8 +84,8 @@ function VerifyEmailContent() {
         <div className="max-w-md w-full mx-4">
           <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 text-center">
             <Loader2 className="w-12 h-12 animate-spin text-violet-500 mx-auto mb-4" />
-            <h1 className="text-xl font-bold text-white mb-2">Verifying your email...</h1>
-            <p className="text-slate-400">Please wait a moment.</p>
+            <h1 className="text-xl font-bold text-white mb-2">Verificando seu e-mail...</h1>
+            <p className="text-slate-400">Aguarde um instante.</p>
           </div>
         </div>
       </div>
@@ -98,15 +100,15 @@ function VerifyEmailContent() {
             <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-8 h-8 text-emerald-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Email Verified!</h1>
+            <h1 className="text-2xl font-bold text-white mb-4">E-mail verificado!</h1>
             <p className="text-slate-400 mb-6">
-              Your email has been verified successfully. Redirecting to dashboard...
+              Seu e-mail foi verificado com sucesso. Redirecionando para o painel...
             </p>
             <Link
               href="/dashboard"
               className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium rounded-xl transition-all"
             >
-              Go to Dashboard
+              Ir para o painel
             </Link>
           </div>
         </div>
@@ -123,9 +125,9 @@ function VerifyEmailContent() {
             <div className="w-16 h-16 bg-violet-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <Mail className="w-8 h-8 text-violet-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Verify Your Email</h1>
+            <h1 className="text-2xl font-bold text-white mb-4">Verifique seu e-mail</h1>
             <p className="text-slate-400 mb-6">
-              Please check your email inbox and click the verification link we sent you.
+              Confira sua caixa de entrada e clique no link de verificação que enviamos.
             </p>
             <div className="space-y-3">
               <button
@@ -136,12 +138,12 @@ function VerifyEmailContent() {
                 {isResending ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Sending...
+                    Enviando...
                   </>
                 ) : (
                   <>
                     <RefreshCw className="w-5 h-5" />
-                    Resend verification email
+                    Reenviar e-mail de verificação
                   </>
                 )}
               </button>
@@ -149,7 +151,7 @@ function VerifyEmailContent() {
                 href="/dashboard"
                 className="block w-full py-3 px-4 bg-slate-700/50 hover:bg-slate-700 text-white font-medium rounded-xl transition-all text-center"
               >
-                Continue to Dashboard
+                Continuar para o painel
               </Link>
             </div>
             {error && (
@@ -169,9 +171,9 @@ function VerifyEmailContent() {
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-8 h-8 text-red-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-4">Verification Failed</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">Falha na verificação</h1>
           <p className="text-slate-400 mb-6">
-            {error || 'The verification link is invalid or has expired.'}
+            {error || 'O link de verificação é inválido ou expirou.'}
           </p>
           <div className="space-y-3">
             <button
@@ -182,12 +184,12 @@ function VerifyEmailContent() {
               {isResending ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Sending...
+                  Enviando...
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-5 h-5" />
-                  Request new verification
+                  Solicitar nova verificação
                 </>
               )}
             </button>
@@ -195,7 +197,7 @@ function VerifyEmailContent() {
               href="/login"
               className="block w-full py-3 px-4 bg-slate-700/50 hover:bg-slate-700 text-white font-medium rounded-xl transition-all text-center"
             >
-              Back to login
+              Voltar para o login
             </Link>
           </div>
         </div>

@@ -3,7 +3,7 @@
  * End-to-end tests for debugging features with DAP and AI
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { getDebugIntegration, resetDebugIntegration } from '../../lib/integration';
 
 describe('Debug Integration', () => {
@@ -14,7 +14,7 @@ describe('Debug Integration', () => {
 
     let sessionSeq = 0;
 
-    globalThis.fetch = jest.fn(async (input: any, init?: any) => {
+    globalThis.fetch = vi.fn(async (input: any, init?: any) => {
       const url = typeof input === 'string' ? input : String(input?.url ?? input);
 
       const okJson = (value: any) => ({

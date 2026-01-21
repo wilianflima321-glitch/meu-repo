@@ -34,8 +34,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
     settings: [
       {
         key: 'editor.fontSize',
-        title: 'Font Size',
-        description: 'Controls the font size in pixels',
+        title: 'Tamanho da fonte',
+        description: 'Controla o tamanho da fonte em pixels',
         type: 'number',
         default: 14,
         category: 'editor',
@@ -43,8 +43,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.fontFamily',
-        title: 'Font Family',
-        description: 'Controls the font family',
+        title: 'Família da fonte',
+        description: 'Controla a família da fonte',
         type: 'string',
         default: 'Consolas, "Courier New", monospace',
         category: 'editor',
@@ -52,8 +52,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.tabSize',
-        title: 'Tab Size',
-        description: 'The number of spaces a tab is equal to',
+        title: 'Tamanho da tabulação',
+        description: 'Número de espaços equivalentes a uma tabulação',
         type: 'number',
         default: 4,
         category: 'editor',
@@ -61,8 +61,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.insertSpaces',
-        title: 'Insert Spaces',
-        description: 'Insert spaces when pressing Tab',
+        title: 'Inserir espaços',
+        description: 'Insere espaços ao pressionar Tab',
         type: 'boolean',
         default: true,
         category: 'editor',
@@ -70,8 +70,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.wordWrap',
-        title: 'Word Wrap',
-        description: 'Controls how lines should wrap',
+        title: 'Quebra de linha',
+        description: 'Controla como as linhas devem quebrar',
         type: 'enum',
         enum: ['off', 'on', 'wordWrapColumn', 'bounded'],
         default: 'off',
@@ -80,8 +80,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.minimap.enabled',
-        title: 'Minimap Enabled',
-        description: 'Controls whether the minimap is shown',
+        title: 'Minimapa ativado',
+        description: 'Controla se o minimapa é exibido',
         type: 'boolean',
         default: true,
         category: 'editor',
@@ -89,8 +89,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.lineNumbers',
-        title: 'Line Numbers',
-        description: 'Controls the display of line numbers',
+        title: 'Números de linha',
+        description: 'Controla a exibição de números de linha',
         type: 'enum',
         enum: ['off', 'on', 'relative', 'interval'],
         default: 'on',
@@ -101,13 +101,13 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   },
   {
     id: 'workbench',
-    label: 'Workbench',
+    label: 'Ambiente',
     icon: '',
     settings: [
       {
         key: 'workbench.colorTheme',
-        title: 'Color Theme',
-        description: 'Specifies the color theme used in the workbench',
+        title: 'Tema de cores',
+        description: 'Especifica o tema de cores usado no ambiente',
         type: 'enum',
         enum: ['Dark+', 'Light+', 'Dark (Visual Studio)', 'Light (Visual Studio)', 'High Contrast'],
         default: 'Dark+',
@@ -116,8 +116,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'workbench.iconTheme',
-        title: 'Icon Theme',
-        description: 'Specifies the icon theme used in the workbench',
+        title: 'Tema de ícones',
+        description: 'Especifica o tema de ícones usado no ambiente',
         type: 'enum',
         enum: ['vs-seti', 'vs-minimal', 'None'],
         default: 'vs-seti',
@@ -126,8 +126,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'workbench.sideBar.location',
-        title: 'Side Bar Location',
-        description: 'Controls the location of the sidebar',
+        title: 'Local da barra lateral',
+        description: 'Controla a localização da barra lateral',
         type: 'enum',
         enum: ['left', 'right'],
         default: 'left',
@@ -136,8 +136,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'workbench.activityBar.visible',
-        title: 'Activity Bar Visible',
-        description: 'Controls the visibility of the activity bar',
+        title: 'Barra de atividade visível',
+        description: 'Controla a visibilidade da barra de atividade',
         type: 'boolean',
         default: true,
         category: 'workbench',
@@ -147,13 +147,13 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   },
   {
     id: 'files',
-    label: 'Files',
+    label: 'Arquivos',
     icon: '',
     settings: [
       {
         key: 'files.autoSave',
-        title: 'Auto Save',
-        description: 'Controls auto save of dirty files',
+        title: 'Salvar automaticamente',
+        description: 'Controla o salvamento automático de arquivos modificados',
         type: 'enum',
         enum: ['off', 'afterDelay', 'onFocusChange', 'onWindowChange'],
         default: 'off',
@@ -162,8 +162,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'files.autoSaveDelay',
-        title: 'Auto Save Delay',
-        description: 'Controls the delay in ms after which a dirty file is saved automatically',
+        title: 'Atraso do salvamento automático',
+        description: 'Controla o atraso em ms para salvar automaticamente arquivos modificados',
         type: 'number',
         default: 1000,
         category: 'files',
@@ -171,8 +171,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'files.encoding',
-        title: 'Encoding',
-        description: 'The default character set encoding to use',
+        title: 'Codificação',
+        description: 'Codificação padrão de caracteres a ser usada',
         type: 'enum',
         enum: ['utf8', 'utf16le', 'utf16be', 'windows1252', 'iso88591'],
         default: 'utf8',
@@ -181,8 +181,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'files.eol',
-        title: 'End of Line',
-        description: 'The default end of line character',
+        title: 'Fim de linha',
+        description: 'Caractere padrão de fim de linha',
         type: 'enum',
         enum: ['\\n', '\\r\\n', 'auto'],
         default: 'auto',
@@ -198,8 +198,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
     settings: [
       {
         key: 'terminal.integrated.fontSize',
-        title: 'Font Size',
-        description: 'Controls the font size in pixels of the terminal',
+        title: 'Tamanho da fonte',
+        description: 'Controla o tamanho da fonte em pixels do terminal',
         type: 'number',
         default: 14,
         category: 'terminal',
@@ -207,8 +207,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'terminal.integrated.fontFamily',
-        title: 'Font Family',
-        description: 'Controls the font family of the terminal',
+        title: 'Família da fonte',
+        description: 'Controla a família da fonte do terminal',
         type: 'string',
         default: 'monospace',
         category: 'terminal',
@@ -217,7 +217,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       {
         key: 'terminal.integrated.shell.linux',
         title: 'Shell: Linux',
-        description: 'The path of the shell that the terminal uses on Linux',
+        description: 'Caminho do shell usado no Linux',
         type: 'string',
         default: '/bin/bash',
         category: 'terminal',
@@ -232,8 +232,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
     settings: [
       {
         key: 'git.enabled',
-        title: 'Enabled',
-        description: 'Whether git is enabled',
+        title: 'Ativado',
+        description: 'Define se o git está ativado',
         type: 'boolean',
         default: true,
         category: 'git',
@@ -241,8 +241,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'git.autoFetch',
-        title: 'Auto Fetch',
-        description: 'Whether to automatically fetch from the remote',
+        title: 'Busca automática',
+        description: 'Define se deve buscar automaticamente do remoto',
         type: 'boolean',
         default: false,
         category: 'git',
@@ -250,8 +250,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'git.confirmSync',
-        title: 'Confirm Sync',
-        description: 'Confirm before synchronizing git repositories',
+        title: 'Confirmar sincronização',
+        description: 'Confirma antes de sincronizar repositórios git',
         type: 'boolean',
         default: true,
         category: 'git',
@@ -261,13 +261,13 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   },
   {
     id: 'ai',
-    label: 'AI Features',
+    label: 'Recursos de IA',
     icon: '',
     settings: [
       {
         key: 'ai.enabled',
-        title: 'AI Enabled',
-        description: 'Enable AI-powered features',
+        title: 'IA ativada',
+        description: 'Ativa recursos com IA',
         type: 'boolean',
         default: true,
         category: 'ai',
@@ -275,8 +275,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'ai.completions.enabled',
-        title: 'AI Completions',
-        description: 'Enable AI-enhanced code completions',
+        title: 'Autocompletar com IA',
+        description: 'Ativa sugestões de código com IA',
         type: 'boolean',
         default: true,
         category: 'ai',
@@ -284,8 +284,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'ai.debug.enabled',
-        title: 'AI Debug Assistant',
-        description: 'Enable AI debug assistance',
+        title: 'Assistente de depuração com IA',
+        description: 'Ativa assistência de depuração com IA',
         type: 'boolean',
         default: true,
         category: 'ai',
@@ -293,8 +293,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'ai.provider',
-        title: 'AI Provider',
-        description: 'Select AI provider',
+        title: 'Provedor de IA',
+        description: 'Seleciona o provedor de IA',
         type: 'enum',
         enum: ['OpenAI', 'Anthropic', 'Google', 'Ollama'],
         default: 'OpenAI',
@@ -321,7 +321,7 @@ export default function SettingsEditor() {
       try {
         setSettings(JSON.parse(stored));
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        console.error('Falha ao carregar configurações:', error);
       }
     }
   }, []);
@@ -380,7 +380,7 @@ export default function SettingsEditor() {
 
   // Reset all settings
   const resetAllSettings = () => {
-    if (confirm('Are you sure you want to reset all settings to defaults?')) {
+    if (confirm('Tem certeza de que deseja redefinir todas as configurações?')) {
       saveSettings({});
       setModifiedSettings(new Set());
     }
@@ -402,7 +402,7 @@ export default function SettingsEditor() {
               className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-2 focus:ring-blue-500"
             />
             <span className="text-sm text-gray-300">
-              {value ? 'Enabled' : 'Disabled'}
+              {value ? 'Ativado' : 'Desativado'}
             </span>
           </label>
         );
@@ -445,7 +445,7 @@ export default function SettingsEditor() {
       default:
         return (
           <span className="text-sm text-gray-400">
-            Unsupported type: {setting.type}
+            Tipo não suportado: {setting.type}
           </span>
         );
     }
@@ -459,7 +459,7 @@ export default function SettingsEditor() {
         <div className="p-4 border-b border-gray-700">
           <input
             type="text"
-            placeholder="Search settings..."
+            placeholder="Buscar configurações..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -477,7 +477,7 @@ export default function SettingsEditor() {
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
-              User
+              Usuário
             </button>
             <button
               onClick={() => setScope('workspace')}
@@ -506,7 +506,7 @@ export default function SettingsEditor() {
               <div className="flex-1">
                 <div className="text-sm font-medium">{category.label}</div>
                 <div className="text-xs text-gray-400">
-                  {category.settings.length} settings
+                  {category.settings.length} configurações
                 </div>
               </div>
             </button>
@@ -519,7 +519,7 @@ export default function SettingsEditor() {
             onClick={resetAllSettings}
             className="w-full px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
           >
-            Reset All Settings
+            Redefinir todas as configurações
           </button>
         </div>
       </div>
@@ -534,7 +534,7 @@ export default function SettingsEditor() {
               {currentCategory?.label}
             </h1>
             <p className="text-gray-400">
-              {currentCategory?.settings.length} settings
+              {currentCategory?.settings.length} configurações
             </p>
           </div>
 
@@ -555,7 +555,7 @@ export default function SettingsEditor() {
                         <h3 className="text-sm font-medium">{setting.title}</h3>
                         {isModified && (
                           <span className="px-2 py-0.5 bg-blue-600 text-xs rounded">
-                            Modified
+                            Alterado
                           </span>
                         )}
                       </div>
@@ -571,7 +571,7 @@ export default function SettingsEditor() {
                         onClick={() => resetSetting(setting.key)}
                         className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded"
                       >
-                        Reset
+                        Redefinir
                       </button>
                     )}
                   </div>
@@ -586,7 +586,7 @@ export default function SettingsEditor() {
           {/* Empty state */}
           {currentCategory?.settings.length === 0 && (
             <div className="text-center py-12 text-gray-400">
-              <p>No settings found matching &quot;{searchQuery}&quot;</p>
+              <p>Nenhuma configuração encontrada para &quot;{searchQuery}&quot;</p>
             </div>
           )}
         </div>

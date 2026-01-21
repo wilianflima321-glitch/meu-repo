@@ -135,217 +135,8 @@ const CATEGORY_LABELS: Record<ExtensionCategory, string> = {
   other: 'Other',
 }
 
-// ============= Mock Extensions =============
-
-const MOCK_EXTENSIONS: Extension[] = [
-  {
-    id: 'aethel.typescript-language',
-    name: 'typescript-language',
-    displayName: 'TypeScript Language Features',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '5.3.0',
-    description: 'Rich TypeScript support including IntelliSense, diagnostics, code navigation, and refactoring.',
-    category: 'language',
-    tags: ['typescript', 'javascript', 'language'],
-    rating: 4.9,
-    ratingCount: 15420,
-    downloadCount: 5200000,
-    isInstalled: true,
-    isEnabled: true,
-    isBuiltIn: true,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-  },
-  {
-    id: 'aethel.ai-copilot',
-    name: 'ai-copilot',
-    displayName: 'Aethel AI Copilot',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '2.1.0',
-    description: 'AI-powered code completion, chat, and code generation with multiple LLM providers.',
-    category: 'ai',
-    tags: ['ai', 'copilot', 'completion', 'chat'],
-    rating: 4.8,
-    ratingCount: 8750,
-    downloadCount: 2100000,
-    isInstalled: true,
-    isEnabled: true,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-  },
-  {
-    id: 'aethel.blueprint-editor',
-    name: 'blueprint-editor',
-    displayName: 'Blueprint Visual Scripting',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '1.5.0',
-    description: 'Visual node-based scripting system for game logic without writing code.',
-    category: 'engine',
-    tags: ['blueprint', 'visual', 'scripting', 'nodes'],
-    rating: 4.7,
-    ratingCount: 3200,
-    downloadCount: 890000,
-    isInstalled: true,
-    isEnabled: true,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14),
-  },
-  {
-    id: 'aethel.material-editor',
-    name: 'material-editor',
-    displayName: 'Material & Shader Editor',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '1.2.0',
-    description: 'Node-based material editor with PBR workflows and real-time preview.',
-    category: 'engine',
-    tags: ['material', 'shader', 'pbr', 'nodes'],
-    rating: 4.6,
-    ratingCount: 1850,
-    downloadCount: 520000,
-    isInstalled: true,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
-  },
-  {
-    id: 'aethel.dark-theme',
-    name: 'dark-theme',
-    displayName: 'Aethel Dark Pro',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '3.0.0',
-    description: 'A professional dark theme with carefully crafted colors for reduced eye strain.',
-    category: 'theme',
-    tags: ['theme', 'dark', 'colors'],
-    rating: 4.9,
-    ratingCount: 12500,
-    downloadCount: 3800000,
-    isInstalled: true,
-    isEnabled: true,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 60),
-  },
-  {
-    id: 'aethel.git-lens',
-    name: 'git-lens',
-    displayName: 'GitLens Advanced',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '14.5.0',
-    description: 'Supercharge Git with blame, history, stash management, and more.',
-    category: 'git',
-    tags: ['git', 'blame', 'history', 'stash'],
-    rating: 4.8,
-    ratingCount: 9200,
-    downloadCount: 4100000,
-    isInstalled: false,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-  },
-  {
-    id: 'aethel.prettier',
-    name: 'prettier',
-    displayName: 'Prettier - Code Formatter',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '10.1.0',
-    description: 'Automatic code formatting for JavaScript, TypeScript, CSS, HTML, and more.',
-    category: 'formatter',
-    tags: ['formatter', 'prettier', 'code style'],
-    rating: 4.7,
-    ratingCount: 7800,
-    downloadCount: 6500000,
-    isInstalled: false,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10),
-  },
-  {
-    id: 'aethel.eslint',
-    name: 'eslint',
-    displayName: 'ESLint',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '3.0.0',
-    description: 'Integrates ESLint JavaScript linting into the editor.',
-    category: 'linter',
-    tags: ['linter', 'eslint', 'javascript'],
-    rating: 4.6,
-    ratingCount: 6500,
-    downloadCount: 5800000,
-    isInstalled: false,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15),
-  },
-  {
-    id: 'aethel.python',
-    name: 'python',
-    displayName: 'Python',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '2024.1.0',
-    description: 'Rich Python support with IntelliSense, linting, debugging, and more.',
-    category: 'language',
-    tags: ['python', 'language', 'intellisense'],
-    rating: 4.8,
-    ratingCount: 18500,
-    downloadCount: 8200000,
-    isInstalled: false,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-  },
-  {
-    id: 'aethel.cpp',
-    name: 'cpp',
-    displayName: 'C/C++ Extension Pack',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '1.18.0',
-    description: 'Complete C/C++ support including IntelliSense, debugging, and code browsing.',
-    category: 'language',
-    tags: ['c', 'cpp', 'c++', 'language'],
-    rating: 4.5,
-    ratingCount: 8900,
-    downloadCount: 4500000,
-    isInstalled: false,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8),
-  },
-  {
-    id: 'aethel.rust-analyzer',
-    name: 'rust-analyzer',
-    displayName: 'rust-analyzer',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '0.4.1800',
-    description: 'Rust language support with code completion, go to definition, and more.',
-    category: 'language',
-    tags: ['rust', 'language', 'analyzer'],
-    rating: 4.9,
-    ratingCount: 5200,
-    downloadCount: 2800000,
-    isInstalled: false,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-  {
-    id: 'aethel.docker',
-    name: 'docker',
-    displayName: 'Docker',
-    publisher: 'aethel',
-    publisherDisplayName: 'Aethel',
-    version: '1.28.0',
-    description: 'Build, manage, and deploy containerized applications.',
-    category: 'tool',
-    tags: ['docker', 'container', 'devops'],
-    rating: 4.6,
-    ratingCount: 4100,
-    downloadCount: 3200000,
-    isInstalled: false,
-    isEnabled: false,
-    lastUpdated: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12),
-  },
-]
-
 // ============= Format Helpers =============
+
 
 function formatDownloads(count: number): string {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
@@ -387,11 +178,9 @@ export default function ExtensionManager({
   } = useExtensions({ autoLoad: !propExtensions })
   
   // Use prop extensions if provided, otherwise use API extensions
-  // Fall back to MOCK_EXTENSIONS only if both are empty (for demo/offline)
   const extensions = useMemo(() => {
     if (propExtensions && propExtensions.length > 0) return propExtensions
-    if (apiExtensions.length > 0) return apiExtensions as Extension[]
-    return MOCK_EXTENSIONS
+    return apiExtensions as Extension[]
   }, [propExtensions, apiExtensions])
   
   const [activeView, setActiveView] = useState<'installed' | 'marketplace' | 'recommended'>('installed')
@@ -466,7 +255,8 @@ export default function ExtensionManager({
   
   // Handle uninstall
   const handleUninstall = useCallback(async (ext: Extension) => {
-    if (!confirm(`Uninstall "${ext.displayName}"?`)) return
+    // TODO: Replace with ConfirmModal for better UX
+    if (!window.confirm(`Uninstall "${ext.displayName}"?`)) return
     setIsLoading(ext.id)
     try {
       // Use prop callback if provided, otherwise use API
@@ -532,7 +322,7 @@ export default function ExtensionManager({
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search extensions..."
               className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
             />
@@ -621,8 +411,13 @@ export default function ExtensionManager({
                 {showDisabled ? 'Show Disabled' : 'Hide Disabled'}
               </button>
             )}
-            <button className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded">
-              <RefreshCw className="w-4 h-4" />
+            <button 
+              onClick={handleRefresh}
+              disabled={apiLoading}
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded disabled:opacity-50"
+              title="Refresh extensions"
+            >
+              <RefreshCw className={`w-4 h-4 ${apiLoading ? 'animate-spin' : ''}`} />
             </button>
             <button className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded">
               <Filter className="w-4 h-4" />
@@ -632,9 +427,40 @@ export default function ExtensionManager({
         
         {/* Extension List */}
         <div className="flex-1 overflow-y-auto">
-          {filteredExtensions.length === 0 ? (
+          {/* Loading State */}
+          {apiLoading && extensions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-slate-500">
+              <Loader2 className="w-16 h-16 mb-4 animate-spin text-indigo-500" />
+              <p className="text-lg">Loading extensions...</p>
+              <p className="text-sm">Fetching from marketplace</p>
+            </div>
+          ) : /* Error State */ apiError ? (
+            <div className="flex flex-col items-center justify-center h-full text-slate-500">
+              <AlertTriangle className="w-16 h-16 mb-4 text-red-400" />
+              <p className="text-lg text-red-400">Failed to load extensions</p>
+              <p className="text-sm mb-4">{apiError}</p>
+              <button
+                onClick={handleRefresh}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : /* Empty State for Installed */ activeView === 'installed' && filteredExtensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-500">
               <Package className="w-16 h-16 mb-4 opacity-50" />
+              <p className="text-lg">No extensions installed</p>
+              <p className="text-sm mb-4">Browse the marketplace to find extensions</p>
+              <button
+                onClick={() => setActiveView('marketplace')}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors"
+              >
+                Browse Marketplace
+              </button>
+            </div>
+          ) : /* Empty State for Search/Filter */ filteredExtensions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-slate-500">
+              <Search className="w-16 h-16 mb-4 opacity-50" />
               <p className="text-lg">No extensions found</p>
               <p className="text-sm">Try adjusting your search or filters</p>
             </div>

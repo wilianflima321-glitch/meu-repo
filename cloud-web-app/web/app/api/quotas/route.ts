@@ -10,53 +10,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { getPlanLimits, getUsageStatus, recordTokenUsage } from '@/lib/plan-limits';
+import { getUserStorageUsed } from '@/lib/storage-quota';
 
 export const dynamic = 'force-dynamic';
 
-// Quotas por plano (em produção, vem do banco)
-const PLAN_QUOTAS: Record<string, Record<string, { limit: number; period: 'day' | 'month' }>> = {
-  starter: {
-    ai_tokens: { limit: 10000, period: 'month' },
-    storage_mb: { limit: 500, period: 'month' },
-    builds: { limit: 10, period: 'month' },
-    exports: { limit: 5, period: 'month' },
-    projects: { limit: 3, period: 'month' },
-  },
-  basic: {
-    ai_tokens: { limit: 50000, period: 'month' },
-    storage_mb: { limit: 2000, period: 'month' },
-    builds: { limit: 50, period: 'month' },
-    exports: { limit: 20, period: 'month' },
-    projects: { limit: 10, period: 'month' },
-  },
-  pro: {
-    ai_tokens: { limit: 200000, period: 'month' },
-    storage_mb: { limit: 10000, period: 'month' },
-    builds: { limit: 200, period: 'month' },
-    exports: { limit: 100, period: 'month' },
-    projects: { limit: 50, period: 'month' },
-  },
-  studio: {
-    ai_tokens: { limit: 1000000, period: 'month' },
-    storage_mb: { limit: 50000, period: 'month' },
-    builds: { limit: -1, period: 'month' }, // -1 = unlimited
-    exports: { limit: -1, period: 'month' },
-    projects: { limit: -1, period: 'month' },
-  },
-  enterprise: {
-    ai_tokens: { limit: -1, period: 'month' },
-    storage_mb: { limit: -1, period: 'month' },
-    builds: { limit: -1, period: 'month' },
-    exports: { limit: -1, period: 'month' },
-    projects: { limit: -1, period: 'month' },
-  },
-};
-
-// Armazena uso atual (em produção, usar Redis)
-const userUsage = new Map<string, Map<string, number>>();
-
 function getUserPlan(plan: string): string {
-  // Remove sufixo _trial
   return plan.replace('_trial', '');
 }
 
@@ -76,32 +35,57 @@ export async function GET(request: NextRequest) {
     });
     
     const plan = getUserPlan(dbUser?.plan || 'starter');
-    const quotas = PLAN_QUOTAS[plan] || PLAN_QUOTAS.starter;
-    
-    // Obtém uso atual
-    const monthKey = getMonthKey();
-    const usageKey = `${user.userId}:${monthKey}`;
-    const usage = userUsage.get(usageKey) || new Map();
-    
-    const quotaStatus = Object.entries(quotas).map(([resource, config]) => {
-      const used = usage.get(resource) || 0;
-      const limit = config.limit;
-      
-      return {
-        resource,
-        used,
-        limit,
-        unlimited: limit === -1,
-        remaining: limit === -1 ? -1 : Math.max(0, limit - used),
-        percentage: limit === -1 ? 0 : Math.min(100, Math.round((used / limit) * 100)),
-        period: config.period,
-      };
+    const limits = getPlanLimits(plan);
+    const usageStatus = await getUsageStatus(user.userId);
+
+    const storageUsedBytes = await getUserStorageUsed(user.userId);
+    const storageUsedMb = Math.round(storageUsedBytes / (1024 * 1024));
+    const storageLimitMb = limits.storageGB < 0 ? -1 : Math.round(limits.storageGB * 1024);
+
+    const projectsCount = await prisma.project.count({
+      where: { userId: user.userId },
     });
+
+    const quotaStatus = [
+      {
+        resource: 'ai_tokens',
+        used: usageStatus.usage.tokensUsed,
+        limit: limits.tokensPerMonth,
+        unlimited: limits.tokensPerMonth === -1,
+        remaining: limits.tokensPerMonth === -1 ? -1 : Math.max(0, limits.tokensPerMonth - usageStatus.usage.tokensUsed),
+        percentage: limits.tokensPerMonth > 0
+          ? Math.min(100, Math.round((usageStatus.usage.tokensUsed / limits.tokensPerMonth) * 100))
+          : 0,
+        period: 'month' as const,
+      },
+      {
+        resource: 'storage_mb',
+        used: storageUsedMb,
+        limit: storageLimitMb,
+        unlimited: storageLimitMb === -1,
+        remaining: storageLimitMb === -1 ? -1 : Math.max(0, storageLimitMb - storageUsedMb),
+        percentage: storageLimitMb > 0
+          ? Math.min(100, Math.round((storageUsedMb / storageLimitMb) * 100))
+          : 0,
+        period: 'month' as const,
+      },
+      {
+        resource: 'projects',
+        used: projectsCount,
+        limit: limits.projectsMax,
+        unlimited: limits.projectsMax === -1,
+        remaining: limits.projectsMax === -1 ? -1 : Math.max(0, limits.projectsMax - projectsCount),
+        percentage: limits.projectsMax > 0
+          ? Math.min(100, Math.round((projectsCount / limits.projectsMax) * 100))
+          : 0,
+        period: 'month' as const,
+      },
+    ];
     
     return NextResponse.json({
       success: true,
       plan,
-      period: monthKey,
+      period: getMonthKey(),
       quotas: quotaStatus,
     });
   } catch (error) {
@@ -117,7 +101,9 @@ export async function POST(request: NextRequest) {
     const user = requireAuth(request);
     const body = await request.json();
     
-    const { action, resource, amount = 1 } = body;
+    const action = body?.action;
+    const resource = body?.resource;
+    const amount = typeof body?.amount === 'number' && Number.isFinite(body.amount) ? body.amount : 1;
     
     // Busca usuário para pegar plano
     const dbUser = await prisma.user.findUnique({
@@ -126,60 +112,70 @@ export async function POST(request: NextRequest) {
     });
     
     const plan = getUserPlan(dbUser?.plan || 'starter');
-    const quotas = PLAN_QUOTAS[plan] || PLAN_QUOTAS.starter;
-    const resourceQuota = quotas[resource];
-    
-    if (!resourceQuota) {
+    const limits = getPlanLimits(plan);
+    const usageStatus = await getUsageStatus(user.userId);
+    const storageUsedBytes = await getUserStorageUsed(user.userId);
+    const storageUsedMb = Math.round(storageUsedBytes / (1024 * 1024));
+    const projectsCount = await prisma.project.count({ where: { userId: user.userId } });
+
+    let currentUsage = 0;
+    let limit = -1;
+    if (resource === 'ai_tokens') {
+      currentUsage = usageStatus.usage.tokensUsed;
+      limit = limits.tokensPerMonth;
+    } else if (resource === 'storage_mb') {
+      currentUsage = storageUsedMb;
+      limit = limits.storageGB < 0 ? -1 : Math.round(limits.storageGB * 1024);
+    } else if (resource === 'projects') {
+      currentUsage = projectsCount;
+      limit = limits.projectsMax;
+    } else {
       return NextResponse.json(
         { success: false, error: 'Unknown resource' },
         { status: 400 }
       );
     }
     
-    const monthKey = getMonthKey();
-    const usageKey = `${user.userId}:${monthKey}`;
-    
-    let usage = userUsage.get(usageKey);
-    if (!usage) {
-      usage = new Map();
-      userUsage.set(usageKey, usage);
-    }
-    
-    const currentUsage = usage.get(resource) || 0;
-    
     if (action === 'check') {
       // Apenas verifica se pode usar
-      const canUse = resourceQuota.limit === -1 || (currentUsage + amount) <= resourceQuota.limit;
+      const canUse = limit === -1 || (currentUsage + amount) <= limit;
       
       return NextResponse.json({
         success: true,
         allowed: canUse,
         current: currentUsage,
         requested: amount,
-        limit: resourceQuota.limit,
-        remaining: resourceQuota.limit === -1 ? -1 : Math.max(0, resourceQuota.limit - currentUsage),
+        limit,
+        remaining: limit === -1 ? -1 : Math.max(0, limit - currentUsage),
       });
     }
     
     if (action === 'consume') {
       // Verifica e consome
-      if (resourceQuota.limit !== -1 && (currentUsage + amount) > resourceQuota.limit) {
+      if (limit !== -1 && (currentUsage + amount) > limit) {
         return NextResponse.json({
           success: false,
           error: 'Quota exceeded',
           current: currentUsage,
-          limit: resourceQuota.limit,
+          limit,
         }, { status: 429 });
       }
-      
-      usage.set(resource, currentUsage + amount);
+
+      if (resource !== 'ai_tokens') {
+        return NextResponse.json(
+          { success: false, error: 'Consume supported only for ai_tokens' },
+          { status: 400 }
+        );
+      }
+
+      await recordTokenUsage(user.userId, amount);
       
       return NextResponse.json({
         success: true,
         consumed: amount,
         current: currentUsage + amount,
-        limit: resourceQuota.limit,
-        remaining: resourceQuota.limit === -1 ? -1 : Math.max(0, resourceQuota.limit - currentUsage - amount),
+        limit,
+        remaining: limit === -1 ? -1 : Math.max(0, limit - currentUsage - amount),
       });
     }
     

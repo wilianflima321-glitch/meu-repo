@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { requireAuth } from '@/lib/auth-server';
 
 // =============================================================================
 // GOD VIEW SESSIONS API
@@ -87,19 +88,23 @@ async function handler(req: NextRequest) {
   }
 }
 
-export const GET = withAdminAuth(handler, 'ops:users:read');
+export const GET = withAdminAuth(handler, 'ops:users:view');
 
 // =============================================================================
 // SESSION TRACKING (called by client)
 // =============================================================================
 
 async function updateSessionHandler(req: NextRequest) {
+  let authUser;
+  try {
+    authUser = requireAuth(req);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await req.json();
   const { 
     sessionId,
-    userId,
-    userEmail,
-    userName,
     projectId,
     projectName,
     currentPage,
@@ -109,6 +114,10 @@ async function updateSessionHandler(req: NextRequest) {
     aiTokensIncrement,
     aiCostIncrement,
   } = body;
+
+  if (!sessionId) {
+    return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
+  }
   
   try {
     // Get IP and user agent from request
@@ -121,15 +130,39 @@ async function updateSessionHandler(req: NextRequest) {
     const country = undefined; // Would use MaxMind or similar
     const city = undefined;
     
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { id: true, email: true, name: true },
+    });
+
+    let resolvedProjectId: string | undefined;
+    let resolvedProjectName: string | undefined;
+    if (projectId) {
+      const project = await prisma.project.findFirst({
+        where: {
+          id: projectId,
+          OR: [
+            { userId: authUser.userId },
+            { members: { some: { userId: authUser.userId } } },
+          ],
+        },
+        select: { id: true, name: true },
+      });
+      if (project) {
+        resolvedProjectId = project.id;
+        resolvedProjectName = project.name;
+      }
+    }
+
     await prisma.liveSession.upsert({
       where: { id: sessionId },
       create: {
         id: sessionId,
-        userId,
-        userEmail,
-        userName,
-        projectId,
-        projectName,
+        userId: authUser.userId,
+        userEmail: dbUser?.email || authUser.email,
+        userName: dbUser?.name || undefined,
+        projectId: resolvedProjectId,
+        projectName: resolvedProjectName || projectName,
         ipAddress: ip,
         userAgent,
         country,
@@ -137,23 +170,29 @@ async function updateSessionHandler(req: NextRequest) {
         currentPage,
         currentTool,
         lastAction,
-        aiCallsCount: aiCallIncrement || 0,
-        aiTokensUsed: aiTokensIncrement || 0,
-        aiCostIncurred: aiCostIncrement || 0,
+        aiCallsCount: typeof aiCallIncrement === 'number' ? aiCallIncrement : 0,
+        aiTokensUsed: typeof aiTokensIncrement === 'number' ? aiTokensIncrement : 0,
+        aiCostIncurred: typeof aiCostIncrement === 'number' ? aiCostIncrement : 0,
         startedAt: new Date(),
         lastPingAt: new Date(),
         isActive: true,
       },
       update: {
-        projectId,
-        projectName,
+        projectId: resolvedProjectId,
+        projectName: resolvedProjectName || projectName,
         currentPage,
         currentTool,
         lastAction,
         lastPingAt: new Date(),
-        ...(aiCallIncrement && { aiCallsCount: { increment: aiCallIncrement } }),
-        ...(aiTokensIncrement && { aiTokensUsed: { increment: aiTokensIncrement } }),
-        ...(aiCostIncrement && { aiCostIncurred: { increment: aiCostIncrement } }),
+        ...(typeof aiCallIncrement === 'number' && aiCallIncrement !== 0
+          ? { aiCallsCount: { increment: aiCallIncrement } }
+          : {}),
+        ...(typeof aiTokensIncrement === 'number' && aiTokensIncrement !== 0
+          ? { aiTokensUsed: { increment: aiTokensIncrement } }
+          : {}),
+        ...(typeof aiCostIncrement === 'number' && aiCostIncrement !== 0
+          ? { aiCostIncurred: { increment: aiCostIncrement } }
+          : {}),
       },
     });
     
@@ -172,6 +211,12 @@ export const POST = updateSessionHandler;
 
 // End session
 async function endSessionHandler(req: NextRequest) {
+  try {
+    requireAuth(req);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get('id');
   

@@ -1,49 +1,177 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+type NotificationItem = {
+  id: string;
+  userEmail: string | null;
+  type: string;
+  title: string;
+  message: string | null;
+  read: boolean;
+  createdAt: string;
+};
+
+type Totals = {
+  total: number;
+  read: number;
+  unread: number;
+};
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'Email', message: 'Bem-vindo ao Aethel!', enabled: true },
-    { id: 2, type: 'Push', message: 'Atualização disponível', enabled: false },
-  ]);
+  const [items, setItems] = useState<NotificationItem[]>([]);
+  const [totals, setTotals] = useState<Totals>({ total: 0, read: 0, unread: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [readFilter, setReadFilter] = useState<'all' | 'read' | 'unread'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | string>('all');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const toggle = (id) => {
-    setNotifications(notifications.map(n => n.id === id ? { ...n, enabled: !n.enabled } : n));
-  };
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      params.set('limit', '100');
+      params.set('read', readFilter === 'all' ? 'all' : readFilter === 'read' ? 'true' : 'false');
+      if (typeFilter !== 'all') params.set('type', typeFilter);
+      const res = await fetch(`/api/admin/notifications?${params.toString()}`);
+      if (!res.ok) throw new Error('Falha ao carregar notificações');
+      const data = await res.json();
+      setItems(Array.isArray(data?.items) ? data.items : []);
+      setTotals(data?.totals ?? { total: 0, read: 0, unread: 0 });
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar notificações');
+    } finally {
+      setLoading(false);
+    }
+  }, [readFilter, typeFilter]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const types = Array.from(new Set(items.map((item) => item.type))).sort();
+  const filteredItems = items.filter((item) => {
+    const term = search.trim().toLowerCase();
+    return !term ||
+      (item.userEmail || '').toLowerCase().includes(term) ||
+      item.title.toLowerCase().includes(term) ||
+      (item.message || '').toLowerCase().includes(term);
+  });
 
   return (
     <div className='p-6 max-w-6xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-6'>Gerenciamento de Notificações</h1>
-      <p className='mb-4 text-gray-600'>Configure notificações push, emails e alerts para usuários e admin.</p>
-
-      <div className='mb-6'>
-        <button className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'>Nova Notificação</button>
+      <div className='flex items-center justify-between mb-6'>
+        <div>
+          <h1 className='text-3xl font-bold'>Notificações</h1>
+          <p className='text-gray-600'>Notificações reais para usuários e administradores.</p>
+          {lastUpdated && (
+            <p className='text-xs text-gray-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+          )}
+        </div>
+        <button
+          onClick={fetchNotifications}
+          className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+        >
+          Atualizar
+        </button>
       </div>
 
-      <table className='w-full table-auto'>
-        <thead>
-          <tr className='bg-gray-100'>
-            <th className='p-2'>Tipo</th>
-            <th className='p-2'>Mensagem</th>
-            <th className='p-2'>Ativo</th>
-            <th className='p-2'>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {notifications.map((n) => (
-            <tr key={n.id}>
-              <td className='p-2'>{n.type}</td>
-              <td className='p-2'>{n.message}</td>
-              <td className='p-2'>{n.enabled ? 'Sim' : 'Não'}</td>
-              <td className='p-2'>
-                <button onClick={() => toggle(n.id)} className='px-2 py-1 bg-yellow-500 text-white rounded mr-2'>Toggle</button>
-                <button className='px-2 py-1 bg-red-500 text-white rounded'>Editar</button>
-              </td>
-            </tr>
+      <div className='bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+        <div className='text-center'>
+          <h3 className='text-sm font-semibold'>Total</h3>
+          <p className='text-2xl font-bold text-blue-600'>{totals.total}</p>
+        </div>
+        <div className='text-center'>
+          <h3 className='text-sm font-semibold'>Lidas</h3>
+          <p className='text-2xl font-bold text-green-600'>{totals.read}</p>
+        </div>
+        <div className='text-center'>
+          <h3 className='text-sm font-semibold'>Não lidas</h3>
+          <p className='text-2xl font-bold text-yellow-600'>{totals.unread}</p>
+        </div>
+      </div>
+
+      <div className='bg-white p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+        <input
+          type='text'
+          placeholder='Buscar por título, mensagem ou e-mail'
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className='border p-2 rounded w-full md:max-w-sm'
+        />
+        <div className='flex items-center gap-2 flex-wrap'>
+          {(['all', 'read', 'unread'] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() => setReadFilter(status)}
+              className={`px-3 py-1 rounded text-xs font-semibold ${
+                readFilter === status ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              {status === 'all' ? 'Todas' : status === 'read' ? 'Lidas' : 'Não lidas'}
+            </button>
           ))}
-        </tbody>
-      </table>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className='border p-1 rounded text-xs'
+          >
+            <option value='all'>Todos os tipos</option>
+            {types.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className='bg-white rounded-lg shadow overflow-hidden'>
+        <table className='w-full table-auto'>
+          <thead>
+            <tr className='bg-gray-100 text-sm'>
+              <th className='p-2'>Tipo</th>
+              <th className='p-2'>Título</th>
+              <th className='p-2'>Usuário</th>
+              <th className='p-2'>Status</th>
+              <th className='p-2'>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td className='p-2 text-sm text-gray-500' colSpan={5}>Carregando notificações...</td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td className='p-2 text-sm text-red-500' colSpan={5}>{error}</td>
+              </tr>
+            ) : filteredItems.length === 0 ? (
+              <tr>
+                <td className='p-2 text-sm text-gray-500' colSpan={5}>Nenhuma notificação encontrada.</td>
+              </tr>
+            ) : (
+              filteredItems.map((item) => (
+                <tr key={item.id} className='border-t'>
+                  <td className='p-2'>{item.type}</td>
+                  <td className='p-2'>{item.title}</td>
+                  <td className='p-2'>{item.userEmail || '—'}</td>
+                  <td className='p-2'>
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      item.read ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {item.read ? 'Lida' : 'Não lida'}
+                    </span>
+                  </td>
+                  <td className='p-2'>{new Date(item.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

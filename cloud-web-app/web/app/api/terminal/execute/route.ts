@@ -286,7 +286,7 @@ function buildEnvironment(sessionEnv: Record<string, string>, user: AuthUser): R
   };
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<Response> {
   const startTime = Date.now();
   
   // SECURITY: Require authentication
@@ -425,7 +425,7 @@ export async function POST(req: NextRequest) {
     const { shell, shellArgs } = getShellCommand();
     const environment = buildEnvironment({ ...session.env, ...customEnv }, user);
     
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       let output = '';
       let errorOutput = '';
       let resolved = false;

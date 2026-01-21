@@ -3,7 +3,7 @@
 import { type ReactNode, type HTMLAttributes } from 'react'
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info'
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info' | 'secondary'
   size?: 'sm' | 'md' | 'lg'
   dot?: boolean
   icon?: ReactNode
@@ -12,6 +12,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const variantClasses: Record<string, string> = {
   default: 'bg-slate-700 text-slate-200 border-slate-600',
+  secondary: 'bg-slate-700 text-slate-200 border-slate-600',
   primary: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
   success: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   warning: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
@@ -21,6 +22,7 @@ const variantClasses: Record<string, string> = {
 
 const dotColors: Record<string, string> = {
   default: 'bg-slate-400',
+  secondary: 'bg-slate-400',
   primary: 'bg-indigo-400',
   success: 'bg-emerald-400',
   warning: 'bg-amber-400',

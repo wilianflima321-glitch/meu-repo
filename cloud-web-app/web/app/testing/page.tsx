@@ -21,7 +21,7 @@ export default function TestingPage() {
       const discovered = await testManager.discoverTests('/workspace');
       setTests(discovered);
     } catch (error) {
-      console.error('Failed to discover tests:', error);
+      console.error('Falha ao descobrir testes:', error);
     } finally {
       setIsDiscovering(false);
     }
@@ -49,7 +49,7 @@ export default function TestingPage() {
         setCoverage(cov);
       }
     } catch (error) {
-      console.error('Failed to run tests:', error);
+      console.error('Falha ao executar testes:', error);
     } finally {
       setIsRunning(false);
     }
@@ -59,7 +59,7 @@ export default function TestingPage() {
     try {
       await testManager.debugTest(testId, '/workspace');
     } catch (error) {
-      console.error('Failed to debug test:', error);
+      console.error('Falha ao depurar teste:', error);
     }
   };
 
@@ -142,12 +142,12 @@ export default function TestingPage() {
     const isSelected = selectedTests.has(item.id);
 
     const getIcon = () => {
-      if (item.type === 'file') return 'FILE';
-      if (item.type === 'suite') return 'SUITE';
+      if (item.type === 'file') return 'ARQ';
+      if (item.type === 'suite') return 'SUÍTE';
       if (!result) return '';
       if (result.state === 'passed') return 'OK';
-      if (result.state === 'failed' || result.state === 'errored') return 'ERR';
-      if (result.state === 'skipped') return 'SKIP';
+      if (result.state === 'failed' || result.state === 'errored') return 'ERRO';
+      if (result.state === 'skipped') return 'IGN';
       return '';
     };
 
@@ -180,7 +180,7 @@ export default function TestingPage() {
               onClick={() => debugTest(item.id)}
               className="px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded"
             >
-              Debug
+              Depurar
             </button>
           )}
         </div>
@@ -204,8 +204,8 @@ export default function TestingPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Test Explorer</h1>
-          <p className="text-slate-300">Discover, run, and debug your tests</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Explorador de testes</h1>
+          <p className="text-slate-300">Descubra, execute e depure seus testes</p>
         </div>
 
         {/* Controls */}
@@ -216,36 +216,36 @@ export default function TestingPage() {
               disabled={isDiscovering}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
             >
-              <span className="text-xs font-semibold">FIND</span>
-              <span>{isDiscovering ? 'Discovering...' : 'Discover Tests'}</span>
+              <span className="text-xs font-semibold">BUSCAR</span>
+              <span>{isDiscovering ? 'Buscando...' : 'Buscar testes'}</span>
             </button>
             <button
               onClick={() => runTests()}
               disabled={isRunning}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
             >
-              <span className="text-xs font-semibold">RUN</span>
-              <span>{isRunning ? 'Running...' : 'Run All'}</span>
+              <span className="text-xs font-semibold">EXEC</span>
+              <span>{isRunning ? 'Executando...' : 'Executar tudo'}</span>
             </button>
             <button
               onClick={() => runTests(Array.from(selectedTests))}
               disabled={isRunning || selectedTests.size === 0}
               className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
             >
-              <span className="text-xs font-semibold">RUN</span>
-              <span>Run Selected ({selectedTests.size})</span>
+              <span className="text-xs font-semibold">EXEC</span>
+              <span>Executar selecionados ({selectedTests.size})</span>
             </button>
             <button
               onClick={selectAll}
               className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
             >
-              Select All
+              Selecionar tudo
             </button>
             <button
               onClick={deselectAll}
               className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
             >
-              Deselect All
+              Desmarcar tudo
             </button>
           </div>
 
@@ -261,7 +261,13 @@ export default function TestingPage() {
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
-                {f.charAt(0).toUpperCase() + f.slice(1)}
+                {f === 'all'
+                  ? 'Todos'
+                  : f === 'passed'
+                  ? 'Aprovados'
+                  : f === 'failed'
+                  ? 'Falharam'
+                  : 'Ignorados'}
               </button>
             ))}
             <label className="flex items-center gap-2 px-4 py-2 bg-slate-700 rounded-lg cursor-pointer">
@@ -271,7 +277,7 @@ export default function TestingPage() {
                 onChange={(e) => setShowCoverage(e.target.checked)}
                 className="w-4 h-4"
               />
-              <span className="text-slate-300">Show Coverage</span>
+              <span className="text-slate-300">Mostrar cobertura</span>
             </label>
           </div>
         </div>
@@ -279,11 +285,11 @@ export default function TestingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Test Tree */}
           <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Tests</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Testes</h3>
             <div className="max-h-[600px] overflow-y-auto">
               {tests.length === 0 ? (
                 <p className="text-slate-400 text-center py-8">
-                  {isDiscovering ? 'Discovering tests...' : 'No tests found. Click "Discover Tests" to scan your workspace.'}
+                  {isDiscovering ? 'Buscando testes...' : 'Nenhum teste encontrado. Clique em "Buscar testes" para analisar seu workspace.'}
                 </p>
               ) : (
                 tests.map(test => renderTestItem(test))
@@ -295,7 +301,7 @@ export default function TestingPage() {
           <div className="space-y-6">
             {/* Test Stats */}
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Test Results</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Resultados dos testes</h3>
               {stats.total > 0 ? (
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -303,20 +309,20 @@ export default function TestingPage() {
                     <span className="text-white font-semibold">{stats.total}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-green-400">Passed</span>
+                    <span className="text-green-400">Aprovados</span>
                     <span className="text-white font-semibold">{stats.passed}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-red-400">Failed</span>
+                    <span className="text-red-400">Falharam</span>
                     <span className="text-white font-semibold">{stats.failed}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-yellow-400">Skipped</span>
+                    <span className="text-yellow-400">Ignorados</span>
                     <span className="text-white font-semibold">{stats.skipped}</span>
                   </div>
                   <div className="pt-3 border-t border-slate-700">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-300">Pass Rate</span>
+                      <span className="text-slate-300">Taxa de aprovação</span>
                       <span className="text-white font-semibold">
                         {((stats.passed / stats.total) * 100).toFixed(1)}%
                       </span>
@@ -324,19 +330,19 @@ export default function TestingPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-slate-400 text-sm">No test results yet</p>
+                <p className="text-slate-400 text-sm">Sem resultados ainda</p>
               )}
             </div>
 
             {/* Coverage */}
             {showCoverage && (
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4">Coverage</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">Cobertura</h3>
                 {coverage.length > 0 ? (
                   <div className="space-y-3">
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-slate-300">Lines</span>
+                        <span className="text-slate-300">Linhas</span>
                         <span className="text-white font-semibold">{coverageStats.lines}%</span>
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2">
@@ -348,7 +354,7 @@ export default function TestingPage() {
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-slate-300">Branches</span>
+                        <span className="text-slate-300">Ramificações</span>
                         <span className="text-white font-semibold">{coverageStats.branches}%</span>
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2">
@@ -360,7 +366,7 @@ export default function TestingPage() {
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-slate-300">Functions</span>
+                        <span className="text-slate-300">Funções</span>
                         <span className="text-white font-semibold">{coverageStats.functions}%</span>
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2">
@@ -372,7 +378,7 @@ export default function TestingPage() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-slate-400 text-sm">No coverage data available</p>
+                  <p className="text-slate-400 text-sm">Sem dados de cobertura disponíveis</p>
                 )}
               </div>
             )}

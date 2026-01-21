@@ -1,186 +1,161 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
- * Admin Subscriptions - Gestão de Planos
- * Alinhado com estratégia 2025 - ZERO PREJUÍZO
+ * Admin Subscriptions - Gestão de Planos (dados reais do DB/Stripe config)
  */
 
-interface Plan {
+interface PlanSummary {
   id: string;
   name: string;
   priceUSD: number;
-  priceBRL: number;
-  tokensPerMonth: number;
-  margin: string;
-  models: string[];
-  domains: string[];
+  users: number;
+  mrr: number;
+  isTrial: boolean;
 }
 
 export default function AdminSubscriptions() {
-  const [plans, setPlans] = useState<Plan[]>([
-    { 
-      id: 'starter',
-      name: 'Starter', 
-      priceUSD: 3, 
-      priceBRL: 15, 
-      tokensPerMonth: 500_000,
-      margin: '96.7%',
-      models: ['gemini-1.5-flash', 'deepseek-v3'],
-      domains: ['code'],
-    },
-    { 
-      id: 'basic',
-      name: 'Basic', 
-      priceUSD: 9, 
-      priceBRL: 45, 
-      tokensPerMonth: 2_000_000,
-      margin: '93.9%',
-      models: ['gemini-1.5-flash', 'deepseek-v3', 'gpt-4o-mini', 'claude-3-haiku'],
-      domains: ['code', 'research'],
-    },
-    { 
-      id: 'pro',
-      name: 'Pro', 
-      priceUSD: 29, 
-      priceBRL: 149, 
-      tokensPerMonth: 8_000_000,
-      margin: '89.2%',
-      models: ['all-balanced'],
-      domains: ['code', 'trading', 'research', 'creative'],
-    },
-    { 
-      id: 'studio',
-      name: 'Studio', 
-      priceUSD: 79, 
-      priceBRL: 399, 
-      tokensPerMonth: 25_000_000,
-      margin: '89.6%',
-      models: ['all'],
-      domains: ['all'],
-    },
-    { 
-      id: 'enterprise',
-      name: 'Enterprise', 
-      priceUSD: 199, 
-      priceBRL: 999, 
-      tokensPerMonth: 100_000_000,
-      margin: '92.0%',
-      models: ['all', 'custom'],
-      domains: ['all', 'custom'],
-    },
-  ]);
+  const [plans, setPlans] = useState<PlanSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showTrials, setShowTrials] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const formatTokens = (tokens: number) => {
-    if (tokens >= 1_000_000) return `${tokens / 1_000_000}M`;
-    if (tokens >= 1_000) return `${tokens / 1_000}K`;
-    return tokens.toString();
-  };
+  const fetchPlans = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/admin/subscriptions');
+      if (!res.ok) throw new Error('Falha ao carregar planos');
+      const data = await res.json();
+      setPlans(Array.isArray(data?.plans) ? data.plans : []);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar planos');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleEdit = (index: number, field: keyof Plan, value: string | number) => {
-    const newPlans = [...plans];
-    (newPlans[index] as any)[field] = value;
-    setPlans(newPlans);
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
+
+  const filteredPlans = plans.filter((plan) => {
+    if (!showTrials && plan.isTrial) return false;
+    const term = search.trim().toLowerCase();
+    return !term || plan.name.toLowerCase().includes(term) || plan.id.toLowerCase().includes(term);
+  });
+
+  const summary = {
+    totalUsers: plans.reduce((sum, plan) => sum + plan.users, 0),
+    totalMRR: plans.reduce((sum, plan) => sum + plan.mrr, 0),
+    trialUsers: plans.filter((plan) => plan.isTrial).reduce((sum, plan) => sum + plan.users, 0),
   };
 
   return (
     <div className='p-6 max-w-7xl mx-auto'>
-      <div className='mb-6'>
-        <h1 className='text-3xl font-bold'>Gestão de Planos</h1>
-        <p className='text-gray-600 mt-2'>
-          Planos alinhados com estratégia ZERO PREJUÍZO - Margem mínima 89%
-        </p>
+      <div className='flex items-center justify-between mb-6'>
+        <div>
+          <h1 className='text-3xl font-bold'>Gestão de Planos</h1>
+          <p className='text-gray-600 mt-2'>
+            Distribuição por plano e MRR baseado nos usuários ativos.
+          </p>
+          {lastUpdated && (
+            <p className='text-xs text-gray-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+          )}
+        </div>
+        <button
+          onClick={fetchPlans}
+          className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+        >
+          Atualizar
+        </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className='grid grid-cols-5 gap-4 mb-6'>
-        {plans.map((plan) => (
-          <div key={plan.id} className='bg-white rounded-lg shadow p-4'>
-            <h3 className='font-bold text-lg'>{plan.name}</h3>
-            <p className='text-2xl font-bold text-green-600'>R${plan.priceBRL}</p>
-            <p className='text-sm text-gray-500'>${plan.priceUSD} USD</p>
-            <p className='text-sm mt-2'>
-              <span className='font-medium'>{formatTokens(plan.tokensPerMonth)}</span> tokens
-            </p>
-            <p className='text-sm text-green-500'>Margem: {plan.margin}</p>
-          </div>
-        ))}
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
+        <div className='bg-white rounded-lg shadow p-4 text-center'>
+          <h3 className='text-sm font-semibold'>Usuários totais</h3>
+          <p className='text-2xl font-bold text-blue-600'>{summary.totalUsers}</p>
+        </div>
+        <div className='bg-white rounded-lg shadow p-4 text-center'>
+          <h3 className='text-sm font-semibold'>MRR total (US$)</h3>
+          <p className='text-2xl font-bold text-green-600'>US${summary.totalMRR.toFixed(2)}</p>
+        </div>
+        <div className='bg-white rounded-lg shadow p-4 text-center'>
+          <h3 className='text-sm font-semibold'>Usuários em teste</h3>
+          <p className='text-2xl font-bold text-gray-600'>{summary.trialUsers}</p>
+        </div>
       </div>
 
-      {/* Detailed Table */}
+      <div className='bg-white rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+        <input
+          type='text'
+          placeholder='Buscar plano'
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className='border p-2 rounded w-full md:max-w-sm'
+        />
+        <label className='flex items-center gap-2 text-sm text-gray-600'>
+          <input
+            type='checkbox'
+            checked={showTrials}
+            onChange={(e) => setShowTrials(e.target.checked)}
+          />
+          Exibir testes
+        </label>
+      </div>
+
       <div className='bg-white rounded-lg shadow overflow-hidden'>
         <table className='w-full'>
           <thead>
-            <tr className='bg-gray-100'>
+            <tr className='bg-gray-100 text-sm'>
               <th className='p-3 text-left'>Plano</th>
-              <th className='p-3 text-left'>USD/mês</th>
-              <th className='p-3 text-left'>BRL/mês</th>
-              <th className='p-3 text-left'>Tokens/mês</th>
-              <th className='p-3 text-left'>Margem</th>
-              <th className='p-3 text-left'>Modelos</th>
-              <th className='p-3 text-left'>Domínios</th>
+              <th className='p-3 text-left'>Preço (US$)</th>
+              <th className='p-3 text-left'>Usuários</th>
+              <th className='p-3 text-left'>MRR</th>
+              <th className='p-3 text-left'>Tipo</th>
             </tr>
           </thead>
           <tbody>
-            {plans.map((plan, index) => (
-              <tr key={plan.id} className='border-t hover:bg-gray-50'>
-                <td className='p-3 font-medium'>{plan.name}</td>
-                <td className='p-3'>
-                  <input 
-                    type='number' 
-                    value={plan.priceUSD} 
-                    onChange={(e) => handleEdit(index, 'priceUSD', Number(e.target.value))} 
-                    className='w-20 border rounded px-2 py-1'
-                  />
-                </td>
-                <td className='p-3'>
-                  <input 
-                    type='number' 
-                    value={plan.priceBRL} 
-                    onChange={(e) => handleEdit(index, 'priceBRL', Number(e.target.value))} 
-                    className='w-20 border rounded px-2 py-1'
-                  />
-                </td>
-                <td className='p-3'>{formatTokens(plan.tokensPerMonth)}</td>
-                <td className='p-3'>
-                  <span className={`px-2 py-1 rounded text-sm ${
-                    parseFloat(plan.margin) >= 90 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {plan.margin}
-                  </span>
-                </td>
-                <td className='p-3 text-sm text-gray-600'>
-                  {plan.models.join(', ')}
-                </td>
-                <td className='p-3 text-sm text-gray-600'>
-                  {plan.domains.join(', ')}
-                </td>
+            {loading ? (
+              <tr>
+                <td className='p-3 text-sm text-gray-500' colSpan={5}>Carregando planos...</td>
               </tr>
-            ))}
+            ) : error ? (
+              <tr>
+                <td className='p-3 text-sm text-red-500' colSpan={5}>{error}</td>
+              </tr>
+            ) : filteredPlans.length === 0 ? (
+              <tr>
+                <td className='p-3 text-sm text-gray-500' colSpan={5}>Nenhum plano encontrado.</td>
+              </tr>
+            ) : (
+              filteredPlans.map((plan) => (
+                <tr key={plan.id} className='border-t hover:bg-gray-50'>
+                  <td className='p-3 font-medium'>{plan.name}</td>
+                  <td className='p-3'>US${plan.priceUSD.toFixed(2)}</td>
+                  <td className='p-3'>{plan.users}</td>
+                  <td className='p-3'>US${plan.mrr.toFixed(2)}</td>
+                  <td className='p-3'>
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      plan.isTrial ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                    }`}>
+                      {plan.isTrial ? 'Teste' : 'Pago'}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Actions */}
-      <div className='mt-6 flex gap-4'>
-        <button className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'>
-          Salvar Alterações
-        </button>
-        <button className='bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300'>
-          Restaurar Padrão
-        </button>
-      </div>
-
-      {/* Info Box */}
-      <div className='mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4'>
-        <h3 className='font-bold text-blue-800'>💡 Estratégia Zero Prejuízo</h3>
-        <ul className='mt-2 text-sm text-blue-700 space-y-1'>
-          <li>• Sem plano gratuito = todo usuário gera receita</li>
-          <li>• Margem mínima 89% garante lucro em todos os planos</li>
-          <li>• IAs ultra baratas (Gemini Flash $0.14/1M) nos planos básicos</li>
-          <li>• Hard limits impedem uso excessivo</li>
-        </ul>
+      <div className='mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600'>
+        Limitação: preços e identificação de planos vêm da configuração do backend. Tokens, modelos e domínios são
+        definidos no faturamento/Stripe e não são editáveis nesta tela.
       </div>
     </div>
   );

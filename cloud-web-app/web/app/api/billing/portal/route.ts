@@ -10,26 +10,25 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/prisma';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2024-06-20',
 });
 
 // POST - Criar sessão do Customer Portal
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = requireAuth(req);
     
-    if (!session?.user?.id) {
+    if (!session.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
     // Buscar usuário com Stripe Customer ID
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: session.userId },
       select: {
         id: true,
         email: true,
@@ -87,14 +86,14 @@ export async function POST(req: NextRequest) {
 // GET - Obter informações do portal/subscription
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = requireAuth(req);
     
-    if (!session?.user?.id) {
+    if (!session.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: session.userId },
       select: {
         stripeCustomerId: true,
         stripeSubscriptionId: true,
@@ -112,7 +111,7 @@ export async function GET(req: NextRequest) {
     }
     
     // Buscar subscription ativa
-    let subscription = null;
+    let subscription: Stripe.Subscription | null = null;
     let invoices: Stripe.Invoice[] = [];
     let paymentMethods: Stripe.PaymentMethod[] = [];
     
@@ -235,9 +234,6 @@ async function getOrCreatePortalConfiguration(): Promise<string> {
             'other',
           ],
         },
-      },
-      subscription_pause: {
-        enabled: true,
       },
       subscription_update: {
         enabled: true,

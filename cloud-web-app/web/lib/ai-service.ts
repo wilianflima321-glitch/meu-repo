@@ -252,7 +252,7 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
    * Verifica se pode fazer request (para UI)
    */
   canMakeRequest(model?: string, tokens?: number) {
-    return emergencyController.canMakeRequest(model || 'gpt-4o-mini', tokens);
+    return emergencyController.canMakeRequest(model || 'gpt-4o-mini', tokens ?? 0);
   }
   
   /**

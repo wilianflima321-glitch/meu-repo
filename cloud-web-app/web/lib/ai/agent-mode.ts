@@ -734,12 +734,24 @@ export class AutonomousAgent extends EventEmitter {
     // Try to get tools from MCP server if available
     try {
       // Dynamically import MCP server tools
-      const mcpTools = toolsRegistry?.getTools?.() || [];
+      const mcpTools = toolsRegistry?.getAll?.() || [];
       for (const tool of mcpTools) {
+        const inputSchema = {
+          type: 'object',
+          properties: tool.parameters.reduce((acc, param) => {
+            acc[param.name] = {
+              type: param.type,
+              description: param.description,
+              ...(param.enum ? { enum: param.enum } : {}),
+            };
+            return acc;
+          }, {} as Record<string, unknown>),
+          required: tool.parameters.filter((p) => p.required).map((p) => p.name),
+        };
         registeredTools.push({
           name: tool.name,
           description: tool.description,
-          inputSchema: tool.inputSchema || {}
+          inputSchema
         });
       }
     } catch {

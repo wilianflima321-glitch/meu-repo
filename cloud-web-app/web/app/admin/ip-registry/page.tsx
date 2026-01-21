@@ -1,18 +1,16 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { API_BASE } from '@/lib/api'
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface LicenseEntry {
   status: string;
-  holder?: string;
-  since?: string;
-  until?: string;
-  notes?: string;
+  holder?: string | null;
+  since?: string | null;
+  until?: string | null;
+  notes?: string | null;
 }
 
 interface Registry {
   licenses: Record<string, LicenseEntry>;
-  owned: Record<string, boolean>;
   allowed: string[];
 }
 
@@ -20,22 +18,36 @@ export default function AdminIpRegistryPage() {
   const [data, setData] = useState<Registry | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const apiUrl = API_BASE;
+  const [allowedInput, setAllowedInput] = useState('');
+  const [licenseForm, setLicenseForm] = useState({
+    slug: '',
+    status: 'licensed',
+    holder: '',
+    since: '',
+    until: '',
+    notes: '',
+  });
+  const [message, setMessage] = useState<string | null>(null);
+  const statusLabels: Record<string, string> = {
+    licensed: 'Licenciado',
+    owned: 'Proprietário',
+    restricted: 'Restrito',
+  };
 
   const fetchRegistry = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiUrl}/admin/ip/registry`);
+      const res = await fetch('/api/admin/ip-registry');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const j = await res.json();
       setData(j);
     } catch (e: any) {
-      setError(e.message || "Erro ao carregar registry");
+      setError(e.message || "Erro ao carregar registro");
     } finally {
       setLoading(false);
     }
-  }, [apiUrl]);
+  }, []);
 
   useEffect(() => {
     fetchRegistry();
@@ -46,15 +58,16 @@ export default function AdminIpRegistryPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiUrl}/admin/ip/registry`, {
+      const res = await fetch('/api/admin/ip-registry', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setMessage('Registro salvo com sucesso.');
       await fetchRegistry();
     } catch (e: any) {
-      setError(e.message || "Erro ao salvar registry");
+      setError(e.message || "Erro ao salvar registro");
     } finally {
       setLoading(false);
     }
@@ -64,13 +77,13 @@ export default function AdminIpRegistryPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiUrl}/rag/index`, {
+      const res = await fetch('/api/admin/ip-registry/ingest', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ip }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      alert("RAG ingestion triggered for IP: " + ip);
+      setMessage(`Ingestão solicitada para ${ip}.`);
     } catch (e: any) {
       setError(e.message || "Erro ao ingerir RAG");
     } finally {
@@ -79,67 +92,129 @@ export default function AdminIpRegistryPage() {
   };
 
   const addAllowed = () => {
-    if (!data) return;
-    const ip = prompt("Adicionar IP permitido (slug):");
-    if (!ip) return;
-    setData({ ...data, allowed: Array.from(new Set([...(data.allowed||[]), ip.toLowerCase()])) });
+    if (!data || !allowedInput.trim()) return;
+    const slug = allowedInput.toLowerCase().trim();
+    setData({ ...data, allowed: Array.from(new Set([...(data.allowed || []), slug])) });
+    setAllowedInput('');
   };
 
   const addLicense = () => {
-    if (!data) return;
-    const ip = prompt("IP (slug) para licenciar:");
-    if (!ip) return;
-    const status = prompt("Status (licensed|owned|restricted):", "licensed") || "licensed";
-    const holder = prompt("Titular (opcional):") || undefined;
-    const since = prompt("Desde (YYYY-MM-DD) (opcional):") || undefined;
-    const until = prompt("Até (YYYY-MM-DD) (opcional):") || undefined;
-    const notes = prompt("Notas (opcional):") || undefined;
+    if (!data || !licenseForm.slug.trim()) return;
+    const slug = licenseForm.slug.toLowerCase().trim();
     setData({
       ...data,
       licenses: {
         ...(data.licenses || {}),
-        [ip.toLowerCase()]: { status, holder, since, until, notes },
+        [slug]: {
+          status: licenseForm.status,
+          holder: licenseForm.holder || null,
+          since: licenseForm.since || null,
+          until: licenseForm.until || null,
+          notes: licenseForm.notes || null,
+        },
       },
     });
+    setLicenseForm({ slug: '', status: 'licensed', holder: '', since: '', until: '', notes: '' });
   };
+
+  const allowedList = useMemo(() => data?.allowed || [], [data]);
+  const licensesList = useMemo(() => Object.entries(data?.licenses || {}), [data]);
 
   if (loading && !data) return <div className="p-6">Carregando…</div>;
   if (error) return <div className="p-6 text-red-600">Erro: {error}</div>;
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Admin • IP Registry</h1>
-      <div className="flex gap-2">
-        <button className="px-3 py-1 bg-gray-200 rounded" onClick={fetchRegistry}>Atualizar</button>
-        <button className="px-3 py-1 bg-blue-600 text-white rounded" onClick={saveRegistry}>Salvar</button>
-        <button className="px-3 py-1 bg-green-600 text-white rounded" onClick={addAllowed}>Adicionar Allowed</button>
-        <button className="px-3 py-1 bg-indigo-600 text-white rounded" onClick={addLicense}>Adicionar License</button>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Registro de IPs</h1>
+          <p className="text-sm text-gray-500">Controle de permissões e licenças com auditoria.</p>
+        </div>
+        <div className="flex gap-2">
+          <button className="px-3 py-1 bg-gray-200 rounded" onClick={fetchRegistry}>Atualizar</button>
+          <button className="px-3 py-1 bg-blue-600 text-white rounded" onClick={saveRegistry}>Salvar</button>
+        </div>
       </div>
 
-      {!data ? <div>Nenhum dado</div> : (
+      {message && <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded">{message}</div>}
+
+      {!data ? <div>Nenhum dado disponível.</div> : (
         <div className="grid md:grid-cols-2 gap-6">
-          <section>
-            <h2 className="text-xl font-medium mb-2">Allowed IPs</h2>
-            <ul className="list-disc pl-5">
-              {(data.allowed||[]).map(ip => (
+          <section className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-xl font-medium mb-2">IPs permitidos</h2>
+            <div className="flex gap-2 mb-4">
+              <input
+                value={allowedInput}
+                onChange={(e) => setAllowedInput(e.target.value)}
+                className="border p-2 rounded text-sm flex-1"
+                placeholder="Adicionar identificador"
+              />
+              <button className="px-3 py-2 bg-green-600 text-white rounded" onClick={addAllowed}>Adicionar</button>
+            </div>
+            <ul className="list-disc pl-5 space-y-1">
+              {allowedList.map(ip => (
                 <li key={ip} className="flex items-center gap-2">
                   <span>{ip}</span>
-                  <button className="text-sm text-blue-600 underline" onClick={() => ingestIp(ip)}>Ingerir RAG</button>
+                  <button className="text-xs text-blue-600 underline" onClick={() => ingestIp(ip)}>Ingerir RAG</button>
                 </li>
               ))}
             </ul>
           </section>
-          <section>
-            <h2 className="text-xl font-medium mb-2">Licenses</h2>
+          <section className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-xl font-medium mb-2">Licenças</h2>
+            <div className="grid grid-cols-1 gap-2 mb-4">
+              <input
+                className="border p-2 rounded text-sm"
+                placeholder="Identificador"
+                value={licenseForm.slug}
+                onChange={(e) => setLicenseForm((prev) => ({ ...prev, slug: e.target.value }))}
+              />
+              <select
+                className="border p-2 rounded text-sm"
+                value={licenseForm.status}
+                onChange={(e) => setLicenseForm((prev) => ({ ...prev, status: e.target.value }))}
+              >
+                <option value="licensed">Licenciado</option>
+                <option value="owned">Proprietário</option>
+                <option value="restricted">Restrito</option>
+              </select>
+              <input
+                className="border p-2 rounded text-sm"
+                placeholder="Titular"
+                value={licenseForm.holder}
+                onChange={(e) => setLicenseForm((prev) => ({ ...prev, holder: e.target.value }))}
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  className="border p-2 rounded text-sm"
+                  type="date"
+                  value={licenseForm.since}
+                  onChange={(e) => setLicenseForm((prev) => ({ ...prev, since: e.target.value }))}
+                />
+                <input
+                  className="border p-2 rounded text-sm"
+                  type="date"
+                  value={licenseForm.until}
+                  onChange={(e) => setLicenseForm((prev) => ({ ...prev, until: e.target.value }))}
+                />
+              </div>
+              <input
+                className="border p-2 rounded text-sm"
+                placeholder="Notas"
+                value={licenseForm.notes}
+                onChange={(e) => setLicenseForm((prev) => ({ ...prev, notes: e.target.value }))}
+              />
+              <button className="px-3 py-2 bg-indigo-600 text-white rounded" onClick={addLicense}>Adicionar</button>
+            </div>
             <ul className="space-y-2">
-              {Object.entries(data.licenses || {}).map(([ip, lic]) => (
+              {licensesList.map(([ip, lic]) => (
                 <li key={ip} className="border rounded p-3">
                   <div className="font-semibold">{ip}</div>
-                  <div className="text-sm text-gray-600">status: {lic.status}</div>
-                  {lic.holder && <div className="text-sm">holder: {lic.holder}</div>}
-                  {lic.since && <div className="text-sm">since: {lic.since}</div>}
-                  {lic.until && <div className="text-sm">until: {lic.until}</div>}
-                  {lic.notes && <div className="text-sm">notes: {lic.notes}</div>}
+                  <div className="text-sm text-gray-600">Status: {statusLabels[lic.status] ?? lic.status}</div>
+                  {lic.holder && <div className="text-sm">Titular: {lic.holder}</div>}
+                  {lic.since && <div className="text-sm">Desde: {lic.since}</div>}
+                  {lic.until && <div className="text-sm">Até: {lic.until}</div>}
+                  {lic.notes && <div className="text-sm">Notas: {lic.notes}</div>}
                 </li>
               ))}
             </ul>

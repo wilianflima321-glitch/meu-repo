@@ -5,6 +5,9 @@
  * Suporta MinIO (local/dev) e S3 (produção).
  * 
  * NÃO É MOCK - Este é um serviço REAL de storage.
+ * 
+ * DEPENDÊNCIAS OPCIONAIS:
+ * npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
  */
 
 // Tipos para o serviço de storage (evita dependência direta do SDK)
@@ -14,110 +17,48 @@ interface StorageClient {
 
 // Configuração do cliente S3/MinIO - lazy loading
 let storageClient: StorageClient | null = null;
+let s3Module: any | null = null;
 
-async function getStorageClient(): Promise<StorageClient> {
-  if (storageClient) return storageClient;
-  
-  // Dynamic import para evitar erros se SDK não instalado
+async function loadS3Module(): Promise<any> {
+  if (s3Module) return s3Module;
   try {
-    // @ts-ignore - SDK pode não estar instalado em dev
-    const { S3Client } = await import('@aws-sdk/client-s3');
-    
-    const isProduction = process.env.NODE_ENV === 'production';
-    const endpoint = process.env.S3_ENDPOINT || (isProduction ? undefined : 'http://localhost:9000');
-    const region = process.env.S3_REGION || 'us-east-1';
-    const accessKeyId = process.env.S3_ACCESS_KEY_ID || process.env.MINIO_ROOT_USER || 'minioadmin';
-    const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY || process.env.MINIO_ROOT_PASSWORD || 'minioadmin';
-    
-    storageClient = new S3Client({
-      region,
-      endpoint,
-      forcePathStyle: !isProduction,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-    }) as StorageClient;
-    
-    console.log('[Storage] Connected to S3/MinIO storage');
-    return storageClient;
+    // Usa eval para evitar que o webpack tente bundlar o módulo
+    s3Module = await eval('import("@aws-sdk/client-s3")');
+    return s3Module;
   } catch (error) {
-    // Log warning prominently in development
+    const message = 'STORAGE_SDK_NOT_AVAILABLE: instale @aws-sdk/client-s3 e configure S3/MINIO para usar storage real.';
     if (process.env.NODE_ENV === 'production') {
-      console.error('[Storage] ⚠️ CRITICAL: AWS SDK not available in production! Data will be lost on restart.');
+      console.error(`[Storage] ❌ ${message}`);
     } else {
-      console.warn('[Storage] ⚠️ AWS SDK not available, using in-memory mock storage. Install @aws-sdk/client-s3 for persistence.');
+      console.warn(`[Storage] ⚠️ ${message}`);
     }
-    // Fallback mock para desenvolvimento sem SDK
-    storageClient = createMockStorageClient();
-    return storageClient;
+    throw Object.assign(new Error(message), { code: 'STORAGE_SDK_NOT_AVAILABLE' });
   }
 }
 
-// Mock client para desenvolvimento local sem S3
-// ⚠️ WARNING: Data is stored in memory and will be lost on server restart
-function createMockStorageClient(): StorageClient {
-  console.warn('[Storage] Using MOCK storage - data will NOT persist!');
-  const mockStorage = new Map<string, { data: Uint8Array; metadata: Record<string, string> }>();
-  
-  return {
-    async send(command: any): Promise<any> {
-      const commandName = command.constructor?.name || '';
-      
-      if (commandName === 'PutObjectCommand' || command.input?.Body) {
-        const key = `${command.input.Bucket}/${command.input.Key}`;
-        const body = command.input.Body;
-        const data = body instanceof Uint8Array ? body : new TextEncoder().encode(String(body));
-        mockStorage.set(key, { data, metadata: command.input.Metadata || {} });
-        return { ETag: `"mock-${Date.now()}"` };
-      }
-      
-      if (commandName === 'GetObjectCommand') {
-        const key = `${command.input.Bucket}/${command.input.Key}`;
-        const entry = mockStorage.get(key);
-        if (!entry) throw Object.assign(new Error('NotFound'), { name: 'NotFound' });
-        return {
-          Body: createReadableStream(entry.data),
-          ContentType: 'application/octet-stream',
-          Metadata: entry.metadata,
-        };
-      }
-      
-      if (commandName === 'ListObjectsV2Command') {
-        const prefix = `${command.input.Bucket}/${command.input.Prefix || ''}`;
-        const contents = Array.from(mockStorage.entries())
-          .filter(([k]) => k.startsWith(prefix))
-          .map(([k, v]) => ({
-            Key: k.replace(`${command.input.Bucket}/`, ''),
-            Size: v.data.length,
-            LastModified: new Date(),
-          }));
-        return { Contents: contents };
-      }
-      
-      if (commandName === 'DeleteObjectCommand') {
-        const key = `${command.input.Bucket}/${command.input.Key}`;
-        mockStorage.delete(key);
-        return {};
-      }
-      
-      if (commandName === 'HeadObjectCommand') {
-        const key = `${command.input.Bucket}/${command.input.Key}`;
-        if (!mockStorage.has(key)) throw Object.assign(new Error('NotFound'), { name: 'NotFound' });
-        return {};
-      }
-      
-      return {};
-    }
-  };
-}
+async function getStorageClient(): Promise<StorageClient> {
+  if (storageClient) return storageClient;
+  const s3Module = await loadS3Module();
+  const { S3Client } = s3Module;
 
-function createReadableStream(data: Uint8Array): AsyncIterable<Uint8Array> {
-  return {
-    async *[Symbol.asyncIterator]() {
-      yield data;
-    }
-  };
+  const isProduction = process.env.NODE_ENV === 'production';
+  const endpoint = process.env.S3_ENDPOINT || (isProduction ? undefined : 'http://localhost:9000');
+  const region = process.env.S3_REGION || 'us-east-1';
+  const accessKeyId = process.env.S3_ACCESS_KEY_ID || process.env.MINIO_ROOT_USER || 'minioadmin';
+  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY || process.env.MINIO_ROOT_PASSWORD || 'minioadmin';
+
+  storageClient = new S3Client({
+    region,
+    endpoint,
+    forcePathStyle: !isProduction,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+  }) as StorageClient;
+
+  console.log('[Storage] Connected to S3/MinIO storage');
+  return storageClient;
 }
 
 // Buckets configurados
@@ -142,15 +83,12 @@ export interface UploadOptions {
 
 // Helper para criar comandos dinamicamente
 async function createCommand(name: string, input: any): Promise<any> {
-  try {
-    // @ts-ignore - SDK pode não estar instalado em dev
-    const module = await import('@aws-sdk/client-s3');
-    const CommandClass = (module as any)[name];
-    if (CommandClass) return new CommandClass(input);
-  } catch {
-    // SDK não disponível, retornar objeto mock
+  const s3Module = await loadS3Module();
+  const CommandClass = (s3Module as any)[name];
+  if (!CommandClass) {
+    throw new Error(`STORAGE_COMMAND_NOT_AVAILABLE: ${name}`);
   }
-  return { constructor: { name }, input };
+  return new CommandClass(input);
 }
 
 /**
@@ -302,8 +240,8 @@ export async function getSignedDownloadUrl(
 ): Promise<string> {
   // Tentar usar SDK para URL assinada
   try {
-    // @ts-ignore - SDK pode não estar instalado em dev
-    const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+    // Usa eval para evitar que o webpack tente bundlar o módulo
+    const { getSignedUrl } = await eval('import("@aws-sdk/s3-request-presigner")');
     const client = await getStorageClient();
     const bucketName = BUCKETS[bucket];
     
@@ -330,8 +268,8 @@ export async function getSignedUploadUrl(
   expiresInSeconds: number = 3600
 ): Promise<string> {
   try {
-    // @ts-ignore - SDK pode não estar instalado em dev
-    const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+    // Usa eval para evitar que o webpack tente bundlar o módulo
+    const { getSignedUrl } = await eval('import("@aws-sdk/s3-request-presigner")');
     const client = await getStorageClient();
     const bucketName = BUCKETS[bucket];
     

@@ -15,7 +15,6 @@ import {
   Bot,
   User,
   Lightbulb,
-  ArrowRight,
 } from 'lucide-react'
 
 interface Message {
@@ -37,6 +36,7 @@ export default function PlaygroundPage() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (prompt?: string) => {
     const text = prompt || input
@@ -53,17 +53,50 @@ export default function PlaygroundPage() {
     setInput('')
     setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      setError(null)
+      const payload = {
+        model: 'gpt-4o-mini',
+        messages: [...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
+      }
+
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const textResponse = await res.text()
+      if (!res.ok) {
+        const message = textResponse || 'Falha ao obter resposta da IA.'
+        throw new Error(message)
+      }
+
+      let content = textResponse
+      try {
+        const data = JSON.parse(textResponse)
+        content =
+          data?.choices?.[0]?.message?.content ||
+          data?.message?.content ||
+          data?.content ||
+          data?.output?.text ||
+          textResponse
+      } catch {
+        // keep raw text
+      }
+
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: generateSampleResponse(text),
+        content: content || 'Sem resposta do modelo.',
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMessage])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao chamar a IA')
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handleCopy = (id: string, content: string) => {
@@ -90,7 +123,7 @@ export default function PlaygroundPage() {
                 <span className="text-xl font-bold text-white">Aethel</span>
               </Link>
               <span className="text-slate-600">|</span>
-              <span className="text-slate-400 font-medium">AI Playground</span>
+              <span className="text-slate-400 font-medium">Playground de IA</span>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -136,21 +169,21 @@ export default function PlaygroundPage() {
               ))}
             </div>
 
-            {/* Info Box */}
-            <div className="mt-12 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl max-w-md">
-              <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-amber-400 mt-0.5" />
-                <div className="text-left">
-                  <p className="text-amber-200 text-sm font-medium mb-1">
-                    Modo demonstração
-                  </p>
-                  <p className="text-amber-200/70 text-xs">
-                    Esta é uma prévia do playground. Crie uma conta grátis para
-                    acessar todas as funcionalidades da IA.
-                  </p>
+            {error && (
+              <div className="mt-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl max-w-md">
+                <div className="flex items-start gap-3">
+                  <Lightbulb className="w-5 h-5 text-red-400 mt-0.5" />
+                  <div className="text-left">
+                    <p className="text-red-200 text-sm font-medium mb-1">
+                      Falha ao conectar com a IA
+                    </p>
+                    <p className="text-red-200/70 text-xs">
+                      {error}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           /* Chat Messages */
@@ -205,6 +238,12 @@ export default function PlaygroundPage() {
                 )}
               </div>
             ))}
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-200 text-sm rounded-xl px-4 py-3">
+                {error}
+              </div>
+            )}
 
             {/* Loading indicator */}
             {isLoading && (
@@ -265,159 +304,6 @@ export default function PlaygroundPage() {
           </p>
         </div>
       </main>
-
-      {/* CTA Banner */}
-      <div className="border-t border-slate-800 bg-slate-900/50 py-6 px-6">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h3 className="text-white font-semibold mb-1">
-              Gostou do que viu?
-            </h3>
-            <p className="text-slate-400 text-sm">
-              Crie sua conta grátis e tenha acesso a todas as funcionalidades.
-            </p>
-          </div>
-          <Link
-            href="/register"
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors whitespace-nowrap"
-          >
-            Começar grátis
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </div>
     </div>
   )
-}
-
-// Helper function to generate sample responses
-function generateSampleResponse(prompt: string): string {
-  if (prompt.toLowerCase().includes('react') || prompt.toLowerCase().includes('login')) {
-    return `Aqui está um componente React de login:
-
-\`\`\`tsx
-import { useState } from 'react'
-
-export default function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    // Implementar lógica de login
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className="w-full px-4 py-2 rounded-lg"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Senha"
-        className="w-full px-4 py-2 rounded-lg"
-      />
-      <button type="submit" disabled={loading}>
-        {loading ? 'Entrando...' : 'Entrar'}
-      </button>
-    </form>
-  )
-}
-\`\`\`
-
-Quer que eu adicione validação ou integração com alguma API?`
-  }
-
-  if (prompt.toLowerCase().includes('landing') || prompt.toLowerCase().includes('page')) {
-    return `Vou criar uma estrutura de landing page moderna:
-
-**Seções recomendadas:**
-
-1. **Hero Section**
-   - Título impactante
-   - Subtítulo explicativo
-   - CTA principal
-   - Imagem/ilustração
-
-2. **Features/Benefícios**
-   - 3-6 cards com ícones
-   - Descrições concisas
-
-3. **Social Proof**
-   - Logos de clientes
-   - Depoimentos
-
-4. **Pricing**
-   - 2-3 planos
-   - Comparativo de features
-
-5. **CTA Final**
-   - Reforço da proposta de valor
-   - Formulário de contato
-
-Quer que eu gere o código completo de alguma dessas seções?`
-  }
-
-  if (prompt.toLowerCase().includes('api') || prompt.toLowerCase().includes('node')) {
-    return `Aqui está uma estrutura básica de API REST em Node.js:
-
-\`\`\`javascript
-const express = require('express')
-const app = express()
-
-app.use(express.json())
-
-// Middleware de logging
-app.use((req, res, next) => {
-  console.log(\`\${req.method} \${req.path}\`)
-  next()
-})
-
-// Routes
-app.get('/api/users', async (req, res) => {
-  // Listar usuários
-  res.json({ users: [] })
-})
-
-app.post('/api/users', async (req, res) => {
-  // Criar usuário
-  const { name, email } = req.body
-  res.status(201).json({ id: 1, name, email })
-})
-
-app.get('/api/users/:id', async (req, res) => {
-  // Buscar usuário por ID
-  res.json({ id: req.params.id })
-})
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).json({ error: 'Something went wrong!' })
-})
-
-app.listen(3000, () => {
-  console.log('Server running on port 3000')
-})
-\`\`\`
-
-Quer que eu adicione autenticação JWT ou conexão com banco de dados?`
-  }
-
-  return `Entendi sua solicitação! Posso ajudar com:
-
-• **Geração de código** - React, Node.js, Python, etc.
-• **Explicações técnicas** - Conceitos e melhores práticas
-• **Debugging** - Análise e correção de erros
-• **Otimização** - Performance e boas práticas
-
-Como posso ajudar especificamente? Dê mais detalhes sobre o que você precisa.`
 }

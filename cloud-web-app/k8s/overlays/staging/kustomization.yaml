@@ -26,6 +26,8 @@ images:
     newTag: develop
   - name: ghcr.io/aethel-engine/runtime
     newTag: develop
+  - name: ghcr.io/aethel-engine/worker
+    newTag: develop
 
 patches:
   # Staging resource limits (lower than prod)

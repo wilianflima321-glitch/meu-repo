@@ -3,7 +3,7 @@
  * End-to-end tests for IDE initialization and system integration
  */
 
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { getIDEIntegration, resetIDEIntegration } from '../../lib/integration';
 
 describe('IDE Integration', () => {

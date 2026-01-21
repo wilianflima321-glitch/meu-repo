@@ -66,7 +66,9 @@ export class LSPApiClient {
   async stopServer(language: string): Promise<void> {
     const sessionId = this.sessions.get(language);
     if (!sessionId) {
-      throw new Error(`No active session for ${language}`);
+      // No active session, nothing to stop
+      console.log(`[LSP API] No active session for ${language}, skipping stop`);
+      return;
     }
 
     const response = await fetch(`${this.baseUrl}/stop/${sessionId}`, {

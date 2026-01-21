@@ -3,7 +3,7 @@
  * End-to-end tests for AI features
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getAIApiClient } from '../../lib/api/index';
 
 describe('AI Integration', () => {
@@ -12,7 +12,7 @@ describe('AI Integration', () => {
   beforeEach(() => {
     // Esses testes rodam via Jest (sem servidor Next rodando). Portanto,
     // mockamos fetch para simular respostas das rotas /api/ai/*.
-    globalThis.fetch = jest.fn(async (input: any) => {
+    globalThis.fetch = vi.fn(async (input: any) => {
       const url = typeof input === 'string' ? input : String(input?.url ?? input);
 
       const json = async () => {

@@ -17,6 +17,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import LivePreview from './LivePreview'
 import MiniPreview from './MiniPreview'
 import AdminPanel from './AdminPanel'
+import BillingTab, { type Plan as BillingPlanCard } from './dashboard/tabs/BillingTab'
 import * as THREE from 'three'
 import {
   ReactFlow,
@@ -30,6 +31,11 @@ import type { Edge, Node } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
 import { isAuthenticated } from '@/lib/auth'
+import { useAssetDownload, useJobQueue, useRenderProgress } from '@/hooks/useAethelGateway'
+import { RenderQueue, type RenderJob } from './dashboard/RenderProgress'
+import { AIThinkingPanel } from './ai/AIThinkingPanel'
+import { DirectorNotePanel } from './ai/DirectorNotePanel'
+import { TimeMachineSlider } from './collaboration/TimeMachineSlider'
 
 interface WorkflowTemplate {
   id: string;
@@ -282,33 +288,33 @@ const clearStoredDashboardState = () => {
 const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
   {
     id: '1',
-    name: 'AI Research Assistant',
-    description: 'Multi-agent workflow for gathering, summarizing, and reporting findings',
-    category: 'Research',
+    name: 'Assistente de pesquisa com IA',
+    description: 'Fluxo multiagente para coletar, resumir e reportar descobertas',
+    category: 'Pesquisa',
     nodes: [],
     edges: [],
   },
   {
     id: '2',
-    name: 'Data Ops Pipeline',
-    description: 'End-to-end data processing and visualization',
-    category: 'Data Science',
+    name: 'Pipeline de dados',
+    description: 'Processamento e visualização de dados ponta a ponta',
+    category: 'Ciência de Dados',
     nodes: [],
     edges: [],
   },
   {
     id: '3',
-    name: 'Content Creation Suite',
-    description: 'Multi-step content generation and editing',
-    category: 'Creative',
+    name: 'Suíte de criação de conteúdo',
+    description: 'Geração e edição de conteúdo em múltiplas etapas',
+    category: 'Criativo',
     nodes: [],
     edges: [],
   },
   {
     id: '4',
-    name: 'Research & Analysis',
-    description: 'Comprehensive research and analysis workflow',
-    category: 'Research',
+    name: 'Pesquisa e análise',
+    description: 'Fluxo completo de pesquisa e análise',
+    category: 'Pesquisa',
     nodes: [],
     edges: [],
   },
@@ -317,61 +323,61 @@ const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
 const DEFAULT_USE_CASES: UseCase[] = [
   {
     id: '1',
-    title: 'Build a React Dashboard',
-    description: 'Complete workflow for creating a modern React dashboard with AI assistance',
-    category: 'Development',
-    sharedBy: 'Community',
+    title: 'Criar um dashboard em React',
+    description: 'Fluxo completo para criar um dashboard moderno em React com assistência de IA',
+    category: 'Desenvolvimento',
+    sharedBy: 'Comunidade',
     views: 1250,
     likes: 89,
-    tags: ['React', 'Dashboard', 'Frontend'],
+    tags: ['React', 'Painel', 'Front-end'],
     preview: 'https://example.com/preview1.png',
   },
   {
     id: '2',
-    title: 'Data Visualization Suite',
-    description: 'End-to-end data analysis and visualization pipeline',
-    category: 'Data Science',
-    sharedBy: 'DataExpert',
+    title: 'Suíte de visualização de dados',
+    description: 'Pipeline de análise e visualização de dados ponta a ponta',
+    category: 'Ciência de Dados',
+    sharedBy: 'EspecialistaDados',
     views: 890,
     likes: 67,
-    tags: ['Python', 'Visualization', 'Analytics'],
+    tags: ['Python', 'Visualização', 'Análises'],
     preview: 'https://example.com/preview2.png',
   },
   {
     id: '3',
-    title: 'Content Marketing Strategy',
-    description: 'AI-powered content creation and marketing strategy development',
+    title: 'Estratégia de marketing de conteúdo',
+    description: 'Criação de conteúdo com IA e desenvolvimento de estratégia de marketing',
     category: 'Marketing',
     sharedBy: 'MarketingPro',
     views: 2100,
     likes: 145,
-    tags: ['Marketing', 'Content', 'Strategy'],
+    tags: ['Marketing', 'Conteúdo', 'Estratégia'],
     preview: 'https://example.com/preview3.png',
   },
 ]
 
 const DEFAULT_PROJECTS: Project[] = [
-  { id: 1, name: 'AI Content Studio', type: 'code', status: 'active' },
-  { id: 2, name: 'Metaverse Hub', type: 'unreal', status: 'active' },
-  { id: 3, name: 'Automation Funnel', type: 'web', status: 'planning' },
+  { id: 1, name: 'Estúdio de Conteúdo IA', type: 'code', status: 'active' },
+  { id: 2, name: 'Hub do Metaverso', type: 'unreal', status: 'active' },
+  { id: 3, name: 'Funil de automação', type: 'web', status: 'planning' },
 ]
 
 const INITIAL_NODES: Node[] = [
   {
     id: '1',
     position: { x: 80, y: 40 },
-    data: { label: 'Input Signal' },
+    data: { label: 'Sinal de entrada' },
     type: 'input',
   },
   {
     id: '2',
     position: { x: 320, y: 140 },
-    data: { label: 'AI Orchestrator' },
+    data: { label: 'Orquestrador IA' },
   },
   {
     id: '3',
     position: { x: 560, y: 40 },
-    data: { label: 'Output' },
+    data: { label: 'Saída' },
     type: 'output',
   },
 ]
@@ -390,6 +396,58 @@ const CREDITS_KEY = 'billing::credits'
 
 const CHAT_THREAD_KEY_BASE = 'chat::activeThreadId'
 const COPILOT_WORKFLOW_KEY_BASE = 'copilot::activeWorkflowId'
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'pendente',
+  processing: 'processando',
+  paid: 'pago',
+  succeeded: 'confirmado',
+  success: 'confirmado',
+  completed: 'concluído',
+  failed: 'falhou',
+  canceled: 'cancelado',
+  cancelled: 'cancelado',
+  awaiting_settlement: 'aguardando liquidação',
+  refunded: 'reembolsado',
+  requires_action: 'requer ação',
+  requires_payment_method: 'requer método de pagamento',
+  requires_confirmation: 'requer confirmação',
+  requires_capture: 'requer captura',
+}
+
+const CONNECTIVITY_STATUS_LABELS: Record<string, string> = {
+  healthy: 'saudável',
+  degraded: 'degradado',
+  down: 'indisponível',
+  unavailable: 'indisponível',
+  unknown: 'desconhecido',
+}
+
+function formatStatusLabel(rawStatus: unknown) {
+  if (typeof rawStatus !== 'string' || !rawStatus.trim()) {
+    return 'confirmado'
+  }
+  const normalized = rawStatus.toLowerCase()
+  return STATUS_LABELS[normalized] ?? rawStatus
+}
+
+function formatConnectivityStatus(rawStatus?: string | null) {
+  if (!rawStatus) {
+    return CONNECTIVITY_STATUS_LABELS.unknown
+  }
+  const normalized = rawStatus.toLowerCase()
+  return CONNECTIVITY_STATUS_LABELS[normalized] ?? rawStatus
+}
+
+function formatCurrencyLabel(currency?: string | null) {
+  if (!currency) {
+    return 'créditos'
+  }
+  if (currency.toLowerCase() === 'credits') {
+    return 'créditos'
+  }
+  return currency
+}
 
 function getScopedKeys(projectId: string | null) {
   const suffix = projectId ? `::${projectId}` : ''
@@ -421,7 +479,7 @@ export default function AethelDashboard() {
     }
     return resolveStoredActiveTab(window.localStorage.getItem(STORAGE_KEYS.activeTab))
   })
-  const [aiActivity, setAiActivity] = useState('Idle')
+  const [aiActivity, setAiActivity] = useState('Ocioso')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => {
     if (typeof window === 'undefined') {
       return []
@@ -447,6 +505,7 @@ export default function AethelDashboard() {
   const [newProjectName, setNewProjectName] = useState('')
   const [newProjectType, setNewProjectType] = useState<Project['type']>('code')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
   const [miniPreviewExpanded, setMiniPreviewExpanded] = useState(true)
   const [chatMode, setChatMode] = useState<'chat' | 'agent' | 'canvas'>('chat')
   const [walletActionMessage, setWalletActionMessage] = useState<string | null>(null)
@@ -466,6 +525,69 @@ export default function AethelDashboard() {
   const [hasToken, setHasToken] = useState(false)
   const [authReady, setAuthReady] = useState(false)
   const [authError, setAuthError] = useState<Error | null>(null)
+
+  const { downloads, startDownload, cancelDownload } = useAssetDownload()
+  const { renders, cancelRender } = useRenderProgress()
+  const { jobs: queueJobs } = useJobQueue()
+
+  const renderJobs = useMemo<RenderJob[]>(() => {
+    return renders.map((render, index) => {
+      const totalFrames = render.totalFrames && render.totalFrames > 0 ? render.totalFrames : 1
+      const currentFrame = render.currentFrame && render.currentFrame > 0 ? render.currentFrame : 0
+      const statusMap: Record<string, RenderJob['status']> = {
+        pending: 'queued',
+        rendering: 'rendering',
+        complete: 'completed',
+        failed: 'failed',
+        cancelled: 'cancelled'
+      }
+
+      return {
+        id: render.jobId,
+        name: render.message || `Renderização ${index + 1}`,
+        type: totalFrames > 1 ? 'sequence' : 'image',
+        status: statusMap[render.status] || 'queued',
+        progress: render.progress ?? 0,
+        currentFrame,
+        totalFrames,
+        estimatedTimeRemaining: render.eta,
+        output: render.output,
+        error: render.error,
+        resolution: { width: 1920, height: 1080 },
+        samples: render.totalSamples ?? 0,
+        engine: 'cycles',
+        peakMemory: render.memory,
+        frames: []
+      }
+    })
+  }, [renders])
+
+  const exportJobs = useMemo(() => {
+    return queueJobs.filter(job => job.type.toLowerCase().includes('export'))
+  }, [queueJobs])
+
+  const formatBytes = useCallback((bytes: number) => {
+    if (!Number.isFinite(bytes)) return '-'
+    if (bytes < 1024) return `${bytes} B`
+    const kb = bytes / 1024
+    if (kb < 1024) return `${kb.toFixed(1)} KB`
+    const mb = kb / 1024
+    if (mb < 1024) return `${mb.toFixed(1)} MB`
+    const gb = mb / 1024
+    return `${gb.toFixed(2)} GB`
+  }, [])
+
+  const formatCurrency = useCallback((value: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 2,
+      }).format(value)
+    } catch {
+      return `${currency} ${value.toFixed(2)}`
+    }
+  }, [])
 
   // Show toast notification (must be declared before callbacks that use it)
   const showToastMessage = useCallback((message: string, type: ToastType = 'info') => {
@@ -511,6 +633,26 @@ export default function AethelDashboard() {
     () => AethelAPIClient.getCredits(),
     { revalidateOnFocus: false, shouldRetryOnError: false }
   )
+
+  const billingPlansForUI = useMemo<BillingPlanCard[]>(() => {
+    if (!billingData || billingData.length === 0) return []
+    return billingData.map((plan) => ({
+      id: String(plan.id),
+      name: plan.name ?? String(plan.id),
+      description: plan.description ?? '',
+      price: Number(plan.priceBRL ?? plan.price ?? 0),
+      currency: plan.currency ?? 'BRL',
+      interval: (plan.interval as BillingPlanCard['interval']) ?? 'month',
+      popular: plan.popular ?? false,
+      features: plan.features ?? [],
+      limits: {
+        requests: (plan.limits as any)?.tokensPerMonth ?? (plan.limits as any)?.requests ?? 'unlimited',
+        projects: (plan.limits as any)?.projects ?? 'unlimited',
+        storage: (plan.limits as any)?.storage ?? '—',
+        collaborators: (plan.limits as any)?.collaborators ?? 'unlimited',
+      },
+    }))
+  }, [billingData])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -572,7 +714,7 @@ export default function AethelDashboard() {
     try {
       setHasToken(isAuthenticated())
     } catch (error) {
-      setAuthError(error instanceof Error ? error : new Error('Failed to verify authentication state'))
+      setAuthError(error instanceof Error ? error : new Error('Falha ao verificar estado de autenticação'))
       setHasToken(false)
     } finally {
       setAuthReady(true)
@@ -913,7 +1055,7 @@ export default function AethelDashboard() {
       try {
         setHasToken(isAuthenticated())
       } catch (error) {
-        setAuthError(error instanceof Error ? error : new Error('Failed to verify authentication state'))
+        setAuthError(error instanceof Error ? error : new Error('Falha ao verificar estado de autenticação'))
         setHasToken(false)
       }
     }
@@ -937,7 +1079,7 @@ export default function AethelDashboard() {
     setSessionHistory(prev => {
       const newSession: SessionEntry = {
         id: Date.now().toString(),
-        name: `New Session ${prev.length + 1}`,
+        name: `Sessão ${prev.length + 1}`,
         timestamp: Date.now(),
         chatHistory: [],
         livePreviewSuggestions: [],
@@ -950,13 +1092,13 @@ export default function AethelDashboard() {
     setChatHistory([])
     setLivePreviewSuggestions([])
     setActiveTab('ai-chat')
-    showToastMessage('New session created!', 'success')
+    showToastMessage('Sessão criada!', 'success')
 
     // Também cria uma nova thread persistida para a conta.
     if (typeof window !== 'undefined' && isAuthenticated()) {
       void (async () => {
         try {
-          const created = await AethelAPIClient.createChatThread({ title: `Session ${new Date().toLocaleString()}` })
+          const created = await AethelAPIClient.createChatThread({ title: `Sessão ${new Date().toLocaleString()}` })
           const threadId = (created as any)?.thread?.id
           if (typeof threadId === 'string' && threadId) {
             const keys = getScopedKeys(copilotProjectId)
@@ -964,7 +1106,7 @@ export default function AethelDashboard() {
             setActiveChatThreadId(threadId)
 
             const createdWf = await AethelAPIClient.createCopilotWorkflow({
-              title: `Workflow ${new Date().toLocaleString()}`,
+              title: `Fluxo ${new Date().toLocaleString()}`,
               chatThreadId: threadId,
             }).catch(() => null)
             const wfId = (createdWf as any)?.workflow?.id
@@ -1066,28 +1208,28 @@ export default function AethelDashboard() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [createNewSession, saveCurrentSession, showToastMessage, sidebarOpen]);
 
-  // Simulate download functionality
-  const handleDownload = async (platform: 'windows' | 'mac' | 'linux') => {
-    showToastMessage(`Preparing ${platform} installer...`, 'info');
+  const downloadUrls = useMemo(() => ({
+    windows: process.env.NEXT_PUBLIC_IDE_DOWNLOAD_URL_WINDOWS,
+    mac: process.env.NEXT_PUBLIC_IDE_DOWNLOAD_URL_MAC,
+    linux: process.env.NEXT_PUBLIC_IDE_DOWNLOAD_URL_LINUX,
+  }), [])
 
-    // Simulate download preparation
-    setTimeout(() => {
-      showToastMessage(`${platform} installer ready! Download starting...`, 'success');
+  const handleDownload = useCallback(async (platform: 'windows' | 'mac' | 'linux') => {
+    const url = downloadUrls[platform]
+    if (!url) {
+      showToastMessage(`URL de download para ${platform} não configurada.`, 'error')
+      return
+    }
 
-      // In a real implementation, this would trigger actual download
-      // For now, we'll simulate the download process
-      setTimeout(() => {
-        const link = document.createElement('a');
-        link.href = '#'; // Would be actual download URL
-        link.download = `aethel-ide-${platform}-v2.1.0${platform === 'windows' ? '.exe' : platform === 'mac' ? '.dmg' : '.tar.gz'}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showToastMessage(`Download completed! Aethel IDE for ${platform} is ready to install.`, 'success');
-      }, 2000);
-    }, 1500);
-  };
+    showToastMessage(`Iniciando download para ${platform}...`, 'info')
+    try {
+      await startDownload(url, {
+        filename: `aethel-ide-${platform}-v2.1.0${platform === 'windows' ? '.exe' : platform === 'mac' ? '.dmg' : '.tar.gz'}`,
+      })
+    } catch (error) {
+      showToastMessage(`Falha ao iniciar download para ${platform}.`, 'error')
+    }
+  }, [downloadUrls, showToastMessage, startDownload])
 
   // Mobile responsiveness improvements
   useEffect(() => {
@@ -1115,7 +1257,7 @@ export default function AethelDashboard() {
   const sendChatMessage = async () => {
     if (!chatMessage.trim()) return
 
-    setAiActivity('Sending message to AI...')
+    setAiActivity('Enviando mensagem para a IA...')
     const userMessage: ChatMessage = { role: 'user', content: chatMessage }
     setChatHistory(prev => [...prev, userMessage])
     const currentMessage = chatMessage
@@ -1141,7 +1283,7 @@ export default function AethelDashboard() {
     setChatHistory(prev => [...prev, aiMessage])
 
     try {
-      setAiActivity('AI is thinking...')
+      setAiActivity('A IA está pensando...')
       const messages: ChatMessage[] = [...chatHistory, userMessage].map(m => ({
         role: (m.role as ChatMessage['role']) || 'user',
         content: m.content
@@ -1160,8 +1302,8 @@ export default function AethelDashboard() {
         void AethelAPIClient.appendChatMessage(threadId, { role: 'assistant', content: accumulatedContent, model: 'openai:gpt-4' }).catch(() => null)
       }
 
-      setAiActivity('AI responded')
-      showToastMessage('AI response received!', 'success');
+      setAiActivity('IA respondeu')
+      showToastMessage('Resposta da IA recebida!', 'success');
 
       // Add to session history with enhanced metadata
       setSessionHistory(prev => [{
@@ -1178,15 +1320,15 @@ export default function AethelDashboard() {
       console.error('Error:', error)
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: 'Failed to connect to backend. Please check if the server is running.'
+        content: 'Falha ao conectar ao backend. Verifique se o servidor está em execução.'
       }
       setChatHistory(prev =>
         prev.map(msg =>
           msg === aiMessage ? errorMessage : msg
         )
       )
-      setAiActivity('Connection failed')
-      showToastMessage('Failed to connect to AI backend', 'error');
+      setAiActivity('Falha de conexão')
+      showToastMessage('Falha ao conectar ao backend de IA', 'error');
     }
   }
 
@@ -1208,7 +1350,7 @@ export default function AethelDashboard() {
   }
 
   const handleMagicWandSelect = async (position: THREE.Vector3) => {
-    setAiActivity('Analyzing selected area...')
+    setAiActivity('Analisando área selecionada...')
     setIsGenerating(true)
 
     try {
@@ -1230,17 +1372,17 @@ export default function AethelDashboard() {
     }
 
     const prompt =
-      `Live Preview context:\n` +
-      `Selected point: x=${position.x.toFixed(3)}, y=${position.y.toFixed(3)}, z=${position.z.toFixed(3)}\n\n` +
-      `Task: Suggest ONE concrete improvement for the scene at that point. ` +
-      `Return a single short sentence. No markdown. No bullet lists.`
+      `Contexto da Prévia ao Vivo:\n` +
+      `Ponto selecionado: x=${position.x.toFixed(3)}, y=${position.y.toFixed(3)}, z=${position.z.toFixed(3)}\n\n` +
+      `Tarefa: sugira UMA melhoria concreta para a cena naquele ponto. ` +
+      `Retorne uma única frase curta. Sem markdown. Sem listas.`
 
     try {
       const messages: ChatMessage[] = [
         {
           role: 'system',
           content:
-            'You are Aethel Copilot for Live Preview. Be precise, minimal, and avoid guessing. If you lack info, ask one question.',
+            'Você é o Copilot Aethel para Prévia ao Vivo. Seja preciso, minimalista e evite suposições. Se faltar informação, faça uma pergunta.',
         },
         { role: 'user', content: prompt },
       ]
@@ -1253,16 +1395,16 @@ export default function AethelDashboard() {
 
       const suggestion = String(content).trim()
       if (!suggestion) {
-        setAiActivity('No suggestion returned')
+        setAiActivity('Nenhuma sugestão retornada')
         showToastMessage('AI não retornou sugestão para a área selecionada.', 'info')
         return
       }
 
       setLivePreviewSuggestions(prev => [...prev, suggestion])
-      setAiActivity('Generated suggestion for selected area')
+      setAiActivity('Sugestão gerada para a área selecionada')
     } catch (error) {
       console.error('Error generating live preview suggestion:', error)
-      setAiActivity('Suggestion unavailable')
+      setAiActivity('Sugestão indisponível')
       showToastMessage('Sugestão indisponível (IA não configurada ou sem créditos).', 'error')
     } finally {
       setIsGenerating(false)
@@ -1270,10 +1412,10 @@ export default function AethelDashboard() {
   }
 
   const handleSendSuggestion = async (suggestion: string) => {
-    setAiActivity('Processing user suggestion...')
+    setAiActivity('Processando sugestão do usuário...')
     setIsGenerating(true)
     // Add to chat history and send to AI
-    const userMessage: ChatMessage = { role: 'user', content: `Live Preview Suggestion: ${suggestion}` }
+    const userMessage: ChatMessage = { role: 'user', content: `Sugestão de prévia ao vivo: ${suggestion}` }
     setChatHistory(prev => [...prev, userMessage])
 
     try {
@@ -1285,17 +1427,17 @@ export default function AethelDashboard() {
       if (data?.choices?.[0]?.message) {
         const aiMessage = { role: data.choices[0].message.role, content: data.choices[0].message.content }
         setChatHistory(prev => [...prev, aiMessage])
-        setAiActivity('Applied suggestion to live preview')
+        setAiActivity('Sugestão aplicada na prévia ao vivo')
       }
     } catch (error) {
       console.error('Error sending suggestion:', error)
-      setAiActivity('Error processing suggestion')
+      setAiActivity('Erro ao processar sugestão')
     }
     setIsGenerating(false)
   }
 
   const handleAcceptSuggestion = (suggestion: string) => {
-    handleSendSuggestion(`Accept and apply: ${suggestion}`)
+    handleSendSuggestion(`Aceite e aplique: ${suggestion}`)
   }
 
   const walletTransactions = useMemo(() => walletData?.transactions ?? [], [walletData?.transactions])
@@ -1417,7 +1559,7 @@ export default function AethelDashboard() {
       })
       setLastPurchaseIntent(intent)
       setWalletActionMessage(
-        `Intenção ${intent.intent_id} confirmada: +${intent.entry.amount.toLocaleString()} ${intent.entry.currency}.`,
+        `Intenção ${intent.intent_id} confirmada: +${intent.entry.amount.toLocaleString()} ${formatCurrencyLabel(intent.entry.currency)}.`,
       )
       setPurchaseForm(prev => ({ ...prev, amount: '', reference: '' }))
       await refreshWallet()
@@ -1459,7 +1601,7 @@ export default function AethelDashboard() {
       })
       setLastTransferReceipt(receipt)
       setWalletActionMessage(
-        `Transferência ${receipt.transfer_id} concluída: -${receipt.sender_entry.amount.toLocaleString()} ${receipt.sender_entry.currency}.`,
+        `Transferência ${receipt.transfer_id} concluída: -${receipt.sender_entry.amount.toLocaleString()} ${formatCurrencyLabel(receipt.sender_entry.currency)}.`,
       )
       setTransferForm(prev => ({ ...prev, amount: '', reference: '' }))
       await refreshWallet()
@@ -1516,6 +1658,24 @@ export default function AethelDashboard() {
     }
   }
 
+  const handleManageSubscription = useCallback(async () => {
+    if (!hasToken) {
+      setSubscribeError('Faça login para gerenciar sua assinatura.')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/billing/portal', { method: 'POST' })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data?.url) {
+        throw new Error(data?.error || 'Falha ao abrir portal')
+      }
+      window.location.assign(data.url)
+    } catch (error) {
+      setSubscribeError('Não foi possível abrir o portal de cobrança.')
+    }
+  }, [hasToken])
+
   return (
     <div className="min-h-screen aethel-container">
       {/* Trial Banner */}
@@ -1525,10 +1685,10 @@ export default function AethelDashboard() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span>Free Trial: {trialDaysLeft} days remaining - Upgrade to Pro for unlimited access</span>
+            <span>Teste Pro: {trialDaysLeft} dias restantes — faça upgrade para acesso completo</span>
           </div>
           <div className="flex items-center gap-2">
-            <button className="text-white underline text-xs hover:text-gray-200">Upgrade Now</button>
+            <button className="text-white underline text-xs hover:text-gray-200">Fazer upgrade</button>
             <button
               onClick={() => setIsTrialActive(false)}
               className="text-white hover:text-gray-200 ml-2"
@@ -1608,7 +1768,7 @@ export default function AethelDashboard() {
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Launch Desktop IDE
+              Abrir IDE Desktop
             </button>
           </div>
         </div>
@@ -1624,7 +1784,7 @@ export default function AethelDashboard() {
               <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-pink-500 rounded aethel-flex aethel-items-center aethel-justify-center">
                 <span className="text-white font-bold text-xs">A</span>
               </div>
-              <span className="font-semibold text-sm">Navigation</span>
+              <span className="font-semibold text-sm">Navegação</span>
             </div>
           </div>
 
@@ -1637,7 +1797,7 @@ export default function AethelDashboard() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>New Task</span>
+              <span>Nova tarefa</span>
               <div className="flex items-center gap-0.5 ml-auto">
                 <span className="flex text-slate-300 justify-center items-center min-w-4 h-4 px-1 rounded text-xs font-normal">Ctrl</span>
                 <span className="flex justify-center items-center w-4 h-4 px-1 rounded text-xs font-normal text-slate-300">K</span>
@@ -1656,7 +1816,7 @@ export default function AethelDashboard() {
                     : 'border border-slate-600 text-slate-400 hover:bg-slate-800'
                 }`}
               >
-                All
+                Todas
               </button>
               <button
                 onClick={() => setSessionFilter('favorites')}
@@ -1669,7 +1829,7 @@ export default function AethelDashboard() {
                 <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
-                Favorites
+                Favoritas
               </button>
               <button
                 onClick={() => setSessionFilter('scheduled')}
@@ -1682,7 +1842,7 @@ export default function AethelDashboard() {
                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Scheduled
+                Agendadas
               </button>
             </div>
           </div>
@@ -1695,7 +1855,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              Overview
+              Visão geral
             </button>
 
             <button
@@ -1706,7 +1866,7 @@ export default function AethelDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v0M8 5a2 2 0 012-2h4a2 2 0 012 2v0" />
               </svg>
-              Projects
+              Projetos
             </button>
 
             <button
@@ -1716,7 +1876,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              AI Chat
+              Chat IA
             </button>
 
             <button
@@ -1726,7 +1886,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Agent Canvas
+              Canvas de agentes
             </button>
 
             <button
@@ -1737,7 +1897,7 @@ export default function AethelDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 10l2 2-2 2" />
               </svg>
-              Content Creation
+              Criação de conteúdo
             </button>
 
             <button
@@ -1758,7 +1918,7 @@ export default function AethelDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18a2 2 0 012 2v6a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11a1 1 0 110 2 1 1 0 010-2z" />
               </svg>
-              Wallet
+              Carteira
             </button>
 
             <button
@@ -1768,7 +1928,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
-              Billing
+              Faturamento
             </button>
 
             <button
@@ -1779,7 +1939,7 @@ export default function AethelDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-3.866 0-7 3.134-7 7m7-11c5.523 0 10 4.477 10 10m-5 0a5 5 0 00-10 0" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19h.01" />
               </svg>
-              Connectivity
+              Conectividade
             </button>
 
             <button
@@ -1789,7 +1949,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Templates
+              Modelos
             </button>
 
             <button
@@ -1799,7 +1959,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Use Cases
+              Casos de uso
             </button>
 
             <button
@@ -1809,7 +1969,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Download IDE
+              Baixar IDE
             </button>
 
             <button
@@ -1819,7 +1979,7 @@ export default function AethelDashboard() {
               <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              Admin Panel
+              Painel admin
             </button>
           </div>
         </nav>
@@ -1832,23 +1992,23 @@ export default function AethelDashboard() {
               {/* Status Cards */}
               <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 aethel-gap-6">
                 <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">AI Activity</h3>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Atividade de IA</h3>
                   <p className="aethel-text-2xl aethel-font-bold aethel-text-indigo-400">{aiActivity}</p>
                 </div>
                 <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Active Projects</h3>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Projetos ativos</h3>
                   <p className="aethel-text-2xl aethel-font-bold aethel-text-green-400">{projects.filter(p => p.status === 'active').length}</p>
                 </div>
                 <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Live Preview</h3>
-                  <p className="aethel-text-2xl aethel-font-bold aethel-text-purple-400">{livePreviewSuggestions.length} suggestions</p>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Prévia ao vivo</h3>
+                  <p className="aethel-text-2xl aethel-font-bold aethel-text-purple-400">{livePreviewSuggestions.length} sugestões</p>
                 </div>
               </div>
 
               <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 aethel-gap-6">
                 <div className="aethel-card aethel-p-6">
                   <div className="aethel-flex aethel-items-center aethel-justify-between">
-                    <h3 className="aethel-text-lg aethel-font-semibold">Wallet Balance</h3>
+                    <h3 className="aethel-text-lg aethel-font-semibold">Saldo da carteira</h3>
                     {authReady && hasToken && (
                       <button
                         onClick={refreshWallet}
@@ -1881,7 +2041,7 @@ export default function AethelDashboard() {
                     {authReady && hasToken && !walletLoading && !walletError && walletData && (
                       <>
                         <p className="aethel-text-3xl aethel-font-bold aethel-text-slate-100">
-                          {walletData.balance.toLocaleString()} {walletData.currency}
+                          {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                         </p>
                         <p className="aethel-text-xs aethel-text-slate-400 aethel-mt-1">
                           {walletTransactions.length} transações registradas
@@ -1894,12 +2054,12 @@ export default function AethelDashboard() {
                                   {entry.reference || entry.entry_type.toUpperCase()}
                                 </span>
                                 <span className={`aethel-text-sm aethel-font-semibold ${entry.entry_type === 'credit' ? 'aethel-text-emerald-400' : 'aethel-text-red-400'}`}>
-                                  {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {entry.currency}
+                                  {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
                                 </span>
                               </div>
                               <div className="aethel-flex aethel-justify-between aethel-items-center aethel-mt-1">
                                 <span className="aethel-text-xs aethel-text-slate-400">
-                                  Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
+                                  Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
                                 </span>
                                 <span className="aethel-text-xs aethel-text-slate-500">
                                   {new Date(entry.created_at).toLocaleString()}
@@ -1918,7 +2078,7 @@ export default function AethelDashboard() {
 
                 <div className="aethel-card aethel-p-6">
                   <div className="aethel-flex aethel-justify-between aethel-items-center">
-                    <h3 className="aethel-text-lg aethel-font-semibold">Connectivity Status</h3>
+                    <h3 className="aethel-text-lg aethel-font-semibold">Status de conectividade</h3>
                     {connectivityData && (
                       <span className={`aethel-text-xs aethel-rounded-full aethel-px-2 aethel-py-1 aethel-border ${
                         connectivityData.overall_status === 'healthy'
@@ -1927,7 +2087,7 @@ export default function AethelDashboard() {
                           ? 'aethel-border-amber-500/30 aethel-bg-amber-500/20 aethel-text-amber-300'
                           : 'aethel-border-red-500/30 aethel-bg-red-500/20 aethel-text-red-300'
                       }`}>
-                        {(connectivityData.overall_status ?? 'unknown').toUpperCase()}
+                        {formatConnectivityStatus(connectivityData.overall_status).toUpperCase()}
                       </span>
                     )}
                   </div>
@@ -1954,7 +2114,7 @@ export default function AethelDashboard() {
                                   ? 'aethel-bg-amber-500/20 aethel-text-amber-300'
                                   : 'aethel-bg-red-500/20 aethel-text-red-300'
                               }`}>
-                                {service.status.toUpperCase()}
+                                {formatConnectivityStatus(service.status).toUpperCase()}
                               </span>
                             </div>
                             <ul className="aethel-mt-2 aethel-space-y-1">
@@ -1985,12 +2145,12 @@ export default function AethelDashboard() {
               {/* Live Preview */}
               <div className="aethel-card aethel-p-6">
                 <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-4">
-                  <h3 className="aethel-text-xl aethel-font-semibold">Live Preview</h3>
+                  <h3 className="aethel-text-xl aethel-font-semibold">Prévia ao vivo</h3>
                   <button
                     onClick={() => setMiniPreviewExpanded(!miniPreviewExpanded)}
                     className="aethel-button aethel-button-ghost aethel-text-sm"
                   >
-                    {miniPreviewExpanded ? 'Collapse' : 'Expand'}
+                    {miniPreviewExpanded ? 'Recolher' : 'Expandir'}
                   </button>
                 </div>
                 <LivePreview
@@ -2005,30 +2165,59 @@ export default function AethelDashboard() {
 
           {activeTab === 'projects' && (
             <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Projects</h2>
+              <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-6">
+                <h2 className="aethel-text-2xl aethel-font-bold">Projetos</h2>
+                
+                {/* TimeMachine Slider para histórico do projeto */}
+                {projects.length > 0 && (
+                  <div className="aethel-w-96">
+                    <TimeMachineSlider
+                      versions={[]}
+                      onVersionChange={(versionId) => {
+                        showToastMessage(`Navegando para versão: ${versionId}`, 'info');
+                      }}
+                      variant="compact"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              {/* Director Note Panel - Feedback artístico da IA */}
+              {projects.length > 0 && (
+                <div className="aethel-mb-6">
+                  <DirectorNotePanel
+                    projectId={String(projects[0].id)}
+                    position="floating"
+                    onApplyFix={async (note) => {
+                      showToastMessage(`Aplicando sugestão: ${note.title}`, 'success');
+                    }}
+                  />
+                </div>
+              )}
+              
               <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-6 aethel-mb-6">
                 {projects.map(project => (
                   <div key={project.id} className="aethel-card aethel-p-4">
                     <h3 className="aethel-font-semibold aethel-mb-2">{project.name}</h3>
-                    <p className="aethel-text-sm aethel-text-slate-400 aethel-mb-2">Type: {project.type}</p>
+                    <p className="aethel-text-sm aethel-text-slate-400 aethel-mb-2">Tipo: {project.type}</p>
                     <p className="aethel-text-sm aethel-mb-4">Status: <span className={`aethel-px-2 aethel-py-1 aethel-rounded aethel-text-xs ${project.status === 'active' ? 'aethel-bg-green-500/20 aethel-text-green-400' : 'aethel-bg-gray-500/20 aethel-text-gray-400'}`}>{project.status}</span></p>
                     <button
                       onClick={() => deleteProject(project.id)}
                       className="aethel-button aethel-button-danger aethel-text-xs"
                     >
-                      Delete
+                      Remover
                     </button>
                   </div>
                 ))}
               </div>
               <div className="aethel-card aethel-p-6 aethel-max-w-md">
-                <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Create New Project</h3>
+                <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Criar novo projeto</h3>
                 <div className="aethel-space-y-4">
                   <input
                     type="text"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
-                    placeholder="Project name"
+                    placeholder="Nome do projeto"
                     className="aethel-input aethel-w-full"
                   />
                   <select
@@ -2036,15 +2225,15 @@ export default function AethelDashboard() {
                     onChange={(e) => setNewProjectType(e.target.value)}
                     className="aethel-input aethel-w-full"
                   >
-                    <option value="code">Code Project</option>
+                    <option value="code">Projeto de código</option>
                     <option value="unreal">Unreal Engine</option>
-                    <option value="web">Web Application</option>
+                    <option value="web">Aplicação web</option>
                   </select>
                   <button
                     onClick={createProject}
                     className="aethel-button aethel-button-primary aethel-w-full"
                   >
-                    Create Project
+                    Criar projeto
                   </button>
                 </div>
               </div>
@@ -2054,7 +2243,7 @@ export default function AethelDashboard() {
           {activeTab === 'ai-chat' && (
             <div className="aethel-p-6">
               <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-6">
-                <h2 className="aethel-text-2xl aethel-font-bold">AI Chat</h2>
+                <h2 className="aethel-text-2xl aethel-font-bold">Chat IA</h2>
                 <div className="aethel-flex aethel-gap-2">
                   <button
                     onClick={() => setChatMode('chat')}
@@ -2094,7 +2283,7 @@ export default function AethelDashboard() {
                 >
                   {copilotWorkflows.map((wf) => (
                     <option key={String(wf.id)} value={String(wf.id)}>
-                      {wf.title || 'Workflow'}
+                      {wf.title || 'Fluxo'}
                     </option>
                   ))}
                   <option value="__new__">+ Novo trabalho</option>
@@ -2126,7 +2315,7 @@ export default function AethelDashboard() {
                     .filter((w) => String(w.id) !== String(activeWorkflowId))
                     .map((wf) => (
                       <option key={String(wf.id)} value={String(wf.id)}>
-                        {wf.title || 'Workflow'}
+                        {wf.title || 'Fluxo'}
                       </option>
                     ))}
                 </select>
@@ -2162,15 +2351,23 @@ export default function AethelDashboard() {
               {chatMode === 'chat' && (
                 <div className="aethel-card aethel-p-6 aethel-max-w-4xl aethel-mx-auto">
                   <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
-                    Standard conversational AI chat with Aethel&apos;s advanced agents.
+                    Chat conversacional padrão com os agentes avançados do Aethel.
                   </div>
                   <div className="aethel-space-y-4 aethel-mb-4 aethel-max-h-96 aethel-overflow-y-auto">
                     {chatHistory.map((msg, index) => (
                       <div key={index} className={`aethel-p-3 aethel-rounded-lg ${msg.role === 'user' ? 'aethel-bg-indigo-500/20 aethel-ml-12' : 'aethel-bg-slate-700/50 aethel-mr-12'}`}>
-                        <p className="aethel-text-sm aethel-font-medium aethel-mb-1">{msg.role === 'user' ? 'You' : 'AI'}</p>
+                        <p className="aethel-text-sm aethel-font-medium aethel-mb-1">{msg.role === 'user' ? 'Você' : 'IA'}</p>
                         <p className="aethel-text-sm">{msg.content}</p>
                       </div>
                     ))}
+                    
+                    {/* AI Thinking Panel - Mostra quando IA está processando */}
+                    {isStreaming && (
+                      <AIThinkingPanel 
+                        isStreaming={isStreaming}
+                        position="floating"
+                      />
+                    )}
                   </div>
                   <div className="aethel-flex aethel-gap-2">
                     <input
@@ -2178,14 +2375,15 @@ export default function AethelDashboard() {
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                      placeholder="Type your message..."
+                      placeholder="Digite sua mensagem..."
                       className="aethel-input aethel-flex-1"
                     />
                     <button
                       onClick={sendChatMessage}
                       className="aethel-button aethel-button-primary"
+                      disabled={isStreaming}
                     >
-                      Send
+                      {isStreaming ? 'Processando...' : 'Enviar'}
                     </button>
                   </div>
                 </div>
@@ -2194,41 +2392,41 @@ export default function AethelDashboard() {
               {chatMode === 'agent' && (
                 <div className="aethel-card aethel-p-6 aethel-max-w-4xl aethel-mx-auto">
                   <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
-                    Autonomous agent mode - Inspired by Manus platform. The AI will execute tasks step-by-step and provide results.
+                    Modo de agente autônomo — inspirado na plataforma Manus. A IA executará tarefas passo a passo e entregará resultados.
                   </div>
                   <div className="aethel-space-y-4 aethel-mb-4">
                     <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-4">
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Research & Analysis</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Gather information, analyze data, and provide insights</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Pesquisa e análise</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Coletar informações, analisar dados e gerar insights</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Content Creation</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Generate articles, code, documentation, and creative content</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Criação de conteúdo</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Gerar artigos, código, documentação e conteúdo criativo</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Automation</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Build workflows, scripts, and automated processes</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Automação</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Criar fluxos, scripts e processos automatizados</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Problem Solving</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Debug code, optimize performance, solve complex issues</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Resolução de problemas</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Depurar código, otimizar performance e resolver issues complexas</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Code Generation</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Generate, debug, and optimize code across languages</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Geração de código</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Gerar, depurar e otimizar código em várias linguagens</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Data Analysis</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Analyze datasets, create visualizations, and extract insights</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Análise de dados</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Analisar datasets, criar visualizações e extrair insights</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Creative Design</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Design UI/UX, graphics, and creative concepts</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Design criativo</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Desenhar UI/UX, gráficos e conceitos criativos</p>
                       </button>
                       <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Business Strategy</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Strategic planning, market analysis, and business development</p>
+                        <h3 className="aethel-font-semibold aethel-mb-2">Estratégia de negócios</h3>
+                        <p className="aethel-text-sm aethel-text-slate-400">Planejamento estratégico, análise de mercado e desenvolvimento de negócios</p>
                       </button>
                     </div>
                   </div>
@@ -2238,7 +2436,7 @@ export default function AethelDashboard() {
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                      placeholder="Describe the task for the agent..."
+                      placeholder="Descreva a tarefa para o agente..."
                       className="aethel-input aethel-flex-1"
                     />
                     <button
@@ -2254,21 +2452,21 @@ export default function AethelDashboard() {
               {chatMode === 'canvas' && (
                 <div className="aethel-card aethel-p-6 aethel-max-w-6xl aethel-mx-auto">
                   <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
-                    Visual canvas for collaborative AI work. Draw, sketch ideas, and collaborate with AI in real-time.
+                    Canvas visual para trabalho colaborativo com IA. Desenhe, esboce ideias e colabore em tempo real.
                   </div>
                   <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-4 aethel-min-h-96 aethel-border aethel-border-slate-700 aethel-relative">
                     <div className="aethel-absolute aethel-top-4 aethel-left-4 aethel-flex aethel-gap-2">
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Draw</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Shapes</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Text</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">AI Enhance</button>
+                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Desenhar</button>
+                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Formas</button>
+                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Texto</button>
+                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Melhorar com IA</button>
                     </div>
                     <div className="aethel-text-center aethel-text-slate-500 aethel-py-32">
                       <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
-                      <p className="text-lg font-medium mb-2">Interactive Canvas</p>
-                      <p className="text-sm">Coming soon with full drawing and collaboration features</p>
+                      <p className="text-lg font-medium mb-2">Canvas interativo</p>
+                      <p className="text-sm">Em breve com recursos completos de desenho e colaboração</p>
                     </div>
                   </div>
                 </div>
@@ -2278,17 +2476,17 @@ export default function AethelDashboard() {
 
           {activeTab === 'content-creation' && (
             <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Content Creation</h2>
+              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Criação de conteúdo</h2>
               <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
                 <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">AI-Powered Content</h3>
-                  <p className="aethel-text-slate-400 aethel-mb-4">Generate code, documentation, and creative content with AI assistance.</p>
-                  <button className="aethel-button aethel-button-primary">Start Creating</button>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Conteúdo com IA</h3>
+                  <p className="aethel-text-slate-400 aethel-mb-4">Gere código, documentação e conteúdo criativo com assistência de IA.</p>
+                  <button className="aethel-button aethel-button-primary">Começar a criar</button>
                 </div>
                 <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Templates</h3>
-                  <p className="aethel-text-slate-400 aethel-mb-4">Use pre-built templates for common development tasks.</p>
-                  <button className="aethel-button aethel-button-secondary">Browse Templates</button>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Modelos</h3>
+                  <p className="aethel-text-slate-400 aethel-mb-4">Use modelos pré-prontos para tarefas comuns de desenvolvimento.</p>
+                  <button className="aethel-button aethel-button-secondary">Ver modelos</button>
                 </div>
               </div>
             </div>
@@ -2296,12 +2494,12 @@ export default function AethelDashboard() {
 
           {activeTab === 'unreal' && (
             <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Unreal Engine Integration</h2>
+              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Integração com Unreal Engine</h2>
               <div className="aethel-card aethel-p-6">
-                <p className="aethel-text-slate-400 aethel-mb-4">Seamlessly integrate with Unreal Engine for VR and game development.</p>
+                <p className="aethel-text-slate-400 aethel-mb-4">Integre-se ao Unreal Engine para VR e desenvolvimento de jogos.</p>
                 <div className="aethel-flex aethel-gap-4">
-                  <button className="aethel-button aethel-button-primary">Connect to Unreal</button>
-                  <button className="aethel-button aethel-button-secondary">VR Preview</button>
+                  <button className="aethel-button aethel-button-primary">Conectar à Unreal</button>
+                  <button className="aethel-button aethel-button-secondary">Prévia VR</button>
                 </div>
               </div>
             </div>
@@ -2310,7 +2508,7 @@ export default function AethelDashboard() {
           {activeTab === 'wallet' && (
             <div className="aethel-p-6 aethel-space-y-6">
               <div className="aethel-flex aethel-items-center aethel-justify-between">
-                <h2 className="aethel-text-2xl aethel-font-bold">Wallet</h2>
+                <h2 className="aethel-text-2xl aethel-font-bold">Carteira</h2>
                 {authReady && hasToken && (
                   <button onClick={refreshWallet} className="aethel-button aethel-button-secondary aethel-text-xs">
                     Atualizar
@@ -2339,11 +2537,11 @@ export default function AethelDashboard() {
                       {!walletLoading && !walletError && walletData && (
                         <>
                           <div className="aethel-text-4xl aethel-font-bold aethel-text-slate-100">
-                            {walletData.balance.toLocaleString()} {walletData.currency}
+                            {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                           </div>
                           {creditsInfo && (
                             <p className="aethel-text-xs aethel-text-slate-400">
-                              Créditos faturáveis: {creditsInfo.credits.toLocaleString()} {walletData.currency}
+                              Créditos faturáveis: {creditsInfo.credits.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                             </p>
                           )}
                           <p className="aethel-text-xs aethel-text-slate-500">
@@ -2358,33 +2556,33 @@ export default function AethelDashboard() {
                             <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
                               <p className="aethel-text-xs aethel-text-slate-500">Gasto hoje</p>
                               <p className="aethel-text-lg aethel-font-semibold aethel-text-rose-300">
-                                {creditsUsedToday.toLocaleString()} {walletData.currency}
+                                {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                               </p>
                             </div>
                             <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
                               <p className="aethel-text-xs aethel-text-slate-500">Gasto no mês</p>
                               <p className="aethel-text-lg aethel-font-semibold aethel-text-amber-300">
-                                {creditsUsedThisMonth.toLocaleString()} {walletData.currency}
+                                {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                               </p>
                             </div>
                             <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
                               <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
                               <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                                {creditsReceivedThisMonth.toLocaleString()} {walletData.currency}
+                                {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                               </p>
                             </div>
                           </div>
                           {lastPurchaseIntent && (
                             <p className="aethel-text-xs aethel-text-slate-400 aethel-mt-2">
                               Última intenção #{lastPurchaseIntent.intent_id} • +
-                              {lastPurchaseIntent.entry.amount.toLocaleString()} {lastPurchaseIntent.entry.currency}{' '}
+                              {lastPurchaseIntent.entry.amount.toLocaleString()} {formatCurrencyLabel(lastPurchaseIntent.entry.currency)}{' '}
                               em {new Date(lastPurchaseIntent.entry.created_at).toLocaleString()}
                             </p>
                           )}
                           {lastTransferReceipt && (
                             <p className="aethel-text-xs aethel-text-slate-400">
                               Última transferência #{lastTransferReceipt.transfer_id} • -
-                              {lastTransferReceipt.sender_entry.amount.toLocaleString()} {lastTransferReceipt.sender_entry.currency}{' '}
+                              {lastTransferReceipt.sender_entry.amount.toLocaleString()} {formatCurrencyLabel(lastTransferReceipt.sender_entry.currency)}{' '}
                               em {new Date(lastTransferReceipt.sender_entry.created_at).toLocaleString()}
                             </p>
                           )}
@@ -2413,7 +2611,7 @@ export default function AethelDashboard() {
                           onChange={(e) => setPurchaseForm(prev => ({ ...prev, currency: e.target.value }))}
                           className="aethel-input aethel-w-32"
                         >
-                          <option value="credits">Credits</option>
+                          <option value="credits">Créditos</option>
                         </select>
                       </div>
                       <input
@@ -2441,7 +2639,7 @@ export default function AethelDashboard() {
                         value={transferForm.targetUserId}
                         onChange={(e) => setTransferForm(prev => ({ ...prev, targetUserId: e.target.value }))}
                         className="aethel-input"
-                        placeholder="User ID ou email do destinatário"
+                        placeholder="ID do usuário ou e-mail do destinatário"
                         required
                       />
                       <div className="aethel-flex aethel-gap-2">
@@ -2459,7 +2657,7 @@ export default function AethelDashboard() {
                           onChange={(e) => setTransferForm(prev => ({ ...prev, currency: e.target.value }))}
                           className="aethel-input aethel-w-32"
                         >
-                          <option value="credits">Credits</option>
+                          <option value="credits">Créditos</option>
                         </select>
                       </div>
                       <input
@@ -2491,12 +2689,12 @@ export default function AethelDashboard() {
                                 {entry.reference || entry.entry_type.toUpperCase()}
                               </span>
                               <span className={`aethel-text-sm aethel-font-semibold ${entry.entry_type === 'credit' ? 'aethel-text-emerald-400' : entry.entry_type === 'transfer' ? 'aethel-text-amber-300' : 'aethel-text-red-400'}`}>
-                                {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {entry.currency}
+                                {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
                               </span>
                             </div>
                             <div className="aethel-flex aethel-justify-between aethel-items-center aethel-mt-1">
                               <span className="aethel-text-xs aethel-text-slate-400">
-                                Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
+                                Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
                               </span>
                               <span className="aethel-text-xs aethel-text-slate-500">
                                 {new Date(entry.created_at).toLocaleString()}
@@ -2519,19 +2717,19 @@ export default function AethelDashboard() {
                       <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                         <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
                         <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                          {creditsReceivedThisMonth.toLocaleString()} {walletData?.currency ?? 'credits'}
+                          {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                         </p>
                       </div>
                       <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                         <p className="aethel-text-xs aethel-text-slate-500">Total creditado</p>
                         <p className="aethel-text-lg aethel-font-semibold aethel-text-indigo-300">
-                          {receivableSummary.total.toLocaleString()} {walletData?.currency ?? 'credits'}
+                          {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                         </p>
                       </div>
                       <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                         <p className="aethel-text-xs aethel-text-slate-500">Pendente de conciliação</p>
                         <p className="aethel-text-lg aethel-font-semibold aethel-text-amber-300">
-                          {receivableSummary.pending.toLocaleString()} {walletData?.currency ?? 'credits'}
+                          {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                         </p>
                       </div>
                     </div>
@@ -2556,10 +2754,10 @@ export default function AethelDashboard() {
                           )}
                           {receivableSummary.recent.map(entry => {
                             const rawStatus = entry.metadata?.['status'] as unknown
-                            const statusLabel = typeof rawStatus === 'string' ? rawStatus : 'confirmado'
+                            const statusLabel = formatStatusLabel(rawStatus)
                             const invoice = entry.metadata?.['invoice_id'] as unknown
                             const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
-                            const amountLabel = `+${entry.amount.toLocaleString()} ${entry.currency}`
+                            const amountLabel = `+${entry.amount.toLocaleString()} ${formatCurrencyLabel(entry.currency)}`
                             return (
                               <tr key={entry.id} className="aethel-border-t aethel-border-slate-800">
                                 <td className="aethel-py-2 aethel-pr-4 aethel-font-medium aethel-text-slate-200">
@@ -2572,7 +2770,7 @@ export default function AethelDashboard() {
                                   {statusLabel}
                                 </td>
                                 <td className="aethel-py-2 aethel-pr-4 aethel-text-slate-400">
-                                  {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
+                                  {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
                                 </td>
                                 <td className="aethel-py-2 aethel-text-slate-400">
                                   {new Date(entry.created_at).toLocaleString()}
@@ -2592,7 +2790,7 @@ export default function AethelDashboard() {
           {activeTab === 'connectivity' && (
             <div className="aethel-p-6 aethel-space-y-6">
               <div className="aethel-flex aethel-items-center aethel-justify-between">
-                <h2 className="aethel-text-2xl aethel-font-bold">Connectivity Monitor</h2>
+                <h2 className="aethel-text-2xl aethel-font-bold">Monitor de conectividade</h2>
                 <button onClick={refreshConnectivity} className="aethel-button aethel-button-secondary aethel-text-xs">
                   Atualizar
                 </button>
@@ -2609,7 +2807,7 @@ export default function AethelDashboard() {
                     <div>
                       <p className="aethel-text-sm aethel-text-slate-400">Status geral</p>
                       <p className="aethel-text-3xl aethel-font-bold">
-                        {(connectivityData.overall_status ?? 'unknown').toUpperCase()}
+                        {formatConnectivityStatus(connectivityData.overall_status).toUpperCase()}
                       </p>
                     </div>
                     <div className="aethel-text-sm aethel-text-slate-400">
@@ -2629,7 +2827,7 @@ export default function AethelDashboard() {
                               ? 'aethel-bg-amber-500/20 aethel-text-amber-300'
                               : 'aethel-bg-red-500/20 aethel-text-red-300'
                           }`}>
-                            {service.status.toUpperCase()}
+                            {formatConnectivityStatus(service.status).toUpperCase()}
                           </span>
                         </div>
                         <div className="aethel-space-y-2">
@@ -2657,14 +2855,14 @@ export default function AethelDashboard() {
 
           {activeTab === 'agent-canvas' && (
             <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Agent Canvas</h2>
+              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Canvas de agentes</h2>
               <div className="aethel-card aethel-p-6">
                 <div className="aethel-mb-4">
-                  <p className="aethel-text-slate-400 aethel-mb-4">Build and visualize AI agent workflows. Inspired by advanced platforms like Manus for autonomous task execution.</p>
+                  <p className="aethel-text-slate-400 aethel-mb-4">Construa e visualize fluxos de agentes de IA. Inspirado em plataformas avançadas como Manus para execução autônoma.</p>
                   <div className="aethel-flex aethel-gap-4 aethel-mb-4">
-                    <button className="aethel-button aethel-button-primary">New Workflow</button>
-                    <button className="aethel-button aethel-button-secondary">Load Template</button>
-                    <button className="aethel-button aethel-button-ghost">Run Agent</button>
+                    <button className="aethel-button aethel-button-primary">Novo fluxo</button>
+                    <button className="aethel-button aethel-button-secondary">Carregar template</button>
+                    <button className="aethel-button aethel-button-ghost">Executar agente</button>
                   </div>
                 </div>
                <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-4 aethel-min-h-96 aethel-border aethel-border-slate-700 aethel-overflow-hidden">
@@ -2692,7 +2890,7 @@ export default function AethelDashboard() {
             <div className="aethel-p-6 aethel-space-y-6">
               <div className="aethel-flex aethel-flex-col md:aethel-flex-row md:aethel-items-end md:aethel-justify-between aethel-gap-4">
                 <div className="aethel-space-y-2">
-                  <h2 className="aethel-text-3xl aethel-font-bold">Billing &amp; Credits</h2>
+                  <h2 className="aethel-text-3xl aethel-font-bold">Faturamento &amp; Créditos</h2>
                   <p className="aethel-text-slate-400 aethel-max-w-2xl">
                     Acompanhe o plano ativo, créditos disponíveis e recebíveis em tempo real. Todas as operações refletem
                     diretamente o que está registrado na carteira e nos endpoints de billing.
@@ -2726,7 +2924,11 @@ export default function AethelDashboard() {
                     {currentPlan?.name ?? 'Plano padrão'}
                   </h3>
                   <p className="aethel-text-sm aethel-text-slate-400">
-                    {currentPlan?.price !== undefined ? `US$ ${currentPlan.price.toFixed(2)}/mês` : 'Valor conforme consumo'}
+                    {currentPlan?.priceBRL !== undefined
+                      ? `${formatCurrency(currentPlan.priceBRL, 'BRL')}/mês`
+                      : currentPlan?.price !== undefined
+                        ? `${formatCurrency(currentPlan.price, 'USD')}/mês`
+                        : 'Valor conforme consumo'}
                   </p>
                   {currentPlan?.features && currentPlan.features.length > 0 && (
                     <ul className="aethel-text-xs aethel-text-slate-400 aethel-space-y-1">
@@ -2740,11 +2942,11 @@ export default function AethelDashboard() {
                 <div className="aethel-card aethel-p-5 aethel-space-y-3">
                   <p className="aethel-text-xs aethel-text-slate-500">Saldo em créditos</p>
                   <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-indigo-300">
-                    {walletData ? `${walletData.balance.toLocaleString()} ${walletData.currency}` : '—'}
+                    {walletData ? `${walletData.balance.toLocaleString()} ${formatCurrencyLabel(walletData.currency)}` : '—'}
                   </h3>
                   <p className="aethel-text-xs aethel-text-slate-400">
                     {creditsInfo
-                      ? `Créditos faturáveis: ${creditsInfo.credits.toLocaleString()} ${walletData?.currency ?? 'credits'}`
+                      ? `Créditos faturáveis: ${creditsInfo.credits.toLocaleString()} ${formatCurrencyLabel(walletData?.currency)}`
                       : 'Sincronize após login para detalhar faturamento.'}
                   </p>
                 </div>
@@ -2752,7 +2954,7 @@ export default function AethelDashboard() {
                 <div className="aethel-card aethel-p-5 aethel-space-y-3">
                   <p className="aethel-text-xs aethel-text-slate-500">Consumo mensal</p>
                   <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-rose-300">
-                    {creditsUsedThisMonth.toLocaleString()} {walletData?.currency ?? 'credits'}
+                    {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                   </h3>
                   <p className="aethel-text-xs aethel-text-slate-400">Inclui débitos e transferências realizadas desde o início do mês.</p>
                 </div>
@@ -2760,7 +2962,7 @@ export default function AethelDashboard() {
                 <div className="aethel-card aethel-p-5 aethel-space-y-3">
                   <p className="aethel-text-xs aethel-text-slate-500">Recebíveis pendentes</p>
                   <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-amber-300">
-                    {receivableSummary.pending.toLocaleString()} {walletData?.currency ?? 'credits'}
+                    {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                   </h3>
                   <p className="aethel-text-xs aethel-text-slate-400">Baseado nos lançamentos com status pendente ou não conciliado.</p>
                 </div>
@@ -2775,19 +2977,19 @@ export default function AethelDashboard() {
                   <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                     <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
                     <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                      {creditsReceivedThisMonth.toLocaleString()} {walletData?.currency ?? 'credits'}
+                      {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                     </p>
                   </div>
                   <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                     <p className="aethel-text-xs aethel-text-slate-500">Gasto hoje</p>
                     <p className="aethel-text-lg aethel-font-semibold aethel-text-rose-300">
-                      {creditsUsedToday.toLocaleString()} {walletData?.currency ?? 'credits'}
+                      {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                     </p>
                   </div>
                   <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                     <p className="aethel-text-xs aethel-text-slate-500">Total creditado</p>
                     <p className="aethel-text-lg aethel-font-semibold aethel-text-indigo-300">
-                      {receivableSummary.total.toLocaleString()} {walletData?.currency ?? 'credits'}
+                      {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                     </p>
                   </div>
                 </div>
@@ -2812,10 +3014,10 @@ export default function AethelDashboard() {
                       )}
                       {receivableSummary.recent.map(entry => {
                         const rawStatus = entry.metadata?.['status'] as unknown
-                        const statusLabel = typeof rawStatus === 'string' ? rawStatus : 'confirmado'
+                        const statusLabel = formatStatusLabel(rawStatus)
                         const invoice = entry.metadata?.['invoice_id'] as unknown
                         const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
-                        const amountLabel = `+${entry.amount.toLocaleString()} ${entry.currency}`
+                        const amountLabel = `+${entry.amount.toLocaleString()} ${formatCurrencyLabel(entry.currency)}`
                         return (
                           <tr key={entry.id} className="aethel-border-t aethel-border-slate-800">
                             <td className="aethel-py-2 aethel-pr-4 aethel-font-medium aethel-text-slate-200">
@@ -2828,7 +3030,7 @@ export default function AethelDashboard() {
                               {statusLabel}
                             </td>
                             <td className="aethel-py-2 aethel-pr-4 aethel-text-slate-400">
-                              {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {entry.currency}
+                              {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
                             </td>
                             <td className="aethel-py-2 aethel-text-slate-400">
                               {new Date(entry.created_at).toLocaleString()}
@@ -2841,58 +3043,28 @@ export default function AethelDashboard() {
                 </div>
               </div>
 
-              <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 xl:aethel-grid-cols-3 aethel-gap-4">
-                {billingData && billingData.length > 0 ? (
-                  billingData.map(plan => {
-                    const isActive = currentPlan?.id === plan.id || currentPlan?.name === plan.name
-                    return (
-                      <div
-                        key={plan.id}
-                        className={`aethel-card aethel-p-6 aethel-space-y-4 ${isActive ? 'aethel-border-2 aethel-border-indigo-500' : 'aethel-border aethel-border-slate-700'}`}
-                      >
-                        <div className="aethel-flex aethel-justify-between aethel-items-start">
-                          <div>
-                            <h3 className="aethel-text-xl aethel-font-semibold">{plan.name}</h3>
-                            <p className="aethel-text-3xl aethel-font-bold aethel-text-slate-200">
-                              {/* Todos os planos são pagos - estratégia zero prejuízo */}
-                              US$ {plan.price?.toFixed(2) || '0.00'}/mês
-                              {plan.priceBRL && <span className="aethel-text-sm aethel-text-slate-400 aethel-ml-2">(R${plan.priceBRL})</span>}
-                            </p>
-                          </div>
-                          {isActive && (
-                            <span className="aethel-bg-indigo-600/20 aethel-text-indigo-200 aethel-text-xs aethel-font-semibold aethel-rounded-full aethel-px-3 aethel-py-1">
-                              Plano atual
-                            </span>
-                          )}
-                        </div>
-                        {plan.features && plan.features.length > 0 ? (
-                          <ul className="aethel-text-sm aethel-space-y-2 aethel-text-slate-300">
-                            {plan.features.map(feature => (
-                              <li key={feature} className="aethel-flex aethel-gap-2">
-                                <span className="aethel-text-indigo-400">•</span>
-                                <span>{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="aethel-text-sm aethel-text-slate-400">Recursos definidos conforme contrato.</p>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleSubscribe(plan.id)}
-                          className={`aethel-button aethel-w-full ${isActive ? 'aethel-button-secondary' : 'aethel-button-primary'}`}
-                          disabled={isActive || subscribingPlan === plan.id}
-                        >
-                          {isActive ? 'Plano atual' : subscribingPlan === plan.id ? 'Processando...' : 'Selecionar plano'}
-                        </button>
-                      </div>
-                    )
-                  })
-                ) : (
-                  <div className="aethel-card aethel-p-6 aethel-col-span-full">
-                    <p className="aethel-text-sm aethel-text-slate-400">Nenhum plano disponível no momento.</p>
-                  </div>
-                )}
+              <div className="aethel-card aethel-p-6 aethel-space-y-4">
+                <div className="aethel-flex aethel-items-center aethel-justify-between">
+                  <h3 className="aethel-text-lg aethel-font-semibold">Planos e assinatura</h3>
+                  <button
+                    type="button"
+                    onClick={handleManageSubscription}
+                    className="aethel-button aethel-button-ghost aethel-text-xs"
+                  >
+                    Gerenciar assinatura
+                  </button>
+                </div>
+                <BillingTab
+                  plans={billingPlansForUI}
+                  currentPlan={currentPlan?.id ?? ''}
+                  loading={!billingData && !billingError}
+                  onSelectPlan={handleSubscribe}
+                  onManageSubscription={handleManageSubscription}
+                  showHeader={false}
+                  showHighlights={false}
+                  showFaq={false}
+                  showCurrentPlanInfo={false}
+                />
               </div>
 
               <div className="aethel-card aethel-p-6 aethel-space-y-3">
@@ -2917,12 +3089,12 @@ export default function AethelDashboard() {
           {activeTab === 'download' && (
             <div className="aethel-p-6 aethel-space-y-6">
               <div className="aethel-text-center">
-                <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Download Aethel IDE</h2>
+                <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Baixar Aethel IDE</h2>
                 <p className="aethel-text-lg aethel-text-slate-400 aethel-max-w-2xl aethel-mx-auto">
-                  Experience the full power of Aethel with our local IDE. Complete with AI integration,
-                  advanced coding tools, and seamless backend connectivity.
+                  Experimente todo o poder do Aethel com a nossa IDE local. Inclui integração com IA,
+                  ferramentas avançadas de código e conectividade total com o backend.
                   <br /><br />
-                  <strong>Free for personal use • Professional features available</strong>
+                  <strong>Gratuito para uso pessoal • Recursos profissionais disponíveis</strong>
                 </p>
               </div>
 
@@ -2934,23 +3106,23 @@ export default function AethelDashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     </div>
-                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">Windows Installer</h3>
-                    <p className="aethel-text-slate-400">Complete setup for Windows 10/11</p>
+                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">Instalador Windows</h3>
+                    <p className="aethel-text-slate-400">Instalação completa para Windows 10/11</p>
                   </div>
                   <div className="aethel-space-y-3">
                     <div className="aethel-flex aethel-justify-between aethel-text-sm">
-                    <span>Size:</span>
+                    <span>Tamanho:</span>
                     <span>~250 MB</span>
                     </div>
                     <div className="aethel-flex aethel-justify-between aethel-text-sm">
-                    <span>Version:</span>
+                    <span>Versão:</span>
                     <span>v2.1.0</span>
                     </div>
                     <button
                       onClick={() => handleDownload('windows')}
                       className="aethel-button aethel-button-primary aethel-w-full aethel-mt-4"
                     >
-                    Download for Windows
+                    Baixar para Windows
                     </button>
                   </div>
                 </div>
@@ -2962,23 +3134,23 @@ export default function AethelDashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     </div>
-                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">macOS Installer</h3>
-                    <p className="aethel-text-slate-400">Native app for macOS 11+</p>
+                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">Instalador macOS</h3>
+                    <p className="aethel-text-slate-400">App nativo para macOS 11+</p>
                   </div>
                   <div className="aethel-space-y-3">
                     <div className="aethel-flex aethel-justify-between aethel-text-sm">
-                    <span>Size:</span>
+                    <span>Tamanho:</span>
                     <span>~220 MB</span>
                     </div>
                     <div className="aethel-flex aethel-justify-between aethel-text-sm">
-                    <span>Version:</span>
+                    <span>Versão:</span>
                     <span>v2.1.0</span>
                     </div>
                     <button
                       onClick={() => handleDownload('mac')}
                       className="aethel-button aethel-button-primary aethel-w-full aethel-mt-4"
                     >
-                    🍎 Download for macOS
+                    🍎 Baixar para macOS
                     </button>
                   </div>
                 </div>
@@ -2990,23 +3162,23 @@ export default function AethelDashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                     </svg>
                     </div>
-                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">Linux Installer</h3>
-                    <p className="aethel-text-slate-400">Universal Linux package</p>
+                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">Instalador Linux</h3>
+                    <p className="aethel-text-slate-400">Pacote Linux universal</p>
                   </div>
                   <div className="aethel-space-y-3">
                     <div className="aethel-flex aethel-justify-between aethel-text-sm">
-                    <span>Size:</span>
+                    <span>Tamanho:</span>
                     <span>~200 MB</span>
                     </div>
                     <div className="aethel-flex aethel-justify-between aethel-text-sm">
-                    <span>Version:</span>
+                    <span>Versão:</span>
                     <span>v2.1.0</span>
                     </div>
                     <button
                       onClick={() => handleDownload('linux')}
                       className="aethel-button aethel-button-primary aethel-w-full aethel-mt-4"
                     >
-                    🐧 Download for Linux
+                    🐧 Baixar para Linux
                     </button>
                   </div>
                 </div>
@@ -3018,35 +3190,35 @@ export default function AethelDashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     </div>
-                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">System Requirements</h3>
-                    <p className="aethel-text-slate-400">Cross-platform compatibility</p>
+                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2">Requisitos do sistema</h3>
+                    <p className="aethel-text-slate-400">Compatibilidade multiplataforma</p>
                   </div>
                   <div className="aethel-space-y-4">
                     <div className="aethel-border-b aethel-border-slate-700 aethel-pb-3">
-                      <h4 className="aethel-text-sm aethel-font-medium aethel-text-slate-300 aethel-mb-2">All Platforms</h4>
+                      <h4 className="aethel-text-sm aethel-font-medium aethel-text-slate-300 aethel-mb-2">Todas as plataformas</h4>
                       <ul className="aethel-space-y-1 aethel-text-sm">
                         <li className="aethel-flex aethel-items-center aethel-gap-2">
                         <svg className="w-4 h-4 aethel-text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        8GB RAM minimum
+                        Mínimo de 8GB RAM
                         </li>
                         <li className="aethel-flex aethel-items-center aethel-gap-2">
                         <svg className="w-4 h-4 aethel-text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        2GB free disk space
+                        2GB de espaço livre
                         </li>
                         <li className="aethel-flex aethel-items-center aethel-gap-2">
                         <svg className="w-4 h-4 aethel-text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Internet connection for AI features
+                        Conexão com a internet para recursos de IA
                         </li>
                       </ul>
                     </div>
                     <div>
-                      <h4 className="aethel-text-sm aethel-font-medium aethel-text-slate-300 aethel-mb-2">Platform Specific</h4>
+                      <h4 className="aethel-text-sm aethel-font-medium aethel-text-slate-300 aethel-mb-2">Específico por plataforma</h4>
                       <ul className="aethel-space-y-1 aethel-text-sm">
                         <li className="aethel-flex aethel-items-center aethel-gap-2">
                         <span className="aethel-text-slate-400">Windows:</span>
@@ -3066,21 +3238,106 @@ export default function AethelDashboard() {
                 </div>
               </div>
 
+              <div className="aethel-space-y-6">
+                <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
+                  <div className="aethel-card aethel-p-6">
+                    <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-4">
+                      <h3 className="aethel-text-lg aethel-font-semibold">Downloads em andamento</h3>
+                      <span className="aethel-text-xs aethel-text-slate-400">{downloads.length} ativos</span>
+                    </div>
+                    {downloads.length === 0 ? (
+                      <p className="aethel-text-sm aethel-text-slate-500">Nenhum download ativo no momento.</p>
+                    ) : (
+                      <div className="aethel-space-y-4">
+                        {downloads.map(download => (
+                          <div key={download.id} className="aethel-rounded-lg aethel-bg-slate-900/60 aethel-p-4">
+                            <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-2">
+                              <div className="aethel-flex aethel-flex-col">
+                                <span className="aethel-text-sm aethel-font-medium aethel-text-white">
+                                  {download.filename || download.url}
+                                </span>
+                                <span className="aethel-text-xs aethel-text-slate-400">
+                                  {formatBytes(download.downloaded)} / {formatBytes(download.total)}
+                                </span>
+                              </div>
+                              <div className="aethel-flex aethel-items-center aethel-gap-3">
+                                <span className="aethel-text-xs aethel-text-slate-400">{download.status}</span>
+                                {download.status === 'downloading' && (
+                                  <button
+                                    onClick={() => cancelDownload(download.id)}
+                                    className="aethel-button aethel-button-ghost aethel-text-xs"
+                                  >
+                                    Cancelar
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <div className="aethel-h-2 aethel-bg-slate-800 aethel-rounded-full">
+                              <div
+                                className="aethel-h-2 aethel-rounded-full aethel-bg-indigo-500"
+                                style={{ width: `${Math.min(100, Math.max(0, download.progress))}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="aethel-card aethel-p-6">
+                    <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-4">
+                      <h3 className="aethel-text-lg aethel-font-semibold">Exportações</h3>
+                      <span className="aethel-text-xs aethel-text-slate-400">{exportJobs.length} jobs</span>
+                    </div>
+                    {exportJobs.length === 0 ? (
+                      <p className="aethel-text-sm aethel-text-slate-500">Nenhum job de exportação ativo.</p>
+                    ) : (
+                      <div className="aethel-space-y-4">
+                        {exportJobs.map(job => (
+                          <div key={job.id} className="aethel-rounded-lg aethel-bg-slate-900/60 aethel-p-4">
+                            <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-2">
+                              <div>
+                                <div className="aethel-text-sm aethel-font-medium aethel-text-white">{job.type}</div>
+                                <div className="aethel-text-xs aethel-text-slate-400">
+                                  {new Date(job.createdAt).toLocaleTimeString()}
+                                </div>
+                              </div>
+                              <span className="aethel-text-xs aethel-text-slate-400">{job.status}</span>
+                            </div>
+                            <div className="aethel-h-2 aethel-bg-slate-800 aethel-rounded-full">
+                              <div
+                                className="aethel-h-2 aethel-rounded-full aethel-bg-emerald-500"
+                                style={{ width: `${Math.min(100, Math.max(0, job.progress ?? 0))}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-3">Fila de renderização</h3>
+                  <RenderQueue jobs={renderJobs} onCancel={cancelRender} />
+                </div>
+              </div>
+
               <div className="aethel-text-center aethel-mt-8">
                 <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-6 aethel-max-w-2xl aethel-mx-auto">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-3">Quick Start</h3>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-3">Início rápido</h3>
                   <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 aethel-gap-4 aethel-text-sm">
                     <div className="aethel-text-center">
                     <div className="aethel-w-8 aethel-h-8 aethel-bg-indigo-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">1</div>
-                    Download & Install
+                    Baixar e instalar
                     </div>
                     <div className="aethel-text-center">
                     <div className="aethel-w-8 aethel-h-8 aethel-bg-indigo-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">2</div>
-                    Connect to Backend
+                    Conectar ao backend
                     </div>
                     <div className="aethel-text-center">
                     <div className="aethel-w-8 aethel-h-8 aethel-bg-indigo-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">3</div>
-                    Start Creating
+                    Começar a criar
                     </div>
                   </div>
                 </div>
@@ -3091,22 +3348,28 @@ export default function AethelDashboard() {
           {activeTab === 'templates' && (
             <div className="aethel-p-6 aethel-space-y-6">
               <div className="aethel-text-center">
-                <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Workflow Templates</h2>
+                <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Modelos de workflow</h2>
                 <p className="aethel-text-lg aethel-text-slate-400 aethel-max-w-2xl aethel-mx-auto">
-                  Jumpstart your projects with pre-built workflow templates. Drag and drop to customize your AI-powered pipelines.
+                  Acelere seus projetos com modelos de workflow prontos. Arraste e solte para personalizar seus pipelines com IA.
                 </p>
               </div>
 
               <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-6">
-                {workflowTemplates.map(template => (
+                {workflowTemplates.map(template => {
+                  const category = String(template.category || '').toLowerCase()
+                  const categoryClass =
+                    category.includes('desenvolvimento') || category.includes('development')
+                      ? 'aethel-bg-blue-500/20 aethel-text-blue-400'
+                      : category.includes('ciência') || category.includes('data')
+                      ? 'aethel-bg-green-500/20 aethel-text-green-400'
+                      : category.includes('criativo') || category.includes('creative')
+                      ? 'aethel-bg-purple-500/20 aethel-text-purple-400'
+                      : 'aethel-bg-orange-500/20 aethel-text-orange-400'
+
+                  return (
                   <div key={template.id} className="aethel-card aethel-p-6 hover:aethel-shadow-xl aethel-transition aethel-cursor-pointer group">
                     <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-4">
-                      <div className={`aethel-w-12 aethel-h-12 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center ${
-                        template.category === 'Development' ? 'aethel-bg-blue-500/20 aethel-text-blue-400' :
-                        template.category === 'Data Science' ? 'aethel-bg-green-500/20 aethel-text-green-400' :
-                        template.category === 'Creative' ? 'aethel-bg-purple-500/20 aethel-text-purple-400' :
-                        'aethel-bg-orange-500/20 aethel-text-orange-400'
-                      }`}>
+                      <div className={`aethel-w-12 aethel-h-12 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center ${categoryClass}`}>
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -3122,10 +3385,10 @@ export default function AethelDashboard() {
                       {template.description}
                     </p>
                     <button className="aethel-button aethel-button-primary aethel-w-full group-hover:aethel-bg-indigo-600 aethel-transition">
-                      Use Template
+                      Usar template
                     </button>
                   </div>
-                ))}
+                )})}
               </div>
             </div>
           )}
@@ -3133,9 +3396,9 @@ export default function AethelDashboard() {
           {activeTab === 'use-cases' && (
             <div className="aethel-p-6 aethel-space-y-6">
               <div className="aethel-text-center">
-                <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Community Use Cases</h2>
+                <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Casos de uso da comunidade</h2>
                 <p className="aethel-text-lg aethel-text-slate-400 aethel-max-w-2xl aethel-mx-auto">
-                  Discover how the Aethel community is building amazing things. Get inspired and share your own creations.
+                  Veja como a comunidade Aethel está criando coisas incríveis. Inspire-se e compartilhe suas criações.
                 </p>
               </div>
 
@@ -3175,7 +3438,7 @@ export default function AethelDashboard() {
                       {useCase.description}
                     </p>
                     <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-3">
-                      <span className="aethel-text-xs aethel-text-slate-500">by {useCase.sharedBy}</span>
+                      <span className="aethel-text-xs aethel-text-slate-500">por {useCase.sharedBy}</span>
                       <div className="aethel-flex aethel-gap-1">
                         {useCase.tags.slice(0, 2).map(tag => (
                           <span key={tag} className="aethel-text-xs aethel-px-2 aethel-py-1 aethel-rounded aethel-bg-slate-700 aethel-text-slate-300">
@@ -3185,7 +3448,7 @@ export default function AethelDashboard() {
                       </div>
                     </div>
                     <button className="aethel-button aethel-button-secondary aethel-w-full group-hover:aethel-bg-slate-600 aethel-transition">
-                      View Case Study
+                      Ver estudo de caso
                     </button>
                   </div>
                 ))}
@@ -3193,11 +3456,11 @@ export default function AethelDashboard() {
 
               <div className="aethel-text-center aethel-mt-8">
                 <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-6 aethel-max-w-2xl aethel-mx-auto">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Share Your Success</h3>
+                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Compartilhe seu sucesso</h3>
                   <p className="aethel-text-slate-400 aethel-mb-4">
-                    Built something amazing with Aethel? Share your use case with the community and inspire others!
+                    Criou algo incrível com Aethel? Compartilhe seu caso de uso com a comunidade e inspire outras pessoas!
                   </p>
-                  <button className="aethel-button aethel-button-primary">Share Your Use Case</button>
+                  <button className="aethel-button aethel-button-primary">Compartilhar caso de uso</button>
                 </div>
               </div>
             </div>

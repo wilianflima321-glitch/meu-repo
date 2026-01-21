@@ -10,6 +10,11 @@ const fetcher = (url: string) => fetch(url, {
 
 export default function Admin() {
   const { data, error, isLoading } = useSWR(`${API_BASE}/admin/users`, fetcher);
+  const planLabels: Record<string, string> = {
+    enterprise: 'Empresarial',
+    pro: 'Pro',
+    free: 'Gratuito',
+  };
 
   return (
     <div className='p-6 max-w-6xl mx-auto'>
@@ -32,7 +37,7 @@ export default function Admin() {
                   <th className="p-2">Email</th>
                   <th className="p-2">Plano</th>
                   <th className="p-2">Projetos</th>
-                  <th className="p-2">Data Cadastro</th>
+                  <th className="p-2">Data de cadastro</th>
                 </tr>
               </thead>
               <tbody>
@@ -46,7 +51,7 @@ export default function Admin() {
                         user.plan === 'pro' ? 'bg-blue-100 text-blue-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {user.plan}
+                        {planLabels[user.plan] ?? user.plan}
                       </span>
                     </td>
                     <td className="p-2">{user._count.projects}</td>
@@ -63,14 +68,14 @@ export default function Admin() {
         {/* Links existentes mantidos para brevidade */}
         <Link href='/admin/users' className='block p-4 bg-white rounded-lg shadow hover:shadow-md transition'>
           <h2 className='text-xl font-semibold'>Gerenciar Usuários</h2>
-          <p>Visualize e edite perfis, roles e detalhes de usuários normais.</p>
+          <p>Visualize e edite perfis, funções e detalhes de usuários.</p>
         </Link>
 
         {/* ... outros links ... */}
 
         <Link href='/admin/ai-enhancements' className='block p-4 bg-white rounded-lg shadow hover:shadow-md transition'>
-          <h2 className='text-xl font-semibold'>Enhancements Avançados de IA</h2>
-          <p>Acesso IDEs, geração áudio/música, modo sonhar, verificação arquivos.</p>
+          <h2 className='text-xl font-semibold'>Melhorias avançadas de IA</h2>
+          <p>Acesso a IDEs, geração de áudio/música, modo sonho, verificação de arquivos.</p>
         </Link>
 
         {/* Nova seção para evolução */}
@@ -81,7 +86,7 @@ export default function Admin() {
 
         {/* Novo: Governança/IP Registry */}
         <Link href='/admin/ip-registry' className='block p-4 bg-white rounded-lg shadow hover:shadow-md transition'>
-          <h2 className='text-xl font-semibold'>Governança • IP Registry</h2>
+          <h2 className='text-xl font-semibold'>Governança • Registro de IP</h2>
           <p>Defina licenças, IPs permitidos e acione ingestão RAG por IP.</p>
         </Link>
       </div>

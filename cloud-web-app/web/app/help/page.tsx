@@ -59,7 +59,7 @@ const categories: Category[] = [
     faqs: [
       {
         question: 'Qual a diferença entre os planos?',
-        answer: 'O plano Free é ideal para projetos pessoais e aprendizado. O Pro oferece recursos avançados como projetos ilimitados e mais execuções de IA. O Enterprise inclui SSO, SLA garantido e suporte dedicado.',
+        answer: 'O plano Gratuito é ideal para projetos pessoais e aprendizado. O Pro oferece recursos avançados como projetos ilimitados e mais execuções de IA. O Empresarial inclui SSO, SLA garantido e suporte dedicado.',
       },
       {
         question: 'Posso testar o plano Pro antes de assinar?',
@@ -111,7 +111,7 @@ const categories: Category[] = [
       },
       {
         question: 'Onde meus dados são armazenados?',
-        answer: 'Nossos servidores estão localizados no Brasil (São Paulo) e nos EUA. Clientes Enterprise podem escolher a região de armazenamento de acordo com requisitos de compliance.',
+        answer: 'Nossos servidores estão localizados no Brasil (São Paulo) e nos EUA. Clientes Empresarial podem escolher a região de armazenamento de acordo com requisitos de conformidade.',
       },
       {
         question: 'Vocês têm certificações de segurança?',
@@ -125,19 +125,19 @@ const categories: Category[] = [
     faqs: [
       {
         question: 'Como adiciono membros ao meu time?',
-        answer: 'No dashboard, vá em Configurações > Time > Convidar membros. Você pode convidar por email ou gerar um link de convite. Os convites expiram em 7 dias.',
+        answer: 'No painel, vá em Configurações > Time > Convidar membros. Você pode convidar por e-mail ou gerar um link de convite. Os convites expiram em 7 dias.',
       },
       {
         question: 'Quais são os níveis de permissão disponíveis?',
-        answer: 'Oferecemos 4 níveis: Viewer (apenas leitura), Editor (pode editar), Admin (gerencia membros) e Owner (controle total). Você pode criar roles customizados no plano Enterprise.',
+        answer: 'Oferecemos 4 níveis: Visualizador (apenas leitura), Editor (pode editar), Administrador (gerencia membros) e Proprietário (controle total). Você pode criar papéis customizados no plano Empresarial.',
       },
       {
         question: 'Posso ter projetos privados e públicos?',
         answer: 'Sim! Projetos podem ser privados (apenas membros do time), internos (todos da organização) ou públicos (qualquer pessoa). A configuração está nas opções de cada projeto.',
       },
       {
-        question: 'Como funciona o billing para times?',
-        answer: 'O billing é por usuário ativo. Você paga apenas pelos membros que realmente usam a plataforma no mês. Usuários inativos não são cobrados.',
+        question: 'Como funciona o faturamento para times?',
+        answer: 'O faturamento é por usuário ativo. Você paga apenas pelos membros que realmente usam a plataforma no mês. Usuários inativos não são cobrados.',
       },
     ],
   },
@@ -178,36 +178,28 @@ export default function HelpPage() {
               <span className="text-slate-600">|</span>
               <span className="text-slate-400 font-medium">Central de Ajuda</span>
             </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/contact"
-                className="text-slate-300 hover:text-white transition-colors"
-              >
-                Contato
-              </Link>
-              <Link
-                href="/dashboard"
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors"
-              >
-                Dashboard
-              </Link>
-            </div>
+            <Link
+              href="/dashboard"
+              className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              Voltar ao Dashboard
+            </Link>
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="py-16 px-6 border-b border-slate-800">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Central de Ajuda
+      <div className="bg-gradient-to-b from-indigo-600/10 to-transparent border-b border-slate-800">
+        <div className="max-w-6xl mx-auto px-6 py-16 text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Como podemos ajudar?
           </h1>
-          <p className="text-xl text-slate-400 mb-8">
-            Encontre respostas rápidas para suas dúvidas
+          <p className="text-lg text-slate-400 mb-8 max-w-2xl mx-auto">
+            Encontre respostas para as perguntas mais frequentes ou entre em contato com nosso suporte
           </p>
-
+          
           {/* Search */}
-          <div className="relative max-w-xl mx-auto">
+          <div className="max-w-xl mx-auto relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
             <input
               type="text"
@@ -218,73 +210,84 @@ export default function HelpPage() {
             />
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Quick Links */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <Link
             href="/docs"
-            className="flex flex-col items-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors text-center"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
           >
-            <Book className="w-6 h-6 text-indigo-400" />
-            <span className="text-sm text-slate-300">Documentação</span>
+            <Book className="w-6 h-6 text-indigo-400 mb-2" />
+            <h3 className="font-medium text-white group-hover:text-indigo-400 transition-colors">
+              Documentação
+            </h3>
+            <p className="text-sm text-slate-500">Guias completos</p>
           </Link>
           <Link
             href="/contact"
-            className="flex flex-col items-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors text-center"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
           >
-            <MessageSquare className="w-6 h-6 text-emerald-400" />
-            <span className="text-sm text-slate-300">Suporte</span>
+            <MessageSquare className="w-6 h-6 text-emerald-400 mb-2" />
+            <h3 className="font-medium text-white group-hover:text-emerald-400 transition-colors">
+              Suporte
+            </h3>
+            <p className="text-sm text-slate-500">Fale conosco</p>
           </Link>
           <Link
             href="https://status.aethel.io"
-            className="flex flex-col items-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors text-center"
             target="_blank"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
           >
-            <Zap className="w-6 h-6 text-amber-400" />
-            <span className="text-sm text-slate-300">Status</span>
+            <Zap className="w-6 h-6 text-yellow-400 mb-2" />
+            <h3 className="font-medium text-white group-hover:text-yellow-400 transition-colors">
+              Status
+            </h3>
+            <p className="text-sm text-slate-500">Disponibilidade</p>
           </Link>
           <Link
             href="https://discord.gg/aethel"
-            className="flex flex-col items-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors text-center"
             target="_blank"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
           >
-            <Users className="w-6 h-6 text-purple-400" />
-            <span className="text-sm text-slate-300">Comunidade</span>
+            <Users className="w-6 h-6 text-purple-400 mb-2" />
+            <h3 className="font-medium text-white group-hover:text-purple-400 transition-colors">
+              Comunidade
+            </h3>
+            <p className="text-sm text-slate-500">Discord</p>
           </Link>
         </div>
 
         {/* FAQ Categories */}
+        <h2 className="text-xl font-semibold text-white mb-6">
+          Perguntas Frequentes
+        </h2>
+
         <div className="space-y-4">
           {filteredCategories.map((category) => (
             <div
               key={category.name}
-              className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden"
+              className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden"
             >
-              {/* Category Header */}
               <button
                 onClick={() =>
                   setExpandedCategory(
                     expandedCategory === category.name ? null : category.name
                   )
                 }
-                className="w-full flex items-center justify-between p-6 hover:bg-slate-800/50 transition-colors"
+                className="w-full flex items-center gap-4 p-5 hover:bg-slate-800/50 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                    <category.icon className="w-5 h-5 text-indigo-400" />
-                  </div>
-                  <div className="text-left">
-                    <h2 className="text-lg font-semibold text-white">
-                      {category.name}
-                    </h2>
-                    <p className="text-sm text-slate-400">
-                      {category.faqs.length} perguntas
-                    </p>
-                  </div>
+                <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center">
+                  <category.icon className="w-5 h-5 text-indigo-400" />
                 </div>
+                <span className="flex-1 text-left font-medium text-white">
+                  {category.name}
+                </span>
+                <span className="text-sm text-slate-500 mr-2">
+                  {category.faqs.length} perguntas
+                </span>
                 <ChevronDown
                   className={`w-5 h-5 text-slate-400 transition-transform ${
                     expandedCategory === category.name ? 'rotate-180' : ''
@@ -292,7 +295,6 @@ export default function HelpPage() {
                 />
               </button>
 
-              {/* FAQs */}
               {expandedCategory === category.name && (
                 <div className="border-t border-slate-800">
                   {category.faqs.map((faq) => (

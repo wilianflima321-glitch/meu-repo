@@ -3,6 +3,7 @@ import useSWR from 'swr'
 import { Users, CreditCard, DollarSign, Activity, Settings, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
 import { authHeaders } from '@/lib/auth'
 import { API_BASE } from '@/lib/api'
+import { useToast } from '@/components/ui/Toast'
 
 interface User {
   id: number
@@ -44,6 +45,7 @@ const fetcher = (url: string) => {
 }
 
 export default function AdminPanel() {
+  const toast = useToast()
   const recentTransactions: CreditTransaction[] = []
   const [activeAdminTab, setActiveAdminTab] = useState<'overview' | 'users' | 'credits' | 'financial' | 'system'>('overview')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
@@ -87,11 +89,11 @@ export default function AdminPanel() {
       if (!response.ok) throw new Error('Failed to adjust credits')
 
       const result = await response.json()
-      alert(`Credits adjusted successfully. New balance: $${result.new_balance}`)
+      toast.success(`Créditos ajustados com sucesso. Novo saldo: $${result.new_balance}`)
       mutateUsers() // Refresh user data
     } catch (error) {
       console.error('Error adjusting credits:', error)
-      alert('Failed to adjust credits')
+      toast.error('Falha ao ajustar créditos')
     }
   }
 
@@ -103,13 +105,13 @@ export default function AdminPanel() {
         body: JSON.stringify({ is_active: false })
       })
 
-      if (!response.ok) throw new Error('Failed to suspend user')
+      if (!response.ok) throw new Error('Falha ao suspender usuário')
 
-      alert('User suspended successfully')
+      toast.success('Usuário suspenso com sucesso')
       mutateUsers() // Refresh user data
     } catch (error) {
       console.error('Error suspending user:', error)
-      alert('Failed to suspend user')
+      toast.error('Falha ao suspender usuário')
     }
   }
 
@@ -121,33 +123,33 @@ export default function AdminPanel() {
         body: JSON.stringify({ is_active: true })
       })
 
-      if (!response.ok) throw new Error('Failed to activate user')
+      if (!response.ok) throw new Error('Falha ao ativar usuário')
 
-      alert('User activated successfully')
+      toast.success('Usuário ativado com sucesso')
       mutateUsers() // Refresh user data
     } catch (error) {
-      console.error('Error activating user:', error)
-      alert('Failed to activate user')
+      console.error('Erro ao ativar usuário:', error)
+      toast.error('Falha ao ativar usuário')
     }
   }
 
   return (
     <div className="aethel-p-6 aethel-space-y-6">
       <div className="aethel-text-center">
-        <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Admin Dashboard</h2>
+        <h2 className="aethel-text-3xl aethel-font-bold aethel-mb-4">Painel Administrativo</h2>
         <p className="aethel-text-lg aethel-text-slate-400 aethel-max-w-2xl aethel-mx-auto">
-          Manage users, credits, plans, and system metrics. Full administrative control over the Aethel platform.
+          Gerencie usuários, créditos, planos e métricas do sistema. Controle administrativo completo da plataforma Aethel.
         </p>
       </div>
 
       {/* Admin Navigation */}
       <div className="aethel-flex aethel-space-x-1 aethel-bg-slate-800 aethel-p-1 aethel-rounded-lg aethel-max-w-2xl aethel-mx-auto">
         {[
-          { id: 'overview', label: 'Overview', icon: '' },
-          { id: 'users', label: 'Users', icon: '' },
-          { id: 'credits', label: 'Credits', icon: '' },
-          { id: 'financial', label: 'Financial', icon: '' },
-          { id: 'system', label: 'System', icon: '' }
+          { id: 'overview', label: 'Visão Geral', icon: '' },
+          { id: 'users', label: 'Usuários', icon: '' },
+          { id: 'credits', label: 'Créditos', icon: '' },
+          { id: 'financial', label: 'Financeiro', icon: '' },
+          { id: 'system', label: 'Sistema', icon: '' }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -170,9 +172,9 @@ export default function AdminPanel() {
             <div className="aethel-card aethel-p-6">
               <div className="aethel-flex aethel-items-center aethel-justify-between">
                 <div>
-                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Total Users</h3>
+                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Total de Usuários</h3>
                   <p className="aethel-text-2xl aethel-font-bold aethel-text-white">{currentStats.total_users.toLocaleString()}</p>
-                  <p className="aethel-text-xs aethel-text-green-400 aethel-mt-1">Active: {currentStats.active_users}</p>
+                  <p className="aethel-text-xs aethel-text-green-400 aethel-mt-1">Ativos: {currentStats.active_users}</p>
                 </div>
                 <div className="aethel-w-12 aethel-h-12 aethel-bg-blue-500/20 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center">
                   <Users className="w-6 h-6 aethel-text-blue-400" />
@@ -183,9 +185,9 @@ export default function AdminPanel() {
             <div className="aethel-card aethel-p-6">
               <div className="aethel-flex aethel-items-center aethel-justify-between">
                 <div>
-                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Total Credits</h3>
+                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Total de Créditos</h3>
                   <p className="aethel-text-2xl aethel-font-bold aethel-text-white">${currentStats.total_credits.toFixed(2)}</p>
-                  <p className="aethel-text-xs aethel-text-green-400 aethel-mt-1">Across all users</p>
+                  <p className="aethel-text-xs aethel-text-green-400 aethel-mt-1">Todos os usuários</p>
                 </div>
                 <div className="aethel-w-12 aethel-h-12 aethel-bg-green-500/20 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center">
                   <CreditCard className="w-6 h-6 aethel-text-green-400" />
@@ -196,9 +198,9 @@ export default function AdminPanel() {
             <div className="aethel-card aethel-p-6">
               <div className="aethel-flex aethel-items-center aethel-justify-between">
                 <div>
-                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Monthly Revenue</h3>
+                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Receita Mensal</h3>
                   <p className="aethel-text-2xl aethel-font-bold aethel-text-white">${currentStats.monthly_revenue.toFixed(2)}</p>
-                  <p className="aethel-text-xs aethel-text-yellow-400 aethel-mt-1">This month</p>
+                  <p className="aethel-text-xs aethel-text-yellow-400 aethel-mt-1">Este mês</p>
                 </div>
                 <div className="aethel-w-12 aethel-h-12 aethel-bg-yellow-500/20 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center">
                   <DollarSign className="w-6 h-6 aethel-text-yellow-400" />
@@ -209,9 +211,9 @@ export default function AdminPanel() {
             <div className="aethel-card aethel-p-6">
               <div className="aethel-flex aethel-items-center aethel-justify-between">
                 <div>
-                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">API Calls Today</h3>
+                  <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Chamadas API Hoje</h3>
                   <p className="aethel-text-2xl aethel-font-bold aethel-text-white">{currentStats.api_calls_today.toLocaleString()}</p>
-                  <p className="aethel-text-xs aethel-text-purple-400 aethel-mt-1">Active sessions: {currentStats.active_sessions}</p>
+                  <p className="aethel-text-xs aethel-text-purple-400 aethel-mt-1">Sessões ativas: {currentStats.active_sessions}</p>
                 </div>
                 <div className="aethel-w-12 aethel-h-12 aethel-bg-purple-500/20 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center">
                   <Activity className="w-6 h-6 aethel-text-purple-400" />
@@ -222,7 +224,7 @@ export default function AdminPanel() {
 
           {/* Recent Activity */}
           <div className="aethel-card aethel-p-6">
-            <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-4">Recent Admin Activity</h3>
+            <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-4">Atividade Recente</h3>
             <div className="aethel-space-y-4">
               {recentTransactions.map((transaction) => (
                 <div key={transaction.id} className="aethel-flex aethel-items-center aethel-gap-3 aethel-p-3 aethel-rounded-lg aethel-bg-slate-800/50">
@@ -308,7 +310,7 @@ export default function AdminPanel() {
                           user.is_active ? 'aethel-bg-green-500/20 aethel-text-green-400' :
                           'aethel-bg-red-500/20 aethel-text-red-400'
                         }`}>
-                          {user.is_active ? 'Active' : 'Suspended'}
+                          {user.is_active ? 'Ativo' : 'Suspenso'}
                         </span>
                       </td>
                       <td className="aethel-py-3 aethel-px-4">
@@ -325,26 +327,26 @@ export default function AdminPanel() {
                         <div className="aethel-flex aethel-space-x-2">
                           <button
                             onClick={() => {
-                              const amount = prompt('Enter credits to add:');
+                              const amount = prompt('Digite os créditos a adicionar:');
                               if (amount) handleAddCredits(user.id, parseFloat(amount));
                             }}
                             className="aethel-text-xs aethel-bg-blue-500/20 aethel-text-blue-400 aethel-px-2 aethel-py-1 aethel-rounded hover:aethel-bg-blue-500/30"
                           >
-                            Add Credits
+                            Adicionar Créditos
                           </button>
                           {user.is_active ? (
                             <button
                               onClick={() => handleSuspendUser(user.id)}
                               className="aethel-text-xs aethel-bg-red-500/20 aethel-text-red-400 aethel-px-2 aethel-py-1 aethel-rounded hover:aethel-bg-red-500/30"
                             >
-                              Suspend
+                              Suspender
                             </button>
                           ) : (
                             <button
                               onClick={() => handleActivateUser(user.id)}
                               className="aethel-text-xs aethel-bg-green-500/20 aethel-text-green-400 aethel-px-2 aethel-py-1 aethel-rounded hover:aethel-bg-green-500/30"
                             >
-                              Activate
+                              Ativar
                             </button>
                           )}
                         </div>
@@ -358,7 +360,7 @@ export default function AdminPanel() {
             {/* Pagination */}
             <div className="aethel-flex aethel-justify-between aethel-items-center aethel-mt-4">
               <span className="aethel-text-sm aethel-text-slate-400">
-                Showing {users.length} of {totalUsers} users
+                Mostrando {users.length} de {totalUsers} usuários
               </span>
               <div className="aethel-flex aethel-gap-2">
                 <button
@@ -366,17 +368,17 @@ export default function AdminPanel() {
                   disabled={userPage === 1}
                   className="aethel-px-3 aethel-py-1 aethel-text-sm aethel-bg-slate-700 aethel-text-white aethel-rounded disabled:aethel-opacity-50"
                 >
-                  Previous
+                  Anterior
                 </button>
                 <span className="aethel-px-3 aethel-py-1 aethel-text-sm aethel-text-slate-400">
-                  Page {userPage}
+                  Página {userPage}
                 </span>
                 <button
                   onClick={() => setUserPage(userPage + 1)}
                   disabled={users.length < 20}
                   className="aethel-px-3 aethel-py-1 aethel-text-sm aethel-bg-slate-700 aethel-text-white aethel-rounded disabled:aethel-opacity-50"
                 >
-                  Next
+                  Próxima
                 </button>
               </div>
             </div>
@@ -387,24 +389,24 @@ export default function AdminPanel() {
       {activeAdminTab === 'credits' && (
         <div className="aethel-space-y-6">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
-            <h3 className="aethel-text-xl aethel-font-semibold">Credit Management</h3>
-            <button className="aethel-button aethel-button-primary">Bulk Credit Operation</button>
+            <h3 className="aethel-text-xl aethel-font-semibold">Gerenciamento de Créditos</h3>
+            <button className="aethel-button aethel-button-primary">Operação de Créditos em Lote</button>
           </div>
 
           <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
             <div className="aethel-card aethel-p-6">
-              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Credit Allocation</h4>
+              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Alocação de Créditos</h4>
               <div className="aethel-space-y-4">
                 <div>
-                  <label className="aethel-block aethel-text-sm aethel-font-medium aethel-text-slate-400 aethel-mb-2">User Email</label>
+                  <label className="aethel-block aethel-text-sm aethel-font-medium aethel-text-slate-400 aethel-mb-2">E-mail do Usuário</label>
                   <input
                     type="email"
                     className="aethel-w-full aethel-bg-slate-800 aethel-border aethel-border-slate-600 aethel-rounded aethel-px-3 aethel-py-2 aethel-text-white"
-                    placeholder="user@example.com"
+                    placeholder="usuario@exemplo.com"
                   />
                 </div>
                 <div>
-                  <label className="aethel-block aethel-text-sm aethel-font-medium aethel-text-slate-400 aethel-mb-2">Credits to Add</label>
+                  <label className="aethel-block aethel-text-sm aethel-font-medium aethel-text-slate-400 aethel-mb-2">Créditos a Adicionar</label>
                   <input
                     type="number"
                     className="aethel-w-full aethel-bg-slate-800 aethel-border aethel-border-slate-600 aethel-rounded aethel-px-3 aethel-py-2 aethel-text-white"
@@ -412,29 +414,29 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div>
-                  <label className="aethel-block aethel-text-sm aethel-font-medium aethel-text-slate-400 aethel-mb-2">Reason</label>
+                  <label className="aethel-block aethel-text-sm aethel-font-medium aethel-text-slate-400 aethel-mb-2">Motivo</label>
                   <textarea
                     className="aethel-w-full aethel-bg-slate-800 aethel-border aethel-border-slate-600 aethel-rounded aethel-px-3 aethel-py-2 aethel-text-white aethel-h-20"
-                    placeholder="Reason for credit allocation"
+                    placeholder="Motivo para alocação de créditos"
                   />
                 </div>
-                <button className="aethel-button aethel-button-primary aethel-w-full">Add Credits</button>
+                <button className="aethel-button aethel-button-primary aethel-w-full">Adicionar Créditos</button>
               </div>
             </div>
 
             <div className="aethel-card aethel-p-6">
-              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Credit Analytics</h4>
+              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Análise de Créditos</h4>
               <div className="aethel-space-y-4">
                 <div className="aethel-flex aethel-justify-between aethel-items-center aethel-p-3 aethel-bg-slate-800/50 aethel-rounded">
-                  <span className="aethel-text-sm">Average Credits per User</span>
+                  <span className="aethel-text-sm">Média de Créditos por Usuário</span>
                   <span className="aethel-font-semibold">1,247</span>
                 </div>
                 <div className="aethel-flex aethel-justify-between aethel-items-center aethel-p-3 aethel-bg-slate-800/50 aethel-rounded">
-                  <span className="aethel-text-sm">Credits Used Today</span>
+                  <span className="aethel-text-sm">Créditos Usados Hoje</span>
                   <span className="aethel-font-semibold">45,231</span>
                 </div>
                 <div className="aethel-flex aethel-justify-between aethel-items-center aethel-p-3 aethel-bg-slate-800/50 aethel-rounded">
-                  <span className="aethel-text-sm">Top Spender (This Month)</span>
+                  <span className="aethel-text-sm">Maior Consumidor (Este Mês)</span>
                   <span className="aethel-font-semibold">user@company.com</span>
                 </div>
               </div>
@@ -442,16 +444,16 @@ export default function AdminPanel() {
           </div>
 
           <div className="aethel-card aethel-p-6">
-            <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Recent Credit Transactions</h4>
+            <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Transações de Créditos Recentes</h4>
             <div className="aethel-overflow-x-auto">
               <table className="aethel-w-full aethel-text-sm">
                 <thead>
                   <tr className="aethel-border-b aethel-border-slate-700">
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">User</th>
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Type</th>
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Amount</th>
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Description</th>
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Time</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Usuário</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Tipo</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Valor</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Descrição</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Horário</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -488,13 +490,13 @@ export default function AdminPanel() {
       {activeAdminTab === 'financial' && (
         <div className="aethel-space-y-6">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
-            <h3 className="aethel-text-xl aethel-font-semibold">Financial Management</h3>
-            <button className="aethel-button aethel-button-primary">Generate Report</button>
+            <h3 className="aethel-text-xl aethel-font-semibold">Gestão Financeira</h3>
+            <button className="aethel-button aethel-button-primary">Gerar Relatório</button>
           </div>
 
           <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-3 aethel-gap-6">
             <div className="aethel-card aethel-p-6">
-              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Revenue Breakdown</h4>
+              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Detalhamento de Receita</h4>
               <div className="aethel-space-y-3">
                 <div className="aethel-flex aethel-justify-between">
                   <span className="aethel-text-sm aethel-text-slate-400">Basic Plan ($19)</span>
@@ -516,10 +518,10 @@ export default function AdminPanel() {
             </div>
 
             <div className="aethel-card aethel-p-6">
-              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Payment Methods</h4>
+              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Métodos de Pagamento</h4>
               <div className="aethel-space-y-3">
                 <div className="aethel-flex aethel-justify-between">
-                  <span className="aethel-text-sm aethel-text-slate-400">Credit Card</span>
+                  <span className="aethel-text-sm aethel-text-slate-400">Cartão de Crédito</span>
                   <span className="aethel-font-semibold">68%</span>
                 </div>
                 <div className="aethel-flex aethel-justify-between">
@@ -527,54 +529,54 @@ export default function AdminPanel() {
                   <span className="aethel-font-semibold">22%</span>
                 </div>
                 <div className="aethel-flex aethel-justify-between">
-                  <span className="aethel-text-sm aethel-text-slate-400">Bank Transfer</span>
+                  <span className="aethel-text-sm aethel-text-slate-400">Transferência Bancária</span>
                   <span className="aethel-font-semibold">10%</span>
                 </div>
               </div>
             </div>
 
             <div className="aethel-card aethel-p-6">
-              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Failed Payments</h4>
+              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Pagamentos Falhados</h4>
               <div className="aethel-text-center">
                 <div className="aethel-text-3xl aethel-font-bold aethel-text-red-400 aethel-mb-2">2.3%</div>
-                <p className="aethel-text-sm aethel-text-slate-400">Failure rate this month</p>
-                <p className="aethel-text-xs aethel-text-slate-500 aethel-mt-2">127 failed out of 5,421 attempts</p>
+                <p className="aethel-text-sm aethel-text-slate-400">Taxa de falha este mês</p>
+                <p className="aethel-text-xs aethel-text-slate-500 aethel-mt-2">127 falharam de 5.421 tentativas</p>
               </div>
             </div>
           </div>
 
           <div className="aethel-card aethel-p-6">
-            <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Recent Payments</h4>
+            <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Pagamentos Recentes</h4>
             <div className="aethel-overflow-x-auto">
               <table className="aethel-w-full aethel-text-sm">
                 <thead>
                   <tr className="aethel-border-b aethel-border-slate-700">
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">User</th>
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Plan</th>
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Amount</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Usuário</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Plano</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Valor</th>
                     <th className="aethel-text-left aethel-py-3 aethel-px-4">Status</th>
-                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Date</th>
+                    <th className="aethel-text-left aethel-py-3 aethel-px-4">Data</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="aethel-border-b aethel-border-slate-800">
                     <td className="aethel-py-3 aethel-px-4">john.doe@example.com</td>
-                    <td className="aethel-py-3 aethel-px-4">Plus Plan</td>
+                    <td className="aethel-py-3 aethel-px-4">Plano Plus</td>
                     <td className="aethel-py-3 aethel-px-4">$39.00</td>
                     <td className="aethel-py-3 aethel-px-4">
                       <span className="aethel-px-2 aethel-py-1 aethel-rounded aethel-text-xs aethel-bg-green-500/20 aethel-text-green-400">
-                        Completed
+                        Concluído
                       </span>
                     </td>
                     <td className="aethel-py-3 aethel-px-4 aethel-text-slate-400">2025-01-25</td>
                   </tr>
                   <tr className="aethel-border-b aethel-border-slate-800">
                     <td className="aethel-py-3 aethel-px-4">jane.smith@example.com</td>
-                    <td className="aethel-py-3 aethel-px-4">Basic Plan</td>
+                    <td className="aethel-py-3 aethel-px-4">Plano Básico</td>
                     <td className="aethel-py-3 aethel-px-4">$19.00</td>
                     <td className="aethel-py-3 aethel-px-4">
                       <span className="aethel-px-2 aethel-py-1 aethel-rounded aethel-text-xs aethel-bg-green-500/20 aethel-text-green-400">
-                        Completed
+                        Concluído
                       </span>
                     </td>
                     <td className="aethel-py-3 aethel-px-4 aethel-text-slate-400">2025-01-24</td>
@@ -589,13 +591,13 @@ export default function AdminPanel() {
       {activeAdminTab === 'system' && (
         <div className="aethel-space-y-6">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
-            <h3 className="aethel-text-xl aethel-font-semibold">System Management</h3>
-            <button className="aethel-button aethel-button-primary">System Settings</button>
+            <h3 className="aethel-text-xl aethel-font-semibold">Gestão do Sistema</h3>
+            <button className="aethel-button aethel-button-primary">Configurações do Sistema</button>
           </div>
 
           <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
             <div className="aethel-card aethel-p-6">
-              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Server Status</h4>
+              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Status dos Servidores</h4>
               <div className="aethel-space-y-4">
                 <div className="aethel-flex aethel-justify-between aethel-items-center aethel-p-3 aethel-bg-green-500/10 aethel-rounded">
                   <div className="aethel-flex aethel-items-center aethel-gap-3">
@@ -622,22 +624,22 @@ export default function AdminPanel() {
             </div>
 
             <div className="aethel-card aethel-p-6">
-              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">System Metrics</h4>
+              <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Métricas do Sistema</h4>
               <div className="aethel-space-y-4">
                 <div className="aethel-flex aethel-justify-between aethel-items-center">
-                  <span className="aethel-text-sm aethel-text-slate-400">CPU Usage</span>
+                  <span className="aethel-text-sm aethel-text-slate-400">Uso de CPU</span>
                   <span className="aethel-font-semibold">45%</span>
                 </div>
                 <div className="aethel-flex aethel-justify-between aethel-items-center">
-                  <span className="aethel-text-sm aethel-text-slate-400">Memory Usage</span>
+                  <span className="aethel-text-sm aethel-text-slate-400">Uso de Memória</span>
                   <span className="aethel-font-semibold">67%</span>
                 </div>
                 <div className="aethel-flex aethel-justify-between aethel-items-center">
-                  <span className="aethel-text-sm aethel-text-slate-400">Active Connections</span>
+                  <span className="aethel-text-sm aethel-text-slate-400">Conexões Ativas</span>
                   <span className="aethel-font-semibold">1,247</span>
                 </div>
                 <div className="aethel-flex aethel-justify-between aethel-items-center">
-                  <span className="aethel-text-sm aethel-text-slate-400">Queue Size</span>
+                  <span className="aethel-text-sm aethel-text-slate-400">Tamanho da Fila</span>
                   <span className="aethel-font-semibold">23</span>
                 </div>
               </div>
@@ -645,7 +647,7 @@ export default function AdminPanel() {
           </div>
 
           <div className="aethel-card aethel-p-6">
-            <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">System Logs</h4>
+            <h4 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Logs do Sistema</h4>
             <div className="aethel-bg-slate-900 aethel-rounded aethel-p-4 aethel-font-mono aethel-text-sm aethel-max-h-96 aethel-overflow-y-auto">
               <div className="aethel-space-y-1">
                 <div className="aethel-text-green-400">[2025-01-25 10:30:15] INFO: User authentication successful - user_12345</div>

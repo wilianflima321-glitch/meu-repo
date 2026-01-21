@@ -83,6 +83,34 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 CMD ["npx", "ts-node", "--transpile-only", "lib/server/bootstrap.ts"]
 
 # ========================================
+# Stage 3b: Worker (Build Queue)
+# ========================================
+FROM node:20-alpine AS worker
+
+WORKDIR /app
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy only what the worker needs
+COPY server ./server
+COPY lib ./lib
+COPY public ./public
+COPY prisma ./prisma
+COPY tsconfig.json package.json ./
+
+ENV NODE_ENV=production
+
+# Non-root user for security
+RUN addgroup --system --gid 1001 aethel && \
+  adduser --system --uid 1001 aethel && \
+  chown -R aethel:aethel /app
+
+USER aethel
+
+CMD ["npm", "run", "worker:build-queue"]
+
+# ========================================
 # Stage 4: Web Application (Production)
 # ========================================
 FROM node:20-alpine AS web

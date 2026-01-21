@@ -226,6 +226,33 @@ class EmergencyController extends EventEmitter {
     }
     return this.state.settings.fallbackModel;
   }
+
+  /**
+   * Verifica se a requisição pode ser executada no estado atual.
+   */
+  canMakeRequest(modelId: string, _estimatedTokens: number): { allowed: boolean; reason?: string; model?: string } {
+    if (this.state.level === 'shutdown') {
+      return { allowed: false, reason: 'Emergency shutdown active' };
+    }
+
+    const effectiveModel = this.getEffectiveModel(modelId);
+    if (!this.canUseModel(effectiveModel)) {
+      return { allowed: false, reason: 'Model not allowed in emergency mode', model: effectiveModel };
+    }
+
+    return { allowed: true, model: effectiveModel };
+  }
+
+  /**
+   * Registra gasto estimado em memória (fallback leve)
+   */
+  recordSpend(cost: number): void {
+    if (!Number.isFinite(cost) || cost <= 0) return;
+    this.state.metrics.dailySpend += cost;
+    this.state.metrics.hourlySpend += cost;
+    this.state.metrics.monthlySpend += cost;
+    this.state.metrics.lastUpdated = new Date();
+  }
   
   // ============================================================================
   // AÇÕES DE CONTROLE
@@ -318,7 +345,7 @@ class EmergencyController extends EventEmitter {
         prisma.creditLedgerEntry.aggregate({
           where: {
             createdAt: { gte: startOfHour },
-            type: { in: ['usage', 'ai_generation'] },
+            entryType: { in: ['usage', 'ai_generation'] },
           },
           _sum: { amount: true },
           _count: { _all: true },
@@ -326,7 +353,7 @@ class EmergencyController extends EventEmitter {
         prisma.creditLedgerEntry.aggregate({
           where: {
             createdAt: { gte: startOfDay },
-            type: { in: ['usage', 'ai_generation'] },
+            entryType: { in: ['usage', 'ai_generation'] },
           },
           _sum: { amount: true },
           _count: { _all: true },
@@ -334,7 +361,7 @@ class EmergencyController extends EventEmitter {
         prisma.creditLedgerEntry.aggregate({
           where: {
             createdAt: { gte: startOfMonth },
-            type: { in: ['usage', 'ai_generation'] },
+            entryType: { in: ['usage', 'ai_generation'] },
           },
           _sum: { amount: true },
           _count: { _all: true },
@@ -451,10 +478,12 @@ class EmergencyController extends EventEmitter {
       await prisma.auditLog.create({
         data: {
           action: `EMERGENCY:${action}`,
-          actorId: 'system',
-          actorEmail: 'system@aethel.io',
-          details: details as any,
-          timestamp: new Date(),
+          category: 'system',
+          severity: 'info',
+          adminId: null,
+          adminEmail: 'system@aethel.io',
+          adminRole: 'system',
+          metadata: details as any,
         },
       });
     } catch (error) {
@@ -520,8 +549,8 @@ class EmergencyController extends EventEmitter {
         data: {
           userId,
           amount: -credits,
-          type: 'ai_generation',
-          description: `AI usage: ${model}`,
+          entryType: 'ai_generation',
+          reference: `AI usage: ${model}`,
           metadata: {
             model,
             inputTokens,

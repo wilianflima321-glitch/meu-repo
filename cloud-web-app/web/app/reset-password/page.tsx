@@ -21,7 +21,7 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     if (!token || !email) {
-      setError('Invalid reset link. Please request a new one.')
+      setError('Link de redefinição inválido. Solicite um novo.')
     }
   }, [token, email])
 
@@ -31,13 +31,13 @@ function ResetPasswordForm() {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('As senhas não coincidem')
       setIsLoading(false)
       return
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError('A senha deve ter pelo menos 8 caracteres')
       setIsLoading(false)
       return
     }
@@ -52,7 +52,7 @@ function ResetPasswordForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Failed to reset password')
+        setError(data.error || 'Falha ao redefinir a senha')
         return
       }
 
@@ -63,7 +63,7 @@ function ResetPasswordForm() {
         router.push('/login')
       }, 3000)
     } catch (err) {
-      setError('Network error. Please try again.')
+      setError('Erro de rede. Tente novamente.')
     } finally {
       setIsLoading(false)
     }
@@ -77,15 +77,15 @@ function ResetPasswordForm() {
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <XCircle className="w-8 h-8 text-red-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Invalid Link</h1>
+            <h1 className="text-2xl font-bold text-white mb-4">Link inválido</h1>
             <p className="text-slate-400 mb-6">
-              This password reset link is invalid or has expired.
+              Este link de redefinição é inválido ou expirou.
             </p>
             <Link
               href="/forgot-password"
               className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium rounded-xl transition-all"
             >
-              Request new link
+              Solicitar novo link
             </Link>
           </div>
         </div>
@@ -101,16 +101,16 @@ function ResetPasswordForm() {
             <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-8 h-8 text-emerald-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Password Reset!</h1>
+            <h1 className="text-2xl font-bold text-white mb-4">Senha redefinida!</h1>
             <p className="text-slate-400 mb-6">
-              Your password has been reset successfully. Redirecting to login...
+              Sua senha foi redefinida com sucesso. Redirecionando para o login...
             </p>
             <Link
               href="/login"
               className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              Go to login now
+              Ir para o login agora
             </Link>
           </div>
         </div>
@@ -127,9 +127,9 @@ function ResetPasswordForm() {
             <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/25">
               <Lock className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Reset Password</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">Redefinir senha</h1>
             <p className="text-slate-400">
-              Enter your new password below.
+              Digite sua nova senha abaixo.
             </p>
           </div>
 
@@ -143,7 +143,7 @@ function ResetPasswordForm() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
-                New password
+                Nova senha
               </label>
               <div className="relative">
                 <input
@@ -168,7 +168,7 @@ function ResetPasswordForm() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300 mb-2">
-                Confirm new password
+                Confirmar nova senha
               </label>
               <input
                 id="confirmPassword"
@@ -185,10 +185,10 @@ function ResetPasswordForm() {
             {/* Password requirements */}
             <div className="text-xs text-slate-500 space-y-1">
               <p className={password.length >= 8 ? 'text-emerald-400' : ''}>
-                • At least 8 characters
+                • Pelo menos 8 caracteres
               </p>
               <p className={password === confirmPassword && password.length > 0 ? 'text-emerald-400' : ''}>
-                • Passwords match
+                • Senhas coincidem
               </p>
             </div>
 
@@ -200,10 +200,10 @@ function ResetPasswordForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Resetting...
+                  Redefinindo...
                 </>
               ) : (
-                'Reset password'
+                'Redefinir senha'
               )}
             </button>
           </form>
@@ -215,7 +215,7 @@ function ResetPasswordForm() {
               className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to login
+              Voltar para o login
             </Link>
           </div>
         </div>

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { authHeaders } from '@/lib/auth'
 import { postChat } from '@/lib/ai'
+import { useToast } from '@/components/ui/Toast'
 
 const FALLBACK_MODELS = ['gpt-4o-mini', 'gemini-1.5-flash', 'gemini-1.5-pro', 'claude-3-5-haiku-20241022']
 
@@ -137,6 +138,7 @@ function TraceDetailsPanel(props: { traceId: string; trace: any }) {
 }
 
 export default function ChatPage(){
+  const toast = useToast()
   const [history, setHistory] = useState<Msg[]>([])
   const [input, setInput] = useState('')
   const [availableModels, setAvailableModels] = useState<string[]>(FALLBACK_MODELS)
@@ -270,7 +272,7 @@ export default function ChatPage(){
       return
     } catch (e:any) {
       const txt = e?.message || 'Erro desconhecido'
-      alert(`Falha no chat (precisa estar logado e com créditos)\n${txt}`)
+      toast.error(`Falha no chat (precisa estar logado e com créditos): ${txt}`)
       return
     }
   }
@@ -340,7 +342,7 @@ export default function ChatPage(){
           <input type="checkbox" checked={includeTrace} onChange={(e)=>setIncludeTrace(e.target.checked)} disabled={runtime !== 'advanced'} />
           Ver detalhes
         </label>
-        <button className="aethel-button aethel-button-secondary" onClick={()=>alert('Live / Canvas em breve')}>Live/Canvas</button>
+        <button className="aethel-button aethel-button-secondary" onClick={()=>toast.info('Live / Canvas em breve')}>Live/Canvas</button>
       </div>
       <div style={{minHeight:200,background:'#0b1325',padding:12,borderRadius:8,marginBottom:8}}>
         {history.map((m,i)=> (

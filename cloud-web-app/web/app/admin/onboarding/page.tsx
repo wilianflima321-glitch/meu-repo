@@ -1,51 +1,115 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+type OnboardingStats = {
+  totalActions: number;
+  uniqueUsers: number;
+  lastActivity: string | null;
+  actionCounts: Record<string, number>;
+};
 
 export default function Onboarding() {
-  const [journeys, setJourneys] = useState([
-    { id: 1, name: 'Tutorial Básico', steps: 5, users: 100, active: true },
-    { id: 2, name: 'Onboarding Avançado IA', steps: 8, users: 50, active: false },
-  ]);
+  const [stats, setStats] = useState<OnboardingStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [search, setSearch] = useState('');
 
-  const toggle = (id) => {
-    setJourneys(journeys.map(j => j.id === id ? { ...j, active: !j.active } : j));
-  };
+  const fetchStats = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/admin/onboarding/stats');
+      if (!res.ok) throw new Error('Falha ao carregar estatísticas de onboarding');
+      const data = await res.json();
+      setStats(data?.stats ?? null);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar onboarding');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  const filteredActions = Object.entries(stats?.actionCounts || {}).filter(([action]) => {
+    const term = search.trim().toLowerCase();
+    return !term || action.toLowerCase().includes(term);
+  });
 
   return (
     <div className='p-6 max-w-6xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-6'>User Onboarding</h1>
-      <p className='mb-4 text-gray-600'>Gerencie jornadas adaptativas de onboarding para novos usuários.</p>
-
-      <div className='mb-6'>
-        <button className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'>Nova Jornada</button>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className='text-3xl font-bold'>Onboarding de usuários</h1>
+          <p className='text-gray-600'>Resumo das ações registradas no onboarding.</p>
+          {lastUpdated && (
+            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+          )}
+        </div>
+        <button
+          onClick={fetchStats}
+          className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+        >
+          Atualizar
+        </button>
       </div>
 
-      <table className='w-full table-auto'>
-        <thead>
-          <tr className='bg-gray-100'>
-            <th className='p-2'>Nome</th>
-            <th className='p-2'>Passos</th>
-            <th className='p-2'>Usuários Ativos</th>
-            <th className='p-2'>Ativa</th>
-            <th className='p-2'>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {journeys.map((j) => (
-            <tr key={j.id}>
-              <td className='p-2'>{j.name}</td>
-              <td className='p-2'>{j.steps}</td>
-              <td className='p-2'>{j.users}</td>
-              <td className='p-2'>{j.active ? 'Sim' : 'Não'}</td>
-              <td className='p-2'>
-                <button onClick={() => toggle(j.id)} className='px-2 py-1 bg-yellow-500 text-white rounded mr-2'>Toggle</button>
-                <button className='px-2 py-1 bg-red-500 text-white rounded'>Editar</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className='bg-white p-4 rounded-lg shadow mb-6'>
+        {loading ? (
+          <p className='text-sm text-gray-500'>Carregando estatísticas...</p>
+        ) : error ? (
+          <p className='text-sm text-red-500'>{error}</p>
+        ) : !stats ? (
+          <p className='text-sm text-gray-500'>Sem dados disponíveis.</p>
+        ) : (
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='text-center'>
+              <p className='text-sm font-semibold'>Ações registradas</p>
+              <p className='text-2xl font-bold text-blue-600'>{stats.totalActions}</p>
+            </div>
+            <div className='text-center'>
+              <p className='text-sm font-semibold'>Usuários únicos</p>
+              <p className='text-2xl font-bold text-green-600'>{stats.uniqueUsers}</p>
+            </div>
+            <div className='text-center'>
+              <p className='text-sm font-semibold'>Última atividade</p>
+              <p className='text-sm text-gray-600'>
+                {stats.lastActivity ? new Date(stats.lastActivity).toLocaleString() : '—'}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className='bg-white p-4 rounded-lg shadow'>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className='text-lg font-semibold'>Ações por tipo</h2>
+          <input
+            type="text"
+            placeholder="Buscar ação"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border p-2 rounded text-sm"
+          />
+        </div>
+        {filteredActions.length > 0 ? (
+          <ul>
+            {filteredActions.map(([action, count]) => (
+              <li key={action} className='flex justify-between border-b p-2'>
+                <span>{action}</span>
+                <span className='text-sm text-gray-600'>{count}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className='text-sm text-gray-500'>Nenhuma ação registrada.</p>
+        )}
+      </div>
     </div>
   );
 }

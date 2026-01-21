@@ -234,8 +234,8 @@ export default function AethelIDE() {
       return (
         <div className="h-full flex items-center justify-center text-slate-500">
           <div className="text-center">
-            <p className="text-xl mb-2">Welcome to Aethel Engine</p>
-            <p className="text-sm">Open a file or create a new one to get started</p>
+            <p className="text-xl mb-2">Bem-vindo ao Aethel Engine</p>
+            <p className="text-sm">Abra um arquivo ou crie um novo para começar</p>
           </div>
         </div>
       )

@@ -1,6 +1,0 @@
-{
-  "name": "@aethel/core",
-  "version": "0.0.0-test",
-  "description": "Temporary package.json added to satisfy runtime requires during tests",
-  "private": true
-}

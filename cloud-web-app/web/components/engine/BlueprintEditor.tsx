@@ -39,6 +39,7 @@ import {
   StandardNodes,
   getBlueprintManager,
 } from '@/lib/blueprint-system';
+import { useToast } from '@/components/ui/Toast';
 
 // ============================================================================
 // TYPES
@@ -468,6 +469,7 @@ const DetailsPanel: React.FC<{
 // ============================================================================
 
 export default function BlueprintEditor({ blueprintId, onSave, onClose }: BlueprintEditorProps) {
+  const toast = useToast();
   const manager = getBlueprintManager();
   
   // Blueprint state
@@ -660,8 +662,8 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
     manager.updateBlueprint(blueprint.id, updatedBlueprint);
     
     console.log('✅ Blueprint compiled successfully!');
-    alert('Blueprint compiled successfully!');
-  }, [blueprint, nodes, edges, manager]);
+    toast.success('Blueprint compiled successfully!');
+  }, [blueprint, nodes, edges, manager, toast]);
   
   // Save blueprint
   const handleSave = useCallback(() => {

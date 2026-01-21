@@ -132,7 +132,7 @@ export interface BackupData {
     id: string;
     name: string;
     type: string;
-    url: string;
+    url: string | null;
     size: number;
     mimeType: string | null;
   }>;
@@ -419,9 +419,13 @@ export async function deleteBackup(
   // Registrar no audit log
   await prisma.auditLog.create({
     data: {
-      userId,
+      adminId: userId,
+      adminEmail: userId,
+      adminRole: 'user',
       action: 'backup_delete',
-      resource: projectId,
+      category: 'system',
+      targetType: 'project',
+      targetId: projectId,
       metadata: { backupId },
     },
   });

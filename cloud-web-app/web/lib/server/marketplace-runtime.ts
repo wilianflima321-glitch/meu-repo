@@ -689,8 +689,8 @@ export class ExtensionMarketplaceRuntime extends EventEmitter {
     
     fileStream.end();
     
-    await new Promise((resolve, reject) => {
-      fileStream.on('finish', resolve);
+    await new Promise<void>((resolve, reject) => {
+      fileStream.on('finish', () => resolve());
       fileStream.on('error', reject);
     });
   }

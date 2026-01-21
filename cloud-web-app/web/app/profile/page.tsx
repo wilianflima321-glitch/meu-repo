@@ -22,7 +22,6 @@ import {
   AlertTriangle,
   Smartphone,
   Monitor,
-  MapPin,
   Calendar
 } from 'lucide-react'
 import { AethelAPIClient } from '@/lib/api'
@@ -54,11 +53,8 @@ interface UserProfile {
 
 interface ActiveSession {
   id: string
-  device: string
-  browser: string
-  ip: string
-  location: string
-  lastActive: string
+  createdAt: string
+  expiresAt: string
   current: boolean
 }
 
@@ -122,11 +118,26 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [profileError, setProfileError] = useState<string | null>(null)
   const [sessions, setSessions] = useState<ActiveSession[]>([])
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'sessions'>('profile')
   const [editingName, setEditingName] = useState(false)
   const [tempName, setTempName] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [twoFactorModal, setTwoFactorModal] = useState<'setup' | 'disable' | null>(null)
+  const [twoFactorSetup, setTwoFactorSetup] = useState<{ qrCode: string; backupCodes: string[] } | null>(null)
+  const [twoFactorCode, setTwoFactorCode] = useState('')
+  const [twoFactorPassword, setTwoFactorPassword] = useState('')
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false)
+  const [twoFactorError, setTwoFactorError] = useState<string | null>(null)
+  const planLabels: Record<string, string> = {
+    starter: 'Inicial',
+    basic: 'Básico',
+    pro: 'Pro',
+    studio: 'Estúdio',
+    enterprise: 'Empresarial',
+    free: 'Gratuito',
+  }
   
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -142,71 +153,46 @@ export default function ProfilePage() {
     try {
       setLoading(true)
       const response = await AethelAPIClient.getProfile()
-      const data = response as any
-      setProfile(data.profile || {
-        id: 'usr_' + Date.now(),
-        email: data.email || 'user@aethel.dev',
-        name: data.name || 'Aethel User',
-        createdAt: new Date().toISOString(),
-        plan: data.plan || 'free',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        language: 'pt-BR',
-        theme: 'dark',
-        emailVerified: true,
-        twoFactorEnabled: false,
-        notifications: {
-          email: true,
-          push: true,
-          marketing: false,
-        }
-      })
-    } catch (error) {
-      console.error('Failed to load profile:', error)
-      // Use default profile on error
+      const data = (response as any)?.profile ?? response
       setProfile({
-        id: 'usr_' + Date.now(),
-        email: 'user@aethel.dev',
-        name: 'Aethel User',
-        createdAt: new Date().toISOString(),
-        plan: 'free',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        language: 'pt-BR',
-        theme: 'dark',
-        emailVerified: true,
-        twoFactorEnabled: false,
+        id: data.id,
+        email: data.email,
+        name: data.name || data.email?.split('@')[0] || 'Usuário',
+        avatar: data.avatar || undefined,
+        createdAt: data.createdAt || new Date().toISOString(),
+        lastLogin: data.lastLogin || undefined,
+        plan: data.plan || 'free',
+        timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        language: data.language || 'pt-BR',
+        theme: data.theme || 'dark',
+        emailVerified: Boolean(data.emailVerified),
+        twoFactorEnabled: Boolean(data.twoFactorEnabled || data.mfaEnabled),
         notifications: {
-          email: true,
-          push: true,
-          marketing: false,
+          email: data.notifications?.email ?? true,
+          push: data.notifications?.push ?? false,
+          marketing: data.notifications?.marketing ?? false,
         }
       })
+      setProfileError(null)
+    } catch (error) {
+      console.error('Falha ao carregar o perfil:', error)
+      setProfileError('Não foi possível carregar o perfil. Tente novamente.')
+      setProfile(null)
     } finally {
       setLoading(false)
     }
   }
   
   async function loadSessions() {
-    // Mock sessions - em produção viria da API
-    setSessions([
-      {
-        id: 'sess_1',
-        device: 'Windows 11',
-        browser: 'Chrome 120',
-        ip: '192.168.1.100',
-        location: 'São Paulo, BR',
-        lastActive: new Date().toISOString(),
-        current: true,
-      },
-      {
-        id: 'sess_2',
-        device: 'macOS Sonoma',
-        browser: 'Safari 17',
-        ip: '192.168.1.101',
-        location: 'São Paulo, BR',
-        lastActive: new Date(Date.now() - 3600000).toISOString(),
-        current: false,
-      },
-    ])
+    try {
+      const response = await AethelAPIClient.getSessions()
+      const data = response as any
+      const items = Array.isArray(data?.sessions) ? data.sessions : []
+      setSessions(items)
+    } catch (error) {
+      console.error('Falha ao carregar sessões:', error)
+      setSessions([])
+    }
   }
   
   async function updateProfile(updates: Partial<UserProfile>) {
@@ -214,12 +200,90 @@ export default function ProfilePage() {
     
     setSaving(true)
     try {
-      await AethelAPIClient.updateProfile(updates)
-      setProfile({ ...profile, ...updates })
+      const response = await AethelAPIClient.updateProfile(updates)
+      const data = (response as any)?.profile ?? response
+      setProfile({
+        ...profile,
+        ...updates,
+        ...data,
+        notifications: {
+          ...profile.notifications,
+          ...(data?.notifications || {}),
+        },
+      })
     } catch (error) {
-      console.error('Failed to update profile:', error)
+      console.error('Falha ao atualizar o perfil:', error)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function startTwoFactorSetup() {
+    try {
+      setTwoFactorLoading(true)
+      setTwoFactorError(null)
+      setTwoFactorCode('')
+      const res = await fetch('/api/auth/2fa/setup', { method: 'POST' })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(data?.error || 'Falha ao iniciar 2FA')
+      }
+      setTwoFactorSetup({
+        qrCode: data.qrCode,
+        backupCodes: Array.isArray(data.backupCodes) ? data.backupCodes : [],
+      })
+      setTwoFactorModal('setup')
+    } catch (error) {
+      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao configurar 2FA')
+    } finally {
+      setTwoFactorLoading(false)
+    }
+  }
+
+  async function confirmTwoFactorSetup() {
+    try {
+      setTwoFactorLoading(true)
+      setTwoFactorError(null)
+      const res = await fetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: twoFactorCode }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(data?.error || 'Falha ao validar 2FA')
+      }
+      setTwoFactorModal(null)
+      setTwoFactorSetup(null)
+      await loadProfile()
+    } catch (error) {
+      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao validar 2FA')
+    } finally {
+      setTwoFactorLoading(false)
+    }
+  }
+
+  async function confirmTwoFactorDisable() {
+    try {
+      setTwoFactorLoading(true)
+      setTwoFactorError(null)
+      const res = await fetch('/api/auth/2fa/disable', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: twoFactorCode, password: twoFactorPassword }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(data?.error || 'Falha ao desativar 2FA')
+      }
+      setTwoFactorModal(null)
+      setTwoFactorCode('')
+      setTwoFactorPassword('')
+      await loadProfile()
+    } catch (error) {
+      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao desativar 2FA')
+    } finally {
+      setTwoFactorLoading(false)
     }
   }
   
@@ -230,22 +294,30 @@ export default function ProfilePage() {
   }
   
   async function revokeSession(sessionId: string) {
-    setSessions(sessions.filter(s => s.id !== sessionId))
-    // Em produção: await AethelAPIClient.revokeSession(sessionId)
+    try {
+      await AethelAPIClient.revokeSession(sessionId)
+      setSessions(sessions.filter(s => s.id !== sessionId))
+    } catch (error) {
+      console.error('Falha ao revogar a sessão:', error)
+    }
   }
   
   async function revokeAllSessions() {
-    setSessions(sessions.filter(s => s.current))
-    // Em produção: await AethelAPIClient.revokeAllSessions()
+    try {
+      await AethelAPIClient.revokeAllSessions()
+      setSessions(sessions.filter(s => s.current))
+    } catch (error) {
+      console.error('Falha ao revogar sessões:', error)
+    }
   }
   
   async function deleteAccount() {
     try {
-      // Em produção: await AethelAPIClient.deleteAccount()
+      await AethelAPIClient.deleteAccount()
       logout()
       router.push('/')
     } catch (error) {
-      console.error('Failed to delete account:', error)
+      console.error('Falha ao excluir a conta:', error)
     }
   }
   
@@ -258,7 +330,11 @@ export default function ProfilePage() {
   }
   
   if (!profile) {
-    return null
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-slate-400">{profileError || 'Perfil indisponível.'}</div>
+      </div>
+    )
   }
   
   return (
@@ -315,11 +391,11 @@ export default function ProfilePage() {
               <p className="text-slate-400">{profile.email}</p>
               <div className="flex items-center gap-4 mt-2">
                 <span className="px-2 py-1 text-xs rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                  {profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
+                  {planLabels[profile.plan] ?? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 </span>
                 {profile.emailVerified && (
                   <span className="flex items-center gap-1 text-xs text-green-400">
-                    <Check className="w-3 h-3" /> Email verificado
+                    <Check className="w-3 h-3" /> E-mail verificado
                   </span>
                 )}
               </div>
@@ -330,7 +406,7 @@ export default function ProfilePage() {
               onClick={() => router.push('/dashboard')}
               className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
             >
-              Voltar ao Dashboard
+              Voltar ao painel
             </button>
           </div>
         </div>
@@ -385,7 +461,7 @@ export default function ProfilePage() {
               />
               <SettingRow 
                 icon={Mail} 
-                label="Email" 
+                label="E-mail" 
                 value={profile.email}
                 action={
                   <button className="text-sm text-indigo-400 hover:text-indigo-300">
@@ -408,13 +484,13 @@ export default function ProfilePage() {
               <SettingRow 
                 icon={CreditCard} 
                 label="Plano atual" 
-                value={profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
+                value={planLabels[profile.plan] ?? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 action={
                   <button 
                     onClick={() => router.push('/billing')}
                     className="px-3 py-1 text-sm bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
                   >
-                    Upgrade
+                    Atualizar plano
                   </button>
                 }
               />
@@ -442,14 +518,24 @@ export default function ProfilePage() {
                 value={profile.twoFactorEnabled ? 'Ativada' : 'Desativada'}
                 action={
                   <button 
-                    onClick={() => updateProfile({ twoFactorEnabled: !profile.twoFactorEnabled })}
+                    onClick={() => {
+                      if (profile.twoFactorEnabled) {
+                        setTwoFactorModal('disable')
+                        setTwoFactorError(null)
+                        setTwoFactorCode('')
+                        setTwoFactorPassword('')
+                      } else {
+                        startTwoFactorSetup()
+                      }
+                    }}
+                    disabled={twoFactorLoading}
                     className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                       profile.twoFactorEnabled 
                         ? 'bg-red-600 hover:bg-red-700' 
                         : 'bg-green-600 hover:bg-green-700'
                     }`}
                   >
-                    {profile.twoFactorEnabled ? 'Desativar' : 'Ativar'}
+                    {twoFactorLoading ? 'Processando...' : profile.twoFactorEnabled ? 'Desativar' : 'Ativar'}
                   </button>
                 }
               />
@@ -500,7 +586,7 @@ export default function ProfilePage() {
               <SettingRow 
                 icon={Globe} 
                 label="Idioma" 
-                value={profile.language === 'pt-BR' ? 'Português (Brasil)' : 'English'}
+                value={profile.language === 'pt-BR' ? 'Português (Brasil)' : 'Inglês'}
                 action={
                   <select 
                     value={profile.language}
@@ -508,7 +594,7 @@ export default function ProfilePage() {
                     className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
                   >
                     <option value="pt-BR">Português (Brasil)</option>
-                    <option value="en-US">English (US)</option>
+                    <option value="en-US">Inglês (EUA)</option>
                   </select>
                 }
               />
@@ -522,7 +608,7 @@ export default function ProfilePage() {
             <ProfileSection title="Notificações">
               <SettingRow 
                 icon={Bell} 
-                label="Notificações por email" 
+                label="Notificações por e-mail" 
                 action={
                   <button 
                     onClick={() => updateProfile({ 
@@ -558,7 +644,7 @@ export default function ProfilePage() {
               />
               <SettingRow 
                 icon={Mail} 
-                label="Emails de marketing" 
+                label="E-mails de marketing" 
                 action={
                   <button 
                     onClick={() => updateProfile({ 
@@ -606,7 +692,7 @@ export default function ProfilePage() {
                       <Monitor className="w-8 h-8 text-slate-400" />
                       <div>
                         <div className="font-medium text-white flex items-center gap-2">
-                          {session.device} • {session.browser}
+                          Sessão {session.id.slice(0, 8)}
                           {session.current && (
                             <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full">
                               Sessão atual
@@ -614,11 +700,11 @@ export default function ProfilePage() {
                           )}
                         </div>
                         <div className="text-sm text-slate-400 flex items-center gap-2">
-                          <MapPin className="w-3 h-3" />
-                          {session.location} • {session.ip}
+                          <Calendar className="w-3 h-3" />
+                          Criada em {new Date(session.createdAt).toLocaleString('pt-BR')}
                         </div>
                         <div className="text-xs text-slate-500">
-                          Última atividade: {new Date(session.lastActive).toLocaleString('pt-BR')}
+                          Expira em: {new Date(session.expiresAt).toLocaleString('pt-BR')}
                         </div>
                       </div>
                     </div>
@@ -639,6 +725,103 @@ export default function ProfilePage() {
         )}
       </main>
       
+      {/* Two-Factor Modal */}
+      {twoFactorModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-slate-800 rounded-xl p-6 max-w-lg w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white">
+                {twoFactorModal === 'setup' ? 'Ativar 2FA' : 'Desativar 2FA'}
+              </h3>
+            </div>
+
+            {twoFactorError && (
+              <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
+                {twoFactorError}
+              </div>
+            )}
+
+            {twoFactorModal === 'setup' && (
+              <div className="space-y-4">
+                {twoFactorSetup?.qrCode && (
+                  <div className="flex flex-col items-center gap-3">
+                    <img src={twoFactorSetup.qrCode} alt="QR Code 2FA" className="w-40 h-40" />
+                    <p className="text-sm text-slate-400">Escaneie o QR Code no seu autenticador.</p>
+                  </div>
+                )}
+                <div>
+                  <label className="text-sm text-slate-300">Código do autenticador</label>
+                  <input
+                    type="text"
+                    value={twoFactorCode}
+                    onChange={(e) => setTwoFactorCode(e.target.value)}
+                    className="mt-1 w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"
+                    placeholder="000000"
+                  />
+                </div>
+                {twoFactorSetup?.backupCodes?.length ? (
+                  <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
+                    <p className="text-xs text-slate-400 mb-2">Códigos de backup (salve em local seguro):</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-200">
+                      {twoFactorSetup.backupCodes.map((code) => (
+                        <div key={code} className="bg-slate-800 rounded px-2 py-1 text-center">{code}</div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            {twoFactorModal === 'disable' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-slate-300">Código 2FA</label>
+                  <input
+                    type="text"
+                    value={twoFactorCode}
+                    onChange={(e) => setTwoFactorCode(e.target.value)}
+                    className="mt-1 w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"
+                    placeholder="000000"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-slate-300">Senha da conta</label>
+                  <input
+                    type="password"
+                    value={twoFactorPassword}
+                    onChange={(e) => setTwoFactorPassword(e.target.value)}
+                    className="mt-1 w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => {
+                  setTwoFactorModal(null)
+                  setTwoFactorError(null)
+                }}
+                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={twoFactorModal === 'setup' ? confirmTwoFactorSetup : confirmTwoFactorDisable}
+                disabled={twoFactorLoading}
+                className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+              >
+                {twoFactorLoading ? 'Processando...' : twoFactorModal === 'setup' ? 'Confirmar' : 'Desativar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">

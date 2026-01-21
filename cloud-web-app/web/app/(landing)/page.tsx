@@ -94,7 +94,7 @@ export default function LandingPage() {
           </div>
 
           {/* Hero Image/Demo */}
-          <div className="mt-16 relative">
+          <div id="demo" className="mt-16 relative scroll-mt-24">
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10" />
             <div className="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl shadow-black/50">
               <div className="bg-slate-900 px-4 py-3 flex items-center gap-2 border-b border-slate-800">
@@ -105,11 +105,31 @@ export default function LandingPage() {
                 </div>
                 <span className="text-sm text-slate-500 ml-2">Aethel IDE</span>
               </div>
-              <div className="aspect-video bg-slate-900 flex items-center justify-center">
-                <div className="text-center">
-                  <Code className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-                  <p className="text-slate-600">Demo interativa</p>
+              <div className="aspect-video bg-slate-900 flex items-center justify-center relative overflow-hidden">
+                {/* Animated Code Demo */}
+                <div className="absolute inset-0 p-6 font-mono text-sm text-left">
+                  <div className="text-slate-500">// Escreva um comentário e a IA completa o código</div>
+                  <div className="mt-2">
+                    <span className="text-purple-400">function</span>{' '}
+                    <span className="text-yellow-400">processData</span>
+                    <span className="text-slate-300">(</span>
+                    <span className="text-orange-400">data</span>
+                    <span className="text-slate-300">: </span>
+                    <span className="text-cyan-400">DataType[]</span>
+                    <span className="text-slate-300">) {'{'}</span>
+                  </div>
+                  <div className="text-slate-500 ml-4">// Valida, filtra e transforma dados</div>
+                  <div className="ml-4 text-indigo-300 opacity-60 animate-pulse">
+                    ▌ IA gerando código...
+                  </div>
                 </div>
+                <Link
+                  href="/register"
+                  className="relative z-10 flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg"
+                >
+                  <Play className="w-5 h-5" />
+                  Experimentar Agora
+                </Link>
               </div>
             </div>
           </div>

@@ -19,8 +19,6 @@
     "jsx": "preserve",
     "incremental": true,
     "typeRoots": ["./types", "./node_modules/@types"],
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
       "@/components/*": ["./components/*"],
@@ -40,6 +38,9 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "lib/build/build-pipeline.ts",
+    "tests/e2e/**/*",
+    "__tests__/**/*"
   ]
 }

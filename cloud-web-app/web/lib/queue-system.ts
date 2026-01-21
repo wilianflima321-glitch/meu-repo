@@ -9,16 +9,39 @@
  * - Webhooks
  * 
  * Usa Redis como backend para persistência e distribuição.
+ * 
+ * DEPENDÊNCIAS OPCIONAIS:
+ * npm install bullmq ioredis
  */
 
-import { Queue, Worker, Job, QueueEvents, ConnectionOptions } from 'bullmq';
-import IORedis from 'ioredis';
+// ============================================================================
+// LAZY LOAD - Dependências opcionais
+// ============================================================================
+
+let BullMQ: any = null;
+let IORedis: any = null;
+let loadAttempted = false;
+
+async function loadDependencies(): Promise<boolean> {
+  if (loadAttempted) return !!BullMQ;
+  loadAttempted = true;
+  
+  try {
+    // Dynamic imports usando eval para evitar erros de webpack
+    BullMQ = await eval('import("bullmq")');
+    IORedis = await eval('import("ioredis")').then((m: any) => m.default || m);
+    return true;
+  } catch {
+    console.warn('[QueueSystem] bullmq/ioredis not installed. Queue features disabled.');
+    return false;
+  }
+}
 
 // ============================================================================
 // CONFIGURAÇÃO REDIS
 // ============================================================================
 
-const redisConfig: ConnectionOptions = {
+const redisConfig = {
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD || undefined,
@@ -26,13 +49,15 @@ const redisConfig: ConnectionOptions = {
 };
 
 // Conexão singleton
-let redisConnection: IORedis | null = null;
+let redisConnection: any = null;
 
-function getRedisConnection(): IORedis {
+async function getRedisConnection(): Promise<any | null> {
+  if (!await loadDependencies()) return null;
+  
   if (!redisConnection) {
     redisConnection = new IORedis(redisConfig);
     
-    redisConnection.on('error', (error) => {
+    redisConnection.on('error', (error: any) => {
       console.error('[QueueSystem] Redis connection error:', error);
     });
     
@@ -145,18 +170,36 @@ const DEFAULT_JOB_OPTIONS = {
 // ============================================================================
 
 class QueueManager {
-  private queues: Map<string, Queue> = new Map();
-  private workers: Map<string, Worker> = new Map();
-  private events: Map<string, QueueEvents> = new Map();
+  private queues: Map<string, any> = new Map();
+  private workers: Map<string, any> = new Map();
+  private events: Map<string, any> = new Map();
   private initialized = false;
+  private available = false;
+  
+  /**
+   * Verifica se o sistema de filas está disponível
+   */
+  async isAvailable(): Promise<boolean> {
+    await this.initialize();
+    return this.available;
+  }
   
   /**
    * Inicializa todas as filas
    */
   async initialize(): Promise<void> {
     if (this.initialized) return;
+    this.initialized = true;
     
-    const connection = getRedisConnection();
+    const connection = await getRedisConnection();
+    if (!connection || !BullMQ) {
+      console.warn('[QueueManager] Redis/BullMQ not available. Queue features disabled.');
+      this.available = false;
+      return;
+    }
+    
+    this.available = true;
+    const { Queue, QueueEvents } = BullMQ;
     
     // Cria filas
     for (const [name, queueName] of Object.entries(QUEUE_NAMES)) {
@@ -167,23 +210,22 @@ class QueueManager {
       const events = new QueueEvents(queueName, { connection });
       this.events.set(queueName, events);
       
-      events.on('completed', ({ jobId }) => {
+      events.on('completed', ({ jobId }: any) => {
         console.log(`[Queue:${name}] Job ${jobId} completed`);
       });
       
-      events.on('failed', ({ jobId, failedReason }) => {
+      events.on('failed', ({ jobId, failedReason }: any) => {
         console.error(`[Queue:${name}] Job ${jobId} failed:`, failedReason);
       });
     }
     
-    this.initialized = true;
     console.log('[QueueManager] All queues initialized');
   }
   
   /**
    * Adiciona job a uma fila
    */
-  async addJob<T extends Record<string, unknown>>(
+  async addJob<T>(
     queueName: string,
     jobType: JobType,
     data: T,
@@ -193,8 +235,13 @@ class QueueManager {
       attempts?: number;
       jobId?: string;
     }
-  ): Promise<Job<T>> {
+  ): Promise<any> {
     await this.initialize();
+    
+    if (!this.available) {
+      console.warn('[QueueManager] Queue system not available. Job not queued:', jobType);
+      return null;
+    }
     
     const queue = this.queues.get(queueName);
     if (!queue) {
@@ -215,25 +262,33 @@ class QueueManager {
     );
     
     console.log(`[QueueManager] Added job ${job.id} to ${queueName}`);
-    return job as Job<T>;
+    return job;
   }
   
   /**
    * Registra worker para processar jobs
    */
-  registerWorker<T>(
+  async registerWorker<T>(
     queueName: string,
-    processor: (job: Job<T>) => Promise<unknown>,
+    processor: (job: any) => Promise<unknown>,
     concurrency = 5
-  ): Worker {
-    const connection = getRedisConnection();
+  ): Promise<any | null> {
+    await this.initialize();
+    
+    if (!this.available || !BullMQ) {
+      console.warn('[QueueManager] Queue system not available. Worker not registered.');
+      return null;
+    }
+    
+    const connection = await getRedisConnection();
+    const { Worker } = BullMQ;
     
     const worker = new Worker(
       queueName,
-      async (job) => {
+      async (job: any) => {
         console.log(`[Worker:${queueName}] Processing job ${job.id}: ${job.name}`);
         try {
-          const result = await processor(job as Job<T>);
+          const result = await processor(job);
           return result;
         } catch (error) {
           console.error(`[Worker:${queueName}] Job ${job.id} error:`, error);
@@ -243,11 +298,11 @@ class QueueManager {
       { connection, concurrency }
     );
     
-    worker.on('completed', (job) => {
+    worker.on('completed', (job: any) => {
       console.log(`[Worker:${queueName}] Job ${job.id} completed`);
     });
     
-    worker.on('failed', (job, err) => {
+    worker.on('failed', (job: any, err: Error) => {
       console.error(`[Worker:${queueName}] Job ${job?.id} failed:`, err);
     });
     
@@ -398,14 +453,14 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Envia email via fila
  */
-export async function queueEmail(data: EmailJobData, options?: { delay?: number }): Promise<Job> {
+export async function queueEmail(data: EmailJobData, options?: { delay?: number }): Promise<any> {
   return queueManager.addJob(QUEUE_NAMES.EMAIL, 'email:send', data, options);
 }
 
 /**
  * Queue export de projeto
  */
-export async function queueProjectExport(data: ExportJobData): Promise<Job> {
+export async function queueProjectExport(data: ExportJobData): Promise<any> {
   return queueManager.addJob(QUEUE_NAMES.EXPORT, 'export:project', data, {
     priority: 5, // Higher priority
   });
@@ -414,21 +469,21 @@ export async function queueProjectExport(data: ExportJobData): Promise<Job> {
 /**
  * Queue processamento de asset
  */
-export async function queueAssetProcess(data: AssetJobData): Promise<Job> {
+export async function queueAssetProcess(data: AssetJobData): Promise<any> {
   return queueManager.addJob(QUEUE_NAMES.ASSET, 'asset:process', data);
 }
 
 /**
  * Queue batch de IA
  */
-export async function queueAIBatch(data: AIBatchJobData): Promise<Job> {
+export async function queueAIBatch(data: AIBatchJobData): Promise<any> {
   return queueManager.addJob(QUEUE_NAMES.AI, 'ai:batch', data);
 }
 
 /**
  * Queue webhook
  */
-export async function queueWebhook(data: WebhookJobData): Promise<Job> {
+export async function queueWebhook(data: WebhookJobData): Promise<any> {
   return queueManager.addJob(QUEUE_NAMES.WEBHOOK, 'webhook:send', data, {
     attempts: 5,
   });
@@ -439,4 +494,3 @@ export async function queueWebhook(data: WebhookJobData): Promise<Job> {
 // ============================================================================
 
 export default queueManager;
-export { Queue, Worker, Job } from 'bullmq';

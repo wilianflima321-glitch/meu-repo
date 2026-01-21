@@ -195,7 +195,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
 // ============================================================================
 
 function TourOverlay() {
-  const { activeTour, currentStepIndex, nextStep, prevStep, endTour } = useTour();
+  const { activeTour, currentStepIndex, nextStep, prevStep, endTour, goToStep } = useTour();
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -392,10 +392,7 @@ function TourOverlay() {
             {Array.from({ length: totalSteps }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => {
-                  const { goToStep } = useTour();
-                  goToStep(i);
-                }}
+                onClick={() => goToStep(i)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   i === currentStepIndex 
                     ? 'bg-indigo-500 w-4' 

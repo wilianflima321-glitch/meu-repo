@@ -89,6 +89,47 @@ services:
         reservations:
           memory: 512M
           cpus: '0.5'
+    volumes:
+      - ./cloud-web-app/web/public/exports:/app/public/exports
+
+  # ----------------------------------------
+  # Build Queue Worker (consome build-queue)
+  # ----------------------------------------
+  worker:
+    build:
+      context: ./cloud-web-app/web
+      dockerfile: Dockerfile
+      target: worker
+    container_name: aethel-worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-aethel}:${DB_PASSWORD:-aethel_secure_password}@postgres:5432/${DB_NAME:-aethel_engine}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-aethel_redis_password}@redis:6379
+      - S3_ENDPOINT=http://minio:9000
+      - S3_BUCKET=${S3_BUCKET:-aethel-assets}
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-aethel}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-aethel_minio_password}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./cloud-web-app/web/public/exports:/app/public/exports
+    networks:
+      - aethel-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
   # ----------------------------------------
   # Runtime Server (WebSocket, Terminal, LSP, DAP)

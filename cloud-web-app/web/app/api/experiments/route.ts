@@ -1,11 +1,10 @@
 /**
  * Experiments/A-B Testing API - Aethel Engine
  * GET /api/experiments - Lista experimentos
- * POST /api/experiments - Cria experimento
- * POST /api/experiments/enroll - Entra em experimento
- * POST /api/experiments/conversion - Registra conversão
+ * POST /api/experiments - Cria experimento / Enroll / Conversion
  * 
- * Integra com o sistema de feature flags em lib/feature-flags.ts
+ * MIGRADO: De Map() in-memory para PostgreSQL/Prisma
+ * Dados agora são persistentes e suportam múltiplas instâncias.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,40 +14,56 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-// Armazena experimentos e enrollments (em produção, usar Redis ou DB)
-const experiments = new Map<string, {
-  id: string;
-  name: string;
-  description: string;
-  variants: Array<{ id: string; name: string; weight: number }>;
-  status: 'draft' | 'running' | 'paused' | 'completed';
-  startDate?: Date;
-  endDate?: Date;
-  enrollments: number;
-  conversions: Map<string, number>; // variant -> count
-}>();
-
-const userEnrollments = new Map<string, Map<string, string>>(); // userId -> experimentId -> variantId
-
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
     
-    const experimentList = Array.from(experiments.values()).map(exp => ({
-      id: exp.id,
-      name: exp.name,
-      description: exp.description,
-      variants: exp.variants,
-      status: exp.status,
-      startDate: exp.startDate,
-      endDate: exp.endDate,
-      enrollments: exp.enrollments,
-      conversions: Object.fromEntries(exp.conversions),
-    }));
+    // Busca experimentos do banco de dados
+    const experiments = await prisma.experiment.findMany({
+      include: {
+        variants: {
+          select: {
+            id: true,
+            name: true,
+            weight: true,
+          },
+        },
+        _count: {
+          select: { enrollments: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    
+    // Calcula conversões por variante para cada experimento
+    const experimentsWithStats = await Promise.all(
+      experiments.map(async (exp) => {
+        const conversions = await prisma.experimentConversion.groupBy({
+          by: ['variantId'],
+          where: { experimentId: exp.id },
+          _count: true,
+        });
+        
+        return {
+          id: exp.id,
+          name: exp.name,
+          description: exp.description,
+          status: exp.status,
+          startDate: exp.startDate,
+          endDate: exp.endDate,
+          variants: exp.variants,
+          enrollments: exp._count.enrollments,
+          conversions: Object.fromEntries(
+            conversions.map(c => [c.variantId, c._count])
+          ),
+          createdAt: exp.createdAt,
+        };
+      })
+    );
     
     return NextResponse.json({
       success: true,
-      experiments: experimentList,
+      experiments: experimentsWithStats,
     });
   } catch (error) {
     console.error('Failed to get experiments:', error);
@@ -65,7 +80,7 @@ export async function POST(request: NextRequest) {
     
     const { action } = body;
     
-    // Criar experimento
+    // === CRIAR EXPERIMENTO ===
     if (action === 'create') {
       const { name, description, variants } = body;
       
@@ -76,33 +91,101 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      const id = `exp_${Date.now()}`;
-      const experiment = {
-        id,
-        name,
-        description: description || '',
-        variants,
-        status: 'draft' as const,
-        enrollments: 0,
-        conversions: new Map<string, number>(),
-      };
+      // Valida que pesos somam 100
+      const totalWeight = variants.reduce((sum: number, v: { weight: number }) => sum + v.weight, 0);
+      if (Math.abs(totalWeight - 100) > 0.01) {
+        return NextResponse.json(
+          { success: false, error: 'Variant weights must sum to 100' },
+          { status: 400 }
+        );
+      }
       
-      experiments.set(id, experiment);
+      // Cria experimento no banco
+      const experiment = await prisma.experiment.create({
+        data: {
+          name,
+          description: description || '',
+          status: 'draft',
+          createdBy: user.userId,
+          variants: {
+            create: variants.map((v: { name: string; weight: number }) => ({
+              name: v.name,
+              weight: v.weight,
+            })),
+          },
+        },
+        include: {
+          variants: {
+            select: { id: true, name: true, weight: true },
+          },
+        },
+      });
       
       return NextResponse.json({
         success: true,
         experiment: {
-          ...experiment,
-          conversions: Object.fromEntries(experiment.conversions),
+          id: experiment.id,
+          name: experiment.name,
+          description: experiment.description,
+          status: experiment.status,
+          variants: experiment.variants,
+          enrollments: 0,
+          conversions: {},
+          createdAt: experiment.createdAt,
         },
       });
     }
     
-    // Enroll em experimento
+    // === ATUALIZAR STATUS DO EXPERIMENTO ===
+    if (action === 'update_status') {
+      const { experimentId, status } = body;
+      
+      if (!experimentId || !status) {
+        return NextResponse.json(
+          { success: false, error: 'experimentId and status are required' },
+          { status: 400 }
+        );
+      }
+      
+      const validStatuses = ['draft', 'running', 'paused', 'completed'];
+      if (!validStatuses.includes(status)) {
+        return NextResponse.json(
+          { success: false, error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
+          { status: 400 }
+        );
+      }
+      
+      const experiment = await prisma.experiment.update({
+        where: { id: experimentId },
+        data: {
+          status,
+          startDate: status === 'running' ? new Date() : undefined,
+          endDate: status === 'completed' ? new Date() : undefined,
+        },
+      });
+      
+      return NextResponse.json({
+        success: true,
+        experiment: {
+          id: experiment.id,
+          status: experiment.status,
+          startDate: experiment.startDate,
+          endDate: experiment.endDate,
+        },
+      });
+    }
+    
+    // === ENROLL EM EXPERIMENTO ===
     if (action === 'enroll') {
       const { experimentId } = body;
       
-      const experiment = experiments.get(experimentId);
+      const experiment = await prisma.experiment.findUnique({
+        where: { id: experimentId },
+        include: {
+          variants: true,
+        },
+      });
+      
       if (!experiment) {
         return NextResponse.json(
           { success: false, error: 'Experiment not found' },
@@ -110,51 +193,76 @@ export async function POST(request: NextRequest) {
         );
       }
       
+      if (experiment.status !== 'running') {
+        return NextResponse.json(
+          { success: false, error: 'Experiment is not running' },
+          { status: 400 }
+        );
+      }
+      
       // Verifica se já está enrolled
-      let userExps = userEnrollments.get(user.userId);
-      if (!userExps) {
-        userExps = new Map();
-        userEnrollments.set(user.userId, userExps);
+      const existingEnrollment = await prisma.experimentEnrollment.findUnique({
+        where: {
+          userId_experimentId: {
+            userId: user.userId,
+            experimentId,
+          },
+        },
+      });
+      
+      if (existingEnrollment) {
+        return NextResponse.json({
+          success: true,
+          enrollment: {
+            experimentId,
+            variantId: existingEnrollment.variantId,
+            enrolled: true,
+            existing: true,
+          },
+        });
       }
       
-      let variantId = userExps.get(experimentId);
+      // Seleciona variante por peso
+      const random = Math.random() * 100;
+      let cumulative = 0;
+      let selectedVariant = experiment.variants[0];
       
-      if (!variantId) {
-        // Seleciona variante por peso
-        const random = Math.random() * 100;
-        let cumulative = 0;
-        
-        for (const variant of experiment.variants) {
-          cumulative += variant.weight;
-          if (random < cumulative) {
-            variantId = variant.id;
-            break;
-          }
+      for (const variant of experiment.variants) {
+        cumulative += variant.weight;
+        if (random < cumulative) {
+          selectedVariant = variant;
+          break;
         }
-        
-        if (!variantId) {
-          variantId = experiment.variants[0].id;
-        }
-        
-        userExps.set(experimentId, variantId);
-        experiment.enrollments++;
       }
+      
+      // Cria enrollment no banco
+      const enrollment = await prisma.experimentEnrollment.create({
+        data: {
+          userId: user.userId,
+          experimentId,
+          variantId: selectedVariant.id,
+        },
+      });
       
       return NextResponse.json({
         success: true,
         enrollment: {
           experimentId,
-          variantId,
+          variantId: enrollment.variantId,
           enrolled: true,
+          existing: false,
         },
       });
     }
     
-    // Registrar conversão
+    // === REGISTRAR CONVERSÃO ===
     if (action === 'conversion') {
       const { experimentId, value } = body;
       
-      const experiment = experiments.get(experimentId);
+      const experiment = await prisma.experiment.findUnique({
+        where: { id: experimentId },
+      });
+      
       if (!experiment) {
         return NextResponse.json(
           { success: false, error: 'Experiment not found' },
@@ -162,18 +270,32 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      const userExps = userEnrollments.get(user.userId);
-      const variantId = userExps?.get(experimentId);
+      // Verifica enrollment do usuário
+      const enrollment = await prisma.experimentEnrollment.findUnique({
+        where: {
+          userId_experimentId: {
+            userId: user.userId,
+            experimentId,
+          },
+        },
+      });
       
-      if (!variantId) {
+      if (!enrollment) {
         return NextResponse.json(
           { success: false, error: 'User not enrolled in experiment' },
           { status: 400 }
         );
       }
       
-      const currentConversions = experiment.conversions.get(variantId) || 0;
-      experiment.conversions.set(variantId, currentConversions + 1);
+      // Registra conversão no banco
+      await prisma.experimentConversion.create({
+        data: {
+          userId: user.userId,
+          experimentId,
+          variantId: enrollment.variantId,
+          value: value ?? null,
+        },
+      });
       
       // Log para analytics
       await prisma.analyticsEvent.create({
@@ -183,7 +305,7 @@ export async function POST(request: NextRequest) {
           category: 'experiment',
           properties: {
             experimentId,
-            variantId,
+            variantId: enrollment.variantId,
             value,
           },
         },
@@ -193,14 +315,47 @@ export async function POST(request: NextRequest) {
         success: true,
         conversion: {
           experimentId,
-          variantId,
+          variantId: enrollment.variantId,
           recorded: true,
         },
       });
     }
     
+    // === OBTER VARIANTE DO USUÁRIO (para renderização condicional) ===
+    if (action === 'get_variant') {
+      const { experimentId } = body;
+      
+      const enrollment = await prisma.experimentEnrollment.findUnique({
+        where: {
+          userId_experimentId: {
+            userId: user.userId,
+            experimentId,
+          },
+        },
+        include: {
+          variant: {
+            select: { id: true, name: true },
+          },
+        },
+      });
+      
+      if (!enrollment) {
+        return NextResponse.json({
+          success: true,
+          variant: null,
+          enrolled: false,
+        });
+      }
+      
+      return NextResponse.json({
+        success: true,
+        variant: enrollment.variant,
+        enrolled: true,
+      });
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'Invalid action' },
+      { success: false, error: 'Invalid action. Valid actions: create, update_status, enroll, conversion, get_variant' },
       { status: 400 }
     );
   } catch (error) {

@@ -139,16 +139,17 @@ export async function POST(
           createdBy: user.userId,
         },
       });
-    } catch {
-      // InviteLink model não existe - retorna mock
-      inviteLink = {
-        id: nanoid(10),
-        code,
-        role,
-        expiresAt,
-        usageCount: 0,
-        maxUsage: maxUsage || null,
-      };
+    } catch (err) {
+      // InviteLink model não existe - retorna erro e instrução
+      console.error('[Invite Links API] InviteLink model not available:', err);
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Invite links feature not available. Please run prisma generate to sync the database schema.',
+          details: 'The InviteLink model may not be defined in your Prisma schema.'
+        },
+        { status: 503 }
+      );
     }
 
     return NextResponse.json({

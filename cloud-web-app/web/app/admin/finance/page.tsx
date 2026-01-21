@@ -116,7 +116,7 @@ function MetricCard({
       </div>
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-bold text-white">
-          {prefix}{typeof value === 'number' ? value.toLocaleString('en-US', { maximumFractionDigits: 2 }) : value}{suffix}
+          {prefix}{typeof value === 'number' ? value.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : value}{suffix}
         </span>
         {change !== undefined && (
           <span className={`text-xs flex items-center ${
@@ -140,7 +140,7 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
     <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
       <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
         <Bot className="w-4 h-4" />
-        AI Cost by Model
+        Custo de IA por modelo
       </h3>
       
       {/* Bar chart */}
@@ -163,7 +163,7 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
               />
             </div>
             <p className="text-[10px] text-gray-500 mt-0.5">
-              {item.calls.toLocaleString()} calls
+              {item.calls.toLocaleString()} chamadas
             </p>
           </div>
         ))}
@@ -171,7 +171,7 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
       
       <div className="mt-4 pt-4 border-t border-[#333]">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-400">Total AI Cost Today</span>
+          <span className="text-gray-400">Custo total de IA hoje</span>
           <span className="text-white font-medium">${total.toFixed(2)}</span>
         </div>
       </div>
@@ -192,7 +192,7 @@ function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] })
     <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
       <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
         <PieChart className="w-4 h-4" />
-        Revenue by Plan
+        Receita por plano
       </h3>
       
       <div className="space-y-3">
@@ -208,7 +208,7 @@ function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] })
                 <span className="text-white font-medium">${item.revenue.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>{item.users} users</span>
+                <span>{item.users} usuários</span>
                 <span>{item.percentage.toFixed(1)}%</span>
               </div>
             </div>
@@ -225,10 +225,10 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
         <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" />
-          Financial Alerts
+          Alertas financeiros
         </h3>
         <p className="text-sm text-gray-500 text-center py-4">
-          No alerts at this time
+          Nenhum alerta no momento
         </p>
       </div>
     );
@@ -238,7 +238,7 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
     <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
       <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
         <AlertTriangle className="w-4 h-4" />
-        Financial Alerts ({alerts.length})
+        Alertas financeiros ({alerts.length})
       </h3>
       <div className="space-y-2">
         {alerts.map((alert, i) => (
@@ -256,7 +256,7 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
               {alert.message}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              {alert.metric}: {alert.value} (threshold: {alert.threshold})
+              {alert.metric}: {alert.value} (limite: {alert.threshold})
             </p>
           </div>
         ))}
@@ -272,17 +272,24 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
     refund: 'text-red-400',
     credit: 'text-purple-400'
   };
+
+  const typeLabels: Record<string, string> = {
+    subscription: 'assinatura',
+    usage: 'uso',
+    refund: 'reembolso',
+    credit: 'crédito',
+  };
   
   return (
     <div className="bg-[#1a1a1a] border border-[#333] rounded-lg overflow-hidden">
       <div className="p-4 border-b border-[#333] flex items-center justify-between">
         <h3 className="text-sm font-medium text-white flex items-center gap-2">
           <CreditCard className="w-4 h-4" />
-          Recent Transactions
+          Transações recentes
         </h3>
         <button className="text-xs text-gray-400 hover:text-white flex items-center gap-1">
           <Download className="w-3 h-3" />
-          Export
+          Exportar
         </button>
       </div>
       
@@ -290,11 +297,11 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[#333]">
-              <th className="text-left text-xs text-gray-500 font-normal px-4 py-2">Type</th>
-              <th className="text-left text-xs text-gray-500 font-normal px-4 py-2">User</th>
-              <th className="text-left text-xs text-gray-500 font-normal px-4 py-2">Description</th>
-              <th className="text-right text-xs text-gray-500 font-normal px-4 py-2">Amount</th>
-              <th className="text-right text-xs text-gray-500 font-normal px-4 py-2">Time</th>
+              <th className="text-left text-xs text-gray-500 font-normal px-4 py-2">Tipo</th>
+              <th className="text-left text-xs text-gray-500 font-normal px-4 py-2">Usuário</th>
+              <th className="text-left text-xs text-gray-500 font-normal px-4 py-2">Descrição</th>
+              <th className="text-right text-xs text-gray-500 font-normal px-4 py-2">Valor</th>
+              <th className="text-right text-xs text-gray-500 font-normal px-4 py-2">Hora</th>
             </tr>
           </thead>
           <tbody>
@@ -302,7 +309,7 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
               <tr key={tx.id} className="border-b border-[#252525] hover:bg-[#252525]/50">
                 <td className="px-4 py-2">
                   <span className={`capitalize ${typeColors[tx.type]}`}>
-                    {tx.type}
+                    {typeLabels[tx.type] ?? tx.type}
                   </span>
                 </td>
                 <td className="px-4 py-2">
@@ -342,12 +349,12 @@ export default function FinanceDashboard() {
   const fetchMetrics = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/finance/metrics?range=${dateRange}`);
-      if (!res.ok) throw new Error('Failed to fetch metrics');
+      if (!res.ok) throw new Error('Falha ao carregar métricas');
       const data = await res.json();
       setMetrics(data);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
@@ -373,12 +380,12 @@ export default function FinanceDashboard() {
   if (error || !metrics) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-red-400">{error || 'No data available'}</p>
+        <p className="text-red-400">{error || 'Sem dados disponíveis'}</p>
         <button 
           onClick={fetchMetrics}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
         >
-          Retry
+          Tentar novamente
         </button>
       </div>
     );
@@ -391,8 +398,8 @@ export default function FinanceDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Financial Health</h1>
-          <p className="text-sm text-gray-400">MRR, costs, and profitability metrics</p>
+          <h1 className="text-xl font-semibold text-white">Saúde financeira</h1>
+          <p className="text-sm text-gray-400">MRR, custos e métricas de rentabilidade</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -408,7 +415,7 @@ export default function FinanceDashboard() {
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                {range.toUpperCase()}
+                {range === 'today' ? 'HOJE' : range === '7d' ? '7D' : range === '30d' ? '30D' : 'MTD'}
               </button>
             ))}
           </div>
@@ -421,7 +428,7 @@ export default function FinanceDashboard() {
                 ? 'border-green-500/30 bg-green-500/10 text-green-400' 
                 : 'border-[#333] text-gray-400'
             }`}
-            title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+            title={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
           </button>
@@ -440,47 +447,47 @@ export default function FinanceDashboard() {
           subtitle={`ARR: $${(metrics.arr / 1000).toFixed(0)}k`}
         />
         <MetricCard
-          title="Daily Revenue"
+          title="Receita diária"
           value={metrics.dailyRevenue}
           icon={DollarSign}
           prefix="$"
         />
         <MetricCard
-          title="Daily Profit"
+          title="Lucro diário"
           value={metrics.dailyProfit}
           icon={metrics.dailyProfit >= 0 ? TrendingUp : TrendingDown}
           prefix="$"
           trend={metrics.dailyProfit >= 0 ? 'up' : 'down'}
-          subtitle={`Margin: ${metrics.profitMargin.toFixed(1)}%`}
+          subtitle={`Margem: ${metrics.profitMargin.toFixed(1)}%`}
         />
         <MetricCard
-          title="Burn Rate"
+          title="Queima diária"
           value={metrics.burnRate}
           icon={Zap}
           prefix="$"
-          suffix="/day"
-          subtitle={`Runway: ${metrics.runway} months`}
+          suffix="/dia"
+          subtitle={`Fôlego: ${metrics.runway} meses`}
         />
       </div>
       
       {/* Cost Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <MetricCard
-          title="AI Costs"
+          title="Custos de IA"
           value={metrics.dailyAICost}
           icon={Bot}
           prefix="$"
-          subtitle="Today's AI API spend"
+          subtitle="Gasto de IA hoje"
         />
         <MetricCard
-          title="Infrastructure"
+          title="Infraestrutura"
           value={metrics.dailyInfraCost}
           icon={Server}
           prefix="$"
-          subtitle="Servers, DBs, CDN"
+          subtitle="Servidores, BD, CDN"
         />
         <MetricCard
-          title="Active Subs"
+          title="Assinaturas ativas"
           value={metrics.activeSubscriptions}
           icon={Users}
           subtitle={`Churn: ${metrics.churnRate.toFixed(1)}%`}
@@ -494,14 +501,14 @@ export default function FinanceDashboard() {
           value={metrics.ltv}
           icon={TrendingUp}
           prefix="$"
-          subtitle="Lifetime Value"
+          subtitle="Valor do ciclo de vida"
         />
         <MetricCard
           title="CAC"
           value={metrics.cac}
           icon={CreditCard}
           prefix="$"
-          subtitle="Customer Acquisition Cost"
+          subtitle="Custo de aquisição"
         />
         <MetricCard
           title="LTV:CAC"
@@ -509,15 +516,15 @@ export default function FinanceDashboard() {
           icon={PieChart}
           suffix="x"
           trend={(metrics.ltv / metrics.cac) >= 3 ? 'up' : 'down'}
-          subtitle={metrics.ltv / metrics.cac >= 3 ? 'Healthy' : 'Needs improvement'}
+          subtitle={metrics.ltv / metrics.cac >= 3 ? 'Saudável' : 'Precisa melhorar'}
         />
         <MetricCard
-          title="Churn Rate"
+          title="Taxa de churn"
           value={metrics.churnRate}
           icon={TrendingDown}
           suffix="%"
           trend={metrics.churnRate <= 5 ? 'up' : 'down'}
-          subtitle="Monthly"
+          subtitle="Mensal"
         />
       </div>
       

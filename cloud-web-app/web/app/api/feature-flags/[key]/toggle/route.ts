@@ -4,35 +4,41 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { prisma } from '@/lib/db';
+import { withAdminAuth } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(
+async function toggleHandler(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  context: { user: { id: string } }
 ) {
   try {
-    const user = requireAuth(request);
-    const { key } = params;
-    const { enabled } = await request.json();
+    // Extract key from URL path
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const key = pathParts[pathParts.indexOf('feature-flags') + 1];
     
+    const { enabled } = await request.json();
+
     if (typeof enabled !== 'boolean') {
       return NextResponse.json(
         { success: false, error: 'enabled must be boolean' },
         { status: 400 }
       );
     }
-    
-    // Em produção, atualizar no banco de dados
-    console.log(`[FeatureFlags] Toggle ${key} to ${enabled} by ${user.userId}`);
-    
+
+    const flag = await prisma.featureFlag.update({
+      where: { key },
+      data: { enabled },
+    });
+
     return NextResponse.json({
       success: true,
       key,
-      enabled,
-      updatedAt: new Date(),
+      enabled: flag.enabled,
+      updatedAt: flag.updatedAt,
     });
   } catch (error) {
     console.error('Failed to toggle feature flag:', error);
@@ -41,3 +47,5 @@ export async function POST(
     return apiInternalError();
   }
 }
+
+export const POST = withAdminAuth(toggleHandler, 'ops:settings:feature_flags');

@@ -62,6 +62,62 @@ const PRIMITIVE_GEOMETRIES = {
 };
 
 // ============================================================================
+// SNAP TO GRID UTILITY
+// ============================================================================
+
+interface SnapSettings {
+  enabled: boolean;
+  gridSize: number;
+  rotationSnap: number; // em graus
+  scaleSnap: number;
+}
+
+const DEFAULT_SNAP_SETTINGS: SnapSettings = {
+  enabled: true,
+  gridSize: 0.5, // Snap a cada 0.5 unidades
+  rotationSnap: 15, // Snap a cada 15 graus
+  scaleSnap: 0.1, // Snap a cada 0.1
+};
+
+function snapToGrid(value: number, gridSize: number): number {
+  return Math.round(value / gridSize) * gridSize;
+}
+
+function snapPosition(
+  position: [number, number, number],
+  gridSize: number
+): [number, number, number] {
+  return [
+    snapToGrid(position[0], gridSize),
+    snapToGrid(position[1], gridSize),
+    snapToGrid(position[2], gridSize),
+  ];
+}
+
+function snapRotation(
+  rotation: [number, number, number],
+  snapDegrees: number
+): [number, number, number] {
+  const snapRad = (snapDegrees * Math.PI) / 180;
+  return [
+    snapToGrid(rotation[0], snapRad),
+    snapToGrid(rotation[1], snapRad),
+    snapToGrid(rotation[2], snapRad),
+  ];
+}
+
+function snapScale(
+  scale: [number, number, number],
+  snapSize: number
+): [number, number, number] {
+  return [
+    snapToGrid(scale[0], snapSize),
+    snapToGrid(scale[1], snapSize),
+    snapToGrid(scale[2], snapSize),
+  ];
+}
+
+// ============================================================================
 // SCENE OBJECT COMPONENT
 // ============================================================================
 
@@ -71,6 +127,7 @@ interface SceneObjectMeshProps {
   onSelect: () => void;
   transformMode: TransformMode;
   onTransformChange: (position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => void;
+  snapSettings?: SnapSettings;
 }
 
 function SceneObjectMesh({ 
@@ -78,7 +135,8 @@ function SceneObjectMesh({
   isSelected, 
   onSelect, 
   transformMode,
-  onTransformChange 
+  onTransformChange,
+  snapSettings = DEFAULT_SNAP_SETTINGS,
 }: SceneObjectMeshProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -97,6 +155,21 @@ function SceneObjectMesh({
     }
   }, [object.position, object.rotation, object.scale]);
 
+  // Handler com snap aplicado
+  const handleTransformWithSnap = useCallback(
+    (pos: [number, number, number], rot: [number, number, number], scl: [number, number, number]) => {
+      if (snapSettings.enabled) {
+        const snappedPos = snapPosition(pos, snapSettings.gridSize);
+        const snappedRot = snapRotation(rot, snapSettings.rotationSnap);
+        const snappedScl = snapScale(scl, snapSettings.scaleSnap);
+        onTransformChange(snappedPos, snappedRot, snappedScl);
+      } else {
+        onTransformChange(pos, rot, scl);
+      }
+    },
+    [snapSettings, onTransformChange]
+  );
+
   return (
     <group ref={groupRef} name={object.id}>
       {isSelected && (
@@ -112,7 +185,8 @@ function SceneObjectMesh({
             
             const euler = new THREE.Euler().setFromQuaternion(quaternion);
             
-            onTransformChange(
+            // Usar handler com snap
+            handleTransformWithSnap(
               [position.x, position.y, position.z],
               [euler.x, euler.y, euler.z],
               [scale.x, scale.y, scale.z]
@@ -186,13 +260,23 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
     color
   );
 
+  // Propriedades adicionais para luzes
+  const angle = (object.properties.angle as number) || 0.5;
+  const penumbra = (object.properties.penumbra as number) || 0.5;
+  const distance = (object.properties.distance as number) || 0;
+  const decay = (object.properties.decay as number) || 2;
+  const width = (object.properties.width as number) || 1;
+  const height = (object.properties.height as number) || 1;
+
   return (
-    <group position={object.position}>
+    <group position={object.position} rotation={object.rotation}>
       {lightType === 'point' && (
         <pointLight
           ref={lightRef as React.MutableRefObject<THREE.PointLight>}
           color={color}
           intensity={intensity}
+          distance={distance}
+          decay={decay}
           castShadow
         />
       )}
@@ -202,7 +286,6 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
           color={color}
           intensity={intensity}
           castShadow
-          position={[5, 5, 5]}
         />
       )}
       {lightType === 'spot' && (
@@ -211,16 +294,68 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
           color={color}
           intensity={intensity}
           castShadow
-          angle={0.5}
-          penumbra={0.5}
+          angle={angle}
+          penumbra={penumbra}
+          distance={distance}
+          decay={decay}
+        />
+      )}
+      {lightType === 'hemisphere' && (
+        <hemisphereLight
+          color={color}
+          groundColor={(object.properties.groundColor as number) || 0x444444}
+          intensity={intensity}
+        />
+      )}
+      {lightType === 'rect' && (
+        <rectAreaLight
+          color={color}
+          intensity={intensity}
+          width={width}
+          height={height}
         />
       )}
       
-      {/* Clickable indicator */}
+      {/* Light icon indicator - diferente por tipo */}
       <mesh onClick={onSelect}>
-        <sphereGeometry args={[0.1, 8, 8]} />
-        <meshBasicMaterial color={isSelected ? '#ffff00' : color} transparent opacity={0.7} />
+        {lightType === 'point' && <sphereGeometry args={[0.15, 16, 16]} />}
+        {lightType === 'spot' && <coneGeometry args={[0.15, 0.3, 16]} />}
+        {lightType === 'directional' && <cylinderGeometry args={[0.05, 0.15, 0.3, 8]} />}
+        {lightType === 'hemisphere' && <sphereGeometry args={[0.15, 16, 8]} />}
+        {lightType === 'rect' && <boxGeometry args={[width * 0.3, height * 0.3, 0.05]} />}
+        <meshBasicMaterial 
+          color={isSelected ? '#ffff00' : color} 
+          transparent 
+          opacity={0.9} 
+        />
       </mesh>
+      
+      {/* Light direction indicator for spot/directional */}
+      {(lightType === 'spot' || lightType === 'directional') && (
+        <arrowHelper args={[
+          new THREE.Vector3(0, -1, 0),
+          new THREE.Vector3(0, 0, 0),
+          0.5,
+          isSelected ? 0xffff00 : color
+        ]} />
+      )}
+      
+      {/* Selection label */}
+      {isSelected && (
+        <Html position={[0, 0.4, 0]}>
+          <div style={{
+            background: 'rgba(0,0,0,0.8)',
+            color: '#fff',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '11px',
+            whiteSpace: 'nowrap',
+            border: '1px solid #444'
+          }}>
+            💡 {object.name} ({lightType})
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
@@ -271,11 +406,17 @@ function CameraObject({ object, isSelected, onSelect }: CameraObjectProps) {
 
 import { AAAPostProcessing } from './AAAPostProcessing';
 
-// ============================================================================
-// SCENE CANVAS
-// ============================================================================
+interface SceneCanvasProps {
+  objects: SceneObject[];
+  selectedId: string | null;
+  transformMode: TransformMode;
   onSelect: (id: string | null) => void;
-  onTransformChange: (id: string, position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => void;
+  onTransformChange: (
+    id: string,
+    position: [number, number, number],
+    rotation: [number, number, number],
+    scale: [number, number, number]
+  ) => void;
   showGrid: boolean;
   showStats: boolean;
   isPlaying?: boolean;
@@ -288,6 +429,7 @@ function SceneCanvas({
   onSelect, 
   onTransformChange,
   showGrid,
+  showStats,
   isPlaying = false
 }: SceneCanvasProps) {
   const { camera } = useThree();
@@ -657,6 +799,8 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
     fontWeight: 'bold' as const,
   };
 
+  const properties = object.properties as Record<string, any>;
+
   return (
     <div style={{
       width: '280px',
@@ -850,27 +994,27 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                PHYSICS
                <input 
                  type="checkbox" 
-                 checked={!!object.properties.rigidbody}
+                 checked={Boolean(properties.rigidbody)}
                  onChange={(e) => {
                    if (e.target.checked) {
-                     onChange({ properties: { ...object.properties, rigidbody: { mass: 1, type: 'dynamic' } } });
+                     onChange({ properties: { ...properties, rigidbody: { mass: 1, type: 'dynamic' } } });
                    } else {
-                     const { rigidbody, ...rest } = object.properties;
+                     const { rigidbody, ...rest } = properties;
                      onChange({ properties: rest });
                    }
                  }}
                />
              </h4>
              
-             {object.properties.rigidbody && (
+             {Boolean(properties.rigidbody) && (
                <>
                  <div style={{ marginBottom: '8px' }}>
                    <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>Type</div>
                    <select
-                     value={(object.properties.rigidbody as any).type || 'dynamic'}
+                     value={(properties.rigidbody as any).type || 'dynamic'}
                      onChange={(e) => {
-                       const rb = object.properties.rigidbody as any;
-                       onChange({ properties: { ...object.properties, rigidbody: { ...rb, type: e.target.value } } });
+                       const rb = properties.rigidbody as any;
+                       onChange({ properties: { ...properties, rigidbody: { ...rb, type: e.target.value } } });
                      }}
                      style={{ width: '100%', background: '#333', color: '#fff', border: '1px solid #444', padding: '4px' }}
                    >
@@ -885,10 +1029,10 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                    <input
                      type="number"
                      step="0.1"
-                     value={(object.properties.rigidbody as any).mass || 1}
+                     value={(properties.rigidbody as any).mass || 1}
                      onChange={(e) => {
-                        const rb = object.properties.rigidbody as any;
-                        onChange({ properties: { ...object.properties, rigidbody: { ...rb, mass: parseFloat(e.target.value) } } });
+                        const rb = properties.rigidbody as any;
+                        onChange({ properties: { ...properties, rigidbody: { ...rb, mass: parseFloat(e.target.value) } } });
                      }}
                      style={{ width: '100%', background: '#333', color: '#fff', border: '1px solid #444', padding: '4px' }}
                    />

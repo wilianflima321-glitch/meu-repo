@@ -95,11 +95,16 @@ export async function POST(req: NextRequest) {
     await writeFile(filepath, new Uint8Array(finalBuffer));
 
     // Create asset record
+    const rawPath = (formData.get('path') as string) || '/Content';
+    const normalizedPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+    const assetPath = `${normalizedPath.replace(/\/$/, '')}/${file.name}`;
+
     const asset = await prisma.asset.create({
       data: {
         projectId,
         name: file.name,
         type: assetType || detectAssetType(file.type),
+        path: assetPath,
         url: `/uploads/${filename}`,
         size: finalBuffer.byteLength, // Use optimized size
         mimeType: file.type,

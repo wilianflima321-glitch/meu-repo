@@ -25,13 +25,13 @@ export default function ForgotPasswordPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Failed to send reset email')
+        setError(data.error || 'Falha ao enviar e-mail de redefinição')
         return
       }
 
       setIsSuccess(true)
     } catch (err) {
-      setError('Network error. Please try again.')
+      setError('Erro de rede. Tente novamente.')
     } finally {
       setIsLoading(false)
     }
@@ -45,19 +45,19 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-8 h-8 text-emerald-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Check your email</h1>
+            <h1 className="text-2xl font-bold text-white mb-4">Verifique seu e-mail</h1>
             <p className="text-slate-400 mb-6">
-              If an account exists with <span className="text-white">{email}</span>, you will receive a password reset link shortly.
+              Se existir uma conta com <span className="text-white">{email}</span>, você receberá um link de redefinição em instantes.
             </p>
             <p className="text-sm text-slate-500 mb-6">
-              Don&apos;t see the email? Check your spam folder.
+              Não encontrou o e-mail? Verifique a pasta de spam.
             </p>
             <Link
               href="/login"
               className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to login
+              Voltar para o login
             </Link>
           </div>
         </div>
@@ -74,9 +74,9 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/25">
               <Mail className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Forgot password?</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">Esqueceu a senha?</h1>
             <p className="text-slate-400">
-              No worries, we&apos;ll send you reset instructions.
+              Sem problemas, enviaremos as instruções de redefinição.
             </p>
           </div>
 
@@ -90,14 +90,14 @@ export default function ForgotPasswordPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                Email address
+                Endereço de e-mail
               </label>
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                placeholder="seu@email.com"
                 required
                 className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
               />
@@ -111,10 +111,10 @@ export default function ForgotPasswordPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Sending...
+                  Enviando...
                 </>
               ) : (
-                'Send reset link'
+                'Enviar link de redefinição'
               )}
             </button>
           </form>
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
               className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to login
+              Voltar para o login
             </Link>
           </div>
         </div>

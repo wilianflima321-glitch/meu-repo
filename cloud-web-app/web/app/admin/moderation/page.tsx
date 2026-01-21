@@ -74,16 +74,30 @@ interface ModerationStats {
 // =============================================================================
 
 const SHORTCUTS = {
-  'a': 'Approve',
-  'r': 'Reject',
-  'e': 'Escalate',
-  's': 'Skip',
-  'b': 'Shadow Ban User',
-  'd': 'Delete Content',
-  'n': 'Next Item',
-  'p': 'Previous Item',
-  'v': 'Toggle Content View',
-  '?': 'Show Shortcuts',
+  'a': 'Aprovar',
+  'r': 'Rejeitar',
+  'e': 'Escalar',
+  's': 'Ignorar',
+  'b': 'Banir usuário (sombra)',
+  'd': 'Excluir conteúdo',
+  'n': 'Próximo item',
+  'p': 'Item anterior',
+  'v': 'Alternar visualização',
+  '?': 'Mostrar atalhos',
+};
+
+const TYPE_LABELS: Record<ModerationItem['type'], string> = {
+  user_report: 'Denúncia de usuário',
+  ai_output: 'Saída de IA',
+  project_content: 'Conteúdo do projeto',
+  asset: 'Ativo',
+};
+
+const TARGET_LABELS: Record<ModerationItem['targetType'], string> = {
+  user: 'usuário',
+  project: 'projeto',
+  asset: 'ativo',
+  ai_generation: 'geração de IA',
 };
 
 // =============================================================================
@@ -95,7 +109,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
     <div className="grid grid-cols-4 gap-4 mb-6">
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Pending</span>
+          <span className="text-xs text-gray-400">Pendentes</span>
           <Clock className="w-4 h-4 text-yellow-400" />
         </div>
         <p className="text-xl font-bold text-white mt-1">{stats.pending}</p>
@@ -103,7 +117,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
       
       <div className="bg-[#1a1a1a] border border-red-500/30 rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Urgent</span>
+          <span className="text-xs text-gray-400">Urgentes</span>
           <AlertTriangle className="w-4 h-4 text-red-400" />
         </div>
         <p className="text-xl font-bold text-red-400 mt-1">{stats.urgent}</p>
@@ -111,7 +125,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
       
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Processed Today</span>
+          <span className="text-xs text-gray-400">Processados hoje</span>
           <CheckCircle className="w-4 h-4 text-green-400" />
         </div>
         <p className="text-xl font-bold text-white mt-1">{stats.todayProcessed}</p>
@@ -119,7 +133,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
       
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Avg Response</span>
+          <span className="text-xs text-gray-400">Tempo médio</span>
           <Clock className="w-4 h-4 text-blue-400" />
         </div>
         <p className="text-xl font-bold text-white mt-1">{stats.avgResponseTime}m</p>
@@ -172,16 +186,16 @@ function ItemCard({
         <div className="flex items-center gap-2">
           <TypeIcon className="w-4 h-4 text-gray-400" />
           <span className="text-sm text-gray-300 capitalize">
-            {item.type.replace('_', ' ')}
+            {TYPE_LABELS[item.type]}
           </span>
           {item.priority === 'urgent' && (
             <span className="px-2 py-0.5 text-xs bg-red-500 text-white rounded">
-              URGENT
+              URGENTE
             </span>
           )}
           {item.autoScore && item.autoScore > 0.7 && (
             <span className="px-2 py-0.5 text-xs bg-yellow-500/20 text-yellow-400 rounded">
-              AI Flagged: {Math.round(item.autoScore * 100)}%
+              Sinalizado por IA: {Math.round(item.autoScore * 100)}%
             </span>
           )}
         </div>
@@ -193,12 +207,12 @@ function ItemCard({
       {/* Target Info */}
       <div className="mb-3">
         <p className="text-sm text-white">
-          <span className="text-gray-400">Target:</span>{' '}
-          <span className="capitalize">{item.targetType}</span> ({item.targetId.slice(0, 8)}...)
+          <span className="text-gray-400">Alvo:</span>{' '}
+          <span className="capitalize">{TARGET_LABELS[item.targetType]}</span> ({item.targetId.slice(0, 8)}...)
         </p>
         {item.targetOwnerEmail && (
           <p className="text-xs text-gray-400 mt-1">
-            Owner: {item.targetOwnerEmail}
+            Responsável: {item.targetOwnerEmail}
           </p>
         )}
       </div>
@@ -206,7 +220,7 @@ function ItemCard({
       {/* Reason & Category */}
       {item.reason && (
         <div className="mb-3 p-2 bg-[#252525] rounded text-sm">
-          <span className="text-gray-400">Reason:</span>{' '}
+          <span className="text-gray-400">Motivo:</span>{' '}
           <span className="text-gray-200">{item.reason}</span>
           {item.category && (
             <span className="ml-2 px-2 py-0.5 text-xs bg-[#333] rounded capitalize">
@@ -224,7 +238,7 @@ function ItemCard({
             className="flex items-center gap-2 text-xs text-gray-400 hover:text-white"
           >
             {showContent ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-            {showContent ? 'Hide Content' : 'View Content'}
+            {showContent ? 'Ocultar conteúdo' : 'Ver conteúdo'}
           </button>
           {showContent && (
             <div className="mt-2 p-3 bg-[#0a0a0a] border border-[#333] rounded text-sm font-mono overflow-x-auto max-h-48 overflow-y-auto">
@@ -255,35 +269,35 @@ function ItemCard({
             className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded"
           >
             <CheckCircle className="w-4 h-4" />
-            Approve (A)
+            Aprovar (A)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('reject'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
           >
             <XCircle className="w-4 h-4" />
-            Reject (R)
+            Rejeitar (R)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('escalate'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm rounded"
           >
             <ArrowUp className="w-4 h-4" />
-            Escalate (E)
+            Escalar (E)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('shadowban'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded"
           >
             <UserX className="w-4 h-4" />
-            Shadow Ban (B)
+            Banimento sombra (B)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('skip'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded ml-auto"
           >
             <SkipForward className="w-4 h-4" />
-            Skip (S)
+            Ignorar (S)
           </button>
         </div>
       )}
@@ -298,7 +312,7 @@ function ShortcutsModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             <Keyboard className="w-5 h-5" />
-            Keyboard Shortcuts
+            Atalhos do teclado
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <XCircle className="w-5 h-5" />
@@ -317,7 +331,7 @@ function ShortcutsModal({ onClose }: { onClose: () => void }) {
         </div>
         
         <p className="text-xs text-gray-500 mt-4">
-          Press any key while an item is selected to perform the action.
+          Pressione qualquer tecla enquanto um item estiver selecionado para executar a ação.
         </p>
       </div>
     </div>
@@ -341,18 +355,21 @@ export default function ModerationQueue() {
   const [filter, setFilter] = useState<'all' | 'urgent' | 'pending'>('pending');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [search, setSearch] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   const containerRef = useRef<HTMLDivElement>(null);
   
   const fetchItems = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/moderation/queue?filter=${filter}`);
-      if (!res.ok) throw new Error('Failed to fetch');
+      if (!res.ok) throw new Error('Falha ao buscar');
       const data = await res.json();
       setItems(data.items);
       setStats(data.stats);
+      setLastUpdated(new Date());
     } catch (error) {
-      console.error('Failed to fetch moderation queue:', error);
+      console.error('Falha ao buscar fila de moderação:', error);
     } finally {
       setLoading(false);
     }
@@ -363,6 +380,20 @@ export default function ModerationQueue() {
     const interval = setInterval(fetchItems, 30000);
     return () => clearInterval(interval);
   }, [fetchItems]);
+
+  const filteredItems = items.filter((item) => {
+    const term = search.trim().toLowerCase();
+    return (
+      !term ||
+      item.reason?.toLowerCase().includes(term) ||
+      item.targetId.toLowerCase().includes(term) ||
+      item.targetOwnerEmail?.toLowerCase().includes(term)
+    );
+  });
+
+  useEffect(() => {
+    setSelectedIndex((index) => Math.min(index, Math.max(filteredItems.length - 1, 0)));
+  }, [filteredItems.length]);
   
   // Keyboard shortcuts
   useEffect(() => {
@@ -372,7 +403,7 @@ export default function ModerationQueue() {
         return;
       }
       
-      const item = items[selectedIndex];
+      const item = filteredItems[selectedIndex];
       if (!item && e.key !== '?' && e.key !== 'n' && e.key !== 'p') return;
       
       switch (e.key.toLowerCase()) {
@@ -395,7 +426,7 @@ export default function ModerationQueue() {
           handleAction('delete');
           break;
         case 'n':
-          setSelectedIndex(i => Math.min(i + 1, items.length - 1));
+          setSelectedIndex(i => Math.min(i + 1, filteredItems.length - 1));
           break;
         case 'p':
           setSelectedIndex(i => Math.max(i - 1, 0));
@@ -411,10 +442,10 @@ export default function ModerationQueue() {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [items, selectedIndex]);
+  }, [filteredItems, selectedIndex]);
   
   const handleAction = async (action: string) => {
-    const item = items[selectedIndex];
+    const item = filteredItems[selectedIndex];
     if (!item || processing) return;
     
     setProcessing(true);
@@ -426,10 +457,10 @@ export default function ModerationQueue() {
         body: JSON.stringify({ action }),
       });
       
-      if (!res.ok) throw new Error('Action failed');
+      if (!res.ok) throw new Error('Falha na ação');
       
       // Remove item from list and refresh stats
-      setItems(prev => prev.filter((_, i) => i !== selectedIndex));
+      setItems(prev => prev.filter((entry) => entry.id !== item.id));
       setStats(prev => ({
         ...prev,
         pending: Math.max(0, prev.pending - 1),
@@ -437,10 +468,10 @@ export default function ModerationQueue() {
       }));
       
       // Keep selection in bounds
-      setSelectedIndex(i => Math.min(i, items.length - 2));
+      setSelectedIndex(i => Math.min(i, filteredItems.length - 2));
       
     } catch (error) {
-      console.error('Action failed:', error);
+      console.error('Falha na ação:', error);
     } finally {
       setProcessing(false);
     }
@@ -461,11 +492,14 @@ export default function ModerationQueue() {
         <div>
           <h1 className="text-xl font-semibold text-white flex items-center gap-2">
             <Shield className="w-6 h-6" />
-            Moderation Queue
+            Fila de moderação
           </h1>
           <p className="text-sm text-gray-400">
-            Review and moderate flagged content
+            Revisar e moderar conteúdos sinalizados
           </p>
+          {lastUpdated && (
+            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+          )}
         </div>
         
         <div className="flex items-center gap-3">
@@ -475,7 +509,7 @@ export default function ModerationQueue() {
             className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] rounded text-sm text-gray-400 hover:text-white"
           >
             <Keyboard className="w-4 h-4" />
-            Shortcuts (?)
+            Atalhos (?)
           </button>
           
           {/* Filter */}
@@ -490,10 +524,19 @@ export default function ModerationQueue() {
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                {f}
+                {f === 'pending' ? 'pendentes' : f === 'urgent' ? 'urgentes' : 'todos'}
               </button>
             ))}
           </div>
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Buscar alvo/motivo"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-3 py-1.5 text-xs rounded bg-[#1a1a1a] border border-[#333] text-gray-200"
+          />
           
           {/* Refresh */}
           <button
@@ -509,15 +552,15 @@ export default function ModerationQueue() {
       <StatsBar stats={stats} />
       
       {/* Queue */}
-      {items.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-[#1a1a1a] border border-[#333] rounded-lg">
           <CheckCircle className="w-12 h-12 text-green-400 mb-4" />
-          <p className="text-lg text-gray-300">All clear!</p>
-          <p className="text-sm text-gray-500">No items in the moderation queue</p>
+          <p className="text-lg text-gray-300">Tudo certo!</p>
+          <p className="text-sm text-gray-500">Nenhum item na fila de moderação</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {items.map((item, index) => (
+          {filteredItems.map((item, index) => (
             <ItemCard
               key={item.id}
               item={item}
@@ -533,7 +576,7 @@ export default function ModerationQueue() {
       {processing && (
         <div className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
           <RefreshCw className="w-4 h-4 animate-spin" />
-          Processing...
+          Processando...
         </div>
       )}
       

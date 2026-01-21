@@ -30,7 +30,7 @@ const DiscordIcon = () => (
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <div className="animate-spin h-8 w-8 border-2 border-violet-500 border-t-transparent rounded-full" />
       </div>
     }>
@@ -55,7 +55,7 @@ function LoginForm() {
       await login(email, password);
       router.push('/dashboard');
     } catch (err) {
-      console.error('Login failed:', err);
+      console.error('Falha no login:', err);
     }
   };
 
@@ -64,25 +64,25 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="w-full max-w-md mx-4">
-        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
+    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/60 shadow-[0_24px_80px_-48px_rgba(124,58,237,0.7)]">
           {/* Logo & Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/25">
               <span className="text-2xl font-bold">A</span>
             </div>
-            <h1 className="text-2xl font-bold">Welcome back</h1>
-            <p className="text-slate-400 mt-1">Sign in to your Aethel account</p>
+            <h1 className="text-2xl font-bold">Bem-vindo de volta</h1>
+            <p className="text-slate-400 mt-1">Entre na sua conta Aethel</p>
           </div>
 
           {/* OAuth Error */}
           {oauthError && (
             <div className="mb-6 p-3 text-sm text-center text-red-400 bg-red-900/20 border border-red-500/20 rounded-lg">
-              {oauthError === 'invalid_state' && 'Session expired. Please try again.'}
-              {oauthError === 'no_email' && 'Could not retrieve email from provider.'}
-              {oauthError === 'oauth_failed' && 'OAuth authentication failed. Please try again.'}
-              {!['invalid_state', 'no_email', 'oauth_failed'].includes(oauthError) && `Error: ${oauthError}`}
+              {oauthError === 'invalid_state' && 'Sessão expirada. Tente novamente.'}
+              {oauthError === 'no_email' && 'Não foi possível obter o e-mail do provedor.'}
+              {oauthError === 'oauth_failed' && 'Falha na autenticação OAuth. Tente novamente.'}
+              {!['invalid_state', 'no_email', 'oauth_failed'].includes(oauthError) && `Erro: ${oauthError}`}
             </div>
           )}
 
@@ -90,24 +90,24 @@ function LoginForm() {
           <div className="space-y-3 mb-6">
             <button
               onClick={() => handleOAuthLogin('github')}
-              className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 rounded-xl text-white font-medium transition-all"
+              className="flex h-11 items-center justify-center gap-3 w-full px-4 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl text-white text-sm font-semibold transition-all"
             >
               <GitHubIcon />
-              Continue with GitHub
+              Continuar com GitHub
             </button>
             <button
               onClick={() => handleOAuthLogin('google')}
-              className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 rounded-xl text-white font-medium transition-all"
+              className="flex h-11 items-center justify-center gap-3 w-full px-4 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl text-white text-sm font-semibold transition-all"
             >
               <GoogleIcon />
-              Continue with Google
+              Continuar com Google
             </button>
             <button
               onClick={() => handleOAuthLogin('discord')}
-              className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 rounded-xl text-white font-medium transition-all"
+              className="flex h-11 items-center justify-center gap-3 w-full px-4 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl text-white text-sm font-semibold transition-all"
             >
               <DiscordIcon />
-              Continue with Discord
+              Continuar com Discord
             </button>
           </div>
 
@@ -117,7 +117,7 @@ function LoginForm() {
               <div className="w-full border-t border-slate-600/50"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-slate-800/50 text-slate-400">or continue with email</span>
+              <span className="px-4 bg-slate-800/50 text-slate-400">ou continue com e-mail</span>
             </div>
           </div>
 
@@ -125,7 +125,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                Email
+                E-mail
               </label>
               <input
                 id="email"
@@ -135,17 +135,17 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                placeholder="seu@email.com"
+                className="w-full h-11 px-4 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/60 transition-all"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label htmlFor="password" className="block text-sm font-medium text-slate-300">
-                  Password
+                  Senha
                 </label>
                 <Link href="/forgot-password" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
-                  Forgot password?
+                  Esqueceu a senha?
                 </Link>
               </div>
               <div className="relative">
@@ -158,7 +158,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all pr-12"
+                  className="w-full h-11 px-4 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/60 transition-all pr-12"
                 />
                 <button
                   type="button"
@@ -179,7 +179,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-11 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -187,29 +187,29 @@ function LoginForm() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Signing in...
+                  Entrando...
                 </>
               ) : (
-                'Sign in'
+                'Entrar'
               )}
             </button>
           </form>
 
           {/* Sign up link */}
           <p className="mt-6 text-center text-slate-400 text-sm">
-            Don&apos;t have an account?{' '}
+            Não tem uma conta?{' '}
             <Link href="/register" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
-              Sign up for free
+              Cadastre-se grátis
             </Link>
           </p>
         </div>
 
         {/* Footer */}
         <p className="mt-6 text-center text-slate-500 text-xs">
-          By continuing, you agree to our{' '}
-          <Link href="/terms" className="text-slate-400 hover:text-white">Terms of Service</Link>
-          {' '}and{' '}
-          <Link href="/privacy" className="text-slate-400 hover:text-white">Privacy Policy</Link>
+          Ao continuar, você concorda com nossos{' '}
+          <Link href="/terms" className="text-slate-400 hover:text-white">Termos de Serviço</Link>
+          {' '}e{' '}
+          <Link href="/privacy" className="text-slate-400 hover:text-white">Política de Privacidade</Link>
         </p>
       </div>
     </div>

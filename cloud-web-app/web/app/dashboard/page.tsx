@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 
-const AethelDashboard = dynamic(() => import('../../components/AethelDashboard'), { ssr: false })
+const AethelDashboard = dynamic(() => import('../../components/AethelDashboardGateway'), { ssr: false })
 
 export const metadata = {
   title: 'Aethel IDE Dashboard',

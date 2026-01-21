@@ -41,6 +41,33 @@ export async function getProjectAccess(userId: string, projectId: string): Promi
 	return { projectId: project.id, ownerId: project.userId, role };
 }
 
+export async function checkProjectAccess(
+	userId: string,
+	projectId: string,
+	action?: 'read' | 'write' | 'manage' | 'export'
+): Promise<{ allowed: boolean; reason?: string; access?: ProjectAccess | null }> {
+	const access = await getProjectAccess(userId, projectId);
+	if (!access) {
+		return { allowed: false, reason: 'Project not found' };
+	}
+
+	const canRead = canReadProject(access.role);
+	const canWrite = canWriteProject(access.role);
+	const canManage = canManageProject(access.role);
+
+	const allowed = action === 'write'
+		? canWrite
+		: action === 'manage'
+			? canManage
+			: canRead;
+
+	if (!allowed) {
+		return { allowed: false, reason: 'Access denied', access };
+	}
+
+	return { allowed: true, access };
+}
+
 export async function requireProjectAccess(userId: string, projectId: string): Promise<ProjectAccess> {
 	const access = await getProjectAccess(userId, projectId);
 	if (!access) {

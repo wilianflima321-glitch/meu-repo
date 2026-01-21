@@ -11,37 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
-
-// Lazy load AWS SDK
-let S3Client: any, HeadObjectCommand: any;
-
-async function loadAwsSdk() {
-  if (!S3Client) {
-    try {
-      const s3 = await import('@aws-sdk/client-s3');
-      S3Client = s3.S3Client;
-      HeadObjectCommand = s3.HeadObjectCommand;
-    } catch {
-      // AWS SDK not installed - skip S3 verification
-      return false;
-    }
-  }
-  return true;
-}
-
-function getS3Client() {
-  return new S3Client({
-    region: process.env.AWS_REGION || 'us-east-1',
-    endpoint: process.env.S3_ENDPOINT,
-    forcePathStyle: !!process.env.S3_ENDPOINT,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-    },
-  });
-}
-
-const BUCKET_NAME = process.env.S3_BUCKET || 'aethel-assets';
+import { headObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 
 // ============================================================================
 // POST - Confirm Upload
@@ -84,17 +54,18 @@ export async function POST(
     }
 
     // Try to verify in S3 if SDK available
-    const sdkAvailable = await loadAwsSdk();
+    const sdkAvailable = await isS3Available();
     let actualSize = asset.size;
 
     if (sdkAvailable && asset.url) {
       try {
-        const s3 = getS3Client();
-        const headResult = await s3.send(new HeadObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: asset.url,
-        }));
-        actualSize = headResult.ContentLength || asset.size;
+        // Extract S3 key from URL
+        const s3Key = asset.url.startsWith(`s3://${S3_BUCKET}/`) 
+          ? asset.url.replace(`s3://${S3_BUCKET}/`, '')
+          : asset.url;
+        
+        const headResult = await headObject(s3Key);
+        actualSize = headResult?.size || asset.size;
       } catch (s3Error: any) {
         if (s3Error?.name === 'NotFound') {
           return NextResponse.json(
