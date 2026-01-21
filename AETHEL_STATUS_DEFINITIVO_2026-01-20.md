@@ -278,3 +278,30 @@ O **Aethel Engine** está **100% pronto para produção** 🚀:
 3. `Dockerfile.worker` - CI/CD worker image (~200 linhas)
 4. `tests/unit/pixel-streaming.test.ts` - Unit tests (~400 linhas)
 5. `.github/workflows/ci-worker-image.yml` - Workflow CI (~180 linhas)
+
+---
+
+## 🎨 ATUALIZAÇÃO UI/UX AAA (Janeiro 2026)
+
+### Páginas com Design AAA Studio-Grade:
+
+| Página | Linhas | Status | Descrição |
+|--------|--------|--------|-----------|
+| `app/(landing)/page.tsx` | ~680 | ✅ AAA | Landing page com glassmorphism, gradientes violet/purple |
+| `app/login/page.tsx` | ~350 | ✅ AAA | Login com OAuth (GitHub/Google) + ícones inline SVG |
+| `app/register/page.tsx` | ~380 | ✅ AAA | Registro com validação + plano seletor |
+| `app/pricing/page.tsx` | ~450 | ✅ AAA | Cards de pricing (Hobby/Pro/Enterprise) + FAQ |
+| `app/settings/page.tsx` | ~220 | ✅ AAA | Tabs (Editor/Profile/Billing/API) + sidebar com ícones |
+| `app/download/page.tsx` | ~280 | ✅ AAA | Download com auto-detecção de plataforma + feature grid |
+| `app/profile/page.tsx` | ~860 | ✅ Funcional | Profile completo com 2FA, sessions, delete account |
+
+### Design System Implementado:
+- **Cores:** Paleta violet/purple/fuchsia com gradientes
+- **Efeitos:** Glassmorphism, blur backdrops, glow effects
+- **Tipografia:** Font weights variados (black, bold, semibold, medium)
+- **Componentes:** Cards com bordas white/5, hover transitions, ícones SVG inline
+- **Responsivo:** Grids adaptativos para mobile/tablet/desktop
+
+### Commits Recentes UI/AAA:
+- `74cec39ef` - refactor: AAA redesign - Settings + Download pages + Landing fix
+- `baec0bca8` - docs: Consolidate documentation with master index
