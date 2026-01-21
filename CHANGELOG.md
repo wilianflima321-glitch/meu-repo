@@ -5,6 +5,45 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-21
+
+### 🎨 Design System AAA Professional
+
+Esta versão implementa um redesign completo da interface com qualidade AAA profissional.
+
+### ✨ Added
+
+#### 🎨 Design System `.aethel-*`
+- Sistema de design profissional em `app/globals.css` (+400 linhas)
+  - Layouts: `.aethel-dashboard`, `.aethel-sidebar`, `.aethel-header`
+  - Cards: `.aethel-card`, `.aethel-card-hover`, `.aethel-card-interactive`
+  - Buttons: `.aethel-button-primary/secondary/ghost/danger`
+  - Badges, Tabs, Tables, Modals, Dropdowns, Tooltips
+  - Animações: `fadeInUp`, `shimmer`, `pulse-glow`
+
+#### 📄 Novas Páginas AAA
+- `app/(auth)/register/page.tsx` - Registro com OAuth, split-screen, password strength
+- `app/not-found.tsx` - Página 404 profissional
+- `app/contact-sales/page.tsx` - Formulário enterprise sales
+- `app/status/page.tsx` - Página de status do sistema
+
+#### 📚 Documentação Consolidada
+- `FONTE_DA_VERDADE.md` - Documento único de referência (v0.3.0)
+- `INDICE_DOCUMENTACAO_MASTER.md` - Índice de toda documentação
+
+### 🔄 Changed
+
+#### 🎨 Páginas Redesenhadas
+- `app/(auth)/login/page.tsx` - Login AAA com Dev Mode button
+- `app/(landing)/page.tsx` - Landing page AAA studio-grade
+- `app/pricing/page.tsx` - Pricing AAA com tabela comparativa, FAQs
+
+#### 📝 Documentação Atualizada
+- `README.md` - Alinhado com FONTE_DA_VERDADE
+- `CHANGELOG.md` - Atualizado para v0.3.0
+
+---
+
 ## [2.0.0] - 2026-01-20
 
 ### 🎉 Major Release - Produção 100% Completa

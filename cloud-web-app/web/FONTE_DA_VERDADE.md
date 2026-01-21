@@ -1,7 +1,10 @@
 # 📋 AETHEL ENGINE - FONTE DA VERDADE
-**Última atualização:** 21 de Janeiro de 2026, 22:00 UTC-3  
+**Última atualização:** 21 de Janeiro de 2026, 23:00 UTC-3  
 **Versão:** 0.3.0  
 **Branch:** main
+
+> ⚠️ **ATENÇÃO:** Este é o ÚNICO documento de referência para o estado atual do projeto.  
+> Todos os outros arquivos `.md` são históricos. Ver [INDICE_DOCUMENTACAO_MASTER.md](INDICE_DOCUMENTACAO_MASTER.md)
 
 ---
 
