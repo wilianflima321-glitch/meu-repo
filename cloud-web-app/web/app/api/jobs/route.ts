@@ -2,85 +2,31 @@
  * AETHEL ENGINE - Jobs Queue API
  * 
  * Gerencia filas de trabalho (build, render, export, etc).
+ * MIGRADO: De Map() in-memory para PostgreSQL/Prisma
+ * 
  * GET - Lista jobs
  * POST - Cria novo job
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/prisma';
+import { verifyToken } from '@/lib/auth';
 
-type JobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
-type JobType = 'build' | 'render' | 'export' | 'import' | 'compress' | 'upload';
-
-interface Job {
-  id: string;
-  type: JobType;
-  status: JobStatus;
-  progress: number;
-  projectId?: string;
-  projectName?: string;
-  createdAt: string;
-  startedAt?: string;
-  completedAt?: string;
-  error?: string;
-  metadata?: Record<string, unknown>;
-}
-
-// Store em memória (em produção usar Redis/PostgreSQL)
-const jobsStore: Map<string, Job> = new Map();
-
-// Inicializar com alguns jobs de exemplo
-function initializeSampleJobs() {
-  if (jobsStore.size === 0) {
-    const now = Date.now();
-    const sampleJobs: Job[] = [
-      {
-        id: 'job-1',
-        type: 'build',
-        status: 'completed',
-        progress: 100,
-        projectId: 'proj-1',
-        projectName: 'Meu Jogo RPG',
-        createdAt: new Date(now - 3600000).toISOString(),
-        startedAt: new Date(now - 3500000).toISOString(),
-        completedAt: new Date(now - 3400000).toISOString(),
-      },
-      {
-        id: 'job-2',
-        type: 'render',
-        status: 'processing',
-        progress: 45,
-        projectId: 'proj-2',
-        projectName: 'Cinemática Intro',
-        createdAt: new Date(now - 1800000).toISOString(),
-        startedAt: new Date(now - 1700000).toISOString(),
-      },
-      {
-        id: 'job-3',
-        type: 'export',
-        status: 'queued',
-        progress: 0,
-        projectId: 'proj-1',
-        projectName: 'Meu Jogo RPG',
-        createdAt: new Date(now - 600000).toISOString(),
-      },
-    ];
-    
-    sampleJobs.forEach(job => jobsStore.set(job.id, job));
-  }
-}
-
-initializeSampleJobs();
+type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+type JobType = 'build' | 'render' | 'export' | 'import' | 'compress' | 'upload' | 'ai-generation' | 'asset-import';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
     
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
+    if (!token) {
+      return NextResponse.json({ error: 'Token não fornecido' }, { status: 401 });
+    }
+    
+    const payload = await verifyToken(token);
+    if (!payload?.userId) {
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -88,39 +34,58 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    let jobs = Array.from(jobsStore.values());
-
-    // Filtrar por status
+    const where: any = { userId: payload.userId };
+    
     if (status && status !== 'all') {
-      jobs = jobs.filter(job => job.status === status);
+      where.status = status;
     }
-
-    // Filtrar por tipo
+    
     if (type && type !== 'all') {
-      jobs = jobs.filter(job => job.type === type);
+      where.type = type;
     }
 
-    // Ordenar por data de criação (mais recentes primeiro)
-    jobs.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    // Limitar resultados
-    jobs = jobs.slice(0, limit);
+    const jobs = await prisma.backgroundJob.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
 
     // Calcular estatísticas
-    const allJobs = Array.from(jobsStore.values());
-    const stats = {
-      total: allJobs.length,
-      queued: allJobs.filter(j => j.status === 'queued').length,
-      processing: allJobs.filter(j => j.status === 'processing').length,
-      completed: allJobs.filter(j => j.status === 'completed').length,
-      failed: allJobs.filter(j => j.status === 'failed').length,
+    const stats = await prisma.backgroundJob.groupBy({
+      by: ['status'],
+      where: { userId: payload.userId },
+      _count: { status: true },
+    });
+
+    const statsMap = {
+      total: 0,
+      queued: 0,
+      running: 0,
+      completed: 0,
+      failed: 0,
+      cancelled: 0,
     };
 
+    stats.forEach(s => {
+      statsMap[s.status as keyof typeof statsMap] = s._count.status;
+      statsMap.total += s._count.status;
+    });
+
     return NextResponse.json({
-      jobs,
-      stats,
+      jobs: jobs.map(job => ({
+        id: job.id,
+        type: job.type,
+        status: job.status,
+        progress: job.progress,
+        projectId: job.projectId,
+        currentStep: job.currentStep,
+        error: job.error,
+        createdAt: job.createdAt.toISOString(),
+        startedAt: job.startedAt?.toISOString(),
+        completedAt: job.completedAt?.toISOString(),
+        metadata: job.input,
+      })),
+      stats: statsMap,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -134,17 +99,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
     
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
+    if (!token) {
+      return NextResponse.json({ error: 'Token não fornecido' }, { status: 401 });
+    }
+    
+    const payload = await verifyToken(token);
+    if (!payload?.userId) {
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { type, projectId, projectName, metadata } = body;
+    const { type, projectId, metadata, priority = 0 } = body;
 
     if (!type) {
       return NextResponse.json(
@@ -153,7 +121,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validTypes: JobType[] = ['build', 'render', 'export', 'import', 'compress', 'upload'];
+    const validTypes: JobType[] = ['build', 'render', 'export', 'import', 'compress', 'upload', 'ai-generation', 'asset-import'];
     if (!validTypes.includes(type)) {
       return NextResponse.json(
         { error: `Tipo inválido. Use: ${validTypes.join(', ')}` },
@@ -161,23 +129,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const job: Job = {
-      id: `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type,
-      status: 'queued',
-      progress: 0,
-      projectId,
-      projectName,
-      createdAt: new Date().toISOString(),
-      metadata,
-    };
-
-    jobsStore.set(job.id, job);
+    const job = await prisma.backgroundJob.create({
+      data: {
+        type,
+        status: 'queued',
+        priority,
+        userId: payload.userId,
+        projectId,
+        input: metadata || {},
+        progress: 0,
+      },
+    });
 
     return NextResponse.json({
       success: true,
       message: 'Job criado com sucesso',
-      job,
+      job: {
+        id: job.id,
+        type: job.type,
+        status: job.status,
+        progress: job.progress,
+        projectId: job.projectId,
+        createdAt: job.createdAt.toISOString(),
+      },
     });
   } catch (error) {
     console.error('Erro ao criar job:', error);

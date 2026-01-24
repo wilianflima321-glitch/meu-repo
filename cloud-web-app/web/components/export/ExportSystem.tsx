@@ -497,18 +497,23 @@ export class ExportManager {
   private currentJob: ExportJob | null = null
   private isProcessing = false
   private abortController: AbortController | null = null
+  private projectId: string
   
   private onQueueUpdate?: (queue: ExportJob[]) => void
   private onJobProgress?: (jobId: string, progress: number) => void
   private onJobComplete?: (jobId: string, outputUrl: string) => void
   private onJobError?: (jobId: string, error: string) => void
   
-  constructor(callbacks?: {
-    onQueueUpdate?: (queue: ExportJob[]) => void
-    onJobProgress?: (jobId: string, progress: number) => void
-    onJobComplete?: (jobId: string, outputUrl: string) => void
-    onJobError?: (jobId: string, error: string) => void
-  }) {
+  constructor(
+    projectId: string,
+    callbacks?: {
+      onQueueUpdate?: (queue: ExportJob[]) => void
+      onJobProgress?: (jobId: string, progress: number) => void
+      onJobComplete?: (jobId: string, outputUrl: string) => void
+      onJobError?: (jobId: string, error: string) => void
+    }
+  ) {
+    this.projectId = projectId
     if (callbacks) {
       this.onQueueUpdate = callbacks.onQueueUpdate
       this.onJobProgress = callbacks.onJobProgress
@@ -524,7 +529,8 @@ export class ExportManager {
       settings,
       status: 'queued',
       progress: 0,
-      sourceRange
+      sourceRange,
+      sourceProjectId: this.projectId
     }
     
     this.queue.push(job)
@@ -613,32 +619,122 @@ export class ExportManager {
   }
   
   private async processJob(job: ExportJob, signal: AbortSignal): Promise<string> {
-    // This is where actual encoding would happen
-    // For now, simulate progress
-    
     const { settings } = job
-    const duration = job.sourceRange.end - job.sourceRange.start
     
-    // Simulate encoding progress
-    const totalFrames = duration * settings.frameRate
-    const framesPerSecond = settings.hardwareAcceleration ? 120 : 30
-    const estimatedDuration = totalFrames / framesPerSecond
+    // Start export via API
+    const exportResponse = await fetch(`/api/projects/${this.projectId}/export`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        platform: 'web', // Default to web export
+        format: settings.container,
+        settings: {
+          videoCodec: settings.videoCodec,
+          audioCodec: settings.audioCodec,
+          resolution: settings.resolution,
+          frameRate: settings.frameRate,
+          bitrate: settings.bitrate,
+          quality: settings.bitrateMode === 'crf' ? settings.crf : undefined,
+          twoPass: settings.twoPass,
+          hardwareAcceleration: settings.hardwareAcceleration,
+        },
+        range: job.sourceRange,
+      }),
+      signal,
+    })
     
-    for (let progress = 0; progress <= 100; progress += 1) {
+    if (!exportResponse.ok) {
+      const error = await exportResponse.json().catch(() => ({ message: 'Export failed' }))
+      throw new Error(error.message || 'Export failed')
+    }
+    
+    const { exportId } = await exportResponse.json()
+    
+    // Poll for export status
+    let lastProgress = 0
+    while (true) {
       if (signal.aborted) {
         throw new DOMException('Aborted', 'AbortError')
       }
       
-      await new Promise(resolve => setTimeout(resolve, estimatedDuration * 10))
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      job.progress = progress
-      job.estimatedTimeRemaining = (estimatedDuration * (100 - progress)) / 100
-      this.onJobProgress?.(job.id, progress)
+      const statusResponse = await fetch(`/api/projects/${this.projectId}/export/${exportId}`, {
+        signal,
+      })
+      
+      if (!statusResponse.ok) {
+        throw new Error('Failed to check export status')
+      }
+      
+      const status = await statusResponse.json()
+      
+      // Update progress
+      if (status.progress !== undefined && status.progress !== lastProgress) {
+        lastProgress = status.progress
+        job.progress = status.progress
+        job.estimatedTimeRemaining = status.estimatedTimeRemaining
+        this.onJobProgress?.(job.id, status.progress)
+      }
+      
+      // Check completion states
+      if (status.status === 'completed') {
+        return status.downloadUrl || status.outputPath || ''
+      }
+      
+      if (status.status === 'failed') {
+        throw new Error(status.error || 'Export failed')
+      }
+      
+      if (status.status === 'cancelled') {
+        throw new DOMException('Cancelled', 'AbortError')
+      }
+    }
+  }
+  
+  // Retry a failed job
+  async retryJob(jobId: string): Promise<boolean> {
+    const job = this.queue.find(j => j.id === jobId)
+    if (!job || job.status !== 'failed') {
+      return false
     }
     
-    // Return a blob URL (in real implementation, this would be the actual encoded file)
-    const blob = new Blob(['dummy video data'], { type: 'video/mp4' })
-    return URL.createObjectURL(blob)
+    // Try to retry via API if we have an exportId
+    if (job.sourceProjectId) {
+      try {
+        const response = await fetch(`/api/projects/${job.sourceProjectId}/export/${jobId}/retry`, {
+          method: 'POST',
+        })
+        
+        if (response.ok) {
+          job.status = 'queued'
+          job.progress = 0
+          job.error = undefined
+          this.onQueueUpdate?.(this.queue)
+          
+          if (!this.isProcessing) {
+            this.processNext()
+          }
+          return true
+        }
+      } catch {
+        // Fall through to local retry
+      }
+    }
+    
+    // Local retry
+    job.status = 'queued'
+    job.progress = 0
+    job.error = undefined
+    this.onQueueUpdate?.(this.queue)
+    
+    if (!this.isProcessing) {
+      this.processNext()
+    }
+    
+    return true
   }
 }
 

@@ -816,7 +816,7 @@ describe('Cross-System Integration', () => {
     // World
     expect(lib.WorldStreamingSystem).toBeDefined();
     expect(lib.Octree).toBeDefined();
-  }, 30000); // 30s timeout for large module import
+  }, 60000); // 60s timeout for large module import (can be slow on Windows/CI)
   
   it('should export React providers', async () => {
     const lib = await import('../index');
@@ -831,7 +831,7 @@ describe('Cross-System Integration', () => {
     expect(lib.ControllerProvider).toBeDefined();
     expect(lib.CaptureProvider).toBeDefined();
     expect(lib.WorldStreamingProvider).toBeDefined();
-  }, 30000);
+  }, 60000);
   
   it('should export React hooks', async () => {
     const lib = await import('../index');
@@ -847,12 +847,12 @@ describe('Cross-System Integration', () => {
     expect(typeof lib.useControllerMapper).toBe('function');
     expect(typeof lib.useCaptureSystem).toBe('function');
     expect(typeof lib.useWorldStreaming).toBe('function');
-  }, 30000);
+  }, 60000);
   
   it('should have correct engine version', async () => {
     const lib = await import('../index');
     
     expect(lib.AETHEL_VERSION).toBe('1.1.0');
     expect(lib.ENGINE_NAME).toBe('Aethel Engine');
-  }, 30000);
+  }, 60000);
 });

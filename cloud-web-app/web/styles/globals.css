@@ -1,6 +1,10 @@
 /* Aethel IDE - Professional Design System */
 /* Version 2.0 - Enterprise Grade UI */
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ===== CSS Custom Properties ===== */
 :root {
   /* Aethel Professional Color Palette */

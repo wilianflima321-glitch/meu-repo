@@ -3,10 +3,13 @@
 /**
  * Animation Blueprint Editor Page
  * Página do editor de Animation Blueprints
+ * 
+ * NOTA: Esta é uma feature Pro - requer plano Pro ou superior
  */
 
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { PremiumLock } from '@/components/billing/PremiumLock';
 
 // Dynamic import para evitar problemas de SSR com ReactFlow
 const AnimationBlueprint = dynamic(
@@ -26,14 +29,16 @@ const AnimationBlueprint = dynamic(
 
 export default function AnimationBlueprintPage() {
   return (
-    <div className="h-screen w-screen overflow-hidden">
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-full bg-[#1e1e1e]">
-          <div className="text-white">Carregando...</div>
-        </div>
-      }>
-        <AnimationBlueprint />
-      </Suspense>
-    </div>
+    <PremiumLock feature="agents" requiredPlan="pro">
+      <div className="h-screen w-screen overflow-hidden">
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-full bg-[#1e1e1e]">
+            <div className="text-white">Carregando...</div>
+          </div>
+        }>
+          <AnimationBlueprint />
+        </Suspense>
+      </div>
+    </PremiumLock>
   );
 }

@@ -1,5 +1,17 @@
 'use client'
+import dynamicImport from 'next/dynamic'
 
-import LivePreviewPage from '@/app/live-preview/page'
+export const dynamic = 'force-dynamic'
 
-export default LivePreviewPage
+const PreviewContent = dynamicImport(() => import('../live-preview/LivePreviewContent'), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-screen w-screen bg-black flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  )
+})
+
+export default function PreviewPage() {
+  return <PreviewContent />
+}

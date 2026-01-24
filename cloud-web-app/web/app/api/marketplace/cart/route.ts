@@ -2,29 +2,39 @@
  * AETHEL ENGINE - Marketplace Cart API
  * 
  * Gerencia o carrinho de compras do marketplace.
+ * MIGRADO: De Map() in-memory para PostgreSQL/Prisma
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-
-interface CartItem {
-  assetId: string;
-  addedAt: string;
-}
-
-// Mock de dados - Substituir por banco de dados real
-const userCarts: Record<string, CartItem[]> = {};
+import { prisma } from '@/lib/prisma';
+import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    const userId = session?.user?.email || 'anonymous';
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (!token) {
+      return NextResponse.json({ items: [], count: 0 });
+    }
+    
+    const payload = await verifyToken(token);
+    if (!payload?.userId) {
+      return NextResponse.json({ items: [], count: 0 });
+    }
 
-    const cart = userCarts[userId] || [];
+    const cartItems = await prisma.marketplaceCartItem.findMany({
+      where: { userId: payload.userId },
+      orderBy: { createdAt: 'desc' },
+    });
 
     return NextResponse.json({ 
-      items: cart,
-      count: cart.length 
+      items: cartItems.map(item => ({
+        assetId: item.itemId,
+        quantity: item.quantity,
+        addedAt: item.createdAt.toISOString(),
+      })),
+      count: cartItems.length 
     });
   } catch (error) {
     console.error('Erro ao buscar carrinho:', error);
@@ -37,8 +47,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    const userId = session?.user?.email || 'anonymous';
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (!token) {
+      return NextResponse.json({ error: 'Token não fornecido' }, { status: 401 });
+    }
+    
+    const payload = await verifyToken(token);
+    if (!payload?.userId) {
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+    }
 
     const body = await request.json();
     const { assetId } = body;
@@ -50,28 +69,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!userCarts[userId]) {
-      userCarts[userId] = [];
-    }
+    // Upsert to add or update quantity
+    await prisma.marketplaceCartItem.upsert({
+      where: {
+        userId_itemId: {
+          userId: payload.userId,
+          itemId: assetId,
+        },
+      },
+      update: {
+        quantity: { increment: 1 },
+      },
+      create: {
+        userId: payload.userId,
+        itemId: assetId,
+        quantity: 1,
+      },
+    });
 
-    // Verificar se já está no carrinho
-    const exists = userCarts[userId].some(item => item.assetId === assetId);
-    if (exists) {
-      return NextResponse.json(
-        { error: 'Asset já está no carrinho' },
-        { status: 400 }
-      );
-    }
-
-    userCarts[userId].push({
-      assetId,
-      addedAt: new Date().toISOString(),
+    const count = await prisma.marketplaceCartItem.count({
+      where: { userId: payload.userId },
     });
 
     return NextResponse.json({ 
       success: true,
       message: 'Asset adicionado ao carrinho',
-      count: userCarts[userId].length 
+      count 
     });
   } catch (error) {
     console.error('Erro ao adicionar ao carrinho:', error);
@@ -84,26 +107,44 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    const userId = session?.user?.email || 'anonymous';
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (!token) {
+      return NextResponse.json({ error: 'Token não fornecido' }, { status: 401 });
+    }
+    
+    const payload = await verifyToken(token);
+    if (!payload?.userId) {
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+    }
 
     const { searchParams } = new URL(request.url);
     const assetId = searchParams.get('assetId');
 
     if (!assetId) {
       // Limpar todo o carrinho
-      userCarts[userId] = [];
+      await prisma.marketplaceCartItem.deleteMany({
+        where: { userId: payload.userId },
+      });
     } else {
       // Remover item específico
-      if (userCarts[userId]) {
-        userCarts[userId] = userCarts[userId].filter(item => item.assetId !== assetId);
-      }
+      await prisma.marketplaceCartItem.deleteMany({
+        where: {
+          userId: payload.userId,
+          itemId: assetId,
+        },
+      });
     }
+
+    const count = await prisma.marketplaceCartItem.count({
+      where: { userId: payload.userId },
+    });
 
     return NextResponse.json({ 
       success: true,
       message: 'Carrinho atualizado',
-      count: userCarts[userId]?.length || 0 
+      count 
     });
   } catch (error) {
     console.error('Erro ao remover do carrinho:', error);
@@ -113,3 +154,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

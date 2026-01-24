@@ -34,12 +34,15 @@ const config: Config = {
     '**/?(*.)+(spec|test).[jt]s?(x)',
   ],
   
-  // Ignore patterns
+  // Ignore patterns - também ignora testes que usam Vitest
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
     '<rootDir>/e2e/',
-    '<rootDir>/tests/e2e/',
+    '<rootDir>/tests/', // Todo tests/ usa Vitest
+    '<rootDir>/lib/test/',
+    '<rootDir>/__tests__/', // Todo __tests__ usa Vitest
+    '<rootDir>/lib/engine/', // Usa Vitest
   ],
   
   // Transform ignore

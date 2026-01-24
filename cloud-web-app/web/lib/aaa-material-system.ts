@@ -749,11 +749,28 @@ export class MaterialLibrary {
 MaterialLibrary.initialize();
 
 // ============================================================================
-// SHADER GRAPH COMPILER
+// SHADER GRAPH COMPILER - REAL GLSL GENERATION
 // ============================================================================
 
+interface CompiledNode {
+  code: string;
+  outputVar: string;
+  outputType: string;
+}
+
 export class ShaderGraphCompiler {
+  private nodeCounter = 0;
+  private compiledNodes = new Map<string, CompiledNode>();
+  private uniformDeclarations: string[] = [];
+  private functionDefinitions: string[] = [];
+  
   compile(graph: ShaderGraph): { vertexShader: string; fragmentShader: string; uniforms: Record<string, THREE.IUniform> } {
+    // Reset state
+    this.nodeCounter = 0;
+    this.compiledNodes.clear();
+    this.uniformDeclarations = [];
+    this.functionDefinitions = [];
+    
     const uniforms: Record<string, THREE.IUniform> = {};
     
     // Find output node
@@ -762,66 +779,497 @@ export class ShaderGraphCompiler {
       throw new Error('Shader graph must have an output node');
     }
     
-    // Generate fragment shader code by traversing from output
-    const fragmentCode = this.generateFragmentCode(graph, outputNode, uniforms);
+    // Build node connection map
+    const connectionMap = new Map<string, string>(); // toSocketId -> fromSocketId
+    for (const conn of graph.connections) {
+      connectionMap.set(conn.to, conn.from);
+    }
     
-    // Standard vertex shader
+    // Generate fragment shader code by traversing from output
+    const fragmentCode = this.generateNodeCode(graph, outputNode, connectionMap, uniforms);
+    
+    // Standard vertex shader with tangent space support
     const vertexShader = `
+      precision highp float;
+      
       varying vec2 vUv;
       varying vec3 vNormal;
       varying vec3 vPosition;
+      varying vec3 vWorldPosition;
+      varying vec3 vViewDir;
+      varying mat3 vTBN;
+      
+      #ifdef USE_TANGENT
+        attribute vec4 tangent;
+      #endif
       
       void main() {
         vUv = uv;
         vNormal = normalize(normalMatrix * normal);
         vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+        vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        vViewDir = normalize(cameraPosition - vWorldPosition);
+        
+        // Calculate TBN matrix for normal mapping
+        #ifdef USE_TANGENT
+          vec3 T = normalize(normalMatrix * tangent.xyz);
+          vec3 N = vNormal;
+          vec3 B = normalize(cross(N, T) * tangent.w);
+          vTBN = mat3(T, B, N);
+        #else
+          vec3 T = normalize(cross(vNormal, vec3(0.0, 1.0, 0.0)));
+          vec3 B = normalize(cross(vNormal, T));
+          vTBN = mat3(T, B, vNormal);
+        #endif
+        
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `;
     
+    // Build complete fragment shader
     const fragmentShader = `
+      precision highp float;
+      
       varying vec2 vUv;
       varying vec3 vNormal;
       varying vec3 vPosition;
+      varying vec3 vWorldPosition;
+      varying vec3 vViewDir;
+      varying mat3 vTBN;
       
-      ${this.generateUniforms(uniforms)}
+      uniform float time;
       
-      ${fragmentCode}
+      ${this.uniformDeclarations.join('\n')}
+      
+      // Utility functions
+      ${this.getUtilityFunctions()}
+      
+      // Node functions
+      ${this.functionDefinitions.join('\n')}
       
       void main() {
-        gl_FragColor = calculateOutput();
+        ${fragmentCode}
       }
     `;
+    
+    // Add time uniform
+    uniforms['time'] = { value: 0 };
     
     return { vertexShader, fragmentShader, uniforms };
   }
   
-  private generateFragmentCode(graph: ShaderGraph, node: ShaderNode, uniforms: Record<string, THREE.IUniform>): string {
-    // Traverse graph and generate GLSL code
-    // This is a simplified version - full implementation would handle all node types
-    return `
-      vec4 calculateOutput() {
-        return vec4(1.0, 0.0, 1.0, 1.0); // Placeholder
-      }
-    `;
-  }
-  
-  private generateUniforms(uniforms: Record<string, THREE.IUniform>): string {
-    let code = '';
-    for (const [name, uniform] of Object.entries(uniforms)) {
-      // Generate uniform declaration based on type
-      code += `uniform ${this.getGLSLType(uniform.value)} ${name};\n`;
+  private generateNodeCode(
+    graph: ShaderGraph, 
+    node: ShaderNode, 
+    connectionMap: Map<string, string>,
+    uniforms: Record<string, THREE.IUniform>
+  ): string {
+    // Check if already compiled
+    if (this.compiledNodes.has(node.id)) {
+      return ''; // Code already generated
     }
+    
+    const nodeId = this.nodeCounter++;
+    let code = '';
+    let outputVar = `node_${nodeId}`;
+    let outputType = 'vec4';
+    
+    // Process input connections first (depth-first)
+    const inputValues: Record<string, string> = {};
+    for (const input of node.inputs) {
+      const connectedSocketId = connectionMap.get(input.id);
+      if (connectedSocketId) {
+        // Find the connected node
+        const fromNode = graph.nodes.find(n => 
+          n.outputs.some(o => o.id === connectedSocketId)
+        );
+        if (fromNode) {
+          // Generate code for connected node
+          code += this.generateNodeCode(graph, fromNode, connectionMap, uniforms);
+          // Get the output variable
+          const compiled = this.compiledNodes.get(fromNode.id);
+          if (compiled) {
+            inputValues[input.name] = compiled.outputVar;
+          }
+        }
+      } else if (input.value !== undefined) {
+        // Use default value
+        inputValues[input.name] = this.valueToGLSL(input.value, input.type);
+      }
+    }
+    
+    // Generate code based on node type
+    switch (node.type) {
+      case 'output':
+        const baseColor = inputValues['baseColor'] || 'vec3(0.8, 0.8, 0.8)';
+        const metallic = inputValues['metallic'] || '0.0';
+        const roughness = inputValues['roughness'] || '0.5';
+        const normal = inputValues['normal'] || 'vNormal';
+        const emissive = inputValues['emissive'] || 'vec3(0.0)';
+        const opacity = inputValues['opacity'] || '1.0';
+        
+        code += `
+        // PBR Output Calculation
+        vec3 N = normalize(${normal});
+        vec3 V = normalize(vViewDir);
+        
+        vec3 albedo = ${baseColor};
+        float metal = clamp(${metallic}, 0.0, 1.0);
+        float rough = clamp(${roughness}, 0.04, 1.0);
+        vec3 emit = ${emissive};
+        float alpha = clamp(${opacity}, 0.0, 1.0);
+        
+        // Simplified PBR lighting
+        vec3 F0 = mix(vec3(0.04), albedo, metal);
+        
+        // Ambient light approximation
+        vec3 ambient = albedo * 0.03;
+        
+        // Simple directional light (sun)
+        vec3 lightDir = normalize(vec3(1.0, 1.0, 0.5));
+        vec3 lightColor = vec3(1.0, 0.98, 0.95);
+        
+        vec3 H = normalize(V + lightDir);
+        float NdotL = max(dot(N, lightDir), 0.0);
+        float NdotH = max(dot(N, H), 0.0);
+        float NdotV = max(dot(N, V), 0.0);
+        
+        // GGX Distribution
+        float a = rough * rough;
+        float a2 = a * a;
+        float denom = NdotH * NdotH * (a2 - 1.0) + 1.0;
+        float D = a2 / (3.14159 * denom * denom);
+        
+        // Fresnel (Schlick)
+        vec3 F = F0 + (1.0 - F0) * pow(1.0 - max(dot(H, V), 0.0), 5.0);
+        
+        // Geometry (Smith GGX)
+        float k = (rough + 1.0) * (rough + 1.0) / 8.0;
+        float G = (NdotV / (NdotV * (1.0 - k) + k)) * (NdotL / (NdotL * (1.0 - k) + k));
+        
+        // Specular BRDF
+        vec3 specular = (D * F * G) / max(4.0 * NdotV * NdotL, 0.001);
+        
+        // Diffuse (Lambert with energy conservation)
+        vec3 kD = (1.0 - F) * (1.0 - metal);
+        vec3 diffuse = kD * albedo / 3.14159;
+        
+        // Final color
+        vec3 Lo = (diffuse + specular) * lightColor * NdotL;
+        vec3 finalColor = ambient + Lo + emit;
+        
+        // Tone mapping (ACES approximation)
+        finalColor = finalColor / (finalColor + vec3(1.0));
+        finalColor = pow(finalColor, vec3(1.0 / 2.2));
+        
+        gl_FragColor = vec4(finalColor, alpha);
+        `;
+        break;
+        
+      case 'texture':
+        const textureName = `texture_${nodeId}`;
+        const textureUV = inputValues['uv'] || 'vUv';
+        this.uniformDeclarations.push(`uniform sampler2D ${textureName};`);
+        uniforms[textureName] = { value: node.parameters.texture || null };
+        
+        code += `vec4 ${outputVar} = texture2D(${textureName}, ${textureUV});\n`;
+        break;
+        
+      case 'color':
+        const color = node.parameters.color as { r: number; g: number; b: number; a?: number } || { r: 1, g: 1, b: 1, a: 1 };
+        code += `vec4 ${outputVar} = vec4(${color.r.toFixed(4)}, ${color.g.toFixed(4)}, ${color.b.toFixed(4)}, ${(color.a ?? 1).toFixed(4)});\n`;
+        break;
+        
+      case 'value':
+        const val = node.parameters.value as number ?? 0.5;
+        code += `float ${outputVar} = ${val.toFixed(4)};\n`;
+        outputType = 'float';
+        break;
+        
+      case 'math':
+        const mathOp = node.parameters.operation as string || 'add';
+        const inputA = inputValues['a'] || '0.0';
+        const inputB = inputValues['b'] || '0.0';
+        
+        switch (mathOp) {
+          case 'add':
+            code += `float ${outputVar} = ${inputA} + ${inputB};\n`;
+            break;
+          case 'subtract':
+            code += `float ${outputVar} = ${inputA} - ${inputB};\n`;
+            break;
+          case 'multiply':
+            code += `float ${outputVar} = ${inputA} * ${inputB};\n`;
+            break;
+          case 'divide':
+            code += `float ${outputVar} = ${inputA} / max(${inputB}, 0.0001);\n`;
+            break;
+          case 'power':
+            code += `float ${outputVar} = pow(${inputA}, ${inputB});\n`;
+            break;
+          case 'sqrt':
+            code += `float ${outputVar} = sqrt(max(${inputA}, 0.0));\n`;
+            break;
+          case 'abs':
+            code += `float ${outputVar} = abs(${inputA});\n`;
+            break;
+          case 'sin':
+            code += `float ${outputVar} = sin(${inputA});\n`;
+            break;
+          case 'cos':
+            code += `float ${outputVar} = cos(${inputA});\n`;
+            break;
+          case 'min':
+            code += `float ${outputVar} = min(${inputA}, ${inputB});\n`;
+            break;
+          case 'max':
+            code += `float ${outputVar} = max(${inputA}, ${inputB});\n`;
+            break;
+          case 'lerp':
+            const inputT = inputValues['t'] || '0.5';
+            code += `float ${outputVar} = mix(${inputA}, ${inputB}, ${inputT});\n`;
+            break;
+          default:
+            code += `float ${outputVar} = ${inputA};\n`;
+        }
+        outputType = 'float';
+        break;
+        
+      case 'vector':
+        const vecOp = node.parameters.operation as string || 'combine';
+        
+        if (vecOp === 'combine') {
+          const x = inputValues['x'] || '0.0';
+          const y = inputValues['y'] || '0.0';
+          const z = inputValues['z'] || '0.0';
+          code += `vec3 ${outputVar} = vec3(${x}, ${y}, ${z});\n`;
+          outputType = 'vec3';
+        } else if (vecOp === 'normalize') {
+          const vec = inputValues['vector'] || 'vec3(0.0, 1.0, 0.0)';
+          code += `vec3 ${outputVar} = normalize(${vec});\n`;
+          outputType = 'vec3';
+        } else if (vecOp === 'dot') {
+          const vecA = inputValues['a'] || 'vec3(0.0, 1.0, 0.0)';
+          const vecB = inputValues['b'] || 'vec3(0.0, 1.0, 0.0)';
+          code += `float ${outputVar} = dot(${vecA}, ${vecB});\n`;
+          outputType = 'float';
+        } else if (vecOp === 'cross') {
+          const vecA = inputValues['a'] || 'vec3(1.0, 0.0, 0.0)';
+          const vecB = inputValues['b'] || 'vec3(0.0, 1.0, 0.0)';
+          code += `vec3 ${outputVar} = cross(${vecA}, ${vecB});\n`;
+          outputType = 'vec3';
+        }
+        break;
+        
+      case 'noise':
+        const noiseType = node.parameters.type as string || 'perlin';
+        const noiseScale = inputValues['scale'] || '1.0';
+        const noisePos = inputValues['position'] || 'vWorldPosition';
+        
+        code += `float ${outputVar} = noise_${noiseType}(${noisePos} * ${noiseScale});\n`;
+        outputType = 'float';
+        break;
+        
+      case 'fresnel':
+        const fresnelPower = inputValues['power'] || '5.0';
+        const fresnelNormal = inputValues['normal'] || 'vNormal';
+        code += `float ${outputVar} = pow(1.0 - max(dot(normalize(${fresnelNormal}), normalize(vViewDir)), 0.0), ${fresnelPower});\n`;
+        outputType = 'float';
+        break;
+        
+      case 'normal':
+        const normalStrength = inputValues['strength'] || '1.0';
+        const normalMap = inputValues['map'];
+        if (normalMap) {
+          code += `
+        vec3 normalSample = ${normalMap}.xyz * 2.0 - 1.0;
+        normalSample.xy *= ${normalStrength};
+        vec3 ${outputVar} = normalize(vTBN * normalSample);
+        `;
+        } else {
+          code += `vec3 ${outputVar} = vNormal;\n`;
+        }
+        outputType = 'vec3';
+        break;
+        
+      case 'uv':
+        const uvChannel = node.parameters.channel as number || 0;
+        code += `vec2 ${outputVar} = vUv;\n`; // Could support multiple UV channels
+        outputType = 'vec2';
+        break;
+        
+      case 'time':
+        code += `float ${outputVar} = time;\n`;
+        outputType = 'float';
+        break;
+        
+      case 'split':
+        const splitInput = inputValues['vector'] || 'vec4(0.0)';
+        const splitChannel = node.parameters.channel as string || 'r';
+        code += `float ${outputVar} = ${splitInput}.${splitChannel};\n`;
+        outputType = 'float';
+        break;
+        
+      case 'blend':
+        const blendMode = node.parameters.mode as string || 'mix';
+        const blendA = inputValues['a'] || 'vec3(0.0)';
+        const blendB = inputValues['b'] || 'vec3(1.0)';
+        const blendFactor = inputValues['factor'] || '0.5';
+        
+        switch (blendMode) {
+          case 'mix':
+            code += `vec3 ${outputVar} = mix(${blendA}, ${blendB}, ${blendFactor});\n`;
+            break;
+          case 'add':
+            code += `vec3 ${outputVar} = ${blendA} + ${blendB} * ${blendFactor};\n`;
+            break;
+          case 'multiply':
+            code += `vec3 ${outputVar} = mix(${blendA}, ${blendA} * ${blendB}, ${blendFactor});\n`;
+            break;
+          case 'screen':
+            code += `vec3 ${outputVar} = mix(${blendA}, 1.0 - (1.0 - ${blendA}) * (1.0 - ${blendB}), ${blendFactor});\n`;
+            break;
+          case 'overlay':
+            code += `
+        vec3 blendOverlay = vec3(
+          ${blendA}.r < 0.5 ? (2.0 * ${blendA}.r * ${blendB}.r) : (1.0 - 2.0 * (1.0 - ${blendA}.r) * (1.0 - ${blendB}.r)),
+          ${blendA}.g < 0.5 ? (2.0 * ${blendA}.g * ${blendB}.g) : (1.0 - 2.0 * (1.0 - ${blendA}.g) * (1.0 - ${blendB}.g)),
+          ${blendA}.b < 0.5 ? (2.0 * ${blendA}.b * ${blendB}.b) : (1.0 - 2.0 * (1.0 - ${blendA}.b) * (1.0 - ${blendB}.b))
+        );
+        vec3 ${outputVar} = mix(${blendA}, blendOverlay, ${blendFactor});
+        `;
+            break;
+          default:
+            code += `vec3 ${outputVar} = mix(${blendA}, ${blendB}, ${blendFactor});\n`;
+        }
+        outputType = 'vec3';
+        break;
+        
+      case 'remap':
+        const remapInput = inputValues['value'] || '0.5';
+        const fromMin = inputValues['fromMin'] || '0.0';
+        const fromMax = inputValues['fromMax'] || '1.0';
+        const toMin = inputValues['toMin'] || '0.0';
+        const toMax = inputValues['toMax'] || '1.0';
+        code += `float ${outputVar} = ${toMin} + (${remapInput} - ${fromMin}) * (${toMax} - ${toMin}) / max(${fromMax} - ${fromMin}, 0.0001);\n`;
+        outputType = 'float';
+        break;
+        
+      case 'input':
+        // Input nodes represent external uniforms or vertex attributes
+        const inputName = node.parameters.name as string || 'input';
+        const inputType = node.parameters.inputType as string || 'float';
+        this.uniformDeclarations.push(`uniform ${inputType} ${inputName};`);
+        code += `${inputType} ${outputVar} = ${inputName};\n`;
+        outputType = inputType;
+        break;
+        
+      default:
+        // Unknown node type - output white
+        code += `vec4 ${outputVar} = vec4(1.0);\n`;
+    }
+    
+    // Store compiled node
+    this.compiledNodes.set(node.id, { code, outputVar, outputType });
+    
     return code;
   }
   
-  private getGLSLType(value: any): string {
-    if (typeof value === 'number') return 'float';
-    if (value instanceof THREE.Vector2) return 'vec2';
-    if (value instanceof THREE.Vector3) return 'vec3';
-    if (value instanceof THREE.Vector4 || value instanceof THREE.Color) return 'vec4';
-    if (value instanceof THREE.Texture) return 'sampler2D';
-    return 'float';
+  private valueToGLSL(value: any, type: string): string {
+    if (type === 'float') {
+      return typeof value === 'number' ? value.toFixed(4) : '0.0';
+    }
+    if (type === 'vec2') {
+      if (value && typeof value === 'object') {
+        return `vec2(${(value.x || 0).toFixed(4)}, ${(value.y || 0).toFixed(4)})`;
+      }
+      return 'vec2(0.0)';
+    }
+    if (type === 'vec3') {
+      if (value && typeof value === 'object') {
+        return `vec3(${(value.x || value.r || 0).toFixed(4)}, ${(value.y || value.g || 0).toFixed(4)}, ${(value.z || value.b || 0).toFixed(4)})`;
+      }
+      return 'vec3(0.0)';
+    }
+    if (type === 'vec4') {
+      if (value && typeof value === 'object') {
+        return `vec4(${(value.x || value.r || 0).toFixed(4)}, ${(value.y || value.g || 0).toFixed(4)}, ${(value.z || value.b || 0).toFixed(4)}, ${(value.w || value.a || 1).toFixed(4)})`;
+      }
+      return 'vec4(0.0, 0.0, 0.0, 1.0)';
+    }
+    return '0.0';
+  }
+  
+  private getUtilityFunctions(): string {
+    return `
+      // Hash functions for noise
+      float hash(float n) { return fract(sin(n) * 43758.5453123); }
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+      float hash(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453123); }
+      
+      // Perlin noise
+      float noise_perlin(vec3 p) {
+        vec3 i = floor(p);
+        vec3 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        
+        float n = i.x + i.y * 57.0 + 113.0 * i.z;
+        return mix(
+          mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
+              mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
+          mix(mix(hash(n + 113.0), hash(n + 114.0), f.x),
+              mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y),
+          f.z
+        );
+      }
+      
+      // Simplex noise (approximation)
+      float noise_simplex(vec3 p) {
+        return noise_perlin(p); // Simplified - use perlin as fallback
+      }
+      
+      // Voronoi noise
+      float noise_voronoi(vec3 p) {
+        vec3 i = floor(p);
+        vec3 f = fract(p);
+        
+        float minDist = 1.0;
+        for (int x = -1; x <= 1; x++) {
+          for (int y = -1; y <= 1; y++) {
+            for (int z = -1; z <= 1; z++) {
+              vec3 neighbor = vec3(float(x), float(y), float(z));
+              vec3 point = hash(i + neighbor) * 0.5 + 0.5;
+              vec3 diff = neighbor + point - f;
+              float dist = length(diff);
+              minDist = min(minDist, dist);
+            }
+          }
+        }
+        return minDist;
+      }
+      
+      // FBM (Fractal Brownian Motion)
+      float noise_fbm(vec3 p) {
+        float value = 0.0;
+        float amplitude = 0.5;
+        float frequency = 1.0;
+        for (int i = 0; i < 6; i++) {
+          value += amplitude * noise_perlin(p * frequency);
+          frequency *= 2.0;
+          amplitude *= 0.5;
+        }
+        return value;
+      }
+      
+      // Gradient noise for normal mapping
+      vec3 noise_gradient(vec3 p) {
+        float eps = 0.001;
+        float nx = noise_perlin(p + vec3(eps, 0.0, 0.0)) - noise_perlin(p - vec3(eps, 0.0, 0.0));
+        float ny = noise_perlin(p + vec3(0.0, eps, 0.0)) - noise_perlin(p - vec3(0.0, eps, 0.0));
+        float nz = noise_perlin(p + vec3(0.0, 0.0, eps)) - noise_perlin(p - vec3(0.0, 0.0, eps));
+        return normalize(vec3(nx, ny, nz));
+      }
+    `;
   }
 }
 

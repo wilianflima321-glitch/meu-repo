@@ -5,6 +5,9 @@
  * Observação: lógica de JWT/requireAuth para rotas do Next está em lib/auth-server.ts.
  */
 
+// Re-export server-side auth functions for API routes
+export { verifyToken, getUserFromRequest, requireAuth, type AuthUser } from './auth-server';
+
 const TOKEN_STORAGE_KEY = 'aethel-token';
 
 function canUseLocalStorage(): boolean {

@@ -113,19 +113,24 @@ function LoginForm() {
         {/* Left Side - Branding & Features */}
         <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-16 xl:px-24">
           <div className="max-w-lg">
-            {/* Logo */}
+            {/* Logo - Professional Branding */}
             <div className="flex items-center gap-4 mb-12">
               <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-violet-500/40">
-                  <span className="text-2xl font-black tracking-tight">A</span>
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/50">
+                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
+                    <path d="M16 4L28 26H4L16 4Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    <line x1="9" y1="20" x2="23" y2="20" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="16" cy="16" r="2.5" fill="white" opacity="0.9"/>
+                  </svg>
                 </div>
-                <div className="absolute -inset-1 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl blur opacity-40 -z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur-lg opacity-50 -z-10 animate-pulse" />
               </div>
               <div>
-                <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-violet-200 to-purple-200 bg-clip-text text-transparent">
-                  Aethel Engine
+                <h1 className="text-4xl tracking-tight">
+                  <span className="font-light text-white/90">AETHEL</span>
+                  <span className="font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">STUDIO</span>
                 </h1>
-                <p className="text-sm text-violet-300/80 font-medium">Game Development Studio</p>
+                <p className="text-sm text-slate-400 font-medium tracking-wider uppercase">Professional Game Engine</p>
               </div>
             </div>
 
@@ -182,10 +187,17 @@ function LoginForm() {
             {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-10">
               <div className="inline-flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
-                  <span className="text-xl font-black">A</span>
+                <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/40">
+                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                    <path d="M16 4L28 26H4L16 4Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    <line x1="9" y1="20" x2="23" y2="20" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="16" cy="16" r="2.5" fill="white" opacity="0.9"/>
+                  </svg>
                 </div>
-                <span className="text-2xl font-black">Aethel Engine</span>
+                <div className="text-left">
+                  <span className="text-2xl font-light text-white/90">AETHEL</span>
+                  <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">STUDIO</span>
+                </div>
               </div>
             </div>
 
@@ -358,12 +370,12 @@ function LoginForm() {
               </div>
             </div>
 
-            {/* Footer */}
-            <p className="mt-8 text-center text-slate-600 text-xs">
+            {/* Footer - Terms and Privacy */}
+            <p className="mt-8 text-center text-slate-300 text-sm">
               Ao continuar, você concorda com nossos{' '}
-              <Link href="/terms" className="text-slate-500 hover:text-white transition-colors">Termos</Link>
+              <Link href="/terms" className="text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors font-medium">Termos de Uso</Link>
               {' '}e{' '}
-              <Link href="/privacy" className="text-slate-500 hover:text-white transition-colors">Privacidade</Link>
+              <Link href="/privacy" className="text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors font-medium">Política de Privacidade</Link>
             </p>
           </div>
         </div>

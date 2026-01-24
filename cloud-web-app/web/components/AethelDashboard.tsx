@@ -37,6 +37,12 @@ import { AIThinkingPanel } from './ai/AIThinkingPanel'
 import { DirectorNotePanel } from './ai/DirectorNotePanel'
 import { TimeMachineSlider } from './collaboration/TimeMachineSlider'
 
+// Onboarding components
+import { WelcomeWizard } from './onboarding/WelcomeWizard'
+import { OnboardingChecklist } from './onboarding/OnboardingChecklist'
+import { TourProvider, useStartTour, TOURS } from './onboarding/InteractiveTour'
+import { OnboardingProvider, useOnboarding } from './Onboarding'
+
 interface WorkflowTemplate {
   id: string;
   name: string;
@@ -459,8 +465,30 @@ function getScopedKeys(projectId: string | null) {
   }
 }
 
+// Onboarding checklist with integrated tour functionality
+function OnboardingChecklistWithTour({ onDismiss }: { onDismiss: () => void }) {
+  const { startIDETour } = useStartTour()
+  
+  const handleStartTour = useCallback(() => {
+    onDismiss()
+    startIDETour()
+  }, [onDismiss, startIDETour])
+  
+  return (
+    <OnboardingChecklist
+      onDismiss={onDismiss}
+      onStartTour={handleStartTour}
+    />
+  )
+}
+
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
+  
+  // Onboarding state
+  const [showWelcomeWizard, setShowWelcomeWizard] = useState(false)
+  const [showOnboardingChecklist, setShowOnboardingChecklist] = useState(false)
+  const [isNewUser, setIsNewUser] = useState(false)
 
   const [workflowTemplates, setWorkflowTemplates] = useState<WorkflowTemplate[]>(DEFAULT_WORKFLOW_TEMPLATES)
   const [useCases, setUseCases] = useState<UseCase[]>(DEFAULT_USE_CASES)
@@ -653,6 +681,38 @@ export default function AethelDashboard() {
       },
     }))
   }, [billingData])
+
+  // Check onboarding status for new users
+  useEffect(() => {
+    if (!hasToken || typeof window === 'undefined') return
+    
+    const checkOnboarding = async () => {
+      try {
+        const response = await fetch('/api/onboarding')
+        const data = await response.json()
+        
+        if (data.success && data.onboarding) {
+          const { currentStep, completedSteps = [], completedTours = [] } = data.onboarding
+          
+          // Show welcome wizard for new users who haven't completed it
+          if (currentStep === 'welcome' || !completedSteps.includes('welcome')) {
+            setIsNewUser(true)
+            setShowWelcomeWizard(true)
+          }
+          
+          // Show checklist if welcome is done but other steps remain
+          if (completedSteps.includes('welcome') && 
+              (!completedSteps.includes('first_project') || !completedSteps.includes('first_build'))) {
+            setShowOnboardingChecklist(true)
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to check onboarding status:', error)
+      }
+    }
+    
+    checkOnboarding()
+  }, [hasToken])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -1677,9 +1737,36 @@ export default function AethelDashboard() {
   }, [hasToken])
 
   return (
-    <div className="min-h-screen aethel-container">
-      {/* Trial Banner */}
-      {isTrialActive && (
+    <OnboardingProvider>
+      <TourProvider>
+      <div className="min-h-screen aethel-container">
+        {/* Onboarding Components */}
+        {showWelcomeWizard && (
+          <WelcomeWizard
+            isOpen={showWelcomeWizard}
+            onComplete={(template) => {
+              setShowWelcomeWizard(false)
+              setShowOnboardingChecklist(true)
+              // If template selected, could trigger project creation
+              if (template) {
+                showToastMessage(`Template "${template}" selecionado! Criando projeto...`, 'success')
+              }
+            }}
+            onSkip={() => {
+              setShowWelcomeWizard(false)
+              setShowOnboardingChecklist(true)
+            }}
+          />
+        )}
+        
+        {showOnboardingChecklist && !showWelcomeWizard && (
+          <OnboardingChecklistWithTour 
+            onDismiss={() => setShowOnboardingChecklist(false)}
+          />
+        )}
+        
+        {/* Trial Banner */}
+        {isTrialActive && (
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 text-sm flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1989,6 +2076,54 @@ export default function AethelDashboard() {
           {/* Content based on active tab */}
           {activeTab === 'overview' && (
             <div className="aethel-p-6 aethel-space-y-6">
+              {/* 🚀 Studio Pro CTA - AAA Professional Experience */}
+              <Link 
+                href="/studio" 
+                className="aethel-block aethel-group aethel-relative aethel-overflow-hidden aethel-rounded-xl aethel-border aethel-border-indigo-500/30 aethel-bg-gradient-to-r aethel-from-indigo-950/50 aethel-via-purple-950/50 aethel-to-zinc-900/50 aethel-p-6 hover:aethel-border-indigo-400/50 aethel-transition-all aethel-duration-300"
+              >
+                {/* Animated background glow */}
+                <div className="aethel-absolute aethel-inset-0 aethel-bg-gradient-to-r aethel-from-indigo-600/10 aethel-via-purple-600/10 aethel-to-transparent aethel-opacity-0 group-hover:aethel-opacity-100 aethel-transition-opacity aethel-duration-500" />
+                
+                <div className="aethel-flex aethel-items-center aethel-justify-between aethel-relative aethel-z-10">
+                  <div className="aethel-flex aethel-items-center aethel-gap-4">
+                    {/* Animated icon */}
+                    <div className="aethel-w-14 aethel-h-14 aethel-rounded-xl aethel-bg-gradient-to-br aethel-from-indigo-500 aethel-to-purple-600 aethel-flex aethel-items-center aethel-justify-center aethel-shadow-lg aethel-shadow-indigo-500/25 group-hover:aethel-shadow-indigo-500/40 aethel-transition-shadow">
+                      <svg className="aethel-w-7 aethel-h-7 aethel-text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+                        <line x1="12" y1="22" x2="12" y2="15.5" />
+                        <polyline points="22 8.5 12 15.5 2 8.5" />
+                        <polyline points="2 15.5 12 8.5 22 15.5" />
+                        <line x1="12" y1="2" x2="12" y2="8.5" />
+                      </svg>
+                    </div>
+                    
+                    <div>
+                      <div className="aethel-flex aethel-items-center aethel-gap-2">
+                        <h3 className="aethel-text-xl aethel-font-bold aethel-text-white">Aethel Studio Pro</h3>
+                        <span className="aethel-text-[10px] aethel-font-semibold aethel-uppercase aethel-tracking-wider aethel-px-2 aethel-py-0.5 aethel-rounded-full aethel-bg-indigo-500/20 aethel-text-indigo-300 aethel-border aethel-border-indigo-500/30">
+                          Unificado
+                        </span>
+                      </div>
+                      <p className="aethel-text-sm aethel-text-slate-400 aethel-mt-1">
+                        Ambiente de desenvolvimento AAA • Level Editor • Material Editor • VFX • Tudo em uma tela
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Arrow with animation */}
+                  <div className="aethel-flex aethel-items-center aethel-gap-2">
+                    <span className="aethel-text-sm aethel-font-medium aethel-text-indigo-300 aethel-opacity-0 group-hover:aethel-opacity-100 aethel-transition-opacity">
+                      Abrir Studio
+                    </span>
+                    <div className="aethel-w-10 aethel-h-10 aethel-rounded-lg aethel-bg-indigo-500/20 aethel-flex aethel-items-center aethel-justify-center group-hover:aethel-bg-indigo-500/30 aethel-transition-colors">
+                      <svg className="aethel-w-5 aethel-h-5 aethel-text-indigo-300 group-hover:aethel-translate-x-0.5 aethel-transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
               {/* Status Cards */}
               <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 aethel-gap-6">
                 <div className="aethel-card aethel-p-6">
@@ -3510,5 +3645,7 @@ export default function AethelDashboard() {
         </main>
       </div>
     </div>
+    </TourProvider>
+    </OnboardingProvider>
   )
 }

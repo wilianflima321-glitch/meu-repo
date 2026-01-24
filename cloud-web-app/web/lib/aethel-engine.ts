@@ -33,7 +33,7 @@ import * as THREE from 'three';
 import { PhysicsWorld, PhysicsBody, PhysicsCollider, RigidBodyConfig } from './physics-engine-real';
 import { BehaviorTree, BehaviorNode, Blackboard } from './behavior-tree';
 import { NavigationMesh, NavAgentSystem, createNavAgentSystem } from './navigation-mesh';
-import { VideoEncoderReal, VideoEncoderConfig } from './video-encoder-real';
+import { VideoEncoderReal, VideoEncoderConfig, ScreenRecorder, createScreenRecorder } from './video-encoder-real';
 import { ParticleSystemManager, ParticleEmitter } from './particle-system-real';
 import { AnimationClip } from './skeletal-animation';
 import { LevelSerializer } from './level-serialization';
@@ -92,6 +92,7 @@ export class AethelEngine {
   
   // Video export
     readonly videoEncoder: VideoEncoderReal | null;
+    readonly screenRecorder: ScreenRecorder;
 
     // Nav agents
     readonly navAgents: NavAgentSystem;
@@ -163,6 +164,9 @@ export class AethelEngine {
     
     // Video encoder (requires explicit config)
     this.videoEncoder = null;
+    
+    // Screen recorder - always available
+    this.screenRecorder = createScreenRecorder();
     
     // Connect post-process volumes to pass
     this.ppVolumes.onSettingsChanged((settings) => {
@@ -334,9 +338,49 @@ export class AethelEngine {
   // Audio shortcuts
   playSound(_synth: unknown, _note: number, _duration?: number): void {}
   
-  // Video export shortcuts
-  async exportVideo(_duration: number, _config?: Partial<VideoEncoderConfig>): Promise<Blob> {
-    throw new Error('Video export not wired in this facade yet');
+  // Video export - uses canvas captureStream + WebM encoding
+  async exportVideo(duration: number, _config?: Partial<VideoEncoderConfig>): Promise<Blob> {
+    // Capture the WebGL canvas as a MediaStream
+    const canvas = this.renderer.domElement;
+    const fps = _config?.framerate ?? 30;
+    const stream = canvas.captureStream(fps);
+    
+    // Create a WebM muxer for recording
+    const { WebMMuxer } = await import('./video-encoder-real');
+    const muxer = new WebMMuxer();
+    
+    // Start recording
+    await muxer.startRecording(stream);
+    
+    // Wait for the specified duration
+    await new Promise<void>((resolve) => {
+      const startTime = Date.now();
+      
+      const checkDuration = () => {
+        if (Date.now() - startTime >= duration * 1000) {
+          resolve();
+        } else {
+          requestAnimationFrame(checkDuration);
+        }
+      };
+      
+      checkDuration();
+    });
+    
+    // Stop and return the blob
+    const blob = await muxer.stopRecording();
+    return blob;
+  }
+  
+  // Start screen/canvas recording for manual control
+  async startRecording(): Promise<void> {
+    const canvas = this.renderer.domElement;
+    const stream = canvas.captureStream(30);
+    await this.screenRecorder['muxer'].startRecording(stream);
+  }
+  
+  async stopRecording(): Promise<Blob> {
+    return this.screenRecorder.stopRecording();
   }
   
   // Level shortcuts

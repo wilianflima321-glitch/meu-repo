@@ -582,52 +582,186 @@ export class RayTracingPass {
           vec3 emissive;
         };
         
-        HitInfo traceRay(vec3 origin, vec3 direction) {
+        // BVH texture dimensions - set via uniform
+        const float BVH_TEX_SIZE = 256.0;
+        const float TRI_TEX_SIZE = 512.0;
+        const float MAT_TEX_SIZE = 64.0;
+        
+        // Fetch BVH node data from texture
+        void fetchBVHNode(int nodeIndex, out vec3 boxMin, out vec3 boxMax, out int leftChild, out int rightChild, out int triStart, out int triCount) {
+          // Each BVH node uses 2 texels (8 floats)
+          float texelY = floor(float(nodeIndex * 2) / BVH_TEX_SIZE) / BVH_TEX_SIZE;
+          float texelX1 = mod(float(nodeIndex * 2), BVH_TEX_SIZE) / BVH_TEX_SIZE;
+          float texelX2 = mod(float(nodeIndex * 2 + 1), BVH_TEX_SIZE) / BVH_TEX_SIZE;
+          
+          vec4 data1 = texture2D(bvhTexture, vec2(texelX1 + 0.5/BVH_TEX_SIZE, texelY + 0.5/BVH_TEX_SIZE));
+          vec4 data2 = texture2D(bvhTexture, vec2(texelX2 + 0.5/BVH_TEX_SIZE, texelY + 0.5/BVH_TEX_SIZE));
+          
+          boxMin = data1.xyz;
+          leftChild = int(data1.w);
+          boxMax = data2.xyz;
+          rightChild = int(data2.w);
+          
+          // If leaf node (no children), the values encode triangle range
+          if (leftChild < 0 && rightChild < 0) {
+            triStart = int(-data1.w - 1.0);
+            triCount = int(-data2.w);
+          } else {
+            triStart = -1;
+            triCount = 0;
+          }
+        }
+        
+        // Fetch triangle data from texture
+        void fetchTriangle(int triIndex, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 n0, out vec3 n1, out vec3 n2, out int matIndex) {
+          // Each triangle uses 4 texels (16 floats)
+          float baseIdx = float(triIndex * 4);
+          
+          vec2 texCoord0 = vec2(mod(baseIdx, TRI_TEX_SIZE), floor(baseIdx / TRI_TEX_SIZE)) / TRI_TEX_SIZE + 0.5/TRI_TEX_SIZE;
+          vec2 texCoord1 = vec2(mod(baseIdx + 1.0, TRI_TEX_SIZE), floor((baseIdx + 1.0) / TRI_TEX_SIZE)) / TRI_TEX_SIZE + 0.5/TRI_TEX_SIZE;
+          vec2 texCoord2 = vec2(mod(baseIdx + 2.0, TRI_TEX_SIZE), floor((baseIdx + 2.0) / TRI_TEX_SIZE)) / TRI_TEX_SIZE + 0.5/TRI_TEX_SIZE;
+          vec2 texCoord3 = vec2(mod(baseIdx + 3.0, TRI_TEX_SIZE), floor((baseIdx + 3.0) / TRI_TEX_SIZE)) / TRI_TEX_SIZE + 0.5/TRI_TEX_SIZE;
+          
+          vec4 data0 = texture2D(triangleTexture, texCoord0);
+          vec4 data1 = texture2D(triangleTexture, texCoord1);
+          vec4 data2 = texture2D(triangleTexture, texCoord2);
+          vec4 data3 = texture2D(triangleTexture, texCoord3);
+          
+          v0 = data0.xyz;
+          matIndex = int(data0.w);
+          v1 = data1.xyz;
+          v2 = data2.xyz;
+          
+          // Normals (we reconstruct from vertices if not stored)
+          vec3 edge1 = v1 - v0;
+          vec3 edge2 = v2 - v0;
+          vec3 faceNormal = normalize(cross(edge1, edge2));
+          n0 = faceNormal;
+          n1 = faceNormal;
+          n2 = faceNormal;
+        }
+        
+        // Fetch material data from texture
+        void fetchMaterial(int matIndex, out vec3 albedo, out float roughness, out float metalness, out vec3 emissive) {
+          // Each material uses 2 texels (8 floats)
+          float baseIdx = float(matIndex * 2);
+          
+          vec2 texCoord0 = vec2(mod(baseIdx, MAT_TEX_SIZE), floor(baseIdx / MAT_TEX_SIZE)) / MAT_TEX_SIZE + 0.5/MAT_TEX_SIZE;
+          vec2 texCoord1 = vec2(mod(baseIdx + 1.0, MAT_TEX_SIZE), floor((baseIdx + 1.0) / MAT_TEX_SIZE)) / MAT_TEX_SIZE + 0.5/MAT_TEX_SIZE;
+          
+          vec4 data0 = texture2D(materialTexture, texCoord0);
+          vec4 data1 = texture2D(materialTexture, texCoord1);
+          
+          albedo = data0.rgb;
+          roughness = data0.a;
+          emissive = data1.rgb;
+          metalness = data1.a;
+        }
+        
+        // BVH traversal with actual geometry
+        HitInfo traceRayBVH(vec3 origin, vec3 direction) {
           HitInfo info;
           info.hit = false;
           info.t = 1e20;
           
-          // Simple ground plane
-          float groundT = -origin.y / direction.y;
-          if (groundT > 0.001 && groundT < info.t) {
-            info.hit = true;
-            info.t = groundT;
-            info.position = origin + direction * groundT;
-            info.normal = vec3(0.0, 1.0, 0.0);
+          // Stack for BVH traversal (GLSL doesn't support recursion)
+          int stack[32];
+          int stackPtr = 0;
+          stack[stackPtr++] = 0; // Start with root node
+          
+          float closestT = 1e20;
+          int closestMatIndex = -1;
+          vec3 closestNormal = vec3(0.0, 1.0, 0.0);
+          vec3 closestPosition = vec3(0.0);
+          float closestU = 0.0;
+          float closestV = 0.0;
+          
+          // Traverse BVH
+          for (int iter = 0; iter < 256; iter++) { // Max iterations to prevent infinite loop
+            if (stackPtr <= 0) break;
             
-            // Checkerboard pattern
-            float checker = mod(floor(info.position.x) + floor(info.position.z), 2.0);
-            info.albedo = mix(vec3(0.4), vec3(0.8), checker);
-            info.roughness = 0.5;
-            info.metalness = 0.0;
-            info.emissive = vec3(0.0);
+            int nodeIndex = stack[--stackPtr];
+            
+            vec3 boxMin, boxMax;
+            int leftChild, rightChild, triStart, triCount;
+            fetchBVHNode(nodeIndex, boxMin, boxMax, leftChild, rightChild, triStart, triCount);
+            
+            // Test ray against bounding box
+            float tMin, tMax;
+            if (!intersectAABB(origin, direction, boxMin, boxMax, tMin, tMax)) {
+              continue;
+            }
+            
+            // Skip if box is farther than current hit
+            if (tMin > closestT) continue;
+            
+            // Leaf node - test triangles
+            if (triStart >= 0) {
+              for (int i = 0; i < 16; i++) { // Max triangles per leaf
+                if (i >= triCount) break;
+                
+                vec3 v0, v1, v2, n0, n1, n2;
+                int matIndex;
+                fetchTriangle(triStart + i, v0, v1, v2, n0, n1, n2, matIndex);
+                
+                float t, u, v;
+                if (intersectTriangle(origin, direction, v0, v1, v2, t, u, v)) {
+                  if (t > 0.001 && t < closestT) {
+                    closestT = t;
+                    closestMatIndex = matIndex;
+                    closestPosition = origin + direction * t;
+                    // Interpolate normal using barycentric coordinates
+                    closestNormal = normalize(n0 * (1.0 - u - v) + n1 * u + n2 * v);
+                    closestU = u;
+                    closestV = v;
+                  }
+                }
+              }
+            } else {
+              // Internal node - push children onto stack
+              if (rightChild >= 0 && stackPtr < 31) {
+                stack[stackPtr++] = rightChild;
+              }
+              if (leftChild >= 0 && stackPtr < 31) {
+                stack[stackPtr++] = leftChild;
+              }
+            }
           }
           
-          // Sphere at origin
-          vec3 sphereCenter = vec3(0.0, 1.0, 0.0);
-          float sphereRadius = 1.0;
+          // Fallback: ground plane if no BVH hit
+          float groundT = -origin.y / direction.y;
+          if (groundT > 0.001 && groundT < closestT && origin.y > 0.0) {
+            closestT = groundT;
+            closestPosition = origin + direction * groundT;
+            closestNormal = vec3(0.0, 1.0, 0.0);
+            closestMatIndex = -1; // Special: ground plane
+          }
           
-          vec3 oc = origin - sphereCenter;
-          float a = dot(direction, direction);
-          float b = 2.0 * dot(oc, direction);
-          float c = dot(oc, oc) - sphereRadius * sphereRadius;
-          float discriminant = b * b - 4.0 * a * c;
-          
-          if (discriminant > 0.0) {
-            float t = (-b - sqrt(discriminant)) / (2.0 * a);
-            if (t > 0.001 && t < info.t) {
-              info.hit = true;
-              info.t = t;
-              info.position = origin + direction * t;
-              info.normal = normalize(info.position - sphereCenter);
-              info.albedo = vec3(0.8, 0.2, 0.2);
-              info.roughness = 0.2;
-              info.metalness = 0.8;
+          if (closestT < 1e19) {
+            info.hit = true;
+            info.t = closestT;
+            info.position = closestPosition;
+            info.normal = closestNormal;
+            
+            if (closestMatIndex >= 0) {
+              // Fetch material from texture
+              fetchMaterial(closestMatIndex, info.albedo, info.roughness, info.metalness, info.emissive);
+            } else {
+              // Ground plane with checkerboard
+              float checker = mod(floor(info.position.x) + floor(info.position.z), 2.0);
+              info.albedo = mix(vec3(0.3), vec3(0.8), checker);
+              info.roughness = 0.5;
+              info.metalness = 0.0;
               info.emissive = vec3(0.0);
             }
           }
           
           return info;
+        }
+        
+        // Use BVH-based ray tracing
+        HitInfo traceRay(vec3 origin, vec3 direction) {
+          return traceRayBVH(origin, direction);
         }
         
         // Sky color

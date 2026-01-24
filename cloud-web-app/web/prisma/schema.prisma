@@ -79,6 +79,8 @@ model User {
   supportTickets   SupportTicket[]
   supportMessages  SupportMessage[]
   userPreferences  UserPreferences?
+  
+  marketplaceItems MarketplaceItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -399,20 +401,55 @@ model CreditLedgerEntry {
 // ============================================
 
 model MarketplaceItem {
-  id          String @id @default(cuid())
-  title       String
-  description String @db.Text
-  price       Int // cents, 0 for free
-  category    String // template, asset, plugin
-  authorId    String
-  downloads   Int    @default(0)
-  rating      Float  @default(0)
-
+  id              String @id @default(cuid())
+  title           String
+  description     String @db.Text
+  shortDescription String @default("")
+  price           Int // cents, 0 for free
+  currency        String @default("USD")
+  category        String // template, asset, plugin, 3d-model, texture, audio, vfx, animation
+  subcategory     String @default("")
+  tags            String[] @default([])
+  
+  // Storage
+  storagePath     String? // S3 key: marketplace/{id}/{filename}
+  fileSize        Int     @default(0) // bytes
+  version         String  @default("1.0.0")
+  
+  // Media
+  thumbnailUrl    String?
+  previewUrl      String?
+  images          String[] @default([])
+  
+  // Compatibility & License
+  compatibility   String[] @default(["Aethel 1.0"])
+  license         String  @default("standard") // standard, extended, exclusive
+  
+  // Creator
+  authorId        String
+  author          User?   @relation(fields: [authorId], references: [id])
+  
+  // Stats
+  downloads       Int     @default(0)
+  rating          Float   @default(0)
+  reviewCount     Int     @default(0)
+  favorites       Int     @default(0)
+  
+  // Flags
+  isFeatured      Boolean @default(false)
+  isPublished     Boolean @default(false)
+  isApproved      Boolean @default(false) // Admin approval
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  publishedAt DateTime?
 
   @@index([category])
   @@index([authorId])
+  @@index([isPublished, isApproved])
+  @@index([isFeatured])
+  @@index([downloads])
+  @@index([rating])
 }
 
 model InstalledExtension {
@@ -1247,5 +1284,115 @@ model LobbySession {
   @@index([gameId])
   @@index([hostId])
   @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// MARKETPLACE FAVORITES & CART
+// ============================================
+
+model MarketplaceFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String   // MarketplaceItem ID
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, itemId])
+  @@index([userId])
+  @@index([itemId])
+}
+
+model MarketplaceCartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String   // MarketplaceItem ID
+  quantity  Int      @default(1)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, itemId])
+  @@index([userId])
+}
+
+model MarketplacePurchase {
+  id          String   @id @default(cuid())
+  userId      String
+  itemId      String   // MarketplaceItem ID
+  
+  price       Int      // Price at time of purchase (cents)
+  currency    String   @default("USD")
+  
+  // Payment info
+  paymentId   String?  // Stripe payment ID
+  paymentStatus String @default("pending") // pending, completed, refunded
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([itemId])
+  @@index([paymentStatus])
+}
+
+// ============================================
+// BACKGROUND JOBS (replaces in-memory Map)
+// ============================================
+
+model BackgroundJob {
+  id          String   @id @default(cuid())
+  type        String   // build, export, ai-generation, asset-import
+  status      String   @default("queued") // queued, running, completed, failed, cancelled
+  priority    Int      @default(0)
+  
+  userId      String
+  projectId   String?
+  
+  // Input/Output
+  input       Json?
+  output      Json?
+  error       String?
+  
+  // Progress tracking
+  progress    Int      @default(0) // 0-100
+  currentStep String?
+  
+  // Timing
+  createdAt   DateTime @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // Retries
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ============================================
+// AI FEEDBACK (replaces in-memory store)
+// ============================================
+
+model AiFeedback {
+  id           String   @id @default(cuid())
+  userId       String
+  
+  suggestionId String
+  action       String   // accept, reject, modify, ignore
+  category     String?  // code, design, ai-chat, etc
+  
+  originalContent String? @db.Text
+  modifiedContent String? @db.Text
+  reason         String?
+  
+  createdAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([category])
   @@index([createdAt])
 }

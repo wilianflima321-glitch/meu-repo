@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import ClientLayout from '../components/ClientLayout'
 import { ServiceWorkerProvider } from '../components/ServiceWorkerProvider'
+import DevNavigation from '../components/dev/DevNavigation'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -76,6 +77,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="antialiased">
         <ServiceWorkerProvider>
+          <DevNavigation />
           <div id="root" className="min-h-screen bg-slate-900 text-slate-100">
             <ClientLayout>
               {children}

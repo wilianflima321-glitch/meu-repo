@@ -3,10 +3,13 @@
 /**
  * Niagara VFX Editor Page
  * Página do editor de partículas Niagara
+ * 
+ * NOTA: Esta é uma feature Pro - requer plano Pro ou superior
  */
 
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { PremiumLock } from '@/components/billing/PremiumLock';
 
 // Dynamic import para evitar problemas de SSR com ReactFlow/Three.js
 const NiagaraVFX = dynamic(
@@ -26,14 +29,16 @@ const NiagaraVFX = dynamic(
 
 export default function NiagaraEditorPage() {
   return (
-    <div className="h-screen w-screen overflow-hidden">
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-full bg-[#1e1e1e]">
-          <div className="text-white">Carregando...</div>
-        </div>
-      }>
-        <NiagaraVFX />
-      </Suspense>
-    </div>
+    <PremiumLock feature="agents" requiredPlan="pro">
+      <div className="h-screen w-screen overflow-hidden">
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-full bg-[#1e1e1e]">
+            <div className="text-white">Carregando...</div>
+          </div>
+        }>
+          <NiagaraVFX />
+        </Suspense>
+      </div>
+    </PremiumLock>
   );
 }

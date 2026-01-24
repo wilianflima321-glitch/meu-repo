@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { Avatar, PlanBadge, Dropdown, type DropdownItem, Badge } from './ui'
 import { isAuthenticated } from '@/lib/auth'
+import NotificationCenter from './NotificationCenter'
 
 interface UserData {
   name: string
@@ -35,6 +36,7 @@ export default function AethelHeader() {
   const [isAuth, setIsAuth] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
   const [notifications, setNotifications] = useState(3)
   
   // Simulated user data - in production, fetch from API
@@ -123,6 +125,10 @@ export default function AethelHeader() {
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/chat', label: 'AI Chat' },
+    { href: '/editor-hub', label: 'Editores' },
+    { href: '/marketplace', label: 'Marketplace' },
+    { href: '/billing', label: 'Billing' },
+    { href: '/docs', label: 'Docs' },
     { href: '/download', label: 'Download' },
   ]
 
@@ -191,14 +197,23 @@ export default function AethelHeader() {
             {isAuth ? (
               <>
                 {/* Notifications */}
-                <button className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
-                  <Bell className="w-5 h-5" />
-                  {notifications > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
-                      {notifications > 9 ? '9+' : notifications}
-                    </span>
-                  )}
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => setNotificationOpen(!notificationOpen)}
+                    className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {notifications > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
+                        {notifications > 9 ? '9+' : notifications}
+                      </span>
+                    )}
+                  </button>
+                  <NotificationCenter 
+                    isOpen={notificationOpen} 
+                    onClose={() => setNotificationOpen(false)} 
+                  />
+                </div>
 
                 {/* Plan Badge */}
                 {user && (

@@ -141,6 +141,8 @@ interface OnboardingChecklistProps {
   onTaskComplete?: (task: OnboardingTask) => void;
   onAllComplete?: () => void;
   onNavigate?: (target: string) => void;
+  onDismiss?: () => void;
+  onStartTour?: () => void;
   className?: string;
 }
 
@@ -551,6 +553,8 @@ export function OnboardingChecklist({
   onTaskComplete,
   onAllComplete,
   onNavigate,
+  onDismiss,
+  onStartTour,
   className = '',
 }: OnboardingChecklistProps) {
   const [localProgress, updateLocalProgress] = useLocalProgress(userId);

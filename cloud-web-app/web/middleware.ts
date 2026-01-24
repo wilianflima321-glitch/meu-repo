@@ -4,9 +4,13 @@ import { jwtVerify } from 'jose';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis/cloudflare';
 
-function getJwtSecretBytes(): Uint8Array {
+function getJwtSecretBytes(): Uint8Array | null {
   const secret = process.env.JWT_SECRET;
   if (!secret || secret === 'your-secret-key-change-in-production') {
+    // Return null para rotas públicas (development)
+    if (process.env.NODE_ENV !== 'production') {
+      return null;
+    }
     // Mantém a mesma filosofia de lib/auth-server.ts: sem segredo => misconfig.
     throw Object.assign(
       new Error('AUTH_NOT_CONFIGURED: defina JWT_SECRET (não use default).'),
@@ -235,6 +239,18 @@ export async function middleware(req: NextRequest) {
   }
 
   // 2) Public Paths (Login, Register, Public Assets)
+  // Also allow dev mode bypass in development - more permissive for testing
+  const isDevBypass = process.env.NODE_ENV !== 'production' && (
+    req.nextUrl.searchParams.get('devMode') === 'true' ||
+    req.cookies.get('dev_bypass')?.value === 'true' ||
+    req.cookies.get('aethel_dev_mode')?.value === 'enabled' ||
+    req.headers.get('x-dev-mode') === 'true'
+  );
+  
+  // In development, allow access to all non-API routes for easier testing
+  const isDevEnvironment = process.env.NODE_ENV !== 'production';
+  const isPageRoute = !pathname.startsWith('/api');
+  
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
@@ -243,9 +259,20 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/health') || // Health checks públicos
     pathname.startsWith('/api/billing/webhook') || // Webhooks must be public
-    pathname === '/'
+    pathname === '/' ||
+    isDevBypass || // Allow dev mode bypass
+    (isDevEnvironment && isPageRoute) // In dev, allow all page routes without auth
   ) {
-    return withSecurityHeaders(NextResponse.next(), req);
+    // Set dev bypass cookie for subsequent requests
+    const response = withSecurityHeaders(NextResponse.next(), req);
+    if (isDevBypass && !req.cookies.get('aethel_dev_mode')?.value) {
+      response.cookies.set('aethel_dev_mode', 'enabled', {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        httpOnly: false,
+      });
+    }
+    return response;
   }
 
   // 3) CSRF proteção simples para cookie-based sessions em APIs
@@ -279,8 +306,15 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    // Verify token
-    const { payload } = await jwtVerify(token, getJwtSecretBytes());
+    // Verify token - check if JWT secret is configured
+    const jwtSecret = getJwtSecretBytes();
+    if (!jwtSecret) {
+      // In development without JWT_SECRET, allow access but log warning
+      console.warn('[Middleware] JWT_SECRET not configured - skipping token verification in development');
+      return withSecurityHeaders(NextResponse.next(), req);
+    }
+    
+    const { payload } = await jwtVerify(token, jwtSecret);
     
     // Admin Check - verifica role no token
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {

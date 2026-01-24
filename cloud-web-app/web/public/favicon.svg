@@ -1,11 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6366f1"/>
-      <stop offset="1" stop-color="#ec4899"/>
+    <linearGradient id="aethel-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#ec4899"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="14" fill="url(#g)"/>
-  <path d="M18 42l14-22 14 22" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="32" cy="42" r="3" fill="white"/>
+  
+  <!-- Background -->
+  <rect width="64" height="64" rx="16" fill="url(#aethel-grad)"/>
+  
+  <!-- Grid overlay -->
+  <g opacity="0.1">
+    <line x1="0" y1="21" x2="64" y2="21" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="42" x2="64" y2="42" stroke="white" stroke-width="0.5"/>
+    <line x1="21" y1="0" x2="21" y2="64" stroke="white" stroke-width="0.5"/>
+    <line x1="42" y1="0" x2="42" y2="64" stroke="white" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Main A symbol -->
+  <path d="M32 12L52 48H12L32 12Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="20" y1="38" x2="44" y2="38" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="4" fill="white"/>
+  
+  <!-- Energy lines -->
+  <g stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.8">
+    <line x1="32" y1="26" x2="32" y2="22"/>
+    <line x1="26" y1="32" x2="22" y2="32"/>
+    <line x1="38" y1="32" x2="42" y2="32"/>
+  </g>
+  
+  <!-- Corner accents -->
+  <g stroke="white" stroke-width="1" opacity="0.4">
+    <path d="M8 16V8H16" fill="none" stroke-linecap="round"/>
+    <path d="M48 8H56V16" fill="none" stroke-linecap="round"/>
+    <path d="M56 48V56H48" fill="none" stroke-linecap="round"/>
+    <path d="M16 56H8V48" fill="none" stroke-linecap="round"/>
+  </g>
 </svg>
