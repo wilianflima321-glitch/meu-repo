@@ -193,6 +193,10 @@ STRIPE_SECRET_KEY=xxx
 
 ---
 
+## 📌 Relatórios e Auditorias
+- Relatório de Continuação — Auditoria Multi‑Agente: [audit%20dicas%20do%20emergent%20usar/Relatorio_de_Continuacao_Auditoria_Multi-Agente.md](audit%20dicas%20do%20emergent%20usar/Relatorio_de_Continuacao_Auditoria_Multi-Agente.md)
+
+
 ## 📝 LICENSE
 
 MIT License - veja [LICENSE](LICENSE) para detalhes.
