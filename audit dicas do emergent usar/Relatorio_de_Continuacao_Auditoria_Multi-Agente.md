@@ -27,7 +27,7 @@ Arquivos revisados (todos em `audit dicas do emergent usar/`):
 - **Jornadas críticas**: criar app, editar com IA, preview, deploy e colaboração estão listados como prioridade, mas com status “não implementado”.【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L53-L61】
 
 ### 2) Frontend & IDE
-- **Workbench (shell única)**: especificação completa do layout, menu, barras, painel inferior, AI panel e status bar, com layout grid e painéis redimensionáveis; isso define o alvo, mas não prova implementação existente。【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L1-L166】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L229-L318】
+- **Workbench (shell única)**: especificação completa do layout, menu, barras, painel inferior, AI panel e status bar, com layout grid e painéis redimensionáveis; isso define o alvo, mas não prova implementação existente.【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L1-L166】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L229-L318】
 - **Editor**: Monaco é o componente alvo; tabs, minimap e atalhos estilo VS Code são requisitos, não capacidades existentes.【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L78-L126】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L118-L176】
 - **Preview & Viewport**: preview via iframe e viewport 3D via Three.js definidos, mas não implementados; timeline é escopo futuro (P2/P3).【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L85-L125】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L176-L227】
 - **Performance percebida**: targets claros (load, refresh, latency) definidos para Workbench, porém são metas, não métricas de produção atuais.【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L387-L401】
@@ -113,7 +113,7 @@ Esta seção consolida o que precisa ser corrigido/alinhado para sair de “docu
 
 ## FASE 6 — Visão Final: IDE AAA Unificada (somente alinhamento com specs)
 - **Workbench como shell única**: layout, docking, menu, status bar e painéis definidos no spec; esse é o núcleo da experiência de IDE tipo VS Code, com preview e AI integrados no mesmo shell.【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L1-L166】
-- **Editor + Preview + Viewport + Timeline**: editor Monaco, preview via iframe, viewport 3D via Three.js, timeline básica planejada; todos integrados no layout principal e sujeitos às limitações web documentadas。【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L118-L227】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L152-L200】
+- **Editor + Preview + Viewport + Timeline**: editor Monaco, preview via iframe, viewport 3D via Three.js, timeline básica planejada; todos integrados no layout principal e sujeitos às limitações web documentadas.【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L118-L227】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L152-L200】
 - **IA nativa**: sistema L1‑L5 com contexto integrado e ações rápidas (Ctrl+K), incluindo agent e multi‑agent com orquestração; integração é core, não plugin.【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L1-L233】
 - **Backend e Admin**: backend em FastAPI com serviços de auth, files, execution, deploy, collab e AI; admin para billing, custos de IA, moderação e logs (necessário para operar custos e limites).【F:audit dicas do emergent usar/9_BACKEND_SYSTEM_SPEC.md†L1-L87】【F:audit dicas do emergent usar/8_ADMIN_SYSTEM_SPEC.md†L1-L63】
 
@@ -134,7 +134,7 @@ Esta seção consolida decisões de interface para garantir **uma única shell (
 - **AI panel** como parte do layout principal, com ações rápidas (Ctrl+K) e chat contextual (inline + sidebar), evitando duplicação de experiências desconexas。【F:audit dicas do emergent usar/2_DUPLICATIONS_AND_CONFLICTS.md†L65-L74】【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L1-L118】
 
 ### 4) Feedback e estados do sistema
-- **Status bar** como fonte única de estado (branch, erros, AI ready, deploy) para reduzir ambiguidade e tornar o fluxo previsível.【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L229-L287】
+- **Status bar** como fonte única de estado (branch, erros, AI ready, deploy) para reduzir ambiguidade e tornar o fluxo previsível。【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L229-L287】
 - **Metas de performance explícitas** para sensação de fluidez (load, refresh, terminal e AI), evitando regressões de UX durante o build‑out.【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L387-L401】
 
 ---
@@ -158,8 +158,8 @@ Detalhamento prático da experiência, baseado em decisões já documentadas, pa
 - **Latência de IA e multi‑agent** precisa de feedback visual (progress/streaming), alinhado com o spec de UX de IA e seus limites de latência. 【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L1-L189】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L110-L150】
 
 ### 4) Acessibilidade e teclado‑first
-- **Atalhos VS Code‑like** e navegação por teclado são mandatórios para produtividade e familiaridade, reduzindo abandono por curva de aprendizado.【F:audit dicas do emergent usar/2_DUPLICATIONS_AND_CONFLICTS.md†L143-L157】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L319-L367】
-- **Requisitos de acessibilidade** (WCAG AA, focus visible, live regions) devem ser seguidos desde o core do Workbench. 【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L403-L424】
+- **Atalhos VS Code‑like** e navegação por teclado são mandatórios para produtividade e familiaridade, reduzindo abandono por curva de aprendizado【F:audit dicas do emergent usar/2_DUPLICATIONS_AND_CONFLICTS.md†L143-L157】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L319-L367】
+- **Requisitos de acessibilidade** (WCAG AA, focus visible, live regions) devem ser seguidos desde o core do Workbench.【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L403-L424】
 
 ---
 
@@ -167,4 +167,107 @@ Detalhamento prático da experiência, baseado em decisões já documentadas, pa
 O objetivo é “entregar a plataforma pronta” **seguindo o contrato de execução** já definido, respeitando limitações reais e o roadmap P0‑P3.
 
 ### P0 (MVP funcional)
-- Workbench shell + menu, sidebar, status bar, painéis redimensionáveis.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L88】【F:audit dicas do emergent usar/5_Workbench_SPEC.md†L1-L318】
+- Workbench shell + menu, sidebar, status bar, painéis redimensionáveis.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L88】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L1-L318】
+- Editor Monaco, tabs, atalhos e sync de arquivos.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L90-L126】
+- Preview via iframe com hot reload básico.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L108-L126】
+- AI chat + autocomplete + quick actions (Ctrl+K).【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L128-L166】【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L1-L189】
+- Terminal integrado com PTY backend.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L146-L166】
+- Deploy one‑click mínimo viável e URL pública.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L168-L186】
+
+### P1 (v1.0)
+- Colaboração real‑time (Yjs), multi‑agent e RAG básico conforme spec.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L52】【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L195-L233】
+- Git integration e deploy customizado (opcional).【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L52】
+
+### P2/P3 (expansão AAA limitada pelo web)
+- Viewport 3D e timeline básica conforme limitações web documentadas; plugins e marketplace somente após estabilidade do core.【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L52】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L152-L200】
+
+---
+
+## FASE 6.3 — Mapa de Riscos Operacionais (com ações)
+Riscos críticos já documentados e suas ações mitigadoras para manter a plataforma viável.
+
+- **Custos de IA** (alto e variável) → limites agressivos por plano, caching e filas de execução para evitar explosão de custo。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L110-L150】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L250-L318】
+- **Cold‑start de containers** → pools quentes e priorização por tier para preservar UX no preview/terminal。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L70-L108】
+- **Limites de WebGL/WebGPU** → fallback WebGL e otimização agressiva (LOD/streaming), aceitando gaps vs AAA desktop。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L11-L37】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L152-L200】
+- **Escala de WebSocket** → sharding e Redis PubSub para colaboração e preview real‑time。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L70-L108】
+- **Risco de qualidade da IA** (hallucinations/context loss) → RAG e seleção de contexto, além de UX com revisão/aplicação manual。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L110-L150】【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L1-L118】
+
+---
+
+## FASE 6.4 — Dicas adicionais e locais de modificação necessários (sem alucinar)
+Este bloco lista **o que ainda falta** e **onde modificar** com base direta nos specs, para que nenhuma IA “se perca” e todas as decisões permaneçam rastreáveis.
+
+### 1) Workbench e UI shell (ponto único de verdade)
+- **Local de referência**: `5_WORKBENCH_SPEC.md` define layout, docking, atalhos, status bar, temas e acessibilidade. Alterações de UI devem partir daqui para evitar divergência de UX。【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L1-L424】
+- **Lacuna**: Workbench ainda não existe como implementação (documento de auditoria confirma ausência). A primeira modificação real deve criar essa shell antes de qualquer feature avançada。【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L13-L76】
+
+### 2) Editor + Preview + Terminal (núcleo de produtividade)
+- **Editor Monaco**: alvo obrigatório; atalhos e features mínimas já listadas, evitando alternativas paralelas de editor。【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L78-L126】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L118-L176】
+- **Preview**: unificar em iframe sandboxed com HMR único; não permitir múltiplos mecanismos de preview concorrentes。【F:audit dicas do emergent usar/2_DUPLICATIONS_AND_CONFLICTS.md†L39-L49】【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L108-L126】
+- **Terminal**: xterm.js integrado + PTY backend, como painel fixo; não usar modal/popups para terminal。【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L78-L126】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L229-L267】
+
+### 3) IA nativa (L1–L3 primeiro, L4/L5 depois)
+- **Local de referência**: `6_AI_SYSTEM_SPEC.md` define chat, ações rápidas, agent e multi‑agent. As implementações devem seguir esta hierarquia para evitar “IA solta”.【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L1-L233】
+- **Lacuna**: todos os níveis estão como “não implementados”; iniciar com autocomplete + chat + quick actions antes de agent/multi‑agent (P0/P1).【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L186-L229】【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L128-L166】
+
+### 4) Backend e execução (evitar backends paralelos)
+- **Local de referência**: `9_BACKEND_SYSTEM_SPEC.md` define serviços e stack; deve existir apenas um gateway e serviços claros (auth, file, execution, AI, deploy, collab).【F:audit dicas do emergent usar/9_BACKEND_SYSTEM_SPEC.md†L1-L87】
+- **Lacuna**: execução em containers, build e deploy são requisitos, mas ainda não implementados; seguir o roadmap P0/P1 para evitar divergência de stack。【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L186】
+
+### 5) Colaboração e DX (evitar promessas vazias)
+- **Colaboração**: Yjs + awareness é a base; limites de escala e offline precisam ser reconhecidos e tratados como P1/P2, não como “já pronto”.【F:audit dicas do emergent usar/3_LIMITATIONS.md†L202-L232】【F:audit dicas do emergent usar/1_FULL_AUDIT.md†L238-L264】
+
+### 6) Admin e custos (viabilidade real)
+- **Local de referência**: `8_ADMIN_SYSTEM_SPEC.md` define módulos críticos para monitorar custos e uso; sem isso, custos de IA e infra ficam invisíveis。【F:audit dicas do emergent usar/8_ADMIN_SYSTEM_SPEC.md†L1-L63】
+- **Lacuna**: painel admin não está implementado e é necessário antes de escalar usuários pagos (riscos já documentados).【F:audit dicas do emergent usar/3_LIMITATIONS.md†L250-L318】
+
+### 7) Dispositivos e limites web (realidade do browser)
+- **Desktop‑first**: edição completa em mobile não é viável; mobile deve ser view‑only ou limitado (decisão explícita).【F:audit dicas do emergent usar/3_LIMITATIONS.md†L234-L248】
+- **3D/Video**: limitações web impedem equivalência total com AAA desktop; roadmap deve manter 3D/timeline como expansão controlada P2/P3。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L152-L200】【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L52】
+
+---
+
+## FASE 6.5 — Planos, assinaturas e sustentabilidade (evitar prejuízo sem reduzir UX)
+Esta seção alinha **planos, custos e limites** aos dados documentados para manter viabilidade financeira sem degradar a experiência do usuário.
+
+### 1) Custos reais e risco de prejuízo
+- **Custos operacionais por usuário** são altos (compute + AI + storage + bandwidth), variando entre ~$8–34/mês; sem limites claros, o prejuízo é inevitável。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L250-L287】
+- **Custos de IA** crescem rápido e são risco crítico; precisam de limites agressivos e caching já no MVP para não explodir。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L110-L150】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L250-L318】
+
+### 2) Metas de preço e posicionamento
+- A meta documentada é **plano gratuito limitado + pago entre $15–25**, alinhado a concorrentes (Replit/Cursor).【F:audit dicas do emergent usar/3_LIMITATIONS.md†L250-L287】
+- **Viabilidade depende de limites por tier** (containers concorrentes, IA, storage, bandwidth), porque o custo por usuário pode ultrapassar a receita sem throttling。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L70-L108】【F:audit dicas do emergent usar/3_LIMITATIONS.md†L250-L318】
+
+### 3) O que precisa mudar/alinhação prática
+- **Definir limites por plano**: quotas de execução, tokens de IA, storage e banda; sem isso o free‑tier inviabiliza o negócio。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L250-L318】
+- **Admin de custos** é obrigatório antes de escalar: monitorar uso e ajustar limites em tempo real para evitar prejuízo。【F:audit dicas do emergent usar/8_ADMIN_SYSTEM_SPEC.md†L1-L63】
+
+---
+
+## FASE 6.6 — Escala para milhões de usuários (infra sem travas)
+Este bloco resume o que é necessário para **aguentar milhões de usuários** sem travamentos, baseado nos limites reais documentados.
+
+### 1) Conexões e colaboração
+- **WebSocket scale** (~65k conexões/servidor) exige sharding e Redis PubSub; sem isso, colaboração e preview caem em escala。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L70-L108】
+- **Colaboração** deve reconhecer limites de >10 editores e offline; precisa de arquitetura CRDT/Yjs e sharding já no P1。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L202-L232】【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L52】
+
+### 2) Execução e preview em massa
+- **Cold‑start** de containers (2–5s) exige pools quentes e priorização por tier para manter UX fluida em grande escala。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L70-L108】
+- **Concorrência de containers** é limitada; precisa de fila e limites por plano para evitar saturação e custo explosivo。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L70-L108】
+
+### 3) IA em escala
+- **Rate limits de APIs** e latência de IA precisam de fila, cache e fallback; sem isso o sistema trava com uso intensivo。【F:audit dicas do emergent usar/3_LIMITATIONS.md†L110-L150】
+- **Context window caro** exige RAG e seleção de contexto para não inviabilizar performance/custo em escala.【F:audit dicas do emergent usar/3_LIMITATIONS.md†L110-L150】【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L1-L118】
+
+---
+
+## FASE 7 — Plano para Superar o Vergent (documentado, sem invenção)
+- **Paralelismo real**: roadmap prevê multi‑agent (L5) para tarefas paralelas, com orquestração e síntese de resultados — diferencial para superar Vergent ao trazer isso para o browser e para dentro do Workbench。【F:audit dicas do emergent usar/6_AI_SYSTEM_SPEC.md†L195-L233】
+- **UX superior**: decisões de padronização de atalhos, layout VS Code‑like, integração de preview e AI em painel lateral suportam uma UX mais integrada do que ferramentas separadas。【F:audit dicas do emergent usar/2_DUPLICATIONS_AND_CONFLICTS.md†L125-L157】【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L1-L166】
+- **Menos fricção**: one‑click deploy e zero‑config estão definidos como P0, alinhando competitividade direta com Replit/Vergent ao reduzir setup e depender menos de Git para publicar。【F:audit dicas do emergent usar/2_DUPLICATIONS_AND_CONFLICTS.md†L90-L113】【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L23-L146】
+- **Mais rápido e integrado**: preview web com hot reload e terminal embutido em Workbench criam ciclo de feedback rápido, alinhado com metas de performance do Workbench e P0 MVP【F:audit dicas do emergent usar/5_WORKBENCH_SPEC.md†L387-L401】【F:audit dicas do emergent usar/7_EXECUTION_PLAN.md†L92-L146】
+
+---
+
+## Conclusão Executiva
+A documentação aponta claramente que **o produto real ainda não existe como IDE funcional**, mas há um contrato detalhado de execução (Workbench, IA, backend, admin e roadmap). A continuidade da auditoria confirma que a prioridade é implementar o núcleo (Workbench + Monaco + preview + AI + deploy básico) antes de qualquer ambição AAA avançada (viewport 3D/timeline). Todos os passos e decisões acima são derivados estritamente dos documentos da pasta de fonte de verdade.
