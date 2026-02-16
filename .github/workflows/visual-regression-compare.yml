@@ -56,6 +56,9 @@ jobs:
       - name: Route contracts gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:route-contracts
 
+      - name: Anti fake-success gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:no-fake-success
+
       - name: Encoding sweep gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:mojibake
 

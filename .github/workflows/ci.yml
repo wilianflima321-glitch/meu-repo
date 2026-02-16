@@ -43,6 +43,10 @@ jobs:
         working-directory: cloud-web-app/web
         run: npm run lint
 
+      - name: Anti fake-success contracts
+        working-directory: cloud-web-app/web
+        run: npm run qa:no-fake-success
+
       - name: Security audit
         working-directory: cloud-web-app/web
         run: npm audit --audit-level=high || echo "::warning::Security vulnerabilities found"
