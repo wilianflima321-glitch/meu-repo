@@ -14,6 +14,7 @@ import { LowBalanceModalAuto } from './billing/LowBalanceModal'
 import { AISuggestionBubbleAuto } from './ai/AISuggestionBubble'
 import { CommandRegistryProvider, useDefaultCommands } from '@/lib/commands/command-registry'
 import { DevToolsProvider } from '@/lib/debug/devtools-provider'
+import { ToastProvider } from '@/components/ui/Toast'
 
 // Hook para registrar comandos padrão no layout
 function DefaultCommandsRegistration() {
@@ -30,7 +31,7 @@ function LoadingFallback() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm z-50">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
         <span className="text-sm text-slate-400">Carregando Aethel Engine...</span>
       </div>
     </div>
@@ -45,32 +46,34 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <AuthProvider>
-        <ErrorBoundaryProvider>
-          <A11yProvider>
-            <SessionTrackerProvider>
-              <CommandRegistryProvider>
-                <DevToolsProvider>
-                  <AethelProvider>
-                    <OnboardingProvider>
-                      <DefaultCommandsRegistration />
-                      <Suspense fallback={<LoadingFallback />}>
-                        {children}
-                        
-                        {/* Componentes globais de UI */}
-                        <WelcomeModal />
-                        <OnboardingChecklist />
-                        <LowBalanceModalAuto />
-                        <AISuggestionBubbleAuto />
-                      </Suspense>
-                    </OnboardingProvider>
-                  </AethelProvider>
-                </DevToolsProvider>
-              </CommandRegistryProvider>
-            </SessionTrackerProvider>
-          </A11yProvider>
-        </ErrorBoundaryProvider>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <ErrorBoundaryProvider>
+            <A11yProvider>
+              <SessionTrackerProvider>
+                <CommandRegistryProvider>
+                  <DevToolsProvider>
+                    <AethelProvider>
+                      <OnboardingProvider>
+                        <DefaultCommandsRegistration />
+                        <Suspense fallback={<LoadingFallback />}>
+                          {children}
+                          
+                          {/* Componentes globais de UI */}
+                          <WelcomeModal />
+                          <OnboardingChecklist />
+                          <LowBalanceModalAuto />
+                          <AISuggestionBubbleAuto />
+                        </Suspense>
+                      </OnboardingProvider>
+                    </AethelProvider>
+                  </DevToolsProvider>
+                </CommandRegistryProvider>
+              </SessionTrackerProvider>
+            </A11yProvider>
+          </ErrorBoundaryProvider>
+        </AuthProvider>
+      </ToastProvider>
     </I18nextProvider>
   );
 }

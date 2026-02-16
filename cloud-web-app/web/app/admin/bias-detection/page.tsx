@@ -35,10 +35,10 @@ function getBiasLabel(score?: number | null) {
 }
 
 function getBiasColor(score?: number | null) {
-  if (score === null || score === undefined) return 'bg-gray-200 text-gray-700';
-  if (score >= 0.7) return 'bg-red-100 text-red-700';
-  if (score >= 0.4) return 'bg-yellow-100 text-yellow-700';
-  return 'bg-green-100 text-green-700';
+  if (score === null || score === undefined) return 'bg-gray-200 text-zinc-300';
+  if (score >= 0.7) return 'bg-rose-500/15 text-rose-300';
+  if (score >= 0.4) return 'bg-amber-500/15 text-amber-300';
+  return 'bg-emerald-500/15 text-emerald-300';
 }
 
 export default function BiasDetectionPage() {
@@ -163,18 +163,18 @@ export default function BiasDetectionPage() {
         <div>
           <h1 className="text-2xl font-bold">Detecção de viés e ética</h1>
           {lastUpdated && (
-            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchItems}
-          className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Auditar Output da IA</h2>
         <div className="space-y-4">
           <textarea
@@ -231,7 +231,7 @@ export default function BiasDetectionPage() {
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Relatórios Éticos</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center">
@@ -252,12 +252,12 @@ export default function BiasDetectionPage() {
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Pendentes</h3>
-            <p className="text-2xl font-bold text-gray-600">{stats.pending}</p>
+            <p className="text-2xl font-bold text-zinc-400">{stats.pending}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Outputs Auditados</h2>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
           <input
@@ -275,7 +275,7 @@ export default function BiasDetectionPage() {
                 className={`px-3 py-1 rounded text-xs font-semibold ${
                   statusFilter === status
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-zinc-800/70 text-zinc-400'
                 }`}
               >
                 {status === 'all' ? 'Todos' : status === 'pending' ? 'Pendentes' : 'Resolvidos'}
@@ -287,8 +287,8 @@ export default function BiasDetectionPage() {
                 onClick={() => setBiasFilter(bias)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
                   biasFilter === bias
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-zinc-800/70 text-zinc-400'
                 }`}
               >
                 {bias === 'all'
@@ -307,18 +307,18 @@ export default function BiasDetectionPage() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-20 bg-gray-100 rounded animate-pulse" />
+              <div key={index} className="h-20 bg-zinc-800/70 rounded animate-pulse" />
             ))}
           </div>
         ) : filteredItems.length === 0 ? (
-          <p className="text-sm text-gray-500">Nenhuma auditoria registrada.</p>
+          <p className="text-sm text-zinc-500">Nenhuma auditoria registrada.</p>
         ) : (
           <ul>
             {filteredItems.map((item) => (
               <li key={item.id} className="p-4 border-b">
-                <p className="mb-2 text-sm text-gray-800">{item.text}</p>
+                <p className="mb-2 text-sm text-zinc-200">{item.text}</p>
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <div className="flex items-center gap-3 text-sm text-zinc-400">
                     <span>
                       Score de viés:{' '}
                       {item.autoScore === null || item.autoScore === undefined
@@ -337,7 +337,7 @@ export default function BiasDetectionPage() {
                     {item.autoFlags.map((flag) => (
                       <span
                         key={flag}
-                        className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
+                        className="text-xs bg-zinc-800/70 text-zinc-400 px-2 py-1 rounded"
                       >
                         {flag}
                       </span>
@@ -347,13 +347,13 @@ export default function BiasDetectionPage() {
                 <div className="mt-3 flex items-center gap-2">
                   <button
                     onClick={() => handleModerationAction(item.id, 'approve')}
-                    className="px-3 py-1 rounded text-xs bg-green-100 text-green-700"
+                    className="px-3 py-1 rounded text-xs bg-emerald-500/15 text-emerald-300"
                   >
                     Aprovar
                   </button>
                   <button
                     onClick={() => handleModerationAction(item.id, 'reject')}
-                    className="px-3 py-1 rounded text-xs bg-red-100 text-red-700"
+                    className="px-3 py-1 rounded text-xs bg-rose-500/15 text-rose-300"
                   >
                     Rejeitar
                   </button>

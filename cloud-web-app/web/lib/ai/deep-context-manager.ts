@@ -3,7 +3,7 @@
  * 
  * Resolve o problema da Janela de Contexto Limitada.
  * Em vez de passar o projeto inteiro para a IA, este sistema indexa
- * TODO o conhecimento do projeto e entrega apenas o fragmento exato necessário.
+ * todo o conhecimento do projeto e entrega apenas o fragmento exato necessário.
  */
 
 export interface ContextChunk {

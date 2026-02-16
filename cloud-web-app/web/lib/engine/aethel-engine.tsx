@@ -498,9 +498,11 @@ export { VisualScriptDefaults };
 export { SceneSerializer, AssetImporter };
 
 // Default export
-export default {
+const __defaultExport = {
   AethelEngine,
   EngineProvider,
   useEngine,
   useEngineState,
 };
+
+export default __defaultExport;

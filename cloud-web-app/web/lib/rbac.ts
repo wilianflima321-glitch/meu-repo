@@ -208,6 +208,21 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'aethel-super-secret-key-change-in-production'
 );
 
+function extractAuthToken(request: NextRequest): string | null {
+  const header = request.headers.get('Authorization') || request.headers.get('authorization');
+  if (header && header.startsWith('Bearer ')) {
+    return header.replace('Bearer ', '').trim();
+  }
+
+  const cookieToken = request.cookies.get('token')?.value;
+  if (cookieToken) return cookieToken;
+
+  const legacyCookieToken = request.cookies.get('auth_token')?.value;
+  if (legacyCookieToken) return legacyCookieToken;
+
+  return null;
+}
+
 /**
  * Middleware Zero Trust para rotas admin/ops
  * 
@@ -219,8 +234,7 @@ export async function protectAdminRoute(
   requiredPermission?: AdminPermission
 ): Promise<NextResponse | null> {
   // Extrai token
-  const token = request.cookies.get('auth_token')?.value
-    || request.headers.get('Authorization')?.replace('Bearer ', '');
+  const token = extractAuthToken(request);
   
   if (!token) {
     // Retorna 404 para esconder que a rota existe
@@ -265,8 +279,7 @@ export function withAdminAuth(
   requiredPermission?: AdminPermission
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
-    const token = request.cookies.get('auth_token')?.value
-      || request.headers.get('Authorization')?.replace('Bearer ', '');
+    const token = extractAuthToken(request);
     
     if (!token) {
       return NextResponse.json({ error: 'Not Found' }, { status: 404 });
@@ -471,7 +484,7 @@ export async function isUserShadowBanned(userId: string): Promise<boolean> {
 // EXPORTS
 // ============================================================================
 
-export default {
+const __defaultExport = {
   hasAdminPermission,
   canAccessAdminRoute,
   protectAdminRoute,
@@ -483,3 +496,5 @@ export default {
   isOwnerEmail,
   AdminRolePermissions,
 };
+
+export default __defaultExport;

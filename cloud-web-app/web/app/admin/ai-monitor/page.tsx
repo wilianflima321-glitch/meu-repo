@@ -121,7 +121,7 @@ function AICallRow({ call, expanded, onToggle }: { call: AICall; expanded: boole
   const modelColors: Record<string, string> = {
     'gpt-4o': 'bg-green-500/20 text-green-400',
     'gpt-4o-mini': 'bg-blue-500/20 text-blue-400',
-    'gpt-4-turbo': 'bg-purple-500/20 text-purple-400',
+    'gpt-4-turbo': 'bg-blue-500/20 text-blue-400',
     'claude-3-5-sonnet': 'bg-amber-500/20 text-amber-400',
     'claude-3-5-haiku': 'bg-cyan-500/20 text-cyan-400',
   };

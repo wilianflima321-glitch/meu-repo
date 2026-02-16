@@ -181,10 +181,32 @@ function VirtualListInner<T extends VirtualListItem>(
   useResizeObserver(containerRef, useCallback((entry) => {
     setContainerHeight(entry.contentRect.height);
   }, []));
+
+  // Scroll methods
+  const scrollToItemInternal = useCallback((index: number, align: 'start' | 'center' | 'end' = 'start') => {
+    if (!containerRef.current) return;
+
+    let offset = 0;
+    for (let i = 0; i < index; i++) {
+      offset += measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
+    }
+
+    const itemH = measuredHeights.current.get(items[index].id) || items[index].height || itemHeight;
+
+    let scrollPosition = offset;
+    if (align === 'center') {
+      scrollPosition = offset - containerHeight / 2 + itemH / 2;
+    } else if (align === 'end') {
+      scrollPosition = offset - containerHeight + itemH;
+    }
+
+    containerRef.current.scrollTop = Math.max(0, scrollPosition);
+  }, [items, containerHeight, itemHeight]);
   
   // Keyboard navigation
   useEffect(() => {
     if (!enableKeyboard || !containerRef.current) return;
+    const container = containerRef.current;
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedId || !onSelect) return;
@@ -230,30 +252,9 @@ function VirtualListInner<T extends VirtualListItem>(
       }
     };
     
-    containerRef.current.addEventListener('keydown', handleKeyDown);
-    return () => containerRef.current?.removeEventListener('keydown', handleKeyDown);
-  }, [enableKeyboard, selectedId, onSelect, items, containerHeight, itemHeight]);
-  
-  // Scroll methods
-  const scrollToItemInternal = useCallback((index: number, align: 'start' | 'center' | 'end' = 'start') => {
-    if (!containerRef.current) return;
-    
-    let offset = 0;
-    for (let i = 0; i < index; i++) {
-      offset += measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
-    }
-    
-    const itemH = measuredHeights.current.get(items[index].id) || items[index].height || itemHeight;
-    
-    let scrollPosition = offset;
-    if (align === 'center') {
-      scrollPosition = offset - containerHeight / 2 + itemH / 2;
-    } else if (align === 'end') {
-      scrollPosition = offset - containerHeight + itemH;
-    }
-    
-    containerRef.current.scrollTop = Math.max(0, scrollPosition);
-  }, [items, containerHeight, itemHeight]);
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
+  }, [enableKeyboard, selectedId, onSelect, items, containerHeight, itemHeight, scrollToItemInternal]);
   
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
@@ -290,7 +291,6 @@ function VirtualListInner<T extends VirtualListItem>(
       onScroll={handleScroll}
       tabIndex={enableKeyboard ? 0 : undefined}
       role="listbox"
-      aria-rowcount={items.length}
     >
       {/* Spacer to maintain scroll height */}
       <div style={{ height: totalHeight, position: 'relative' }}>

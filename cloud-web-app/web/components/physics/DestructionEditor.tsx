@@ -344,7 +344,7 @@ function DestructibleMesh3D({
       const color = new THREE.Color().setHSL(index / cells.length, 0.7, 0.5);
       return { geometry, color, center: cell.center };
     });
-  }, [showPreview, config.fragmentCount, pattern]);
+  }, [showPreview, config.fragmentCount]);
   
   // Handle pointer events for impact point selection
   const handlePointerMove = useCallback((event: ThreeEvent<PointerEvent>) => {
@@ -798,7 +798,7 @@ export default function DestructionEditor({
           </CollapsibleSection>
           
           {/* Fracture Pattern */}
-          <CollapsibleSection title="Fracture Pattern" icon={<Sparkles className="w-4 h-4 text-purple-400" />}>
+          <CollapsibleSection title="Fracture Pattern" icon={<Sparkles className="w-4 h-4 text-blue-400" />}>
             <PatternSelector value={pattern} onChange={setPattern} />
             
             <div className="mt-3 flex items-center justify-between">
@@ -893,7 +893,7 @@ export default function DestructionEditor({
           </CollapsibleSection>
           
           {/* Effects */}
-          <CollapsibleSection title="Effects" icon={<Sparkles className="w-4 h-4 text-pink-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Effects" icon={<Sparkles className="w-4 h-4 text-cyan-400" />} defaultOpen={false}>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs text-slate-400 flex items-center gap-1.5">

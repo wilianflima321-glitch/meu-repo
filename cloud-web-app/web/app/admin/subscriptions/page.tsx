@@ -60,37 +60,37 @@ export default function AdminSubscriptions() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Gestão de Planos</h1>
-          <p className='text-gray-600 mt-2'>
+          <p className='text-zinc-400 mt-2'>
             Distribuição por plano e MRR baseado nos usuários ativos.
           </p>
           {lastUpdated && (
-            <p className='text-xs text-gray-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchPlans}
-          className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
         >
           Atualizar
         </button>
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-        <div className='bg-white rounded-lg shadow p-4 text-center'>
+        <div className='bg-zinc-900/70 rounded-lg shadow p-4 text-center'>
           <h3 className='text-sm font-semibold'>Usuários totais</h3>
           <p className='text-2xl font-bold text-blue-600'>{summary.totalUsers}</p>
         </div>
-        <div className='bg-white rounded-lg shadow p-4 text-center'>
+        <div className='bg-zinc-900/70 rounded-lg shadow p-4 text-center'>
           <h3 className='text-sm font-semibold'>MRR total (US$)</h3>
           <p className='text-2xl font-bold text-green-600'>US${summary.totalMRR.toFixed(2)}</p>
         </div>
-        <div className='bg-white rounded-lg shadow p-4 text-center'>
+        <div className='bg-zinc-900/70 rounded-lg shadow p-4 text-center'>
           <h3 className='text-sm font-semibold'>Usuários em teste</h3>
-          <p className='text-2xl font-bold text-gray-600'>{summary.trialUsers}</p>
+          <p className='text-2xl font-bold text-zinc-400'>{summary.trialUsers}</p>
         </div>
       </div>
 
-      <div className='bg-white rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+      <div className='bg-zinc-900/70 rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar plano'
@@ -98,7 +98,7 @@ export default function AdminSubscriptions() {
           onChange={(e) => setSearch(e.target.value)}
           className='border p-2 rounded w-full md:max-w-sm'
         />
-        <label className='flex items-center gap-2 text-sm text-gray-600'>
+        <label className='flex items-center gap-2 text-sm text-zinc-400'>
           <input
             type='checkbox'
             checked={showTrials}
@@ -108,10 +108,10 @@ export default function AdminSubscriptions() {
         </label>
       </div>
 
-      <div className='bg-white rounded-lg shadow overflow-hidden'>
+      <div className='bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
         <table className='w-full'>
           <thead>
-            <tr className='bg-gray-100 text-sm'>
+            <tr className='bg-zinc-800/70 text-sm'>
               <th className='p-3 text-left'>Plano</th>
               <th className='p-3 text-left'>Preço (US$)</th>
               <th className='p-3 text-left'>Usuários</th>
@@ -122,7 +122,7 @@ export default function AdminSubscriptions() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-3 text-sm text-gray-500' colSpan={5}>Carregando planos...</td>
+                <td className='p-3 text-sm text-zinc-500' colSpan={5}>Carregando planos...</td>
               </tr>
             ) : error ? (
               <tr>
@@ -130,18 +130,18 @@ export default function AdminSubscriptions() {
               </tr>
             ) : filteredPlans.length === 0 ? (
               <tr>
-                <td className='p-3 text-sm text-gray-500' colSpan={5}>Nenhum plano encontrado.</td>
+                <td className='p-3 text-sm text-zinc-500' colSpan={5}>Nenhum plano encontrado.</td>
               </tr>
             ) : (
               filteredPlans.map((plan) => (
-                <tr key={plan.id} className='border-t hover:bg-gray-50'>
+                <tr key={plan.id} className='border-t hover:bg-zinc-900/60'>
                   <td className='p-3 font-medium'>{plan.name}</td>
                   <td className='p-3'>US${plan.priceUSD.toFixed(2)}</td>
                   <td className='p-3'>{plan.users}</td>
                   <td className='p-3'>US${plan.mrr.toFixed(2)}</td>
                   <td className='p-3'>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      plan.isTrial ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                      plan.isTrial ? 'bg-amber-500/15 text-amber-200' : 'bg-emerald-500/15 text-emerald-200'
                     }`}>
                       {plan.isTrial ? 'Teste' : 'Pago'}
                     </span>
@@ -153,7 +153,7 @@ export default function AdminSubscriptions() {
         </table>
       </div>
 
-      <div className='mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600'>
+      <div className='mt-6 bg-zinc-900/60 border border-zinc-700 rounded-lg p-4 text-sm text-zinc-400'>
         Limitação: preços e identificação de planos vêm da configuração do backend. Tokens, modelos e domínios são
         definidos no faturamento/Stripe e não são editáveis nesta tela.
       </div>

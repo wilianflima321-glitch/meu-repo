@@ -1160,7 +1160,7 @@ export function usePrefabs() {
   };
 }
 
-export default {
+const __defaultExport = {
   ComponentRegistry,
   EntityManager,
   PrefabManager,
@@ -1170,3 +1170,5 @@ export default {
   useComponent,
   usePrefabs,
 };
+
+export default __defaultExport;

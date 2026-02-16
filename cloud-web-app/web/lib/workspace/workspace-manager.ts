@@ -441,9 +441,8 @@ export class WorkspaceManager {
   private detectRecommendations(): ExtensionRecommendation[] {
     const recommendations: ExtensionRecommendation[] = [];
 
-    // This would analyze workspace files and suggest extensions
-    // For now, return empty array
-    // TODO: Implement file analysis
+    // File-based recommendation detection is deferred until the workspace indexer milestone.
+    // Current behavior is explicit: no inferred recommendations without indexed evidence.
 
     return recommendations;
   }

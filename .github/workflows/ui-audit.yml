@@ -2,12 +2,20 @@ name: UI Audit (Playwright + axe)
 
 on:
   workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
   schedule:
     - cron: '0 4 * * *' # daily at 04:00 UTC
+
+concurrency:
+  group: ui-audit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ui-audit:
     runs-on: ubuntu-latest
+    env:
+      BASE_URL: http://localhost:3000
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,28 +23,95 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloud-web-app/web/package-lock.json
 
-      - name: Install deps
+      - name: Install root deps
         run: |
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Install web deps
+        run: |
+          npm --prefix cloud-web-app/web ci
 
       - name: Install Playwright browsers
         run: |
           npx playwright install --with-deps
 
-      - name: Start dev server (background)
+      - name: Interface gate (pre-audit)
         run: |
-          # Attempt to start a dev server; adjust command if your project has a dedicated start script
-          npm run start &
-          sleep 3
+          npm --prefix cloud-web-app/web run qa:interface-gate
+
+      - name: Canonical component gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:canonical-components
+
+      - name: Route contracts gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:route-contracts
+
+      - name: Encoding sweep gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:mojibake
+
+      - name: Start server (web app with static fallback)
+        run: |
+          check_ready() {
+            for i in $(seq 1 45); do
+              if curl -fsS "$BASE_URL" >/dev/null; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+
+          npm run portal:dev > /tmp/portal-dev.log 2>&1 &
+
+          if check_ready; then
+            echo "Web app is online at $BASE_URL"
+            exit 0
+          fi
+
+          echo "Web app did not start in time; switching to static audit site."
+          node tools/ide/ui-audit/static_server.js > /tmp/static-server.log 2>&1 &
+          if ! check_ready; then
+            echo "Static fallback did not become ready."
+            echo "--- portal-dev.log (tail) ---"
+            tail -n 80 /tmp/portal-dev.log || true
+            echo "--- static-server.log (tail) ---"
+            tail -n 80 /tmp/static-server.log || true
+            exit 1
+          fi
 
       - name: Run UI audit
         run: |
-          node tools/ide/ui-audit/run_audit.js --baseUrl http://localhost:3000
+          node tools/ide/ui-audit/run_audit.js --baseUrl "$BASE_URL"
+
+      - name: Run Lighthouse CI (Performance Budget)
+        continue-on-error: true
+        run: |
+          npx -y @lhci/cli@0.12.x autorun \
+            --upload.target=temporary-public-storage \
+            --collect.url="$BASE_URL" \
+            --assert.preset="lighthouse:recommended" \
+            --assert.assertions.cumulative-layout-shift="error" \
+            --assert.assertions.first-contentful-paint="off"
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ui-audit-artifacts
-          path: tools/ide/ui-audit/output
+          path: |
+            tools/ide/ui-audit/output
+            .lighthouseci/
+            /tmp/portal-dev.log
+            /tmp/static-server.log

@@ -1,9 +1,19 @@
+# DEPRECATED (HISTORICAL)
+This file is no longer the canonical source of truth.
+Canonical docs live in: `meu-repo/audit dicas do emergent usar/`.
+Primary entry: `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+Validation log: `audit dicas do emergent usar/00_REALITY_MATRIX_2026-02-04.md`
+
+All content below is historical and UNVERIFIED until validated.
+
+---
+
 # 📋 AETHEL ENGINE - FONTE DA VERDADE
 **Última atualização:** 21 de Janeiro de 2026, 23:00 UTC-3  
 **Versão:** 0.3.0  
 **Branch:** main
 
-> ⚠️ **ATENÇÃO:** Este é o ÚNICO documento de referência para o estado atual do projeto.  
+> ATENCAO: Este arquivo e HISTORICO. A fonte canonica esta no audit folder.
 > Todos os outros arquivos `.md` são históricos. Ver [INDICE_DOCUMENTACAO_MASTER.md](INDICE_DOCUMENTACAO_MASTER.md)
 
 ---

@@ -1,48 +1,72 @@
 /**
  * AETHEL ENGINE - Job Retry API
- * 
- * Re-enfileira um job que falhou.
- * POST - Retry do job
+ *
+ * POST /api/jobs/{id}/retry
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { requireAuth } from '@/lib/auth-server';
+import { queueManager } from '@/lib/queue-system';
+
+function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Unauthorized';
+}
+
+function isAuthNotConfigured(error: unknown): boolean {
+  return error instanceof Error && String((error as any).code || '') === 'AUTH_NOT_CONFIGURED';
+}
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user) {
+    requireAuth(request);
+
+    const available = await queueManager.isAvailable();
+    if (!available) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
+        {
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+          message: 'Queue backend is not configured.',
+        },
+        { status: 503 }
       );
     }
 
-    const jobId = params.id;
-
-    // Em produção, buscar job do banco e verificar se pode ser retried
-    // Mock: criar novo job baseado no original
-
-    const retriedJob = {
-      id: `job-retry-${Date.now()}`,
-      originalJobId: jobId,
-      type: 'build',
-      status: 'queued',
-      progress: 0,
-      createdAt: new Date().toISOString(),
-      retryCount: 1,
-    };
+    const result = await queueManager.retryJob(params.id);
+    if (!result.found) {
+      return NextResponse.json({ error: 'Job nao encontrado' }, { status: 404 });
+    }
+    if (!result.retried) {
+      return NextResponse.json(
+        {
+          error: result.reason || 'Retry indisponivel',
+          state: result.state,
+        },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Job re-enfileirado com sucesso',
-      job: retriedJob,
+      message: 'Job reenfileirado com sucesso',
+      job: {
+        id: params.id,
+        status: 'queued',
+        retriedAt: new Date().toISOString(),
+      },
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (isAuthNotConfigured(error)) {
+      return NextResponse.json(
+        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+        { status: 503 }
+      );
+    }
     console.error('Erro ao retry job:', error);
     return NextResponse.json(
       { error: 'Falha ao retry job' },

@@ -321,7 +321,7 @@ export default function IDELayout({
             {/* Sidebar Resize Handle */}
             <div
               ref={sidebarResizeRef}
-              className="w-1 cursor-col-resize hover:bg-indigo-500 active:bg-indigo-500 transition-colors"
+              className="w-1 cursor-col-resize hover:bg-sky-500 active:bg-sky-500 transition-colors"
               onMouseDown={handleSidebarResize}
             />
           </>
@@ -351,7 +351,7 @@ export default function IDELayout({
                 {/* Bottom Resize Handle */}
                 <div
                   ref={bottomResizeRef}
-                  className="h-1 cursor-row-resize hover:bg-indigo-500 active:bg-indigo-500 transition-colors"
+                  className="h-1 cursor-row-resize hover:bg-sky-500 active:bg-sky-500 transition-colors"
                   onMouseDown={handleBottomResize}
                 />
                 
@@ -368,7 +368,7 @@ export default function IDELayout({
                           onClick={() => onBottomViewChange?.(item.id)}
                           className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                             activeBottomView === item.id
-                              ? 'text-white border-b-2 border-indigo-500'
+                              ? 'text-white border-b-2 border-sky-500'
                               : 'text-slate-400 hover:text-white'
                           }`}
                         >
@@ -418,7 +418,7 @@ export default function IDELayout({
           <>
             <div
               ref={secondaryResizeRef}
-              className="w-1 cursor-col-resize hover:bg-indigo-500 active:bg-indigo-500 transition-colors"
+              className="w-1 cursor-col-resize hover:bg-sky-500 active:bg-sky-500 transition-colors"
             />
             <div
               className="flex flex-col bg-slate-850 border-l border-slate-700"
@@ -464,7 +464,7 @@ function TitleBar({ onMaximize, isMaximized }: TitleBarProps) {
     <div className="h-8 flex items-center justify-between bg-slate-900 border-b border-slate-800 px-2 select-none">
       {/* Left - Menu */}
       <div className="flex items-center gap-2">
-        <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-indigo-500 to-purple-600" />
+        <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-sky-500 to-purple-600" />
         <span className="text-sm font-medium text-slate-300">Aethel Engine</span>
       </div>
       
@@ -512,7 +512,7 @@ function ActivityBar({ items, activeItem, onItemClick, bottomItems }: ActivityBa
             onClick={() => onItemClick(item.id)}
             className={`w-10 h-10 flex items-center justify-center rounded transition-colors ${
               activeItem === item.id
-                ? 'text-white bg-slate-800 border-l-2 border-indigo-500'
+                ? 'text-white bg-slate-800 border-l-2 border-sky-500'
                 : 'text-slate-500 hover:text-white'
             }`}
             title={item.title}
@@ -636,22 +636,22 @@ function StatusBar({
   onPlayGame,
 }: StatusBarProps) {
   return (
-    <div className="h-6 flex items-center justify-between px-2 bg-indigo-600 text-white text-xs select-none">
+    <div className="h-6 flex items-center justify-between px-2 bg-sky-600 text-white text-xs select-none">
       {/* Left */}
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
-          className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded"
+          className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded"
         >
           <PanelLeft className="w-3.5 h-3.5" />
         </button>
         
-        <button className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded">
+        <button className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded">
           <GitBranch className="w-3.5 h-3.5" />
           {gitBranch}
         </button>
         
-        <button className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded">
+        <button className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded">
           {problems.errors > 0 ? (
             <AlertCircle className="w-3.5 h-3.5 text-red-300" />
           ) : (
@@ -667,7 +667,7 @@ function StatusBar({
       <div className="flex items-center gap-2">
         <button
           onClick={onPlayGame}
-          className="flex items-center gap-1 hover:bg-indigo-700 px-2 py-0.5 rounded bg-green-600/50"
+          className="flex items-center gap-1 hover:bg-sky-700 px-2 py-0.5 rounded bg-green-600/50"
         >
           <Play className="w-3.5 h-3.5" />
           Play
@@ -676,22 +676,22 @@ function StatusBar({
       
       {/* Right */}
       <div className="flex items-center gap-3">
-        <button className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded">
+        <button className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded">
           <Code className="w-3.5 h-3.5" />
           TypeScript
         </button>
         
-        <button className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded">
+        <button className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded">
           UTF-8
         </button>
         
-        <button className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded">
+        <button className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded">
           LF
         </button>
         
         <button
           onClick={onOpenCommandPalette}
-          className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded"
+          className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded"
           title="Command Palette (Ctrl+Shift+P)"
         >
           <Command className="w-3.5 h-3.5" />
@@ -704,7 +704,7 @@ function StatusBar({
         )}
         
         {notifications > 0 && (
-          <button className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded">
+          <button className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded">
             <Bell className="w-3.5 h-3.5" />
             <span className="bg-red-500 text-white text-[10px] px-1 rounded">
               {notifications}
@@ -714,14 +714,14 @@ function StatusBar({
         
         <button
           onClick={onToggleBottomPanel}
-          className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded"
+          className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded"
         >
           <PanelBottom className="w-3.5 h-3.5" />
         </button>
         
         <button
           onClick={onOpenSettings}
-          className="flex items-center gap-1 hover:bg-indigo-700 px-1 py-0.5 rounded"
+          className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded"
         >
           <Settings className="w-3.5 h-3.5" />
         </button>
@@ -788,7 +788,7 @@ function ExplorerTree() {
       name: 'public',
       children: [
         { name: 'index.html', icon: <FileCode className="w-4 h-4 text-orange-400" /> },
-        { name: 'favicon.ico', icon: <Image className="w-4 h-4 text-purple-400" /> },
+        { name: 'favicon.ico', icon: <Image className="w-4 h-4 text-blue-400" /> },
       ],
     },
     { name: 'package.json', icon: <FileCode className="w-4 h-4 text-green-400" /> },
@@ -856,7 +856,7 @@ function EditorPlaceholder() {
   return (
     <div className="flex-1 flex items-center justify-center bg-slate-900">
       <div className="text-center">
-        <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+        <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-sky-500 to-purple-600 flex items-center justify-center">
           <Code className="w-12 h-12 text-white" />
         </div>
         <h2 className="text-xl font-semibold text-white mb-2">Aethel IDE</h2>

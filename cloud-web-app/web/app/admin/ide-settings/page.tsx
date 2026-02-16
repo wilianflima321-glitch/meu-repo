@@ -297,15 +297,15 @@ export default function IDESettings() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Configurações Globais do IDE</h1>
-          <p className='text-sm text-gray-500'>Controle temas, IA, extensões e políticas para toda a plataforma.</p>
+          <p className='text-sm text-zinc-500'>Controle temas, IA, extensões e políticas para toda a plataforma.</p>
           {lastUpdated && (
-            <p className='text-xs text-gray-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <div className='flex gap-2'>
           <button
             onClick={fetchSettings}
-            className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+            className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
           >
             Atualizar
           </button>
@@ -319,12 +319,12 @@ export default function IDESettings() {
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
           {error}
         </div>
       )}
 
-      <div className='bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Categorias</h3>
           <p className='text-2xl font-bold text-blue-600'>{categories.length}</p>
@@ -339,7 +339,7 @@ export default function IDESettings() {
         </div>
       </div>
 
-      <div className='bg-white rounded-lg shadow p-4 mb-6'>
+      <div className='bg-zinc-900/70 rounded-lg shadow p-4 mb-6'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
           <div className='flex gap-2'>
             <input
@@ -371,7 +371,7 @@ export default function IDESettings() {
           <div className='flex gap-2'>
             <button
               onClick={handleResetDefaults}
-              className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+              className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
             >
               Restaurar padrões
             </button>
@@ -396,9 +396,9 @@ export default function IDESettings() {
 
         <div className='space-y-4'>
           {loading ? (
-            <p className='text-sm text-gray-500'>Carregando configurações...</p>
+            <p className='text-sm text-zinc-500'>Carregando configurações...</p>
           ) : filteredKeys.length === 0 ? (
-            <p className='text-sm text-gray-500'>Nenhuma configuração encontrada.</p>
+            <p className='text-sm text-zinc-500'>Nenhuma configuração encontrada.</p>
           ) : (
             filteredKeys.map((key) => {
               const def = data?.definitions?.[key];
@@ -408,8 +408,8 @@ export default function IDESettings() {
                   <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4'>
                     <div className='md:w-1/2'>
                       <p className='font-medium'>{key}</p>
-                      <p className='text-xs text-gray-500'>{def.description || 'Sem descrição'}</p>
-                      <p className='text-[11px] text-gray-400 mt-1'>Tipo: {def.type}</p>
+                      <p className='text-xs text-zinc-500'>{def.description || 'Sem descrição'}</p>
+                      <p className='text-[11px] text-zinc-500 mt-1'>Tipo: {def.type}</p>
                     </div>
                     <div className='md:w-1/2'>
                       {renderInput(key, def)}
@@ -422,19 +422,19 @@ export default function IDESettings() {
         </div>
       </div>
 
-      <div className='bg-white rounded-lg shadow p-4'>
+      <div className='bg-zinc-900/70 rounded-lg shadow p-4'>
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-xl font-semibold'>Histórico de Mudanças</h2>
           <button
             onClick={fetchHistory}
-            className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+            className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
           >
             Atualizar
           </button>
         </div>
         <table className='w-full table-auto'>
           <thead>
-            <tr className='bg-gray-100 text-sm'>
+            <tr className='bg-zinc-800/70 text-sm'>
               <th className='p-2 text-left'>Ação</th>
               <th className='p-2 text-left'>Admin</th>
               <th className='p-2 text-left'>Ambiente</th>
@@ -445,19 +445,19 @@ export default function IDESettings() {
           <tbody>
             {history.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-gray-500' colSpan={5}>Sem histórico disponível.</td>
+                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Sem histórico disponível.</td>
               </tr>
             ) : (
               history.map((item) => (
                 <tr key={item.id} className='border-t'>
                   <td className='p-2'>
-                    <span className='text-xs px-2 py-1 rounded bg-gray-100 text-gray-600'>
+                    <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>
                       {item.action}
                     </span>
                   </td>
                   <td className='p-2'>{item.adminEmail || '—'}</td>
                   <td className='p-2'>{formatEnvironment(item.metadata?.environment || item.metadata?.to)}</td>
-                  <td className='p-2 text-xs text-gray-600'>
+                  <td className='p-2 text-xs text-zinc-400'>
                     {item.action === 'IDE_SETTINGS_PUBLISH'
                       ? `Publicação ${formatEnvironment(item.metadata?.from)} → ${formatEnvironment(item.metadata?.to)}`
                       : `Atualizações: ${Object.keys(item.metadata?.updates || {}).length}`}

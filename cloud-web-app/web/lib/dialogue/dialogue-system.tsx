@@ -947,8 +947,9 @@ export function DialogueProvider({ children }: { children: React.ReactNode }) {
   const managerRef = useRef<DialogueManager>(new DialogueManager());
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1039,7 +1040,7 @@ export function useDialogueEvents(eventType: string, handler: (event: DialogueEv
   }, [manager, eventType, handler]);
 }
 
-export default {
+const __defaultExport = {
   DialogueManager,
   DialogueBuilder,
   DialogueVariableStore,
@@ -1047,3 +1048,5 @@ export default {
   useDialogue,
   useDialogueEvents,
 };
+
+export default __defaultExport;

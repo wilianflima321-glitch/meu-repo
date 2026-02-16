@@ -1053,8 +1053,9 @@ export function NetworkProvider({
   const managerRef = useRef<NetworkManager>(new NetworkManager(config));
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1154,7 +1155,7 @@ export function useSyncedVariable<T>(name: string, initialValue: T, mode: SyncMo
   return [value, setSyncedValue];
 }
 
-export default {
+const __defaultExport = {
   NetworkManager,
   NetworkProvider,
   useNetwork,
@@ -1164,3 +1165,5 @@ export default {
   InputPredictor,
   LobbyManager,
 };
+
+export default __defaultExport;

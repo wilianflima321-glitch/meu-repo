@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 import { verifyToken } from '@/lib/auth-server';
 import { twoFactorService } from '@/lib/security/two-factor-auth';
 import { prisma } from '@/lib/db';
@@ -279,7 +280,6 @@ async function handleDisable(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const bcrypt = require('bcrypt');
     const passwordValid = await bcrypt.compare(password, user.password);
     if (!passwordValid) {
       return NextResponse.json(

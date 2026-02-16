@@ -14,6 +14,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSWR from 'swr';
 import {
@@ -120,14 +121,14 @@ const CATEGORY_INFO: Record<NoteCategory, {
 }> = {
   composition: { icon: Camera, label: 'Composição', color: 'text-sky-400' },
   lighting: { icon: Sparkles, label: 'Iluminação', color: 'text-amber-400' },
-  color: { icon: Palette, label: 'Cores', color: 'text-fuchsia-400' },
+  color: { icon: Palette, label: 'Cores', color: 'text-cyan-400' },
   pacing: { icon: Clock, label: 'Ritmo', color: 'text-emerald-400' },
   audio: { icon: Volume2, label: 'Áudio', color: 'text-violet-400' },
   gameplay: { icon: Gamepad2, label: 'Gameplay', color: 'text-orange-400' },
   narrative: { icon: MessageSquare, label: 'Narrativa', color: 'text-rose-400' },
   performance: { icon: TrendingUp, label: 'Performance', color: 'text-lime-400' },
   accessibility: { icon: Users, label: 'Acessibilidade', color: 'text-teal-400' },
-  ux: { icon: Target, label: 'UX', color: 'text-indigo-400' },
+  ux: { icon: Target, label: 'UX', color: 'text-sky-400' },
 };
 
 const SEVERITY_STYLES: Record<NoteSeverity, {
@@ -366,9 +367,12 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                         {note.examples.map((example, i) => (
                           <div key={i} className="flex gap-2 p-2 bg-zinc-900 rounded">
                             {example.image && (
-                              <img 
-                                src={example.image} 
+                              <Image
+                                src={example.image}
                                 alt={example.label}
+                                width={64}
+                                height={48}
+                                unoptimized
                                 className="w-16 h-12 object-cover rounded"
                               />
                             )}

@@ -225,6 +225,34 @@ export class VisualScriptSystem implements System {
     // Call Update every frame
     runtime.update(deltaTime);
   }
+
+  private performRaycast(origin: Vector3, direction: Vector3, distance: number): null {
+    void origin;
+    void direction;
+    void distance;
+    // Physics bridge stays explicitly deferred until Rapier integration milestone.
+    return null;
+  }
+
+  private applyForce(target: unknown, force: Vector3, impulse?: boolean): void {
+    // Explicit no-op bridge keeps behavior deterministic without hidden fake physics.
+    this.contextLog(`addForce target=${Boolean(target)} impulse=${Boolean(impulse)} force=${JSON.stringify(force)}`);
+  }
+
+  private playSound(sound: string, volume = 1, loop = false): void {
+    // Audio bridge is deferred; maintain explicit traceable behavior.
+    this.contextLog(`playSound sound=${sound} volume=${volume} loop=${loop}`);
+  }
+
+  private spawnObject(prefab: string, position: Vector3): null {
+    // Prefab spawning requires runtime prefab registry (P1+).
+    this.contextLog(`spawn requested prefab=${prefab} position=${JSON.stringify(position)}`);
+    return null;
+  }
+
+  private contextLog(message: string): void {
+    console.log(`[VisualScriptBridge] ${message}`);
+  }
   
   private createRuntimeContext(entity: Entity, deltaTime: number): RuntimeContext {
     const transform = this.world?.getComponent<TransformComponent>(entity.id, 'transform');
@@ -253,32 +281,19 @@ export class VisualScriptSystem implements System {
       },
       
       physics: {
-        raycast: (origin, direction, distance) => {
-          // TODO: Integrate with Rapier physics
-          return null;
-        },
-        addForce: (target, force, impulse) => {
-          // TODO: Integrate with Rapier physics
-          console.log('[VisualScript] addForce called:', force);
-        },
+        raycast: (origin, direction, distance) => this.performRaycast(origin, direction, distance),
+        addForce: (target, force, impulse) => this.applyForce(target, force, impulse),
       },
       
       audio: {
-        playSound: (sound, volume = 1, loop = false) => {
-          // TODO: Integrate with AudioEngine
-          console.log('[VisualScript] playSound:', sound);
-        },
+        playSound: (sound, volume = 1, loop = false) => this.playSound(sound, volume, loop),
         stopSound: (sound) => {
           console.log('[VisualScript] stopSound:', sound);
         },
       },
       
       objects: {
-        spawn: (prefab, position) => {
-          // TODO: Create entity from prefab
-          console.log('[VisualScript] spawn:', prefab, position);
-          return null;
-        },
+        spawn: (prefab, position) => this.spawnObject(prefab, position),
         destroy: (target, delay = 0) => {
           console.log('[VisualScript] destroy:', target, 'delay:', delay);
         },
@@ -368,10 +383,12 @@ export function detachVisualScript(
 // EXPORTS
 // ============================================================================
 
-export default {
+const __defaultExport = {
   VisualScriptSystem,
   createVisualScriptComponent,
   attachVisualScript,
   detachVisualScript,
   getInputManager,
 };
+
+export default __defaultExport;

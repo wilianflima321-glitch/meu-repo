@@ -82,17 +82,18 @@ export function useTransport(options: UseTransportOptions): UseTransportResult {
   
   // Initialize transport
   useEffect(() => {
+    const currentOptions = optionsRef.current;
     const client = new UnifiedTransportClient({
-      url: options.url,
-      fallbackUrl: options.fallbackUrl,
-      forceWebSocket: options.forceWebSocket,
-      autoReconnect: options.autoReconnect ?? true,
-      reconnectInterval: options.reconnectInterval,
-      maxReconnectAttempts: options.maxReconnectAttempts,
-      connectionTimeout: options.connectionTimeout,
-      debug: options.debug,
-      useDatagrams: options.useDatagrams,
-      congestionControl: options.congestionControl,
+      url: currentOptions.url,
+      fallbackUrl: currentOptions.fallbackUrl,
+      forceWebSocket: currentOptions.forceWebSocket,
+      autoReconnect: currentOptions.autoReconnect ?? true,
+      reconnectInterval: currentOptions.reconnectInterval,
+      maxReconnectAttempts: currentOptions.maxReconnectAttempts,
+      connectionTimeout: currentOptions.connectionTimeout,
+      debug: currentOptions.debug,
+      useDatagrams: currentOptions.useDatagrams,
+      congestionControl: currentOptions.congestionControl,
     });
     
     // Event handlers
@@ -125,7 +126,7 @@ export function useTransport(options: UseTransportOptions): UseTransportResult {
     setTransport(client);
     
     // Auto-connect if enabled
-    if (options.autoConnect !== false) {
+    if (currentOptions.autoConnect !== false) {
       client.connect().catch(console.error);
     }
     

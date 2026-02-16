@@ -68,7 +68,7 @@ function MessageBubble({
       <div
         className={`
           flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
-          ${isUser ? 'bg-indigo-600' : 'bg-gradient-to-br from-purple-500 to-pink-500'}
+          ${isUser ? 'bg-sky-600' : 'bg-gradient-to-br from-blue-500 to-cyan-500'}
         `}
       >
         {isUser ? (
@@ -84,7 +84,7 @@ function MessageBubble({
           className={`
             inline-block p-4 rounded-2xl
             ${isUser
-              ? 'bg-indigo-600 text-white rounded-tr-none'
+              ? 'bg-sky-600 text-white rounded-tr-none'
               : 'bg-slate-800 text-slate-100 rounded-tl-none'
             }
           `}
@@ -129,7 +129,7 @@ function MessageBubble({
 function TypingIndicator() {
   return (
     <div className="flex gap-4">
-      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
         <Bot className="w-4 h-4 text-white" />
       </div>
       <div className="bg-slate-800 rounded-2xl rounded-tl-none px-4 py-3">
@@ -203,7 +203,7 @@ export function AIChatTab({
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <Sparkles className="w-6 h-6 text-indigo-400" />
+          <Sparkles className="w-6 h-6 text-sky-400" />
           <div>
             <h1 className="text-xl font-bold text-white">AI Chat</h1>
             <p className="text-sm text-slate-400">
@@ -260,7 +260,7 @@ export function AIChatTab({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-            className="w-full px-4 py-3 pr-24 bg-slate-800 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 resize-none focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full px-4 py-3 pr-24 bg-slate-800 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 resize-none focus:outline-none focus:border-sky-500 transition-colors"
             rows={1}
             disabled={isGenerating}
           />

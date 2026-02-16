@@ -268,6 +268,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
   const aaaRendererRef = useRef<AAARenderer | null>(null);
   const frameTimesRef = useRef<number[]>([]);
   const lastFrameTimeRef = useRef<number>(performance.now());
+  const eventsRef = useRef(events);
 
   // State
   const [quality, setQualityState] = useState<QualityPreset>(initialQuality);
@@ -318,6 +319,10 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
   const [volumetricConfig, setVolumetricConfigState] = useState<VolumetricConfig>(
     DEFAULT_VOLUMETRIC_CONFIG
   );
+
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
 
   // ============================================================================
   // INITIALIZATION
@@ -376,7 +381,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
 
       setIsInitialized(true);
     } catch (error) {
-      events.onError?.(error as Error);
+      eventsRef.current.onError?.(error as Error);
     }
 
     return () => {
@@ -386,7 +391,15 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
       aaaRendererRef.current = null;
       setIsInitialized(false);
     };
-  }, [canvas]);
+  }, [
+    canvas,
+    pipelineConfig.multisampling,
+    pipelineConfig.outputColorSpace,
+    pipelineConfig.shadowMapEnabled,
+    pipelineConfig.shadowMapType,
+    pipelineConfig.toneMapping,
+    pipelineConfig.toneMappingExposure,
+  ]);
 
   // ============================================================================
   // QUALITY MANAGEMENT
@@ -407,7 +420,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
     }));
     
     setQualityState(preset);
-    events.onQualityChanged?.(preset);
+      eventsRef.current.onQualityChanged?.(preset);
 
     // Update renderer settings
     if (rendererRef.current) {
@@ -417,7 +430,7 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
       rendererRef.current.shadowMap.enabled = config.shadowMapEnabled;
       rendererRef.current.shadowMap.type = config.shadowMapType;
     }
-  }, [customPipeline, events]);
+  }, [customPipeline]);
 
   const setCustomPipeline = useCallback((config: Partial<RenderPipelineConfig>) => {
     setPipelineConfig(prev => ({ ...prev, ...config }));
@@ -480,6 +493,25 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
   // RENDER CONTROL
   // ============================================================================
 
+  const adjustQualityDynamically = useCallback((currentFPS: number) => {
+    if (!dynamicQuality?.enabled) return;
+
+    const { targetFPS, minQuality, maxQuality, hysteresis } = dynamicQuality;
+    const qualityOrder: QualityPreset[] = ['mobile', 'low', 'medium', 'high', 'ultra'];
+    
+    const currentIndex = qualityOrder.indexOf(quality);
+    const minIndex = qualityOrder.indexOf(minQuality);
+    const maxIndex = qualityOrder.indexOf(maxQuality);
+
+    if (currentFPS < targetFPS - hysteresis && currentIndex > minIndex) {
+      // Lower quality
+      setQuality(qualityOrder[currentIndex - 1]);
+    } else if (currentFPS > targetFPS + hysteresis && currentIndex < maxIndex) {
+      // Raise quality
+      setQuality(qualityOrder[currentIndex + 1]);
+    }
+  }, [dynamicQuality, quality, setQuality]);
+
   const render = useCallback((scene: THREE.Scene, camera: THREE.Camera) => {
     if (!rendererRef.current) return;
 
@@ -525,33 +557,14 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
       };
 
       setStats(newStats);
-      events.onStatsUpdate?.(newStats);
+      eventsRef.current.onStatsUpdate?.(newStats);
 
       // Dynamic quality adjustment
       if (dynamicQuality?.enabled) {
         adjustQualityDynamically(newStats.fps);
       }
     }
-  }, [events, dynamicQuality]);
-
-  const adjustQualityDynamically = useCallback((currentFPS: number) => {
-    if (!dynamicQuality?.enabled) return;
-
-    const { targetFPS, minQuality, maxQuality, hysteresis } = dynamicQuality;
-    const qualityOrder: QualityPreset[] = ['mobile', 'low', 'medium', 'high', 'ultra'];
-    
-    const currentIndex = qualityOrder.indexOf(quality);
-    const minIndex = qualityOrder.indexOf(minQuality);
-    const maxIndex = qualityOrder.indexOf(maxQuality);
-
-    if (currentFPS < targetFPS - hysteresis && currentIndex > minIndex) {
-      // Lower quality
-      setQuality(qualityOrder[currentIndex - 1]);
-    } else if (currentFPS > targetFPS + hysteresis && currentIndex < maxIndex) {
-      // Raise quality
-      setQuality(qualityOrder[currentIndex + 1]);
-    }
-  }, [dynamicQuality, quality, setQuality]);
+  }, [adjustQualityDynamically, dynamicQuality]);
 
   const resize = useCallback((width: number, height: number) => {
     if (rendererRef.current) {
@@ -605,10 +618,10 @@ export function useRenderPipeline(options: UseRenderPipelineOptions = {}): UseRe
         );
       });
     } catch (error) {
-      events.onError?.(error as Error);
+      eventsRef.current.onError?.(error as Error);
       return null;
     }
-  }, [events]);
+  }, []);
 
   // ============================================================================
   // RETURN

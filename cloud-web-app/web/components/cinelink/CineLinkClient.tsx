@@ -177,52 +177,6 @@ export function CineLinkClient({
     setConnectionUrl(url);
   }, [serverUrl]);
   
-  // WebSocket connection
-  const connect = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) return;
-    
-    try {
-      const ws = new WebSocket(connectionUrl.replace('http', 'ws'));
-      
-      ws.onopen = () => {
-        console.log('[CineLink] Connected');
-        setState(prev => ({ ...prev, isConnected: true }));
-        onConnectionChange?.(true);
-        
-        // Start ping interval
-        lastPingRef.current = Date.now();
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const message: CineLinkMessage = JSON.parse(event.data);
-          handleMessage(message);
-        } catch (e) {
-          console.error('[CineLink] Invalid message:', e);
-        }
-      };
-      
-      ws.onclose = () => {
-        console.log('[CineLink] Disconnected');
-        setState(prev => ({ 
-          ...prev, 
-          isConnected: false, 
-          isStreaming: false,
-          deviceId: null 
-        }));
-        onConnectionChange?.(false);
-      };
-      
-      ws.onerror = (error) => {
-        console.error('[CineLink] Error:', error);
-      };
-      
-      wsRef.current = ws;
-    } catch (error) {
-      console.error('[CineLink] Connection failed:', error);
-    }
-  }, [connectionUrl, onConnectionChange]);
-  
   // Handle incoming messages
   const handleMessage = useCallback((message: CineLinkMessage) => {
     switch (message.type) {
@@ -276,6 +230,52 @@ export function CineLinkClient({
         break;
     }
   }, [settings, onCameraUpdate]);
+
+  // WebSocket connection
+  const connect = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+
+    try {
+      const ws = new WebSocket(connectionUrl.replace('http', 'ws'));
+
+      ws.onopen = () => {
+        console.log('[CineLink] Connected');
+        setState(prev => ({ ...prev, isConnected: true }));
+        onConnectionChange?.(true);
+
+        // Start ping interval
+        lastPingRef.current = Date.now();
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message: CineLinkMessage = JSON.parse(event.data);
+          handleMessage(message);
+        } catch (e) {
+          console.error('[CineLink] Invalid message:', e);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('[CineLink] Disconnected');
+        setState(prev => ({
+          ...prev,
+          isConnected: false,
+          isStreaming: false,
+          deviceId: null
+        }));
+        onConnectionChange?.(false);
+      };
+
+      ws.onerror = (error) => {
+        console.error('[CineLink] Error:', error);
+      };
+
+      wsRef.current = ws;
+    } catch (error) {
+      console.error('[CineLink] Connection failed:', error);
+    }
+  }, [connectionUrl, handleMessage, onConnectionChange]);
   
   // Smooth orientation values
   const smoothOrientation = (
@@ -546,7 +546,7 @@ export function CineLinkClient({
               </div>
               <div className="p-3 bg-gray-800 rounded-lg text-center">
                 <p className="text-xs text-gray-500 mb-1">Gamma (Y)</p>
-                <p className="text-lg font-mono text-purple-400">
+                <p className="text-lg font-mono text-blue-400">
                   {state.lastOrientation.gamma?.toFixed(1) || '0.0'}°
                 </p>
               </div>
@@ -740,7 +740,7 @@ export function CineLinkMobile({ serverUrl }: CineLinkMobileProps): JSX.Element 
               </div>
               <div className="p-4 bg-gray-800 rounded-xl text-center">
                 <p className="text-xs text-gray-500 mb-2">Gamma</p>
-                <p className="text-2xl font-mono text-purple-400">
+                <p className="text-2xl font-mono text-blue-400">
                   {orientation.gamma?.toFixed(0) || 0}°
                 </p>
               </div>

@@ -1,32 +1,7 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
-import {
-  ChevronRight,
-  ChevronDown,
-  File,
-  Folder,
-  FolderOpen,
-  Plus,
-  RefreshCw,
-  MoreHorizontal,
-  Search,
-  FileCode,
-  FileJson,
-  FileType,
-  FileImage,
-  Package,
-  Settings,
-  Trash2,
-  Edit,
-  Copy,
-  Scissors,
-  Clipboard,
-  Download,
-  Upload,
-  FolderPlus,
-  FilePlus,
-} from 'lucide-react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import Codicon, { type CodiconName } from './Codicon'
 
 // ============= Types =============
 
@@ -46,7 +21,7 @@ interface FileExplorerProps {
   onFileSelect?: (file: FileNode) => void
   onFileCreate?: (parentPath: string, type: 'file' | 'folder') => void
   onFileDelete?: (file: FileNode) => void
-  onFileRename?: (file: FileNode, newName: string) => void
+  onFileRename?: (file: FileNode, newName?: string) => void
   onRefresh?: () => void
   workspaceName?: string
   className?: string
@@ -54,21 +29,33 @@ interface FileExplorerProps {
 
 // ============= File Icon Helper =============
 
-const FILE_ICONS: Record<string, { icon: typeof File; color: string }> = {
-  ts: { icon: FileCode, color: 'text-blue-400' },
-  tsx: { icon: FileCode, color: 'text-blue-400' },
-  js: { icon: FileCode, color: 'text-yellow-400' },
-  jsx: { icon: FileCode, color: 'text-yellow-400' },
-  json: { icon: FileJson, color: 'text-amber-400' },
-  md: { icon: FileType, color: 'text-slate-400' },
-  css: { icon: FileCode, color: 'text-purple-400' },
-  scss: { icon: FileCode, color: 'text-pink-400' },
-  html: { icon: FileCode, color: 'text-orange-400' },
-  png: { icon: FileImage, color: 'text-green-400' },
-  jpg: { icon: FileImage, color: 'text-green-400' },
-  svg: { icon: FileImage, color: 'text-amber-400' },
-  package: { icon: Package, color: 'text-red-400' },
-  config: { icon: Settings, color: 'text-slate-400' },
+const FILE_ICONS: Record<string, { icon: CodiconName; color: string }> = {
+  ts: { icon: 'symbol-file', color: 'text-slate-300' },
+  tsx: { icon: 'symbol-file', color: 'text-slate-300' },
+  js: { icon: 'symbol-file', color: 'text-slate-300' },
+  jsx: { icon: 'symbol-file', color: 'text-slate-300' },
+  json: { icon: 'symbol-number', color: 'text-slate-400' },
+  md: { icon: 'symbol-file', color: 'text-slate-400' },
+  css: { icon: 'symbol-color', color: 'text-slate-400' },
+  scss: { icon: 'symbol-color', color: 'text-slate-400' },
+  html: { icon: 'symbol-file', color: 'text-slate-300' },
+  png: { icon: 'symbol-file', color: 'text-slate-400' },
+  jpg: { icon: 'symbol-file', color: 'text-slate-400' },
+  svg: { icon: 'symbol-file', color: 'text-slate-400' },
+  package: { icon: 'extensions', color: 'text-slate-400' },
+  config: { icon: 'gear', color: 'text-slate-400' },
+}
+
+const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId'
+
+function resolveProjectIdFromClient(): string {
+  if (typeof window === 'undefined') return 'default'
+  const params = new URLSearchParams(window.location.search)
+  const fromQuery = params.get('projectId')
+  if (fromQuery && fromQuery.trim()) return fromQuery.trim()
+  const fromStorage = localStorage.getItem(WORKBENCH_PROJECT_STORAGE_KEY)
+  if (fromStorage && fromStorage.trim()) return fromStorage.trim()
+  return 'default'
 }
 
 function getFileIcon(name: string, isOpen = false) {
@@ -76,7 +63,7 @@ function getFileIcon(name: string, isOpen = false) {
   if (name.includes('config')) return FILE_ICONS.config
   
   const ext = name.split('.').pop()?.toLowerCase() || ''
-  return FILE_ICONS[ext] || { icon: File, color: 'text-slate-400' }
+  return FILE_ICONS[ext] || { icon: 'symbol-file' as CodiconName, color: 'text-slate-400' }
 }
 
 // ============= Workspace Tree =============
@@ -125,8 +112,8 @@ function FileTreeNode({
   const isExpanded = expandedFolders.has(node.id)
   const isSelected = selectedFile === node.id
   const fileIcon = getFileIcon(node.name, isExpanded)
-  const IconComponent = isFolder 
-    ? (isExpanded ? FolderOpen : Folder)
+  const nodeIcon = isFolder
+    ? (isExpanded ? 'folder-opened' : 'folder')
     : fileIcon.icon
 
   return (
@@ -135,25 +122,26 @@ function FileTreeNode({
         onClick={() => isFolder ? onToggle(node.id) : onSelect(node)}
         onContextMenu={(e) => onContextMenu(e, node)}
         className={`
-          w-full flex items-center gap-1.5 py-1 px-2 text-sm text-left
-          hover:bg-slate-800/50 transition-colors
+          w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
+          hover:bg-white/5 active:bg-white/10 transition-colors
+          focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
           ${isSelected ? 'bg-slate-800 text-white' : 'text-slate-300'}
         `}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
         {/* Chevron for folders */}
         {isFolder && (
-          <span className="w-4 h-4 flex items-center justify-center">
+          <span className="w-3.5 h-3.5 flex items-center justify-center text-slate-500">
             {isExpanded ? (
-              <ChevronDown className="w-3.5 h-3.5" />
+              <Codicon name="chevron-down" />
             ) : (
-              <ChevronRight className="w-3.5 h-3.5" />
+              <Codicon name="chevron-right" />
             )}
           </span>
         )}
         
         {/* File/Folder icon */}
-        <IconComponent className={`w-4 h-4 ${isFolder ? 'text-amber-400' : fileIcon.color}`} />
+        <Codicon name={nodeIcon} className={`${isFolder ? 'text-slate-300' : fileIcon.color}`} />
         
         {/* Name */}
         <span className="flex-1 truncate">{node.name}</span>
@@ -200,18 +188,12 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
   
   const menuItems = [
     ...(isFolder ? [
-      { id: 'new-file', label: 'New File', icon: FilePlus },
-      { id: 'new-folder', label: 'New Folder', icon: FolderPlus },
+      { id: 'new-file', label: 'New File', icon: 'new-file' as CodiconName },
+      { id: 'new-folder', label: 'New Folder', icon: 'new-folder' as CodiconName },
       { id: 'divider-1', divider: true },
     ] : []),
-    { id: 'rename', label: 'Rename', icon: Edit },
-    { id: 'duplicate', label: 'Duplicate', icon: Copy },
-    { id: 'divider-2', divider: true },
-    { id: 'cut', label: 'Cut', icon: Scissors, shortcut: '⌘X' },
-    { id: 'copy', label: 'Copy', icon: Copy, shortcut: '⌘C' },
-    { id: 'paste', label: 'Paste', icon: Clipboard, shortcut: '⌘V' },
-    { id: 'divider-3', divider: true },
-    { id: 'delete', label: 'Delete', icon: Trash2, danger: true },
+    { id: 'rename', label: 'Rename', icon: 'edit' as CodiconName },
+    { id: 'delete', label: 'Delete', icon: 'trash' as CodiconName, danger: true },
   ]
 
   return (
@@ -238,15 +220,12 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
                 onClose()
               }}
               className={`
-                w-full flex items-center gap-2 px-3 py-1.5 text-sm
+                w-full flex items-center gap-2 px-3 py-1.5 text-xs
                 ${item.danger ? 'text-red-400 hover:bg-red-500/20' : 'text-slate-300 hover:bg-slate-700'}
               `}
             >
-              {item.icon && <item.icon className="w-4 h-4" />}
+              {item.icon && <Codicon name={item.icon} />}
               <span className="flex-1 text-left">{item.label}</span>
-              {item.shortcut && (
-                <span className="text-xs text-slate-500">{item.shortcut}</span>
-              )}
             </button>
           )
         ))}
@@ -286,14 +265,22 @@ export default function FileExplorerPro({
     try {
       setIsLoading(true)
       setLoadError(null)
-      const res = await fetch('/api/workspace/tree', {
+      const projectId = resolveProjectIdFromClient()
+      const res = await fetch('/api/files/tree', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-project-id': projectId,
+        },
+        body: JSON.stringify({ path: '/', maxDepth: 6, projectId }),
       })
       if (!res.ok) throw new Error('Falha ao carregar workspace')
       const data = await res.json()
-      const tree = Array.isArray(data?.tree) ? data.tree : []
+      const tree = Array.isArray(data?.children)
+        ? data.children
+        : Array.isArray(data?.tree)
+          ? data.tree
+          : []
       const mapped = tree.map(mapWorkspaceNode)
       setInternalFiles(mapped)
     } catch (error) {
@@ -344,7 +331,7 @@ export default function FileExplorerPro({
         onFileDelete?.(contextMenu.file)
         break
       case 'rename':
-        // Would show rename modal
+        onFileRename?.(contextMenu.file)
         break
       case 'new-file':
         onFileCreate?.(contextMenu.file.path, 'file')
@@ -353,7 +340,7 @@ export default function FileExplorerPro({
         onFileCreate?.(contextMenu.file.path, 'folder')
         break
     }
-  }, [contextMenu, onFileDelete, onFileCreate])
+  }, [contextMenu, onFileDelete, onFileCreate, onFileRename])
 
   const handleRefresh = useCallback(() => {
     if (onRefresh) return onRefresh()
@@ -390,38 +377,38 @@ export default function FileExplorerPro({
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+      <div className="density-header flex items-center justify-between px-2 border-b border-slate-800">
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
           {workspaceName}
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className={`p-1 rounded hover:bg-slate-800 ${showSearch ? 'text-indigo-400' : 'text-slate-400'}`}
+            className={`p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${showSearch ? 'text-blue-300' : 'text-slate-400'}`}
             title="Search Files"
           >
-            <Search className="w-4 h-4" />
+            <Codicon name="search" />
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'file')}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400"
+            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="New File"
           >
-            <FilePlus className="w-4 h-4" />
+            <Codicon name="new-file" />
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'folder')}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400"
+            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="New Folder"
           >
-            <FolderPlus className="w-4 h-4" />
+            <Codicon name="new-folder" />
           </button>
           <button
             onClick={handleRefresh}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400"
+            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="Refresh"
           >
-            <RefreshCw className="w-4 h-4" />
+            <Codicon name="refresh" />
           </button>
         </div>
       </div>
@@ -430,13 +417,13 @@ export default function FileExplorerPro({
       {showSearch && (
         <div className="px-2 py-2 border-b border-slate-800">
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Codicon name="search" className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search files..."
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
               autoFocus
             />
           </div>
@@ -451,7 +438,11 @@ export default function FileExplorerPro({
           </div>
         )}
         {isLoading && !loadError && (
-          <div className="px-3 py-2 text-xs text-slate-500">Carregando arquivos...</div>
+          <div className="px-3 py-2 text-xs text-slate-500 space-y-1.5">
+            <div className="h-3 rounded bg-slate-800/80 aethel-shimmer" />
+            <div className="h-3 rounded bg-slate-800/70 aethel-shimmer" />
+            <div className="h-3 rounded bg-slate-800/60 aethel-shimmer" />
+          </div>
         )}
         {filteredFiles.map(node => (
           <FileTreeNode
@@ -486,3 +477,5 @@ export default function FileExplorerPro({
     </div>
   )
 }
+
+

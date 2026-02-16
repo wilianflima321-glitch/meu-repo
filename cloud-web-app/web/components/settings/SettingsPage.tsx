@@ -888,7 +888,7 @@ function SettingToggle({ setting, value, onChange }: SettingInputProps) {
     <button
       onClick={() => onChange(!value)}
       className={`relative w-11 h-6 rounded-full transition-colors ${
-        value ? 'bg-indigo-600' : 'bg-slate-600'
+        value ? 'bg-sky-600' : 'bg-slate-600'
       }`}
     >
       <span
@@ -951,7 +951,7 @@ function SettingSlider({ setting, value, onChange }: SettingInputProps) {
         min={setting.min}
         max={setting.max}
         step={setting.step || 1}
-        className="w-32 accent-indigo-500"
+        className="w-32 accent-sky-500"
       />
       <span className="text-sm text-slate-400 w-12">{value}</span>
     </div>
@@ -1127,7 +1127,7 @@ export default function SettingsPage() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
                   selectedCategory === category.id && !selectedSubcategory
-                    ? 'bg-indigo-600/20 text-indigo-400'
+                    ? 'bg-sky-600/20 text-sky-400'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
               >
@@ -1144,7 +1144,7 @@ export default function SettingsPage() {
                       onClick={() => setSelectedSubcategory(sub.id)}
                       className={`w-full flex items-center gap-2 px-4 py-1.5 text-left text-sm transition-colors ${
                         selectedSubcategory === sub.id
-                          ? 'text-indigo-400'
+                          ? 'text-sky-400'
                           : 'text-slate-500 hover:text-white'
                       }`}
                     >

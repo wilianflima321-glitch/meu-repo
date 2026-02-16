@@ -10,6 +10,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Clock,
@@ -228,9 +229,12 @@ export function TimeMachineSlider({
         {selectedVersion && (
           <div className="flex items-start gap-3">
             {showThumbnails && selectedVersion.thumbnail && (
-              <img
+              <Image
                 src={selectedVersion.thumbnail}
                 alt="Version preview"
+                width={64}
+                height={48}
+                unoptimized
                 className="w-16 h-12 rounded object-cover"
               />
             )}

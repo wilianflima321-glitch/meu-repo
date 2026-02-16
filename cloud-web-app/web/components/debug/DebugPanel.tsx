@@ -84,40 +84,6 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
   // SESSION MANAGEMENT
   // ============================================================================
   
-  useEffect(() => {
-    const handleEvent = (event: any) => {
-      switch (event.event) {
-        case 'stopped':
-          setStatus('paused');
-          refreshState();
-          break;
-        case 'continued':
-          setStatus('running');
-          break;
-        case 'terminated':
-        case 'exited':
-          setStatus('stopped');
-          setSession(null);
-          break;
-        case 'output':
-          if (event.body?.output) {
-            setConsoleMessages(prev => [...prev, {
-              type: event.body.category === 'stderr' ? 'error' : 'output',
-              message: event.body.output,
-              timestamp: Date.now(),
-            }]);
-          }
-          break;
-      }
-    };
-    
-    debugSessionManager.on('event', handleEvent);
-    
-    return () => {
-      debugSessionManager.off('event', handleEvent);
-    };
-  }, []);
-  
   const refreshState = useCallback(async () => {
     const activeSession = debugSessionManager.getActiveSession();
     if (!activeSession) return;
@@ -158,6 +124,40 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
     // Get console
     setConsoleMessages(activeSession.getConsoleMessages());
   }, [currentThread, selectedFrame]);
+
+  useEffect(() => {
+    const handleEvent = (event: any) => {
+      switch (event.event) {
+        case 'stopped':
+          setStatus('paused');
+          refreshState();
+          break;
+        case 'continued':
+          setStatus('running');
+          break;
+        case 'terminated':
+        case 'exited':
+          setStatus('stopped');
+          setSession(null);
+          break;
+        case 'output':
+          if (event.body?.output) {
+            setConsoleMessages(prev => [...prev, {
+              type: event.body.category === 'stderr' ? 'error' : 'output',
+              message: event.body.output,
+              timestamp: Date.now(),
+            }]);
+          }
+          break;
+      }
+    };
+
+    debugSessionManager.on('event', handleEvent);
+
+    return () => {
+      debugSessionManager.off('event', handleEvent);
+    };
+  }, [refreshState]);
   
   // ============================================================================
   // CONTROL ACTIONS

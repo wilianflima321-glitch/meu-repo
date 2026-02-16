@@ -8,6 +8,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import NextImage from 'next/image';
 import {
   Folder,
   FolderOpen,
@@ -347,9 +348,11 @@ const AssetCard: React.FC<AssetCardProps> = ({
         }}
       >
         {asset.thumbnail ? (
-          <img
+          <NextImage
             src={asset.thumbnail}
             alt={asset.name}
+            fill
+            unoptimized
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
@@ -625,7 +628,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
     }
 
     setContextMenu(null);
-  }, [contextMenu, onAssetDelete, onAssetRename, onAssetSelect]);
+  }, [contextMenu, onAssetDelete, onAssetDuplicate, onAssetExport, onAssetRename, onAssetSelect]);
 
   const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {

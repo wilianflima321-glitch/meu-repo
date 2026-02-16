@@ -120,9 +120,9 @@ function getToolIcon(tool?: string) {
 function StatsOverview({ stats }: { stats: GodViewStats }) {
   return (
     <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">Usuários ao vivo</span>
+          <span className="text-xs text-zinc-500 uppercase">Usuários ao vivo</span>
           <Users className="w-4 h-4 text-green-400" />
         </div>
         <p className="text-3xl font-bold text-white">{stats.totalActive}</p>
@@ -132,33 +132,33 @@ function StatsOverview({ stats }: { stats: GodViewStats }) {
         </div>
       </div>
       
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">Chamadas de IA</span>
+          <span className="text-xs text-zinc-500 uppercase">Chamadas de IA</span>
           <Bot className="w-4 h-4 text-blue-400" />
         </div>
         <p className="text-3xl font-bold text-white">{stats.totalAICalls.toLocaleString()}</p>
-        <p className="text-xs text-gray-500 mt-2">{stats.totalTokens.toLocaleString()} tokens</p>
+        <p className="text-xs text-zinc-500 mt-2">{stats.totalTokens.toLocaleString()} tokens</p>
       </div>
       
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">Custo de IA (ao vivo)</span>
+          <span className="text-xs text-zinc-500 uppercase">Custo de IA (ao vivo)</span>
           <DollarSign className="w-4 h-4 text-yellow-400" />
         </div>
         <p className="text-3xl font-bold text-white">${stats.totalAICost.toFixed(2)}</p>
-        <p className="text-xs text-gray-500 mt-2">Sessões atuais</p>
+        <p className="text-xs text-zinc-500 mt-2">Sessões atuais</p>
       </div>
       
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 uppercase">Região principal</span>
-          <Globe className="w-4 h-4 text-purple-400" />
+          <span className="text-xs text-zinc-500 uppercase">Região principal</span>
+          <Globe className="w-4 h-4 text-cyan-400" />
         </div>
         <p className="text-3xl font-bold text-white">
           {stats.byCountry[0]?.country || 'N/D'}
         </p>
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-zinc-500 mt-2">
           {stats.byCountry[0]?.count || 0} usuários
         </p>
       </div>
@@ -181,20 +181,20 @@ function SessionCard({
   return (
     <div 
       className={`
-        bg-[#1a1a1a] border border-[#333] rounded-lg overflow-hidden
+        bg-zinc-900/70 border border-zinc-700 rounded-lg overflow-hidden
         ${session.aiCostIncurred > 1 ? 'border-l-4 border-l-yellow-500' : ''}
       `}
     >
       {/* Header Row */}
       <div 
-        className="p-4 cursor-pointer hover:bg-[#252525] transition-colors"
+        className="p-4 cursor-pointer hover:bg-zinc-800/80 transition-colors"
         onClick={onToggle}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Status Indicator */}
             <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-[#252525] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-zinc-800/80 flex items-center justify-center">
                 <span className="text-sm font-medium text-white">
                   {session.userName?.charAt(0) || session.userEmail.charAt(0).toUpperCase()}
                 </span>
@@ -209,12 +209,12 @@ function SessionCard({
               </p>
               <div className="flex items-center gap-2 mt-0.5">
                 {session.projectName && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-zinc-500">
                     {session.projectName}
                   </span>
                 )}
                 {session.country && (
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <span className="text-xs text-zinc-500 flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
                     {session.city && `${session.city}, `}{session.country}
                   </span>
@@ -226,7 +226,7 @@ function SessionCard({
           {/* Quick Stats */}
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <p className="text-xs text-gray-400">Duração</p>
+              <p className="text-xs text-zinc-500">Duração</p>
               <p className="text-sm text-white flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {formatDuration(session.duration)}
@@ -234,7 +234,7 @@ function SessionCard({
             </div>
             
             <div className="text-right">
-              <p className="text-xs text-gray-400">Chamadas de IA</p>
+              <p className="text-xs text-zinc-500">Chamadas de IA</p>
               <p className="text-sm text-white flex items-center gap-1">
                 <Bot className="w-3 h-3" />
                 {session.aiCallsCount}
@@ -242,7 +242,7 @@ function SessionCard({
             </div>
             
             <div className="text-right">
-              <p className="text-xs text-gray-400">Custo</p>
+              <p className="text-xs text-zinc-500">Custo</p>
               <p className={`text-sm font-medium flex items-center gap-1 ${
                 session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-white'
               }`}>
@@ -251,9 +251,9 @@ function SessionCard({
               </p>
             </div>
             
-            <DeviceIcon className="w-4 h-4 text-gray-500" />
+            <DeviceIcon className="w-4 h-4 text-zinc-500" />
             
-            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${
+            <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${
               isExpanded ? 'rotate-180' : ''
             }`} />
           </div>
@@ -262,33 +262,33 @@ function SessionCard({
       
       {/* Expanded Details */}
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-[#333] pt-4">
+        <div className="px-4 pb-4 border-t border-zinc-700 pt-4">
           <div className="grid grid-cols-3 gap-4">
             {/* Activity */}
             <div className="space-y-3">
-              <h4 className="text-xs text-gray-400 uppercase">Atividade atual</h4>
+              <h4 className="text-xs text-zinc-500 uppercase">Atividade atual</h4>
               
               <div className="flex items-center gap-2">
-                <MousePointer className="w-4 h-4 text-gray-500" />
+                <MousePointer className="w-4 h-4 text-zinc-500" />
                 <div>
-                  <p className="text-xs text-gray-400">Página</p>
+                  <p className="text-xs text-zinc-500">Página</p>
                   <p className="text-sm text-white">{session.currentPage || 'Desconhecida'}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
-                <ToolIcon className="w-4 h-4 text-gray-500" />
+                <ToolIcon className="w-4 h-4 text-zinc-500" />
                 <div>
-                  <p className="text-xs text-gray-400">Ferramenta ativa</p>
+                  <p className="text-xs text-zinc-500">Ferramenta ativa</p>
                   <p className="text-sm text-white">{session.currentTool || 'Nenhuma'}</p>
                 </div>
               </div>
               
               {session.lastAction && (
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-gray-500" />
+                  <Zap className="w-4 h-4 text-zinc-500" />
                   <div>
-                    <p className="text-xs text-gray-400">Última ação</p>
+                    <p className="text-xs text-zinc-500">Última ação</p>
                     <p className="text-sm text-white">{session.lastAction}</p>
                   </div>
                 </div>
@@ -297,44 +297,44 @@ function SessionCard({
             
             {/* Technical */}
             <div className="space-y-3">
-              <h4 className="text-xs text-gray-400 uppercase">Técnico</h4>
+              <h4 className="text-xs text-zinc-500 uppercase">Técnico</h4>
               
               <div>
-                <p className="text-xs text-gray-400">ID da sessão</p>
+                <p className="text-xs text-zinc-500">ID da sessão</p>
                 <p className="text-sm text-white font-mono">{session.id.slice(0, 12)}...</p>
               </div>
               
               <div>
-                <p className="text-xs text-gray-400">Endereço IP</p>
+                <p className="text-xs text-zinc-500">Endereço IP</p>
                 <p className="text-sm text-white font-mono">{session.ipAddress || 'Desconhecido'}</p>
               </div>
               
               <div>
-                <p className="text-xs text-gray-400">Navegador</p>
+                <p className="text-xs text-zinc-500">Navegador</p>
                 <p className="text-sm text-white">{session.browser || 'Desconhecido'}</p>
               </div>
             </div>
             
             {/* AI Usage */}
             <div className="space-y-3">
-              <h4 className="text-xs text-gray-400 uppercase">Uso de IA</h4>
+              <h4 className="text-xs text-zinc-500 uppercase">Uso de IA</h4>
               
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-[#252525] rounded p-2">
-                  <p className="text-xs text-gray-400">Chamadas</p>
+                <div className="bg-zinc-800/80 rounded p-2">
+                  <p className="text-xs text-zinc-500">Chamadas</p>
                   <p className="text-lg font-medium text-white">{session.aiCallsCount}</p>
                 </div>
                 
-                <div className="bg-[#252525] rounded p-2">
-                  <p className="text-xs text-gray-400">Tokens</p>
+                <div className="bg-zinc-800/80 rounded p-2">
+                  <p className="text-xs text-zinc-500">Tokens</p>
                   <p className="text-lg font-medium text-white">
                     {session.aiTokensUsed.toLocaleString()}
                   </p>
                 </div>
               </div>
               
-              <div className="bg-[#252525] rounded p-2">
-                <p className="text-xs text-gray-400">Custo da sessão</p>
+              <div className="bg-zinc-800/80 rounded p-2">
+                <p className="text-xs text-zinc-500">Custo da sessão</p>
                 <p className={`text-xl font-bold ${
                   session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-green-400'
                 }`}>
@@ -354,7 +354,7 @@ function WorldMap({ byCountry }: { byCountry: { country: string; count: number }
   const maxCount = Math.max(...byCountry.map(c => c.count), 1);
   
   return (
-    <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
       <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
         <Globe className="w-4 h-4" />
         Ativos por região
@@ -363,14 +363,14 @@ function WorldMap({ byCountry }: { byCountry: { country: string; count: number }
       <div className="space-y-2">
         {byCountry.slice(0, 10).map(({ country, count }) => (
           <div key={country} className="flex items-center gap-3">
-            <span className="text-sm text-gray-400 w-20 truncate">{country}</span>
-            <div className="flex-1 h-2 bg-[#252525] rounded-full overflow-hidden">
+            <span className="text-sm text-zinc-500 w-20 truncate">{country}</span>
+            <div className="flex-1 h-2 bg-zinc-800/80 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-blue-500 rounded-full"
                 style={{ width: `${(count / maxCount) * 100}%` }}
               />
             </div>
-            <span className="text-sm text-gray-300 w-12 text-right">{count}</span>
+            <span className="text-sm text-zinc-300 w-12 text-right">{count}</span>
           </div>
         ))}
       </div>
@@ -452,7 +452,7 @@ export default function GodViewPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
+        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
       </div>
     );
   }
@@ -472,7 +472,7 @@ export default function GodViewPage() {
               </span>
             )}
           </h1>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-zinc-500">
             Visão em tempo real de todas as sessões ativas
           </p>
         </div>
@@ -480,13 +480,13 @@ export default function GodViewPage() {
         <div className="flex items-center gap-3">
           {/* Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Buscar usuários, projetos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm text-white placeholder-gray-500 w-64"
+              className="pl-9 pr-4 py-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-sm text-white placeholder-gray-500 w-64"
             />
           </div>
           
@@ -494,7 +494,7 @@ export default function GodViewPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm text-white"
+            className="px-3 py-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-sm text-white"
           >
             <option value="duration">Ordenar por duração</option>
             <option value="cost">Ordenar por custo de IA</option>
@@ -507,7 +507,7 @@ export default function GodViewPage() {
             className={`p-2 rounded-lg border ${
               paused 
                 ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400' 
-                : 'border-[#333] text-gray-400 hover:text-white'
+                : 'border-zinc-700 text-zinc-500 hover:text-white'
             }`}
             title={paused ? 'Retomar atualizações ao vivo' : 'Pausar atualizações ao vivo'}
           >
@@ -517,7 +517,7 @@ export default function GodViewPage() {
           {/* Manual Refresh */}
           <button
             onClick={fetchSessions}
-            className="p-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-gray-400 hover:text-white"
+            className="p-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-zinc-500 hover:text-white"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -532,15 +532,15 @@ export default function GodViewPage() {
         {/* Sessions List */}
         <div className="col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-400">
+            <h2 className="text-sm font-medium text-zinc-500">
               {filteredSessions.length} sessões ativas
             </h2>
           </div>
           
           {filteredSessions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 bg-[#1a1a1a] border border-[#333] rounded-lg">
-              <Users className="w-12 h-12 text-gray-600 mb-4" />
-              <p className="text-gray-400">Nenhuma sessão ativa</p>
+            <div className="flex flex-col items-center justify-center h-64 bg-zinc-900/70 border border-zinc-700 rounded-lg">
+              <Users className="w-12 h-12 text-zinc-400 mb-4" />
+              <p className="text-zinc-500">Nenhuma sessão ativa</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -561,7 +561,7 @@ export default function GodViewPage() {
           <WorldMap byCountry={stats.byCountry} />
           
           {/* Device Breakdown */}
-          <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+          <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
             <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
               <Monitor className="w-4 h-4" />
               Tipos de dispositivo
@@ -572,11 +572,11 @@ export default function GodViewPage() {
                 <div key={device} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {device === 'mobile' ? (
-                      <Smartphone className="w-4 h-4 text-gray-400" />
+                      <Smartphone className="w-4 h-4 text-zinc-500" />
                     ) : (
-                      <Monitor className="w-4 h-4 text-gray-400" />
+                      <Monitor className="w-4 h-4 text-zinc-500" />
                     )}
-                    <span className="text-sm text-gray-300 capitalize">{device}</span>
+                    <span className="text-sm text-zinc-300 capitalize">{device}</span>
                   </div>
                   <span className="text-sm text-white font-medium">{count}</span>
                 </div>
@@ -591,7 +591,7 @@ export default function GodViewPage() {
                 <AlertCircle className="w-4 h-4 text-yellow-400" />
                 <span className="text-sm font-medium text-yellow-400">Uso elevado de IA</span>
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-zinc-500">
                 {filteredSessions.filter(s => s.aiCostIncurred > 1).length} sessão(ões) 
                 ultrapassaram $1 em custos de IA nesta sessão.
               </p>

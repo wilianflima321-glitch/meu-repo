@@ -27,17 +27,17 @@ const variantClasses = {
   default: `
     bg-slate-900/80 border border-slate-700/80 rounded-lg
     hover:border-slate-600 hover:bg-slate-900/90
-    focus:bg-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
+    focus:bg-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20
   `,
   filled: `
     bg-slate-800/90 border border-transparent rounded-lg
     hover:bg-slate-800
-    focus:bg-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
+    focus:bg-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20
   `,
   flushed: `
     bg-transparent border-0 border-b-2 border-slate-700 rounded-none px-0
     hover:border-slate-500
-    focus:border-indigo-500 focus:ring-0
+    focus:border-sky-500 focus:ring-0
   `,
 }
 

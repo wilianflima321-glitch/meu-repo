@@ -668,7 +668,7 @@ function ConstraintPanel({ constraint, onUpdate, onDelete }: ConstraintPanelProp
         <span className="text-xs font-medium capitalize">{constraint.type}</span>
         <button
           onClick={() => onUpdate({ enabled: !constraint.enabled })}
-          className={`ml-auto p-1 rounded text-xs ${constraint.enabled ? 'bg-purple-600' : 'bg-slate-600'}`}
+          className={`ml-auto p-1 rounded text-xs ${constraint.enabled ? 'bg-blue-600' : 'bg-slate-600'}`}
         >
           {constraint.enabled ? 'ON' : 'OFF'}
         </button>
@@ -947,7 +947,7 @@ export default function ControlRigEditor({
           {/* Constraints */}
           <CollapsibleSection 
             title="Constraints" 
-            icon={<Link className="w-4 h-4 text-purple-400" />}
+            icon={<Link className="w-4 h-4 text-blue-400" />}
             defaultOpen={false}
           >
             {constraints.length === 0 ? (

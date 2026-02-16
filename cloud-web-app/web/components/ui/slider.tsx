@@ -30,7 +30,7 @@ export function Slider({
       step={step}
       value={numericValue}
       onChange={(e) => onValueChange?.([Number(e.target.value)])}
-      className={cn('w-full accent-indigo-500', className)}
+      className={cn('w-full accent-sky-500', className)}
       {...props}
     />
   );

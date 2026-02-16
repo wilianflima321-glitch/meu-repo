@@ -326,7 +326,7 @@ function TourOverlay() {
       {/* Spotlight border/highlight */}
       {targetRect && (
         <div
-          className="absolute border-2 border-indigo-500 rounded-lg pointer-events-none animate-pulse"
+          className="absolute border-2 border-sky-500 rounded-lg pointer-events-none animate-pulse"
           style={{
             left: targetRect.left - spotlightPadding,
             top: targetRect.top - spotlightPadding,
@@ -347,10 +347,10 @@ function TourOverlay() {
         }}
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-b border-slate-700">
+        <div className="px-5 py-4 bg-gradient-to-r from-sky-600/20 to-purple-600/20 border-b border-slate-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <Sparkles className="w-5 h-5 text-sky-400" />
               <span className="text-xs text-slate-400 font-medium">
                 Passo {currentStepIndex + 1} de {totalSteps}
               </span>
@@ -378,7 +378,7 @@ function TourOverlay() {
           {currentStep.action && (
             <button
               onClick={currentStep.action.onClick}
-              className="mt-4 w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium rounded-lg transition-colors"
+              className="mt-4 w-full px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {currentStep.action.label}
             </button>
@@ -395,9 +395,9 @@ function TourOverlay() {
                 onClick={() => goToStep(i)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   i === currentStepIndex 
-                    ? 'bg-indigo-500 w-4' 
+                    ? 'bg-sky-500 w-4' 
                     : i < currentStepIndex 
-                    ? 'bg-indigo-400/50' 
+                    ? 'bg-sky-400/50' 
                     : 'bg-slate-600'
                 }`}
               />
@@ -417,7 +417,7 @@ function TourOverlay() {
             )}
             <button
               onClick={nextStep}
-              className="px-4 py-1.5 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+              className="px-4 py-1.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
             >
               {isLastStep ? (
                 <>

@@ -120,7 +120,7 @@ const STEP_COLORS: Record<ThinkingStepType, { bg: string; text: string; border: 
   analyzing: { bg: 'bg-sky-500/20', text: 'text-sky-400', border: 'border-sky-500/30' },
   searching: { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' },
   planning: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30' },
-  generating: { bg: 'bg-fuchsia-500/20', text: 'text-fuchsia-400', border: 'border-fuchsia-500/30' },
+  generating: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30' },
   validating: { bg: 'bg-teal-500/20', text: 'text-teal-400', border: 'border-teal-500/30' },
   refining: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30' },
   complete: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
@@ -307,7 +307,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
       <div className={`
         relative rounded-lg border transition-all duration-200
         ${colors.bg} ${colors.border}
-        ${step.status === 'active' ? 'ring-1 ring-violet-500/50' : ''}
+        ${step.status === 'active' ? 'ring-1 ring-sky-500/50' : ''}
       `}>
         <NeuralPulse active={step.status === 'active'} />
 

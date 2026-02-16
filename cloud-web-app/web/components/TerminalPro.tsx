@@ -62,7 +62,7 @@ const QUICK_TASKS = [
   { label: 'Install', command: 'npm install', color: 'text-emerald-400' },
   { label: 'Dev', command: 'npm run dev', color: 'text-blue-400' },
   { label: 'Build', command: 'npm run build', color: 'text-amber-400' },
-  { label: 'Test', command: 'npm run test', color: 'text-purple-400' },
+  { label: 'Test', command: 'npm run test', color: 'text-blue-400' },
 ]
 
 export default function Terminal({
@@ -398,7 +398,7 @@ Press Ctrl+C to cancel running command
                 className={`
                   w-full px-3 py-2 text-left text-sm font-mono
                   ${index === selectedSuggestion
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-sky-600 text-white'
                     : 'text-slate-300 hover:bg-slate-700'
                   }
                 `}

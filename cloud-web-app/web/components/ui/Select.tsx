@@ -102,12 +102,12 @@ export function Select({
           ${sizeClasses[size]}
           w-full flex items-center justify-between gap-2
           bg-slate-900/80 
-          border ${error ? 'border-red-500/70' : isOpen ? 'border-indigo-500' : 'border-slate-700/80'}
+          border ${error ? 'border-red-500/70' : isOpen ? 'border-sky-500' : 'border-slate-700/80'}
           rounded-lg
           text-left
           transition-all duration-200 ease-out
           hover:border-slate-600 hover:bg-slate-900/90
-          focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
+          focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20
           disabled:opacity-40 disabled:cursor-not-allowed
         `}
       >
@@ -147,7 +147,7 @@ export function Select({
                   bg-slate-800/80 border border-slate-700/50
                   rounded-lg
                   text-sm text-slate-100 placeholder-slate-500
-                  focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30
+                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/30
                 "
               />
             </div>
@@ -171,7 +171,7 @@ export function Select({
                     text-left text-sm
                     transition-colors duration-100
                     ${option.value === value 
-                      ? 'bg-indigo-500/15 text-indigo-300' 
+                      ? 'bg-sky-500/15 text-sky-300' 
                       : 'text-slate-200 hover:bg-slate-800/80'
                     }
                     ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
@@ -193,7 +193,7 @@ export function Select({
                     </div>
                   </div>
                   {option.value === value && (
-                    <Check className="h-4 w-4 flex-shrink-0 text-indigo-400" />
+                    <Check className="h-4 w-4 flex-shrink-0 text-sky-400" />
                   )}
                 </button>
               ))

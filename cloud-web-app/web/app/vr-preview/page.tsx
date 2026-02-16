@@ -1,9 +1,5 @@
-import VRPreview from '../../components/VRPreview';
+﻿import { redirect } from 'next/navigation'
 
-export default function VRPreviewPage() {
-  return (
-    <div className='h-screen'>
-      <VRPreview />
-    </div>
-  );
+export default function Page() {
+  redirect('/ide?entry=vr-preview')
 }

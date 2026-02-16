@@ -78,7 +78,7 @@ export default function CodeEditor({
             onClick={handleSave}
             className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
               isDirty
-                ? 'bg-indigo-600 text-white hover:bg-indigo-500'
+                ? 'bg-sky-600 text-white hover:bg-sky-500'
                 : 'bg-slate-700 text-slate-400 cursor-not-allowed'
             }`}
             disabled={!isDirty}

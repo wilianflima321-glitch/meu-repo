@@ -622,7 +622,7 @@ export async function updateUserSupportPreferences(
   });
 }
 
-export default {
+const __defaultExport = {
   createTicket,
   addTicketReply,
   updateTicketStatus,
@@ -632,3 +632,5 @@ export default {
   getUserSupportPreferences,
   updateUserSupportPreferences,
 };
+
+export default __defaultExport;

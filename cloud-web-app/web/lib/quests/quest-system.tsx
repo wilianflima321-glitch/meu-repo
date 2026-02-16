@@ -1028,10 +1028,11 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
   const managerRef = useRef<QuestManager>(new QuestManager());
   
   useEffect(() => {
-    managerRef.current.startTimerChecks();
+    const manager = managerRef.current;
+    manager.startTimerChecks();
     
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1139,10 +1140,12 @@ export function useQuestProgress(questId: string) {
   return quest;
 }
 
-export default {
+const __defaultExport = {
   QuestManager,
   QuestBuilder,
   QuestProvider,
   useQuests,
   useQuestProgress,
 };
+
+export default __defaultExport;

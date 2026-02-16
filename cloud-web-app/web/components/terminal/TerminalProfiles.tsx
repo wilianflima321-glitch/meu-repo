@@ -79,7 +79,7 @@ const colors = {
   error: '#ef4444',
   accent: '#8b5cf6',
   cyan: '#06b6d4',
-  pink: '#ec4899',
+  magenta: '#ec4899',
 };
 
 // ============================================================================
@@ -151,7 +151,7 @@ export const DEFAULT_TERMINAL_PROFILES: TerminalProfile[] = [
     name: 'Test Runner',
     icon: <Zap size={16} />,
     shell: process.platform === 'win32' ? 'powershell.exe' : 'bash',
-    color: colors.pink,
+    color: colors.cyan,
     description: 'Execução de testes',
     category: 'development',
     commands: ['npm test -- --watch'],

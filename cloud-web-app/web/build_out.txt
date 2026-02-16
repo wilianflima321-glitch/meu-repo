@@ -1,0 +1,357 @@
+
+> aethel-portal@0.2.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+[Upstash Redis] Unable to find environment variable: `UPSTASH_REDIS_REST_URL`
+[Upstash Redis] Unable to find environment variable: `UPSTASH_REDIS_REST_TOKEN`
+[Upstash Redis] The 'url' property is missing or undefined in your Redis config.
+[Upstash Redis] The 'token' property is missing or undefined in your Redis config.
+[Sandbox] Docker not available, falling back to direct execution
+   Generating static pages (0/218) ...
+   Generating static pages (54/218) 
+🌐 i18next is maintained with support from locize.com — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+🌐 i18next is maintained with support from locize.com — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+🌐 i18next is maintained with support from locize.com — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+   Generating static pages (108/218) 
+   Generating static pages (163/218) 
+[Sandbox] Docker not available, falling back to direct execution
+ ✓ Generating static pages (218/218)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                     Size     First Load JS
+┌ ƒ /                                           193 B          99.1 kB
+├ ○ /_not-found                                 197 B          89.9 kB
+├ ○ /admin                                      2.96 kB         107 kB
+├ ○ /admin/ai                                   1.61 kB        91.3 kB
+├ ○ /admin/ai-agents                            1.51 kB        91.3 kB
+├ ○ /admin/ai-enhancements                      1.72 kB        91.5 kB
+├ ○ /admin/ai-monitor                           4.53 kB        99.5 kB
+├ ○ /admin/ai-training                          1.57 kB        91.3 kB
+├ ○ /admin/ai-upgrades                          2.28 kB          92 kB
+├ ○ /admin/analytics                            1.6 kB         91.3 kB
+├ ○ /admin/apis                                 1.51 kB        91.2 kB
+├ ○ /admin/arpu-churn                           1.04 kB        90.8 kB
+├ ○ /admin/audit-logs                           1.99 kB        91.7 kB
+├ ○ /admin/automation                           1.64 kB        91.4 kB
+├ ○ /admin/backup                               1.52 kB        91.3 kB
+├ ○ /admin/bias-detection                       2.6 kB         92.3 kB
+├ ○ /admin/chat                                 1.47 kB        91.2 kB
+├ ○ /admin/collaboration                        1.25 kB          91 kB
+├ ○ /admin/compliance                           1.37 kB        91.1 kB
+├ ○ /admin/cost-optimization                    1.52 kB        91.3 kB
+├ ○ /admin/deploy                               1.51 kB        91.2 kB
+├ ○ /admin/feature-flags                        1.8 kB         91.5 kB
+├ ○ /admin/feedback                             1.74 kB        91.5 kB
+├ ○ /admin/finance                              4.66 kB        94.4 kB
+├ ○ /admin/fine-tuning                          1.96 kB        91.7 kB
+├ ○ /admin/god-view                             5.31 kB        95.1 kB
+├ ○ /admin/ide-settings                         3.38 kB        93.1 kB
+├ ○ /admin/indexing                             1.59 kB        91.3 kB
+├ ○ /admin/infrastructure                       4.67 kB        94.4 kB
+├ ○ /admin/ip-registry                          1.87 kB        91.6 kB
+├ ○ /admin/marketplace                          1.66 kB        91.4 kB
+├ ○ /admin/moderation                           5.26 kB          95 kB
+├ ○ /admin/multi-tenancy                        1.34 kB        91.1 kB
+├ ○ /admin/notifications                        1.72 kB        91.5 kB
+├ ○ /admin/onboarding                           1.27 kB          91 kB
+├ ○ /admin/payments                             2.58 kB        92.3 kB
+├ ○ /admin/promotions                           2.37 kB        92.1 kB
+├ ○ /admin/rate-limiting                        1.29 kB          91 kB
+├ ○ /admin/real-time                            1.72 kB        91.5 kB
+├ ○ /admin/roles                                1.21 kB        90.9 kB
+├ ○ /admin/scalability                          1.93 kB        91.7 kB
+├ ○ /admin/security                             1.7 kB         91.4 kB
+├ ○ /admin/subscriptions                        1.69 kB        91.4 kB
+├ ○ /admin/support                              1.83 kB        91.6 kB
+├ ○ /admin/updates                              1.84 kB        91.6 kB
+├ ○ /admin/users                                1.76 kB        91.5 kB
+├ ○ /ai-command                                 197 B          89.9 kB
+├ ○ /animation-blueprint                        197 B          89.9 kB
+├ ƒ /api/admin/ai/agents                        0 B                0 B
+├ ƒ /api/admin/ai/calls                         0 B                0 B
+├ ƒ /api/admin/ai/enhancements                  0 B                0 B
+├ ƒ /api/admin/ai/metrics                       0 B                0 B
+├ ƒ /api/admin/ai/settings                      0 B                0 B
+├ ƒ /api/admin/ai/training                      0 B                0 B
+├ ƒ /api/admin/apis                             0 B                0 B
+├ ƒ /api/admin/audit                            0 B                0 B
+├ ƒ /api/admin/automation                       0 B                0 B
+├ ƒ /api/admin/backup                           0 B                0 B
+├ ƒ /api/admin/backup/restore                   0 B                0 B
+├ ƒ /api/admin/bias-detection                   0 B                0 B
+├ ƒ /api/admin/chat                             0 B                0 B
+├ ƒ /api/admin/collaboration                    0 B                0 B
+├ ƒ /api/admin/compatibility-routes             0 B                0 B
+├ ƒ /api/admin/compliance                       0 B                0 B
+├ ƒ /api/admin/dashboard                        0 B                0 B
+├ ƒ /api/admin/deploy                           0 B                0 B
+├ ƒ /api/admin/emergency                        0 B                0 B
+├ ƒ /api/admin/feature-flags                    0 B                0 B
+├ ƒ /api/admin/feature-flags/toggle             0 B                0 B
+├ ƒ /api/admin/feedback                         0 B                0 B
+├ ƒ /api/admin/finance/metrics                  0 B                0 B
+├ ƒ /api/admin/fine-tuning/datasets             0 B                0 B
+├ ƒ /api/admin/fine-tuning/jobs                 0 B                0 B
+├ ƒ /api/admin/god-view/sessions                0 B                0 B
+├ ƒ /api/admin/ide-settings                     0 B                0 B
+├ ƒ /api/admin/ide-settings/history             0 B                0 B
+├ ƒ /api/admin/ide-settings/publish             0 B                0 B
+├ ƒ /api/admin/indexing                         0 B                0 B
+├ ƒ /api/admin/infrastructure/status            0 B                0 B
+├ ƒ /api/admin/ip-registry                      0 B                0 B
+├ ƒ /api/admin/ip-registry/ingest               0 B                0 B
+├ ƒ /api/admin/marketplace                      0 B                0 B
+├ ƒ /api/admin/moderation/[id]                  0 B                0 B
+├ ƒ /api/admin/moderation/queue                 0 B                0 B
+├ ƒ /api/admin/notifications                    0 B                0 B
+├ ƒ /api/admin/onboarding/stats                 0 B                0 B
+├ ƒ /api/admin/payments                         0 B                0 B
+├ ƒ /api/admin/payments/gateway                 0 B                0 B
+├ ƒ /api/admin/promotions                       0 B                0 B
+├ ƒ /api/admin/quick-stats                      0 B                0 B
+├ ƒ /api/admin/rate-limits                      0 B                0 B
+├ ƒ /api/admin/roles                            0 B                0 B
+├ ƒ /api/admin/security/overview                0 B                0 B
+├ ƒ /api/admin/stats                            0 B                0 B
+├ ƒ /api/admin/status                           0 B                0 B
+├ ƒ /api/admin/subscriptions                    0 B                0 B
+├ ƒ /api/admin/support/tickets                  0 B                0 B
+├ ƒ /api/admin/tenants                          0 B                0 B
+├ ƒ /api/admin/updates                          0 B                0 B
+├ ƒ /api/admin/users                            0 B                0 B
+├ ƒ /api/ai/3d/generate                         0 B                0 B
+├ ƒ /api/ai/action                              0 B                0 B
+├ ƒ /api/ai/agent                               0 B                0 B
+├ ƒ /api/ai/chat                                0 B                0 B
+├ ƒ /api/ai/chat-advanced                       0 B                0 B
+├ ƒ /api/ai/complete                            0 B                0 B
+├ ƒ /api/ai/director/[projectId]                0 B                0 B
+├ ƒ /api/ai/director/[projectId]/action         0 B                0 B
+├ ƒ /api/ai/image/generate                      0 B                0 B
+├ ƒ /api/ai/inline-completion                   0 B                0 B
+├ ƒ /api/ai/inline-edit                         0 B                0 B
+├ ƒ /api/ai/music/generate                      0 B                0 B
+├ ƒ /api/ai/query                               0 B                0 B
+├ ƒ /api/ai/stream                              0 B                0 B
+├ ƒ /api/ai/suggestions                         0 B                0 B
+├ ƒ /api/ai/suggestions/feedback                0 B                0 B
+├ ƒ /api/ai/thinking/[sessionId]                0 B                0 B
+├ ƒ /api/ai/trace/[traceId]                     0 B                0 B
+├ ƒ /api/ai/voice/generate                      0 B                0 B
+├ ƒ /api/analytics                              0 B                0 B
+├ ƒ /api/assets/[id]                            0 B                0 B
+├ ƒ /api/assets/[id]/confirm                    0 B                0 B
+├ ƒ /api/assets/[id]/download                   0 B                0 B
+├ ƒ /api/assets/[id]/duplicate                  0 B                0 B
+├ ƒ /api/assets/[id]/favorite                   0 B                0 B
+├ ƒ /api/assets/presign                         0 B                0 B
+├ ƒ /api/assets/upload                          0 B                0 B
+├ ƒ /api/auth/2fa                               0 B                0 B
+├ ƒ /api/auth/2fa/setup                         0 B                0 B
+├ ƒ /api/auth/2fa/status                        0 B                0 B
+├ ƒ /api/auth/2fa/verify                        0 B                0 B
+├ ƒ /api/auth/delete-account                    0 B                0 B
+├ ƒ /api/auth/forgot-password                   0 B                0 B
+├ ƒ /api/auth/login                             0 B                0 B
+├ ƒ /api/auth/me                                0 B                0 B
+├ ƒ /api/auth/oauth/[provider]                  0 B                0 B
+├ ƒ /api/auth/oauth/[provider]/callback         0 B                0 B
+├ ƒ /api/auth/profile                           0 B                0 B
+├ ƒ /api/auth/register                          0 B                0 B
+├ ƒ /api/auth/reset-password                    0 B                0 B
+├ ƒ /api/auth/sessions                          0 B                0 B
+├ ƒ /api/auth/sessions/[id]                     0 B                0 B
+├ ƒ /api/auth/verify-email                      0 B                0 B
+├ ƒ /api/backup                                 0 B                0 B
+├ ƒ /api/backup/restore                         0 B                0 B
+├ ƒ /api/billing/checkout                       0 B                0 B
+├ ƒ /api/billing/checkout-link                  0 B                0 B
+├ ƒ /api/billing/credits                        0 B                0 B
+├ ƒ /api/billing/plans                          0 B                0 B
+├ ƒ /api/billing/portal                         0 B                0 B
+├ ƒ /api/billing/subscription                   0 B                0 B
+├ ƒ /api/billing/usage                          0 B                0 B
+├ ƒ /api/billing/webhook                        0 B                0 B
+├ ƒ /api/chat/orchestrator                      0 B                0 B
+├ ƒ /api/chat/threads                           0 B                0 B
+├ ƒ /api/chat/threads/[id]                      0 B                0 B
+├ ƒ /api/chat/threads/[id]/messages             0 B                0 B
+├ ƒ /api/chat/threads/clone                     0 B                0 B
+├ ƒ /api/chat/threads/merge                     0 B                0 B
+├ ƒ /api/collaboration/rooms                    0 B                0 B
+├ ƒ /api/collaboration/rooms/[id]               0 B                0 B
+├ ƒ /api/connectivity/status                    0 B                0 B
+├ ƒ /api/contact                                0 B                0 B
+├ ƒ /api/copilot/action                         0 B                0 B
+├ ƒ /api/copilot/context                        0 B                0 B
+├ ƒ /api/copilot/workflows                      0 B                0 B
+├ ƒ /api/copilot/workflows/[id]                 0 B                0 B
+├ ƒ /api/credits/transfer                       0 B                0 B
+├ ƒ /api/dap/events                             0 B                0 B
+├ ƒ /api/dap/processes                          0 B                0 B
+├ ƒ /api/dap/request                            0 B                0 B
+├ ƒ /api/dap/session/start                      0 B                0 B
+├ ƒ /api/dap/session/stop                       0 B                0 B
+├ ƒ /api/docs                                   0 B                0 B
+├ ƒ /api/email                                  0 B                0 B
+├ ƒ /api/experiments                            0 B                0 B
+├ ƒ /api/exports/metrics                        0 B                0 B
+├ ƒ /api/feature-flags                          0 B                0 B
+├ ƒ /api/feature-flags/[key]/toggle             0 B                0 B
+├ ƒ /api/files                                  0 B                0 B
+├ ƒ /api/files/copy                             0 B                0 B
+├ ƒ /api/files/create                           0 B                0 B
+├ ƒ /api/files/delete                           0 B                0 B
+├ ƒ /api/files/fs                               0 B                0 B
+├ ƒ /api/files/list                             0 B                0 B
+├ ƒ /api/files/move                             0 B                0 B
+├ ƒ /api/files/read                             0 B                0 B
+├ ƒ /api/files/rename                           0 B                0 B
+├ ƒ /api/files/tree                             0 B                0 B
+├ ƒ /api/files/write                            0 B                0 B
+├ ƒ /api/git                                    0 B                0 B
+├ ƒ /api/git/add                                0 B                0 B
+├ ƒ /api/git/branch                             0 B                0 B
+├ ƒ /api/git/checkout                           0 B                0 B
+├ ƒ /api/git/commit                             0 B                0 B
+├ ƒ /api/git/pull                               0 B                0 B
+├ ƒ /api/git/push                               0 B                0 B
+├ ƒ /api/git/status                             0 B                0 B
+├ ƒ /api/health                                 0 B                0 B
+├ ƒ /api/health/ai                              0 B                0 B
+├ ƒ /api/health/cache                           0 B                0 B
+├ ƒ /api/health/db                              0 B                0 B
+├ ƒ /api/health/live                            0 B                0 B
+├ ƒ /api/health/metrics                         0 B                0 B
+├ ƒ /api/health/ready                           0 B                0 B
+├ ƒ /api/health/storage                         0 B                0 B
+├ ƒ /api/jobs                                   0 B                0 B
+├ ƒ /api/jobs/[id]                              0 B                0 B
+├ ƒ /api/jobs/[id]/cancel                       0 B                0 B
+├ ƒ /api/jobs/[id]/retry                        0 B                0 B
+├ ƒ /api/jobs/start                             0 B                0 B
+├ ƒ /api/jobs/stats                             0 B                0 B
+├ ƒ /api/jobs/stop                              0 B                0 B
+├ ƒ /api/logs                                   0 B                0 B
+├ ƒ /api/lsp/notification                       0 B                0 B
+├ ƒ /api/lsp/request                            0 B                0 B
+├ ƒ /api/marketplace                            0 B                0 B
+├ ƒ /api/marketplace/assets                     0 B                0 B
+├ ƒ /api/marketplace/cart                       0 B                0 B
+├ ƒ /api/marketplace/creator/assets             0 B                0 B
+├ ƒ /api/marketplace/creator/categories         0 B                0 B
+├ ƒ /api/marketplace/creator/revenue            0 B                0 B
+├ ƒ /api/marketplace/creator/sales/recent       0 B                0 B
+├ ƒ /api/marketplace/creator/stats              0 B                0 B
+├ ƒ /api/marketplace/extensions                 0 B                0 B
+├ ƒ /api/marketplace/favorites                  0 B                0 B
+├ ƒ /api/marketplace/favorites/[assetId]        0 B                0 B
+├ ƒ /api/marketplace/install                    0 B                0 B
+├ ƒ /api/marketplace/uninstall                  0 B                0 B
+├ ƒ /api/mcp                                    0 B                0 B
+├ ○ /api/multiplayer/health                     0 B                0 B
+├ ƒ /api/multiplayer/lobby                      0 B                0 B
+├ ƒ /api/notifications                          0 B                0 B
+├ ƒ /api/onboarding                             0 B                0 B
+├ ƒ /api/projects                               0 B                0 B
+├ ƒ /api/projects/[id]                          0 B                0 B
+├ ƒ /api/projects/[id]/assets                   0 B                0 B
+├ ƒ /api/projects/[id]/commits                  0 B                0 B
+├ ƒ /api/projects/[id]/duplicate                0 B                0 B
+├ ƒ /api/projects/[id]/export                   0 B                0 B
+├ ƒ /api/projects/[id]/export/[exportId]        0 B                0 B
+├ ƒ /api/projects/[id]/export/[exportId]/retry  0 B                0 B
+├ ƒ /api/projects/[id]/folders                  0 B                0 B
+├ ƒ /api/projects/[id]/invite-links             0 B                0 B
+├ ƒ /api/projects/[id]/invite-links/[linkId]    0 B                0 B
+├ ƒ /api/projects/[id]/members                  0 B                0 B
+├ ƒ /api/projects/[id]/members/[memberId]       0 B                0 B
+├ ƒ /api/projects/[id]/share                    0 B                0 B
+├ ƒ /api/quotas                                 0 B                0 B
+├ ƒ /api/render/jobs/[jobId]/cancel             0 B                0 B
+├ ƒ /api/search                                 0 B                0 B
+├ ƒ /api/search/replace                         0 B                0 B
+├ ƒ /api/system-health                          0 B                0 B
+├ ƒ /api/system/health                          0 B                0 B
+├ ƒ /api/tasks/detect                           0 B                0 B
+├ ƒ /api/tasks/load                             0 B                0 B
+├ ƒ /api/templates                              0 B                0 B
+├ ƒ /api/terminal/action                        0 B                0 B
+├ ƒ /api/terminal/close                         0 B                0 B
+├ ƒ /api/terminal/create                        0 B                0 B
+├ ƒ /api/terminal/execute                       0 B                0 B
+├ ƒ /api/terminal/input                         0 B                0 B
+├ ƒ /api/terminal/kill                          0 B                0 B
+├ ƒ /api/terminal/resize                        0 B                0 B
+├ ƒ /api/terminal/sandbox                       0 B                0 B
+├ ƒ /api/test/discover                          0 B                0 B
+├ ƒ /api/test/run                               0 B                0 B
+├ ƒ /api/usage/status                           0 B                0 B
+├ ƒ /api/wallet/purchase-intent                 0 B                0 B
+├ ƒ /api/wallet/summary                         0 B                0 B
+├ ƒ /api/wallet/transactions                    0 B                0 B
+├ ƒ /api/web/fetch                              0 B                0 B
+├ ƒ /api/web/search                             0 B                0 B
+├ ƒ /api/workspace/files                        0 B                0 B
+├ ƒ /api/workspace/tree                         0 B                0 B
+├ ○ /billing                                    7.88 kB         103 kB
+├ ○ /billing/cancel                             578 B          99.5 kB
+├ ○ /billing/checkout                           1.42 kB        91.2 kB
+├ ○ /billing/invoices                           2.8 kB         92.5 kB
+├ ○ /billing/success                            627 B          99.6 kB
+├ ○ /blueprint-editor                           196 B          89.9 kB
+├ ○ /chat                                       196 B          89.9 kB
+├ ○ /contact                                    3.9 kB          123 kB
+├ ○ /contact-sales                              2.74 kB         102 kB
+├ ○ /dashboard                                  366 kB          526 kB
+├ ○ /debugger                                   197 B          89.9 kB
+├ ○ /docs                                       4.29 kB         103 kB
+├ ○ /download                                   6.63 kB         106 kB
+├ ○ /editor-hub                                 197 B          89.9 kB
+├ ○ /explorer                                   197 B          89.9 kB
+├ ○ /forgot-password                            2.26 kB         101 kB
+├ ○ /git                                        197 B          89.9 kB
+├ ○ /health                                     2.08 kB        97.1 kB
+├ ○ /help                                       5.84 kB         105 kB
+├ ○ /ide                                        40.8 kB         175 kB
+├ ○ /landscape-editor                           197 B          89.9 kB
+├ ○ /level-editor                               197 B          89.9 kB
+├ ○ /live-preview                               197 B          89.9 kB
+├ ○ /login                                      6.38 kB         105 kB
+├ ○ /manifest.webmanifest                       0 B                0 B
+├ ○ /marketplace                                2.34 kB        94.2 kB
+├ ○ /niagara-editor                             197 B          89.9 kB
+├ ○ /playground                                 197 B          89.9 kB
+├ ○ /preview                                    350 B          90.1 kB
+├ ○ /pricing                                    193 B          99.1 kB
+├ ○ /profile                                    7.72 kB        97.5 kB
+├ ○ /project-settings                           1.42 kB        91.2 kB
+├ ○ /register                                   6.61 kB         106 kB
+├ ○ /reset-password                             3.1 kB          102 kB
+├ ○ /search                                     197 B          89.9 kB
+├ ○ /settings                                   3.17 kB         102 kB
+├ ○ /status                                     193 B          99.1 kB
+├ ○ /terminal                                   197 B          89.9 kB
+├ ○ /terms                                      193 B          99.1 kB
+├ ○ /testing                                    197 B          89.9 kB
+├ ○ /verify-email                               3.86 kB         103 kB
+└ ○ /vr-preview                                 197 B          89.9 kB
++ First Load JS shared by all                   89.7 kB
+  ├ chunks/2117-47bbfb9507c2da2a.js             31.9 kB
+  ├ chunks/fd9d1056-6318712dc61c7b46.js         53.6 kB
+  └ other shared chunks (total)                 4.2 kB
+
+
+ƒ Middleware                                    54.6 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

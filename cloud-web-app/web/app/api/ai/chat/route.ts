@@ -2,112 +2,144 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { aiService } from '@/lib/ai-service';
 import {
-	acquireConcurrencyLease,
-	estimateTokensFromText,
-	consumeMeteredUsage,
-	releaseConcurrencyLease,
+  acquireConcurrencyLease,
+  estimateTokensFromText,
+  consumeMeteredUsage,
+  releaseConcurrencyLease,
 } from '@/lib/metering';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 
-function getBackendBaseUrl(): string {
-	// Quando NEXT_PUBLIC_API_URL aponta para runtime externo (ex: http://localhost:8000)
-	// este endpoint pode atuar como proxy com enforcement.
-	const raw = process.env.NEXT_PUBLIC_API_URL;
-	if (!raw) {
-		throw Object.assign(
-			new Error('AI_BACKEND_NOT_CONFIGURED: defina NEXT_PUBLIC_API_URL (ex: http://localhost:8000) ou use um runtime interno.'),
-			{ code: 'AI_BACKEND_NOT_CONFIGURED' }
-		);
-	}
-	// Evita base relativa aqui (seria loop com /api no mesmo servidor)
-	if (raw.startsWith('/')) {
-		throw Object.assign(
-			new Error('AI_BACKEND_NOT_CONFIGURED: NEXT_PUBLIC_API_URL precisa ser uma URL absoluta (http/https) para proxy de IA.'),
-			{ code: 'AI_BACKEND_NOT_CONFIGURED' }
-		);
-	}
-	return raw.replace(/\/$/, '');
+function resolveBackendBaseUrl(): string | null {
+  const raw = process.env.NEXT_PUBLIC_API_URL;
+  if (!raw) return null;
+  if (raw.startsWith('/')) return null;
+  return raw.replace(/\/$/, '');
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-	let leaseId: string | null = null;
+  let leaseId: string | null = null;
 
-	try {
-		const auth = requireAuth(req);
-		const entitlements = await requireEntitlementsForUser(auth.userId);
+  try {
+    const auth = requireAuth(req);
+    const entitlements = await requireEntitlementsForUser(auth.userId);
 
-		const body = await req.json().catch(() => null);
-		if (!body || typeof body !== 'object') {
-			return NextResponse.json({ error: 'INVALID_BODY', message: 'Body JSON inválido.' }, { status: 400 });
-		}
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 });
+    }
 
-		// Estima tokens a partir de mensagens/prompt
-		const messages = Array.isArray((body as any).messages) ? (body as any).messages : [];
-		const promptText = messages
-			.map((m: any) => (typeof m?.content === 'string' ? m.content : ''))
-			.join('\n');
-		const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(0, Math.floor((body as any).maxTokens)) : 0;
+    const messages = Array.isArray((body as any).messages) ? (body as any).messages : [];
+    const promptText = messages
+      .map((m: any) => (typeof m?.content === 'string' ? m.content : ''))
+      .join('\n');
+    const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(0, Math.floor((body as any).maxTokens)) : 0;
+    const resolvedMaxTokens = maxTokens > 0 ? maxTokens : undefined;
 
-		const estimatedPromptTokens = estimateTokensFromText(promptText);
-		const estimatedTotalTokens = estimatedPromptTokens + maxTokens;
+    if (!promptText.trim()) {
+      return NextResponse.json({ error: 'MISSING_PROMPT', message: 'messages is required.' }, { status: 400 });
+    }
 
-		// Concurrency enforcement (IA costuma ser a operação cara)
-		const lease = await acquireConcurrencyLease({
-			userId: auth.userId,
-			key: 'api/ai/chat',
-			concurrencyLimit: entitlements.plan.limits.concurrent,
-			ttlSeconds: 90,
-		});
-		leaseId = lease?.leaseId ?? null;
+    const estimatedPromptTokens = estimateTokensFromText(promptText);
+    const estimatedTotalTokens = estimatedPromptTokens + maxTokens;
 
-		const decision = await consumeMeteredUsage({
-			userId: auth.userId,
-			limits: entitlements.plan.limits,
-			cost: { requests: 1, tokens: estimatedTotalTokens },
-		});
+    const lease = await acquireConcurrencyLease({
+      userId: auth.userId,
+      key: 'api/ai/chat',
+      concurrencyLimit: entitlements.plan.limits.concurrent,
+      ttlSeconds: 90,
+    });
+    leaseId = lease?.leaseId ?? null;
 
-		const backendBase = getBackendBaseUrl();
-		const upstream = await fetch(`${backendBase}/chat`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				...(req.headers.get('authorization') ? { Authorization: req.headers.get('authorization') as string } : {}),
-				'X-Aethel-User-Id': auth.userId,
-			},
-			body: JSON.stringify(body),
-		});
+    const decision = await consumeMeteredUsage({
+      userId: auth.userId,
+      limits: entitlements.plan.limits,
+      cost: { requests: 1, tokens: estimatedTotalTokens },
+    });
 
-		const text = await upstream.text();
-		return new NextResponse(text, {
-			status: upstream.status,
-			headers: {
-				'Content-Type': upstream.headers.get('content-type') || 'application/json',
-				...(decision.remaining?.requestsPerHour !== undefined
-					? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
-					: {}),
-				...(decision.remaining?.tokensPerDay !== undefined
-					? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
-					: {}),
-				...(decision.remaining?.tokensPerMonth !== undefined
-					? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
-					: {}),
-			},
-		});
-	} catch (error) {
-		const mapped = apiErrorToResponse(error);
-		if (mapped) return mapped;
+    const backendBase = resolveBackendBaseUrl();
+    if (backendBase) {
+      const upstream = await fetch(`${backendBase}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(req.headers.get('authorization') ? { Authorization: req.headers.get('authorization') as string } : {}),
+          'X-Aethel-User-Id': auth.userId,
+        },
+        body: JSON.stringify(body),
+      });
 
-		if ((error as any)?.code === 'AI_BACKEND_NOT_CONFIGURED') {
-			return NextResponse.json(
-				{ error: 'AI_BACKEND_NOT_CONFIGURED', message: (error as Error).message },
-				{ status: 501 }
-			);
-		}
+      const text = await upstream.text();
+      return new NextResponse(text, {
+        status: upstream.status,
+        headers: {
+          'Content-Type': upstream.headers.get('content-type') || 'application/json',
+          ...(decision.remaining?.requestsPerHour !== undefined
+            ? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
+            : {}),
+          ...(decision.remaining?.tokensPerDay !== undefined
+            ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
+            : {}),
+          ...(decision.remaining?.tokensPerMonth !== undefined
+            ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
+            : {}),
+        },
+      });
+    }
 
-		return apiInternalError('Internal server error', 500);
-	} finally {
-		if (leaseId) {
-			await releaseConcurrencyLease(leaseId);
-		}
-	}
+    if (aiService.getAvailableProviders().length === 0) {
+      return notImplementedCapability({
+        error: 'NOT_IMPLEMENTED',
+        status: 501,
+        message: 'AI provider not configured.',
+        capability: 'AI_CHAT',
+        milestone: 'P0',
+      });
+    }
+
+    const aiMessages = messages
+      .filter((m: any) => typeof m?.role === 'string' && typeof m?.content === 'string')
+      .map((m: any) => ({ role: m.role, content: m.content }));
+
+    const response = await aiService.chat({
+      messages: aiMessages,
+      model: typeof (body as any).model === 'string' ? (body as any).model : undefined,
+      provider: typeof (body as any).provider === 'string' ? (body as any).provider : undefined,
+      temperature: typeof (body as any).temperature === 'number' ? (body as any).temperature : undefined,
+      maxTokens: resolvedMaxTokens,
+    });
+
+    return NextResponse.json(
+      {
+        content: response.content,
+        provider: response.provider,
+        model: response.model,
+        tokensUsed: response.tokensUsed,
+        latencyMs: response.latencyMs,
+      },
+      {
+        headers: {
+          ...(decision.remaining?.requestsPerHour !== undefined
+            ? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
+            : {}),
+          ...(decision.remaining?.tokensPerDay !== undefined
+            ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
+            : {}),
+          ...(decision.remaining?.tokensPerMonth !== undefined
+            ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
+            : {}),
+        },
+      }
+    );
+  } catch (error) {
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+
+    return apiInternalError('Internal server error', 500);
+  } finally {
+    if (leaseId) {
+      await releaseConcurrencyLease(leaseId);
+    }
+  }
 }

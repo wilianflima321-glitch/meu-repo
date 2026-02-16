@@ -792,6 +792,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
         wsRef.current?.disconnect();
         terminalRef.current?.dispose();
       };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- terminal runtime is initialized once and lifecycle-managed manually
     }, []);
     
     // Create new terminal session
@@ -839,6 +840,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
         
         return null;
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- connectToSession is stable in runtime flow and invoked after terminal init
     }, [sessions, initialCwd, initialShell]);
     
     // Connect to existing session

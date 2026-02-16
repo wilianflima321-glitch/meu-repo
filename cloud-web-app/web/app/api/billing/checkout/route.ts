@@ -8,6 +8,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { optionalEnv } from '@/lib/env';
 import { getStripe, getStripePriceIdForPlan } from '@/lib/stripe';
+import { readPaymentGatewayConfig } from '@/lib/server/payment-gateway-config';
+import { notImplementedCapability } from '@/lib/server/capability-response';
+import { buildAppUrl } from '@/lib/server/app-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,14 +34,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate plan exists - Planos alinhados com estratégia 2025
-    // SEM FREE TIER - Todos os planos são pagos para garantir zero prejuízo
+    // Validate plan exists.
     const validPlans = ['starter', 'basic', 'pro', 'studio', 'enterprise'];
     if (!validPlans.includes(planId)) {
       return NextResponse.json(
         { error: 'Invalid plan ID. Valid plans: starter, basic, pro, studio, enterprise' },
         { status: 400 }
       );
+    }
+
+    const gatewayConfig = await readPaymentGatewayConfig();
+    if (!gatewayConfig.checkoutEnabled) {
+      return NextResponse.json(
+        { error: 'CHECKOUT_DISABLED', message: 'Checkout is temporarily disabled by admin.' },
+        { status: 503 }
+      );
+    }
+    if (gatewayConfig.activeGateway !== 'stripe') {
+      return notImplementedCapability({
+        error: 'PAYMENT_GATEWAY_NOT_IMPLEMENTED',
+        message: `Active gateway "${gatewayConfig.activeGateway}" is not available in this build.`,
+        capability: 'PAYMENT_GATEWAY_RUNTIME',
+        milestone: 'P1',
+        metadata: { activeGateway: gatewayConfig.activeGateway },
+      });
     }
 
     // Stripe (real-or-fail)
@@ -64,7 +83,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const appUrl = optionalEnv('NEXT_PUBLIC_APP_URL') || 'http://localhost:3000';
+    const appUrl = (gatewayConfig.checkoutOrigin || optionalEnv('NEXT_PUBLIC_APP_URL') || buildAppUrl('', req)).replace(/\/+$/, '');
     const resolvedSuccessUrl = successUrl || `${appUrl}/billing/success?plan=${encodeURIComponent(planId)}`;
     const resolvedCancelUrl = cancelUrl || `${appUrl}/billing/cancel`;
 
@@ -80,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     if (!session.url) {
       return NextResponse.json(
-        { error: 'STRIPE_SESSION_NO_URL', message: 'Stripe retornou sessão sem URL.' },
+        { error: 'STRIPE_SESSION_NO_URL', message: 'Stripe returned a checkout session without URL.' },
         { status: 502 }
       );
     }

@@ -501,7 +501,7 @@ export function useFocusTrap(
     return () => {
       trapRef.current?.deactivate();
     };
-  }, [isActive, options]);
+  }, [containerRef, isActive, options]);
 }
 
 /**

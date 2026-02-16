@@ -269,7 +269,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
                 key={reward.id}
                 className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-700/50 rounded text-[10px]"
               >
-                {reward.type === 'xp' && <Star className="w-3 h-3 text-purple-400" />}
+                {reward.type === 'xp' && <Star className="w-3 h-3 text-blue-400" />}
                 {reward.type === 'gold' && <Coins className="w-3 h-3 text-yellow-400" />}
                 {reward.type === 'item' && <Package className="w-3 h-3 text-blue-400" />}
                 {reward.type === 'reputation' && <Award className="w-3 h-3 text-green-400" />}
@@ -774,7 +774,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.prerequisites ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <Link className="w-4 h-4 text-purple-400" />
+          <Link className="w-4 h-4 text-blue-400" />
           Prerequisites ({data.prerequisites.length})
         </button>
         
@@ -843,7 +843,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                 const newPrereq: QuestPrerequisite = { type: 'quest', questId: '' };
                 updateData({ prerequisites: [...data.prerequisites, newPrereq] });
               }}
-              className="flex items-center gap-1 w-full p-2 bg-purple-600/20 hover:bg-purple-600/30 rounded text-xs"
+              className="flex items-center gap-1 w-full p-2 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs"
             >
               <Plus className="w-3 h-3" />
               Add Prerequisite

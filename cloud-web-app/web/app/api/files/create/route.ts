@@ -1,114 +1,74 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/auth-server';
-import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
+import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import {
+  getScopedProjectId,
+  resolveScopedWorkspacePath,
+  toVirtualWorkspacePath,
+} from '@/lib/server/workspace-scope'
+import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
 
-/**
- * POST /api/files/create
- * 
- * Cria um novo arquivo ou pasta
- */
-export async function POST(req: NextRequest) {
+export const dynamic = 'force-dynamic'
+
+export async function POST(request: NextRequest) {
   try {
-    const user = requireAuth(req);
-    const { projectId, path, content = '', type = 'file', language } = await req.json();
+    const user = requireAuth(request)
+    await requireEntitlementsForUser(user.userId)
 
-    if (!projectId || !path) {
-      return NextResponse.json(
-        { error: 'projectId e path são obrigatórios' },
-        { status: 400 }
-      );
+    const body = await request.json()
+    const path = (body?.path || '').trim()
+    const type = body?.type === 'directory' || body?.type === 'folder' ? 'directory' : 'file'
+    const content = body?.content ?? ''
+    const projectId = getScopedProjectId(request, body)
+
+    if (!path) {
+      return NextResponse.json({ error: 'path is required' }, { status: 400 })
     }
 
-    // Verificar propriedade do projeto
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, userId: user.userId },
-    });
+    const runtime = getFileSystemRuntime()
+    const { absolutePath, root } = resolveScopedWorkspacePath({
+      userId: user.userId,
+      projectId,
+      requestedPath: path,
+    })
 
-    if (!project) {
-      return NextResponse.json(
-        { error: 'Projeto não encontrado' },
-        { status: 404 }
-      );
+    if (type === 'directory') {
+      await runtime.createDirectory(absolutePath, { recursive: true })
+    } else {
+      await runtime.writeFile(absolutePath, String(content), {
+        createDirectories: true,
+        atomic: true,
+      })
     }
 
-    // Verificar se já existe
-    const existingFile = await prisma.file.findUnique({
-      where: {
-        projectId_path: {
-          projectId,
-          path,
-        },
-      },
-    });
+    const info = await runtime.getFileInfo(absolutePath)
 
-    if (existingFile) {
-      return NextResponse.json(
-        { error: 'Arquivo já existe' },
-        { status: 409 }
-      );
-    }
+    const telemetryHeaders = trackCompatibilityRouteHit({
+      request,
+      route: '/api/files/create',
+      replacement: '/api/files/fs?action=write|mkdir',
+      status: 'compatibility-wrapper',
+    })
 
-    // Detectar linguagem pelo path se não fornecida
-    const detectedLanguage = language || detectLanguage(path);
-
-    // Criar arquivo
-    const file = await prisma.file.create({
-      data: {
+    return NextResponse.json(
+      {
+        success: true,
+        path: toVirtualWorkspacePath(info.path, root),
+        type: info.type,
+        created: true,
         projectId,
-        path,
-        content: type === 'folder' ? '' : content,
-        language: detectedLanguage,
+        runtime: 'filesystem-runtime',
+        authority: 'canonical',
+        compatibilityRoute: '/api/files/create',
+        canonicalEndpoint: '/api/files/fs',
       },
-    });
-
-    return NextResponse.json({
-      success: true,
-      file,
-      message: type === 'folder' ? 'Pasta criada com sucesso' : 'Arquivo criado com sucesso',
-    });
+      { headers: telemetryHeaders }
+    )
   } catch (error) {
-    console.error('[files/create] Error:', error);
-    const mapped = apiErrorToResponse(error);
-    if (mapped) return mapped;
-    return apiInternalError();
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
   }
-}
-
-/**
- * Detecta linguagem baseado na extensão do arquivo
- */
-function detectLanguage(path: string): string | null {
-  const extension = path.split('.').pop()?.toLowerCase();
-  
-  const languageMap: Record<string, string> = {
-    'ts': 'typescript',
-    'tsx': 'typescriptreact',
-    'js': 'javascript',
-    'jsx': 'javascriptreact',
-    'py': 'python',
-    'json': 'json',
-    'html': 'html',
-    'css': 'css',
-    'scss': 'scss',
-    'md': 'markdown',
-    'yaml': 'yaml',
-    'yml': 'yaml',
-    'xml': 'xml',
-    'sql': 'sql',
-    'sh': 'shellscript',
-    'bash': 'shellscript',
-    'ps1': 'powershell',
-    'rs': 'rust',
-    'go': 'go',
-    'java': 'java',
-    'cpp': 'cpp',
-    'c': 'c',
-    'cs': 'csharp',
-    'lua': 'lua',
-    'glsl': 'glsl',
-    'hlsl': 'hlsl',
-  };
-
-  return languageMap[extension || ''] || null;
 }

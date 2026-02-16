@@ -113,7 +113,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
           ? 'border-violet-500 bg-violet-500/10' 
           : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
         }
-        ${pkg.popular ? 'ring-2 ring-violet-500/30' : ''}
+        ${pkg.popular ? 'ring-2 ring-sky-500/30' : ''}
       `}
     >
       {/* Popular badge */}
@@ -378,8 +378,8 @@ export function LowBalanceModal({
                 onClick={handleContinue}
                 disabled={!selectedPackage || isProcessing}
                 className="w-full flex items-center justify-center gap-2 py-3
-                         bg-gradient-to-r from-violet-600 to-fuchsia-600
-                         hover:from-violet-500 hover:to-fuchsia-500
+                         bg-gradient-to-r from-blue-600 to-cyan-600
+                         hover:from-blue-500 hover:to-cyan-500
                          rounded-xl text-white font-semibold transition-all
                          disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -417,7 +417,7 @@ export function LowBalanceModal({
 
             {/* Upgrade suggestion for heavy users */}
             {balanceLevel === 'critical' && (
-              <div className="mx-6 mb-6 p-4 bg-gradient-to-r from-violet-900/30 to-fuchsia-900/30 
+              <div className="mx-6 mb-6 p-4 bg-gradient-to-r from-blue-900/30 to-cyan-900/30 
                             border border-violet-500/20 rounded-xl">
                 <div className="flex items-start gap-3">
                   <TrendingUp className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" />

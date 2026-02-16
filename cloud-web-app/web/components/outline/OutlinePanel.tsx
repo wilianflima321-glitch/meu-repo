@@ -103,7 +103,7 @@ const getSymbolIcon = (kind: SymbolKind) => {
     case 'module':
     case 'namespace':
     case 'package':
-      return <Package {...iconProps} className="text-purple-400" />;
+      return <Package {...iconProps} className="text-blue-400" />;
     case 'class':
       return <Box {...iconProps} className="text-amber-400" />;
     case 'method':

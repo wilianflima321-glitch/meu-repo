@@ -723,7 +723,7 @@ export function TooltipProvider({
 }) {
   const value = useMemo(() => ({
     manager: new TooltipManager(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     return () => {
@@ -780,7 +780,7 @@ export function useTooltip(options: TooltipOptions): {
       manager.off('show', onShow);
       manager.off('hide', onHide);
     };
-  }, [manager, ref.current]);
+  }, [manager, options]);
   
   const show = useCallback(() => {
     if (tooltipId) manager.show(tooltipId);
@@ -848,7 +848,7 @@ export function useTooltipHideAll() {
   }, [manager]);
 }
 
-export default {
+const __defaultExport = {
   TooltipManager,
   TooltipProvider,
   useTooltipManager,
@@ -857,3 +857,5 @@ export default {
   useVisibleTooltips,
   useTooltipHideAll,
 };
+
+export default __defaultExport;

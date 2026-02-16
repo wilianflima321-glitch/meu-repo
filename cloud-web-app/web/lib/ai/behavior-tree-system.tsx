@@ -1286,8 +1286,9 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
   const managerRef = useRef<AIManager>(new AIManager());
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1363,7 +1364,7 @@ export function useAgent(agentId: string) {
   return agent;
 }
 
-export default {
+const __defaultExport = {
   AIManager,
   AIAgent,
   AIProvider,
@@ -1394,3 +1395,5 @@ export default {
   LogNode,
   SetBlackboardNode,
 };
+
+export default __defaultExport;

@@ -3,7 +3,11 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime';
-import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
+import {
+  getScopedProjectId,
+  resolveScopedWorkspacePath,
+  toVirtualWorkspacePath,
+} from '@/lib/server/workspace-scope';
 
 /**
  * POST /api/files/fs - File System Operations
@@ -22,6 +26,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { action, path: filePath, content, destination, options } = body;
+    const projectId = getScopedProjectId(request, body);
 
     if (!action || !filePath) {
       return NextResponse.json(
@@ -31,17 +36,36 @@ export async function POST(request: NextRequest) {
     }
 
     const fsRuntime = getFileSystemRuntime();
-    const resolvedPath = resolveWorkspaceRoot(filePath);
+    const { absolutePath: resolvedPath, root: scopedRoot } = resolveScopedWorkspacePath({
+      userId: user.userId,
+      projectId,
+      requestedPath: filePath,
+    });
+    const canonical = { runtime: 'filesystem-runtime', authority: 'canonical' as const };
 
     switch (action) {
       case 'list': {
         const result = await fsRuntime.listDirectory(resolvedPath, options);
-        return NextResponse.json(result);
+        return NextResponse.json({
+          path: toVirtualWorkspacePath(result.path, scopedRoot),
+          entries: result.entries.map((entry) => ({
+            ...entry,
+            path: toVirtualWorkspacePath(entry.path, scopedRoot),
+          })),
+          total: result.total,
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'read': {
         const result = await fsRuntime.readFile(resolvedPath, options);
-        return NextResponse.json(result);
+        return NextResponse.json({
+          ...result,
+          path: toVirtualWorkspacePath(result.path, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'write': {
@@ -52,12 +76,22 @@ export async function POST(request: NextRequest) {
           );
         }
         await fsRuntime.writeFile(resolvedPath, content, options);
-        return NextResponse.json({ success: true, path: resolvedPath });
+        return NextResponse.json({
+          success: true,
+          path: toVirtualWorkspacePath(resolvedPath, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'delete': {
         await fsRuntime.delete(resolvedPath, options);
-        return NextResponse.json({ success: true, path: resolvedPath });
+        return NextResponse.json({
+          success: true,
+          path: toVirtualWorkspacePath(resolvedPath, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'copy': {
@@ -67,8 +101,19 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        await fsRuntime.copy(resolvedPath, destination, options);
-        return NextResponse.json({ success: true, source: resolvedPath, destination });
+        const { absolutePath: resolvedDestination } = resolveScopedWorkspacePath({
+          userId: user.userId,
+          projectId,
+          requestedPath: destination,
+        });
+        await fsRuntime.copy(resolvedPath, resolvedDestination, options);
+        return NextResponse.json({
+          success: true,
+          source: toVirtualWorkspacePath(resolvedPath, scopedRoot),
+          destination: toVirtualWorkspacePath(resolvedDestination, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'move': {
@@ -78,38 +123,92 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        await fsRuntime.move(resolvedPath, destination, options);
-        return NextResponse.json({ success: true, source: resolvedPath, destination });
+        const { absolutePath: resolvedDestination } = resolveScopedWorkspacePath({
+          userId: user.userId,
+          projectId,
+          requestedPath: destination,
+        });
+        await fsRuntime.move(resolvedPath, resolvedDestination, options);
+        return NextResponse.json({
+          success: true,
+          source: toVirtualWorkspacePath(resolvedPath, scopedRoot),
+          destination: toVirtualWorkspacePath(resolvedDestination, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'mkdir': {
         await fsRuntime.createDirectory(resolvedPath, options);
-        return NextResponse.json({ success: true, path: resolvedPath });
+        return NextResponse.json({
+          success: true,
+          path: toVirtualWorkspacePath(resolvedPath, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'info': {
         const result = await fsRuntime.getFileInfo(resolvedPath);
-        return NextResponse.json(result);
+        return NextResponse.json({
+          ...result,
+          path: toVirtualWorkspacePath(result.path, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'exists': {
         const exists = await fsRuntime.exists(resolvedPath);
-        return NextResponse.json({ exists, path: resolvedPath });
+        return NextResponse.json({
+          exists,
+          path: toVirtualWorkspacePath(resolvedPath, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'hash': {
         const hash = await fsRuntime.getFileHash(resolvedPath, options?.algorithm);
-        return NextResponse.json({ hash, path: resolvedPath, algorithm: options?.algorithm || 'sha256' });
+        return NextResponse.json({
+          hash,
+          path: toVirtualWorkspacePath(resolvedPath, scopedRoot),
+          algorithm: options?.algorithm || 'sha256',
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'compress': {
-        const outputPath = await fsRuntime.compress(resolvedPath, destination);
-        return NextResponse.json({ success: true, output: outputPath });
+        const { absolutePath: resolvedDestination } = resolveScopedWorkspacePath({
+          userId: user.userId,
+          projectId,
+          requestedPath: destination || `${filePath}.gz`,
+        });
+        const outputPath = await fsRuntime.compress(resolvedPath, resolvedDestination);
+        return NextResponse.json({
+          success: true,
+          output: toVirtualWorkspacePath(outputPath, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       case 'decompress': {
-        const outputPath = await fsRuntime.decompress(resolvedPath, destination);
-        return NextResponse.json({ success: true, output: outputPath });
+        const resolvedDestination = destination
+          ? resolveScopedWorkspacePath({
+              userId: user.userId,
+              projectId,
+              requestedPath: destination,
+            }).absolutePath
+          : undefined;
+        const outputPath = await fsRuntime.decompress(resolvedPath, resolvedDestination);
+        return NextResponse.json({
+          success: true,
+          output: toVirtualWorkspacePath(outputPath, scopedRoot),
+          projectId,
+          ...canonical,
+        });
       }
 
       default:

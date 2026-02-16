@@ -544,7 +544,7 @@ function FoliageTypeCard({ type, isSelected, onSelect, instanceCount }: FoliageT
     tree: 'bg-green-600',
     bush: 'bg-emerald-600',
     grass: 'bg-lime-600',
-    flower: 'bg-pink-600',
+    flower: 'bg-cyan-600',
     rock: 'bg-stone-600',
   };
   

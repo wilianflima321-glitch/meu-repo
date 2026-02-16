@@ -1,98 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry';
 
 export const dynamic = 'force-dynamic';
 
-type WorkspaceFileItem = {
-  path: string;
-  name: string;
-  type: 'file' | 'directory';
-  size?: number;
-  modified?: string;
-};
-
-function normalizePath(path: string): string {
-  if (!path) return '/';
-  const p = path.startsWith('/') ? path : `/${path}`;
-  return p.replace(/\\/g, '/');
-}
-
-async function resolveProjectId(userId: string, request: NextRequest, body: any): Promise<string | null> {
-  const url = new URL(request.url);
-  const headerProjectId = request.headers.get('x-project-id');
-  const queryProjectId = url.searchParams.get('projectId');
-  const bodyProjectId = body?.projectId;
-
-  const candidate = headerProjectId || queryProjectId || bodyProjectId;
-  if (typeof candidate === 'string' && candidate.trim()) return candidate;
-
-  const project = await prisma.project.findFirst({
-    where: {
-      OR: [
-        { userId },
-        { members: { some: { userId } } },
-      ],
-    },
-    orderBy: { updatedAt: 'desc' },
-    select: { id: true },
-  });
-
-  return project?.id ?? null;
-}
-
-export async function POST(request: NextRequest) {
+async function deprecatedResponse(request: NextRequest) {
   try {
     const user = requireAuth(request);
     await requireEntitlementsForUser(user.userId);
 
-    const body = await request.json().catch(() => ({}));
-    const projectId = await resolveProjectId(user.userId, request, body);
-
-    if (!projectId) {
-      return NextResponse.json({ files: [] satisfies WorkspaceFileItem[] });
-    }
-
-    const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        OR: [
-          { userId: user.userId },
-          { members: { some: { userId: user.userId } } },
-        ],
+    return NextResponse.json(
+      {
+        error: 'DEPRECATED_ROUTE',
+        message: 'Use /api/files/fs with action=list as the canonical files endpoint.',
+        replacement: '/api/files/fs',
+        action: 'list',
+        deprecatedSince: '2026-02-11',
+        removalCycleTarget: '2026-cycle-2',
+        deprecationPolicy: 'phaseout_after_2_cycles',
       },
-      select: { id: true },
-    });
-
-    if (!project) {
-      return NextResponse.json({ files: [] satisfies WorkspaceFileItem[] }, { status: 404 });
-    }
-
-    const files = await prisma.file.findMany({
-      where: { projectId },
-      select: { path: true, updatedAt: true },
-      orderBy: { path: 'asc' },
-    });
-
-    const items: WorkspaceFileItem[] = files.map((f) => {
-      const p = normalizePath(f.path);
-      const name = p.split('/').filter(Boolean).pop() ?? p;
-      return {
-        path: p,
-        name,
-        type: 'file',
-        modified: f.updatedAt?.toISOString?.() ?? undefined,
-      };
-    });
-
-    return NextResponse.json({ files: items, projectId });
+      {
+        status: 410,
+        headers: trackCompatibilityRouteHit({
+          request,
+          route: '/api/workspace/files',
+          replacement: '/api/files/fs?action=list',
+          status: 'deprecated',
+          deprecatedSince: '2026-02-11',
+          removalCycleTarget: '2026-cycle-2',
+          deprecationPolicy: 'phaseout_after_2_cycles',
+        }),
+      }
+    );
   } catch (error) {
-    console.error('Workspace files error:', error);
-
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
   }
+}
+
+export async function GET(request: NextRequest) {
+  return deprecatedResponse(request);
+}
+
+export async function POST(request: NextRequest) {
+  return deprecatedResponse(request);
 }

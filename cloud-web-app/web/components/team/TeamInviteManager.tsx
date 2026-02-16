@@ -8,6 +8,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 import useSWR from 'swr';
 import {
   Users,
@@ -157,9 +158,12 @@ const StatusIndicator: React.FC<{ status: TeamMember['status'] }> = ({ status })
 const MemberAvatar: React.FC<{ member: TeamMember; size?: number }> = ({ member, size = 40 }) => {
   if (member.avatar) {
     return (
-      <img
+      <Image
         src={member.avatar}
         alt={member.name}
+        width={size}
+        height={size}
+        unoptimized
         style={{
           width: size,
           height: size,

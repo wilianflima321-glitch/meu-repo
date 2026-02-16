@@ -186,7 +186,7 @@ export function WelcomeModal() {
     {
       title: 'Bem-vindo ao Aethel Engine! 🎮',
       description: 'A plataforma mais avançada para criar jogos. Vamos configurar sua conta e explorar as funcionalidades.',
-      icon: <Sparkles className="w-12 h-12 text-purple-400" />,
+      icon: <Sparkles className="w-12 h-12 text-blue-400" />,
     },
     {
       title: 'Crie Projetos Incríveis',
@@ -223,7 +223,7 @@ export function WelcomeModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="w-full max-w-lg bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-700 overflow-hidden">
         {/* Header */}
-        <div className="relative h-40 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+        <div className="relative h-40 bg-gradient-to-br from-blue-600 to-blue-600 flex items-center justify-center">
           {currentWelcomeStep.icon}
           <button
             onClick={skipOnboarding}
@@ -248,7 +248,7 @@ export function WelcomeModal() {
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? 'bg-purple-500' : 'bg-neutral-600'
+                  i === step ? 'bg-blue-500' : 'bg-neutral-600'
                 }`}
               />
             ))}
@@ -264,7 +264,7 @@ export function WelcomeModal() {
             </button>
             <button
               onClick={handleNext}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
               {isLastStep ? 'Começar' : 'Próximo'}
               <ChevronRight className="w-4 h-4" />
@@ -395,7 +395,7 @@ export function OnboardingChecklist() {
       {isOpen ? (
         <div className="w-80 bg-neutral-900 rounded-lg shadow-2xl border border-neutral-700 overflow-hidden">
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-b border-neutral-700">
+          <div className="p-4 bg-gradient-to-r from-blue-600/20 to-blue-600/20 border-b border-neutral-700">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-white">Primeiros Passos</h3>
               <button
@@ -408,7 +408,7 @@ export function OnboardingChecklist() {
             {/* Progress bar */}
             <div className="h-2 bg-neutral-700 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-500 transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -424,7 +424,7 @@ export function OnboardingChecklist() {
                 <span>Dependências do sistema</span>
                 <button
                   onClick={fetchHealth}
-                  className="text-purple-400 hover:text-purple-300 transition-colors"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   {healthLoading ? 'Verificando...' : 'Reverificar'}
                 </button>
@@ -516,7 +516,7 @@ export function OnboardingChecklist() {
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg shadow-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
         >
           <Target className="w-4 h-4" />
           {completedCount}/{items.length}

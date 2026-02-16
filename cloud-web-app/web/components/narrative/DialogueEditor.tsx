@@ -248,17 +248,17 @@ function ConditionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   const condition = conditions[0];
   
   return (
-    <div className={`w-56 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-purple-500 border-purple-500' : 'border-slate-600'}`}>
-      <Handle type="target" position={Position.Top} className="!bg-purple-400" />
+    <div className={`w-56 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-sky-500 border-purple-500' : 'border-slate-600'}`}>
+      <Handle type="target" position={Position.Top} className="!bg-blue-400" />
       
       <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
-        <Code className="w-4 h-4 text-purple-400" />
+        <Code className="w-4 h-4 text-blue-400" />
         <span className="font-medium text-sm text-white">Condition</span>
       </div>
       
       <div className="p-3">
         {condition ? (
-          <div className="bg-purple-900/30 rounded p-2 text-xs font-mono text-purple-200">
+          <div className="bg-blue-900/30 rounded p-2 text-xs font-mono text-blue-200">
             {condition.variable} {condition.operator} {String(condition.value)}
           </div>
         ) : (
@@ -344,23 +344,23 @@ function ExitNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
 
 function RandomNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   return (
-    <div className={`w-48 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-pink-500 border-pink-500' : 'border-slate-600'}`}>
-      <Handle type="target" position={Position.Top} className="!bg-pink-400" />
+    <div className={`w-48 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-cyan-500 border-cyan-500' : 'border-slate-600'}`}>
+      <Handle type="target" position={Position.Top} className="!bg-cyan-400" />
       
       <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
-        <HelpCircle className="w-4 h-4 text-pink-400" />
+        <HelpCircle className="w-4 h-4 text-cyan-400" />
         <span className="font-medium text-sm text-white">Random</span>
       </div>
       
       <div className="p-2 flex flex-col gap-1">
         {[1, 2, 3].map((n) => (
-          <div key={n} className="relative bg-pink-900/30 rounded p-1.5 text-xs text-pink-200 pr-4">
+          <div key={n} className="relative bg-cyan-900/30 rounded p-1.5 text-xs text-cyan-200 pr-4">
             Path {n}
             <Handle
               type="source"
               position={Position.Right}
               id={`path${n}`}
-              className="!bg-pink-400"
+              className="!bg-cyan-400"
               style={{ top: `${n * 28 + 44}px` }}
             />
           </div>
@@ -574,7 +574,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
         <div className="flex items-center gap-2">
           {data.nodeType === 'dialogue' && <MessageSquare className="w-5 h-5 text-blue-400" />}
           {data.nodeType === 'choice' && <GitBranch className="w-5 h-5 text-amber-400" />}
-          {data.nodeType === 'condition' && <Code className="w-5 h-5 text-purple-400" />}
+          {data.nodeType === 'condition' && <Code className="w-5 h-5 text-blue-400" />}
           {data.nodeType === 'action' && <Zap className="w-5 h-5 text-cyan-400" />}
           <span className="font-medium capitalize">{data.nodeType}</span>
         </div>
@@ -704,7 +704,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
         className="flex items-center gap-2 w-full p-3 text-sm text-left hover:bg-slate-800/50"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        <Code className="w-4 h-4 text-purple-400" />
+        <Code className="w-4 h-4 text-blue-400" />
         Variables ({variables.length})
       </button>
       
@@ -712,7 +712,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
         <div className="p-3 pt-0 space-y-2">
           {variables.map((v, i) => (
             <div key={v.name} className="flex gap-2 items-center bg-slate-800/50 rounded p-2">
-              <code className="text-xs text-purple-300 flex-1 font-mono">{v.name}</code>
+              <code className="text-xs text-blue-300 flex-1 font-mono">{v.name}</code>
               <span className="text-[10px] text-slate-500">{v.type}</span>
               <span className="text-xs text-slate-400 font-mono">{String(v.defaultValue)}</span>
               <button
@@ -726,7 +726,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
           
           <button
             onClick={() => onAdd({ name: `var_${Date.now()}`, type: 'string', defaultValue: '' })}
-            className="flex items-center gap-1 w-full p-2 rounded bg-purple-600/20 hover:bg-purple-600/30 text-xs"
+            className="flex items-center gap-1 w-full p-2 rounded bg-blue-600/20 hover:bg-blue-600/30 text-xs"
           >
             <Plus className="w-3 h-3" />
             Add Variable
@@ -1017,7 +1017,7 @@ export default function DialogueEditor({
             </button>
             <button
               onClick={() => addNode('condition')}
-              className="flex items-center gap-1 px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm"
             >
               <Code className="w-4 h-4" />
               Condition

@@ -24,28 +24,59 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
 }) => {
   const [value, setValue] = useState<string>(initialValue || '');
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   
   // Resolve file path from either path or filePath prop
   const resolvedPath = path || filePath;
+
+  const resolveProjectId = (): string => {
+    if (typeof window === 'undefined') return 'default';
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('projectId');
+    if (fromQuery && fromQuery.trim()) return fromQuery.trim();
+    const fromStorage = localStorage.getItem('aethel.workbench.lastProjectId');
+    if (fromStorage && fromStorage.trim()) return fromStorage.trim();
+    return 'default';
+  };
   
   // Load file content when path changes
   useEffect(() => {
     if (resolvedPath && !initialValue) {
       setLoading(true);
-      // In a real implementation, this would fetch from API
-      // For now, we'll set a placeholder
-      fetch(`/api/files?path=${encodeURIComponent(resolvedPath)}`)
-        .then(res => res.ok ? res.text() : Promise.reject(new Error('File not found')))
-        .then(content => {
+      setLoadError(null);
+      const projectId = resolveProjectId();
+      fetch('/api/files/fs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-project-id': projectId,
+        },
+        body: JSON.stringify({
+          action: 'read',
+          path: resolvedPath,
+          projectId,
+        }),
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            throw new Error(text || `File read failed (${res.status})`);
+          }
+          return res.json();
+        })
+        .then((payload) => {
+          const content = typeof payload?.content === 'string' ? payload.content : '';
           setValue(content);
         })
-        .catch(err => {
+        .catch((err) => {
           console.warn('Could not load file:', err);
-          setValue(`// File: ${resolvedPath}\n// Content not available\n`);
+          setValue('');
+          setLoadError('File content unavailable. Verify canonical File API access for this project.');
         })
         .finally(() => setLoading(false));
     } else if (initialValue) {
       setValue(initialValue);
+      setLoadError(null);
     }
   }, [resolvedPath, initialValue]);
   
@@ -78,6 +109,10 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       {loading ? (
         <div className="flex items-center justify-center h-full text-slate-400">
           Carregando arquivo...
+        </div>
+      ) : loadError ? (
+        <div className="flex h-full items-center justify-center px-6 text-center text-xs text-amber-300">
+          {loadError}
         </div>
       ) : (
         <Editor

@@ -191,7 +191,7 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
               <span className="w-3" />
             )}
             
-            <span className={`${variable.changed ? 'text-amber-300' : 'text-indigo-300'}`}>
+            <span className={`${variable.changed ? 'text-amber-300' : 'text-sky-300'}`}>
               {variable.name}
             </span>
             <span className="text-slate-500">:</span>
@@ -220,7 +220,7 @@ function getTypeColor(type: string): string {
   switch (type) {
     case 'string': return 'text-emerald-300'
     case 'number': return 'text-blue-300'
-    case 'boolean': return 'text-purple-300'
+    case 'boolean': return 'text-blue-300'
     case 'null':
     case 'undefined': return 'text-slate-500'
     case 'function': return 'text-amber-300'
@@ -323,7 +323,7 @@ function CallStack({ frames, selectedFrameId, onSelectFrame }: CallStackProps) {
             onClick={() => onSelectFrame(frame)}
             className={`flex items-center gap-2 w-full px-3 py-1 text-left ${
               frame.id === selectedFrameId
-                ? 'bg-indigo-600/30'
+                ? 'bg-sky-600/30'
                 : 'hover:bg-slate-700/50'
             }`}
           >
@@ -388,7 +388,7 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
         >
           <Eye className="w-3 h-3 text-slate-400 mt-0.5 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="text-indigo-300">{expr.expression}</div>
+            <div className="text-sky-300">{expr.expression}</div>
             {expr.error ? (
               <div className="text-red-400 truncate">{expr.error}</div>
             ) : expr.result !== undefined ? (
@@ -472,7 +472,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
         </button>
         <button
           onClick={() => setShowFilter(!showFilter)}
-          className={`p-1 ${showFilter ? 'text-indigo-400' : 'text-slate-400'} hover:text-white`}
+          className={`p-1 ${showFilter ? 'text-sky-400' : 'text-slate-400'} hover:text-white`}
           title="Filter"
         >
           <Filter className="w-3 h-3" />
@@ -501,7 +501,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
               }}
               className={`px-2 py-0.5 text-xs rounded ${
                 typeFilter.has(type)
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-sky-600 text-white'
                   : 'bg-slate-700 text-slate-400'
               }`}
             >
@@ -768,7 +768,7 @@ export default function DebugPanel({
           
           <CollapsibleSection
             title="Watch"
-            icon={<Eye className="w-4 h-4 text-purple-400" />}
+            icon={<Eye className="w-4 h-4 text-blue-400" />}
             badge={demoSession.watchExpressions.length}
           >
             <WatchExpressions
@@ -788,7 +788,7 @@ export default function DebugPanel({
               onClick={() => setActiveTab('console')}
               className={`px-3 py-1 text-xs rounded ${
                 activeTab === 'console'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-sky-600 text-white'
                   : 'text-slate-400 hover:text-white'
               }`}
             >

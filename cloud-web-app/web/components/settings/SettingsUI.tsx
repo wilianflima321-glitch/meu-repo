@@ -621,7 +621,7 @@ function BooleanSetting({
         type="checkbox"
         checked={value}
         onChange={e => onChange(e.target.checked)}
-        className="mt-1 rounded border-slate-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500"
+        className="mt-1 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
       />
       <div className="flex-1 min-w-0">
         <SettingLabel definition={definition} modified={modified} onReset={onReset} />
@@ -650,7 +650,7 @@ function StringSetting({
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-3 py-1.5 mt-2 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+        className="w-full px-3 py-1.5 mt-2 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
       />
     </div>
   );
@@ -680,7 +680,7 @@ function NumberSetting({
           min={definition.minimum}
           max={definition.maximum}
           step={definition.maximum && definition.maximum <= 1 ? 0.1 : 1}
-          className="w-32 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-32 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
         />
         {definition.minimum !== undefined && definition.maximum !== undefined && (
           <input
@@ -690,7 +690,7 @@ function NumberSetting({
             min={definition.minimum}
             max={definition.maximum}
             step={definition.maximum <= 1 ? 0.01 : 1}
-            className="flex-1 accent-indigo-500"
+            className="flex-1 accent-sky-500"
           />
         )}
       </div>
@@ -717,7 +717,7 @@ function EnumSetting({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-3 py-1.5 mt-2 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+        className="w-full px-3 py-1.5 mt-2 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
       >
         {definition.enum?.map((opt, index) => (
           <option key={opt} value={opt}>
@@ -770,7 +770,7 @@ function ArraySetting({
                 next[index] = e.target.value;
                 onChange(next);
               }}
-              className="flex-1 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+              className="flex-1 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
             />
             <button
               onClick={() => removeItem(index)}
@@ -787,7 +787,7 @@ function ArraySetting({
             onChange={e => setNewItem(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && addItem()}
             placeholder="Add item..."
-            className="flex-1 px-3 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded border border-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+            className="flex-1 px-3 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
           />
           <button
             onClick={addItem}
@@ -830,7 +830,7 @@ function ColorSetting({
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder="#000000"
-          className="w-32 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+          className="w-32 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500 font-mono"
         />
       </div>
     </div>
@@ -859,7 +859,7 @@ function SettingLabel({
             {displayName}
           </span>
           {modified && (
-            <span className="w-2 h-2 bg-indigo-500 rounded-full" title="Modified" />
+            <span className="w-2 h-2 bg-sky-500 rounded-full" title="Modified" />
           )}
           {definition.deprecationMessage && (
             <span title={definition.deprecationMessage}>
@@ -1065,7 +1065,7 @@ export function SettingsUI({
             onClick={() => setScope('user')}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
               scope === 'user'
-                ? 'bg-indigo-600/20 text-indigo-400'
+                ? 'bg-sky-600/20 text-sky-400'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
@@ -1076,7 +1076,7 @@ export function SettingsUI({
             onClick={() => setScope('workspace')}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
               scope === 'workspace'
-                ? 'bg-indigo-600/20 text-indigo-400'
+                ? 'bg-sky-600/20 text-sky-400'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
@@ -1088,7 +1088,7 @@ export function SettingsUI({
             onClick={() => setShowJSON(!showJSON)}
             className={`p-1.5 rounded transition-colors ${
               showJSON
-                ? 'bg-indigo-600/20 text-indigo-400'
+                ? 'bg-sky-600/20 text-sky-400'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
             title="Open Settings (JSON)"
@@ -1108,7 +1108,7 @@ export function SettingsUI({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search settings..."
-            className="w-full pl-10 pr-8 py-2 text-sm bg-slate-800 text-white placeholder-slate-500 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full pl-10 pr-8 py-2 text-sm bg-slate-800 text-white placeholder-slate-500 rounded-lg outline-none focus:ring-1 focus:ring-sky-500"
           />
           {searchQuery && (
             <button
@@ -1261,7 +1261,7 @@ export function QuickSettingsPopup({
                   type="checkbox"
                   checked={value as boolean}
                   onChange={e => setValue(key, e.target.checked)}
-                  className="rounded border-slate-600 bg-slate-800 text-indigo-500"
+                  className="rounded border-slate-600 bg-slate-800 text-sky-500"
                 />
               </label>
             );

@@ -63,18 +63,18 @@ export default function AdminMarketplace() {
         <div>
           <h1 className='text-3xl font-bold'>Gerenciar marketplace</h1>
           {lastUpdated && (
-            <p className='text-xs text-gray-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={load}
-          className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
         >
           Atualizar
         </button>
       </div>
 
-      <div className='bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
           <p className='text-2xl font-bold text-blue-600'>{summary.total}</p>
@@ -85,25 +85,25 @@ export default function AdminMarketplace() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Gratuitos</h3>
-          <p className='text-2xl font-bold text-gray-600'>{summary.free}</p>
+          <p className='text-2xl font-bold text-zinc-400'>{summary.free}</p>
         </div>
       </div>
 
       {status === 'loading' ? (
         <div className='text-sm text-slate-600'>{message}</div>
       ) : status === 'error' ? (
-        <div className='bg-white rounded-lg shadow p-4'>
+        <div className='bg-zinc-900/70 rounded-lg shadow p-4'>
           <div className='font-semibold'>Marketplace indisponível</div>
           <div className='mt-1 text-sm text-slate-600'>{message}</div>
         </div>
       ) : items.length === 0 ? (
-        <div className='bg-white rounded-lg shadow p-4'>
+        <div className='bg-zinc-900/70 rounded-lg shadow p-4'>
           <div className='font-semibold'>Nenhuma extensão</div>
           <div className='mt-1 text-sm text-slate-600'>Ainda não há extensões registradas.</div>
         </div>
       ) : (
         <>
-          <div className='bg-white p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+          <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
             <input
               type='text'
               placeholder='Buscar por título'
@@ -123,9 +123,9 @@ export default function AdminMarketplace() {
             </select>
           </div>
 
-          <table className='w-full bg-white rounded-lg shadow'>
+          <table className='w-full bg-zinc-900/70 rounded-lg shadow'>
             <thead>
-              <tr className='bg-gray-100 text-sm'>
+              <tr className='bg-zinc-800/70 text-sm'>
                 <th className='p-3'>Item</th>
                 <th className='p-3'>Categoria</th>
                 <th className='p-3'>Preço</th>

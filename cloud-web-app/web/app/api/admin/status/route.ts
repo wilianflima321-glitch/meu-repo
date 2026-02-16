@@ -47,12 +47,18 @@ async function checkAI(): Promise<'healthy' | 'degraded' | 'down'> {
   return 'healthy';
 }
 
+async function checkWebsocket(): Promise<'healthy' | 'degraded' | 'down'> {
+  // No runtime ping endpoint exists yet. Mark as degraded instead of reporting fake healthy.
+  return process.env.WS_SERVER_URL ? 'degraded' : 'down';
+}
+
 export const GET = withAdminAuth(
   async (request, { user }) => {
-    const [database, redis, ai] = await Promise.all([
+    const [database, redis, ai, websocket] = await Promise.all([
       checkDatabase(),
       checkRedis(),
       checkAI(),
+      checkWebsocket(),
     ]);
     
     const status: SystemStatus = {
@@ -60,7 +66,7 @@ export const GET = withAdminAuth(
       database,
       redis,
       ai,
-      websocket: 'healthy', // TODO: Implementar check real
+      websocket,
     };
     
     // Se algum está down, API está degradada

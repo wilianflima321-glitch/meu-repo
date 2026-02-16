@@ -1,32 +1,54 @@
 /**
  * AETHEL ENGINE - Job Queue Start API
- * 
- * Endpoint para iniciar/resumir a fila de jobs.
- * 
- * POST /api/jobs/start - Inicia/resume a fila de processamento
+ *
+ * POST /api/jobs/start => resume all queues
+ * GET  /api/jobs/start => queue backend availability + aggregate snapshot
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { queueManager } from '@/lib/queue-system';
 
-// Estado simulado da fila (em produção viria do Redis/DB)
-let isQueueRunning = true;
+function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Unauthorized';
+}
 
-// ============================================================================
-// POST - Iniciar fila
-// ============================================================================
+function isAuthNotConfigured(error: unknown): boolean {
+  return error instanceof Error && String((error as any).code || '') === 'AUTH_NOT_CONFIGURED';
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Em produção, isso enviaria um comando para o worker
-    isQueueRunning = true;
-    
+    requireAuth(request);
+
+    const result = await queueManager.setAllQueuesPaused(false);
+    if (!result.available) {
+      return NextResponse.json(
+        {
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+          message: 'Queue backend is not configured.',
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       status: 'running',
-      message: 'Fila de jobs iniciada com sucesso',
+      message: 'Filas retomadas com sucesso',
+      queues: result.queues,
       startedAt: new Date().toISOString(),
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (isAuthNotConfigured(error)) {
+      return NextResponse.json(
+        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+        { status: 503 }
+      );
+    }
     console.error('Erro ao iniciar fila:', error);
     return NextResponse.json(
       { error: 'Erro interno ao iniciar fila' },
@@ -35,13 +57,56 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ============================================================================
-// GET - Status da fila
-// ============================================================================
+export async function GET(request: NextRequest) {
+  try {
+    requireAuth(request);
 
-export async function GET() {
-  return NextResponse.json({
-    isRunning: isQueueRunning,
-    status: isQueueRunning ? 'running' : 'stopped',
-  });
+    const available = await queueManager.isAvailable();
+    if (!available) {
+      return NextResponse.json(
+        {
+          isRunning: false,
+          status: 'unavailable',
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+        },
+        { status: 503 }
+      );
+    }
+
+    const stats = await queueManager.getAllStats();
+    const aggregate = Object.values(stats).reduce(
+      (acc, queue) => {
+        acc.waiting += queue.waiting;
+        acc.active += queue.active;
+        acc.completed += queue.completed;
+        acc.failed += queue.failed;
+        acc.delayed += queue.delayed;
+        return acc;
+      },
+      { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }
+    );
+
+    return NextResponse.json({
+      isRunning: true,
+      status: 'running',
+      aggregate,
+      queues: stats,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (isAuthNotConfigured(error)) {
+      return NextResponse.json(
+        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+        { status: 503 }
+      );
+    }
+    console.error('Erro ao buscar status da fila:', error);
+    return NextResponse.json(
+      { error: 'Falha ao buscar status da fila' },
+      { status: 500 }
+    );
+  }
 }

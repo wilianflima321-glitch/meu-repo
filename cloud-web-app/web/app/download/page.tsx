@@ -107,15 +107,15 @@ export default function DownloadPage() {
     <div className="min-h-screen bg-black text-white">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[150px]" />
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-sky-600/10 rounded-full blur-[150px]" />
       </div>
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center">
               <SparklesIcon />
             </div>
             <span className="text-xl font-bold">Aethel</span>
@@ -129,7 +129,7 @@ export default function DownloadPage() {
             </Link>
             <Link
               href="/login"
-              className="px-4 py-2 text-sm font-medium bg-violet-600 hover:bg-violet-500 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors"
             >
               Entrar
             </Link>
@@ -140,13 +140,13 @@ export default function DownloadPage() {
       {/* Hero */}
       <section className="relative pt-32 pb-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm mb-6">
             <DownloadIcon />
             Versão {current.version} disponível
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
             Download{' '}
-            <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 to-sky-400 bg-clip-text text-transparent">
               Aethel Engine
             </span>
           </h1>
@@ -172,7 +172,7 @@ export default function DownloadPage() {
                   onClick={() => setSelectedPlatform(platform)}
                   className={`flex items-center gap-3 px-6 py-4 rounded-xl border transition-all ${
                     isSelected
-                      ? 'bg-violet-500/10 border-violet-500/30 text-white'
+                      ? 'bg-blue-500/10 border-blue-500/30 text-white'
                       : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
                   }`}
                 >
@@ -180,7 +180,7 @@ export default function DownloadPage() {
                   <div className="text-left">
                     <div className="font-medium">{p.name}</div>
                     {isDetected && (
-                      <div className="text-xs text-violet-400">Detectado</div>
+                      <div className="text-xs text-blue-400">Detectado</div>
                     )}
                   </div>
                 </button>
@@ -193,7 +193,7 @@ export default function DownloadPage() {
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-sky-500/20 flex items-center justify-center">
                     <CurrentIcon />
                   </div>
                   <div>
@@ -206,7 +206,7 @@ export default function DownloadPage() {
                 </p>
                 <a
                   href={`/downloads/${current.file}`}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 rounded-xl font-semibold text-lg transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 rounded-xl font-semibold text-lg transition-all"
                   download
                 >
                   <DownloadIcon />
@@ -231,15 +231,15 @@ export default function DownloadPage() {
           {/* Checksums */}
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-500">
-              <a href="/downloads/checksums.txt" className="text-violet-400 hover:underline">
+              <a href="/downloads/checksums.txt" className="text-blue-400 hover:underline">
                 Verificar checksums SHA-256
               </a>
               {' • '}
-              <a href="/downloads/RELEASE_NOTES.md" className="text-violet-400 hover:underline">
+              <a href="/downloads/RELEASE_NOTES.md" className="text-blue-400 hover:underline">
                 Notas de versão
               </a>
               {' • '}
-              <Link href="/docs/getting-started" className="text-violet-400 hover:underline">
+              <Link href="/docs/getting-started" className="text-blue-400 hover:underline">
                 Guia de instalação
               </Link>
             </p>

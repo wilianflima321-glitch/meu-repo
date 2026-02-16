@@ -81,21 +81,21 @@ export default function RealTimePage() {
         <div>
           <h1 className="text-2xl font-bold">Monitoramento em tempo real</h1>
           {lastUpdated && (
-            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setAutoRefresh((prev) => !prev)}
             className={`px-3 py-2 rounded text-sm ${
-              autoRefresh ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+              autoRefresh ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
             }`}
           >
             {autoRefresh ? 'Auto: ativado' : 'Auto: desativado'}
           </button>
           <button
             onClick={fetchMetrics}
-            className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+            className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
           >
             Atualizar
           </button>
@@ -103,16 +103,16 @@ export default function RealTimePage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4">
+        <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">
           {error}
         </div>
       )}
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[0, 1, 2, 3].map((index) => (
-          <div key={index} className="bg-white p-4 rounded-lg shadow text-center">
+          <div key={index} className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
             {loading ? (
-              <div className="h-12 bg-gray-100 rounded animate-pulse" />
+              <div className="h-12 bg-zinc-800/70 rounded animate-pulse" />
             ) : (
               <>
                 {index === 0 && (
@@ -136,7 +136,7 @@ export default function RealTimePage() {
                 {index === 3 && (
                   <>
                     <h3 className="text-lg font-semibold">Uso de memória</h3>
-                    <p className="text-2xl font-bold text-purple-600">{metrics.memoryUsage.toFixed(0)}%</p>
+                    <p className="text-2xl font-bold text-blue-600">{metrics.memoryUsage.toFixed(0)}%</p>
                   </>
                 )}
               </>
@@ -145,7 +145,7 @@ export default function RealTimePage() {
         ))}
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Logs recentes</h2>
           <input
@@ -156,9 +156,9 @@ export default function RealTimePage() {
             className="border p-2 rounded text-sm"
           />
         </div>
-        <div className="bg-gray-100 p-4 rounded h-64 overflow-y-auto">
+        <div className="bg-zinc-800/70 p-4 rounded h-64 overflow-y-auto">
           {filteredLogs.length === 0 ? (
-            <p className="text-sm text-gray-500">Sem logs recentes.</p>
+            <p className="text-sm text-zinc-500">Sem logs recentes.</p>
           ) : (
             filteredLogs.map((log) => (
               <p key={log.id} className="text-sm">

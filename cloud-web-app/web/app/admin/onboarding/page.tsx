@@ -46,26 +46,26 @@ export default function Onboarding() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className='text-3xl font-bold'>Onboarding de usuários</h1>
-          <p className='text-gray-600'>Resumo das ações registradas no onboarding.</p>
+          <p className='text-zinc-400'>Resumo das ações registradas no onboarding.</p>
           {lastUpdated && (
-            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchStats}
-          className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className='bg-white p-4 rounded-lg shadow mb-6'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
         {loading ? (
-          <p className='text-sm text-gray-500'>Carregando estatísticas...</p>
+          <p className='text-sm text-zinc-500'>Carregando estatísticas...</p>
         ) : error ? (
           <p className='text-sm text-red-500'>{error}</p>
         ) : !stats ? (
-          <p className='text-sm text-gray-500'>Sem dados disponíveis.</p>
+          <p className='text-sm text-zinc-500'>Sem dados disponíveis.</p>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='text-center'>
@@ -78,7 +78,7 @@ export default function Onboarding() {
             </div>
             <div className='text-center'>
               <p className='text-sm font-semibold'>Última atividade</p>
-              <p className='text-sm text-gray-600'>
+              <p className='text-sm text-zinc-400'>
                 {stats.lastActivity ? new Date(stats.lastActivity).toLocaleString() : '—'}
               </p>
             </div>
@@ -86,7 +86,7 @@ export default function Onboarding() {
         )}
       </div>
 
-      <div className='bg-white p-4 rounded-lg shadow'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow'>
         <div className="flex items-center justify-between mb-4">
           <h2 className='text-lg font-semibold'>Ações por tipo</h2>
           <input
@@ -102,12 +102,12 @@ export default function Onboarding() {
             {filteredActions.map(([action, count]) => (
               <li key={action} className='flex justify-between border-b p-2'>
                 <span>{action}</span>
-                <span className='text-sm text-gray-600'>{count}</span>
+                <span className='text-sm text-zinc-400'>{count}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className='text-sm text-gray-500'>Nenhuma ação registrada.</p>
+          <p className='text-sm text-zinc-500'>Nenhuma ação registrada.</p>
         )}
       </div>
     </div>

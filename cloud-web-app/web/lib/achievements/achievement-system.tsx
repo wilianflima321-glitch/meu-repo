@@ -925,8 +925,9 @@ export function AchievementProvider({
   }, [achievements, statistics]);
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1058,7 +1059,7 @@ export function useStat(statId: string) {
   return { value, increment, set, formatted: stats.formatStat(statId) };
 }
 
-export default {
+const __defaultExport = {
   AchievementManager,
   StatisticsManager,
   AchievementBuilder,
@@ -1067,3 +1068,5 @@ export default {
   useAchievement,
   useStat,
 };
+
+export default __defaultExport;

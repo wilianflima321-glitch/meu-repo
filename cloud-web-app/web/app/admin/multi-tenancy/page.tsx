@@ -54,41 +54,41 @@ export default function MultiTenancyPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Multilocação</h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-zinc-400">
             Visão por domínio (derivado de usuários reais). Gestão manual de locatários não está habilitada.
           </p>
         </div>
         <button
           onClick={fetchTenants}
-          className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Locatários detectados</h3>
           <p className="text-2xl font-bold text-blue-600">{tenants.length}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Usuários totais</h3>
-          <p className="text-2xl font-bold text-gray-700">{summary.totalUsers}</p>
+          <p className="text-2xl font-bold text-zinc-300">{summary.totalUsers}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Armazenamento agregado</h3>
-          <p className="text-2xl font-bold text-gray-700">{formatStorage(summary.totalStorage)}</p>
+          <p className="text-2xl font-bold text-zinc-300">{formatStorage(summary.totalStorage)}</p>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Locatários existentes</h2>
         {loading ? (
-          <p className="text-sm text-gray-500">Carregando locatários...</p>
+          <p className="text-sm text-zinc-500">Carregando locatários...</p>
         ) : error ? (
           <p className="text-sm text-red-600">{error}</p>
         ) : tenants.length === 0 ? (
-          <p className="text-sm text-gray-500">Nenhum locatário encontrado.</p>
+          <p className="text-sm text-zinc-500">Nenhum locatário encontrado.</p>
         ) : (
           <ul>
             {tenants.map((tenant) => (
@@ -96,18 +96,18 @@ export default function MultiTenancyPage() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{tenant.domain}</h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-zinc-400">
                       Usuários: {tenant.users} | Armazenamento: {formatStorage(tenant.storageBytes)}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-zinc-500">
                       Última atividade: {tenant.lastActiveAt ? new Date(tenant.lastActiveAt).toLocaleString() : 'N/D'}
                     </p>
                   </div>
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
                       tenant.status === 'active'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : 'bg-zinc-800/70 text-zinc-400'
                     }`}
                   >
                     {tenant.status === 'active' ? 'Ativo' : 'Inativo'}

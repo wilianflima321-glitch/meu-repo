@@ -1,76 +1,67 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/auth-server';
-import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
+import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import {
+  getScopedProjectId,
+  resolveScopedWorkspacePath,
+  toVirtualWorkspacePath,
+} from '@/lib/server/workspace-scope'
+import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
 
-/**
- * POST /api/files/rename
- * 
- * Renomeia um arquivo ou pasta
- */
-export async function POST(req: NextRequest) {
+export const dynamic = 'force-dynamic'
+
+export async function POST(request: NextRequest) {
   try {
-    const user = requireAuth(req);
-    const { projectId, oldPath, newPath } = await req.json();
+    const user = requireAuth(request)
+    await requireEntitlementsForUser(user.userId)
 
-    if (!projectId || !oldPath || !newPath) {
-      return NextResponse.json(
-        { error: 'projectId, oldPath e newPath são obrigatórios' },
-        { status: 400 }
-      );
+    const body = await request.json()
+    const projectId = getScopedProjectId(request, body)
+    const sourcePath = (body?.oldPath || body?.path || '').trim()
+    const targetPath = (body?.newPath || '').trim()
+
+    if (!sourcePath || !targetPath) {
+      return NextResponse.json({ error: 'oldPath/path and newPath are required' }, { status: 400 })
     }
 
-    // Verificar propriedade do projeto
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, userId: user.userId },
-    });
+    const runtime = getFileSystemRuntime()
+    const sourceResolved = resolveScopedWorkspacePath({
+      userId: user.userId,
+      projectId,
+      requestedPath: sourcePath,
+    })
+    const destinationResolved = resolveScopedWorkspacePath({
+      userId: user.userId,
+      projectId,
+      requestedPath: targetPath,
+    })
+    await runtime.move(sourceResolved.absolutePath, destinationResolved.absolutePath, { overwrite: false })
 
-    if (!project) {
-      return NextResponse.json(
-        { error: 'Projeto não encontrado' },
-        { status: 404 }
-      );
-    }
+    const telemetryHeaders = trackCompatibilityRouteHit({
+      request,
+      route: '/api/files/rename',
+      replacement: '/api/files/fs?action=move',
+      status: 'compatibility-wrapper',
+    })
 
-    // Verificar se destino já existe
-    const existingFile = await prisma.file.findUnique({
-      where: {
-        projectId_path: {
-          projectId,
-          path: newPath,
-        },
+    return NextResponse.json(
+      {
+        success: true,
+        source: toVirtualWorkspacePath(sourceResolved.absolutePath, sourceResolved.root),
+        destination: toVirtualWorkspacePath(destinationResolved.absolutePath, destinationResolved.root),
+        projectId,
+        runtime: 'filesystem-runtime',
+        authority: 'canonical',
+        compatibilityRoute: '/api/files/rename',
+        canonicalEndpoint: '/api/files/fs',
       },
-    });
-
-    if (existingFile) {
-      return NextResponse.json(
-        { error: 'Já existe um arquivo com esse nome' },
-        { status: 409 }
-      );
-    }
-
-    // Renomear arquivo
-    const renamedFile = await prisma.file.update({
-      where: {
-        projectId_path: {
-          projectId,
-          path: oldPath,
-        },
-      },
-      data: {
-        path: newPath,
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      file: renamedFile,
-      message: 'Arquivo renomeado com sucesso',
-    });
+      { headers: telemetryHeaders }
+    )
   } catch (error) {
-    console.error('[files/rename] Error:', error);
-    const mapped = apiErrorToResponse(error);
-    if (mapped) return mapped;
-    return apiInternalError();
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
   }
 }

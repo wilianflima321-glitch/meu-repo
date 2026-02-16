@@ -13,7 +13,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 const variantClasses: Record<string, string> = {
   default: 'bg-slate-700 text-slate-200 border-slate-600',
   secondary: 'bg-slate-700 text-slate-200 border-slate-600',
-  primary: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  primary: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
   success: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   warning: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
   error: 'bg-red-500/20 text-red-300 border-red-500/30',
@@ -23,7 +23,7 @@ const variantClasses: Record<string, string> = {
 const dotColors: Record<string, string> = {
   default: 'bg-slate-400',
   secondary: 'bg-slate-400',
-  primary: 'bg-indigo-400',
+  primary: 'bg-sky-400',
   success: 'bg-emerald-400',
   warning: 'bg-amber-400',
   error: 'bg-red-400',

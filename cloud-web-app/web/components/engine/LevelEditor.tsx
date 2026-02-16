@@ -42,6 +42,17 @@ interface PhysicsState {
 
 const GRAVITY = -9.81;
 const GROUND_Y = 0.05; // Floor height
+const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId';
+
+function resolveProjectIdFromClient(): string {
+  if (typeof window === 'undefined') return 'default';
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get('projectId');
+  if (fromQuery && fromQuery.trim()) return fromQuery.trim();
+  const fromStorage = localStorage.getItem(WORKBENCH_PROJECT_STORAGE_KEY);
+  if (fromStorage && fromStorage.trim()) return fromStorage.trim();
+  return 'default';
+}
 
 function simulatePhysics(
   objects: LevelObject[],
@@ -1183,14 +1194,19 @@ export default function LevelEditor() {
     
     // Also save to API if available
     try {
-      const response = await fetch('/api/files', {
+      const projectId = resolveProjectIdFromClient();
+      const response = await fetch('/api/files/fs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-project-id': projectId,
+        },
         body: JSON.stringify({
-          projectId: 'default',
+          action: 'write',
+          projectId,
           path: 'levels/main.level.json',
           content: JSON.stringify(levelData, null, 2),
-          language: 'json'
+          options: { createDirectories: true },
         })
       });
       if (response.ok) {
@@ -1220,7 +1236,19 @@ export default function LevelEditor() {
       
       // Try API
       try {
-        const response = await fetch('/api/files/read?path=levels/main.level.json');
+        const projectId = resolveProjectIdFromClient();
+        const response = await fetch('/api/files/fs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-project-id': projectId,
+          },
+          body: JSON.stringify({
+            action: 'read',
+            projectId,
+            path: 'levels/main.level.json',
+          }),
+        });
         if (response.ok) {
           const data = await response.json();
           if (data.content) {

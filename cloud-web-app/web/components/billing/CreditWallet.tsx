@@ -166,7 +166,7 @@ function TransactionItem({ transaction }: TransactionItemProps) {
   const typeIcons = {
     usage: <Zap className="w-4 h-4 text-blue-400" />,
     purchase: <CreditCard className="w-4 h-4 text-green-400" />,
-    bonus: <Gift className="w-4 h-4 text-purple-400" />,
+    bonus: <Gift className="w-4 h-4 text-blue-400" />,
     refund: <RefreshCw className="w-4 h-4 text-amber-400" />,
     subscription: <Crown className="w-4 h-4 text-amber-400" />,
   };
@@ -226,7 +226,7 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
       className={`
         relative p-4 rounded-xl border text-left transition-all hover:scale-[1.02]
         ${pkg.popular 
-          ? 'bg-purple-500/10 border-purple-500/50 ring-1 ring-purple-500/30' 
+          ? 'bg-blue-500/10 border-purple-500/50 ring-1 ring-sky-500/30' 
           : pkg.bestValue 
           ? 'bg-green-500/10 border-green-500/50 ring-1 ring-green-500/30'
           : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600'
@@ -237,7 +237,7 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
       {(pkg.popular || pkg.bestValue) && (
         <span className={`
           absolute -top-2 left-4 px-2 py-0.5 text-xs font-medium rounded-full
-          ${pkg.popular ? 'bg-purple-500 text-white' : 'bg-green-500 text-white'}
+          ${pkg.popular ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'}
         `}>
           {pkg.popular ? '⭐ Popular' : '💎 Best Value'}
         </span>
@@ -251,7 +251,7 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
             <span className="text-sm font-normal text-zinc-400 ml-1">créditos</span>
           </p>
         </div>
-        <Coins className={`w-8 h-8 ${pkg.popular ? 'text-purple-400' : pkg.bestValue ? 'text-green-400' : 'text-amber-400'}`} />
+        <Coins className={`w-8 h-8 ${pkg.popular ? 'text-blue-400' : pkg.bestValue ? 'text-green-400' : 'text-amber-400'}`} />
       </div>
 
       {pkg.bonus > 0 && (
@@ -466,7 +466,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setActiveTab('purchase')}
-                className="flex items-center justify-center gap-2 p-3 bg-purple-600 hover:bg-purple-500 rounded-xl text-white font-medium transition-colors"
+                className="flex items-center justify-center gap-2 p-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-medium transition-colors"
               >
                 <Sparkles className="w-5 h-5" />
                 Comprar Créditos

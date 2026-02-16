@@ -170,7 +170,7 @@ export default function HelpPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold text-white">Aethel</span>
@@ -189,7 +189,7 @@ export default function HelpPage() {
       </header>
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-indigo-600/10 to-transparent border-b border-slate-800">
+      <div className="bg-gradient-to-b from-blue-600/10 to-transparent border-b border-slate-800">
         <div className="max-w-6xl mx-auto px-6 py-16 text-center">
           <h1 className="text-4xl font-bold text-white mb-4">
             Como podemos ajudar?
@@ -206,7 +206,7 @@ export default function HelpPage() {
               placeholder="Buscar perguntas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full pl-12 pr-4 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
         </div>
@@ -218,17 +218,17 @@ export default function HelpPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <Link
             href="/docs"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
           >
-            <Book className="w-6 h-6 text-indigo-400 mb-2" />
-            <h3 className="font-medium text-white group-hover:text-indigo-400 transition-colors">
+            <Book className="w-6 h-6 text-blue-400 mb-2" />
+            <h3 className="font-medium text-white group-hover:text-blue-400 transition-colors">
               Documentação
             </h3>
             <p className="text-sm text-slate-500">Guias completos</p>
           </Link>
           <Link
             href="/contact"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
           >
             <MessageSquare className="w-6 h-6 text-emerald-400 mb-2" />
             <h3 className="font-medium text-white group-hover:text-emerald-400 transition-colors">
@@ -239,7 +239,7 @@ export default function HelpPage() {
           <Link
             href="https://status.aethel.io"
             target="_blank"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
           >
             <Zap className="w-6 h-6 text-yellow-400 mb-2" />
             <h3 className="font-medium text-white group-hover:text-yellow-400 transition-colors">
@@ -250,10 +250,10 @@ export default function HelpPage() {
           <Link
             href="https://discord.gg/aethel"
             target="_blank"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 transition-colors group"
+            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
           >
-            <Users className="w-6 h-6 text-purple-400 mb-2" />
-            <h3 className="font-medium text-white group-hover:text-purple-400 transition-colors">
+            <Users className="w-6 h-6 text-cyan-400 mb-2" />
+            <h3 className="font-medium text-white group-hover:text-cyan-400 transition-colors">
               Comunidade
             </h3>
             <p className="text-sm text-slate-500">Discord</p>
@@ -279,8 +279,8 @@ export default function HelpPage() {
                 }
                 className="w-full flex items-center gap-4 p-5 hover:bg-slate-800/50 transition-colors"
               >
-                <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center">
-                  <category.icon className="w-5 h-5 text-indigo-400" />
+                <div className="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center">
+                  <category.icon className="w-5 h-5 text-blue-400" />
                 </div>
                 <span className="flex-1 text-left font-medium text-white">
                   {category.name}
@@ -359,7 +359,7 @@ export default function HelpPage() {
         </div>
 
         {/* Still need help */}
-        <div className="mt-12 p-8 bg-gradient-to-br from-indigo-600/20 to-purple-600/10 border border-indigo-500/30 rounded-2xl text-center">
+        <div className="mt-12 p-8 bg-gradient-to-br from-blue-600/20 to-cyan-600/10 border border-blue-500/30 rounded-2xl text-center">
           <h3 className="text-xl font-semibold text-white mb-2">
             Ainda precisa de ajuda?
           </h3>
@@ -369,7 +369,7 @@ export default function HelpPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
             >
               <MessageSquare className="w-4 h-4" />
               Abrir ticket

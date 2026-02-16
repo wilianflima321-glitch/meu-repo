@@ -1,14 +1,20 @@
 # 🚀 Aethel Engine - Game Development Platform
 
-**Status**: ✅ **PRODUCTION READY**  
+> IMPORTANT: This README is historical. Canonical source of truth:
+> `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+> Validation log: `audit dicas do emergent usar/00_REALITY_MATRIX_2026-02-04.md`
+
+
+**Status**: UNVERIFIED (see Reality Matrix)  
 **Version**: 0.3.0  
 **Date**: 21 de Janeiro de 2026  
 **Lines of Code**: 70,000+  
-**Tests**: 232 passing
+**Tests**: UNVERIFIED (see Reality Matrix)
 
 Uma plataforma cloud-native completa para desenvolvimento de jogos, apps e filmes. Construída com Next.js 14, React 18, TypeScript, Three.js, Rapier WASM e IA multi-provider.
 
-> 📋 **Documento de Referência:** [`cloud-web-app/web/FONTE_DA_VERDADE.md`](cloud-web-app/web/FONTE_DA_VERDADE.md)
+> Documento Canonico: `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+> Reality Matrix: `audit dicas do emergent usar/00_REALITY_MATRIX_2026-02-04.md`
 
 ---
 
@@ -161,7 +167,7 @@ STRIPE_SECRET_KEY=xxx
 
 ## 📚 DOCUMENTAÇÃO
 
-- **Estado Atual:** [FONTE_DA_VERDADE.md](cloud-web-app/web/FONTE_DA_VERDADE.md)
+- **Estado Canonico:** [FONTE_DA_VERDADE.md](audit dicas do emergent usar/00_FONTE_CANONICA.md)
 - **Índice Docs:** [INDICE_DOCUMENTACAO_MASTER.md](cloud-web-app/web/INDICE_DOCUMENTACAO_MASTER.md)
 - **Contribuição:** [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Segurança:** [SECURITY.md](SECURITY.md)

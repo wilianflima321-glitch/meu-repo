@@ -9,6 +9,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import NextImage from 'next/image';
 import {
     Play,
     Pause,
@@ -266,9 +267,11 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                 <div className="relative w-16 h-16 bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
                     {job.thumbnail ? (
                         <>
-                            <img 
-                                src={job.thumbnail} 
+                            <NextImage
+                                src={job.thumbnail}
                                 alt={job.name}
+                                fill
+                                unoptimized
                                 className="w-full h-full object-cover"
                             />
                             {onViewFull && (

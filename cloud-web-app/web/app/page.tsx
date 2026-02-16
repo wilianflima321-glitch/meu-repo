@@ -21,7 +21,7 @@ export default function Page() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/login"
-            className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-700"
+            className="inline-flex items-center justify-center rounded-md bg-sky-600 px-4 py-2 text-sm font-medium hover:bg-sky-700"
           >
             Entrar
           </Link>
@@ -46,7 +46,7 @@ export default function Page() {
               Painel, projetos, histórico, uso/quotas e recursos internos.
             </p>
             <div className="mt-4">
-              <Link href="/login" className="text-sm text-indigo-400 hover:text-indigo-300">
+              <Link href="/login" className="text-sm text-sky-400 hover:text-sky-300">
                 Entrar para acessar →
               </Link>
             </div>

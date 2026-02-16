@@ -126,7 +126,7 @@ const STATUS_ICONS: Record<FileStatus, React.ReactNode> = {
   modified: <Edit3 className="w-4 h-4 text-amber-400" />,
   added: <FilePlus className="w-4 h-4 text-green-400" />,
   deleted: <FileMinus className="w-4 h-4 text-red-400" />,
-  renamed: <FileText className="w-4 h-4 text-purple-400" />,
+  renamed: <FileText className="w-4 h-4 text-blue-400" />,
   untracked: <FileQuestion className="w-4 h-4 text-slate-400" />,
   ignored: <EyeOff className="w-4 h-4 text-slate-600" />,
   conflicted: <AlertTriangle className="w-4 h-4 text-red-500" />,
@@ -326,7 +326,7 @@ export default function GitPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
         <div className="flex items-center gap-2">
-          <GitBranch className="w-5 h-5 text-indigo-400" />
+          <GitBranch className="w-5 h-5 text-sky-400" />
           <span className="text-sm font-medium">Source Control</span>
         </div>
         
@@ -400,7 +400,7 @@ export default function GitPanel({
             onClick={() => setActiveTab(tab)}
             className={`flex-1 px-3 py-2 text-sm font-medium capitalize transition-colors ${
               activeTab === tab
-                ? 'text-white border-b-2 border-indigo-500'
+                ? 'text-white border-b-2 border-sky-500'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -536,13 +536,13 @@ function ChangesTab({
           value={commitMessage}
           onChange={(e) => onCommitMessageChange(e.target.value)}
           placeholder="Commit message..."
-          className="w-full h-20 px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 resize-none focus:outline-none focus:border-indigo-500"
+          className="w-full h-20 px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 resize-none focus:outline-none focus:border-sky-500"
         />
         <div className="flex items-center gap-3 mt-2">
           <button
             onClick={onCommit}
             disabled={!commitMessage.trim() || stagedFiles.length === 0}
-            className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-700 disabled:text-slate-500 rounded text-sm font-medium transition-colors"
+            className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:bg-slate-700 disabled:text-slate-500 rounded text-sm font-medium transition-colors"
           >
             <Check className="w-4 h-4 inline mr-2" />
             Commit{stagedFiles.length > 0 && ` (${stagedFiles.length})`}
@@ -889,7 +889,7 @@ function HistoryTab({ commits, formatDate }: HistoryTabProps) {
         >
           {/* Graph line */}
           <div className="flex flex-col items-center">
-            <div className="w-3 h-3 rounded-full bg-indigo-500 ring-2 ring-slate-900" />
+            <div className="w-3 h-3 rounded-full bg-sky-500 ring-2 ring-slate-900" />
             {idx < commits.length - 1 && (
               <div className="w-0.5 flex-1 bg-slate-700 my-1" />
             )}

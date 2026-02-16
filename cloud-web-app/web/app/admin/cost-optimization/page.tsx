@@ -50,7 +50,7 @@ export default function CostOptimization() {
     return (
       <div className='p-6 max-w-4xl mx-auto'>
         <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
-        <p className='text-sm text-gray-500'>Carregando métricas...</p>
+        <p className='text-sm text-zinc-500'>Carregando métricas...</p>
       </div>
     );
   }
@@ -75,30 +75,30 @@ export default function CostOptimization() {
   return (
     <div className='p-6 max-w-4xl mx-auto'>
       <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
-      <p className='mb-4 text-gray-600'>Custos e margem baseados em dados financeiros reais.</p>
+      <p className='mb-4 text-zinc-400'>Custos e margem baseados em dados financeiros reais.</p>
 
       <div className='mb-6'>
         <h2 className='text-xl font-semibold mb-4'>Resumo de Custos (30 dias)</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-4 bg-white rounded-lg shadow'>
+          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
             <h3 className='font-semibold'>IA (diário)</h3>
             <p className='text-2xl'>${dailyAI.toFixed(2)}</p>
-            <p className='text-sm text-gray-600'>Custo médio diário de IA</p>
+            <p className='text-sm text-zinc-400'>Custo médio diário de IA</p>
           </div>
-          <div className='p-4 bg-white rounded-lg shadow'>
+          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
             <h3 className='font-semibold'>Infra (diário)</h3>
             <p className='text-2xl'>${dailyInfra.toFixed(2)}</p>
-            <p className='text-sm text-gray-600'>Infra configurada por ambiente</p>
+            <p className='text-sm text-zinc-400'>Infra configurada por ambiente</p>
           </div>
-          <div className='p-4 bg-white rounded-lg shadow'>
+          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
             <h3 className='font-semibold'>Receita (diária)</h3>
             <p className='text-2xl'>${dailyRevenue.toFixed(2)}</p>
-            <p className='text-sm text-gray-600'>Baseada em pagamentos confirmados</p>
+            <p className='text-sm text-zinc-400'>Baseada em pagamentos confirmados</p>
           </div>
-          <div className={`p-4 rounded-lg shadow ${dailyProfit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+          <div className={`p-4 rounded-lg shadow ${dailyProfit >= 0 ? 'bg-emerald-500/15' : 'bg-rose-500/15'}`}>
             <h3 className='font-semibold'>Lucro (diário)</h3>
             <p className='text-2xl'>${dailyProfit.toFixed(2)}</p>
-            <p className='text-sm text-gray-600'>Margem: {metrics?.profitMargin?.toFixed(1)}%</p>
+            <p className='text-sm text-zinc-400'>Margem: {metrics?.profitMargin?.toFixed(1)}%</p>
           </div>
         </div>
       </div>
@@ -106,20 +106,20 @@ export default function CostOptimization() {
       <div className='mb-6'>
         <h2 className='text-xl font-semibold mb-4'>Queima diária e fôlego</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-4 bg-white rounded-lg shadow'>
+          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
             <h3 className='font-semibold'>Queima diária</h3>
             <p className='text-2xl'>${(metrics?.burnRate ?? 0).toFixed(2)}/dia</p>
-            <p className='text-sm text-gray-600'>Diferença custo - receita</p>
+            <p className='text-sm text-zinc-400'>Diferença custo - receita</p>
           </div>
-          <div className='p-4 bg-white rounded-lg shadow'>
+          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
             <h3 className='font-semibold'>Fôlego</h3>
             <p className='text-2xl'>{metrics?.runway ?? 0} meses</p>
-            <p className='text-sm text-gray-600'>Baseado em caixa configurado</p>
+            <p className='text-sm text-zinc-400'>Baseado em caixa configurado</p>
           </div>
         </div>
       </div>
 
-      <div className='mt-6 p-4 bg-blue-100 rounded-lg'>
+      <div className='mt-6 p-4 bg-sky-500/15 rounded-lg'>
         <h3 className='font-semibold'>Recomendações</h3>
         {metrics?.alerts?.length ? (
           <ul className='list-disc ml-5'>
@@ -128,7 +128,7 @@ export default function CostOptimization() {
             ))}
           </ul>
         ) : (
-          <p className='text-sm text-gray-700'>Nenhuma recomendação crítica no momento.</p>
+          <p className='text-sm text-zinc-300'>Nenhuma recomendação crítica no momento.</p>
         )}
       </div>
     </div>

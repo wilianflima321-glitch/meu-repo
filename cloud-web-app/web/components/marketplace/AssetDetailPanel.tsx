@@ -12,6 +12,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
@@ -194,9 +195,11 @@ function ImageGallery({ images }: { images: string[] }) {
         <div className="space-y-4">
             {/* Main image */}
             <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                <img
+                <Image
                     src={images[currentIndex]}
                     alt={`Preview ${currentIndex + 1}`}
+                    fill
+                    unoptimized
                     className="w-full h-full object-cover"
                 />
                 
@@ -241,9 +244,12 @@ function ImageGallery({ images }: { images: string[] }) {
                                     : "border-transparent hover:border-muted-foreground/50"
                             )}
                         >
-                            <img
+                            <Image
                                 src={image}
                                 alt={`Thumbnail ${index + 1}`}
+                                width={80}
+                                height={56}
+                                unoptimized
                                 className="w-full h-full object-cover"
                             />
                         </button>

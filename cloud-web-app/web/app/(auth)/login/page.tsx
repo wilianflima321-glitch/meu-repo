@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -51,8 +51,8 @@ export default function LoginPage() {
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="relative">
-          <div className="w-16 h-16 border-4 border-violet-500/20 rounded-full" />
-          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-16 h-16 border-4 border-blue-500/20 rounded-full" />
+          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     }>
@@ -84,8 +84,10 @@ function LoginForm() {
   const handleOAuthLogin = (provider: string) => {
     window.location.href = `/api/auth/oauth/${provider}`;
   };
+  const showDevAccess =
+    process.env.NODE_ENV !== 'production' &&
+    process.env.NEXT_PUBLIC_ENABLE_DEV_ACCESS === '1';
 
-  // DEV MODE: Acesso direto sem login (remover em produção)
   const handleDevAccess = () => {
     router.push('/dashboard');
   };
@@ -94,10 +96,10 @@ function LoginForm() {
     <div className="relative min-h-screen overflow-hidden bg-black text-white">
       {/* Animated Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/50 via-black to-purple-950/30" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-[128px] animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px] animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/10 rounded-full blur-[200px]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-950/50 via-black to-cyan-950/30" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-[128px] animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[200px]" />
         {/* Grid pattern */}
         <div 
           className="absolute inset-0 opacity-20"
@@ -116,46 +118,46 @@ function LoginForm() {
             {/* Logo */}
             <div className="flex items-center gap-4 mb-12">
               <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-violet-500/40">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 via-cyan-500 to-sky-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/40">
                   <span className="text-2xl font-black tracking-tight">A</span>
                 </div>
-                <div className="absolute -inset-1 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl blur opacity-40 -z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-br from-blue-500 via-cyan-500 to-sky-500 rounded-2xl blur opacity-40 -z-10" />
               </div>
               <div>
-                <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-violet-200 to-purple-200 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
                   Aethel Engine
                 </h1>
-                <p className="text-sm text-violet-300/80 font-medium">Game Development Studio</p>
+                <p className="text-sm text-blue-300/80 font-medium">Game Development Studio</p>
               </div>
             </div>
 
             {/* Tagline */}
             <h2 className="text-4xl xl:text-5xl font-bold leading-tight mb-6">
               Crie jogos{' '}
-              <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-                incríveis
+              <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
+                incriveis
               </span>
               <br />
               sem limites
             </h2>
             <p className="text-lg text-slate-400 mb-12 leading-relaxed">
               A plataforma completa para desenvolvedores de jogos. Editor visual, 
-              IA integrada, colaboração em tempo real e muito mais.
+              IA integrada, colaboracao em tempo real e muito mais.
             </p>
 
             {/* Features */}
             <div className="space-y-6">
               <div className="flex items-start gap-4 group">
-                <div className="w-12 h-12 bg-violet-500/10 border border-violet-500/20 rounded-xl flex items-center justify-center text-violet-400 group-hover:bg-violet-500/20 group-hover:border-violet-500/40 transition-all">
+                <div className="w-12 h-12 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 group-hover:border-blue-500/40 transition-all">
                   <FeatureIcon1 />
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-1">Motor de Alta Performance</h3>
-                  <p className="text-sm text-slate-400">Renderização AAA com ray tracing e física avançada</p>
+                  <p className="text-sm text-slate-400">Renderizacao AAA com ray tracing e fisica avancada</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 group">
-                <div className="w-12 h-12 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 group-hover:bg-purple-500/20 group-hover:border-purple-500/40 transition-all">
+                <div className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/40 transition-all">
                   <FeatureIcon2 />
                 </div>
                 <div>
@@ -164,11 +166,11 @@ function LoginForm() {
                 </div>
               </div>
               <div className="flex items-start gap-4 group">
-                <div className="w-12 h-12 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl flex items-center justify-center text-fuchsia-400 group-hover:bg-fuchsia-500/20 group-hover:border-fuchsia-500/40 transition-all">
+                <div className="w-12 h-12 bg-sky-500/10 border border-sky-500/20 rounded-xl flex items-center justify-center text-sky-400 group-hover:bg-sky-500/20 group-hover:border-sky-500/40 transition-all">
                   <FeatureIcon3 />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Colaboração em Tempo Real</h3>
+                  <h3 className="font-semibold text-white mb-1">Colaboracao em Tempo Real</h3>
                   <p className="text-sm text-slate-400">Trabalhe com sua equipe simultaneamente no mesmo projeto</p>
                 </div>
               </div>
@@ -182,7 +184,7 @@ function LoginForm() {
             {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-10">
               <div className="inline-flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-cyan-500 to-sky-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
                   <span className="text-xl font-black">A</span>
                 </div>
                 <span className="text-2xl font-black">Aethel Engine</span>
@@ -191,7 +193,7 @@ function LoginForm() {
 
             {/* Login Card */}
             <div className="relative">
-              <div className="absolute -inset-px bg-gradient-to-b from-violet-500/20 via-transparent to-purple-500/20 rounded-3xl" />
+              <div className="absolute -inset-px bg-gradient-to-b from-blue-500/20 via-transparent to-cyan-500/20 rounded-3xl" />
               <div className="relative bg-slate-950/80 backdrop-blur-2xl rounded-3xl p-8 border border-white/5">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -199,32 +201,33 @@ function LoginForm() {
                   <p className="text-slate-400">Entre para continuar criando</p>
                 </div>
 
-                {/* DEV MODE Button - Remover depois */}
-                <button
-                  onClick={handleDevAccess}
-                  className="w-full mb-6 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  🚀 Acesso Direto (Dev Mode)
-                </button>
+                {showDevAccess && (
+                  <button
+                    onClick={handleDevAccess}
+                    className="w-full mb-6 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Acesso direto (dev)
+                  </button>
+                )}
 
                 <div className="relative mb-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/10" />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="px-3 bg-slate-950 text-xs text-slate-500 uppercase tracking-wider">ou faça login</span>
+                    <span className="px-3 bg-slate-950 text-xs text-slate-500 uppercase tracking-wider">ou faca login</span>
                   </div>
                 </div>
 
                 {/* OAuth Error */}
                 {oauthError && (
                   <div className="mb-6 p-4 text-sm text-center text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl backdrop-blur">
-                    {oauthError === 'invalid_state' && 'Sessão expirada. Tente novamente.'}
-                    {oauthError === 'no_email' && 'Não foi possível obter o e-mail do provedor.'}
-                    {oauthError === 'oauth_failed' && 'Falha na autenticação. Tente novamente.'}
+                    {oauthError === 'invalid_state' && 'Sessao expirada. Tente novamente.'}
+                    {oauthError === 'no_email' && 'Nao foi possivel obter o e-mail do provedor.'}
+                    {oauthError === 'oauth_failed' && 'Falha na autenticacao. Tente novamente.'}
                     {!['invalid_state', 'no_email', 'oauth_failed'].includes(oauthError) && `Erro: ${oauthError}`}
                   </div>
                 )}
@@ -279,7 +282,7 @@ function LoginForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu@email.com"
-                      className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                      className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                     />
                   </div>
                   <div>
@@ -287,7 +290,7 @@ function LoginForm() {
                       <label htmlFor="password" className="block text-sm font-medium text-slate-300">
                         Senha
                       </label>
-                      <Link href="/forgot-password" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
+                      <Link href="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                         Esqueceu?
                       </Link>
                     </div>
@@ -300,8 +303,8 @@ function LoginForm() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all pr-12"
+                        placeholder="********"
+                        className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all pr-12"
                       />
                       <button
                         type="button"
@@ -331,7 +334,7 @@ function LoginForm() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="relative w-full h-12 px-4 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:via-purple-500 hover:to-fuchsia-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 overflow-hidden group"
+                    className="relative w-full h-12 px-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 hover:from-blue-500 hover:via-cyan-500 hover:to-sky-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 overflow-hidden group"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                     {isLoading ? (
@@ -351,8 +354,8 @@ function LoginForm() {
                 {/* Sign up link */}
                 <p className="mt-8 text-center text-slate-400 text-sm">
                   Novo por aqui?{' '}
-                  <Link href="/register" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
-                    Crie sua conta grátis
+                  <Link href="/register" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
+                    Crie sua conta gratis
                   </Link>
                 </p>
               </div>
@@ -360,7 +363,7 @@ function LoginForm() {
 
             {/* Footer */}
             <p className="mt-8 text-center text-slate-600 text-xs">
-              Ao continuar, você concorda com nossos{' '}
+              Ao continuar, voce concorda com nossos{' '}
               <Link href="/terms" className="text-slate-500 hover:text-white transition-colors">Termos</Link>
               {' '}e{' '}
               <Link href="/privacy" className="text-slate-500 hover:text-white transition-colors">Privacidade</Link>
@@ -371,3 +374,5 @@ function LoginForm() {
     </div>
   );
 }
+
+

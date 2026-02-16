@@ -32,7 +32,7 @@ interface InlineEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedCode: string;
-  onApply: (newCode: string) => void;
+  onApply: (newCode: string) => boolean | Promise<boolean>;
   language?: string;
   filePath?: string;
   cursorPosition?: { line: number; column: number };
@@ -81,6 +81,16 @@ export function InlineEditModal({
     }
   }, [isOpen]);
 
+  const handleApply = useCallback(async () => {
+    if (!suggestion) return;
+    const applied = await Promise.resolve(onApply(suggestion.modified));
+    if (!applied) {
+      setError('Aplicação bloqueada pela validação determinística. Revise o diff e tente novamente.');
+      return;
+    }
+    onClose();
+  }, [suggestion, onApply, onClose]);
+
   // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -88,7 +98,7 @@ export function InlineEditModal({
         onClose();
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && suggestion) {
-        handleApply();
+        void handleApply();
       }
     };
 
@@ -96,7 +106,7 @@ export function InlineEditModal({
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen, suggestion, onClose]);
+  }, [isOpen, suggestion, onClose, handleApply]);
 
   const handleSubmit = useCallback(async () => {
     if (!instruction.trim() && !selectedCode) return;
@@ -139,13 +149,6 @@ export function InlineEditModal({
     }
   }, [instruction, selectedCode, language, filePath, cursorPosition]);
 
-  const handleApply = () => {
-    if (suggestion) {
-      onApply(suggestion.modified);
-      onClose();
-    }
-  };
-
   const handleQuickAction = (prompt: string) => {
     setInstruction(prompt);
     // Auto-submit
@@ -173,7 +176,7 @@ export function InlineEditModal({
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#313244]">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-400" />
+              <Sparkles className="h-5 w-5 text-blue-400" />
               <span className="text-sm font-medium text-white">Edição Inline</span>
               <kbd className="px-1.5 py-0.5 text-xs bg-[#313244] text-[#cdd6f4] rounded">
                 ⌘K
@@ -237,7 +240,7 @@ export function InlineEditModal({
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isProcessing || (!instruction.trim() && !selectedCode)}
-                className="absolute bottom-2 right-2 bg-purple-600 hover:bg-purple-700"
+                className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700"
               >
                 {isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -337,7 +340,7 @@ export function InlineEditModal({
                     Cancelar
                   </Button>
                   <Button
-                    onClick={handleApply}
+                    onClick={() => void handleApply()}
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
                     <Check className="h-4 w-4 mr-2" />

@@ -1101,7 +1101,7 @@ export function SaveProvider({
 }) {
   const value = useMemo(() => ({
     manager: new SaveManager(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     if (value.manager.getConfig().autosaveEnabled) {
@@ -1219,7 +1219,7 @@ export function usePlayTime() {
   return playTime;
 }
 
-export default {
+const __defaultExport = {
   SaveManager,
   JSONSerializer,
   CompressedSerializer,
@@ -1232,3 +1232,5 @@ export default {
   useSaveOperations,
   usePlayTime,
 };
+
+export default __defaultExport;

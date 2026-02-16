@@ -106,8 +106,8 @@ const AGENTS: Record<AgentRole, AgentConfig> = {
     name: 'Arquiteto',
     title: 'AI Architect',
     icon: <Brain className="w-5 h-5" />,
-    color: 'text-purple-400',
-    bgColor: 'bg-purple-500/20',
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
     description: 'Planeja a estrutura e arquitetura da solução',
   },
   engineer: {
@@ -327,7 +327,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
         {isProcessing && (
           <div className="mt-3 h-1 bg-zinc-700 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 animate-pulse"
+              className="h-full bg-gradient-to-r from-blue-500 via-blue-500 to-green-500 animate-pulse"
               style={{ 
                 width: `${Math.min(((currentStepIndex + 1) / task.steps.length) * 100, 100)}%`,
                 transition: 'width 0.5s ease-out'
@@ -429,9 +429,9 @@ function MessageBubble({ message, onApply, onReject, onRetry }: MessageBubblePro
   if (message.role === 'user') {
     return (
       <div className="flex justify-end mb-4">
-        <div className="max-w-[80%] px-4 py-3 bg-purple-600 rounded-2xl rounded-br-sm">
+        <div className="max-w-[80%] px-4 py-3 bg-blue-600 rounded-2xl rounded-br-sm">
           <p className="text-white">{message.content}</p>
-          <span className="text-xs text-purple-200 mt-1 block">
+          <span className="text-xs text-blue-200 mt-1 block">
             {message.timestamp.toLocaleTimeString()}
           </span>
         </div>
@@ -723,8 +723,8 @@ export function SystemPanel() {
         {isProcessing && (
           <div className="flex items-center gap-3 text-zinc-400">
             <div className="flex -space-x-1">
-              <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center animate-pulse">
-                <Brain className="w-3 h-3 text-purple-400" />
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center animate-pulse">
+                <Brain className="w-3 h-3 text-blue-400" />
               </div>
               <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center animate-pulse delay-100">
                 <Code2 className="w-3 h-3 text-blue-400" />
@@ -759,7 +759,7 @@ export function SystemPanel() {
             className={`
               p-3 rounded-xl transition-all
               ${input.trim() && !isProcessing
-                ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                ? 'bg-blue-600 hover:bg-blue-500 text-white'
                 : 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
               }
             `}

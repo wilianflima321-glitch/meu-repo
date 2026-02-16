@@ -73,9 +73,9 @@ export default function AdminAI() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Administração da IA Aethel</h1>
-          <p className='text-sm text-gray-500'>Controle de modelo, custos e limites por ambiente.</p>
+          <p className='text-sm text-zinc-500'>Controle de modelo, custos e limites por ambiente.</p>
           {lastUpdated && (
-            <p className='text-xs text-gray-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <div className='flex gap-2'>
@@ -89,7 +89,7 @@ export default function AdminAI() {
           </select>
           <button
             onClick={fetchSettings}
-            className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
+            className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
           >
             Atualizar
           </button>
@@ -97,15 +97,15 @@ export default function AdminAI() {
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
           {error}
         </div>
       )}
 
-      <div className='bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Status</h3>
-          <p className={`text-2xl font-bold ${aiSettings.enabled ? 'text-green-600' : 'text-gray-500'}`}>
+          <p className={`text-2xl font-bold ${aiSettings.enabled ? 'text-green-600' : 'text-zinc-500'}`}>
             {statusLabel}
           </p>
         </div>
@@ -119,10 +119,10 @@ export default function AdminAI() {
         </div>
       </div>
 
-      <div className='bg-white p-6 rounded-lg shadow'>
+      <div className='bg-zinc-900/70 p-6 rounded-lg shadow'>
         <div className='mb-4 flex items-center justify-between'>
           <h2 className='text-xl font-semibold'>Configurações</h2>
-          {loading && <span className='text-xs text-gray-500'>Carregando...</span>}
+          {loading && <span className='text-xs text-zinc-500'>Carregando...</span>}
         </div>
 
         <div className='mb-4'>

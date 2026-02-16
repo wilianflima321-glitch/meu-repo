@@ -320,20 +320,6 @@ export const AethelAPIClient = {
 	deleteAccount: async () => {
 		return requestJSON<{ success: boolean }>('/auth/delete-account', { method: 'DELETE' });
 	},
-	
-	// ========== Sessions ==========
-	
-	getSessions: async () => {
-		return requestJSON<{ sessions: any[] }>('/auth/sessions');
-	},
-	
-	revokeSession: async (sessionId: string) => {
-		return requestJSON<{ success: boolean }>(`/auth/sessions/${encodeURIComponent(sessionId)}`, { method: 'DELETE' });
-	},
-	
-	revokeAllSessions: async () => {
-		return requestJSON<{ success: boolean }>('/auth/sessions', { method: 'DELETE' });
-	},
 };
 
 export default API_BASE;

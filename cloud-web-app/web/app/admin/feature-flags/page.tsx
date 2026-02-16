@@ -95,18 +95,18 @@ export default function FeatureFlagsAdmin() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Flags de recursos</h1>
-          <p className='text-sm text-gray-500'>Controle de distribuição e habilitação por ambiente.</p>
+          <p className='text-sm text-zinc-500'>Controle de distribuição e habilitação por ambiente.</p>
         </div>
-        <button onClick={fetchFlags} className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'>Atualizar</button>
+        <button onClick={fetchFlags} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>Atualizar</button>
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
           {error}
         </div>
       )}
 
-      <div className='bg-white p-4 rounded-lg shadow mb-6'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
         <h2 className='text-xl font-semibold mb-4'>Nova flag</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <input
@@ -155,7 +155,7 @@ export default function FeatureFlagsAdmin() {
         </div>
       </div>
 
-      <div className='bg-white p-4 rounded-lg shadow'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow'>
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-xl font-semibold'>Flags ativas</h2>
           <input
@@ -166,13 +166,13 @@ export default function FeatureFlagsAdmin() {
           />
         </div>
         {loading ? (
-          <p className='text-sm text-gray-500'>Carregando flags...</p>
+          <p className='text-sm text-zinc-500'>Carregando flags...</p>
         ) : filtered.length === 0 ? (
-          <p className='text-sm text-gray-500'>Nenhuma flag encontrada.</p>
+          <p className='text-sm text-zinc-500'>Nenhuma flag encontrada.</p>
         ) : (
           <table className='w-full table-auto'>
             <thead>
-              <tr className='bg-gray-100'>
+              <tr className='bg-zinc-800/70'>
                 <th className='p-2 text-left'>Chave</th>
                 <th className='p-2 text-left'>Nome</th>
                 <th className='p-2 text-left'>Tipo</th>
@@ -191,14 +191,14 @@ export default function FeatureFlagsAdmin() {
                     {flag.type === 'percentage' ? `${flag.percentage ?? 0}%` : '—'}
                   </td>
                   <td className='p-2'>
-                    <span className='text-xs px-2 py-1 rounded bg-gray-100 text-gray-600'>
+                    <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>
                       {flag.enabled ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
                   <td className='p-2'>
                     <button
                       onClick={() => toggleFlag(flag.key, flag.enabled)}
-                      className='px-2 py-1 bg-gray-900 text-white rounded text-sm'
+                      className='px-2 py-1 bg-zinc-900 text-white rounded text-sm'
                     >
                       {flag.enabled ? 'Desativar' : 'Ativar'}
                     </button>

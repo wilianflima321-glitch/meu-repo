@@ -1319,7 +1319,7 @@ export function usePhysics(settings?: Partial<PhysicsSettings>) {
   };
 }
 
-export default {
+const __defaultExport = {
   PhysicsWorld,
   RigidBody,
   Constraint,
@@ -1327,3 +1327,5 @@ export default {
   AABB,
   usePhysics,
 };
+
+export default __defaultExport;

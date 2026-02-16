@@ -116,7 +116,7 @@ const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
     description: 'Designs system architecture, plans implementation strategies, and creates technical specifications.',
     status: 'idle',
     icon: '🏗️',
-    color: 'indigo',
+    color: 'blue',
     capabilities: ['System Design', 'API Planning', 'Database Schema', 'Component Structure'],
   },
   {
@@ -134,7 +134,7 @@ const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
     description: 'Searches documentation, finds solutions, and gathers relevant information for tasks.',
     status: 'idle',
     icon: '🔬',
-    color: 'purple',
+    color: 'cyan',
     capabilities: ['Web Search', 'Doc Analysis', 'API Research', 'Dependency Check'],
   },
   {
@@ -170,7 +170,7 @@ const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
     description: 'Coordinates multiple agents, manages workflows, and ensures task completion.',
     status: 'idle',
     icon: '🎭',
-    color: 'pink',
+    color: 'cyan',
     capabilities: ['Task Routing', 'Agent Coordination', 'Priority Management', 'Workflow'],
   },
   {
@@ -179,7 +179,7 @@ const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
     description: 'Creative ideation agent that explores innovative solutions and generates new concepts.',
     status: 'idle',
     icon: '✨',
-    color: 'violet',
+    color: 'blue',
     capabilities: ['Creative Ideas', 'UI/UX Concepts', 'Innovation', 'Brainstorming'],
   },
 ]
@@ -192,7 +192,7 @@ function getStatusColor(status: AgentStatus): string {
     case 'paused': return 'text-amber-400'
     case 'completed': return 'text-blue-400'
     case 'failed': return 'text-red-400'
-    case 'waiting': return 'text-purple-400'
+    case 'waiting': return 'text-cyan-400'
     default: return 'text-slate-400'
   }
 }
@@ -216,16 +216,13 @@ function formatDuration(ms: number): string {
 
 function getAgentColorClasses(color: string): { bg: string; border: string; text: string } {
   const colors: Record<string, { bg: string; border: string; text: string }> = {
-    indigo: { bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', text: 'text-indigo-400' },
+    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
     emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400' },
-    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400' },
+    cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400' },
     red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400' },
     amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400' },
-    cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400' },
-    pink: { bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-400' },
-    violet: { bg: 'bg-violet-500/10', border: 'border-violet-500/30', text: 'text-violet-400' },
   }
-  return colors[color] || colors.indigo
+  return colors[color] || colors.blue
 }
 
 // ============= Sub-Components =============
@@ -395,7 +392,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
                 <div className="text-xs text-slate-400">Avg Duration</div>
               </div>
               <div className="p-2 bg-slate-800/50 rounded text-center">
-                <div className="text-lg font-semibold text-purple-400">{(agent.metrics.tokensUsed / 1000).toFixed(1)}k</div>
+                <div className="text-lg font-semibold text-cyan-400">{(agent.metrics.tokensUsed / 1000).toFixed(1)}k</div>
                 <div className="text-xs text-slate-400">Tokens Used</div>
               </div>
             </div>
@@ -514,7 +511,7 @@ function WorkflowBuilder({
           <span className="text-xs text-slate-400">Workflow Steps</span>
           <button
             onClick={addStep}
-            className="flex items-center gap-1 px-2 py-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded"
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded"
           >
             <Plus className="w-3 h-3" />
             Add Step
@@ -569,7 +566,7 @@ function WorkflowBuilder({
         className={`
           w-full py-2 rounded font-medium text-sm
           ${steps.length > 0 && objective
-            ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+            ? 'bg-blue-600 hover:bg-blue-500 text-white'
             : 'bg-slate-700 text-slate-500 cursor-not-allowed'
           }
         `}
@@ -652,9 +649,13 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
   
   // Create workflow
   const handleCreateWorkflow = useCallback((steps: WorkflowStepConfig[]) => {
-    console.log('Creating workflow with steps:', steps)
-    // TODO: Implement actual workflow creation
-  }, [])
+    const workflowSummary = steps
+      .map((step, index) => `${index + 1}. ${step.agent.name}: ${step.prompt}`)
+      .join('\n')
+    onSendToChat?.(
+      `Workflow request captured (${steps.length} steps).\n${workflowSummary}\n\nStatus: WORKFLOW_EXECUTION_GATED (P1).`
+    )
+  }, [onSendToChat])
   
   const runningAgents = agents.filter(a => a.status === 'running').length
   const allHistory = agents.flatMap(a => a.taskHistory)
@@ -664,7 +665,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-indigo-400" />
+          <Bot className="w-5 h-5 text-blue-400" />
           <span className="font-semibold text-white">AI Agents</span>
           {runningAgents > 0 && (
             <span className="px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 rounded-full">
@@ -702,7 +703,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             className={`
               flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors capitalize
               ${activeTab === tab
-                ? 'bg-indigo-600 text-white'
+                ? 'bg-blue-600 text-white'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }
             `}
@@ -759,7 +760,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             Chat with Agents
           </button>
           <button
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded text-sm text-white"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm text-white"
           >
             <Zap className="w-4 h-4" />
             Quick Task
@@ -835,7 +836,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
               </button>
               <button
                 onClick={() => setShowAgentConfig(null)}
-                className="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded text-sm text-white"
+                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm text-white"
               >
                 Save Changes
               </button>

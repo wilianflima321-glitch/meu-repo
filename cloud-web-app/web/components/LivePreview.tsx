@@ -196,7 +196,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
       {/* Magic Wand Button */}
       <button
         onClick={handleMagicWandClick}
-        className={`absolute top-4 left-4 p-3 rounded-full ${magicWandActive ? 'bg-purple-600' : 'bg-gray-700'} hover:bg-purple-500 transition`}
+        className={`absolute top-4 left-4 p-3 rounded-full ${magicWandActive ? 'bg-blue-600' : 'bg-gray-700'} hover:bg-blue-500 transition`}
         title="Magic Wand - Select areas to improve"
       >
         <span className="text-xs font-semibold">Tools</span>

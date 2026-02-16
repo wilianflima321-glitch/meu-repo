@@ -772,8 +772,9 @@ export function LocalizationProvider({
   }, [translations]);
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -851,7 +852,7 @@ export function useTranslation(namespace = 'default') {
   
   const t = useCallback((key: string, options?: Omit<FormatOptions, 'namespace'>) => {
     return manager.t(key, { ...options, namespace });
-  }, [manager, namespace, locale]);
+  }, [manager, namespace]);
   
   const exists = useCallback((key: string) => {
     return manager.exists(key, namespace);
@@ -861,13 +862,13 @@ export function useTranslation(namespace = 'default') {
 }
 
 export function useFormattedNumber(value: number, options?: Intl.NumberFormatOptions): string {
-  const { formatNumber, locale } = useLocalization();
-  return useMemo(() => formatNumber(value, options), [value, options, locale, formatNumber]);
+  const { formatNumber } = useLocalization();
+  return useMemo(() => formatNumber(value, options), [value, options, formatNumber]);
 }
 
 export function useFormattedDate(date: Date | number, options?: Intl.DateTimeFormatOptions): string {
-  const { formatDate, locale } = useLocalization();
-  return useMemo(() => formatDate(date, options), [date, options, locale, formatDate]);
+  const { formatDate } = useLocalization();
+  return useMemo(() => formatDate(date, options), [date, options, formatDate]);
 }
 
 // ============================================================================
@@ -883,7 +884,7 @@ export function withLocalization<P extends object>(
   };
 }
 
-export default {
+const __defaultExport = {
   LocalizationManager,
   TranslationKeyBuilder,
   LocalizationProvider,
@@ -895,3 +896,5 @@ export default {
   DEFAULT_LOCALE_CONFIGS,
   PLURAL_RULES,
 };
+
+export default __defaultExport;

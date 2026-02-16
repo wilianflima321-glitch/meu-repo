@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 const SparklesIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,10 +15,10 @@ const CheckIcon = () => (
 const services = [
   { name: 'API Principal', status: 'operational', uptime: '99.99%' },
   { name: 'Editor Web (Monaco)', status: 'operational', uptime: '99.98%' },
-  { name: 'Serviço de IA/Copilot', status: 'operational', uptime: '99.95%' },
-  { name: 'Sistema de Autenticação', status: 'operational', uptime: '99.99%' },
+  { name: 'Servico de IA/Copilot', status: 'operational', uptime: '99.95%' },
+  { name: 'Sistema de Autenticacao', status: 'operational', uptime: '99.99%' },
   { name: 'CDN & Assets', status: 'operational', uptime: '100%' },
-  { name: 'WebSocket (Colaboração)', status: 'operational', uptime: '99.97%' },
+  { name: 'WebSocket (Colaboracao)', status: 'operational', uptime: '99.97%' },
   { name: 'Build & Deploy', status: 'operational', uptime: '99.92%' },
   { name: 'Banco de Dados', status: 'operational', uptime: '99.99%' },
 ];
@@ -47,7 +47,7 @@ export default function StatusPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
               <SparklesIcon />
             </div>
             <span className="text-xl font-bold">Aethel</span>
@@ -57,7 +57,7 @@ export default function StatusPage() {
               Docs
             </Link>
             <Link href="/pricing" className="text-slate-400 hover:text-white transition-colors">
-              Preços
+              Precos
             </Link>
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function StatusPage() {
               Status do Sistema
             </h1>
             <p className="text-slate-400 text-lg">
-              Monitoramento em tempo real de todos os serviços Aethel
+              Monitoramento em tempo real de todos os servicos Aethel
             </p>
           </div>
 
@@ -96,10 +96,10 @@ export default function StatusPage() {
               </div>
               <div>
                 <h2 className={`text-xl font-bold ${allOperational ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {allOperational ? 'Todos os sistemas operacionais' : 'Alguns sistemas com degradação'}
+                  {allOperational ? 'Todos os sistemas operacionais' : 'Alguns sistemas com degradacao'}
                 </h2>
                 <p className="text-slate-400 text-sm">
-                  Última verificação: {new Date().toLocaleTimeString('pt-BR')}
+                  Ultima verificacao: {new Date().toLocaleTimeString('pt-BR')}
                 </p>
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function StatusPage() {
           {/* Services List */}
           <div className="rounded-2xl border border-white/10 overflow-hidden mb-8">
             <div className="px-6 py-4 bg-white/5 border-b border-white/10">
-              <h3 className="font-semibold">Serviços</h3>
+              <h3 className="font-semibold">Servicos</h3>
             </div>
             <div className="divide-y divide-white/5">
               {services.map((service, i) => (
@@ -142,7 +142,7 @@ export default function StatusPage() {
                         ? 'bg-amber-500/20 text-amber-400'
                         : 'bg-red-500/20 text-red-400'
                     }`}>
-                      {service.status === 'operational' ? 'Operacional' : service.status === 'degraded' ? 'Degradado' : 'Indisponível'}
+                      {service.status === 'operational' ? 'Operacional' : service.status === 'degraded' ? 'Degradado' : 'Indisponivel'}
                     </span>
                   </div>
                 </div>
@@ -158,7 +158,7 @@ export default function StatusPage() {
             <div className="p-6">
               {incidents.length === 0 ? (
                 <p className="text-slate-500 text-center py-8">
-                  Nenhum incidente nos últimos 90 dias 🎉
+                  Nenhum incidente nos últimos 90 dias.
                 </p>
               ) : (
                 <div className="space-y-4">
@@ -185,15 +185,15 @@ export default function StatusPage() {
 
           {/* Subscribe */}
           <div className="mt-8 p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
-            <h3 className="font-semibold text-white mb-2">Receba atualizações de status</h3>
+            <h3 className="font-semibold text-white mb-2">Receba atualizacoes de status</h3>
             <p className="text-sm text-slate-400 mb-4">
-              Seja notificado quando houver problemas ou manutenções programadas.
+              Seja notificado quando houver problemas ou manutencoes programadas.
             </p>
             <div className="flex gap-3 max-w-md mx-auto">
               <input
                 type="email"
                 placeholder="seu@email.com"
-                className="flex-1 h-11 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="flex-1 h-11 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
               />
               <button className="h-11 px-6 bg-white text-black font-semibold rounded-xl hover:bg-slate-200 transition-colors">
                 Inscrever
@@ -206,9 +206,9 @@ export default function StatusPage() {
       {/* Footer */}
       <footer className="border-t border-white/5 py-8 px-6">
         <div className="max-w-3xl mx-auto flex items-center justify-between text-sm text-slate-500">
-          <p>© 2026 Aethel Engine</p>
+          <p>&copy; 2026 Aethel Engine</p>
           <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-white transition-colors">Início</Link>
+            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
             <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
             <Link href="/contact-sales" className="hover:text-white transition-colors">Contato</Link>
           </div>
@@ -217,3 +217,7 @@ export default function StatusPage() {
     </div>
   );
 }
+
+
+
+

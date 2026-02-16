@@ -14,6 +14,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import useSWR from 'swr';
 import {
@@ -200,9 +201,12 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
           <div className="flex items-center gap-2">
             {/* Author avatar */}
             {commit.author.avatar ? (
-              <img 
-                src={commit.author.avatar} 
+              <Image
+                src={commit.author.avatar}
                 alt={commit.author.name}
+                width={32}
+                height={32}
+                unoptimized
                 className="w-8 h-8 rounded-full"
               />
             ) : (

@@ -61,7 +61,7 @@ export function CreditDisplay({ collapsed }: CreditDisplayProps) {
     <div className="p-4 border-t border-slate-800 bg-slate-900/50">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-          <Zap className="w-3 h-3 text-indigo-400" />
+          <Zap className="w-3 h-3 text-sky-400" />
           Créditos Aethel
         </h4>
         {isLoading ? (
@@ -76,7 +76,7 @@ export function CreditDisplay({ collapsed }: CreditDisplayProps) {
       </div>
       
       <div className="space-y-1">
-        <Progress value={percent} className="h-1.5 bg-slate-800" indicatorClassName="bg-gradient-to-r from-amber-500 to-indigo-600" />
+        <Progress value={percent} className="h-1.5 bg-slate-800" indicatorClassName="bg-gradient-to-r from-amber-500 to-sky-600" />
         <div className="flex justify-between text-[10px] text-slate-500">
           <span>{percent.toFixed(0)}% Utilizado</span>
           <span className="text-amber-500/80 hover:text-amber-400 cursor-pointer transition-colors">Comprar Mais</span>

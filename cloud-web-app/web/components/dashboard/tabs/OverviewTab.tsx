@@ -64,7 +64,7 @@ function StatCard({
 }) {
   return (
     <Card variant="elevated" padding="md" className="relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
       
       <div className="flex items-start justify-between">
         <div>
@@ -158,14 +158,14 @@ export function OverviewTab({
           title="Projetos Ativos"
           value={currentStats.projects}
           change={currentStats.projectsChange}
-          icon={<FolderKanban className="w-6 h-6 text-indigo-400" />}
+          icon={<FolderKanban className="w-6 h-6 text-sky-400" />}
           trend={currentStats.projectsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
           title="Sessões de Chat"
           value={currentStats.chatSessions}
           change={currentStats.chatSessionsChange}
-          icon={<MessageSquare className="w-6 h-6 text-purple-400" />}
+          icon={<MessageSquare className="w-6 h-6 text-blue-400" />}
           trend={currentStats.chatSessionsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
@@ -206,11 +206,11 @@ export function OverviewTab({
                   onClick={() => onOpenProject?.(project.id)}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-colors text-left group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
                     {project.type === 'unreal' ? (
-                      <Code className="w-5 h-5 text-indigo-400" />
+                      <Code className="w-5 h-5 text-sky-400" />
                     ) : (
-                      <FileCode className="w-5 h-5 text-indigo-400" />
+                      <FileCode className="w-5 h-5 text-sky-400" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -248,7 +248,7 @@ export function OverviewTab({
                   key={activity.id}
                   className="flex items-start gap-3 text-sm"
                 >
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2" />
+                  <div className="w-2 h-2 rounded-full bg-sky-500 mt-2" />
                   <div className="flex-1">
                     <p className="text-slate-200">
                       <span className="font-medium">{activity.action}</span>{' '}

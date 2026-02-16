@@ -1,110 +1,95 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/auth-server';
-import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
+import { getFileSystemRuntime, type FileInfo } from '@/lib/server/filesystem-runtime'
+import {
+  getScopedProjectId,
+  resolveScopedWorkspacePath,
+  toVirtualWorkspacePath,
+} from '@/lib/server/workspace-scope'
+import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
 
-/**
- * GET /api/files/list?projectId=xxx&path=/folder
- * 
- * Lista conteúdo de um diretório
- */
-export async function GET(req: NextRequest) {
+export const dynamic = 'force-dynamic'
+
+function mapToTreeNode(entry: FileInfo, scopedRoot: string) {
+  return {
+    name: entry.name,
+    path: toVirtualWorkspacePath(entry.path, scopedRoot),
+    type: entry.type === 'directory' ? 'directory' : 'file',
+    size: entry.size,
+    modified: entry.modified,
+    language: entry.extension || null,
+  }
+}
+
+async function handleList(
+  request: NextRequest,
+  bodyPath?: string,
+  bodyRecursive?: boolean,
+  body?: Record<string, unknown>
+) {
+  const user = requireAuth(request)
+  await requireEntitlementsForUser(user.userId)
+  const projectId = getScopedProjectId(request, body)
+
+  const url = new URL(request.url)
+  const path = (bodyPath || url.searchParams.get('path') || '/').trim() || '/'
+  const recursive = typeof bodyRecursive === 'boolean' ? bodyRecursive : url.searchParams.get('recursive') === 'true'
+
+  const runtime = getFileSystemRuntime()
+  const { absolutePath: resolvedPath, root: scopedRoot } = resolveScopedWorkspacePath({
+    userId: user.userId,
+    projectId,
+    requestedPath: path,
+  })
+  const result = await runtime.listDirectory(resolvedPath, {
+    recursive,
+    includeHidden: false,
+  })
+
+  const children = result.entries.map((entry) => mapToTreeNode(entry, scopedRoot))
+  const telemetryHeaders = trackCompatibilityRouteHit({
+    request,
+    route: '/api/files/list',
+    replacement: '/api/files/fs?action=list',
+    status: 'compatibility-wrapper',
+  })
+
+  return NextResponse.json(
+    {
+      path: toVirtualWorkspacePath(result.path, scopedRoot),
+      total: result.total,
+      items: children,
+      children,
+      files: children,
+      projectId,
+      runtime: 'filesystem-runtime',
+      authority: 'canonical',
+      compatibilityRoute: '/api/files/list',
+      canonicalEndpoint: '/api/files/fs',
+    },
+    { headers: telemetryHeaders }
+  )
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const user = requireAuth(req);
-    const { searchParams } = new URL(req.url);
-    const projectId = searchParams.get('projectId');
-    const path = searchParams.get('path') || '';
-
-    if (!projectId) {
-      return NextResponse.json(
-        { error: 'projectId é obrigatório' },
-        { status: 400 }
-      );
-    }
-
-    // Verificar propriedade do projeto
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, userId: user.userId },
-    });
-
-    if (!project) {
-      return NextResponse.json(
-        { error: 'Projeto não encontrado' },
-        { status: 404 }
-      );
-    }
-
-    // Buscar arquivos no path especificado
-    const allFiles = await prisma.file.findMany({
-      where: {
-        projectId,
-        ...(path ? {
-          path: {
-            startsWith: path.endsWith('/') ? path : `${path}/`,
-          },
-        } : {}),
-      },
-      orderBy: { path: 'asc' },
-    });
-
-    // Filtrar apenas items no nível atual
-    const normalizedPath = path.replace(/\/$/, '');
-    const items = allFiles
-      .filter(file => {
-        const relativePath = normalizedPath 
-          ? file.path.slice(normalizedPath.length + 1) 
-          : file.path;
-        // Apenas arquivos que não estão em subdiretórios
-        return !relativePath.includes('/') || relativePath.split('/').length === 1;
-      })
-      .map(file => ({
-        name: file.path.split('/').pop() || file.path,
-        path: file.path,
-        type: file.path.endsWith('/') ? 'folder' : 'file',
-        language: file.language,
-        size: file.content?.length || 0,
-        updatedAt: file.updatedAt,
-      }));
-
-    // Extrair pastas únicas
-    const folders = new Set<string>();
-    allFiles.forEach(file => {
-      const relativePath = normalizedPath 
-        ? file.path.slice(normalizedPath.length + 1) 
-        : file.path;
-      const parts = relativePath.split('/');
-      if (parts.length > 1) {
-        folders.add(parts[0]);
-      }
-    });
-
-    // Adicionar pastas à lista
-    const folderItems = Array.from(folders).map(folderName => ({
-      name: folderName,
-      path: normalizedPath ? `${normalizedPath}/${folderName}` : folderName,
-      type: 'folder' as const,
-      language: null,
-      size: 0,
-      updatedAt: new Date(),
-    }));
-
-    // Combinar e ordenar (pastas primeiro)
-    const sortedItems = [...folderItems, ...items.filter(i => i.type !== 'folder')]
-      .sort((a, b) => {
-        if (a.type === 'folder' && b.type !== 'folder') return -1;
-        if (a.type !== 'folder' && b.type === 'folder') return 1;
-        return a.name.localeCompare(b.name);
-      });
-
-    return NextResponse.json({
-      path: normalizedPath || '/',
-      items: sortedItems,
-      total: sortedItems.length,
-    });
+    return await handleList(request)
   } catch (error) {
-    console.error('[files/list] Error:', error);
-    const mapped = apiErrorToResponse(error);
-    if (mapped) return mapped;
-    return apiInternalError();
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json().catch(() => ({} as Record<string, unknown>))
+    return await handleList(request, body?.path as string | undefined, body?.recursive as boolean | undefined, body)
+  } catch (error) {
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
   }
 }

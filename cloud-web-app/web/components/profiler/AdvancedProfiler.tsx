@@ -306,7 +306,7 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
   const [hoveredMarker, setHoveredMarker] = useState<ProfilerMarker | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   
-  const flattenMarkers = (markers: ProfilerMarker[], depth = 0): (ProfilerMarker & { depth: number })[] => {
+  const flattenMarkers = useCallback((markers: ProfilerMarker[], depth = 0): (ProfilerMarker & { depth: number })[] => {
     const result: (ProfilerMarker & { depth: number })[] = [];
     
     for (const marker of markers) {
@@ -317,9 +317,9 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
     }
     
     return result;
-  };
+  }, []);
   
-  const flatMarkers = useMemo(() => flattenMarkers(markers), [markers]);
+  const flatMarkers = useMemo(() => flattenMarkers(markers), [markers, flattenMarkers]);
   const maxDepth = useMemo(() => Math.max(...flatMarkers.map(m => m.depth), 0) + 1, [flatMarkers]);
   
   const handleMouseMove = (e: React.MouseEvent, marker: ProfilerMarker) => {

@@ -142,7 +142,7 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
               toast.action?.onClick()
               handleClose()
             }}
-            className="mt-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="mt-2 text-sm font-medium text-sky-400 hover:text-sky-300 transition-colors"
           >
             {toast.action.label}
           </button>

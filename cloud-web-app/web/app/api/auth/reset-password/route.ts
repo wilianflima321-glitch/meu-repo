@@ -65,10 +65,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Invalidate all existing sessions for security
-    await prisma.session.deleteMany({
-      where: { userId: user.id },
-    });
+    // JWT-only auth: no server sessions to revoke.
+    // Existing tokens remain valid until expiry.
 
     return NextResponse.json({
       message: 'Password has been reset successfully. Please log in with your new password.',

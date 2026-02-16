@@ -389,7 +389,7 @@ export default function LobbyScreen({
     } finally {
       setIsConnecting(false);
     }
-  }, [serverUrl, toast]);
+  }, [toast]);
 
   // Handle create lobby
   const handleCreateLobby = useCallback(async (name: string, mode: string, maxPlayers: number, isPrivate: boolean) => {

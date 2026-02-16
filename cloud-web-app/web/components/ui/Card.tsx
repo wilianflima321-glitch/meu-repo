@@ -39,10 +39,10 @@ const variantClasses: Record<string, string> = {
   `,
   glow: `
     bg-gradient-to-b from-slate-800/90 to-slate-900/90 
-    border border-indigo-500/20
+    border border-sky-500/20
     shadow-[0_0_30px_rgba(99,102,241,0.15)]
     hover:shadow-[0_0_40px_rgba(99,102,241,0.25)]
-    hover:border-indigo-500/40
+    hover:border-sky-500/40
   `,
 }
 
@@ -80,8 +80,8 @@ export function Card({
         ${paddingClasses[padding]}
         ${hoverable ? `
           hover:translate-y-[-2px] 
-          hover:shadow-2xl hover:shadow-indigo-500/10 
-          hover:border-indigo-500/30 
+          hover:shadow-2xl hover:shadow-sky-500/10 
+          hover:border-sky-500/30 
           cursor-pointer
           active:translate-y-0 active:shadow-xl
         ` : ''}
@@ -127,7 +127,7 @@ export function CardHeader({
         <>
           <div className="flex items-start gap-3 min-w-0">
             {icon && (
-              <div className="flex-shrink-0 p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+              <div className="flex-shrink-0 p-2 rounded-lg bg-sky-500/10 text-sky-400">
                 {icon}
               </div>
             )}

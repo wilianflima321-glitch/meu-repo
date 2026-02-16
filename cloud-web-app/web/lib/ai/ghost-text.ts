@@ -6,8 +6,6 @@
  * Similar ao GitHub Copilot.
  */
 
-import { aiService } from '@/lib/ai-service';
-
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -113,21 +111,31 @@ export class GhostTextProvider {
       // Build prompt
       const prompt = this.buildPrompt(request);
       
-      // Call AI
-      const response = await aiService.chat({
-        messages: [
-          { role: 'system', content: this.getSystemPrompt(request.language) },
-          { role: 'user', content: prompt },
-        ],
-        temperature: this.config.temperature,
-        maxTokens: this.config.maxTokens,
-        // Note: stopSequences não suportado via chat API - handled via post-processing
+      // Call AI through canonical server endpoint
+      const response = await fetch('/api/ai/inline-completion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        signal: this.pendingRequest.signal,
+        body: JSON.stringify({
+          prompt: `${this.getSystemPrompt(request.language)}\n\n${prompt}`,
+          temperature: this.config.temperature,
+          maxTokens: this.config.maxTokens,
+        }),
       });
+
+      if (!response.ok) {
+        const raw = await response.text().catch(() => '');
+        throw new Error(`GHOST_TEXT_API_ERROR: ${response.status} ${raw}`.trim());
+      }
+
+      const payload = await response.json().catch(() => null) as { suggestion?: string; text?: string } | null;
+      const completionText = payload?.suggestion ?? payload?.text ?? '';
       
       const latency = Date.now() - startTime;
       
       // Parse response
-      const completions = this.parseCompletions(response.content, request, latency);
+      const completions = this.parseCompletions(completionText, request, latency);
       
       // Cache results
       this.cache.set(cacheKey, completions);

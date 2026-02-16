@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users,
@@ -58,7 +59,7 @@ const colors = {
   mauve: '#cba6f7',
   peach: '#fab387',
   teal: '#94e2d5',
-  pink: '#f5c2e7',
+  cyan: '#f5c2e7',
   overlay0: '#6c7086',
 };
 
@@ -78,9 +79,12 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 32, showStatus = t
   return (
     <div style={{ position: 'relative' }}>
       {user.avatar ? (
-        <img
+        <Image
           src={user.avatar}
           alt={user.name}
+          width={size}
+          height={size}
+          unoptimized
           style={{
             width: size,
             height: size,

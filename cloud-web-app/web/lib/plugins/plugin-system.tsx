@@ -781,7 +781,7 @@ export function PluginProvider({
 }) {
   const value = useMemo(() => ({
     loader: new PluginLoader(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     return () => {
@@ -879,7 +879,7 @@ export function usePluginHook(name: string, callback: HookCallback, deps: unknow
     return () => {
       loader.unregisterHook(name, callback);
     };
-  }, [loader, name, ...deps]);
+  }, [loader, name, callback, deps]);
 }
 
 export function useCallHook(name: string) {
@@ -890,7 +890,7 @@ export function useCallHook(name: string) {
   }, [loader, name]);
 }
 
-export default {
+const __defaultExport = {
   PluginLoader,
   PluginSandbox,
   PluginProvider,
@@ -900,3 +900,5 @@ export default {
   usePluginHook,
   useCallHook,
 };
+
+export default __defaultExport;

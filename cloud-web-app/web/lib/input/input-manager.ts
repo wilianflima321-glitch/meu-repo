@@ -1090,6 +1090,8 @@ export function useAxis(axisName: string): number {
   return value;
 }
 
-export default {
+const __defaultExport = {
   InputManager,
 };
+
+export default __defaultExport;

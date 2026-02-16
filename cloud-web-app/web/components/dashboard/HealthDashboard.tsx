@@ -240,7 +240,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({
         if (health) {
             setLastUpdate(new Date(health.timestamp));
         }
-    }, [health?.timestamp]);
+    }, [health]);
     
     // Offline state
     if (!isConnected) {

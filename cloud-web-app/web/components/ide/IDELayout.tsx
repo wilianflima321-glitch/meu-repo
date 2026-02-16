@@ -1,92 +1,13 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
-import {
-  Files,
-  Search,
-  GitBranch,
-  Bug,
-  Boxes,
-  Terminal as TerminalIcon,
-  MessageSquare,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Maximize2,
-  Minimize2,
-  X,
-  Play,
-  Square,
-  RotateCcw,
-  MoreHorizontal,
-  Layers,
-  Cpu,
-  Globe,
-  Palette,
-  Clapperboard,
-  Mountain,
-  Sparkles,
-  Bot,
-  Workflow,
-  Package,
-  TestTube,
-  Clock,
-  Bell,
-  User,
-  Command,
-  Moon,
-  Sun,
-  PanelLeft,
-  PanelBottom,
-  Layout,
-  FolderOpen,
-  Save,
-  FileText,
-  FolderPlus,
-  Download,
-  Upload,
-  Copy,
-  Scissors,
-  Clipboard,
-  Undo,
-  Redo,
-  ZoomIn,
-  ZoomOut,
-  Maximize,
-  HelpCircle,
-  Info,
-  ExternalLink,
-  RefreshCw,
-} from 'lucide-react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import Codicon, { type CodiconName } from './Codicon'
 
 // ============= Types =============
 
-type SidebarTab = 
-  | 'explorer' 
-  | 'search' 
-  | 'git' 
-  | 'debug' 
-  | 'extensions'
-  | 'ai-chat'
-  | 'ai-agents'
+type SidebarTab = 'explorer' | 'search' | 'git' | 'ai' | 'extensions'
 
-type BottomPanelTab = 
-  | 'terminal' 
-  | 'output' 
-  | 'problems' 
-  | 'debug-console'
-
-type EditorTool =
-  | 'code-editor'
-  | 'visual-scripting'
-  | '3d-viewport'
-  | 'level-editor'
-  | 'material-editor'
-  | 'animation-editor'
-  | 'particle-editor'
-  | 'landscape-editor'
-  | 'sequencer'
-  | 'settings'
+type BottomPanelTab = 'terminal' | 'output' | 'problems' | 'debug' | 'ports'
 
 interface PanelState {
   leftSidebar: boolean
@@ -109,26 +30,28 @@ interface MenuConfig {
 
 interface IDELayoutProps {
   children?: ReactNode
-  // Injeção de componentes externos
   fileExplorer?: ReactNode
   searchPanel?: ReactNode
   gitPanel?: ReactNode
-  debugPanel?: ReactNode
-  extensionsPanel?: ReactNode
   aiChatPanel?: ReactNode
-  aiAgentsPanel?: ReactNode
   terminal?: ReactNode
   outputPanel?: ReactNode
   problemsPanel?: ReactNode
+  debugPanel?: ReactNode
+  portsPanel?: ReactNode
   statusBar?: ReactNode
-  // Callbacks de ações do IDE
   onNewFile?: () => void
   onNewFolder?: () => void
+  onNewProject?: () => void
   onOpenFile?: () => void
   onOpenFolder?: () => void
+  onSwitchProject?: () => void
   onSaveFile?: () => void
   onSaveAll?: () => void
   onExport?: () => void
+  onSettings?: () => void
+  onCommandPalette?: () => void
+  onTogglePreview?: () => void
   onUndo?: () => void
   onRedo?: () => void
   onCut?: () => void
@@ -137,64 +60,67 @@ interface IDELayoutProps {
   onFind?: () => void
   onReplace?: () => void
   onRunProject?: () => void
+  onStopProject?: () => void
+  onRestartProject?: () => void
   onBuildProject?: () => void
   onDebugProject?: () => void
+  onDeployProject?: () => void
+  onNewTerminal?: () => void
+  onSplitTerminal?: () => void
+  onClearTerminal?: () => void
+  onAIChat?: () => void
+  onAIExplain?: () => void
+  onAIRefactor?: () => void
+  onAIFix?: () => void
+  onAIGenerateTest?: () => void
+  onAgentMode?: () => void
+  onHelpDocs?: () => void
+  onHelpShortcuts?: () => void
+  onHelpAbout?: () => void
 }
 
-// ============= Sidebar Tabs Config =============
-
 const SIDEBAR_TABS = [
-  { id: 'explorer' as const, icon: Files, label: 'Explorador', shortcut: '⇧⌘E' },
-  { id: 'search' as const, icon: Search, label: 'Buscar', shortcut: '⇧⌘F' },
-  { id: 'git' as const, icon: GitBranch, label: 'Controle de Versão', shortcut: '⌃⇧G' },
-  { id: 'debug' as const, icon: Bug, label: 'Executar e Depurar', shortcut: '⇧⌘D' },
-  { id: 'extensions' as const, icon: Boxes, label: 'Extensões', shortcut: '⇧⌘X' },
-  { id: 'ai-chat' as const, icon: MessageSquare, label: 'Chat IA', shortcut: '⌘I' },
-  { id: 'ai-agents' as const, icon: Bot, label: 'Agentes IA', shortcut: '⌃⇧A' },
+  { id: 'explorer' as const, icon: 'files' as CodiconName, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
+  { id: 'search' as const, icon: 'search' as CodiconName, label: 'Search', shortcut: 'Ctrl+Shift+F' },
+  { id: 'git' as const, icon: 'source-control' as CodiconName, label: 'Source Control', shortcut: 'Ctrl+Shift+G' },
+  { id: 'ai' as const, icon: 'sparkle' as CodiconName, label: 'AI', shortcut: 'Ctrl+Shift+I' },
+  { id: 'extensions' as const, icon: 'extensions' as CodiconName, label: 'Extensions', shortcut: '' },
 ]
 
 const BOTTOM_TABS = [
-  { id: 'terminal' as const, icon: TerminalIcon, label: 'Terminal' },
-  { id: 'output' as const, icon: Layout, label: 'Saída' },
-  { id: 'problems' as const, icon: Bug, label: 'Problemas', badge: 0 },
-  { id: 'debug-console' as const, icon: Play, label: 'Console de Depuração' },
+  { id: 'terminal' as const, icon: 'terminal' as CodiconName, label: 'Terminal' },
+  { id: 'output' as const, icon: 'output' as CodiconName, label: 'Output' },
+  { id: 'problems' as const, icon: 'warning' as CodiconName, label: 'Problems', badge: 0 },
+  { id: 'debug' as const, icon: 'debug' as CodiconName, label: 'Debug' },
+  { id: 'ports' as const, icon: 'plug' as CodiconName, label: 'Ports' },
 ]
 
-const EDITOR_TOOLS = [
-  { id: 'code-editor' as const, icon: Files, label: 'Editor de Código', category: 'Core' },
-  { id: 'visual-scripting' as const, icon: Workflow, label: 'Script Visual', category: 'Engine' },
-  { id: '3d-viewport' as const, icon: Boxes, label: 'Viewport 3D', category: 'Engine' },
-  { id: 'level-editor' as const, icon: Layers, label: 'Editor de Níveis', category: 'Engine' },
-  { id: 'material-editor' as const, icon: Palette, label: 'Editor de Materiais', category: 'Engine' },
-  { id: 'animation-editor' as const, icon: Clapperboard, label: 'Animação', category: 'Engine' },
-  { id: 'particle-editor' as const, icon: Sparkles, label: 'Partículas (Niagara)', category: 'Engine' },
-  { id: 'landscape-editor' as const, icon: Mountain, label: 'Paisagem', category: 'Engine' },
-  { id: 'sequencer' as const, icon: Clock, label: 'Sequenciador', category: 'Engine' },
-  { id: 'settings' as const, icon: Settings, label: 'Configurações', category: 'Sistema' },
-]
-
-// ============= Main Component =============
+const LOCAL_STORAGE_KEY = 'aethel.workbench.layout'
+const SIDEBAR_TAB_SET = new Set<SidebarTab>(['explorer', 'search', 'git', 'ai', 'extensions'])
+const BOTTOM_TAB_SET = new Set<BottomPanelTab>(['terminal', 'output', 'problems', 'debug', 'ports'])
 
 export default function IDELayout({
   children,
   fileExplorer,
   searchPanel,
   gitPanel,
-  debugPanel,
-  extensionsPanel,
   aiChatPanel,
-  aiAgentsPanel,
   terminal,
   outputPanel,
   problemsPanel,
+  debugPanel,
+  portsPanel,
   statusBar,
   onNewFile,
   onNewFolder,
   onOpenFile,
   onOpenFolder,
+  onSwitchProject,
   onSaveFile,
   onSaveAll,
   onExport,
+  onCommandPalette,
+  onSettings,
   onUndo,
   onRedo,
   onCut,
@@ -203,27 +129,62 @@ export default function IDELayout({
   onFind,
   onReplace,
   onRunProject,
+  onStopProject,
+  onRestartProject,
   onBuildProject,
   onDebugProject,
+  onDeployProject,
+  onTogglePreview,
+  onNewTerminal,
+  onClearTerminal,
+  onAIChat,
+  onHelpDocs,
+  onHelpShortcuts,
+  onHelpAbout,
 }: IDELayoutProps) {
-  // State
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>('explorer')
   const [activeBottomTab, setActiveBottomTab] = useState<BottomPanelTab>('terminal')
-  const [activeEditorTool, setActiveEditorTool] = useState<EditorTool>('code-editor')
   const [panels, setPanels] = useState<PanelState>({
     leftSidebar: true,
-    rightSidebar: false,
+    rightSidebar: true,
     bottomPanel: true,
   })
-  const [bottomPanelHeight, setBottomPanelHeight] = useState(250)
+  const [bottomPanelHeight, setBottomPanelHeight] = useState(260)
   const [sidebarWidth, setSidebarWidth] = useState(280)
-  const [isDarkTheme, setIsDarkTheme] = useState(true)
-  const [showCommandPalette, setShowCommandPalette] = useState(false)
-  const [problemsCount, setProblemCount] = useState(0)
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false)
+  const [isResizingBottom, setIsResizingBottom] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const resizeStateRef = useRef({
+    startX: 0,
+    startWidth: 0,
+    startY: 0,
+    startHeight: 0,
+  })
 
-  // Close menu when clicking outside
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (typeof parsed?.sidebarWidth === 'number') setSidebarWidth(parsed.sidebarWidth)
+        if (typeof parsed?.bottomPanelHeight === 'number') setBottomPanelHeight(parsed.bottomPanelHeight)
+        if (parsed?.panels) setPanels((prev) => ({ ...prev, ...parsed.panels }))
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
+
+  useEffect(() => {
+    const payload = JSON.stringify({
+      sidebarWidth,
+      bottomPanelHeight,
+      panels,
+    })
+    localStorage.setItem(LOCAL_STORAGE_KEY, payload)
+  }, [sidebarWidth, bottomPanelHeight, panels])
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -234,219 +195,315 @@ export default function IDELayout({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Menu configurations
-  const menuConfigs: MenuConfig[] = [
-    {
-      label: 'Arquivo',
-      items: [
-        { label: 'Novo Arquivo', shortcut: '⌘N', action: onNewFile },
-        { label: 'Nova Pasta', shortcut: '⇧⌘N', action: onNewFolder },
-        { separator: true, label: '' },
-        { label: 'Abrir...', shortcut: '⌘O', action: onOpenFile },
-        { label: 'Abrir Pasta...', shortcut: '⇧⌘O', action: onOpenFolder },
-        { separator: true, label: '' },
-        { label: 'Salvar', shortcut: '⌘S', action: onSaveFile },
-        { label: 'Salvar Tudo', shortcut: '⌥⌘S', action: onSaveAll },
-        { separator: true, label: '' },
-        { label: 'Exportar Projeto...', action: onExport },
-      ],
-    },
-    {
-      label: 'Editar',
-      items: [
-        { label: 'Desfazer', shortcut: '⌘Z', action: onUndo },
-        { label: 'Refazer', shortcut: '⇧⌘Z', action: onRedo },
-        { separator: true, label: '' },
-        { label: 'Recortar', shortcut: '⌘X', action: onCut },
-        { label: 'Copiar', shortcut: '⌘C', action: onCopy },
-        { label: 'Colar', shortcut: '⌘V', action: onPaste },
-        { separator: true, label: '' },
-        { label: 'Buscar', shortcut: '⌘F', action: onFind },
-        { label: 'Substituir', shortcut: '⌥⌘F', action: onReplace },
-      ],
-    },
-    {
-      label: 'Ver',
-      items: [
-        { label: 'Paleta de Comandos', shortcut: '⌘K', action: () => setShowCommandPalette(true) },
-        { separator: true, label: '' },
-        { label: 'Barra Lateral', shortcut: '⌘B', action: () => toggleLeftSidebar() },
-        { label: 'Painel', shortcut: '⌘J', action: () => toggleBottomPanel() },
-        { separator: true, label: '' },
-        { label: 'Explorador', shortcut: '⇧⌘E', action: () => { setActiveSidebarTab('explorer'); setPanels(p => ({ ...p, leftSidebar: true })) } },
-        { label: 'Buscar', shortcut: '⇧⌘F', action: () => { setActiveSidebarTab('search'); setPanels(p => ({ ...p, leftSidebar: true })) } },
-        { label: 'Controle de Versão', shortcut: '⌃⇧G', action: () => { setActiveSidebarTab('git'); setPanels(p => ({ ...p, leftSidebar: true })) } },
-        { label: 'Depuração', shortcut: '⇧⌘D', action: () => { setActiveSidebarTab('debug'); setPanels(p => ({ ...p, leftSidebar: true })) } },
-      ],
-    },
-    {
-      label: 'Ir',
-      items: [
-        { label: 'Ir para Arquivo...', shortcut: '⌘P', action: () => setShowCommandPalette(true) },
-        { label: 'Ir para Símbolo...', shortcut: '⇧⌘O', action: () => setShowCommandPalette(true) },
-        { separator: true, label: '' },
-        { label: 'Voltar', shortcut: '⌃-', action: () => window.history.back() },
-        { label: 'Avançar', shortcut: '⌃⇧-', action: () => window.history.forward() },
-      ],
-    },
-    {
-      label: 'Executar',
-      items: [
-        { label: 'Executar Projeto', shortcut: 'F5', action: onRunProject },
-        { label: 'Compilar Projeto', shortcut: '⇧⌘B', action: onBuildProject },
-        { separator: true, label: '' },
-        { label: 'Iniciar Depuração', shortcut: 'F5', action: onDebugProject },
-        { label: 'Executar sem Depuração', shortcut: '⌃F5', action: onRunProject },
-      ],
-    },
-    {
-      label: 'Terminal',
-      items: [
-        { label: 'Novo Terminal', shortcut: '⌃`', action: () => { setActiveBottomTab('terminal'); setPanels(p => ({ ...p, bottomPanel: true })) } },
-        { label: 'Dividir Terminal', action: () => { setActiveBottomTab('terminal'); setPanels(p => ({ ...p, bottomPanel: true })) } },
-        { separator: true, label: '' },
-        { label: 'Limpar Terminal', action: () => {} },
-      ],
-    },
-    {
-      label: 'Ajuda',
-      items: [
-        { label: 'Documentação', action: () => window.open('https://docs.aethel.dev', '_blank') },
-        { label: 'Atalhos de Teclado', shortcut: '⌘K ⌘S', action: () => setShowCommandPalette(true) },
-        { separator: true, label: '' },
-        { label: 'Sobre Aethel Engine', action: () => {} },
-      ],
-    },
-  ]
+  useEffect(() => {
+    if (!isResizingSidebar && !isResizingBottom) return
 
-  // Toggle functions
+    const onMouseMove = (e: MouseEvent) => {
+      if (isResizingSidebar) {
+        const delta = e.clientX - resizeStateRef.current.startX
+        const nextWidth = Math.min(420, Math.max(200, resizeStateRef.current.startWidth + delta))
+        setSidebarWidth(nextWidth)
+      }
+      if (isResizingBottom) {
+        const delta = resizeStateRef.current.startY - e.clientY
+        const nextHeight = Math.min(480, Math.max(160, resizeStateRef.current.startHeight + delta))
+        setBottomPanelHeight(nextHeight)
+      }
+    }
+
+    const onMouseUp = () => {
+      setIsResizingSidebar(false)
+      setIsResizingBottom(false)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = isResizingSidebar ? 'col-resize' : 'row-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [isResizingSidebar, isResizingBottom])
+
   const toggleLeftSidebar = useCallback(() => {
-    setPanels(p => ({ ...p, leftSidebar: !p.leftSidebar }))
+    setPanels((prev) => ({ ...prev, leftSidebar: !prev.leftSidebar }))
   }, [])
 
   const toggleRightSidebar = useCallback(() => {
-    setPanels(p => ({ ...p, rightSidebar: !p.rightSidebar }))
+    setPanels((prev) => ({ ...prev, rightSidebar: !prev.rightSidebar }))
   }, [])
 
   const toggleBottomPanel = useCallback(() => {
-    setPanels(p => ({ ...p, bottomPanel: !p.bottomPanel }))
+    setPanels((prev) => ({ ...prev, bottomPanel: !prev.bottomPanel }))
   }, [])
 
-  // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Command Palette
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setShowCommandPalette(p => !p)
+    const isAccel = (event: KeyboardEvent) => event.ctrlKey || event.metaKey
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isAccel(event) && event.shiftKey && event.key.toLowerCase() === 'p' && onCommandPalette) {
+        event.preventDefault()
+        onCommandPalette()
+        return
       }
-      // Toggle sidebar
-      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-        e.preventDefault()
+      if (isAccel(event) && event.altKey && event.key.toLowerCase() === 'p' && onSwitchProject) {
+        event.preventDefault()
+        onSwitchProject()
+        return
+      }
+      if (isAccel(event) && event.key.toLowerCase() === 'b') {
+        event.preventDefault()
         toggleLeftSidebar()
+        return
       }
-      // Toggle terminal
-      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
-        e.preventDefault()
+      if (isAccel(event) && event.key.toLowerCase() === 'j') {
+        event.preventDefault()
         toggleBottomPanel()
+        return
       }
-      // Explorer
-      if (e.shiftKey && (e.metaKey || e.ctrlKey) && e.key === 'e') {
-        e.preventDefault()
-        setActiveSidebarTab('explorer')
-        setPanels(p => ({ ...p, leftSidebar: true }))
+      if (isAccel(event) && event.key.toLowerCase() === 'i') {
+        event.preventDefault()
+        toggleRightSidebar()
+        return
       }
-      // Search
-      if (e.shiftKey && (e.metaKey || e.ctrlKey) && e.key === 'f') {
-        e.preventDefault()
-        setActiveSidebarTab('search')
-        setPanels(p => ({ ...p, leftSidebar: true }))
-      }
-      // AI Chat
-      if ((e.metaKey || e.ctrlKey) && e.key === 'i') {
-        e.preventDefault()
-        setActiveSidebarTab('ai-chat')
-        setPanels(p => ({ ...p, leftSidebar: true }))
+      if (isAccel(event) && event.shiftKey && event.key.toLowerCase() === 'v' && onTogglePreview) {
+        event.preventDefault()
+        onTogglePreview()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [toggleLeftSidebar, toggleBottomPanel])
+  }, [onCommandPalette, onSwitchProject, onTogglePreview, toggleBottomPanel, toggleLeftSidebar, toggleRightSidebar])
 
-  // Render sidebar content
+  useEffect(() => {
+    const onToggleSidebar = () => toggleLeftSidebar()
+    const onToggleTerminal = () => {
+      setActiveBottomTab('terminal')
+      if (!panels.bottomPanel) {
+        setPanels((prev) => ({ ...prev, bottomPanel: true }))
+        return
+      }
+      toggleBottomPanel()
+    }
+    const onToggleAI = () => toggleRightSidebar()
+    const onOpenSidebarTab = (event: Event) => {
+      const detail = (event as CustomEvent<{ tab?: string }>).detail
+      const tab = detail?.tab
+      if (!tab || !SIDEBAR_TAB_SET.has(tab as SidebarTab)) return
+      setActiveSidebarTab(tab as SidebarTab)
+      setPanels((prev) => ({ ...prev, leftSidebar: true }))
+    }
+    const onOpenBottomTab = (event: Event) => {
+      const detail = (event as CustomEvent<{ tab?: string }>).detail
+      const tab = detail?.tab
+      if (!tab || !BOTTOM_TAB_SET.has(tab as BottomPanelTab)) return
+      setActiveBottomTab(tab as BottomPanelTab)
+      setPanels((prev) => ({ ...prev, bottomPanel: true }))
+    }
+    const onOpenAI = () => {
+      setActiveSidebarTab('ai')
+      setPanels((prev) => ({ ...prev, rightSidebar: true }))
+    }
+
+    window.addEventListener('aethel.layout.toggleSidebar', onToggleSidebar)
+    window.addEventListener('aethel.layout.toggleTerminal', onToggleTerminal)
+    window.addEventListener('aethel.layout.toggleAI', onToggleAI)
+    window.addEventListener('aethel.layout.openSidebarTab', onOpenSidebarTab as EventListener)
+    window.addEventListener('aethel.layout.openBottomTab', onOpenBottomTab as EventListener)
+    window.addEventListener('aethel.layout.openAI', onOpenAI)
+
+    return () => {
+      window.removeEventListener('aethel.layout.toggleSidebar', onToggleSidebar)
+      window.removeEventListener('aethel.layout.toggleTerminal', onToggleTerminal)
+      window.removeEventListener('aethel.layout.toggleAI', onToggleAI)
+      window.removeEventListener('aethel.layout.openSidebarTab', onOpenSidebarTab as EventListener)
+      window.removeEventListener('aethel.layout.openBottomTab', onOpenBottomTab as EventListener)
+      window.removeEventListener('aethel.layout.openAI', onOpenAI)
+    }
+  }, [panels.bottomPanel, toggleBottomPanel, toggleLeftSidebar, toggleRightSidebar])
+
+  const openSidebarTab = (tab: SidebarTab) => {
+    setActiveSidebarTab(tab)
+    setPanels((prev) => ({ ...prev, leftSidebar: true }))
+  }
+
+  const menuConfigs: MenuConfig[] = [
+    {
+      label: 'File',
+      items: [
+        { label: 'New File', shortcut: 'Ctrl+N', action: onNewFile },
+        { label: 'New Folder', shortcut: 'Ctrl+Shift+N', action: onNewFolder },
+        { separator: true, label: '' },
+        { label: 'Open File', shortcut: 'Ctrl+O', action: onOpenFile },
+        { label: 'Open Folder', shortcut: 'Ctrl+Shift+O', action: onOpenFolder },
+        { label: 'Switch Project Context', shortcut: 'Ctrl+Alt+P', action: onSwitchProject },
+        { separator: true, label: '' },
+        { label: 'Save', shortcut: 'Ctrl+S', action: onSaveFile },
+        { label: 'Save All', shortcut: 'Ctrl+Alt+S', action: onSaveAll },
+        { separator: true, label: '' },
+        { label: 'Export Project', action: onExport },
+      ],
+    },
+    {
+      label: 'Edit',
+      items: [
+        { label: 'Undo', shortcut: 'Ctrl+Z', action: onUndo },
+        { label: 'Redo', shortcut: 'Ctrl+Shift+Z', action: onRedo },
+        { separator: true, label: '' },
+        { label: 'Cut', shortcut: 'Ctrl+X', action: onCut },
+        { label: 'Copy', shortcut: 'Ctrl+C', action: onCopy },
+        { label: 'Paste', shortcut: 'Ctrl+V', action: onPaste },
+        { separator: true, label: '' },
+        { label: 'Find', shortcut: 'Ctrl+F', action: onFind },
+        { label: 'Replace', shortcut: 'Ctrl+Alt+F', action: onReplace },
+      ],
+    },
+    {
+      label: 'View',
+      items: [
+        { label: 'Toggle Sidebar', shortcut: 'Ctrl+B', action: () => toggleLeftSidebar() },
+        { label: 'Toggle Panel', shortcut: 'Ctrl+J', action: () => toggleBottomPanel() },
+        { label: 'Toggle AI Panel', shortcut: 'Ctrl+I', action: () => toggleRightSidebar() },
+        { separator: true, label: '' },
+        { label: 'Explorer', shortcut: 'Ctrl+Shift+E', action: () => openSidebarTab('explorer') },
+        { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => openSidebarTab('search') },
+        { label: 'Source Control', shortcut: 'Ctrl+Shift+G', action: () => openSidebarTab('git') },
+        { label: 'Refresh Preview', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
+      ],
+    },
+    {
+      label: 'Run',
+      items: [
+        { label: 'Run', shortcut: 'F5', action: onRunProject },
+        { label: 'Stop', shortcut: 'Shift+F5', action: onStopProject },
+        { label: 'Restart', shortcut: 'Ctrl+Shift+F5', action: onRestartProject },
+        { separator: true, label: '' },
+        { label: 'Build', shortcut: 'Ctrl+Shift+B', action: onBuildProject },
+        { label: 'Debug', shortcut: 'Ctrl+Shift+D', action: onDebugProject },
+        { separator: true, label: '' },
+        { label: 'Deploy', action: onDeployProject },
+      ],
+    },
+    {
+      label: 'Terminal',
+      items: [
+        {
+          label: 'New Terminal',
+          shortcut: 'Ctrl+`',
+          action: () => {
+            setActiveBottomTab('terminal')
+            onNewTerminal?.()
+          },
+        },
+        { label: 'Clear Terminal', action: onClearTerminal },
+      ],
+    },
+    {
+      label: 'AI',
+      items: [
+        { label: 'Open AI Panel', shortcut: 'Ctrl+I', action: () => toggleRightSidebar() },
+        { label: 'New AI Chat', action: onAIChat },
+      ],
+    },
+    {
+      label: 'Help',
+      items: [
+        { label: 'Documentation', action: onHelpDocs },
+        { label: 'Shortcuts', action: onHelpShortcuts },
+        { separator: true, label: '' },
+        { label: 'About', action: onHelpAbout },
+      ],
+    },
+    {
+      label: 'Preferences',
+      items: [
+        { label: 'Command Palette', shortcut: 'Ctrl+Shift+P', action: onCommandPalette },
+        { label: 'Settings', shortcut: 'Ctrl+,', action: onSettings },
+      ],
+    },
+  ]
+
   const renderSidebarContent = () => {
     switch (activeSidebarTab) {
       case 'explorer':
-        return fileExplorer || <DefaultExplorer />
+        return fileExplorer || <NotImplementedPanel title="Explorer" capability="EXPLORER_PANEL" milestone="P0" />
       case 'search':
-        return searchPanel || <DefaultSearch />
+        return searchPanel || <NotImplementedPanel title="Search" capability="SEARCH_PANEL" milestone="P1" />
       case 'git':
-        return gitPanel || <DefaultGit />
-      case 'debug':
-        return debugPanel || <DefaultDebug />
+        return gitPanel || <NotImplementedPanel title="Source Control" capability="GIT_PANEL" milestone="P1" />
+      case 'ai':
+        return aiChatPanel || <NotImplementedPanel title="AI Assistant" capability="AI_CHAT_PANEL" milestone="P0" />
       case 'extensions':
-        return extensionsPanel || <DefaultExtensions />
-      case 'ai-chat':
-        return aiChatPanel || <DefaultAIChat />
-      case 'ai-agents':
-        return aiAgentsPanel || <DefaultAIAgents />
+        return (
+          <NotImplementedPanel
+            title="Extensions"
+            capability="EXTENSIONS_RUNTIME"
+            milestone="P2"
+            description="Extension runtime is intentionally gated until P2."
+          />
+        )
       default:
         return null
     }
   }
 
-  // Render bottom panel content
   const renderBottomContent = () => {
     switch (activeBottomTab) {
       case 'terminal':
-        return terminal || <DefaultTerminal />
+        return terminal || <NotImplementedPanel title="Terminal" capability="TERMINAL_PANEL" milestone="P0" />
       case 'output':
-        return outputPanel || <DefaultOutput />
+        return outputPanel || <NotImplementedPanel title="Output" capability="OUTPUT_PANEL" milestone="P1" />
       case 'problems':
-        return problemsPanel || <DefaultProblems />
-      case 'debug-console':
-        return <DefaultDebugConsole />
+        return problemsPanel || <NotImplementedPanel title="Problems" capability="PROBLEMS_PANEL" milestone="P1" />
+      case 'debug':
+        return debugPanel || <NotImplementedPanel title="Debug Console" capability="DEBUG_PANEL" milestone="P1" />
+      case 'ports':
+        return (
+          portsPanel || (
+            <NotImplementedPanel
+              title="Ports"
+              capability="PORT_FORWARDING_PANEL"
+              milestone="P1"
+              description="No forwarded ports are currently active."
+            />
+          )
+        )
       default:
         return null
     }
   }
 
   return (
-    <div className={`h-screen flex flex-col ${isDarkTheme ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
-      {/* ========== TOP BAR ========== */}
-      <header className={`h-12 flex items-center justify-between px-4 border-b ${isDarkTheme ? 'bg-slate-900 border-slate-800' : 'bg-gray-100 border-gray-200'}`}>
-        {/* Left */}
-        <div className="flex items-center gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
+    <div className="h-screen flex flex-col bg-[#0b0d12] text-slate-100 density-compact">
+      <header className="density-header flex items-center justify-between px-2 border-b border-slate-800/80 bg-[#11141c]">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-sm shadow-blue-900/50">
+              <Codicon name="menu" className="text-white text-[13px]" />
             </div>
-            <span className="font-semibold text-sm">Aethel IDE</span>
+            <span className="font-semibold text-xs tracking-tight">Aethel Workbench</span>
           </div>
 
-          {/* Menu */}
-          <nav ref={menuRef} className="hidden md:flex items-center gap-1 text-sm relative">
+          <nav ref={menuRef} className="hidden md:flex items-center gap-0.5 text-xs relative">
             {menuConfigs.map((menu) => (
               <div key={menu.label} className="relative">
                 <button
                   onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
-                  className={`px-2 py-1 rounded transition-colors ${
-                    activeMenu === menu.label 
-                      ? isDarkTheme ? 'bg-slate-700' : 'bg-gray-300'
-                      : isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'
+                  className={`px-1.5 py-1 rounded transition-colors ${
+                    activeMenu === menu.label ? 'bg-slate-700/90 text-white' : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`}
                 >
                   {menu.label}
                 </button>
                 {activeMenu === menu.label && (
-                  <div className={`absolute top-full left-0 mt-1 w-56 py-1 rounded-lg shadow-xl z-50 ${
-                    isDarkTheme ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-200'
-                  }`}>
-                    {menu.items.map((item, idx) => (
+                  <div className="absolute top-full left-0 mt-1 w-56 py-1 rounded-md shadow-xl z-50 bg-[#171b25] border border-slate-700/80 backdrop-blur">
+                    {menu.items.map((item, idx) =>
                       item.separator ? (
-                        <div key={idx} className={`my-1 border-t ${isDarkTheme ? 'border-slate-700' : 'border-gray-200'}`} />
+                        <div key={idx} className="my-1 border-t border-slate-700" />
                       ) : (
                         <button
                           key={idx}
@@ -454,22 +511,20 @@ export default function IDELayout({
                             item.action?.()
                             setActiveMenu(null)
                           }}
-                          disabled={item.disabled}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 text-sm ${
-                            item.disabled 
+                          disabled={item.disabled ?? !item.action}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs ${
+                            item.disabled ?? !item.action
                               ? 'opacity-50 cursor-not-allowed'
-                              : isDarkTheme ? 'hover:bg-slate-700' : 'hover:bg-gray-100'
+                              : 'hover:bg-slate-700/70 focus-visible:bg-slate-700/70'
                           }`}
                         >
                           <span>{item.label}</span>
                           {item.shortcut && (
-                            <span className={`text-xs ${isDarkTheme ? 'text-slate-500' : 'text-gray-400'}`}>
-                              {item.shortcut}
-                            </span>
+                            <span className="text-xs text-slate-500">{item.shortcut}</span>
                           )}
                         </button>
                       )
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
@@ -477,283 +532,173 @@ export default function IDELayout({
           </nav>
         </div>
 
-        {/* Center - Editor Tools Dropdown */}
         <div className="flex items-center gap-2">
-          <select
-            value={activeEditorTool}
-            onChange={(e) => setActiveEditorTool(e.target.value as EditorTool)}
-            className={`px-3 py-1.5 text-sm rounded-lg border ${
-              isDarkTheme 
-                ? 'bg-slate-800 border-slate-700 text-white' 
-                : 'bg-white border-gray-300'
-            }`}
-          >
-            <optgroup label="Principal">
-              <option value="code-editor">Editor de Código</option>
-            </optgroup>
-            <optgroup label="Ferramentas Engine">
-              <option value="visual-scripting">Script Visual</option>
-              <option value="3d-viewport">Viewport 3D</option>
-              <option value="level-editor">Editor de Níveis</option>
-              <option value="material-editor">Editor de Materiais</option>
-              <option value="animation-editor">Animação</option>
-              <option value="particle-editor">Partículas (Niagara)</option>
-              <option value="landscape-editor">Paisagem</option>
-              <option value="sequencer">Sequenciador</option>
-            </optgroup>
-            <optgroup label="Sistema">
-              <option value="settings">Configurações</option>
-            </optgroup>
-          </select>
-
-          {/* Play/Stop buttons for engine */}
-          {activeEditorTool !== 'code-editor' && activeEditorTool !== 'settings' && (
-            <div className="flex items-center gap-1 ml-2">
-              <button className="p-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white">
-                <Play className="w-4 h-4" />
-              </button>
-              <button className={`p-1.5 rounded ${isDarkTheme ? 'bg-slate-700 hover:bg-slate-600' : 'bg-gray-200 hover:bg-gray-300'}`}>
-                <Square className="w-4 h-4" />
-              </button>
-              <button className={`p-1.5 rounded ${isDarkTheme ? 'bg-slate-700 hover:bg-slate-600' : 'bg-gray-200 hover:bg-gray-300'}`}>
-                <RotateCcw className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Right */}
-        <div className="flex items-center gap-2">
-          {/* Search/Command Palette */}
           <button
-            onClick={() => setShowCommandPalette(true)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
-              isDarkTheme 
-                ? 'bg-slate-800 text-slate-400 hover:text-white' 
-                : 'bg-gray-200 text-gray-600 hover:text-gray-900'
-            }`}
+            onClick={() => onCommandPalette?.()}
+            className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded border border-slate-700/80 bg-slate-900/40 text-[11px] text-slate-300 hover:bg-slate-800/80 focus-visible:bg-slate-800/80"
+            title="Command Palette (Ctrl+Shift+P)"
           >
-            <Search className="w-4 h-4" />
-            <span className="hidden sm:inline">Buscar</span>
-            <kbd className="hidden sm:flex items-center gap-0.5 text-xs opacity-60">
-              <Command className="w-3 h-3" />K
-            </kbd>
+            <Codicon name="sparkle" className="text-[12px]" />
+            <span>Command Palette</span>
+            <span className="text-slate-500">Ctrl+Shift+P</span>
           </button>
-
-          {/* Layout toggles */}
           <button
             onClick={toggleLeftSidebar}
-            className={`p-1.5 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'} ${panels.leftSidebar ? 'text-indigo-400' : ''}`}
-            title="Alternar Barra Lateral (⌘B)"
+            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.leftSidebar ? 'text-blue-300' : 'text-slate-400'}`}
+            title="Toggle Sidebar"
+            aria-pressed={panels.leftSidebar}
           >
-            <PanelLeft className="w-4 h-4" />
+            <Codicon name="layout-sidebar-left" />
           </button>
           <button
             onClick={toggleBottomPanel}
-            className={`p-1.5 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'} ${panels.bottomPanel ? 'text-indigo-400' : ''}`}
-            title="Alternar Painel (⌘J)"
+            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.bottomPanel ? 'text-blue-300' : 'text-slate-400'}`}
+            title="Toggle Panel"
+            aria-pressed={panels.bottomPanel}
           >
-            <PanelBottom className="w-4 h-4" />
+            <Codicon name="layout-panel" />
           </button>
-
-          {/* Theme toggle */}
           <button
-            onClick={() => setIsDarkTheme(!isDarkTheme)}
-            className={`p-1.5 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'}`}
+            onClick={toggleRightSidebar}
+            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.rightSidebar ? 'text-blue-300' : 'text-slate-400'}`}
+            title="Toggle AI Panel"
+            aria-pressed={panels.rightSidebar}
           >
-            {isDarkTheme ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-
-          {/* Notifications */}
-          <button className={`p-1.5 rounded relative ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'}`}>
-            <Bell className="w-4 h-4" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
-          </button>
-
-          {/* User */}
-          <button className={`p-1.5 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'}`}>
-            <User className="w-4 h-4" />
+            <Codicon name="sparkle" />
           </button>
         </div>
       </header>
 
-      {/* ========== MAIN CONTENT ========== */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Activity Bar (leftmost icons) */}
-        <div className={`w-12 flex flex-col items-center py-2 ${isDarkTheme ? 'bg-slate-900 border-r border-slate-800' : 'bg-gray-100 border-r border-gray-200'}`}>
-          {SIDEBAR_TABS.map(tab => (
+        <div className="w-11 flex flex-col items-center py-1.5 bg-[#11141c] border-r border-slate-800/80">
+          {SIDEBAR_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => {
                 setActiveSidebarTab(tab.id)
-                if (!panels.leftSidebar) setPanels(p => ({ ...p, leftSidebar: true }))
+                if (!panels.leftSidebar) setPanels((prev) => ({ ...prev, leftSidebar: true }))
               }}
-              className={`
-                w-10 h-10 flex items-center justify-center rounded-lg mb-1 relative
-                ${activeSidebarTab === tab.id && panels.leftSidebar
-                  ? `${isDarkTheme ? 'text-white bg-slate-800' : 'text-indigo-600 bg-indigo-50'}`
-                  : `${isDarkTheme ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'}`
-                }
-                ${activeSidebarTab === tab.id && panels.leftSidebar ? 'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-6 before:bg-indigo-500 before:rounded-r' : ''}
-              `}
+              className={`w-9 h-9 flex items-center justify-center rounded-md mb-1 relative ${
+                activeSidebarTab === tab.id && panels.leftSidebar
+                  ? 'text-white bg-slate-800/90'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/80 focus-visible:text-white focus-visible:bg-slate-800/80'
+              }`}
               title={`${tab.label} (${tab.shortcut})`}
+              aria-pressed={activeSidebarTab === tab.id && panels.leftSidebar}
             >
-              <tab.icon className="w-5 h-5" />
+              <Codicon name={tab.icon} className="text-[14px]" />
             </button>
           ))}
-
-          <div className="flex-1" />
-
-          {/* Settings at bottom */}
-          <button
-            onClick={() => setActiveEditorTool('settings')}
-            className={`w-10 h-10 flex items-center justify-center rounded-lg ${isDarkTheme ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'}`}
-          >
-            <Settings className="w-5 h-5" />
-          </button>
         </div>
 
-        {/* Left Sidebar */}
         {panels.leftSidebar && (
-          <div 
-            className={`flex flex-col border-r ${isDarkTheme ? 'bg-slate-900 border-slate-800' : 'bg-gray-50 border-gray-200'}`}
+          <div
+            className="flex flex-col border-r border-slate-800/80 bg-[#10131a]"
             style={{ width: sidebarWidth }}
           >
-            {/* Sidebar Header */}
-            <div className={`h-9 flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-wider ${isDarkTheme ? 'text-slate-400' : 'text-gray-500'}`}>
-              {SIDEBAR_TABS.find(t => t.id === activeSidebarTab)?.label}
-              <button
-                onClick={toggleLeftSidebar}
-                className={`p-1 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'}`}
-              >
-                <ChevronLeft className="w-4 h-4" />
+            <div className="density-header flex items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400 border-b border-slate-800/70">
+              {SIDEBAR_TABS.find((t) => t.id === activeSidebarTab)?.label}
+              <button onClick={toggleLeftSidebar} className="p-1 rounded hover:bg-slate-800/80">
+                <Codicon name="chevron-left" />
               </button>
             </div>
-
-            {/* Sidebar Content */}
-            <div className="flex-1 overflow-y-auto">
-              {renderSidebarContent()}
-            </div>
+            <div className="flex-1 overflow-y-auto">{renderSidebarContent()}</div>
           </div>
         )}
 
-        {/* Main Editor Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Editor Content */}
-          <div className={`flex-1 overflow-hidden ${isDarkTheme ? 'bg-slate-950' : 'bg-white'}`}>
-            {children || (
-              <div className="h-full flex items-center justify-center text-slate-500">
-                <div className="text-center">
-                  <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                  <p className="text-lg mb-2">Selecione uma ferramenta</p>
-                  <p className="text-sm opacity-60">
-                    Ferramenta ativa: {EDITOR_TOOLS.find(t => t.id === activeEditorTool)?.label}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+        {panels.leftSidebar && (
+          <div
+            className="w-1 cursor-col-resize bg-slate-800/80 hover:bg-blue-500/50 transition-colors"
+            onMouseDown={(e) => {
+              setIsResizingSidebar(true)
+              resizeStateRef.current.startX = e.clientX
+              resizeStateRef.current.startWidth = sidebarWidth
+            }}
+          />
+        )}
 
-          {/* Bottom Panel */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-hidden bg-[#0b0d12]">{children}</div>
+
           {panels.bottomPanel && (
-            <div 
-              className={`flex flex-col border-t ${isDarkTheme ? 'bg-slate-900 border-slate-800' : 'bg-gray-50 border-gray-200'}`}
+            <div
+              className="flex flex-col border-t border-slate-800/80 bg-[#10131a]"
               style={{ height: bottomPanelHeight }}
             >
-              {/* Bottom Panel Tabs */}
-              <div className={`h-9 flex items-center px-2 gap-1 border-b ${isDarkTheme ? 'border-slate-800' : 'border-gray-200'}`}>
-                {BOTTOM_TABS.map(tab => (
+              <div
+                className="h-1 cursor-row-resize bg-slate-800/80 hover:bg-blue-500/50 transition-colors"
+                onMouseDown={(e) => {
+                  setIsResizingBottom(true)
+                  resizeStateRef.current.startY = e.clientY
+                  resizeStateRef.current.startHeight = bottomPanelHeight
+                }}
+              />
+              <div className="density-header flex items-center px-1.5 gap-0.5 border-b border-slate-800/70">
+                {BOTTOM_TABS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveBottomTab(tab.id)}
-                    className={`
-                      flex items-center gap-1.5 px-3 py-1 text-xs rounded transition-colors
-                      ${activeBottomTab === tab.id
-                        ? `${isDarkTheme ? 'bg-slate-800 text-white' : 'bg-white text-indigo-600 shadow-sm'}`
-                        : `${isDarkTheme ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`
-                      }
-                    `}
+                    className={`density-row flex items-center gap-1.5 px-2.5 text-[11px] rounded transition-colors ${
+                      activeBottomTab === tab.id
+                        ? 'bg-slate-800/90 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60 focus-visible:text-white focus-visible:bg-slate-800/60'
+                    }`}
+                    aria-pressed={activeBottomTab === tab.id}
                   >
-                    <tab.icon className="w-3.5 h-3.5" />
+                    <Codicon name={tab.icon} className="text-[12px]" />
                     {tab.label}
-                    {tab.id === 'problems' && problemsCount > 0 && (
-                      <span className="px-1.5 py-0.5 text-[10px] bg-red-500 text-white rounded-full">
-                        {problemsCount}
-                      </span>
-                    )}
                   </button>
                 ))}
 
                 <div className="flex-1" />
 
-                {/* Panel controls */}
                 <button
-                  onClick={() => setBottomPanelHeight(h => h === 250 ? 400 : 250)}
-                  className={`p-1 rounded ${isDarkTheme ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-200 text-gray-500'}`}
+                  onClick={() => setBottomPanelHeight((h) => (h === 260 ? 380 : 260))}
+                  className="p-1 rounded hover:bg-slate-800/80 text-slate-400"
                 >
-                  {bottomPanelHeight === 250 ? <Maximize2 className="w-3.5 h-3.5" /> : <Minimize2 className="w-3.5 h-3.5" />}
+                  {bottomPanelHeight === 260 ? <Codicon name="fold-down" /> : <Codicon name="fold-up" />}
                 </button>
-                <button
-                  onClick={toggleBottomPanel}
-                  className={`p-1 rounded ${isDarkTheme ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-200 text-gray-500'}`}
-                >
-                  <X className="w-3.5 h-3.5" />
+                <button onClick={toggleBottomPanel} className="p-1 rounded hover:bg-slate-800/80 text-slate-400">
+                  <Codicon name="x" />
                 </button>
               </div>
-
-              {/* Bottom Panel Content */}
-              <div className="flex-1 overflow-hidden">
-                {renderBottomContent()}
-              </div>
+              <div className="flex-1 overflow-hidden">{renderBottomContent()}</div>
             </div>
           )}
         </div>
 
-        {/* Right Sidebar (AI Chat expanded) */}
         {panels.rightSidebar && (
-          <div className={`w-80 flex flex-col border-l ${isDarkTheme ? 'bg-slate-900 border-slate-800' : 'bg-gray-50 border-gray-200'}`}>
-            <div className={`h-9 flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-wider ${isDarkTheme ? 'text-slate-400' : 'text-gray-500'}`}>
-              AI Assistant
-              <button
-                onClick={toggleRightSidebar}
-                className={`p-1 rounded ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-gray-200'}`}
-              >
-                <ChevronRight className="w-4 h-4" />
+          <div className="w-80 flex flex-col border-l border-slate-800/80 bg-[#10131a]">
+            <div className="density-header flex items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400 border-b border-slate-800/70">
+              AI Panel
+              <button onClick={toggleRightSidebar} className="p-1 rounded hover:bg-slate-800/80">
+                <Codicon name="chevron-right" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {aiChatPanel || <DefaultAIChat />}
+              {aiChatPanel || <NotImplementedPanel title="AI Panel" capability="AI_CHAT_PANEL" milestone="P0" />}
             </div>
           </div>
         )}
       </div>
 
-      {/* ========== STATUS BAR ========== */}
-      <footer className={`h-6 flex items-center justify-between px-2 text-[11px] ${isDarkTheme ? 'bg-indigo-600 text-white' : 'bg-indigo-500 text-white'}`}>
+      <footer className="h-5 flex items-center justify-between px-2 text-[10px] bg-[#11141c] border-t border-slate-800/80 text-slate-200">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <GitBranch className="w-3 h-3" />
+          <span className="flex items-center gap-1 text-slate-300">
+            <Codicon name="git-branch" className="text-[11px]" />
             main
           </span>
-          <span className="flex items-center gap-1">
-            <RotateCcw className="w-3 h-3" />
-            0↓ 0↑
-          </span>
-          {problemsCount > 0 && (
-            <span className="flex items-center gap-1">
-              <Bug className="w-3 h-3" />
-              {problemsCount}
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-3">
           {statusBar}
-          <span>Ln 1, Col 1</span>
-          <span>UTF-8</span>
-          <span>TypeScript</span>
-          <span className="flex items-center gap-1">
-            <Cpu className="w-3 h-3" />
+          <span className="text-slate-400">UTF-8</span>
+          <span className="flex items-center gap-1 text-slate-300">
+            <Codicon name="comment-discussion" className="text-[11px]" />
             Ready
+          </span>
+          <span className="flex items-center gap-1 text-emerald-300">
+            <Codicon name="circle-filled" className="text-[8px]" />
+            Synced
           </span>
         </div>
       </footer>
@@ -761,141 +706,36 @@ export default function IDELayout({
   )
 }
 
-// ============= Default Panels =============
+function NotImplementedPanel({
+  title,
+  description,
+  capability = 'PANEL',
+  milestone = 'P1',
+}: {
+  title: string
+  description?: string
+  capability?: string
+  milestone?: string
+}) {
+  const nextAction =
+    milestone === 'P0'
+      ? 'Use the current Workbench flow for the same task in this release.'
+      : 'This capability is intentionally deferred outside the P0 critical path.'
 
-function DefaultExplorer() {
   return (
-    <div className="p-2">
-      <div className="text-xs text-slate-400 mb-2 px-2">WORKSPACE</div>
-      <div className="space-y-0.5">
-        {['src', 'components', 'lib', 'public', 'package.json', 'tsconfig.json'].map(item => (
-          <button key={item} className="w-full flex items-center gap-2 px-2 py-1 text-sm hover:bg-slate-800 rounded">
-            {item.includes('.') ? <Files className="w-4 h-4 text-slate-500" /> : <Files className="w-4 h-4 text-amber-400" />}
-            {item}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function DefaultSearch() {
-  return (
-    <div className="p-3">
-      <input
-        type="text"
-        placeholder="Search files..."
-        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm"
-      />
-    </div>
-  )
-}
-
-function DefaultGit() {
-  return (
-    <div className="p-3">
-      <p className="text-sm text-slate-400">No source control providers registered.</p>
-    </div>
-  )
-}
-
-function DefaultDebug() {
-  return (
-    <div className="p-3">
-      <button className="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-sm">
-        Run and Debug
-      </button>
-    </div>
-  )
-}
-
-function DefaultExtensions() {
-  return (
-    <div className="p-3">
-      <input
-        type="text"
-        placeholder="Search extensions..."
-        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm mb-3"
-      />
-      <p className="text-xs text-slate-400">Popular extensions will appear here.</p>
-    </div>
-  )
-}
-
-function DefaultAIChat() {
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 p-3 overflow-y-auto">
-        <div className="text-center text-slate-400 py-8">
-          <Bot className="w-12 h-12 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">Start a conversation with AI</p>
+    <div className="h-full flex items-center justify-center text-center px-6">
+      <div className="max-w-xs rounded border border-slate-800 bg-slate-950/50 px-4 py-3">
+        <div className="mb-1.5 flex items-center justify-center gap-2 text-slate-300">
+          <Codicon name="warning" className="text-[13px] text-amber-300" />
+          <span className="text-xs font-semibold tracking-wide">{title}</span>
         </div>
+        <p className="text-[11px] leading-5 text-slate-400">
+          {description || 'Capability is intentionally gated for this milestone.'}
+        </p>
+        <p className="mt-2 text-[10px] font-mono text-slate-500">Capability gate: {capability}</p>
+        <p className="text-[10px] text-slate-500">Target milestone: {milestone}</p>
+        <p className="mt-1 text-[10px] text-slate-500">{nextAction}</p>
       </div>
-      <div className="p-3 border-t border-slate-800">
-        <input
-          type="text"
-          placeholder="Ask AI..."
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm"
-        />
-      </div>
-    </div>
-  )
-}
-
-function DefaultAIAgents() {
-  const agents = [
-    { name: 'Architect', status: 'idle', icon: '🏗️' },
-    { name: 'Coder', status: 'active', icon: '💻' },
-    { name: 'Research', status: 'idle', icon: '🔬' },
-    { name: 'AI Dream', status: 'idle', icon: '✨' },
-  ]
-  return (
-    <div className="p-3">
-      <div className="space-y-2">
-        {agents.map(agent => (
-          <div key={agent.name} className="flex items-center gap-3 p-2 bg-slate-800 rounded-lg">
-            <span className="text-2xl">{agent.icon}</span>
-            <div className="flex-1">
-              <div className="text-sm font-medium">{agent.name}</div>
-              <div className={`text-xs ${agent.status === 'active' ? 'text-emerald-400' : 'text-slate-500'}`}>
-                {agent.status}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function DefaultTerminal() {
-  return (
-    <div className="h-full p-2 font-mono text-sm bg-slate-950">
-      <div className="text-slate-500">$ </div>
-    </div>
-  )
-}
-
-function DefaultOutput() {
-  return (
-    <div className="h-full p-2 font-mono text-xs text-slate-400">
-      No output yet.
-    </div>
-  )
-}
-
-function DefaultProblems() {
-  return (
-    <div className="h-full p-3 text-sm text-slate-400">
-      No problems detected.
-    </div>
-  )
-}
-
-function DefaultDebugConsole() {
-  return (
-    <div className="h-full p-2 font-mono text-sm">
-      <div className="text-slate-500">Debug console ready.</div>
     </div>
   )
 }

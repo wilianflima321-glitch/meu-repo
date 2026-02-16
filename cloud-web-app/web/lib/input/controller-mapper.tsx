@@ -958,7 +958,7 @@ export function ControllerProvider({
 }) {
   const value = useMemo(() => ({
     mapper: new ControllerMapper(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     value.mapper.start();
@@ -1124,7 +1124,7 @@ export function useVibration() {
   }, [mapper]);
 }
 
-export default {
+const __defaultExport = {
   ControllerMapper,
   ControllerProvider,
   useControllerMapper,
@@ -1137,3 +1137,5 @@ export default {
   useVibration,
   DEFAULT_PROFILES,
 };
+
+export default __defaultExport;

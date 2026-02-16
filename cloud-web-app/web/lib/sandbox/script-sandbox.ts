@@ -468,7 +468,7 @@ export class ScriptSandbox {
   }
 
   // ============================================================================
-  // MÉTODOS PRIVADOS
+  // API PRIVADA
   // ============================================================================
 
   private handleWorkerMessage(message: SandboxMessage): void {

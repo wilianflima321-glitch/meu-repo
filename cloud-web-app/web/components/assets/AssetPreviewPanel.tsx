@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -228,9 +229,12 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
             <OrbitControls enablePan={false} />
           </Canvas>
         ) : isTexture && downloadUrl ? (
-          <img
+          <Image
             src={downloadUrl}
             alt={asset.name}
+            width={640}
+            height={480}
+            unoptimized
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : isAudio && downloadUrl ? (

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { 
   User, 
@@ -21,7 +22,6 @@ import {
   Save,
   AlertTriangle,
   Smartphone,
-  Monitor,
   Calendar
 } from 'lucide-react'
 import { AethelAPIClient } from '@/lib/api'
@@ -49,13 +49,6 @@ interface UserProfile {
     push: boolean
     marketing: boolean
   }
-}
-
-interface ActiveSession {
-  id: string
-  createdAt: string
-  expiresAt: string
-  current: boolean
 }
 
 // ============================================================================
@@ -119,8 +112,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [profileError, setProfileError] = useState<string | null>(null)
-  const [sessions, setSessions] = useState<ActiveSession[]>([])
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'sessions'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile')
   const [editingName, setEditingName] = useState(false)
   const [tempName, setTempName] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -146,7 +138,6 @@ export default function ProfilePage() {
     }
     
     loadProfile()
-    loadSessions()
   }, [router])
   
   async function loadProfile() {
@@ -180,18 +171,6 @@ export default function ProfilePage() {
       setProfile(null)
     } finally {
       setLoading(false)
-    }
-  }
-  
-  async function loadSessions() {
-    try {
-      const response = await AethelAPIClient.getSessions()
-      const data = response as any
-      const items = Array.isArray(data?.sessions) ? data.sessions : []
-      setSessions(items)
-    } catch (error) {
-      console.error('Falha ao carregar sessões:', error)
-      setSessions([])
     }
   }
   
@@ -293,24 +272,6 @@ export default function ProfilePage() {
     setEditingName(false)
   }
   
-  async function revokeSession(sessionId: string) {
-    try {
-      await AethelAPIClient.revokeSession(sessionId)
-      setSessions(sessions.filter(s => s.id !== sessionId))
-    } catch (error) {
-      console.error('Falha ao revogar a sessão:', error)
-    }
-  }
-  
-  async function revokeAllSessions() {
-    try {
-      await AethelAPIClient.revokeAllSessions()
-      setSessions(sessions.filter(s => s.current))
-    } catch (error) {
-      console.error('Falha ao revogar sessões:', error)
-    }
-  }
-  
   async function deleteAccount() {
     try {
       await AethelAPIClient.deleteAccount()
@@ -324,7 +285,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
   }
@@ -345,9 +306,16 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             {/* Avatar */}
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-3xl font-bold">
                 {profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.name} className="w-full h-full rounded-full object-cover" />
+                  <Image
+                    src={profile.avatar}
+                    alt={profile.name}
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="w-full h-full rounded-full object-cover"
+                  />
                 ) : (
                   profile.name.charAt(0).toUpperCase()
                 )}
@@ -390,7 +358,7 @@ export default function ProfilePage() {
               </div>
               <p className="text-slate-400">{profile.email}</p>
               <div className="flex items-center gap-4 mt-2">
-                <span className="px-2 py-1 text-xs rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
                   {planLabels[profile.plan] ?? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 </span>
                 {profile.emailVerified && (
@@ -420,14 +388,13 @@ export default function ProfilePage() {
               { id: 'profile', label: 'Perfil', icon: User },
               { id: 'security', label: 'Segurança', icon: Shield },
               { id: 'preferences', label: 'Preferências', icon: Palette },
-              { id: 'sessions', label: 'Sessões', icon: Monitor },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 border-b-2 transition-colors ${
                   activeTab === tab.id 
-                    ? 'border-indigo-500 text-white' 
+                    ? 'border-blue-500 text-white' 
                     : 'border-transparent text-slate-400 hover:text-white'
                 }`}
               >
@@ -453,7 +420,7 @@ export default function ProfilePage() {
                 action={
                   <button 
                     onClick={() => { setTempName(profile.name); setEditingName(true); }}
-                    className="text-sm text-indigo-400 hover:text-indigo-300"
+                    className="text-sm text-blue-400 hover:text-blue-300"
                   >
                     Editar
                   </button>
@@ -464,7 +431,7 @@ export default function ProfilePage() {
                 label="E-mail" 
                 value={profile.email}
                 action={
-                  <button className="text-sm text-indigo-400 hover:text-indigo-300">
+                  <button className="text-sm text-blue-400 hover:text-blue-300">
                     Alterar
                   </button>
                 }
@@ -488,7 +455,7 @@ export default function ProfilePage() {
                 action={
                   <button 
                     onClick={() => router.push('/billing')}
-                    className="px-3 py-1 text-sm bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+                    className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                   >
                     Atualizar plano
                   </button>
@@ -507,7 +474,7 @@ export default function ProfilePage() {
                 label="Senha" 
                 value="Última alteração há 30 dias"
                 action={
-                  <button className="text-sm text-indigo-400 hover:text-indigo-300">
+                  <button className="text-sm text-blue-400 hover:text-blue-300">
                     Alterar senha
                   </button>
                 }
@@ -615,7 +582,7 @@ export default function ProfilePage() {
                       notifications: { ...profile.notifications, email: !profile.notifications.email }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.email ? 'bg-indigo-600' : 'bg-slate-600'
+                      profile.notifications.email ? 'bg-blue-600' : 'bg-slate-600'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-white transform transition-transform ${
@@ -633,7 +600,7 @@ export default function ProfilePage() {
                       notifications: { ...profile.notifications, push: !profile.notifications.push }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.push ? 'bg-indigo-600' : 'bg-slate-600'
+                      profile.notifications.push ? 'bg-blue-600' : 'bg-slate-600'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-white transform transition-transform ${
@@ -651,7 +618,7 @@ export default function ProfilePage() {
                       notifications: { ...profile.notifications, marketing: !profile.notifications.marketing }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.marketing ? 'bg-indigo-600' : 'bg-slate-600'
+                      profile.notifications.marketing ? 'bg-blue-600' : 'bg-slate-600'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-white transform transition-transform ${
@@ -664,65 +631,6 @@ export default function ProfilePage() {
           </>
         )}
         
-        {/* Sessions Tab */}
-        {activeTab === 'sessions' && (
-          <>
-            <ProfileSection 
-              title="Sessões ativas" 
-              description="Gerencie os dispositivos conectados à sua conta"
-            >
-              <div className="flex justify-end mb-4">
-                <button 
-                  onClick={revokeAllSessions}
-                  className="text-sm text-red-400 hover:text-red-300"
-                >
-                  Encerrar todas as outras sessões
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                {sessions.map((session) => (
-                  <div 
-                    key={session.id}
-                    className={`flex items-center justify-between p-4 rounded-lg ${
-                      session.current ? 'bg-indigo-500/10 border border-indigo-500/30' : 'bg-slate-700/50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <Monitor className="w-8 h-8 text-slate-400" />
-                      <div>
-                        <div className="font-medium text-white flex items-center gap-2">
-                          Sessão {session.id.slice(0, 8)}
-                          {session.current && (
-                            <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full">
-                              Sessão atual
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-slate-400 flex items-center gap-2">
-                          <Calendar className="w-3 h-3" />
-                          Criada em {new Date(session.createdAt).toLocaleString('pt-BR')}
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          Expira em: {new Date(session.expiresAt).toLocaleString('pt-BR')}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {!session.current && (
-                      <button
-                        onClick={() => revokeSession(session.id)}
-                        className="text-sm text-red-400 hover:text-red-300"
-                      >
-                        Encerrar
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </ProfileSection>
-          </>
-        )}
       </main>
       
       {/* Two-Factor Modal */}
@@ -730,8 +638,8 @@ export default function ProfilePage() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-slate-800 rounded-xl p-6 max-w-lg w-full mx-4">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-indigo-400" />
+              <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-blue-400" />
               </div>
               <h3 className="text-xl font-bold text-white">
                 {twoFactorModal === 'setup' ? 'Ativar 2FA' : 'Desativar 2FA'}
@@ -748,7 +656,14 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 {twoFactorSetup?.qrCode && (
                   <div className="flex flex-col items-center gap-3">
-                    <img src={twoFactorSetup.qrCode} alt="QR Code 2FA" className="w-40 h-40" />
+                    <Image
+                      src={twoFactorSetup.qrCode}
+                      alt="QR Code 2FA"
+                      width={160}
+                      height={160}
+                      unoptimized
+                      className="w-40 h-40"
+                    />
                     <p className="text-sm text-slate-400">Escaneie o QR Code no seu autenticador.</p>
                   </div>
                 )}
@@ -813,7 +728,7 @@ export default function ProfilePage() {
               <button
                 onClick={twoFactorModal === 'setup' ? confirmTwoFactorSetup : confirmTwoFactorDisable}
                 disabled={twoFactorLoading}
-                className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors"
               >
                 {twoFactorLoading ? 'Processando...' : twoFactorModal === 'setup' ? 'Confirmar' : 'Desativar'}
               </button>

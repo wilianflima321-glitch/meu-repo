@@ -1043,7 +1043,7 @@ export function CaptureProvider({
 }) {
   const value = useMemo(() => ({
     captureSystem: new CaptureSystem(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     return () => {
@@ -1195,10 +1195,10 @@ export function useCanvasCapture(canvasRef: React.RefObject<HTMLCanvasElement>) 
     if (canvasRef.current) {
       capture.setCanvas(canvasRef.current);
     }
-  }, [capture, canvasRef.current]);
+  }, [capture, canvasRef]);
 }
 
-export default {
+const __defaultExport = {
   CaptureSystem,
   CaptureProvider,
   useCaptureSystem,
@@ -1209,3 +1209,5 @@ export default {
   useCanvasCapture,
   PHOTO_FILTER_PRESETS,
 };
+
+export default __defaultExport;

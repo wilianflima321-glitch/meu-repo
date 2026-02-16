@@ -335,7 +335,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
           onClick={() => onChange(!setting.value)}
           className={`
             w-11 h-6 rounded-full transition-colors relative
-            ${setting.value ? 'bg-indigo-600' : 'bg-slate-700'}
+            ${setting.value ? 'bg-sky-600' : 'bg-slate-700'}
           `}
         >
           <div className={`
@@ -378,7 +378,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
             step={setting.step}
             value={setting.value}
             onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="w-32 accent-indigo-600"
+            className="w-32 accent-sky-600"
           />
           <span className="text-sm text-slate-400 w-12 text-right">{setting.value}</span>
         </div>
@@ -503,7 +503,7 @@ export default function EngineSettingsPage() {
                       className={`
                         w-full flex items-center gap-2 px-3 py-1.5 text-sm
                         ${activeSubsection === sub.id
-                          ? 'text-indigo-400'
+                          ? 'text-sky-400'
                           : 'text-slate-500 hover:text-slate-300'
                         }
                       `}
@@ -543,7 +543,7 @@ export default function EngineSettingsPage() {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm"
+                  className="flex items-center gap-2 px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-sm"
                 >
                   <Save className="w-4 h-4" />
                   Save Changes

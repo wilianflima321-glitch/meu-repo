@@ -1007,7 +1007,7 @@ function CommandRow({ command, isSelected, onClick, onMouseEnter, isRecent }: Co
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
-        isSelected ? 'bg-indigo-600/30' : 'hover:bg-slate-700/50'
+        isSelected ? 'bg-sky-600/30' : 'hover:bg-slate-700/50'
       }`}
     >
       <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-slate-400">

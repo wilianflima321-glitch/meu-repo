@@ -1139,9 +1139,11 @@ export function useAnimationTimeline(initialName?: string) {
   };
 }
 
-export default {
+const __defaultExport = {
   AnimationPlayer,
   AnimationStateMachine,
   AnimationTimeline,
   EasingFunctions,
 };
+
+export default __defaultExport;

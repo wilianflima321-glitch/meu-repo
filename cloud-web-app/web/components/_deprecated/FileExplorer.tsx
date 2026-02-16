@@ -23,16 +23,16 @@ export default function FileExplorer() {
   const fetchFileStructure = async () => {
     try {
       setErrorMessage(null);
-      const response = await fetch('/api/workspace/tree', {
+      const response = await fetch('/api/files/tree', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: '/workspace' })
+        body: JSON.stringify({ path: '/' })
       });
       if (!response.ok) {
-        throw new Error(`Workspace tree request failed (${response.status})`);
+        throw new Error(`Files tree request failed (${response.status})`);
       }
       const data = await response.json();
-      const tree = Array.isArray(data?.tree) ? data.tree : [];
+      const tree = Array.isArray(data?.children) ? data.children : [];
       // Adapt shape to this component
       const adapt = (nodes: any[]): FileNode[] =>
         nodes.map((n) => ({
@@ -46,7 +46,7 @@ export default function FileExplorer() {
     } catch (error) {
       console.error('Failed to fetch file structure:', error);
       setFiles([]);
-      setErrorMessage('Explorer indisponível. Verifique o endpoint /api/workspace/tree.');
+      setErrorMessage('Explorer unavailable. Verify /api/files/tree.');
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export default function FileExplorer() {
   if (loading) return (
     <div className="aethel-panel aethel-flex aethel-items-center aethel-justify-center aethel-p-8">
       <div className="aethel-flex aethel-flex-col aethel-items-center aethel-gap-3">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
         <span className="text-sm text-slate-400">Loading file structure...</span>
       </div>
     </div>

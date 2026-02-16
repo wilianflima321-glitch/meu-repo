@@ -188,15 +188,15 @@ export default function PricingPage() {
     <div className="min-h-screen bg-black text-white">
       {/* === Background Effects === */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[150px]" />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-sky-600/10 rounded-full blur-[150px]" />
       </div>
 
       {/* === Navbar === */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
               <SparklesIcon />
             </div>
             <span className="text-xl font-bold">Aethel</span>
@@ -219,14 +219,14 @@ export default function PricingPage() {
       <section className="relative pt-32 pb-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm font-medium mb-8">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             20% de desconto em planos anuais
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             Preços simples,{' '}
-            <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-400 bg-clip-text text-transparent">
               poder ilimitado
             </span>
           </h1>
@@ -247,7 +247,7 @@ export default function PricingPage() {
                 className={`
                   relative rounded-2xl p-8 transition-all duration-300
                   ${plan.highlight
-                    ? 'bg-gradient-to-b from-violet-500/20 via-fuchsia-500/10 to-transparent border-2 border-violet-500/50 shadow-2xl shadow-violet-500/20 scale-105'
+                    ? 'bg-gradient-to-b from-blue-500/20 via-sky-500/10 to-transparent border-2 border-blue-500/50 shadow-2xl shadow-blue-500/20 scale-105'
                     : 'bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/[0.07]'
                   }
                 `}
@@ -255,7 +255,7 @@ export default function PricingPage() {
                 {/* Popular Badge */}
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="px-4 py-1.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-semibold rounded-full shadow-lg shadow-violet-500/30">
+                    <span className="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-sky-500 text-white text-sm font-semibold rounded-full shadow-lg shadow-blue-500/30">
                       Mais popular
                     </span>
                   </div>
@@ -285,7 +285,7 @@ export default function PricingPage() {
                   className={`
                     flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-semibold transition-all duration-200 group
                     ${plan.highlight
-                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-lg shadow-violet-500/30'
+                      ? 'bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white shadow-lg shadow-blue-500/30'
                       : 'bg-white/10 hover:bg-white/20 text-white'
                     }
                   `}
@@ -337,9 +337,9 @@ export default function PricingPage() {
             {additionalFeatures.map((feature) => (
               <div
                 key={feature.title}
-                className="text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-violet-500/30 transition-all"
+                className="text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all"
               >
-                <div className="w-14 h-14 mx-auto mb-5 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                <div className="w-14 h-14 mx-auto mb-5 rounded-xl bg-gradient-to-br from-blue-500/20 to-sky-500/20 border border-blue-500/20 flex items-center justify-center text-blue-400">
                   <feature.icon />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
@@ -363,7 +363,7 @@ export default function PricingPage() {
                 <tr className="border-b border-white/10">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-white">Recurso</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-white">Hobby</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-violet-400 bg-violet-500/10">Pro</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-blue-400 bg-blue-500/10">Pro</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-white">Enterprise</th>
                 </tr>
               </thead>
@@ -380,7 +380,7 @@ export default function PricingPage() {
                   <tr key={i} className="hover:bg-white/[0.02]">
                     <td className="px-6 py-4 text-sm text-slate-300">{row.feature}</td>
                     <td className="px-6 py-4 text-center text-sm text-slate-400">{row.hobby}</td>
-                    <td className="px-6 py-4 text-center text-sm text-white bg-violet-500/5">{row.pro}</td>
+                    <td className="px-6 py-4 text-center text-sm text-white bg-blue-500/5">{row.pro}</td>
                     <td className="px-6 py-4 text-center text-sm text-slate-400">{row.enterprise}</td>
                   </tr>
                 ))}
@@ -422,12 +422,12 @@ export default function PricingPage() {
       {/* === CTA === */}
       <section className="relative py-24 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl p-12 sm:p-16 bg-gradient-to-br from-violet-600/20 via-fuchsia-600/20 to-pink-600/20 border border-violet-500/30">
+          <div className="relative overflow-hidden rounded-3xl p-12 sm:p-16 bg-gradient-to-br from-blue-600/20 via-sky-600/20 to-cyan-600/20 border border-blue-500/30">
             {/* Background glow */}
-            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-violet-500/20 rounded-full blur-[100px]" />
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500/20 rounded-full blur-[100px]" />
 
             <div className="relative text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center text-white">
                 <HeadphonesIcon />
               </div>
 
@@ -464,7 +464,7 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
               <span className="text-slate-400 text-sm">

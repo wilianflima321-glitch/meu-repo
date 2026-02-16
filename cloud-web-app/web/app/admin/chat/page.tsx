@@ -75,15 +75,15 @@ export default function Chat() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Chat Prioritário com IA</h1>
-          <p className='text-sm text-gray-500'>Histórico persistente e prioridade operacional.</p>
+          <p className='text-sm text-zinc-500'>Histórico persistente e prioridade operacional.</p>
         </div>
-        <button onClick={fetchMessages} className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'>
+        <button onClick={fetchMessages} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>
           Atualizar
         </button>
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
           {error}
         </div>
       )}
@@ -109,16 +109,16 @@ export default function Chat() {
         </button>
       </div>
 
-      <div className='border rounded p-4 h-96 overflow-y-auto bg-white'>
+      <div className='border rounded p-4 h-96 overflow-y-auto bg-zinc-900/70'>
         {loading ? (
-          <p className='text-sm text-gray-500'>Carregando mensagens...</p>
+          <p className='text-sm text-zinc-500'>Carregando mensagens...</p>
         ) : messages.length === 0 ? (
-          <p className='text-sm text-gray-500'>Nenhuma mensagem registrada.</p>
+          <p className='text-sm text-zinc-500'>Nenhuma mensagem registrada.</p>
         ) : (
           messages.map((msg) => (
             <div key={msg.id} className="mb-2 p-2 rounded border">
               <strong>{msg.sender.toUpperCase()} ({priorityLabels[msg.priority] ?? msg.priority}):</strong> {msg.text}
-              <div className='text-xs text-gray-500 mt-1'>{new Date(msg.createdAt).toLocaleString()}</div>
+              <div className='text-xs text-zinc-500 mt-1'>{new Date(msg.createdAt).toLocaleString()}</div>
             </div>
           ))
         )}

@@ -196,7 +196,7 @@ export default function ConsentDialog({
               <ul className="space-y-2">
                 {request.details.map((detail, index) => (
                   <li key={index} className="flex items-start gap-2 text-slate-300">
-                    <span className="text-purple-400 mt-1">•</span>
+                    <span className="text-blue-400 mt-1">•</span>
                     <span>{detail}</span>
                   </li>
                 ))}
@@ -240,7 +240,7 @@ export default function ConsentDialog({
           <button
             onClick={handleApprove}
             disabled={isProcessing}
-            className="flex-1 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 text-white rounded-lg transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors font-medium"
           >
             {isProcessing ? 'Processing...' : 'Approve & Continue'}
           </button>

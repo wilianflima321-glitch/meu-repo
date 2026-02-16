@@ -162,8 +162,10 @@ export function SearchProvider({
     }));
   }, []);
 
+  const query = state.query;
+  const options = state.options;
+
   const search = useCallback(async () => {
-    const { query, options } = state;
     if (!query.trim()) {
       setState(prev => ({ ...prev, results: [], totalMatches: 0 }));
       return;
@@ -196,7 +198,7 @@ export function SearchProvider({
         error: error instanceof Error ? error.message : 'Search failed',
       }));
     }
-  }, [state.query, state.options, onSearch]);
+  }, [query, options, onSearch]);
 
   const replaceInFile = useCallback(async (path: string, match: SearchMatch) => {
     if (onReplace) {
@@ -403,7 +405,7 @@ function SearchInput({
           onFocus={() => showHistory && setShowDropdown(true)}
           onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-8 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full pl-10 pr-8 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
         />
         {value && (
           <button
@@ -459,7 +461,7 @@ function OptionButton({
       title={title}
       className={`p-1 rounded transition-colors ${
         active
-          ? 'bg-indigo-600/20 text-indigo-400'
+          ? 'bg-sky-600/20 text-sky-400'
           : 'text-slate-500 hover:text-white hover:bg-slate-800'
       }`}
     >
@@ -502,7 +504,7 @@ function SearchResultFile({
         ) : (
           <ChevronDown className="w-4 h-4 text-slate-500" />
         )}
-        <FileCode className="w-4 h-4 text-indigo-400" />
+        <FileCode className="w-4 h-4 text-sky-400" />
         <span className="text-sm text-white">{fileName}</span>
         <span className="text-xs text-slate-500 truncate">{dirPath}</span>
         <span className="ml-auto text-xs text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
@@ -602,7 +604,7 @@ export function GlobalSearchPanel({
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [state.query, state.options]);
+  }, [state.query, state.options, search]);
 
   // Focus search input on mount
   useEffect(() => {
@@ -633,7 +635,7 @@ export function GlobalSearchPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <Search className="w-4 h-4 text-indigo-400" />
+          <Search className="w-4 h-4 text-sky-400" />
           <span className="text-sm font-medium text-white">Search</span>
         </div>
         <div className="flex items-center gap-1">
@@ -641,7 +643,7 @@ export function GlobalSearchPanel({
             onClick={() => setShowReplace(!showReplace)}
             className={`p-1 rounded transition-colors ${
               showReplace
-                ? 'bg-indigo-600/20 text-indigo-400'
+                ? 'bg-sky-600/20 text-sky-400'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
             title="Toggle Replace (Ctrl+Shift+H)"
@@ -753,14 +755,14 @@ export function GlobalSearchPanel({
               value={state.options.includePattern}
               onChange={e => setOptions({ includePattern: e.target.value })}
               placeholder="files to include (e.g., *.ts, src/**)"
-              className="w-full px-2 py-1 text-xs bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-2 py-1 text-xs bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
             />
             <input
               type="text"
               value={state.options.excludePattern}
               onChange={e => setOptions({ excludePattern: e.target.value })}
               placeholder="files to exclude"
-              className="w-full px-2 py-1 text-xs bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-2 py-1 text-xs bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
             />
           </div>
         )}
@@ -786,7 +788,7 @@ export function GlobalSearchPanel({
       <div className="flex-1 overflow-y-auto">
         {state.searching ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
+            <Loader2 className="w-6 h-6 text-sky-400 animate-spin" />
           </div>
         ) : state.results.length === 0 && state.query ? (
           <div className="px-4 py-12 text-center text-slate-500">

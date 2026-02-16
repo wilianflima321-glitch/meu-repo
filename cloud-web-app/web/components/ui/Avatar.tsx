@@ -18,7 +18,17 @@ export interface AvatarImageProps extends HTMLAttributes<HTMLImageElement> {
 
 export function AvatarImage({ src, alt = 'Avatar', className = '', ...props }: AvatarImageProps) {
   if (!src) return null;
-  return <img src={src} alt={alt} className={`h-full w-full object-cover ${className}`} {...props} />;
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={96}
+      height={96}
+      unoptimized
+      className={`h-full w-full object-cover ${className}`}
+      {...props}
+    />
+  );
 }
 
 export interface AvatarFallbackProps extends HTMLAttributes<HTMLDivElement> {
@@ -62,9 +72,9 @@ function getInitials(name: string): string {
 
 function getColorFromName(name: string): string {
   const colors = [
-    'bg-indigo-600',
-    'bg-purple-600',
-    'bg-pink-600',
+    'bg-sky-600',
+    'bg-blue-600',
+    'bg-cyan-600',
     'bg-rose-600',
     'bg-orange-600',
     'bg-amber-600',

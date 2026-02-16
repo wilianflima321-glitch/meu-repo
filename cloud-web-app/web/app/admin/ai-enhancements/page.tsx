@@ -92,20 +92,20 @@ export default function AIEnhancements() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Melhorias Avançadas de IA</h1>
-          <p className='text-sm text-gray-500'>Roadmap operacional com controle de status e aprovação.</p>
+          <p className='text-sm text-zinc-500'>Roadmap operacional com controle de status e aprovação.</p>
         </div>
-        <button onClick={fetchEnhancements} className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'>
+        <button onClick={fetchEnhancements} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>
           Atualizar
         </button>
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
           {error}
         </div>
       )}
 
-      <div className='bg-white p-4 rounded-lg shadow mb-6'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
         <h2 className='text-xl font-semibold mb-4'>Criar nova melhoria</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <input
@@ -140,7 +140,7 @@ export default function AIEnhancements() {
         </button>
       </div>
 
-      <div className='bg-white p-4 rounded-lg shadow'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
           <h2 className='text-xl font-semibold'>Pipeline de melhorias</h2>
           <div className='flex gap-2'>
@@ -164,25 +164,25 @@ export default function AIEnhancements() {
           </div>
         </div>
         {loading ? (
-          <p className='text-sm text-gray-500'>Carregando melhorias...</p>
+          <p className='text-sm text-zinc-500'>Carregando melhorias...</p>
         ) : filteredItems.length === 0 ? (
-          <p className='text-sm text-gray-500'>Nenhuma melhoria encontrada.</p>
+          <p className='text-sm text-zinc-500'>Nenhuma melhoria encontrada.</p>
         ) : (
           <div className='space-y-4'>
             {filteredItems.map((item) => (
-              <div key={item.id} className='p-4 bg-white rounded-lg border'>
+              <div key={item.id} className='p-4 bg-zinc-900/70 rounded-lg border'>
                 <div className='flex items-center justify-between'>
                   <div>
                     <h3 className='text-lg font-semibold'>{item.name}</h3>
-                    <p className='text-sm text-gray-500'>{item.description || 'Sem descrição'}</p>
+                    <p className='text-sm text-zinc-500'>{item.description || 'Sem descrição'}</p>
                   </div>
-                  <span className='text-xs px-2 py-1 rounded bg-gray-100 text-gray-600'>
+                  <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>
                     {statusLabels[item.status] ?? item.status}
                   </span>
                 </div>
                 <button
                   onClick={() => toggleApplied(item)}
-                  className='mt-3 px-3 py-2 rounded bg-gray-900 text-white text-sm'
+                  className='mt-3 px-3 py-2 rounded bg-zinc-900 text-white text-sm'
                 >
                   {item.applied ? 'Reverter' : 'Aplicar'}
                 </button>

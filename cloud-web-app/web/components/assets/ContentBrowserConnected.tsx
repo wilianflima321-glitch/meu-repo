@@ -15,12 +15,14 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import ContentBrowser, { Asset, AssetFolder, AssetType } from './ContentBrowser';
 import useProjectAssets, { uploadLargeAsset, Asset as HookAsset, AssetFolder as HookFolder } from '@/hooks/useProjectAssets';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useToast, ConfirmModal } from '@/components/ui';
+import { useToast } from '@/components/ui';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 
 // ============================================================================
 // TYPES
@@ -233,9 +235,12 @@ function AssetPreviewModal({
               <div style={{ color: '#ef4444', fontSize: '13px' }}>{error}</div>
             )}
             {!isLoading && !error && isImageAsset(asset) && (
-              <img
+              <Image
                 src={previewUrl || asset.path}
                 alt={asset.name}
+                width={640}
+                height={360}
+                unoptimized
                 style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '6px' }}
               />
             )}
@@ -435,7 +440,13 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
   // ============================================================================
 
   const handleDelete = useCallback(async (asset: Asset) => {
-    if (!window.confirm(`Tem certeza que deseja excluir "${asset.name}"?`)) return;
+    const shouldDelete = await openConfirmDialog({
+      title: 'Excluir asset',
+      message: `Tem certeza que deseja excluir "${asset.name}"?`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
+    });
+    if (!shouldDelete) return;
     
     try {
       await deleteAsset(asset.id);

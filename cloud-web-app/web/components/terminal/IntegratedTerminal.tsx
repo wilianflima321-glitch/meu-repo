@@ -135,7 +135,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
     if (terminals.length === 0) {
       createTerminal();
     }
-  }, []);
+  }, [createTerminal, terminals.length]);
 
   // Mount terminal to DOM when active
   useEffect(() => {
@@ -174,6 +174,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
     return () => {
       resizeObserver.disconnect();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- terminal input handler is bound only when mounting a new xterm node
   }, [activeTerminalId, terminals]);
 
   // Write prompt
@@ -183,7 +184,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
   };
 
   // Setup input handler
-  const setupInputHandler = (instance: TerminalInstance) => {
+  function setupInputHandler(instance: TerminalInstance) {
     let currentLine = '';
     
     instance.terminal.onData(async (data) => {
@@ -269,7 +270,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
         instance.terminal.write(data);
       }
     });
-  };
+  }
 
   // Execute command
   const executeCommand = async (instance: TerminalInstance, command: string) => {

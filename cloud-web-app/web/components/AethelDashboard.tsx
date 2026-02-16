@@ -36,6 +36,7 @@ import { RenderQueue, type RenderJob } from './dashboard/RenderProgress'
 import { AIThinkingPanel } from './ai/AIThinkingPanel'
 import { DirectorNotePanel } from './ai/DirectorNotePanel'
 import { TimeMachineSlider } from './collaboration/TimeMachineSlider'
+import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs'
 
 interface WorkflowTemplate {
   id: string;
@@ -885,7 +886,14 @@ export default function AethelDashboard() {
   const renameCopilotWorkflow = useCallback(async () => {
     if (!activeWorkflowId) return
     const current = copilotWorkflows.find((w) => String(w.id) === String(activeWorkflowId))
-    const nextTitle = window.prompt('Novo nome do trabalho (workflow):', current?.title || 'Workflow')
+    const nextTitle = await openPromptDialog({
+      title: 'Renomear trabalho',
+      message: 'Informe o novo nome do workflow.',
+      defaultValue: current?.title || 'Workflow',
+      placeholder: 'Nome do workflow',
+      confirmText: 'Salvar',
+      cancelText: 'Cancelar',
+    })
     if (!nextTitle || !nextTitle.trim()) return
     await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { title: nextTitle.trim() }).catch(() => null)
     await refreshCopilotWorkflows().catch(() => null)
@@ -894,7 +902,12 @@ export default function AethelDashboard() {
 
   const archiveCopilotWorkflow = useCallback(async () => {
     if (!activeWorkflowId) return
-    const ok = window.confirm('Arquivar este trabalho (workflow)?')
+    const ok = await openConfirmDialog({
+      title: 'Arquivar trabalho',
+      message: 'Arquivar este trabalho (workflow)?',
+      confirmText: 'Arquivar',
+      cancelText: 'Cancelar',
+    })
     if (!ok) return
     await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { archived: true }).catch(() => null)
     const list = await refreshCopilotWorkflows().catch(() => [])
@@ -1680,7 +1693,7 @@ export default function AethelDashboard() {
     <div className="min-h-screen aethel-container">
       {/* Trial Banner */}
       {isTrialActive && (
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 text-sm flex items-center justify-between shadow-lg">
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 text-sm flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1716,10 +1729,10 @@ export default function AethelDashboard() {
               </svg>
             </button>
             <div className="aethel-flex aethel-items-center aethel-gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-lg aethel-flex aethel-items-center aethel-justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg aethel-flex aethel-items-center aethel-justify-center">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 Aethel IDE
               </h1>
             </div>
@@ -1781,7 +1794,7 @@ export default function AethelDashboard() {
         }`}>
           <div className="aethel-sidebar-header">
             <div className="aethel-flex aethel-items-center aethel-gap-3">
-              <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-pink-500 rounded aethel-flex aethel-items-center aethel-justify-center">
+              <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded aethel-flex aethel-items-center aethel-justify-center">
                 <span className="text-white font-bold text-xs">A</span>
               </div>
               <span className="font-semibold text-sm">Navegação</span>
@@ -1792,7 +1805,7 @@ export default function AethelDashboard() {
           <div className="px-3 py-3">
             <button
               onClick={createNewSession}
-              className="inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors active:opacity-80 bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 active:bg-indigo-800 h-9 px-3 rounded-lg gap-2 text-sm min-w-9 w-full"
+              className="inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors active:opacity-80 bg-blue-600 text-white shadow-sm hover:bg-blue-700 active:bg-blue-800 h-9 px-3 rounded-lg gap-2 text-sm min-w-9 w-full"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1812,7 +1825,7 @@ export default function AethelDashboard() {
                 onClick={() => setSessionFilter('all')}
                 className={`flex justify-center items-center clickable rounded-full px-3 py-1.5 border-none outline-offset-0 outline-slate-600 text-xs leading-4 ${
                   sessionFilter === 'all'
-                    ? 'bg-indigo-600 text-white outline-none outline-0'
+                    ? 'bg-blue-600 text-white outline-none outline-0'
                     : 'border border-slate-600 text-slate-400 hover:bg-slate-800'
                 }`}
               >
@@ -1822,7 +1835,7 @@ export default function AethelDashboard() {
                 onClick={() => setSessionFilter('favorites')}
                 className={`flex justify-center items-center clickable rounded-full px-3 py-1.5 border-none outline-offset-0 outline-slate-600 text-xs leading-4 ${
                   sessionFilter === 'favorites'
-                    ? 'bg-indigo-600 text-white outline-none outline-0'
+                    ? 'bg-blue-600 text-white outline-none outline-0'
                     : 'border border-slate-600 text-slate-400 hover:bg-slate-800'
                 }`}
               >
@@ -1835,7 +1848,7 @@ export default function AethelDashboard() {
                 onClick={() => setSessionFilter('scheduled')}
                 className={`flex justify-center items-center clickable rounded-full px-3 py-1.5 border-none outline-offset-0 outline-slate-600 text-xs leading-4 ${
                   sessionFilter === 'scheduled'
-                    ? 'bg-indigo-600 text-white outline-none outline-0'
+                    ? 'bg-blue-600 text-white outline-none outline-0'
                     : 'border border-slate-600 text-slate-400 hover:bg-slate-800'
                 }`}
               >
@@ -1993,7 +2006,7 @@ export default function AethelDashboard() {
               <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 aethel-gap-6">
                 <div className="aethel-card aethel-p-6">
                   <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Atividade de IA</h3>
-                  <p className="aethel-text-2xl aethel-font-bold aethel-text-indigo-400">{aiActivity}</p>
+                  <p className="aethel-text-2xl aethel-font-bold aethel-text-blue-400">{aiActivity}</p>
                 </div>
                 <div className="aethel-card aethel-p-6">
                   <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Projetos ativos</h3>
@@ -2001,7 +2014,7 @@ export default function AethelDashboard() {
                 </div>
                 <div className="aethel-card aethel-p-6">
                   <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2">Prévia ao vivo</h3>
-                  <p className="aethel-text-2xl aethel-font-bold aethel-text-purple-400">{livePreviewSuggestions.length} sugestões</p>
+                  <p className="aethel-text-2xl aethel-font-bold aethel-text-cyan-400">{livePreviewSuggestions.length} sugestões</p>
                 </div>
               </div>
 
@@ -2247,19 +2260,19 @@ export default function AethelDashboard() {
                 <div className="aethel-flex aethel-gap-2">
                   <button
                     onClick={() => setChatMode('chat')}
-                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'chat' ? 'aethel-bg-indigo-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
+                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'chat' ? 'aethel-bg-blue-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
                   >
                     Chat
                   </button>
                   <button
                     onClick={() => setChatMode('agent')}
-                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'agent' ? 'aethel-bg-indigo-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
+                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'agent' ? 'aethel-bg-blue-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
                   >
                     Modo agente
                   </button>
                   <button
                     onClick={() => setChatMode('canvas')}
-                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'canvas' ? 'aethel-bg-indigo-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
+                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'canvas' ? 'aethel-bg-blue-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
                   >
                     Canvas
                   </button>
@@ -2355,7 +2368,7 @@ export default function AethelDashboard() {
                   </div>
                   <div className="aethel-space-y-4 aethel-mb-4 aethel-max-h-96 aethel-overflow-y-auto">
                     {chatHistory.map((msg, index) => (
-                      <div key={index} className={`aethel-p-3 aethel-rounded-lg ${msg.role === 'user' ? 'aethel-bg-indigo-500/20 aethel-ml-12' : 'aethel-bg-slate-700/50 aethel-mr-12'}`}>
+                      <div key={index} className={`aethel-p-3 aethel-rounded-lg ${msg.role === 'user' ? 'aethel-bg-blue-500/20 aethel-ml-12' : 'aethel-bg-slate-700/50 aethel-mr-12'}`}>
                         <p className="aethel-text-sm aethel-font-medium aethel-mb-1">{msg.role === 'user' ? 'Você' : 'IA'}</p>
                         <p className="aethel-text-sm">{msg.content}</p>
                       </div>
@@ -2722,7 +2735,7 @@ export default function AethelDashboard() {
                       </div>
                       <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                         <p className="aethel-text-xs aethel-text-slate-500">Total creditado</p>
-                        <p className="aethel-text-lg aethel-font-semibold aethel-text-indigo-300">
+                        <p className="aethel-text-lg aethel-font-semibold aethel-text-blue-300">
                           {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                         </p>
                       </div>
@@ -2941,7 +2954,7 @@ export default function AethelDashboard() {
 
                 <div className="aethel-card aethel-p-5 aethel-space-y-3">
                   <p className="aethel-text-xs aethel-text-slate-500">Saldo em créditos</p>
-                  <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-indigo-300">
+                  <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-blue-300">
                     {walletData ? `${walletData.balance.toLocaleString()} ${formatCurrencyLabel(walletData.currency)}` : '—'}
                   </h3>
                   <p className="aethel-text-xs aethel-text-slate-400">
@@ -2988,7 +3001,7 @@ export default function AethelDashboard() {
                   </div>
                   <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
                     <p className="aethel-text-xs aethel-text-slate-500">Total creditado</p>
-                    <p className="aethel-text-lg aethel-font-semibold aethel-text-indigo-300">
+                    <p className="aethel-text-lg aethel-font-semibold aethel-text-blue-300">
                       {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                     </p>
                   </div>
@@ -3101,7 +3114,7 @@ export default function AethelDashboard() {
               <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-8 aethel-max-w-6xl aethel-mx-auto">
                 <div className="aethel-card aethel-p-6">
                   <div className="aethel-text-center aethel-mb-6">
-                    <div className="aethel-w-16 aethel-h-16 aethel-bg-gradient-to-r aethel-from-indigo-500 aethel-to-purple-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-4">
+                    <div className="aethel-w-16 aethel-h-16 aethel-bg-gradient-to-r aethel-from-blue-500 aethel-to-cyan-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-4">
                     <svg className="w-8 h-8 aethel-text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -3274,7 +3287,7 @@ export default function AethelDashboard() {
                             </div>
                             <div className="aethel-h-2 aethel-bg-slate-800 aethel-rounded-full">
                               <div
-                                className="aethel-h-2 aethel-rounded-full aethel-bg-indigo-500"
+                                className="aethel-h-2 aethel-rounded-full aethel-bg-blue-500"
                                 style={{ width: `${Math.min(100, Math.max(0, download.progress))}%` }}
                               />
                             </div>
@@ -3328,15 +3341,15 @@ export default function AethelDashboard() {
                   <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-3">Início rápido</h3>
                   <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 aethel-gap-4 aethel-text-sm">
                     <div className="aethel-text-center">
-                    <div className="aethel-w-8 aethel-h-8 aethel-bg-indigo-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">1</div>
+                    <div className="aethel-w-8 aethel-h-8 aethel-bg-blue-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">1</div>
                     Baixar e instalar
                     </div>
                     <div className="aethel-text-center">
-                    <div className="aethel-w-8 aethel-h-8 aethel-bg-indigo-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">2</div>
+                    <div className="aethel-w-8 aethel-h-8 aethel-bg-blue-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">2</div>
                     Conectar ao backend
                     </div>
                     <div className="aethel-text-center">
-                    <div className="aethel-w-8 aethel-h-8 aethel-bg-indigo-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">3</div>
+                    <div className="aethel-w-8 aethel-h-8 aethel-bg-blue-600 aethel-rounded-full aethel-flex aethel-items-center aethel-justify-center aethel-mx-auto aethel-mb-2 aethel-text-white aethel-font-bold">3</div>
                     Começar a criar
                     </div>
                   </div>
@@ -3363,7 +3376,7 @@ export default function AethelDashboard() {
                       : category.includes('ciência') || category.includes('data')
                       ? 'aethel-bg-green-500/20 aethel-text-green-400'
                       : category.includes('criativo') || category.includes('creative')
-                      ? 'aethel-bg-purple-500/20 aethel-text-purple-400'
+                      ? 'aethel-bg-cyan-500/20 aethel-text-cyan-400'
                       : 'aethel-bg-orange-500/20 aethel-text-orange-400'
 
                   return (
@@ -3378,13 +3391,13 @@ export default function AethelDashboard() {
                         {template.category}
                       </span>
                     </div>
-                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2 group-hover:aethel-text-indigo-400 aethel-transition">
+                    <h3 className="aethel-text-xl aethel-font-semibold aethel-mb-2 group-hover:aethel-text-blue-400 aethel-transition">
                       {template.name}
                     </h3>
                     <p className="aethel-text-slate-400 aethel-text-sm aethel-mb-4">
                       {template.description}
                     </p>
-                    <button className="aethel-button aethel-button-primary aethel-w-full group-hover:aethel-bg-indigo-600 aethel-transition">
+                    <button className="aethel-button aethel-button-primary aethel-w-full group-hover:aethel-bg-blue-600 aethel-transition">
                       Usar template
                     </button>
                   </div>
@@ -3413,7 +3426,7 @@ export default function AethelDashboard() {
                       </div>
                     )}
                     <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-2">
-                      <span className="aethel-text-xs aethel-px-2 aethel-py-1 aethel-rounded-full aethel-bg-indigo-500/20 aethel-text-indigo-400">
+                      <span className="aethel-text-xs aethel-px-2 aethel-py-1 aethel-rounded-full aethel-bg-blue-500/20 aethel-text-blue-400">
                         {useCase.category}
                       </span>
                       <div className="aethel-flex aethel-items-center aethel-gap-3 aethel-text-xs aethel-text-slate-400">
@@ -3431,7 +3444,7 @@ export default function AethelDashboard() {
                         </span>
                       </div>
                     </div>
-                    <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2 group-hover:aethel-text-indigo-400 aethel-transition">
+                    <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-2 group-hover:aethel-text-blue-400 aethel-transition">
                       {useCase.title}
                     </h3>
                     <p className="aethel-text-slate-400 aethel-text-sm aethel-mb-3">
