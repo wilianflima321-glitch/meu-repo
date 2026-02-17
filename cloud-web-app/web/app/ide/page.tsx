@@ -970,6 +970,7 @@ function IDEPageInner() {
       onToggleSidebar={() => window.dispatchEvent(new Event('aethel.layout.toggleSidebar'))}
       onToggleTerminal={() => window.dispatchEvent(new Event('aethel.layout.toggleTerminal'))}
       onAIChat={() => window.dispatchEvent(new Event('aethel.layout.toggleAI'))}
+      onRollbackLastAIPatch={() => window.dispatchEvent(new Event('aethel.editor.rollbackInlinePatch'))}
       onOpenSettings={() => pushMessage('Global IDE settings are managed under Admin > IDE Settings.')}
     >
       <IDELayout

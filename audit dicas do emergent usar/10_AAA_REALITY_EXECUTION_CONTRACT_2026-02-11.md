@@ -1862,3 +1862,15 @@ Validation snapshot:
 
 Residual limit:
 1. Rollback durability is local-runtime persistent, not distributed cross-instance durable yet.
+
+## 57) Delta 2026-02-18 XI - Editor rollback discoverability in command palette
+
+Implemented:
+1. Added command palette action `AI: Rollback Last AI Patch` with `Ctrl+Alt+Z` shortcut:
+- `cloud-web-app/web/components/ide/CommandPalette.tsx`
+2. Wired command action to editor rollback event in `/ide`:
+- `cloud-web-app/web/app/ide/page.tsx`
+- `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
+
+Decision lock:
+1. Partial/gated capability remains explicit; rollback action only affects server-applied inline patch token.

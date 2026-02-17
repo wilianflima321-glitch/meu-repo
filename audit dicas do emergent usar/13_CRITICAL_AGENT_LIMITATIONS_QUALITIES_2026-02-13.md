@@ -630,3 +630,10 @@ Implemented:
 Critical reading:
 1. Reliability improved for restart/local-session continuity.
 2. Enterprise distributed durability remains a P1/P2 infrastructure concern.
+
+## Delta 2026-02-18 XI - UX discoverability for rollback control
+Implemented:
+1. Command palette now exposes rollback action for last AI patch (`Ctrl+Alt+Z`) and dispatches explicit editor event.
+
+Critical reading:
+1. Improves operator trust and reversibility discoverability without introducing fake capability claims.

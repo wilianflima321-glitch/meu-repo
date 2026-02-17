@@ -603,6 +603,16 @@ export function MonacoEditorPro({
     }
   }, [emitInlineEditToast]);
 
+  useEffect(() => {
+    const onRollbackEvent = async () => {
+      await handleRollbackLastInlineApply();
+    };
+    window.addEventListener('aethel.editor.rollbackInlinePatch', onRollbackEvent);
+    return () => {
+      window.removeEventListener('aethel.editor.rollbackInlinePatch', onRollbackEvent);
+    };
+  }, [handleRollbackLastInlineApply]);
+
   // Apply diagnostics decorations
   useEffect(() => {
     if (!editorRef.current || !monacoRef.current || !enableErrorDecorations) return;

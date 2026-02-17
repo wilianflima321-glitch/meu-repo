@@ -652,3 +652,10 @@ Delivered:
 
 Triaged impact:
 1. Prevents silent contract drift for core anti-alucination flows.
+
+## Delta 2026-02-18 XI - Command-surface alignment for reversibility
+Delivered:
+1. Added command palette action for rollback of last AI patch and wired it to editor rollback event.
+
+Triaged impact:
+1. Closes UX gap between deterministic backend rollback and user-discoverable controls in `/ide`.
