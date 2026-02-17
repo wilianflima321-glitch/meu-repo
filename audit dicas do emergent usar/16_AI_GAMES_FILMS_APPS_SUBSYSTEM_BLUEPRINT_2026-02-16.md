@@ -146,3 +146,5 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 - `app/api/assets/upload/route.ts`
 5. Advanced chat orchestration now enforces quality mode + self-questioning checklist + optional benchmark references, with explicit provider gates:
 - `app/api/ai/chat-advanced/route.ts`
+6. Workbench AI panel is now wired to advanced orchestration route for runtime use:
+- `components/ide/AIChatPanelContainer.tsx`

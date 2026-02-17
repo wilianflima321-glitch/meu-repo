@@ -602,3 +602,13 @@ Delivered:
 Triaged impact:
 1. Improves reliability and auditability of agent output without expanding product scope.
 2. Keeps anti-fake-success intact and prevents hidden dependency on external research availability.
+
+## Delta 2026-02-17 VI - Agentic UX wiring in `/ide`
+Delivered:
+1. Right-sidebar AI chat now uses advanced route orchestration (`/api/ai/chat-advanced`).
+2. Automatic request profile selection added (`qualityMode`, `agentCount`, benchmark research flag).
+3. Plan-gated multi-agent requests now degrade to single-agent automatically instead of hard dead-end for user.
+
+Triaged impact:
+1. Closes part of P1-02 (Editor-Native AI Clarity support path) by improving assistant execution quality in main Workbench shell.
+2. Does not change collaboration/L4/L5 status gates.

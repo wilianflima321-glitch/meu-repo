@@ -1762,3 +1762,24 @@ Validation snapshot:
 Decision lock:
 1. Keep anti-fake-success as hard rule for all advanced agent paths.
 2. Keep benchmark ingestion as best-effort (never a hidden dependency for successful completion).
+
+## 52) Delta 2026-02-17 VI - IDE AI panel moved to advanced orchestration
+
+Implemented:
+1. IDE AI sidebar now calls `/api/ai/chat-advanced` instead of `/api/ai/chat`:
+- `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
+2. Runtime profile inference added in UI:
+- deep audit/benchmark prompts -> `qualityMode=studio`, `agentCount=3`, web research enabled;
+- implementation prompts -> `qualityMode=delivery`, `agentCount=2`;
+- normal prompts -> `qualityMode=standard`, `agentCount=1`.
+3. Multi-agent plan gates now degrade safely to single-agent in UI when plan limits block agent mode.
+4. Project context is now forwarded from `/ide` URL (`projectId`) to advanced chat calls.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:enterprise-gate` PASS
+
+Critical reading:
+1. This improves Manus-like orchestration behavior without inflating maturity claims.
+2. L4/L5 readiness remains blocked by missing deterministic multi-file validate/apply/rollback pipeline.

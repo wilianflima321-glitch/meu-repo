@@ -576,3 +576,13 @@ Implemented:
 Critical reading:
 1. This reduces optimistic/hand-wavy agent output risk in long multi-step interface tasks.
 2. It does not promote L4/L5 claims; it improves L1-L3 reliability posture only.
+
+## Delta 2026-02-17 VI - Chat panel orchestration hardening
+Implemented:
+1. `AIChatPanelContainer` now targets `/api/ai/chat-advanced` as primary runtime path.
+2. Prompt intent classifier added to map requests into `standard|delivery|studio` quality modes.
+3. Agent-count downgrade logic added (`3/2 -> 1`) when plan gate denies multi-agent.
+
+Critical reading:
+1. UX now aligns better with "agentic" expectation in sidebar chat.
+2. Remaining hard limitation: still no end-to-end deterministic patch execution loop for arbitrary multi-file code changes.
