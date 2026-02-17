@@ -18,7 +18,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | AI inline completion (compat) | `app/api/ai/inline-completion/route.ts` | active compat surface | canonical `suggestion` + alias `text` |
 | AI deterministic validation | `app/api/ai/change/validate/route.ts` | `IMPLEMENTED` | returns `canApply`, `verdict`, `checks`, dependency impact |
 | AI deterministic apply | `app/api/ai/change/apply/route.ts` | `IMPLEMENTED` | scoped apply with stale-context guard (`409`) + validation gate (`422`) + rollback token |
-| AI deterministic rollback | `app/api/ai/change/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | token-based restore; partial for multi-instance durability until persistent store is added |
+| AI deterministic rollback | `app/api/ai/change/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | token-based restore with stale-context guard; partial for distributed multi-instance durability |
 | Render cancel | `app/api/render/jobs/[jobId]/cancel/route.ts` | `NOT_IMPLEMENTED` | explicit capability gate with metadata |
 | Billing checkout (non-stripe) | `app/api/billing/checkout/route.ts` | `NOT_IMPLEMENTED` branch | `PAYMENT_GATEWAY_NOT_IMPLEMENTED` with capability metadata |
 | File tree | `app/api/files/tree/route.ts` | `IMPLEMENTED` | canonical file authority |
@@ -58,7 +58,7 @@ Validation status:
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.
 2. Current local baseline: `npm run build` passes; residual warning remains from Next internal IPC revalidate URL (`localhost:undefined`) and is tracked separately as non-blocking runtime noise.
 3. This does not relax API capability/error contracts in this matrix.
-4. Rollback token snapshots for AI apply are currently process-memory scoped and expiring; this is acceptable for current P0 scope but not yet cross-instance durable.
+4. Rollback token snapshots are now persisted in local runtime temp storage + memory cache with TTL; still not cross-instance durable in distributed deployments.
 
 ## 4) Promotion criteria (P1+)
 1. Promote `PARTIAL` to `IMPLEMENTED` only after:

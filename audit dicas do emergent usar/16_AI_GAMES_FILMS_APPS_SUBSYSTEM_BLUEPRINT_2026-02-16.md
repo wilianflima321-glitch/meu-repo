@@ -153,3 +153,5 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 - `app/api/ai/change/rollback/route.ts`
 - `lib/server/change-apply-runtime.ts`
 - `components/editor/MonacoEditorPro.tsx`
+8. Rollback snapshots now persist to local runtime temp storage (TTL) for improved continuity across local restarts:
+- `lib/server/change-apply-runtime.ts`

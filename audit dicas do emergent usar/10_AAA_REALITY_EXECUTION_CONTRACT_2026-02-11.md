@@ -1843,3 +1843,22 @@ Validation snapshot:
 Decision lock:
 1. Keep local-only editor mutation as fallback only when scoped server apply is unavailable.
 2. Do not promote L4/L5 until this deterministic path is expanded from single-file inline edit to broader multi-file workflows.
+
+## 56) Delta 2026-02-18 X - Rollback durability hardening + contract gate expansion
+
+Implemented:
+1. Rollback snapshots now persist in runtime temp storage (disk) with TTL in addition to in-memory cache:
+- `cloud-web-app/web/lib/server/change-apply-runtime.ts`
+2. Rollback flow now validates latest file hash before consume and only invalidates token after safety check:
+- `cloud-web-app/web/app/api/ai/change/rollback/route.ts`
+3. Route-contract QA now enforces deterministic apply/rollback contract patterns:
+- `cloud-web-app/web/scripts/check-route-contracts.mjs`
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:route-contracts` PASS (contract checks expanded)
+4. `npm run qa:no-fake-success` PASS
+
+Residual limit:
+1. Rollback durability is local-runtime persistent, not distributed cross-instance durable yet.

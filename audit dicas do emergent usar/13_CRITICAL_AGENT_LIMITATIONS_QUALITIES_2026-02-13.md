@@ -620,4 +620,13 @@ Validation:
 
 Critical reading:
 1. This closes a real anti-alucination gap for single-file inline edits (`validate -> apply -> rollback token`).
-2. Remaining limitation: rollback token store is runtime-memory scoped and should be persisted for cross-instance reliability in future phases.
+2. Remaining limitation: rollback token store now persists in local runtime temp storage, but is not yet distributed cross-instance durable.
+
+## Delta 2026-02-18 X - Reliability follow-up
+Implemented:
+1. Added local-runtime persistence fallback for rollback snapshots (`temp storage + TTL`).
+2. Expanded route contract checker to enforce deterministic apply/rollback API patterns.
+
+Critical reading:
+1. Reliability improved for restart/local-session continuity.
+2. Enterprise distributed durability remains a P1/P2 infrastructure concern.

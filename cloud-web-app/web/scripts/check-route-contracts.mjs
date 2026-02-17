@@ -72,7 +72,7 @@ const checks = [
   },
   {
     file: 'app/api/ai/complete/route.ts',
-    patterns: ["error: 'NOT_IMPLEMENTED'", 'status: 501'],
+    patterns: ["error: 'NOT_IMPLEMENTED'", 'status: 501', 'suggestion', 'text: suggestion'],
     name: 'ai/complete provider-gate contract',
   },
   {
@@ -89,6 +89,30 @@ const checks = [
     file: 'app/api/ai/inline-completion/route.ts',
     patterns: ["error: 'NOT_IMPLEMENTED'", 'status: 501', 'suggestion', 'text: suggestion'],
     name: 'ai/inline-completion provider-gate + payload contract',
+  },
+  {
+    file: 'app/api/ai/change/apply/route.ts',
+    patterns: [
+      "capability: 'AI_CHANGE_APPLY'",
+      "error: 'STALE_CONTEXT'",
+      'status: 409',
+      "error: 'VALIDATION_BLOCKED'",
+      'status: 422',
+      'rollback:',
+    ],
+    name: 'ai/change/apply deterministic contract',
+  },
+  {
+    file: 'app/api/ai/change/rollback/route.ts',
+    patterns: [
+      "capability: 'AI_CHANGE_ROLLBACK'",
+      "error: 'ROLLBACK_TOKEN_INVALID'",
+      'status: 404',
+      "error: 'ROLLBACK_STALE_CONTEXT'",
+      'status: 409',
+      'restoredAt',
+    ],
+    name: 'ai/change/rollback deterministic contract',
   },
 ]
 

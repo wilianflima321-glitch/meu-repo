@@ -644,4 +644,11 @@ Delivered:
 Triaged impact:
 1. Upgrades core `/ide` patch flow from local-only mutation to auditable server apply in scoped context.
 2. Converts a major residual risk ("apply without reversible trace") into explicit, testable behavior.
-3. Residual risk remains for multi-instance rollback durability because token storage is memory-scoped at runtime.
+3. Residual risk remains for multi-instance rollback durability (runtime local persistence exists, distributed persistence still pending).
+
+## Delta 2026-02-18 X - Contract enforcement expansion
+Delivered:
+1. QA route-contract checks now cover deterministic apply/rollback routes explicitly.
+
+Triaged impact:
+1. Prevents silent contract drift for core anti-alucination flows.
