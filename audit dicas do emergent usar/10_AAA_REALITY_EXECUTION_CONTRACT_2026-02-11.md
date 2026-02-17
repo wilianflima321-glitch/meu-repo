@@ -137,6 +137,9 @@ Implemented in code:
 3. Visual regression CI now runs without permissive bypass in core capture/compare steps:
 - `.github/workflows/visual-regression-compare.yml` removed `continue-on-error` on Playwright install and compare.
 - removed `|| true` from screenshot capture and diff compare commands.
+4. UI quality workflows now enforce compiler-quality gates before visual jobs:
+- `.github/workflows/ui-audit.yml` adds `lint` + `typecheck` pre-audit.
+- `.github/workflows/visual-regression-compare.yml` adds `lint` + `typecheck` pre-compare.
 
 Validation snapshot (this delta):
 1. `cmd /c npm run lint` -> PASS (0 warnings)

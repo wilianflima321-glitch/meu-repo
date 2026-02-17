@@ -94,6 +94,7 @@ Delta tecnico (2026-02-17, rodada atual):
 3. Workflow de regressao visual endurecido:
 - sem `continue-on-error` na instalacao de Playwright;
 - sem bypass `|| true` em captura/comparacao.
+4. Workflows de auditoria visual agora exigem `lint` e `typecheck` antes da execucao dos checks visuais.
 
 Lacunas reais abertas (fato):
 1. Colaboracao avancada ainda `PARTIAL` para prontidao enterprise.

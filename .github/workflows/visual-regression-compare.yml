@@ -49,6 +49,12 @@ jobs:
       - name: Interface gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:interface-gate
 
+      - name: Lint gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run lint
+
+      - name: Typecheck gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run typecheck
+
       - name: Canonical component gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:canonical-components
 
