@@ -22,6 +22,7 @@ function stringifyMeta(value: unknown): string {
 
 export function capabilityResponse(options: CapabilityResponseOptions) {
   const capabilityStatus = options.capabilityStatus || 'NOT_IMPLEMENTED'
+  const metadata = options.metadata || {}
 
   const payload = {
     error: options.error,
@@ -30,7 +31,9 @@ export function capabilityResponse(options: CapabilityResponseOptions) {
     capabilityStatus,
     ...(options.milestone ? { milestone: options.milestone } : {}),
     ...(options.runtimeMode ? { runtimeMode: options.runtimeMode } : {}),
-    ...(options.metadata || {}),
+    metadata,
+    // Compatibility alias (kept while consumers migrate to payload.metadata)
+    ...metadata,
   }
 
   const headers: Record<string, string> = {
@@ -40,8 +43,8 @@ export function capabilityResponse(options: CapabilityResponseOptions) {
     ...(options.headers || {}),
   }
 
-  if (options.metadata) {
-    for (const [key, value] of Object.entries(options.metadata)) {
+  if (Object.keys(metadata).length > 0) {
+    for (const [key, value] of Object.entries(metadata)) {
       headers[`x-aethel-meta-${key}`] = stringifyMeta(value)
     }
   }

@@ -8,12 +8,13 @@ const OUT = path.join(ROOT, 'docs', 'MOJIBAKE_SCAN.md')
 const ignoreDirs = new Set(['node_modules', '.next', 'dist', 'build'])
 const ignoreFiles = new Set(['docs/MOJIBAKE_SCAN.md'])
 
-// Focus on high-confidence corruption signatures, not valid Portuguese accents.
+// High-confidence corruption signatures only.
+// We avoid language-specific glyph literals and match canonical mojibake ranges.
 const PATTERNS = [
-  /Ãƒ/,
-  /Ã¢â‚¬|Ã¢â€|â€œ|â€|â€™|â€“|â€”|â€¦/,
-  /ï¸|âƒ£/,
-  /Â©|Â®|Â±|Â·/,
+  // Typical UTF-8 -> Latin-1 corruption pairs (e.g. "Ã§", "Ã£", "Â©").
+  /\u00C3[\u0080-\u00BF]/,
+  /\u00C2[\u0080-\u00BF]/,
+  // Replacement character indicates failed decode.
   /\uFFFD/,
 ]
 

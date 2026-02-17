@@ -9,6 +9,8 @@ const API_DIR = path.join(ROOT, 'app', 'api')
 const STATUS_BY_ERROR = {
   NOT_IMPLEMENTED: 501,
   DEPRECATED_ROUTE: 410,
+  PAYMENT_GATEWAY_NOT_IMPLEMENTED: 501,
+  AUTH_NOT_CONFIGURED: 503,
   QUEUE_BACKEND_UNAVAILABLE: 503,
 }
 
@@ -47,15 +49,20 @@ function includesStatusNear(content, index, status) {
   return new RegExp(`status\\s*:\\s*${status}`).test(windowText)
 }
 
+function isWrappedByNotImplementedCapability(content, index) {
+  if (index < 0) return false
+  const start = Math.max(0, index - 1200)
+  const end = Math.min(content.length, index + 1200)
+  const windowText = content.slice(start, end)
+  return /notImplementedCapability\s*\(\s*\{/.test(windowText)
+}
+
 function checkErrorStatusContract(content, fileRel, failures) {
   for (const [errorCode, expectedStatus] of Object.entries(STATUS_BY_ERROR)) {
     const pattern = new RegExp(`error\\s*:\\s*['"\`]${errorCode}['"\`]`, 'g')
     let match
     while ((match = pattern.exec(content)) !== null) {
-      if (
-        errorCode === 'NOT_IMPLEMENTED' &&
-        content.includes('notImplementedCapability(')
-      ) {
+      if (isWrappedByNotImplementedCapability(content, match.index)) {
         continue
       }
       if (!includesStatusNear(content, match.index, expectedStatus)) {

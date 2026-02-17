@@ -79,6 +79,55 @@ Validation snapshot after this pass (`cloud-web-app/web`):
 - `cmd /c npm run qa:route-contracts` -> PASS
 - `cmd /c npm run build` -> FAIL (`spawn EPERM` in restricted environment)
 
+## 0.3 Delta Update 2026-02-17 (Benchmark absorption + strict PR governance)
+Policy locked:
+1. External benchmark reports are accepted only as directional input.
+2. Any benchmark claim without canonical evidence must be tagged `EXTERNAL_BENCHMARK_ASSUMPTION`.
+3. No benchmark claim can override canonical facts in this folder.
+
+Operational baseline (local evidence):
+1. `cmd /c npm run lint` -> PASS (0 warnings)
+2. `cmd /c npm run qa:interface-gate` -> PASS
+3. `cmd /c npm run qa:route-contracts` -> PASS
+4. `cmd /c npm run qa:no-fake-success` -> PASS
+5. Interface critical summary (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+- `frontend-workspace-route-usage=0`
+- `legacy-editor-shell-usage=0`
+
+Implemented in this delta:
+1. `capabilityResponse` now returns canonical `metadata` object while preserving compatibility aliases.
+2. Preview panel gained explicit large-payload guardrail:
+- inline preview is gated above validated threshold (no fake runtime success for oversized files).
+3. Admin security overview now authenticates requests explicitly with bearer token, aligning with backend RBAC contract.
+4. CI workflow hardening:
+- `cloud-web-app.yml` now executes `qa:no-fake-success`.
+5. Interface gate tightened:
+- `not-implemented-ui` threshold reduced from `10` to `6` to match current validated baseline.
+6. Anti fake-success validator expanded to enforce status contracts for:
+- `PAYMENT_GATEWAY_NOT_IMPLEMENTED -> 501`
+- `AUTH_NOT_CONFIGURED -> 503`
+- `QUEUE_BACKEND_UNAVAILABLE -> 503`
+
+Strict PR policy (no bypass) documented as execution rule:
+1. Mandatory checks:
+- `lint`
+- `typecheck`
+- `build`
+- `qa:interface-gate`
+- `qa:canonical-components`
+- `qa:route-contracts`
+- `qa:no-fake-success`
+- `qa:mojibake`
+- `qa:enterprise-gate`
+2. No manual override outside incident procedure.
+3. Branch protection remains required at repository settings level.
+4. Operational reference: `.github/BRANCH_PROTECTION_POLICY.md`.
+
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
    Source: `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`

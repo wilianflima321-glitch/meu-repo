@@ -81,6 +81,10 @@ jobs:
         working-directory: cloud-web-app/web
         run: npm run qa:route-contracts
 
+      - name: Run anti fake-success contract gate
+        working-directory: cloud-web-app/web
+        run: npm run qa:no-fake-success
+
       - name: Run mojibake scan gate
         working-directory: cloud-web-app/web
         run: npm run qa:mojibake

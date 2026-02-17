@@ -12,7 +12,7 @@ const THRESHOLDS = {
   'admin-light-theme-tokens': 0,
   'admin-status-light-tokens': 0,
   'blocking-browser-dialogs': 0,
-  'not-implemented-ui': 10,
+  'not-implemented-ui': 6,
   'frontend-workspace-route-usage': 0,
   'legacy-editor-shell-usage': 0,
 }

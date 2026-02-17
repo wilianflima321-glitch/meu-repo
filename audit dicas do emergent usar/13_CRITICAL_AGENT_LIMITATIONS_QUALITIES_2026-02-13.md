@@ -64,6 +64,35 @@ Debt tecnico atualizado:
 - `@next/next/no-img-element = 0`
 - `jsx-a11y/role-supports-aria-props = 0`
 
+## Snapshot incremental (2026-02-17) - benchmark externo sob controle canonico
+Regra aplicada:
+1. Benchmark externo nao substitui baseline canonico.
+2. Claim sem evidencia local passa a ser tratado como `EXTERNAL_BENCHMARK_ASSUMPTION`.
+3. Claims proibidos:
+- paridade desktop total Unreal/Premiere no browser
+- promocao L4/L5 sem evidencia operacional
+- colaboracao avancada sem SLO/limites testados
+
+Validacao local executada:
+1. `cmd /c npm run lint` -> PASS (0 warnings)
+2. `cmd /c npm run qa:interface-gate` -> PASS
+3. `cmd /c npm run qa:route-contracts` -> PASS
+4. `cmd /c npm run qa:no-fake-success` -> PASS
+
+Metricas criticas atuais:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+- `frontend-workspace-route-usage=0`
+- `legacy-editor-shell-usage=0`
+
+Lacunas reais abertas (fato):
+1. Colaboracao avancada ainda `PARTIAL` para prontidao enterprise.
+2. Render cancel continua em gate explicito `NOT_IMPLEMENTED`.
+3. Build local pode falhar em sandbox restrito (`spawn EPERM`), exigindo validacao em CI sem restricao.
+
 ## Validacao tecnica desta rodada
 Executado em `cloud-web-app/web`:
 - `npm run qa:interface-critical` -> PASS
