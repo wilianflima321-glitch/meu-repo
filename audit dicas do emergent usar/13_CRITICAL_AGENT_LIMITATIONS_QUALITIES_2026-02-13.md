@@ -88,6 +88,13 @@ Metricas criticas atuais:
 - `frontend-workspace-route-usage=0`
 - `legacy-editor-shell-usage=0`
 
+Delta tecnico (2026-02-17, rodada atual):
+1. `next.config.js` endurecido para limpar variaveis IPC invalidas (`__NEXT_*` e `__NEXT_PRIVATE_*`) que causavam ruido de revalidate IPC em runtime de build.
+2. `experimental.workerThreads=false` aplicado para reduzir instabilidade de build em ambiente restrito.
+3. Workflow de regressao visual endurecido:
+- sem `continue-on-error` na instalacao de Playwright;
+- sem bypass `|| true` em captura/comparacao.
+
 Lacunas reais abertas (fato):
 1. Colaboracao avancada ainda `PARTIAL` para prontidao enterprise.
 2. Render cancel continua em gate explicito `NOT_IMPLEMENTED`.

@@ -33,6 +33,11 @@ Authoritative references used:
 - no desktop parity claim for Unreal/Premiere
 - no L4/L5 promotion without operational evidence
 
+## 1.2 Reliability delta (2026-02-17)
+1. Build/runtime config hardened for restricted environments by sanitizing invalid Next IPC env keys and disabling worker threads locally.
+2. Visual regression pipeline moved to stricter execution (no permissive compare/capture bypass in CI script).
+3. Core anti-fake-success gates remain mandatory before any subsystem promotion claim.
+
 ## 2) Critical limitations to beat (without fake claims)
 ## 2.1 AI limitations (current generation models)
 1. Non-determinism under repeated prompts.

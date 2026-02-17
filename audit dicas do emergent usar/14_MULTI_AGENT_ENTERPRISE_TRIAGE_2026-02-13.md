@@ -72,6 +72,20 @@ Metricas:
 - `frontend-workspace-route-usage`: **0**
 - `legacy-editor-shell-usage`: **0**
 
+## 2.0 Canonical override (2026-02-17)
+Estado vigente para execucao desta fase:
+1. `legacy-accent-tokens=0`
+2. `admin-light-theme-tokens=0`
+3. `admin-status-light-tokens=0`
+4. `blocking-browser-dialogs=0`
+5. `not-implemented-ui=6` (gates API explicitos)
+6. `frontend-workspace-route-usage=0`
+7. `legacy-editor-shell-usage=0`
+8. `lint=0 warnings`
+
+Nota:
+1. Valores anteriores nesta pagina devem ser tratados como snapshot historico quando divergirem deste bloco.
+
 ## 2.1 Reconciliacao de benchmark externo (2026-02-17)
 Matriz factual de absorcao:
 

@@ -50,6 +50,11 @@ Validation status:
 - `AUTH_NOT_CONFIGURED -> 503`
 - `QUEUE_BACKEND_UNAVAILABLE -> 503`
 
+## 3.2 Build/runtime reliability note (2026-02-17)
+1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.
+2. In restricted local shells, `npm run build` may still fail with `spawn EPERM`; this is treated as environment constraint until CI revalidation.
+3. This does not relax API capability/error contracts in this matrix.
+
 ## 4) Promotion criteria (P1+)
 1. Promote `PARTIAL` to `IMPLEMENTED` only after:
 - operational test evidence;

@@ -128,6 +128,27 @@ Strict PR policy (no bypass) documented as execution rule:
 3. Branch protection remains required at repository settings level.
 4. Operational reference: `.github/BRANCH_PROTECTION_POLICY.md`.
 
+## 0.4 Delta Update 2026-02-17 (Build runtime hardening)
+Implemented in code:
+1. `cloud-web-app/web/next.config.js` now normalizes/clears both IPC env families:
+- `__NEXT_INCREMENTAL_CACHE_IPC_*`
+- `__NEXT_PRIVATE_INCREMENTAL_CACHE_IPC_*`
+2. Local build hardening switched to `experimental.workerThreads=false` to avoid unstable IPC behavior in restricted environments.
+3. Visual regression CI now runs without permissive bypass in core capture/compare steps:
+- `.github/workflows/visual-regression-compare.yml` removed `continue-on-error` on Playwright install and compare.
+- removed `|| true` from screenshot capture and diff compare commands.
+
+Validation snapshot (this delta):
+1. `cmd /c npm run lint` -> PASS (0 warnings)
+2. `cmd /c npm run qa:no-fake-success` -> PASS
+3. `cmd /c npm run qa:interface-gate` -> PASS (`not-implemented-ui=6`)
+4. `cmd /c npm run build` -> FAIL (`spawn EPERM` in this local restricted shell)
+
+Execution interpretation:
+1. Build remains a hard gate in CI and cannot be bypassed in PR.
+2. Local `spawn EPERM` is tracked as environment restriction until revalidated on unrestricted runner.
+3. No fake-success policy and explicit capability contracts remain unchanged.
+
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
    Source: `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`
