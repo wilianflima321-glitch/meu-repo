@@ -697,3 +697,15 @@ Delivered:
 Triaged impact:
 1. Removed a misleading build warning class (`revalidateTag` invalid URL).
 2. Leaves only environment-dependent warnings that are operationally expected in local mode.
+
+## Delta 2026-02-18 XVI - Architecture complexity triage
+Delivered:
+1. Added generated architecture triage report:
+- `cloud-web-app/web/docs/ARCHITECTURE_CRITICAL_TRIAGE.md`
+2. Added report generator:
+- `cloud-web-app/web/scripts/architecture-critical-scan.mjs`
+- npm task `docs:architecture-triage`
+
+Triaged impact:
+1. Exposed concrete consolidation targets (`/api/files/*` compatibility usage, `_deprecated` backlog, unreferenced candidate components).
+2. Gives deterministic execution order for next hardening wave without scope expansion.

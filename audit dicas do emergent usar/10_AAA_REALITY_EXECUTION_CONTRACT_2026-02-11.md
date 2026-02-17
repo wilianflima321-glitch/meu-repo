@@ -1972,3 +1972,24 @@ Observed result:
 2. Remaining build warnings are environment-expected only:
 - missing `UPSTASH_REDIS_REST_URL/TOKEN`
 - Docker sandbox fallback
+
+## 64) Delta 2026-02-18 XVIII - Architecture triage sweep (system complexity alignment)
+
+Implemented:
+1. Added architecture-wide critical scan and report generation:
+- script: `cloud-web-app/web/scripts/architecture-critical-scan.mjs`
+- npm task: `docs:architecture-triage`
+- report: `cloud-web-app/web/docs/ARCHITECTURE_CRITICAL_TRIAGE.md`
+
+Factual snapshot from current sweep:
+1. API route files: `231`
+2. `_deprecated` component files: `10`
+3. Frontend compatibility usage of `/api/files/read|write|list|...`: `22`
+4. Redirect aliases to `/ide?entry=`: `17`
+5. File API compatibility wrappers (`trackCompatibilityRouteHit` under `app/api/files/*`): `8`
+6. API `NOT_IMPLEMENTED` markers: `6`
+7. Unreferenced candidate found: `components/ide/WorkbenchRedirect.tsx`
+
+Decision lock:
+1. Keep compatibility wrappers only with explicit removal-cycle planning.
+2. Reduce frontend usage of `/api/files/*` compatibility routes toward canonical `/api/files/fs`.

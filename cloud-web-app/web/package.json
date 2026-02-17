@@ -25,6 +25,7 @@
     "qa:interface-critical": "node scripts/interface-critical-scan.mjs",
     "qa:interface-gate": "node scripts/interface-critical-gate.mjs",
     "qa:enterprise-gate": "npm run qa:interface-gate && npm run qa:canonical-components && npm run qa:route-contracts && npm run qa:no-fake-success && npm run qa:mojibake && npm run typecheck && npm run build",
+    "docs:architecture-triage": "node scripts/architecture-critical-scan.mjs",
     "docs:routes-inventory": "node scripts/generate-routes-inventory.mjs",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

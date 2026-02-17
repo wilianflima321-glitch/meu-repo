@@ -694,3 +694,18 @@ Implemented:
 Critical reading:
 1. The recurring `revalidateTag` invalid URL warning is resolved in this wave.
 2. Residual build warnings now map to explicit missing environment/runtime dependencies only (Upstash + Docker fallback).
+
+## Delta 2026-02-18 XVIII - System complexity critical triage
+Implemented:
+1. Added architecture sweep (`docs:architecture-triage`) with machine-generated report:
+- `cloud-web-app/web/docs/ARCHITECTURE_CRITICAL_TRIAGE.md`
+2. Added hard metrics for structural drift:
+- high API surface (`231` routes)
+- compatibility route usage still active in frontend (`22` calls)
+- `_deprecated` component backlog (`10` files)
+- unreferenced component candidate (`components/ide/WorkbenchRedirect.tsx`)
+
+Critical reading:
+1. Product quality gates are green, but structural complexity is still high.
+2. Biggest engineering risk is not visual polish now; it is parallel API surface and compatibility-layer drag.
+3. Next P0 should reduce compatibility calls to canonical file authority (`/api/files/fs`) before adding new surfaces.
