@@ -541,3 +541,16 @@ Validation:
 Residual critical gaps:
 1. The `revalidateTag` invalid URL warning is still present at build finalization and remains tracked as framework/runtime noise.
 2. `NOT_IMPLEMENTED` remains intentionally explicit in AI provider gates, render cancel, and unsupported payment runtime paths.
+
+## Delta 2026-02-17 III - Handoff and runbook hardening
+Implemented:
+1. Canonical interface map created for external AI improvement workflow:
+- `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+2. Runtime warning/environment runbook created:
+- `19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+3. Canonical source index updated to include both docs:
+- `00_FONTE_CANONICA.md`
+
+Critical reading:
+1. Interface improvement ownership is now explicit and auditable by file path.
+2. Runtime warning handling is tracked operationally without lowering quality gates.

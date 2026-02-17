@@ -288,7 +288,9 @@ export default function PreviewPanel({
         </div>
         <button
           onClick={onRefresh}
-          className="flex items-center gap-1 px-2 py-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-300"
+          disabled={!onRefresh}
+          aria-label="Refresh preview panel"
+          className="flex items-center gap-1 px-2 py-1 rounded text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/5 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
           title="Refresh preview"
         >
           <Codicon name="refresh" />

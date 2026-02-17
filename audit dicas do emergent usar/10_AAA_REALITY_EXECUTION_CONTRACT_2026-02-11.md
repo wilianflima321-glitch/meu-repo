@@ -182,6 +182,19 @@ Critical interpretation:
 2. The remaining runtime warning is tracked as framework-level noise and does not change operational readiness gates.
 3. `NOT_IMPLEMENTED` remains explicit and limited to known capability gates (AI provider unavailable, render cancel, unsupported payment runtime path).
 
+## 0.6 Delta Update 2026-02-17 (Claude handoff map + runtime runbook)
+Implemented in canonical docs:
+1. New interface handoff map for external AI refactor execution:
+- `audit dicas do emergent usar/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+2. New runtime warning/environment runbook:
+- `audit dicas do emergent usar/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+3. Canonical source index updated to include both docs:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+
+Execution interpretation:
+1. Interface ownership and file-level targets are now explicit for parallel UI hardening.
+2. Runtime warning handling is formalized without weakening hard quality gates.
+
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
    Source: `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`

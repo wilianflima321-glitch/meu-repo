@@ -568,3 +568,16 @@ Critical residuals after this pass:
 - AI provider missing
 - render cancel
 - unsupported payment gateway runtime
+
+## Delta 2026-02-17 III - Execution support docs added
+Delivered:
+1. File-level interface execution map for Claude:
+- `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+2. Runtime warning/environment runbook:
+- `19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+3. Canonical registry updated:
+- `00_FONTE_CANONICA.md`
+
+Why this matters:
+1. Multi-agent execution now has deterministic interface targets and guardrails.
+2. Infra/runtime residual risks are tracked in a dedicated operational artifact.
