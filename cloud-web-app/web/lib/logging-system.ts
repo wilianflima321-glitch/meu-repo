@@ -237,7 +237,7 @@ export class Logger {
   }
   
   // ==========================================================================
-  // MÉTODOS DE LOG
+  // API DE LOG
   // ==========================================================================
   
   debug(message: string, context?: Record<string, unknown>): void {

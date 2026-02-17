@@ -1,49 +1,67 @@
-/**
- * AETHEL ENGINE - Marketplace Creator Categories API
- * 
- * Retorna a distribuição de vendas por categoria para o dashboard do criador.
- */
-
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/db';
+import { requireAuth } from '@/lib/auth-server';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
-interface CategoryData {
+export const dynamic = 'force-dynamic';
+
+type CategoryData = {
   name: string;
   value: number;
   revenue: number;
-}
+  isEstimated?: boolean;
+};
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
+    const user = requireAuth(request);
+
+    const items = await prisma.marketplaceItem.findMany({
+      where: { authorId: user.userId },
+      select: {
+        category: true,
+        price: true,
+        downloads: true,
+      },
+    });
+
+    const byCategory = new Map<
+      string,
+      { downloads: number; items: number; revenueCents: number }
+    >();
+
+    for (const item of items) {
+      const category = (item.category || 'uncategorized').trim() || 'uncategorized';
+      const downloads = Math.max(0, item.downloads || 0);
+      const unitPriceCents = Math.max(0, item.price || 0);
+      const revenueCents = unitPriceCents * downloads;
+
+      const current = byCategory.get(category) || {
+        downloads: 0,
+        items: 0,
+        revenueCents: 0,
+      };
+
+      current.downloads += downloads;
+      current.items += 1;
+      current.revenueCents += revenueCents;
+      byCategory.set(category, current);
     }
 
-    // TODO: Buscar dados reais do banco de dados
-    // Por enquanto retorna array vazio para novos criadores
-    // Quando houver vendas, isso será populado automaticamente
-    
-    const categories: CategoryData[] = [];
-    
-    // Em produção, seria algo assim:
-    // const categories = await db.sales.groupBy({
-    //   by: ['category'],
-    //   where: { creatorId: session.user.id },
-    //   _sum: { amount: true },
-    //   _count: true,
-    // });
+    const categories: CategoryData[] = Array.from(byCategory.entries())
+      .map(([name, data]) => ({
+        name,
+        value: data.downloads > 0 ? data.downloads : data.items,
+        revenue: Number((data.revenueCents / 100).toFixed(2)),
+        isEstimated: true,
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
 
     return NextResponse.json(categories);
   } catch (error) {
-    console.error('Erro ao buscar categorias:', error);
-    return NextResponse.json(
-      { error: 'Falha ao buscar dados de categorias' },
-      { status: 500 }
-    );
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    console.error('[marketplace/creator/categories] Error:', error);
+    return apiInternalError('Failed to load creator categories');
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, {
+  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -43,14 +44,14 @@ export function DropdownMenu({
   const isOpen = controlled ? open : internalOpen;
   const triggerRef = useRef<HTMLElement>(null);
 
-  const setOpen = (value: boolean) => {
+  const setOpen = useCallback((value: boolean) => {
     if (!controlled) {
       setInternalOpen(value);
     }
     onOpenChange?.(value);
-  };
+  }, [controlled, onOpenChange]);
 
-  const value = useMemo(() => ({ open: isOpen, setOpen, triggerRef }), [isOpen]);
+  const value = useMemo(() => ({ open: isOpen, setOpen, triggerRef }), [isOpen, setOpen]);
 
   return <DropdownMenuContext.Provider value={value}>{children}</DropdownMenuContext.Provider>;
 }

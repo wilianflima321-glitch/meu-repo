@@ -69,6 +69,26 @@ jobs:
         working-directory: cloud-web-app/web
         run: npm run lint
 
+      - name: Run interface quality gate
+        working-directory: cloud-web-app/web
+        run: npm run qa:interface-gate
+
+      - name: Run canonical component gate
+        working-directory: cloud-web-app/web
+        run: npm run qa:canonical-components
+
+      - name: Run API route contract gate
+        working-directory: cloud-web-app/web
+        run: npm run qa:route-contracts
+
+      - name: Run mojibake scan gate
+        working-directory: cloud-web-app/web
+        run: npm run qa:mojibake
+
+      - name: Run TypeScript check
+        working-directory: cloud-web-app/web
+        run: npm run typecheck
+
   build:
     name: Build
     runs-on: ubuntu-latest

@@ -362,7 +362,7 @@ function TemplateCard({
       className={`
         relative p-4 rounded-xl border text-left transition-all
         ${selected 
-          ? 'bg-violet-500/20 border-violet-500 ring-2 ring-violet-500/50' 
+          ? 'bg-violet-500/20 border-violet-500 ring-2 ring-sky-500/50' 
           : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800'}
       `}
     >
@@ -551,7 +551,7 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
       case 'welcome':
         return (
           <div className="text-center max-w-lg mx-auto">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-violet-500 to-fuchsia-600 
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-cyan-600 
                           rounded-2xl flex items-center justify-center shadow-2xl shadow-violet-500/30">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
@@ -602,7 +602,7 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
                   className={`
                     flex items-center gap-3 p-3 rounded-lg border transition-all
                     ${selectedLanguage === lang.code
-                      ? 'bg-violet-500/20 border-violet-500 ring-2 ring-violet-500/50'
+                      ? 'bg-violet-500/20 border-violet-500 ring-2 ring-sky-500/50'
                       : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600'}
                   `}
                 >
@@ -804,8 +804,8 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
             
             <button
               onClick={handleComplete}
-              className="w-full py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 
-                       hover:from-violet-500 hover:to-fuchsia-500 rounded-lg
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 
+                       hover:from-blue-500 hover:to-cyan-500 rounded-lg
                        font-semibold text-white flex items-center justify-center gap-2
                        transition-all shadow-lg shadow-violet-500/25"
             >

@@ -35,10 +35,28 @@ interface ThinkingSession {
   estimatedCost: number;
   startTime: number;
   endTime?: number;
+  runtimeMode: 'simulated_preview';
 }
 
 // Cache de sessões (em produção, Redis)
 const sessions = new Map<string, ThinkingSession>();
+
+type ThinkingSessionPayload = ThinkingSession & {
+  capabilityStatus: 'PARTIAL';
+  warning: string;
+};
+
+const THINKING_WARNING =
+  'THINKING_SIMULATED_PREVIEW: endpoint em modo simulado para UX preview; nao representa runtime L4/L5 de producao.';
+
+function withThinkingMeta(session: ThinkingSession): ThinkingSessionPayload {
+  return {
+    ...session,
+    capabilityStatus: 'PARTIAL',
+    warning: THINKING_WARNING,
+  };
+}
+
 
 export async function GET(
   req: NextRequest,
@@ -58,7 +76,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    return NextResponse.json(session);
+    return NextResponse.json(withThinkingMeta(session));
   } catch (error) {
     console.error('Thinking GET error:', error);
     const mapped = apiErrorToResponse(error);
@@ -86,6 +104,7 @@ export async function POST(
       totalTokens: 0,
       estimatedCost: 0,
       startTime: Date.now(),
+      runtimeMode: 'simulated_preview',
     };
 
     sessions.set(sessionId, session);
@@ -93,11 +112,21 @@ export async function POST(
     // Simular progresso (em produção, seria streaming real)
     simulateThinkingProgress(sessionId);
 
-    return NextResponse.json({
-      success: true,
-      sessionId,
-      session,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        sessionId,
+        session: withThinkingMeta(session),
+        capabilityStatus: 'PARTIAL',
+        warning: THINKING_WARNING,
+      },
+      {
+        headers: {
+          'x-aethel-capability-status': 'PARTIAL',
+          'x-aethel-runtime-mode': 'simulated_preview',
+        },
+      }
+    );
   } catch (error) {
     console.error('Thinking POST error:', error);
     const mapped = apiErrorToResponse(error);

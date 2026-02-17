@@ -131,7 +131,7 @@ function PlanCard({
     <Card
       variant={isPopular ? 'gradient' : 'elevated'}
       padding="none"
-      className={`relative overflow-hidden ${isPopular ? 'ring-2 ring-indigo-500' : ''}`}
+      className={`relative overflow-hidden ${isPopular ? 'ring-2 ring-sky-500' : ''}`}
     >
       {isPopular && (
         <div className="absolute top-4 right-4">
@@ -149,7 +149,7 @@ function PlanCard({
             className={`
               w-12 h-12 rounded-xl flex items-center justify-center
               ${isPopular
-                ? 'bg-indigo-500/20 text-indigo-400'
+                ? 'bg-sky-500/20 text-sky-400'
                 : 'bg-slate-800 text-slate-400'
               }
             `}
@@ -299,7 +299,7 @@ export function BillingTab({
             </div>
           </Card>
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
-            <Rocket className="w-5 h-5 text-indigo-400" />
+            <Rocket className="w-5 h-5 text-sky-400" />
             <div>
               <p className="text-sm text-white font-semibold">Upgrade instantâneo</p>
               <p className="text-xs text-slate-400">Ativação imediata após pagamento.</p>
@@ -320,8 +320,8 @@ export function BillingTab({
         <Card variant="elevated" padding="md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-                {planIcons[currentPlan] || <Sparkles className="w-6 h-6 text-indigo-400" />}
+              <div className="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center">
+                {planIcons[currentPlan] || <Sparkles className="w-6 h-6 text-sky-400" />}
               </div>
               <div>
                 <p className="text-sm text-slate-400">Seu plano atual</p>

@@ -135,7 +135,7 @@ function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
     if (t.includes('Ice')) return 'bg-cyan-600';
     if (t.includes('Lightning')) return 'bg-yellow-600';
     if (t.includes('Damage')) return 'bg-red-600';
-    if (t.includes('State')) return 'bg-purple-600';
+    if (t.includes('State')) return 'bg-blue-600';
     if (t.includes('Ability')) return 'bg-blue-600';
     return 'bg-green-600';
   };
@@ -159,7 +159,7 @@ function AttributeBar({ name, current, max, color = 'blue' }: {
     green: 'bg-green-500',
     red: 'bg-red-500',
     yellow: 'bg-yellow-500',
-    purple: 'bg-purple-500',
+    purple: 'bg-blue-500',
   }[color] || 'bg-blue-500';
 
   return (
@@ -216,7 +216,7 @@ function EffectCard({ effect }: { effect: GameplayEffectSpec }) {
         <span className="font-medium text-white">{effect.name}</span>
         <span className={`px-2 py-0.5 text-xs rounded ${
           effect.durationType === 'instant' ? 'bg-green-600' :
-          effect.durationType === 'duration' ? 'bg-yellow-600' : 'bg-purple-600'
+          effect.durationType === 'duration' ? 'bg-yellow-600' : 'bg-blue-600'
         }`}>
           {effect.durationType}
         </span>

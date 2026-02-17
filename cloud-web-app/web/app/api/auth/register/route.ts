@@ -44,17 +44,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Generate JWT token (real-or-fail)
+    // Generate JWT token (real-or-fail). JWT-only (no server sessions).
     const token = generateTokenWithRole(user.id, user.email, (user as any).role || 'user');
-
-    // Create session
-    await prisma.session.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    });
 
     // Return user data
     const response = NextResponse.json({

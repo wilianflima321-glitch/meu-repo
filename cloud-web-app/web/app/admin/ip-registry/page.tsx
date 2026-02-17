@@ -128,7 +128,7 @@ export default function AdminIpRegistryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Registro de IPs</h1>
-          <p className="text-sm text-gray-500">Controle de permissões e licenças com auditoria.</p>
+          <p className="text-sm text-zinc-500">Controle de permissões e licenças com auditoria.</p>
         </div>
         <div className="flex gap-2">
           <button className="px-3 py-1 bg-gray-200 rounded" onClick={fetchRegistry}>Atualizar</button>
@@ -136,11 +136,11 @@ export default function AdminIpRegistryPage() {
         </div>
       </div>
 
-      {message && <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded">{message}</div>}
+      {message && <div className="bg-green-50 border border-green-200 text-emerald-300 p-3 rounded">{message}</div>}
 
       {!data ? <div>Nenhum dado disponível.</div> : (
         <div className="grid md:grid-cols-2 gap-6">
-          <section className="bg-white p-4 rounded-lg shadow">
+          <section className="bg-zinc-900/70 p-4 rounded-lg shadow">
             <h2 className="text-xl font-medium mb-2">IPs permitidos</h2>
             <div className="flex gap-2 mb-4">
               <input
@@ -160,7 +160,7 @@ export default function AdminIpRegistryPage() {
               ))}
             </ul>
           </section>
-          <section className="bg-white p-4 rounded-lg shadow">
+          <section className="bg-zinc-900/70 p-4 rounded-lg shadow">
             <h2 className="text-xl font-medium mb-2">Licenças</h2>
             <div className="grid grid-cols-1 gap-2 mb-4">
               <input
@@ -204,13 +204,13 @@ export default function AdminIpRegistryPage() {
                 value={licenseForm.notes}
                 onChange={(e) => setLicenseForm((prev) => ({ ...prev, notes: e.target.value }))}
               />
-              <button className="px-3 py-2 bg-indigo-600 text-white rounded" onClick={addLicense}>Adicionar</button>
+              <button className="px-3 py-2 bg-sky-600 text-white rounded" onClick={addLicense}>Adicionar</button>
             </div>
             <ul className="space-y-2">
               {licensesList.map(([ip, lic]) => (
                 <li key={ip} className="border rounded p-3">
                   <div className="font-semibold">{ip}</div>
-                  <div className="text-sm text-gray-600">Status: {statusLabels[lic.status] ?? lic.status}</div>
+                  <div className="text-sm text-zinc-400">Status: {statusLabels[lic.status] ?? lic.status}</div>
                   {lic.holder && <div className="text-sm">Titular: {lic.holder}</div>}
                   {lic.since && <div className="text-sm">Desde: {lic.since}</div>}
                   {lic.until && <div className="text-sm">Até: {lic.until}</div>}

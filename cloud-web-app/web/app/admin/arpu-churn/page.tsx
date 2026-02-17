@@ -40,7 +40,7 @@ export default function ArpuChurnPage() {
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
-        <p className="text-sm text-gray-500">Carregando métricas...</p>
+        <p className="text-sm text-zinc-500">Carregando métricas...</p>
       </div>
     );
   }
@@ -67,23 +67,23 @@ export default function ArpuChurnPage() {
       <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
       
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow text-center">
+        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">ARPU (30d)</h3>
           <p className="text-2xl font-bold text-green-600">${arpu.toFixed(2)}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow text-center">
+        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Taxa de Churn</h3>
           <p className="text-2xl font-bold text-red-600">{churnRate.toFixed(1)}%</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow text-center">
+        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Taxa de Retenção</h3>
           <p className="text-2xl font-bold text-blue-600">{retentionRate.toFixed(1)}%</p>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Dados Históricos</h2>
-        <p className="text-sm text-gray-500">Nenhuma série histórica consolidada disponível no momento.</p>
+        <p className="text-sm text-zinc-500">Nenhuma série histórica consolidada disponível no momento.</p>
       </div>
     </div>
   );

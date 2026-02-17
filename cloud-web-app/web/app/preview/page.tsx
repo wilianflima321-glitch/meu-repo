@@ -1,5 +1,3 @@
 'use client'
 
-import LivePreviewPage from '@/app/live-preview/page'
-
-export default LivePreviewPage
+export { default } from '@/app/live-preview/page'

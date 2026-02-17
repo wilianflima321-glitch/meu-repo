@@ -110,23 +110,23 @@ const AETHEL_DARK_THEME: monacoEditor.editor.IStandaloneThemeData = {
     { token: 'regexp', foreground: 'f38ba8' },
   ],
   colors: {
-    'editor.background': '#1e1e2e',
-    'editor.foreground': '#cdd6f4',
-    'editor.lineHighlightBackground': '#313244',
-    'editor.selectionBackground': '#45475a',
-    'editor.selectionHighlightBackground': '#45475a80',
-    'editorCursor.foreground': '#f5e0dc',
-    'editorWhitespace.foreground': '#45475a',
-    'editorIndentGuide.background1': '#313244',
-    'editorIndentGuide.activeBackground1': '#45475a',
-    'editorLineNumber.foreground': '#6c7086',
-    'editorLineNumber.activeForeground': '#cdd6f4',
-    'editorBracketMatch.background': '#45475a',
-    'editorBracketMatch.border': '#f9e2af',
-    'editorGutter.addedBackground': '#a6e3a1',
-    'editorGutter.modifiedBackground': '#f9e2af',
-    'editorGutter.deletedBackground': '#f38ba8',
-    'minimap.background': '#181825',
+    'editor.background': '#09090b',
+    'editor.foreground': '#f4f4f5',
+    'editor.lineHighlightBackground': '#18181b',
+    'editor.selectionBackground': '#3f3f46',
+    'editor.selectionHighlightBackground': '#3f3f4680',
+    'editorCursor.foreground': '#e4e4e7',
+    'editorWhitespace.foreground': '#3f3f46',
+    'editorIndentGuide.background1': '#27272a',
+    'editorIndentGuide.activeBackground1': '#3f3f46',
+    'editorLineNumber.foreground': '#71717a',
+    'editorLineNumber.activeForeground': '#d4d4d8',
+    'editorBracketMatch.background': '#27272a',
+    'editorBracketMatch.border': '#3b82f6',
+    'editorGutter.addedBackground': '#22c55e',
+    'editorGutter.modifiedBackground': '#f59e0b',
+    'editorGutter.deletedBackground': '#ef4444',
+    'minimap.background': '#09090b',
     'scrollbar.shadow': '#00000000',
     'scrollbarSlider.background': '#45475a80',
     'scrollbarSlider.hoverBackground': '#585b70',
@@ -152,7 +152,7 @@ export function MonacoEditorPro({
   minimap = true,
   lineNumbers = 'on',
   wordWrap = 'off',
-  fontSize = 14,
+  fontSize = 12,
   tabSize = 2,
   theme = 'aethel-dark',
   height = '100%',
@@ -167,6 +167,7 @@ export function MonacoEditorPro({
   const monacoRef = useRef<Monaco | null>(null);
   const decorationsRef = useRef<string[]>([]);
   const lspDisposablesRef = useRef<monacoEditor.IDisposable[]>([]);
+  const inlineCompletionDisposableRef = useRef<monacoEditor.IDisposable | null>(null);
   
   // Inline edit integration
   const { isOpen, selection, openInlineEdit, closeInlineEdit } = useInlineEdit();
@@ -194,10 +195,31 @@ export function MonacoEditorPro({
         console.warn('[MonacoEditorPro] Failed to register LSP providers:', err);
       });
     }
+
+    // Register AI inline completions (L1)
+    if (enableAISuggestions) {
+      import('@/lib/ai/inline-completion').then(({ registerInlineCompletionProvider }) => {
+        inlineCompletionDisposableRef.current?.dispose();
+        inlineCompletionDisposableRef.current = registerInlineCompletionProvider([
+          'typescript',
+          'javascript',
+          'typescriptreact',
+          'javascriptreact',
+          'json',
+          'markdown',
+          'css',
+          'html',
+          'python',
+        ]);
+      }).catch(err => {
+        console.warn('[MonacoEditorPro] Failed to register inline completions:', err);
+      });
+    }
     
     // Configure editor
     editor.updateOptions({
       fontSize,
+      lineHeight: Math.round(fontSize * 1.5),
       tabSize,
       minimap: { enabled: minimap },
       lineNumbers,
@@ -296,6 +318,8 @@ export function MonacoEditorPro({
     
     // Call user's onMount
     onMountProp?.(editor, monaco);
+  // registerKeybindings/registerCommands are intentionally invoked during mount lifecycle.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fontSize, tabSize, minimap, lineNumbers, wordWrap, readOnly, enableAISuggestions, language, onCursorChange, onSelectionChange, onMountProp]);
 
   // Cleanup LSP disposables on unmount
@@ -303,14 +327,43 @@ export function MonacoEditorPro({
     return () => {
       lspDisposablesRef.current.forEach((d) => d.dispose());
       lspDisposablesRef.current = [];
+      inlineCompletionDisposableRef.current?.dispose();
+      inlineCompletionDisposableRef.current = null;
     };
   }, []);
 
+  useEffect(() => {
+    const handleRevealLocation = (event: Event) => {
+      const detail = (event as CustomEvent<{ path?: string; line?: number; column?: number }>).detail;
+      const targetPath = detail?.path?.trim();
+
+      if (targetPath && path) {
+        const normalize = (value: string) => value.replace(/\\/g, '/');
+        if (normalize(targetPath) !== normalize(path)) return;
+      }
+
+      const editor = editorRef.current;
+      if (!editor) return;
+
+      const lineNumber = Math.max(1, Number(detail?.line || 1));
+      const column = Math.max(1, Number(detail?.column || 1));
+
+      editor.setPosition({ lineNumber, column });
+      editor.revealPositionInCenter({ lineNumber, column });
+      editor.focus();
+    };
+
+    window.addEventListener('aethel.editor.revealLocation', handleRevealLocation as EventListener);
+    return () => {
+      window.removeEventListener('aethel.editor.revealLocation', handleRevealLocation as EventListener);
+    };
+  }, [path]);
+
   // Register keybindings
-  const registerKeybindings = useCallback((
+  function registerKeybindings(
     editor: monacoEditor.editor.IStandaloneCodeEditor,
     monaco: Monaco
-  ) => {
+  ) {
     // Cmd+S / Ctrl+S - Save
     editor.addAction({
       id: 'aethel.save',
@@ -425,13 +478,13 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.quickFix', null);
       },
     });
-  }, [enableInlineEdit, language, path, onSave, openInlineEdit]);
+  }
 
   // Register custom commands
-  const registerCommands = useCallback((
+  function registerCommands(
     editor: monacoEditor.editor.IStandaloneCodeEditor,
     monaco: Monaco
-  ) => {
+  ) {
     // Format Document
     editor.addAction({
       id: 'aethel.formatDocument',
@@ -463,7 +516,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.unfoldAll', null);
       },
     });
-  }, []);
+  }
 
   // Apply diagnostics decorations
   useEffect(() => {
@@ -536,23 +589,69 @@ export function MonacoEditorPro({
   }, [gitChanges, enableGitDecorations]);
 
   // Handle inline edit apply
-  const handleInlineEditApply = useCallback((newCode: string) => {
-    if (!editorRef.current || !editorSelection.range) return;
-    
+  const handleInlineEditApply = useCallback(async (newCode: string) => {
+    if (!editorRef.current || !editorSelection.range) return false;
+
     const editor = editorRef.current;
     const model = editor.getModel();
-    
-    if (model && editorSelection.range) {
-      // Apply edit
-      editor.executeEdits('aethel.inlineEdit', [{
-        range: editorSelection.range,
-        text: newCode,
-      }]);
-      
-      // Notify onChange
-      onChange?.(editor.getValue(), {} as any);
+    if (!model) return false;
+
+    const range = editorSelection.range;
+    const originalSnippet = model.getValueInRange(range);
+
+    const startOffset = model.getOffsetAt({
+      lineNumber: range.startLineNumber,
+      column: range.startColumn,
+    });
+    const endOffset = model.getOffsetAt({
+      lineNumber: range.endLineNumber,
+      column: range.endColumn,
+    });
+    const currentDocument = model.getValue();
+    const nextDocument = `${currentDocument.slice(0, startOffset)}${newCode}${currentDocument.slice(endOffset)}`;
+
+    try {
+      const validationResponse = await fetch('/api/ai/change/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          original: originalSnippet,
+          modified: newCode,
+          fullDocument: nextDocument,
+          language,
+          filePath: path,
+        }),
+      });
+
+      if (!validationResponse.ok) {
+        console.warn('[MonacoEditorPro] Inline edit validation request failed', await validationResponse.text());
+        return false;
+      }
+
+      const validation = await validationResponse.json();
+      if (!validation?.canApply) {
+        const firstFailure = Array.isArray(validation?.checks)
+          ? validation.checks.find((check: any) => check?.status === 'fail')
+          : null;
+        const reason = firstFailure?.message || 'Validation blocked this patch.';
+        console.warn('[MonacoEditorPro] Inline edit blocked:', reason);
+        return false;
+      }
+    } catch (error) {
+      console.error('[MonacoEditorPro] Inline edit validation error:', error);
+      return false;
     }
-  }, [editorSelection.range, onChange]);
+
+    editor.executeEdits('aethel.inlineEdit', [
+      {
+        range,
+        text: newCode,
+      },
+    ]);
+
+    onChange?.(editor.getValue(), {} as any);
+    return true;
+  }, [editorSelection.range, onChange, language, path]);
 
   return (
     <div className="relative w-full h-full">

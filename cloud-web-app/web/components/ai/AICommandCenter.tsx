@@ -53,6 +53,22 @@ const COMMAND_SUGGESTIONS: CommandSuggestion[] = [
   { command: 'Otimize o código do projeto', description: 'Analisa e melhora performance', agentId: 'coder' },
 ];
 
+function resolveUserId(): string {
+  if (typeof window === 'undefined') return 'anonymous';
+  return (
+    localStorage.getItem('aethel.user.id') ||
+    localStorage.getItem('aethel.auth.userId') ||
+    'anonymous'
+  );
+}
+
+function resolveProjectId(): string {
+  if (typeof window === 'undefined') return 'default';
+  const params = new URLSearchParams(window.location.search);
+  const queryProjectId = params.get('projectId');
+  return queryProjectId || localStorage.getItem('aethel.workbench.lastProjectId') || 'default';
+}
+
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
@@ -120,8 +136,8 @@ export function AICommandCenter() {
         id: `task-${Date.now()}`,
         description: command,
         executionContext: {
-          userId: 'user-1', // TODO: Get from auth
-          projectId: 'project-1', // TODO: Get from context
+          userId: resolveUserId(),
+          projectId: resolveProjectId(),
         },
       };
 
@@ -205,7 +221,7 @@ export function AICommandCenter() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-800/50">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                 d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" 
@@ -215,7 +231,7 @@ export function AICommandCenter() {
           <div>
             <h2 className="text-sm font-semibold">AI Command Center</h2>
             <p className="text-xs text-slate-400">
-              Agente: <span className="text-indigo-400">{AGENTS[selectedAgent]?.name}</span>
+              Agente: <span className="text-sky-400">{AGENTS[selectedAgent]?.name}</span>
             </p>
           </div>
         </div>
@@ -225,7 +241,7 @@ export function AICommandCenter() {
           value={selectedAgent}
           onChange={(e) => setSelectedAgent(e.target.value)}
           className="px-3 py-1.5 text-sm bg-slate-700 border border-slate-600 rounded-lg 
-                     text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                     text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500"
         >
           {agentList.map(agent => (
             <option key={agent.id} value={agent.id}>
@@ -251,7 +267,7 @@ export function AICommandCenter() {
                   key={i}
                   onClick={() => handleSuggestion(suggestion)}
                   className="p-3 text-left bg-slate-800 hover:bg-slate-700 rounded-lg border 
-                             border-slate-700 hover:border-indigo-500 transition-colors group"
+                             border-slate-700 hover:border-sky-500 transition-colors group"
                 >
                   <p className="text-sm text-slate-200 group-hover:text-white">
                     {suggestion.command}
@@ -288,12 +304,12 @@ export function AICommandCenter() {
             disabled={isProcessing}
             className="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg
                        text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 
-                       focus:ring-indigo-500 disabled:opacity-50"
+                       focus:ring-sky-500 disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={isProcessing || !input.trim()}
-            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 disabled:bg-slate-600 
+            className="px-6 py-3 bg-sky-500 hover:bg-sky-400 disabled:bg-slate-600 
                        disabled:cursor-not-allowed rounded-lg font-medium transition-colors
                        flex items-center gap-2"
           >
@@ -337,7 +353,7 @@ function MessageBubble({ message }: { message: Message }) {
       <div
         className={`max-w-[80%] rounded-lg p-4 ${
           isUser
-            ? 'bg-indigo-500 text-white'
+            ? 'bg-sky-500 text-white'
             : isSystem
             ? 'bg-slate-800 border border-slate-700'
             : 'bg-slate-800'
@@ -371,7 +387,7 @@ function ExecutionPanel({
         className="w-full px-4 py-2 flex items-center justify-between text-sm hover:bg-slate-700/50"
       >
         <span className="flex items-center gap-2">
-          <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" 
             />
@@ -428,7 +444,7 @@ function StepCard({ step, index }: { step: AgentStep; index: number }) {
         <div className="flex-1 min-w-0">
           <p className="text-sm text-slate-300">{step.thought}</p>
           {step.action && (
-            <p className="text-xs text-indigo-400 mt-1">
+            <p className="text-xs text-sky-400 mt-1">
               → {step.action.tool}
             </p>
           )}

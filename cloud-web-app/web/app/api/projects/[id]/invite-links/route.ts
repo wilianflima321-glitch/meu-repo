@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { nanoid } from 'nanoid';
+import { buildAppUrl } from '@/lib/server/app-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -161,7 +162,7 @@ export async function POST(
         expiresAt: inviteLink.expiresAt?.toISOString() || null,
         usageCount: inviteLink.usageCount,
         maxUsage: inviteLink.maxUsage,
-        url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/invite/${code}`,
+        url: buildAppUrl(`/invite/${code}`, request),
       },
     });
   } catch (error) {

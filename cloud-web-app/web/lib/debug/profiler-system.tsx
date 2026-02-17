@@ -867,7 +867,7 @@ export function ProfilerProvider({
       profiler,
       timeline: new Timeline(profiler),
     };
-  }, []);
+  }, [config]);
   
   useEffect(() => {
     return () => {
@@ -983,7 +983,7 @@ export function useProfileScope(name: string, category = 'default') {
   return { begin, end };
 }
 
-export default {
+const __defaultExport = {
   Profiler,
   Timeline,
   Profile,
@@ -996,3 +996,5 @@ export default {
   useBudgetViolations,
   useProfileScope,
 };
+
+export default __defaultExport;

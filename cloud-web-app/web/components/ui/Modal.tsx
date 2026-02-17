@@ -118,7 +118,7 @@ export function Modal({
                     text-slate-400 hover:text-slate-200
                     bg-transparent hover:bg-slate-700/50
                     transition-all duration-200
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500
                   "
                   aria-label="Fechar modal"
                 >

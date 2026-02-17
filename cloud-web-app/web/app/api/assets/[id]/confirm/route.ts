@@ -85,8 +85,6 @@ export async function POST(
       });
     }
 
-    // TODO: Trigger async post-processing jobs via job queue
-
     return NextResponse.json({
       id: asset.id,
       name: asset.name,
@@ -94,6 +92,10 @@ export async function POST(
       size: actualSize,
       mimeType: asset.mimeType,
       createdAt: asset.createdAt.toISOString(),
+      postProcessing: {
+        queued: false,
+        reason: 'JOB_QUEUE_NOT_CONFIGURED',
+      },
     });
   } catch (error: any) {
     console.error('Confirm upload error:', error);

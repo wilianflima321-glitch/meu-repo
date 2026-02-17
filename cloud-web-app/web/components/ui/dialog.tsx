@@ -1,6 +1,7 @@
 'use client';
 
 import React, {
+  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -39,14 +40,14 @@ export function Dialog({
   const controlled = open !== undefined;
   const isOpen = controlled ? open : internalOpen;
 
-  const setOpen = (value: boolean) => {
+  const setOpen = useCallback((value: boolean) => {
     if (!controlled) {
       setInternalOpen(value);
     }
     onOpenChange?.(value);
-  };
+  }, [controlled, onOpenChange]);
 
-  const value = useMemo(() => ({ open: isOpen, setOpen }), [isOpen]);
+  const value = useMemo(() => ({ open: isOpen, setOpen }), [isOpen, setOpen]);
 
   return <DialogContext.Provider value={value}>{children}</DialogContext.Provider>;
 }

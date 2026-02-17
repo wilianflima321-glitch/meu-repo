@@ -857,7 +857,7 @@ export function InspectorProvider({
 }) {
   const value = useMemo(() => ({
     inspector: new ObjectInspector(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     return () => {
@@ -980,7 +980,7 @@ export function useInspectorSearch(id: string) {
   return { query, setQuery, results };
 }
 
-export default {
+const __defaultExport = {
   ObjectInspector,
   Inspectable,
   Range,
@@ -996,3 +996,5 @@ export default {
   usePropertyEditor,
   useInspectorSearch,
 };
+
+export default __defaultExport;

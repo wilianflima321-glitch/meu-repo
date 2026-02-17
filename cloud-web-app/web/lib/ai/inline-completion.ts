@@ -28,7 +28,7 @@ interface AICompletionResponse {
 
 const remoteAIService = {
   async complete(request: AICompletionRequest, signal: AbortSignal): Promise<AICompletionResponse> {
-    const res = await fetch('/api/ai/inline-completion', {
+    const res = await fetch('/api/ai/complete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -47,8 +47,9 @@ const remoteAIService = {
       throw new Error(`Inline completion request failed: ${res.status} ${text}`);
     }
 
-    const data = (await res.json().catch(() => null)) as { text?: string } | null;
-    return { text: (data?.text || '').toString() };
+    const data = (await res.json().catch(() => null)) as { text?: string; suggestion?: string } | null;
+    const completion = data?.suggestion ?? data?.text ?? '';
+    return { text: String(completion) };
   },
 };
 

@@ -107,33 +107,33 @@ const TARGET_LABELS: Record<ModerationItem['targetType'], string> = {
 function StatsBar({ stats }: { stats: ModerationStats }) {
   return (
     <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-3">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Pendentes</span>
+          <span className="text-xs text-zinc-500">Pendentes</span>
           <Clock className="w-4 h-4 text-yellow-400" />
         </div>
         <p className="text-xl font-bold text-white mt-1">{stats.pending}</p>
       </div>
       
-      <div className="bg-[#1a1a1a] border border-red-500/30 rounded-lg p-3">
+      <div className="bg-zinc-900/70 border border-red-500/30 rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Urgentes</span>
+          <span className="text-xs text-zinc-500">Urgentes</span>
           <AlertTriangle className="w-4 h-4 text-red-400" />
         </div>
         <p className="text-xl font-bold text-red-400 mt-1">{stats.urgent}</p>
       </div>
       
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-3">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Processados hoje</span>
+          <span className="text-xs text-zinc-500">Processados hoje</span>
           <CheckCircle className="w-4 h-4 text-green-400" />
         </div>
         <p className="text-xl font-bold text-white mt-1">{stats.todayProcessed}</p>
       </div>
       
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-3">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Tempo médio</span>
+          <span className="text-xs text-zinc-500">Tempo médio</span>
           <Clock className="w-4 h-4 text-blue-400" />
         </div>
         <p className="text-xl font-bold text-white mt-1">{stats.avgResponseTime}m</p>
@@ -157,7 +157,7 @@ function ItemCard({
   const [showContent, setShowContent] = useState(false);
   
   const priorityColors = {
-    low: 'border-gray-500/30 bg-gray-500/5',
+    low: 'border-zinc-700 bg-zinc-900/60',
     normal: 'border-blue-500/30 bg-blue-500/5',
     high: 'border-yellow-500/30 bg-yellow-500/5',
     urgent: 'border-red-500/30 bg-red-500/10',
@@ -184,8 +184,8 @@ function ItemCard({
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <TypeIcon className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-300 capitalize">
+          <TypeIcon className="w-4 h-4 text-zinc-500" />
+          <span className="text-sm text-zinc-300 capitalize">
             {TYPE_LABELS[item.type]}
           </span>
           {item.priority === 'urgent' && (
@@ -199,7 +199,7 @@ function ItemCard({
             </span>
           )}
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-zinc-500">
           {new Date(item.createdAt).toLocaleString()}
         </span>
       </div>
@@ -207,11 +207,11 @@ function ItemCard({
       {/* Target Info */}
       <div className="mb-3">
         <p className="text-sm text-white">
-          <span className="text-gray-400">Alvo:</span>{' '}
+          <span className="text-zinc-500">Alvo:</span>{' '}
           <span className="capitalize">{TARGET_LABELS[item.targetType]}</span> ({item.targetId.slice(0, 8)}...)
         </p>
         {item.targetOwnerEmail && (
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-zinc-500 mt-1">
             Responsável: {item.targetOwnerEmail}
           </p>
         )}
@@ -219,9 +219,9 @@ function ItemCard({
       
       {/* Reason & Category */}
       {item.reason && (
-        <div className="mb-3 p-2 bg-[#252525] rounded text-sm">
-          <span className="text-gray-400">Motivo:</span>{' '}
-          <span className="text-gray-200">{item.reason}</span>
+        <div className="mb-3 p-2 bg-zinc-800/80 rounded text-sm">
+          <span className="text-zinc-500">Motivo:</span>{' '}
+          <span className="text-zinc-200">{item.reason}</span>
           {item.category && (
             <span className="ml-2 px-2 py-0.5 text-xs bg-[#333] rounded capitalize">
               {item.category}
@@ -235,14 +235,14 @@ function ItemCard({
         <div className="mb-3">
           <button 
             onClick={(e) => { e.stopPropagation(); setShowContent(!showContent); }}
-            className="flex items-center gap-2 text-xs text-gray-400 hover:text-white"
+            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-white"
           >
             {showContent ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
             {showContent ? 'Ocultar conteúdo' : 'Ver conteúdo'}
           </button>
           {showContent && (
-            <div className="mt-2 p-3 bg-[#0a0a0a] border border-[#333] rounded text-sm font-mono overflow-x-auto max-h-48 overflow-y-auto">
-              <pre className="text-gray-300 whitespace-pre-wrap">
+            <div className="mt-2 p-3 bg-zinc-950 border border-zinc-700 rounded text-sm font-mono overflow-x-auto max-h-48 overflow-y-auto">
+              <pre className="text-zinc-300 whitespace-pre-wrap">
                 {item.contentSnapshot.preview}
               </pre>
             </div>
@@ -263,7 +263,7 @@ function ItemCard({
       
       {/* Quick Actions */}
       {isSelected && (
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#333]">
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-zinc-700">
           <button
             onClick={(e) => { e.stopPropagation(); onAction('approve'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded"
@@ -287,7 +287,7 @@ function ItemCard({
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('shadowban'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm rounded"
           >
             <UserX className="w-4 h-4" />
             Banimento sombra (B)
@@ -308,29 +308,29 @@ function ItemCard({
 function ShortcutsModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-6 max-w-md w-full mx-4">
+      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             <Keyboard className="w-5 h-5" />
             Atalhos do teclado
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button onClick={onClose} className="text-zinc-500 hover:text-white">
             <XCircle className="w-5 h-5" />
           </button>
         </div>
         
         <div className="space-y-2">
           {Object.entries(SHORTCUTS).map(([key, action]) => (
-            <div key={key} className="flex items-center justify-between py-2 border-b border-[#333]">
-              <span className="text-gray-300">{action}</span>
-              <kbd className="px-2 py-1 bg-[#252525] border border-[#444] rounded text-sm text-gray-300 font-mono">
+            <div key={key} className="flex items-center justify-between py-2 border-b border-zinc-700">
+              <span className="text-zinc-300">{action}</span>
+              <kbd className="px-2 py-1 bg-zinc-800/80 border border-zinc-600 rounded text-sm text-zinc-300 font-mono">
                 {key}
               </kbd>
             </div>
           ))}
         </div>
         
-        <p className="text-xs text-gray-500 mt-4">
+        <p className="text-xs text-zinc-500 mt-4">
           Pressione qualquer tecla enquanto um item estiver selecionado para executar a ação.
         </p>
       </div>
@@ -394,6 +394,39 @@ export default function ModerationQueue() {
   useEffect(() => {
     setSelectedIndex((index) => Math.min(index, Math.max(filteredItems.length - 1, 0)));
   }, [filteredItems.length]);
+
+  const handleAction = useCallback(async (action: string) => {
+    const item = filteredItems[selectedIndex];
+    if (!item || processing) return;
+    
+    setProcessing(true);
+    
+    try {
+      const res = await fetch(`/api/admin/moderation/${item.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      
+      if (!res.ok) throw new Error('Falha na ação');
+      
+      // Remove item from list and refresh stats
+      setItems(prev => prev.filter((entry) => entry.id !== item.id));
+      setStats(prev => ({
+        ...prev,
+        pending: Math.max(0, prev.pending - 1),
+        todayProcessed: prev.todayProcessed + (action !== 'skip' ? 1 : 0),
+      }));
+      
+      // Keep selection in bounds
+      setSelectedIndex(i => Math.min(i, filteredItems.length - 2));
+      
+    } catch (error) {
+      console.error('Falha na ação:', error);
+    } finally {
+      setProcessing(false);
+    }
+  }, [filteredItems, processing, selectedIndex]);
   
   // Keyboard shortcuts
   useEffect(() => {
@@ -442,45 +475,12 @@ export default function ModerationQueue() {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [filteredItems, selectedIndex]);
-  
-  const handleAction = async (action: string) => {
-    const item = filteredItems[selectedIndex];
-    if (!item || processing) return;
-    
-    setProcessing(true);
-    
-    try {
-      const res = await fetch(`/api/admin/moderation/${item.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
-      });
-      
-      if (!res.ok) throw new Error('Falha na ação');
-      
-      // Remove item from list and refresh stats
-      setItems(prev => prev.filter((entry) => entry.id !== item.id));
-      setStats(prev => ({
-        ...prev,
-        pending: Math.max(0, prev.pending - 1),
-        todayProcessed: prev.todayProcessed + (action !== 'skip' ? 1 : 0),
-      }));
-      
-      // Keep selection in bounds
-      setSelectedIndex(i => Math.min(i, filteredItems.length - 2));
-      
-    } catch (error) {
-      console.error('Falha na ação:', error);
-    } finally {
-      setProcessing(false);
-    }
-  };
+  }, [filteredItems, handleAction, selectedIndex]);
   
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
+        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
       </div>
     );
   }
@@ -494,11 +494,11 @@ export default function ModerationQueue() {
             <Shield className="w-6 h-6" />
             Fila de moderação
           </h1>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-zinc-500">
             Revisar e moderar conteúdos sinalizados
           </p>
           {lastUpdated && (
-            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         
@@ -506,14 +506,14 @@ export default function ModerationQueue() {
           {/* Shortcuts hint */}
           <button
             onClick={() => setShowShortcuts(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] rounded text-sm text-gray-400 hover:text-white"
+            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/70 border border-zinc-700 rounded text-sm text-zinc-500 hover:text-white"
           >
             <Keyboard className="w-4 h-4" />
             Atalhos (?)
           </button>
           
           {/* Filter */}
-          <div className="flex items-center gap-1 bg-[#1a1a1a] border border-[#333] rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-zinc-900/70 border border-zinc-700 rounded-lg p-1">
             {(['pending', 'urgent', 'all'] as const).map((f) => (
               <button
                 key={f}
@@ -521,7 +521,7 @@ export default function ModerationQueue() {
                 className={`px-3 py-1 text-xs rounded capitalize ${
                   filter === f 
                     ? 'bg-blue-600 text-white' 
-                    : 'text-gray-400 hover:text-white'
+                    : 'text-zinc-500 hover:text-white'
                 }`}
               >
                 {f === 'pending' ? 'pendentes' : f === 'urgent' ? 'urgentes' : 'todos'}
@@ -535,13 +535,13 @@ export default function ModerationQueue() {
             placeholder="Buscar alvo/motivo"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-1.5 text-xs rounded bg-[#1a1a1a] border border-[#333] text-gray-200"
+            className="px-3 py-1.5 text-xs rounded bg-zinc-900/70 border border-zinc-700 text-zinc-200"
           />
           
           {/* Refresh */}
           <button
             onClick={fetchItems}
-            className="p-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-gray-400 hover:text-white"
+            className="p-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-zinc-500 hover:text-white"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -553,10 +553,10 @@ export default function ModerationQueue() {
       
       {/* Queue */}
       {filteredItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 bg-[#1a1a1a] border border-[#333] rounded-lg">
+        <div className="flex flex-col items-center justify-center h-64 bg-zinc-900/70 border border-zinc-700 rounded-lg">
           <CheckCircle className="w-12 h-12 text-green-400 mb-4" />
-          <p className="text-lg text-gray-300">Tudo certo!</p>
-          <p className="text-sm text-gray-500">Nenhum item na fila de moderação</p>
+          <p className="text-lg text-zinc-300">Tudo certo!</p>
+          <p className="text-sm text-zinc-500">Nenhum item na fila de moderação</p>
         </div>
       ) : (
         <div className="space-y-4">

@@ -88,7 +88,7 @@ class GhostTextProvider {
     }
     
     try {
-      const response = await fetch('/api/ai/completion', {
+      const response = await fetch('/api/ai/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -106,7 +106,7 @@ class GhostTextProvider {
       }
       
       const data = await response.json()
-      const completionText = data.completion?.trim()
+      const completionText = data.suggestion?.trim()
       
       if (!completionText) {
         return null
@@ -263,7 +263,7 @@ function CompletionLoading({ position }: { position: { top: number; left: number
         left: position.left,
       }}
     >
-      <Sparkles className="w-3 h-3 text-indigo-400 animate-pulse" />
+      <Sparkles className="w-3 h-3 text-sky-400 animate-pulse" />
       <span className="text-xs text-slate-500">Thinking...</span>
     </div>
   )
@@ -314,6 +314,8 @@ export default function InlineCompletion({
       setGhostText(prev => ({ ...prev, visible: false, loading: false }))
       return
     }
+
+    const provider = providerRef.current
     
     const fetchCompletion = async () => {
       setGhostText(prev => ({
@@ -322,7 +324,7 @@ export default function InlineCompletion({
         position: calculatePosition(debouncedPosition.line, debouncedPosition.column),
       }))
       
-      const suggestion = await providerRef.current.getSuggestion(
+      const suggestion = await provider.getSuggestion(
         debouncedContent,
         debouncedPosition,
         language,
@@ -341,7 +343,7 @@ export default function InlineCompletion({
     fetchCompletion()
     
     return () => {
-      providerRef.current.cancel()
+      provider.cancel()
     }
   }, [debouncedPosition, debouncedContent, language, filePath, model, enabled, showGhostText, calculatePosition])
   
@@ -451,7 +453,7 @@ export function CompletionStatusBar({
         onClick={onToggle}
         className={`flex items-center gap-1 px-2 py-1 rounded ${
           enabled 
-            ? 'bg-indigo-500/20 text-indigo-400' 
+            ? 'bg-sky-500/20 text-sky-400' 
             : 'bg-slate-800 text-slate-500'
         }`}
       >
@@ -497,7 +499,7 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
         <button
           onClick={() => onSettingsChange({ ...settings, enabled: !settings.enabled })}
           className={`w-10 h-5 rounded-full transition-colors ${
-            settings.enabled ? 'bg-indigo-600' : 'bg-slate-700'
+            settings.enabled ? 'bg-sky-600' : 'bg-slate-700'
           }`}
         >
           <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
@@ -534,7 +536,7 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
           step={100}
           value={settings.debounceMs}
           onChange={(e) => onSettingsChange({ ...settings, debounceMs: parseInt(e.target.value) })}
-          className="w-full accent-indigo-600"
+          className="w-full accent-sky-600"
         />
       </div>
       
@@ -550,7 +552,7 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
           step={0.1}
           value={settings.temperature}
           onChange={(e) => onSettingsChange({ ...settings, temperature: parseFloat(e.target.value) })}
-          className="w-full accent-indigo-600"
+          className="w-full accent-sky-600"
         />
         <div className="flex justify-between text-[10px] text-slate-500">
           <span>Precise</span>

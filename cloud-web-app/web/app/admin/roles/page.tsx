@@ -43,68 +43,68 @@ export default function RolesPage() {
         <div>
           <h1 className="text-2xl font-bold">Funções e permissões detalhadas</h1>
           {lastUpdated && (
-            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchRoles}
-          className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Usuários totais</h3>
           <p className="text-2xl font-bold text-blue-600">{summary.totalUsers}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Administradores totais</h3>
-          <p className="text-2xl font-bold text-purple-600">{summary.totalAdmins}</p>
+          <p className="text-2xl font-bold text-blue-600">{summary.totalAdmins}</p>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Distribuição de funções</h2>
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-10 bg-gray-100 rounded animate-pulse" />
+              <div key={index} className="h-10 bg-zinc-800/70 rounded animate-pulse" />
             ))}
           </div>
         ) : error ? (
           <p className="text-sm text-red-500">{error}</p>
         ) : roles.length === 0 ? (
-          <p className="text-sm text-gray-500">Nenhuma função encontrada.</p>
+          <p className="text-sm text-zinc-500">Nenhuma função encontrada.</p>
         ) : (
           <ul>
             {roles.map((role) => (
               <li key={role.role ?? 'unknown'} className="p-3 border-b flex justify-between">
                 <span>{role.role ?? 'sem função'}</span>
-                <span className="text-sm text-gray-600">{role.count} usuários</span>
+                <span className="text-sm text-zinc-400">{role.count} usuários</span>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Funções administrativas</h2>
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={index} className="h-10 bg-gray-100 rounded animate-pulse" />
+              <div key={index} className="h-10 bg-zinc-800/70 rounded animate-pulse" />
             ))}
           </div>
         ) : adminRoles.length === 0 ? (
-          <p className="text-sm text-gray-500">Nenhuma função administrativa definida.</p>
+          <p className="text-sm text-zinc-500">Nenhuma função administrativa definida.</p>
         ) : (
           <ul>
             {adminRoles.map((role) => (
               <li key={role.role ?? 'admin-unknown'} className="p-3 border-b flex justify-between">
                 <span>{role.role ?? 'sem função administrativa'}</span>
-                <span className="text-sm text-gray-600">{role.count} usuários</span>
+                <span className="text-sm text-zinc-400">{role.count} usuários</span>
               </li>
             ))}
           </ul>

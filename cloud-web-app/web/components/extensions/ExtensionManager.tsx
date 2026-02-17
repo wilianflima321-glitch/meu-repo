@@ -15,6 +15,7 @@
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
+import Image from 'next/image'
 import {
   Search,
   Package,
@@ -55,6 +56,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { useExtensions, type Extension as HookExtension } from '@/lib/hooks/useExtensions'
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
 // ============= Types =============
 
@@ -255,8 +257,13 @@ export default function ExtensionManager({
   
   // Handle uninstall
   const handleUninstall = useCallback(async (ext: Extension) => {
-    // TODO: Replace with ConfirmModal for better UX
-    if (!window.confirm(`Uninstall "${ext.displayName}"?`)) return
+    const shouldUninstall = await openConfirmDialog({
+      title: 'Uninstall extension',
+      message: `Uninstall "${ext.displayName}"?`,
+      confirmText: 'Uninstall',
+      cancelText: 'Cancel',
+    })
+    if (!shouldUninstall) return
     setIsLoading(ext.id)
     try {
       // Use prop callback if provided, otherwise use API
@@ -324,7 +331,7 @@ export default function ExtensionManager({
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search extensions..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
             />
           </div>
         </div>
@@ -404,7 +411,7 @@ export default function ExtensionManager({
               <button
                 onClick={() => setShowDisabled(!showDisabled)}
                 className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors ${
-                  showDisabled ? 'bg-slate-800 text-slate-300' : 'bg-indigo-600 text-white'
+                  showDisabled ? 'bg-slate-800 text-slate-300' : 'bg-sky-600 text-white'
                 }`}
               >
                 {showDisabled ? <ToggleLeft className="w-4 h-4" /> : <ToggleRight className="w-4 h-4" />}
@@ -430,7 +437,7 @@ export default function ExtensionManager({
           {/* Loading State */}
           {apiLoading && extensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-500">
-              <Loader2 className="w-16 h-16 mb-4 animate-spin text-indigo-500" />
+              <Loader2 className="w-16 h-16 mb-4 animate-spin text-sky-500" />
               <p className="text-lg">Loading extensions...</p>
               <p className="text-sm">Fetching from marketplace</p>
             </div>
@@ -441,7 +448,7 @@ export default function ExtensionManager({
               <p className="text-sm mb-4">{apiError}</p>
               <button
                 onClick={handleRefresh}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded transition-colors"
               >
                 Try Again
               </button>
@@ -453,7 +460,7 @@ export default function ExtensionManager({
               <p className="text-sm mb-4">Browse the marketplace to find extensions</p>
               <button
                 onClick={() => setActiveView('marketplace')}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded transition-colors"
               >
                 Browse Marketplace
               </button>
@@ -577,7 +584,14 @@ function ExtensionCard({
       {/* Icon */}
       <div className="w-12 h-12 rounded-lg bg-slate-700 flex items-center justify-center flex-shrink-0">
         {extension.icon ? (
-          <img src={extension.icon} alt="" className="w-8 h-8 rounded" />
+          <Image
+            src={extension.icon}
+            alt=""
+            width={32}
+            height={32}
+            unoptimized
+            className="w-8 h-8 rounded"
+          />
         ) : (
           CATEGORY_ICONS[extension.category]
         )}
@@ -649,7 +663,7 @@ function ExtensionCard({
         ) : (
           <button
             onClick={onInstall}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded transition-colors"
+            className="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-sm rounded transition-colors"
           >
             Install
           </button>
@@ -689,7 +703,14 @@ function ExtensionDetails({
         <div className="flex items-start gap-3">
           <div className="w-16 h-16 rounded-lg bg-slate-700 flex items-center justify-center">
             {extension.icon ? (
-              <img src={extension.icon} alt="" className="w-12 h-12 rounded" />
+              <Image
+                src={extension.icon}
+                alt=""
+                width={48}
+                height={48}
+                unoptimized
+                className="w-12 h-12 rounded"
+              />
             ) : (
               <div className="text-slate-400">{CATEGORY_ICONS[extension.category]}</div>
             )}
@@ -750,7 +771,7 @@ function ExtensionDetails({
           ) : (
             <button
               onClick={onInstall}
-              className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
+              className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded"
             >
               <Download className="w-4 h-4 inline mr-2" />
               Install
@@ -770,7 +791,7 @@ function ExtensionDetails({
         <button
           onClick={() => setActiveTab('details')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'details' ? 'text-white border-b-2 border-indigo-500' : 'text-slate-400'
+            activeTab === 'details' ? 'text-white border-b-2 border-sky-500' : 'text-slate-400'
           }`}
         >
           Details
@@ -778,7 +799,7 @@ function ExtensionDetails({
         <button
           onClick={() => setActiveTab('changelog')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'changelog' ? 'text-white border-b-2 border-indigo-500' : 'text-slate-400'
+            activeTab === 'changelog' ? 'text-white border-b-2 border-sky-500' : 'text-slate-400'
           }`}
         >
           Changelog
@@ -819,7 +840,7 @@ function ExtensionDetails({
                   href={extension.repository}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300"
+                  className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
                 >
                   <ExternalLink className="w-3 h-3" />
                   View on GitHub

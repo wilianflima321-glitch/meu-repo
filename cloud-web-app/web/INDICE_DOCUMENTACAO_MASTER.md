@@ -5,14 +5,15 @@
 
 ---
 
-## 🎯 DOCUMENTO ÚNICO DE REFERÊNCIA
+## DOCUMENTO CANONICO (ATUAL)
 
-### ⭐ FONTE_DA_VERDADE.md
-**Localização:** `cloud-web-app/web/FONTE_DA_VERDADE.md`  
-**Status:** ✅ ATUALIZADO (v0.3.0)  
-**Última atualização:** 21/01/2026
+### audit dicas do emergent usar/00_FONTE_CANONICA.md
+Localizacao: `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+Status: CANONICO
+Ultima atualizacao: 2026-02-04
 
-Este é o **ÚNICO** documento que deve ser consultado para estado atual do projeto.
+Este arquivo (e o audit folder) e a unica fonte de verdade para estado atual.
+Use tambem: `audit dicas do emergent usar/00_REALITY_MATRIX_2026-02-04.md`
 
 ---
 
@@ -100,7 +101,7 @@ c:\Users\omega\Desktop\aethel engine\
 | Componente | Arquivo | Linhas | Descrição |
 |------------|---------|--------|-----------|
 | AethelDashboard | `AethelDashboard.tsx` | ~3500 | Dashboard principal completo |
-| AethelIDE | `AethelIDE.tsx` | ~1500 | IDE layout com painéis |
+| AethelIDE | `app/ide/page.tsx` + `components/ide/IDELayout.tsx` | canônico | IDE layout com painéis |
 | AethelHeaderPro | `AethelHeaderPro.tsx` | ~300 | Header com navegação |
 | AdminPanel | `AdminPanel.tsx` | ~800 | Painel de administração |
 
@@ -108,7 +109,7 @@ c:\Users\omega\Desktop\aethel engine\
 | Componente | Pasta | Descrição |
 |------------|-------|-----------|
 | MonacoEditorPro | `editor/` | Monaco editor customizado |
-| CommandPalette | `CommandPaletteUnified.tsx` | Paleta de comandos (Ctrl+Shift+P) |
+| CommandPalette | `components/ide/CommandPalette.tsx` | Paleta de comandos (Ctrl+Shift+P) |
 | SearchReplace | `SearchReplace.tsx` | Busca e substituição |
 | SnippetManager | `snippets/` | Gerenciador de snippets |
 

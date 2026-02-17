@@ -17,6 +17,20 @@ O backend é a fundação da plataforma, responsável por:
 - Colaboração real-time
 - Admin e billing
 
+### 1.1 MODOS DE OPERAÇÃO (HÍBRIDO)
+
+A plataforma opera em dois modos distintos para garantir viabilidade econômica e performance AAA:
+
+1.  **Modo Cloud (Web-Native):**
+    - Execução em containers gerenciados (Kubernetes).
+    - Foco: Coding, Preview leve (WebGPU), IA Agents, Colaboração.
+    - Custo: Deduzido da Wallet do usuário (Pay-as-you-go).
+
+2.  **Modo Local (Bridge):**
+    - Execução na máquina do usuário (via CLI/Desktop Bridge).
+    - Foco: Builds pesados (Unreal/Unity), Renderização 4K, Jogos AAA.
+    - Custo: Zero infraestrutura para a plataforma (BYOD - Bring Your Own Device).
+
 ---
 
 ## 2. ARQUITETURA GERAL
@@ -134,6 +148,7 @@ class User(BaseModel):
     plan: str
     created_at: datetime
     last_login: datetime | None
+    wallet_balance: float = 0.0  # Saldo em creditos (Aethel Coins)
 
 # ============ CONFIG ============
 
@@ -192,6 +207,7 @@ async def register(data: UserCreate):
         "plan": "free",
         "created_at": datetime.utcnow(),
         "last_login": None,
+        "wallet_balance": 0.0,
     }
     result = await db.users.insert_one(user)
     
@@ -295,6 +311,7 @@ class Project(BaseModel):
     
     # Collaboration
     collaborators: List[str]
+    runtime_mode: str = "cloud" # 'cloud' | 'local'
 
 # ============ ROUTES ============
 
@@ -344,6 +361,7 @@ async def create_project(
         "deploy_url": None,
         "last_deployed": None,
         "collaborators": [],
+        "runtime_mode": "cloud", # Default to cloud
     }
     
     result = await db.projects.insert_one(project)
@@ -825,6 +843,32 @@ class ContainerManager:
 
 container_manager = ContainerManager()
 
+# ============ BILLING & METERING ============
+
+async def check_wallet_balance(user_id: str, estimated_cost: float) -> bool:
+    """Check if user has enough credits"""
+    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    
+    # Free tier limits logic here...
+    if user["plan"] == "free":
+        return True # Apply hard limits instead of cost
+        
+    return user.get("wallet_balance", 0) >= estimated_cost
+
+async def deduct_credits(user_id: str, amount: float, description: str):
+    """Deduct credits from wallet"""
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$inc": {"wallet_balance": -amount}}
+    )
+    # Log transaction
+    await db.transactions.insert_one({
+        "user_id": user_id,
+        "amount": -amount,
+        "description": description,
+        "timestamp": datetime.utcnow()
+    })
+
 # ============ ROUTES ============
 
 @router.post("/{project_id}/exec")
@@ -836,6 +880,11 @@ async def execute_command(
     """Execute command in project container"""
     await verify_project_access(project_id, current_user)
     
+    # Check execution context
+    project = await db.projects.find_one({"_id": ObjectId(project_id)})
+    if project.get("runtime_mode") == "local":
+        return {"status": "routed_to_local_bridge", "message": "Command sent to local machine"}
+
     exit_code, stdout, stderr = await container_manager.exec_command(
         project_id, current_user.id, command
     )
@@ -871,6 +920,11 @@ async def start_dev_server(
         except:
             command = "echo 'No package.json or requirements.txt found'"
     
+    # Check balance before starting expensive container
+    if current_user.plan != "free":
+        if not await check_wallet_balance(current_user.id, 0.05): # Min 1 hour
+            raise HTTPException(status_code=402, detail="Insufficient credits")
+
     # Execute in background
     container = await container_manager.get_container(project_id, current_user.id)
     
@@ -1072,6 +1126,10 @@ async def autocomplete(
     if not await check_rate_limit(current_user.id, "autocomplete"):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
     
+    # Check wallet for heavy usage
+    if current_user.plan != "free" and not await check_wallet_balance(current_user.id, 0.001):
+        raise HTTPException(status_code=402, detail="Insufficient credits for AI")
+
     config = MODEL_CONFIG["autocomplete"]
     
     prompt = f"""Complete the following {data.language} code. Only output the completion, no explanations.
@@ -1097,6 +1155,11 @@ Complete at <CURSOR>:"""
         # Track usage
         tokens = response.usage.total_tokens
         cost = tokens * 0.00001  # Approximate cost
+        
+        # Charge user (with markup)
+        if current_user.plan != "free":
+            await deduct_credits(current_user.id, cost * 1.5, "AI Autocomplete")
+            
         await track_usage(current_user.id, "autocomplete", tokens, cost)
         
         return {
@@ -1440,7 +1503,7 @@ paths:
 2. **Setup Docker para containers de usuário**
 3. **Integrar AI providers**
 4. **WebSocket para terminal e collab**
-5. **Admin dashboard básico**
+5. **Admin dashboard profissional**
 6. **Testes automatizados**
 7. **Documentação OpenAPI**
 
@@ -1448,6 +1511,6 @@ paths:
 
 **DOCUMENTOS RELACIONADOS:**
 - `8_ADMIN_SYSTEM_SPEC.md`
-- `5_WORKBENCH_SPEC.md`
-- `6_AI_SYSTEM_SPEC.md`
-- `7_EXECUTION_PLAN.md`
+- `WORKBENCH_SPEC.md`
+- `AI_SYSTEM_SPEC.md`
+- `EXECUTION_PLAN.md`

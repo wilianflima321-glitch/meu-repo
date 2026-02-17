@@ -217,7 +217,7 @@ export default function StatusBar({
   }
   
   return (
-    <div className="h-6 flex items-center justify-between bg-indigo-600 text-white text-xs select-none border-t border-indigo-700">
+    <div className="h-6 flex items-center justify-between bg-sky-600 text-white text-xs select-none border-t border-sky-700">
       {/* Left Section */}
       <div className="flex items-center h-full">
         {/* Panel Toggles */}
@@ -297,7 +297,7 @@ export default function StatusBar({
             Ln {cursorPosition.line}, Col {cursorPosition.column}
           </span>
           {selection && (
-            <span className="text-indigo-300">
+            <span className="text-sky-300">
               ({selection.lines} lines, {selection.characters} chars)
             </span>
           )}
@@ -327,7 +327,7 @@ export default function StatusBar({
         </StatusBarButton>
         
         {/* Separator */}
-        <div className="w-px h-4 bg-indigo-500 mx-1" />
+        <div className="w-px h-4 bg-sky-500 mx-1" />
         
         {/* Performance */}
         <StatusBarButton title="Performance">
@@ -354,7 +354,7 @@ export default function StatusBar({
         )}
         
         {/* Separator */}
-        <div className="w-px h-4 bg-indigo-500 mx-1" />
+        <div className="w-px h-4 bg-sky-500 mx-1" />
         
         {/* Online Status */}
         <StatusBarButton title={isOnline ? 'Online' : 'Offline'}>
@@ -434,8 +434,8 @@ function StatusBarButton({
       title={title}
       className={`
         flex items-center gap-1 h-full px-2 
-        hover:bg-indigo-700/50 transition-colors
-        ${active ? 'bg-indigo-700/50' : ''}
+        hover:bg-sky-700/50 transition-colors
+        ${active ? 'bg-sky-700/50' : ''}
         ${className}
       `}
     >
@@ -506,7 +506,7 @@ export function FloatingStatus({
     success: <CheckCircle className="w-4 h-4 text-green-400" />,
     warning: <AlertTriangle className="w-4 h-4 text-amber-400" />,
     error: <AlertCircle className="w-4 h-4 text-red-400" />,
-    loading: <RefreshCw className="w-4 h-4 text-indigo-400 animate-spin" />,
+    loading: <RefreshCw className="w-4 h-4 text-sky-400 animate-spin" />,
   }
   
   const colors = {
@@ -514,7 +514,7 @@ export function FloatingStatus({
     success: 'border-green-500/50 bg-green-500/10',
     warning: 'border-amber-500/50 bg-amber-500/10',
     error: 'border-red-500/50 bg-red-500/10',
-    loading: 'border-indigo-500/50 bg-indigo-500/10',
+    loading: 'border-sky-500/50 bg-sky-500/10',
   }
   
   return (

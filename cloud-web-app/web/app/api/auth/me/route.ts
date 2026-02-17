@@ -3,16 +3,17 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/auth/me
- * 
- * Retorna dados do usuário autenticado
+ *
+ * Returns authenticated user data.
  */
 export async function GET(request: NextRequest) {
   try {
     const authUser = requireAuth(request);
-    
-    // Buscar dados completos do usuário
+
     const user = await prisma.user.findUnique({
       where: { id: authUser.userId },
       select: {
@@ -26,18 +27,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Buscar informações de créditos/plano se disponível
-    let credits = null;
+    let credits: number | null = null;
     let plan: string | null = null;
-    
+
     try {
-      // @ts-ignore - Tabela pode não existir no schema
       const creditBalance = await (prisma as any).creditBalance?.findUnique?.({
         where: { userId: user.id },
       });
@@ -45,7 +41,7 @@ export async function GET(request: NextRequest) {
         credits = creditBalance.balance;
       }
     } catch {
-      // Tabela pode não existir
+      // Optional model may not exist.
     }
 
     try {
@@ -57,7 +53,7 @@ export async function GET(request: NextRequest) {
         plan = subscription.stripePriceId || 'pro';
       }
     } catch {
-      // Tabela pode não existir
+      // Optional model may not exist.
     }
 
     return NextResponse.json({
@@ -67,17 +63,28 @@ export async function GET(request: NextRequest) {
       authenticated: true,
     });
   } catch (error) {
-    console.error('[auth/me] Error:', error);
-    
-    // Se não autenticado, retornar null (não erro)
-    if ((error as Error).message?.includes('Unauthorized') || 
-        (error as Error).message?.includes('Not authenticated')) {
+    const err = error as Error & { code?: string };
+    const message = err?.message || '';
+
+    if (message.includes('Unauthorized') || message.includes('Not authenticated')) {
       return NextResponse.json({
         authenticated: false,
         user: null,
       });
     }
-    
+
+    if (err?.code === 'AUTH_NOT_CONFIGURED' || message.includes('AUTH_NOT_CONFIGURED')) {
+      return NextResponse.json(
+        {
+          authenticated: false,
+          user: null,
+          error: 'AUTH_NOT_CONFIGURED',
+        },
+        { status: 503 }
+      );
+    }
+
+    console.error('[auth/me] Error:', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

@@ -785,7 +785,7 @@ export default function ProjectSettings() {
       }
     };
     input.click();
-  }, []);
+  }, [toast]);
   
   return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#1a1a1a', color: '#fff' }}>

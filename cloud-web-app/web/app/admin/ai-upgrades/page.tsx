@@ -21,10 +21,10 @@ const statusLabels: Record<UpgradeStatus, string> = {
 };
 
 const statusColors: Record<UpgradeStatus, string> = {
-  applied: 'bg-green-100 text-green-800 border-green-400',
-  partial: 'bg-yellow-100 text-yellow-800 border-yellow-400',
-  missing: 'bg-red-100 text-red-800 border-red-400',
-  planned: 'bg-blue-100 text-blue-800 border-blue-400',
+  applied: 'bg-emerald-500/15 text-emerald-200 border-emerald-500/40',
+  partial: 'bg-amber-500/15 text-amber-200 border-amber-500/40',
+  missing: 'bg-rose-500/15 text-rose-200 border-rose-500/40',
+  planned: 'bg-sky-500/15 text-sky-200 border-sky-500/40',
 };
 
 export default function AIUpgrades() {
@@ -74,7 +74,7 @@ export default function AIUpgrades() {
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <h1 className='text-3xl font-bold mb-6'>Melhorias para IA Aethel</h1>
-      <p className='mb-4 text-gray-600'>Matriz de maturidade: capacidades atuais, lacunas e melhorias priorizadas com governança.</p>
+      <p className='mb-4 text-zinc-400'>Matriz de maturidade: capacidades atuais, lacunas e melhorias priorizadas com governança.</p>
 
       <div className='mb-6'>
         <h2 className='text-xl font-semibold mb-4'>O que Aethel Já Tem (Pontos Fortes)</h2>
@@ -110,14 +110,14 @@ export default function AIUpgrades() {
           />
         </div>
         {error && (
-          <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+          <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
             {error}
           </div>
         )}
         {loading ? (
-          <p className='text-sm text-gray-500'>Carregando melhorias...</p>
+          <p className='text-sm text-zinc-500'>Carregando melhorias...</p>
         ) : filtered.length === 0 ? (
-          <p className='text-sm text-gray-500'>Nenhuma melhoria encontrada.</p>
+          <p className='text-sm text-zinc-500'>Nenhuma melhoria encontrada.</p>
         ) : (
           <div className='space-y-4'>
             {filtered.map((upgrade) => (
@@ -132,7 +132,7 @@ export default function AIUpgrades() {
                   </div>
                   <button
                     onClick={() => applyUpgrade(upgrade)}
-                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white'}`}
+                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                   >
                     {upgrade.applied ? 'Reverter' : 'Aplicar melhoria'}
                   </button>
@@ -143,7 +143,7 @@ export default function AIUpgrades() {
         )}
       </div>
 
-      <div className='p-4 bg-purple-100 rounded-lg'>
+      <div className='p-4 bg-sky-500/15 rounded-lg'>
         <h3 className='font-semibold'>Diretrizes de Evolução:</h3>
         <ul className='list-disc ml-5'>
           <li>Priorize confiabilidade com validação, métricas e aprovação por ambiente.</li>

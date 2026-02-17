@@ -16,6 +16,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Crosshair,
@@ -364,7 +365,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             className={`
               relative group p-4 rounded-xl border-2 transition-all duration-300
               ${selectedGenre === genre.id
-                ? 'border-purple-500 bg-purple-500/20 scale-105'
+                ? 'border-purple-500 bg-blue-500/20 scale-105'
                 : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-500 hover:bg-zinc-800'
               }
               ${genre.expertOnly ? 'opacity-60' : ''}
@@ -381,7 +382,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             <div className={`
               w-16 h-16 mx-auto mb-3 rounded-xl flex items-center justify-center
               ${selectedGenre === genre.id
-                ? 'bg-purple-500 text-white'
+                ? 'bg-blue-500 text-white'
                 : 'bg-zinc-700 text-zinc-300 group-hover:bg-zinc-600'
               }
             `}>
@@ -404,7 +405,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
             {/* Selection indicator */}
             {selectedGenre === genre.id && (
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                 <Check className="w-4 h-4 text-white" />
               </div>
             )}
@@ -436,7 +437,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             className={`
               flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all
               ${selectedGenre
-                ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                ? 'bg-blue-600 hover:bg-blue-500 text-white'
                 : 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
               }
             `}
@@ -474,7 +475,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             className={`
               relative group p-4 rounded-xl border-2 transition-all duration-300
               ${selectedStyle === style.id
-                ? 'border-purple-500 bg-purple-500/20 scale-105'
+                ? 'border-purple-500 bg-blue-500/20 scale-105'
                 : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-500'
               }
             `}
@@ -488,13 +489,14 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             )}
 
             {/* Preview Image */}
-            <div className="w-full aspect-video rounded-lg bg-zinc-700 mb-3 overflow-hidden">
-              <img
+            <div className="relative w-full aspect-video rounded-lg bg-zinc-700 mb-3 overflow-hidden">
+              <Image
                 src={style.previewImage}
                 alt={style.name}
+                fill
+                unoptimized
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback gradient
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
@@ -519,7 +521,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
             {/* Selection indicator */}
             {selectedStyle === style.id && (
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                 <Check className="w-4 h-4 text-white" />
               </div>
             )}
@@ -562,7 +564,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           className={`
             flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all
             ${selectedStyle && projectName.trim()
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white'
+              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white'
               : 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
             }
           `}
@@ -585,14 +587,14 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <div className="absolute inset-0 rounded-full border-4 border-purple-500/30 animate-ping" />
         <div className="absolute inset-2 rounded-full border-4 border-purple-500/50 animate-pulse" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <Sparkles className="w-12 h-12 text-purple-400 animate-bounce" />
+          <Sparkles className="w-12 h-12 text-blue-400 animate-bounce" />
         </div>
       </div>
 
       {/* Progress Bar */}
       <div className="w-80 h-2 bg-zinc-800 rounded-full overflow-hidden mb-4">
         <div
-          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300"
           style={{ width: `${loadingProgress}%` }}
         />
       </div>
@@ -609,9 +611,9 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             key={s.id}
             className={`w-2 h-2 rounded-full transition-all ${
               i < loadingStep
-                ? 'bg-purple-500'
+                ? 'bg-blue-500'
                 : i === loadingStep
-                ? 'bg-purple-400 animate-pulse'
+                ? 'bg-blue-400 animate-pulse'
                 : 'bg-zinc-700'
             }`}
           />
@@ -641,7 +643,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       </div>
       <h2 className="text-2xl font-bold text-white mb-2">Universo Criado!</h2>
       <p className="text-zinc-400 mb-6">Abrindo o editor...</p>
-      <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
+      <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
     </div>
   );
 
@@ -655,15 +657,15 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         {/* Step Indicator */}
         {step !== 'loading' && step !== 'complete' && (
           <div className="flex items-center justify-center gap-4 mb-8">
-            <div className={`flex items-center gap-2 ${step === 'genre' ? 'text-purple-400' : 'text-zinc-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'genre' ? 'bg-purple-500 text-white' : 'bg-zinc-700'}`}>
+            <div className={`flex items-center gap-2 ${step === 'genre' ? 'text-blue-400' : 'text-zinc-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'genre' ? 'bg-blue-500 text-white' : 'bg-zinc-700'}`}>
                 1
               </div>
               <span className="hidden sm:inline">Gênero</span>
             </div>
             <div className="w-12 h-0.5 bg-zinc-700" />
-            <div className={`flex items-center gap-2 ${step === 'style' ? 'text-purple-400' : 'text-zinc-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'style' ? 'bg-purple-500 text-white' : 'bg-zinc-700'}`}>
+            <div className={`flex items-center gap-2 ${step === 'style' ? 'text-blue-400' : 'text-zinc-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'style' ? 'bg-blue-500 text-white' : 'bg-zinc-700'}`}>
                 2
               </div>
               <span className="hidden sm:inline">Estilo</span>

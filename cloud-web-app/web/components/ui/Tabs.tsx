@@ -150,7 +150,7 @@ export function TabTrigger({
         relative flex items-center justify-center gap-2
         font-medium rounded-lg
         transition-all duration-200 ease-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
         disabled:opacity-40 disabled:cursor-not-allowed
         ${isActive 
           ? `
@@ -176,7 +176,7 @@ export function TabTrigger({
           className={`
             px-1.5 py-0.5 text-[10px] font-semibold rounded-full
             ${isActive 
-              ? 'bg-indigo-500/20 text-indigo-300' 
+              ? 'bg-sky-500/20 text-sky-300' 
               : 'bg-slate-700/80 text-slate-400'
             }
           `}

@@ -766,7 +766,7 @@ export function DayNightProvider({
 }) {
   const value = useMemo(() => ({
     cycle: new DayNightCycle(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     value.cycle.start();
@@ -878,7 +878,7 @@ export function useSeason() {
   return season;
 }
 
-export default {
+const __defaultExport = {
   DayNightCycle,
   SKY_PRESETS,
   DayNightProvider,
@@ -889,3 +889,5 @@ export default {
   useTimeControl,
   useSeason,
 };
+
+export default __defaultExport;

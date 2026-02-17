@@ -49,7 +49,11 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
 
   const handleOpenRecent = (workspaceUri: string) => {
     workspaceManager.addToRecent(workspaceUri);
-    // TODO: Navigate to workspace
+    window.dispatchEvent(
+      new CustomEvent('aethel.workspace.openRecent', {
+        detail: { workspaceUri },
+      })
+    );
     onClose();
   };
 

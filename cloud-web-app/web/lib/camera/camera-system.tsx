@@ -871,8 +871,9 @@ export function CameraProvider({
   const controllerRef = useRef<CameraController>(new CameraController(config));
   
   useEffect(() => {
+    const controller = controllerRef.current;
     return () => {
-      controllerRef.current.dispose();
+      controller.dispose();
     };
   }, []);
   
@@ -953,7 +954,7 @@ export function useCameraMode() {
   return { mode, setMode };
 }
 
-export default {
+const __defaultExport = {
   CameraController,
   CameraPathBuilder,
   CameraProvider,
@@ -963,3 +964,5 @@ export default {
   useCameraShake,
   useCameraMode,
 };
+
+export default __defaultExport;

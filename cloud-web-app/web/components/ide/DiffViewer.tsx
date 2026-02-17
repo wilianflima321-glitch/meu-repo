@@ -507,13 +507,13 @@ export default function DiffViewer({
           <div className="flex items-center bg-slate-700 rounded overflow-hidden">
             <button
               onClick={() => setViewMode('unified')}
-              className={`px-2 py-1 text-xs ${viewMode === 'unified' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2 py-1 text-xs ${viewMode === 'unified' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'}`}
             >
               Unified
             </button>
             <button
               onClick={() => setViewMode('side-by-side')}
-              className={`px-2 py-1 text-xs ${viewMode === 'side-by-side' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2 py-1 text-xs ${viewMode === 'side-by-side' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'}`}
             >
               Side by Side
             </button>
@@ -611,7 +611,7 @@ export default function DiffViewer({
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm font-medium ${
               stats.pending > 0
                 ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                : 'bg-sky-600 hover:bg-sky-500 text-white'
             }`}
           >
             <FilePlus className="w-4 h-4" />

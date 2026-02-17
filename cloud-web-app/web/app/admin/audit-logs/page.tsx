@@ -91,7 +91,7 @@ export default function AuditLogsPage() {
         <div>
           <h1 className="text-2xl font-bold">Logs de auditoria avançados</h1>
           {lastUpdated && (
-            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -103,14 +103,14 @@ export default function AuditLogsPage() {
           </button>
           <button
             onClick={fetchLogs}
-            className="px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm"
+            className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
           >
             Atualizar
           </button>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
           <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
@@ -125,7 +125,7 @@ export default function AuditLogsPage() {
         </div>
       </div>
       
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Filtros</h2>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <input
@@ -167,22 +167,22 @@ export default function AuditLogsPage() {
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Logs de Auditoria</h2>
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-10 bg-gray-100 rounded animate-pulse" />
+              <div key={index} className="h-10 bg-zinc-800/70 rounded animate-pulse" />
             ))}
           </div>
         ) : error ? (
           <p className="text-sm text-red-500">{error}</p>
         ) : logs.length === 0 ? (
-          <p className="text-sm text-gray-500">Nenhum log encontrado.</p>
+          <p className="text-sm text-zinc-500">Nenhum log encontrado.</p>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b text-xs text-gray-500">
+              <tr className="border-b text-xs text-zinc-500">
                 <th className="text-left p-2">Admin</th>
                 <th className="text-left p-2">Ação</th>
                 <th className="text-left p-2">Categoria</th>
@@ -194,17 +194,17 @@ export default function AuditLogsPage() {
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className="border-b hover:bg-gray-50 text-sm">
+                <tr key={log.id} className="border-b hover:bg-zinc-900/60 text-sm">
                   <td className="p-2">{log.adminEmail || log.userId || '—'}</td>
                   <td className="p-2">{log.action || '—'}</td>
                   <td className="p-2">{log.category || '—'}</td>
                   <td className="p-2">
                     <span className={`px-2 py-1 rounded text-xs ${
                       log.severity === 'critical'
-                        ? 'bg-red-100 text-red-700'
+                        ? 'bg-rose-500/15 text-rose-300'
                         : log.severity === 'warning'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-amber-500/15 text-amber-300'
+                        : 'bg-zinc-800/70 text-zinc-400'
                     }`}>
                       {severityLabels[log.severity || 'info'] ?? log.severity ?? 'informação'}
                     </span>

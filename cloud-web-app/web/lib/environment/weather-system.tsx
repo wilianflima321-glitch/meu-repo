@@ -850,7 +850,7 @@ export function WeatherProvider({
 }) {
   const value = useMemo(() => ({
     system: new WeatherSystem(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     value.system.start();
@@ -955,7 +955,7 @@ export function useLightning() {
   return { lastBolt, lastThunder };
 }
 
-export default {
+const __defaultExport = {
   WeatherSystem,
   DEFAULT_WEATHER_PRESETS,
   WeatherProvider,
@@ -965,3 +965,5 @@ export default {
   useWind,
   useLightning,
 };
+
+export default __defaultExport;

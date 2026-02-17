@@ -1,45 +1,26 @@
-/**
- * Admin System Stats API - Aethel Engine
- * GET /api/admin/stats - Estatísticas do sistema
+﻿/**
+ * Admin System Stats API
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-server';
-import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { withAdminAuth } from '@/lib/rbac';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+async function getHandler(_request: NextRequest) {
   try {
-    const user = requireAuth(request);
-    
-    // SECURITY: Verificar se é admin
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.userId },
-      select: { role: true },
-    });
-    
-    if (!dbUser || dbUser.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
-    }
-    
-    // Database stats
     const dbStats = {
       users: await prisma.user.count(),
       projects: await prisma.project.count(),
       files: await prisma.file.count(),
       assets: await prisma.asset.count(),
-      sessions: await prisma.session.count(),
+      sessions: 0,
       subscriptions: await prisma.subscription.count(),
       auditLogs: await prisma.auditLog.count(),
       marketplaceItems: await prisma.marketplaceItem.count(),
     };
-    
-    // System info
+
     const systemInfo = {
       nodeVersion: process.version,
       platform: process.platform,
@@ -48,16 +29,14 @@ export async function GET(request: NextRequest) {
       memoryUsage: process.memoryUsage(),
       env: process.env.NODE_ENV || 'development',
     };
-    
-    // Growth metrics (últimos 7 dias)
+
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    
     const recentGrowth = {
       newUsers: await prisma.user.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
       newProjects: await prisma.project.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
       newAssets: await prisma.asset.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     };
-    
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -68,9 +47,9 @@ export async function GET(request: NextRequest) {
       generatedAt: new Date(),
     });
   } catch (error) {
-    console.error('Failed to get system stats:', error);
-    const mapped = apiErrorToResponse(error);
-    if (mapped) return mapped;
-    return apiInternalError();
+    console.error('[admin/stats] Failed to get system stats:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export const GET = withAdminAuth(getHandler, 'ops:dashboard:metrics');

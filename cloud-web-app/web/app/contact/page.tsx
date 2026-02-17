@@ -85,7 +85,7 @@ export default function ContactPage() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
           >
             Voltar ao início
           </Link>
@@ -101,7 +101,7 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <nav className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold text-white">Aethel</span>
@@ -131,8 +131,8 @@ export default function ContactPage() {
             {/* Contact Info */}
             <div className="space-y-6 mb-12">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-6 h-6 text-indigo-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Email</h3>
@@ -142,8 +142,8 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-6 h-6 text-indigo-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Telefone</h3>
@@ -152,8 +152,8 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-indigo-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Endereço</h3>
@@ -166,8 +166,8 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-indigo-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Horário</h3>
@@ -190,7 +190,7 @@ export default function ContactPage() {
               </p>
               <Link
                 href="/pricing#faq"
-                className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
+                className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
               >
                 Ver perguntas frequentes →
               </Link>
@@ -250,7 +250,7 @@ export default function ContactPage() {
                           flex items-center gap-3 p-4 rounded-xl border transition-all text-left
                           ${
                             formData.reason === reason.value
-                              ? 'bg-indigo-600/20 border-indigo-500 text-white'
+                              ? 'bg-blue-600/20 border-blue-500 text-white'
                               : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
                           }
                         `}
@@ -273,7 +273,7 @@ export default function ContactPage() {
                     onChange={handleChange}
                     rows={5}
                     required
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
                   />
                 </div>
 

@@ -37,10 +37,11 @@ export function GameSimulation({ objects }: GameSimulationProps) {
 
     init();
 
+    const bodyMapRef = bodyMap.current;
     return () => {
       active = false;
       physicsWorld.current = null;
-      bodyMap.current.clear();
+      bodyMapRef.clear();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only init once on mount

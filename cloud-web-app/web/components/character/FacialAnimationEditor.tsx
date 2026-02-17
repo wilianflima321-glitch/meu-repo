@@ -383,8 +383,8 @@ const BlendShapeSlider: React.FC<BlendShapeSliderProps> = React.memo(({ name, va
         className="flex-1 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 
                    [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full 
-                   [&::-webkit-slider-thumb]:bg-indigo-500 [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-indigo-400"
+                   [&::-webkit-slider-thumb]:bg-sky-500 [&::-webkit-slider-thumb]:cursor-pointer
+                   [&::-webkit-slider-thumb]:hover:bg-sky-400"
       />
       <span className="text-xs text-slate-500 w-10 text-right font-mono">
         {value.toFixed(2)}
@@ -411,7 +411,7 @@ const EmotionPresetButton: React.FC<EmotionPresetButtonProps> = React.memo(({ pr
       onClick={onClick}
       className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200
                   ${isActive 
-                    ? 'bg-indigo-600 text-white ring-2 ring-indigo-400' 
+                    ? 'bg-sky-600 text-white ring-2 ring-sky-400' 
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
     >
       <span className="text-2xl mb-1">{preset.icon}</span>
@@ -571,7 +571,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
         <div className="flex items-center gap-2">
           <button
             onClick={togglePlayback}
-            className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 rounded text-xs font-medium transition-colors"
+            className="px-3 py-1 bg-sky-600 hover:bg-sky-500 rounded text-xs font-medium transition-colors"
           >
             {isPlaying ? '⏸ Pause' : '▶ Play'}
           </button>
@@ -589,7 +589,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
             onClick={() => setSelectedViseme(viseme.id)}
             className={`px-2 py-1 text-xs rounded transition-colors
                         ${selectedViseme === viseme.id
-                          ? 'bg-indigo-600 text-white'
+                          ? 'bg-sky-600 text-white'
                           : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
           >
             {viseme.label}
@@ -626,8 +626,8 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
               }
             }}
           >
-            <div className="w-4 h-8 bg-indigo-500 rounded-sm flex items-center justify-center
-                            group-hover:bg-indigo-400 transition-colors">
+            <div className="w-4 h-8 bg-sky-500 rounded-sm flex items-center justify-center
+                            group-hover:bg-sky-400 transition-colors">
               <span className="text-xs font-bold text-white">
                 {VISEMES.find(v => v.id === kf.viseme)?.label.charAt(0) || '?'}
               </span>
@@ -684,7 +684,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-sm
                    text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-2 
-                   focus:ring-indigo-500 mb-3"
+                   focus:ring-sky-500 mb-3"
       />
 
       <div className="max-h-64 overflow-y-auto space-y-1 custom-scrollbar">
@@ -696,7 +696,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono bg-indigo-600 px-2 py-0.5 rounded">
+                <span className="text-xs font-mono bg-sky-600 px-2 py-0.5 rounded">
                   {au.au}
                 </span>
                 <span className="text-sm text-slate-300">{au.name}</span>
@@ -722,7 +722,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
                     e.stopPropagation()
                     onSelectAU(au.relatedBlendShapes)
                   }}
-                  className="mt-2 text-xs text-indigo-400 hover:text-indigo-300"
+                  className="mt-2 text-xs text-sky-400 hover:text-sky-300"
                 >
                   Apply to sliders →
                 </button>
@@ -1053,7 +1053,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-bold text-indigo-400">
+          <h2 className="text-lg font-bold text-sky-400">
             🎭 Facial Animation Editor
           </h2>
           <span className="text-xs text-slate-500 bg-slate-700 px-2 py-1 rounded">
@@ -1067,7 +1067,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           <button
             onClick={() => setShowFACS(!showFACS)}
             className={`px-3 py-1.5 text-sm rounded transition-colors
-                        ${showFACS ? 'bg-indigo-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                        ${showFACS ? 'bg-sky-600' : 'bg-slate-700 hover:bg-slate-600'}`}
           >
             📖 FACS Reference
           </button>
@@ -1079,7 +1079,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           </button>
           <button
             onClick={handleExport}
-            className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 rounded transition-colors"
+            className="px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-500 rounded transition-colors"
           >
             📥 Export JSON
           </button>
@@ -1146,7 +1146,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
                 onClick={() => setActiveCategory(category.name)}
                 className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1
                             ${activeCategory === category.name
-                              ? 'bg-indigo-600 text-white'
+                              ? 'bg-sky-600 text-white'
                               : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
               >
                 <span>{category.icon}</span>

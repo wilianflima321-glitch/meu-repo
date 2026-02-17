@@ -91,10 +91,10 @@ export default function Terminal() {
       handleCommand(command);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      // TODO: Command history
+      setOutput(prev => [...prev, 'LEGACY_TERMINAL_NOTICE: command history unavailable in deprecated terminal.']);
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      // TODO: Auto-completion
+      setOutput(prev => [...prev, 'LEGACY_TERMINAL_NOTICE: autocomplete unavailable in deprecated terminal.']);
     }
   };
 
@@ -116,7 +116,7 @@ export default function Terminal() {
                 key={index}
                 onClick={() => runTask(task.label)}
                 disabled={isLoading}
-                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 text-white text-sm rounded transition-colors"
+                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white text-sm rounded transition-colors"
               >
                 {task.label}
               </button>

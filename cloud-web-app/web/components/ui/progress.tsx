@@ -17,7 +17,7 @@ export function Progress({ value = 0, className, indicatorClassName, ...props }:
       {...props}
     >
       <div
-        className={cn('h-full rounded-full bg-indigo-500 transition-all', indicatorClassName)}
+        className={cn('h-full rounded-full bg-sky-500 transition-all', indicatorClassName)}
         style={{ width: `${clamped}%` }}
       />
     </div>

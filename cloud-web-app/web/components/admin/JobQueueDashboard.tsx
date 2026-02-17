@@ -79,7 +79,7 @@ const StatusBadge: React.FC<{ status: JobStatus }> = ({ status }) => {
 
 const TypeBadge: React.FC<{ type: JobType }> = ({ type }) => {
   const config: Record<JobType, { color: string; label: string }> = {
-    render: { color: 'bg-purple-500/20 text-purple-400', label: '🎨 Render' },
+    render: { color: 'bg-blue-500/20 text-blue-400', label: '🎨 Render' },
     build: { color: 'bg-orange-500/20 text-orange-400', label: '🔨 Build' },
     ai: { color: 'bg-cyan-500/20 text-cyan-400', label: '🤖 AI' },
     export: { color: 'bg-green-500/20 text-green-400', label: '📤 Export' },

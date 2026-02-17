@@ -254,7 +254,7 @@ export default function GitGraph() {
 
               {/* Actions */}
               <div className="pt-4 border-t border-slate-700 space-y-2">
-                <button className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                <button className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                   View Changes
                 </button>
                 <button className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">

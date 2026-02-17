@@ -823,7 +823,7 @@ export default function WaterEditor({
           </CollapsibleSection>
           
           {/* Reflection/Refraction */}
-          <CollapsibleSection title="Optics" icon={<Eye className="w-4 h-4 text-purple-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Optics" icon={<Eye className="w-4 h-4 text-blue-400" />} defaultOpen={false}>
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="checkbox"

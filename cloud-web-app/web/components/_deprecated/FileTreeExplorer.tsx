@@ -35,25 +35,25 @@ export default function FileTreeExplorer() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await fetch('/api/workspace/tree', {
+      const response = await fetch('/api/files/tree', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: '/workspace' })
+        body: JSON.stringify({ path: '/' })
       });
       if (!response.ok) {
-        throw new Error(`Workspace tree request failed (${response.status})`);
+        throw new Error(`Files tree request failed (${response.status})`);
       }
       const data = await response.json();
-      if (Array.isArray(data?.tree)) {
-        setTree(data.tree);
+      if (Array.isArray(data?.children)) {
+        setTree(data.children);
       } else {
         setTree([]);
-        setErrorMessage('Árvore de arquivos indisponível (resposta inválida do backend).');
+        setErrorMessage('File tree unavailable (invalid backend response).');
       }
     } catch (error) {
       console.error('Failed to load file tree:', error);
       setTree([]);
-      setErrorMessage('Não foi possível carregar o Explorer. Verifique o endpoint /api/workspace/tree.');
+      setErrorMessage('Failed to load Explorer. Verify /api/files/tree.');
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function FileTreeExplorer() {
   const handleFileClick = (node: FileNode) => {
     if (node.type === 'file') {
       setSelectedPath(node.path);
-      router.push(`/editor?file=${encodeURIComponent(node.path)}`);
+      router.push(`/ide?file=${encodeURIComponent(node.path)}`);
     } else {
       toggleExpand(node);
     }
@@ -141,7 +141,7 @@ export default function FileTreeExplorer() {
           onContextMenu={(e) => handleContextMenu(e, node)}
           className={`flex items-center gap-2 px-2 py-1 cursor-pointer transition-colors ${
             isSelected
-              ? 'bg-purple-600 text-white'
+              ? 'bg-blue-600 text-white'
               : 'text-slate-300 hover:bg-slate-700'
           }`}
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
@@ -251,7 +251,7 @@ export default function FileTreeExplorer() {
       <div className="overflow-y-auto h-[calc(100%-48px)]">
         {errorMessage ? (
           <div className="p-4 text-sm text-slate-400">
-            <div className="font-semibold text-slate-300">Explorer indisponível</div>
+            <div className="font-semibold text-slate-300">Explorer unavailable</div>
             <div className="mt-1">{errorMessage}</div>
           </div>
         ) : tree.length === 0 ? (

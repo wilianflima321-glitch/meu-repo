@@ -74,21 +74,21 @@ export default function AdminAnalytics() {
         <div>
           <h1 className='text-3xl font-bold'>Análises e relatórios</h1>
           {lastUpdated && (
-            <p className="text-xs text-gray-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <div className="flex items-center gap-3">
           <button className='bg-blue-500 text-white px-4 py-2 rounded' onClick={handleExport}>
             Exportar Relatório
           </button>
-          <button className='bg-gray-100 text-gray-700 px-4 py-2 rounded' onClick={fetchMetrics}>
+          <button className='bg-zinc-800/70 text-zinc-300 px-4 py-2 rounded' onClick={fetchMetrics}>
             Atualizar
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4">
+        <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">
           {error}
           <button className='ml-3 text-sm underline' onClick={fetchMetrics}>
             Tentar novamente
@@ -98,23 +98,23 @@ export default function AdminAnalytics() {
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
         {(loading ? Array.from({ length: 3 }) : [1, 2, 3]).map((_, index) => (
-          <div key={index} className='bg-white p-4 rounded-lg shadow'>
+          <div key={index} className='bg-zinc-900/70 p-4 rounded-lg shadow'>
             {loading ? (
-              <div className="h-16 bg-gray-100 rounded animate-pulse" />
+              <div className="h-16 bg-zinc-800/70 rounded animate-pulse" />
             ) : (
               <>
                 {index === 0 && (
                   <>
                     <h3 className='text-lg font-semibold'>Usuários Ativos (1h)</h3>
                     <p className='text-2xl'>{metrics?.activeUsers ?? 0}</p>
-                    <p className='text-xs text-gray-500'>Req/min: {metrics?.requestsPerMinute ?? 0}</p>
+                    <p className='text-xs text-zinc-500'>Req/min: {metrics?.requestsPerMinute ?? 0}</p>
                   </>
                 )}
                 {index === 1 && (
                   <>
                     <h3 className='text-lg font-semibold'>Receita diária (US$)</h3>
                     <p className='text-2xl'>{(metrics?.dailyRevenue ?? 0).toFixed(2)}</p>
-                    <p className='text-xs text-gray-500'>Custo de IA hoje: ${(metrics?.aiCostToday ?? 0).toFixed(2)}</p>
+                    <p className='text-xs text-zinc-500'>Custo de IA hoje: ${(metrics?.aiCostToday ?? 0).toFixed(2)}</p>
                   </>
                 )}
                 {index === 2 && (

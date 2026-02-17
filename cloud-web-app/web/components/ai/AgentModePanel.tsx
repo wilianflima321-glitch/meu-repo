@@ -206,7 +206,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#313244]">
         <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-purple-400" />
+          <Bot className="h-5 w-5 text-blue-400" />
           <span className="font-semibold text-white">Agent Mode</span>
           <span className={cn('text-xs px-2 py-0.5 rounded-full bg-opacity-20', getStatusColor(status))}>
             {status.toUpperCase()}
@@ -238,7 +238,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       {status === 'running' && (
         <div className="h-1 bg-[#313244]">
           <motion.div
-            className="h-full bg-purple-500"
+            className="h-full bg-blue-500"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
@@ -323,7 +323,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
                   )}
                   <StepIcon className={cn(
                     'h-4 w-4',
-                    step.type === 'think' && 'text-purple-400',
+                    step.type === 'think' && 'text-blue-400',
                     step.type === 'plan' && 'text-blue-400',
                     step.type === 'execute' && 'text-green-400',
                     step.type === 'observe' && 'text-yellow-400',
@@ -429,7 +429,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             size="icon"
             onClick={handleSubmit}
             disabled={!input.trim() || status === 'running'}
-            className="absolute bottom-2 right-2 h-8 w-8 bg-purple-600 hover:bg-purple-700"
+            className="absolute bottom-2 right-2 h-8 w-8 bg-blue-600 hover:bg-blue-700"
           >
             {status === 'running' ? (
               <Loader2 className="h-4 w-4 animate-spin" />

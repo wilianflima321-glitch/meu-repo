@@ -98,6 +98,21 @@ export interface JobData {
   retries?: number;
 }
 
+export interface QueueJobSnapshot {
+  id: string;
+  queueName: string;
+  name: string;
+  state: string;
+  data: unknown;
+  attemptsMade: number;
+  progress: unknown;
+  returnvalue?: unknown;
+  failedReason?: string;
+  timestamp: number;
+  processedOn?: number;
+  finishedOn?: number;
+}
+
 export interface EmailJobData {
   to: string;
   subject: string;
@@ -323,10 +338,13 @@ class QueueManager {
     delayed: number;
   }> {
     await this.initialize();
+    if (!this.available) {
+      return { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 };
+    }
     
     const queue = this.queues.get(queueName);
     if (!queue) {
-      throw new Error(`Queue ${queueName} not found`);
+      return { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 };
     }
     
     const [waiting, active, completed, failed, delayed] = await Promise.all([
@@ -350,6 +368,7 @@ class QueueManager {
     failed: number;
     delayed: number;
   }>> {
+    await this.initialize();
     const stats: Record<string, any> = {};
     
     for (const queueName of Object.values(QUEUE_NAMES)) {
@@ -363,6 +382,8 @@ class QueueManager {
    * Pausa uma fila
    */
   async pauseQueue(queueName: string): Promise<void> {
+    await this.initialize();
+    if (!this.available) return;
     const queue = this.queues.get(queueName);
     if (queue) {
       await queue.pause();
@@ -374,11 +395,170 @@ class QueueManager {
    * Resume uma fila
    */
   async resumeQueue(queueName: string): Promise<void> {
+    await this.initialize();
+    if (!this.available) return;
     const queue = this.queues.get(queueName);
     if (queue) {
       await queue.resume();
       console.log(`[QueueManager] Queue ${queueName} resumed`);
     }
+  }
+
+  /**
+   * Lista jobs entre filas para consumo de API.
+   */
+  async listJobs(limit = 50): Promise<QueueJobSnapshot[]> {
+    await this.initialize();
+    if (!this.available) return [];
+
+    const states = ['active', 'waiting', 'completed', 'failed', 'delayed', 'paused'];
+    const snapshots: QueueJobSnapshot[] = [];
+    const perQueueLimit = Math.max(1, limit);
+
+    for (const queueName of Object.values(QUEUE_NAMES)) {
+      const queue = this.queues.get(queueName);
+      if (!queue) continue;
+
+      const jobs = await queue.getJobs(states, 0, perQueueLimit - 1, true);
+      for (const job of jobs) {
+        const state = await job.getState();
+        snapshots.push({
+          id: String(job.id),
+          queueName,
+          name: job.name,
+          state,
+          data: job.data,
+          attemptsMade: job.attemptsMade ?? 0,
+          progress: job.progress ?? 0,
+          returnvalue: job.returnvalue,
+          failedReason: job.failedReason,
+          timestamp: Number(job.timestamp || 0),
+          processedOn: job.processedOn || undefined,
+          finishedOn: job.finishedOn || undefined,
+        });
+      }
+    }
+
+    snapshots.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    return snapshots.slice(0, limit);
+  }
+
+  /**
+   * Busca um job por id em qualquer fila.
+   */
+  async getJobById(jobId: string): Promise<QueueJobSnapshot | null> {
+    await this.initialize();
+    if (!this.available) return null;
+
+    for (const queueName of Object.values(QUEUE_NAMES)) {
+      const queue = this.queues.get(queueName);
+      if (!queue) continue;
+      const job = await queue.getJob(jobId);
+      if (!job) continue;
+      const state = await job.getState();
+      return {
+        id: String(job.id),
+        queueName,
+        name: job.name,
+        state,
+        data: job.data,
+        attemptsMade: job.attemptsMade ?? 0,
+        progress: job.progress ?? 0,
+        returnvalue: job.returnvalue,
+        failedReason: job.failedReason,
+        timestamp: Number(job.timestamp || 0),
+        processedOn: job.processedOn || undefined,
+        finishedOn: job.finishedOn || undefined,
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Cancela (remove) job pendente/adiado/pausado.
+   */
+  async cancelJob(jobId: string): Promise<{
+    found: boolean;
+    cancelled: boolean;
+    reason?: string;
+    state?: string;
+  }> {
+    await this.initialize();
+    if (!this.available) {
+      return { found: false, cancelled: false, reason: 'QUEUE_BACKEND_UNAVAILABLE' };
+    }
+
+    for (const queueName of Object.values(QUEUE_NAMES)) {
+      const queue = this.queues.get(queueName);
+      if (!queue) continue;
+      const job = await queue.getJob(jobId);
+      if (!job) continue;
+
+      const state = await job.getState();
+      if (state === 'completed' || state === 'failed') {
+        return { found: true, cancelled: false, reason: 'JOB_ALREADY_FINALIZED', state };
+      }
+      if (state === 'active') {
+        return { found: true, cancelled: false, reason: 'JOB_ACTIVE_CANNOT_CANCEL', state };
+      }
+
+      await job.remove();
+      return { found: true, cancelled: true, state };
+    }
+
+    return { found: false, cancelled: false, reason: 'JOB_NOT_FOUND' };
+  }
+
+  /**
+   * Reenvia job com falha.
+   */
+  async retryJob(jobId: string): Promise<{
+    found: boolean;
+    retried: boolean;
+    reason?: string;
+    state?: string;
+  }> {
+    await this.initialize();
+    if (!this.available) {
+      return { found: false, retried: false, reason: 'QUEUE_BACKEND_UNAVAILABLE' };
+    }
+
+    for (const queueName of Object.values(QUEUE_NAMES)) {
+      const queue = this.queues.get(queueName);
+      if (!queue) continue;
+      const job = await queue.getJob(jobId);
+      if (!job) continue;
+
+      const state = await job.getState();
+      if (state !== 'failed') {
+        return { found: true, retried: false, reason: 'JOB_NOT_FAILED', state };
+      }
+
+      await job.retry();
+      return { found: true, retried: true, state };
+    }
+
+    return { found: false, retried: false, reason: 'JOB_NOT_FOUND' };
+  }
+
+  /**
+   * Pausa ou resume todas as filas conhecidas.
+   */
+  async setAllQueuesPaused(paused: boolean): Promise<{ available: boolean; queues: string[] }> {
+    await this.initialize();
+    if (!this.available) return { available: false, queues: [] };
+
+    const touched: string[] = [];
+    for (const queueName of Object.values(QUEUE_NAMES)) {
+      if (paused) {
+        await this.pauseQueue(queueName);
+      } else {
+        await this.resumeQueue(queueName);
+      }
+      touched.push(queueName);
+    }
+    return { available: true, queues: touched };
   }
   
   /**

@@ -585,6 +585,26 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
       }
     },
   });
+
+  const handleNewTab = useCallback(() => {
+    if (tabs.length >= maxTabs) return;
+    
+    const id = `terminal_${Date.now()}`;
+    const newTab: TerminalTab = {
+      id,
+      name: `Terminal ${tabs.length + 1}`,
+      sessionId: null,
+      cwd: initialCwd,
+      shell: initialShell,
+      isActive: true,
+    };
+    
+    setTabs((prev) => [
+      ...prev.map((t) => ({ ...t, isActive: false })),
+      newTab,
+    ]);
+    setActiveTabId(id);
+  }, [tabs.length, maxTabs, initialCwd, initialShell]);
   
   // Update session ID when created
   useEffect(() => {
@@ -603,7 +623,7 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
     if (tabs.length === 0) {
       handleNewTab();
     }
-  }, []);
+  }, [tabs.length, handleNewTab]);
   
   // Keyboard shortcuts
   useEffect(() => {
@@ -627,27 +647,7 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [searchVisible, focus]);
-  
-  const handleNewTab = useCallback(() => {
-    if (tabs.length >= maxTabs) return;
-    
-    const id = `terminal_${Date.now()}`;
-    const newTab: TerminalTab = {
-      id,
-      name: `Terminal ${tabs.length + 1}`,
-      sessionId: null,
-      cwd: initialCwd,
-      shell: initialShell,
-      isActive: true,
-    };
-    
-    setTabs((prev) => [
-      ...prev.map((t) => ({ ...t, isActive: false })),
-      newTab,
-    ]);
-    setActiveTabId(id);
-  }, [tabs.length, maxTabs, initialCwd, initialShell]);
+  }, [searchVisible, focus, handleNewTab, terminalRef]);
   
   const handleSelectTab = useCallback((id: string) => {
     setTabs((prev) =>
@@ -705,9 +705,9 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
   }, []);
   
   const handleSplit = useCallback(() => {
-    // TODO: Implement split terminal
-    console.log('Split terminal - TODO');
-  }, []);
+    // P0 fallback: keep user flow productive by opening another tab session.
+    handleNewTab();
+  }, [handleNewTab]);
   
   const handleKill = useCallback(() => {
     disconnect();
@@ -752,7 +752,8 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
         ref={terminalRef}
         className="terminal-container"
         onContextMenu={(e) => {
-          // TODO: Implement context menu
+          e.preventDefault();
+          focus();
         }}
       />
       <style jsx>{`

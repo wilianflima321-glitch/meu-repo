@@ -73,18 +73,18 @@ export default function Deploy() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>CI/CD e implantação</h1>
-          <p className='text-sm text-gray-500'>Pipelines auditáveis para build e lançamento.</p>
+          <p className='text-sm text-zinc-500'>Pipelines auditáveis para build e lançamento.</p>
         </div>
-        <button onClick={fetchPipelines} className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'>Atualizar</button>
+        <button onClick={fetchPipelines} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>Atualizar</button>
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
           {error}
         </div>
       )}
 
-      <div className='mb-6 bg-white p-4 rounded-lg shadow'>
+      <div className='mb-6 bg-zinc-900/70 p-4 rounded-lg shadow'>
         <h2 className='text-xl font-semibold mb-4'>Novo Pipeline</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <input
@@ -112,9 +112,9 @@ export default function Deploy() {
         </div>
       </div>
 
-      <table className='w-full table-auto bg-white rounded-lg shadow'>
+      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
         <thead>
-          <tr className='bg-gray-100'>
+          <tr className='bg-zinc-800/70'>
             <th className='p-2 text-left'>Nome</th>
             <th className='p-2 text-left'>Provedor</th>
             <th className='p-2 text-left'>Status</th>
@@ -125,11 +125,11 @@ export default function Deploy() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-gray-500' colSpan={5}>Carregando pipelines...</td>
+              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando pipelines...</td>
             </tr>
           ) : pipelines.length === 0 ? (
             <tr>
-              <td className='p-2 text-sm text-gray-500' colSpan={5}>Nenhum pipeline encontrado.</td>
+              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum pipeline encontrado.</td>
             </tr>
           ) : (
             pipelines.map((d) => (
@@ -137,7 +137,7 @@ export default function Deploy() {
                 <td className='p-2'>{d.name}</td>
                 <td className='p-2'>{d.provider}</td>
                 <td className='p-2'>
-                  <span className='text-xs px-2 py-1 rounded bg-gray-100 text-gray-600'>{d.status}</span>
+                  <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>{d.status}</span>
                 </td>
                 <td className='p-2'>
                   {d.lastRunAt ? new Date(d.lastRunAt).toLocaleString() : '—'}

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Validation Logic (AssetProcessor)
-    const validation = AssetProcessor.validate(file);
+    const validation = await AssetProcessor.validate(file);
     if (!validation.valid) {
         return NextResponse.json({ error: validation.error }, { status: 400 });
     }
@@ -77,13 +77,36 @@ export async function POST(req: NextRequest) {
 
     // 3. Asset Processing (Compression/Optimization)
     const rawBuffer = await file.arrayBuffer();
-    // Assuming processImage returns a Buffer. For non-images it might just filter through
     let finalBuffer: Buffer;
+    let optimizationMeta: {
+      enabled: boolean;
+      processor: string;
+      reason: string | null;
+    } = {
+      enabled: false,
+      processor: 'none',
+      reason: null,
+    };
     
-    if (file.type.startsWith('image/')) {
-       finalBuffer = await AssetProcessor.processImage(rawBuffer, file.type);
+    if (validation.assetClass === 'image') {
+       const processed = await AssetProcessor.processImage(rawBuffer, file.type);
+       finalBuffer = processed.buffer;
+       optimizationMeta = {
+        enabled: processed.optimized,
+        processor: processed.processor,
+        reason: processed.reason || null,
+       };
     } else {
        finalBuffer = Buffer.from(rawBuffer);
+       optimizationMeta = {
+        enabled: false,
+        processor: 'none',
+        reason: validation.assetClass === 'model'
+          ? 'MODEL_OPTIMIZATION_PIPELINE_NOT_CONFIGURED'
+          : validation.assetClass === 'audio' || validation.assetClass === 'video'
+            ? 'MEDIA_OPTIMIZATION_PIPELINE_NOT_CONFIGURED'
+            : 'NON_IMAGE_ASSET',
+       };
     }
 
     const timestamp = Date.now();
@@ -114,8 +137,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       asset,
-      message: 'File uploaded and optimized successfully',
+      capabilityStatus: optimizationMeta.enabled ? 'IMPLEMENTED' : (validation.capabilityStatus || 'PARTIAL'),
+      message: optimizationMeta.enabled
+        ? 'File uploaded and optimized successfully'
+        : 'File uploaded successfully (optimization unavailable for current backend)',
+      validation: {
+        assetClass: validation.assetClass,
+        warnings: validation.warnings || [],
+      },
       optimization: {
+          enabled: optimizationMeta.enabled,
+          processor: optimizationMeta.processor,
+          reason: optimizationMeta.reason,
           original: file.size,
           optimized: finalBuffer.byteLength,
           ratio: (finalBuffer.byteLength / file.size).toFixed(2)

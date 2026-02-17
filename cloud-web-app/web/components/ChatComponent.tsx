@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AethelAPIClient, APIError } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 import type { ChatMessage, ChatThreadSummary, CopilotWorkflowSummary } from '@/lib/api';
+import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
 
 const STORAGE_KEYS_BASE = {
   activeThreadId: 'chat::activeThreadId',
@@ -358,7 +359,14 @@ const ChatComponent: React.FC = () => {
   const renameWorkflow = async () => {
     if (!activeWorkflowId) return;
     const current = workflows.find((w) => String(w.id) === String(activeWorkflowId));
-    const nextTitle = window.prompt('Novo nome do trabalho (workflow):', current?.title || 'Workflow');
+    const nextTitle = await openPromptDialog({
+      title: 'Renomear trabalho',
+      message: 'Informe o novo nome do workflow.',
+      defaultValue: current?.title || 'Workflow',
+      placeholder: 'Nome do workflow',
+      confirmText: 'Salvar',
+      cancelText: 'Cancelar',
+    });
     if (!nextTitle || !nextTitle.trim()) return;
     await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { title: nextTitle.trim() });
     await refreshWorkflows();
@@ -367,7 +375,12 @@ const ChatComponent: React.FC = () => {
 
   const archiveWorkflow = async () => {
     if (!activeWorkflowId) return;
-    const ok = window.confirm('Arquivar este trabalho (workflow)?');
+    const ok = await openConfirmDialog({
+      title: 'Arquivar trabalho',
+      message: 'Arquivar este trabalho (workflow)?',
+      confirmText: 'Arquivar',
+      cancelText: 'Cancelar',
+    });
     if (!ok) return;
     await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { archived: true });
     const list = await refreshWorkflows();

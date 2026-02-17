@@ -108,9 +108,9 @@ const TYPE_CONFIG: Record<SuggestionType, {
   },
   design: {
     icon: Palette,
-    color: 'text-fuchsia-400',
-    bgColor: 'bg-fuchsia-500/10',
-    borderColor: 'border-fuchsia-500/30',
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
+    borderColor: 'border-cyan-500/30',
     label: 'Design',
   },
   performance: {
@@ -434,8 +434,8 @@ export function AISuggestionBubble({
               disabled={isApplying}
               className={`
                 flex-1 flex items-center justify-center gap-1.5 py-2
-                bg-gradient-to-r from-violet-600 to-fuchsia-600
-                hover:from-violet-500 hover:to-fuchsia-500
+                bg-gradient-to-r from-blue-600 to-cyan-600
+                hover:from-blue-500 hover:to-cyan-500
                 rounded-lg text-sm font-medium transition-all
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}

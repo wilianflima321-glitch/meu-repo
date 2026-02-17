@@ -95,6 +95,7 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
   
   const wsRef = useRef<AethelWebSocketClient | null>(null);
   const subscribedJobs = useRef<Set<string>>(new Set());
+  const handleRenderMessageRef = useRef<(msg: any) => void>(() => {});
 
   // Inicializa conexão WebSocket
   useEffect(() => {
@@ -141,7 +142,7 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
 
     // Handler de mensagens
     ws.on('message', (msg: any) => {
-      handleRenderMessage(msg);
+      handleRenderMessageRef.current(msg);
     });
 
     ws.connect().catch((err) => {
@@ -178,6 +179,10 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
         break;
     }
   }, []);
+
+  useEffect(() => {
+    handleRenderMessageRef.current = handleRenderMessage;
+  }, [handleRenderMessage]);
 
   // Atualiza progresso de um job
   const handleProgressUpdate = (event: RenderProgressEvent) => {

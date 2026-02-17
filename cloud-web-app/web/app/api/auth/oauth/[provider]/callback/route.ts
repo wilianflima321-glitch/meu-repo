@@ -234,21 +234,12 @@ export async function GET(
       }
     }
 
-    // Generate JWT token
+    // Generate JWT token (JWT-only, no server sessions)
     const token = generateTokenWithRole(
       user.id,
       user.email,
       (user as any).role || 'user'
     );
-
-    // Create session
-    await prisma.session.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      },
-    });
 
     // Redirect to dashboard with token cookie
     const response = NextResponse.redirect(new URL('/dashboard', req.url));

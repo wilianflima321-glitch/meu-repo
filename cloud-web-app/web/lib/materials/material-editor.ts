@@ -1081,8 +1081,10 @@ export function useMaterialEditor() {
   };
 }
 
-export default {
+const __defaultExport = {
   MaterialFactory,
   MaterialEditor,
   DEFAULT_PRESETS,
 };
+
+export default __defaultExport;

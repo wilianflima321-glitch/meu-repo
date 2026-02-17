@@ -9,14 +9,15 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#6366f1' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0f' },
+    { media: '(prefers-color-scheme: light)', color: '#2563eb' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0d12' },
   ],
 }
 
 export const metadata: Metadata = {
   title: 'Aethel Engine - AI-Powered Game Development IDE',
   description: 'Next-generation game development IDE with AI assistance, real-time collaboration, and professional tools for web and desktop.',
+  metadataBase: new URL('https://aethel.dev'),
   keywords: ['game engine', 'game development', 'IDE', 'AI', 'three.js', 'WebGL', 'game editor'],
   authors: [{ name: 'Aethel Engine Team' }],
   creator: 'Aethel Engine',

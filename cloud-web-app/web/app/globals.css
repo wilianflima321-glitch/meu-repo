@@ -1,3 +1,5 @@
+@import url('https://cdn.jsdelivr.net/npm/@vscode/codicons@0.0.36/dist/codicon.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,7 +11,7 @@
  */
 
 /* ============================================================================
-   CSS Variables - The Bridge (Theia ↔ Web Sync)
+   CSS Variables - The Bridge (Theia <-> Web Sync)
    These can be overridden by Theia via postMessage for theme sync
    ============================================================================ */
 :root {
@@ -27,12 +29,12 @@
   /* Border Colors */
   --border-primary: #27272a;  /* Zinc 800 */
   --border-muted: #1f1f23;
-  --border-focus: #6366f1;    /* Indigo 500 */
+  --border-focus: #3b82f6;    /* Blue 500 */
   
   /* Brand Colors */
-  --color-primary: #6366f1;   /* Indigo 500 */
-  --color-primary-hover: #818cf8; /* Indigo 400 */
-  --color-accent: #a855f7;    /* Purple 500 */
+  --color-primary: #2563eb;   /* Blue 600 */
+  --color-primary-hover: #3b82f6; /* Blue 500 */
+  --color-accent: #0891b2;    /* Cyan 600 */
   
   /* Semantic Colors */
   --color-success: #22c55e;
@@ -43,6 +45,12 @@
   /* Typography */
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --ui-density-font-size: 12px;
+  --ui-density-row-height: 22px;
+  --ui-density-header-height: 32px;
+  --ui-density-gap-2: 2px;
+  --ui-density-gap-4: 4px;
+  --ui-density-gap-6: 6px;
   
   /* Spacing */
   --header-height: 64px;
@@ -85,43 +93,57 @@
   html {
     @apply antialiased;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-size: var(--ui-density-font-size);
   }
   
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-sans);
+    font-size: var(--ui-density-font-size);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     @apply min-h-screen;
+  }
+
+  .codicon {
+    color: currentColor;
+    font-size: 14px;
+    line-height: 1;
   }
   
   /* Custom scrollbar styling */
   ::-webkit-scrollbar {
-    @apply w-2 h-2;
+    width: 10px;
+    height: 10px;
   }
   
   ::-webkit-scrollbar-track {
-    background: var(--bg-primary);
+    background: transparent;
   }
   
   ::-webkit-scrollbar-thumb {
-    background: var(--border-primary);
-    @apply rounded-full;
+    background: #424242;
+    border-radius: 5px;
+    border: 2px solid #1e1e1e;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--bg-hover);
+    background: #4f4f4f;
   }
   
   /* Selection styling */
   ::selection {
-    background: rgba(99, 102, 241, 0.3);
+    background: rgba(59, 130, 246, 0.28);
     color: var(--text-primary);
   }
   
   /* Focus ring styling */
   :focus-visible {
     outline: 2px solid var(--border-focus);
-    outline-offset: 2px;
+    outline-offset: 1px;
   }
 }
 
@@ -200,8 +222,8 @@
   .panel-header {
     background-color: var(--bg-primary);
     border-bottom: 1px solid var(--border-primary);
-    @apply px-3 py-2 flex items-center justify-between;
-    @apply text-sm font-medium text-zinc-400;
+    @apply px-2 py-1 flex items-center justify-between;
+    @apply text-xs font-medium text-zinc-400;
   }
   
   /* Status indicator */
@@ -234,6 +256,42 @@
    Utility Classes
    ============================================================================ */
 @layer utilities {
+  .density-compact {
+    font-size: var(--ui-density-font-size);
+  }
+
+  .density-row {
+    height: var(--ui-density-row-height);
+  }
+
+  .density-header {
+    height: var(--ui-density-header-height);
+  }
+
+  /*
+   * Legacy admin pages still use light utility classes (bg-white/text-gray).
+   * This scope remaps them into the unified dark design system without page-by-page rewrites.
+   */
+  .admin-unified-theme :is(.bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-900) {
+    background-color: rgba(24, 24, 27, 0.82) !important;
+  }
+
+  .admin-unified-theme :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-black) {
+    color: #f4f4f5 !important;
+  }
+
+  .admin-unified-theme :is(.text-gray-600, .text-gray-500, .text-gray-400) {
+    color: #a1a1aa !important;
+  }
+
+  .admin-unified-theme :is(.border-gray-100, .border-gray-200, .border-gray-300, .border-slate-200) {
+    border-color: rgba(63, 63, 70, 0.9) !important;
+  }
+
+  .admin-unified-theme :is(.shadow, .shadow-md, .shadow-lg) {
+    box-shadow: 0 0 0 1px rgba(63, 63, 70, 0.5), 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+  }
+
   /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -319,12 +377,12 @@
 
 .aethel-card-hover {
   @apply aethel-card;
-  @apply hover:bg-white/[0.05] hover:shadow-lg hover:shadow-violet-500/5;
+  @apply hover:bg-white/[0.05] hover:shadow-lg hover:shadow-blue-500/5;
 }
 
 .aethel-card-interactive {
   @apply aethel-card cursor-pointer;
-  @apply hover:bg-white/[0.06] hover:border-violet-500/20;
+  @apply hover:bg-white/[0.06] hover:border-blue-500/20;
   @apply active:scale-[0.99] transition-all duration-150;
 }
 
@@ -332,7 +390,7 @@
 .aethel-input {
   @apply w-full h-10 px-4 bg-white/[0.03] border border-white/10 rounded-lg;
   @apply text-white placeholder-zinc-500;
-  @apply focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/40;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/40;
   @apply transition-all duration-150;
 }
 
@@ -345,16 +403,16 @@
   @apply inline-flex items-center justify-center gap-2;
   @apply font-medium text-sm rounded-lg;
   @apply transition-all duration-150;
-  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50;
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50;
   @apply disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .aethel-button-primary {
   @apply aethel-button h-10 px-5;
-  @apply bg-gradient-to-r from-violet-600 to-fuchsia-600;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-500;
   @apply text-white font-semibold;
-  @apply hover:from-violet-500 hover:to-fuchsia-500;
-  @apply shadow-lg shadow-violet-500/20;
+  @apply hover:from-blue-500 hover:to-cyan-400;
+  @apply shadow-lg shadow-blue-500/20;
 }
 
 .aethel-button-secondary {
@@ -381,7 +439,7 @@
 }
 
 .aethel-badge-primary {
-  @apply aethel-badge bg-violet-500/20 text-violet-300 border border-violet-500/30;
+  @apply aethel-badge bg-blue-500/20 text-blue-300 border border-blue-500/30;
 }
 
 .aethel-badge-success {
@@ -574,8 +632,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.5); }
+  0%, 100% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(14, 165, 233, 0.5); }
 }
 
 .aethel-shimmer {
@@ -663,7 +721,7 @@
 }
 
 .aethel-progress-bar {
-  @apply h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full;
+  @apply h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full;
   @apply transition-all duration-300 ease-out;
 }
 

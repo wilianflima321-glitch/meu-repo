@@ -1265,7 +1265,7 @@ export function usePostProcessing(
   };
 }
 
-export default {
+const __defaultExport = {
   EffectComposer,
   BloomPass,
   ColorGradingPass,
@@ -1274,3 +1274,5 @@ export default {
   ChromaticAberrationPass,
   TonemappingPass,
 };
+
+export default __defaultExport;

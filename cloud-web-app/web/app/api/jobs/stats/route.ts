@@ -1,73 +1,117 @@
 /**
  * AETHEL ENGINE - Jobs Statistics API
- * 
- * Estatísticas agregadas de jobs.
+ *
+ * Queue-backed metrics without mock data.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { requireAuth } from '@/lib/auth-server';
+import { queueManager } from '@/lib/queue-system';
+
+function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Unauthorized';
+}
+
+function isAuthNotConfigured(error: unknown): boolean {
+  return error instanceof Error && String((error as any).code || '') === 'AUTH_NOT_CONFIGURED';
+}
+
+function mapStateToType(name: string): string {
+  if (name.startsWith('export:')) return 'export';
+  if (name.startsWith('asset:')) return 'asset';
+  if (name.startsWith('ai:')) return 'ai';
+  if (name.startsWith('email:')) return 'email';
+  if (name.startsWith('webhook:')) return 'webhook';
+  return 'other';
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user) {
+    requireAuth(request);
+
+    const available = await queueManager.isAvailable();
+    if (!available) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
+        {
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+          message: 'Queue backend is not configured.',
+        },
+        { status: 503 }
       );
     }
 
-    // Em produção, calcular a partir do banco de dados
-    const stats = {
-      total: 156,
-      today: 23,
-      thisWeek: 89,
-      thisMonth: 156,
-      
-      byStatus: {
-        queued: 5,
-        processing: 3,
-        completed: 142,
-        failed: 4,
-        cancelled: 2,
-      },
-      
-      byType: {
-        build: 67,
-        render: 34,
-        export: 28,
-        import: 15,
-        compress: 8,
-        upload: 4,
-      },
-      
-      averageDuration: {
-        build: 45000, // ms
-        render: 180000,
-        export: 30000,
-        import: 20000,
-        compress: 15000,
-        upload: 10000,
-      },
-      
-      successRate: 96.2,
-      
-      lastHour: {
-        total: 8,
-        completed: 6,
-        failed: 1,
-        processing: 1,
-      },
-      
-      timestamp: new Date().toISOString(),
-    };
+    const [statsByQueue, jobs] = await Promise.all([
+      queueManager.getAllStats(),
+      queueManager.listJobs(500),
+    ]);
 
-    return NextResponse.json(stats);
+    const totals = Object.values(statsByQueue).reduce(
+      (acc, item) => {
+        acc.waiting += item.waiting;
+        acc.active += item.active;
+        acc.completed += item.completed;
+        acc.failed += item.failed;
+        acc.delayed += item.delayed;
+        return acc;
+      },
+      { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }
+    );
+
+    const byType = jobs.reduce((acc, job) => {
+      const type = mapStateToType(job.name);
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const durationStats = jobs
+      .filter((job) => typeof job.processedOn === 'number' && typeof job.finishedOn === 'number' && job.finishedOn! >= job.processedOn!)
+      .map((job) => ({
+        type: mapStateToType(job.name),
+        durationMs: (job.finishedOn as number) - (job.processedOn as number),
+      }));
+
+    const averageDuration: Record<string, number> = {};
+    const bucket: Record<string, { total: number; count: number }> = {};
+    for (const entry of durationStats) {
+      bucket[entry.type] = bucket[entry.type] || { total: 0, count: 0 };
+      bucket[entry.type].total += entry.durationMs;
+      bucket[entry.type].count += 1;
+    }
+    Object.entries(bucket).forEach(([type, value]) => {
+      averageDuration[type] = Math.round(value.total / Math.max(1, value.count));
+    });
+
+    const successRate = totals.completed + totals.failed > 0
+      ? Number(((totals.completed / (totals.completed + totals.failed)) * 100).toFixed(2))
+      : 0;
+
+    return NextResponse.json({
+      total: jobs.length,
+      byStatus: {
+        queued: totals.waiting + totals.delayed,
+        processing: totals.active,
+        completed: totals.completed,
+        failed: totals.failed,
+      },
+      byType,
+      averageDuration,
+      successRate,
+      queues: statsByQueue,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error('Erro ao buscar estatísticas:', error);
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (isAuthNotConfigured(error)) {
+      return NextResponse.json(
+        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+        { status: 503 }
+      );
+    }
+    console.error('Erro ao buscar estatisticas:', error);
     return NextResponse.json(
-      { error: 'Falha ao buscar estatísticas' },
+      { error: 'Falha ao buscar estatisticas' },
       { status: 500 }
     );
   }

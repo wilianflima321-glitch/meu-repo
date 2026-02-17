@@ -602,18 +602,18 @@ function Tab({
         group flex items-center gap-2 h-9 px-3 border-r border-slate-800 cursor-pointer
         transition-colors select-none
         ${isActive
-          ? 'bg-slate-900 text-white border-t-2 border-t-indigo-500'
+          ? 'bg-slate-900 text-white border-t-2 border-t-sky-500'
           : 'bg-slate-950 text-slate-400 hover:bg-slate-800/50 border-t-2 border-t-transparent'
         }
         ${tab.isPreview ? 'italic' : ''}
         ${isDragging ? 'opacity-50' : ''}
-        ${isDragOver ? 'border-l-2 border-l-indigo-500' : ''}
+        ${isDragOver ? 'border-l-2 border-l-sky-500' : ''}
         ${tab.isPinned ? 'px-2' : ''}
       `}
     >
       {/* Pin indicator */}
       {tab.isPinned && (
-        <Pin className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+        <Pin className="w-3 h-3 text-sky-400 flex-shrink-0" />
       )}
 
       {/* File icon */}
@@ -780,7 +780,7 @@ export function TabBar({ className }: { className?: string }) {
                     }}
                     className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left ${
                       tab.id === activeTabId
-                        ? 'bg-indigo-600/20 text-indigo-400'
+                        ? 'bg-sky-600/20 text-sky-400'
                         : 'text-slate-300 hover:bg-slate-800'
                     }`}
                   >
@@ -879,7 +879,7 @@ export function TabGroupContainer({
             <div
               onMouseDown={() => handleResizeStart(group.id)}
               className={`absolute right-0 top-0 bottom-0 w-1 cursor-col-resize z-10 ${
-                resizing === group.id ? 'bg-indigo-500' : 'hover:bg-indigo-500/50'
+                resizing === group.id ? 'bg-sky-500' : 'hover:bg-sky-500/50'
               }`}
             />
           )}

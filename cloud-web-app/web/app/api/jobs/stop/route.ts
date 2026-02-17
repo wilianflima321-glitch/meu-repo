@@ -1,29 +1,53 @@
 /**
  * AETHEL ENGINE - Job Queue Stop API
- * 
- * Endpoint para pausar a fila de jobs.
- * 
- * POST /api/jobs/stop - Pausa a fila de processamento
+ *
+ * POST /api/jobs/stop => pause all queues
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-server';
+import { queueManager } from '@/lib/queue-system';
 
-// ============================================================================
-// POST - Pausar fila
-// ============================================================================
+function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Unauthorized';
+}
+
+function isAuthNotConfigured(error: unknown): boolean {
+  return error instanceof Error && String((error as any).code || '') === 'AUTH_NOT_CONFIGURED';
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Em produção, isso enviaria um comando para o worker pausar
-    // e não processar novos jobs
-    
+    requireAuth(request);
+
+    const result = await queueManager.setAllQueuesPaused(true);
+    if (!result.available) {
+      return NextResponse.json(
+        {
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+          message: 'Queue backend is not configured.',
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       status: 'stopped',
-      message: 'Fila de jobs pausada com sucesso',
+      message: 'Filas pausadas com sucesso',
+      queues: result.queues,
       stoppedAt: new Date().toISOString(),
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (isAuthNotConfigured(error)) {
+      return NextResponse.json(
+        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+        { status: 503 }
+      );
+    }
     console.error('Erro ao pausar fila:', error);
     return NextResponse.json(
       { error: 'Erro interno ao pausar fila' },

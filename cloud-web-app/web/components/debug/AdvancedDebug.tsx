@@ -170,7 +170,7 @@ export function BreakpointEditor({
             onClick={() => setType(value as BreakpointType)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs transition-colors ${
               type === value
-                ? 'bg-indigo-600/20 text-indigo-400 border-b-2 border-indigo-500'
+                ? 'bg-sky-600/20 text-sky-400 border-b-2 border-sky-500'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
@@ -193,7 +193,7 @@ export function BreakpointEditor({
               value={condition}
               onChange={e => setCondition(e.target.value)}
               placeholder="e.g., i > 10 && user.name === 'test'"
-              className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
             />
           </div>
         )}
@@ -210,7 +210,7 @@ export function BreakpointEditor({
               value={logMessage}
               onChange={e => setLogMessage(e.target.value)}
               placeholder="e.g., Value: {myVar}, Count: {count}"
-              className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
             />
             <div className="mt-1 text-xs text-slate-500">
               Logs to console without pausing
@@ -228,7 +228,7 @@ export function BreakpointEditor({
             value={hitCondition}
             onChange={e => setHitCondition(e.target.value)}
             placeholder="e.g., >= 10, == 5, % 2 == 0"
-            className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+            className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
           />
         </div>
 
@@ -242,7 +242,7 @@ export function BreakpointEditor({
           </button>
           <button
             onClick={handleSave}
-            className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded transition-colors"
+            className="px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-500 text-white rounded transition-colors"
           >
             {breakpoint?.id ? 'Update' : 'Add'}
           </button>
@@ -358,7 +358,7 @@ export function BreakpointsPanel({
                       type="checkbox"
                       checked={ex.enabled}
                       onChange={() => onToggleException?.(ex.id)}
-                      className="rounded border-slate-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500"
+                      className="rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
                     />
                     <span className={ex.enabled ? 'text-white' : 'text-slate-500'}>
                       {ex.label}
@@ -425,7 +425,7 @@ export function BreakpointsPanel({
                       </span>
                     )}
                     {bp.hitCount !== undefined && bp.hitCount > 0 && (
-                      <span className="text-xs text-indigo-400">
+                      <span className="text-xs text-sky-400">
                         ×{bp.hitCount}
                       </span>
                     )}
@@ -559,11 +559,11 @@ export function WatchPanel({
                   setEditValue('');
                 }
               }}
-              className="flex-1 px-1 py-0.5 text-sm bg-slate-800 text-white rounded outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              className="flex-1 px-1 py-0.5 text-sm bg-slate-800 text-white rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
             />
           ) : (
             <>
-              <span className="text-sm text-indigo-400 font-mono">
+              <span className="text-sm text-sky-400 font-mono">
                 {expr.expression}
               </span>
               <span className="text-slate-600">:</span>
@@ -628,7 +628,7 @@ export function WatchPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <Eye className="w-4 h-4 text-indigo-400" />
+          <Eye className="w-4 h-4 text-sky-400" />
           <span className="text-sm font-medium text-white">Watch</span>
         </div>
         {onRefresh && (
@@ -651,7 +651,7 @@ export function WatchPanel({
           onChange={e => setNewExpression(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleAdd()}
           placeholder="Add expression..."
-          className="flex-1 px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+          className="flex-1 px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
           disabled={disabled}
         />
         <button
@@ -749,7 +749,7 @@ export function CallStackPanel({
                   onSelectThread?.(thread.id);
                 }}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-800/50 ${
-                  selectedThreadId === thread.id ? 'bg-indigo-600/10' : ''
+                  selectedThreadId === thread.id ? 'bg-sky-600/10' : ''
                 }`}
               >
                 {expandedThreads.has(thread.id) ? (
@@ -840,7 +840,7 @@ function StackFrameItem({
     <button
       onClick={onSelect}
       className={`w-full flex items-center gap-2 px-4 py-1.5 text-sm text-left hover:bg-slate-800/50 group ${
-        isSelected ? 'bg-indigo-600/20' : ''
+        isSelected ? 'bg-sky-600/20' : ''
       }`}
     >
       {/* Frame number */}

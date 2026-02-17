@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Package,
@@ -113,14 +114,6 @@ export function ExtensionManagerPanel({
     };
   }, []);
   
-  useEffect(() => {
-    if (viewMode === 'marketplace') {
-      searchMarketplace();
-    } else if (viewMode === 'updates') {
-      checkUpdates();
-    }
-  }, [viewMode, searchQuery, selectedCategory]);
-  
   const searchMarketplace = useCallback(async () => {
     setLoading(true);
     try {
@@ -145,6 +138,14 @@ export function ExtensionManagerPanel({
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (viewMode === 'marketplace') {
+      searchMarketplace();
+    } else if (viewMode === 'updates') {
+      checkUpdates();
+    }
+  }, [checkUpdates, searchMarketplace, viewMode, searchQuery, selectedCategory]);
   
   // ============================================================================
   // ACTIONS
@@ -469,7 +470,14 @@ function InstalledExtensionCard({
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 bg-[#45475a] rounded-lg flex items-center justify-center text-2xl">
             {extension.manifest.icon ? (
-              <img src={extension.manifest.icon} alt="" className="w-full h-full rounded-lg" />
+              <Image
+                src={extension.manifest.icon}
+                alt=""
+                width={48}
+                height={48}
+                unoptimized
+                className="w-full h-full rounded-lg"
+              />
             ) : (
               '📦'
             )}
@@ -506,7 +514,14 @@ function InstalledExtensionCard({
     >
       <div className="w-10 h-10 bg-[#45475a] rounded-lg flex items-center justify-center">
         {extension.manifest.icon ? (
-          <img src={extension.manifest.icon} alt="" className="w-full h-full rounded-lg" />
+          <Image
+            src={extension.manifest.icon}
+            alt=""
+            width={40}
+            height={40}
+            unoptimized
+            className="w-full h-full rounded-lg"
+          />
         ) : (
           '📦'
         )}
@@ -565,7 +580,14 @@ function MarketplaceExtensionCard({
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 bg-[#45475a] rounded-lg flex items-center justify-center">
             {extension.icon ? (
-              <img src={extension.icon} alt="" className="w-full h-full rounded-lg" />
+              <Image
+                src={extension.icon}
+                alt=""
+                width={48}
+                height={48}
+                unoptimized
+                className="w-full h-full rounded-lg"
+              />
             ) : (
               '📦'
             )}
@@ -610,7 +632,14 @@ function MarketplaceExtensionCard({
     <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#313244]/50 transition-colors">
       <div className="w-10 h-10 bg-[#45475a] rounded-lg flex items-center justify-center">
         {extension.icon ? (
-          <img src={extension.icon} alt="" className="w-full h-full rounded-lg" />
+          <Image
+            src={extension.icon}
+            alt=""
+            width={40}
+            height={40}
+            unoptimized
+            className="w-full h-full rounded-lg"
+          />
         ) : (
           '📦'
         )}

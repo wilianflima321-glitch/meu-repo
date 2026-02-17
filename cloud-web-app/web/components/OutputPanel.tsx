@@ -84,7 +84,7 @@ export default function OutputPanel() {
             placeholder="Filter..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="px-3 py-1 bg-slate-800 text-white text-sm rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-3 py-1 bg-slate-800 text-white text-sm rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
           <button
             onClick={clearMessages}

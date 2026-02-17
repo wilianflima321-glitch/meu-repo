@@ -831,8 +831,9 @@ export function StreamingProvider({
   }, [scene]);
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -945,7 +946,7 @@ export function useLevelState(levelId: string) {
   return { state, progress };
 }
 
-export default {
+const __defaultExport = {
   LevelStreamingManager,
   LevelLoader,
   AssetCache,
@@ -953,3 +954,5 @@ export default {
   useLevelStreaming,
   useLevelState,
 };
+
+export default __defaultExport;

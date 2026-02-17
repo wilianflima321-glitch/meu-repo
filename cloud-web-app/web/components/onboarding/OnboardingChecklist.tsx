@@ -512,7 +512,7 @@ function LevelUpNotification({ level, onClose }: { level: number; onClose: () =>
       <motion.div
         initial={{ y: 50 }}
         animate={{ y: 0 }}
-        className="bg-gradient-to-br from-violet-900 to-fuchsia-900 
+        className="bg-gradient-to-br from-blue-900 to-cyan-900 
                  p-8 rounded-2xl text-center border border-violet-500/30"
         onClick={e => e.stopPropagation()}
       >
@@ -581,7 +581,7 @@ export function OnboardingChecklist({
       if (xp >= LEVEL_THRESHOLDS[i]) return i + 1;
     }
     return 1;
-  }, [progress?.totalXP]);
+  }, [progress]);
 
   // Filter tasks
   const filteredTasks = useMemo(() => {

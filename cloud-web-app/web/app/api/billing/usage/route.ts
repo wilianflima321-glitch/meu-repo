@@ -9,6 +9,8 @@ import { prisma } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { getBuildMinutesUsed } from '@/lib/build-minutes';
 
+export const dynamic = 'force-dynamic';
+
 interface UsageHistoryItem {
   date: string;
   aiTokens: number;

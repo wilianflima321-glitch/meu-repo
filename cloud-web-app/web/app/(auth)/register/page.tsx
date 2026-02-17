@@ -88,16 +88,16 @@ export default function RegisterPage() {
       {/* === Left Panel - Branding === */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-950 via-slate-950 to-black" />
-        <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-fuchsia-600/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-slate-950 to-black" />
+        <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-sky-600/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center p-12 xl:p-20">
           {/* Logo */}
           <Link href="/" className="mb-12 inline-flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-500/30 group-hover:shadow-violet-500/50 transition-shadow">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-shadow">
               <span className="text-white font-bold text-xl">A</span>
             </div>
             <span className="text-2xl font-bold text-white">Aethel Engine</span>
@@ -106,7 +106,7 @@ export default function RegisterPage() {
           {/* Headline */}
           <h1 className="text-4xl xl:text-5xl font-bold text-white mb-6 leading-tight">
             Transforme suas
-            <span className="block bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-400 bg-clip-text text-transparent">
               ideias em realidade
             </span>
           </h1>
@@ -119,7 +119,7 @@ export default function RegisterPage() {
           <div className="space-y-5">
             {features.map((feature, i) => (
               <div key={i} className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
                   <CheckIcon />
                 </div>
                 <div>
@@ -154,7 +154,7 @@ export default function RegisterPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center">
                 <span className="text-white font-bold">A</span>
               </div>
               <span className="text-xl font-bold text-white">Aethel</span>
@@ -217,7 +217,7 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Como quer ser chamado"
-                className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
               />
             </div>
 
@@ -234,7 +234,7 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
               />
             </div>
 
@@ -252,7 +252,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Mínimo 8 caracteres"
-                  className="w-full h-12 px-4 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+                  className="w-full h-12 px-4 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                 />
                 <button
                   type="button"
@@ -265,9 +265,9 @@ export default function RegisterPage() {
               {password && (
                 <div className="mt-2 flex items-center gap-2">
                   <div className="flex-1 flex gap-1">
-                    <div className={`h-1 flex-1 rounded-full ${passwordStrength !== 'weak' ? 'bg-gradient-to-r from-violet-500 to-violet-400' : 'bg-red-500'}`} />
-                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'medium' || passwordStrength === 'strong' ? 'bg-gradient-to-r from-violet-400 to-fuchsia-400' : 'bg-slate-700'}`} />
-                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'strong' ? 'bg-gradient-to-r from-fuchsia-400 to-emerald-400' : 'bg-slate-700'}`} />
+                    <div className={`h-1 flex-1 rounded-full ${passwordStrength !== 'weak' ? 'bg-gradient-to-r from-blue-500 to-blue-400' : 'bg-red-500'}`} />
+                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'medium' || passwordStrength === 'strong' ? 'bg-gradient-to-r from-blue-400 to-sky-400' : 'bg-slate-700'}`} />
+                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'strong' ? 'bg-gradient-to-r from-sky-400 to-emerald-400' : 'bg-slate-700'}`} />
                   </div>
                   <span className={`text-xs ${strengthColor}`}>{strengthLabel}</span>
                 </div>
@@ -290,7 +290,7 @@ export default function RegisterPage() {
                 className={`w-full h-12 px-4 bg-white/5 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
                   !passwordsMatch
                     ? 'border-red-500/50 focus:ring-red-500/50'
-                    : 'border-white/10 focus:ring-violet-500/50 focus:border-violet-500/50'
+                    : 'border-white/10 focus:ring-blue-500/50 focus:border-blue-500/50'
                 }`}
               />
               {!passwordsMatch && (
@@ -305,15 +305,15 @@ export default function RegisterPage() {
                 type="checkbox"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-violet-500 focus:ring-violet-500/50 focus:ring-offset-0"
+                className="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500/50 focus:ring-offset-0"
               />
               <label htmlFor="terms" className="text-sm text-slate-400">
                 Concordo com os{' '}
-                <Link href="/terms" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">
+                <Link href="/terms" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
                   Termos de Serviço
                 </Link>{' '}
                 e{' '}
-                <Link href="/privacy" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">
+                <Link href="/privacy" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
                   Política de Privacidade
                 </Link>
               </label>
@@ -330,7 +330,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading || !passwordsMatch || password.length < 8 || !agreeTerms}
-              className="relative w-full h-12 px-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
+              className="relative w-full h-12 px-6 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group"
             >
               <span className="relative z-10">{isLoading ? 'Criando conta...' : 'Criar conta gratuita'}</span>
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -340,7 +340,7 @@ export default function RegisterPage() {
           {/* Login Link */}
           <p className="mt-8 text-center text-slate-400">
             Já tem uma conta?{' '}
-            <Link href="/login" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
+            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
               Entrar
             </Link>
           </p>

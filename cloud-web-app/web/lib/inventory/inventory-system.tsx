@@ -1176,7 +1176,7 @@ export function useEquipment() {
   };
 }
 
-export default {
+const __defaultExport = {
   ItemRegistry,
   Inventory,
   EquipmentManager,
@@ -1186,3 +1186,5 @@ export default {
   useInventory,
   useEquipment,
 };
+
+export default __defaultExport;

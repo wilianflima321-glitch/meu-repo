@@ -690,11 +690,12 @@ export class ReplayPlayer extends EventEmitter {
     
     // For exact keyframes, return directly
     if (keyframeIndex === frame) {
-      return keyframeData.snapshot;
+      return this.cloneSnapshot(keyframeData.snapshot);
     }
-    
-    // TODO: Apply events/inputs between keyframe and target frame
-    return keyframeData.snapshot;
+
+    const state = this.cloneSnapshot(keyframeData.snapshot);
+    this.applyFrameDelta(state, keyframeIndex + 1, frame);
+    return state;
   }
   
   getInputsAtFrame(frame: number): InputState[] {
@@ -744,6 +745,78 @@ export class ReplayPlayer extends EventEmitter {
       (nextFrame.timestamp - prevFrame.timestamp);
     
     return this.interpolateSnapshots(prevFrame.snapshot, nextFrame.snapshot, alpha);
+  }
+
+  private cloneSnapshot(snapshot: StateSnapshot): StateSnapshot {
+    const entities = snapshot.entities.map((entity) => ({
+      ...entity,
+      components: new Map(entity.components),
+      children: entity.children ? [...entity.children] : undefined,
+    }));
+
+    return {
+      entities,
+      globals: new Map(snapshot.globals),
+      random: snapshot.random,
+    };
+  }
+
+  private applyFrameDelta(state: StateSnapshot, startFrame: number, endFrame: number): void {
+    if (!this.recording) return;
+
+    const boundedStart = Math.max(0, startFrame);
+    const boundedEnd = Math.min(endFrame, this.recording.frames.length - 1);
+    if (boundedStart > boundedEnd) return;
+
+    let inputCount = 0;
+    let eventCount = 0;
+
+    for (let frameIndex = boundedStart; frameIndex <= boundedEnd; frameIndex++) {
+      const frameData = this.recording.frames[frameIndex];
+      if (!frameData) continue;
+
+      inputCount += frameData.inputs.length;
+      eventCount += frameData.events.length;
+
+      for (const event of frameData.events) {
+        this.applyReplayEvent(state, event);
+      }
+    }
+
+    state.globals.set('__replay.resolvedFromKeyframe', boundedStart - 1);
+    state.globals.set('__replay.resolvedToFrame', boundedEnd);
+    state.globals.set('__replay.appliedInputCount', inputCount);
+    state.globals.set('__replay.appliedEventCount', eventCount);
+  }
+
+  private applyReplayEvent(state: StateSnapshot, event: ReplayEvent): void {
+    if (!event || typeof event.type !== 'string') return;
+
+    if (event.type === 'state.setGlobal') {
+      const data = event.data as { key?: string; value?: unknown } | null;
+      if (data?.key) {
+        state.globals.set(data.key, data.value);
+      }
+      return;
+    }
+
+    if (event.type === 'entity.patch') {
+      const data = event.data as {
+        id?: string;
+        component?: string;
+        value?: unknown;
+      } | null;
+      if (!data?.id || !data.component) return;
+
+      const entity = state.entities.find((candidate) => candidate.id === data.id);
+      if (!entity) return;
+      entity.components.set(data.component, data.value);
+      return;
+    }
+
+    const replayLog = (state.globals.get('__replay.unhandledEvents') as string[]) || [];
+    replayLog.push(event.type);
+    state.globals.set('__replay.unhandledEvents', replayLog.slice(-25));
   }
   
   private interpolateSnapshots(a: StateSnapshot, b: StateSnapshot, alpha: number): StateSnapshot {
@@ -1073,7 +1146,7 @@ export function ReplayProvider({
       recorder: manager.getRecorder(),
       player: manager.getPlayer(),
     };
-  }, []);
+  }, [config]);
   
   useEffect(() => {
     return () => {
@@ -1179,7 +1252,7 @@ export function useReplayRecordings() {
   return recordings;
 }
 
-export default {
+const __defaultExport = {
   ReplayRecorder,
   ReplayPlayer,
   ReplayManager,
@@ -1191,3 +1264,5 @@ export default {
   useReplayPlayer,
   useReplayRecordings,
 };
+
+export default __defaultExport;

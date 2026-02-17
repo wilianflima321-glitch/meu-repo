@@ -5,6 +5,10 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch: {}
 
+concurrency:
+  group: visual-regression-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   issues: write
@@ -12,6 +16,8 @@ permissions:
 jobs:
   compare:
     runs-on: ubuntu-latest
+    env:
+      BASE_URL: http://localhost:3000
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,38 +27,79 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloud-web-app/web/package-lock.json
 
-      - name: Install deps
+      - name: Install root deps
         run: |
-          # Use npm ci when a lockfile exists for reproducible installs,
-          # otherwise fall back to npm install in this repo (no lockfile).
           if [ -f package-lock.json ]; then
             npm ci
           else
             npm install --no-audit --no-fund
           fi
 
+      - name: Install web deps
+        run: |
+          npm --prefix cloud-web-app/web ci
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
         continue-on-error: true
+
+      - name: Interface gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:interface-gate
+
+      - name: Canonical component gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:canonical-components
+
+      - name: Route contracts gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:route-contracts
+
+      - name: Anti fake-success gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:no-fake-success
+
+      - name: Encoding sweep gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:mojibake
+
+      - name: Start server (web app with static fallback)
+        run: |
+          check_ready() {
+            for i in $(seq 1 45); do
+              if curl -fsS "$BASE_URL" >/dev/null; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+
+          npm run portal:dev > /tmp/portal-dev.log 2>&1 &
+
+          if check_ready; then
+            echo "Web app is online at $BASE_URL"
+            exit 0
+          fi
+
+          echo "Web app did not start in time; switching to static test site."
+          node tools/ide/ui-audit/static_server.js > /tmp/static-server.log 2>&1 &
+          if ! check_ready; then
+            echo "Static fallback did not become ready."
+            echo "--- portal-dev.log (tail) ---"
+            tail -n 80 /tmp/portal-dev.log || true
+            echo "--- static-server.log (tail) ---"
+            tail -n 80 /tmp/static-server.log || true
+            exit 1
+          fi
 
       - name: Fetch visual-baseline branch
         run: |
           # Attempt to fetch the baseline branch if it exists; don't fail if it doesn't.
           git fetch origin visual-baseline:visual-baseline || echo 'no baseline branch'
 
-      - name: (fallback) Start static server for capture
-        if: always()
-        run: |
-          # In case the project does not expose a live dev server on 3000 in CI,
-          # serve the bundled test_site so capture_baseline can fetch pages.
-          python3 -m http.server 3000 --directory tools/ide/ui-audit/test_site > /dev/null 2>&1 &
-          echo "Static test site started"
-
       - name: Capture current screenshots
         run: |
-          node tools/ide/visual-regression/capture_baseline.js --baseUrl http://localhost:3000 --out tools/ide/visual-regression/output/current || true
+          node tools/ide/visual-regression/capture_baseline.js --baseUrl "$BASE_URL" --out tools/ide/visual-regression/output/current || true
 
       - name: Restore baseline (if present)
         run: |
@@ -79,17 +126,22 @@ jobs:
         run: |
           # Only run compare if baseline directory exists; otherwise skip with notice.
           if [ -d "tools/ide/visual-regression/baseline" ]; then
-            node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 100 --total 500 || echo 'compare exit code indicates diffs'
+            node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 50 --total 100 || echo 'compare exit code indicates diffs'
           else
             echo 'No baseline present; skipping compare step'
           fi
 
       - name: Upload diffs
+        if: always()
         uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
           name: visual-diffs
-          path: tools/ide/visual-regression/output/diffs
+          path: |
+            tools/ide/visual-regression/output/current
+            tools/ide/visual-regression/output/diffs
+            /tmp/portal-dev.log
+            /tmp/static-server.log
 
       - name: Check report and create issue if regressions
         if: always()
@@ -102,7 +154,7 @@ jobs:
             if (!fs.existsSync(reportPath)) { core.notice('No compare report'); return }
             const report = JSON.parse(fs.readFileSync(reportPath,'utf8'));
             const total = report.totalDiff || 0;
-            if (total > 500) {
+            if (total > 100) {
               const body = `Visual regression detected: total differing pixels = ${total}. See artifacts attached to the workflow run.`;
               try {
                 await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: 'Visual regression detected', body });

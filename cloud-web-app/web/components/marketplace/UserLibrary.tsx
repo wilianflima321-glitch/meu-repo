@@ -11,6 +11,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -162,9 +163,12 @@ function AssetCard({
                     >
                         {/* Thumbnail */}
                         <div className="w-16 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                            <img 
-                                src={asset.thumbnailUrl} 
+                            <Image
+                                src={asset.thumbnailUrl}
                                 alt={asset.name}
+                                width={64}
+                                height={48}
+                                unoptimized
                                 className="w-full h-full object-cover"
                             />
                         </div>
@@ -266,9 +270,11 @@ function AssetCard({
                 >
                     {/* Thumbnail */}
                     <div className="relative aspect-video overflow-hidden bg-muted">
-                        <img 
-                            src={asset.thumbnailUrl} 
+                        <Image
+                            src={asset.thumbnailUrl}
                             alt={asset.name}
+                            fill
+                            unoptimized
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                         />
                         
@@ -348,11 +354,13 @@ function CollectionCard({
             onClick={onClick}
         >
             {/* Cover */}
-            <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                 {collection.coverImage ? (
-                    <img 
-                        src={collection.coverImage} 
+                    <Image
+                        src={collection.coverImage}
                         alt={collection.name}
+                        fill
+                        unoptimized
                         className="w-full h-full object-cover"
                     />
                 ) : (

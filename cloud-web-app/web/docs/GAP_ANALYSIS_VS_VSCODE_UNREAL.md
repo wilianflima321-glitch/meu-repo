@@ -22,7 +22,7 @@
 
 | Feature | Arquivo | Notas |
 |---------|---------|-------|
-| **Command Palette (Ctrl+Shift+P)** | [CommandPalette.tsx](../components/CommandPalette.tsx) | 396 linhas, comandos categorizados, keybindings |
+| **Command Palette (Ctrl+Shift+P)** | [components/ide/CommandPalette.tsx](../components/ide/CommandPalette.tsx) | Implementação canônica, comandos categorizados, keybindings |
 | **Quick Open (Ctrl+P)** | [QuickOpen.tsx](../components/QuickOpen.tsx) | 285 linhas, fuzzy search, API integrada |
 | **IntelliSense/Autocomplete** | [lsp-client.ts](../lib/lsp/lsp-client.ts) | LSP completo, CompletionItem, SignatureHelp |
 | **Multi-cursor editing** | [MonacoEditorPro.tsx](../components/editor/MonacoEditorPro.tsx) | Monaco nativo suporta |

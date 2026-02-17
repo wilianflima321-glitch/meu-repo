@@ -116,7 +116,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-white">Notifications</h2>
             {unreadCount > 0 && (
-              <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded-full">
+              <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
                 {unreadCount}
               </span>
             )}
@@ -137,7 +137,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
               onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded text-xs transition-colors ${
                 filter === f
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
@@ -213,7 +213,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                       {!notification.read && (
                         <button
                           onClick={() => markAsRead(notification.id)}
-                          className="text-xs text-purple-400 hover:text-purple-300"
+                          className="text-xs text-blue-400 hover:text-blue-300"
                         >
                           Mark as read
                         </button>
@@ -229,7 +229,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                               action.action();
                               markAsRead(notification.id);
                             }}
-                            className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors"
+                            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors"
                           >
                             {action.label}
                           </button>

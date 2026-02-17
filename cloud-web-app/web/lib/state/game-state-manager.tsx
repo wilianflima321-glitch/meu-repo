@@ -1048,8 +1048,9 @@ export function GameStateProvider({
   const managerRef = useRef<GameStateManager>(new GameStateManager(options));
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1146,7 +1147,7 @@ export function useGameState() {
   };
 }
 
-export default {
+const __defaultExport = {
   GameStateManager,
   GameStateProvider,
   useGameState,
@@ -1155,3 +1156,5 @@ export default {
   Compressor,
   Checksum,
 };
+
+export default __defaultExport;

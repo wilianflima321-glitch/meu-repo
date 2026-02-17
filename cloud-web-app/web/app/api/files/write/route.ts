@@ -1,118 +1,71 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/auth-server';
-import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
+import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import {
+  getScopedProjectId,
+  resolveScopedWorkspacePath,
+  toVirtualWorkspacePath,
+} from '@/lib/server/workspace-scope'
+import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
 
-/**
- * POST /api/files/write
- * 
- * Escreve conteúdo em um arquivo (usado pela IA)
- */
-export async function POST(req: NextRequest) {
+export const dynamic = 'force-dynamic'
+
+export async function POST(request: NextRequest) {
   try {
-    const user = requireAuth(req);
-    const { projectId, path, content, createIfNotExists = true } = await req.json();
+    const user = requireAuth(request)
+    await requireEntitlementsForUser(user.userId)
 
-    if (!projectId || !path) {
-      return NextResponse.json(
-        { error: 'projectId e path são obrigatórios' },
-        { status: 400 }
-      );
+    const body = await request.json()
+    const path = (body?.path || '').trim()
+    const content = body?.content
+    const createDirectories = body?.createIfNotExists !== false
+    const projectId = getScopedProjectId(request, body)
+
+    if (!path) {
+      return NextResponse.json({ error: 'path is required' }, { status: 400 })
     }
-
     if (content === undefined) {
-      return NextResponse.json(
-        { error: 'content é obrigatório' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'content is required' }, { status: 400 })
     }
 
-    // Verificar propriedade do projeto
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, userId: user.userId },
-    });
+    const runtime = getFileSystemRuntime()
+    const { absolutePath, root } = resolveScopedWorkspacePath({
+      userId: user.userId,
+      projectId,
+      requestedPath: path,
+    })
+    await runtime.writeFile(absolutePath, String(content), {
+      createDirectories,
+      atomic: true,
+    })
 
-    if (!project) {
-      return NextResponse.json(
-        { error: 'Projeto não encontrado' },
-        { status: 404 }
-      );
-    }
+    const info = await runtime.getFileInfo(absolutePath)
 
-    // Detectar linguagem
-    const extension = path.split('.').pop()?.toLowerCase();
-    const languageMap: Record<string, string> = {
-      'ts': 'typescript',
-      'tsx': 'typescriptreact',
-      'js': 'javascript',
-      'jsx': 'javascriptreact',
-      'py': 'python',
-      'json': 'json',
-      'html': 'html',
-      'css': 'css',
-      'md': 'markdown',
-    };
-    const language = languageMap[extension || ''] || null;
+    const telemetryHeaders = trackCompatibilityRouteHit({
+      request,
+      route: '/api/files/write',
+      replacement: '/api/files/fs?action=write',
+      status: 'compatibility-wrapper',
+    })
 
-    if (createIfNotExists) {
-      // Upsert - cria ou atualiza
-      const file = await prisma.file.upsert({
-        where: {
-          projectId_path: {
-            projectId,
-            path,
-          },
-        },
-        update: {
-          content,
-        },
-        create: {
-          projectId,
-          path,
-          content,
-          language,
-        },
-      });
-
-      return NextResponse.json({
+    return NextResponse.json(
+      {
         success: true,
-        file,
-        created: !file.updatedAt || file.createdAt === file.updatedAt,
-        message: 'Arquivo salvo com sucesso',
-      });
-    } else {
-      // Apenas atualiza se existir
-      const file = await prisma.file.update({
-        where: {
-          projectId_path: {
-            projectId,
-            path,
-          },
-        },
-        data: {
-          content,
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        file,
-        message: 'Arquivo atualizado com sucesso',
-      });
-    }
+        path: toVirtualWorkspacePath(info.path, root),
+        projectId,
+        modified: info.modified,
+        runtime: 'filesystem-runtime',
+        authority: 'canonical',
+        compatibilityRoute: '/api/files/write',
+        canonicalEndpoint: '/api/files/fs',
+      },
+      { headers: telemetryHeaders }
+    )
   } catch (error) {
-    console.error('[files/write] Error:', error);
-    
-    // Verificar se é erro de "not found"
-    if ((error as any)?.code === 'P2025') {
-      return NextResponse.json(
-        { error: 'Arquivo não encontrado' },
-        { status: 404 }
-      );
-    }
-    
-    const mapped = apiErrorToResponse(error);
-    if (mapped) return mapped;
-    return apiInternalError();
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
   }
 }

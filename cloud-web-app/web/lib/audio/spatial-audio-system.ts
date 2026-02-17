@@ -996,8 +996,10 @@ export function useAudioSource(
   return sourceRef.current;
 }
 
-export default {
+const __defaultExport = {
   SpatialAudioManager,
   AudioSource,
   REVERB_PRESETS,
 };
+
+export default __defaultExport;

@@ -1019,9 +1019,11 @@ export function useTerrainManager() {
   };
 }
 
-export default {
+const __defaultExport = {
   HeightMap,
   TerrainMesh,
   TerrainManager,
   PerlinNoise,
 };
+
+export default __defaultExport;

@@ -56,7 +56,7 @@ interface ProjectsTabProps {
 const typeIcons: Record<string, React.ReactNode> = {
   code: <Code className="w-5 h-5 text-blue-400" />,
   web: <Globe className="w-5 h-5 text-emerald-400" />,
-  unreal: <Gamepad2 className="w-5 h-5 text-purple-400" />,
+  unreal: <Gamepad2 className="w-5 h-5 text-blue-400" />,
   api: <FolderKanban className="w-5 h-5 text-amber-400" />,
 }
 
@@ -112,7 +112,7 @@ function ProjectCard({
               {typeIcons[project.type]}
             </div>
             <div>
-              <h3 className="font-semibold text-white group-hover:text-indigo-400 transition-colors">
+              <h3 className="font-semibold text-white group-hover:text-sky-400 transition-colors">
                 {project.name}
               </h3>
               <p className="text-sm text-slate-500">{typeLabels[project.type]}</p>
@@ -235,7 +235,7 @@ export function ProjectsTab({
           <select
             value={filterType || ''}
             onChange={(e) => setFilterType(e.target.value || null)}
-            className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+            className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-sky-500"
           >
             <option value="">Todos os tipos</option>
             <option value="code">Código</option>
@@ -246,7 +246,7 @@ export function ProjectsTab({
           <select
             value={filterStatus || ''}
             onChange={(e) => setFilterStatus(e.target.value || null)}
-            className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+            className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-sky-500"
           >
             <option value="">Todos os status</option>
             <option value="active">Ativo</option>

@@ -972,7 +972,7 @@ export function DebugProvider({
     console: new DebugConsole(config),
     perfMonitor: new PerformanceMonitor(),
     statsOverlay: new StatsOverlay(),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     value.statsOverlay.create();
@@ -1016,7 +1016,7 @@ export function useConsoleLogs(options?: { level?: LogLevel; limit?: number }) {
       console.off('log', update);
       console.off('cleared', update);
     };
-  }, [console, options?.level, options?.limit]);
+  }, [console, options]);
   
   return logs;
 }
@@ -1037,7 +1037,8 @@ export function useConsoleCommands() {
 
 export function usePerformanceMonitor() {
   const context = useContext(DebugContext);
-  const monitor = context?.perfMonitor || new PerformanceMonitor();
+  const fallbackMonitor = useMemo(() => new PerformanceMonitor(), []);
+  const monitor = context?.perfMonitor ?? fallbackMonitor;
   const [metrics, setMetrics] = useState<PerformanceMetrics>(monitor.getMetrics());
   
   useEffect(() => {
@@ -1061,7 +1062,7 @@ export function useWatchVariable(name: string, getter: () => unknown, deps: unkn
     return () => {
       console.unwatch(name);
     };
-  }, [console, name, ...deps]);
+  }, [console, name, getter, deps]);
 }
 
 // ============================================================================
@@ -1090,7 +1091,7 @@ export function getLogLevelColor(level: LogLevel): string {
   return colors[level];
 }
 
-export default {
+const __defaultExport = {
   DebugConsole,
   PerformanceMonitor,
   StatsOverlay,
@@ -1103,3 +1104,5 @@ export default {
   formatLogEntry,
   getLogLevelColor,
 };
+
+export default __defaultExport;

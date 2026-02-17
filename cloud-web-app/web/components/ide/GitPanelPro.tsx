@@ -73,7 +73,7 @@ function getStatusIcon(status: GitFile['status']) {
     case 'deleted':
       return { icon: FileX, color: 'text-red-400', label: 'D' }
     case 'renamed':
-      return { icon: FileCode, color: 'text-purple-400', label: 'R' }
+      return { icon: FileCode, color: 'text-blue-400', label: 'R' }
     case 'untracked':
       return { icon: FilePlus, color: 'text-slate-400', label: 'U' }
     case 'conflicted':
@@ -433,7 +433,7 @@ export default function GitPanelPro({
   if (loading) {
     return (
       <div className={`h-full flex items-center justify-center ${className}`}>
-        <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-sky-400" />
       </div>
     )
   }
@@ -446,7 +446,7 @@ export default function GitPanelPro({
         <p className="text-sm text-red-400">{error}</p>
         <button
           onClick={fetchStatus}
-          className="text-sm text-indigo-400 hover:underline"
+          className="text-sm text-sky-400 hover:underline"
         >
           Retry
         </button>
@@ -462,7 +462,7 @@ export default function GitPanelPro({
           onClick={() => setShowBranches(!showBranches)}
           className="flex items-center gap-2 text-sm hover:text-white transition-colors"
         >
-          <GitBranch className="w-4 h-4 text-indigo-400" />
+          <GitBranch className="w-4 h-4 text-sky-400" />
           <span>{currentBranch}</span>
           {ahead > 0 && (
             <span className="text-xs text-emerald-400">↑{ahead}</span>
@@ -495,7 +495,7 @@ export default function GitPanelPro({
           </button>
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className={`p-1 rounded hover:bg-slate-800 ${showHistory ? 'text-indigo-400' : 'text-slate-400'}`}
+            className={`p-1 rounded hover:bg-slate-800 ${showHistory ? 'text-sky-400' : 'text-slate-400'}`}
             title="History"
           >
             <History className="w-4 h-4" />
@@ -516,7 +516,7 @@ export default function GitPanelPro({
                 onClick={() => handleCheckout(branch.name)}
                 className={`
                   w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm
-                  ${branch.current ? 'bg-indigo-500/20 text-indigo-300' : 'hover:bg-slate-800 text-slate-300'}
+                  ${branch.current ? 'bg-sky-500/20 text-sky-300' : 'hover:bg-slate-800 text-slate-300'}
                 `}
               >
                 <GitBranch className="w-4 h-4" />
@@ -587,7 +587,7 @@ export default function GitPanelPro({
           value={commitMessage}
           onChange={(e) => setCommitMessage(e.target.value)}
           placeholder="Commit message..."
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
+          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 resize-none"
           rows={3}
         />
         <div className="flex items-center justify-between mt-2">
@@ -600,7 +600,7 @@ export default function GitPanelPro({
             className={`
               px-3 py-1.5 rounded text-sm font-medium transition-colors
               ${commitMessage.trim() && stagedFiles.length > 0
-                ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                ? 'bg-sky-600 hover:bg-sky-500 text-white'
                 : 'bg-slate-800 text-slate-500 cursor-not-allowed'
               }
             `}

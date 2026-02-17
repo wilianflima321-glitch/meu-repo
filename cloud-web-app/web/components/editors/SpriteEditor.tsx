@@ -213,7 +213,7 @@ function ToolButton({ icon, active, onClick, tooltip, shortcut }: ToolButtonProp
       onClick={onClick}
       className={`p-2 rounded transition-colors ${
         active 
-          ? 'bg-indigo-600 text-white' 
+          ? 'bg-sky-600 text-white' 
           : 'text-slate-400 hover:bg-slate-700 hover:text-white'
       }`}
       title={`${tooltip}${shortcut ? ` (${shortcut})` : ''}`}
@@ -302,7 +302,7 @@ function LayerPanel({
           <div
             key={layer.id}
             className={`flex items-center gap-2 px-2 py-1.5 border-b border-slate-700 cursor-pointer ${
-              layer.id === currentLayerId ? 'bg-indigo-600/20' : 'hover:bg-slate-700/50'
+              layer.id === currentLayerId ? 'bg-sky-600/20' : 'hover:bg-slate-700/50'
             }`}
             onClick={() => onSelectLayer(layer.id)}
           >
@@ -438,7 +438,7 @@ function Timeline({
             key={frame.id}
             className={`relative flex-shrink-0 w-16 h-16 rounded border-2 cursor-pointer ${
               idx === currentFrameIndex 
-                ? 'border-indigo-500' 
+                ? 'border-sky-500' 
                 : 'border-slate-600 hover:border-slate-500'
             }`}
             onClick={() => onSelectFrame(idx)}
@@ -620,7 +620,7 @@ export default function SpriteEditor() {
       })
       return { ...prev, animations: newAnimations }
     })
-  }, [state.width, state.height, state.currentAnimationId, state.currentFrameIndex, state.currentLayerId, currentLayer.locked])
+  }, [state.width, state.height, currentLayer.locked])
   
   // Draw line (Bresenham's algorithm)
   const drawLine = useCallback((x0: number, y0: number, x1: number, y1: number, color: Color) => {

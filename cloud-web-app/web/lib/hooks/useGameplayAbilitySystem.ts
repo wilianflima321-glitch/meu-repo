@@ -168,6 +168,12 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
 
   // Tracking de valores anteriores para callbacks
   const prevAttributesRef = useRef<Map<string, number>>(new Map());
+  const eventsRef = useRef(events);
+  const syncStateRef = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
 
   // ============================================================================
   // INICIALIZAÇÃO
@@ -183,13 +189,13 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
     systemRef.current = createAbilitySystemComponent('player', attrs, initialAbilities);
 
     // Sincronizar estado inicial
-    syncState();
+    syncStateRef.current();
 
     return () => {
       // Cleanup
       systemRef.current = null;
     };
-  }, []);
+  }, [customAttributes, initialAbilities, useStandardAttributes]);
 
   // ============================================================================
   // GAME LOOP
@@ -210,7 +216,7 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
         systemRef.current.tick(deltaTime);
 
         // Sincronizar estado com React
-        syncState();
+        syncStateRef.current();
 
         // Atualizar stats
         setStats(prev => ({
@@ -249,7 +255,7 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
       // Check for changes
       const prevValue = prevAttributesRef.current.get(name);
       if (prevValue !== undefined && prevValue !== current) {
-        events.onAttributeChanged?.(name, prevValue, current);
+        eventsRef.current.onAttributeChanged?.(name, prevValue, current);
       }
       prevAttributesRef.current.set(name, current);
 
@@ -329,7 +335,11 @@ export function useGameplayAbilitySystem(options: UseGASOptions = {}): UseGASRet
       activeEffects: newEffects.length,
       totalTags: currentTags.length,
     }));
-  }, [events]);
+  }, []);
+
+  useEffect(() => {
+    syncStateRef.current = syncState;
+  }, [syncState]);
 
   // ============================================================================
   // AÇÕES DE ATRIBUTOS

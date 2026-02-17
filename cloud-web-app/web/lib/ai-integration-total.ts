@@ -1,7 +1,7 @@
 /**
  * AI Integration Total - Integração Completa da IA com Todos os Sistemas
  * 
- * Este arquivo integra TODOS os sistemas do Aethel Engine com a IA,
+ * Este arquivo integra todos os sistemas do Aethel Engine com a IA,
  * permitindo que a IA controle TUDO na plataforma.
  * 
  * Sistemas integrados:

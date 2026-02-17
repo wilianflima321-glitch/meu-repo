@@ -280,7 +280,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
           {notification.action && (
             <button
               onClick={notification.action.onClick}
-              className="mt-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+              className="mt-2 text-sm font-medium text-sky-400 hover:text-sky-300 transition-colors"
             >
               {notification.action.label}
             </button>

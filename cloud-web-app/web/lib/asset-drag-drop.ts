@@ -177,8 +177,7 @@ export function useAssetDrop(
         // Tenta ler arquivos nativos
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-          // TODO: Implementar importação de arquivos nativos
-          onError?.('Native file drop not yet implemented. Use Content Browser to import files.');
+          onError?.('NATIVE_FILE_DROP_GATED: use Content Browser upload before dragging into scene.');
           return;
         }
         
@@ -199,9 +198,17 @@ export function useAssetDrop(
       let worldPos = options?.worldPosition || { x: 0, y: 0, z: 0 };
       
       if (!options?.worldPosition && options?.screenPosition) {
-        // TODO: Converter coordenadas de tela para mundo usando raycasting
-        // Por enquanto usa uma posição padrão
-        worldPos = { x: 0, y: 0, z: 0 };
+        const target = e.currentTarget as HTMLElement | null;
+        if (target) {
+          const rect = target.getBoundingClientRect();
+          const normalizedX = (options.screenPosition.x - rect.left) / Math.max(rect.width, 1);
+          const normalizedY = (options.screenPosition.y - rect.top) / Math.max(rect.height, 1);
+          worldPos = {
+            x: (normalizedX - 0.5) * 20,
+            y: 0,
+            z: (normalizedY - 0.5) * -20,
+          };
+        }
       }
 
       // Cria o objeto de cena

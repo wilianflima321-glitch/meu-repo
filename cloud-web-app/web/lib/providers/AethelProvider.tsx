@@ -299,8 +299,8 @@ export function AethelProvider({ children }: AethelProviderProps) {
   const [state, dispatch] = useReducer(aethelReducer, initialState);
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Fetch user session
-  const { data: userData } = useSWR('/api/auth/session', fetcher, {
+  // Fetch authenticated user (JWT-only, no server sessions)
+  const { data: userData } = useSWR('/api/auth/me', fetcher, {
     revalidateOnFocus: false,
   });
 
@@ -338,13 +338,22 @@ export function AethelProvider({ children }: AethelProviderProps) {
     }
   }, []);
 
-  // Update user from session
+  // Update user from auth endpoint (supports both shapes)
   useEffect(() => {
-    if (userData?.user) {
-      dispatch({ type: 'SET_USER', payload: userData.user });
-    } else if (userData === null) {
+    if (userData === undefined) return;
+
+    if (userData?.authenticated === false || userData?.user === null) {
       dispatch({ type: 'SET_USER', payload: null });
+      return;
     }
+
+    const rawUser = userData?.user ?? userData;
+    if (rawUser?.id) {
+      dispatch({ type: 'SET_USER', payload: rawUser });
+      return;
+    }
+
+    dispatch({ type: 'SET_USER', payload: null });
   }, [userData]);
 
   // Update wallet state
@@ -384,6 +393,40 @@ export function AethelProvider({ children }: AethelProviderProps) {
     }
   }, [onboardingData]);
 
+  // Handle WebSocket messages
+  const handleWebSocketMessage = useCallback((data: any) => {
+    switch (data.type) {
+      case 'BALANCE_UPDATED':
+        dispatch({
+          type: 'UPDATE_WALLET',
+          payload: {
+            balance: data.balance,
+            lowBalanceWarning: data.balance < 100,
+          },
+        });
+        break;
+
+      case 'AI_STEP_START':
+        dispatch({ type: 'ADD_AI_STEP', payload: data.step });
+        break;
+
+      case 'AI_STEP_UPDATE':
+        dispatch({
+          type: 'UPDATE_AI_STEP',
+          payload: { stepId: data.stepId, updates: data.updates },
+        });
+        break;
+
+      case 'AI_SESSION_COMPLETE':
+        dispatch({ type: 'COMPLETE_AI_SESSION', payload: { result: data.result } });
+        break;
+
+      case 'NOTIFICATION':
+        dispatch({ type: 'ADD_NOTIFICATION', payload: data.notification });
+        break;
+    }
+  }, []);
+
   // WebSocket connection for real-time updates
   useEffect(() => {
     if (!state.isAuthenticated) return;
@@ -420,41 +463,7 @@ export function AethelProvider({ children }: AethelProviderProps) {
     return () => {
       wsRef.current?.close();
     };
-  }, [state.isAuthenticated]);
-
-  // Handle WebSocket messages
-  const handleWebSocketMessage = useCallback((data: any) => {
-    switch (data.type) {
-      case 'BALANCE_UPDATED':
-        dispatch({
-          type: 'UPDATE_WALLET',
-          payload: {
-            balance: data.balance,
-            lowBalanceWarning: data.balance < 100,
-          },
-        });
-        break;
-
-      case 'AI_STEP_START':
-        dispatch({ type: 'ADD_AI_STEP', payload: data.step });
-        break;
-
-      case 'AI_STEP_UPDATE':
-        dispatch({
-          type: 'UPDATE_AI_STEP',
-          payload: { stepId: data.stepId, updates: data.updates },
-        });
-        break;
-
-      case 'AI_SESSION_COMPLETE':
-        dispatch({ type: 'COMPLETE_AI_SESSION', payload: { result: data.result } });
-        break;
-
-      case 'NOTIFICATION':
-        dispatch({ type: 'ADD_NOTIFICATION', payload: data.notification });
-        break;
-    }
-  }, []);
+  }, [state.isAuthenticated, handleWebSocketMessage]);
 
   // Convenience methods
   const updateWallet = useCallback((data: Partial<WalletState>) => {

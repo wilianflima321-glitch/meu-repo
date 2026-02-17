@@ -1025,7 +1025,7 @@ export function WorldStreamingProvider({
 }) {
   const value = useMemo(() => ({
     system: new WorldStreamingSystem(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     if (chunkLoader) {
@@ -1111,7 +1111,7 @@ export function useChunkState(position: Vector3) {
     return () => {
       system.off('update', update);
     };
-  }, [system, position.x, position.y, position.z]);
+  }, [system, position]);
   
   return chunk;
 }
@@ -1135,7 +1135,7 @@ export function useEntityLOD(entityId: string, initialPosition: Vector3) {
       system.unregisterEntity(entityId);
       system.off('entityLODChanged', onLodChange);
     };
-  }, [system, entityId]);
+  }, [system, entityId, initialPosition]);
   
   const updatePosition = useCallback((position: Vector3) => {
     system.updateEntityPosition(entityId, position);
@@ -1144,7 +1144,7 @@ export function useEntityLOD(entityId: string, initialPosition: Vector3) {
   return { lod, updatePosition };
 }
 
-export default {
+const __defaultExport = {
   WorldStreamingSystem,
   Octree,
   WorldStreamingProvider,
@@ -1155,3 +1155,5 @@ export default {
   useChunkState,
   useEntityLOD,
 };
+
+export default __defaultExport;

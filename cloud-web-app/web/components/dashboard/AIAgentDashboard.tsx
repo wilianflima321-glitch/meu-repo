@@ -320,7 +320,7 @@ export function AIAgentDashboard({
       <div className="p-4 border-b border-[#3c3c3c]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="text-purple-400">
+            <div className="text-blue-400">
               <Icons.Robot />
             </div>
             <h2 className="text-white font-semibold">AI Agents</h2>
@@ -510,7 +510,7 @@ export function AIAgentDashboard({
                 icon={<Icons.Code />}
                 label="Tokens Usados"
                 value={formatTokens(metrics.totalTokensUsed)}
-                color="text-purple-400"
+                color="text-blue-400"
               />
               <MetricCard
                 icon={<Icons.Dollar />}
@@ -672,7 +672,7 @@ function ModelUsageBar({
       </div>
       <div className="h-2 bg-[#3c3c3c] rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
+          className="h-full bg-gradient-to-r from-blue-500 to-blue-500"
           style={{ width: `${percent}%` }}
         />
       </div>

@@ -1,18 +1,19 @@
 /**
  * AETHEL ENGINE - Jobs Queue API
- * 
- * Gerencia filas de trabalho (build, render, export, etc).
- * GET - Lista jobs
- * POST - Cria novo job
+ *
+ * Real queue-backed endpoint.
+ * - GET: list jobs from BullMQ queues
+ * - POST: enqueue a job in mapped queue
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { requireAuth } from '@/lib/auth-server';
+import { QUEUE_NAMES, queueManager, type QueueJobSnapshot } from '@/lib/queue-system';
 
 type JobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
 type JobType = 'build' | 'render' | 'export' | 'import' | 'compress' | 'upload';
 
-interface Job {
+interface ApiJob {
   id: string;
   type: JobType;
   status: JobStatus;
@@ -26,96 +27,103 @@ interface Job {
   metadata?: Record<string, unknown>;
 }
 
-// Store em memória (em produção usar Redis/PostgreSQL)
-const jobsStore: Map<string, Job> = new Map();
+function mapStatus(state: string): JobStatus {
+  if (state === 'active') return 'processing';
+  if (state === 'completed') return 'completed';
+  if (state === 'failed') return 'failed';
+  return 'queued';
+}
 
-// Inicializar com alguns jobs de exemplo
-function initializeSampleJobs() {
-  if (jobsStore.size === 0) {
-    const now = Date.now();
-    const sampleJobs: Job[] = [
-      {
-        id: 'job-1',
-        type: 'build',
-        status: 'completed',
-        progress: 100,
-        projectId: 'proj-1',
-        projectName: 'Meu Jogo RPG',
-        createdAt: new Date(now - 3600000).toISOString(),
-        startedAt: new Date(now - 3500000).toISOString(),
-        completedAt: new Date(now - 3400000).toISOString(),
-      },
-      {
-        id: 'job-2',
-        type: 'render',
-        status: 'processing',
-        progress: 45,
-        projectId: 'proj-2',
-        projectName: 'Cinemática Intro',
-        createdAt: new Date(now - 1800000).toISOString(),
-        startedAt: new Date(now - 1700000).toISOString(),
-      },
-      {
-        id: 'job-3',
-        type: 'export',
-        status: 'queued',
-        progress: 0,
-        projectId: 'proj-1',
-        projectName: 'Meu Jogo RPG',
-        createdAt: new Date(now - 600000).toISOString(),
-      },
-    ];
-    
-    sampleJobs.forEach(job => jobsStore.set(job.id, job));
+function mapType(jobName: string): JobType {
+  if (jobName.startsWith('asset:')) return 'import';
+  if (jobName === 'export:project' || jobName === 'export:game') return 'export';
+  if (jobName.startsWith('ai:')) return 'build';
+  return 'build';
+}
+
+function toApiJob(snapshot: QueueJobSnapshot): ApiJob {
+  const payload = (snapshot.data || {}) as Record<string, unknown>;
+  const progressValue = typeof snapshot.progress === 'number'
+    ? snapshot.progress
+    : typeof (snapshot.progress as any)?.percentage === 'number'
+      ? (snapshot.progress as any).percentage
+      : 0;
+
+  return {
+    id: snapshot.id,
+    type: mapType(snapshot.name),
+    status: mapStatus(snapshot.state),
+    progress: Math.max(0, Math.min(100, progressValue)),
+    projectId: typeof payload.projectId === 'string' ? payload.projectId : undefined,
+    projectName: typeof payload.projectName === 'string' ? payload.projectName : undefined,
+    createdAt: new Date(snapshot.timestamp || Date.now()).toISOString(),
+    startedAt: snapshot.processedOn ? new Date(snapshot.processedOn).toISOString() : undefined,
+    completedAt: snapshot.finishedOn ? new Date(snapshot.finishedOn).toISOString() : undefined,
+    error: snapshot.failedReason,
+    metadata: typeof payload.metadata === 'object' && payload.metadata !== null
+      ? (payload.metadata as Record<string, unknown>)
+      : undefined,
+  };
+}
+
+function mapJobTypeToQueue(type: JobType): { queueName: string; jobType: string; priority?: number } {
+  switch (type) {
+    case 'build':
+    case 'render':
+    case 'export':
+      return { queueName: QUEUE_NAMES.EXPORT, jobType: 'export:project', priority: 5 };
+    case 'import':
+    case 'compress':
+    case 'upload':
+      return { queueName: QUEUE_NAMES.ASSET, jobType: 'asset:process', priority: 3 };
+    default:
+      return { queueName: QUEUE_NAMES.EXPORT, jobType: 'export:project', priority: 1 };
   }
 }
 
-initializeSampleJobs();
+function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Unauthorized';
+}
+
+function isAuthNotConfigured(error: unknown): boolean {
+  return error instanceof Error && String((error as any).code || '') === 'AUTH_NOT_CONFIGURED';
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
-    }
+    requireAuth(request);
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const type = searchParams.get('type');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const rawLimit = Number.parseInt(searchParams.get('limit') || '50', 10);
+    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(200, rawLimit)) : 50;
 
-    let jobs = Array.from(jobsStore.values());
+    const available = await queueManager.isAvailable();
+    if (!available) {
+      return NextResponse.json(
+        {
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+          message: 'Queue backend is not configured. Install/configure Redis + BullMQ.',
+        },
+        { status: 503 }
+      );
+    }
 
-    // Filtrar por status
+    let jobs = (await queueManager.listJobs(limit)).map(toApiJob);
     if (status && status !== 'all') {
-      jobs = jobs.filter(job => job.status === status);
+      jobs = jobs.filter((job) => job.status === status);
     }
-
-    // Filtrar por tipo
     if (type && type !== 'all') {
-      jobs = jobs.filter(job => job.type === type);
+      jobs = jobs.filter((job) => job.type === type);
     }
 
-    // Ordenar por data de criação (mais recentes primeiro)
-    jobs.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    // Limitar resultados
-    jobs = jobs.slice(0, limit);
-
-    // Calcular estatísticas
-    const allJobs = Array.from(jobsStore.values());
     const stats = {
-      total: allJobs.length,
-      queued: allJobs.filter(j => j.status === 'queued').length,
-      processing: allJobs.filter(j => j.status === 'processing').length,
-      completed: allJobs.filter(j => j.status === 'completed').length,
-      failed: allJobs.filter(j => j.status === 'failed').length,
+      total: jobs.length,
+      queued: jobs.filter((job) => job.status === 'queued').length,
+      processing: jobs.filter((job) => job.status === 'processing').length,
+      completed: jobs.filter((job) => job.status === 'completed').length,
+      failed: jobs.filter((job) => job.status === 'failed').length,
     };
 
     return NextResponse.json({
@@ -124,6 +132,15 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (isAuthNotConfigured(error)) {
+      return NextResponse.json(
+        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+        { status: 503 }
+      );
+    }
     console.error('Erro ao listar jobs:', error);
     return NextResponse.json(
       { error: 'Falha ao listar jobs' },
@@ -134,52 +151,83 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
-    }
+    const user = requireAuth(request);
 
     const body = await request.json();
     const { type, projectId, projectName, metadata } = body;
-
-    if (!type) {
-      return NextResponse.json(
-        { error: 'Tipo de job é obrigatório' },
-        { status: 400 }
-      );
-    }
-
     const validTypes: JobType[] = ['build', 'render', 'export', 'import', 'compress', 'upload'];
-    if (!validTypes.includes(type)) {
+
+    if (!type || !validTypes.includes(type)) {
       return NextResponse.json(
-        { error: `Tipo inválido. Use: ${validTypes.join(', ')}` },
+        { error: `Tipo invalido. Use: ${validTypes.join(', ')}` },
         { status: 400 }
       );
     }
 
-    const job: Job = {
-      id: `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type,
-      status: 'queued',
-      progress: 0,
-      projectId,
-      projectName,
-      createdAt: new Date().toISOString(),
-      metadata,
-    };
+    const available = await queueManager.isAvailable();
+    if (!available) {
+      return NextResponse.json(
+        {
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+          message: 'Queue backend is not configured. Cannot enqueue jobs.',
+        },
+        { status: 503 }
+      );
+    }
 
-    jobsStore.set(job.id, job);
+    const queueConfig = mapJobTypeToQueue(type);
+    const queued = await queueManager.addJob(
+      queueConfig.queueName,
+      queueConfig.jobType as any,
+      {
+        projectId,
+        projectName,
+        metadata: metadata || {},
+        requestedBy: user.userId,
+        requestedAt: new Date().toISOString(),
+      },
+      {
+        priority: queueConfig.priority,
+      }
+    );
 
-    return NextResponse.json({
-      success: true,
-      message: 'Job criado com sucesso',
-      job,
-    });
+    if (!queued) {
+      return NextResponse.json(
+        {
+          error: 'QUEUE_BACKEND_UNAVAILABLE',
+          message: 'Queue backend is not available to accept jobs.',
+        },
+        { status: 503 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Job enfileirado com sucesso',
+        job: {
+          id: String(queued.id),
+          type,
+          status: 'queued',
+          progress: 0,
+          projectId,
+          projectName,
+          createdAt: new Date().toISOString(),
+          metadata: metadata || {},
+        },
+      },
+      { status: 202 }
+    );
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (isAuthNotConfigured(error)) {
+      return NextResponse.json(
+        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+        { status: 503 }
+      );
+    }
     console.error('Erro ao criar job:', error);
     return NextResponse.json(
       { error: 'Falha ao criar job' },

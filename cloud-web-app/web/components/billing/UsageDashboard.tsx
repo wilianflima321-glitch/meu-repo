@@ -165,11 +165,11 @@ export function UsageDashboard() {
         <div>
           <h2 className="text-xl font-bold text-white">Seu Consumo</h2>
           <p className="text-sm text-slate-400">
-            Plano <span className="text-indigo-400 font-medium">{usage.plan.name}</span> • 
+            Plano <span className="text-sky-400 font-medium">{usage.plan.name}</span> • 
             Renova em {daysUntilRenewal} dias
           </p>
         </div>
-        <button className="px-4 py-2 text-sm bg-indigo-500 hover:bg-indigo-400 text-white rounded-lg font-medium transition-colors">
+        <button className="px-4 py-2 text-sm bg-sky-500 hover:bg-sky-400 text-white rounded-lg font-medium transition-colors">
           Upgrade
         </button>
       </div>
@@ -184,7 +184,7 @@ export function UsageDashboard() {
       {/* Usage Over Time Chart */}
       <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-indigo-400" />
+          <TrendingUp className="w-5 h-5 text-sky-400" />
           Consumo dos últimos 30 dias
         </h3>
         <UsageChart history={usage.history} />
@@ -216,10 +216,10 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
   const isCritical = percentage > 95;
 
   const colorOptions = {
-    indigo: { bg: 'bg-indigo-500', text: 'text-indigo-400', ring: 'ring-indigo-500/30' },
+    indigo: { bg: 'bg-sky-500', text: 'text-sky-400', ring: 'ring-sky-500/30' },
     blue: { bg: 'bg-blue-500', text: 'text-blue-400', ring: 'ring-blue-500/30' },
     green: { bg: 'bg-green-500', text: 'text-green-400', ring: 'ring-green-500/30' },
-    purple: { bg: 'bg-purple-500', text: 'text-purple-400', ring: 'ring-purple-500/30' },
+    purple: { bg: 'bg-blue-500', text: 'text-blue-400', ring: 'ring-sky-500/30' },
     amber: { bg: 'bg-amber-500', text: 'text-amber-400', ring: 'ring-amber-500/30' },
     cyan: { bg: 'bg-cyan-500', text: 'text-cyan-400', ring: 'ring-cyan-500/30' },
   };
@@ -305,7 +305,7 @@ function UsageChart({ history }: { history: UsageData['history'] }) {
         return (
           <div
             key={i}
-            className="flex-1 bg-indigo-500/30 hover:bg-indigo-500/50 rounded-t transition-all cursor-pointer group relative"
+            className="flex-1 bg-sky-500/30 hover:bg-sky-500/50 rounded-t transition-all cursor-pointer group relative"
             style={{ height: `${Math.max(height, 4)}%` }}
           >
             {/* Tooltip */}

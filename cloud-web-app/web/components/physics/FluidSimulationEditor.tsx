@@ -1068,11 +1068,12 @@ export default function FluidSimulationEditor({
   const [isBaking, setIsBaking] = useState(false);
   
   // Simulation reference
+  const initialParamsRef = useRef(params);
   const simulationRef = useRef<SPHFluidSimulation | null>(null);
   
   // Initialize simulation
   useEffect(() => {
-    simulationRef.current = new SPHFluidSimulation(params);
+    simulationRef.current = new SPHFluidSimulation(initialParamsRef.current);
     return () => {
       simulationRef.current = null;
     };
@@ -1272,7 +1273,7 @@ export default function FluidSimulationEditor({
           <button
             onClick={() => setEditorState((p) => ({ ...p, showDensityColors: !p.showDensityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showDensityColors ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-400'
+              editorState.showDensityColors ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'
             }`}
           >
             <Layers className="w-3 h-3" /> Density
@@ -1417,7 +1418,7 @@ export default function FluidSimulationEditor({
           </CollapsibleSection>
           
           {/* Appearance */}
-          <CollapsibleSection title="Appearance" icon={<Palette className="w-4 h-4 text-pink-400" />}>
+          <CollapsibleSection title="Appearance" icon={<Palette className="w-4 h-4 text-cyan-400" />}>
             <ColorPicker
               label="Fluid Color"
               value={params.color}
@@ -1435,7 +1436,7 @@ export default function FluidSimulationEditor({
           </CollapsibleSection>
           
           {/* Gravity */}
-          <CollapsibleSection title="Gravity" icon={<ArrowDown className="w-4 h-4 text-purple-400" />}>
+          <CollapsibleSection title="Gravity" icon={<ArrowDown className="w-4 h-4 text-blue-400" />}>
             <Vector3Input
               label="Gravity Vector"
               value={params.gravity}
@@ -1511,7 +1512,7 @@ export default function FluidSimulationEditor({
           </CollapsibleSection>
           
           {/* Bake to Mesh */}
-          <CollapsibleSection title="Surface Meshing" icon={<RefreshCw className="w-4 h-4 text-indigo-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Surface Meshing" icon={<RefreshCw className="w-4 h-4 text-sky-400" />} defaultOpen={false}>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs text-slate-400">Enable Surface Mesh</label>
               <input
@@ -1535,7 +1536,7 @@ export default function FluidSimulationEditor({
             <button
               onClick={bakeToMesh}
               disabled={isBaking}
-              className="w-full mt-3 p-2 rounded bg-indigo-600 hover:bg-indigo-500 
+              className="w-full mt-3 p-2 rounded bg-sky-600 hover:bg-sky-500 
                        disabled:bg-slate-700 disabled:text-slate-500
                        transition-colors flex items-center justify-center gap-2"
             >

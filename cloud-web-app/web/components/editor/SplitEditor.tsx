@@ -116,7 +116,7 @@ const Tab: React.FC<TabProps> = ({
       rs: 'text-orange-400',
       go: 'text-cyan-400',
       java: 'text-red-400',
-      css: 'text-purple-400',
+      css: 'text-blue-400',
       html: 'text-orange-500',
       json: 'text-yellow-500',
       md: 'text-gray-400',
@@ -574,10 +574,11 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
   
   // Update sizes when groups change
   useEffect(() => {
-    if (groups.length !== groupSizes.length) {
-      setGroupSizes(groups.map(() => 100 / groups.length));
-    }
-  }, [groups.length, groupSizes.length]);
+    setGroupSizes((prev) => {
+      if (groups.length === prev.length) return prev;
+      return groups.map(() => 100 / groups.length);
+    });
+  }, [groups]);
   
   const handleResize = useCallback((index: number, delta: number) => {
     setGroupSizes(prev => {

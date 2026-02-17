@@ -459,9 +459,9 @@ export const SecurityDashboard: React.FC<{
         <StatsCard
           label="Injeções de Prompt"
           value={stats.promptInjections}
-          icon={<AlertTriangle className="w-5 h-5 text-purple-400" />}
+          icon={<AlertTriangle className="w-5 h-5 text-blue-400" />}
           trend={-8}
-          color="border-purple-500/30 bg-purple-500/5"
+          color="border-purple-500/30 bg-blue-500/5"
         />
         <StatsCard
           label="Ataques Ativos"

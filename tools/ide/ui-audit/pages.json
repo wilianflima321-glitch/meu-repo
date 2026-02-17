@@ -1,6 +1,7 @@
 [
   { "name": "home", "path": "/" },
-  { "name": "editor", "path": "/editor" },
-  { "name": "livepreview", "path": "/live" },
+  { "name": "ide", "path": "/ide" },
+  { "name": "marketplace", "path": "/marketplace" },
+  { "name": "pricing", "path": "/pricing" },
   { "name": "settings", "path": "/settings" }
 ]

@@ -86,12 +86,13 @@ export async function POST(request: NextRequest) {
       },
     });
     
-    // TODO: Enviar via WebSocket para notificação em tempo real
-    // await websocket.emit(`user:${notification.userId}`, 'notification', notification);
-    
     return NextResponse.json({
       success: true,
       notification,
+      realtimeDispatch: {
+        delivered: false,
+        reason: 'WEBSOCKET_DISPATCH_DEFERRED',
+      },
     });
   } catch (error) {
     console.error('Failed to create notification:', error);

@@ -820,8 +820,9 @@ export function EventBusProvider({
   const busRef = useRef<EventBus>(new EventBus(config));
   
   useEffect(() => {
+    const bus = busRef.current;
     return () => {
-      busRef.current.dispose();
+      bus.dispose();
     };
   }, []);
   
@@ -853,7 +854,7 @@ export function useEvent<T = unknown>(
     return () => {
       bus.unsubscribe(id);
     };
-  }, [bus, eventType, ...deps]);
+  }, [bus, eventType, handler, deps]);
 }
 
 export function useEventDispatch() {
@@ -942,7 +943,7 @@ export function useEventHistory(options?: { type?: string; limit?: number }) {
     return () => {
       bus.unsubscribe(id);
     };
-  }, [bus, options?.type, options?.limit]);
+  }, [bus, options]);
   
   const clearHistory = useCallback(() => {
     bus.clearHistory();
@@ -1005,7 +1006,7 @@ export function EmitEvent(eventType: string) {
 // EXPORTS
 // ============================================================================
 
-export default {
+const __defaultExport = {
   EventBus,
   EventChannel,
   TypedEventEmitter,
@@ -1022,3 +1023,5 @@ export default {
   OnEvent,
   EmitEvent,
 };
+
+export default __defaultExport;

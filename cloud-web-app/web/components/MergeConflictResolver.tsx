@@ -204,7 +204,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
             onClick={() => setResolution('manual')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
               resolution === 'manual'
-                ? 'bg-purple-600 text-white'
+                ? 'bg-blue-600 text-white'
                 : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
             }`}
           >
@@ -221,7 +221,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
           <textarea
             value={manualContent}
             onChange={(e) => setManualContent(e.target.value)}
-            className="w-full h-96 p-4 bg-slate-900 text-white font-mono text-sm rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full h-96 p-4 bg-slate-900 text-white font-mono text-sm rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-sky-500"
             spellCheck={false}
           />
         </div>
@@ -321,7 +321,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
       <div className="flex gap-4">
         <button
           onClick={handleResolve}
-          className="flex-1 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold"
+          className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold"
         >
           Mark as Resolved
         </button>

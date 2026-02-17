@@ -17,12 +17,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<string, string> = {
   primary: `
-    bg-gradient-to-r from-indigo-600 to-indigo-500 
+    bg-gradient-to-r from-blue-600 to-blue-500 
     text-white font-medium
-    hover:from-indigo-500 hover:to-indigo-400
-    active:from-indigo-700 active:to-indigo-600
-    shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40
-    border border-indigo-500/20
+    hover:from-blue-500 hover:to-blue-400
+    active:from-blue-700 active:to-blue-600
+    shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
+    border border-blue-500/20
   `,
   secondary: `
     bg-slate-800/80 text-slate-100 
@@ -60,11 +60,11 @@ const variantClasses: Record<string, string> = {
     border border-slate-600 hover:border-slate-500
   `,
   premium: `
-    bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 
+    bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 
     text-white font-semibold
-    hover:from-indigo-500 hover:via-purple-500 hover:to-pink-400
-    active:from-indigo-700 active:via-purple-700 active:to-pink-600
-    shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50
+    hover:from-blue-500 hover:via-cyan-500 hover:to-cyan-400
+    active:from-blue-700 active:via-cyan-700 active:to-cyan-600
+    shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50
     border border-white/10
   `,
 }
@@ -114,7 +114,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ${roundedClass}
       transition-all duration-200 ease-out
       transform active:scale-[0.98]
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
       ${variantClasses[variant]}
       ${sizeClasses[size]}

@@ -833,7 +833,7 @@ export function HapticsProvider({
 }) {
   const value = useMemo(() => ({
     system: new HapticsSystem(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     return () => {
@@ -957,7 +957,7 @@ export function useHapticsIntensity() {
   return { intensity, setIntensity: set };
 }
 
-export default {
+const __defaultExport = {
   HapticsSystem,
   HAPTIC_EFFECTS,
   HapticsProvider,
@@ -968,3 +968,5 @@ export default {
   useHapticsEnabled,
   useHapticsIntensity,
 };
+
+export default __defaultExport;

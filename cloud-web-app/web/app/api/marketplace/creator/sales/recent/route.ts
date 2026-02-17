@@ -1,53 +1,48 @@
-/**
- * AETHEL ENGINE - Marketplace Creator Recent Sales API
- * 
- * Retorna as vendas recentes para o dashboard do criador.
- */
-
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/db';
+import { requireAuth } from '@/lib/auth-server';
+import { apiErrorToResponse } from '@/lib/api-errors';
 
-interface RecentSale {
-  id: string;
-  assetName: string;
-  buyerName: string;
-  amount: number;
-  date: string;
-}
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
-    }
+    const user = requireAuth(request);
 
-    // TODO: Buscar vendas reais do banco de dados
-    // Por enquanto retorna array vazio para novos criadores
-    // Quando houver vendas, isso será populado automaticamente
-    
-    const sales: RecentSale[] = [];
-    
-    // Em produção, seria algo assim:
-    // const sales = await db.sales.findMany({
-    //   where: { creatorId: session.user.id },
-    //   orderBy: { createdAt: 'desc' },
-    //   take: 10,
-    //   include: {
-    //     asset: { select: { name: true } },
-    //     buyer: { select: { name: true } },
-    //   },
-    // });
+    const items = await prisma.marketplaceItem.findMany({
+      where: {
+        authorId: user.userId,
+        downloads: { gt: 0 },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        downloads: true,
+        updatedAt: true,
+      },
+    });
+
+    const sales = items.map((item) => ({
+      id: `estimated-${item.id}`,
+      assetName: item.title,
+      buyerName: 'Marketplace aggregate',
+      amount: Number((((item.price || 0) * (item.downloads || 0)) / 100).toFixed(2)),
+      date: item.updatedAt.toISOString(),
+      estimated: true,
+    }));
 
     return NextResponse.json(sales);
   } catch (error) {
-    console.error('Erro ao buscar vendas recentes:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    console.error('[marketplace/creator/sales/recent] Error:', error);
     return NextResponse.json(
-      { error: 'Falha ao buscar vendas recentes' },
+      {
+        error: 'Failed to load recent sales',
+      },
       { status: 500 }
     );
   }

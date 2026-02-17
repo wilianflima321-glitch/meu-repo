@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Mail, CheckCircle, Loader2, XCircle, RefreshCw } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CheckCircle, Loader2, Mail, RefreshCw, XCircle } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 
 function VerifyEmailContent() {
   const toast = useToast()
   const searchParams = useSearchParams()
   const router = useRouter()
-  
+
   const [isLoading, setIsLoading] = useState(true)
   const [isVerified, setIsVerified] = useState(false)
   const [error, setError] = useState('')
@@ -20,7 +20,7 @@ function VerifyEmailContent() {
   const email = searchParams.get('email')
 
   useEffect(() => {
-    const doVerify = async () => {
+    const verify = async () => {
       try {
         const res = await fetch('/api/auth/verify-email', {
           method: 'POST',
@@ -28,64 +28,57 @@ function VerifyEmailContent() {
           body: JSON.stringify({ token, email }),
         })
 
-        const data = await res.json()
-
+        const payload = await res.json()
         if (!res.ok) {
-          setError(data.error || 'Falha na verificação')
+          setError(payload?.error || 'Falha na verificacao do email')
           return
         }
 
         setIsVerified(true)
-        
-        // Redirect to dashboard after 3 seconds
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 3000)
-      } catch (err) {
-        setError('Erro de rede. Tente novamente.')
+        setTimeout(() => router.push('/dashboard'), 2500)
+      } catch {
+        setError('Erro de rede durante a verificacao')
       } finally {
         setIsLoading(false)
       }
     }
 
     if (token && email) {
-      doVerify()
+      verify()
     } else {
       setIsLoading(false)
     }
   }, [token, email, router])
 
-  const handleResendVerification = async () => {
+  const resendVerification = async () => {
     setIsResending(true)
     try {
-      const res = await fetch('/api/auth/verify-email', {
-        method: 'GET',
-      })
-
-      const data = await res.json()
-
+      const res = await fetch('/api/auth/verify-email', { method: 'GET' })
+      const payload = await res.json()
       if (!res.ok) {
-        setError(data.error || 'Falha ao reenviar o e-mail de verificação')
+        setError(payload?.error || 'Falha ao reenviar email')
         return
       }
-
       setError('')
-      toast.success('E-mail de verificação enviado! Confira sua caixa de entrada.')
-    } catch (err) {
-      setError('Erro de rede. Tente novamente.')
+      toast.success('Email reenviado com sucesso.')
+    } catch {
+      setError('Erro de rede ao reenviar email')
     } finally {
       setIsResending(false)
     }
   }
 
+  const frameClass =
+    'w-full max-w-md rounded-2xl border border-slate-700/70 bg-slate-900/70 p-8 backdrop-blur'
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-violet-500 mx-auto mb-4" />
-            <h1 className="text-xl font-bold text-white mb-2">Verificando seu e-mail...</h1>
-            <p className="text-slate-400">Aguarde um instante.</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#0b0d12] px-4">
+        <div className={frameClass}>
+          <div className="flex flex-col items-center text-center">
+            <Loader2 className="w-10 h-10 animate-spin text-blue-400 mb-4" />
+            <h1 className="text-xl font-semibold text-white mb-2">Verificando email</h1>
+            <p className="text-sm text-slate-400">Validando seu link de acesso.</p>
           </div>
         </div>
       </div>
@@ -94,21 +87,19 @@ function VerifyEmailContent() {
 
   if (isVerified) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 text-center">
-            <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0b0d12] px-4">
+        <div className={frameClass}>
+          <div className="flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center mb-4">
+              <CheckCircle className="w-7 h-7 text-emerald-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-4">E-mail verificado!</h1>
-            <p className="text-slate-400 mb-6">
-              Seu e-mail foi verificado com sucesso. Redirecionando para o painel...
-            </p>
+            <h1 className="text-xl font-semibold text-white mb-2">Email verificado</h1>
+            <p className="text-sm text-slate-400 mb-5">Sua conta foi validada. Redirecionando para o painel.</p>
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium rounded-xl transition-all"
+              className="w-full text-center rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 transition-colors"
             >
-              Ir para o painel
+              Ir para dashboard
             </Link>
           </div>
         </div>
@@ -116,88 +107,62 @@ function VerifyEmailContent() {
     )
   }
 
-  // No token - show instructions
   if (!token || !email) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 text-center">
-            <div className="w-16 h-16 bg-violet-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Mail className="w-8 h-8 text-violet-400" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0b0d12] px-4">
+        <div className={frameClass}>
+          <div className="flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-full bg-blue-500/15 flex items-center justify-center mb-4">
+              <Mail className="w-7 h-7 text-blue-400" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Verifique seu e-mail</h1>
-            <p className="text-slate-400 mb-6">
-              Confira sua caixa de entrada e clique no link de verificação que enviamos.
-            </p>
-            <div className="space-y-3">
+            <h1 className="text-xl font-semibold text-white mb-2">Confirme seu email</h1>
+            <p className="text-sm text-slate-400 mb-5">Abra o link enviado para concluir a ativacao da conta.</p>
+            <div className="w-full space-y-3">
               <button
-                onClick={handleResendVerification}
+                onClick={resendVerification}
                 disabled={isResending}
-                className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isResending ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-5 h-5" />
-                    Reenviar e-mail de verificação
-                  </>
-                )}
+                {isResending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {isResending ? 'Enviando...' : 'Reenviar verificacao'}
               </button>
               <Link
                 href="/dashboard"
-                className="block w-full py-3 px-4 bg-slate-700/50 hover:bg-slate-700 text-white font-medium rounded-xl transition-all text-center"
+                className="block w-full rounded-lg border border-slate-700 bg-slate-800/70 hover:bg-slate-800 text-white font-medium py-2.5 text-center transition-colors"
               >
-                Continuar para o painel
+                Continuar para dashboard
               </Link>
             </div>
-            {error && (
-              <p className="mt-4 text-red-400 text-sm">{error}</p>
-            )}
+            {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
           </div>
         </div>
       </div>
     )
   }
 
-  // Error state
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-md w-full mx-4">
-        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 text-center">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <XCircle className="w-8 h-8 text-red-400" />
+    <div className="min-h-screen flex items-center justify-center bg-[#0b0d12] px-4">
+      <div className={frameClass}>
+        <div className="flex flex-col items-center text-center">
+          <div className="w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center mb-4">
+            <XCircle className="w-7 h-7 text-red-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-4">Falha na verificação</h1>
-          <p className="text-slate-400 mb-6">
-            {error || 'O link de verificação é inválido ou expirou.'}
-          </p>
-          <div className="space-y-3">
+          <h1 className="text-xl font-semibold text-white mb-2">Falha na verificacao</h1>
+          <p className="text-sm text-slate-400 mb-5">{error || 'Link invalido ou expirado.'}</p>
+          <div className="w-full space-y-3">
             <button
-              onClick={handleResendVerification}
+              onClick={resendVerification}
               disabled={isResending}
-              className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {isResending ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-5 h-5" />
-                  Solicitar nova verificação
-                </>
-              )}
+              {isResending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              {isResending ? 'Enviando...' : 'Solicitar novo link'}
             </button>
             <Link
               href="/login"
-              className="block w-full py-3 px-4 bg-slate-700/50 hover:bg-slate-700 text-white font-medium rounded-xl transition-all text-center"
+              className="block w-full rounded-lg border border-slate-700 bg-slate-800/70 hover:bg-slate-800 text-white font-medium py-2.5 text-center transition-colors"
             >
-              Voltar para o login
+              Voltar para login
             </Link>
           </div>
         </div>
@@ -208,11 +173,13 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#0b0d12]">
+          <Loader2 className="w-7 h-7 animate-spin text-blue-400" />
+        </div>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   )

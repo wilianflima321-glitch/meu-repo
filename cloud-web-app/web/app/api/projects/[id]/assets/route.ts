@@ -135,22 +135,26 @@ export async function GET(
       fileSystemAssets = await scanDirectory(uploadsDir, params.id);
     }
 
-    // Merge database assets with filesystem (DB takes priority)
-    // Note: path, thumbnail, metadata, isFavorite, updatedAt require prisma generate
+    // Merge database assets with filesystem (DB takes priority).
+    // Compatibility fallback: current schema exposes canonical URL; extended fields
+    // (path/thumbnail/metadata/favorite/updatedAt) are normalized at response level.
     const dbAssetPaths = new Set(dbAssets.map(a => a.url || '')); // Use url as path for now
     const mergedAssets = [
       ...dbAssets.map(a => ({
         id: a.id,
         name: a.name,
         type: a.type,
-        path: a.url || '', // TODO: Use a.path after prisma generate
+        path: a.url || '',
         extension: extname(a.name),
         size: a.size || 0,
-        thumbnail: undefined as string | undefined, // TODO: Use a.thumbnail after prisma generate
-        metadata: {} as Record<string, unknown>, // TODO: Use a.metadata after prisma generate
-        isFavorite: false, // TODO: Use a.isFavorite after prisma generate
+        thumbnail: undefined as string | undefined,
+        metadata: {
+          source: 'project_assets_compat',
+          schemaVersion: 'v1',
+        } as Record<string, unknown>,
+        isFavorite: false,
         createdAt: a.createdAt.toISOString(),
-        modifiedAt: a.createdAt.toISOString(), // TODO: Use a.updatedAt after prisma generate
+        modifiedAt: a.createdAt.toISOString(),
       })),
       ...fileSystemAssets.filter(f => !dbAssetPaths.has(f.path)),
     ];

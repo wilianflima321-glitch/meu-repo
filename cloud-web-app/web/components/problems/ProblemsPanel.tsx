@@ -36,9 +36,17 @@ export const ProblemsPanel: React.FC = () => {
   }, [filter]);
 
   // Handle problem click
-  const handleProblemClick = useCallback((index: number) => {
+  const handleProblemClick = useCallback((index: number, problem: Diagnostic) => {
     setSelectedProblem(index);
-    // TODO: Navigate to problem location
+    window.dispatchEvent(
+      new CustomEvent('aethel.problems.openLocation', {
+        detail: {
+          uri: problem.uri,
+          line: problem.range.start.line,
+          column: problem.range.start.character,
+        },
+      })
+    );
   }, []);
 
   // Handle quick fix
@@ -141,7 +149,7 @@ export const ProblemsPanel: React.FC = () => {
                 <div
                   key={`${problem.uri}-${problem.range.start.line}-${problem.range.start.character}`}
                   className={`problem-item ${selectedProblem === index ? 'selected' : ''}`}
-                  onClick={() => handleProblemClick(index)}
+                  onClick={() => handleProblemClick(index, problem)}
                 >
                   <span
                     className="severity-icon"

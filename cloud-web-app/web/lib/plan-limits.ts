@@ -248,7 +248,7 @@ export async function getCurrentUsage(userId: string): Promise<{ tokensUsed: num
   return {
     tokensUsed: bucket?.tokens || 0,
     requestsUsed: bucket?.requests || 0,
-    storageUsedMB: 0, // TODO: calcular do Asset model
+    storageUsedMB: 0, // Pending asset-ledger integration
   };
 }
 

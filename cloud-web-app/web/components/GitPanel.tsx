@@ -285,13 +285,13 @@ export default function GitPanel() {
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
               placeholder="Commit message..."
-              className="w-full p-3 bg-slate-700 text-white rounded-lg mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 bg-slate-700 text-white rounded-lg mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-sky-500"
               rows={3}
             />
             <button
               onClick={handleCommit}
               disabled={!commitMessage.trim()}
-              className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 text-white rounded-lg transition-colors"
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg transition-colors"
             >
               Commit {status.staged.length} file{status.staged.length !== 1 ? 's' : ''}
             </button>

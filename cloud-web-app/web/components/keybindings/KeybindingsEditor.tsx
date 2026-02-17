@@ -203,8 +203,8 @@ function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
   }, [isRecording, onChange])
   
   return (
-    <div className="flex items-center gap-2 p-2 bg-indigo-900/50 rounded border border-indigo-500">
-      <Keyboard className="w-4 h-4 text-indigo-400" />
+    <div className="flex items-center gap-2 p-2 bg-sky-900/50 rounded border border-sky-500">
+      <Keyboard className="w-4 h-4 text-sky-400" />
       <span className="text-sm text-white">
         {recording.length > 0 ? (
           recording.map((key, idx) => (
@@ -274,7 +274,7 @@ export default function KeybindingsEditor({
         })
       }
     })
-  }, [])
+  }, [toast])
   
   // Detect conflicts
   const conflicts = useMemo(() => {
@@ -430,7 +430,7 @@ export default function KeybindingsEditor({
       reader.readAsText(file)
     }
     input.click()
-  }, [])
+  }, [toast])
   
   // Get all categories for initial expansion
   useEffect(() => {
@@ -444,7 +444,7 @@ export default function KeybindingsEditor({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
         <div className="flex items-center gap-3">
-          <Keyboard className="w-5 h-5 text-indigo-400" />
+          <Keyboard className="w-5 h-5 text-sky-400" />
           <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
           {hasChanges && (
             <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded">
@@ -478,7 +478,7 @@ export default function KeybindingsEditor({
           {hasChanges && (
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-700 rounded"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-700 rounded"
             >
               <Check className="w-4 h-4" />
               Save
@@ -504,7 +504,7 @@ export default function KeybindingsEditor({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search keybindings..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
           />
         </div>
         
@@ -512,7 +512,7 @@ export default function KeybindingsEditor({
           onClick={() => setShowOnlyModified(!showOnlyModified)}
           className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
             showOnlyModified
-              ? 'bg-indigo-600 text-white'
+              ? 'bg-sky-600 text-white'
               : 'bg-slate-800 text-slate-400 hover:text-white'
           }`}
         >
@@ -698,9 +698,9 @@ function KeybindingRow({
         <span
           className={`px-2 py-0.5 rounded text-xs ${
             keybinding.source === 'user'
-              ? 'bg-indigo-500/20 text-indigo-400'
+              ? 'bg-sky-500/20 text-sky-400'
               : keybinding.source === 'extension'
-              ? 'bg-purple-500/20 text-purple-400'
+              ? 'bg-blue-500/20 text-blue-400'
               : 'bg-slate-700 text-slate-400'
           }`}
         >

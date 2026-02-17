@@ -10,6 +10,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';
 
 // Context para expor o estado do SW para toda a aplicação
@@ -98,9 +99,9 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
           <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
             <div className="p-4">
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 bg-sky-500/20 rounded-full flex items-center justify-center">
                   <svg 
-                    className="w-5 h-5 text-indigo-400" 
+                    className="w-5 h-5 text-sky-400" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -139,7 +140,7 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
               </button>
               <button
                 onClick={handleUpdate}
-                className="flex-1 px-4 py-3 text-sm font-medium text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 transition-colors border-l border-slate-700"
+                className="flex-1 px-4 py-3 text-sm font-medium text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors border-l border-slate-700"
               >
                 Atualizar agora
               </button>
@@ -192,7 +193,7 @@ export function InstallPrompt() {
     <div className="fixed bottom-4 left-4 z-[9999] max-w-sm">
       <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4">
         <div className="flex items-center gap-3">
-          <img src="/aethel-logo.svg" alt="" className="w-10 h-10" />
+          <Image src="/aethel-logo.svg" alt="" width={40} height={40} className="w-10 h-10" />
           <div className="flex-1">
             <p className="text-sm font-medium text-white">
               Instalar Aethel Engine
@@ -203,7 +204,7 @@ export function InstallPrompt() {
           </div>
           <button
             onClick={handleInstall}
-            className="px-3 py-1.5 bg-indigo-500 text-white text-sm rounded font-medium hover:bg-indigo-400 transition-colors"
+            className="px-3 py-1.5 bg-sky-500 text-white text-sm rounded font-medium hover:bg-sky-400 transition-colors"
           >
             Instalar
           </button>

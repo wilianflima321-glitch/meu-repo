@@ -84,18 +84,18 @@ export default function Backup() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Backup e recuperação</h1>
-          <p className='text-sm text-gray-500'>Controle de backups com auditoria e restauração controlada.</p>
+          <p className='text-sm text-zinc-500'>Controle de backups com auditoria e restauração controlada.</p>
         </div>
-        <button onClick={fetchBackups} className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'>Atualizar</button>
+        <button onClick={fetchBackups} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>Atualizar</button>
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4'>
+        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
           {error}
         </div>
       )}
 
-      <div className='mb-6 bg-white p-4 rounded-lg shadow'>
+      <div className='mb-6 bg-zinc-900/70 p-4 rounded-lg shadow'>
         <h2 className='text-xl font-semibold mb-3'>Solicitar Backup Manual</h2>
         <div className='flex flex-col md:flex-row gap-3'>
           <input
@@ -110,9 +110,9 @@ export default function Backup() {
         </div>
       </div>
 
-      <table className='w-full table-auto bg-white rounded-lg shadow'>
+      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
         <thead>
-          <tr className='bg-gray-100'>
+          <tr className='bg-zinc-800/70'>
             <th className='p-2 text-left'>ID</th>
             <th className='p-2 text-left'>Data</th>
             <th className='p-2 text-left'>Tamanho</th>
@@ -123,20 +123,20 @@ export default function Backup() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-gray-500' colSpan={5}>Carregando backups...</td>
+              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando backups...</td>
             </tr>
           ) : backups.length === 0 ? (
             <tr>
-              <td className='p-2 text-sm text-gray-500' colSpan={5}>Nenhum backup encontrado.</td>
+              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum backup encontrado.</td>
             </tr>
           ) : (
             backups.map((b) => (
               <tr key={b.id} className='border-t'>
-                <td className='p-2 text-xs text-gray-500'>{b.id.slice(0, 8)}</td>
+                <td className='p-2 text-xs text-zinc-500'>{b.id.slice(0, 8)}</td>
                 <td className='p-2'>{new Date(b.date).toLocaleString()}</td>
                 <td className='p-2'>{formatSize(b.size)}</td>
                 <td className='p-2'>
-                  <span className='text-xs px-2 py-1 rounded bg-gray-100 text-gray-600'>{b.status}</span>
+                  <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>{b.status}</span>
                 </td>
                 <td className='p-2'>
                   {b.storageUrl ? (
@@ -147,7 +147,7 @@ export default function Backup() {
                       Baixar
                     </a>
                   ) : (
-                    <span className='text-xs text-gray-400 mr-2'>Sem arquivo</span>
+                    <span className='text-xs text-zinc-500 mr-2'>Sem arquivo</span>
                   )}
                   <button
                     onClick={() => requestRestore(b.id)}

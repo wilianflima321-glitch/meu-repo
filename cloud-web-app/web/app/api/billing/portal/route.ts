@@ -1,99 +1,80 @@
-/**
- * Stripe Customer Portal - Endpoint Completo
- * 
- * Permite ao usuário:
- * - Ver e atualizar método de pagamento
- * - Ver histórico de faturas
- * - Cancelar/pausar assinatura
- * - Fazer upgrade/downgrade
+﻿/**
+ * Stripe Customer Portal API
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { requireAuth } from '@/lib/auth-server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/db';
+import { getStripe } from '@/lib/stripe';
+import { optionalEnv } from '@/lib/env';
+import { buildAppUrl } from '@/lib/server/app-origin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-});
+function resolveAppUrl(req?: NextRequest): string {
+  const explicit = optionalEnv('NEXT_PUBLIC_APP_URL') || optionalEnv('NEXTAUTH_URL');
+  return (explicit || buildAppUrl('', req)).replace(/\/+$/, '');
+}
 
-// POST - Criar sessão do Customer Portal
+function handleStripeConfigError(error: unknown): NextResponse | null {
+  if ((error as any)?.code === 'ENV_NOT_SET') {
+    return NextResponse.json(
+      { error: 'STRIPE_NOT_CONFIGURED', message: (error as Error).message },
+      { status: 503 }
+    );
+  }
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const session = requireAuth(req);
-    
-    if (!session.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    
-    // Buscar usuário com Stripe Customer ID
+    const stripe = getStripe();
+    const auth = requireAuth(req);
+
     const user = await prisma.user.findUnique({
-      where: { id: session.userId },
-      select: {
-        id: true,
-        email: true,
-        stripeCustomerId: true,
-      },
+      where: { id: auth.userId },
+      select: { id: true, email: true, stripeCustomerId: true },
     });
-    
+
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    
+
     let customerId = user.stripeCustomerId;
-    
-    // Se não tem customer, criar um
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: user.email!,
-        metadata: {
-          userId: user.id,
-        },
+        email: user.email,
+        metadata: { userId: user.id },
       });
-      
       customerId = customer.id;
-      
-      // Salvar no banco
+
       await prisma.user.update({
         where: { id: user.id },
         data: { stripeCustomerId: customerId },
       });
     }
-    
-    // Configuração do portal
-    const returnUrl = `${process.env.NEXTAUTH_URL}/billing`;
-    
-    // Criar sessão do portal
+
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: returnUrl,
-      configuration: await getOrCreatePortalConfiguration(),
+      return_url: `${resolveAppUrl(req)}/billing`,
+      configuration: await getOrCreatePortalConfiguration(stripe, req),
     });
-    
-    return NextResponse.json({
-      url: portalSession.url,
-    });
-    
+
+    return NextResponse.json({ url: portalSession.url });
   } catch (error) {
-    console.error('[Stripe Portal] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create portal session' },
-      { status: 500 }
-    );
+    console.error('[billing/portal:POST] Error:', error);
+    const mapped = handleStripeConfigError(error);
+    if (mapped) return mapped;
+    return NextResponse.json({ error: 'Failed to create portal session' }, { status: 500 });
   }
 }
 
-// GET - Obter informações do portal/subscription
 export async function GET(req: NextRequest) {
   try {
-    const session = requireAuth(req);
-    
-    if (!session.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    
+    const stripe = getStripe();
+    const auth = requireAuth(req);
+
     const user = await prisma.user.findUnique({
-      where: { id: session.userId },
+      where: { id: auth.userId },
       select: {
         stripeCustomerId: true,
         stripeSubscriptionId: true,
@@ -101,66 +82,71 @@ export async function GET(req: NextRequest) {
         trialEndsAt: true,
       },
     });
-    
+
     if (!user?.stripeCustomerId) {
       return NextResponse.json({
         hasSubscription: false,
-        plan: 'free',
+        plan: user?.plan || 'starter_trial',
         canAccessPortal: false,
+        subscription: null,
+        invoices: [],
+        paymentMethods: [],
+        trial: user?.trialEndsAt
+          ? {
+              endsAt: user.trialEndsAt,
+              isActive: new Date(user.trialEndsAt) > new Date(),
+              daysRemaining: Math.max(
+                0,
+                Math.ceil((new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+              ),
+            }
+          : null,
       });
     }
-    
-    // Buscar subscription ativa
+
     let subscription: Stripe.Subscription | null = null;
-    let invoices: Stripe.Invoice[] = [];
-    let paymentMethods: Stripe.PaymentMethod[] = [];
-    
     if (user.stripeSubscriptionId) {
       try {
         subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-      } catch (e) {
-        // Subscription may have been deleted
+      } catch {
+        subscription = null;
       }
     }
-    
-    // Buscar últimas faturas
-    try {
-      const invoiceList = await stripe.invoices.list({
-        customer: user.stripeCustomerId,
-        limit: 10,
-      });
-      invoices = invoiceList.data;
-    } catch (e) {
-      // Ignore
-    }
-    
-    // Buscar métodos de pagamento
-    try {
-      const pmList = await stripe.paymentMethods.list({
-        customer: user.stripeCustomerId,
-        type: 'card',
-      });
-      paymentMethods = pmList.data;
-    } catch (e) {
-      // Ignore
-    }
-    
+
+    const [invoiceList, paymentMethodList] = await Promise.all([
+      stripe.invoices
+        .list({ customer: user.stripeCustomerId, limit: 10 })
+        .then((res) => res.data)
+        .catch(() => [] as Stripe.Invoice[]),
+      stripe.paymentMethods
+        .list({ customer: user.stripeCustomerId, type: 'card' })
+        .then((res) => res.data)
+        .catch(() => [] as Stripe.PaymentMethod[]),
+    ]);
+
     return NextResponse.json({
       hasSubscription: !!subscription && subscription.status === 'active',
       plan: user.plan,
-      subscription: subscription ? {
-        id: subscription.id,
-        status: subscription.status,
-        currentPeriodEnd: subscription.current_period_end,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        cancelAt: subscription.cancel_at,
-      } : null,
-      trial: user.trialEndsAt ? {
-        endsAt: user.trialEndsAt,
-        isActive: new Date(user.trialEndsAt) > new Date(),
-        daysRemaining: Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
-      } : null,
-      invoices: invoices.map(inv => ({
+      subscription: subscription
+        ? {
+            id: subscription.id,
+            status: subscription.status,
+            currentPeriodEnd: subscription.current_period_end,
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            cancelAt: subscription.cancel_at,
+          }
+        : null,
+      trial: user.trialEndsAt
+        ? {
+            endsAt: user.trialEndsAt,
+            isActive: new Date(user.trialEndsAt) > new Date(),
+            daysRemaining: Math.max(
+              0,
+              Math.ceil((new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+            ),
+          }
+        : null,
+      invoices: invoiceList.map((inv) => ({
         id: inv.id,
         number: inv.number,
         status: inv.status,
@@ -170,7 +156,7 @@ export async function GET(req: NextRequest) {
         pdfUrl: inv.invoice_pdf,
         hostedUrl: inv.hosted_invoice_url,
       })),
-      paymentMethods: paymentMethods.map(pm => ({
+      paymentMethods: paymentMethodList.map((pm) => ({
         id: pm.id,
         brand: pm.card?.brand,
         last4: pm.card?.last4,
@@ -180,31 +166,27 @@ export async function GET(req: NextRequest) {
       })),
       canAccessPortal: true,
     });
-    
   } catch (error) {
-    console.error('[Stripe Portal] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch billing info' },
-      { status: 500 }
-    );
+    console.error('[billing/portal:GET] Error:', error);
+    const mapped = handleStripeConfigError(error);
+    if (mapped) return mapped;
+    return NextResponse.json({ error: 'Failed to fetch billing info' }, { status: 500 });
   }
 }
 
-// Helper: Criar ou obter configuração do portal
-async function getOrCreatePortalConfiguration(): Promise<string> {
-  // Verificar se já existe uma configuração
+async function getOrCreatePortalConfiguration(stripe: Stripe, req?: NextRequest): Promise<string> {
+  const appUrl = resolveAppUrl(req);
   const configs = await stripe.billingPortal.configurations.list({ limit: 1 });
-  
+
   if (configs.data.length > 0 && configs.data[0].is_default) {
     return configs.data[0].id;
   }
-  
-  // Criar nova configuração
+
   const config = await stripe.billingPortal.configurations.create({
     business_profile: {
       headline: 'Aethel Engine - Manage your subscription',
-      privacy_policy_url: `${process.env.NEXTAUTH_URL}/legal/privacy`,
-      terms_of_service_url: `${process.env.NEXTAUTH_URL}/legal/terms`,
+      privacy_policy_url: `${appUrl}/legal/privacy`,
+      terms_of_service_url: `${appUrl}/legal/terms`,
     },
     features: {
       customer_update: {
@@ -221,43 +203,26 @@ async function getOrCreatePortalConfiguration(): Promise<string> {
         enabled: true,
         mode: 'at_period_end',
         proration_behavior: 'none',
-        cancellation_reason: {
-          enabled: true,
-          options: [
-            'too_expensive',
-            'missing_features',
-            'switched_service',
-            'unused',
-            'customer_service',
-            'too_complex',
-            'low_quality',
-            'other',
-          ],
-        },
       },
       subscription_update: {
         enabled: true,
         default_allowed_updates: ['price', 'quantity', 'promotion_code'],
         proration_behavior: 'create_prorations',
-        products: await getProductsForPortal(),
+        products: await getProductsForPortal(stripe),
       },
     },
-    default_return_url: `${process.env.NEXTAUTH_URL}/billing`,
+      default_return_url: `${appUrl}/billing`,
   });
-  
+
   return config.id;
 }
 
-// Helper: Obter produtos para o portal
-async function getProductsForPortal() {
-  const products = await stripe.products.list({
-    active: true,
-    limit: 10,
-  });
-  
+async function getProductsForPortal(stripe: Stripe) {
+  const products = await stripe.products.list({ active: true, limit: 10 });
+
   return products.data
-    .filter(p => p.metadata.plan_type)
-    .map(product => ({
+    .filter((p) => p.metadata.plan_type)
+    .map((product) => ({
       product: product.id,
       prices: product.default_price ? [product.default_price as string] : [],
     }));

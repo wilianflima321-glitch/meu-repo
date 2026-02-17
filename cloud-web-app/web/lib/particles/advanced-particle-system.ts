@@ -1214,7 +1214,9 @@ export function useParticleSystem() {
   };
 }
 
-export default {
+const __defaultExport = {
   ParticleEmitter,
   ParticleSystemManager,
 };
+
+export default __defaultExport;

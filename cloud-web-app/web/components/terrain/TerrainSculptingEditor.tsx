@@ -225,7 +225,7 @@ function TerrainMesh({
       metalness: 0.1,
       wireframe: false,
     });
-  }, [layers]);
+  }, []);
   
   const handlePointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();

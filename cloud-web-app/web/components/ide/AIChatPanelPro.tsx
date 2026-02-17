@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
+import NextImage from 'next/image'
 import {
   Send,
   Bot,
@@ -164,6 +165,7 @@ interface AIChatPanelProps {
   isLiveMode?: boolean
   onToggleLiveMode?: () => void
   liveStatus?: 'idle' | 'listening' | 'thinking' | 'speaking'
+  allowAttachments?: boolean
 }
 
 interface MessageContext {
@@ -266,19 +268,19 @@ function ToolCallDisplay({ toolCall }: { toolCall: ToolCall }) {
 
 function ThinkingDisplay({ thinking, isExpanded, onToggle }: { thinking: string; isExpanded: boolean; onToggle: () => void }) {
   return (
-    <div className="my-2 rounded-lg border border-purple-500/30 bg-purple-500/5 overflow-hidden">
+    <div className="my-2 rounded-lg border border-cyan-500/30 bg-cyan-500/5 overflow-hidden">
       <button
         onClick={onToggle}
         className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/5"
       >
-        <Brain className="w-3.5 h-3.5 text-purple-400" />
-        <span className="flex-1 text-sm text-purple-300">Thinking...</span>
-        <ChevronRight className={`w-4 h-4 text-purple-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+        <Brain className="w-3.5 h-3.5 text-cyan-400" />
+        <span className="flex-1 text-sm text-cyan-300">Thinking...</span>
+        <ChevronRight className={`w-4 h-4 text-cyan-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
       </button>
       
       {isExpanded && (
-        <div className="px-3 py-2 border-t border-purple-500/20 bg-purple-900/20">
-          <p className="text-sm text-purple-200/80 whitespace-pre-wrap">{thinking}</p>
+        <div className="px-3 py-2 border-t border-cyan-500/20 bg-cyan-900/20">
+          <p className="text-sm text-cyan-200/80 whitespace-pre-wrap">{thinking}</p>
         </div>
       )}
     </div>
@@ -298,7 +300,7 @@ function LiveModeIndicator({ status, onEnd }: { status: 'idle' | 'listening' | '
   const config = statusConfig[status]
   
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border-b border-indigo-500/30">
+    <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-900/50 to-cyan-900/50 border-b border-blue-500/30">
       <div className="relative">
         <div className={`w-3 h-3 rounded-full ${config.color} ${config.pulse ? 'animate-pulse' : ''}`} />
         {config.pulse && (
@@ -307,7 +309,7 @@ function LiveModeIndicator({ status, onEnd }: { status: 'idle' | 'listening' | '
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <Radio className="w-4 h-4 text-indigo-400" />
+          <Radio className="w-4 h-4 text-blue-400" />
           <span className="text-sm font-medium text-white">Live Mode</span>
         </div>
         <span className="text-xs text-slate-400">{config.text}</span>
@@ -374,12 +376,12 @@ function ChatHistorySidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search conversations..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
         <button
           onClick={onCreateThread}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm text-white font-medium"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm text-white font-medium"
         >
           <Plus className="w-4 h-4" />
           New Chat
@@ -451,7 +453,7 @@ function ThreadItem({
   return (
     <div
       className={`group relative rounded-lg cursor-pointer mb-1 ${
-        isActive ? 'bg-indigo-600/20 border border-indigo-500/30' : 'hover:bg-slate-800'
+        isActive ? 'bg-blue-600/20 border border-blue-500/30' : 'hover:bg-slate-800'
       }`}
     >
       <button onClick={onSelect} className="w-full text-left p-2.5">
@@ -506,12 +508,19 @@ function AttachmentPreview({ attachment, onRemove }: { attachment: Attachment; o
     <div className="relative group">
       {attachment.type === 'image' && attachment.preview ? (
         <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
-          <img src={attachment.preview} alt={attachment.name} className="w-full h-full object-cover" />
+          <NextImage
+            src={attachment.preview}
+            alt={attachment.name}
+            width={64}
+            height={64}
+            unoptimized
+            className="w-full h-full object-cover"
+          />
         </div>
       ) : (
         <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg">
           {attachment.type === 'code' ? (
-            <FileCode className="w-4 h-4 text-indigo-400" />
+            <FileCode className="w-4 h-4 text-blue-400" />
           ) : (
             <File className="w-4 h-4 text-slate-400" />
           )}
@@ -710,7 +719,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
       {/* Avatar */}
       <div className={`
         w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-        ${isUser ? 'bg-indigo-600' : 'bg-gradient-to-br from-emerald-500 to-cyan-500'}
+        ${isUser ? 'bg-blue-600' : 'bg-gradient-to-br from-emerald-500 to-cyan-500'}
       `}>
         {isUser ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
       </div>
@@ -719,7 +728,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
       <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
         {/* Voice indicator */}
         {message.isVoice && (
-          <div className="flex items-center gap-1 mb-1 text-xs text-indigo-400">
+          <div className="flex items-center gap-1 mb-1 text-xs text-blue-400">
             <Mic className="w-3 h-3" />
             Voice message
           </div>
@@ -758,7 +767,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         <div className={`
           inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
           ${isUser 
-            ? 'bg-indigo-600 text-white rounded-tr-sm' 
+            ? 'bg-blue-600 text-white rounded-tr-sm' 
             : 'bg-slate-800 text-slate-200 rounded-tl-sm'
           }
         `}>
@@ -845,6 +854,7 @@ export default function AIChatPanelPro({
   isLiveMode = false,
   onToggleLiveMode,
   liveStatus = 'idle',
+  allowAttachments = false,
 }: AIChatPanelProps) {
   const [input, setInput] = useState('')
   const [showModelSelector, setShowModelSelector] = useState(false)
@@ -908,12 +918,12 @@ export default function AIChatPanelPro({
     if (!input.trim() || isLoading) return
     
     onSendMessage?.(input, {
-      attachments: attachments.length > 0 ? attachments : undefined,
+      attachments: allowAttachments && attachments.length > 0 ? attachments : undefined,
     })
     setInput('')
     setAttachments([])
     clearRecording()
-  }, [input, isLoading, attachments, onSendMessage, clearRecording])
+  }, [input, isLoading, attachments, onSendMessage, clearRecording, allowAttachments])
 
   // Handle keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -1014,7 +1024,7 @@ export default function AIChatPanelPro({
             {threads.length > 0 && (
               <button
                 onClick={() => setShowHistorySidebar(!showHistorySidebar)}
-                className={`p-1.5 rounded hover:bg-slate-800 ${showHistorySidebar ? 'bg-slate-800 text-indigo-400' : 'text-slate-400'}`}
+                className={`p-1.5 rounded hover:bg-slate-800 ${showHistorySidebar ? 'bg-slate-800 text-blue-400' : 'text-slate-400'}`}
                 title="Chat History"
               >
                 <History className="w-4 h-4" />
@@ -1027,7 +1037,7 @@ export default function AIChatPanelPro({
                 onClick={() => setShowModelSelector(!showModelSelector)}
                 className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-800 text-sm"
               >
-                <Sparkles className="w-4 h-4 text-indigo-400" />
+                <Sparkles className="w-4 h-4 text-blue-400" />
                 <span>{selectedModel.name}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
@@ -1045,16 +1055,16 @@ export default function AIChatPanelPro({
                         }}
                         className={`
                           w-full flex items-start gap-3 px-3 py-2 text-left
-                          ${model.id === currentModel ? 'bg-indigo-500/20' : 'hover:bg-slate-700'}
+                          ${model.id === currentModel ? 'bg-blue-500/20' : 'hover:bg-slate-700'}
                         `}
                       >
-                        <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-indigo-400' : 'text-slate-500'}`} />
+                        <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-blue-400' : 'text-slate-500'}`} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-medium text-white">{model.name}</span>
                             <span className="text-xs text-slate-500">{model.provider}</span>
                             {model.supportsVision && (
-                              <span className="px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded">Vision</span>
+                              <span className="px-1.5 py-0.5 text-[10px] bg-cyan-500/20 text-cyan-400 rounded">Vision</span>
                             )}
                             {model.supportsVoice && (
                               <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded">Voice</span>
@@ -1064,7 +1074,7 @@ export default function AIChatPanelPro({
                             <span className="text-xs text-slate-400">{model.description}</span>
                           )}
                         </div>
-                        {model.id === currentModel && <Check className="w-4 h-4 text-indigo-400" />}
+                        {model.id === currentModel && <Check className="w-4 h-4 text-blue-400" />}
                       </button>
                     ))}
                   </div>
@@ -1079,7 +1089,7 @@ export default function AIChatPanelPro({
             {selectedModel.supportsVoice && onToggleLiveMode && (
               <button
                 onClick={onToggleLiveMode}
-                className={`p-1.5 rounded ${isLiveMode ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+                className={`p-1.5 rounded ${isLiveMode ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
                 title={isLiveMode ? 'Exit Live Mode' : 'Enter Live Mode (Gemini Live style)'}
               >
                 <Radio className="w-4 h-4" />
@@ -1118,7 +1128,7 @@ export default function AIChatPanelPro({
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4">
                 <Bot className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">AI Assistant</h3>
@@ -1126,7 +1136,7 @@ export default function AIChatPanelPro({
                 Ask me anything about your code. I can explain, debug, optimize, and generate code.
               </p>
               {selectedModel.supportsVoice && (
-                <p className="text-xs text-indigo-400 mb-4 flex items-center gap-1">
+                <p className="text-xs text-blue-400 mb-4 flex items-center gap-1">
                   <Radio className="w-3 h-3" />
                   This model supports Live Mode for real-time voice chat
                 </p>
@@ -1165,7 +1175,7 @@ export default function AIChatPanelPro({
             <div className="flex-1 min-w-0">
               <div className="inline-block max-w-full text-left px-4 py-2.5 rounded-2xl rounded-tl-sm bg-slate-800 text-slate-200">
                 <div className="text-sm whitespace-pre-wrap">{streamingContent}</div>
-                <span className="inline-block w-2 h-4 bg-indigo-400 animate-pulse ml-1" />
+                <span className="inline-block w-2 h-4 bg-blue-400 animate-pulse ml-1" />
               </div>
             </div>
           </div>
@@ -1207,7 +1217,7 @@ export default function AIChatPanelPro({
       {/* Input area */}
       <form onSubmit={handleSend} className="p-3 border-t border-slate-800">
         {/* Attachments preview */}
-        {attachments.length > 0 && (
+        {allowAttachments && attachments.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {attachments.map(att => (
               <AttachmentPreview
@@ -1237,15 +1247,17 @@ export default function AIChatPanelPro({
         <div className="flex items-end gap-2">
           {/* Attach buttons */}
           <div className="flex items-center gap-1 pb-1">
-            <button
-              type="button"
-              onClick={handleFileAttach}
-              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-              title="Attach file"
-            >
-              <Paperclip className="w-4 h-4" />
-            </button>
-            {selectedModel.supportsVision && (
+            {allowAttachments && (
+              <button
+                type="button"
+                onClick={handleFileAttach}
+                className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+                title="Attach file"
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+            )}
+            {allowAttachments && selectedModel.supportsVision && (
               <button
                 type="button"
                 onClick={handleImageAttach}
@@ -1274,7 +1286,7 @@ export default function AIChatPanelPro({
               onKeyDown={handleKeyDown}
               placeholder={isRecording ? 'Listening...' : 'Ask AI...'}
               disabled={isLoading}
-              className="w-full px-4 py-2.5 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none min-h-[44px] max-h-[200px]"
+              className="w-full px-4 py-2.5 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none min-h-[44px] max-h-[200px]"
               rows={1}
             />
             <button
@@ -1283,7 +1295,7 @@ export default function AIChatPanelPro({
               className={`
                 absolute right-2 bottom-2 p-1.5 rounded-lg transition-colors
                 ${input.trim() && !isLoading
-                  ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                  ? 'bg-blue-600 hover:bg-blue-500 text-white'
                   : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                 }
               `}
@@ -1298,20 +1310,24 @@ export default function AIChatPanelPro({
         </div>
 
         {/* Hidden file inputs */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          accept=".ts,.tsx,.js,.jsx,.json,.md,.txt,.py,.css,.html"
-          onChange={(e) => handleFileSelect(e, 'file')}
-        />
-        <input
-          ref={imageInputRef}
-          type="file"
-          className="hidden"
-          accept="image/*"
-          onChange={(e) => handleFileSelect(e, 'image')}
-        />
+        {allowAttachments && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".ts,.tsx,.js,.jsx,.json,.md,.txt,.py,.css,.html"
+              onChange={(e) => handleFileSelect(e, 'file')}
+            />
+            <input
+              ref={imageInputRef}
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={(e) => handleFileSelect(e, 'image')}
+            />
+          </>
+        )}
       </form>
       </div>
     </div>

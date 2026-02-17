@@ -567,7 +567,7 @@ export function WithSkeleton<T>({
   return <>{children(data)}</>;
 }
 
-export default {
+const SkeletonLoading = {
   SkeletonBox,
   SkeletonText,
   SkeletonAvatar,
@@ -584,3 +584,5 @@ export default {
   useSkeleton,
   WithSkeleton,
 };
+
+export default SkeletonLoading;

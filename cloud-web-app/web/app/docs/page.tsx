@@ -45,8 +45,8 @@ const sections = [
     title: 'Componentes',
     description: 'Biblioteca de componentes UI',
     icon: Layers,
-    color: 'text-purple-400',
-    bgColor: 'bg-purple-500/10',
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
     items: [
       { title: 'Button', href: '/docs/components/button' },
       { title: 'Input', href: '/docs/components/input' },
@@ -71,8 +71,8 @@ const sections = [
     title: 'Integrações',
     description: 'Conecte com suas ferramentas favoritas',
     icon: Puzzle,
-    color: 'text-pink-400',
-    bgColor: 'bg-pink-500/10',
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
     items: [
       { title: 'GitHub', href: '/docs/integrations/github' },
       { title: 'VS Code', href: '/docs/integrations/vscode' },
@@ -84,8 +84,8 @@ const sections = [
     title: 'Guias Avançados',
     description: 'Domine recursos avançados',
     icon: Book,
-    color: 'text-indigo-400',
-    bgColor: 'bg-indigo-500/10',
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/10',
     items: [
       { title: 'Performance', href: '/docs/guides/performance' },
       { title: 'Segurança', href: '/docs/guides/security' },
@@ -112,7 +112,7 @@ export default function DocsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link href="/" className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold text-white">Aethel</span>
@@ -128,7 +128,7 @@ export default function DocsPage() {
                 <input
                   type="text"
                   placeholder="Buscar na documentação... (⌘K)"
-                  className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function DocsPage() {
               </Link>
               <Link
                 href="/dashboard"
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
               >
                 Dashboard
               </Link>
@@ -168,7 +168,7 @@ export default function DocsPage() {
             <input
               type="text"
               placeholder="Buscar artigos, tutoriais, API..."
-              className="w-full pl-12 pr-4 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors text-lg"
+              className="w-full pl-12 pr-4 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors text-lg"
             />
           </div>
         </div>
@@ -197,9 +197,9 @@ export default function DocsPage() {
                   <li key={item.title}>
                     <Link
                       href={item.href}
-                      className="flex items-center gap-2 text-slate-300 hover:text-indigo-400 transition-colors group"
+                      className="flex items-center gap-2 text-slate-300 hover:text-blue-400 transition-colors group"
                     >
-                      <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-indigo-400 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-colors" />
                       {item.title}
                     </Link>
                   </li>
@@ -219,17 +219,17 @@ export default function DocsPage() {
               <Link
                 key={article.title}
                 href="#"
-                className="flex items-center justify-between p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all group"
+                className="flex items-center justify-between p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 hover:bg-slate-800/50 transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <Book className="w-5 h-5 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                  <Book className="w-5 h-5 text-slate-500 group-hover:text-blue-400 transition-colors" />
                   <span className="text-slate-300 group-hover:text-white transition-colors">
                     {article.title}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-slate-500">{article.views} views</span>
-                  <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-indigo-400 transition-colors" />
+                  <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-colors" />
                 </div>
               </Link>
             ))}
@@ -240,7 +240,7 @@ export default function DocsPage() {
         <section className="grid md:grid-cols-3 gap-6">
           <Link
             href="/docs/changelog"
-            className="p-6 bg-gradient-to-br from-indigo-600/20 to-purple-600/10 border border-indigo-500/30 rounded-2xl hover:border-indigo-500/50 transition-colors"
+            className="p-6 bg-gradient-to-br from-blue-600/20 to-cyan-600/10 border border-blue-500/30 rounded-2xl hover:border-blue-500/50 transition-colors"
           >
             <h3 className="text-lg font-semibold text-white mb-2">
               📝 Changelog
@@ -281,7 +281,7 @@ export default function DocsPage() {
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-slate-500">
             Não encontrou o que procurava?{' '}
-            <Link href="/contact" className="text-indigo-400 hover:text-indigo-300">
+            <Link href="/contact" className="text-blue-400 hover:text-blue-300">
               Entre em contato
             </Link>
           </p>

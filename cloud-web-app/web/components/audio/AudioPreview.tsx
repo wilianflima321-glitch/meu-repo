@@ -336,13 +336,6 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
         };
     }, [src, onTimeUpdate, onEnded]);
 
-    // Auto play
-    useEffect(() => {
-        if (autoPlay && audioRef.current && !isLoading) {
-            play();
-        }
-    }, [autoPlay, isLoading]);
-
     // Update audio properties
     useEffect(() => {
         if (audioRef.current) {
@@ -363,6 +356,13 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
         setIsPlaying(false);
         onPause?.();
     }, [onPause]);
+
+    // Auto play
+    useEffect(() => {
+        if (autoPlay && audioRef.current && !isLoading) {
+            play();
+        }
+    }, [autoPlay, isLoading, play]);
 
     const toggle = useCallback(() => {
         if (isPlaying) {

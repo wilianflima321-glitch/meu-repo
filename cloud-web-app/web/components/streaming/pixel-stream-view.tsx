@@ -226,7 +226,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                     </>
                 ) : (
                     <>
-                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30">
                             <Play className="w-10 h-10 text-white ml-1" />
                         </div>
                         <div className="text-white font-medium text-lg">Cloud Rendering</div>
@@ -235,7 +235,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                         </div>
                         <Button 
                             onClick={onConnect}
-                            className="mt-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                            className="mt-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700"
                             size="lg"
                         >
                             <Zap className="w-4 h-4 mr-2" />

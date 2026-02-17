@@ -1102,8 +1102,9 @@ export function CutsceneProvider({ children }: { children: React.ReactNode }) {
   const managerRef = useRef<CutsceneManager>(new CutsceneManager());
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1195,7 +1196,7 @@ export function useCutsceneEvents() {
   return { onEvent };
 }
 
-export default {
+const __defaultExport = {
   CutscenePlayer,
   CutsceneManager,
   CutsceneBuilder,
@@ -1203,3 +1204,5 @@ export default {
   useCutscene,
   useCutsceneEvents,
 };
+
+export default __defaultExport;

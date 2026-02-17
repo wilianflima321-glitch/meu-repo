@@ -48,6 +48,24 @@ interface DirectorSession {
   isAnalyzing: boolean;
 }
 
+type DirectorSessionPayload = DirectorSession & {
+  capabilityStatus: 'PARTIAL';
+  analysisMode: 'heuristic_preview';
+  warning: string;
+};
+
+const DIRECTOR_WARNING =
+  'DIRECTOR_HEURISTIC_PREVIEW: notas geradas por heuristica local, sem inferencia LLM dedicada nesta rota.';
+
+function withDirectorMeta(session: DirectorSession): DirectorSessionPayload {
+  return {
+    ...session,
+    capabilityStatus: 'PARTIAL',
+    analysisMode: 'heuristic_preview',
+    warning: DIRECTOR_WARNING,
+  };
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
@@ -71,7 +89,7 @@ export async function GET(
     // Verificar cache
     const cached = analysisCache.get(projectId);
     if (cached && Date.now() - cached.timestamp < 300000) { // 5 min cache
-      return NextResponse.json(cached.session);
+      return NextResponse.json(withDirectorMeta(cached.session));
     }
 
     // Buscar ou criar sessão
@@ -83,7 +101,12 @@ export async function GET(
       timestamp: Date.now(),
     });
 
-    return NextResponse.json(session);
+    return NextResponse.json(withDirectorMeta(session), {
+      headers: {
+        "x-aethel-capability-status": "PARTIAL",
+        "x-aethel-analysis-mode": "heuristic_preview",
+      },
+    });
   } catch (error) {
     console.error('Director API error:', error);
     const mapped = apiErrorToResponse(error);

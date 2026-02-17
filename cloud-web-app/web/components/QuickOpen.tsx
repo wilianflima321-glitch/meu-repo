@@ -11,6 +11,18 @@ interface FileItem {
   modified?: Date;
 }
 
+const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId';
+
+function resolveProjectIdFromClient(): string {
+  if (typeof window === 'undefined') return 'default';
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get('projectId');
+  if (fromQuery && fromQuery.trim()) return fromQuery.trim();
+  const fromStorage = localStorage.getItem(WORKBENCH_PROJECT_STORAGE_KEY);
+  if (fromStorage && fromStorage.trim()) return fromStorage.trim();
+  return 'default';
+}
+
 export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [query, setQuery] = useState('');
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -24,7 +36,8 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
     if (!file) return;
     
     if (file.type === 'file') {
-      router.push(`/editor?file=${encodeURIComponent(file.path)}`);
+      const projectId = resolveProjectIdFromClient();
+      router.push(`/ide?projectId=${encodeURIComponent(projectId)}&file=${encodeURIComponent(file.path)}`);
       onClose();
     }
   }, [onClose, router]);
@@ -66,25 +79,49 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await fetch('/api/workspace/files', {
+      const projectId = resolveProjectIdFromClient();
+      const response = await fetch('/api/files/fs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: '/workspace' })
+        headers: {
+          'Content-Type': 'application/json',
+          'x-project-id': projectId,
+        },
+        body: JSON.stringify({
+          action: 'list',
+          path: '/',
+          projectId,
+        }),
       });
       if (!response.ok) {
-        throw new Error(`Workspace files request failed (${response.status})`);
+        throw new Error(`Files list request failed (${response.status})`);
       }
       const data = await response.json();
-      if (Array.isArray(data?.files)) {
-        setFiles(data.files);
+      if (Array.isArray(data?.entries)) {
+        const mapped: FileItem[] = data.entries.map(
+          (entry: { path?: string; name?: string; type?: string; size?: number; modified?: string }) => {
+            const rawPath = String(entry.path ?? '');
+            const name =
+              typeof entry.name === 'string' && entry.name.trim().length > 0
+                ? entry.name
+                : rawPath.split('/').filter(Boolean).pop() || rawPath;
+            return {
+              path: rawPath,
+              name,
+              type: entry.type === 'directory' ? 'directory' : 'file',
+              size: typeof entry.size === 'number' ? entry.size : undefined,
+              modified: entry.modified ? new Date(entry.modified) : undefined,
+            };
+          }
+        );
+        setFiles(mapped);
       } else {
         setFiles([]);
-        setErrorMessage('Lista de arquivos indisponível (resposta inválida do backend).');
+        setErrorMessage('File list unavailable (invalid backend response).');
       }
     } catch (error) {
       console.error('Failed to load files:', error);
       setFiles([]);
-      setErrorMessage('Não foi possível carregar arquivos. Verifique o endpoint /api/workspace/files.');
+      setErrorMessage('Failed to load files. Verify /api/files/fs (action=list).');
     } finally {
       setLoading(false);
     }
@@ -175,7 +212,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
           parts.push(<span key={`text-${i}`}>{text.substring(lastIndex, index)}</span>);
         }
         parts.push(
-          <span key={`match-${i}`} className="text-purple-400 font-semibold">
+          <span key={`match-${i}`} className="text-blue-400 font-semibold">
             {text[index]}
           </span>
         );
@@ -208,7 +245,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                 setSelectedIndex(0);
               }}
               placeholder="Search files by name..."
-              className="flex-1 px-4 py-3 bg-slate-900 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="flex-1 px-4 py-3 bg-slate-900 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
         </div>
@@ -240,7 +277,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full px-4 py-3 flex items-center justify-between rounded-lg transition-colors ${
                       isSelected
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-blue-600 text-white'
                         : 'text-slate-300 hover:bg-slate-700'
                     }`}
                   >
@@ -250,13 +287,13 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                         <div className="font-medium truncate">
                           {highlightMatch(file.name, query)}
                         </div>
-                        <div className={`text-xs truncate ${isSelected ? 'text-purple-200' : 'text-slate-500'}`}>
+                        <div className={`text-xs truncate ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>
                           {file.path}
                         </div>
                       </div>
                     </div>
                     {file.size && (
-                      <span className={`text-xs ml-4 flex-shrink-0 ${isSelected ? 'text-purple-200' : 'text-slate-500'}`}>
+                      <span className={`text-xs ml-4 flex-shrink-0 ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>
                         {formatSize(file.size)}
                       </span>
                     )}

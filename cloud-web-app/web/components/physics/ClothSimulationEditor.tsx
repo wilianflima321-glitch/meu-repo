@@ -227,10 +227,10 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, tool
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-3
                    [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-indigo-500
+                   [&::-webkit-slider-thumb]:bg-sky-500
                    [&::-webkit-slider-thumb]:rounded-full
                    [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-indigo-400
+                   [&::-webkit-slider-thumb]:hover:bg-sky-400
                    [&::-webkit-slider-thumb]:transition-colors"
       />
     </div>
@@ -268,7 +268,7 @@ function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.
               step={step}
               onChange={(e) => onChange({ ...value, [axis]: parseFloat(e.target.value) || 0 })}
               className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 pl-6
-                       text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                       text-xs text-slate-200 focus:border-sky-500 focus:outline-none"
             />
           </div>
         ))}
@@ -681,7 +681,7 @@ function Toolbar({
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
             selectedTool === tool.id
-              ? 'bg-indigo-600 text-white'
+              ? 'bg-sky-600 text-white'
               : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
           }`}
           title={tool.label}
@@ -773,7 +773,7 @@ export default function ClothSimulationEditor({
     sim.setColliders(colliders);
     
     setSimulation(sim);
-  }, [config.width, config.height, config.segmentsX, config.segmentsY]);
+  }, [config, colliders, editorState.pinnedVertices]);
   
   // Update simulation config when changed
   useEffect(() => {
@@ -782,7 +782,7 @@ export default function ClothSimulationEditor({
       simulation.setColliders(colliders);
       onSimulationUpdate?.(config);
     }
-  }, [simulation, config, colliders]);
+  }, [simulation, config, colliders, onSimulationUpdate]);
   
   // Handle vertex click
   const handleVertexClick = useCallback((index: number, shiftKey: boolean) => {
@@ -976,12 +976,12 @@ export default function ClothSimulationEditor({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Layers className="w-5 h-5 text-indigo-400" />
+              <Layers className="w-5 h-5 text-sky-400" />
               Cloth Settings
             </h2>
             <button
               onClick={handleExport}
-              className="p-1.5 rounded bg-indigo-600 hover:bg-indigo-500 transition-colors"
+              className="p-1.5 rounded bg-sky-600 hover:bg-sky-500 transition-colors"
               title="Export Configuration"
             >
               <Download className="w-4 h-4" />
@@ -997,7 +997,7 @@ export default function ClothSimulationEditor({
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded text-left transition-colors ${
                     editorState.currentPreset === preset.id
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-sky-600 text-white'
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
@@ -1063,8 +1063,8 @@ export default function ClothSimulationEditor({
                 type="checkbox"
                 checked={config.selfCollision}
                 onChange={(e) => setConfig((p) => ({ ...p, selfCollision: e.target.checked }))}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-indigo-600 
-                         focus:ring-indigo-500 focus:ring-offset-slate-900"
+                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600 
+                         focus:ring-sky-500 focus:ring-offset-slate-900"
               />
             </div>
           </CollapsibleSection>
@@ -1096,13 +1096,13 @@ export default function ClothSimulationEditor({
                 type="checkbox"
                 checked={showWindArrow}
                 onChange={(e) => setShowWindArrow(e.target.checked)}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-indigo-600"
+                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
               />
             </div>
           </CollapsibleSection>
           
           {/* Gravity */}
-          <CollapsibleSection title="Gravity" icon={<Circle className="w-4 h-4 text-purple-400" />}>
+          <CollapsibleSection title="Gravity" icon={<Circle className="w-4 h-4 text-blue-400" />}>
             <Vector3Input
               label="Gravity Vector"
               value={{ x: config.gravity.x, y: config.gravity.y, z: config.gravity.z }}
@@ -1143,7 +1143,7 @@ export default function ClothSimulationEditor({
                 key={index}
                 className={`p-2 rounded mb-1.5 cursor-pointer transition-colors ${
                   selectedCollider === index 
-                    ? 'bg-indigo-600/30 border border-indigo-500' 
+                    ? 'bg-sky-600/30 border border-sky-500' 
                     : 'bg-slate-700'
                 }`}
                 onClick={() => setSelectedCollider(index)}
@@ -1169,7 +1169,7 @@ export default function ClothSimulationEditor({
                 type="checkbox"
                 checked={editorState.showColliders}
                 onChange={(e) => setEditorState((p) => ({ ...p, showColliders: e.target.checked }))}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-indigo-600"
+                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
               />
             </div>
             
@@ -1179,7 +1179,7 @@ export default function ClothSimulationEditor({
                 type="checkbox"
                 checked={config.groundPlane}
                 onChange={(e) => setConfig((p) => ({ ...p, groundPlane: e.target.checked }))}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-indigo-600"
+                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
               />
             </div>
           </CollapsibleSection>
@@ -1193,7 +1193,7 @@ export default function ClothSimulationEditor({
                   type="checkbox"
                   checked={editorState.showWireframe}
                   onChange={(e) => setEditorState((p) => ({ ...p, showWireframe: e.target.checked }))}
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-indigo-600"
+                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -1202,7 +1202,7 @@ export default function ClothSimulationEditor({
                   type="checkbox"
                   checked={editorState.showConstraints}
                   onChange={(e) => setEditorState((p) => ({ ...p, showConstraints: e.target.checked }))}
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-indigo-600"
+                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
                 />
               </div>
             </div>

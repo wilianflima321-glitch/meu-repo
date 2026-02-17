@@ -596,8 +596,9 @@ export function UIProvider({
   }, [theme]);
   
   useEffect(() => {
+    const manager = managerRef.current;
     return () => {
-      managerRef.current.dispose();
+      manager.dispose();
     };
   }, []);
   
@@ -1170,7 +1171,7 @@ export function Input({
 // EXPORTS
 // ============================================================================
 
-export default {
+const __defaultExport = {
   UIManager,
   UIProvider,
   useUI,
@@ -1189,3 +1190,5 @@ export default {
   lightTheme,
   gameTheme,
 };
+
+export default __defaultExport;

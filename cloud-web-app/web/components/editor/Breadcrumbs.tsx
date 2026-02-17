@@ -139,13 +139,13 @@ const SYMBOL_COLORS: Record<SymbolKind, string> = {
   namespace: 'text-amber-400',
   package: 'text-amber-400',
   class: 'text-amber-500',
-  method: 'text-purple-400',
+  method: 'text-blue-400',
   property: 'text-sky-400',
   field: 'text-sky-400',
-  constructor: 'text-purple-400',
+  constructor: 'text-blue-400',
   enum: 'text-amber-400',
   interface: 'text-sky-400',
-  function: 'text-purple-400',
+  function: 'text-blue-400',
   variable: 'text-sky-300',
   constant: 'text-blue-400',
   string: 'text-emerald-400',
@@ -292,7 +292,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search..."
-              className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
             />
           </div>
 
@@ -315,7 +315,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                       onClick={() => handleItemClick(item)}
                       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
                         index === selectedIndex
-                          ? 'bg-indigo-600/30'
+                          ? 'bg-sky-600/30'
                           : 'hover:bg-slate-800'
                       }`}
                     >
@@ -338,7 +338,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                       onClick={() => handleItemClick(item)}
                       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
                         index === selectedIndex
-                          ? 'bg-indigo-600/30'
+                          ? 'bg-sky-600/30'
                           : 'hover:bg-slate-800'
                       }`}
                     >
@@ -658,7 +658,7 @@ export function SymbolOutlinePanel({
           }}
           className={`w-full flex items-center gap-1 px-2 py-1 text-sm text-left transition-colors ${
             isActive
-              ? 'bg-indigo-600/20 text-white'
+              ? 'bg-sky-600/20 text-white'
               : 'hover:bg-slate-800 text-slate-300'
           }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
@@ -704,7 +704,7 @@ export function SymbolOutlinePanel({
           value={filter}
           onChange={e => setFilter(e.target.value)}
           placeholder="Filter symbols..."
-          className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
         />
       </div>
 

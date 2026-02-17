@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 import cache from '@/lib/redis-cache';
 import queueManager from '@/lib/queue-system';
+import { buildAppUrl } from '@/lib/server/app-origin';
 
 // =============================================================================
 // INFRASTRUCTURE STATUS API
@@ -83,8 +84,9 @@ async function handler(req: NextRequest) {
       checkServiceHealth('AI Gateway', async () => {
         const start = Date.now();
         // Simple health check - in production would ping actual AI service
-        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/health`, {
+        const res = await fetch(buildAppUrl('/api/health', req), {
           method: 'HEAD',
+          cache: 'no-store',
         }).catch(() => null);
         return { 
           latency: Date.now() - start,

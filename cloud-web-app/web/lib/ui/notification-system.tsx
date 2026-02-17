@@ -735,7 +735,7 @@ export function NotificationProvider({
 }) {
   const value = useMemo(() => ({
     manager: new NotificationManager(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     return () => {
@@ -874,7 +874,7 @@ export function useNotificationProgress(id: string) {
   return { setProgress, complete };
 }
 
-export default {
+const __defaultExport = {
   NotificationManager,
   NOTIFICATION_TEMPLATES,
   NotificationProvider,
@@ -885,3 +885,5 @@ export default {
   useGameNotifications,
   useNotificationProgress,
 };
+
+export default __defaultExport;

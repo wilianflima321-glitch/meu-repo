@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { getToken } from '@/lib/auth';
 
 type PaymentItem = {
   id: string;
@@ -18,9 +19,29 @@ type Totals = {
   failed: number;
 };
 
+type GatewayConfig = {
+  activeGateway: 'stripe' | 'disabled';
+  checkoutEnabled: boolean;
+  allowLocalIdeRedirect: boolean;
+  checkoutOrigin: string | null;
+  updatedBy: string | null;
+  updatedAt: string | null;
+};
+
+const DEFAULT_GATEWAY: GatewayConfig = {
+  activeGateway: 'stripe',
+  checkoutEnabled: true,
+  allowLocalIdeRedirect: true,
+  checkoutOrigin: null,
+  updatedBy: null,
+  updatedAt: null,
+};
+
 export default function Payments() {
   const [items, setItems] = useState<PaymentItem[]>([]);
   const [totals, setTotals] = useState<Totals>({ total: 0, succeeded: 0, pending: 0, failed: 0 });
+  const [gateway, setGateway] = useState<GatewayConfig>(DEFAULT_GATEWAY);
+  const [savingGateway, setSavingGateway] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'succeeded' | 'pending' | 'failed'>('all');
@@ -33,12 +54,31 @@ export default function Payments() {
     failed: 'Falhou',
   };
 
+  const getAuthHeaders = () => {
+    const token = getToken();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
+  const fetchGateway = useCallback(async () => {
+    const res = await fetch('/api/admin/payments/gateway', {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error('Falha ao carregar configuração de gateway');
+    const data = await res.json();
+    setGateway(data?.config || DEFAULT_GATEWAY);
+  }, []);
+
   const fetchPayments = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       params.set('status', statusFilter);
-      const res = await fetch(`/api/admin/payments?${params.toString()}`);
+      const res = await fetch(`/api/admin/payments?${params.toString()}`, {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) throw new Error('Falha ao carregar pagamentos');
       const data = await res.json();
       setItems(Array.isArray(data?.items) ? data.items : []);
@@ -54,55 +94,119 @@ export default function Payments() {
 
   useEffect(() => {
     fetchPayments();
-  }, [fetchPayments]);
+    fetchGateway().catch((err) => {
+      setError(err instanceof Error ? err.message : 'Falha ao carregar gateway');
+    });
+  }, [fetchGateway, fetchPayments]);
+
+  const saveGateway = useCallback(async () => {
+    try {
+      setSavingGateway(true);
+      const res = await fetch('/api/admin/payments/gateway', {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(gateway),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload?.error || 'Falha ao salvar gateway');
+      }
+      setGateway(payload?.config || gateway);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao salvar gateway');
+    } finally {
+      setSavingGateway(false);
+    }
+  }, [gateway]);
 
   const filteredItems = items.filter((item) => {
     const term = search.trim().toLowerCase();
     return !term || (item.userEmail || '').toLowerCase().includes(term) || item.id.includes(term);
   });
 
-  const handleExport = () => {
-    const payload = {
-      generatedAt: new Date().toISOString(),
-      statusFilter,
-      items,
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `payments-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-bold'>Pagamentos e Faturamento</h1>
-          <p className='text-gray-600'>Últimas transações registradas no sistema.</p>
-          {lastUpdated && (
-            <p className='text-xs text-gray-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+          <h1 className='text-3xl font-bold'>Pagamentos e Checkout</h1>
+          <p className='text-zinc-400'>Gateway controlado por admin e transações reais registradas.</p>
+          {lastUpdated && <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
-        <div className='flex items-center gap-2'>
+        <button onClick={fetchPayments} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>
+          Atualizar
+        </button>
+      </div>
+
+      {error && (
+        <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
+          {error}
+        </div>
+      )}
+
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
+        <h2 className='text-lg font-semibold mb-4'>Gateway de pagamento (admin)</h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <label className='text-sm'>
+            <span className='block mb-1 text-zinc-400'>Gateway ativo</span>
+            <select
+              value={gateway.activeGateway}
+              onChange={(e) => setGateway((prev) => ({ ...prev, activeGateway: e.target.value as 'stripe' | 'disabled' }))}
+              className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full'
+            >
+              <option value='stripe'>Stripe</option>
+              <option value='disabled'>Desabilitado</option>
+            </select>
+          </label>
+
+          <label className='text-sm'>
+            <span className='block mb-1 text-zinc-400'>Origem web do checkout</span>
+            <input
+              value={gateway.checkoutOrigin || ''}
+              onChange={(e) => setGateway((prev) => ({ ...prev, checkoutOrigin: e.target.value.trim() || null }))}
+              placeholder='https://seu-dominio.com'
+              className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full'
+            />
+          </label>
+        </div>
+
+        <div className='flex flex-wrap items-center gap-4 mt-4'>
+          <label className='inline-flex items-center gap-2 text-sm'>
+            <input
+              type='checkbox'
+              checked={gateway.checkoutEnabled}
+              onChange={(e) => setGateway((prev) => ({ ...prev, checkoutEnabled: e.target.checked }))}
+            />
+            Checkout habilitado
+          </label>
+
+          <label className='inline-flex items-center gap-2 text-sm'>
+            <input
+              type='checkbox'
+              checked={gateway.allowLocalIdeRedirect}
+              onChange={(e) => setGateway((prev) => ({ ...prev, allowLocalIdeRedirect: e.target.checked }))}
+            />
+            Permitir redirecionamento da IDE local para web
+          </label>
+
           <button
-            onClick={handleExport}
-            className='px-3 py-2 rounded bg-blue-600 text-white text-sm'
+            onClick={saveGateway}
+            disabled={savingGateway}
+            className='px-3 py-2 rounded bg-blue-600 text-white text-sm disabled:opacity-60'
           >
-            Exportar
+            {savingGateway ? 'Salvando...' : 'Salvar configuração'}
           </button>
-          <button
-            onClick={fetchPayments}
-            className='px-3 py-2 rounded bg-gray-100 text-gray-700 text-sm'
-          >
-            Atualizar
-          </button>
+        </div>
+
+        <div className='mt-4 rounded border border-zinc-800/70 bg-zinc-950/50 p-3 text-xs text-zinc-400'>
+          Estado operacional: gateway <span className='text-zinc-200'>{gateway.activeGateway}</span>, checkout{' '}
+          <span className='text-zinc-200'>{gateway.checkoutEnabled ? 'habilitado' : 'desabilitado'}</span>, redirecionamento da IDE local{' '}
+          <span className='text-zinc-200'>{gateway.allowLocalIdeRedirect ? 'habilitado' : 'desabilitado'}</span>.
         </div>
       </div>
 
-      <div className='bg-white p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
           <p className='text-2xl font-bold text-blue-600'>US${totals.total.toFixed(2)}</p>
@@ -121,13 +225,13 @@ export default function Payments() {
         </div>
       </div>
 
-      <div className='bg-white p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar por e-mail ou ID'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className='border p-2 rounded w-full md:max-w-sm'
+          className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full md:max-w-sm text-zinc-100 placeholder:text-zinc-500'
         />
         <div className='flex items-center gap-2'>
           {(['all', 'succeeded', 'pending', 'failed'] as const).map((status) => (
@@ -135,19 +239,19 @@ export default function Payments() {
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
               }`}
             >
-              {status === 'all' ? 'Todos' : (statusLabels[status] ?? status)}
+              {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
             </button>
           ))}
         </div>
       </div>
 
-      <div className='bg-white rounded-lg shadow overflow-hidden'>
+      <div className='bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
         <table className='w-full table-auto'>
           <thead>
-            <tr className='bg-gray-100 text-sm'>
+            <tr className='bg-zinc-800/70 text-sm'>
               <th className='p-2'>ID</th>
               <th className='p-2'>Usuário</th>
               <th className='p-2'>Valor</th>
@@ -158,44 +262,28 @@ export default function Payments() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-gray-500' colSpan={5}>Carregando pagamentos...</td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td className='p-2 text-sm text-red-500' colSpan={5}>{error}</td>
+                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando pagamentos...</td>
               </tr>
             ) : filteredItems.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-gray-500' colSpan={5}>Nenhum pagamento encontrado.</td>
+                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum pagamento encontrado.</td>
               </tr>
             ) : (
               filteredItems.map((item) => (
                 <tr key={item.id} className='border-t'>
-                  <td className='p-2 text-xs text-gray-500'>{item.id.slice(-6)}</td>
+                  <td className='p-2 text-xs text-zinc-500'>{item.id.slice(-6)}</td>
+                  <td className='p-2'>{item.userEmail || '—'}</td>
+                  <td className='p-2'>{item.currency.toUpperCase()} {item.amount.toFixed(2)}</td>
                   <td className='p-2'>
-                    <div className='flex items-center gap-2'>
-                      <span>{item.userEmail || '—'}</span>
-                      {item.userEmail && (
-                        <button
-                          onClick={() => navigator.clipboard.writeText(item.userEmail || '')}
-                          className='text-xs text-gray-500 hover:text-gray-800'
-                        >
-                          Copiar
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                  <td className='p-2'>
-                    {item.currency.toUpperCase()} {item.amount.toFixed(2)}
-                  </td>
-                  <td className='p-2'>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      item.status === 'succeeded'
-                        ? 'bg-green-100 text-green-700'
-                        : item.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        item.status === 'succeeded'
+                          ? 'bg-emerald-500/15 text-emerald-300'
+                          : item.status === 'pending'
+                          ? 'bg-amber-500/15 text-amber-300'
+                          : 'bg-rose-500/15 text-rose-300'
+                      }`}
+                    >
                       {statusLabels[item.status] ?? item.status}
                     </span>
                   </td>

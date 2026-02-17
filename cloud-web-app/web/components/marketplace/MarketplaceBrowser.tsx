@@ -12,6 +12,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -238,9 +239,12 @@ function AssetCard({
             >
                 {/* Thumbnail */}
                 <div className="w-32 h-24 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                    <img 
-                        src={asset.thumbnailUrl} 
+                    <Image
+                        src={asset.thumbnailUrl}
                         alt={asset.name}
+                        width={128}
+                        height={96}
+                        unoptimized
                         className="w-full h-full object-cover"
                     />
                 </div>
@@ -332,9 +336,11 @@ function AssetCard({
         >
             {/* Thumbnail */}
             <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                <img 
-                    src={asset.thumbnailUrl} 
+                <Image
+                    src={asset.thumbnailUrl}
                     alt={asset.name}
+                    fill
+                    unoptimized
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 

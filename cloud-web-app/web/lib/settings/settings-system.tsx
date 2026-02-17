@@ -1032,7 +1032,7 @@ export function SettingsProvider({
 }) {
   const value = useMemo(() => ({
     manager: new SettingsManager(config),
-  }), []);
+  }), [config]);
   
   useEffect(() => {
     return () => {
@@ -1208,7 +1208,7 @@ export function useSetting<K extends keyof AllSettings, P extends keyof AllSetti
   return [value, updateValue];
 }
 
-export default {
+const __defaultExport = {
   SettingsManager,
   DEFAULT_AUDIO_SETTINGS,
   DEFAULT_VIDEO_SETTINGS,
@@ -1229,3 +1229,5 @@ export default {
   useAccessibilitySettings,
   useSetting,
 };
+
+export default __defaultExport;

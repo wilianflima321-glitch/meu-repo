@@ -156,7 +156,7 @@ export default function AdminPanel() {
             onClick={() => setActiveAdminTab(tab.id as any)}
             className={`aethel-flex-1 aethel-py-2 aethel-px-3 aethel-rounded-md aethel-text-sm aethel-font-medium aethel-transition ${
               activeAdminTab === tab.id
-                ? 'aethel-bg-indigo-600 aethel-text-white'
+                ? 'aethel-bg-sky-600 aethel-text-white'
                 : 'aethel-text-slate-400 hover:aethel-text-white hover:aethel-bg-slate-700'
             }`}
           >
@@ -213,10 +213,10 @@ export default function AdminPanel() {
                 <div>
                   <h3 className="aethel-text-sm aethel-font-medium aethel-text-slate-400">Chamadas API Hoje</h3>
                   <p className="aethel-text-2xl aethel-font-bold aethel-text-white">{currentStats.api_calls_today.toLocaleString()}</p>
-                  <p className="aethel-text-xs aethel-text-purple-400 aethel-mt-1">Sessões ativas: {currentStats.active_sessions}</p>
+                  <p className="aethel-text-xs aethel-text-blue-400 aethel-mt-1">Sessões ativas: {currentStats.active_sessions}</p>
                 </div>
-                <div className="aethel-w-12 aethel-h-12 aethel-bg-purple-500/20 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center">
-                  <Activity className="w-6 h-6 aethel-text-purple-400" />
+                <div className="aethel-w-12 aethel-h-12 aethel-bg-blue-500/20 aethel-rounded-lg aethel-flex aethel-items-center aethel-justify-center">
+                  <Activity className="w-6 h-6 aethel-text-blue-400" />
                 </div>
               </div>
             </div>
@@ -315,7 +315,7 @@ export default function AdminPanel() {
                       </td>
                       <td className="aethel-py-3 aethel-px-4">
                         {user.is_admin && (
-                          <span className="aethel-px-2 aethel-py-1 aethel-rounded aethel-text-xs aethel-bg-purple-500/20 aethel-text-purple-400">
+                          <span className="aethel-px-2 aethel-py-1 aethel-rounded aethel-text-xs aethel-bg-blue-500/20 aethel-text-blue-400">
                             Admin
                           </span>
                         )}

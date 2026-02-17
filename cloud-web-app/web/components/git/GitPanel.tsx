@@ -51,6 +51,7 @@ import type {
   GitDiff,
   GitFileStatus,
 } from '@/lib/git/git-service';
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 
 // ============================================================================
 // STYLES
@@ -73,7 +74,7 @@ const colors = {
   mauve: '#cba6f7',
   peach: '#fab387',
   teal: '#94e2d5',
-  pink: '#f5c2e7',
+  cyan: '#f5c2e7',
   overlay0: '#6c7086',
 };
 
@@ -427,10 +428,15 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
   }, [gitService, refresh]);
   
   const handleDiscard = useCallback(async (path: string) => {
-    if (window.confirm(`Discard changes to ${path}?`)) {
-      await gitService.discard(path);
-      refresh();
-    }
+    const shouldDiscard = await openConfirmDialog({
+      title: 'Discard changes',
+      message: `Discard changes to ${path}?`,
+      confirmText: 'Discard',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDiscard) return;
+    await gitService.discard(path);
+    refresh();
   }, [gitService, refresh]);
   
   const handleStageAll = useCallback(async () => {
@@ -472,10 +478,15 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
   }, [gitService, refresh]);
   
   const handleDeleteBranch = useCallback(async (branchName: string) => {
-    if (window.confirm(`Delete branch ${branchName}?`)) {
-      await gitService.deleteBranch(branchName);
-      refresh();
-    }
+    const shouldDelete = await openConfirmDialog({
+      title: 'Delete branch',
+      message: `Delete branch ${branchName}?`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
+    await gitService.deleteBranch(branchName);
+    refresh();
   }, [gitService, refresh]);
   
   const toggleSection = (section: string) => {
