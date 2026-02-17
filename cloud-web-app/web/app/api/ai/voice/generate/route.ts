@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Rate limit: 50 voice generations per hour
 const VOICE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 50 };
@@ -53,6 +54,12 @@ interface GenerateRequest {
   speed?: number; // 0.5 to 2.0
   pitch?: number; // -50 to +50
   format?: 'mp3' | 'wav' | 'ogg';
+}
+
+function getAvailableProviders(): Provider[] {
+  return Object.entries(PROVIDERS)
+    .filter(([, config]) => Boolean(process.env[config.envKey]))
+    .map(([id]) => id as Provider);
 }
 
 // ElevenLabs Generation
@@ -232,23 +239,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if provider API key is configured
+    // Keep provider selection explicit: do not auto-fallback to another provider.
     const providerConfig = PROVIDERS[provider as Provider];
     if (!process.env[providerConfig.envKey]) {
-      // Fallback to available provider
-      const availableProvider = Object.entries(PROVIDERS).find(
-        ([_, config]) => process.env[config.envKey]
-      );
-      
-      if (!availableProvider) {
-        return NextResponse.json(
-          { 
-            error: 'No voice provider configured',
-            message: 'Please configure ELEVENLABS_API_KEY, OPENAI_API_KEY, or AZURE_SPEECH_KEY',
-          },
-          { status: 503 }
-        );
-      }
+      const availableProviders = getAvailableProviders();
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message:
+          availableProviders.length === 0
+            ? 'No voice generation provider configured.'
+            : `Requested provider "${provider}" is not configured.`,
+        capability: 'AI_VOICE_GENERATION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1_PROVIDER_CONFIG',
+        metadata: {
+          requestedProvider: provider,
+          requiredEnv: providerConfig.envKey,
+          availableProviders,
+        },
+      });
     }
 
     // Get default voice for provider

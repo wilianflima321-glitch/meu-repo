@@ -91,6 +91,26 @@ const checks = [
     name: 'ai/inline-completion provider-gate + payload contract',
   },
   {
+    file: 'app/api/ai/image/generate/route.ts',
+    patterns: ["error: 'PROVIDER_NOT_CONFIGURED'", 'status: 503', "capability: 'AI_IMAGE_GENERATION'", "capabilityStatus: 'PARTIAL'"],
+    name: 'ai/image/generate provider-gate contract',
+  },
+  {
+    file: 'app/api/ai/voice/generate/route.ts',
+    patterns: ["error: 'PROVIDER_NOT_CONFIGURED'", 'status: 503', "capability: 'AI_VOICE_GENERATION'", "capabilityStatus: 'PARTIAL'"],
+    name: 'ai/voice/generate provider-gate contract',
+  },
+  {
+    file: 'app/api/ai/music/generate/route.ts',
+    patterns: ["error: 'PROVIDER_NOT_CONFIGURED'", 'status: 503', "capability: 'AI_MUSIC_GENERATION'", "capabilityStatus: 'PARTIAL'"],
+    name: 'ai/music/generate provider-gate contract',
+  },
+  {
+    file: 'app/api/ai/3d/generate/route.ts',
+    patterns: ["error: 'PROVIDER_NOT_CONFIGURED'", 'status: 503', "capability: 'AI_3D_GENERATION'", "capabilityStatus: 'PARTIAL'"],
+    name: 'ai/3d/generate provider-gate contract',
+  },
+  {
     file: 'app/api/ai/change/apply/route.ts',
     patterns: [
       "capability: 'AI_CHANGE_APPLY'",

@@ -155,3 +155,8 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 - `components/editor/MonacoEditorPro.tsx`
 8. Rollback snapshots now persist to local runtime temp storage (TTL) for improved continuity across local restarts:
 - `lib/server/change-apply-runtime.ts`
+9. Media/3D generation routes now fail explicitly on missing provider config (`503 PROVIDER_NOT_CONFIGURED`, `capabilityStatus=PARTIAL`, metadata) instead of implicit provider fallback:
+- `app/api/ai/image/generate/route.ts`
+- `app/api/ai/voice/generate/route.ts`
+- `app/api/ai/music/generate/route.ts`
+- `app/api/ai/3d/generate/route.ts`

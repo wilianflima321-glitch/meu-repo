@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Rate limit: 30 music generations per hour
 const RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 30 };
@@ -58,6 +59,12 @@ interface GenerateRequest {
   instrumental?: boolean;
   lyrics?: string;
   referenceUrl?: string; // for style reference
+}
+
+function getAvailableProviders(): Provider[] {
+  return Object.entries(PROVIDERS)
+    .filter(([, config]) => Boolean(process.env[config.envKey]))
+    .map(([id]) => id as Provider);
 }
 
 // Suno Generation
@@ -266,21 +273,25 @@ export async function POST(req: NextRequest) {
 
     const providerConfig = PROVIDERS[provider as Provider];
     
-    // Check API key
+    // Keep provider selection explicit: do not auto-fallback to another provider.
     if (!process.env[providerConfig.envKey]) {
-      const availableProvider = Object.entries(PROVIDERS).find(
-        ([_, config]) => process.env[config.envKey]
-      );
-      
-      if (!availableProvider) {
-        return NextResponse.json(
-          { 
-            error: 'No music provider configured',
-            message: 'Please configure SUNO_API_KEY or REPLICATE_API_TOKEN',
-          },
-          { status: 503 }
-        );
-      }
+      const availableProviders = getAvailableProviders();
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message:
+          availableProviders.length === 0
+            ? 'No music generation provider configured.'
+            : `Requested provider "${provider}" is not configured.`,
+        capability: 'AI_MUSIC_GENERATION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1_PROVIDER_CONFIG',
+        metadata: {
+          requestedProvider: provider,
+          requiredEnv: providerConfig.envKey,
+          availableProviders,
+        },
+      });
     }
 
     // Validate duration

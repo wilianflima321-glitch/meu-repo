@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Rate limit: 20 images per hour
 const IMAGE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 20 };
@@ -53,6 +54,12 @@ interface GenerateRequest {
   style?: string;
   quality?: 'standard' | 'hd';
   n?: number;
+}
+
+function getAvailableProviders(): Provider[] {
+  return Object.entries(PROVIDERS)
+    .filter(([, config]) => Boolean(process.env[config.envKey]))
+    .map(([id]) => id as Provider);
 }
 
 // DALL-E Generation
@@ -249,23 +256,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if provider API key is configured
+    // Keep provider selection explicit: do not auto-fallback to another provider.
     const providerConfig = PROVIDERS[provider as Provider];
     if (!process.env[providerConfig.envKey]) {
-      // Fallback to available provider
-      const availableProvider = Object.entries(PROVIDERS).find(
-        ([_, config]) => process.env[config.envKey]
-      );
-      
-      if (!availableProvider) {
-        return NextResponse.json(
-          { 
-            error: 'No image generation provider configured',
-            message: 'Please configure OPENAI_API_KEY, STABILITY_API_KEY, or FLUX_API_KEY',
-          },
-          { status: 503 }
-        );
-      }
+      const availableProviders = getAvailableProviders();
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message:
+          availableProviders.length === 0
+            ? 'No image generation provider configured.'
+            : `Requested provider "${provider}" is not configured.`,
+        capability: 'AI_IMAGE_GENERATION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1_PROVIDER_CONFIG',
+        metadata: {
+          requestedProvider: provider,
+          requiredEnv: providerConfig.envKey,
+          availableProviders,
+        },
+      });
     }
 
     // Generate based on provider

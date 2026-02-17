@@ -653,3 +653,26 @@ Implemented:
 Critical reading:
 1. Reduces integration drift risk between frontend/client tooling and runtime API behavior.
 2. Existing runtime limitation warnings remain operational (not contract-breaking).
+
+## Delta 2026-02-18 XIV - Full gate revalidation
+Implemented:
+1. Executed full `qa:enterprise-gate` successfully on current branch.
+2. Refreshed interface/mojibake/route inventory evidence docs.
+
+Critical reading:
+1. Hard gates are stable; residual warnings are environmental/runtime-noise and already tracked.
+2. Remaining functional explicit gap is still `not-implemented-ui=6` by policy, not hidden.
+
+## Delta 2026-02-18 XV - Media provider fallback risk removed
+Implemented:
+1. Replaced implicit fallback in media/3D generation routes with explicit capability gate:
+- `app/api/ai/image/generate/route.ts`
+- `app/api/ai/voice/generate/route.ts`
+- `app/api/ai/music/generate/route.ts`
+- `app/api/ai/3d/generate/route.ts`
+2. Added provider availability metadata in `503 PROVIDER_NOT_CONFIGURED` responses (`capabilityStatus=PARTIAL`).
+3. Expanded route contract checker coverage for these routes.
+
+Critical reading:
+1. This closes a real reliability bug class: requested provider missing no longer degrades into downstream runtime exception.
+2. UX now receives deterministic capability status and actionable metadata instead of ambiguous 500s.

@@ -1903,3 +1903,43 @@ Validation snapshot:
 3. `npm run qa:route-contracts` PASS
 4. `npm run qa:no-fake-success` PASS
 5. `npm run build` PASS (with existing non-blocking runtime warnings tracked in runbook)
+
+## 60) Delta 2026-02-18 XIV - Enterprise gate full pass refresh
+
+Implemented:
+1. Re-ran full enterprise gate end-to-end with current branch state.
+2. Refreshed generated evidence docs:
+- `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
+- `cloud-web-app/web/docs/MOJIBAKE_SCAN.md`
+- `cloud-web-app/web/docs/ROUTES_INVENTORY.md`
+
+Validation snapshot:
+1. `npm run qa:enterprise-gate` PASS
+2. `not-implemented-ui=6` remains explicit (API gates only)
+3. Critical zeros preserved:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+
+Residual warning inventory remains unchanged and tracked in runbook `19`.
+
+## 61) Delta 2026-02-18 XV - Provider gate hardening for media/3D AI routes
+
+Implemented:
+1. Removed implicit provider fallback behavior that could degrade into hidden 500 paths.
+2. Added explicit capability gates (`503 PROVIDER_NOT_CONFIGURED`, `capabilityStatus=PARTIAL`) when requested provider is not configured:
+- `cloud-web-app/web/app/api/ai/image/generate/route.ts`
+- `cloud-web-app/web/app/api/ai/voice/generate/route.ts`
+- `cloud-web-app/web/app/api/ai/music/generate/route.ts`
+- `cloud-web-app/web/app/api/ai/3d/generate/route.ts`
+3. Added capability metadata in these branches:
+- `requestedProvider`
+- `requiredEnv`
+- `availableProviders`
+4. Expanded route contract QA coverage for these routes:
+- `cloud-web-app/web/scripts/check-route-contracts.mjs`
+
+Decision lock:
+1. Requested provider is now explicit-by-contract; runtime no longer auto-switches provider silently.
+2. Capability-unavailable branches must remain machine-readable and auditable.

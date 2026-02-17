@@ -659,3 +659,24 @@ Delivered:
 
 Triaged impact:
 1. Closes UX gap between deterministic backend rollback and user-discoverable controls in `/ide`.
+
+## Delta 2026-02-18 XII - Gate revalidation snapshot
+Delivered:
+1. Full enterprise gate rerun on current branch state.
+2. Updated generated evidence artifacts:
+- `docs/INTERFACE_CRITICAL_SWEEP.md`
+- `docs/MOJIBAKE_SCAN.md`
+- `docs/ROUTES_INVENTORY.md`
+
+Triaged impact:
+1. Confirms current branch remains contract-safe for PR without bypass.
+
+## Delta 2026-02-18 XIII - Provider-capability contract triage for media AI surfaces
+Delivered:
+1. Normalized provider-unavailable behavior in media/3D routes to explicit `503 PROVIDER_NOT_CONFIGURED` capability gates (`capabilityStatus=PARTIAL`).
+2. Added metadata for operational diagnosis (`requestedProvider`, `requiredEnv`, `availableProviders`).
+3. Extended route-contract gate to prevent drift on these surfaces.
+
+Triaged impact:
+1. Removes hidden fallback ambiguity in high-cost generation endpoints.
+2. Improves enterprise observability and user-facing failure clarity without scope expansion.

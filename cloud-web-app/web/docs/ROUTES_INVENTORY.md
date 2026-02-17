@@ -1,5 +1,5 @@
 # ROUTES_INVENTORY.md
-Generated: 2026-02-16T04:18:58.582Z
+Generated: 2026-02-17T17:34:28.167Z
 
 ## Summary
 - Total routes: 88
@@ -9,7 +9,7 @@ Generated: 2026-02-16T04:18:58.582Z
 - Workbench redirect routes: 17
 
 ## API Gate Status
-- Remaining NOT_IMPLEMENTED API markers: 6
+- Remaining NOT_IMPLEMENTED API markers: 8
 - Canonical file API: `/api/files/tree` + `/api/files/fs`
 - Deprecated file API: `/api/workspace/tree` + `/api/workspace/files` (410 DEPRECATED_ROUTE)
 - Checkout canonical web path: `/billing/checkout`

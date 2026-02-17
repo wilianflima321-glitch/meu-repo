@@ -16,6 +16,10 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | AI action | `app/api/ai/action/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
 | AI inline edit | `app/api/ai/inline-edit/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
 | AI inline completion (compat) | `app/api/ai/inline-completion/route.ts` | active compat surface | canonical `suggestion` + alias `text` |
+| AI image generation | `app/api/ai/image/generate/route.ts` | `IMPLEMENTED/PARTIAL` | `503 PROVIDER_NOT_CONFIGURED` + capability metadata when requested provider is not configured |
+| AI voice generation | `app/api/ai/voice/generate/route.ts` | `IMPLEMENTED/PARTIAL` | `503 PROVIDER_NOT_CONFIGURED` + capability metadata when requested provider is not configured |
+| AI music generation | `app/api/ai/music/generate/route.ts` | `IMPLEMENTED/PARTIAL` | `503 PROVIDER_NOT_CONFIGURED` + capability metadata when requested provider is not configured |
+| AI 3D generation | `app/api/ai/3d/generate/route.ts` | `IMPLEMENTED/PARTIAL` | `503 PROVIDER_NOT_CONFIGURED` + capability metadata when requested provider is not configured |
 | AI deterministic validation | `app/api/ai/change/validate/route.ts` | `IMPLEMENTED` | returns `canApply`, `verdict`, `checks`, dependency impact |
 | AI deterministic apply | `app/api/ai/change/apply/route.ts` | `IMPLEMENTED` | scoped apply with stale-context guard (`409`) + validation gate (`422`) + rollback token |
 | AI deterministic rollback | `app/api/ai/change/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | token-based restore with stale-context guard; partial for distributed multi-instance durability |
