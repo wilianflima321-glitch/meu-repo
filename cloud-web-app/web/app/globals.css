@@ -144,6 +144,7 @@
   :focus-visible {
     outline: 2px solid var(--border-focus);
     outline-offset: 1px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
   }
 }
 
@@ -731,4 +732,20 @@
   @apply bg-zinc-800 text-white rounded;
   @apply shadow-lg border border-white/10;
   @apply z-50 whitespace-nowrap;
+}
+
+/* Accessibility: reduce motion for users who opt out of animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .aethel-shimmer,
+  .aethel-pulse-glow,
+  .animate-in {
+    animation: none !important;
+  }
 }

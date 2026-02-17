@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
 
+export const dynamic = 'force-dynamic';
+
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
 }
@@ -109,9 +111,9 @@ export async function GET(request: NextRequest) {
         { status: 503 }
       );
     }
-    console.error('Erro ao buscar estatisticas:', error);
+    console.error('Failed to fetch queue statistics:', error);
     return NextResponse.json(
-      { error: 'Falha ao buscar estatisticas' },
+      { error: 'Failed to fetch queue statistics' },
       { status: 500 }
     );
   }

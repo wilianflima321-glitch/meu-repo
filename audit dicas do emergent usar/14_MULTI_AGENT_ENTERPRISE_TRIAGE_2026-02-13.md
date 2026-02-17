@@ -539,3 +539,32 @@ Leitura critica:
   1. eliminate non-blocking build warning path (`revalidateTag` invalid URL)
   2. close environment checklist in runtime/CI for redis+docker expected modes
   3. continue reducing gated surfaces outside critical path.
+
+## Delta 2026-02-17 II - Cross-agent quality pass (runtime + UX + shell)
+Implemented:
+1. Frontend/UX:
+- stronger focus ring visibility and reduced-motion guard in `cloud-web-app/web/app/globals.css`.
+2. Backend reliability:
+- `force-dynamic` on runtime-sensitive API routes:
+  - `app/api/exports/metrics/route.ts`
+  - `app/api/jobs/stats/route.ts`
+  - `app/api/multiplayer/health/route.ts`
+- normalized health route copy to clean English ASCII.
+3. Product alignment:
+- PWA manifest now starts in `/ide` and shortcuts target `/ide` entry contexts (`explorer`, `ai`) in `cloud-web-app/web/app/manifest.ts`.
+
+Validation snapshot:
+1. `qa:interface-gate` PASS.
+2. `qa:canonical-components` PASS.
+3. `qa:route-contracts` PASS.
+4. `qa:no-fake-success` PASS.
+5. `qa:mojibake` PASS.
+6. `typecheck` PASS.
+7. `build` PASS (with known non-blocking Next runtime warning).
+
+Critical residuals after this pass:
+1. Build warning `revalidateTag -> localhost:undefined` remains unresolved and tracked.
+2. Capability gates remain explicit by design for non-ready paths:
+- AI provider missing
+- render cancel
+- unsupported payment gateway runtime

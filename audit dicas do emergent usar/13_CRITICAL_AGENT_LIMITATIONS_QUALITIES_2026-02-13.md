@@ -514,3 +514,30 @@ Critica objetiva:
 3. Claim policy unchanged:
 - no promotion beyond L3 without operational evidence;
 - no fake success for gated capabilities.
+
+## Delta 2026-02-17 II - UX/accessibility and shell coherence pass
+Implemented:
+1. Runtime-scoped API routes were hardened with `force-dynamic` to avoid static-cache ambiguity in ops metrics/health surfaces:
+- `app/api/exports/metrics/route.ts`
+- `app/api/jobs/stats/route.ts`
+- `app/api/multiplayer/health/route.ts`
+2. Multiplayer health route copy was normalized to clean English ASCII (removed encoding drift risk).
+3. Global accessibility quality improved in `app/globals.css`:
+- stronger focus ring visibility;
+- reduced-motion fallback to disable non-essential animations when requested by user preference.
+4. Manifest shell alignment completed in `app/manifest.ts`:
+- `/ide` is now the default app entrypoint;
+- shortcuts now resolve to `/ide` contexts.
+
+Validation:
+1. `qa:interface-gate` PASS (`not-implemented-ui=6`).
+2. `qa:canonical-components` PASS.
+3. `qa:route-contracts` PASS.
+4. `qa:no-fake-success` PASS.
+5. `qa:mojibake` PASS (`findings=0`).
+6. `typecheck` PASS.
+7. `build` PASS with existing non-blocking Next runtime warning.
+
+Residual critical gaps:
+1. The `revalidateTag` invalid URL warning is still present at build finalization and remains tracked as framework/runtime noise.
+2. `NOT_IMPLEMENTED` remains intentionally explicit in AI provider gates, render cancel, and unsupported payment runtime paths.

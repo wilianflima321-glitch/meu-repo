@@ -154,6 +154,34 @@ Execution interpretation:
 3. Remaining build warning is tracked as runtime-noise risk (non-blocking), pending deeper root-cause isolation.
 4. No fake-success policy and explicit capability contracts remain unchanged.
 
+## 0.5 Delta Update 2026-02-17 (Studio UX hardening + canonical alignment)
+Implemented in code:
+1. Static-heavy API routes now explicitly opt out of static cache generation where operational data is runtime-scoped:
+- `cloud-web-app/web/app/api/exports/metrics/route.ts`
+- `cloud-web-app/web/app/api/jobs/stats/route.ts`
+- `cloud-web-app/web/app/api/multiplayer/health/route.ts`
+2. Multiplayer health route copy/comments were normalized to clean ASCII English to remove encoding drift.
+3. Global UX accessibility polish:
+- stronger `:focus-visible` ring contrast in `cloud-web-app/web/app/globals.css`;
+- `prefers-reduced-motion` safety block to disable non-essential animations for reduced-motion users.
+4. PWA manifest was aligned with the single-shell contract:
+- `start_url` moved to `/ide`;
+- shortcuts now route to `/ide` contexts (`entry=explorer|ai`) in `cloud-web-app/web/app/manifest.ts`.
+
+Validation snapshot (local evidence):
+1. `cmd /c npm run qa:interface-gate` -> PASS (`not-implemented-ui=6`)
+2. `cmd /c npm run qa:canonical-components` -> PASS
+3. `cmd /c npm run qa:route-contracts` -> PASS
+4. `cmd /c npm run qa:no-fake-success` -> PASS
+5. `cmd /c npm run qa:mojibake` -> PASS (`findings=0`)
+6. `cmd /c npm run typecheck` -> PASS
+7. `cmd /c npm run build` -> PASS with existing non-blocking Next runtime warning (`revalidateTag` URL noise).
+
+Critical interpretation:
+1. Core P0 quality gates stay green.
+2. The remaining runtime warning is tracked as framework-level noise and does not change operational readiness gates.
+3. `NOT_IMPLEMENTED` remains explicit and limited to known capability gates (AI provider unavailable, render cancel, unsupported payment runtime path).
+
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
    Source: `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`
