@@ -148,3 +148,8 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 - `app/api/ai/chat-advanced/route.ts`
 6. Workbench AI panel is now wired to advanced orchestration route for runtime use:
 - `components/ide/AIChatPanelContainer.tsx`
+7. Deterministic inline edit execution now includes scoped server apply + rollback token issuance:
+- `app/api/ai/change/apply/route.ts`
+- `app/api/ai/change/rollback/route.ts`
+- `lib/server/change-apply-runtime.ts`
+- `components/editor/MonacoEditorPro.tsx`

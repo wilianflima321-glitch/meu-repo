@@ -32,6 +32,7 @@ export interface MonacoEditorProps {
   defaultValue?: string;
   language?: string;
   path?: string;
+  projectId?: string;
   
   // Callbacks
   onChange?: (value: string | undefined, event: monacoEditor.editor.IModelContentChangedEvent) => void;
@@ -143,6 +144,7 @@ export function MonacoEditorPro({
   defaultValue,
   language = 'typescript',
   path,
+  projectId,
   onChange,
   onSave,
   onCursorChange,
@@ -168,6 +170,10 @@ export function MonacoEditorPro({
   const decorationsRef = useRef<string[]>([]);
   const lspDisposablesRef = useRef<monacoEditor.IDisposable[]>([]);
   const inlineCompletionDisposableRef = useRef<monacoEditor.IDisposable | null>(null);
+  const lastRollbackTokenRef = useRef<string | null>(null);
+  const pathRef = useRef<string | undefined>(path);
+  const projectIdRef = useRef<string | undefined>(projectId);
+  const onChangeRef = useRef(onChange);
   
   // Inline edit integration
   const { isOpen, selection, openInlineEdit, closeInlineEdit } = useInlineEdit();
@@ -175,6 +181,24 @@ export function MonacoEditorPro({
     code: '',
     range: null as monacoEditor.IRange | null,
   });
+
+  const emitInlineEditToast = useCallback(
+    (type: 'info' | 'success' | 'warning' | 'error', title: string, message: string) => {
+      if (typeof window === 'undefined') return;
+      window.dispatchEvent(
+        new CustomEvent('aethel:toast', {
+          detail: { type, title, message },
+        })
+      );
+    },
+    []
+  );
+
+  useEffect(() => {
+    pathRef.current = path;
+    projectIdRef.current = projectId;
+    onChangeRef.current = onChange;
+  }, [onChange, path, projectId]);
 
   // Handle editor mount
   const handleMount: OnMount = useCallback((editor, monaco) => {
@@ -399,6 +423,16 @@ export function MonacoEditorPro({
         },
       });
     }
+
+    // Cmd+Alt+Z - Rollback last AI inline patch
+    editor.addAction({
+      id: 'aethel.rollbackLastAiPatch',
+      label: 'Rollback Last AI Patch',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.KeyZ],
+      run: async () => {
+        await handleRollbackLastInlineApply();
+      },
+    });
     
     // Cmd+Shift+K - Delete Line
     editor.addAction({
@@ -517,6 +551,57 @@ export function MonacoEditorPro({
       },
     });
   }
+
+  const handleRollbackLastInlineApply = useCallback(async () => {
+    const rollbackToken = lastRollbackTokenRef.current;
+    if (!rollbackToken) {
+      emitInlineEditToast('info', 'No rollback available', 'No recent AI patch token was found.');
+      return false;
+    }
+
+    if (!pathRef.current || !projectIdRef.current || !editorRef.current) {
+      emitInlineEditToast(
+        'warning',
+        'Rollback unavailable',
+        'Rollback needs an open scoped file with projectId.'
+      );
+      return false;
+    }
+
+    try {
+      const response = await fetch('/api/ai/change/rollback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-project-id': projectIdRef.current,
+        },
+        body: JSON.stringify({ rollbackToken }),
+      });
+
+      if (!response.ok) {
+        const details = await response.text().catch(() => '');
+        emitInlineEditToast('error', 'Rollback failed', details || response.statusText);
+        return false;
+      }
+
+      const payload = await response.json().catch(() => ({}));
+      if (typeof payload?.content === 'string') {
+        editorRef.current.setValue(payload.content);
+        onChangeRef.current?.(payload.content, {} as any);
+      }
+
+      lastRollbackTokenRef.current = null;
+      emitInlineEditToast('success', 'Rollback applied', 'Last AI patch was reverted.');
+      return true;
+    } catch (error) {
+      emitInlineEditToast(
+        'error',
+        'Rollback failed',
+        error instanceof Error ? error.message : 'Unknown rollback error'
+      );
+      return false;
+    }
+  }, [emitInlineEditToast]);
 
   // Apply diagnostics decorations
   useEffect(() => {
@@ -642,6 +727,65 @@ export function MonacoEditorPro({
       return false;
     }
 
+    if (path && projectId) {
+      try {
+        const applyResponse = await fetch('/api/ai/change/apply', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-project-id': projectId,
+          },
+          body: JSON.stringify({
+            projectId,
+            filePath: path,
+            original: originalSnippet,
+            modified: newCode,
+            language,
+            range: {
+              startOffset,
+              endOffset,
+            },
+          }),
+        });
+
+        if (!applyResponse.ok) {
+          const details = await applyResponse.text().catch(() => '');
+          console.warn('[MonacoEditorPro] Inline edit apply failed', details || applyResponse.statusText);
+          return false;
+        }
+
+        const applyResult = await applyResponse.json().catch(() => ({}));
+        const nextContent =
+          typeof applyResult?.content === 'string' && applyResult.content.length > 0
+            ? applyResult.content
+            : nextDocument;
+        const rollbackToken =
+          typeof applyResult?.rollback?.token === 'string' ? applyResult.rollback.token : null;
+
+        editor.setValue(nextContent);
+        onChange?.(nextContent, {} as any);
+        if (rollbackToken) {
+          lastRollbackTokenRef.current = rollbackToken;
+          emitInlineEditToast(
+            'success',
+            'AI patch applied',
+            'Patch saved. Use Ctrl+Alt+Z to rollback this change.'
+          );
+        } else {
+          emitInlineEditToast('success', 'AI patch applied', 'Patch saved successfully.');
+        }
+        return true;
+      } catch (error) {
+        console.error('[MonacoEditorPro] Inline edit apply error:', error);
+        emitInlineEditToast(
+          'error',
+          'AI patch failed',
+          error instanceof Error ? error.message : 'Unknown apply error'
+        );
+        return false;
+      }
+    }
+
     editor.executeEdits('aethel.inlineEdit', [
       {
         range,
@@ -650,8 +794,13 @@ export function MonacoEditorPro({
     ]);
 
     onChange?.(editor.getValue(), {} as any);
+    emitInlineEditToast(
+      'warning',
+      'Local apply only',
+      'Patch applied locally without server rollback token.'
+    );
     return true;
-  }, [editorSelection.range, onChange, language, path]);
+  }, [editorSelection.range, onChange, language, path, projectId, emitInlineEditToast]);
 
   return (
     <div className="relative w-full h-full">

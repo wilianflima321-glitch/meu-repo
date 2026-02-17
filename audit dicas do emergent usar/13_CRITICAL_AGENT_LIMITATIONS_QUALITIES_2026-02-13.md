@@ -601,3 +601,23 @@ Implemented:
 
 Critical reading:
 1. Reduces false perception of "empty preview" by showing exact failure class (`PARTIAL` capability runtime).
+
+## Delta 2026-02-18 IX - Deterministic patch apply with rollback token
+Implemented:
+1. Added server apply endpoint with stale-context guard and validation gate:
+- `cloud-web-app/web/app/api/ai/change/apply/route.ts`
+2. Added rollback endpoint backed by expiring runtime snapshots:
+- `cloud-web-app/web/app/api/ai/change/rollback/route.ts`
+- `cloud-web-app/web/lib/server/change-apply-runtime.ts`
+3. Updated Monaco inline apply path to use scoped server mutation when `projectId` and `path` are available:
+- `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
+- `cloud-web-app/web/app/ide/page.tsx`
+
+Validation:
+1. `qa:route-contracts` PASS.
+2. `qa:no-fake-success` PASS.
+3. `qa:enterprise-gate` PASS.
+
+Critical reading:
+1. This closes a real anti-alucination gap for single-file inline edits (`validate -> apply -> rollback token`).
+2. Remaining limitation: rollback token store is runtime-memory scoped and should be persisted for cross-instance reliability in future phases.

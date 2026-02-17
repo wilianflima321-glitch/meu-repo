@@ -1023,6 +1023,7 @@ function IDEPageInner() {
               {activePath ? (
                 <MonacoEditorPro
                   path={activePath}
+                  projectId={projectId}
                   value={activeState?.content ?? ''}
                   language={activeState?.language || activeTab?.language || guessLanguage(activePath)}
                   onChange={handleEditorChange}

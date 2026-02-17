@@ -628,3 +628,20 @@ Delivered:
 
 Triaged impact:
 1. Improves user trust by replacing silent blank previews with explicit capability messaging.
+
+## Delta 2026-02-18 IX - Reliability triage closure for AI patch path
+Delivered:
+1. Deterministic server mutation endpoint for inline AI edits:
+- `cloud-web-app/web/app/api/ai/change/apply/route.ts`
+2. Tokenized rollback endpoint for reversible patch operations:
+- `cloud-web-app/web/app/api/ai/change/rollback/route.ts`
+3. Runtime rollback snapshot service:
+- `cloud-web-app/web/lib/server/change-apply-runtime.ts`
+4. Workbench editor wiring to scoped apply path (`projectId` propagated to Monaco):
+- `cloud-web-app/web/app/ide/page.tsx`
+- `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
+
+Triaged impact:
+1. Upgrades core `/ide` patch flow from local-only mutation to auditable server apply in scoped context.
+2. Converts a major residual risk ("apply without reversible trace") into explicit, testable behavior.
+3. Residual risk remains for multi-instance rollback durability because token storage is memory-scoped at runtime.

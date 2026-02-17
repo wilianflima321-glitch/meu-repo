@@ -1816,3 +1816,30 @@ Validation snapshot:
 
 Decision lock:
 1. Keep unsupported/failed media runtime states explicit; never imply successful preview render.
+
+## 55) Delta 2026-02-18 IX - Deterministic inline apply/rollback for AI patches
+
+Implemented:
+1. Added deterministic server-side apply path for inline AI edits:
+- `cloud-web-app/web/app/api/ai/change/apply/route.ts`
+2. Added rollback endpoint with expiring token snapshots:
+- `cloud-web-app/web/app/api/ai/change/rollback/route.ts`
+- `cloud-web-app/web/lib/server/change-apply-runtime.ts`
+3. Monaco inline edit apply now prefers server-backed scoped mutation when `path + projectId` exist:
+- `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
+- `cloud-web-app/web/app/ide/page.tsx`
+4. Apply contract includes:
+- stale-context protection (`409 STALE_CONTEXT`);
+- validation gate (`422 VALIDATION_BLOCKED`);
+- rollback token with TTL metadata.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:route-contracts` PASS
+4. `npm run qa:no-fake-success` PASS
+5. `npm run qa:enterprise-gate` PASS
+
+Decision lock:
+1. Keep local-only editor mutation as fallback only when scoped server apply is unavailable.
+2. Do not promote L4/L5 until this deterministic path is expanded from single-file inline edit to broader multi-file workflows.
