@@ -594,3 +594,10 @@ Implemented:
 
 Critical reading:
 1. This closes a practical UX gap in P1-01 (flow clarity) without changing product scope.
+
+## Delta 2026-02-17 VIII - Preview media error signaling
+Implemented:
+1. `PreviewPanel` now shows explicit media failure state for image/audio/video runtime errors.
+
+Critical reading:
+1. Reduces false perception of "empty preview" by showing exact failure class (`PARTIAL` capability runtime).

@@ -621,3 +621,10 @@ Delivered:
 Triaged impact:
 1. Reduces user confusion in core editor journey.
 2. Keeps keyboard-first and compact layout unchanged.
+
+## Delta 2026-02-17 VIII - P1-03 preview stability pass
+Delivered:
+1. Media preview runtime now emits explicit error state when decode/source fails (`image/audio/video`).
+
+Triaged impact:
+1. Improves user trust by replacing silent blank previews with explicit capability messaging.

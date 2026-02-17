@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Codicon from './Codicon'
 
@@ -232,6 +232,7 @@ export default function PreviewPanel({
   isStale = false,
   onRefresh,
 }: PreviewPanelProps) {
+  const [mediaLoadError, setMediaLoadError] = useState<string | null>(null)
   const ext = getExtension(filePath)
   const mode = useMemo(() => resolvePreviewMode(filePath), [filePath])
   const textContent = typeof content === 'string' ? content : typeof html === 'string' ? html : ''
@@ -261,6 +262,10 @@ export default function PreviewPanel({
     (mode === 'html' || mode === 'markdown' || mode === 'css' || mode === 'javascript' || mode === 'typescript')
   const showText = !isLargeTextPreview && (mode === 'json' || mode === 'text')
   const showMedia = mode === 'image' || mode === 'audio' || mode === 'video'
+
+  useEffect(() => {
+    setMediaLoadError(null)
+  }, [rawAssetUrl, mode, filePath])
 
   return (
     <div className="h-full flex flex-col bg-slate-950">
@@ -314,7 +319,7 @@ export default function PreviewPanel({
           </pre>
         )}
 
-        {showMedia && !!rawAssetUrl && (
+        {showMedia && !!rawAssetUrl && !mediaLoadError && (
           <div className="w-full h-full flex items-center justify-center p-4">
             {mode === 'image' && (
               <div className="relative w-full h-full min-h-[220px]">
@@ -324,15 +329,38 @@ export default function PreviewPanel({
                   fill
                   unoptimized
                   className="object-contain"
+                  onError={() => setMediaLoadError('Unable to render image preview from file runtime endpoint.')}
                 />
               </div>
             )}
             {mode === 'audio' && (
-              <audio controls src={rawAssetUrl} className="w-full max-w-xl" />
+              <audio
+                controls
+                src={rawAssetUrl}
+                className="w-full max-w-xl"
+                onError={() => setMediaLoadError('Audio preview failed (unsupported codec or missing runtime source).')}
+              />
             )}
             {mode === 'video' && (
-              <video controls src={rawAssetUrl} className="max-w-full max-h-full bg-black" />
+              <video
+                controls
+                src={rawAssetUrl}
+                className="max-w-full max-h-full bg-black"
+                onError={() => setMediaLoadError('Video preview failed (unsupported codec or missing runtime source).')}
+              />
             )}
+          </div>
+        )}
+
+        {showMedia && mediaLoadError && (
+          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+            <div className="max-w-lg rounded border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+              <div className="mb-2 font-medium text-amber-200">Media preview unavailable</div>
+              <div className="text-slate-300 text-xs">{mediaLoadError}</div>
+              <div className="mt-2 text-slate-500 text-xs">
+                Capability status: PARTIAL. Validate media codec/runtime support in final target environment.
+              </div>
+            </div>
           </div>
         )}
 

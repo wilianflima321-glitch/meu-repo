@@ -1801,3 +1801,18 @@ Validation snapshot:
 
 Decision lock:
 1. Keep workspace loading/error feedback inside explorer panel to avoid split-state ambiguity.
+
+## 54) Delta 2026-02-17 VIII - Preview media failure transparency
+
+Implemented:
+1. Added explicit media runtime failure handling in preview panel:
+- `cloud-web-app/web/components/ide/PreviewPanel.tsx`
+2. Image/audio/video preview now surfaces actionable `PARTIAL` gate message when runtime decoding/source fails.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:enterprise-gate` PASS
+
+Decision lock:
+1. Keep unsupported/failed media runtime states explicit; never imply successful preview render.
