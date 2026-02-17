@@ -72,6 +72,22 @@ Metricas:
 - `frontend-workspace-route-usage`: **0**
 - `legacy-editor-shell-usage`: **0**
 
+## 2.1 Reconciliacao de benchmark externo (2026-02-17)
+Matriz factual de absorcao:
+
+| Claim externo | Estado na base canonica | Tratamento |
+|---|---|---|
+| "Projeto principal e Jupyter Notebook IDE" | Nao confirmado no contrato canonicamente ativo | `EXTERNAL_BENCHMARK_ASSUMPTION` |
+| "11 regresses visuais abertas #52/#53..." | Nao evidenciado no fluxo canonicamente ativo de `cloud-web-app/web` | `EXTERNAL_BENCHMARK_ASSUMPTION` |
+| Design system unificado e densidade profissional | Alinhado com direcao canonicamente ativa | Absorvido como direcao |
+| Acessibilidade teclado-first e foco visivel | Alinhado com direcao canonicamente ativa | Absorvido como direcao |
+| Live preview robusto e honesto | Alinhado com direcao canonicamente ativa | Absorvido com limite tecnico |
+| ROI/KPI numerico do benchmark externo | Nao evidenciado com telemetria local consolidada | `EXTERNAL_BENCHMARK_ASSUMPTION` |
+
+Regra operacional:
+1. Sem evidencia em codigo/rota/script/doc canonico, claim nao entra como fato.
+2. Claims externos podem orientar backlog, mas nao alteram status factual de prontidao.
+
 Delta operacional (2026-02-16, sem rodar suite completa):
 1. APIs de notificacao e confirmacao de asset agora expõem estado real de operacao deferida (sem fake success silencioso).
 2. `TODO` de API critica zerado.
@@ -85,6 +101,13 @@ Delta de validacao (2026-02-16, suite parcial executada):
 2. `qa:interface-gate` verde com `not-implemented-ui=5`.
 3. `qa:route-contracts` verde.
 4. `build` segue bloqueado por `spawn EPERM` em ambiente restrito.
+
+Delta de validacao (2026-02-17):
+1. `lint` PASS (0 warnings).
+2. `qa:interface-gate` PASS (`not-implemented-ui=6`).
+3. `qa:route-contracts` PASS.
+4. `qa:no-fake-success` PASS.
+5. CI `cloud-web-app.yml` atualizado para executar gate anti-fake-success.
 
 Validacoes:
 - `npm run qa:interface-critical` -> PASS
@@ -138,6 +161,21 @@ Sprint C:
 10. `IDE-07` Revisar warnings de hooks em `lib/world/world-streaming.tsx` e `lib/transport/use-transport.ts`.
 11. `IDE-08` Revisar warnings de hooks em `lib/hooks/useGameplayAbilitySystem.ts` e `lib/hooks/useRenderPipeline.ts`.
 12. `IDE-09` Validar estabilidade de split editor + busca global + preview em cenarios de uso continuo.
+
+## 6) Readiness gate de colaboracao e DX (2026-02-17)
+Matriz factual atual:
+
+| Area | Status | Evidencia | Gate para promocao |
+|---|---|---|---|
+| Sync colaborativo de edicao | PARTIAL | Fundacao presente, sem SLO enterprise fechado no canone | Teste concorrente + reconexao + limite de usuarios por sessao |
+| Locks/conflitos/versionamento | PARTIAL | Policas discutidas em contratos, sem acceptance suite dedicada | Suite automatizada de conflito + rollback |
+| Debug colaborativo | NOT_IMPLEMENTED para claim enterprise | Sem evidencia operacional de compartilhamento de sessao de debug | Fluxo validado ponta-a-ponta + observabilidade |
+| DX de setup | IMPLEMENTED/PARTIAL | Workbench shell consolidado, dependencia de ambiente ainda impacta build local | Checklist ambiente + validacao CI sem sandbox |
+
+SLO minimo proposto para declarar "real-time ready":
+1. reconexao < 5s em perda de socket.
+2. conflito resolvido sem perda de dados em edicao concorrente basica.
+3. taxa de erro de sync < 1% em sessao de 30 min.
 13. `API-01` Manter telemetria e janela de cutoff para rotas deprecadas `/api/workspace/*` e `/api/auth/sessions*`.
 14. `API-02` Publicar criterio objetivo para remocao definitiva de rotas deprecadas (uso real por janela).
 15. `API-03` Padronizar envelope de erro em jobs/queue com codigos canonicos (`QUEUE_BACKEND_UNAVAILABLE`, `NOT_IMPLEMENTED`).

@@ -25,6 +25,14 @@ Authoritative references used:
 - `/api/ai/inline-edit`
 5. Legacy routes remain explicit `410 DEPRECATED_ROUTE` with phased telemetry cutoff.
 
+## 1.1 Benchmark absorption policy (2026-02-17)
+1. External benchmark claims are directional until proven in canonical evidence.
+2. Unsupported external claims must be tagged `EXTERNAL_BENCHMARK_ASSUMPTION`.
+3. This blueprint keeps scope fixed:
+- no second shell outside `/ide`
+- no desktop parity claim for Unreal/Premiere
+- no L4/L5 promotion without operational evidence
+
 ## 2) Critical limitations to beat (without fake claims)
 ## 2.1 AI limitations (current generation models)
 1. Non-determinism under repeated prompts.

@@ -28,6 +28,28 @@ Provide a single factual map of capability status for high-impact APIs and runti
 2. No capability may claim success if runtime/provider/pipeline is absent.
 3. UI must not expose CTA for gated capability in critical user journeys.
 
+## 3.1 Capability envelope contract (2026-02-17)
+Mandatory fields for gated/unavailable capability responses:
+1. `error`
+2. `message`
+3. `capability`
+4. `capabilityStatus`
+5. `metadata` (object, may be empty)
+6. `milestone` (when applicable)
+
+Headers (when applicable):
+1. `x-aethel-capability`
+2. `x-aethel-capability-status`
+3. `x-aethel-meta-*` (metadata projection for operational tooling)
+
+Validation status:
+1. `qa:route-contracts` PASS
+2. `qa:no-fake-success` PASS
+3. `qa:no-fake-success` also enforces:
+- `PAYMENT_GATEWAY_NOT_IMPLEMENTED -> 501`
+- `AUTH_NOT_CONFIGURED -> 503`
+- `QUEUE_BACKEND_UNAVAILABLE -> 503`
+
 ## 4) Promotion criteria (P1+)
 1. Promote `PARTIAL` to `IMPLEMENTED` only after:
 - operational test evidence;

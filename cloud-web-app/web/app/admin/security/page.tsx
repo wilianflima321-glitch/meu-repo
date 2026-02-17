@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { getToken } from '@/lib/auth';
 
 type SecurityLog = {
   id: string;
@@ -33,11 +34,24 @@ export default function AdminSecurity() {
     info: 'informacao',
   };
 
+  const getAuthHeaders = useCallback(() => {
+    const token = getToken();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  }, []);
+
   const fetchSecurity = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/security/overview');
-      if (!res.ok) throw new Error('Falha ao carregar seguranca');
+      const res = await fetch('/api/admin/security/overview', {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.message || payload?.error || 'Falha ao carregar seguranca');
+      }
       const json = await res.json();
       setData(json);
       setLastUpdated(new Date());
@@ -47,7 +61,7 @@ export default function AdminSecurity() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     fetchSecurity();

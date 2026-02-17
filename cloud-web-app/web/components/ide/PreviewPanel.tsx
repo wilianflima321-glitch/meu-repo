@@ -31,6 +31,7 @@ const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif'])
 const AUDIO_EXTENSIONS = new Set(['mp3', 'wav', 'ogg'])
 const VIDEO_EXTENSIONS = new Set(['mp4', 'webm'])
 const TEXT_EXTENSIONS = new Set(['txt', 'log', 'ini', 'env', 'toml', 'yaml', 'yml'])
+const MAX_INLINE_PREVIEW_CHARS = 350_000
 
 function getExtension(filePath?: string): string {
   if (!filePath) return ''
@@ -235,6 +236,7 @@ export default function PreviewPanel({
   const mode = useMemo(() => resolvePreviewMode(filePath), [filePath])
   const textContent = typeof content === 'string' ? content : typeof html === 'string' ? html : ''
   const hasText = textContent.length > 0
+  const isLargeTextPreview = hasText && textContent.length > MAX_INLINE_PREVIEW_CHARS
 
   const runtimeDoc = useMemo(() => {
     if (!hasText) return ''
@@ -254,8 +256,10 @@ export default function PreviewPanel({
     return `/api/files/raw?${params.toString()}`
   }, [filePath, mode, projectId])
 
-  const showIframeRuntime = mode === 'html' || mode === 'markdown' || mode === 'css' || mode === 'javascript' || mode === 'typescript'
-  const showText = mode === 'json' || mode === 'text'
+  const showIframeRuntime =
+    !isLargeTextPreview &&
+    (mode === 'html' || mode === 'markdown' || mode === 'css' || mode === 'javascript' || mode === 'typescript')
+  const showText = !isLargeTextPreview && (mode === 'json' || mode === 'text')
   const showMedia = mode === 'image' || mode === 'audio' || mode === 'video'
 
   return (
@@ -330,7 +334,32 @@ export default function PreviewPanel({
           </div>
         )}
 
-        {!hasText && !showMedia && (
+        {mode === 'unsupported' && (
+          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+            <div className="max-w-md rounded border border-slate-700 bg-slate-950/40 px-4 py-3">
+              <div className="mb-2 font-medium text-slate-300">Preview unsupported for this file type</div>
+              <div className="text-slate-500 text-xs">
+                Extension &quot;{ext || 'unknown'}&quot; is outside the validated runtime preview scope.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isLargeTextPreview && (
+          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+            <div className="max-w-lg rounded border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+              <div className="mb-2 font-medium text-amber-200">Preview gated for large payload</div>
+              <div className="text-slate-300 text-xs">
+                This file exceeds the validated inline preview limit ({MAX_INLINE_PREVIEW_CHARS.toLocaleString()} chars).
+              </div>
+              <div className="mt-2 text-slate-500 text-xs">
+                Capability status: PARTIAL. Use runtime execution or open a smaller scoped file.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!hasText && !showMedia && mode !== 'unsupported' && (
           <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
             <div>
               <div className="mb-2 font-medium text-slate-300">Preview not available</div>
@@ -346,17 +375,6 @@ export default function PreviewPanel({
             <div>
               <div className="mb-2 font-medium text-slate-300">Media preview unavailable</div>
               <div className="text-slate-500">Missing media source path for this preview context.</div>
-            </div>
-          </div>
-        )}
-
-        {mode === 'unsupported' && (
-          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
-            <div className="max-w-md rounded border border-slate-700 bg-slate-950/40 px-4 py-3">
-              <div className="mb-2 font-medium text-slate-300">Preview unsupported for this file type</div>
-              <div className="text-slate-500 text-xs">
-                Extension &quot;{ext || 'unknown'}&quot; is outside the validated runtime preview scope.
-              </div>
             </div>
           </div>
         )}
