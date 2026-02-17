@@ -90,7 +90,7 @@ Metricas criticas atuais:
 
 Delta tecnico (2026-02-17, rodada atual):
 1. `next.config.js` endurecido para limpar variaveis IPC invalidas (`__NEXT_*` e `__NEXT_PRIVATE_*`) que causavam ruido de revalidate IPC em runtime de build.
-2. `experimental.workerThreads=false` aplicado para reduzir instabilidade de build em ambiente restrito.
+2. `experimental.workerThreads=true` foi restaurado com sanitizacao de IPC env para evitar `spawn EPERM` sem perder estabilidade de gate.
 3. Workflow de regressao visual endurecido:
 - sem `continue-on-error` na instalacao de Playwright;
 - sem bypass `|| true` em captura/comparacao.
@@ -99,7 +99,7 @@ Delta tecnico (2026-02-17, rodada atual):
 Lacunas reais abertas (fato):
 1. Colaboracao avancada ainda `PARTIAL` para prontidao enterprise.
 2. Render cancel continua em gate explicito `NOT_IMPLEMENTED`.
-3. Build local pode falhar em sandbox restrito (`spawn EPERM`), exigindo validacao em CI sem restricao.
+3. Build local voltou a passar nesta trilha; risco residual atual e ruido de runtime interno do Next (`revalidateTag` com URL IPC invalida) sem quebrar o gate.
 
 ## Validacao tecnica desta rodada
 Executado em `cloud-web-app/web`:

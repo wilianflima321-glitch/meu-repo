@@ -133,7 +133,7 @@ Implemented in code:
 1. `cloud-web-app/web/next.config.js` now normalizes/clears both IPC env families:
 - `__NEXT_INCREMENTAL_CACHE_IPC_*`
 - `__NEXT_PRIVATE_INCREMENTAL_CACHE_IPC_*`
-2. Local build hardening switched to `experimental.workerThreads=false` to avoid unstable IPC behavior in restricted environments.
+2. Build execution now uses `experimental.workerThreads=true` with IPC env sanitization to avoid local `spawn EPERM` regressions while preserving gate reliability.
 3. Visual regression CI now runs without permissive bypass in core capture/compare steps:
 - `.github/workflows/visual-regression-compare.yml` removed `continue-on-error` on Playwright install and compare.
 - removed `|| true` from screenshot capture and diff compare commands.
@@ -145,12 +145,14 @@ Validation snapshot (this delta):
 1. `cmd /c npm run lint` -> PASS (0 warnings)
 2. `cmd /c npm run qa:no-fake-success` -> PASS
 3. `cmd /c npm run qa:interface-gate` -> PASS (`not-implemented-ui=6`)
-4. `cmd /c npm run build` -> FAIL (`spawn EPERM` in this local restricted shell)
+4. `cmd /c npm run qa:enterprise-gate` -> PASS (includes build/typecheck/interface/contracts)
+5. `cmd /c npm run build` -> PASS (non-blocking warning still appears from Next internal IPC revalidate URL: `localhost:undefined`)
 
 Execution interpretation:
 1. Build remains a hard gate in CI and cannot be bypassed in PR.
-2. Local `spawn EPERM` is tracked as environment restriction until revalidated on unrestricted runner.
-3. No fake-success policy and explicit capability contracts remain unchanged.
+2. Local `spawn EPERM` no longer blocks this branch under current config.
+3. Remaining build warning is tracked as runtime-noise risk (non-blocking), pending deeper root-cause isolation.
+4. No fake-success policy and explicit capability contracts remain unchanged.
 
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  

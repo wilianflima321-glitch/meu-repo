@@ -52,7 +52,7 @@ Validation status:
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.
-2. In restricted local shells, `npm run build` may still fail with `spawn EPERM`; this is treated as environment constraint until CI revalidation.
+2. Current local baseline: `npm run build` passes; residual warning remains from Next internal IPC revalidate URL (`localhost:undefined`) and is tracked separately as non-blocking runtime noise.
 3. This does not relax API capability/error contracts in this matrix.
 
 ## 4) Promotion criteria (P1+)

@@ -51,9 +51,8 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   experimental: {
     cpus: 1,
-    // Build stability > parallelism. This avoids invalid localhost:undefined IPC revalidate calls
-    // on constrained/local environments where Next's incremental-cache IPC vars are incomplete.
-    workerThreads: false,
+    // Prefer worker threads to avoid child-process spawn restrictions in locked-down environments.
+    workerThreads: true,
     webpackBuildWorker: false,
   },
   i18n,
