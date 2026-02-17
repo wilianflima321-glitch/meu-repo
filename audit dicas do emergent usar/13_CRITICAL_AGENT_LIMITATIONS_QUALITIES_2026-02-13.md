@@ -644,3 +644,12 @@ Implemented:
 
 Critical reading:
 1. Improves observability and consistency for failure handling in enterprise operations tooling.
+
+## Delta 2026-02-18 XIII - OpenAPI fidelity hardening
+Implemented:
+1. OpenAPI now documents deterministic AI change endpoints and canonical completion payload fields.
+2. Added `CapabilityError` schema and deterministic patch request/response schemas.
+
+Critical reading:
+1. Reduces integration drift risk between frontend/client tooling and runtime API behavior.
+2. Existing runtime limitation warnings remain operational (not contract-breaking).

@@ -458,8 +458,8 @@ Configure webhooks em \`/api/webhooks\` para receber eventos em tempo real.
     '/api/ai/complete': {
       post: {
         tags: ['AI'],
-        summary: 'Autocompletar código',
-        description: 'Usa IA para sugerir completions de código',
+        summary: 'Inline code completion',
+        description: 'Returns canonical ghost-text completion payload for editor inline suggestions.',
         operationId: 'aiCodeComplete',
         security: [{ bearerAuth: [] }],
         requestBody: {
@@ -474,11 +474,21 @@ Configure webhooks em \`/api/webhooks\` para receber eventos em tempo real.
         },
         responses: {
           '200': {
-            description: 'Sugestões de código',
+            description: 'Completion result',
             content: {
               'application/json': {
                 schema: {
                   $ref: '#/components/schemas/AICompleteResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'AI provider not configured',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
                 },
               },
             },
@@ -546,6 +556,140 @@ Configure webhooks em \`/api/webhooks\` para receber eventos em tempo real.
                 schema: {
                   type: 'string',
                   description: 'Server-Sent Events para streaming',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    '/api/ai/change/validate': {
+      post: {
+        tags: ['AI'],
+        summary: 'Validate AI code patch',
+        description: 'Runs deterministic checks before apply.',
+        operationId: 'aiValidateChange',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AIChangeValidateRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Validation result',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AIChangeValidateResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/ai/change/apply': {
+      post: {
+        tags: ['AI'],
+        summary: 'Apply validated AI patch',
+        description: 'Applies a scoped patch and returns rollback token metadata.',
+        operationId: 'aiApplyChange',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AIChangeApplyRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Patch applied',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AIChangeApplyResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Stale context',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation blocked',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/ai/change/rollback': {
+      post: {
+        tags: ['AI'],
+        summary: 'Rollback AI patch by token',
+        description: 'Restores previous content for last applied AI patch token.',
+        operationId: 'aiRollbackChange',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AIChangeRollbackRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Rollback applied',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AIChangeRollbackResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Rollback token invalid',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Rollback stale context',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
                 },
               },
             },
@@ -765,30 +909,130 @@ Configure webhooks em \`/api/webhooks\` para receber eventos em tempo real.
         },
       },
       // AI
+      CapabilityError: {
+        type: 'object',
+        properties: {
+          error: { type: 'string' },
+          message: { type: 'string' },
+          capability: { type: 'string' },
+          capabilityStatus: { type: 'string', enum: ['IMPLEMENTED', 'PARTIAL', 'NOT_IMPLEMENTED', 'DEPRECATED'] },
+          milestone: { type: 'string' },
+          metadata: { type: 'object' },
+        },
+        required: ['error', 'message', 'capability', 'capabilityStatus'],
+      },
       AICompleteRequest: {
         type: 'object',
         properties: {
-          code: { type: 'string', description: 'Código atual' },
-          language: { type: 'string', enum: ['typescript', 'javascript', 'glsl'] },
-          cursorPosition: { type: 'integer' },
-          maxTokens: { type: 'integer', default: 100 },
+          prompt: { type: 'string' },
+          prefix: { type: 'string' },
+          suffix: { type: 'string' },
+          language: { type: 'string' },
+          filepath: { type: 'string' },
+          maxTokens: { type: 'integer', default: 256 },
+          temperature: { type: 'number', default: 0.1 },
+          provider: { type: 'string' },
+          model: { type: 'string' },
         },
-        required: ['code', 'language'],
       },
       AICompleteResponse: {
         type: 'object',
         properties: {
-          suggestions: {
+          suggestion: { type: 'string' },
+          text: { type: 'string', description: 'Compatibility alias for legacy consumers' },
+          provider: { type: 'string' },
+          model: { type: 'string' },
+          tokensUsed: { type: 'integer' },
+          latencyMs: { type: 'integer' },
+        },
+        required: ['suggestion'],
+      },
+      AIChangeValidateRequest: {
+        type: 'object',
+        properties: {
+          original: { type: 'string' },
+          modified: { type: 'string' },
+          fullDocument: { type: 'string' },
+          language: { type: 'string' },
+          filePath: { type: 'string' },
+        },
+        required: ['original', 'modified'],
+      },
+      AIChangeValidateResponse: {
+        type: 'object',
+        properties: {
+          canApply: { type: 'boolean' },
+          verdict: { type: 'string' },
+          checks: {
             type: 'array',
             items: {
               type: 'object',
               properties: {
-                text: { type: 'string' },
-                confidence: { type: 'number' },
-                documentation: { type: 'string' },
+                name: { type: 'string' },
+                status: { type: 'string' },
+                message: { type: 'string' },
               },
             },
           },
+        },
+        required: ['canApply'],
+      },
+      AIChangeApplyRequest: {
+        type: 'object',
+        properties: {
+          projectId: { type: 'string' },
+          filePath: { type: 'string' },
+          original: { type: 'string' },
+          modified: { type: 'string' },
+          language: { type: 'string' },
+          range: {
+            type: 'object',
+            properties: {
+              startOffset: { type: 'integer' },
+              endOffset: { type: 'integer' },
+            },
+          },
+        },
+        required: ['projectId', 'filePath', 'original', 'modified'],
+      },
+      AIChangeApplyResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          capability: { type: 'string' },
+          capabilityStatus: { type: 'string' },
+          projectId: { type: 'string' },
+          filePath: { type: 'string' },
+          content: { type: 'string' },
+          hashBefore: { type: 'string' },
+          hashAfter: { type: 'string' },
+          rollback: {
+            type: 'object',
+            properties: {
+              token: { type: 'string' },
+              expiresAt: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+      },
+      AIChangeRollbackRequest: {
+        type: 'object',
+        properties: {
+          rollbackToken: { type: 'string' },
+        },
+        required: ['rollbackToken'],
+      },
+      AIChangeRollbackResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          capability: { type: 'string' },
+          capabilityStatus: { type: 'string' },
+          projectId: { type: 'string' },
+          filePath: { type: 'string' },
+          hash: { type: 'string' },
+          content: { type: 'string' },
+          restoredAt: { type: 'string', format: 'date-time' },
         },
       },
       AIGenerateAssetRequest: {

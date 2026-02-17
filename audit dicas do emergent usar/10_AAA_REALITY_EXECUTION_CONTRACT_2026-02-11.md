@@ -1885,3 +1885,21 @@ Implemented:
 Validation snapshot:
 1. `npm run qa:route-contracts` PASS
 2. `npm run qa:no-fake-success` PASS
+
+## 59) Delta 2026-02-18 XIII - OpenAPI contract alignment for deterministic AI patch flow
+
+Implemented:
+1. Updated public API spec to reflect canonical AI completion payload (`suggestion` + alias `text`).
+2. Added documented endpoints:
+- `/api/ai/change/validate`
+- `/api/ai/change/apply`
+- `/api/ai/change/rollback`
+3. Added corresponding schemas for capability error and deterministic patch apply/rollback payloads:
+- `cloud-web-app/web/lib/openapi-spec.ts`
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:route-contracts` PASS
+4. `npm run qa:no-fake-success` PASS
+5. `npm run build` PASS (with existing non-blocking runtime warnings tracked in runbook)
