@@ -637,3 +637,10 @@ Implemented:
 
 Critical reading:
 1. Improves operator trust and reversibility discoverability without introducing fake capability claims.
+
+## Delta 2026-02-18 XII - Capability envelope normalization
+Implemented:
+1. Apply/rollback blocked branches now emit standardized capability envelope headers.
+
+Critical reading:
+1. Improves observability and consistency for failure handling in enterprise operations tooling.

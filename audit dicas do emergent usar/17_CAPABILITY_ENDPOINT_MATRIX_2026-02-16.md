@@ -53,6 +53,7 @@ Validation status:
 - `PAYMENT_GATEWAY_NOT_IMPLEMENTED -> 501`
 - `AUTH_NOT_CONFIGURED -> 503`
 - `QUEUE_BACKEND_UNAVAILABLE -> 503`
+4. `AI_CHANGE_APPLY` and `AI_CHANGE_ROLLBACK` blocked states now use capability envelope helper, including `x-aethel-capability*` headers.
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

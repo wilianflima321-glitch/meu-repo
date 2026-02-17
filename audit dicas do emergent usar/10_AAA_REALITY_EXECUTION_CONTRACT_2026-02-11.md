@@ -1874,3 +1874,14 @@ Implemented:
 
 Decision lock:
 1. Partial/gated capability remains explicit; rollback action only affects server-applied inline patch token.
+
+## 58) Delta 2026-02-18 XII - Capability envelope alignment for apply/rollback errors
+
+Implemented:
+1. `AI_CHANGE_APPLY` blocked branches now return via capability envelope helper (`x-aethel-capability*` headers included).
+2. `AI_CHANGE_ROLLBACK` blocked branches now return via capability envelope helper.
+3. Route contract checks continue enforcing explicit deterministic patterns.
+
+Validation snapshot:
+1. `npm run qa:route-contracts` PASS
+2. `npm run qa:no-fake-success` PASS

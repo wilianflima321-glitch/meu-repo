@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { apiErrorToResponse } from '@/lib/api-errors'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { capabilityResponse } from '@/lib/server/capability-response'
 import { consumeRollbackSnapshot, getRollbackSnapshot } from '@/lib/server/change-apply-runtime'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
 import {
@@ -35,15 +36,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const snapshot = getRollbackSnapshot(rollbackToken, auth.userId)
     if (!snapshot) {
-      return NextResponse.json(
-        {
-          error: 'ROLLBACK_TOKEN_INVALID',
-          message: 'Rollback token not found or expired.',
-          capability: 'AI_CHANGE_ROLLBACK',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 404 }
-      )
+      return capabilityResponse({
+        error: 'ROLLBACK_TOKEN_INVALID',
+        message: 'Rollback token not found or expired.',
+        status: 404,
+        capability: 'AI_CHANGE_ROLLBACK',
+        capabilityStatus: 'PARTIAL',
+      })
     }
 
     const scoped = resolveScopedWorkspacePath({
@@ -56,33 +55,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const currentHash = computeHash(current.content)
 
     if (snapshot.expectedCurrentHash && snapshot.expectedCurrentHash !== currentHash) {
-      return NextResponse.json(
-        {
-          error: 'ROLLBACK_STALE_CONTEXT',
-          message: 'File changed after apply. Rollback refused to avoid clobbering newer edits.',
-          capability: 'AI_CHANGE_ROLLBACK',
-          capabilityStatus: 'PARTIAL',
-          metadata: {
-            expectedCurrentHash: snapshot.expectedCurrentHash,
-            currentHash,
-            projectId: snapshot.projectId,
-          },
+      return capabilityResponse({
+        error: 'ROLLBACK_STALE_CONTEXT',
+        message: 'File changed after apply. Rollback refused to avoid clobbering newer edits.',
+        status: 409,
+        capability: 'AI_CHANGE_ROLLBACK',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          expectedCurrentHash: snapshot.expectedCurrentHash,
+          currentHash,
+          projectId: snapshot.projectId,
         },
-        { status: 409 }
-      )
+      })
     }
 
     const consumedSnapshot = consumeRollbackSnapshot(rollbackToken, auth.userId)
     if (!consumedSnapshot) {
-      return NextResponse.json(
-        {
-          error: 'ROLLBACK_TOKEN_INVALID',
-          message: 'Rollback token no longer available.',
-          capability: 'AI_CHANGE_ROLLBACK',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 404 }
-      )
+      return capabilityResponse({
+        error: 'ROLLBACK_TOKEN_INVALID',
+        message: 'Rollback token no longer available.',
+        status: 404,
+        capability: 'AI_CHANGE_ROLLBACK',
+        capabilityStatus: 'PARTIAL',
+      })
     }
 
     await fsRuntime.writeFile(scoped.absolutePath, consumedSnapshot.content, {

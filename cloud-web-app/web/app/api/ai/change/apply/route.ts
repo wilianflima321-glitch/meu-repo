@@ -5,6 +5,7 @@ import { apiErrorToResponse } from '@/lib/api-errors'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { validateAiChange } from '@/lib/server/change-validation'
 import { createRollbackSnapshot } from '@/lib/server/change-apply-runtime'
+import { capabilityResponse } from '@/lib/server/capability-response'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
 import {
   getScopedProjectId,
@@ -76,18 +77,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const originalSlice = currentContent.slice(startOffset, endOffset)
     if (original !== originalSlice) {
-      return NextResponse.json(
-        {
-          error: 'STALE_CONTEXT',
-          message: 'Document changed before apply. Refresh editor context and retry.',
-          metadata: {
-            expectedLength: original.length,
-            currentLength: originalSlice.length,
-            projectId,
-          },
+      return capabilityResponse({
+        error: 'STALE_CONTEXT',
+        message: 'Document changed before apply. Refresh editor context and retry.',
+        status: 409,
+        capability: 'AI_CHANGE_APPLY',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          expectedLength: original.length,
+          currentLength: originalSlice.length,
+          projectId,
         },
-        { status: 409 }
-      )
+      })
     }
 
     const nextDocument = `${currentContent.slice(0, startOffset)}${modified}${currentContent.slice(endOffset)}`
@@ -100,18 +101,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     })
 
     if (!validation.canApply) {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_BLOCKED',
-          message: 'Validation blocked apply.',
-          capability: 'AI_CHANGE_APPLY',
-          capabilityStatus: 'PARTIAL',
-          metadata: { projectId },
+      return capabilityResponse({
+        error: 'VALIDATION_BLOCKED',
+        message: 'Validation blocked apply.',
+        status: 422,
+        capability: 'AI_CHANGE_APPLY',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          projectId,
           checks: validation.checks,
           verdict: validation.verdict,
         },
-        { status: 422 }
-      )
+      })
     }
 
     await fsRuntime.writeFile(scoped.absolutePath, nextDocument, {
