@@ -1734,4 +1734,31 @@ Decision lock:
 - Residual environment warnings remain expected in local build without full env:
   - `UPSTASH_REDIS_REST_URL/TOKEN` missing
   - Docker sandbox fallback
-  - remaining `revalidateTag` invalid URL warning still under investigation (non-blocking to build completion in this run).
+- remaining `revalidateTag` invalid URL warning still under investigation (non-blocking to build completion in this run).
+
+## 51) Delta 2026-02-17 V - Advanced agent reliability loop
+
+Implemented:
+1. `chat-advanced` now exposes explicit provider capability gates (no ambiguous fallback when provider for model is missing):
+- `cloud-web-app/web/app/api/ai/chat-advanced/route.ts`
+2. Advanced request contract now supports:
+- `qualityMode`: `standard | delivery | studio`
+- `enableWebResearch`: benchmark context enrichment for UI/UX tasks
+3. Multi-role and single-role prompts now include:
+- quality policy
+- self-questioning checklist
+- optional benchmark references
+4. Trace evidence now records:
+- `qualityMode`
+- benchmark references (when available) as `search` evidence items.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:route-contracts` PASS
+4. `npm run qa:no-fake-success` PASS
+5. `npm run qa:enterprise-gate` PASS
+
+Decision lock:
+1. Keep anti-fake-success as hard rule for all advanced agent paths.
+2. Keep benchmark ingestion as best-effort (never a hidden dependency for successful completion).

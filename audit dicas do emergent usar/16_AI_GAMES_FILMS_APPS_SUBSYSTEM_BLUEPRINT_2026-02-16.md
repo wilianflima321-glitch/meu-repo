@@ -144,3 +144,5 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 4. Asset pipeline now classifies media/model constraints with explicit `PARTIAL` warnings:
 - `lib/server/asset-processor.ts`
 - `app/api/assets/upload/route.ts`
+5. Advanced chat orchestration now enforces quality mode + self-questioning checklist + optional benchmark references, with explicit provider gates:
+- `app/api/ai/chat-advanced/route.ts`

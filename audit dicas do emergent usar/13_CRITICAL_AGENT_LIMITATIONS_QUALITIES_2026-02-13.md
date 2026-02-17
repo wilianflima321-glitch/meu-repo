@@ -563,3 +563,16 @@ Implemented:
 Critical reading:
 1. P1/P2 ambiguity is removed; each item now has explicit file scope and done criteria.
 2. This reduces execution drift risk for external AI collaborators.
+
+## Delta 2026-02-17 V - Agent quality/research hardening (chat-advanced)
+Implemented:
+1. `chat-advanced` now enforces explicit provider capability gate before execution.
+2. Added configurable quality behavior:
+- `qualityMode=standard|delivery|studio`
+- mandatory self-questioning checklist in prompt orchestration.
+3. Added optional benchmark enrichment for interface/UX tasks (`enableWebResearch`), best-effort and traceable.
+4. Trace output now includes quality mode and benchmark references as search evidence.
+
+Critical reading:
+1. This reduces optimistic/hand-wavy agent output risk in long multi-step interface tasks.
+2. It does not promote L4/L5 claims; it improves L1-L3 reliability posture only.

@@ -10,6 +10,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Surface | Endpoint/File | Status | Contract |
 |---|---|---|---|
 | AI chat | `app/api/ai/chat/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
+| AI chat advanced | `app/api/ai/chat-advanced/route.ts` | `IMPLEMENTED` with explicit provider gates + quality controls | `501 NOT_IMPLEMENTED` on missing provider/model-provider mismatch; supports `qualityMode` + optional benchmark context |
 | AI complete | `app/api/ai/complete/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | response canonical `suggestion` + alias `text` |
 | AI action | `app/api/ai/action/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
 | AI inline edit | `app/api/ai/inline-edit/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |

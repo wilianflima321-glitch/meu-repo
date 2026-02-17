@@ -592,3 +592,13 @@ Delivered:
 Decision lock:
 1. Next wave executes by strict order in `20` (P1 first, then P2).
 2. No P2 item promotion before P1 freeze and gate pass.
+
+## Delta 2026-02-17 V - Multi-agent output quality controls
+Delivered:
+1. Advanced chat route now supports explicit quality mode (`standard|delivery|studio`) and benchmark-assisted context for interface tasks.
+2. Provider mismatch for requested model now fails with explicit capability gate instead of implicit fallback.
+3. Multi-agent and single-agent traces now record `qualityMode` plus benchmark references.
+
+Triaged impact:
+1. Improves reliability and auditability of agent output without expanding product scope.
+2. Keeps anti-fake-success intact and prevents hidden dependency on external research availability.
