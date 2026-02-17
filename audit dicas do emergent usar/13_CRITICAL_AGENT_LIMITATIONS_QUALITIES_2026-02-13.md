@@ -586,3 +586,11 @@ Implemented:
 Critical reading:
 1. UX now aligns better with "agentic" expectation in sidebar chat.
 2. Remaining hard limitation: still no end-to-end deterministic patch execution loop for arbitrary multi-file code changes.
+
+## Delta 2026-02-17 VII - Explorer state coherence
+Implemented:
+1. Unified explorer loading/error ownership in `FileExplorerPro` with explicit props from `/ide`.
+2. Added explicit empty workspace action state (create file/folder) to avoid blank panel ambiguity.
+
+Critical reading:
+1. This closes a practical UX gap in P1-01 (flow clarity) without changing product scope.

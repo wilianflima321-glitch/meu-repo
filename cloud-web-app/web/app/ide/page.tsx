@@ -976,6 +976,8 @@ function IDEPageInner() {
         fileExplorer={
           <FileExplorerPro
             files={fileTree}
+            isLoading={treeLoading}
+            error={treeError}
             onFileSelect={handleFileSelect}
             onFileCreate={handleCreate}
             onFileDelete={handleDelete}
@@ -1041,16 +1043,6 @@ function IDEPageInner() {
               isStale={isPreviewStale}
             />
           </div>
-          {treeLoading && (
-            <div className="absolute top-3 left-3 px-3 py-2 text-xs text-slate-300 bg-slate-800 rounded">
-              Loading workspace...
-            </div>
-          )}
-          {treeError && (
-            <div className="absolute top-3 left-3 px-3 py-2 text-xs text-red-300 bg-red-900/40 rounded">
-              {treeError}
-            </div>
-          )}
           <PromptDialog
             open={promptDialog.state.open}
             title={promptDialog.state.title}

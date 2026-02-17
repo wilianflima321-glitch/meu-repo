@@ -612,3 +612,12 @@ Delivered:
 Triaged impact:
 1. Closes part of P1-02 (Editor-Native AI Clarity support path) by improving assistant execution quality in main Workbench shell.
 2. Does not change collaboration/L4/L5 status gates.
+
+## Delta 2026-02-17 VII - P1-01 explorer consistency pass
+Delivered:
+1. Explorer is now canonical owner of its loading/error/empty states.
+2. `/ide` no longer duplicates explorer state overlays in editor viewport.
+
+Triaged impact:
+1. Reduces user confusion in core editor journey.
+2. Keeps keyboard-first and compact layout unchanged.

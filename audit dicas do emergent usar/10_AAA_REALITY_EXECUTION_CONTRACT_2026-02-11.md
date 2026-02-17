@@ -1783,3 +1783,21 @@ Validation snapshot:
 Critical reading:
 1. This improves Manus-like orchestration behavior without inflating maturity claims.
 2. L4/L5 readiness remains blocked by missing deterministic multi-file validate/apply/rollback pipeline.
+
+## 53) Delta 2026-02-17 VII - Explorer UX hardening in `/ide`
+
+Implemented:
+1. File explorer now receives canonical load/error state from `/ide` shell:
+- `cloud-web-app/web/app/ide/page.tsx`
+- `cloud-web-app/web/components/ide/FileExplorerPro.tsx`
+2. Added explicit empty-state action panel in explorer (no silent blank workspace):
+- CTA: `New File` and `New Folder`
+3. Removed duplicated global loading/error overlays in editor area; explorer is now the single source for its own load/error UX.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:enterprise-gate` PASS
+
+Decision lock:
+1. Keep workspace loading/error feedback inside explorer panel to avoid split-state ambiguity.
