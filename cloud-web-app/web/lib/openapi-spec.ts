@@ -563,6 +563,166 @@ Configure webhooks em \`/api/webhooks\` para receber eventos em tempo real.
         },
       },
     },
+    '/api/ai/image/generate': {
+      post: {
+        tags: ['AI'],
+        summary: 'Generate image with selected provider',
+        operationId: 'aiImageGenerate',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AIImageGenerateRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Image generation accepted and completed in-request',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AIImageGenerateResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Requested provider not configured',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/ai/voice/generate': {
+      post: {
+        tags: ['AI'],
+        summary: 'Generate voice audio from text with selected provider',
+        operationId: 'aiVoiceGenerate',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AIVoiceGenerateRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Voice audio generated',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AIVoiceGenerateResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Requested provider not configured',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/ai/music/generate': {
+      post: {
+        tags: ['AI'],
+        summary: 'Generate music with selected provider',
+        operationId: 'aiMusicGenerate',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AIMusicGenerateRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Music generation task created',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AIMusicGenerateResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Requested provider not configured',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/ai/3d/generate': {
+      post: {
+        tags: ['AI'],
+        summary: 'Generate 3D model task with selected provider',
+        operationId: 'ai3dGenerate',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AI3DGenerateRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: '3D generation task created',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AI3DGenerateResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Requested provider not configured',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CapabilityError',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
 
     '/api/ai/change/validate': {
       post: {
@@ -946,6 +1106,135 @@ Configure webhooks em \`/api/webhooks\` para receber eventos em tempo real.
           latencyMs: { type: 'integer' },
         },
         required: ['suggestion'],
+      },
+      AIImageGenerateRequest: {
+        type: 'object',
+        properties: {
+          prompt: { type: 'string' },
+          provider: { type: 'string', enum: ['dalle', 'stable-diffusion', 'flux'] },
+          size: { type: 'string' },
+          style: { type: 'string' },
+          quality: { type: 'string', enum: ['standard', 'hd'] },
+          n: { type: 'integer', minimum: 1 },
+        },
+        required: ['prompt'],
+      },
+      AIImageGenerateResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          provider: { type: 'string' },
+          images: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                url: { type: 'string' },
+                revisedPrompt: { type: 'string' },
+              },
+              required: ['url'],
+            },
+          },
+          metadata: { type: 'object' },
+        },
+        required: ['success', 'provider', 'images'],
+      },
+      AIVoiceGenerateRequest: {
+        type: 'object',
+        properties: {
+          text: { type: 'string' },
+          provider: { type: 'string', enum: ['elevenlabs', 'openai', 'azure'] },
+          voice: { type: 'string' },
+          emotion: { type: 'string' },
+          speed: { type: 'number' },
+          pitch: { type: 'number' },
+          format: { type: 'string', enum: ['mp3', 'wav', 'ogg'] },
+        },
+        required: ['text'],
+      },
+      AIVoiceGenerateResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          provider: { type: 'string' },
+          audio: {
+            type: 'object',
+            properties: {
+              data: { type: 'string' },
+              mimeType: { type: 'string' },
+              format: { type: 'string' },
+              size: { type: 'integer' },
+            },
+          },
+          metadata: { type: 'object' },
+        },
+        required: ['success', 'provider', 'audio'],
+      },
+      AIMusicGenerateRequest: {
+        type: 'object',
+        properties: {
+          provider: { type: 'string', enum: ['suno', 'musicgen'] },
+          prompt: { type: 'string' },
+          genre: { type: 'string' },
+          mood: { type: 'string' },
+          duration: { type: 'integer' },
+          tempo: { type: 'string', enum: ['slow', 'medium', 'fast'] },
+          instrumental: { type: 'boolean' },
+          lyrics: { type: 'string' },
+          referenceUrl: { type: 'string', format: 'uri' },
+        },
+        required: ['prompt'],
+      },
+      AIMusicGenerateResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          provider: { type: 'string' },
+          task: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              status: { type: 'string' },
+              checkStatusUrl: { type: 'string' },
+            },
+          },
+          metadata: { type: 'object' },
+        },
+        required: ['success', 'provider', 'task'],
+      },
+      AI3DGenerateRequest: {
+        type: 'object',
+        properties: {
+          provider: { type: 'string', enum: ['meshy', 'tripo3d'] },
+          mode: { type: 'string', enum: ['text-to-3d', 'image-to-3d'] },
+          prompt: { type: 'string' },
+          imageUrl: { type: 'string', format: 'uri' },
+          imageBase64: { type: 'string' },
+          style: { type: 'string' },
+          format: { type: 'string' },
+          quality: { type: 'string', enum: ['draft', 'standard', 'high'] },
+          targetPolycount: { type: 'integer' },
+          negativePrompt: { type: 'string' },
+        },
+        required: ['mode'],
+      },
+      AI3DGenerateResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          provider: { type: 'string' },
+          mode: { type: 'string' },
+          task: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              status: { type: 'string' },
+              checkStatusUrl: { type: 'string' },
+            },
+          },
+          metadata: { type: 'object' },
+        },
+        required: ['success', 'provider', 'mode', 'task'],
       },
       AIChangeValidateRequest: {
         type: 'object',

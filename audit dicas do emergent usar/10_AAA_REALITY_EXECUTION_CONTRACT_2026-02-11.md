@@ -1943,3 +1943,32 @@ Implemented:
 Decision lock:
 1. Requested provider is now explicit-by-contract; runtime no longer auto-switches provider silently.
 2. Capability-unavailable branches must remain machine-readable and auditable.
+
+## 62) Delta 2026-02-18 XVI - OpenAPI alignment for media/3D AI generation routes
+
+Implemented:
+1. Added OpenAPI path docs for:
+- `/api/ai/image/generate`
+- `/api/ai/voice/generate`
+- `/api/ai/music/generate`
+- `/api/ai/3d/generate`
+2. Added request/response schemas for these routes in:
+- `cloud-web-app/web/lib/openapi-spec.ts`
+3. Capability failure path documented as explicit provider-config gate (`503 PROVIDER_NOT_CONFIGURED` + capability envelope).
+
+Decision lock:
+1. API behavior and documentation must stay synchronized in the same wave for AI generation surfaces.
+
+## 63) Delta 2026-02-18 XVII - Build warning reduction for Next IPC env serialization
+
+Implemented:
+1. Hardened IPC env cleanup in `cloud-web-app/web/next.config.js`:
+- invalid incremental-cache IPC keys are now normalized to empty string (instead of delete) to avoid `"undefined"` serialization in subprocess contexts.
+2. Revalidated full gate after change:
+- `npm run qa:enterprise-gate` PASS.
+
+Observed result:
+1. Previous `revalidateTag` invalid URL warning (`localhost:undefined`) no longer appears in build output for this wave.
+2. Remaining build warnings are environment-expected only:
+- missing `UPSTASH_REDIS_REST_URL/TOKEN`
+- Docker sandbox fallback

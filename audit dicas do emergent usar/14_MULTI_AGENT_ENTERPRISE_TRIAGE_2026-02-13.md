@@ -680,3 +680,20 @@ Delivered:
 Triaged impact:
 1. Removes hidden fallback ambiguity in high-cost generation endpoints.
 2. Improves enterprise observability and user-facing failure clarity without scope expansion.
+
+## Delta 2026-02-18 XIV - OpenAPI parity update
+Delivered:
+1. Added OpenAPI route coverage and schemas for AI image/voice/music/3D generation endpoints.
+2. Synced provider-missing semantics with runtime capability contract (`503 PROVIDER_NOT_CONFIGURED`).
+
+Triaged impact:
+1. Lowers client-integration ambiguity and keeps contract truth aligned.
+
+## Delta 2026-02-18 XV - Build-noise triage closure for IPC URL parse
+Delivered:
+1. `next.config.js` now normalizes invalid incremental-cache IPC env values to empty strings to avoid `"undefined"` propagation.
+2. Full enterprise gate revalidated after change.
+
+Triaged impact:
+1. Removed a misleading build warning class (`revalidateTag` invalid URL).
+2. Leaves only environment-dependent warnings that are operationally expected in local mode.

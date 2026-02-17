@@ -31,7 +31,9 @@ const resolveFirstValidEnvValue = (keys) => {
 
 const clearIpcEnv = () => {
   for (const key of [...IPC_PORT_ENV_KEYS, ...IPC_KEY_ENV_KEYS]) {
-    delete process.env[key]
+    // Keep as empty string (instead of deleting) to avoid downstream
+    // env serialization turning `undefined` into the literal string "undefined".
+    process.env[key] = ''
   }
 }
 

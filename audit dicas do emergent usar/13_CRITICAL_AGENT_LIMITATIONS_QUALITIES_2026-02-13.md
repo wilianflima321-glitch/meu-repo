@@ -676,3 +676,21 @@ Implemented:
 Critical reading:
 1. This closes a real reliability bug class: requested provider missing no longer degrades into downstream runtime exception.
 2. UX now receives deterministic capability status and actionable metadata instead of ambiguous 500s.
+
+## Delta 2026-02-18 XVI - Contract/doc parity for AI media surfaces
+Implemented:
+1. OpenAPI now includes `/api/ai/image|voice|music|3d/generate` paths and typed schemas.
+2. Failure branch semantics in docs aligned with runtime (`503 PROVIDER_NOT_CONFIGURED`, capability envelope).
+
+Critical reading:
+1. This reduces integration drift for external clients and internal tooling.
+2. Runtime limit remains: provider configuration is still a hard prerequisite for these capabilities.
+
+## Delta 2026-02-18 XVII - Next IPC warning mitigation
+Implemented:
+1. Updated `next.config.js` IPC env sanitization to avoid propagating literal `"undefined"` values to incremental-cache IPC fields.
+2. Re-ran `qa:enterprise-gate` with PASS outcome.
+
+Critical reading:
+1. The recurring `revalidateTag` invalid URL warning is resolved in this wave.
+2. Residual build warnings now map to explicit missing environment/runtime dependencies only (Upstash + Docker fallback).
