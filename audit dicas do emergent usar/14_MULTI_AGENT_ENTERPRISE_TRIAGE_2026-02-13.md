@@ -581,3 +581,14 @@ Delivered:
 Why this matters:
 1. Multi-agent execution now has deterministic interface targets and guardrails.
 2. Infra/runtime residual risks are tracked in a dedicated operational artifact.
+
+## Delta 2026-02-17 IV - P1/P2 execution finalization
+Delivered:
+1. Final ordered backlog derived from interface map:
+- `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
+2. Canonical index sync:
+- `00_FONTE_CANONICA.md` now includes `20`.
+
+Decision lock:
+1. Next wave executes by strict order in `20` (P1 first, then P2).
+2. No P2 item promotion before P1 freeze and gate pass.

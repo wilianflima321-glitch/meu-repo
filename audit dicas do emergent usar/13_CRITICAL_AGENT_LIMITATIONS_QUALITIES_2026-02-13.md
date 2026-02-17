@@ -554,3 +554,12 @@ Implemented:
 Critical reading:
 1. Interface improvement ownership is now explicit and auditable by file path.
 2. Runtime warning handling is tracked operationally without lowering quality gates.
+
+## Delta 2026-02-17 IV - Critical execution ordering (P1/P2)
+Implemented:
+1. Priority execution artifact added:
+- `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
+
+Critical reading:
+1. P1/P2 ambiguity is removed; each item now has explicit file scope and done criteria.
+2. This reduces execution drift risk for external AI collaborators.

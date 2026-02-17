@@ -195,6 +195,17 @@ Execution interpretation:
 1. Interface ownership and file-level targets are now explicit for parallel UI hardening.
 2. Runtime warning handling is formalized without weakening hard quality gates.
 
+## 0.7 Delta Update 2026-02-17 (P1/P2 triage finalized)
+Implemented in canonical planning:
+1. Final P1/P2 execution list generated from interface surface map:
+- `audit dicas do emergent usar/20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
+2. Canonical source list updated:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+
+Execution interpretation:
+1. Post-P0 work now has strict ordered priorities and done criteria.
+2. This closes ambiguity for next execution wave without changing product scope.
+
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
    Source: `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`
