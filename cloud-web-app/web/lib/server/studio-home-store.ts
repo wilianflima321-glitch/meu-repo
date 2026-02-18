@@ -127,6 +127,10 @@ function stableSeed(value: string): number {
   return hash
 }
 
+function hasEnoughBudget(session: StudioSession, expectedCost: number): boolean {
+  return session.cost.remainingCredits >= expectedCost
+}
+
 function isStudioContextContainer(input: unknown): input is Record<string, unknown> {
   return !!input && typeof input === 'object' && !Array.isArray(input)
 }
@@ -461,7 +465,7 @@ export async function planStudioTasks(userId: string, sessionId: string): Promis
       id: randomUUID(),
       title: 'Mission decomposition and acceptance criteria',
       ownerRole: 'planner',
-      status: 'planning',
+      status: 'queued',
       estimateCredits: 4,
       estimateSeconds: 25,
       validationVerdict: 'pending',
@@ -574,6 +578,23 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
   const tokensIn = 640 + (seed % 220)
   const tokensOut = 240 + ((seed >>> 3) % 130)
   const runCost = Math.max(0.1, Math.round((target.estimateCredits * 0.4) * 100) / 100)
+
+  if (!hasEnoughBudget(current, runCost)) {
+    const tasks = [...current.tasks]
+    tasks[index] = {
+      ...target,
+      status: 'blocked',
+      result: `Blocked: budget cap reached. Needed ${runCost} credits.`,
+      validationVerdict: 'pending',
+      finishedAt: nowIso(),
+    }
+    let next = appendMessage({ ...current, tasks, lastActivityAt: nowIso() }, {
+      role: 'system',
+      content: `Task "${target.title}" blocked: budget exhausted (${current.cost.remainingCredits} credits remaining).`,
+      status: 'blocked',
+    })
+    return persistSession(workflow, next)
+  }
 
   const result =
     target.ownerRole === 'planner'
@@ -762,6 +783,7 @@ export async function createFullAccessGrant(
     projectId: workflow.projectId || 'default',
     createdAt: workflow.createdAt.toISOString(),
   })
+  if (current.status !== 'active') return current
   const now = new Date()
   const expiresAt = new Date(now.getTime() + Math.max(1, ttlMinutes) * 60_000)
   const grant: FullAccessGrant = {

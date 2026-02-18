@@ -95,3 +95,5 @@ Mandatory before completion:
 9. Build split confirms lightweight default entry:
 - `/dashboard` now loads as lightweight shell
 - legacy-heavy surface moved to `/dashboard/legacy`.
+10. Active Studio session can be resumed on reload; stopped sessions are not auto-resumed.
+11. Task run enforces server-side budget cap before orchestration execution.

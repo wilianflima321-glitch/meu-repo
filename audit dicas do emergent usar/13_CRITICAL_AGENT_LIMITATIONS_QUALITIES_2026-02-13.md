@@ -820,3 +820,13 @@ Implemented:
 Critical reading:
 1. Continuity improved between orchestrated home and advanced shell.
 2. Main unresolved risk remains route/bundle scale (`apiRoutes` high and dashboard first-load still above ideal target).
+
+## Delta 2026-02-18 XXVII - Budget and session continuity critical read
+Implemented:
+1. Execution is now budget-gated at task-run level (server-side), not only UI-level.
+2. Active Studio session restoration on reload was added to reduce operator friction.
+3. Planner task default state corrected to avoid first-step dead path.
+
+Critical reading:
+1. This closes a real operational risk (silent budget drift during orchestration).
+2. Residual risk remains in long-term persistence model (workflow JSON context, not dedicated domain tables).

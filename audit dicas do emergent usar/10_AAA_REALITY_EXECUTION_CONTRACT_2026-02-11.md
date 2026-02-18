@@ -2221,3 +2221,21 @@ Decision lock:
 1. Legacy dashboard stays available only as explicit fallback route.
 2. Studio Home remains default entry.
 3. IDE handoff context is additive and backward compatible with existing `file/entry/projectId` contract.
+
+## 74) Delta 2026-02-18 XXVIII - Studio session resilience and budget gate
+
+Implemented:
+1. Studio Home now restores latest active session on reload via local persistence.
+2. Task execution now enforces budget guard in orchestration store:
+- run is blocked with explicit message when budget cap is exhausted
+3. Planner initial status normalized to `queued` for deterministic first-run path.
+4. Full Access grant creation now requires active session state.
+
+Factual snapshot:
+1. `lint` PASS
+2. `typecheck` PASS
+3. Existing enterprise gates remain green in this branch baseline.
+
+Decision lock:
+1. Budget cap is an execution gate (not advisory only).
+2. Session continuity is resume-only for active sessions (stopped sessions are not auto-resumed).

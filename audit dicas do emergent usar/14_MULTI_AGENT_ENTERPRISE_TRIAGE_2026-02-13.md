@@ -808,3 +808,14 @@ Triaged impact:
 1. Lower default dashboard load pressure.
 2. Better continuity for user journeys crossing home orchestration and deep IDE execution.
 3. Residual risks still open: API surface breadth and wrapper deprecation completion window.
+
+## Delta 2026-02-18 XXV - Orchestration resilience triage
+Delivered:
+1. Server-side budget guard for task runs.
+2. Session restore for active Studio workflow after page reload.
+3. Planner start-state normalization to prevent first-step blockage.
+
+Triaged impact:
+1. Better cost control under long session usage.
+2. Better operator continuity without manual session re-open.
+3. No scope change; residual architecture constraints remain unchanged.

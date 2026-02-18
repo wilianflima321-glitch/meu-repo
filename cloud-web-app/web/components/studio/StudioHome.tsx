@@ -14,6 +14,7 @@ const AIChatPanelContainer = dynamic(() => import('@/components/ide/AIChatPanelC
 })
 const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
+const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
 
 type StudioTask = {
   id: string
@@ -97,7 +98,12 @@ function canRunTask(
   allTasks: StudioTask[]
 ): boolean {
   if (sessionStatus !== 'active') return false
-  if (!(task.status === 'queued' || task.status === 'blocked' || task.status === 'error')) return false
+  const runEligible =
+    task.status === 'queued' ||
+    task.status === 'blocked' ||
+    task.status === 'error' ||
+    (task.ownerRole === 'planner' && task.status === 'planning')
+  if (!runEligible) return false
   if (task.ownerRole === 'coder') {
     return allTasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
   }
@@ -147,6 +153,7 @@ export default function StudioHome() {
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [sessionBootstrapped, setSessionBootstrapped] = useState(false)
 
   const activeGrant = useMemo(
     () =>
@@ -215,6 +222,14 @@ export default function StudioHome() {
     window.localStorage.setItem(PREVIEW_RUNTIME_STORAGE_KEY, showRuntimePreview ? '1' : '0')
   }, [showRuntimePreview])
 
+  useEffect(() => {
+    if (!session?.id || session.status !== 'active') {
+      window.localStorage.removeItem(STUDIO_SESSION_STORAGE_KEY)
+      return
+    }
+    window.localStorage.setItem(STUDIO_SESSION_STORAGE_KEY, session.id)
+  }, [session?.id, session?.status])
+
   const requireSessionId = useCallback(() => {
     if (!session?.id) throw new Error('Start a studio session first.')
     return session.id
@@ -260,6 +275,26 @@ export default function StudioHome() {
     }, 8000)
     return () => window.clearInterval(interval)
   }, [session?.id, session?.status, busy, refreshSession])
+
+  useEffect(() => {
+    if (sessionBootstrapped) return
+    const restore = async () => {
+      const persistedSessionId = window.localStorage.getItem(STUDIO_SESSION_STORAGE_KEY)?.trim()
+      if (!persistedSessionId) {
+        setSessionBootstrapped(true)
+        return
+      }
+      try {
+        await refreshSession(persistedSessionId)
+        setToast('Resumed latest Studio session.')
+      } catch {
+        window.localStorage.removeItem(STUDIO_SESSION_STORAGE_KEY)
+      } finally {
+        setSessionBootstrapped(true)
+      }
+    }
+    void restore()
+  }, [sessionBootstrapped, refreshSession])
 
   const createSuperPlan = useCallback(async () => {
     await withAction(async () => {
