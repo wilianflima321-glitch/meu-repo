@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession, validateStudioTask } from '@/lib/server/studio-home-store'
+import { capabilityResponse } from '@/lib/server/capability-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,15 +30,14 @@ export async function POST(
       )
     }
     if (current.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'SESSION_NOT_ACTIVE',
-          message: 'Studio session is not active. Validation is disabled.',
-          capability: 'STUDIO_HOME_TASK_VALIDATE',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'SESSION_NOT_ACTIVE',
+        message: 'Studio session is not active. Validation is disabled.',
+        capability: 'STUDIO_HOME_TASK_VALIDATE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
     const task = current.tasks.find((item) => item.id === ctx.params.id)
     if (!task) {
@@ -47,50 +47,46 @@ export async function POST(
       )
     }
     if (task.ownerRole !== 'reviewer') {
-      return NextResponse.json(
-        {
-          error: 'REVIEW_GATE_REQUIRED',
-          message: 'Validation is allowed only for reviewer checkpoints.',
-          capability: 'STUDIO_HOME_TASK_VALIDATE',
-          capabilityStatus: 'PARTIAL',
-          metadata: { ownerRole: task.ownerRole },
-        },
-        { status: 422 }
-      )
+      return capabilityResponse({
+        status: 422,
+        error: 'REVIEW_GATE_REQUIRED',
+        message: 'Validation is allowed only for reviewer checkpoints.',
+        capability: 'STUDIO_HOME_TASK_VALIDATE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { ownerRole: task.ownerRole },
+      })
     }
     if (task.status !== 'done') {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_NOT_READY',
-          message: 'Validation is available only after task run is completed.',
-          capability: 'STUDIO_HOME_TASK_VALIDATE',
-          capabilityStatus: 'PARTIAL',
-          metadata: { status: task.status },
-        },
-        { status: 422 }
-      )
+      return capabilityResponse({
+        status: 422,
+        error: 'VALIDATION_NOT_READY',
+        message: 'Validation is available only after task run is completed.',
+        capability: 'STUDIO_HOME_TASK_VALIDATE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { status: task.status },
+      })
     }
     if (task.validationVerdict === 'passed') {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_ALREADY_PASSED',
-          message: 'Validation has already passed for this task.',
-          capability: 'STUDIO_HOME_TASK_VALIDATE',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'VALIDATION_ALREADY_PASSED',
+        message: 'Validation has already passed for this task.',
+        capability: 'STUDIO_HOME_TASK_VALIDATE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
     if (task.validationVerdict === 'failed') {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_ALREADY_FAILED',
-          message: 'Validation already failed. Re-run reviewer task before validating again.',
-          capability: 'STUDIO_HOME_TASK_VALIDATE',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'VALIDATION_ALREADY_FAILED',
+        message: 'Validation already failed. Re-run reviewer task before validating again.',
+        capability: 'STUDIO_HOME_TASK_VALIDATE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
 
     const session = await validateStudioTask(auth.userId, sessionId, ctx.params.id)
@@ -109,16 +105,19 @@ export async function POST(
     }
 
     if (updatedTask.validationVerdict === 'failed') {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_FAILED',
-          message: 'Task failed deterministic validation.',
-          session,
-          capability: 'STUDIO_HOME_TASK_VALIDATE',
-          capabilityStatus: 'PARTIAL',
+      return capabilityResponse({
+        status: 422,
+        error: 'VALIDATION_FAILED',
+        message: 'Task failed deterministic validation.',
+        capability: 'STUDIO_HOME_TASK_VALIDATE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          sessionId: session.id,
+          taskId: updatedTask.id,
+          ownerRole: updatedTask.ownerRole,
         },
-        { status: 422 }
-      )
+      })
     }
 
     return NextResponse.json({

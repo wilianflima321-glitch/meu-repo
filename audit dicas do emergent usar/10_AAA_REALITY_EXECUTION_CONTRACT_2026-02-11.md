@@ -2289,3 +2289,28 @@ Factual snapshot:
 Decision lock:
 1. Replay or out-of-order studio actions must fail explicitly, never mutate silently.
 2. Reviewer remains the only authority for validate/apply/rollback in Studio orchestration.
+
+## 77) Delta 2026-02-18 XXXI - Studio capability envelope normalization
+
+Implemented:
+1. Normalized Studio route gate responses to `capabilityResponse` helper for capability headers and metadata parity:
+- `tasks/plan`
+- `tasks/[id]/run`
+- `tasks/[id]/validate`
+- `tasks/[id]/apply`
+- `tasks/[id]/rollback`
+2. Preserved explicit non-capability contracts (`SESSION_ID_REQUIRED`, `TASK_NOT_FOUND`, `STUDIO_SESSION_NOT_FOUND`) for deterministic client handling.
+
+Factual snapshot:
+1. `cmd /c npm run qa:enterprise-gate` -> PASS
+2. `cmd /c npm run qa:route-contracts` -> PASS (`checks=31`)
+3. Interface critical baseline preserved:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+
+Decision lock:
+1. Studio gated failures must include capability envelope headers (`x-aethel-capability*`) consistently.
+2. Capability semantics stay explicit and machine-readable; no success-masking on blocked edges.

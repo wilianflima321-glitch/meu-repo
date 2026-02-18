@@ -106,3 +106,4 @@ Mandatory before completion:
 10. Active Studio session can be resumed on reload; stopped sessions are not auto-resumed.
 11. Task run enforces server-side budget cap before orchestration execution.
 12. Super Plan creation is single-shot per active session by default; regeneration requires explicit `force`.
+13. Studio task/plan gates are normalized through shared capability-response helper for consistent telemetry headers.

@@ -844,3 +844,12 @@ Triaged impact:
 1. Eliminates a class of UX/API inconsistencies where invalid task actions could appear accepted.
 2. Improves cost discipline by preventing accidental reruns/replays from consuming orchestration budget.
 3. Keeps policy alignment strong: visible gates, explicit errors, no silent mutation.
+
+## Delta 2026-02-18 XXVIII - Studio envelope parity triage
+Delivered:
+1. Studio capability-gated task routes normalized to shared capability-response helper.
+2. Header-level observability parity enforced for blocked/partial states.
+
+Triaged impact:
+1. Better compatibility with downstream telemetry and support tooling.
+2. No behavior inflation; this is reliability and contract consistency hardening only.

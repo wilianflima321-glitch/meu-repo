@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { applyStudioTask, getStudioSession } from '@/lib/server/studio-home-store'
+import { capabilityResponse } from '@/lib/server/capability-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,15 +30,14 @@ export async function POST(
       )
     }
     if (current.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'SESSION_NOT_ACTIVE',
-          message: 'Studio session is not active. Apply is disabled.',
-          capability: 'STUDIO_HOME_TASK_APPLY',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'SESSION_NOT_ACTIVE',
+        message: 'Studio session is not active. Apply is disabled.',
+        capability: 'STUDIO_HOME_TASK_APPLY',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
 
     const task = current.tasks.find((item) => item.id === ctx.params.id)
@@ -48,41 +48,38 @@ export async function POST(
       )
     }
     if (task.applyToken) {
-      return NextResponse.json(
-        {
-          error: 'APPLY_ALREADY_COMPLETED',
-          message: 'Apply already completed for this task. Use rollback before re-applying.',
-          capability: 'STUDIO_HOME_TASK_APPLY',
-          capabilityStatus: 'PARTIAL',
-          metadata: { applyToken: task.applyToken },
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'APPLY_ALREADY_COMPLETED',
+        message: 'Apply already completed for this task. Use rollback before re-applying.',
+        capability: 'STUDIO_HOME_TASK_APPLY',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { applyToken: task.applyToken },
+      })
     }
 
     if (task.validationVerdict !== 'passed') {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_REQUIRED',
-          message: 'Apply is blocked until deterministic validation passes.',
-          capability: 'STUDIO_HOME_TASK_APPLY',
-          capabilityStatus: 'PARTIAL',
-          metadata: { validationVerdict: task.validationVerdict },
-        },
-        { status: 422 }
-      )
+      return capabilityResponse({
+        status: 422,
+        error: 'VALIDATION_REQUIRED',
+        message: 'Apply is blocked until deterministic validation passes.',
+        capability: 'STUDIO_HOME_TASK_APPLY',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { validationVerdict: task.validationVerdict },
+      })
     }
     if (task.ownerRole !== 'reviewer') {
-      return NextResponse.json(
-        {
-          error: 'REVIEW_GATE_REQUIRED',
-          message: 'Apply is allowed only for reviewer-approved checkpoints.',
-          capability: 'STUDIO_HOME_TASK_APPLY',
-          capabilityStatus: 'PARTIAL',
-          metadata: { ownerRole: task.ownerRole },
-        },
-        { status: 422 }
-      )
+      return capabilityResponse({
+        status: 422,
+        error: 'REVIEW_GATE_REQUIRED',
+        message: 'Apply is allowed only for reviewer-approved checkpoints.',
+        capability: 'STUDIO_HOME_TASK_APPLY',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { ownerRole: task.ownerRole },
+      })
     }
 
     const session = await applyStudioTask(auth.userId, sessionId, ctx.params.id)

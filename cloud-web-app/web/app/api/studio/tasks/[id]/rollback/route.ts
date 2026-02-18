@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession, rollbackStudioTask } from '@/lib/server/studio-home-store'
+import { capabilityResponse } from '@/lib/server/capability-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,15 +33,14 @@ export async function POST(
       )
     }
     if (current.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'SESSION_NOT_ACTIVE',
-          message: 'Studio session is not active. Rollback is disabled.',
-          capability: 'STUDIO_HOME_TASK_ROLLBACK',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'SESSION_NOT_ACTIVE',
+        message: 'Studio session is not active. Rollback is disabled.',
+        capability: 'STUDIO_HOME_TASK_ROLLBACK',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
     const currentTask = current.tasks.find((item) => item.id === ctx.params.id)
     if (!currentTask) {
@@ -50,15 +50,14 @@ export async function POST(
       )
     }
     if (!currentTask.applyToken) {
-      return NextResponse.json(
-        {
-          error: 'ROLLBACK_NOT_AVAILABLE',
-          message: 'Rollback is only available after a successful apply.',
-          capability: 'STUDIO_HOME_TASK_ROLLBACK',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'ROLLBACK_NOT_AVAILABLE',
+        message: 'Rollback is only available after a successful apply.',
+        capability: 'STUDIO_HOME_TASK_ROLLBACK',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
 
     const session = await rollbackStudioTask(auth.userId, sessionId, ctx.params.id, body.applyToken)
@@ -78,15 +77,14 @@ export async function POST(
     }
 
     if (task.status !== 'blocked' || task.applyToken) {
-      return NextResponse.json(
-        {
-          error: 'ROLLBACK_NOT_AVAILABLE',
-          message: 'Rollback is only available after a successful apply.',
-          capability: 'STUDIO_HOME_TASK_ROLLBACK',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'ROLLBACK_NOT_AVAILABLE',
+        message: 'Rollback is only available after a successful apply.',
+        capability: 'STUDIO_HOME_TASK_ROLLBACK',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
 
     return NextResponse.json({

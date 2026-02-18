@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession, planStudioTasks } from '@/lib/server/studio-home-store'
+import { capabilityResponse } from '@/lib/server/capability-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,30 +30,28 @@ export async function POST(req: NextRequest) {
       )
     }
     if (current.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'SESSION_NOT_ACTIVE',
-          message: 'Studio session is not active. Super plan generation is disabled.',
-          capability: 'STUDIO_HOME_SUPER_PLAN',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'SESSION_NOT_ACTIVE',
+        message: 'Studio session is not active. Super plan generation is disabled.',
+        capability: 'STUDIO_HOME_SUPER_PLAN',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
     if (!force && current.tasks.length > 0) {
-      return NextResponse.json(
-        {
-          error: 'PLAN_ALREADY_EXISTS',
-          message: 'A super plan already exists for this session.',
-          capability: 'STUDIO_HOME_SUPER_PLAN',
-          capabilityStatus: 'PARTIAL',
-          metadata: {
-            taskCount: current.tasks.length,
-            force: false,
-          },
+      return capabilityResponse({
+        status: 409,
+        error: 'PLAN_ALREADY_EXISTS',
+        message: 'A super plan already exists for this session.',
+        capability: 'STUDIO_HOME_SUPER_PLAN',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          taskCount: current.tasks.length,
+          force: false,
         },
-        { status: 409 }
-      )
+      })
     }
 
     const session = await planStudioTasks(auth.userId, sessionId)

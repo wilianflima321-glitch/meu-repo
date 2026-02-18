@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { getPlanLimits } from '@/lib/plan-limits'
 import { prisma } from '@/lib/db'
 import { getStudioSession, runStudioTask } from '@/lib/server/studio-home-store'
+import { capabilityResponse } from '@/lib/server/capability-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,16 +30,15 @@ export async function POST(
     })
     const limits = getPlanLimits(user?.plan || 'starter_trial')
     if (limits.maxAgents < 3) {
-      return NextResponse.json(
-        {
-          error: 'FEATURE_NOT_ALLOWED',
-          message: 'Your plan does not support 3-role studio orchestration.',
-          capability: 'STUDIO_HOME_MULTI_AGENT',
-          capabilityStatus: 'PARTIAL',
-          metadata: { maxAgents: limits.maxAgents, required: 3 },
-        },
-        { status: 403 }
-      )
+      return capabilityResponse({
+        status: 403,
+        error: 'FEATURE_NOT_ALLOWED',
+        message: 'Your plan does not support 3-role studio orchestration.',
+        capability: 'STUDIO_HOME_MULTI_AGENT',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { maxAgents: limits.maxAgents, required: 3 },
+      })
     }
 
     const current = await getStudioSession(auth.userId, sessionId)
@@ -49,15 +49,14 @@ export async function POST(
       )
     }
     if (current.status !== 'active') {
-      return NextResponse.json(
-        {
-          error: 'SESSION_NOT_ACTIVE',
-          message: 'Studio session is not active. Start a new session to continue execution.',
-          capability: 'STUDIO_HOME_TASK_RUN',
-          capabilityStatus: 'PARTIAL',
-        },
-        { status: 409 }
-      )
+      return capabilityResponse({
+        status: 409,
+        error: 'SESSION_NOT_ACTIVE',
+        message: 'Studio session is not active. Start a new session to continue execution.',
+        capability: 'STUDIO_HOME_TASK_RUN',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+      })
     }
 
     const task = current.tasks.find((item) => item.id === ctx.params.id)
@@ -73,16 +72,15 @@ export async function POST(
       task.status === 'error' ||
       (task.ownerRole === 'planner' && task.status === 'planning')
     if (!runEligible) {
-      return NextResponse.json(
-        {
-          error: 'TASK_RUN_NOT_ALLOWED',
-          message: 'Task cannot be executed in current state.',
-          capability: 'STUDIO_HOME_TASK_RUN',
-          capabilityStatus: 'PARTIAL',
-          metadata: { taskId: task.id, ownerRole: task.ownerRole, status: task.status },
-        },
-        { status: 422 }
-      )
+      return capabilityResponse({
+        status: 422,
+        error: 'TASK_RUN_NOT_ALLOWED',
+        message: 'Task cannot be executed in current state.',
+        capability: 'STUDIO_HOME_TASK_RUN',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { taskId: task.id, ownerRole: task.ownerRole, status: task.status },
+      })
     }
 
     const session = await runStudioTask(auth.userId, sessionId, ctx.params.id)
@@ -100,16 +98,15 @@ export async function POST(
       )
     }
     if (updatedTask.status === 'blocked') {
-      return NextResponse.json(
-        {
-          error: 'TASK_RUN_BLOCKED',
-          message: updatedTask.result || 'Task run blocked by orchestration guard.',
-          capability: 'STUDIO_HOME_TASK_RUN',
-          capabilityStatus: 'PARTIAL',
-          metadata: { taskId: updatedTask.id, ownerRole: updatedTask.ownerRole },
-        },
-        { status: 422 }
-      )
+      return capabilityResponse({
+        status: 422,
+        error: 'TASK_RUN_BLOCKED',
+        message: updatedTask.result || 'Task run blocked by orchestration guard.',
+        capability: 'STUDIO_HOME_TASK_RUN',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { taskId: updatedTask.id, ownerRole: updatedTask.ownerRole },
+      })
     }
 
     return NextResponse.json({

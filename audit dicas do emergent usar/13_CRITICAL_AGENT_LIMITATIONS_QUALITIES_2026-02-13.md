@@ -853,3 +853,12 @@ Implemented:
 Critical reading:
 1. This closes a real replay/mis-order reliability risk in long sessions.
 2. Remaining limitations are now mostly structural (single-node JSON persistence and high API surface), not workflow honesty in these task transitions.
+
+## Delta 2026-02-18 XXX - Studio capability envelope consistency
+Implemented:
+1. Studio task gating responses were normalized to the shared capability-response helper.
+2. `tasks/plan|run|validate|apply|rollback` now emit consistent capability headers and metadata on blocked/partial states.
+
+Critical reading:
+1. This improves operational observability (headers) and client-side deterministic handling without changing scope.
+2. Remaining critical limitations are still architecture-level: wrapper phaseout completion, API surface breadth, and distributed durability.
