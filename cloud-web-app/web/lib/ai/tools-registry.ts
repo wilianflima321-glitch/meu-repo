@@ -145,7 +145,7 @@ export const toolsRegistry = new ToolsRegistry();
 // Filesystem tools
 toolsRegistry.register({
   name: 'read_file',
-  description: 'Lê conteúdo de um arquivo do projeto',
+  description: 'Le conteudo de um arquivo do projeto',
   category: 'filesystem',
   inputSchema: {
     type: 'object',
@@ -181,7 +181,7 @@ toolsRegistry.register({
     type: 'object',
     properties: {
       path: { type: 'string', description: 'Caminho do arquivo' },
-      content: { type: 'string', description: 'Conteúdo a escrever' }
+      content: { type: 'string', description: 'Conteudo a escrever' }
     },
     required: ['path', 'content']
   },
@@ -203,14 +203,14 @@ toolsRegistry.register({
 
 toolsRegistry.register({
   name: 'delete_file',
-  description: 'Deleta um arquivo ou diretório',
+  description: 'Deleta um arquivo ou diretorio',
   category: 'filesystem',
   requiresConfirmation: true,
   inputSchema: {
     type: 'object',
     properties: {
-      path: { type: 'string', description: 'Caminho do arquivo/diretório' },
-      recursive: { type: 'boolean', description: 'Deletar recursivamente (para diretórios)' }
+      path: { type: 'string', description: 'Caminho do arquivo/diretorio' },
+      recursive: { type: 'boolean', description: 'Deletar recursivamente (para diretorios)' }
     },
     required: ['path']
   },
@@ -231,12 +231,12 @@ toolsRegistry.register({
 
 toolsRegistry.register({
   name: 'list_directory',
-  description: 'Lista arquivos e pastas em um diretório',
+  description: 'Lista arquivos e pastas em um diretorio',
   category: 'filesystem',
   inputSchema: {
     type: 'object',
     properties: {
-      path: { type: 'string', description: 'Caminho do diretório' },
+      path: { type: 'string', description: 'Caminho do diretorio' },
       recursive: { type: 'boolean', description: 'Listar recursivamente' }
     },
     required: ['path']
@@ -265,7 +265,7 @@ toolsRegistry.register({
   inputSchema: {
     type: 'object',
     properties: {
-      query: { type: 'string', description: 'Texto ou padrão regex para buscar' },
+      query: { type: 'string', description: 'Texto ou padrao regex para buscar' },
       isRegex: { type: 'boolean', description: 'Tratar query como regex' },
       includePattern: { type: 'string', description: 'Glob pattern para filtrar arquivos' }
     },
@@ -289,13 +289,13 @@ toolsRegistry.register({
 
 toolsRegistry.register({
   name: 'get_definitions',
-  description: 'Encontra definições de funções, classes ou variáveis',
+  description: 'Encontra definicoes de funcoes, classes ou variaveis',
   category: 'code',
   inputSchema: {
     type: 'object',
     properties: {
-      symbol: { type: 'string', description: 'Nome do símbolo a buscar' },
-      file: { type: 'string', description: 'Arquivo específico para buscar (opcional)' }
+      symbol: { type: 'string', description: 'Nome do simbolo a buscar' },
+      file: { type: 'string', description: 'Arquivo especifico para buscar (opcional)' }
     },
     required: ['symbol']
   },
@@ -318,14 +318,14 @@ toolsRegistry.register({
 // Terminal tools
 toolsRegistry.register({
   name: 'run_command',
-  description: 'Executa comando no terminal (com segurança)',
+  description: 'Executa comando no terminal (com seguranca)',
   category: 'terminal',
   requiresConfirmation: true,
   inputSchema: {
     type: 'object',
     properties: {
       command: { type: 'string', description: 'Comando a executar' },
-      cwd: { type: 'string', description: 'Diretório de trabalho' }
+      cwd: { type: 'string', description: 'Diretorio de trabalho' }
     },
     required: ['command']
   },
@@ -348,7 +348,7 @@ toolsRegistry.register({
 // Git tools
 toolsRegistry.register({
   name: 'git_status',
-  description: 'Mostra status atual do repositório Git',
+  description: 'Mostra status atual do repositorio Git',
   category: 'git',
   inputSchema: {
     type: 'object',
@@ -367,12 +367,12 @@ toolsRegistry.register({
 
 toolsRegistry.register({
   name: 'git_diff',
-  description: 'Mostra diferenças de arquivos no Git',
+  description: 'Mostra diferencas de arquivos no Git',
   category: 'git',
   inputSchema: {
     type: 'object',
     properties: {
-      file: { type: 'string', description: 'Arquivo específico (opcional)' },
+      file: { type: 'string', description: 'Arquivo especifico (opcional)' },
       staged: { type: 'boolean', description: 'Mostrar apenas staged' }
     }
   },
@@ -401,7 +401,7 @@ toolsRegistry.register({
     type: 'object',
     properties: {
       message: { type: 'string', description: 'Mensagem do commit' },
-      files: { type: 'string', description: 'Arquivos específicos (opcional, usa staged se não especificado)' }
+      files: { type: 'string', description: 'Arquivos especificos (opcional, usa staged se nao especificado)' }
     },
     required: ['message']
   },
@@ -430,7 +430,7 @@ toolsRegistry.register({
     type: 'object',
     properties: {
       query: { type: 'string', description: 'Termo de busca' },
-      maxResults: { type: 'number', description: 'Número máximo de resultados' }
+      maxResults: { type: 'number', description: 'Numero maximo de resultados' }
     },
     required: ['query']
   },
@@ -452,7 +452,7 @@ toolsRegistry.register({
 
 toolsRegistry.register({
   name: 'fetch_url',
-  description: 'Busca e parseia conteúdo de uma URL',
+  description: 'Busca e parseia conteudo de uma URL',
   category: 'web',
   inputSchema: {
     type: 'object',
@@ -544,8 +544,8 @@ toolsRegistry.register({
     type: 'object',
     properties: {
       blueprintId: { type: 'string', description: 'ID do blueprint do ator' },
-      position: { type: 'string', description: 'Posição [x,y,z]' },
-      rotation: { type: 'string', description: 'Rotação [pitch,yaw,roll]' }
+      position: { type: 'string', description: 'Posicao [x,y,z]' },
+      rotation: { type: 'string', description: 'Rotacao [pitch,yaw,roll]' }
     },
     required: ['blueprintId']
   },
