@@ -2175,3 +2175,24 @@ Decision lock:
 1. `not-implemented-ui=6` is explicit and policy-compliant (capability gates), not hidden with fake success.
 2. Studio Home remains entry UX; `/ide` remains advanced shell.
 3. Capability promotion above `PARTIAL` still requires operational evidence.
+
+## 72) Delta 2026-02-18 XXVI - Studio task-run honesty hardening
+
+Implemented:
+1. Studio task-run execution model now avoids random/synthetic telemetry artifacts:
+- deterministic seed-based token/cost estimates in `studio-home-store`
+- explicit orchestration-only result messaging
+2. Validation/apply gating tightened:
+- validation passes only from reviewer checkpoint marker (`[review-ok]`)
+- apply gate requires reviewer-owned validated checkpoint
+3. Route contract tightened:
+- `POST /api/studio/tasks/{id}/run` now returns `capabilityStatus='PARTIAL'` with execution metadata.
+
+Factual snapshot:
+1. `qa:route-contracts` PASS (`checks=29`)
+2. `qa:no-fake-success` PASS
+3. `lint`, `typecheck`, `build`, `qa:interface-gate` PASS
+
+Decision lock:
+1. Studio Home run/apply controls are orchestration checkpoints, not direct file patch apply.
+2. Deterministic file mutation remains anchored in `/ide` and `/api/ai/change/*` flows.

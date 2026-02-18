@@ -12,6 +12,7 @@ const AIChatPanelContainer = dynamic(() => import('@/components/ide/AIChatPanelC
   ssr: false,
   loading: () => <div className="h-52 w-full animate-pulse rounded bg-slate-900/50" />,
 })
+const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 
 type StudioTask = {
   id: string
@@ -89,9 +90,20 @@ function statusTone(status: StudioTask['status']): string {
   return 'text-slate-300 border-slate-600/40 bg-slate-700/20'
 }
 
-function canRunTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
+function canRunTask(
+  task: StudioTask,
+  sessionStatus: StudioSession['status'] | null,
+  allTasks: StudioTask[]
+): boolean {
   if (sessionStatus !== 'active') return false
-  return task.status === 'queued' || task.status === 'blocked' || task.status === 'error'
+  if (!(task.status === 'queued' || task.status === 'blocked' || task.status === 'error')) return false
+  if (task.ownerRole === 'coder') {
+    return allTasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
+  }
+  if (task.ownerRole === 'reviewer') {
+    return allTasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
+  }
+  return true
 }
 
 function canValidateTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
@@ -126,6 +138,7 @@ export default function StudioHome() {
   const [projectId, setProjectId] = useState('default')
   const [budgetCap, setBudgetCap] = useState(30)
   const [qualityMode, setQualityMode] = useState<'standard' | 'delivery' | 'studio'>('studio')
+  const [showAgentWorkspace, setShowAgentWorkspace] = useState(false)
   const [session, setSession] = useState<StudioSession | null>(null)
   const [wallet, setWallet] = useState<WalletSummary | null>(null)
   const [usage, setUsage] = useState<UsageSummary | null>(null)
@@ -143,6 +156,7 @@ export default function StudioHome() {
   )
 
   const selectedTask = session?.tasks[session.tasks.length - 1] || null
+  const variableUsageBlocked = Boolean(usage?.usageEntitlement && !usage.usageEntitlement.variableUsageAllowed)
 
   const previewContent = useMemo(() => {
     if (selectedTask?.result) return `# ${selectedTask.title}\n\n${selectedTask.result}`
@@ -183,6 +197,15 @@ export default function StudioHome() {
   useEffect(() => {
     void loadOps()
   }, [loadOps])
+
+  useEffect(() => {
+    const persisted = window.localStorage.getItem(AGENT_WORKSPACE_STORAGE_KEY)
+    if (persisted === '1') setShowAgentWorkspace(true)
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem(AGENT_WORKSPACE_STORAGE_KEY, showAgentWorkspace ? '1' : '0')
+  }, [showAgentWorkspace])
 
   const requireSessionId = useCallback(() => {
     if (!session?.id) throw new Error('Start a studio session first.')
@@ -372,6 +395,11 @@ export default function StudioHome() {
             <p className="text-xs text-slate-400">
               Chat/preview-first mission control with deterministic apply/rollback and full handoff to IDE.
             </p>
+            {session && (
+              <div className="mt-2 inline-flex items-center rounded border border-slate-700 bg-slate-950 px-2 py-0.5 text-[11px] text-slate-300">
+                Session {session.status.toUpperCase()} - {session.id.slice(0, 8)}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -394,20 +422,32 @@ export default function StudioHome() {
             <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
               <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Mission</div>
               <form onSubmit={startSession} className="space-y-3">
+                <label className="sr-only" htmlFor="studio-mission">
+                  Mission description
+                </label>
                 <textarea
+                  id="studio-mission"
                   value={mission}
                   onChange={(event) => setMission(event.target.value)}
                   placeholder="Describe mission: what to build, quality target, constraints, and expected output."
                   className="h-32 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 />
                 <div className="grid grid-cols-2 gap-2">
+                  <label className="sr-only" htmlFor="studio-project-id">
+                    Project id
+                  </label>
                   <input
+                    id="studio-project-id"
                     value={projectId}
                     onChange={(event) => setProjectId(event.target.value)}
                     placeholder="projectId"
                     className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   />
+                  <label className="sr-only" htmlFor="studio-budget-cap">
+                    Budget cap
+                  </label>
                   <input
+                    id="studio-budget-cap"
                     value={budgetCap}
                     onChange={(event) => setBudgetCap(Number(event.target.value))}
                     type="number"
@@ -434,7 +474,7 @@ export default function StudioHome() {
                 </div>
                 <button
                   type="submit"
-                  disabled={busy}
+                  disabled={busy || variableUsageBlocked}
                   className="w-full rounded border border-blue-500/40 bg-blue-500/20 px-3 py-2 text-xs font-semibold text-blue-100 hover:bg-blue-500/30 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Start Studio Session
@@ -446,7 +486,7 @@ export default function StudioHome() {
               <div className="mb-3 flex items-center justify-between">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Task Board</div>
                 <button
-                  disabled={!session || busy || session.status !== 'active'}
+                  disabled={!session || busy || session.status !== 'active' || variableUsageBlocked}
                   onClick={createSuperPlan}
                   className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                 >
@@ -465,7 +505,12 @@ export default function StudioHome() {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       <button
-                        disabled={busy || !session || !canRunTask(task, session.status)}
+                        disabled={
+                          busy ||
+                          !session ||
+                          variableUsageBlocked ||
+                          !canRunTask(task, session.status, session.tasks)
+                        }
                         onClick={() => runTask(task.id)}
                         className="rounded border border-slate-600 px-2 py-1 text-[10px] hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
                       >
@@ -507,7 +552,15 @@ export default function StudioHome() {
           <section className="space-y-4">
             <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
               <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Team Chat Live</div>
-              <div className="max-h-64 space-y-2 overflow-auto pr-1">
+              <div className="mb-2 flex items-center justify-end">
+                <button
+                  onClick={() => setShowAgentWorkspace((prev) => !prev)}
+                  className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                >
+                  {showAgentWorkspace ? 'Hide Agent Workspace' : 'Open Agent Workspace'}
+                </button>
+              </div>
+              <div aria-live="polite" className="max-h-64 space-y-2 overflow-auto pr-1">
                 {(session?.messages || []).map((message) => (
                   <div key={message.id} className="rounded border border-slate-800 bg-slate-950 px-3 py-2 text-xs">
                     <div className="mb-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
@@ -528,9 +581,16 @@ export default function StudioHome() {
               </div>
             </div>
 
-            <div className="rounded border border-slate-800 bg-slate-900/60 p-2">
-              <AIChatPanelContainer />
-            </div>
+            {showAgentWorkspace ? (
+              <div className="rounded border border-slate-800 bg-slate-900/60 p-2">
+                <AIChatPanelContainer />
+              </div>
+            ) : (
+              <div className="rounded border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-400">
+                Agent workspace is collapsed to keep the home surface responsive. Use the button above when you need
+                deep chat actions.
+              </div>
+            )}
           </section>
 
           <section className="space-y-4">
@@ -592,6 +652,10 @@ export default function StudioHome() {
                   Active grant: {activeGrant.scope} until {new Date(activeGrant.expiresAt).toLocaleTimeString()}
                 </div>
               )}
+              <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
+                Note: Studio Home apply/rollback controls manage mission checkpoints. File-level patch apply remains in
+                `/ide` deterministic flows.
+              </div>
               {usage?.usageEntitlement && !usage.usageEntitlement.variableUsageAllowed && (
                 <div className="mt-2 rounded border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-100">
                   Variable AI usage is blocked (
@@ -604,7 +668,7 @@ export default function StudioHome() {
         </div>
 
         {(toast || error) && (
-          <div className="fixed bottom-4 right-4 z-40 max-w-xl space-y-2">
+          <div aria-live="polite" className="fixed bottom-4 right-4 z-40 max-w-xl space-y-2">
             {toast && (
               <div className="rounded border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-100">
                 {toast}

@@ -53,7 +53,11 @@ export async function POST(
       ok: true,
       session,
       capability: 'STUDIO_HOME_TASK_RUN',
-      capabilityStatus: 'IMPLEMENTED',
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        executionMode: 'orchestration_only',
+        applyPolicy: 'manual-review-before-ide-apply',
+      },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to run studio task'
@@ -63,4 +67,3 @@ export async function POST(
     return NextResponse.json({ error: 'STUDIO_TASK_RUN_FAILED', message }, { status: 500 })
   }
 }
-

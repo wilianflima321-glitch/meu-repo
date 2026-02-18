@@ -786,3 +786,14 @@ Triaged impact:
 - `not-implemented-ui=6` (policy-compliant gates)
 - high dashboard initial JS footprint (~530 kB first load)
 - state durability remains `PARTIAL` for distributed multi-instance operations.
+
+## Delta 2026-02-18 XXIII - Studio orchestration fidelity triage
+Delivered:
+1. Task-run route downgraded to explicit `PARTIAL` capability with orchestration metadata.
+2. Reviewer checkpoint requirement enforced for validation/apply.
+3. Studio UI now communicates checkpoint scope and limits false-action paths.
+
+Triaged impact:
+1. Better alignment with anti-fake-success policy.
+2. Clear separation between orchestration UX (`/dashboard`) and deterministic code-apply UX (`/ide`).
+3. Residual structural risks unchanged: dashboard payload weight and JSON-context persistence model.

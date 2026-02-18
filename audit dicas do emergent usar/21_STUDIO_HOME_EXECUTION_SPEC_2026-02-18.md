@@ -62,6 +62,7 @@ Define the execution spec for Studio Home as the authenticated entrypoint (`/das
 1. Uses existing `copilotWorkflow.context` as storage container for studio session state.
 2. No schema migration in this wave.
 3. Marked as `IMPLEMENTED/PARTIAL` for multi-instance durability until dedicated tables are introduced.
+4. Studio task run is orchestration-only (`capabilityStatus=PARTIAL`), with deterministic reviewer gate before apply.
 
 ## 7) Validation and gates
 Mandatory before completion:

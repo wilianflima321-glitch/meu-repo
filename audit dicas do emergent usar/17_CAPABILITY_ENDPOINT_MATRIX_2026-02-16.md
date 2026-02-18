@@ -27,7 +27,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Studio session get | `app/api/studio/session/[id]/route.ts` | `IMPLEMENTED` | returns aggregated session state |
 | Studio session stop | `app/api/studio/session/[id]/stop/route.ts` | `IMPLEMENTED` | explicit lifecycle stop contract |
 | Studio super plan | `app/api/studio/tasks/plan/route.ts` | `IMPLEMENTED` | generates baseline plan task set |
-| Studio task run | `app/api/studio/tasks/[id]/run/route.ts` | `IMPLEMENTED/PARTIAL` | role-based execution with plan-limit gate for multi-role |
+| Studio task run | `app/api/studio/tasks/[id]/run/route.ts` | `IMPLEMENTED/PARTIAL` | orchestration-only checkpoint run (`executionMode=orchestration_only`) with plan-limit gate |
 | Studio task validate | `app/api/studio/tasks/[id]/validate/route.ts` | `IMPLEMENTED` | deterministic verdict (`passed` or `failed`) |
 | Studio task apply | `app/api/studio/tasks/[id]/apply/route.ts` | `IMPLEMENTED/PARTIAL` | blocked until validation pass (`422 VALIDATION_REQUIRED`) |
 | Studio task rollback | `app/api/studio/tasks/[id]/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | requires prior apply token/state |

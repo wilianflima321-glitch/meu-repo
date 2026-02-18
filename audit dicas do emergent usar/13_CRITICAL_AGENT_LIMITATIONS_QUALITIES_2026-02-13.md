@@ -800,3 +800,13 @@ Validation:
 Critical reading:
 1. Reliability improved on the user path (fewer invalid actions exposed).
 2. Remaining high-impact risk is still architectural: session state persistence in generic workflow JSON and dashboard payload weight.
+
+## Delta 2026-02-18 XXV - Anti-fake-success tightening on Studio run/apply
+Implemented:
+1. Removed stochastic run artifacts and switched to deterministic, explicit orchestration output in Studio task runs.
+2. Strengthened reviewer gate before validation/apply to prevent misleading "done" semantics on non-reviewed tasks.
+3. Route contract now marks studio task run as `PARTIAL` with execution-mode metadata.
+
+Critical reading:
+1. This is a reliability gain and claim-discipline gain.
+2. Remaining limitation is still explicit: Studio Home orchestration does not replace deterministic patch apply inside `/ide`.

@@ -119,6 +119,14 @@ function clampBudget(value: number): number {
   return Math.min(100_000, Math.max(5, Math.round(value)))
 }
 
+function stableSeed(value: string): number {
+  let hash = 0
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
+  }
+  return hash
+}
+
 function isStudioContextContainer(input: unknown): input is Record<string, unknown> {
   return !!input && typeof input === 'object' && !Array.isArray(input)
 }
@@ -510,8 +518,48 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
   if (index === -1) return current
 
   const target = current.tasks[index]
+  const plannerDone = current.tasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
+  const coderDone = current.tasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
+
+  if (target.ownerRole === 'coder' && !plannerDone) {
+    const tasks = [...current.tasks]
+    tasks[index] = {
+      ...target,
+      status: 'blocked',
+      result: 'Blocked: run planner checkpoint first.',
+      validationVerdict: 'pending',
+      finishedAt: nowIso(),
+    }
+    let next = appendMessage({ ...current, tasks, lastActivityAt: nowIso() }, {
+      role: 'system',
+      agentRole: 'coder',
+      content: 'Coder checkpoint blocked until planner task is done.',
+      status: 'blocked',
+    })
+    return persistSession(workflow, next)
+  }
+
+  if (target.ownerRole === 'reviewer' && !coderDone) {
+    const tasks = [...current.tasks]
+    tasks[index] = {
+      ...target,
+      status: 'blocked',
+      result: 'Blocked: run coder checkpoint first.',
+      validationVerdict: 'pending',
+      finishedAt: nowIso(),
+    }
+    let next = appendMessage({ ...current, tasks, lastActivityAt: nowIso() }, {
+      role: 'system',
+      agentRole: 'reviewer',
+      content: 'Reviewer checkpoint blocked until coder task is done.',
+      status: 'blocked',
+    })
+    return persistSession(workflow, next)
+  }
+
   const startedAt = nowIso()
   const runId = randomUUID()
+  const seed = stableSeed(`${target.id}:${target.title}:${target.ownerRole}`)
   const roleModel =
     target.ownerRole === 'planner'
       ? 'gpt-4o-mini'
@@ -523,22 +571,24 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
     target.ownerRole === 'planner' ? 'planning' : target.ownerRole === 'coder' ? 'building' : 'validating'
   const finishedAt = nowIso()
 
-  const tokensIn = 850 + Math.floor(Math.random() * 160)
-  const tokensOut = 320 + Math.floor(Math.random() * 90)
-  const runCost = Math.max(0.2, Math.round((target.estimateCredits * 0.55) * 100) / 100)
+  const tokensIn = 640 + (seed % 220)
+  const tokensOut = 240 + ((seed >>> 3) % 130)
+  const runCost = Math.max(0.1, Math.round((target.estimateCredits * 0.4) * 100) / 100)
+
+  const result =
+    target.ownerRole === 'planner'
+      ? 'Plan checkpoint completed with acceptance criteria and risk notes. (executionMode=orchestration-only)'
+      : target.ownerRole === 'coder'
+        ? 'Code proposal drafted for manual IDE apply review. [requires-manual-apply]'
+        : 'Review checkpoint completed for proposal. [review-ok]'
 
   const updatedTask: StudioTask = {
     ...target,
     status: 'done',
     startedAt,
     finishedAt,
-    validationVerdict: target.ownerRole === 'reviewer' ? 'passed' : 'pending',
-    result:
-      target.ownerRole === 'planner'
-        ? 'Plan decomposition finished with acceptance criteria and risk checkpoints.'
-        : target.ownerRole === 'coder'
-          ? 'Implementation patch prepared and scoped for deterministic validation.'
-          : 'Review finished. Validation checks passed for apply gate.',
+    validationVerdict: 'pending',
+    result,
   }
 
   const tasks = [...current.tasks]
@@ -591,7 +641,9 @@ export async function validateStudioTask(userId: string, sessionId: string, task
   if (index === -1) return current
   const target = current.tasks[index]
 
-  const hasResult = Boolean(target.result && target.result.trim().length > 12)
+  const hasResult =
+    target.ownerRole === 'reviewer' &&
+    Boolean(target.result && target.result.includes('[review-ok]') && target.result.trim().length > 12)
   const verdict: StudioValidationVerdict = hasResult ? 'passed' : 'failed'
   const status: StudioTaskStatus = hasResult ? 'done' : 'error'
   const task: StudioTask = {
@@ -630,7 +682,7 @@ export async function applyStudioTask(userId: string, sessionId: string, taskId:
   if (index === -1) return current
 
   const target = current.tasks[index]
-  if (target.validationVerdict !== 'passed') return current
+  if (target.validationVerdict !== 'passed' || target.ownerRole !== 'reviewer') return current
 
   const applyToken = `apply_${randomUUID()}`
   const task: StudioTask = {

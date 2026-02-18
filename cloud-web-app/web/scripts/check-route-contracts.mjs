@@ -185,6 +185,11 @@ const checks = [
     name: 'studio/session/start capability contract',
   },
   {
+    file: 'app/api/studio/tasks/[id]/run/route.ts',
+    patterns: ["capability: 'STUDIO_HOME_TASK_RUN'", "capabilityStatus: 'PARTIAL'"],
+    name: 'studio/tasks/[id]/run capability contract',
+  },
+  {
     file: 'app/api/studio/tasks/[id]/apply/route.ts',
     patterns: ["error: 'VALIDATION_REQUIRED'", "capability: 'STUDIO_HOME_TASK_APPLY'", "capabilityStatus: 'PARTIAL'"],
     name: 'studio/tasks/[id]/apply gate contract',

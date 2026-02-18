@@ -49,6 +49,18 @@ export async function POST(
         { status: 422 }
       )
     }
+    if (task.ownerRole !== 'reviewer') {
+      return NextResponse.json(
+        {
+          error: 'REVIEW_GATE_REQUIRED',
+          message: 'Apply is allowed only for reviewer-approved checkpoints.',
+          capability: 'STUDIO_HOME_TASK_APPLY',
+          capabilityStatus: 'PARTIAL',
+          metadata: { ownerRole: task.ownerRole },
+        },
+        { status: 422 }
+      )
+    }
 
     return NextResponse.json({
       ok: true,
@@ -65,4 +77,3 @@ export async function POST(
     return NextResponse.json({ error: 'STUDIO_TASK_APPLY_FAILED', message }, { status: 500 })
   }
 }
-
