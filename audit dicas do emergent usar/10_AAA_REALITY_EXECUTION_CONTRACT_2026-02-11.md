@@ -1993,3 +1993,32 @@ Factual snapshot from current sweep:
 Decision lock:
 1. Keep compatibility wrappers only with explicit removal-cycle planning.
 2. Reduce frontend usage of `/api/files/*` compatibility routes toward canonical `/api/files/fs`.
+
+## 65) Delta 2026-02-18 XIX - Canonical file API cutover on frontend call sites
+
+Implemented:
+1. Migrated frontend/lib call sites from compatibility routes (`/api/files/read|write|list|copy|move|delete|create|rename`) to canonical authority `/api/files/fs`.
+2. Added shared client helper for canonical file actions:
+- `cloud-web-app/web/lib/client/files-fs.ts`
+3. Updated top compatibility offenders:
+- `cloud-web-app/web/lib/explorer/file-explorer-manager.ts`
+- `cloud-web-app/web/lib/ai/tools-registry.ts`
+- `cloud-web-app/web/lib/workspace/workspace-manager.ts`
+- `cloud-web-app/web/lib/search/search-manager.ts`
+- `cloud-web-app/web/lib/problems/problems-manager.ts`
+- `cloud-web-app/web/lib/terminal/task-detector.ts`
+- `cloud-web-app/web/lib/ai/ai-enhanced-lsp.ts`
+4. Removed unreferenced surface component:
+- deleted `cloud-web-app/web/components/ide/WorkbenchRedirect.tsx`
+
+Factual snapshot after cutover:
+1. `docs:architecture-triage` -> `fileCompatUsage=0` (before `22`)
+2. `qa:interface-gate` PASS (`not-implemented-ui=6`, critical zero metrics preserved)
+3. `lint` PASS (`0` warnings)
+4. `typecheck` PASS
+5. `qa:route-contracts` PASS
+6. `qa:no-fake-success` PASS
+
+Decision lock:
+1. Canonical frontend authority for scoped file operations remains `/api/files/fs`.
+2. Compatibility wrappers remain server-side only for phased deprecation telemetry.

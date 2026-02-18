@@ -709,3 +709,22 @@ Critical reading:
 1. Product quality gates are green, but structural complexity is still high.
 2. Biggest engineering risk is not visual polish now; it is parallel API surface and compatibility-layer drag.
 3. Next P0 should reduce compatibility calls to canonical file authority (`/api/files/fs`) before adding new surfaces.
+
+## Delta 2026-02-18 XIX - Frontend compatibility drag removed for file operations
+Implemented:
+1. Replaced frontend compatibility calls to `/api/files/read|write|list|...` with canonical action calls to `/api/files/fs`.
+2. Added unified client adapter for scoped file operations:
+- `cloud-web-app/web/lib/client/files-fs.ts`
+3. Cutover applied in explorer, AI tools, workspace manager, search manager, problems manager, task detector and AI-LSP integration.
+4. Removed unreferenced `WorkbenchRedirect` component to reduce orphan UI surface.
+
+Validation:
+1. `docs:architecture-triage` now reports `fileCompatUsage=0` (before `22`).
+2. `lint` PASS (`0 warnings`), `typecheck` PASS.
+3. `qa:route-contracts` PASS.
+4. `qa:no-fake-success` PASS.
+5. `qa:interface-gate` PASS with critical zero metrics preserved and `not-implemented-ui=6`.
+
+Critical reading:
+1. This is a structural reliability gain: frontend now has a single file-operation authority.
+2. Remaining risk is server compatibility-surface backlog (`fileCompatWrappers=8`) until deprecation cycle completes.

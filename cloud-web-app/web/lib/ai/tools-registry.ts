@@ -2,6 +2,7 @@
  * Tools Registry - Central registry for all AI agent tools
  * Provides dynamic tool discovery and execution
  */
+import { requestFileFs } from '../client/files-fs';
 
 export interface ToolDefinition {
   name: string;
@@ -159,12 +160,11 @@ toolsRegistry.register({
     // This will be connected to the actual file system service
     const { path, startLine, endLine } = params as { path: string; startLine?: number; endLine?: number };
     try {
-      const response = await fetch('/api/files/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path, startLine, endLine })
+      const data = await requestFileFs<{ content?: string }>({
+        action: 'read',
+        path,
+        options: { startLine, endLine },
       });
-      const data = await response.json();
       return { success: true, output: data.content, data };
     } catch (error) {
       return { success: false, error: String(error) };
@@ -188,12 +188,12 @@ toolsRegistry.register({
   handler: async (params) => {
     const { path, content } = params as { path: string; content: string };
     try {
-      const response = await fetch('/api/files/write', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path, content })
+      const data = await requestFileFs({
+        action: 'write',
+        path,
+        content,
+        options: { createDirectories: true, atomic: true },
       });
-      const data = await response.json();
       return { success: true, output: `File written: ${path}`, data };
     } catch (error) {
       return { success: false, error: String(error) };
@@ -217,12 +217,11 @@ toolsRegistry.register({
   handler: async (params) => {
     const { path, recursive } = params as { path: string; recursive?: boolean };
     try {
-      const response = await fetch('/api/files/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path, recursive })
+      const data = await requestFileFs({
+        action: 'delete',
+        path,
+        options: { recursive: Boolean(recursive), force: true },
       });
-      const data = await response.json();
       return { success: true, output: `Deleted: ${path}`, data };
     } catch (error) {
       return { success: false, error: String(error) };
@@ -245,13 +244,13 @@ toolsRegistry.register({
   handler: async (params) => {
     const { path, recursive } = params as { path: string; recursive?: boolean };
     try {
-      const response = await fetch('/api/files/list', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path, recursive })
+      const data = await requestFileFs<{ entries?: unknown[]; files?: unknown[] }>({
+        action: 'list',
+        path,
+        options: { recursive: Boolean(recursive) },
       });
-      const data = await response.json();
-      return { success: true, output: JSON.stringify(data.files, null, 2), data };
+      const listed = Array.isArray(data.entries) ? data.entries : Array.isArray(data.files) ? data.files : [];
+      return { success: true, output: JSON.stringify(listed, null, 2), data };
     } catch (error) {
       return { success: false, error: String(error) };
     }

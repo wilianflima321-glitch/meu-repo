@@ -2,6 +2,7 @@
  * File Explorer Manager
  * Advanced file explorer with drag & drop, multi-select, and context menu
  */
+import { requestFileFs } from '@/lib/client/files-fs'
 
 export interface FileNode {
   path: string;
@@ -30,6 +31,14 @@ export type FileChangeCallback = (event: FileWatchEvent) => void;
 
 export interface Disposable {
   dispose(): void;
+}
+
+type FsListEntry = {
+  path: string;
+  name: string;
+  type: 'file' | 'directory';
+  size?: number;
+  modified?: string | Date;
 }
 
 export class FileExplorerManager {
@@ -197,14 +206,17 @@ export class FileExplorerManager {
    * Copy files
    */
   async copyFiles(sources: string[], destination: string): Promise<void> {
-    const response = await fetch('/api/files/copy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sources, destination }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to copy files');
+    const normalizedDestination = destination.replace(/[\\/]+$/, '')
+    for (const source of sources) {
+      const sourceName = source.split(/[\\/]/).pop() || source
+      const targetPath =
+        sources.length > 1 ? `${normalizedDestination}/${sourceName}` : destination
+      await requestFileFs({
+        action: 'copy',
+        path: source,
+        destination: targetPath,
+        options: { overwrite: false, recursive: true },
+      })
     }
 
     console.log(`[File Explorer] Copied ${sources.length} files to ${destination}`);
@@ -214,14 +226,17 @@ export class FileExplorerManager {
    * Move files
    */
   async moveFiles(sources: string[], destination: string): Promise<void> {
-    const response = await fetch('/api/files/move', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sources, destination }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to move files');
+    const normalizedDestination = destination.replace(/[\\/]+$/, '')
+    for (const source of sources) {
+      const sourceName = source.split(/[\\/]/).pop() || source
+      const targetPath =
+        sources.length > 1 ? `${normalizedDestination}/${sourceName}` : destination
+      await requestFileFs({
+        action: 'move',
+        path: source,
+        destination: targetPath,
+        options: { overwrite: false, recursive: true },
+      })
     }
 
     // Refresh source directories
@@ -237,14 +252,12 @@ export class FileExplorerManager {
    * Delete files
    */
   async deleteFiles(paths: string[]): Promise<void> {
-    const response = await fetch('/api/files/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paths }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to delete files');
+    for (const path of paths) {
+      await requestFileFs({
+        action: 'delete',
+        path,
+        options: { recursive: false, force: true },
+      })
     }
 
     // Refresh parent directories
@@ -263,15 +276,12 @@ export class FileExplorerManager {
     const parentPath = path.substring(0, path.lastIndexOf('/'));
     const newPath = `${parentPath}/${newName}`;
 
-    const response = await fetch('/api/files/rename', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, newPath }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to rename file');
-    }
+    await requestFileFs({
+      action: 'move',
+      path,
+      destination: newPath,
+      options: { overwrite: false },
+    })
 
     await this.refreshPath(parentPath);
     console.log(`[File Explorer] Renamed: ${path} → ${newPath}`);
@@ -283,15 +293,12 @@ export class FileExplorerManager {
   async createFile(parentPath: string, name: string): Promise<void> {
     const path = `${parentPath}/${name}`;
 
-    const response = await fetch('/api/files/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, type: 'file' }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create file');
-    }
+    await requestFileFs({
+      action: 'write',
+      path,
+      content: '',
+      options: { createDirectories: true, atomic: true },
+    })
 
     await this.refreshPath(parentPath);
     console.log(`[File Explorer] Created file: ${path}`);
@@ -303,15 +310,11 @@ export class FileExplorerManager {
   async createDirectory(parentPath: string, name: string): Promise<void> {
     const path = `${parentPath}/${name}`;
 
-    const response = await fetch('/api/files/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, type: 'directory' }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create directory');
-    }
+    await requestFileFs({
+      action: 'mkdir',
+      path,
+      options: { recursive: true },
+    })
 
     await this.refreshPath(parentPath);
     console.log(`[File Explorer] Created directory: ${path}`);
@@ -389,18 +392,16 @@ export class FileExplorerManager {
    * Load directory
    */
   private async loadDirectory(path: string): Promise<FileNode> {
-    const response = await fetch(`/api/files/list?path=${encodeURIComponent(path)}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to load directory: ${path}`);
-    }
-
-    const data = await response.json();
+    const data = await requestFileFs<{ entries?: FsListEntry[] }>({
+      action: 'list',
+      path,
+      options: { includeHidden: false },
+    })
     return {
       path,
       name: path.split('/').pop() || path,
       type: 'directory',
-      children: data.children || [],
+      children: this.mapFsEntries(data.entries),
       expanded: true,
     };
   }
@@ -409,14 +410,26 @@ export class FileExplorerManager {
    * Load children of directory
    */
   private async loadChildren(path: string): Promise<FileNode[]> {
-    const response = await fetch(`/api/files/list?path=${encodeURIComponent(path)}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to load children: ${path}`);
-    }
+    const data = await requestFileFs<{ entries?: FsListEntry[] }>({
+      action: 'list',
+      path,
+      options: { includeHidden: false },
+    })
+    return this.mapFsEntries(data.entries)
+  }
 
-    const data = await response.json();
-    return data.children || [];
+  /**
+   * Map canonical fs entries to explorer node format
+   */
+  private mapFsEntries(entries?: FsListEntry[]): FileNode[] {
+    if (!Array.isArray(entries)) return []
+    return entries.map((entry) => ({
+      path: entry.path,
+      name: entry.name,
+      type: entry.type === 'directory' ? 'directory' : 'file',
+      size: entry.size,
+      modified: entry.modified ? new Date(entry.modified) : undefined,
+    }))
   }
 
   /**

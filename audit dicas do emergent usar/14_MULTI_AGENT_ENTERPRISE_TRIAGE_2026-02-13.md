@@ -709,3 +709,20 @@ Delivered:
 Triaged impact:
 1. Exposed concrete consolidation targets (`/api/files/*` compatibility usage, `_deprecated` backlog, unreferenced candidate components).
 2. Gives deterministic execution order for next hardening wave without scope expansion.
+
+## Delta 2026-02-18 XVII - File API consolidation executed on frontend
+Delivered:
+1. Frontend/lib compatibility usage for file routes reduced from `22` to `0` by moving to canonical `/api/files/fs`.
+2. Added shared adapter `cloud-web-app/web/lib/client/files-fs.ts` and migrated core modules:
+- explorer manager
+- AI tools registry
+- workspace manager
+- search manager
+- problems manager
+- task detector
+- AI-enhanced LSP
+3. Removed unreferenced `components/ide/WorkbenchRedirect.tsx`.
+
+Triaged impact:
+1. Removes duplicated route semantics on client side and enforces scoped `projectId` propagation through canonical endpoint.
+2. Keeps phased deprecation strategy intact: wrappers remain server-side with telemetry until cutoff criteria.

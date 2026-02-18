@@ -109,7 +109,6 @@ async function main() {
 
   const unreferencedCandidates = await detectUnreferencedCandidates(
     [
-      path.join(ROOT, 'components', 'ide', 'WorkbenchRedirect.tsx'),
       path.join(ROOT, 'components', 'editor', 'MonacoEditor.tsx'),
     ],
     [...appFiles, ...componentFiles, ...libFiles, ...hookFiles]

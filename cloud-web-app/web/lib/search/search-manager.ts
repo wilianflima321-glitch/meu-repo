@@ -2,6 +2,7 @@
  * Search Manager
  * Orchestrates search and replace operations across workspace
  */
+import { readFileViaFs, writeFileViaFs } from '@/lib/client/files-fs'
 
 export interface SearchOptions {
   query: string;
@@ -296,28 +297,16 @@ export class SearchManager {
    * Read file content
    */
   private async readFile(path: string): Promise<string> {
-    const response = await fetch(`/api/files/read?path=${encodeURIComponent(path)}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to read file: ${path}`);
-    }
-
-    return response.text();
+    return readFileViaFs(path)
   }
 
   /**
    * Write file content
    */
   private async writeFile(path: string, content: string): Promise<void> {
-    const response = await fetch('/api/files/write', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, content }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to write file: ${path}`);
-    }
+    await writeFileViaFs(path, content, {
+      writeOptions: { createDirectories: true, atomic: true },
+    })
   }
 
   /**
