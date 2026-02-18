@@ -3,178 +3,191 @@ Status: CANONICAL EXECUTION INPUT
 Date: 2026-02-18  
 Owner: Product + Platform + Critical Agent
 
-## 0) Objetivo
-Consolidar o relatório detalhado enviado pelo usuário em uma fonte única para execução, sem perder conteúdo relevante, mas com marcação explícita de confiabilidade para evitar deriva, marketing inflation e decisões técnicas baseadas em suposição.
+## 0) Purpose
+This document consolidates the detailed audit report provided by the user and converts it into an execution-safe source of truth.
 
-Este documento é detalhado por design e serve como base operacional para próximas ondas.
+Goal:
+1. keep all relevant ideas;
+2. remove ambiguity;
+3. prevent fake claims and scope drift;
+4. provide direct execution inputs for next waves.
 
-## 1) Regra de Leitura Obrigatória
-Todo item abaixo deve ser interpretado com uma destas etiquetas:
-1. `VERIFIED_INTERNAL` — confirmado no repositório/gates atuais.
-2. `PARTIAL_INTERNAL` — parcialmente implementado ou com gate explícito.
-3. `EXTERNAL_BENCHMARK_ASSUMPTION` — benchmark externo não comprovado internamente.
-4. `CONTRADICTS_CANONICAL` — conflito com contratos canônicos já validados.
+This document is intentionally detailed and is now part of canonical references.
 
-Se houver conflito:
-1. prevalece `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`;
-2. depois `13`, `14`, `17`, `21`;
-3. benchmark externo só entra como hipótese até validação.
+## 1) Mandatory Reading Protocol
+Every statement must be interpreted with one label:
+1. `VERIFIED_INTERNAL` = confirmed by repo/code/gates.
+2. `PARTIAL_INTERNAL` = partially implemented or capability-gated.
+3. `EXTERNAL_BENCHMARK_ASSUMPTION` = external benchmark hypothesis, not proven internally.
+4. `CONTRADICTS_CANONICAL` = conflicts with current canonical contract.
 
-## 2) Snapshot Canônico Atual (Base Real)
-Etiqueta: `VERIFIED_INTERNAL`
+Conflict rule:
+1. `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md` wins.
+2. Then `13`, `14`, `17`, `21`.
+3. External benchmark claims only become factual after code + route + gate evidence.
 
-1. Shell principal:
-- `/dashboard` = Studio Home (entrada padrão)
-- `/ide` = modo avançado
+## 2) Canonical Snapshot (Current Internal Reality)
+Label: `VERIFIED_INTERNAL`
 
-2. Gates de qualidade:
-- `npm run qa:enterprise-gate` = PASS
+1. Product entry and shell:
+- `/dashboard` = Studio Home default entry.
+- `/ide` = advanced shell.
+
+2. Quality gates:
+- `qa:enterprise-gate` = PASS
 - `qa:route-contracts` = PASS (`checks=32`)
 - `qa:no-fake-success` = PASS
 - `typecheck` = PASS
 - `build` = PASS
 
-3. Métricas críticas de interface:
+3. Critical interface metrics:
 - `legacy-accent-tokens=0`
 - `admin-light-theme-tokens=0`
 - `admin-status-light-tokens=0`
 - `blocking-browser-dialogs=0`
 - `not-implemented-ui=6`
 
-4. Contratos de depreciação ativos:
+4. Deprecation contracts:
 - `/api/workspace/tree` -> `410 DEPRECATED_ROUTE`
 - `/api/workspace/files` -> `410 DEPRECATED_ROUTE`
 - `/api/auth/sessions` -> `410 DEPRECATED_ROUTE`
 - `/api/auth/sessions/[id]` -> `410 DEPRECATED_ROUTE`
 
-5. Contratos de capacidade Studio (resumo):
-- run/validate/apply/rollback/plan com gates explícitos, capability envelope e headers.
-- rollback com `ROLLBACK_TOKEN_MISMATCH` explícito.
+5. Studio capability truthfulness:
+- mission/plan/run/validate/apply/rollback all gated with explicit error contracts
+- rollback has explicit token mismatch branch (`ROLLBACK_TOKEN_MISMATCH`)
 
-## 3) Relatório do Usuário — Absorção Estruturada
+## 3) Report Absorption Matrix (No Gaps)
+This section maps the user report to canonical classification.
 
-## 3.1 Resumo Executivo (absorvido)
-1. Aethel é plataforma cloud-native para jogos/apps/filmes.
-2. Meta de qualidade: padrão Studio/AAA em UX, confiabilidade e execução real.
-3. Forças destacadas: IA multi-provider, colaboração real-time, base técnica moderna.
-4. Gaps destacados: testes, segurança, estabilidade visual, documentação, performance.
+## 3.1 Executive statements
+1. "Aethel has strong potential and broad architecture ambition" -> `PARTIAL_INTERNAL`
+2. "Current maturity is around advanced prototype stage" -> `EXTERNAL_BENCHMARK_ASSUMPTION` (direction accepted)
+3. "Needs AAA quality hardening on UX, security, and reliability" -> `VERIFIED_INTERNAL`
 
-Etiqueta geral:
-1. arquitetura/IA/colaboração: `PARTIAL_INTERNAL`
-2. números de maturidade e comparação absoluta com concorrentes: `EXTERNAL_BENCHMARK_ASSUMPTION`
+## 3.2 SWOT conversion
 
-## 3.2 SWOT consolidado
+### Strengths
+1. Modern stack and architecture separation -> `VERIFIED_INTERNAL`
+2. Multi-provider AI stack -> `VERIFIED_INTERNAL`
+3. Explicit anti-fake-success capability contracts -> `VERIFIED_INTERNAL`
+4. Collaboration base (Yjs/WebSocket/WebRTC) -> `PARTIAL_INTERNAL`
+5. Physics/rendering foundations for web workflows -> `PARTIAL_INTERNAL`
 
-### Forças
-Etiqueta: `VERIFIED_INTERNAL` ou `PARTIAL_INTERNAL`
-1. Stack moderna (Next.js + TS + App Router) — `VERIFIED_INTERNAL`
-2. AI multi-provider — `VERIFIED_INTERNAL`
-3. Contratos anti-fake-success — `VERIFIED_INTERNAL`
-4. Colaboração (Yjs/WebSocket/WebRTC) — `PARTIAL_INTERNAL`
-5. Física/3D em web stack — `PARTIAL_INTERNAL`
+### Weaknesses
+1. Remaining `NOT_IMPLEMENTED/PARTIAL` surfaces -> `VERIFIED_INTERNAL`
+2. API surface breadth and compat wrapper debt -> `VERIFIED_INTERNAL`
+3. Security hardening incomplete (2FA, broad rate-limit policy) -> `PARTIAL_INTERNAL`
+4. Absolute test coverage claims without direct evidence in this file -> `EXTERNAL_BENCHMARK_ASSUMPTION`
+5. Numeric maturity score as absolute fact -> `EXTERNAL_BENCHMARK_ASSUMPTION`
 
-### Fraquezas
-1. Superfícies ainda com `NOT_IMPLEMENTED/PARTIAL` — `VERIFIED_INTERNAL`
-2. Escala de API e wrappers compat — `VERIFIED_INTERNAL`
-3. Lacunas de segurança enterprise (2FA/rate limiting completo) — `PARTIAL_INTERNAL`
-4. claims absolutos de cobertura de testes sem prova atual neste documento — `EXTERNAL_BENCHMARK_ASSUMPTION`
-5. estimativas de maturidade numérica fixa (ex.: 65/100) — `EXTERNAL_BENCHMARK_ASSUMPTION`
+### Opportunities
+1. Marketplace as monetization and ecosystem channel -> `EXTERNAL_BENCHMARK_ASSUMPTION` (strategic direction accepted)
+2. Shader graph and material node workflow -> `EXTERNAL_BENCHMARK_ASSUMPTION`
+3. Enterprise collaboration layers (RBAC/comments/voice) -> `EXTERNAL_BENCHMARK_ASSUMPTION`
 
-### Oportunidades
-Etiqueta: `EXTERNAL_BENCHMARK_ASSUMPTION` com direção válida
-1. Marketplace como alavanca de monetização.
-2. Shader graph/node materials.
-3. Features enterprise de colaboração (RBAC/comments/voice).
+### Threats
+1. AI cost and latency pressure -> `VERIFIED_INTERNAL`
+2. Scope complexity risk -> `VERIFIED_INTERNAL`
+3. Provider dependency risk -> `VERIFIED_INTERNAL`
+4. Absolute competitor gap numbers -> `EXTERNAL_BENCHMARK_ASSUMPTION`
 
-### Ameaças
-Etiqueta: `VERIFIED_INTERNAL` para risco técnico; `EXTERNAL_BENCHMARK_ASSUMPTION` para comparativos absolutos
-1. Custo de IA/latência/concorrência.
-2. Complexidade de manter escopo amplo.
-3. Dependência de provedores externos.
+## 4) Domain-by-Domain Critical Read
 
-## 3.3 Avaliação por domínio (convertida em backlog)
-
-### A) UI/UX
+## 4.1 Product and UX
 Status: `PARTIAL_INTERNAL`
-1. Design system base está forte, mas há dívida em superfícies extensas.
-2. Acessibilidade e teclado-first precisam varredura contínua em toda superfície.
-3. Regressão visual precisa permanecer gateada por CI estrito.
+1. Studio Home + IDE dual mode is in place.
+2. Core interaction truthfulness is improved.
+3. Remaining work:
+- consistent high-density interaction standards across all surfaces
+- full keyboard-first pass in high-traffic pages
+- systematic empty/error/loading normalization
 
-### B) IDE/Editor
+## 4.2 Frontend and IDE
 Status: `PARTIAL_INTERNAL`
-1. Núcleo editor é robusto (Monaco + terminal + file flows).
-2. Gaps de experiência avançada continuam (ex.: debugger/refactor full parity desktop).
+1. Monaco + terminal + preview base is strong.
+2. Remaining advanced gaps (desktop parity features) are expected and explicitly out of current scope.
+3. Keep focus on reliability and flow coherence over surface expansion.
 
-### C) IA/Copilot
+## 4.3 AI and Automation
 Status: `PARTIAL_INTERNAL`
-1. Multi-provider e contracts estão bons.
-2. Orquestração Studio está honesta com gates.
-3. Promoção L4/L5 continua bloqueada por evidência operacional.
+1. Multi-provider routing and capability contracts are a strong base.
+2. Studio orchestration is now explicit and deterministic in edge cases.
+3. L4/L5 claims remain blocked until operational evidence.
 
-### D) Física/Rendering/Viewport
+## 4.4 Physics, 3D and Media
 Status: `PARTIAL_INTERNAL`
-1. Capacidade web realista existe.
-2. Paridade Unreal/Unity desktop não é meta desta fase.
+1. Web-first realism is aligned with limitations.
+2. No desktop engine parity claims.
+3. Keep capability statements explicit and avoid overclaim.
 
-### E) Colaboração
+## 4.5 Collaboration and DX
 Status: `PARTIAL_INTERNAL`
-1. Base técnica existe.
-2. Falta fechar readiness enterprise (RBAC, conflito avançado, SLOs de escala).
+1. Collaboration primitives exist.
+2. Enterprise readiness still requires:
+- RBAC policy
+- conflict and lock behavior policy
+- reconnect and concurrency SLOs
 
-### F) Billing/Auth/Security
+## 4.6 Backend, Security, and Billing
 Status: `PARTIAL_INTERNAL`
-1. Gateway e contratos estão explícitos.
-2. Faltam hardenings enterprise completos (2FA, rate limits full coverage, operação de compliance).
+1. Explicit deprecation and capability contracts are in place.
+2. Remaining security and ops priorities:
+- endpoint-class rate limiting
+- 2FA/MFA rollout
+- stronger operational runbooks and telemetry closure
 
-### G) Performance/Observabilidade
+## 4.7 Performance and Observability
 Status: `PARTIAL_INTERNAL`
-1. Há progresso de peso na entrada Studio Home.
-2. Ainda há trabalho em footprint legado e budgets de sessão longa.
+1. Entry path has been optimized (Studio Home lighter default path).
+2. Legacy heavy surface remains intentionally isolated.
+3. Continue reducing high-cost pathways and improving runtime observability.
 
-### H) Documentação/Governança
-Status: `VERIFIED_INTERNAL` com necessidade contínua
-1. Base canônica existe e foi consolidada.
-2. Toda onda precisa sincronizar `10/13/14/17/21`.
+## 5) Contradictions and Clarifications
+This section resolves contradictions found in the submitted report.
 
-## 4) Matriz de Priorização (Fechamento Sem Lacuna)
+1. Claim: canonical source file inaccessible -> `CONTRADICTS_CANONICAL`  
+Resolution: `audit dicas do emergent usar/00_FONTE_CANONICA.md` exists and is active.
 
-## 4.1 P0 (execução imediata)
-1. Segurança operacional mínima enterprise:
-- rate limit por endpoint crítico (auth, ai, build, billing)
-- hardening de headers/validação de entrada
-- trilha de auditoria consistente em ações sensíveis
+2. Claim: project status fully "UNVERIFIED" -> `CONTRADICTS_CANONICAL`  
+Resolution: current gates are passing; verification is partial by capability, not globally unverified.
 
-2. Confiabilidade de jornadas críticas:
-- Studio mission -> plan -> run -> validate -> apply -> rollback (sem ambiguidade)
-- handoff íntegro Studio -> IDE (`projectId`,`sessionId`,`taskId`)
+3. Claim: fixed numeric metrics for business traction (stars, MRR, churn) -> `EXTERNAL_BENCHMARK_ASSUMPTION`  
+Resolution: accepted as strategic targets, not factual baseline.
 
-3. Continuidade dos gates:
-- manter `qa:enterprise-gate` obrigatório
-- manter contrato de capability/deprecation estrito
+4. Claim: desktop/mobile readiness as present capability -> `CONTRADICTS_CANONICAL` when used as "already delivered".  
+Resolution: only claim what is implemented and validated.
 
-## 4.2 P1 (após freeze P0)
-1. Collaboration readiness formal:
-- RBAC em colaboração
-- política de conflitos/locks/versionamento
-- SLO de reconexão e concorrência
+## 6) P0/P1/P2 Master Backlog (Derived and Consolidated)
 
-2. IDE advanced productivity:
-- debug readiness progressivo
-- refactor/lint/analysis UX avançada
+## 6.1 P0 (Immediate)
+1. `SEC-001` Endpoint-class rate limiting for auth/ai/build/billing.
+2. `SEC-002` MFA/2FA rollout for account security baseline.
+3. `REL-001` Continue file compat wrapper phaseout policy with telemetry windows.
+4. `REL-002` Reduce `not-implemented-ui` from 6 by closing or hard-gating non-critical paths.
+5. `UX-001` Full keyboard/focus sweep for Studio Home + IDE + Admin.
+6. `UX-002` Normalize empty/error/loading states in critical journeys.
 
-3. Admin enterprise actionability:
-- remover qualquer widget sem ação real
-- fechar fluxos operacionais ponta-a-ponta
+## 6.2 P1 (After P0 freeze)
+1. `COL-001` Collaboration readiness matrix with explicit SLOs and limits.
+2. `IDE-001` Advanced IDE reliability pass (debug/readiness/refactor UX improvements without scope inflation).
+3. `ADM-001` Admin actionability hardening (remove decorative-only widgets, keep transactional feedback).
+4. `BIZ-001` Pricing and cost model precision with entitlement split.
 
-## 4.3 P2 (sem inflar escopo nesta fase)
-1. Shader graph e pipeline de materiais avançados.
-2. Marketplace expandido com governança.
-3. Expansões desktop/mobile somente com execução real (não mock claim).
+## 6.3 P2 (Strategic, no immediate scope expansion)
+1. Shader graph and advanced material workflow.
+2. Marketplace maturity and governance.
+3. Desktop/mobile expansion only with real implementation evidence.
 
-## 5) Critérios de Aceite Obrigatórios
-1. Nenhuma capability indisponível pode parecer sucesso.
-2. Toda falha relevante deve ser machine-readable (`error`, `capability`, `capabilityStatus`, metadata).
-3. Toda evolução deve passar:
+## 7) Acceptance Criteria (Hard Requirements)
+1. No unavailable capability may present success UI.
+2. Every blocked/partial path must return explicit machine-readable payload:
+- `error`
+- `message`
+- `capability`
+- `capabilityStatus`
+- `metadata`
+3. All waves must pass:
 - `lint`
 - `typecheck`
 - `build`
@@ -185,42 +198,34 @@ Status: `VERIFIED_INTERNAL` com necessidade contínua
 - `qa:mojibake`
 - `qa:enterprise-gate`
 
-## 6) Claims Proibidos (até validação)
-1. “Paridade total com Unity/Unreal/Premiere desktop”.
-2. “L4/L5 em produção” sem evidência operacional reproduzível.
-3. “Colaboração enterprise pronta” sem SLO/carga/recuperação validados.
-4. Qualquer métrica de negócio (MRR, churn, NPS, stars) como fato sem telemetria interna comprovável.
+## 8) Claims Policy (Strict)
+Blocked claims until evidence:
+1. full desktop parity (Unity/Unreal/Premiere level)
+2. L4/L5 production readiness
+3. enterprise collaboration readiness without SLO validation
+4. business KPI claims without internal telemetry source
 
-## 7) Conversão do Relatório em Regras de Execução
-1. Benchmark externo é bem-vindo como input de melhoria.
-2. Só entra como verdade operacional após:
-- evidência de código,
-- evidência de rota/contrato,
-- evidência de gate.
-3. Sempre manter distinção:
-- “direção estratégica” vs “estado implementado”.
+Allowed claims:
+1. implemented and gated features with explicit capability status
+2. strategic targets clearly labeled as targets
 
-## 8) Backlog Mestre Derivado (IDs)
-1. `SEC-001` Rate limiting por classe de endpoint.
-2. `SEC-002` MFA/2FA rollout.
-3. `REL-001` reduzir `apiRoutes` e concluir política de wrappers por telemetria.
-4. `REL-002` reduzir `not-implemented-ui` de 6 para alvo da próxima wave.
-5. `UX-001` varredura completa de teclado/foco em Studio Home + IDE + Admin.
-6. `UX-002` estados empty/error/loading padronizados em todas as páginas de alto tráfego.
-7. `COL-001` matriz readiness colaboração (SLO + conflitos + reconexão).
-8. `BIZ-001` refino de plano/custos com split de entitlement (tempo x consumo) mantendo política anti-prejuízo.
-9. `DOC-001` sincronização canônica obrigatória por wave.
+## 9) Traceability for Next Waves
+For every new wave:
+1. link code changes
+2. link route contracts
+3. link gate output
+4. update canonical docs (`10`, `13`, `14`, `17`, `21`)
 
-## 9) Próximo Ciclo (orientação prática)
-1. Executar primeiro `SEC-001`, `REL-001`, `UX-001`.
-2. Rodar gate completo.
-3. Atualizar `10`, `13`, `14`, `17`, `21` no mesmo commit da implementação.
+If any of these are missing, wave is incomplete.
 
----
+## 10) Practical Next-Cycle Order
+1. Execute `SEC-001` first.
+2. Execute `REL-001` second.
+3. Execute `UX-001` third.
+4. Run full enterprise gate.
+5. Publish canonical deltas in same commit sequence.
 
-## 10) Registro da Origem
-Este documento consolida integralmente o conteúdo estratégico e crítico enviado pelo usuário nesta conversa em 2026-02-18, com normalização para execução técnica sem lacuna e com marcação de confiabilidade.
+## 11) Source Record
+This file consolidates the full detailed report provided by the user on 2026-02-18 and converts it into execution-safe canonical guidance.
 
-Uso obrigatório:
-1. Fonte de triagem e priorização das próximas waves.
-2. Não substitui o contrato mestre (`10`), complementa com visão consolidada de escopo, qualidade e lacunas.
+It does not replace the master execution contract (`10`), but acts as a high-detail, no-gap triage source tied to canonical rules.
