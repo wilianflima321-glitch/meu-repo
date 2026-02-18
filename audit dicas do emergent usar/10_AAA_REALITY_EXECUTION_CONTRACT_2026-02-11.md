@@ -2261,3 +2261,31 @@ Factual snapshot:
 Decision lock:
 1. Blocked orchestration states must not emit `ok: true`.
 2. Rollback remains strictly token-based after successful apply only.
+
+## 76) Delta 2026-02-18 XXX - Reviewer gate hardening and replay protection
+
+Implemented:
+1. Added preflight gate contracts before task mutation:
+- `tasks/run`: rejects invalid states with `TASK_RUN_NOT_ALLOWED`
+- `tasks/validate`: reviewer-only + done-state readiness gates
+- `tasks/apply`: explicit replay prevention via `APPLY_ALREADY_COMPLETED`
+2. Store-level guardrails reinforced to match route contracts:
+- non-runnable tasks are ignored by runner
+- validation runs only for reviewer tasks with `pending` verdict
+- apply ignores re-apply when token already exists
+3. UI guard tightened in Studio Home:
+- validate/apply/rollback actions now enabled only for reviewer checkpoints
+4. Route contract scanner expanded to enforce these gates (`checks=31`).
+
+Factual snapshot:
+1. `cmd /c npm run qa:route-contracts` -> PASS (`checks=31`)
+2. Existing P0 baseline remains unchanged:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+
+Decision lock:
+1. Replay or out-of-order studio actions must fail explicitly, never mutate silently.
+2. Reviewer remains the only authority for validate/apply/rollback in Studio orchestration.

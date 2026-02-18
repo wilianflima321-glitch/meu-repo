@@ -832,3 +832,15 @@ Triaged impact:
 1. Closed a real anti-fake-success gap in orchestration edges.
 2. Kept Studio Home semantics honest: orchestration checkpoints remain `PARTIAL`, deterministic file mutation remains `/ide`-first.
 3. Improved operational clarity for user support and telemetry-based deprecation/cutoff tracking.
+
+## Delta 2026-02-18 XXVII - Studio action order triage hardening
+Delivered:
+1. Added reviewer-only validation/apply contract enforcement.
+2. Added run-state guard (`TASK_RUN_NOT_ALLOWED`) to block out-of-order executions.
+3. Added apply replay guard (`APPLY_ALREADY_COMPLETED`) to prevent token overwrite.
+4. Updated route contract scan to enforce new guardrails (`checks=31`).
+
+Triaged impact:
+1. Eliminates a class of UX/API inconsistencies where invalid task actions could appear accepted.
+2. Improves cost discipline by preventing accidental reruns/replays from consuming orchestration budget.
+3. Keeps policy alignment strong: visible gates, explicit errors, no silent mutation.

@@ -522,6 +522,13 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
   if (index === -1) return current
 
   const target = current.tasks[index]
+  const runEligible =
+    target.status === 'queued' ||
+    target.status === 'blocked' ||
+    target.status === 'error' ||
+    (target.ownerRole === 'planner' && target.status === 'planning')
+  if (!runEligible) return current
+
   const plannerDone = current.tasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
   const coderDone = current.tasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
 
@@ -662,6 +669,9 @@ export async function validateStudioTask(userId: string, sessionId: string, task
   const index = current.tasks.findIndex((task) => task.id === taskId)
   if (index === -1) return current
   const target = current.tasks[index]
+  if (target.ownerRole !== 'reviewer') return current
+  if (target.status !== 'done') return current
+  if (target.validationVerdict !== 'pending') return current
 
   const hasResult =
     target.ownerRole === 'reviewer' &&
@@ -705,6 +715,7 @@ export async function applyStudioTask(userId: string, sessionId: string, taskId:
   if (index === -1) return current
 
   const target = current.tasks[index]
+  if (target.applyToken) return current
   if (target.validationVerdict !== 'passed' || target.ownerRole !== 'reviewer') return current
 
   const applyToken = `apply_${randomUUID()}`

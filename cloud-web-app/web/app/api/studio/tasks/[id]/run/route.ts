@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getPlanLimits } from '@/lib/plan-limits'
 import { prisma } from '@/lib/db'
-import { runStudioTask } from '@/lib/server/studio-home-store'
+import { getStudioSession, runStudioTask } from '@/lib/server/studio-home-store'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,14 +41,14 @@ export async function POST(
       )
     }
 
-    const session = await runStudioTask(auth.userId, sessionId, ctx.params.id)
-    if (!session) {
+    const current = await getStudioSession(auth.userId, sessionId)
+    if (!current) {
       return NextResponse.json(
         { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
         { status: 404 }
       )
     }
-    if (session.status !== 'active') {
+    if (current.status !== 'active') {
       return NextResponse.json(
         {
           error: 'SESSION_NOT_ACTIVE',
@@ -60,21 +60,53 @@ export async function POST(
       )
     }
 
-    const task = session.tasks.find((item) => item.id === ctx.params.id)
+    const task = current.tasks.find((item) => item.id === ctx.params.id)
     if (!task) {
       return NextResponse.json(
         { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
         { status: 404 }
       )
     }
-    if (task.status === 'blocked') {
+    const runEligible =
+      task.status === 'queued' ||
+      task.status === 'blocked' ||
+      task.status === 'error' ||
+      (task.ownerRole === 'planner' && task.status === 'planning')
+    if (!runEligible) {
+      return NextResponse.json(
+        {
+          error: 'TASK_RUN_NOT_ALLOWED',
+          message: 'Task cannot be executed in current state.',
+          capability: 'STUDIO_HOME_TASK_RUN',
+          capabilityStatus: 'PARTIAL',
+          metadata: { taskId: task.id, ownerRole: task.ownerRole, status: task.status },
+        },
+        { status: 422 }
+      )
+    }
+
+    const session = await runStudioTask(auth.userId, sessionId, ctx.params.id)
+    if (!session) {
+      return NextResponse.json(
+        { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
+        { status: 404 }
+      )
+    }
+    const updatedTask = session.tasks.find((item) => item.id === ctx.params.id)
+    if (!updatedTask) {
+      return NextResponse.json(
+        { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
+        { status: 404 }
+      )
+    }
+    if (updatedTask.status === 'blocked') {
       return NextResponse.json(
         {
           error: 'TASK_RUN_BLOCKED',
-          message: task.result || 'Task run blocked by orchestration guard.',
+          message: updatedTask.result || 'Task run blocked by orchestration guard.',
           capability: 'STUDIO_HOME_TASK_RUN',
           capabilityStatus: 'PARTIAL',
-          metadata: { taskId: task.id, ownerRole: task.ownerRole },
+          metadata: { taskId: updatedTask.id, ownerRole: updatedTask.ownerRole },
         },
         { status: 422 }
       )

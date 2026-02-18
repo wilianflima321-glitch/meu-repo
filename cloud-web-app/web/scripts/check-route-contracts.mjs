@@ -191,6 +191,7 @@ const checks = [
       "capabilityStatus: 'PARTIAL'",
       "error: 'TASK_RUN_BLOCKED'",
       "error: 'SESSION_NOT_ACTIVE'",
+      "error: 'TASK_RUN_NOT_ALLOWED'",
     ],
     name: 'studio/tasks/[id]/run capability contract',
   },
@@ -200,8 +201,25 @@ const checks = [
     name: 'studio/tasks/plan existing-plan gate contract',
   },
   {
+    file: 'app/api/studio/tasks/[id]/validate/route.ts',
+    patterns: [
+      "error: 'SESSION_NOT_ACTIVE'",
+      "error: 'REVIEW_GATE_REQUIRED'",
+      "error: 'VALIDATION_NOT_READY'",
+      "capability: 'STUDIO_HOME_TASK_VALIDATE'",
+      "capabilityStatus: 'PARTIAL'",
+    ],
+    name: 'studio/tasks/[id]/validate gate contract',
+  },
+  {
     file: 'app/api/studio/tasks/[id]/apply/route.ts',
-    patterns: ["error: 'VALIDATION_REQUIRED'", "capability: 'STUDIO_HOME_TASK_APPLY'", "capabilityStatus: 'PARTIAL'"],
+    patterns: [
+      "error: 'VALIDATION_REQUIRED'",
+      "error: 'APPLY_ALREADY_COMPLETED'",
+      "error: 'SESSION_NOT_ACTIVE'",
+      "capability: 'STUDIO_HOME_TASK_APPLY'",
+      "capabilityStatus: 'PARTIAL'",
+    ],
     name: 'studio/tasks/[id]/apply gate contract',
   },
   {

@@ -61,6 +61,9 @@ Define the execution spec for Studio Home as the authenticated entrypoint (`/das
 - `tasks/plan` blocks duplicate plan by default (`409 PLAN_ALREADY_EXISTS`) unless `force=true`
 - `tasks/run|validate|apply|rollback|access/full` return explicit inactive-session gate (`409 SESSION_NOT_ACTIVE`)
 - `tasks/run` returns explicit blocked gate (`422 TASK_RUN_BLOCKED`) for orchestration failures
+- `tasks/run` returns explicit not-runnable gate (`422 TASK_RUN_NOT_ALLOWED`) for invalid state transitions
+- `tasks/validate` is reviewer-only and ready-state only (`REVIEW_GATE_REQUIRED`, `VALIDATION_NOT_READY`)
+- `tasks/apply` blocks replay (`409 APPLY_ALREADY_COMPLETED`) until rollback
 
 ## 6) Runtime/data persistence strategy (phase-safe)
 1. Uses existing `copilotWorkflow.context` as storage container for studio session state.
@@ -90,7 +93,7 @@ Mandatory before completion:
 1. `lint` PASS (`0 warnings`).
 2. `typecheck` PASS.
 3. `build` PASS.
-4. `qa:route-contracts` PASS (`checks=30`).
+4. `qa:route-contracts` PASS (`checks=31`).
 5. `qa:no-fake-success` PASS.
 6. `qa:interface-gate` PASS with critical metrics at zero and `not-implemented-ui=6`.
 7. Residual non-blocking local warnings during build:

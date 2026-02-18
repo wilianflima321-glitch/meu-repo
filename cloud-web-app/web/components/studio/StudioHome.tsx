@@ -115,17 +115,21 @@ function canRunTask(
 
 function canValidateTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
   if (sessionStatus !== 'active') return false
+  if (task.ownerRole !== 'reviewer') return false
   return task.status === 'done' && task.validationVerdict === 'pending'
 }
 
 function canApplyTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
   if (sessionStatus !== 'active') return false
+  if (task.ownerRole !== 'reviewer') return false
+  if (task.status !== 'done') return false
   if (task.applyToken) return false
   return task.validationVerdict === 'passed'
 }
 
 function canRollbackTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
   if (sessionStatus !== 'active') return false
+  if (task.ownerRole !== 'reviewer') return false
   return Boolean(task.applyToken)
 }
 
@@ -547,6 +551,9 @@ export default function StudioHome() {
                   Super plan already created for this session. Complete or stop this session before opening a new plan.
                 </div>
               ) : null}
+              <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
+                Validation/apply/rollback are restricted to reviewer checkpoints.
+              </div>
               <div className="space-y-2">
                 {(session?.tasks || []).map((task) => (
                   <div key={task.id} className={`rounded border px-3 py-2 text-xs ${statusTone(task.status)}`}>

@@ -840,3 +840,16 @@ Implemented:
 Critical reading:
 1. This removes a false-success class in orchestration APIs.
 2. Residual risk remains in scale architecture, not in gate semantics for these routes.
+
+## Delta 2026-02-18 XXIX - Reviewer authority and replay-risk closure
+Implemented:
+1. Added explicit route preflight gates to prevent invalid order execution:
+- run allowed only for runnable task states
+- validate restricted to reviewer checkpoints in `done + pending` state
+- apply blocked when token already exists (`APPLY_ALREADY_COMPLETED`)
+2. Added mirrored store-level guardrails to prevent silent state mutation on invalid calls.
+3. Updated Studio Home controls to expose validate/apply/rollback only on reviewer checkpoints.
+
+Critical reading:
+1. This closes a real replay/mis-order reliability risk in long sessions.
+2. Remaining limitations are now mostly structural (single-node JSON persistence and high API surface), not workflow honesty in these task transitions.

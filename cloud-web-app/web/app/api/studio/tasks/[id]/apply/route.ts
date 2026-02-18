@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { applyStudioTask } from '@/lib/server/studio-home-store'
+import { applyStudioTask, getStudioSession } from '@/lib/server/studio-home-store'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,14 +21,14 @@ export async function POST(
       )
     }
 
-    const session = await applyStudioTask(auth.userId, sessionId, ctx.params.id)
-    if (!session) {
+    const current = await getStudioSession(auth.userId, sessionId)
+    if (!current) {
       return NextResponse.json(
         { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
         { status: 404 }
       )
     }
-    if (session.status !== 'active') {
+    if (current.status !== 'active') {
       return NextResponse.json(
         {
           error: 'SESSION_NOT_ACTIVE',
@@ -40,11 +40,23 @@ export async function POST(
       )
     }
 
-    const task = session.tasks.find((item) => item.id === ctx.params.id)
+    const task = current.tasks.find((item) => item.id === ctx.params.id)
     if (!task) {
       return NextResponse.json(
         { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
         { status: 404 }
+      )
+    }
+    if (task.applyToken) {
+      return NextResponse.json(
+        {
+          error: 'APPLY_ALREADY_COMPLETED',
+          message: 'Apply already completed for this task. Use rollback before re-applying.',
+          capability: 'STUDIO_HOME_TASK_APPLY',
+          capabilityStatus: 'PARTIAL',
+          metadata: { applyToken: task.applyToken },
+        },
+        { status: 409 }
       )
     }
 
@@ -73,10 +85,25 @@ export async function POST(
       )
     }
 
+    const session = await applyStudioTask(auth.userId, sessionId, ctx.params.id)
+    if (!session) {
+      return NextResponse.json(
+        { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
+        { status: 404 }
+      )
+    }
+    const updatedTask = session.tasks.find((item) => item.id === ctx.params.id)
+    if (!updatedTask) {
+      return NextResponse.json(
+        { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
+        { status: 404 }
+      )
+    }
+
     return NextResponse.json({
       ok: true,
       session,
-      applyToken: task.applyToken ?? null,
+      applyToken: updatedTask.applyToken ?? null,
       capability: 'STUDIO_HOME_TASK_APPLY',
       capabilityStatus: 'IMPLEMENTED',
     })
