@@ -225,6 +225,18 @@ If any of these are missing, wave is incomplete.
 4. Run full enterprise gate.
 5. Publish canonical deltas in same commit sequence.
 
+## 10.1 Execution Progress Update (same day)
+Label: `PARTIAL_INTERNAL`
+
+1. `SEC-001` moved to partial completion:
+- shared rate limiter added (Upstash-first with memory fallback)
+- applied to critical auth/ai/billing/studio-start routes
+- security headers added globally
+- CI guard added (`qa:critical-rate-limit`) for protected endpoints
+2. Remaining for `SEC-001` completion:
+- production env validation that Upstash mode is active in deployed environments
+- final enterprise gate rerun and evidence registration for this wave
+
 ## 11) Source Record
 This file consolidates the full detailed report provided by the user on 2026-02-18 and converts it into execution-safe canonical guidance.
 

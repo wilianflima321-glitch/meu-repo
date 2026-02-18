@@ -3,12 +3,16 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { generateTokenWithRole } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json();
+    const body = await req.json().catch(() => ({} as Record<string, unknown>));
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
+    const name = typeof body.name === 'string' ? body.name : null;
 
     // Validate input
     if (!email || !password) {
@@ -17,6 +21,15 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-register',
+      key: getRequestIp(req),
+      max: 5,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many registration attempts from this IP. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({

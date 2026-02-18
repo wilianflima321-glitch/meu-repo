@@ -18,6 +18,7 @@ import { prisma } from '@/lib/prisma';
 import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
 import { notImplementedCapability } from '@/lib/server/capability-response';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -222,9 +223,17 @@ function getMissingProviderForModel(
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Autenticação
+    // Authentication
     const auth = requireAuth(request);
     const userId = auth.userId;
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-chat-advanced',
+      key: userId,
+      max: 40,
+      windowMs: 60 * 1000,
+      message: 'Too many advanced AI chat requests. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body: AdvancedChatRequest = await request.json();
     const { 

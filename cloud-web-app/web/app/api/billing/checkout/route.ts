@@ -11,6 +11,7 @@ import { getStripe, getStripePriceIdForPlan } from '@/lib/stripe';
 import { readPaymentGatewayConfig } from '@/lib/server/payment-gateway-config';
 import { notImplementedCapability } from '@/lib/server/capability-response';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,15 @@ interface CheckoutRequest {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-checkout',
+      key: user.userId,
+      max: 12,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many checkout attempts. Please wait before trying again.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body: CheckoutRequest = await req.json();
 
     const { planId, successUrl, cancelUrl } = body;

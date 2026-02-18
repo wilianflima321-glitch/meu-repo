@@ -2347,3 +2347,37 @@ Factual snapshot:
 Decision lock:
 1. Rollback attempts with wrong token must fail explicitly and audibly.
 2. Token-based rollback remains deterministic and non-ambiguous for support/telemetry.
+
+## 80) Delta 2026-02-18 XXXIV - Security hardening batch (rate limiting + headers)
+
+Implemented:
+1. Added shared rate limiter utility with distributed-first mode:
+- `cloud-web-app/web/lib/server/rate-limit.ts`
+2. Rate-limit backend strategy:
+- uses Upstash sliding-window when `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are configured
+- falls back to in-memory mode when not configured
+- falls back to in-memory fail-safe if Upstash is transiently unavailable
+3. Applied rate limiting to critical abuse surfaces:
+- `app/api/auth/login/route.ts`
+- `app/api/auth/register/route.ts`
+- `app/api/ai/complete/route.ts`
+- `app/api/ai/chat-advanced/route.ts`
+- `app/api/billing/checkout/route.ts`
+- `app/api/billing/checkout-link/route.ts`
+- `app/api/studio/session/start/route.ts`
+4. Added platform security response headers in Next config:
+- `X-Content-Type-Options`
+- `X-Frame-Options`
+- `Referrer-Policy`
+- `Permissions-Policy`
+5. Added critical CI contract guard:
+- `scripts/check-critical-rate-limits.mjs`
+- wired into `qa:enterprise-gate` via `qa:critical-rate-limit`
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. This delta is marked `PARTIAL_INTERNAL` until enterprise gate rerun.
+
+Decision lock:
+1. Rate limiting is now mandatory on critical endpoints and must remain explicit (429 with metadata).
+2. Upstash mode is canonical for multi-instance; in-memory remains only fallback/transitional.

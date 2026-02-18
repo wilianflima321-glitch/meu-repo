@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { createStudioSession } from '@/lib/server/studio-home-store'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +42,15 @@ function sanitizeBudgetCap(value: unknown): number {
 export async function POST(req: NextRequest) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-session-start',
+      key: auth.userId,
+      max: 15,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many studio session starts. Please retry later.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = (await req.json().catch(() => ({}))) as Body
     const session = await createStudioSession({
       userId: auth.userId,
@@ -64,4 +74,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'STUDIO_SESSION_START_FAILED', message }, { status: 500 })
   }
 }
-

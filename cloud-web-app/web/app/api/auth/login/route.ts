@@ -3,12 +3,15 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { generateTokenWithRole } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json().catch(() => ({} as Record<string, unknown>));
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
 
     // Validate input
     if (!email || !password) {
@@ -17,6 +20,15 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-login',
+      key: `${getRequestIp(req)}:${email}`,
+      max: 8,
+      windowMs: 15 * 60 * 1000,
+      message: 'Too many login attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Find user
     const user = await prisma.user.findUnique({

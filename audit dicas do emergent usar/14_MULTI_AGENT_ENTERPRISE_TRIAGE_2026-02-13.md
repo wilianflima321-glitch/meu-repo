@@ -872,3 +872,13 @@ Delivered:
 Triaged impact:
 1. Better operator diagnostics during rollback incidents.
 2. Reduced ambiguity in orchestration logs and support playbooks.
+
+## Delta 2026-02-18 XXXI - Security triage: abuse-control first pass
+Delivered:
+1. Introduced shared rate limiter module (Upstash-first with memory fallback) and applied it to highest risk routes (auth, AI, billing, studio session-start).
+2. Added baseline security headers globally via `next.config.js`.
+3. Added CI scanner `qa:critical-rate-limit` to ensure critical routes remain protected.
+
+Triaged impact:
+1. Immediate abuse resistance improved with explicit 429 responses and retry metadata.
+2. Remaining gap is environmental: instances without Upstash credentials run in fallback memory mode and should be promoted to distributed mode in production.

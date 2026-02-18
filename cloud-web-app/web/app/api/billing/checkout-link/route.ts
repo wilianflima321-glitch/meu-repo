@@ -3,12 +3,21 @@ import { requireAuth } from '@/lib/auth-server';
 import { readPaymentGatewayConfig } from '@/lib/server/payment-gateway-config';
 import { notImplementedCapability } from '@/lib/server/capability-response';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 const ALLOWED_PLANS = new Set(['starter', 'basic', 'pro', 'studio', 'enterprise']);
 
 export async function POST(req: NextRequest) {
   try {
-    requireAuth(req);
+    const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-checkout-link',
+      key: auth.userId,
+      max: 20,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many checkout link requests. Please retry later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const gatewayConfig = await readPaymentGatewayConfig();
     if (!gatewayConfig.checkoutEnabled) {

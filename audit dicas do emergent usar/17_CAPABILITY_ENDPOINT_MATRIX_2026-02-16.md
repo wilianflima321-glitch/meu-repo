@@ -64,13 +64,14 @@ Headers (when applicable):
 Validation status:
 1. `qa:route-contracts` PASS
 2. `qa:no-fake-success` PASS
-3. `qa:no-fake-success` also enforces:
+3. `qa:critical-rate-limit` enforces rate-limit presence on critical abuse-prone routes (`auth`, `ai`, `billing`, `studio session start`).
+4. `qa:no-fake-success` also enforces:
 - `PAYMENT_GATEWAY_NOT_IMPLEMENTED -> 501`
 - `AUTH_NOT_CONFIGURED -> 503`
 - `QUEUE_BACKEND_UNAVAILABLE -> 503`
-4. `AI_CHANGE_APPLY` and `AI_CHANGE_ROLLBACK` blocked states now use capability envelope helper, including `x-aethel-capability*` headers.
-5. Studio route contracts include blocked/inactive-edge checks (`checks=32`).
-6. Studio task gating routes now use shared capability envelope helper for header parity (`x-aethel-capability*`).
+5. `AI_CHANGE_APPLY` and `AI_CHANGE_ROLLBACK` blocked states now use capability envelope helper, including `x-aethel-capability*` headers.
+6. Studio route contracts include blocked/inactive-edge checks (`checks=32`).
+7. Studio task gating routes now use shared capability envelope helper for header parity (`x-aethel-capability*`).
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

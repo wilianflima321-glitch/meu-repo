@@ -880,3 +880,13 @@ Implemented:
 Critical reading:
 1. This closes a support-critical ambiguity in rollback troubleshooting.
 2. No scope expansion: still orchestration-layer safety, not distributed durability promotion.
+
+## Delta 2026-02-18 XXXIII - Security control baseline uplift
+Implemented:
+1. Added centralized rate limiting utility with distributed-first backend (Upstash when configured, memory fallback) and wired it into auth, AI, billing and studio session-start critical routes.
+2. Added default security headers in Next runtime config for all routes.
+3. Added CI guard (`qa:critical-rate-limit`) to block regressions where critical routes lose rate-limit protection.
+
+Critical reading:
+1. This closes an immediate P0 gap (abuse control baseline) without changing business scope.
+2. Residual risk remains explicit: deployments without Upstash configuration still run in fallback memory mode (`PARTIAL`).
