@@ -230,7 +230,7 @@ Label: `PARTIAL_INTERNAL`
 
 1. `SEC-001` moved to partial completion:
 - shared rate limiter added (Upstash-first with memory fallback)
-- applied to critical auth/ai/billing/studio-start routes
+- applied to critical auth/ai core/billing/studio-start routes and studio task mutation endpoints
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

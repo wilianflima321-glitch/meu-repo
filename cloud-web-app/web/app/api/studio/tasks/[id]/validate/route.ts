@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession, validateStudioTask } from '@/lib/server/studio-home-store'
 import { capabilityResponse } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,15 @@ export async function POST(
 ) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-task-validate',
+      key: auth.userId,
+      max: 90,
+      windowMs: 60 * 1000,
+      message: 'Too many studio task validation operations. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = (await req.json().catch(() => ({}))) as Body
     const sessionId = String(body.sessionId || '').trim()
     if (!sessionId) {

@@ -8,11 +8,19 @@ const ROOT = process.cwd()
 const ROUTE_EXPECTATIONS = [
   { file: 'app/api/auth/login/route.ts', scope: 'auth-login' },
   { file: 'app/api/auth/register/route.ts', scope: 'auth-register' },
+  { file: 'app/api/ai/chat/route.ts', scope: 'ai-chat' },
   { file: 'app/api/ai/complete/route.ts', scope: 'ai-complete' },
   { file: 'app/api/ai/chat-advanced/route.ts', scope: 'ai-chat-advanced' },
+  { file: 'app/api/ai/action/route.ts', scope: 'ai-action' },
+  { file: 'app/api/ai/inline-edit/route.ts', scope: 'ai-inline-edit' },
+  { file: 'app/api/ai/inline-completion/route.ts', scope: 'ai-inline-completion' },
   { file: 'app/api/billing/checkout/route.ts', scope: 'billing-checkout' },
   { file: 'app/api/billing/checkout-link/route.ts', scope: 'billing-checkout-link' },
   { file: 'app/api/studio/session/start/route.ts', scope: 'studio-session-start' },
+  { file: 'app/api/studio/tasks/[id]/run/route.ts', scope: 'studio-task-run' },
+  { file: 'app/api/studio/tasks/[id]/validate/route.ts', scope: 'studio-task-validate' },
+  { file: 'app/api/studio/tasks/[id]/apply/route.ts', scope: 'studio-task-apply' },
+  { file: 'app/api/studio/tasks/[id]/rollback/route.ts', scope: 'studio-task-rollback' },
 ]
 
 const failures = []

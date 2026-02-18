@@ -4,6 +4,7 @@ import { aiService, type LLMProvider } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { notImplementedCapability } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 const INLINE_EDIT_SYSTEM_PROMPT = `You are an inline code editing assistant.
 Rules:
@@ -39,6 +40,15 @@ function asProvider(value: unknown): LLMProvider | undefined {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-inline-edit',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 1000,
+      message: 'Too many inline edit requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = (await req.json().catch(() => null)) as InlineEditBody | null
 
     if (!body || typeof body !== 'object') {

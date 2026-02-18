@@ -2360,11 +2360,19 @@ Implemented:
 3. Applied rate limiting to critical abuse surfaces:
 - `app/api/auth/login/route.ts`
 - `app/api/auth/register/route.ts`
+- `app/api/ai/chat/route.ts`
 - `app/api/ai/complete/route.ts`
 - `app/api/ai/chat-advanced/route.ts`
+- `app/api/ai/action/route.ts`
+- `app/api/ai/inline-edit/route.ts`
+- `app/api/ai/inline-completion/route.ts`
 - `app/api/billing/checkout/route.ts`
 - `app/api/billing/checkout-link/route.ts`
 - `app/api/studio/session/start/route.ts`
+- `app/api/studio/tasks/[id]/run/route.ts`
+- `app/api/studio/tasks/[id]/validate/route.ts`
+- `app/api/studio/tasks/[id]/apply/route.ts`
+- `app/api/studio/tasks/[id]/rollback/route.ts`
 4. Added platform security response headers in Next config:
 - `X-Content-Type-Options`
 - `X-Frame-Options`

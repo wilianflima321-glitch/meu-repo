@@ -4,6 +4,7 @@ import { getPlanLimits } from '@/lib/plan-limits'
 import { prisma } from '@/lib/db'
 import { getStudioSession, runStudioTask } from '@/lib/server/studio-home-store'
 import { capabilityResponse } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +16,15 @@ export async function POST(
 ) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-task-run',
+      key: auth.userId,
+      max: 90,
+      windowMs: 60 * 1000,
+      message: 'Too many studio task run operations. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = (await req.json().catch(() => ({}))) as Body
     const sessionId = String(body.sessionId || '').trim()
     if (!sessionId) {

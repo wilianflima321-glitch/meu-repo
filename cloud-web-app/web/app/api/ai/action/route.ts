@@ -4,6 +4,7 @@ import { aiService } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { notImplementedCapability } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 /**
  * POST /api/ai/action
@@ -34,6 +35,15 @@ const ACTION_PROMPTS: Record<string, (code: string, language: string) => string>
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-action',
+      key: user.userId,
+      max: 40,
+      windowMs: 60 * 1000,
+      message: 'Too many AI action requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = await req.json().catch(() => null)
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 })

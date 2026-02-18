@@ -10,6 +10,7 @@ import {
   releaseConcurrencyLease,
 } from '@/lib/metering';
 import { notImplementedCapability } from '@/lib/server/capability-response';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 function resolveBackendBaseUrl(): string | null {
   const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -23,6 +24,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-chat',
+      key: auth.userId,
+      max: 60,
+      windowMs: 60 * 1000,
+      message: 'Too many AI chat requests. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const entitlements = await requireEntitlementsForUser(auth.userId);
 
     const body = await req.json().catch(() => null);
