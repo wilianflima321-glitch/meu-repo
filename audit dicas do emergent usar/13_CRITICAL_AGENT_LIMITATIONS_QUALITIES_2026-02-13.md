@@ -745,3 +745,16 @@ Validation:
 Critical reading:
 1. Compatibility surface is now explicit and auditable for cutoff execution.
 2. Residual structural gap remains: wrappers count (`8`) still requires phaseout by telemetry window.
+
+## Delta 2026-02-18 XXI - Deprecated UI debt physically removed
+Implemented:
+1. Deleted `components/_deprecated/**` (legacy duplicate UI surface no longer used).
+2. Kept active UX contracts unchanged in canonical shell `/ide`.
+
+Validation:
+1. `docs:architecture-triage` now reports `deprecatedComponents=0` (before `10`).
+2. Core gates remain green (`lint`, `typecheck`, `qa:route-contracts`, `qa:no-fake-success`, `qa:interface-gate`).
+
+Critical reading:
+1. This reduces cognitive and maintenance debt without inflating product claims.
+2. Remaining architectural constraints are now concentrated in route surface (`apiRoutes=231`), redirect aliases (`17`) and wrapper phaseout (`8`).

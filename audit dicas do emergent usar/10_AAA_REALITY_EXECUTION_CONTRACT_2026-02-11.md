@@ -2046,3 +2046,19 @@ Factual snapshot:
 Decision lock:
 1. File wrapper routes remain operational only as compatibility bridge with explicit removal-cycle metadata.
 2. Admin compatibility dashboard can now use wrappers and deprecated routes under the same 14-day cutoff criterion.
+
+## 67) Delta 2026-02-18 XXI - Deprecated component backlog removed
+
+Implemented:
+1. Removed dead `_deprecated` component surface from active codebase:
+- `cloud-web-app/web/components/_deprecated/**` deleted
+2. Preserved canonical surface only (`/ide` + active components), without route or API behavior change.
+
+Factual snapshot:
+1. `docs:architecture-triage` now reports `deprecatedComponents=0` (before `10`)
+2. `fileCompatUsage=0` and `frontend workspace-route usage=0` remain preserved
+3. `lint`, `typecheck`, `qa:route-contracts`, `qa:no-fake-success`, `qa:interface-gate` PASS
+
+Decision lock:
+1. New legacy UI fragments must not be reintroduced under `components/_deprecated`.
+2. Backward-compat strategy stays on API contract/telemetry level, not duplicate component trees.

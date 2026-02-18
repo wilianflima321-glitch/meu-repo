@@ -739,3 +739,12 @@ Delivered:
 Triaged impact:
 1. Cutoff execution is now deterministic for both deprecated and wrapper routes.
 2. Architecture metric noise removed; current frontend workspace-route usage is factual `0`.
+
+## Delta 2026-02-18 XIX - Legacy component triage closure
+Delivered:
+1. Removed inactive duplicate component tree: `cloud-web-app/web/components/_deprecated/**`.
+2. Revalidated architecture sweep and hard gates after removal.
+
+Triaged impact:
+1. `deprecatedComponents` reduced from `10` to `0`.
+2. Simplifies maintenance baseline and lowers risk of accidental reactivation of legacy UI paths.
