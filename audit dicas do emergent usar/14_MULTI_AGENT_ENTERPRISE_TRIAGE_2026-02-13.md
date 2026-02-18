@@ -748,3 +748,15 @@ Delivered:
 Triaged impact:
 1. `deprecatedComponents` reduced from `10` to `0`.
 2. Simplifies maintenance baseline and lowers risk of accidental reactivation of legacy UI paths.
+
+## Delta 2026-02-18 XX - Route alias surface consolidation
+Delivered:
+1. Removed 17 duplicated App Router redirect pages and migrated alias policy to centralized Next redirects:
+- `cloud-web-app/web/next.config.js`
+2. Preserved legacy `/preview` handoff by redirecting directly to `/ide?entry=live-preview`.
+3. Re-ran architecture and quality checks after migration.
+
+Triaged impact:
+1. `redirectAliases` metric reduced from `17` to `0` in `docs/ARCHITECTURE_CRITICAL_TRIAGE.md`.
+2. Reduces route-component churn and enforces one canonical place for alias mapping.
+3. Maintains behavior while lowering maintenance and regression surface.

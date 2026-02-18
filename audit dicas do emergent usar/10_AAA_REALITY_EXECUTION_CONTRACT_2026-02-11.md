@@ -2062,3 +2062,41 @@ Factual snapshot:
 Decision lock:
 1. New legacy UI fragments must not be reintroduced under `components/_deprecated`.
 2. Backward-compat strategy stays on API contract/telemetry level, not duplicate component trees.
+
+## 68) Delta 2026-02-18 XXII - Redirect alias deduplication to config-level policy
+
+Implemented:
+1. Replaced 17 duplicated App Router alias pages (`app/*/page.tsx` doing `redirect('/ide?entry=...')`) with centralized Next redirects:
+- `cloud-web-app/web/next.config.js`
+2. Added explicit redirect mapping for `/preview` to keep legacy handoff:
+- `/preview` -> `/ide?entry=live-preview`
+3. Removed obsolete alias pages:
+- `app/ai-command/page.tsx`
+- `app/animation-blueprint/page.tsx`
+- `app/blueprint-editor/page.tsx`
+- `app/chat/page.tsx`
+- `app/debugger/page.tsx`
+- `app/editor-hub/page.tsx`
+- `app/explorer/page.tsx`
+- `app/git/page.tsx`
+- `app/landscape-editor/page.tsx`
+- `app/level-editor/page.tsx`
+- `app/live-preview/page.tsx`
+- `app/niagara-editor/page.tsx`
+- `app/playground/page.tsx`
+- `app/preview/page.tsx`
+- `app/search/page.tsx`
+- `app/terminal/page.tsx`
+- `app/testing/page.tsx`
+- `app/vr-preview/page.tsx`
+
+Factual snapshot after dedup:
+1. `docs:architecture-triage` -> `redirectAliases=0` (before `17`)
+2. `lint` PASS (`0 warnings`)
+3. `typecheck` PASS
+4. `qa:route-contracts` PASS (`checks=25`)
+5. `qa:interface-gate` PASS (critical zero metrics preserved)
+
+Decision lock:
+1. Route aliasing to `/ide` must stay centralized in `next.config.js`; no new one-file redirect pages under `app/*`.
+2. Legacy UX handoff remains supported through redirect mapping, not duplicated route components.

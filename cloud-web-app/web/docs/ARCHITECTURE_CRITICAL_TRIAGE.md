@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-18T02:35:07.151Z`
+- Generated at: `2026-02-18T03:32:39.960Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -9,7 +9,7 @@
 - Deprecated component files (`components/_deprecated/*`): **0**
 - Frontend usage of file compatibility routes (`/api/files/read|write|list|...`): **0**
 - Frontend usage of deprecated workspace routes (`/api/workspace/*`): **0**
-- Redirect alias pages to `/ide?entry=`: **17**
+- Redirect alias pages to `/ide?entry=`: **0**
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **6**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 

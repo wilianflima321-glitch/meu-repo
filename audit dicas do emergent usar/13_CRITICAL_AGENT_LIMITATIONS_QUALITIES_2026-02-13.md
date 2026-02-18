@@ -758,3 +758,19 @@ Validation:
 Critical reading:
 1. This reduces cognitive and maintenance debt without inflating product claims.
 2. Remaining architectural constraints are now concentrated in route surface (`apiRoutes=231`), redirect aliases (`17`) and wrapper phaseout (`8`).
+
+## Delta 2026-02-18 XXII - Redirect alias debt removed from app surface
+Implemented:
+1. Removed duplicated `app/*/page.tsx` alias pages that only redirected to `/ide?entry=...`.
+2. Moved alias behavior to centralized redirect policy in `cloud-web-app/web/next.config.js`.
+3. Kept legacy `/preview` handoff via config redirect to `/ide?entry=live-preview`.
+
+Validation:
+1. `docs:architecture-triage` now reports `redirectAliases=0` (before `17`).
+2. `lint` PASS (`0 warnings`), `typecheck` PASS.
+3. `qa:route-contracts` PASS (`checks=25`).
+4. `qa:interface-gate` PASS (critical zero metrics preserved).
+
+Critical reading:
+1. This removes low-value route duplication without changing user-facing navigation contract.
+2. Remaining structural constraints are now concentrated in API surface size (`231`) and wrapper phaseout (`8`), not alias page sprawl.
