@@ -2314,3 +2314,21 @@ Factual snapshot:
 Decision lock:
 1. Studio gated failures must include capability envelope headers (`x-aethel-capability*`) consistently.
 2. Capability semantics stay explicit and machine-readable; no success-masking on blocked edges.
+
+## 78) Delta 2026-02-18 XXXII - Route contract gate coverage expansion
+
+Implemented:
+1. Extended route-contract scanner coverage for Studio orchestration gates:
+- added rollback gate contract assertions
+- enforced `capabilityResponse` presence in Studio task/plan gate routes
+- enforced validate gate replay/status markers (`VALIDATION_ALREADY_*`)
+2. Kept runtime behavior unchanged; this wave increases guardrail strictness.
+
+Factual snapshot:
+1. `cmd /c npm run qa:route-contracts` -> PASS (`checks=32`)
+2. `cmd /c npm run qa:enterprise-gate` -> PASS
+3. Interface baseline unchanged (`not-implemented-ui=6`, other critical zeros preserved).
+
+Decision lock:
+1. Future Studio route regressions must fail contract gate earlier in CI.
+2. Contract strictness can increase, but must not weaken capability truthfulness semantics.

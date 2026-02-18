@@ -853,3 +853,13 @@ Delivered:
 Triaged impact:
 1. Better compatibility with downstream telemetry and support tooling.
 2. No behavior inflation; this is reliability and contract consistency hardening only.
+
+## Delta 2026-02-18 XXIX - Contract coverage triage expansion
+Delivered:
+1. Route contract checks expanded to cover rollback gate and additional Studio gate-state assertions.
+2. Contract scan now enforces `capabilityResponse` usage pattern on Studio task/plan gates.
+3. `qa:route-contracts` baseline moved to `checks=32`.
+
+Triaged impact:
+1. Lower chance of future regressions reintroducing non-standard gate responses.
+2. Improves CI trust as a release-quality gate for Studio orchestration APIs.

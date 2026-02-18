@@ -187,6 +187,7 @@ const checks = [
   {
     file: 'app/api/studio/tasks/[id]/run/route.ts',
     patterns: [
+      'capabilityResponse({',
       "capability: 'STUDIO_HOME_TASK_RUN'",
       "capabilityStatus: 'PARTIAL'",
       "error: 'TASK_RUN_BLOCKED'",
@@ -197,15 +198,24 @@ const checks = [
   },
   {
     file: 'app/api/studio/tasks/plan/route.ts',
-    patterns: ["error: 'PLAN_ALREADY_EXISTS'", "capability: 'STUDIO_HOME_SUPER_PLAN'", "capabilityStatus: 'PARTIAL'"],
+    patterns: [
+      'capabilityResponse({',
+      "error: 'PLAN_ALREADY_EXISTS'",
+      "error: 'SESSION_NOT_ACTIVE'",
+      "capability: 'STUDIO_HOME_SUPER_PLAN'",
+      "capabilityStatus: 'PARTIAL'",
+    ],
     name: 'studio/tasks/plan existing-plan gate contract',
   },
   {
     file: 'app/api/studio/tasks/[id]/validate/route.ts',
     patterns: [
+      'capabilityResponse({',
       "error: 'SESSION_NOT_ACTIVE'",
       "error: 'REVIEW_GATE_REQUIRED'",
       "error: 'VALIDATION_NOT_READY'",
+      "error: 'VALIDATION_ALREADY_PASSED'",
+      "error: 'VALIDATION_ALREADY_FAILED'",
       "capability: 'STUDIO_HOME_TASK_VALIDATE'",
       "capabilityStatus: 'PARTIAL'",
     ],
@@ -214,6 +224,7 @@ const checks = [
   {
     file: 'app/api/studio/tasks/[id]/apply/route.ts',
     patterns: [
+      'capabilityResponse({',
       "error: 'VALIDATION_REQUIRED'",
       "error: 'APPLY_ALREADY_COMPLETED'",
       "error: 'SESSION_NOT_ACTIVE'",
@@ -221,6 +232,17 @@ const checks = [
       "capabilityStatus: 'PARTIAL'",
     ],
     name: 'studio/tasks/[id]/apply gate contract',
+  },
+  {
+    file: 'app/api/studio/tasks/[id]/rollback/route.ts',
+    patterns: [
+      'capabilityResponse({',
+      "error: 'SESSION_NOT_ACTIVE'",
+      "error: 'ROLLBACK_NOT_AVAILABLE'",
+      "capability: 'STUDIO_HOME_TASK_ROLLBACK'",
+      "capabilityStatus: 'PARTIAL'",
+    ],
+    name: 'studio/tasks/[id]/rollback gate contract',
   },
   {
     file: 'app/api/studio/access/full/route.ts',

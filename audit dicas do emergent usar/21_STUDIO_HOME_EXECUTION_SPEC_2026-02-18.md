@@ -93,7 +93,7 @@ Mandatory before completion:
 1. `lint` PASS (`0 warnings`).
 2. `typecheck` PASS.
 3. `build` PASS.
-4. `qa:route-contracts` PASS (`checks=31`).
+4. `qa:route-contracts` PASS (`checks=32`).
 5. `qa:no-fake-success` PASS.
 6. `qa:interface-gate` PASS with critical metrics at zero and `not-implemented-ui=6`.
 7. Residual non-blocking local warnings during build:
@@ -107,3 +107,4 @@ Mandatory before completion:
 11. Task run enforces server-side budget cap before orchestration execution.
 12. Super Plan creation is single-shot per active session by default; regeneration requires explicit `force`.
 13. Studio task/plan gates are normalized through shared capability-response helper for consistent telemetry headers.
+14. Route-contract scan covers rollback gate and gate-state replay markers.

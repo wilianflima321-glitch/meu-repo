@@ -69,7 +69,7 @@ Validation status:
 - `AUTH_NOT_CONFIGURED -> 503`
 - `QUEUE_BACKEND_UNAVAILABLE -> 503`
 4. `AI_CHANGE_APPLY` and `AI_CHANGE_ROLLBACK` blocked states now use capability envelope helper, including `x-aethel-capability*` headers.
-5. Studio route contracts include blocked/inactive-edge checks (`checks=31`).
+5. Studio route contracts include blocked/inactive-edge checks (`checks=32`).
 6. Studio task gating routes now use shared capability envelope helper for header parity (`x-aethel-capability*`).
 
 ## 3.2 Build/runtime reliability note (2026-02-17)

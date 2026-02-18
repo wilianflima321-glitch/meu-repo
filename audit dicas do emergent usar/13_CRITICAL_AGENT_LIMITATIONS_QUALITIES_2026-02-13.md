@@ -862,3 +862,12 @@ Implemented:
 Critical reading:
 1. This improves operational observability (headers) and client-side deterministic handling without changing scope.
 2. Remaining critical limitations are still architecture-level: wrapper phaseout completion, API surface breadth, and distributed durability.
+
+## Delta 2026-02-18 XXXI - Contract scanner rigor uplift
+Implemented:
+1. Increased route-contract scanner strictness for Studio routes, including rollback and gate-status replay markers.
+2. Enforced `capabilityResponse` pattern presence for Studio task/plan gate routes.
+
+Critical reading:
+1. This reduces risk of silent contract drift between code and documentation.
+2. Residual limitations remain functional/architectural, not contract-observability related.
