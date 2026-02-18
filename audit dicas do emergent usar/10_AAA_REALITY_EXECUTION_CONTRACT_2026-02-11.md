@@ -128,6 +128,84 @@ Strict PR policy (no bypass) documented as execution rule:
 3. Branch protection remains required at repository settings level.
 4. Operational reference: `.github/BRANCH_PROTECTION_POLICY.md`.
 
+## 0.4 Delta Update 2026-02-17 (Build runtime hardening)
+Implemented in code:
+1. `cloud-web-app/web/next.config.js` now normalizes/clears both IPC env families:
+- `__NEXT_INCREMENTAL_CACHE_IPC_*`
+- `__NEXT_PRIVATE_INCREMENTAL_CACHE_IPC_*`
+2. Build execution now uses `experimental.workerThreads=true` with IPC env sanitization to avoid local `spawn EPERM` regressions while preserving gate reliability.
+3. Visual regression CI now runs without permissive bypass in core capture/compare steps:
+- `.github/workflows/visual-regression-compare.yml` removed `continue-on-error` on Playwright install and compare.
+- removed `|| true` from screenshot capture and diff compare commands.
+4. UI quality workflows now enforce compiler-quality gates before visual jobs:
+- `.github/workflows/ui-audit.yml` adds `lint` + `typecheck` pre-audit.
+- `.github/workflows/visual-regression-compare.yml` adds `lint` + `typecheck` pre-compare.
+
+Validation snapshot (this delta):
+1. `cmd /c npm run lint` -> PASS (0 warnings)
+2. `cmd /c npm run qa:no-fake-success` -> PASS
+3. `cmd /c npm run qa:interface-gate` -> PASS (`not-implemented-ui=6`)
+4. `cmd /c npm run qa:enterprise-gate` -> PASS (includes build/typecheck/interface/contracts)
+5. `cmd /c npm run build` -> PASS (non-blocking warning still appears from Next internal IPC revalidate URL: `localhost:undefined`)
+
+Execution interpretation:
+1. Build remains a hard gate in CI and cannot be bypassed in PR.
+2. Local `spawn EPERM` no longer blocks this branch under current config.
+3. Remaining build warning is tracked as runtime-noise risk (non-blocking), pending deeper root-cause isolation.
+4. No fake-success policy and explicit capability contracts remain unchanged.
+
+## 0.5 Delta Update 2026-02-17 (Studio UX hardening + canonical alignment)
+Implemented in code:
+1. Static-heavy API routes now explicitly opt out of static cache generation where operational data is runtime-scoped:
+- `cloud-web-app/web/app/api/exports/metrics/route.ts`
+- `cloud-web-app/web/app/api/jobs/stats/route.ts`
+- `cloud-web-app/web/app/api/multiplayer/health/route.ts`
+2. Multiplayer health route copy/comments were normalized to clean ASCII English to remove encoding drift.
+3. Global UX accessibility polish:
+- stronger `:focus-visible` ring contrast in `cloud-web-app/web/app/globals.css`;
+- `prefers-reduced-motion` safety block to disable non-essential animations for reduced-motion users.
+4. PWA manifest was aligned with the single-shell contract:
+- `start_url` moved to `/ide`;
+- shortcuts now route to `/ide` contexts (`entry=explorer|ai`) in `cloud-web-app/web/app/manifest.ts`.
+
+Validation snapshot (local evidence):
+1. `cmd /c npm run qa:interface-gate` -> PASS (`not-implemented-ui=6`)
+2. `cmd /c npm run qa:canonical-components` -> PASS
+3. `cmd /c npm run qa:route-contracts` -> PASS
+4. `cmd /c npm run qa:no-fake-success` -> PASS
+5. `cmd /c npm run qa:mojibake` -> PASS (`findings=0`)
+6. `cmd /c npm run typecheck` -> PASS
+7. `cmd /c npm run build` -> PASS with existing non-blocking Next runtime warning (`revalidateTag` URL noise).
+
+Critical interpretation:
+1. Core P0 quality gates stay green.
+2. The remaining runtime warning is tracked as framework-level noise and does not change operational readiness gates.
+3. `NOT_IMPLEMENTED` remains explicit and limited to known capability gates (AI provider unavailable, render cancel, unsupported payment runtime path).
+
+## 0.6 Delta Update 2026-02-17 (Claude handoff map + runtime runbook)
+Implemented in canonical docs:
+1. New interface handoff map for external AI refactor execution:
+- `audit dicas do emergent usar/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+2. New runtime warning/environment runbook:
+- `audit dicas do emergent usar/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+3. Canonical source index updated to include both docs:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+
+Execution interpretation:
+1. Interface ownership and file-level targets are now explicit for parallel UI hardening.
+2. Runtime warning handling is formalized without weakening hard quality gates.
+
+## 0.7 Delta Update 2026-02-17 (P1/P2 triage finalized)
+Implemented in canonical planning:
+1. Final P1/P2 execution list generated from interface surface map:
+- `audit dicas do emergent usar/20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
+2. Canonical source list updated:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+
+Execution interpretation:
+1. Post-P0 work now has strict ordered priorities and done criteria.
+2. This closes ambiguity for next execution wave without changing product scope.
+
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
    Source: `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`
@@ -1656,4 +1734,85 @@ Decision lock:
 - Residual environment warnings remain expected in local build without full env:
   - `UPSTASH_REDIS_REST_URL/TOKEN` missing
   - Docker sandbox fallback
-  - remaining `revalidateTag` invalid URL warning still under investigation (non-blocking to build completion in this run).
+- remaining `revalidateTag` invalid URL warning still under investigation (non-blocking to build completion in this run).
+
+## 51) Delta 2026-02-17 V - Advanced agent reliability loop
+
+Implemented:
+1. `chat-advanced` now exposes explicit provider capability gates (no ambiguous fallback when provider for model is missing):
+- `cloud-web-app/web/app/api/ai/chat-advanced/route.ts`
+2. Advanced request contract now supports:
+- `qualityMode`: `standard | delivery | studio`
+- `enableWebResearch`: benchmark context enrichment for UI/UX tasks
+3. Multi-role and single-role prompts now include:
+- quality policy
+- self-questioning checklist
+- optional benchmark references
+4. Trace evidence now records:
+- `qualityMode`
+- benchmark references (when available) as `search` evidence items.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:route-contracts` PASS
+4. `npm run qa:no-fake-success` PASS
+5. `npm run qa:enterprise-gate` PASS
+
+Decision lock:
+1. Keep anti-fake-success as hard rule for all advanced agent paths.
+2. Keep benchmark ingestion as best-effort (never a hidden dependency for successful completion).
+
+## 52) Delta 2026-02-17 VI - IDE AI panel moved to advanced orchestration
+
+Implemented:
+1. IDE AI sidebar now calls `/api/ai/chat-advanced` instead of `/api/ai/chat`:
+- `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
+2. Runtime profile inference added in UI:
+- deep audit/benchmark prompts -> `qualityMode=studio`, `agentCount=3`, web research enabled;
+- implementation prompts -> `qualityMode=delivery`, `agentCount=2`;
+- normal prompts -> `qualityMode=standard`, `agentCount=1`.
+3. Multi-agent plan gates now degrade safely to single-agent in UI when plan limits block agent mode.
+4. Project context is now forwarded from `/ide` URL (`projectId`) to advanced chat calls.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:enterprise-gate` PASS
+
+Critical reading:
+1. This improves Manus-like orchestration behavior without inflating maturity claims.
+2. L4/L5 readiness remains blocked by missing deterministic multi-file validate/apply/rollback pipeline.
+
+## 53) Delta 2026-02-17 VII - Explorer UX hardening in `/ide`
+
+Implemented:
+1. File explorer now receives canonical load/error state from `/ide` shell:
+- `cloud-web-app/web/app/ide/page.tsx`
+- `cloud-web-app/web/components/ide/FileExplorerPro.tsx`
+2. Added explicit empty-state action panel in explorer (no silent blank workspace):
+- CTA: `New File` and `New Folder`
+3. Removed duplicated global loading/error overlays in editor area; explorer is now the single source for its own load/error UX.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:enterprise-gate` PASS
+
+Decision lock:
+1. Keep workspace loading/error feedback inside explorer panel to avoid split-state ambiguity.
+
+## 54) Delta 2026-02-17 VIII - Preview media failure transparency
+
+Implemented:
+1. Added explicit media runtime failure handling in preview panel:
+- `cloud-web-app/web/components/ide/PreviewPanel.tsx`
+2. Image/audio/video preview now surfaces actionable `PARTIAL` gate message when runtime decoding/source fails.
+
+Validation snapshot:
+1. `npm run lint` PASS
+2. `npm run typecheck` PASS
+3. `npm run qa:enterprise-gate` PASS
+
+Decision lock:
+1. Keep unsupported/failed media runtime states explicit; never imply successful preview render.

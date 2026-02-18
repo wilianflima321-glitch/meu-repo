@@ -18,6 +18,8 @@ interface FileNode {
 
 interface FileExplorerProps {
   files?: FileNode[]
+  isLoading?: boolean
+  error?: string | null
   onFileSelect?: (file: FileNode) => void
   onFileCreate?: (parentPath: string, type: 'file' | 'folder') => void
   onFileDelete?: (file: FileNode) => void
@@ -238,6 +240,8 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
 
 export default function FileExplorerPro({
   files,
+  isLoading: externalLoading = false,
+  error: externalError = null,
   onFileSelect,
   onFileCreate,
   onFileDelete,
@@ -259,7 +263,10 @@ export default function FileExplorerPro({
     file: FileNode
   } | null>(null)
 
+  const usingExternalFiles = Array.isArray(files)
   const resolvedFiles = files ?? internalFiles
+  const effectiveLoading = usingExternalFiles ? externalLoading : isLoading
+  const effectiveError = usingExternalFiles ? externalError : loadError
 
   const fetchWorkspaceTree = useCallback(async () => {
     try {
@@ -432,12 +439,12 @@ export default function FileExplorerPro({
 
       {/* File Tree */}
       <div className="flex-1 overflow-y-auto py-1">
-        {loadError && (
+        {effectiveError && (
           <div className="px-3 py-2 text-xs text-red-400">
-            {loadError}
+            {effectiveError}
           </div>
         )}
-        {isLoading && !loadError && (
+        {effectiveLoading && !effectiveError && (
           <div className="px-3 py-2 text-xs text-slate-500 space-y-1.5">
             <div className="h-3 rounded bg-slate-800/80 aethel-shimmer" />
             <div className="h-3 rounded bg-slate-800/70 aethel-shimmer" />
@@ -460,6 +467,30 @@ export default function FileExplorerPro({
         {filteredFiles.length === 0 && searchQuery && (
           <div className="text-center py-8 text-slate-500 text-sm">
             No files matching {`"${searchQuery}"`}
+          </div>
+        )}
+        {filteredFiles.length === 0 && !searchQuery && !effectiveLoading && !effectiveError && (
+          <div className="h-full flex items-center justify-center px-4 text-center">
+            <div className="max-w-xs">
+              <div className="text-xs font-medium text-slate-300 mb-1">Workspace is empty</div>
+              <div className="text-[11px] text-slate-500 mb-3">
+                Create a file or folder to start editing in this project.
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => onFileCreate?.('/', 'file')}
+                  className="px-2.5 py-1.5 rounded border border-slate-700 bg-slate-800/70 text-[11px] text-slate-200 hover:bg-slate-700/80"
+                >
+                  New File
+                </button>
+                <button
+                  onClick={() => onFileCreate?.('/', 'folder')}
+                  className="px-2.5 py-1.5 rounded border border-slate-700 bg-slate-800/70 text-[11px] text-slate-200 hover:bg-slate-700/80"
+                >
+                  New Folder
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -1,23 +1,21 @@
 /**
  * AETHEL ENGINE - Multiplayer Health Check API
- * 
- * Verifica a saúde do servidor de matchmaking.
+ *
+ * Verifies multiplayer matchmaking service health.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
   try {
-    // Verificar serviços de matchmaking
+    // In production, this should validate actual backing services.
     const checks = {
       server: 'ok',
       redis: 'ok',
       timestamp: new Date().toISOString(),
     };
-
-    // Em produção, verificar conexões reais
-    // const redisOk = await redis.ping();
-    // checks.redis = redisOk ? 'ok' : 'error';
 
     return NextResponse.json({
       status: 'healthy',
@@ -25,12 +23,12 @@ export async function GET(request: NextRequest) {
       checks,
     });
   } catch (error) {
-    console.error('Erro no health check multiplayer:', error);
+    console.error('Multiplayer health check failed:', error);
     return NextResponse.json(
-      { 
+      {
         status: 'unhealthy',
         service: 'matchmaking',
-        error: 'Falha ao verificar serviços' 
+        error: 'Failed to verify matchmaking services',
       },
       { status: 503 }
     );

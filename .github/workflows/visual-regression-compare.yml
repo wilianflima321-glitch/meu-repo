@@ -45,10 +45,15 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
-        continue-on-error: true
 
       - name: Interface gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:interface-gate
+
+      - name: Lint gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run lint
+
+      - name: Typecheck gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run typecheck
 
       - name: Canonical component gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:canonical-components
@@ -99,7 +104,7 @@ jobs:
 
       - name: Capture current screenshots
         run: |
-          node tools/ide/visual-regression/capture_baseline.js --baseUrl "$BASE_URL" --out tools/ide/visual-regression/output/current || true
+          node tools/ide/visual-regression/capture_baseline.js --baseUrl "$BASE_URL" --out tools/ide/visual-regression/output/current
 
       - name: Restore baseline (if present)
         run: |
@@ -122,11 +127,10 @@ jobs:
           fi
 
       - name: Compare baseline vs current
-        continue-on-error: true
         run: |
           # Only run compare if baseline directory exists; otherwise skip with notice.
           if [ -d "tools/ide/visual-regression/baseline" ]; then
-            node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 50 --total 100 || echo 'compare exit code indicates diffs'
+            node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 50 --total 100
           else
             echo 'No baseline present; skipping compare step'
           fi

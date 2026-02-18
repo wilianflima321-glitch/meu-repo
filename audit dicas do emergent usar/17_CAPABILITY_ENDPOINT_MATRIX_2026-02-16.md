@@ -10,6 +10,8 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Surface | Endpoint/File | Status | Contract |
 |---|---|---|---|
 | AI chat | `app/api/ai/chat/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
+| AI chat advanced | `app/api/ai/chat-advanced/route.ts` | `IMPLEMENTED` with explicit provider gates + quality controls | `501 NOT_IMPLEMENTED` on missing provider/model-provider mismatch; supports `qualityMode` + optional benchmark context |
+| AI chat panel orchestration | `components/ide/AIChatPanelContainer.tsx` | `IMPLEMENTED/PARTIAL` | routes through `/api/ai/chat-advanced`; auto-selects `qualityMode`/`agentCount`; falls back to single-agent when plan gate blocks multi-agent |
 | AI complete | `app/api/ai/complete/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | response canonical `suggestion` + alias `text` |
 | AI action | `app/api/ai/action/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
 | AI inline edit | `app/api/ai/inline-edit/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
@@ -49,6 +51,11 @@ Validation status:
 - `PAYMENT_GATEWAY_NOT_IMPLEMENTED -> 501`
 - `AUTH_NOT_CONFIGURED -> 503`
 - `QUEUE_BACKEND_UNAVAILABLE -> 503`
+
+## 3.2 Build/runtime reliability note (2026-02-17)
+1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.
+2. Current local baseline: `npm run build` passes; residual warning remains from Next internal IPC revalidate URL (`localhost:undefined`) and is tracked separately as non-blocking runtime noise.
+3. This does not relax API capability/error contracts in this matrix.
 
 ## 4) Promotion criteria (P1+)
 1. Promote `PARTIAL` to `IMPLEMENTED` only after:

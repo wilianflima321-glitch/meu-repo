@@ -33,6 +33,11 @@ Authoritative references used:
 - no desktop parity claim for Unreal/Premiere
 - no L4/L5 promotion without operational evidence
 
+## 1.2 Reliability delta (2026-02-17)
+1. Build/runtime config hardened for restricted environments by sanitizing invalid Next IPC env keys and disabling worker threads locally.
+2. Visual regression pipeline moved to stricter execution (no permissive compare/capture bypass in CI script).
+3. Core anti-fake-success gates remain mandatory before any subsystem promotion claim.
+
 ## 2) Critical limitations to beat (without fake claims)
 ## 2.1 AI limitations (current generation models)
 1. Non-determinism under repeated prompts.
@@ -139,3 +144,7 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 4. Asset pipeline now classifies media/model constraints with explicit `PARTIAL` warnings:
 - `lib/server/asset-processor.ts`
 - `app/api/assets/upload/route.ts`
+5. Advanced chat orchestration now enforces quality mode + self-questioning checklist + optional benchmark references, with explicit provider gates:
+- `app/api/ai/chat-advanced/route.ts`
+6. Workbench AI panel is now wired to advanced orchestration route for runtime use:
+- `components/ide/AIChatPanelContainer.tsx`

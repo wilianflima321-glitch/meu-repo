@@ -88,10 +88,18 @@ Metricas criticas atuais:
 - `frontend-workspace-route-usage=0`
 - `legacy-editor-shell-usage=0`
 
+Delta tecnico (2026-02-17, rodada atual):
+1. `next.config.js` endurecido para limpar variaveis IPC invalidas (`__NEXT_*` e `__NEXT_PRIVATE_*`) que causavam ruido de revalidate IPC em runtime de build.
+2. `experimental.workerThreads=true` foi restaurado com sanitizacao de IPC env para evitar `spawn EPERM` sem perder estabilidade de gate.
+3. Workflow de regressao visual endurecido:
+- sem `continue-on-error` na instalacao de Playwright;
+- sem bypass `|| true` em captura/comparacao.
+4. Workflows de auditoria visual agora exigem `lint` e `typecheck` antes da execucao dos checks visuais.
+
 Lacunas reais abertas (fato):
 1. Colaboracao avancada ainda `PARTIAL` para prontidao enterprise.
 2. Render cancel continua em gate explicito `NOT_IMPLEMENTED`.
-3. Build local pode falhar em sandbox restrito (`spawn EPERM`), exigindo validacao em CI sem restricao.
+3. Build local voltou a passar nesta trilha; risco residual atual e ruido de runtime interno do Next (`revalidateTag` com URL IPC invalida) sem quebrar o gate.
 
 ## Validacao tecnica desta rodada
 Executado em `cloud-web-app/web`:
@@ -506,3 +514,90 @@ Critica objetiva:
 3. Claim policy unchanged:
 - no promotion beyond L3 without operational evidence;
 - no fake success for gated capabilities.
+
+## Delta 2026-02-17 II - UX/accessibility and shell coherence pass
+Implemented:
+1. Runtime-scoped API routes were hardened with `force-dynamic` to avoid static-cache ambiguity in ops metrics/health surfaces:
+- `app/api/exports/metrics/route.ts`
+- `app/api/jobs/stats/route.ts`
+- `app/api/multiplayer/health/route.ts`
+2. Multiplayer health route copy was normalized to clean English ASCII (removed encoding drift risk).
+3. Global accessibility quality improved in `app/globals.css`:
+- stronger focus ring visibility;
+- reduced-motion fallback to disable non-essential animations when requested by user preference.
+4. Manifest shell alignment completed in `app/manifest.ts`:
+- `/ide` is now the default app entrypoint;
+- shortcuts now resolve to `/ide` contexts.
+
+Validation:
+1. `qa:interface-gate` PASS (`not-implemented-ui=6`).
+2. `qa:canonical-components` PASS.
+3. `qa:route-contracts` PASS.
+4. `qa:no-fake-success` PASS.
+5. `qa:mojibake` PASS (`findings=0`).
+6. `typecheck` PASS.
+7. `build` PASS with existing non-blocking Next runtime warning.
+
+Residual critical gaps:
+1. The `revalidateTag` invalid URL warning is still present at build finalization and remains tracked as framework/runtime noise.
+2. `NOT_IMPLEMENTED` remains intentionally explicit in AI provider gates, render cancel, and unsupported payment runtime paths.
+
+## Delta 2026-02-17 III - Handoff and runbook hardening
+Implemented:
+1. Canonical interface map created for external AI improvement workflow:
+- `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+2. Runtime warning/environment runbook created:
+- `19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+3. Canonical source index updated to include both docs:
+- `00_FONTE_CANONICA.md`
+
+Critical reading:
+1. Interface improvement ownership is now explicit and auditable by file path.
+2. Runtime warning handling is tracked operationally without lowering quality gates.
+
+## Delta 2026-02-17 IV - Critical execution ordering (P1/P2)
+Implemented:
+1. Priority execution artifact added:
+- `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
+
+Critical reading:
+1. P1/P2 ambiguity is removed; each item now has explicit file scope and done criteria.
+2. This reduces execution drift risk for external AI collaborators.
+
+## Delta 2026-02-17 V - Agent quality/research hardening (chat-advanced)
+Implemented:
+1. `chat-advanced` now enforces explicit provider capability gate before execution.
+2. Added configurable quality behavior:
+- `qualityMode=standard|delivery|studio`
+- mandatory self-questioning checklist in prompt orchestration.
+3. Added optional benchmark enrichment for interface/UX tasks (`enableWebResearch`), best-effort and traceable.
+4. Trace output now includes quality mode and benchmark references as search evidence.
+
+Critical reading:
+1. This reduces optimistic/hand-wavy agent output risk in long multi-step interface tasks.
+2. It does not promote L4/L5 claims; it improves L1-L3 reliability posture only.
+
+## Delta 2026-02-17 VI - Chat panel orchestration hardening
+Implemented:
+1. `AIChatPanelContainer` now targets `/api/ai/chat-advanced` as primary runtime path.
+2. Prompt intent classifier added to map requests into `standard|delivery|studio` quality modes.
+3. Agent-count downgrade logic added (`3/2 -> 1`) when plan gate denies multi-agent.
+
+Critical reading:
+1. UX now aligns better with "agentic" expectation in sidebar chat.
+2. Remaining hard limitation: still no end-to-end deterministic patch execution loop for arbitrary multi-file code changes.
+
+## Delta 2026-02-17 VII - Explorer state coherence
+Implemented:
+1. Unified explorer loading/error ownership in `FileExplorerPro` with explicit props from `/ide`.
+2. Added explicit empty workspace action state (create file/folder) to avoid blank panel ambiguity.
+
+Critical reading:
+1. This closes a practical UX gap in P1-01 (flow clarity) without changing product scope.
+
+## Delta 2026-02-17 VIII - Preview media error signaling
+Implemented:
+1. `PreviewPanel` now shows explicit media failure state for image/audio/video runtime errors.
+
+Critical reading:
+1. Reduces false perception of "empty preview" by showing exact failure class (`PARTIAL` capability runtime).

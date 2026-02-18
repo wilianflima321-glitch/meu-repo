@@ -72,6 +72,20 @@ Metricas:
 - `frontend-workspace-route-usage`: **0**
 - `legacy-editor-shell-usage`: **0**
 
+## 2.0 Canonical override (2026-02-17)
+Estado vigente para execucao desta fase:
+1. `legacy-accent-tokens=0`
+2. `admin-light-theme-tokens=0`
+3. `admin-status-light-tokens=0`
+4. `blocking-browser-dialogs=0`
+5. `not-implemented-ui=6` (gates API explicitos)
+6. `frontend-workspace-route-usage=0`
+7. `legacy-editor-shell-usage=0`
+8. `lint=0 warnings`
+
+Nota:
+1. Valores anteriores nesta pagina devem ser tratados como snapshot historico quando divergirem deste bloco.
+
 ## 2.1 Reconciliacao de benchmark externo (2026-02-17)
 Matriz factual de absorcao:
 
@@ -525,3 +539,92 @@ Leitura critica:
   1. eliminate non-blocking build warning path (`revalidateTag` invalid URL)
   2. close environment checklist in runtime/CI for redis+docker expected modes
   3. continue reducing gated surfaces outside critical path.
+
+## Delta 2026-02-17 II - Cross-agent quality pass (runtime + UX + shell)
+Implemented:
+1. Frontend/UX:
+- stronger focus ring visibility and reduced-motion guard in `cloud-web-app/web/app/globals.css`.
+2. Backend reliability:
+- `force-dynamic` on runtime-sensitive API routes:
+  - `app/api/exports/metrics/route.ts`
+  - `app/api/jobs/stats/route.ts`
+  - `app/api/multiplayer/health/route.ts`
+- normalized health route copy to clean English ASCII.
+3. Product alignment:
+- PWA manifest now starts in `/ide` and shortcuts target `/ide` entry contexts (`explorer`, `ai`) in `cloud-web-app/web/app/manifest.ts`.
+
+Validation snapshot:
+1. `qa:interface-gate` PASS.
+2. `qa:canonical-components` PASS.
+3. `qa:route-contracts` PASS.
+4. `qa:no-fake-success` PASS.
+5. `qa:mojibake` PASS.
+6. `typecheck` PASS.
+7. `build` PASS (with known non-blocking Next runtime warning).
+
+Critical residuals after this pass:
+1. Build warning `revalidateTag -> localhost:undefined` remains unresolved and tracked.
+2. Capability gates remain explicit by design for non-ready paths:
+- AI provider missing
+- render cancel
+- unsupported payment gateway runtime
+
+## Delta 2026-02-17 III - Execution support docs added
+Delivered:
+1. File-level interface execution map for Claude:
+- `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+2. Runtime warning/environment runbook:
+- `19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+3. Canonical registry updated:
+- `00_FONTE_CANONICA.md`
+
+Why this matters:
+1. Multi-agent execution now has deterministic interface targets and guardrails.
+2. Infra/runtime residual risks are tracked in a dedicated operational artifact.
+
+## Delta 2026-02-17 IV - P1/P2 execution finalization
+Delivered:
+1. Final ordered backlog derived from interface map:
+- `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
+2. Canonical index sync:
+- `00_FONTE_CANONICA.md` now includes `20`.
+
+Decision lock:
+1. Next wave executes by strict order in `20` (P1 first, then P2).
+2. No P2 item promotion before P1 freeze and gate pass.
+
+## Delta 2026-02-17 V - Multi-agent output quality controls
+Delivered:
+1. Advanced chat route now supports explicit quality mode (`standard|delivery|studio`) and benchmark-assisted context for interface tasks.
+2. Provider mismatch for requested model now fails with explicit capability gate instead of implicit fallback.
+3. Multi-agent and single-agent traces now record `qualityMode` plus benchmark references.
+
+Triaged impact:
+1. Improves reliability and auditability of agent output without expanding product scope.
+2. Keeps anti-fake-success intact and prevents hidden dependency on external research availability.
+
+## Delta 2026-02-17 VI - Agentic UX wiring in `/ide`
+Delivered:
+1. Right-sidebar AI chat now uses advanced route orchestration (`/api/ai/chat-advanced`).
+2. Automatic request profile selection added (`qualityMode`, `agentCount`, benchmark research flag).
+3. Plan-gated multi-agent requests now degrade to single-agent automatically instead of hard dead-end for user.
+
+Triaged impact:
+1. Closes part of P1-02 (Editor-Native AI Clarity support path) by improving assistant execution quality in main Workbench shell.
+2. Does not change collaboration/L4/L5 status gates.
+
+## Delta 2026-02-17 VII - P1-01 explorer consistency pass
+Delivered:
+1. Explorer is now canonical owner of its loading/error/empty states.
+2. `/ide` no longer duplicates explorer state overlays in editor viewport.
+
+Triaged impact:
+1. Reduces user confusion in core editor journey.
+2. Keeps keyboard-first and compact layout unchanged.
+
+## Delta 2026-02-17 VIII - P1-03 preview stability pass
+Delivered:
+1. Media preview runtime now emits explicit error state when decode/source fails (`image/audio/video`).
+
+Triaged impact:
+1. Improves user trust by replacing silent blank previews with explicit capability messaging.
