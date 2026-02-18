@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
+import { redirect } from 'next/navigation'
 
-const AethelDashboard = dynamic(() => import('../../components/AethelDashboardGateway'), { ssr: false })
 const StudioHome = dynamic(() => import('../../components/studio/StudioHome'), { ssr: false })
 
 export const metadata = {
@@ -16,6 +16,6 @@ export default function DashboardPage({ searchParams }: DashboardPageProps) {
   const legacyFlag = searchParams?.legacy
   const legacyMode = Array.isArray(legacyFlag) ? legacyFlag.includes('1') : legacyFlag === '1'
 
-  if (legacyMode) return <AethelDashboard />
+  if (legacyMode) redirect('/dashboard/legacy')
   return <StudioHome />
 }

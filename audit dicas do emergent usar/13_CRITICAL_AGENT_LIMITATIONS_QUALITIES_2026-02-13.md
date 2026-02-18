@@ -810,3 +810,13 @@ Implemented:
 Critical reading:
 1. This is a reliability gain and claim-discipline gain.
 2. Remaining limitation is still explicit: Studio Home orchestration does not replace deterministic patch apply inside `/ide`.
+
+## Delta 2026-02-18 XXVI - Entry continuity and residual risk update
+Implemented:
+1. Legacy dashboard split into dedicated fallback route (`/dashboard/legacy`) to reduce default entry coupling.
+2. Studio Home now defaults to lightweight preview and only loads runtime preview on explicit enable.
+3. IDE now receives session/task handoff context for continuity traceability.
+
+Critical reading:
+1. Continuity improved between orchestrated home and advanced shell.
+2. Main unresolved risk remains route/bundle scale (`apiRoutes` high and dashboard first-load still above ideal target).

@@ -13,6 +13,7 @@ const AIChatPanelContainer = dynamic(() => import('@/components/ide/AIChatPanelC
   loading: () => <div className="h-52 w-full animate-pulse rounded bg-slate-900/50" />,
 })
 const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
+const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 
 type StudioTask = {
   id: string
@@ -139,6 +140,7 @@ export default function StudioHome() {
   const [budgetCap, setBudgetCap] = useState(30)
   const [qualityMode, setQualityMode] = useState<'standard' | 'delivery' | 'studio'>('studio')
   const [showAgentWorkspace, setShowAgentWorkspace] = useState(false)
+  const [showRuntimePreview, setShowRuntimePreview] = useState(false)
   const [session, setSession] = useState<StudioSession | null>(null)
   const [wallet, setWallet] = useState<WalletSummary | null>(null)
   const [usage, setUsage] = useState<UsageSummary | null>(null)
@@ -201,11 +203,17 @@ export default function StudioHome() {
   useEffect(() => {
     const persisted = window.localStorage.getItem(AGENT_WORKSPACE_STORAGE_KEY)
     if (persisted === '1') setShowAgentWorkspace(true)
+    const previewPersisted = window.localStorage.getItem(PREVIEW_RUNTIME_STORAGE_KEY)
+    if (previewPersisted === '1') setShowRuntimePreview(true)
   }, [])
 
   useEffect(() => {
     window.localStorage.setItem(AGENT_WORKSPACE_STORAGE_KEY, showAgentWorkspace ? '1' : '0')
   }, [showAgentWorkspace])
+
+  useEffect(() => {
+    window.localStorage.setItem(PREVIEW_RUNTIME_STORAGE_KEY, showRuntimePreview ? '1' : '0')
+  }, [showRuntimePreview])
 
   const requireSessionId = useCallback(() => {
     if (!session?.id) throw new Error('Start a studio session first.')
@@ -594,19 +602,36 @@ export default function StudioHome() {
           </section>
 
           <section className="space-y-4">
-            <div className="h-[460px] overflow-hidden rounded border border-slate-800 bg-slate-900/60">
-              <PreviewPanel
-                title="Interactive Preview"
-                filePath="studio-home.md"
-                content={previewContent}
-                projectId={session?.projectId || projectId}
-                isStale={Boolean(session?.status === 'stopped')}
-                onRefresh={() => {
-                  if (session?.id) {
-                    void withAction(async () => refreshSession(session.id))
-                  }
-                }}
-              />
+            <div className="overflow-hidden rounded border border-slate-800 bg-slate-900/60">
+              <div className="flex items-center justify-between border-b border-slate-800 px-3 py-2">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Interactive Preview</div>
+                <button
+                  onClick={() => setShowRuntimePreview((prev) => !prev)}
+                  className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                >
+                  {showRuntimePreview ? 'Use Lite Preview' : 'Enable Runtime Preview'}
+                </button>
+              </div>
+              {showRuntimePreview ? (
+                <div className="h-[460px]">
+                  <PreviewPanel
+                    title="Interactive Preview"
+                    filePath="studio-home.md"
+                    content={previewContent}
+                    projectId={session?.projectId || projectId}
+                    isStale={Boolean(session?.status === 'stopped')}
+                    onRefresh={() => {
+                      if (session?.id) {
+                        void withAction(async () => refreshSession(session.id))
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-[460px] overflow-auto p-3">
+                  <pre className="whitespace-pre-wrap text-xs leading-5 text-slate-300">{previewContent}</pre>
+                </div>
+              )}
             </div>
 
             <div className="rounded border border-slate-800 bg-slate-900/60 p-4">

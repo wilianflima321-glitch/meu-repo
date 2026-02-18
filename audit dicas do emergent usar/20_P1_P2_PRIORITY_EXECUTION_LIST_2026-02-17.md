@@ -79,6 +79,17 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - warning inventory updated with root-cause status
 - no regression in `qa:enterprise-gate`
 
+### P1-06 Studio Home Payload Optimization
+1. Objective: reduce default `/dashboard` load without feature regression.
+2. Files:
+- `cloud-web-app/web/app/dashboard/page.tsx`
+- `cloud-web-app/web/app/dashboard/legacy/page.tsx`
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+3. Done criteria:
+- legacy dashboard isolated behind dedicated fallback route
+- runtime preview loaded only on explicit opt-in
+- no regression in session orchestration or IDE handoff
+
 ## 2. P2 Priorities (After P1 Freeze)
 ### P2-01 Collaboration Readiness Gate
 1. Objective: formalize stability claims before promotion.
@@ -126,10 +137,11 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 3. P1-03
 4. P1-04
 5. P1-05
-6. P2-01
-7. P2-02
-8. P2-03
-9. P2-04
+6. P1-06
+7. P2-01
+8. P2-02
+9. P2-03
+10. P2-04
 
 ## 4. Mandatory Gate Before Marking Any Item Done
 1. `npm run lint`

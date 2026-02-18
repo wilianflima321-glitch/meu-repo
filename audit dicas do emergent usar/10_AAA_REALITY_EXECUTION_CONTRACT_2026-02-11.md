@@ -2196,3 +2196,28 @@ Factual snapshot:
 Decision lock:
 1. Studio Home run/apply controls are orchestration checkpoints, not direct file patch apply.
 2. Deterministic file mutation remains anchored in `/ide` and `/api/ai/change/*` flows.
+
+## 73) Delta 2026-02-18 XXVII - Dashboard/IDE continuity and weight control
+
+Implemented:
+1. Moved legacy dashboard surface to dedicated route:
+- `/dashboard/legacy` (`cloud-web-app/web/app/dashboard/legacy/page.tsx`)
+- `/dashboard?legacy=1` now redirects to `/dashboard/legacy`
+2. Studio Home now supports lightweight preview mode by default and runtime preview opt-in:
+- reduces initial interactive load pressure while preserving preview-first workflow
+3. IDE now consumes Studio handoff context query params:
+- `sessionId`, `taskId` are ingested and surfaced in workbench status messaging.
+
+Factual snapshot:
+1. `lint` PASS
+2. `typecheck` PASS
+3. `qa:route-contracts` PASS (`checks=29`)
+4. `qa:no-fake-success` PASS
+5. `build` PASS with split entry weight:
+- `/dashboard` -> `5.87 kB` route size (`95.7 kB` first-load JS)
+- `/dashboard/legacy` -> `366 kB` route size (`526 kB` first-load JS)
+
+Decision lock:
+1. Legacy dashboard stays available only as explicit fallback route.
+2. Studio Home remains default entry.
+3. IDE handoff context is additive and backward compatible with existing `file/entry/projectId` contract.

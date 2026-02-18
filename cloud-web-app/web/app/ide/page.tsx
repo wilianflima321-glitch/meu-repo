@@ -429,8 +429,11 @@ function IDEPageInner() {
   const confirmDialog = useConfirmDialog()
   const startupFilePath = searchParams.get('file')?.trim() || null
   const startupEntry = (searchParams.get('entry')?.trim().toLowerCase() || null) as WorkbenchEntry | null
+  const startupSessionId = searchParams.get('sessionId')?.trim() || null
+  const startupTaskId = searchParams.get('taskId')?.trim() || null
   const startupFileHandledRef = useRef(false)
   const startupEntryHandledRef = useRef(false)
+  const startupSessionHandledRef = useRef(false)
 
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || null
   const activePath = activeTab?.path || null
@@ -743,6 +746,22 @@ function IDEPageInner() {
   }, [startupEntry, pushMessage])
 
   useEffect(() => {
+    if (startupSessionHandledRef.current) return
+    if (!startupSessionId) return
+    startupSessionHandledRef.current = true
+    const payload = {
+      sessionId: startupSessionId,
+      ...(startupTaskId ? { taskId: startupTaskId } : {}),
+    }
+    window.dispatchEvent(new CustomEvent('aethel.ide.studioContext', { detail: payload }))
+    pushMessage(
+      startupTaskId
+        ? `Studio handoff loaded (session ${startupSessionId.slice(0, 8)}, task ${startupTaskId.slice(0, 8)}).`
+        : `Studio handoff loaded (session ${startupSessionId.slice(0, 8)}).`
+    )
+  }, [startupSessionId, startupTaskId, pushMessage])
+
+  useEffect(() => {
     const handleOpenRecentWorkspace = async (event: Event) => {
       const detail = (event as CustomEvent<{ workspaceUri?: string }>).detail
       const workspaceUri = detail?.workspaceUri?.trim()
@@ -905,8 +924,8 @@ function IDEPageInner() {
     <span>
       {statusMessage ||
         (activePath
-          ? `Project: ${projectId} | Workspace: ${workspaceRoot} | ${activePath}${activeState?.content !== activeState?.savedContent ? ' (unsaved)' : ''}`
-          : `Project: ${projectId} | Workspace: ${workspaceRoot}`)}
+          ? `Project: ${projectId} | Workspace: ${workspaceRoot} | ${activePath}${activeState?.content !== activeState?.savedContent ? ' (unsaved)' : ''}${startupSessionId ? ` | Studio: ${startupSessionId.slice(0, 8)}` : ''}`
+          : `Project: ${projectId} | Workspace: ${workspaceRoot}${startupSessionId ? ` | Studio: ${startupSessionId.slice(0, 8)}` : ''}`)}
     </span>
   )
 

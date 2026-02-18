@@ -797,3 +797,14 @@ Triaged impact:
 1. Better alignment with anti-fake-success policy.
 2. Clear separation between orchestration UX (`/dashboard`) and deterministic code-apply UX (`/ide`).
 3. Residual structural risks unchanged: dashboard payload weight and JSON-context persistence model.
+
+## Delta 2026-02-18 XXIV - Studio/IDE handoff triage closure
+Delivered:
+1. Explicit legacy fallback surface isolated at `/dashboard/legacy`.
+2. Studio Home preview strategy updated to lite-first + runtime opt-in.
+3. `/ide` now consumes `sessionId/taskId` handoff context for operational trace continuity.
+
+Triaged impact:
+1. Lower default dashboard load pressure.
+2. Better continuity for user journeys crossing home orchestration and deep IDE execution.
+3. Residual risks still open: API surface breadth and wrapper deprecation completion window.

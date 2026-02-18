@@ -14,11 +14,12 @@ Non-negotiable:
 
 ## 1. Core Entry Surfaces
 1. Studio Home entry: `cloud-web-app/web/app/dashboard/page.tsx`
-2. Studio Home UI: `cloud-web-app/web/components/studio/StudioHome.tsx`
-1. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
-2. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
-3. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
-4. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
+2. Legacy dashboard fallback route: `cloud-web-app/web/app/dashboard/legacy/page.tsx`
+3. Studio Home UI: `cloud-web-app/web/components/studio/StudioHome.tsx`
+4. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
+5. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
+6. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
+7. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
 
 ## 2. IDE UI Surfaces (Primary)
 ### 2.1 Left/center/bottom shell blocks
@@ -112,7 +113,9 @@ CI workflows:
 3. Empty/error/loading states explicit and consistent.
 4. No blocking browser dialogs.
 5. No fake success when capability is unavailable.
-6. `/ide` query contract preserved: `file`, `entry`, `projectId`.
+6. `/ide` query contract preserved:
+- required core: `file`, `entry`, `projectId`
+- additive handoff: `sessionId`, `taskId`
 
 ## 7. Change Guardrails for Claude
 1. Prefer editing canonical components under `components/ide/*` and `components/editor/*`.

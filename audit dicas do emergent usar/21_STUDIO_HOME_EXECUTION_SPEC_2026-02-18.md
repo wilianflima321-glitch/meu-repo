@@ -85,9 +85,13 @@ Mandatory before completion:
 1. `lint` PASS (`0 warnings`).
 2. `typecheck` PASS.
 3. `build` PASS.
-4. `qa:route-contracts` PASS (`checks=28`).
+4. `qa:route-contracts` PASS (`checks=29`).
 5. `qa:no-fake-success` PASS.
 6. `qa:interface-gate` PASS with critical metrics at zero and `not-implemented-ui=6`.
 7. Residual non-blocking local warnings during build:
 - missing Upstash env in local mode
 - Docker unavailable fallback.
+8. Studio Home preview mode is lite-first with explicit runtime-preview opt-in.
+9. Build split confirms lightweight default entry:
+- `/dashboard` now loads as lightweight shell
+- legacy-heavy surface moved to `/dashboard/legacy`.
