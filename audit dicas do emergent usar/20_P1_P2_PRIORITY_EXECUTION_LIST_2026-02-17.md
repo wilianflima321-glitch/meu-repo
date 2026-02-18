@@ -11,6 +11,19 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 4. no fake success
 
 ## 1. P1 Priorities (Execute First)
+### P1-00 Studio Home Entry Hardening
+1. Objective: make `/dashboard` the professional chat/preview-first mission entry.
+2. Files:
+- `cloud-web-app/web/app/dashboard/page.tsx`
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+- `cloud-web-app/web/lib/server/studio-home-store.ts`
+- `cloud-web-app/web/app/api/studio/**/route.ts`
+3. Done criteria:
+- mission -> plan -> run -> validate -> apply -> rollback works end-to-end
+- one-click handoff to `/ide` keeps `projectId`
+- full access is scoped, timeboxed and auditable
+- no fake CTA on blocked capability
+
 ### P1-01 Workbench Usability Consistency
 1. Objective: make primary `/ide` journeys predictable and fast.
 2. Files:
@@ -107,7 +120,8 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - no manual bypass in normal flow
 
 ## 3. Execution Order (Strict)
-1. P1-01
+1. P1-00
+2. P1-01
 2. P1-02
 3. P1-03
 4. P1-04

@@ -2100,3 +2100,78 @@ Factual snapshot after dedup:
 Decision lock:
 1. Route aliasing to `/ide` must stay centralized in `next.config.js`; no new one-file redirect pages under `app/*`.
 2. Legacy UX handoff remains supported through redirect mapping, not duplicated route components.
+
+## 69) Delta 2026-02-18 XXIII - Studio Home cut-in (chat/preview-first entry)
+
+Implemented:
+1. `/dashboard` now defaults to Studio Home entry surface (chat/preview-first), preserving legacy dashboard behind `?legacy=1`:
+- `cloud-web-app/web/app/dashboard/page.tsx`
+2. Added Studio Home modular surface with:
+- mission input
+- super-plan actions
+- task board (`run/validate/apply/rollback`)
+- team live feed
+- ops bar (`stop`, `full access`, cost/usage summary)
+- one-click IDE handoff
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+
+Decision lock:
+1. `/dashboard` is authenticated entry UX.
+2. `/ide` remains advanced execution shell.
+3. Legacy dashboard stays temporary and explicit (`?legacy=1`) during phased adoption.
+
+## 70) Delta 2026-02-18 XXIV - Studio Home API surface and execution contract
+
+Implemented (new API routes):
+1. `POST /api/studio/session/start`
+2. `GET /api/studio/session/{id}`
+3. `POST /api/studio/session/{id}/stop`
+4. `POST /api/studio/tasks/plan`
+5. `POST /api/studio/tasks/{id}/run`
+6. `POST /api/studio/tasks/{id}/validate`
+7. `POST /api/studio/tasks/{id}/apply`
+8. `POST /api/studio/tasks/{id}/rollback`
+9. `GET /api/studio/cost/live`
+10. `POST /api/studio/access/full`
+11. `DELETE /api/studio/access/full/{id}`
+
+Backing service:
+1. `cloud-web-app/web/lib/server/studio-home-store.ts`
+2. Stores Studio session state in `copilotWorkflow.context` for this phase (no schema migration in this wave).
+
+Decision lock:
+1. Orchestration roles are fixed (`planner`, `coder`, `reviewer`).
+2. Apply remains blocked until validation passes.
+3. Full Access is timeboxed and auditable.
+
+## 71) Delta 2026-02-18 XXV - Studio Home hardening + factual gate refresh
+
+Implemented:
+1. Fixed Prisma JSON persistence typing in Studio session store:
+- `cloud-web-app/web/lib/server/studio-home-store.ts`
+2. Hardened Studio Home UX to avoid misleading CTAs:
+- task actions now obey deterministic gate states (`run|validate|apply|rollback`)
+- `Open IDE` now forwards contextual handoff (`projectId`, `entry`, `sessionId`, `taskId`)
+3. Added lightweight operational polling for active studio sessions and dynamic loading for heavy chat/preview blocks:
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+
+Factual snapshot (this wave):
+1. `lint` PASS (`0 warnings`)
+2. `typecheck` PASS
+3. `build` PASS (local non-blocking warnings remain for missing Upstash env and Docker fallback)
+4. `qa:canonical-components` PASS
+5. `qa:route-contracts` PASS (`checks=28`)
+6. `qa:no-fake-success` PASS
+7. `qa:interface-gate` PASS with:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+- `frontend-workspace-route-usage=0`
+- `legacy-editor-shell-usage=0`
+
+Decision lock:
+1. `not-implemented-ui=6` is explicit and policy-compliant (capability gates), not hidden with fake success.
+2. Studio Home remains entry UX; `/ide` remains advanced shell.
+3. Capability promotion above `PARTIAL` still requires operational evidence.

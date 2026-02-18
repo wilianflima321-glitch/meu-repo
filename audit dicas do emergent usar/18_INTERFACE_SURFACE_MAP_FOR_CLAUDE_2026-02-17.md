@@ -13,6 +13,8 @@ Non-negotiable:
 4. Do not remove deprecation contracts from legacy routes.
 
 ## 1. Core Entry Surfaces
+1. Studio Home entry: `cloud-web-app/web/app/dashboard/page.tsx`
+2. Studio Home UI: `cloud-web-app/web/components/studio/StudioHome.tsx`
 1. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
 2. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
 3. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
@@ -24,7 +26,6 @@ Non-negotiable:
 2. Preview panel: `cloud-web-app/web/components/ide/PreviewPanel.tsx`
 3. AI side panel container: `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
 4. Command palette (canonical): `cloud-web-app/web/components/ide/CommandPalette.tsx`
-5. Redirect adapter for parked routes: `cloud-web-app/web/components/ide/WorkbenchRedirect.tsx`
 
 ### 2.2 Editor experience
 1. Monaco editor core: `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
@@ -76,6 +77,19 @@ All other admin surface directories:
 1. `cloud-web-app/web/app/api/billing/checkout/route.ts`
 2. `cloud-web-app/web/app/api/admin/payments/gateway/route.ts`
 
+### 4.5 Studio Home capability routes
+1. `cloud-web-app/web/app/api/studio/session/start/route.ts`
+2. `cloud-web-app/web/app/api/studio/session/[id]/route.ts`
+3. `cloud-web-app/web/app/api/studio/session/[id]/stop/route.ts`
+4. `cloud-web-app/web/app/api/studio/tasks/plan/route.ts`
+5. `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
+6. `cloud-web-app/web/app/api/studio/tasks/[id]/validate/route.ts`
+7. `cloud-web-app/web/app/api/studio/tasks/[id]/apply/route.ts`
+8. `cloud-web-app/web/app/api/studio/tasks/[id]/rollback/route.ts`
+9. `cloud-web-app/web/app/api/studio/cost/live/route.ts`
+10. `cloud-web-app/web/app/api/studio/access/full/route.ts`
+11. `cloud-web-app/web/app/api/studio/access/full/[id]/route.ts`
+
 ## 5. Quality Gates and Scans
 Canonical checks (must stay green):
 1. `cloud-web-app/web/scripts/interface-critical-gate.mjs`
@@ -106,3 +120,4 @@ CI workflows:
 3. Do not route frontend back to `/api/workspace/*`.
 4. Keep `not-implemented-ui` explicit for gated capabilities.
 5. Run gate suite before claiming completion.
+6. Do not reintroduce redirect-alias pages; keep alias policy centralized in `next.config.js`.

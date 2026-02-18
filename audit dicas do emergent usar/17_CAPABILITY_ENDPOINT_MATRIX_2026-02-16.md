@@ -23,6 +23,17 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | AI deterministic validation | `app/api/ai/change/validate/route.ts` | `IMPLEMENTED` | returns `canApply`, `verdict`, `checks`, dependency impact |
 | AI deterministic apply | `app/api/ai/change/apply/route.ts` | `IMPLEMENTED` | scoped apply with stale-context guard (`409`) + validation gate (`422`) + rollback token |
 | AI deterministic rollback | `app/api/ai/change/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | token-based restore with stale-context guard; partial for distributed multi-instance durability |
+| Studio session start | `app/api/studio/session/start/route.ts` | `IMPLEMENTED` | creates mission session with quality mode + budget cap |
+| Studio session get | `app/api/studio/session/[id]/route.ts` | `IMPLEMENTED` | returns aggregated session state |
+| Studio session stop | `app/api/studio/session/[id]/stop/route.ts` | `IMPLEMENTED` | explicit lifecycle stop contract |
+| Studio super plan | `app/api/studio/tasks/plan/route.ts` | `IMPLEMENTED` | generates baseline plan task set |
+| Studio task run | `app/api/studio/tasks/[id]/run/route.ts` | `IMPLEMENTED/PARTIAL` | role-based execution with plan-limit gate for multi-role |
+| Studio task validate | `app/api/studio/tasks/[id]/validate/route.ts` | `IMPLEMENTED` | deterministic verdict (`passed` or `failed`) |
+| Studio task apply | `app/api/studio/tasks/[id]/apply/route.ts` | `IMPLEMENTED/PARTIAL` | blocked until validation pass (`422 VALIDATION_REQUIRED`) |
+| Studio task rollback | `app/api/studio/tasks/[id]/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | requires prior apply token/state |
+| Studio live cost | `app/api/studio/cost/live/route.ts` | `IMPLEMENTED` | per-session cost summary + budget exceeded flag |
+| Studio full access grant | `app/api/studio/access/full/route.ts` | `IMPLEMENTED/PARTIAL` | scoped 30-minute grant with trial/starter gate |
+| Studio full access revoke | `app/api/studio/access/full/[id]/route.ts` | `IMPLEMENTED` | explicit revoke contract |
 | Render cancel | `app/api/render/jobs/[jobId]/cancel/route.ts` | `NOT_IMPLEMENTED` | explicit capability gate with metadata |
 | Billing checkout (non-stripe) | `app/api/billing/checkout/route.ts` | `NOT_IMPLEMENTED` branch | `PAYMENT_GATEWAY_NOT_IMPLEMENTED` with capability metadata |
 | File tree | `app/api/files/tree/route.ts` | `IMPLEMENTED` | canonical file authority |

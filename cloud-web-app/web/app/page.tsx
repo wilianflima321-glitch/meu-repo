@@ -14,7 +14,7 @@ export default function Page() {
         <header className="mb-10">
           <h1 className="text-4xl font-semibold tracking-tight">Aethel</h1>
           <p className="mt-3 text-lg text-gray-300">
-            Portal profissional: projetos, faturamento, uso/quotas, chat e acesso à IDE.
+            Professional portal with Studio Home entry, billing, usage quotas and advanced IDE handoff.
           </p>
         </header>
 
@@ -23,43 +23,43 @@ export default function Page() {
             href="/login"
             className="inline-flex items-center justify-center rounded-md bg-sky-600 px-4 py-2 text-sm font-medium hover:bg-sky-700"
           >
-            Entrar
+            Sign in
           </Link>
           <Link
             href="/register"
             className="inline-flex items-center justify-center rounded-md border border-gray-700 px-4 py-2 text-sm font-medium text-gray-100 hover:bg-gray-900"
           >
-            Criar conta
+            Create account
           </Link>
           <Link
             href="/terms"
             className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-300 hover:text-white"
           >
-            Termos
+            Terms
           </Link>
         </div>
 
         <section className="mt-12 grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-gray-800 bg-gray-900/30 p-5">
-            <h2 className="text-base font-semibold">Área do usuário</h2>
+            <h2 className="text-base font-semibold">Studio Home</h2>
             <p className="mt-2 text-sm text-gray-300">
-              Painel, projetos, histórico, uso/quotas e recursos internos.
+              Chat-first mission control with super plans, team agents, live preview and operational cost tracking.
             </p>
             <div className="mt-4">
               <Link href="/login" className="text-sm text-sky-400 hover:text-sky-300">
-                Entrar para acessar →
+                Enter Studio Home
               </Link>
             </div>
           </div>
 
           <div className="rounded-lg border border-gray-800 bg-gray-900/30 p-5">
-            <h2 className="text-base font-semibold">IDE</h2>
+            <h2 className="text-base font-semibold">Advanced IDE</h2>
             <p className="mt-2 text-sm text-gray-300">
-              A IDE é um produto separado do portal. O portal é o “rosto” e o ponto de entrada.
+              /ide remains the advanced mode for precise edits, debugging and deep project operations.
             </p>
             <div className="mt-4">
               <p className="text-xs text-gray-400">
-                (Integração de um clique para abrir a IDE via rota interna é parte do checklist.)
+                One-click handoff from Studio Home keeps projectId and active context.
               </p>
             </div>
           </div>

@@ -774,3 +774,29 @@ Validation:
 Critical reading:
 1. This removes low-value route duplication without changing user-facing navigation contract.
 2. Remaining structural constraints are now concentrated in API surface size (`231`) and wrapper phaseout (`8`), not alias page sprawl.
+
+## Delta 2026-02-18 XXIII - Studio Home critical read (entry UX + reliability)
+Implemented:
+1. Entry UX now defaults to Studio Home on `/dashboard` with explicit legacy fallback query.
+2. Studio Home exposes deterministic task controls (`run`, `validate`, `apply`, `rollback`) and live session feed.
+3. Dedicated Studio API contract introduced under `/api/studio/*` with explicit error branches and plan gates.
+
+Critical reading:
+1. This reduces first-minute friction for non-IDE-first users without forking product shell.
+2. Residual risk: Studio session persistence currently reuses workflow JSON context and is not yet isolated per-domain table set.
+3. `IMPLEMENTED/PARTIAL` status remains required for multi-instance durability and strict cost accounting closure.
+
+## Delta 2026-02-18 XXIV - Studio Home CTA integrity + residual risk refresh
+Implemented:
+1. Studio Home action controls are now state-gated to avoid false CTA exposure in partial states.
+2. IDE handoff now propagates session/task context for traceable continuation.
+3. Session refresh loop added for active sessions to reduce stale UI risk in long runs.
+
+Validation:
+1. `lint` PASS, `typecheck` PASS, `build` PASS.
+2. `qa:route-contracts` PASS (`checks=28`), `qa:no-fake-success` PASS.
+3. `qa:interface-gate` PASS with `not-implemented-ui=6`.
+
+Critical reading:
+1. Reliability improved on the user path (fewer invalid actions exposed).
+2. Remaining high-impact risk is still architectural: session state persistence in generic workflow JSON and dashboard payload weight.

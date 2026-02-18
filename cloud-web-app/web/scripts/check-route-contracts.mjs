@@ -179,6 +179,21 @@ const checks = [
     ],
     name: 'ai/change/rollback deterministic contract',
   },
+  {
+    file: 'app/api/studio/session/start/route.ts',
+    patterns: ["capability: 'STUDIO_HOME_SESSION'", "capabilityStatus: 'IMPLEMENTED'"],
+    name: 'studio/session/start capability contract',
+  },
+  {
+    file: 'app/api/studio/tasks/[id]/apply/route.ts',
+    patterns: ["error: 'VALIDATION_REQUIRED'", "capability: 'STUDIO_HOME_TASK_APPLY'", "capabilityStatus: 'PARTIAL'"],
+    name: 'studio/tasks/[id]/apply gate contract',
+  },
+  {
+    file: 'app/api/studio/access/full/route.ts',
+    patterns: ["error: 'FEATURE_NOT_ALLOWED'", "capability: 'STUDIO_HOME_FULL_ACCESS'", "capabilityStatus: 'PARTIAL'"],
+    name: 'studio/access/full plan gate contract',
+  },
 ]
 
 async function read(relPath) {

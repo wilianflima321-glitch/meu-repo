@@ -290,6 +290,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Verificar quota
     const quotaCheck = await checkAIQuota(userId, estimatedTokens);
     if (!quotaCheck.allowed) {
+      if (quotaCheck.code === 'CREDITS_EXHAUSTED') {
+        return NextResponse.json(
+          {
+            error: 'CREDITS_EXHAUSTED',
+            message: quotaCheck.reason || 'Credits exhausted for variable AI usage.',
+            capability: 'AI_VARIABLE_USAGE',
+            capabilityStatus: 'PARTIAL',
+            metadata: {
+              estimatedTokens,
+              estimatedCredits: Math.max(1, Math.ceil(Math.max(0, estimatedTokens) / 1000)),
+            },
+          },
+          { status: 402 }
+        );
+      }
       return NextResponse.json(
         { error: quotaCheck.reason || 'AI quota exceeded' },
         { status: 429 }

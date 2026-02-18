@@ -160,3 +160,18 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 - `app/api/ai/voice/generate/route.ts`
 - `app/api/ai/music/generate/route.ts`
 - `app/api/ai/3d/generate/route.ts`
+
+## 8) Delta 2026-02-18 - Studio Home orchestration bridge
+1. Added Studio Home entry as orchestration bridge between conversational flow and deterministic engineering flow.
+2. Added session/task APIs for mission lifecycle:
+- start
+- plan
+- run
+- validate
+- apply
+- rollback
+- stop
+3. Added scoped, timeboxed full-access grant API with explicit plan gate.
+4. Current persistence strategy reuses `copilotWorkflow.context`:
+- operationally viable in this wave
+- still `PARTIAL` for distributed durability and dedicated ledger-grade storage.

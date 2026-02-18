@@ -760,3 +760,29 @@ Triaged impact:
 1. `redirectAliases` metric reduced from `17` to `0` in `docs/ARCHITECTURE_CRITICAL_TRIAGE.md`.
 2. Reduces route-component churn and enforces one canonical place for alias mapping.
 3. Maintains behavior while lowering maintenance and regression surface.
+
+## Delta 2026-02-18 XXI - Studio Home triage cut-in
+Delivered:
+1. `/dashboard` switched to Studio Home entry by default.
+2. Legacy dashboard retained behind explicit `?legacy=1` fallback.
+3. New Studio API family added (`/api/studio/session|tasks|cost|access`) for mission lifecycle and controlled multi-role execution.
+
+Triaged impact:
+1. Entry UX now aligns with chat/preview-first strategy while preserving `/ide` as advanced mode.
+2. Multi-agent flow has explicit deterministic checkpoints (validate before apply).
+3. Full access now follows scoped + timeboxed + auditable rule in API surface.
+
+## Delta 2026-02-18 XXII - Studio Home hardening triage (post-cut-in)
+Delivered:
+1. State-based disabling for Studio task actions to prevent invalid run/validate/apply/rollback paths.
+2. Context handoff enrichment to `/ide` (`projectId`, `entry`, `sessionId`, `taskId`).
+3. Active session polling and dynamic loading for heavy dashboard panels.
+4. Route-contract gate extension validated (`checks=28`).
+
+Triaged impact:
+1. Lower risk of fake-progress interaction in partial capability states.
+2. Better continuity between Studio Home orchestration and deep `/ide` execution.
+3. Residual gaps remain explicit:
+- `not-implemented-ui=6` (policy-compliant gates)
+- high dashboard initial JS footprint (~530 kB first load)
+- state durability remains `PARTIAL` for distributed multi-instance operations.

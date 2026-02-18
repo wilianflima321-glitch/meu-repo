@@ -46,11 +46,12 @@ export async function POST(req: NextRequest) {
 
     const quotaCheck = await checkAIQuota(user.userId, estimatedTokens);
     if (!quotaCheck.allowed) {
+      const status = quotaCheck.code === 'CREDITS_EXHAUSTED' ? 402 : 429;
       return NextResponse.json({
         error: quotaCheck.code,
         message: quotaCheck.reason,
         upgradeUrl: '/pricing',
-      }, { status: 429 }); // 429 = Too Many Requests
+      }, { status });
     }
     
     // 2. Verificar acesso ao modelo solicitado

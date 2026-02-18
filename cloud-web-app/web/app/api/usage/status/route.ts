@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { getUsageStatus } from '@/lib/plan-limits';
+import { getCreditBalance } from '@/lib/credit-wallet';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,10 @@ export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
     
-    const status = await getUsageStatus(user.userId);
+    const [status, creditBalance] = await Promise.all([
+      getUsageStatus(user.userId),
+      getCreditBalance(user.userId),
+    ]);
     
     return NextResponse.json({
       success: true,
@@ -42,6 +46,11 @@ export async function GET(req: NextRequest) {
         models: status.limits.models,
         isOverLimit: !status.allowed,
         message: status.reason,
+        usageEntitlement: {
+          creditBalance,
+          variableUsageAllowed: creditBalance > 0,
+          blockedReason: creditBalance > 0 ? null : 'CREDITS_EXHAUSTED',
+        },
       }
     });
 

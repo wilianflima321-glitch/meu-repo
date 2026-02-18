@@ -6,6 +6,7 @@
  */
 
 import { prisma } from './db';
+import { getCreditBalance } from './credit-wallet';
 
 // ============================================================================
 // DEFINIÇÃO DE LIMITES POR PLANO
@@ -123,7 +124,7 @@ export interface UsageStatus {
 export interface QuotaCheckResult {
   allowed: boolean;
   reason?: string;
-  code?: 'QUOTA_EXCEEDED' | 'MODEL_NOT_ALLOWED' | 'FEATURE_NOT_ALLOWED' | 'RATE_LIMITED';
+  code?: 'QUOTA_EXCEEDED' | 'MODEL_NOT_ALLOWED' | 'FEATURE_NOT_ALLOWED' | 'RATE_LIMITED' | 'CREDITS_EXHAUSTED';
 }
 
 // ============================================================================
@@ -171,6 +172,18 @@ export async function checkAIQuota(userId: string, estimatedTokens: number = 100
       allowed: false,
       reason: `Limite diário de ${limits.requestsPerDay} requisições atingido. Tente novamente amanhã ou upgrade seu plano.`,
       code: 'RATE_LIMITED',
+    };
+  }
+
+  // Entitlement de consumo (credits): bloqueia custo variavel quando saldo zera.
+  // Mantemos features premium do ciclo pago, mas IA/compute depende de saldo.
+  const estimatedCredits = Math.max(1, Math.ceil(Math.max(0, estimatedTokens) / 1000));
+  const creditBalance = await getCreditBalance(userId);
+  if (creditBalance < estimatedCredits) {
+    return {
+      allowed: false,
+      reason: `Créditos insuficientes para esta operação (necessário: ${estimatedCredits}, saldo: ${creditBalance}).`,
+      code: 'CREDITS_EXHAUSTED',
     };
   }
   
@@ -258,14 +271,19 @@ export async function getCurrentUsage(userId: string): Promise<{ tokensUsed: num
 async function getDailyRequestCount(userId: string): Promise<number> {
   const dayStart = new Date();
   dayStart.setHours(0, 0, 0, 0);
-  
-  // Simplificado: usar o bucket mensal dividido por dia do mês
-  // Em produção, usar uma tabela separada de rate limiting
-  const usage = await getCurrentUsage(userId);
-  const dayOfMonth = new Date().getDate();
-  
-  // Estimativa: requisições totais / dias passados
-  return Math.ceil(usage.requestsUsed / dayOfMonth);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const bucket = await prisma.usageBucket.findFirst({
+    where: {
+      userId,
+      window: 'day',
+      windowStart: { gte: dayStart, lte: dayEnd },
+    },
+    select: { requests: true },
+  });
+
+  return bucket?.requests ?? 0;
 }
 
 /**
@@ -313,26 +331,54 @@ export async function recordTokenUsage(userId: string, tokensUsed: number): Prom
   monthEnd.setMonth(monthEnd.getMonth() + 1);
   monthEnd.setDate(0);
   monthEnd.setHours(23, 59, 59, 999);
-  
-  await prisma.usageBucket.upsert({
-    where: {
-      userId_window_windowStart: {
+
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  await prisma.$transaction([
+    prisma.usageBucket.upsert({
+      where: {
+        userId_window_windowStart: {
+          userId,
+          window: 'month',
+          windowStart: monthStart,
+        }
+      },
+      create: {
         userId,
         window: 'month',
         windowStart: monthStart,
+        windowEnd: monthEnd,
+        tokens: tokensUsed,
+        requests: 1,
+      },
+      update: {
+        tokens: { increment: tokensUsed },
+        requests: { increment: 1 },
       }
-    },
-    create: {
-      userId,
-      window: 'month',
-      windowStart: monthStart,
-      windowEnd: monthEnd,
-      tokens: tokensUsed,
-      requests: 1,
-    },
-    update: {
-      tokens: { increment: tokensUsed },
-      requests: { increment: 1 },
-    }
-  });
+    }),
+    prisma.usageBucket.upsert({
+      where: {
+        userId_window_windowStart: {
+          userId,
+          window: 'day',
+          windowStart: dayStart,
+        }
+      },
+      create: {
+        userId,
+        window: 'day',
+        windowStart: dayStart,
+        windowEnd: dayEnd,
+        tokens: tokensUsed,
+        requests: 1,
+      },
+      update: {
+        tokens: { increment: tokensUsed },
+        requests: { increment: 1 },
+      }
+    }),
+  ]);
 }

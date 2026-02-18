@@ -1,8 +1,8 @@
 # Interface Critical Sweep
 
-- Generated at: `2026-02-18T03:34:55.902Z`
+- Generated at: `2026-02-18T06:08:58.723Z`
 - Scope: `app/`, `components/`
-- Files scanned: `518`
+- Files scanned: `530`
 
 ## Summary
 

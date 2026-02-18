@@ -69,7 +69,8 @@ export async function POST(req: NextRequest) {
 
     const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
     if (!quotaCheck.allowed) {
-      return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status: 429 })
+      const status = quotaCheck.code === 'CREDITS_EXHAUSTED' ? 402 : 429
+      return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status })
     }
 
     if (model) {
