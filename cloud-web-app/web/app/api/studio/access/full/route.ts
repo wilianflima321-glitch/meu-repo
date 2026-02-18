@@ -64,6 +64,19 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       )
     }
+    if (session.status !== 'active') {
+      return capabilityResponse({
+        status: 409,
+        error: 'SESSION_NOT_ACTIVE',
+        message: 'Studio session is not active. Full Access cannot be granted.',
+        capability: 'STUDIO_HOME_FULL_ACCESS',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          sessionStatus: session.status,
+        },
+      })
+    }
 
     return NextResponse.json({
       ok: true,
@@ -83,4 +96,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'STUDIO_FULL_ACCESS_GRANT_FAILED', message }, { status: 500 })
   }
 }
-

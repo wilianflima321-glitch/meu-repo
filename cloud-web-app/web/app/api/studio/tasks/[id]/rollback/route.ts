@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { rollbackStudioTask } from '@/lib/server/studio-home-store'
+import { getStudioSession, rollbackStudioTask } from '@/lib/server/studio-home-store'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +24,43 @@ export async function POST(
       )
     }
 
+    const current = await getStudioSession(auth.userId, sessionId)
+    if (!current) {
+      return NextResponse.json(
+        { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
+        { status: 404 }
+      )
+    }
+    if (current.status !== 'active') {
+      return NextResponse.json(
+        {
+          error: 'SESSION_NOT_ACTIVE',
+          message: 'Studio session is not active. Rollback is disabled.',
+          capability: 'STUDIO_HOME_TASK_ROLLBACK',
+          capabilityStatus: 'PARTIAL',
+        },
+        { status: 409 }
+      )
+    }
+    const currentTask = current.tasks.find((item) => item.id === ctx.params.id)
+    if (!currentTask) {
+      return NextResponse.json(
+        { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
+        { status: 404 }
+      )
+    }
+    if (!currentTask.applyToken) {
+      return NextResponse.json(
+        {
+          error: 'ROLLBACK_NOT_AVAILABLE',
+          message: 'Rollback is only available after a successful apply.',
+          capability: 'STUDIO_HOME_TASK_ROLLBACK',
+          capabilityStatus: 'PARTIAL',
+        },
+        { status: 409 }
+      )
+    }
+
     const session = await rollbackStudioTask(auth.userId, sessionId, ctx.params.id, body.applyToken)
     if (!session) {
       return NextResponse.json(
@@ -40,7 +77,7 @@ export async function POST(
       )
     }
 
-    if (task.status !== 'blocked') {
+    if (task.status !== 'blocked' || task.applyToken) {
       return NextResponse.json(
         {
           error: 'ROLLBACK_NOT_AVAILABLE',
@@ -66,4 +103,3 @@ export async function POST(
     return NextResponse.json({ error: 'STUDIO_TASK_ROLLBACK_FAILED', message }, { status: 500 })
   }
 }
-

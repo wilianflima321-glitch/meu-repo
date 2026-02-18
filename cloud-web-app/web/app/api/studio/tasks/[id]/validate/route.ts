@@ -28,6 +28,17 @@ export async function POST(
         { status: 404 }
       )
     }
+    if (session.status !== 'active') {
+      return NextResponse.json(
+        {
+          error: 'SESSION_NOT_ACTIVE',
+          message: 'Studio session is not active. Validation is disabled.',
+          capability: 'STUDIO_HOME_TASK_VALIDATE',
+          capabilityStatus: 'PARTIAL',
+        },
+        { status: 409 }
+      )
+    }
     const task = session.tasks.find((item) => item.id === ctx.params.id)
     if (!task) {
       return NextResponse.json(
@@ -63,4 +74,3 @@ export async function POST(
     return NextResponse.json({ error: 'STUDIO_TASK_VALIDATE_FAILED', message }, { status: 500 })
   }
 }
-

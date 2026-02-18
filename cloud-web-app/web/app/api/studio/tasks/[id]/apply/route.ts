@@ -28,6 +28,17 @@ export async function POST(
         { status: 404 }
       )
     }
+    if (session.status !== 'active') {
+      return NextResponse.json(
+        {
+          error: 'SESSION_NOT_ACTIVE',
+          message: 'Studio session is not active. Apply is disabled.',
+          capability: 'STUDIO_HOME_TASK_APPLY',
+          capabilityStatus: 'PARTIAL',
+        },
+        { status: 409 }
+      )
+    }
 
     const task = session.tasks.find((item) => item.id === ctx.params.id)
     if (!task) {

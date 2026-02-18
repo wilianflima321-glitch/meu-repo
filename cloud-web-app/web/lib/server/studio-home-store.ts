@@ -657,6 +657,7 @@ export async function validateStudioTask(userId: string, sessionId: string, task
     projectId: workflow.projectId || 'default',
     createdAt: workflow.createdAt.toISOString(),
   })
+  if (current.status !== 'active') return current
 
   const index = current.tasks.findIndex((task) => task.id === taskId)
   if (index === -1) return current
@@ -699,6 +700,7 @@ export async function applyStudioTask(userId: string, sessionId: string, taskId:
     projectId: workflow.projectId || 'default',
     createdAt: workflow.createdAt.toISOString(),
   })
+  if (current.status !== 'active') return current
   const index = current.tasks.findIndex((task) => task.id === taskId)
   if (index === -1) return current
 
@@ -741,6 +743,7 @@ export async function rollbackStudioTask(
     projectId: workflow.projectId || 'default',
     createdAt: workflow.createdAt.toISOString(),
   })
+  if (current.status !== 'active') return current
   const index = current.tasks.findIndex((task) => task.id === taskId)
   if (index === -1) return current
 

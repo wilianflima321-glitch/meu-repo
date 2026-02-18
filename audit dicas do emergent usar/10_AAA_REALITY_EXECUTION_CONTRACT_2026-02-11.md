@@ -2239,3 +2239,25 @@ Factual snapshot:
 Decision lock:
 1. Budget cap is an execution gate (not advisory only).
 2. Session continuity is resume-only for active sessions (stopped sessions are not auto-resumed).
+
+## 75) Delta 2026-02-18 XXIX - Studio route hardening against false-positive success
+
+Implemented:
+1. Hardened Studio task routes with explicit blocked/invalid state responses:
+- `tasks/run`: `TASK_RUN_BLOCKED` and `SESSION_NOT_ACTIVE` return `PARTIAL` contract
+- `tasks/validate|apply|rollback`: `SESSION_NOT_ACTIVE` explicit contract
+- `tasks/rollback`: pre-check now requires prior `applyToken` before attempting rollback
+2. Hardened planning route:
+- `tasks/plan` now returns `PLAN_ALREADY_EXISTS` unless explicit force behavior is requested
+3. Full Access route now returns explicit `SESSION_NOT_ACTIVE` capability response if session is stopped.
+4. Route contract scanner expanded:
+- `checks=30` (`qa:route-contracts`)
+
+Factual snapshot:
+1. `qa:enterprise-gate` PASS
+2. `qa:route-contracts` PASS (`checks=30`)
+3. `not-implemented-ui=6` remains explicit and unchanged
+
+Decision lock:
+1. Blocked orchestration states must not emit `ok: true`.
+2. Rollback remains strictly token-based after successful apply only.

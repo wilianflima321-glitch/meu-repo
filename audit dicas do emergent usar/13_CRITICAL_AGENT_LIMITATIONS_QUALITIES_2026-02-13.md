@@ -830,3 +830,13 @@ Implemented:
 Critical reading:
 1. This closes a real operational risk (silent budget drift during orchestration).
 2. Residual risk remains in long-term persistence model (workflow JSON context, not dedicated domain tables).
+
+## Delta 2026-02-18 XXVIII - Studio API truthfulness hardening
+Implemented:
+1. Studio task routes now return explicit blocked/session-state errors instead of silent success in edge states.
+2. Rollback path now requires prior apply token before execution attempt.
+3. Plan generation now blocks duplicate plan creation by default.
+
+Critical reading:
+1. This removes a false-success class in orchestration APIs.
+2. Residual risk remains in scale architecture, not in gate semantics for these routes.

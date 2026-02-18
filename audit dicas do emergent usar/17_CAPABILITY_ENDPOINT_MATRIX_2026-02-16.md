@@ -26,13 +26,13 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Studio session start | `app/api/studio/session/start/route.ts` | `IMPLEMENTED` | creates mission session with quality mode + budget cap |
 | Studio session get | `app/api/studio/session/[id]/route.ts` | `IMPLEMENTED` | returns aggregated session state |
 | Studio session stop | `app/api/studio/session/[id]/stop/route.ts` | `IMPLEMENTED` | explicit lifecycle stop contract |
-| Studio super plan | `app/api/studio/tasks/plan/route.ts` | `IMPLEMENTED` | generates baseline plan task set |
-| Studio task run | `app/api/studio/tasks/[id]/run/route.ts` | `IMPLEMENTED/PARTIAL` | orchestration-only checkpoint run (`executionMode=orchestration_only`) with plan-limit gate |
-| Studio task validate | `app/api/studio/tasks/[id]/validate/route.ts` | `IMPLEMENTED` | deterministic verdict (`passed` or `failed`) |
-| Studio task apply | `app/api/studio/tasks/[id]/apply/route.ts` | `IMPLEMENTED/PARTIAL` | blocked until validation pass (`422 VALIDATION_REQUIRED`) |
-| Studio task rollback | `app/api/studio/tasks/[id]/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | requires prior apply token/state |
+| Studio super plan | `app/api/studio/tasks/plan/route.ts` | `IMPLEMENTED/PARTIAL` | generates baseline plan task set; duplicate plan blocked by default (`409 PLAN_ALREADY_EXISTS`) unless `force=true` |
+| Studio task run | `app/api/studio/tasks/[id]/run/route.ts` | `IMPLEMENTED/PARTIAL` | orchestration-only checkpoint run (`executionMode=orchestration_only`) with plan-limit gate + explicit `SESSION_NOT_ACTIVE` (`409`) and `TASK_RUN_BLOCKED` (`422`) |
+| Studio task validate | `app/api/studio/tasks/[id]/validate/route.ts` | `IMPLEMENTED/PARTIAL` | deterministic verdict (`passed` or `failed`) with explicit inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
+| Studio task apply | `app/api/studio/tasks/[id]/apply/route.ts` | `IMPLEMENTED/PARTIAL` | blocked until validation pass (`422 VALIDATION_REQUIRED`) and inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
+| Studio task rollback | `app/api/studio/tasks/[id]/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | requires prior apply token/state and inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
 | Studio live cost | `app/api/studio/cost/live/route.ts` | `IMPLEMENTED` | per-session cost summary + budget exceeded flag |
-| Studio full access grant | `app/api/studio/access/full/route.ts` | `IMPLEMENTED/PARTIAL` | scoped 30-minute grant with trial/starter gate |
+| Studio full access grant | `app/api/studio/access/full/route.ts` | `IMPLEMENTED/PARTIAL` | scoped 30-minute grant with trial/starter gate + inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
 | Studio full access revoke | `app/api/studio/access/full/[id]/route.ts` | `IMPLEMENTED` | explicit revoke contract |
 | Render cancel | `app/api/render/jobs/[jobId]/cancel/route.ts` | `NOT_IMPLEMENTED` | explicit capability gate with metadata |
 | Billing checkout (non-stripe) | `app/api/billing/checkout/route.ts` | `NOT_IMPLEMENTED` branch | `PAYMENT_GATEWAY_NOT_IMPLEMENTED` with capability metadata |
@@ -69,6 +69,7 @@ Validation status:
 - `AUTH_NOT_CONFIGURED -> 503`
 - `QUEUE_BACKEND_UNAVAILABLE -> 503`
 4. `AI_CHANGE_APPLY` and `AI_CHANGE_ROLLBACK` blocked states now use capability envelope helper, including `x-aethel-capability*` headers.
+5. Studio route contracts include blocked/inactive-edge checks (`checks=30`).
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

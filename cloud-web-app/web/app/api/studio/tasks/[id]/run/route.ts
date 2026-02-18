@@ -48,6 +48,37 @@ export async function POST(
         { status: 404 }
       )
     }
+    if (session.status !== 'active') {
+      return NextResponse.json(
+        {
+          error: 'SESSION_NOT_ACTIVE',
+          message: 'Studio session is not active. Start a new session to continue execution.',
+          capability: 'STUDIO_HOME_TASK_RUN',
+          capabilityStatus: 'PARTIAL',
+        },
+        { status: 409 }
+      )
+    }
+
+    const task = session.tasks.find((item) => item.id === ctx.params.id)
+    if (!task) {
+      return NextResponse.json(
+        { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
+        { status: 404 }
+      )
+    }
+    if (task.status === 'blocked') {
+      return NextResponse.json(
+        {
+          error: 'TASK_RUN_BLOCKED',
+          message: task.result || 'Task run blocked by orchestration guard.',
+          capability: 'STUDIO_HOME_TASK_RUN',
+          capabilityStatus: 'PARTIAL',
+          metadata: { taskId: task.id, ownerRole: task.ownerRole },
+        },
+        { status: 422 }
+      )
+    }
 
     return NextResponse.json({
       ok: true,

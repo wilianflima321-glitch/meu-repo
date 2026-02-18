@@ -819,3 +819,16 @@ Triaged impact:
 1. Better cost control under long session usage.
 2. Better operator continuity without manual session re-open.
 3. No scope change; residual architecture constraints remain unchanged.
+
+## Delta 2026-02-18 XXVI - Studio API edge-state closure
+Delivered:
+1. Studio task routes now reject inactive sessions with explicit `SESSION_NOT_ACTIVE` capability response.
+2. Task run now exposes deterministic blocked response (`TASK_RUN_BLOCKED`) instead of ambiguous success.
+3. Plan route now rejects duplicate plan generation by default (`PLAN_ALREADY_EXISTS`) unless `force=true`.
+4. Rollback now requires a prior `applyToken` before execution attempt.
+5. Route contract scan expanded and validated (`checks=30`).
+
+Triaged impact:
+1. Closed a real anti-fake-success gap in orchestration edges.
+2. Kept Studio Home semantics honest: orchestration checkpoints remain `PARTIAL`, deterministic file mutation remains `/ide`-first.
+3. Improved operational clarity for user support and telemetry-based deprecation/cutoff tracking.

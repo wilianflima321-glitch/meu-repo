@@ -186,8 +186,18 @@ const checks = [
   },
   {
     file: 'app/api/studio/tasks/[id]/run/route.ts',
-    patterns: ["capability: 'STUDIO_HOME_TASK_RUN'", "capabilityStatus: 'PARTIAL'"],
+    patterns: [
+      "capability: 'STUDIO_HOME_TASK_RUN'",
+      "capabilityStatus: 'PARTIAL'",
+      "error: 'TASK_RUN_BLOCKED'",
+      "error: 'SESSION_NOT_ACTIVE'",
+    ],
     name: 'studio/tasks/[id]/run capability contract',
+  },
+  {
+    file: 'app/api/studio/tasks/plan/route.ts',
+    patterns: ["error: 'PLAN_ALREADY_EXISTS'", "capability: 'STUDIO_HOME_SUPER_PLAN'", "capabilityStatus: 'PARTIAL'"],
+    name: 'studio/tasks/plan existing-plan gate contract',
   },
   {
     file: 'app/api/studio/tasks/[id]/apply/route.ts',

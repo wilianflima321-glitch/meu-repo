@@ -57,12 +57,17 @@ Define the execution spec for Studio Home as the authenticated entrypoint (`/das
 9. `GET /api/studio/cost/live?sessionId=...`
 10. `POST /api/studio/access/full`
 11. `DELETE /api/studio/access/full/{id}?sessionId=...`
+12. Contract detail for edge states:
+- `tasks/plan` blocks duplicate plan by default (`409 PLAN_ALREADY_EXISTS`) unless `force=true`
+- `tasks/run|validate|apply|rollback|access/full` return explicit inactive-session gate (`409 SESSION_NOT_ACTIVE`)
+- `tasks/run` returns explicit blocked gate (`422 TASK_RUN_BLOCKED`) for orchestration failures
 
 ## 6) Runtime/data persistence strategy (phase-safe)
 1. Uses existing `copilotWorkflow.context` as storage container for studio session state.
 2. No schema migration in this wave.
 3. Marked as `IMPLEMENTED/PARTIAL` for multi-instance durability until dedicated tables are introduced.
 4. Studio task run is orchestration-only (`capabilityStatus=PARTIAL`), with deterministic reviewer gate before apply.
+5. Rollback is strictly token-gated and requires prior apply token (`applyToken`) to avoid false-positive rollback semantics.
 
 ## 7) Validation and gates
 Mandatory before completion:
@@ -85,7 +90,7 @@ Mandatory before completion:
 1. `lint` PASS (`0 warnings`).
 2. `typecheck` PASS.
 3. `build` PASS.
-4. `qa:route-contracts` PASS (`checks=29`).
+4. `qa:route-contracts` PASS (`checks=30`).
 5. `qa:no-fake-success` PASS.
 6. `qa:interface-gate` PASS with critical metrics at zero and `not-implemented-ui=6`.
 7. Residual non-blocking local warnings during build:
@@ -97,3 +102,4 @@ Mandatory before completion:
 - legacy-heavy surface moved to `/dashboard/legacy`.
 10. Active Studio session can be resumed on reload; stopped sessions are not auto-resumed.
 11. Task run enforces server-side budget cap before orchestration execution.
+12. Super Plan creation is single-shot per active session by default; regeneration requires explicit `force`.

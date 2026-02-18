@@ -302,7 +302,7 @@ export default function StudioHome() {
       const res = await fetch('/api/studio/tasks/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({ sessionId, force: false }),
       })
       const data = await parseJson(res)
       if (!res.ok) throw new Error(data.message || data.error || 'Failed to generate super plan.')
@@ -529,13 +529,24 @@ export default function StudioHome() {
               <div className="mb-3 flex items-center justify-between">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Task Board</div>
                 <button
-                  disabled={!session || busy || session.status !== 'active' || variableUsageBlocked}
+                  disabled={
+                    !session ||
+                    busy ||
+                    session.status !== 'active' ||
+                    variableUsageBlocked ||
+                    session.tasks.length > 0
+                  }
                   onClick={createSuperPlan}
                   className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                 >
                   Super Plan
                 </button>
               </div>
+              {session?.tasks.length ? (
+                <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-400">
+                  Super plan already created for this session. Complete or stop this session before opening a new plan.
+                </div>
+              ) : null}
               <div className="space-y-2">
                 {(session?.tasks || []).map((task) => (
                   <div key={task.id} className={`rounded border px-3 py-2 text-xs ${statusTone(task.status)}`}>
