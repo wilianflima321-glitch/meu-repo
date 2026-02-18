@@ -239,6 +239,7 @@ const checks = [
       'capabilityResponse({',
       "error: 'SESSION_NOT_ACTIVE'",
       "error: 'ROLLBACK_NOT_AVAILABLE'",
+      "error: 'ROLLBACK_TOKEN_MISMATCH'",
       "capability: 'STUDIO_HOME_TASK_ROLLBACK'",
       "capabilityStatus: 'PARTIAL'",
     ],

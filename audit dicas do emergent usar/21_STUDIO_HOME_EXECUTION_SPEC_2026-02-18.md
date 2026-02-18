@@ -64,6 +64,7 @@ Define the execution spec for Studio Home as the authenticated entrypoint (`/das
 - `tasks/run` returns explicit not-runnable gate (`422 TASK_RUN_NOT_ALLOWED`) for invalid state transitions
 - `tasks/validate` is reviewer-only and ready-state only (`REVIEW_GATE_REQUIRED`, `VALIDATION_NOT_READY`)
 - `tasks/apply` blocks replay (`409 APPLY_ALREADY_COMPLETED`) until rollback
+- `tasks/rollback` returns explicit token mismatch gate (`409 ROLLBACK_TOKEN_MISMATCH`)
 
 ## 6) Runtime/data persistence strategy (phase-safe)
 1. Uses existing `copilotWorkflow.context` as storage container for studio session state.

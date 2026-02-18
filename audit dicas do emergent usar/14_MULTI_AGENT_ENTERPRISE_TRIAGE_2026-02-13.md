@@ -863,3 +863,12 @@ Delivered:
 Triaged impact:
 1. Lower chance of future regressions reintroducing non-standard gate responses.
 2. Improves CI trust as a release-quality gate for Studio orchestration APIs.
+
+## Delta 2026-02-18 XXX - Rollback mismatch branch triage
+Delivered:
+1. Studio rollback route now emits explicit `ROLLBACK_TOKEN_MISMATCH` on wrong token.
+2. Route contract scanner asserts this rollback mismatch branch.
+
+Triaged impact:
+1. Better operator diagnostics during rollback incidents.
+2. Reduced ambiguity in orchestration logs and support playbooks.

@@ -871,3 +871,12 @@ Implemented:
 Critical reading:
 1. This reduces risk of silent contract drift between code and documentation.
 2. Residual limitations remain functional/architectural, not contract-observability related.
+
+## Delta 2026-02-18 XXXII - Rollback mismatch clarity
+Implemented:
+1. Added explicit `ROLLBACK_TOKEN_MISMATCH` gate in Studio rollback API when token differs from latest applied checkpoint.
+2. Added scanner assertion for rollback mismatch contract branch.
+
+Critical reading:
+1. This closes a support-critical ambiguity in rollback troubleshooting.
+2. No scope expansion: still orchestration-layer safety, not distributed durability promotion.

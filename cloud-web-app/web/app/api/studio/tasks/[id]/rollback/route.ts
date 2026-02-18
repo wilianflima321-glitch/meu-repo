@@ -59,6 +59,20 @@ export async function POST(
         milestone: 'P1',
       })
     }
+    if (body.applyToken && body.applyToken !== currentTask.applyToken) {
+      return capabilityResponse({
+        status: 409,
+        error: 'ROLLBACK_TOKEN_MISMATCH',
+        message: 'Provided rollback token does not match the latest applied checkpoint.',
+        capability: 'STUDIO_HOME_TASK_ROLLBACK',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          taskId: currentTask.id,
+          tokenProvided: true,
+        },
+      })
+    }
 
     const session = await rollbackStudioTask(auth.userId, sessionId, ctx.params.id, body.applyToken)
     if (!session) {
