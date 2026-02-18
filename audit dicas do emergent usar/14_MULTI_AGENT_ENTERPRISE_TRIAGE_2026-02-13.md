@@ -726,3 +726,16 @@ Delivered:
 Triaged impact:
 1. Removes duplicated route semantics on client side and enforces scoped `projectId` propagation through canonical endpoint.
 2. Keeps phased deprecation strategy intact: wrappers remain server-side with telemetry until cutoff criteria.
+
+## Delta 2026-02-18 XVIII - Wrapper cutoff readiness
+Delivered:
+1. Added shared metadata policy for file compatibility wrappers:
+- `cloud-web-app/web/lib/server/files-compat-policy.ts`
+2. Applied metadata policy to all `/api/files/*` compatibility wrappers (`read|write|list|create|delete|copy|move|rename`).
+3. Extended admin compatibility-route evaluation to treat `compatibility-wrapper` as cutoff-candidate class under same 14-day silence rule.
+4. Updated route-contract checks to enforce wrapper metadata (`checks=25`).
+5. Updated architecture scanner to report only real frontend `/api/workspace/*` usage (intentional telemetry strings excluded).
+
+Triaged impact:
+1. Cutoff execution is now deterministic for both deprecated and wrapper routes.
+2. Architecture metric noise removed; current frontend workspace-route usage is factual `0`.

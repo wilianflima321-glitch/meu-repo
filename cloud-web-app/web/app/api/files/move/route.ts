@@ -9,6 +9,7 @@ import {
   toVirtualWorkspacePath,
 } from '@/lib/server/workspace-scope'
 import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
+import { FILES_COMPAT_METADATA } from '@/lib/server/files-compat-policy'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
       route: '/api/files/move',
       replacement: '/api/files/fs?action=move',
       status: 'compatibility-wrapper',
+      ...FILES_COMPAT_METADATA,
     })
 
     return NextResponse.json(
@@ -74,6 +76,7 @@ export async function POST(request: NextRequest) {
         authority: 'canonical',
         compatibilityRoute: '/api/files/move',
         canonicalEndpoint: '/api/files/fs',
+        ...FILES_COMPAT_METADATA,
       },
       { headers: telemetryHeaders }
     )

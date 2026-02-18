@@ -66,6 +66,51 @@ const checks = [
     name: 'compatibility telemetry response-header contract',
   },
   {
+    file: 'lib/server/files-compat-policy.ts',
+    patterns: ['deprecatedSince:', 'removalCycleTarget:', 'deprecationPolicy:'],
+    name: 'files compatibility policy metadata contract',
+  },
+  {
+    file: 'app/api/files/read/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/read compatibility-wrapper metadata contract',
+  },
+  {
+    file: 'app/api/files/write/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/write compatibility-wrapper metadata contract',
+  },
+  {
+    file: 'app/api/files/list/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/list compatibility-wrapper metadata contract',
+  },
+  {
+    file: 'app/api/files/create/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/create compatibility-wrapper metadata contract',
+  },
+  {
+    file: 'app/api/files/delete/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/delete compatibility-wrapper metadata contract',
+  },
+  {
+    file: 'app/api/files/copy/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/copy compatibility-wrapper metadata contract',
+  },
+  {
+    file: 'app/api/files/move/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/move compatibility-wrapper metadata contract',
+  },
+  {
+    file: 'app/api/files/rename/route.ts',
+    patterns: ["status: 'compatibility-wrapper'", '...FILES_COMPAT_METADATA'],
+    name: 'files/rename compatibility-wrapper metadata contract',
+  },
+  {
     file: 'app/api/ai/chat/route.ts',
     patterns: ["error: 'NOT_IMPLEMENTED'", 'status: 501'],
     name: 'ai/chat provider-gate contract',

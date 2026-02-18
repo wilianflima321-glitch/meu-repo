@@ -93,7 +93,9 @@ async function main() {
   const workspaceDeprecatedUsage = await countByRegex(
     [...appFiles, ...componentFiles, ...libFiles, ...hookFiles],
     /\/api\/workspace\/(tree|files)\b/g,
-    { exclude: /[/\\]app[/\\]api[/\\]/ }
+    {
+      exclude: /[/\\]app[/\\]api[/\\]|[/\\]lib[/\\]server[/\\]compatibility-route-telemetry\.ts$/,
+    }
   )
 
   const redirectAliases = await countByRegex(

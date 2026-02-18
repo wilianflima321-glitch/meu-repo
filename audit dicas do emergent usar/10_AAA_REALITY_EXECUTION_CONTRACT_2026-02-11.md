@@ -2022,3 +2022,27 @@ Factual snapshot after cutover:
 Decision lock:
 1. Canonical frontend authority for scoped file operations remains `/api/files/fs`.
 2. Compatibility wrappers remain server-side only for phased deprecation telemetry.
+
+## 66) Delta 2026-02-18 XX - Wrapper deprecation metadata hardening + telemetry clarity
+
+Implemented:
+1. Added canonical metadata source for file compatibility wrappers:
+- `cloud-web-app/web/lib/server/files-compat-policy.ts`
+2. Applied deprecation-cycle metadata to all file compatibility wrapper routes (`read|write|list|create|delete|copy|move|rename`):
+- response payload now includes `deprecatedSince`, `removalCycleTarget`, `deprecationPolicy`
+- telemetry headers include the same metadata via `trackCompatibilityRouteHit`
+3. Expanded route contract QA coverage:
+- `cloud-web-app/web/scripts/check-route-contracts.mjs` now validates wrapper metadata contract (checks increased to `25`).
+4. Improved architecture triage signal:
+- scanner now excludes intentional telemetry registry strings from frontend workspace-route usage metric.
+
+Factual snapshot:
+1. `qa:route-contracts` PASS (`checks=25`)
+2. `docs:architecture-triage` now reports:
+- `fileCompatUsage=0`
+- `frontend usage of deprecated workspace routes=0`
+3. `lint`, `typecheck`, `qa:interface-gate`, `qa:no-fake-success` PASS.
+
+Decision lock:
+1. File wrapper routes remain operational only as compatibility bridge with explicit removal-cycle metadata.
+2. Admin compatibility dashboard can now use wrappers and deprecated routes under the same 14-day cutoff criterion.

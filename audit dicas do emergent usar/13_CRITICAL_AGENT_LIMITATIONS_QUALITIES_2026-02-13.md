@@ -728,3 +728,20 @@ Validation:
 Critical reading:
 1. This is a structural reliability gain: frontend now has a single file-operation authority.
 2. Remaining risk is server compatibility-surface backlog (`fileCompatWrappers=8`) until deprecation cycle completes.
+
+## Delta 2026-02-18 XX - Compatibility wrapper deprecation hardening
+Implemented:
+1. Added centralized metadata policy for file wrappers:
+- `lib/server/files-compat-policy.ts`
+2. Updated all `/api/files/*` compatibility wrappers to expose explicit deprecation-cycle metadata in payload and telemetry headers.
+3. Expanded route-contract checker to enforce wrapper metadata presence.
+4. Updated architecture scan to avoid counting telemetry registry constants as frontend workspace route usage.
+
+Validation:
+1. `qa:route-contracts` PASS (`checks=25`).
+2. `docs:architecture-triage` now shows `frontend workspace-route usage=0` and `fileCompatUsage=0`.
+3. `lint`, `typecheck`, `qa:interface-gate`, `qa:no-fake-success` PASS.
+
+Critical reading:
+1. Compatibility surface is now explicit and auditable for cutoff execution.
+2. Residual structural gap remains: wrappers count (`8`) still requires phaseout by telemetry window.

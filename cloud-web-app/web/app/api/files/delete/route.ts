@@ -9,6 +9,7 @@ import {
   toVirtualWorkspacePath,
 } from '@/lib/server/workspace-scope'
 import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
+import { FILES_COMPAT_METADATA } from '@/lib/server/files-compat-policy'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,6 +55,7 @@ async function handleDelete(request: NextRequest) {
       authority: 'canonical',
       compatibilityRoute: '/api/files/delete',
       canonicalEndpoint: '/api/files/fs',
+      ...FILES_COMPAT_METADATA,
     },
     {
       headers: trackCompatibilityRouteHit({
@@ -61,6 +63,7 @@ async function handleDelete(request: NextRequest) {
         route: '/api/files/delete',
         replacement: '/api/files/fs?action=delete',
         status: 'compatibility-wrapper',
+        ...FILES_COMPAT_METADATA,
       }),
     }
   )
