@@ -238,6 +238,7 @@ const ROUTE_EXPECTATIONS = [
   { file: 'app/api/studio/session/[id]/stop/route.ts', scope: 'studio-session-stop' },
   { file: 'app/api/studio/cost/live/route.ts', scope: 'studio-cost-live' },
   { file: 'app/api/studio/tasks/plan/route.ts', scope: 'studio-task-plan' },
+  { file: 'app/api/studio/tasks/run-wave/route.ts', scope: 'studio-task-run-wave' },
   { file: 'app/api/studio/tasks/[id]/run/route.ts', scope: 'studio-task-run' },
   { file: 'app/api/studio/tasks/[id]/validate/route.ts', scope: 'studio-task-validate' },
   { file: 'app/api/studio/tasks/[id]/apply/route.ts', scope: 'studio-task-apply' },

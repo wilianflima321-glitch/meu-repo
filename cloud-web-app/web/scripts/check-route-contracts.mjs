@@ -219,6 +219,18 @@ const checks = [
     name: 'studio/tasks/[id]/run capability contract',
   },
   {
+    file: 'app/api/studio/tasks/run-wave/route.ts',
+    patterns: [
+      'capabilityResponse({',
+      "error: 'SESSION_NOT_ACTIVE'",
+      "error: 'RUN_WAVE_REQUIRES_PLAN'",
+      "error: 'TASK_RUN_BLOCKED'",
+      "capability: 'STUDIO_HOME_TASK_RUN_WAVE'",
+      "capabilityStatus: 'PARTIAL'",
+    ],
+    name: 'studio/tasks/run-wave capability contract',
+  },
+  {
     file: 'app/api/studio/tasks/plan/route.ts',
     patterns: [
       'capabilityResponse({',

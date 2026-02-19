@@ -51,17 +51,19 @@ Define the execution spec for Studio Home as the authenticated entrypoint (`/das
 3. `POST /api/studio/session/{id}/stop`
 4. `POST /api/studio/tasks/plan`
 5. `POST /api/studio/tasks/{id}/run`
-6. `POST /api/studio/tasks/{id}/validate`
-7. `POST /api/studio/tasks/{id}/apply`
-8. `POST /api/studio/tasks/{id}/rollback`
-9. `GET /api/studio/cost/live?sessionId=...`
-10. `POST /api/studio/access/full`
-11. `DELETE /api/studio/access/full/{id}?sessionId=...`
-12. Contract detail for edge states:
+6. `POST /api/studio/tasks/run-wave`
+7. `POST /api/studio/tasks/{id}/validate`
+8. `POST /api/studio/tasks/{id}/apply`
+9. `POST /api/studio/tasks/{id}/rollback`
+10. `GET /api/studio/cost/live?sessionId=...`
+11. `POST /api/studio/access/full`
+12. `DELETE /api/studio/access/full/{id}?sessionId=...`
+13. Contract detail for edge states:
 - `tasks/plan` blocks duplicate plan by default (`409 PLAN_ALREADY_EXISTS`) unless `force=true`
-- `tasks/run|validate|apply|rollback|access/full` return explicit inactive-session gate (`409 SESSION_NOT_ACTIVE`)
+- `tasks/run|run-wave|validate|apply|rollback|access/full` return explicit inactive-session gate (`409 SESSION_NOT_ACTIVE`)
 - `tasks/run` returns explicit blocked gate (`422 TASK_RUN_BLOCKED`) for orchestration failures
 - `tasks/run` returns explicit not-runnable gate (`422 TASK_RUN_NOT_ALLOWED`) for invalid state transitions
+- `tasks/run-wave` returns explicit missing-plan gate (`422 RUN_WAVE_REQUIRES_PLAN`) before orchestration execution
 - `tasks/validate` is reviewer-only and ready-state only (`REVIEW_GATE_REQUIRED`, `VALIDATION_NOT_READY`)
 - `tasks/apply` blocks replay (`409 APPLY_ALREADY_COMPLETED`) until rollback
 - `tasks/rollback` returns explicit token mismatch gate (`409 ROLLBACK_TOKEN_MISMATCH`)
@@ -109,3 +111,5 @@ Mandatory before completion:
 12. Super Plan creation is single-shot per active session by default; regeneration requires explicit `force`.
 13. Studio task/plan gates are normalized through shared capability-response helper for consistent telemetry headers.
 14. Route-contract scan covers rollback gate and gate-state replay markers.
+15. Studio run-wave endpoint is active with explicit gate contracts and scanner enforcement (`qa:route-contracts`, `qa:critical-rate-limit`).
+16. Studio session payload now includes mission domain/checklist metadata and orchestration mode/last-wave visibility for quality governance.

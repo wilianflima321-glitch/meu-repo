@@ -1068,3 +1068,23 @@ Delivered:
 Triaged impact:
 1. Reduced security risk from scattered admin route implementations that previously relied only on auth.
 2. Increased baseline resilience against admin-panel request storms even before per-route tightening.
+
+## Delta 2026-02-19 L - Studio triage: queued parallel wave and domain quality envelope
+Delivered:
+1. Added `POST /api/studio/tasks/run-wave` to execute planner/coder/reviewer checkpoints in a single queued wave call.
+2. Added explicit gate outcomes for wave mode:
+- `SESSION_NOT_ACTIVE`
+- `RUN_WAVE_REQUIRES_PLAN`
+- `TASK_RUN_BLOCKED`
+3. Added Studio session metadata for domain and quality envelope:
+- `missionDomain`
+- `qualityChecklist`
+- orchestration state (`mode`, `lastWaveAt`, `applyPolicy`)
+4. Added cost-pressure-aware execution profile in Studio task runtime and reviewer critique notes in session feed.
+5. Extended CI scanner contracts:
+- `qa:critical-rate-limit` includes `studio-task-run-wave`
+- `qa:route-contracts` includes run-wave gate pattern checks
+
+Triaged impact:
+1. Improves perceived parallelism and operator control without violating deterministic apply/rollback policy.
+2. Improves quality transparency for games/films/apps tasks while keeping runtime cost bounded under pressure.

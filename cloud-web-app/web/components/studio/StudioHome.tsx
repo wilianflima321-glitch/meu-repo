@@ -48,10 +48,18 @@ type StudioSession = {
   id: string
   projectId: string
   mission: string
+  missionDomain?: 'games' | 'films' | 'apps' | 'general'
   qualityMode: 'standard' | 'delivery' | 'studio'
+  qualityChecklist?: string[]
   status: 'active' | 'stopped' | 'completed'
   tasks: StudioTask[]
   messages: StudioMessage[]
+  orchestration?: {
+    mode: 'serial' | 'parallel_wave'
+    conversationPolicy: 'peer_review'
+    applyPolicy: 'serial_after_validation'
+    lastWaveAt?: string
+  }
   fullAccessGrants: FullAccessGrant[]
   cost: {
     estimatedCredits: number
@@ -315,6 +323,22 @@ export default function StudioHome() {
     })
   }, [withAction, requireSessionId])
 
+  const runWave = useCallback(async () => {
+    await withAction(async () => {
+      const sessionId = requireSessionId()
+      const res = await fetch('/api/studio/tasks/run-wave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, maxSteps: 3 }),
+      })
+      const data = await parseJson(res)
+      if (!res.ok) throw new Error(data.message || data.error || 'Failed to run wave.')
+      setSession(data.session as StudioSession)
+      const executed = Array.isArray(data?.metadata?.executedTaskIds) ? data.metadata.executedTaskIds.length : 0
+      setToast(`Wave executed with ${executed} completed step(s).`)
+    })
+  }, [withAction, requireSessionId])
+
   const runTask = useCallback(
     async (taskId: string) => {
       await withAction(async () => {
@@ -527,24 +551,52 @@ export default function StudioHome() {
                   Start Studio Session
                 </button>
               </form>
+              {session?.missionDomain && (
+                <div className="mt-3 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-300">
+                  <div className="font-semibold uppercase tracking-wide text-slate-400">
+                    Domain: {session.missionDomain}
+                  </div>
+                  <div className="mt-1 text-slate-400">Quality checklist</div>
+                  <ul className="mt-1 list-disc space-y-1 pl-4 text-slate-300">
+                    {(session.qualityChecklist || []).map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
               <div className="mb-3 flex items-center justify-between">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Task Board</div>
-                <button
-                  disabled={
-                    !session ||
-                    busy ||
-                    session.status !== 'active' ||
-                    variableUsageBlocked ||
-                    session.tasks.length > 0
-                  }
-                  onClick={createSuperPlan}
-                  className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-                >
-                  Super Plan
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    disabled={
+                      !session ||
+                      busy ||
+                      session.status !== 'active' ||
+                      variableUsageBlocked ||
+                      session.tasks.length > 0
+                    }
+                    onClick={createSuperPlan}
+                    className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  >
+                    Super Plan
+                  </button>
+                  <button
+                    disabled={
+                      !session ||
+                      busy ||
+                      session.status !== 'active' ||
+                      variableUsageBlocked ||
+                      session.tasks.length === 0
+                    }
+                    onClick={runWave}
+                    className="rounded border border-indigo-500/40 bg-indigo-500/15 px-2 py-1 text-[11px] font-semibold text-indigo-100 hover:bg-indigo-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  >
+                    Run Wave
+                  </button>
+                </div>
               </div>
               {session?.tasks.length ? (
                 <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-400">
@@ -554,6 +606,14 @@ export default function StudioHome() {
               <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
                 Validation/apply/rollback are restricted to reviewer checkpoints.
               </div>
+              {session?.orchestration ? (
+                <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-400">
+                  Orchestration: {session.orchestration.mode} | policy: {session.orchestration.applyPolicy}
+                  {session.orchestration.lastWaveAt
+                    ? ` | last wave: ${new Date(session.orchestration.lastWaveAt).toLocaleTimeString()}`
+                    : ''}
+                </div>
+              ) : null}
               <div className="space-y-2">
                 {(session?.tasks || []).map((task) => (
                   <div key={task.id} className={`rounded border px-3 py-2 text-xs ${statusTone(task.status)}`}>
@@ -707,6 +767,18 @@ export default function StudioHome() {
                 <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
                   <div className="text-slate-500">Used credits</div>
                   <div className="font-semibold text-slate-100">{session?.cost.usedCredits ?? 0}</div>
+                </div>
+                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
+                  <div className="text-slate-500">Remaining credits</div>
+                  <div className="font-semibold text-slate-100">{session?.cost.remainingCredits ?? '-'}</div>
+                </div>
+                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
+                  <div className="text-slate-500">Cost pressure</div>
+                  <div className="font-semibold text-slate-100">
+                    {session && session.cost.budgetCap > 0 && session.cost.remainingCredits / session.cost.budgetCap <= 0.3
+                      ? 'high'
+                      : 'normal'}
+                  </div>
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">

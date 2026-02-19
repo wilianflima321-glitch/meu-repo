@@ -175,3 +175,12 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 4. Current persistence strategy reuses `copilotWorkflow.context`:
 - operationally viable in this wave
 - still `PARTIAL` for distributed durability and dedicated ledger-grade storage.
+
+## 9) Delta 2026-02-19 - Domain-quality bridge for games/films/apps in Studio orchestration
+1. Studio session now stores domain classification (`games|films|apps|general`) derived from mission context.
+2. Studio plan/task execution now carries a domain-specific quality checklist to keep outputs aligned with:
+- deterministic gameplay/runtime constraints (games)
+- temporal/render constraints (films)
+- multi-file/API/UX consistency constraints (apps)
+3. New `tasks/run-wave` endpoint executes planner/coder/reviewer in queued wave mode with explicit gates and no fake success.
+4. Cost-pressure-aware execution profile now reduces model/cost intensity when remaining budget drops, preserving quality policy while avoiding runaway consumption.

@@ -248,6 +248,8 @@ Label: `PARTIAL_INTERNAL`
 - expanded shared limiter + scanner coverage to backup lifecycle, test discovery/run, and mcp ingress/status endpoints
 - expanded shared limiter + scanner coverage to analytics/experiments, feature management, notifications/onboarding/quotas, templates, task helper endpoints, and admin dashboard/users read routes
 - added wrapper-level limiter baseline in `withAdminAuth` for permission+method scoped protection across admin routes
+- added Studio queued wave orchestration endpoint (`/api/studio/tasks/run-wave`) with explicit capability gates and scanner coverage
+- added domain-aware Studio metadata (`missionDomain`, `qualityChecklist`) and cost-pressure-aware execution profile in Studio task runtime
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

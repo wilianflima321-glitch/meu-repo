@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import type { Prisma } from '@prisma/client'
 
 export type StudioQualityMode = 'standard' | 'delivery' | 'studio'
+export type StudioMissionDomain = 'games' | 'films' | 'apps' | 'general'
 export type StudioSessionStatus = 'active' | 'stopped' | 'completed'
 export type StudioTaskOwnerRole = 'planner' | 'coder' | 'reviewer'
 export type StudioTaskStatus =
@@ -77,13 +78,21 @@ export type StudioSession = {
   userId: string
   projectId: string
   mission: string
+  missionDomain?: StudioMissionDomain
   qualityMode: StudioQualityMode
+  qualityChecklist?: string[]
   status: StudioSessionStatus
   tasks: StudioTask[]
   agentRuns: StudioAgentRun[]
   messages: StudioSessionMessage[]
   cost: StudioCostSummary
   fullAccessGrants: FullAccessGrant[]
+  orchestration?: {
+    mode: 'serial' | 'parallel_wave'
+    conversationPolicy: 'peer_review'
+    applyPolicy: 'serial_after_validation'
+    lastWaveAt?: string
+  }
   createdAt: string
   lastActivityAt: string
   endedAt?: string
@@ -117,6 +126,169 @@ function toNumberSafe(value: unknown, fallback: number): number {
 
 function clampBudget(value: number): number {
   return Math.min(100_000, Math.max(5, Math.round(value)))
+}
+
+function inferMissionDomain(mission: string): StudioMissionDomain {
+  const lower = mission.toLowerCase()
+  const gameTokens = ['game', 'jogo', 'level', 'npc', 'gameplay', 'shader', '3d', 'unity', 'unreal']
+  const filmTokens = ['film', 'filme', 'video', 'trailer', 'shot', 'scene', 'timeline', 'editing', 'render']
+  const appTokens = ['app', 'api', 'backend', 'frontend', 'dashboard', 'web', 'mobile', 'saas', 'crud']
+  if (gameTokens.some((token) => lower.includes(token))) return 'games'
+  if (filmTokens.some((token) => lower.includes(token))) return 'films'
+  if (appTokens.some((token) => lower.includes(token))) return 'apps'
+  return 'general'
+}
+
+function buildDomainChecklist(domain: StudioMissionDomain): string[] {
+  if (domain === 'games') {
+    return [
+      'Deterministic gameplay logic and state transitions',
+      'Asset import/runtime smoke pass with explicit fallback',
+      'Frame-time and memory constraints documented',
+    ]
+  }
+  if (domain === 'films') {
+    return [
+      'Temporal consistency rules for sequence outputs',
+      'Explicit render/export constraints and fallback',
+      'Audio/video sync validation before publish',
+    ]
+  }
+  if (domain === 'apps') {
+    return [
+      'Multi-file dependency impact reviewed before apply',
+      'Error/empty/loading and keyboard-focus states explicit',
+      'Security and API contract checks for changed surfaces',
+    ]
+  }
+  return [
+    'Scope and acceptance criteria explicitly defined',
+    'Validation gates before apply with rollback path',
+    'Cost/latency envelope kept inside budget cap',
+  ]
+}
+
+function normalizeMissionDomain(input: unknown, mission: string): StudioMissionDomain {
+  const value = String(input || '').trim().toLowerCase()
+  if (value === 'games' || value === 'films' || value === 'apps' || value === 'general') {
+    return value
+  }
+  return inferMissionDomain(mission)
+}
+
+function normalizeChecklist(input: unknown, domain: StudioMissionDomain): string[] {
+  if (Array.isArray(input)) {
+    const list = input
+      .filter((item) => typeof item === 'string')
+      .map((item) => String(item).trim())
+      .filter(Boolean)
+      .slice(0, 8)
+    if (list.length > 0) return list
+  }
+  return buildDomainChecklist(domain)
+}
+
+function getCostPressure(session: StudioSession): 'normal' | 'high' {
+  const budget = Math.max(1, session.cost.budgetCap)
+  const remainingRatio = session.cost.remainingCredits / budget
+  return remainingRatio <= 0.3 ? 'high' : 'normal'
+}
+
+function resolveRoleExecutionProfile(
+  session: StudioSession,
+  role: StudioTaskOwnerRole,
+  seed: number
+): {
+  model: string
+  tokensIn: number
+  tokensOut: number
+  costFactor: number
+} {
+  const costPressure = getCostPressure(session)
+  const economy = costPressure === 'high'
+  if (session.qualityMode === 'standard' || economy) {
+    const baseModel =
+      role === 'planner'
+        ? 'gpt-4o-mini'
+        : role === 'coder'
+          ? 'claude-3-5-haiku-20241022'
+          : 'gemini-1.5-flash'
+    return {
+      model: baseModel,
+      tokensIn: 360 + (seed % 160),
+      tokensOut: 120 + ((seed >>> 2) % 100),
+      costFactor: 0.26,
+    }
+  }
+  if (session.qualityMode === 'delivery') {
+    return {
+      model:
+        role === 'planner'
+          ? 'gpt-4o-mini'
+          : role === 'coder'
+            ? 'claude-3-5-haiku-20241022'
+            : 'gemini-1.5-flash',
+      tokensIn: 560 + (seed % 220),
+      tokensOut: 210 + ((seed >>> 3) % 140),
+      costFactor: 0.38,
+    }
+  }
+  return {
+    model:
+      role === 'planner'
+        ? 'gpt-4o'
+        : role === 'coder'
+          ? 'claude-3-5-sonnet-20241022'
+          : 'gemini-1.5-pro',
+    tokensIn: 760 + (seed % 260),
+    tokensOut: 280 + ((seed >>> 4) % 180),
+    costFactor: 0.52,
+  }
+}
+
+function buildPlannerCheckpointResult(session: StudioSession): string {
+  const checklist = (session.qualityChecklist || []).slice(0, 3).map((item) => `- ${item}`).join('\n')
+  return [
+    `Planner checkpoint for ${session.missionDomain || 'general'} completed.`,
+    'Acceptance criteria and risk notes prepared for coder/reviewer handoff.',
+    checklist || '- No domain checklist available.',
+    '(executionMode=orchestration-only)',
+  ].join('\n')
+}
+
+function buildCoderCheckpointResult(session: StudioSession): string {
+  const checklist = (session.qualityChecklist || []).slice(0, 2).map((item) => `- ${item}`).join('\n')
+  return [
+    `Coder checkpoint completed for ${session.missionDomain || 'general'}.`,
+    'Generated change proposal with impact boundaries and deterministic handoff.',
+    checklist || '- Quality checklist unavailable.',
+    '[requires-manual-apply]',
+  ].join('\n')
+}
+
+function buildReviewerCheckpointResult(session: StudioSession): string {
+  return [
+    `Reviewer checkpoint completed for ${session.missionDomain || 'general'}.`,
+    'Cross-agent critique captured (planner -> coder -> reviewer).',
+    'Validation readiness asserted for apply gate.',
+    '[review-ok]',
+  ].join('\n')
+}
+
+function canRunTaskWithDependencies(task: StudioTask, allTasks: StudioTask[]): boolean {
+  const runEligible =
+    task.status === 'queued' ||
+    task.status === 'blocked' ||
+    task.status === 'error' ||
+    (task.ownerRole === 'planner' && task.status === 'planning')
+  if (!runEligible) return false
+  if (task.ownerRole === 'coder') {
+    return allTasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
+  }
+  if (task.ownerRole === 'reviewer') {
+    return allTasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
+  }
+  return true
 }
 
 function stableSeed(value: string): number {
@@ -238,18 +410,27 @@ function computeCost(session: Omit<StudioSession, 'cost'> & { cost?: Partial<Stu
 
 function normalizeSession(raw: unknown, fallback: { id: string; userId: string; projectId: string; createdAt: string }): StudioSession {
   if (!raw || typeof raw !== 'object') {
+    const mission = 'No mission defined.'
+    const missionDomain = inferMissionDomain(mission)
     const base: StudioSession = {
       id: fallback.id,
       userId: fallback.userId,
       projectId: fallback.projectId,
-      mission: 'No mission defined.',
+      mission,
+      missionDomain,
       qualityMode: 'studio',
+      qualityChecklist: buildDomainChecklist(missionDomain),
       status: 'active',
       tasks: [],
       agentRuns: [],
       messages: [],
       cost: { estimatedCredits: 0, usedCredits: 0, budgetCap: 30, remainingCredits: 30 },
       fullAccessGrants: [],
+      orchestration: {
+        mode: 'serial',
+        conversationPolicy: 'peer_review',
+        applyPolicy: 'serial_after_validation',
+      },
       createdAt: fallback.createdAt,
       lastActivityAt: fallback.createdAt,
     }
@@ -269,14 +450,20 @@ function normalizeSession(raw: unknown, fallback: { id: string; userId: string; 
     ? input.fullAccessGrants.map(normalizeFullAccessGrant).filter((item): item is FullAccessGrant => item !== null)
     : []
 
+  const mission = toStringSafe(input.mission, 'No mission defined.')
+  const missionDomain = normalizeMissionDomain((input as { missionDomain?: unknown }).missionDomain, mission)
+  const qualityChecklist = normalizeChecklist((input as { qualityChecklist?: unknown }).qualityChecklist, missionDomain)
+  const orchestrationInput = (input as { orchestration?: unknown }).orchestration
   const base: StudioSession = {
     id: toStringSafe(input.id, fallback.id),
     userId: toStringSafe(input.userId, fallback.userId),
     projectId: toStringSafe(input.projectId, fallback.projectId),
-    mission: toStringSafe(input.mission, 'No mission defined.'),
+    mission,
+    missionDomain,
     qualityMode: ['standard', 'delivery', 'studio'].includes(String(input.qualityMode))
       ? (input.qualityMode as StudioQualityMode)
       : 'studio',
+    qualityChecklist,
     status: ['active', 'stopped', 'completed'].includes(String(input.status))
       ? (input.status as StudioSessionStatus)
       : 'active',
@@ -290,6 +477,21 @@ function normalizeSession(raw: unknown, fallback: { id: string; userId: string; 
       remainingCredits: Math.max(0, toNumberSafe(input.cost?.remainingCredits, 30)),
     },
     fullAccessGrants,
+    orchestration: {
+      mode:
+        orchestrationInput &&
+        typeof orchestrationInput === 'object' &&
+        (orchestrationInput as { mode?: unknown }).mode === 'parallel_wave'
+          ? 'parallel_wave'
+          : 'serial',
+      conversationPolicy: 'peer_review',
+      applyPolicy: 'serial_after_validation',
+      ...(orchestrationInput &&
+      typeof orchestrationInput === 'object' &&
+      typeof (orchestrationInput as { lastWaveAt?: unknown }).lastWaveAt === 'string'
+        ? { lastWaveAt: (orchestrationInput as { lastWaveAt?: string }).lastWaveAt }
+        : {}),
+    },
     createdAt: toStringSafe(input.createdAt, fallback.createdAt),
     lastActivityAt: toStringSafe(input.lastActivityAt, fallback.createdAt),
     endedAt: typeof input.endedAt === 'string' ? input.endedAt : undefined,
@@ -385,13 +587,22 @@ export async function createStudioSession(params: {
     projectId: params.projectId,
     createdAt: created.createdAt.toISOString(),
   })
+  const missionDomain = inferMissionDomain(params.mission)
+  const checklist = buildDomainChecklist(missionDomain)
 
   session = {
     ...session,
     mission: params.mission,
+    missionDomain,
     qualityMode: params.qualityMode,
+    qualityChecklist: checklist,
     status: 'active',
     projectId: params.projectId,
+    orchestration: {
+      mode: 'serial',
+      conversationPolicy: 'peer_review',
+      applyPolicy: 'serial_after_validation',
+    },
     cost: {
       estimatedCredits: 0,
       usedCredits: 0,
@@ -401,7 +612,7 @@ export async function createStudioSession(params: {
   }
   session = appendMessage(session, {
     role: 'system',
-    content: 'Studio session started. Ready to generate a super plan.',
+    content: `Studio session started (${missionDomain}). Ready to generate a super plan.`,
     status: 'queued',
   })
 
@@ -460,46 +671,67 @@ export async function planStudioTasks(userId: string, sessionId: string): Promis
   })
   if (current.status !== 'active') return current
 
+  const missionDomain = current.missionDomain || inferMissionDomain(current.mission)
+  const qualityChecklist = normalizeChecklist(current.qualityChecklist, missionDomain)
+  const qualityFactor = current.qualityMode === 'studio' ? 1.3 : current.qualityMode === 'delivery' ? 1.1 : 1
+  const domainFactor = missionDomain === 'general' ? 1 : 1.15
+  const estimateFactor = qualityFactor * domainFactor
+  const plannerCredits = Math.max(3, Math.round(4 * estimateFactor))
+  const coderCredits = Math.max(5, Math.round(7 * estimateFactor))
+  const reviewerCredits = Math.max(4, Math.round(5 * estimateFactor))
+
   const tasks: StudioTask[] = [
     {
       id: randomUUID(),
-      title: 'Mission decomposition and acceptance criteria',
+      title: `Mission decomposition (${missionDomain}) and acceptance criteria`,
       ownerRole: 'planner',
       status: 'queued',
-      estimateCredits: 4,
-      estimateSeconds: 25,
+      estimateCredits: plannerCredits,
+      estimateSeconds: Math.max(20, Math.round(24 * estimateFactor)),
       validationVerdict: 'pending',
     },
     {
       id: randomUUID(),
-      title: 'Core implementation patch set',
+      title: `Core implementation patch set (${missionDomain})`,
       ownerRole: 'coder',
       status: 'queued',
-      estimateCredits: 8,
-      estimateSeconds: 60,
+      estimateCredits: coderCredits,
+      estimateSeconds: Math.max(45, Math.round(55 * estimateFactor)),
       validationVerdict: 'pending',
     },
     {
       id: randomUUID(),
-      title: 'Deterministic review and release readiness',
+      title: `Deterministic review and release readiness (${missionDomain})`,
       ownerRole: 'reviewer',
       status: 'queued',
-      estimateCredits: 5,
-      estimateSeconds: 35,
+      estimateCredits: reviewerCredits,
+      estimateSeconds: Math.max(30, Math.round(35 * estimateFactor)),
       validationVerdict: 'pending',
     },
   ]
 
   let next: StudioSession = {
     ...current,
+    missionDomain,
+    qualityChecklist,
     tasks,
     agentRuns: [],
+    orchestration: {
+      ...(current.orchestration || {
+        mode: 'serial',
+        conversationPolicy: 'peer_review',
+        applyPolicy: 'serial_after_validation',
+      }),
+      mode: 'parallel_wave',
+    },
     lastActivityAt: nowIso(),
   }
   next = appendMessage(next, {
     role: 'assistant',
     agentRole: 'planner',
-    content: `Super plan created with ${tasks.length} tasks. Budget cap: ${next.cost.budgetCap} credits.`,
+    content: `Super plan created with ${tasks.length} tasks for ${missionDomain}. Budget cap: ${next.cost.budgetCap} credits.\nChecklist:\n${qualityChecklist
+      .map((item) => `- ${item}`)
+      .join('\n')}`,
     status: 'planning',
   })
 
@@ -522,12 +754,7 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
   if (index === -1) return current
 
   const target = current.tasks[index]
-  const runEligible =
-    target.status === 'queued' ||
-    target.status === 'blocked' ||
-    target.status === 'error' ||
-    (target.ownerRole === 'planner' && target.status === 'planning')
-  if (!runEligible) return current
+  if (!canRunTaskWithDependencies(target, current.tasks)) return current
 
   const plannerDone = current.tasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
   const coderDone = current.tasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
@@ -571,20 +798,16 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
   const startedAt = nowIso()
   const runId = randomUUID()
   const seed = stableSeed(`${target.id}:${target.title}:${target.ownerRole}`)
-  const roleModel =
-    target.ownerRole === 'planner'
-      ? 'gpt-4o-mini'
-      : target.ownerRole === 'coder'
-        ? 'claude-3-5-haiku-20241022'
-        : 'gemini-1.5-flash'
+  const executionProfile = resolveRoleExecutionProfile(current, target.ownerRole, seed)
+  const roleModel = executionProfile.model
 
   const baseStatus =
     target.ownerRole === 'planner' ? 'planning' : target.ownerRole === 'coder' ? 'building' : 'validating'
   const finishedAt = nowIso()
 
-  const tokensIn = 640 + (seed % 220)
-  const tokensOut = 240 + ((seed >>> 3) % 130)
-  const runCost = Math.max(0.1, Math.round((target.estimateCredits * 0.4) * 100) / 100)
+  const tokensIn = executionProfile.tokensIn
+  const tokensOut = executionProfile.tokensOut
+  const runCost = Math.max(0.1, Math.round((target.estimateCredits * executionProfile.costFactor) * 100) / 100)
 
   if (!hasEnoughBudget(current, runCost)) {
     const tasks = [...current.tasks]
@@ -605,10 +828,10 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
 
   const result =
     target.ownerRole === 'planner'
-      ? 'Plan checkpoint completed with acceptance criteria and risk notes. (executionMode=orchestration-only)'
+      ? buildPlannerCheckpointResult(current)
       : target.ownerRole === 'coder'
-        ? 'Code proposal drafted for manual IDE apply review. [requires-manual-apply]'
-        : 'Review checkpoint completed for proposal. [review-ok]'
+        ? buildCoderCheckpointResult(current)
+        : buildReviewerCheckpointResult(current)
 
   const updatedTask: StudioTask = {
     ...target,
@@ -642,6 +865,14 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
         message: updatedTask.result || 'Task run complete.',
       },
     ],
+    orchestration: {
+      ...(current.orchestration || {
+        mode: 'serial',
+        conversationPolicy: 'peer_review',
+        applyPolicy: 'serial_after_validation',
+      }),
+      lastWaveAt: finishedAt,
+    },
     lastActivityAt: nowIso(),
   }
 
@@ -652,7 +883,71 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
     status: baseStatus as StudioTaskStatus,
   })
 
+  if (target.ownerRole === 'coder') {
+    const plannerHints = (current.qualityChecklist || []).slice(0, 2).map((item) => `- ${item}`).join('\n')
+    next = appendMessage(next, {
+      role: 'system',
+      agentRole: 'planner',
+      content: `Planner critique for coder handoff:\n${plannerHints || '- Keep deterministic scope and rollback readiness.'}`,
+      status: 'validating',
+    })
+  }
+
+  if (target.ownerRole === 'reviewer') {
+    next = appendMessage(next, {
+      role: 'assistant',
+      agentRole: 'reviewer',
+      content:
+        'Reviewer summary: planner scope preserved, coder proposal bounded, apply remains serial and gated by explicit validation.',
+      status: 'done',
+    })
+  }
+
   return persistSession(workflow, next)
+}
+
+export async function runStudioWave(
+  userId: string,
+  sessionId: string,
+  options?: { maxSteps?: number }
+): Promise<{
+  session: StudioSession | null
+  executedTaskIds: string[]
+  blockedTaskIds: string[]
+}> {
+  let session = await getStudioSession(userId, sessionId)
+  if (!session) {
+    return { session: null, executedTaskIds: [], blockedTaskIds: [] }
+  }
+  if (session.status !== 'active') {
+    return { session, executedTaskIds: [], blockedTaskIds: [] }
+  }
+
+  const maxSteps = Math.max(1, Math.min(3, Math.floor(options?.maxSteps ?? 3)))
+  const roleOrder: StudioTaskOwnerRole[] = ['planner', 'coder', 'reviewer']
+  const executedTaskIds: string[] = []
+  const blockedTaskIds: string[] = []
+
+  for (const role of roleOrder) {
+    if (executedTaskIds.length + blockedTaskIds.length >= maxSteps) break
+    const candidate = session.tasks.find(
+      (task) => task.ownerRole === role && canRunTaskWithDependencies(task, session.tasks)
+    )
+    if (!candidate) continue
+
+    const next = await runStudioTask(userId, sessionId, candidate.id)
+    if (!next) break
+    const updatedTask = next.tasks.find((item) => item.id === candidate.id)
+    if (updatedTask?.status === 'done') {
+      executedTaskIds.push(candidate.id)
+    } else if (updatedTask?.status === 'blocked' || updatedTask?.status === 'error') {
+      blockedTaskIds.push(candidate.id)
+    }
+    session = next
+    if (session.status !== 'active') break
+  }
+
+  return { session, executedTaskIds, blockedTaskIds }
 }
 
 export async function validateStudioTask(userId: string, sessionId: string, taskId: string): Promise<StudioSession | null> {

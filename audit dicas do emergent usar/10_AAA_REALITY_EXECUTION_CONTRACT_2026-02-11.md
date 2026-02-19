@@ -2860,3 +2860,35 @@ Validation status:
 Decision lock:
 1. Any endpoint protected by `withAdminAuth` now inherits mandatory abuse-control baseline even when route-level limiter is absent.
 2. Route-level limiter may remain for stricter endpoint-specific policies; wrapper limiter is baseline floor, not replacement.
+
+## 100) Delta 2026-02-19 LIV - Studio wave orchestration and domain-quality hardening
+
+Implemented:
+1. Added queued parallel-wave orchestration endpoint for Studio Home:
+- `app/api/studio/tasks/run-wave/route.ts`
+2. Added deterministic orchestration helper in studio store:
+- `lib/server/studio-home-store.ts` (`runStudioWave`)
+3. Added domain-aware mission normalization and checklist persistence in Studio session state:
+- `missionDomain` (`games|films|apps|general`)
+- `qualityChecklist`
+- orchestration metadata (`mode`, `lastWaveAt`, apply policy)
+4. Added cost-pressure-aware execution profile in Studio task runtime:
+- model/cost profile adapts by quality mode and remaining budget ratio
+- cross-role critique messages are persisted in session log
+5. Upgraded Studio Home UX:
+- `Run Wave` control in task board
+- domain/checklist visibility in mission panel
+- orchestration mode and last-wave visibility
+- remaining-credit and cost-pressure telemetry cards
+6. Extended CI abuse-control scanner matrix:
+- `check-critical-rate-limits.mjs` now enforces `studio-task-run-wave`
+7. Extended route-contract scanner:
+- `check-route-contracts.mjs` now enforces explicit gate patterns for `tasks/run-wave`
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Studio parallelism remains queued and deterministic (`apply` stays serial and validation-gated).
+2. Domain-specific quality guidance is now explicit in orchestration metadata and must remain capability-truthful.

@@ -28,6 +28,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Studio session stop | `app/api/studio/session/[id]/stop/route.ts` | `IMPLEMENTED` | explicit lifecycle stop contract |
 | Studio super plan | `app/api/studio/tasks/plan/route.ts` | `IMPLEMENTED/PARTIAL` | generates baseline plan task set; duplicate plan blocked by default (`409 PLAN_ALREADY_EXISTS`) unless `force=true` |
 | Studio task run | `app/api/studio/tasks/[id]/run/route.ts` | `IMPLEMENTED/PARTIAL` | orchestration-only checkpoint run (`executionMode=orchestration_only`) with plan-limit gate + explicit `SESSION_NOT_ACTIVE` (`409`), `TASK_RUN_BLOCKED` (`422`), and `TASK_RUN_NOT_ALLOWED` (`422`) |
+| Studio task run-wave | `app/api/studio/tasks/run-wave/route.ts` | `IMPLEMENTED/PARTIAL` | queued planner/coder/reviewer wave execution with explicit `SESSION_NOT_ACTIVE` (`409`), `RUN_WAVE_REQUIRES_PLAN` (`422`), and `TASK_RUN_BLOCKED` (`422`) gates |
 | Studio task validate | `app/api/studio/tasks/[id]/validate/route.ts` | `IMPLEMENTED/PARTIAL` | deterministic verdict (`passed` or `failed`) with explicit reviewer-only + readiness gates (`REVIEW_GATE_REQUIRED`, `VALIDATION_NOT_READY`) and inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
 | Studio task apply | `app/api/studio/tasks/[id]/apply/route.ts` | `IMPLEMENTED/PARTIAL` | blocked until validation pass (`422 VALIDATION_REQUIRED`), inactive-session gate (`409 SESSION_NOT_ACTIVE`), and replay guard (`409 APPLY_ALREADY_COMPLETED`) |
 | Studio task rollback | `app/api/studio/tasks/[id]/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | requires prior apply token/state, inactive-session gate (`409 SESSION_NOT_ACTIVE`), and explicit token mismatch gate (`409 ROLLBACK_TOKEN_MISMATCH`) |
@@ -87,6 +88,7 @@ Validation status:
 18. Scanner coverage now also includes backup lifecycle routes, test discovery/run routes, and MCP ingress/status routes.
 19. Scanner coverage now also includes analytics/experiments, feature-flag management, notifications/onboarding/quotas, templates, task helper routes, and route-level admin reads (`admin/dashboard`, `admin/users`).
 20. `withAdminAuth` wrapper now enforces baseline limiter policy for admin routes (permission+method scoped), reducing unthrottled residuals in wrapper-protected surfaces.
+21. Studio orchestration scanner coverage now includes run-wave control-plane endpoint (`studio-task-run-wave`) and route-contract gate checks for `tasks/run-wave`.
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

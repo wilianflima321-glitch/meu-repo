@@ -1080,3 +1080,15 @@ Implemented:
 Critical reading:
 1. This reduces the residual unthrottled admin route surface without touching each route file individually.
 2. Residual limitation remains unchanged: routes not using `withAdminAuth` still require explicit route-level coverage and scanner enforcement.
+
+## Delta 2026-02-19 LII - Studio multi-agent wave hardening (quality + cost)
+Implemented:
+1. Added explicit queued wave execution path for Studio sessions (`tasks/run-wave`) with gate-only behavior when session is inactive, plan is missing, or orchestration is blocked.
+2. Added domain-aware Studio session metadata (`missionDomain`, `qualityChecklist`) and persisted orchestration metadata for operator visibility.
+3. Added cost-pressure-aware execution profile to Studio task runtime so model/cost behavior degrades safely under low remaining budget.
+4. Added cross-role critique notes into session messages to preserve planner/coder/reviewer accountability in long sessions.
+5. Extended route-contract and critical rate-limit scanners to include the new wave execution surface.
+
+Critical reading:
+1. This improves quality governance without inflating claims to autonomous L4/L5; orchestration stays deterministic and gated.
+2. Residual limitation remains: wave execution is orchestration-level simulation and still requires full gate evidence run before production claim promotion.
