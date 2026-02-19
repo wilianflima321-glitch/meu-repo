@@ -128,6 +128,7 @@ const ROUTE_EXPECTATIONS = [
   { file: 'app/api/studio/tasks/[id]/rollback/route.ts', scope: 'studio-task-rollback' },
   { file: 'app/api/studio/access/full/route.ts', scope: 'studio-full-access-grant' },
   { file: 'app/api/studio/access/full/[id]/route.ts', scope: 'studio-full-access-revoke' },
+  { file: 'app/api/terminal/execute/route.ts', scope: 'terminal-execute-post' },
   { file: 'app/api/render/jobs/[jobId]/cancel/route.ts', scope: 'render-job-cancel-post' },
 ]
 

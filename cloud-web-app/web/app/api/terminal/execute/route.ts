@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 const execAsync = promisify(exec);
 
@@ -303,6 +304,15 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
   
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-execute-post',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal execution requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await req.json();
     const { 
       command, 

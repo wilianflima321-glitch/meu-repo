@@ -981,3 +981,12 @@ Delivered:
 Triaged impact:
 1. Reduced inconsistency risk between in-memory fallback counters and canonical server limiter policy.
 2. Improved observability and enforceability for high-cost AI media traffic control.
+
+## Delta 2026-02-19 XLII - Security triage: terminal execute ingress hardening
+Delivered:
+1. Added shared abuse-control throttle to `app/api/terminal/execute/route.ts` (`terminal-execute-post`).
+2. Extended `qa:critical-rate-limit` scanner matrix to enforce terminal execution throttle presence.
+
+Triaged impact:
+1. Reduced risk of command-execution burst abuse from authenticated clients.
+2. Increased safety by layering route-level limiter above command/session local throttle logic.

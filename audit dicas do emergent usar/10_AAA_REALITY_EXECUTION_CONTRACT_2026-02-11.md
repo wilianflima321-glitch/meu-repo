@@ -2650,3 +2650,18 @@ Validation status:
 Decision lock:
 1. Critical API surfaces must not run mixed limiter strategies in the same handler.
 2. Shared server limiter remains mandatory baseline for media generation routes.
+
+## 92) Delta 2026-02-19 XLVI - Terminal execution ingress hardening
+
+Implemented:
+1. Added shared awaited limiter protection to terminal execution endpoint:
+- `app/api/terminal/execute/route.ts` (`terminal-execute-post`)
+2. Expanded `qa:critical-rate-limit` scanner matrix to enforce the new terminal scope.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Shell execution ingress is classified as high-impact and must always remain explicitly throttled.
+2. Existing per-minute in-route command throttle remains additive, not replacement for shared route limiter.

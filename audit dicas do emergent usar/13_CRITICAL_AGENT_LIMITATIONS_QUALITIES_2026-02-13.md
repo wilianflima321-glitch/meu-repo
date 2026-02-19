@@ -993,3 +993,12 @@ Implemented:
 Critical reading:
 1. This removes split-brain throttling behavior that could diverge across instances and hide real production traffic patterns.
 2. Residual limitation persists: distributed limiter strength still depends on Upstash-backed runtime configuration.
+
+## Delta 2026-02-19 XLIV - Terminal execution ingress throttle uplift
+Implemented:
+1. Added shared route-level throttle (`enforceRateLimit`) to `terminal/execute` in front of command execution flow.
+2. Added scanner enforcement for `terminal-execute-post` in critical CI matrix.
+
+Critical reading:
+1. This reduces abuse risk on one of the highest-impact endpoints (real shell command execution).
+2. Residual limitation remains: command-level safeguards still rely on local policy maps and require periodic review against new bypass patterns.
