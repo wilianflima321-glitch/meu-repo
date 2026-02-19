@@ -3190,3 +3190,21 @@ Validation status:
 Decision lock:
 1. Type-surface extraction is preferred for monolith reduction when behavior must remain unchanged.
 2. Runtime modules must keep compatibility by explicit type re-export when extracted.
+
+## 116) Delta 2026-02-19 LXX - Sequencer easing module extraction
+
+Implemented:
+1. Extracted sequencer easing curves into dedicated module:
+- new `lib/sequencer-easings.ts` (easing type + easing map)
+- `lib/sequencer-cinematics.ts` now imports/re-exports easing contracts and keeps timeline runtime logic focused
+2. Preserved compatibility for consumers by re-exporting `EasingFunction` and `Easings` from sequencer runtime module.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 51` (was `<=52`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Shared curve/math tables should remain in dedicated modules to prevent runtime files from regressing into monoliths.
+2. Oversized threshold tightening remains coupled to actual code-structure reductions only.

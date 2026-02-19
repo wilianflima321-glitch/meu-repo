@@ -1243,3 +1243,13 @@ Implemented:
 Critical reading:
 1. This is low-risk decomposition focused on API/type boundaries while preserving behavior.
 2. Residual limitation remains: oversized debt persists (`52` files) and still requires a multi-wave reduction plan.
+
+## Delta 2026-02-19 LXVIII - Sequencer easing decomposition
+Implemented:
+1. Extracted shared easing curves/type from `lib/sequencer-cinematics.ts` into `lib/sequencer-easings.ts`.
+2. Sequencer runtime now imports/re-exports easing contracts, preserving module compatibility.
+3. Reduced architecture oversized debt baseline (`52 -> 51`) and tightened threshold to `<=51`.
+
+Critical reading:
+1. This removes static math-table burden from runtime timeline module with low behavioral risk.
+2. Residual limitation remains: oversized debt still exists (`51` files) and requires sustained decomposition waves.

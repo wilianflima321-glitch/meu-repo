@@ -1239,3 +1239,13 @@ Delivered:
 Triaged impact:
 1. Reduces runtime monolith complexity without behavior change.
 2. Strengthens maintainability of extension subsystem contracts.
+
+## Delta 2026-02-19 LXVI - Oversized triage reduction via sequencer easing extraction
+Delivered:
+1. Split easing table/type from `lib/sequencer-cinematics.ts` into `lib/sequencer-easings.ts`.
+2. Preserved compatibility by re-exporting easing contracts from sequencer runtime module.
+3. Reduced oversized-file metric from `52` to `51` and tightened threshold to `<=51`.
+
+Triaged impact:
+1. Improves separation between timeline runtime and shared interpolation curves.
+2. Keeps architecture debt reduction measurable without expanding product scope.
