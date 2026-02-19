@@ -2770,3 +2770,25 @@ Validation status:
 Decision lock:
 1. Copilot, debug, search, and collaboration control surfaces are mandatory abuse-control baseline.
 2. High-frequency polling and request loops (`dap/lsp/search/collab`) must remain explicitly throttled in CI.
+
+## 96) Delta 2026-02-19 L - Auth recovery and messaging abuse-control expansion
+
+Implemented:
+1. Migrated `auth/forgot-password` from direct Upstash-only limiter to shared awaited limiter contract with fallback safety:
+- `app/api/auth/forgot-password/route.ts`
+2. Added shared awaited limiter protection on additional auth recovery/verification endpoints:
+- `app/api/auth/reset-password/route.ts`
+- `app/api/auth/verify-email/route.ts` (`POST`, `GET`)
+3. Added shared awaited limiter protection on messaging and credit-transfer surfaces:
+- `app/api/contact/route.ts`
+- `app/api/email/route.ts`
+- `app/api/credits/transfer/route.ts`
+4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Auth recovery and verification routes are mandatory abuse-control baseline and must not depend on provider-specific limiter wiring.
+2. Messaging and credit-transfer endpoints are high-risk mutation surfaces and must remain explicitly throttled in CI.

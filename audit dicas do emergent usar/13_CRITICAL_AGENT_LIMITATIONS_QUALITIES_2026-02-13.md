@@ -1036,3 +1036,14 @@ Implemented:
 Critical reading:
 1. This closes another high-frequency abuse vector in editor-native operational APIs used continuously during active sessions.
 2. Residual limitation remains unchanged: consolidated gate evidence and distributed limiter backing are still required for production-grade confidence.
+
+## Delta 2026-02-19 XLVIII - Auth recovery and messaging limiter coverage uplift
+Implemented:
+1. Migrated forgot-password endpoint to shared awaited limiter contract and removed dependency on direct Upstash-only limiter wiring.
+2. Added shared limiter coverage to auth recovery/verification routes (`reset-password`, `verify-email POST/GET`).
+3. Added shared limiter coverage to messaging/credit routes (`contact`, `email`, `credits/transfer`).
+4. Expanded critical rate-limit scanner matrix to enforce all new scopes in CI.
+
+Critical reading:
+1. This closes abuse vectors on account-recovery and transactional messaging routes that are often targeted under brute-force or spam patterns.
+2. Residual limitation remains unchanged: final confidence still requires consolidated gate execution evidence and distributed limiter backing in deployed runtime.

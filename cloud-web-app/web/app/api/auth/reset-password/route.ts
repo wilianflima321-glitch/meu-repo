@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,15 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-reset-password-post',
+      key: getRequestIp(req),
+      max: 20,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many password reset attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { token, email, password } = await req.json();
 
     if (!token || !email || !password) {

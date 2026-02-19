@@ -83,6 +83,7 @@ Validation status:
 14. Scanner coverage now also includes terminal control/sandbox, chat thread/orchestrator, git operations, and job queue control endpoints.
 15. Scanner coverage now also includes marketplace browse/mutation surfaces, favorites/cart routes, and creator analytics endpoints.
 16. Scanner coverage now also includes copilot workflow/control routes, dap/lsp routes, workspace search/replace routes, and collaboration room control routes.
+17. Scanner coverage now also includes auth recovery/verification routes, contact/email messaging routes, and credits transfer mutation route.
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

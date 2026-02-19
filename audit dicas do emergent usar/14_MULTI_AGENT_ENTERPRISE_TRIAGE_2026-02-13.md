@@ -1024,3 +1024,14 @@ Delivered:
 Triaged impact:
 1. Reduced burst-abuse and runaway polling risk on editor-adjacent operational APIs.
 2. Increased release confidence by moving these high-frequency paths under mandatory CI throttle checks.
+
+## Delta 2026-02-19 XLVI - Security triage: auth recovery and messaging control expansion
+Delivered:
+1. Migrated `auth/forgot-password` to shared awaited limiter guardrail with fallback-safe behavior.
+2. Added shared limiter guardrails for `auth/reset-password` and `auth/verify-email` (`POST`, `GET`).
+3. Added shared limiter guardrails for `contact`, `email`, and `credits/transfer` endpoints.
+4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
+
+Triaged impact:
+1. Reduced brute-force and spam risk on auth-recovery and messaging entry points.
+2. Improved operational safety for credit-transfer mutations via explicit CI-enforced throttle contracts.
