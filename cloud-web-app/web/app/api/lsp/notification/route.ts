@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getOrCreateLspSession } from '@/lib/server/lsp-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface LSPNotification {
   language: string;
@@ -13,7 +14,15 @@ interface LSPNotification {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
-		await requireFeatureForUser(user.userId, 'lsp');
+    await requireFeatureForUser(user.userId, 'lsp');
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'lsp-notification-post',
+      key: user.userId,
+      max: 1200,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many LSP notification calls. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body: LSPNotification = await request.json();
     const { language, method, params } = body;
@@ -38,8 +47,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('LSP notification failed:', error);
-		const mapped = apiErrorToResponse(error);
-		if (mapped) return mapped;
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     const code = (error as any)?.code;
     if (code === 'UNSUPPORTED_LSP_LANGUAGE') {
       return NextResponse.json(

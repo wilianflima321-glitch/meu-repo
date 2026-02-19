@@ -2739,3 +2739,34 @@ Validation status:
 Decision lock:
 1. Marketplace browse/mutate/creator endpoints are now mandatory abuse-control baseline.
 2. High-traffic read routes must remain throttled alongside mutation routes to avoid burst-cost regressions.
+
+## 95) Delta 2026-02-19 XLIX - Copilot/Debug/Search/Collaboration abuse-control expansion
+
+Implemented:
+1. Added shared awaited limiter protection on copilot workflow/control surfaces:
+- `app/api/copilot/action/route.ts`
+- `app/api/copilot/context/route.ts` (`GET`, `POST`)
+- `app/api/copilot/workflows/route.ts` (`GET`, `POST`)
+- `app/api/copilot/workflows/[id]/route.ts` (`GET`, `PATCH`)
+2. Added shared awaited limiter protection on debugger and language-service endpoints:
+- `app/api/dap/events/route.ts`
+- `app/api/dap/processes/route.ts`
+- `app/api/dap/request/route.ts`
+- `app/api/dap/session/start/route.ts`
+- `app/api/dap/session/stop/route.ts`
+- `app/api/lsp/request/route.ts`
+- `app/api/lsp/notification/route.ts`
+3. Added shared awaited limiter protection on workspace search and collaboration room control surfaces:
+- `app/api/search/route.ts` (`POST`, `GET`)
+- `app/api/search/replace/route.ts`
+- `app/api/collaboration/rooms/route.ts` (`GET`, `POST`)
+- `app/api/collaboration/rooms/[id]/route.ts` (`GET`, `POST`, `DELETE`)
+4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Copilot, debug, search, and collaboration control surfaces are mandatory abuse-control baseline.
+2. High-frequency polling and request loops (`dap/lsp/search/collab`) must remain explicitly throttled in CI.

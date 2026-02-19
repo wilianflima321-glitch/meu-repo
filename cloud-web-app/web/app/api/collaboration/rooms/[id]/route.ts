@@ -10,6 +10,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'collaboration-room-detail-get',
+      key: user.userId,
+      max: 900,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many collaboration room detail requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
     const { id } = params;
@@ -91,6 +100,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'collaboration-room-detail-post',
+      key: user.userId,
+      max: 420,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many collaboration room action requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
     const { id } = params;
@@ -173,6 +190,14 @@ export async function DELETE(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'collaboration-room-detail-delete',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many collaboration room leave requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
     const { id } = params;

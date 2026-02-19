@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { dapRequest } from '@/lib/server/dap-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface DAPRequest {
   sessionId: string;
@@ -14,7 +15,15 @@ interface DAPRequest {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
-		await requireFeatureForUser(user.userId, 'dap');
+    await requireFeatureForUser(user.userId, 'dap');
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'dap-request-post',
+      key: user.userId,
+      max: 420,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many debug command requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const payload: DAPRequest = await request.json();
     const { sessionId, command, arguments: args, seq } = payload;

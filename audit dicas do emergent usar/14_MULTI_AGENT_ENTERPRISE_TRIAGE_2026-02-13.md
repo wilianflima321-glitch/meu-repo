@@ -1013,3 +1013,14 @@ Delivered:
 Triaged impact:
 1. Reduced abuse and cost-spike risk in public-browse and preference-heavy marketplace workflows.
 2. Improved operational safety for creator dashboards by enforcing throttle contracts in CI.
+
+## Delta 2026-02-19 XLV - Security triage: copilot/debug/search/collaboration control expansion
+Delivered:
+1. Added shared limiter guardrails for copilot routes (`action`, `context`, `workflows`, `workflows/[id]`).
+2. Added shared limiter guardrails for debug and language-server routes (`dap events/processes/request/session start/stop`, `lsp request/notification`).
+3. Added shared limiter guardrails for search and collaboration room routes (`search`, `search/replace`, `collaboration/rooms`, `collaboration/rooms/[id]`).
+4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
+
+Triaged impact:
+1. Reduced burst-abuse and runaway polling risk on editor-adjacent operational APIs.
+2. Increased release confidence by moving these high-frequency paths under mandatory CI throttle checks.

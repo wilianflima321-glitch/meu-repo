@@ -1025,3 +1025,14 @@ Implemented:
 Critical reading:
 1. This closes an abuse/cost vector on high-traffic marketplace reads and write-heavy preference flows.
 2. Residual limitation remains unchanged: final confidence still depends on consolidated gate execution evidence and distributed limiter backing in deployed runtime.
+
+## Delta 2026-02-19 XLVII - Copilot/debug/search/collaboration limiter coverage uplift
+Implemented:
+1. Added shared limiter coverage to copilot orchestration and workflow routes (`action`, `context`, `workflows`, `workflows/[id]`).
+2. Added shared limiter coverage to debug/LSP routes (`dap events/processes/request/session start/stop`, `lsp request/notification`).
+3. Added shared limiter coverage to workspace search and collaboration room routes (`search`, `search/replace`, `collaboration/rooms`, `collaboration/rooms/[id]`).
+4. Expanded critical rate-limit scanner matrix to enforce all new scopes in CI.
+
+Critical reading:
+1. This closes another high-frequency abuse vector in editor-native operational APIs used continuously during active sessions.
+2. Residual limitation remains unchanged: consolidated gate evidence and distributed limiter backing are still required for production-grade confidence.

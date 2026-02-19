@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { assertProjectOwnership, resolveProjectIdFromRequest } from '@/lib/copilot/project-resolver';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,6 +111,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 	try {
 		const user = requireAuth(req);
 		await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'copilot-action-post',
+      key: user.userId,
+      max: 300,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many copilot action requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
 		const body = (await req.json().catch(() => null)) as ActionBody | null;
 		if (!body || typeof body !== 'object') {

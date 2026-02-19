@@ -9,6 +9,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,14 @@ function requireCollaborationEnabled(collaboratorsLimit: number): void {
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'collaboration-rooms-get',
+      key: user.userId,
+      max: 720,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many collaboration room list requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
     const { searchParams } = new URL(request.url);
@@ -70,6 +79,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'collaboration-rooms-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many collaboration room create requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
     const body = await request.json();

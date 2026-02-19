@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { stopDapSession } from '@/lib/server/dap-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface StopSessionRequest {
   sessionId: string;
@@ -11,7 +12,15 @@ interface StopSessionRequest {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
-		await requireFeatureForUser(user.userId, 'dap');
+    await requireFeatureForUser(user.userId, 'dap');
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'dap-session-stop-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many debug session stop requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body: StopSessionRequest = await request.json();
     const { sessionId } = body;

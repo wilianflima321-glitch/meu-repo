@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,14 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const user = requireAuth(req);
     await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'copilot-workflow-detail-get',
+      key: user.userId,
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many copilot workflow read requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const workflow = await getOwnedWorkflow(user.userId, ctx.params.id);
     if (!workflow) {
@@ -47,6 +56,14 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const user = requireAuth(req);
     await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'copilot-workflow-detail-patch',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many copilot workflow update requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const prismaAny = prisma as any;
 

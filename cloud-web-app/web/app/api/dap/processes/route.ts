@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { listDapSessions } from '@/lib/server/dap-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 type ProcessType = 'game' | 'server' | 'editor' | 'worker' | 'external';
 
@@ -21,6 +22,14 @@ export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
     await requireFeatureForUser(user.userId, 'dap');
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'dap-processes-get',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many debug process list requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const sessions = listDapSessions(user.userId);
     const now = Date.now();

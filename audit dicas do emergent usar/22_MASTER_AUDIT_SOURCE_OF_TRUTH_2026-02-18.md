@@ -243,6 +243,7 @@ Label: `PARTIAL_INTERNAL`
 - added shared route-level throttle for `/api/terminal/execute` and enforced it in critical scanner matrix
 - expanded shared limiter + scanner coverage to terminal control/sandbox, chat orchestration and thread lifecycle, git operations, and job queue control endpoints
 - expanded shared limiter + scanner coverage to marketplace browse/mutation, asset/cart/favorites, and creator analytics endpoints
+- expanded shared limiter + scanner coverage to copilot workflow/control, dap/lsp, workspace search/replace, and collaboration room control endpoints
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:
