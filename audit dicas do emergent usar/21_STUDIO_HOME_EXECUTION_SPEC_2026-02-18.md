@@ -92,6 +92,7 @@ Mandatory before completion:
 1. Session state persistence currently reuses workflow JSON and is not yet isolated in dedicated tables.
 2. Full access is timeboxed and auditable but does not yet enforce domain-specific policy packs per tool class.
 3. Cost model is operationally explicit but final pricing freeze still depends on shadow billing.
+4. Full Access grant policy is plan-scoped and TTL-tiered (15-45 minutes) but still does not enforce tool-class policy packs.
 
 ## 9) Latest factual snapshot (2026-02-18)
 1. `lint` PASS (`0 warnings`).
@@ -115,3 +116,5 @@ Mandatory before completion:
 15. Studio run-wave endpoint is active with explicit gate contracts and scanner enforcement (`qa:route-contracts`, `qa:critical-rate-limit`).
 16. Studio session payload now includes mission domain/checklist metadata and orchestration mode/last-wave visibility for quality governance.
 17. IDE chat panel now surfaces trace summaries from advanced chat responses for decision/cost transparency.
+18. Full Access grant route now enforces plan-scoped allowed scopes and TTL policy (`starter/trial=project@15m`, `basic<=workspace@20m`, `pro/studio=all@30m`, `enterprise=all@45m`).
+19. Studio Home now mirrors Full Access policy in UI via scope selector, plan-aware disabled options, and scope+TTL feedback from API metadata.

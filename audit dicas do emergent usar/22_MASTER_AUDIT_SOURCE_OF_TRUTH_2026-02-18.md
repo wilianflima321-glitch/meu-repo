@@ -252,6 +252,8 @@ Label: `PARTIAL_INTERNAL`
 - added domain-aware Studio metadata (`missionDomain`, `qualityChecklist`) and cost-pressure-aware execution profile in Studio task runtime
 - added explicit wave completion gate (`RUN_WAVE_ALREADY_COMPLETE`) to prevent ambiguous reruns
 - added IDE chat trace-summary rendering for multi-agent decision and telemetry transparency
+- hardened Studio Full Access with plan-scoped allowed scopes and plan-tier TTL policy
+- aligned Studio Home Full Access UX with policy contract (scope selector + plan-aware option gating + metadata-based TTL feedback)
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

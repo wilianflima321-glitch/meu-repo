@@ -2915,3 +2915,44 @@ Validation status:
 Decision lock:
 1. Studio wave actions must not present repeatable-success behavior once the current plan is complete.
 2. AI chat transparency is additive and does not alter capability/error contracts.
+
+## 102) Delta 2026-02-19 LVI - Full Access plan-scope and TTL hardening
+
+Implemented:
+1. Hardened `POST /api/studio/access/full` with plan-aware scope policy:
+- `starter_trial|starter` => `project`
+- `basic` => `project|workspace`
+- `pro|studio|enterprise` => `project|workspace|web_tools`
+2. Added plan-aware TTL policy for access grants:
+- starter/trial: 15 minutes
+- basic: 20 minutes
+- pro/studio: 30 minutes
+- enterprise: 45 minutes
+3. Added explicit capability gate when requested scope is not allowed by plan, including `allowedScopes` metadata.
+4. Updated route-contract scanner to enforce `allowedScopes` presence in full-access gate contract.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Full Access must remain timeboxed and plan-scoped to limit cost and operational risk.
+2. Scope/TTL expansion beyond this matrix requires explicit contract update in canonical docs.
+
+## 103) Delta 2026-02-19 LVII - Studio Home full-access UX contract alignment
+
+Implemented:
+1. Updated Studio Home Full Access controls to align with backend scope policy:
+- explicit scope selector (`project`, `workspace`, `web_tools`)
+- per-plan scope availability rendering in UI
+2. Full Access activation now sends selected scope instead of fixed workspace request.
+3. Success toast now reflects granted scope and plan-tier TTL from API metadata.
+4. Active grant card now uses normalized scope labels for operator clarity.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Studio Home must only expose scopes allowed by current plan policy to avoid false CTA behavior.
+2. UI scope semantics must stay coupled to canonical backend contract (`allowedScopes`, `ttlMinutes`).

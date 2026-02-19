@@ -33,7 +33,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Studio task apply | `app/api/studio/tasks/[id]/apply/route.ts` | `IMPLEMENTED/PARTIAL` | blocked until validation pass (`422 VALIDATION_REQUIRED`), inactive-session gate (`409 SESSION_NOT_ACTIVE`), and replay guard (`409 APPLY_ALREADY_COMPLETED`) |
 | Studio task rollback | `app/api/studio/tasks/[id]/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | requires prior apply token/state, inactive-session gate (`409 SESSION_NOT_ACTIVE`), and explicit token mismatch gate (`409 ROLLBACK_TOKEN_MISMATCH`) |
 | Studio live cost | `app/api/studio/cost/live/route.ts` | `IMPLEMENTED` | per-session cost summary + budget exceeded flag |
-| Studio full access grant | `app/api/studio/access/full/route.ts` | `IMPLEMENTED/PARTIAL` | scoped 30-minute grant with trial/starter gate + inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
+| Studio full access grant | `app/api/studio/access/full/route.ts` | `IMPLEMENTED/PARTIAL` | plan-scoped grant policy (`project|workspace|web_tools`) with plan-aware TTL (15-45m), trial/starter scope gate, and inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
 | Studio full access revoke | `app/api/studio/access/full/[id]/route.ts` | `IMPLEMENTED` | explicit revoke contract |
 | Web search tool | `app/api/web/search/route.ts` | `IMPLEMENTED/PARTIAL` | provider chain (`tavily -> serper -> duckduckgo`) with per-user throttle scope `web-search-post` |
 | Web fetch tool | `app/api/web/fetch/route.ts` | `IMPLEMENTED/PARTIAL` | URL safety gating + content extraction with per-user throttle scope `web-fetch-post` |

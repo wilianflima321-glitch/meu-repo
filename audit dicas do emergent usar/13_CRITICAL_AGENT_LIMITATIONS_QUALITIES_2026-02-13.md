@@ -1102,3 +1102,24 @@ Implemented:
 Critical reading:
 1. This improves user trust by exposing why/with-what-cost a response was produced.
 2. Residual limitation remains unchanged: trace transparency does not replace deterministic apply validation gates.
+
+## Delta 2026-02-19 LIV - Full Access plan-policy hardening
+Implemented:
+1. Added plan-scoped authorization matrix for Studio Full Access scopes (`project|workspace|web_tools`).
+2. Added plan-tier TTL policy (15 to 45 minutes) for grants.
+3. Added explicit gate metadata (`allowedScopes`) when requested scope is not permitted.
+4. Extended route-contract scanner to enforce presence of scope-policy metadata in full-access gate branch.
+
+Critical reading:
+1. This reduces risk of uncontrolled tool exposure and variable-cost escalation in lower tiers.
+2. Residual limitation remains: policy is route-level and still requires deeper tool-class enforcement packs for enterprise posture.
+
+## Delta 2026-02-19 LV - Full Access UX/contract parity hardening
+Implemented:
+1. Studio Home now exposes a plan-aware Full Access scope selector with disabled non-entitled scopes.
+2. Full Access requests now send selected scope (instead of fixed scope), matching route policy contract.
+3. UI feedback now displays granted scope and TTL from backend metadata.
+
+Critical reading:
+1. This removes a user-facing mismatch where UI requested unavailable scope by default.
+2. Residual limitation remains: static plan-to-scope mapping in UI must be kept synchronized with backend policy updates.

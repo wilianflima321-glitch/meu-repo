@@ -15,6 +15,7 @@ const AIChatPanelContainer = dynamic(() => import('@/components/ide/AIChatPanelC
 const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
+type FullAccessScope = 'project' | 'workspace' | 'web_tools'
 
 type StudioTask = {
   id: string
@@ -39,7 +40,7 @@ type StudioMessage = {
 
 type FullAccessGrant = {
   id: string
-  scope: 'project' | 'workspace' | 'web_tools'
+  scope: FullAccessScope
   expiresAt: string
   revokedAt?: string
 }
@@ -98,6 +99,26 @@ function statusTone(status: StudioTask['status']): string {
     return 'text-sky-300 border-sky-500/30 bg-sky-500/10'
   }
   return 'text-slate-300 border-slate-600/40 bg-slate-700/20'
+}
+
+function fullAccessScopeLabel(scope: FullAccessScope): string {
+  if (scope === 'web_tools') return 'Web + Tools'
+  if (scope === 'workspace') return 'Workspace'
+  return 'Project'
+}
+
+function fullAccessAllowedScopesForPlan(plan: string | null | undefined): FullAccessScope[] {
+  const normalized = String(plan || '').trim().toLowerCase()
+  if (normalized === 'basic') return ['project', 'workspace']
+  if (normalized === 'pro' || normalized === 'studio' || normalized === 'enterprise') {
+    return ['project', 'workspace', 'web_tools']
+  }
+  return ['project']
+}
+
+function defaultFullAccessScope(scopes: FullAccessScope[]): FullAccessScope {
+  if (scopes.includes('workspace')) return 'workspace'
+  return scopes[0] || 'project'
 }
 
 function canRunTask(
@@ -166,6 +187,7 @@ export default function StudioHome() {
   const [toast, setToast] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [sessionBootstrapped, setSessionBootstrapped] = useState(false)
+  const [fullAccessScope, setFullAccessScope] = useState<FullAccessScope>('workspace')
 
   const activeGrant = useMemo(
     () =>
@@ -178,6 +200,10 @@ export default function StudioHome() {
 
   const selectedTask = session?.tasks[session.tasks.length - 1] || null
   const variableUsageBlocked = Boolean(usage?.usageEntitlement && !usage.usageEntitlement.variableUsageAllowed)
+  const allowedFullAccessScopes = useMemo(
+    () => fullAccessAllowedScopesForPlan(usage?.plan),
+    [usage?.plan]
+  )
 
   const previewContent = useMemo(() => {
     if (selectedTask?.result) return `# ${selectedTask.title}\n\n${selectedTask.result}`
@@ -241,6 +267,12 @@ export default function StudioHome() {
     }
     window.localStorage.setItem(STUDIO_SESSION_STORAGE_KEY, session.id)
   }, [session?.id, session?.status])
+
+  useEffect(() => {
+    if (activeGrant) return
+    if (allowedFullAccessScopes.includes(fullAccessScope)) return
+    setFullAccessScope(defaultFullAccessScope(allowedFullAccessScopes))
+  }, [activeGrant, allowedFullAccessScopes, fullAccessScope])
 
   const requireSessionId = useCallback(() => {
     if (!session?.id) throw new Error('Start a studio session first.')
@@ -438,14 +470,20 @@ export default function StudioHome() {
       const res = await fetch('/api/studio/access/full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, scope: 'workspace' }),
+        body: JSON.stringify({ sessionId, scope: fullAccessScope }),
       })
       const data = await parseJson(res)
       if (!res.ok) throw new Error(data.message || data.error || 'Failed to enable full access.')
       setSession(data.session as StudioSession)
-      setToast('Full Access enabled (30 minutes).')
+      const ttlMinutes = Number(data?.metadata?.ttlMinutes || 0)
+      const grantedScope = (data?.metadata?.scope || fullAccessScope) as FullAccessScope
+      setToast(
+        ttlMinutes > 0
+          ? `Full Access enabled: ${fullAccessScopeLabel(grantedScope)} (${ttlMinutes}m).`
+          : `Full Access enabled: ${fullAccessScopeLabel(grantedScope)}.`
+      )
     })
-  }, [withAction, requireSessionId, activeGrant])
+  }, [withAction, requireSessionId, activeGrant, fullAccessScope])
 
   const openIde = useCallback(() => {
     const nextProjectId = (session?.projectId || projectId || 'default').trim() || 'default'
@@ -800,14 +838,36 @@ export default function StudioHome() {
                   onClick={toggleFullAccess}
                   className="rounded border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/20 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                 >
-                  {activeGrant ? 'Revoke Full Access' : 'Full Access (30m)'}
+                  {activeGrant ? 'Revoke Full Access' : `Full Access (${fullAccessScopeLabel(fullAccessScope)})`}
                 </button>
+                <label className="sr-only" htmlFor="studio-full-access-scope">
+                  Full access scope
+                </label>
+                <select
+                  id="studio-full-access-scope"
+                  value={fullAccessScope}
+                  onChange={(event) => setFullAccessScope(event.target.value as FullAccessScope)}
+                  disabled={!session || busy || session.status !== 'active' || Boolean(activeGrant)}
+                  className="rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-40"
+                >
+                  <option value="project">Project</option>
+                  <option value="workspace" disabled={!allowedFullAccessScopes.includes('workspace')}>
+                    Workspace
+                  </option>
+                  <option value="web_tools" disabled={!allowedFullAccessScopes.includes('web_tools')}>
+                    Web + Tools
+                  </option>
+                </select>
               </div>
               {activeGrant && (
                 <div className="mt-2 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-100">
-                  Active grant: {activeGrant.scope} until {new Date(activeGrant.expiresAt).toLocaleTimeString()}
+                  Active grant: {fullAccessScopeLabel(activeGrant.scope)} until{' '}
+                  {new Date(activeGrant.expiresAt).toLocaleTimeString()}
                 </div>
               )}
+              <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
+                Allowed scopes for current plan: {allowedFullAccessScopes.map(fullAccessScopeLabel).join(', ')}.
+              </div>
               <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
                 Note: Studio Home apply/rollback controls manage mission checkpoints. File-level patch apply remains in
                 `/ide` deterministic flows.

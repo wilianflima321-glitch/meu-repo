@@ -282,7 +282,12 @@ const checks = [
   },
   {
     file: 'app/api/studio/access/full/route.ts',
-    patterns: ["error: 'FEATURE_NOT_ALLOWED'", "capability: 'STUDIO_HOME_FULL_ACCESS'", "capabilityStatus: 'PARTIAL'"],
+    patterns: [
+      "error: 'FEATURE_NOT_ALLOWED'",
+      'allowedScopes',
+      "capability: 'STUDIO_HOME_FULL_ACCESS'",
+      "capabilityStatus: 'PARTIAL'",
+    ],
     name: 'studio/access/full plan gate contract',
   },
 ]

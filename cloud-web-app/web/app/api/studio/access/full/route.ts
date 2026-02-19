@@ -23,6 +23,23 @@ function isTrialOrStarter(plan: string | null | undefined): boolean {
   return normalized.endsWith('_trial') || normalized === 'starter' || normalized === 'starter_trial'
 }
 
+function getAllowedScopesForPlan(plan: string): Array<'project' | 'workspace' | 'web_tools'> {
+  const normalized = plan.trim().toLowerCase()
+  if (normalized === 'basic') return ['project', 'workspace']
+  if (normalized === 'pro' || normalized === 'studio' || normalized === 'enterprise') {
+    return ['project', 'workspace', 'web_tools']
+  }
+  return ['project']
+}
+
+function getGrantTtlMinutesForPlan(plan: string): number {
+  const normalized = plan.trim().toLowerCase()
+  if (normalized === 'enterprise') return 45
+  if (normalized === 'pro' || normalized === 'studio') return 30
+  if (normalized === 'basic') return 20
+  return 15
+}
+
 export async function POST(req: NextRequest) {
   try {
     const auth = requireAuth(req)
@@ -50,6 +67,8 @@ export async function POST(req: NextRequest) {
       select: { plan: true },
     })
     const plan = String(user?.plan || 'starter_trial')
+    const allowedScopes = getAllowedScopesForPlan(plan)
+    const ttlMinutes = getGrantTtlMinutesForPlan(plan)
 
     if (isTrialOrStarter(plan) && scope !== 'project') {
       return capabilityResponse({
@@ -66,8 +85,23 @@ export async function POST(req: NextRequest) {
         },
       })
     }
+    if (!allowedScopes.includes(scope)) {
+      return capabilityResponse({
+        status: 403,
+        error: 'FEATURE_NOT_ALLOWED',
+        message: 'Requested Full Access scope is not available for current plan.',
+        capability: 'STUDIO_HOME_FULL_ACCESS',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          requestedScope: scope,
+          allowedScopes,
+          plan,
+        },
+      })
+    }
 
-    const session = await createFullAccessGrant(auth.userId, sessionId, scope, 30)
+    const session = await createFullAccessGrant(auth.userId, sessionId, scope, ttlMinutes)
     if (!session) {
       return NextResponse.json(
         { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
@@ -95,7 +129,8 @@ export async function POST(req: NextRequest) {
       capabilityStatus: 'IMPLEMENTED',
       metadata: {
         scope,
-        ttlMinutes: 30,
+        ttlMinutes,
+        allowedScopes,
       },
     })
   } catch (error) {

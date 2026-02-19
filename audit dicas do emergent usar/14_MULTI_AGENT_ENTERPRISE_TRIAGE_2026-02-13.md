@@ -1098,3 +1098,23 @@ Delivered:
 Triaged impact:
 1. Reduces operator confusion and accidental duplicate wave runs.
 2. Improves explainability of multi-agent outputs without expanding scope to autonomous apply behavior.
+
+## Delta 2026-02-19 LII - Studio full-access policy triage
+Delivered:
+1. Added plan-scoped gate matrix for Studio Full Access requests.
+2. Added plan-tiered grant TTL policy to bound exposure and runtime cost.
+3. Added explicit `allowedScopes` metadata in gate responses for operator clarity and client-side handling.
+
+Triaged impact:
+1. Improves cost discipline and reduces accidental high-scope access on lower plans.
+2. Keeps Full Access usable for advanced plans while preserving explicit contract behavior.
+
+## Delta 2026-02-19 LIII - Studio Full Access UX triage alignment
+Delivered:
+1. Added scope selector in Studio Home Full Access controls (`project`, `workspace`, `web_tools`).
+2. Restricted selectable options by current plan policy to prevent non-entitled actions.
+3. Updated activation feedback with backend-provided scope+TTL metadata.
+
+Triaged impact:
+1. Removes CTA mismatch between home UI and backend policy gates.
+2. Improves operational clarity for users managing cost-bound access windows.
