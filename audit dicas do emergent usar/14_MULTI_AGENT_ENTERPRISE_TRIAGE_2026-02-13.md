@@ -1002,3 +1002,14 @@ Delivered:
 Triaged impact:
 1. Reduced operational abuse and burst-risk on core runtime control APIs.
 2. Increased release confidence by moving another large endpoint family under mandatory CI throttle-contract checks.
+
+## Delta 2026-02-19 XLIV - Security triage: marketplace control expansion
+Delivered:
+1. Added shared limiter guardrails for marketplace browse/mutate routes (`marketplace`, `extensions`, `install`, `uninstall`).
+2. Added shared limiter guardrails for marketplace asset/cart/favorites routes (`assets`, `cart`, `favorites`, `favorites/[assetId]`).
+3. Added shared limiter guardrails for creator analytics routes (`creator/assets`, `creator/categories`, `creator/revenue`, `creator/sales/recent`, `creator/stats`).
+4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new marketplace scopes.
+
+Triaged impact:
+1. Reduced abuse and cost-spike risk in public-browse and preference-heavy marketplace workflows.
+2. Improved operational safety for creator dashboards by enforcing throttle contracts in CI.

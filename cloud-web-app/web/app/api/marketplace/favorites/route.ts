@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,14 @@ function extractFavorites(input: unknown): string[] {
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-favorites-get',
+      key: user.userId,
+      max: 720,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many favorites read requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const prefs = await prisma.userPreferences.findUnique({
       where: { userId: user.userId },
       select: { preferences: true },

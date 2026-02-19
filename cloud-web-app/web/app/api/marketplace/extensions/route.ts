@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,6 +98,14 @@ const BUILTIN_EXTENSIONS = [
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-extensions-get',
+      key: user.userId,
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many marketplace extensions requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireFeatureForUser(user.userId, 'marketplace');
     
     const { searchParams } = new URL(request.url);

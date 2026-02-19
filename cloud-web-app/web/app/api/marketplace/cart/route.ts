@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 type CartItem = {
   assetId: string;
@@ -65,6 +66,14 @@ async function writePreferences(userId: string, preferences: PreferencesObject) 
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-cart-get',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many cart read requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const preferences = await readPreferences(user.userId);
     const items = parseCart(preferences[CART_KEY]);
 
@@ -84,6 +93,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-cart-post',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many cart add requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json().catch(() => ({}));
     const assetId = typeof body?.assetId === 'string' ? body.assetId.trim() : '';
 
@@ -138,6 +155,14 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-cart-delete',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many cart remove requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { searchParams } = new URL(request.url);
     const assetId = searchParams.get('assetId')?.trim() || '';
 

@@ -1014,3 +1014,14 @@ Implemented:
 Critical reading:
 1. This significantly reduces abuse exposure on high-frequency operational endpoints that directly mutate runtime state.
 2. Residual limitation remains operational: full confidence still requires consolidated gate evidence and deployed Upstash-backed limiter mode.
+
+## Delta 2026-02-19 XLVI - Marketplace surface limiter coverage uplift
+Implemented:
+1. Added shared limiter coverage to marketplace discovery and mutation routes (`marketplace`, `extensions`, `install`, `uninstall`).
+2. Added shared limiter coverage to marketplace asset/cart/favorites routes (`assets`, `cart`, `favorites`, `favorites/[assetId]`).
+3. Added shared limiter coverage to creator analytics routes (`creator/assets`, `creator/categories`, `creator/revenue`, `creator/sales/recent`, `creator/stats`).
+4. Expanded critical rate-limit scanner matrix to enforce all marketplace scopes in CI.
+
+Critical reading:
+1. This closes an abuse/cost vector on high-traffic marketplace reads and write-heavy preference flows.
+2. Residual limitation remains unchanged: final confidence still depends on consolidated gate execution evidence and distributed limiter backing in deployed runtime.

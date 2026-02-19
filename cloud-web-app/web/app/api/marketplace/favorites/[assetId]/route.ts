@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +78,14 @@ async function handleMutation(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: mode === 'add' ? 'marketplace-favorite-asset-post' : 'marketplace-favorite-asset-delete',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many favorite mutation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const assetId = params.assetId?.trim();
     if (!assetId) {
       return NextResponse.json({ error: 'assetId is required' }, { status: 400 });

@@ -2710,3 +2710,32 @@ Validation status:
 Decision lock:
 1. Runtime control-plane endpoints (`terminal/chat/git/jobs`) are now part of mandatory abuse-control baseline.
 2. Legacy local limiter logic may remain additive, but shared server limiter is mandatory contract.
+
+## 94) Delta 2026-02-19 XLVIII - Marketplace abuse-control expansion
+
+Implemented:
+1. Added shared awaited limiter protection on marketplace discovery and mutation routes:
+- `app/api/marketplace/route.ts` (`GET`, `POST`)
+- `app/api/marketplace/extensions/route.ts`
+- `app/api/marketplace/install/route.ts`
+- `app/api/marketplace/uninstall/route.ts`
+2. Added shared awaited limiter protection on marketplace asset and user-preference surfaces:
+- `app/api/marketplace/assets/route.ts` (`GET`, `POST`)
+- `app/api/marketplace/cart/route.ts` (`GET`, `POST`, `DELETE`)
+- `app/api/marketplace/favorites/route.ts`
+- `app/api/marketplace/favorites/[assetId]/route.ts` (`POST`, `DELETE`)
+3. Added shared awaited limiter protection on creator analytics surfaces:
+- `app/api/marketplace/creator/assets/route.ts`
+- `app/api/marketplace/creator/categories/route.ts`
+- `app/api/marketplace/creator/revenue/route.ts`
+- `app/api/marketplace/creator/sales/recent/route.ts`
+- `app/api/marketplace/creator/stats/route.ts`
+4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all marketplace scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Marketplace browse/mutate/creator endpoints are now mandatory abuse-control baseline.
+2. High-traffic read routes must remain throttled alongside mutation routes to avoid burst-cost regressions.
