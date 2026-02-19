@@ -2792,3 +2792,24 @@ Validation status:
 Decision lock:
 1. Auth recovery and verification routes are mandatory abuse-control baseline and must not depend on provider-specific limiter wiring.
 2. Messaging and credit-transfer endpoints are high-risk mutation surfaces and must remain explicitly throttled in CI.
+
+## 97) Delta 2026-02-19 LI - Backup/Test/MCP abuse-control expansion
+
+Implemented:
+1. Added shared awaited limiter protection on backup lifecycle routes:
+- `app/api/backup/route.ts` (`GET`, `POST`, `DELETE`)
+- `app/api/backup/restore/route.ts`
+2. Added shared awaited limiter protection on test execution routes:
+- `app/api/test/discover/route.ts`
+- `app/api/test/run/route.ts`
+3. Added shared awaited limiter protection on MCP ingress/status routes:
+- `app/api/mcp/route.ts` (`POST`, `GET`)
+4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Backup/restore, test-run, and MCP surfaces are high-impact operational routes and are mandatory abuse-control baseline.
+2. Public status endpoints (`mcp GET`) must remain explicitly throttled to prevent polling storms.

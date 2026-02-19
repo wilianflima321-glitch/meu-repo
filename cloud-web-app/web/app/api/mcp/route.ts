@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import aethelMCPServer from '@/lib/mcp/aethel-mcp-server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 /**
  * Aethel MCP HTTP API
@@ -16,6 +17,14 @@ export async function POST(req: NextRequest) {
   try {
     // CRÍTICO: Autenticação obrigatória para acesso ao MCP
     const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'mcp-post',
+      key: auth.userId,
+      max: 300,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many MCP requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     const message = await req.json();
     
@@ -57,7 +66,16 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const rateLimitResponse = await enforceRateLimit({
+    scope: 'mcp-get',
+    key: getRequestIp(req),
+    max: 180,
+    windowMs: 60 * 60 * 1000,
+    message: 'Too many MCP status requests. Please wait before retrying.',
+  });
+  if (rateLimitResponse) return rateLimitResponse;
+
   // Informações públicas básicas do servidor MCP (sem detalhes de capabilities)
   // Detalhes completos requerem autenticação via POST
   return NextResponse.json({

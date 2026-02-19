@@ -1047,3 +1047,14 @@ Implemented:
 Critical reading:
 1. This closes abuse vectors on account-recovery and transactional messaging routes that are often targeted under brute-force or spam patterns.
 2. Residual limitation remains unchanged: final confidence still requires consolidated gate execution evidence and distributed limiter backing in deployed runtime.
+
+## Delta 2026-02-19 XLIX - Backup/test/mcp limiter coverage uplift
+Implemented:
+1. Added shared limiter coverage to backup lifecycle routes (`backup GET/POST/DELETE`, `backup/restore POST`).
+2. Added shared limiter coverage to test discovery/execution routes (`test/discover`, `test/run`).
+3. Added shared limiter coverage to MCP routes (`mcp POST/GET`).
+4. Expanded critical rate-limit scanner matrix to enforce all new scopes in CI.
+
+Critical reading:
+1. This closes high-impact abuse vectors where backup, test execution, or MCP traffic could saturate runtime resources.
+2. Residual limitation remains unchanged: production confidence still requires consolidated gate execution evidence and distributed limiter backing in deployed runtime.

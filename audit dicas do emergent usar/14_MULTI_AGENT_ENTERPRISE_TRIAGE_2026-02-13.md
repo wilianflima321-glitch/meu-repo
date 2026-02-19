@@ -1035,3 +1035,14 @@ Delivered:
 Triaged impact:
 1. Reduced brute-force and spam risk on auth-recovery and messaging entry points.
 2. Improved operational safety for credit-transfer mutations via explicit CI-enforced throttle contracts.
+
+## Delta 2026-02-19 XLVII - Security triage: backup/test/mcp control expansion
+Delivered:
+1. Added shared limiter guardrails for backup lifecycle routes (`backup`, `backup/restore`).
+2. Added shared limiter guardrails for test discovery/execution routes (`test/discover`, `test/run`).
+3. Added shared limiter guardrails for MCP ingress/status route (`mcp POST/GET`).
+4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
+
+Triaged impact:
+1. Reduced resource-saturation risk on heavy operational routes (backup restore, test execution, MCP transport).
+2. Increased CI confidence by moving another execution-sensitive route family under mandatory throttle checks.

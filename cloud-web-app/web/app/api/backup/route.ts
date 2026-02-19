@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { 
   createBackup, 
   listBackups, 
@@ -23,6 +24,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'backup-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many backup listing requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
     const backupId = searchParams.get('backupId');
@@ -73,6 +82,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'backup-post',
+      key: user.userId,
+      max: 40,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many backup creation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json();
     const { projectId, type = 'manual', description } = body;
     
@@ -123,6 +140,14 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'backup-delete',
+      key: user.userId,
+      max: 80,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many backup delete requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
     const backupId = searchParams.get('backupId');
