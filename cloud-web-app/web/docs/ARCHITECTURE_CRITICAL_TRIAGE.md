@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-19T22:48:09.510Z`
+- Generated at: `2026-02-19T22:53:48.203Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **55**
+- Oversized source files (>=1200 lines): **54**
 
 ## Top Compatibility Call Sites
 
@@ -80,7 +80,7 @@
 | `lib/behavior-tree.ts` | 1267 |
 | `lib/profiler-integrated.ts` | 1267 |
 | `components/physics/ClothSimulationEditor.tsx` | 1256 |
-| `components/export/ExportSystem.tsx` | 1254 |
+| `lib/store/workspace-store.ts` | 1251 |
 
 ## Notes
 

@@ -3136,3 +3136,21 @@ Validation status:
 Decision lock:
 1. Removed duplicate component paths are now explicitly blocked at scanner level.
 2. Any compatibility exception must be added as explicit, reviewed rule with canonical delta.
+
+## 113) Delta 2026-02-19 LXVII - Oversized module reduction (ExportSystem split)
+
+Implemented:
+1. Reduced oversized module count by splitting preset catalog from export runtime UI:
+- extracted `EXPORT_PRESETS` into `components/export/export-presets.ts`
+- kept runtime/editor logic in `components/export/ExportSystem.tsx`
+2. Preserved public component contract (`ExportSystem` remains default export; preset data still consumed identically).
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 54` (was `<=55`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Oversized-file reduction must be real code-structure reduction (not threshold-only adjustment).
+2. Split modules must preserve explicit capability behavior and avoid fake-success UI paths.

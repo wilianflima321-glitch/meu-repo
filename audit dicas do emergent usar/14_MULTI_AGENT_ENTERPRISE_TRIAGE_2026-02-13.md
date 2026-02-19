@@ -1209,3 +1209,13 @@ Delivered:
 Triaged impact:
 1. Prevents low-friction backsliding to duplicate component trees.
 2. Improves long-term maintainability by enforcing single authoritative import paths.
+
+## Delta 2026-02-19 LXIII - Oversized triage reduction via export module split
+Delivered:
+1. Split export preset catalog out of `components/export/ExportSystem.tsx` into dedicated module.
+2. Reduced oversized-file metric from `55` to `54`.
+3. Tightened architecture gate oversized threshold to `<=54`.
+
+Triaged impact:
+1. Demonstrates measurable monolith-debt reduction without changing product scope.
+2. Improves maintainability of export subsystem while preserving existing runtime behavior.

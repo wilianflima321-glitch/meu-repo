@@ -1213,3 +1213,13 @@ Implemented:
 Critical reading:
 1. This closes the most likely reintroduction path for duplicate components after file cleanup.
 2. Residual limitation remains: scanner blocks known duplicate paths, but architectural drift can still occur via new oversized files if refactor waves stall.
+
+## Delta 2026-02-19 LXV - Oversized file count reduced by module split
+Implemented:
+1. Split export preset catalog from `components/export/ExportSystem.tsx` into `components/export/export-presets.ts`.
+2. Reduced `ExportSystem.tsx` from oversized status and lowered architecture oversized count (`55 -> 54`).
+3. Tightened oversized threshold to current factual baseline (`<=54`).
+
+Critical reading:
+1. This is a structural reduction (real module split), not metric masking.
+2. Residual limitation remains: oversized debt is still substantial (`54` files) and requires continued targeted decomposition.
