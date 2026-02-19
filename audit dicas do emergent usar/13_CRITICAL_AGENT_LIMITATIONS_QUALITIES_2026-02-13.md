@@ -964,3 +964,13 @@ Implemented:
 Critical reading:
 1. This closes another major abuse vector in high-traffic collaboration and asset pipelines.
 2. Residual limitation remains operational: this wave still requires consolidated gate execution evidence and distributed limiter backing in production.
+
+## Delta 2026-02-19 XLI - AI auxiliary surface protection uplift
+Implemented:
+1. Added throttle controls across AI auxiliary control-plane routes (`agent`, `change validate/apply/rollback`, `suggestions`, `thinking`, `trace`, `director` and director actions).
+2. Added throttle controls across high-cost AI media generation routes (`image`, `voice`, `music`, `3d`) for both generation and status/provider metadata calls.
+3. Expanded critical rate-limit scanner matrix to enforce all new AI scopes in CI.
+
+Critical reading:
+1. This reduces risk of unbounded AI spend and request storms in agentic and media generation pathways.
+2. Residual limitation remains operational: fallback limiter mode still depends on Upstash presence in deployed environments.

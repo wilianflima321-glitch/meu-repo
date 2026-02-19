@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
@@ -72,6 +73,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-director-get',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many director analysis requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { projectId } = await params;
 
     // Verificar se projeto existe e pertence ao usuário

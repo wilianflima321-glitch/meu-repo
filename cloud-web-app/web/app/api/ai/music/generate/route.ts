@@ -14,6 +14,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { capabilityResponse } from '@/lib/server/capability-response';
 
@@ -234,6 +235,14 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-music-generate-post',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many music generation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -352,7 +361,15 @@ export async function POST(req: NextRequest) {
 // GET - Check status or list providers
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req);
+    const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-music-generate-get',
+      key: auth.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many music status requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

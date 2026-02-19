@@ -2585,3 +2585,32 @@ Validation status:
 Decision lock:
 1. Project and asset endpoints are now part of the mandatory abuse-control baseline.
 2. Export/upload/download high-cost routes cannot run without explicit throttle coverage.
+
+## 89) Delta 2026-02-19 XLIII - AI auxiliary surface abuse-control expansion
+
+Implemented:
+1. Added explicit rate-limit protection to AI auxiliary orchestration and deterministic routes:
+- `app/api/ai/agent/route.ts` (`POST`, `GET`)
+- `app/api/ai/change/validate/route.ts`
+- `app/api/ai/change/apply/route.ts`
+- `app/api/ai/change/rollback/route.ts`
+- `app/api/ai/suggestions/route.ts`
+- `app/api/ai/suggestions/feedback/route.ts` (`POST`, `GET`)
+- `app/api/ai/thinking/[sessionId]/route.ts` (`GET`, `POST`)
+- `app/api/ai/trace/[traceId]/route.ts`
+- `app/api/ai/director/[projectId]/route.ts`
+- `app/api/ai/director/[projectId]/action/route.ts`
+2. Added explicit rate-limit protection to high-cost generative media routes:
+- `app/api/ai/image/generate/route.ts` (`POST`, `GET`)
+- `app/api/ai/voice/generate/route.ts` (`POST`, `GET`)
+- `app/api/ai/music/generate/route.ts` (`POST`, `GET`)
+- `app/api/ai/3d/generate/route.ts` (`POST`, `GET`)
+3. Expanded `qa:critical-rate-limit` scanner matrix to enforce all AI scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. High-cost AI media and agentic endpoints are part of mandatory abuse-control baseline.
+2. No AI auxiliary surface may remain unthrottled in production-hardening waves.

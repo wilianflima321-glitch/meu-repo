@@ -16,6 +16,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
 import { capabilityResponse } from '@/lib/server/capability-response';
@@ -211,6 +212,14 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-image-generate-post',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many image generation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -339,6 +348,14 @@ export async function POST(req: NextRequest) {
 // GET - List available providers and their status
 export async function GET(req: NextRequest) {
   const auth = requireAuth(req);
+  const rateLimitResponse = await enforceRateLimit({
+    scope: 'ai-image-generate-get',
+    key: auth.userId,
+    max: 180,
+    windowMs: 60 * 60 * 1000,
+    message: 'Too many image provider status requests. Please try again later.',
+  });
+  if (rateLimitResponse) return rateLimitResponse;
   if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

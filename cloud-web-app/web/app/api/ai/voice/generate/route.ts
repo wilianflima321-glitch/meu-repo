@@ -15,6 +15,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
 import { capabilityResponse } from '@/lib/server/capability-response';
@@ -197,6 +198,14 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-voice-generate-post',
+      key: user.userId,
+      max: 50,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many voice generation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -317,7 +326,15 @@ export async function POST(req: NextRequest) {
 // GET - List available providers and voices
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req);
+    const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-voice-generate-get',
+      key: auth.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many voice provider status requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

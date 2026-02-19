@@ -39,6 +39,14 @@ function parseOffset(value: unknown, fallback: number): number {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const auth = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-change-apply-post',
+      key: auth.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many AI apply change requests. Please wait before retrying.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     await requireEntitlementsForUser(auth.userId)
 
     const body = (await request.json().catch(() => null)) as ApplyRequestBody | null

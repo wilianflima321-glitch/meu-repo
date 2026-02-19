@@ -237,6 +237,7 @@ Label: `PARTIAL_INTERNAL`
 - expanded abuse control to canonical and compatibility file route surface with CI scanner enforcement
 - expanded abuse control to billing lifecycle + wallet + usage status + admin payments/security overview route surfaces with CI scanner enforcement
 - expanded abuse control to project lifecycle/collaboration/export + asset lifecycle/upload/download route surfaces with CI scanner enforcement
+- expanded abuse control to AI auxiliary + media generation route surfaces with CI scanner enforcement
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

@@ -952,3 +952,13 @@ Delivered:
 Triaged impact:
 1. Reduced risk of burst abuse in high-volume asset and collaboration APIs.
 2. Improved reliability posture for export-control and asset-transfer surfaces with explicit throttle contracts.
+
+## Delta 2026-02-19 XXXIX - Security triage: AI auxiliary/media control expansion
+Delivered:
+1. Added abuse-control throttles to AI auxiliary routes (agent, deterministic change endpoints, suggestions/feedback, thinking sessions, trace lookup, director routes).
+2. Added abuse-control throttles to media-generation routes (`ai/image`, `ai/voice`, `ai/music`, `ai/3d`) for generation and provider/status calls.
+3. Extended `qa:critical-rate-limit` scanner matrix to enforce these AI scopes.
+
+Triaged impact:
+1. Reduced risk of high-cost AI endpoint saturation and accidental overconsumption.
+2. Improved reliability envelope for AI-heavy workflows with explicit per-route throttle policy.

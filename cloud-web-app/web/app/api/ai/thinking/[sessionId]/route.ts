@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
@@ -64,6 +65,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-thinking-get',
+      key: user.userId,
+      max: 300,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many thinking session reads. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { sessionId } = await params;
 
     const session = sessions.get(sessionId);
@@ -91,6 +100,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-thinking-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many thinking session starts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { sessionId } = await params;
     const body = await req.json();
 

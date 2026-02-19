@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
@@ -23,6 +24,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-director-action-post',
+      key: user.userId,
+      max: 90,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many director action requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { projectId } = await params;
     const body: ActionPayload = await req.json();
 

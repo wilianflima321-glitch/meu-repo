@@ -22,6 +22,14 @@ function computeHash(content: string): string {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const auth = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-change-rollback-post',
+      key: auth.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many AI rollback requests. Please wait before retrying.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     await requireEntitlementsForUser(auth.userId)
 
     const body = (await request.json().catch(() => null)) as RollbackRequestBody | null

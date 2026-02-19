@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,14 @@ const feedbackStore: Map<string, FeedbackPayload & { userId: string; timestamp: 
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-suggestions-feedback-post',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many suggestion feedback submissions. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body: FeedbackPayload = await req.json();
 
     if (!body.suggestionId) {
@@ -63,6 +72,14 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-suggestions-feedback-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many suggestion feedback reads. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     // Retorna estatísticas de feedback (admin only em produção)
     const stats = {

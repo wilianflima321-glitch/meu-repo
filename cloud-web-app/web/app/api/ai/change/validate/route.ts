@@ -17,7 +17,15 @@ const CAPABILITY = 'AI_CHANGE_VALIDATE'
 
 export async function POST(req: NextRequest) {
   try {
-    requireAuth(req)
+    const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-change-validate-post',
+      key: auth.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many AI change validation requests. Please try again later.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
 
     const body = (await req.json().catch(() => null)) as ValidateBody | null
     if (!body || typeof body !== 'object') {
