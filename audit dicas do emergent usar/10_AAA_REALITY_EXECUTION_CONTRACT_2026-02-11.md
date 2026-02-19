@@ -2493,3 +2493,29 @@ Validation status:
 Decision lock:
 1. Security-sensitive auth lifecycle routes must remain throttled and contract-checked in CI.
 2. Newly deprecated and gated routes must stay covered by route-contract scanner to prevent drift.
+
+## 86) Delta 2026-02-19 XL - File API abuse-control hardening
+
+Implemented:
+1. Added rate-limit protection for canonical and compatibility file routes:
+- `app/api/files/route.ts` (`GET`, `POST`)
+- `app/api/files/tree/route.ts`
+- `app/api/files/fs/route.ts`
+- `app/api/files/raw/route.ts`
+- `app/api/files/read/route.ts`
+- `app/api/files/write/route.ts`
+- `app/api/files/list/route.ts` (`GET`, `POST`)
+- `app/api/files/create/route.ts`
+- `app/api/files/delete/route.ts` (`POST`, `DELETE`)
+- `app/api/files/copy/route.ts`
+- `app/api/files/move/route.ts`
+- `app/api/files/rename/route.ts`
+2. Expanded `qa:critical-rate-limit` matrix to enforce all file route scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. File authority endpoints are now part of mandatory abuse-control baseline.
+2. Compatibility wrappers cannot bypass throttle policy while still active.

@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
@@ -16,6 +17,14 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-copy',
+      key: user.userId,
+      max: 50,
+      windowMs: 60 * 1000,
+      message: 'Too many file copy requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     await requireEntitlementsForUser(user.userId)
 
     const body = await request.json()

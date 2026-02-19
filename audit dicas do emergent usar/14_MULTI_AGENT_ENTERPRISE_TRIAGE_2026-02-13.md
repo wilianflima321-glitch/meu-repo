@@ -921,3 +921,12 @@ Delivered:
 Triaged impact:
 1. Better protection on high-value identity endpoints.
 2. Lower risk of silent contract drift in newly gated/deprecated routes.
+
+## Delta 2026-02-19 XXXVI - Security triage: file authority hardening
+Delivered:
+1. Applied explicit throttle policy across canonical file endpoints and compatibility wrapper routes.
+2. Expanded critical scanner coverage to enforce file-route protection in CI.
+
+Triaged impact:
+1. Reduced risk of file IO endpoint saturation and abusive burst patterns.
+2. Preserved canonical/compatibility coexistence without opening unthrottled bypass paths.

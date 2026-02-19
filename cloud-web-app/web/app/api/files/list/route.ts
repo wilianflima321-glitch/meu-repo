@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getFileSystemRuntime, type FileInfo } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
@@ -31,6 +32,14 @@ async function handleList(
   body?: Record<string, unknown>
 ) {
   const user = requireAuth(request)
+  const rateLimitResponse = await enforceRateLimit({
+    scope: request.method === 'POST' ? 'files-list-post' : 'files-list-get',
+    key: user.userId,
+    max: 120,
+    windowMs: 60 * 1000,
+    message: 'Too many file list requests. Please retry shortly.',
+  })
+  if (rateLimitResponse) return rateLimitResponse
   await requireEntitlementsForUser(user.userId)
   const projectId = getScopedProjectId(request, body)
 

@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
@@ -15,6 +16,14 @@ export const dynamic = 'force-dynamic'
 
 async function handleDelete(request: NextRequest) {
   const user = requireAuth(request)
+  const rateLimitResponse = await enforceRateLimit({
+    scope: request.method === 'DELETE' ? 'files-delete-delete' : 'files-delete-post',
+    key: user.userId,
+    max: 60,
+    windowMs: 60 * 1000,
+    message: 'Too many file delete requests. Please retry shortly.',
+  })
+  if (rateLimitResponse) return rateLimitResponse
   await requireEntitlementsForUser(user.userId)
 
   const body = await request.json()

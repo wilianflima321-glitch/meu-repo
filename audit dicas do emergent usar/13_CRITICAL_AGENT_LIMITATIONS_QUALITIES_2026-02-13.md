@@ -933,3 +933,12 @@ Implemented:
 Critical reading:
 1. This reduces abuse surface on identity endpoints and improves contract drift detection.
 2. Remaining limitation unchanged: full gate evidence still deferred by current execution policy.
+
+## Delta 2026-02-19 XXXVIII - File API protection uplift
+Implemented:
+1. Added per-route throttle controls across canonical file authority endpoints and active compatibility wrappers.
+2. Expanded critical rate-limit scanner matrix to include full file route surface (`route/tree/fs/raw/read/write/list/create/delete/copy/move/rename`).
+
+Critical reading:
+1. This closes a high-impact abuse vector in file IO-heavy workflows.
+2. Remaining limitation is unchanged: consolidated validation gates are still pending explicit test wave.

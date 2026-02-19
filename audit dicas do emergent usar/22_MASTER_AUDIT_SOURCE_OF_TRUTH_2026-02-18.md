@@ -234,6 +234,7 @@ Label: `PARTIAL_INTERNAL`
 - extended to additional high-cost AI endpoints (`ai-query`, `ai-stream`) with explicit contract coverage
 - extended auth hardening to explicit 2FA subroutes with missing paths implemented and wrapper route deprecated
 - expanded auth hardening to lifecycle endpoints (`me/profile/delete-account`) and scanner parity for query/stream + 2fa deprecation
+- expanded abuse control to canonical and compatibility file route surface with CI scanner enforcement
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

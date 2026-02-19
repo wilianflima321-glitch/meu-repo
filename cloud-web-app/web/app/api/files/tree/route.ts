@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse } from '@/lib/api-errors'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   getScopedWorkspaceRoot,
@@ -109,6 +110,14 @@ async function buildTree(params: {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-tree',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many file tree requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     await requireEntitlementsForUser(user.userId)
 
     const body = await request.json()
