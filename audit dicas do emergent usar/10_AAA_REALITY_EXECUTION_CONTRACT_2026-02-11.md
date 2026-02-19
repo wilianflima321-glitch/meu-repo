@@ -2451,3 +2451,23 @@ Validation status:
 Decision lock:
 1. Security-sensitive auth routes (including 2FA) must remain throttled and cookie-compatible.
 2. Aggregate auth route wrappers are deprecated in favor of explicit endpoint contracts.
+
+## 84) Delta 2026-02-19 XXXVIII - Execution policy note (test wave deferred)
+
+Operational note:
+1. Current execution mode for this phase: implement hardening/code changes first, defer full test wave to explicit user trigger.
+2. Mandatory gate suite remains unchanged and pending:
+- `npm run lint`
+- `npm run typecheck`
+- `npm run build`
+- `npm run qa:interface-gate`
+- `npm run qa:canonical-components`
+- `npm run qa:route-contracts`
+- `npm run qa:no-fake-success`
+- `npm run qa:mojibake`
+- `npm run qa:enterprise-gate`
+3. No feature can be marked `FULLY_VALIDATED_INTERNAL` for this wave until the above suite is executed in one consolidated pass.
+
+Decision lock:
+1. Test deferral is temporary execution policy for velocity, not contract relaxation.
+2. Release/promotion decisions remain blocked on full gate evidence.
