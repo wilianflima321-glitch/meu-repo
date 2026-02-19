@@ -2409,3 +2409,22 @@ Validation status:
 Decision lock:
 1. Studio control-plane endpoints must keep explicit abuse protection in CI and code.
 2. Session/cost polling endpoints must remain rate-limited to protect shared runtime stability.
+
+## 82) Delta 2026-02-19 XXXVI - AI query/stream hardening
+
+Implemented:
+1. Added rate limiting to additional high-cost AI routes:
+- `app/api/ai/query/route.ts`
+- `app/api/ai/stream/route.ts`
+2. Aligned unavailable AI provider/backend behavior to explicit capability contracts:
+- `AI_QUERY` now returns `501 NOT_IMPLEMENTED` via capability envelope when no provider is configured
+- `AI_STREAM_BACKEND` now returns `501 NOT_IMPLEMENTED` via capability envelope when backend URL is not configured
+3. Expanded `qa:critical-rate-limit` scanner coverage for `ai-query` and `ai-stream`.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. High-cost AI surfaces (`query`, `stream`) must remain explicitly throttled and contract-safe.
+2. Provider/backend absence must be machine-readable and never presented as runtime success.

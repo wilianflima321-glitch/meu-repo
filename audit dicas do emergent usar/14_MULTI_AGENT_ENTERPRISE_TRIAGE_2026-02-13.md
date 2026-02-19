@@ -891,3 +891,13 @@ Delivered:
 Triaged impact:
 1. Reduced risk of orchestration endpoint saturation under aggressive polling or abusive clients.
 2. Increased release confidence by moving control-plane protection into mandatory CI contract.
+
+## Delta 2026-02-19 XXXIII - Security triage: AI query/stream hardening
+Delivered:
+1. Added explicit rate limiting for `ai-query` and `ai-stream` routes.
+2. Converted no-provider/no-backend paths to explicit capability envelope `NOT_IMPLEMENTED` responses.
+3. Extended critical scanner matrix to enforce these new protections in CI.
+
+Triaged impact:
+1. Lower risk of cost spikes and runtime overload from unthrottled high-cost AI endpoints.
+2. Better contract consistency for clients handling provider/backend unavailability.

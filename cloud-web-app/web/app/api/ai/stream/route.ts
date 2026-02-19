@@ -8,6 +8,8 @@ import {
 	consumeMeteredUsage,
 	releaseConcurrencyLease,
 } from '@/lib/metering';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 
 function getBackendBaseUrl(): string {
 	const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -34,6 +36,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 	try {
 		const auth = requireAuth(req);
+		const rateLimitResponse = await enforceRateLimit({
+			scope: 'ai-stream',
+			key: auth.userId,
+			max: 30,
+			windowMs: 60 * 1000,
+			message: 'Too many AI stream requests. Please retry shortly.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
+
 		const entitlements = await requireEntitlementsForUser(auth.userId);
 
 		const body = await req.json().catch(() => null);
@@ -114,10 +125,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		if (mapped) return mapped;
 
 		if ((error as any)?.code === 'AI_BACKEND_NOT_CONFIGURED') {
-			return NextResponse.json(
-				{ error: 'AI_BACKEND_NOT_CONFIGURED', message: (error as Error).message },
-				{ status: 501 }
-			);
+			return notImplementedCapability({
+				error: 'NOT_IMPLEMENTED',
+				status: 501,
+				message: (error as Error).message,
+				capability: 'AI_STREAM_BACKEND',
+				milestone: 'P0',
+			});
 		}
 
 		return apiInternalError('Internal server error', 500);

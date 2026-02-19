@@ -9,6 +9,8 @@ const ROUTE_EXPECTATIONS = [
   { file: 'app/api/auth/login/route.ts', scope: 'auth-login' },
   { file: 'app/api/auth/register/route.ts', scope: 'auth-register' },
   { file: 'app/api/ai/chat/route.ts', scope: 'ai-chat' },
+  { file: 'app/api/ai/query/route.ts', scope: 'ai-query' },
+  { file: 'app/api/ai/stream/route.ts', scope: 'ai-stream' },
   { file: 'app/api/ai/complete/route.ts', scope: 'ai-complete' },
   { file: 'app/api/ai/chat-advanced/route.ts', scope: 'ai-chat-advanced' },
   { file: 'app/api/ai/action/route.ts', scope: 'ai-action' },

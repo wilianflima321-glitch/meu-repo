@@ -899,3 +899,13 @@ Implemented:
 Critical reading:
 1. This reduces abuse/spike risk on session orchestration polling and privileged access control endpoints.
 2. Residual limitation persists in fallback mode deployments where distributed backing is not configured.
+
+## Delta 2026-02-19 XXXV - AI query/stream protection and capability truthfulness
+Implemented:
+1. Added abuse control to AI query and stream endpoints with explicit 429 metadata.
+2. Normalized no-provider/no-backend states to capability envelope (`501 NOT_IMPLEMENTED`) for machine-readable handling.
+3. Extended critical CI rate-limit scanner to include these AI endpoints.
+
+Critical reading:
+1. This closes another P0 abuse/cost vector in high-throughput AI surfaces.
+2. Remaining limitation is still operational: distributed backing depends on Upstash env presence in deployed runtime.

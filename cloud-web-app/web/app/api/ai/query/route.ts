@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits';
 import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 
 /**
  * AI Query API - Conexão REAL com LLMs
@@ -16,6 +18,15 @@ import { persistAITrace } from '@/lib/ai-trace-store';
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-query',
+      key: user.userId,
+      max: 40,
+      windowMs: 60 * 1000,
+      message: 'Too many AI query requests. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { query, context, provider, model } = await req.json();
 
     const traceId = createAITraceId();
@@ -74,11 +85,13 @@ export async function POST(req: NextRequest) {
     
     const availableProviders = aiService.getAvailableProviders();
     if (availableProviders.length === 0) {
-      return NextResponse.json({
-        error: 'NO_AI_PROVIDERS',
-        message: 'Nenhum provider de IA configurado. Configure OPENAI_API_KEY, ANTHROPIC_API_KEY ou GOOGLE_API_KEY no .env',
-        availableProviders: []
-      }, { status: 503 });
+      return notImplementedCapability({
+        error: 'NOT_IMPLEMENTED',
+        status: 501,
+        message: 'AI provider not configured.',
+        capability: 'AI_QUERY',
+        milestone: 'P0',
+      });
     }
 
     // =========================================
