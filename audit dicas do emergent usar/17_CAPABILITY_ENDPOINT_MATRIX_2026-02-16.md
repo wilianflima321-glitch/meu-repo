@@ -34,6 +34,8 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Studio live cost | `app/api/studio/cost/live/route.ts` | `IMPLEMENTED` | per-session cost summary + budget exceeded flag |
 | Studio full access grant | `app/api/studio/access/full/route.ts` | `IMPLEMENTED/PARTIAL` | scoped 30-minute grant with trial/starter gate + inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
 | Studio full access revoke | `app/api/studio/access/full/[id]/route.ts` | `IMPLEMENTED` | explicit revoke contract |
+| Web search tool | `app/api/web/search/route.ts` | `IMPLEMENTED/PARTIAL` | provider chain (`tavily -> serper -> duckduckgo`) with per-user throttle scope `web-search-post` |
+| Web fetch tool | `app/api/web/fetch/route.ts` | `IMPLEMENTED/PARTIAL` | URL safety gating + content extraction with per-user throttle scope `web-fetch-post` |
 | Render cancel | `app/api/render/jobs/[jobId]/cancel/route.ts` | `NOT_IMPLEMENTED` | explicit capability gate with metadata |
 | Billing checkout (non-stripe) | `app/api/billing/checkout/route.ts` | `NOT_IMPLEMENTED` branch | `PAYMENT_GATEWAY_NOT_IMPLEMENTED` with capability metadata |
 | File tree | `app/api/files/tree/route.ts` | `IMPLEMENTED` | canonical file authority |
