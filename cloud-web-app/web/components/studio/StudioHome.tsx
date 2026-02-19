@@ -473,7 +473,18 @@ export default function StudioHome() {
         body: JSON.stringify({ sessionId, scope: fullAccessScope }),
       })
       const data = await parseJson(res)
-      if (!res.ok) throw new Error(data.message || data.error || 'Failed to enable full access.')
+      if (!res.ok) {
+        const suggestedScopes = Array.isArray(data?.metadata?.allowedScopes)
+          ? (data.metadata.allowedScopes as FullAccessScope[])
+          : []
+        if (suggestedScopes.length > 0) {
+          const normalized = defaultFullAccessScope(suggestedScopes)
+          setFullAccessScope(normalized)
+          const readable = suggestedScopes.map(fullAccessScopeLabel).join(', ')
+          throw new Error(`${data.message || 'Scope is not allowed for current plan.'} Allowed: ${readable}.`)
+        }
+        throw new Error(data.message || data.error || 'Failed to enable full access.')
+      }
       setSession(data.session as StudioSession)
       const ttlMinutes = Number(data?.metadata?.ttlMinutes || 0)
       const grantedScope = (data?.metadata?.scope || fullAccessScope) as FullAccessScope
