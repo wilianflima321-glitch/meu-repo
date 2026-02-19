@@ -1303,3 +1303,13 @@ Implemented:
 Critical reading:
 1. This improves separation between skeletal runtime logic and shared animation contracts.
 2. Residual limitation remains: oversized debt still exists (`45` files) and needs continued decomposition.
+
+## Delta 2026-02-19 LXXIV - Animation blueprint contract extraction
+Implemented:
+1. Moved animation blueprint editor type contracts from `components/engine/AnimationBlueprint.tsx` to `components/engine/animation-blueprint-types.ts`.
+2. Preserved component-level contract compatibility by importing/re-exporting shared types from the editor module.
+3. Reduced architecture oversized debt baseline (`45 -> 44`) and tightened threshold to `<=44`.
+
+Critical reading:
+1. This reduces non-runtime contract noise inside a large interactive editor component.
+2. Residual limitation remains: oversized debt still remains (`44` files) and requires ongoing reduction waves.

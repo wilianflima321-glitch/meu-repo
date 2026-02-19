@@ -15,7 +15,7 @@ const THRESHOLDS = {
   apiNotImplemented: 8,
   fileCompatWrappers: 8,
   duplicateBasenames: 0,
-  oversizedFiles: 45,
+  oversizedFiles: 44,
 }
 
 function runScan() {

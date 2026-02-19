@@ -1299,3 +1299,13 @@ Delivered:
 Triaged impact:
 1. Improves maintainability of animation runtime by isolating shared contracts.
 2. Continues controlled architecture debt burn-down without scope expansion.
+
+## Delta 2026-02-19 LXXII - Oversized triage reduction via animation blueprint contract extraction
+Delivered:
+1. Split animation blueprint editor contract types from `components/engine/AnimationBlueprint.tsx` into `components/engine/animation-blueprint-types.ts`.
+2. Preserved runtime/editor-facing contract with explicit type re-export.
+3. Reduced oversized-file metric from `45` to `44` and tightened threshold to `<=44`.
+
+Triaged impact:
+1. Reduces interactive editor component complexity while preserving behavior.
+2. Maintains measurable architecture debt reduction under strict gate governance.

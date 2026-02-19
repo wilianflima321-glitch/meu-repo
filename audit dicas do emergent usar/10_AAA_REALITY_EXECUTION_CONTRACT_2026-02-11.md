@@ -3300,3 +3300,21 @@ Validation status:
 Decision lock:
 1. Animation runtime modules must keep shared contract types extracted from behavior-heavy runtime classes.
 2. Threshold hardening remains coupled to measurable structural reductions only.
+
+## 122) Delta 2026-02-19 LXXVI - Animation blueprint contract extraction
+
+Implemented:
+1. Extracted animation blueprint editor contracts into dedicated module:
+- new `components/engine/animation-blueprint-types.ts`
+- `components/engine/AnimationBlueprint.tsx` now imports/re-exports shared editor contracts and keeps interaction/runtime UI focused
+2. Preserved editor contract compatibility via explicit type re-export.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 44` (was `<=45`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Editor contract/type surfaces should remain extracted from large interactive components.
+2. Baseline tightening remains coupled to actual structural reduction evidence.
