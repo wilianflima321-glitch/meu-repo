@@ -233,6 +233,7 @@ Label: `PARTIAL_INTERNAL`
 - applied to critical auth/ai core/billing/studio-start routes, studio task mutation endpoints, and studio control-plane endpoints (plan, session read/stop, cost polling, full access grant/revoke)
 - extended to additional high-cost AI endpoints (`ai-query`, `ai-stream`) with explicit contract coverage
 - extended auth hardening to explicit 2FA subroutes with missing paths implemented and wrapper route deprecated
+- expanded auth hardening to lifecycle endpoints (`me/profile/delete-account`) and scanner parity for query/stream + 2fa deprecation
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

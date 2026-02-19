@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const authUser = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-me',
+      key: authUser.userId,
+      max: 180,
+      windowMs: 60 * 1000,
+      message: 'Too many auth profile checks. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const user = await prisma.user.findUnique({
       where: { id: authUser.userId },

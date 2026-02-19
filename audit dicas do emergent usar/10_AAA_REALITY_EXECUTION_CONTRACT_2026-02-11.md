@@ -2471,3 +2471,25 @@ Operational note:
 Decision lock:
 1. Test deferral is temporary execution policy for velocity, not contract relaxation.
 2. Release/promotion decisions remain blocked on full gate evidence.
+
+## 85) Delta 2026-02-19 XXXIX - Auth lifecycle throttle expansion + contract guard sync
+
+Implemented:
+1. Added explicit rate limiting to auth lifecycle endpoints:
+- `app/api/auth/me/route.ts`
+- `app/api/auth/profile/route.ts` (`GET` + `PATCH`)
+- `app/api/auth/delete-account/route.ts`
+2. Expanded route-contract guard coverage:
+- `scripts/check-route-contracts.mjs` now asserts:
+  - `/api/auth/2fa` aggregate deprecation contract
+  - `/api/ai/query` provider gate contract
+  - `/api/ai/stream` backend gate contract
+3. Expanded critical rate-limit scanner coverage for new auth lifecycle scopes.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Security-sensitive auth lifecycle routes must remain throttled and contract-checked in CI.
+2. Newly deprecated and gated routes must stay covered by route-contract scanner to prevent drift.

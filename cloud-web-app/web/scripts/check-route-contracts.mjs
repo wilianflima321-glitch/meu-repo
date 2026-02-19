@@ -57,6 +57,18 @@ const checks = [
     name: 'auth/sessions/[id] deprecation contract',
   },
   {
+    file: 'app/api/auth/2fa/route.ts',
+    patterns: [
+      "error: 'DEPRECATED_ROUTE'",
+      'status: 410',
+      'deprecatedSince:',
+      'removalCycleTarget:',
+      'deprecationPolicy:',
+      'availableRoutes:',
+    ],
+    name: 'auth/2fa aggregate deprecation contract',
+  },
+  {
     file: 'lib/server/compatibility-route-telemetry.ts',
     patterns: [
       'x-aethel-deprecated-since',
@@ -124,6 +136,16 @@ const checks = [
     file: 'app/api/ai/action/route.ts',
     patterns: ["error: 'NOT_IMPLEMENTED'", 'status: 501'],
     name: 'ai/action provider-gate contract',
+  },
+  {
+    file: 'app/api/ai/query/route.ts',
+    patterns: ["error: 'NOT_IMPLEMENTED'", 'status: 501', "capability: 'AI_QUERY'"],
+    name: 'ai/query provider-gate contract',
+  },
+  {
+    file: 'app/api/ai/stream/route.ts',
+    patterns: ["error: 'NOT_IMPLEMENTED'", 'status: 501', "capability: 'AI_STREAM_BACKEND'"],
+    name: 'ai/stream backend-gate contract',
   },
   {
     file: 'app/api/ai/inline-edit/route.ts',

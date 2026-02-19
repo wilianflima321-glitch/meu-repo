@@ -72,6 +72,7 @@ Validation status:
 5. `AI_CHANGE_APPLY` and `AI_CHANGE_ROLLBACK` blocked states now use capability envelope helper, including `x-aethel-capability*` headers.
 6. Studio route contracts include blocked/inactive-edge checks (`checks=32`).
 7. Studio task gating routes now use shared capability envelope helper for header parity (`x-aethel-capability*`).
+8. Route contract scanner now includes `/api/auth/2fa` aggregate deprecation contract and explicit gate checks for `/api/ai/query` and `/api/ai/stream`.
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

@@ -920,3 +920,16 @@ Implemented:
 Critical reading:
 1. This closes a real journey break in Profile security flow (`/api/auth/2fa/disable` path now exists and is protected).
 2. Residual limitation remains operational around full gate evidence not yet rerun in this wave.
+
+## Delta 2026-02-19 XXXVII - Auth lifecycle and contract-scanner consistency uplift
+Implemented:
+1. Added throttle controls for auth lifecycle endpoints (`me`, `profile read/update`, `delete-account`).
+2. Expanded route-contract scanner to include:
+- `/api/auth/2fa` aggregate deprecation contract
+- `/api/ai/query` gate contract
+- `/api/ai/stream` gate contract
+3. Expanded critical rate-limit scanner matrix for auth lifecycle scopes.
+
+Critical reading:
+1. This reduces abuse surface on identity endpoints and improves contract drift detection.
+2. Remaining limitation unchanged: full gate evidence still deferred by current execution policy.

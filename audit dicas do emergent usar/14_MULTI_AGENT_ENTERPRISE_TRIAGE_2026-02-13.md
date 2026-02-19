@@ -911,3 +911,13 @@ Delivered:
 Triaged impact:
 1. Removes ambiguity and dead-path behavior in security settings journey.
 2. Improves hardening posture for brute-force sensitive 2FA operations.
+
+## Delta 2026-02-19 XXXV - Security triage: auth lifecycle + scanner parity
+Delivered:
+1. Added rate-limit guardrails for auth lifecycle routes (`/api/auth/me`, `/api/auth/profile`, `/api/auth/delete-account`).
+2. Expanded contract scanner for deprecation/gate parity on `/api/auth/2fa`, `/api/ai/query`, `/api/ai/stream`.
+3. Expanded critical rate-limit scanner matrix to include new auth lifecycle scopes.
+
+Triaged impact:
+1. Better protection on high-value identity endpoints.
+2. Lower risk of silent contract drift in newly gated/deprecated routes.
