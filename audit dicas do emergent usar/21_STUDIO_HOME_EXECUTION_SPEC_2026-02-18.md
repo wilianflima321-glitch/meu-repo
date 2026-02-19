@@ -118,3 +118,5 @@ Mandatory before completion:
 17. IDE chat panel now surfaces trace summaries from advanced chat responses for decision/cost transparency.
 18. Full Access grant route now enforces plan-scoped allowed scopes and TTL policy (`starter/trial=project@15m`, `basic<=workspace@20m`, `pro/studio=all@30m`, `enterprise=all@45m`).
 19. Studio Home now mirrors Full Access policy in UI via scope selector, plan-aware disabled options, and scope+TTL feedback from API metadata.
+20. Interface baseline recovered to zero on high-severity tracks after Studio Home accent drift correction.
+21. Interface scan now tracks auxiliary AI `NOT_IMPLEMENTED` surfaces separately (`not-implemented-noncritical=2`) while preserving critical UI ceiling (`not-implemented-ui=6`).

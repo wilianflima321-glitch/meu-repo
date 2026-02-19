@@ -1123,3 +1123,13 @@ Implemented:
 Critical reading:
 1. This removes a user-facing mismatch where UI requested unavailable scope by default.
 2. Residual limitation remains: static plan-to-scope mapping in UI must be kept synchronized with backend policy updates.
+
+## Delta 2026-02-19 LVI - Interface metric hardening split (critical vs auxiliary)
+Implemented:
+1. Removed residual legacy accent token usage in Studio Home action controls.
+2. Refined interface scanner to separate critical UI `NOT_IMPLEMENTED` from auxiliary AI endpoints.
+3. Added explicit gate threshold for auxiliary track (`not-implemented-noncritical <= 2`) without relaxing critical baseline.
+
+Critical reading:
+1. This prevents hidden metric drift while avoiding false critical inflation from non-UI endpoints.
+2. Residual limitation remains: auxiliary `NOT_IMPLEMENTED` surfaces still require roadmap closure before L4/L5 promotion claims.

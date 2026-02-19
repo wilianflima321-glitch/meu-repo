@@ -642,7 +642,7 @@ export default function StudioHome() {
                       session.tasks.every((task) => task.status === 'done')
                     }
                     onClick={runWave}
-                    className="rounded border border-indigo-500/40 bg-indigo-500/15 px-2 py-1 text-[11px] font-semibold text-indigo-100 hover:bg-indigo-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                   >
                     Run Wave
                   </button>

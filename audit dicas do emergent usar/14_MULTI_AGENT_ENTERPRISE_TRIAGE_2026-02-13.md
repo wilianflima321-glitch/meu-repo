@@ -1118,3 +1118,15 @@ Delivered:
 Triaged impact:
 1. Removes CTA mismatch between home UI and backend policy gates.
 2. Improves operational clarity for users managing cost-bound access windows.
+
+## Delta 2026-02-19 LIV - Interface triage stabilization pass
+Delivered:
+1. Fixed Studio Home accent drift on mission orchestration controls.
+2. Updated interface critical scan to split `NOT_IMPLEMENTED` into:
+- critical UI track
+- auxiliary noncritical AI track
+3. Updated interface gate to enforce both tracks with explicit ceilings.
+
+Triaged impact:
+1. Restores critical visual baseline guarantees without masking auxiliary capability debt.
+2. Improves triage signal quality for release decisioning and owner accountability.

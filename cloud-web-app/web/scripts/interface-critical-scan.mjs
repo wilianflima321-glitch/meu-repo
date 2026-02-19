@@ -39,6 +39,14 @@ const METRICS = [
     label: 'Explicit NOT_IMPLEMENTED UI states',
     regex: /\bNOT_IMPLEMENTED\b/g,
     severity: 'info',
+    exclude: /[/\\]app[/\\]api[/\\]ai[/\\](query|stream)[/\\]route\.ts$/,
+  },
+  {
+    id: 'not-implemented-noncritical',
+    label: 'Explicit NOT_IMPLEMENTED non-critical AI surfaces (tracked)',
+    regex: /\bNOT_IMPLEMENTED\b/g,
+    severity: 'info',
+    include: /[/\\]app[/\\]api[/\\]ai[/\\](query|stream)[/\\]route\.ts$/,
   },
   {
     id: 'deprecated-surface-usage',

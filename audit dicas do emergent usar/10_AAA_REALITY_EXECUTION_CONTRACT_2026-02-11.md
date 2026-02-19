@@ -2956,3 +2956,27 @@ Validation status:
 Decision lock:
 1. Studio Home must only expose scopes allowed by current plan policy to avoid false CTA behavior.
 2. UI scope semantics must stay coupled to canonical backend contract (`allowedScopes`, `ttlMinutes`).
+
+## 104) Delta 2026-02-19 LVIII - Interface gate normalization and regression recovery
+
+Implemented:
+1. Removed accidental legacy accent usage from Studio Home (`Run Wave` control migrated from indigo palette to sky palette).
+2. Restored critical interface baseline after regression:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+3. Refined interface scanner to split `NOT_IMPLEMENTED` tracking:
+- `not-implemented-ui` keeps critical UI-facing capability gates (`limit=6`)
+- added `not-implemented-noncritical` for auxiliary AI surfaces (`/api/ai/query`, `/api/ai/stream`)
+4. Updated interface gate thresholds to enforce both tracks:
+- `not-implemented-ui <= 6`
+- `not-implemented-noncritical <= 2`
+
+Validation status:
+1. Executed in-wave: `qa:interface-critical`, `qa:interface-gate`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Auxiliary `NOT_IMPLEMENTED` endpoints must stay visible in reporting, but cannot inflate critical UI baseline metrics.
+2. Any future increase on either not-implemented track requires explicit canonical delta and owner.

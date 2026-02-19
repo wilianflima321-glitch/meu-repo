@@ -58,4 +58,18 @@ Scope: Absorver feedback externo sem inflar claims, mantendo contrato canonico a
 
 ## 6) Estado desta atualizacao
 1. Documento criado para absorver o relatorio externo sem lacunas de governanca.
-2. Nenhum gate de teste executado nesta onda por decisao operacional da rodada (rodar tudo no fechamento).
+2. Onda atual executou apenas gates de interface para correção de baseline e calibracao de metricas.
+
+## 7) Snapshot factual da onda atual
+1. `qa:interface-critical`:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+- `not-implemented-noncritical=2`
+2. `qa:interface-gate`: PASS com thresholds atualizados para os dois trilhos de `NOT_IMPLEMENTED`.
+3. Lacunas que permanecem para fechamento de fase:
+- rerun consolidado do gate enterprise completo
+- validacao operacional de Upstash em ambiente de deploy
+- fechamento de claims `PARTIAL_INTERNAL` em `10`/`22` somente com evidencia de gate final

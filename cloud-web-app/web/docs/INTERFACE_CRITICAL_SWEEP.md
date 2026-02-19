@@ -1,8 +1,8 @@
 # Interface Critical Sweep
 
-- Generated at: `2026-02-18T23:01:24.126Z`
+- Generated at: `2026-02-19T11:33:34.422Z`
 - Scope: `app/`, `components/`
-- Files scanned: `531`
+- Files scanned: `535`
 
 ## Summary
 
@@ -11,6 +11,7 @@
 - `admin-status-light-tokens` (high): 0
 - `blocking-browser-dialogs` (medium): 0
 - `not-implemented-ui` (info): 6
+- `not-implemented-noncritical` (info): 2
 - `deprecated-surface-usage` (medium): 0
 - `frontend-workspace-route-usage` (high): 0
 - `legacy-editor-shell-usage` (high): 0
@@ -61,6 +62,17 @@
 | `app/api/ai/inline-completion/route.ts` | 1 |
 | `app/api/ai/inline-edit/route.ts` | 1 |
 | `app/api/render/jobs/[jobId]/cancel/route.ts` | 1 |
+
+## Explicit NOT_IMPLEMENTED non-critical AI surfaces (tracked)
+
+- Metric ID: `not-implemented-noncritical`
+- Severity: `info`
+- Total matches: `2`
+
+| File | Matches |
+| --- | ---: |
+| `app/api/ai/query/route.ts` | 1 |
+| `app/api/ai/stream/route.ts` | 1 |
 
 ## Deprecated surface references (_deprecated)
 
