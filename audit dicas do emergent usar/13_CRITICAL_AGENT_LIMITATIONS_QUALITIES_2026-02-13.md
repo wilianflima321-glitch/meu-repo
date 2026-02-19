@@ -1195,3 +1195,12 @@ Implemented:
 Critical reading:
 1. This removes residual path ambiguity for humans and AI tooling and prevents accidental import drift.
 2. Residual limitation remains: oversized file debt (`>=1200` lines) is still high and requires dedicated refactor waves.
+
+## Delta 2026-02-19 LXIII - Oversized drift guard tightened to factual baseline
+Implemented:
+1. Tightened architecture gate oversized-files threshold from `<=56` to `<=55`.
+2. Preserved duplicate hard lock at zero as baseline invariant.
+
+Critical reading:
+1. This prevents silent growth of monolith files beyond current known debt.
+2. Residual limitation remains: threshold tightening controls regression, but does not reduce existing oversized-module count by itself.

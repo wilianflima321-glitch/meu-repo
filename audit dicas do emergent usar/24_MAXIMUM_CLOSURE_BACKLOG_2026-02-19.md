@@ -16,7 +16,10 @@ Consolidar o que ainda falta para fechamento de fase com qualidade enterprise, s
 - `not-implemented-noncritical=2`
 3. Deltas canônicos continuam `PARTIAL_INTERNAL` até rerun completo de gates enterprise.
 4. `qa:architecture-gate`: PASS no baseline atual.
-5. `ROUTES_INVENTORY.md` normalizado:
+5. Baseline arquitetural travado:
+- `duplicateBasenames=0` (gate `<=0`)
+- `oversizedFiles=55` (gate `<=55`)
+6. `ROUTES_INVENTORY.md` normalizado:
 - `NOT_IMPLEMENTED total=10`
 - `critical=8`
 - `non-critical=2`

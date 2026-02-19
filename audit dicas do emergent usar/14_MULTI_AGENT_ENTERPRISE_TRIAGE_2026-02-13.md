@@ -1189,3 +1189,14 @@ Delivered:
 Triaged impact:
 1. Eliminates residual duplicate surface ambiguity in active codebase.
 2. Shifts remaining architecture risk focus from duplication to oversized module refactoring.
+
+## Delta 2026-02-19 LXI - Oversized module triage guardrail tightening
+Delivered:
+1. Tightened architecture gate `oversizedFiles` threshold from `56` to `55`.
+2. Confirmed architecture baseline remains passing with:
+- `duplicateBasenames=0`
+- `oversizedFiles=55`
+
+Triaged impact:
+1. Prevents net growth of oversized monolith files in active waves.
+2. Keeps pressure on refactor prioritization without expanding scope in this phase.

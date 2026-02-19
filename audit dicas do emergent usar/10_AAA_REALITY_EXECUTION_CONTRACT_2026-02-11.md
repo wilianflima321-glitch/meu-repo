@@ -3103,3 +3103,18 @@ Validation status:
 Decision lock:
 1. Duplicate component basename reintroduction is disallowed unless explicitly justified for compatibility and documented in canonical deltas.
 2. Canonical ownership remains single-surface per feature domain (assets, ide, collaboration, admin).
+
+## 111) Delta 2026-02-19 LXV - Oversized module gate tightening
+
+Implemented:
+1. Tightened architecture gate oversized-file threshold to current factual baseline:
+- `oversizedFiles <= 55` (was `<=56`)
+2. Kept duplicate threshold hard lock at zero (`duplicateBasenames <= 0`).
+
+Validation status:
+1. Executed in-wave: `qa:architecture-gate` (PASS with `oversizedFiles=55`, `duplicateBasenames=0`).
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. New oversized module creation above baseline is now blocked by default.
+2. Any threshold relaxation requires explicit canonical delta and owner sign-off.

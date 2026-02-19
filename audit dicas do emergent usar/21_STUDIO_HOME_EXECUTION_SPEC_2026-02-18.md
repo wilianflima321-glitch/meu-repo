@@ -127,3 +127,4 @@ Mandatory before completion:
 25. Enterprise gate now includes architecture drift checks as mandatory pre-release contract.
 26. Duplicate component drift was reduced to zero (`duplicate basenames 10 -> 0`) after removal of residual unused legacy duplicates.
 27. Architecture gate duplicate threshold was tightened to `duplicateBasenames <= 0` to prevent reintroduction.
+28. Architecture gate oversized-module threshold was tightened to `oversizedFiles <= 55` to freeze current monolith debt ceiling.
