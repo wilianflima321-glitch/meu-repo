@@ -1170,3 +1170,12 @@ Delivered:
 Triaged impact:
 1. Reduces import/path ambiguity and maintenance overhead.
 2. Keeps duplicate reduction measurable and guarded against regression.
+
+## Delta 2026-02-19 LIX - Capability debt triage normalization
+Delivered:
+1. Route inventory now reports `NOT_IMPLEMENTED` by criticality band.
+2. Added explicit payment-gateway capability debt counting in inventory output.
+
+Triaged impact:
+1. Removes ambiguity between route inventory and interface-gate debt views.
+2. Improves owner assignment for capability closure waves.

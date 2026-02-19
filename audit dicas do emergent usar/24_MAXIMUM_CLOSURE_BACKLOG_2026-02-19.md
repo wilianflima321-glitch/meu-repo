@@ -16,6 +16,11 @@ Consolidar o que ainda falta para fechamento de fase com qualidade enterprise, s
 - `not-implemented-noncritical=2`
 3. Deltas canônicos continuam `PARTIAL_INTERNAL` até rerun completo de gates enterprise.
 4. `qa:architecture-gate`: PASS no baseline atual.
+5. `ROUTES_INVENTORY.md` normalizado:
+- `NOT_IMPLEMENTED total=10`
+- `critical=8`
+- `non-critical=2`
+- `PAYMENT_GATEWAY_NOT_IMPLEMENTED=2`
 
 ## 2) P0 de fechamento (bloqueadores)
 ### P0-01 Consolidacao final de gates

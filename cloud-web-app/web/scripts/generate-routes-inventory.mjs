@@ -7,6 +7,10 @@ const API_DIR = path.join(APP_DIR, 'api');
 const OUTPUT_FILE = path.join(ROOT, 'docs', 'ROUTES_INVENTORY.md');
 
 const skipDirs = new Set(['node_modules', '.next', 'dist', 'build']);
+const NONCRITICAL_NOT_IMPLEMENTED_API_ROUTES = new Set([
+  '/api/ai/query',
+  '/api/ai/stream',
+]);
 
 function walk(dir, predicate, out = []) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -54,10 +58,34 @@ const authRoutes = routeEntries.filter((r) => {
 const coreWorkbenchRoutes = routeEntries.filter((r) => r.route === '/ide').length;
 const redirectToWorkbench = routeEntries.filter((r) => /redirect\(['"]\/ide/.test(r.content) || /WorkbenchRedirect/.test(r.content)).length;
 
-const apiNotImplemented = apiRouteFiles.reduce((count, file) => {
+function normalizeApiRouteFromFile(filePath) {
+  const rel = path.relative(API_DIR, filePath).replace(/\\/g, '/');
+  const route = rel.replace(/\/route\.tsx?$/, '').replace(/^route\.tsx?$/, '');
+  return `/api/${route}`.replace(/\/+/g, '/');
+}
+
+let apiNotImplemented = 0;
+let apiNotImplementedCritical = 0;
+let apiNotImplementedNoncritical = 0;
+let paymentGatewayNotImplemented = 0;
+
+for (const file of apiRouteFiles) {
   const content = fs.readFileSync(file, 'utf8');
-  return count + (content.match(/NOT_IMPLEMENTED/g) || []).length;
-}, 0);
+  const route = normalizeApiRouteFromFile(file);
+  const notImplementedMatches = (content.match(/NOT_IMPLEMENTED/g) || []).length;
+  const paymentGatewayMatches = (content.match(/PAYMENT_GATEWAY_NOT_IMPLEMENTED/g) || []).length;
+
+  apiNotImplemented += notImplementedMatches;
+  paymentGatewayNotImplemented += paymentGatewayMatches;
+
+  if (notImplementedMatches > 0) {
+    if (NONCRITICAL_NOT_IMPLEMENTED_API_ROUTES.has(route)) {
+      apiNotImplementedNoncritical += notImplementedMatches;
+    } else {
+      apiNotImplementedCritical += notImplementedMatches;
+    }
+  }
+}
 
 const lines = [];
 lines.push('# ROUTES_INVENTORY.md');
@@ -71,7 +99,10 @@ lines.push(`- Core workbench routes: ${coreWorkbenchRoutes}`);
 lines.push(`- Workbench redirect routes: ${redirectToWorkbench}`);
 lines.push('');
 lines.push('## API Gate Status');
-lines.push(`- Remaining NOT_IMPLEMENTED API markers: ${apiNotImplemented}`);
+lines.push(`- Remaining NOT_IMPLEMENTED API markers (total): ${apiNotImplemented}`);
+lines.push(`- Critical NOT_IMPLEMENTED markers: ${apiNotImplementedCritical}`);
+lines.push(`- Non-critical NOT_IMPLEMENTED markers: ${apiNotImplementedNoncritical}`);
+lines.push(`- PAYMENT_GATEWAY_NOT_IMPLEMENTED markers: ${paymentGatewayNotImplemented}`);
 lines.push('- Canonical file API: `/api/files/tree` + `/api/files/fs`');
 lines.push('- Deprecated file API: `/api/workspace/tree` + `/api/workspace/files` (410 DEPRECATED_ROUTE)');
 lines.push('- Checkout canonical web path: `/billing/checkout`');

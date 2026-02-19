@@ -1176,3 +1176,12 @@ Implemented:
 Critical reading:
 1. This reduces structural ambiguity for AI/editor tooling and lowers accidental import drift.
 2. Residual limitation remains: remaining duplicate basenames still need convergence in targeted P1 waves.
+
+## Delta 2026-02-19 LXI - Capability inventory split hardening
+Implemented:
+1. Route inventory generation now separates critical vs non-critical `NOT_IMPLEMENTED`.
+2. Added explicit tracking of `PAYMENT_GATEWAY_NOT_IMPLEMENTED` markers.
+
+Critical reading:
+1. This improves operational triage by aligning inventory numbers with interface-gate semantics.
+2. Residual limitation remains: classification policy still depends on explicit allowlist maintenance.

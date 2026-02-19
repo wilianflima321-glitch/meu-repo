@@ -3056,3 +3056,24 @@ Validation status:
 Decision lock:
 1. Root-level duplicate component reintroduction is not allowed without explicit compatibility need and owner.
 2. Canonical UI primitives remain under `components/ui/*` and domain-specific folders.
+
+## 109) Delta 2026-02-19 LXIII - Route inventory capability split normalization
+
+Implemented:
+1. Updated route inventory generator to classify `NOT_IMPLEMENTED` markers into:
+- `critical`
+- `non-critical`
+2. Added explicit `PAYMENT_GATEWAY_NOT_IMPLEMENTED` marker counting in route inventory snapshot.
+3. Regenerated `ROUTES_INVENTORY.md` with normalized split:
+- total `NOT_IMPLEMENTED`: 10
+- critical: 8
+- non-critical: 2
+- payment gateway: 2
+
+Validation status:
+1. Executed in-wave: `docs:routes-inventory`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Route inventory must expose capability debt by criticality to prevent triage ambiguity.
+2. Future non-critical reclassification requires explicit canonical delta.

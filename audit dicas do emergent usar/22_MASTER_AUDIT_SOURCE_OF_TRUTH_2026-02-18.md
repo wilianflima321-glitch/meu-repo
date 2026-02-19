@@ -263,6 +263,7 @@ Label: `PARTIAL_INTERNAL`
 - introduced architecture drift gate (`qa:architecture-gate`) and wired it into enterprise-gate + UI workflows
 - refreshed closure backlog and mandatory gate set to include architecture drift enforcement
 - reduced duplicate component basenames from 10 to 5 and tightened gate threshold accordingly
+- normalized route inventory capability debt reporting (critical/non-critical/payment-gateway split)
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

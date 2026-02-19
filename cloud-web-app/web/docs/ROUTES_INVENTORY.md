@@ -1,5 +1,5 @@
 # ROUTES_INVENTORY.md
-Generated: 2026-02-19T11:40:29.617Z
+Generated: 2026-02-19T11:59:14.530Z
 
 ## Summary
 - Total routes: 71
@@ -9,7 +9,10 @@ Generated: 2026-02-19T11:40:29.617Z
 - Workbench redirect routes: 0
 
 ## API Gate Status
-- Remaining NOT_IMPLEMENTED API markers: 10
+- Remaining NOT_IMPLEMENTED API markers (total): 10
+- Critical NOT_IMPLEMENTED markers: 8
+- Non-critical NOT_IMPLEMENTED markers: 2
+- PAYMENT_GATEWAY_NOT_IMPLEMENTED markers: 2
 - Canonical file API: `/api/files/tree` + `/api/files/fs`
 - Deprecated file API: `/api/workspace/tree` + `/api/workspace/files` (410 DEPRECATED_ROUTE)
 - Checkout canonical web path: `/billing/checkout`
