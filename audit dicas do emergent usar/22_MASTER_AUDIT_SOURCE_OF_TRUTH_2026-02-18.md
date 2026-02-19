@@ -238,6 +238,7 @@ Label: `PARTIAL_INTERNAL`
 - expanded abuse control to billing lifecycle + wallet + usage status + admin payments/security overview route surfaces with CI scanner enforcement
 - expanded abuse control to project lifecycle/collaboration/export + asset lifecycle/upload/download route surfaces with CI scanner enforcement
 - expanded abuse control to AI auxiliary + media generation route surfaces with CI scanner enforcement
+- migrated web tool routes (`/api/web/search`, `/api/web/fetch`) to shared awaited limiter contract and added explicit protection for `/api/render/jobs/[jobId]/cancel`
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

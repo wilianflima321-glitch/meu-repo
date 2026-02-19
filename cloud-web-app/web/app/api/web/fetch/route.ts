@@ -6,8 +6,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 const CONFIG = {
   timeout: 15000,
@@ -93,20 +94,17 @@ function extractTextFromHtml(html: string): { title: string; content: string; ma
 }
 
 export async function POST(req: NextRequest) {
-  let user: AuthUser;
   try {
-    user = requireAuth(req);
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  
-  // Rate limit check
-  const rateLimitResult = checkRateLimit(req, { windowMs: 60000, maxRequests: 20 });
-  if (!rateLimitResult.allowed) {
-    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
-  }
+    const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'web-fetch-post',
+      key: user.userId,
+      max: 40,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many web fetch requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
-  try {
     const { url, selector } = await req.json();
     
     if (!url || typeof url !== 'string') {
@@ -179,14 +177,13 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('[Web Fetch API] Error:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
     
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json({ error: 'Request timeout' }, { status: 504 });
     }
     
-    return NextResponse.json(
-      { error: 'Failed to fetch URL' },
-      { status: 500 }
-    );
+    return apiInternalError();
   }
 }

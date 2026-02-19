@@ -974,3 +974,13 @@ Implemented:
 Critical reading:
 1. This reduces risk of unbounded AI spend and request storms in agentic and media generation pathways.
 2. Residual limitation remains operational: fallback limiter mode still depends on Upstash presence in deployed environments.
+
+## Delta 2026-02-19 XLII - Web tools and render-cancel protection uplift
+Implemented:
+1. Migrated `web/search` and `web/fetch` routes to shared awaited rate-limit contract (`enforceRateLimit`) with per-scope policy.
+2. Added explicit throttle protection to `render/jobs/[jobId]/cancel` even while endpoint remains capability-gated (`NOT_IMPLEMENTED`).
+3. Extended critical scanner coverage so these routes are now contract-gated in CI.
+
+Critical reading:
+1. This closes an abuse vector where external fetch/search could be spammed outside the shared limiter baseline.
+2. Residual limitation remains operational: final wave still requires consolidated gate evidence and distributed limiter backing in deployed runtime.

@@ -962,3 +962,13 @@ Delivered:
 Triaged impact:
 1. Reduced risk of high-cost AI endpoint saturation and accidental overconsumption.
 2. Improved reliability envelope for AI-heavy workflows with explicit per-route throttle policy.
+
+## Delta 2026-02-19 XL - Security triage: web tools + render cancel control expansion
+Delivered:
+1. Migrated `app/api/web/search` and `app/api/web/fetch` to shared route-level rate-limit guard (`enforceRateLimit`) with explicit scopes.
+2. Added explicit abuse-control throttle to `app/api/render/jobs/[jobId]/cancel` while keeping capability-gated behavior (`NOT_IMPLEMENTED`).
+3. Extended `qa:critical-rate-limit` scanner matrix to enforce these new scopes.
+
+Triaged impact:
+1. Reduced abuse and cost-spike risk in external web tool endpoints used by AI workflows.
+2. Prevented unthrottled control-plane mutation attempts on render cancel before queue/runtime implementation is complete.

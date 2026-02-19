@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { notImplementedCapability } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +16,16 @@ export async function POST(
   { params }: { params: { jobId: string } }
 ) {
   try {
-    requireAuth(request)
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'render-job-cancel-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many render job cancel requests. Please wait before retrying.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const { jobId } = params
 
     if (!jobId) {
@@ -30,6 +41,8 @@ export async function POST(
     })
   } catch (error) {
     console.error('[render/jobs/cancel] Error:', error)
-    return NextResponse.json({ error: 'Failed to cancel render job' }, { status: 500 })
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
   }
 }

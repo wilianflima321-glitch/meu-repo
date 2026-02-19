@@ -18,6 +18,8 @@ const ROUTE_EXPECTATIONS = [
   { file: 'app/api/auth/profile/route.ts', scope: 'auth-profile-read' },
   { file: 'app/api/auth/profile/route.ts', scope: 'auth-profile-update' },
   { file: 'app/api/auth/delete-account/route.ts', scope: 'auth-delete-account' },
+  { file: 'app/api/web/search/route.ts', scope: 'web-search-post' },
+  { file: 'app/api/web/fetch/route.ts', scope: 'web-fetch-post' },
   { file: 'app/api/files/route.ts', scope: 'files-legacy-get' },
   { file: 'app/api/files/route.ts', scope: 'files-legacy-post' },
   { file: 'app/api/files/tree/route.ts', scope: 'files-tree' },
@@ -126,6 +128,7 @@ const ROUTE_EXPECTATIONS = [
   { file: 'app/api/studio/tasks/[id]/rollback/route.ts', scope: 'studio-task-rollback' },
   { file: 'app/api/studio/access/full/route.ts', scope: 'studio-full-access-grant' },
   { file: 'app/api/studio/access/full/[id]/route.ts', scope: 'studio-full-access-revoke' },
+  { file: 'app/api/render/jobs/[jobId]/cancel/route.ts', scope: 'render-job-cancel-post' },
 ]
 
 const failures = []

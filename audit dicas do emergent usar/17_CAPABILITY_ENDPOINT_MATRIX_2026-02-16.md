@@ -75,6 +75,7 @@ Validation status:
 8. Route contract scanner now includes `/api/auth/2fa` aggregate deprecation contract and explicit gate checks for `/api/ai/query` and `/api/ai/stream`.
 9. Critical rate-limit scanner now includes canonical + compatibility file routes to enforce abuse protection on file authority surface.
 10. Critical rate-limit scanner now also includes billing lifecycle, wallet, usage status, admin payments/security endpoints, project lifecycle/export surfaces, asset upload/download/mutation surfaces, and AI auxiliary/media generation surfaces.
+11. Critical rate-limit scanner additionally enforces web-tool ingress surfaces (`/api/web/search`, `/api/web/fetch`) and render control-plane cancel endpoint (`/api/render/jobs/[jobId]/cancel`).
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

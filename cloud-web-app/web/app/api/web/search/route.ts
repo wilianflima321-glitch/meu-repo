@@ -6,8 +6,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 const CONFIG = {
   tavily: process.env.TAVILY_API_KEY,
@@ -117,20 +118,17 @@ async function searchDuckDuckGo(query: string, maxResults: number) {
 }
 
 export async function POST(req: NextRequest) {
-  let user: AuthUser;
   try {
-    user = requireAuth(req);
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  
-  // Rate limit check
-  const rateLimitResult = checkRateLimit(req, { windowMs: 60000, maxRequests: 30 });
-  if (!rateLimitResult.allowed) {
-    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
-  }
+    const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'web-search-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many web search requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
-  try {
     const { query, maxResults = 5 } = await req.json();
     
     if (!query || typeof query !== 'string') {
@@ -176,9 +174,8 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('[Web Search API] Error:', error);
-    return NextResponse.json(
-      { error: 'Search failed' },
-      { status: 500 }
-    );
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }

@@ -2614,3 +2614,21 @@ Validation status:
 Decision lock:
 1. High-cost AI media and agentic endpoints are part of mandatory abuse-control baseline.
 2. No AI auxiliary surface may remain unthrottled in production-hardening waves.
+
+## 90) Delta 2026-02-19 XLIV - Web tools and render-cancel abuse-control expansion
+
+Implemented:
+1. Migrated web tool endpoints from legacy `checkRateLimit` to shared awaited limiter contract:
+- `app/api/web/search/route.ts`
+- `app/api/web/fetch/route.ts`
+2. Added explicit throttle policy to render capability-gated control endpoint:
+- `app/api/render/jobs/[jobId]/cancel/route.ts`
+3. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. External web-search/fetch routes are treated as high-cost abuse-prone surfaces and must remain explicitly throttled.
+2. Capability-gated mutation endpoints (render cancel) still require abuse control even before runtime wiring is implemented.
