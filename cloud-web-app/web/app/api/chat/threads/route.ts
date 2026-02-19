@@ -3,12 +3,21 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'chat-threads-get',
+      key: user.userId,
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many chat threads list requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const url = new URL(req.url);
@@ -47,6 +56,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'chat-threads-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many chat thread creation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const body = await req.json().catch(() => ({}));

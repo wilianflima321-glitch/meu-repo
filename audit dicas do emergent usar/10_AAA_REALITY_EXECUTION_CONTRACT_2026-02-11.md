@@ -2665,3 +2665,48 @@ Validation status:
 Decision lock:
 1. Shell execution ingress is classified as high-impact and must always remain explicitly throttled.
 2. Existing per-minute in-route command throttle remains additive, not replacement for shared route limiter.
+
+## 93) Delta 2026-02-19 XLVII - Terminal/Chat/Git/Jobs abuse-control expansion
+
+Implemented:
+1. Added shared awaited limiter protection across terminal control endpoints:
+- `app/api/terminal/action/route.ts`
+- `app/api/terminal/create/route.ts`
+- `app/api/terminal/close/route.ts`
+- `app/api/terminal/input/route.ts`
+- `app/api/terminal/kill/route.ts`
+- `app/api/terminal/resize/route.ts`
+- `app/api/terminal/sandbox/route.ts` (`POST`, `DELETE`, `GET`)
+2. Added shared awaited limiter protection across chat thread/orchestrator endpoints:
+- `app/api/chat/orchestrator/route.ts`
+- `app/api/chat/threads/route.ts` (`GET`, `POST`)
+- `app/api/chat/threads/[id]/route.ts` (`GET`, `PATCH`, `DELETE`)
+- `app/api/chat/threads/[id]/messages/route.ts` (`GET`, `POST`)
+- `app/api/chat/threads/clone/route.ts`
+- `app/api/chat/threads/merge/route.ts`
+3. Added shared awaited limiter protection across git API endpoints:
+- `app/api/git/route.ts` (`POST`, `GET`)
+- `app/api/git/add/route.ts`
+- `app/api/git/status/route.ts`
+- `app/api/git/checkout/route.ts`
+- `app/api/git/commit/route.ts`
+- `app/api/git/pull/route.ts`
+- `app/api/git/push/route.ts`
+- `app/api/git/branch/route.ts` (`POST`, `GET`, `DELETE`)
+4. Added shared awaited limiter protection across job queue endpoints:
+- `app/api/jobs/route.ts` (`GET`, `POST`)
+- `app/api/jobs/start/route.ts` (`POST`, `GET`)
+- `app/api/jobs/stats/route.ts`
+- `app/api/jobs/stop/route.ts`
+- `app/api/jobs/[id]/route.ts` (`GET`, `DELETE`)
+- `app/api/jobs/[id]/retry/route.ts`
+- `app/api/jobs/[id]/cancel/route.ts`
+5. Expanded `qa:critical-rate-limit` scanner matrix to enforce all new scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Runtime control-plane endpoints (`terminal/chat/git/jobs`) are now part of mandatory abuse-control baseline.
+2. Legacy local limiter logic may remain additive, but shared server limiter is mandatory contract.

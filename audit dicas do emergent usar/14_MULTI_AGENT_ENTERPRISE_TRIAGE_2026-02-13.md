@@ -990,3 +990,15 @@ Delivered:
 Triaged impact:
 1. Reduced risk of command-execution burst abuse from authenticated clients.
 2. Increased safety by layering route-level limiter above command/session local throttle logic.
+
+## Delta 2026-02-19 XLIII - Security triage: terminal/chat/git/jobs control expansion
+Delivered:
+1. Added shared limiter guardrails for terminal control endpoints and sandbox lifecycle.
+2. Added shared limiter guardrails for chat orchestrator and thread lifecycle endpoints.
+3. Added shared limiter guardrails for git operation endpoints (both generic and dedicated routes).
+4. Added shared limiter guardrails for job queue control endpoints (start/stop/stats/detail/retry/cancel/list/create).
+5. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
+
+Triaged impact:
+1. Reduced operational abuse and burst-risk on core runtime control APIs.
+2. Increased release confidence by moving another large endpoint family under mandatory CI throttle-contract checks.

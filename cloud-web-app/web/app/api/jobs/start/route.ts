@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -19,7 +20,15 @@ function isAuthNotConfigured(error: unknown): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    requireAuth(request);
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'jobs-start-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many job queue start requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const result = await queueManager.setAllQueuesPaused(false);
     if (!result.available) {
@@ -59,7 +68,15 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request);
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'jobs-start-get',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many job queue start status requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const available = await queueManager.isAvailable();
     if (!available) {

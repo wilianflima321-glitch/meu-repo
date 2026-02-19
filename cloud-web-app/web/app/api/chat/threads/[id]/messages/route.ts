@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,14 @@ async function assertThreadOwnership(userId: string, threadId: string) {
 export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'chat-thread-messages-get',
+      key: user.userId,
+      max: 720,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many chat messages read requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const threadId = ctx.params.id;
@@ -49,6 +58,14 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
 export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'chat-thread-messages-post',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many chat message creation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const threadId = ctx.params.id;

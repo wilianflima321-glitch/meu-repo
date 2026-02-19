@@ -80,6 +80,7 @@ Validation status:
 11. Critical rate-limit scanner additionally enforces web-tool ingress surfaces (`/api/web/search`, `/api/web/fetch`) and render control-plane cancel endpoint (`/api/render/jobs/[jobId]/cancel`).
 12. AI media generation handlers now rely on shared `enforceRateLimit` only (legacy local `checkRateLimit` duplication removed) to keep throttle policy deterministic.
 13. Terminal command execution ingress (`/api/terminal/execute`) is now part of mandatory rate-limit scanner coverage via scope `terminal-execute-post`.
+14. Scanner coverage now also includes terminal control/sandbox, chat thread/orchestrator, git operations, and job queue control endpoints.
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.

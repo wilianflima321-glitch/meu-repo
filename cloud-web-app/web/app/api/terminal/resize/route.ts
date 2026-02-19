@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 /**
  * POST /api/terminal/resize
@@ -9,6 +10,14 @@ import { requireAuth } from '@/lib/auth-server';
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-resize-post',
+      key: user.userId,
+      max: 1200,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal resize requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { sessionId, cols, rows } = await request.json();
 
     if (!sessionId || !cols || !rows) {

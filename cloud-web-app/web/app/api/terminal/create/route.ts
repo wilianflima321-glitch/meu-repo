@@ -5,6 +5,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { createTerminalSession } from '@/lib/server/terminal-pty-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface CreateTerminalRequest {
   name: string;
@@ -18,6 +19,14 @@ interface CreateTerminalRequest {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-create-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal create requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const body: CreateTerminalRequest = await request.json();

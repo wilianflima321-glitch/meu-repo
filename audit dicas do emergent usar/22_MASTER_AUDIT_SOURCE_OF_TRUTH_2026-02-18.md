@@ -241,6 +241,7 @@ Label: `PARTIAL_INTERNAL`
 - migrated web tool routes (`/api/web/search`, `/api/web/fetch`) to shared awaited limiter contract and added explicit protection for `/api/render/jobs/[jobId]/cancel`
 - removed duplicate local `checkRateLimit` usage from AI media generation handlers, keeping shared server limiter as single enforcement path
 - added shared route-level throttle for `/api/terminal/execute` and enforced it in critical scanner matrix
+- expanded shared limiter + scanner coverage to terminal control/sandbox, chat orchestration and thread lifecycle, git operations, and job queue control endpoints
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

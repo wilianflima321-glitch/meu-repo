@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,14 @@ async function assertThreadOwnership(userId: string, threadId: string) {
 export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'chat-thread-detail-get',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many chat thread detail requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const threadId = ctx.params.id;
@@ -37,6 +46,14 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
 export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'chat-thread-detail-patch',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many chat thread update requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const threadId = ctx.params.id;
@@ -76,6 +93,14 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
 export async function DELETE(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'chat-thread-detail-delete',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many chat thread delete requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const threadId = ctx.params.id;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 /**
  * POST /api/terminal/kill
@@ -9,6 +10,14 @@ import { requireAuth } from '@/lib/auth-server';
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-kill-post',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal kill requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { sessionId, signal = 'SIGTERM' } = await request.json();
 
     if (!sessionId) {

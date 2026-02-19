@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -25,7 +26,15 @@ export async function POST(
   { params }: RouteParams
 ) {
   try {
-    requireAuth(request);
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'jobs-id-cancel-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many job cancel requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { id } = await params;
 
     const available = await queueManager.isAvailable();

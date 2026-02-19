@@ -11,9 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { sandboxManager, SandboxSession } from '@/lib/server/sandbox-manager';
+import { sandboxManager } from '@/lib/server/sandbox-manager';
 import { prisma } from '@/lib/db';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 // Track sandbox creation rate per user
 const sandboxRateStore = new Map<string, { count: number; resetTime: number }>();
@@ -64,6 +64,14 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-sandbox-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal sandbox create requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -161,6 +169,14 @@ export async function DELETE(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-sandbox-delete',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal sandbox delete requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -216,6 +232,14 @@ export async function GET(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-sandbox-get',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal sandbox status requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

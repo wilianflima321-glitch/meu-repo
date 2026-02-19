@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { QUEUE_NAMES, queueManager, type QueueJobSnapshot } from '@/lib/queue-system';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 type JobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
 type JobType = 'build' | 'render' | 'export' | 'import' | 'compress' | 'upload';
@@ -91,7 +92,15 @@ function isAuthNotConfigured(error: unknown): boolean {
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request);
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'jobs-get',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many jobs list requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
@@ -152,6 +161,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'jobs-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many job creation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body = await request.json();
     const { type, projectId, projectName, metadata } = body;

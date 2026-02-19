@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 const execFileAsync = promisify(execFile);
 
@@ -25,6 +26,14 @@ interface GitBranchRequest {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'git-branch-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many git branch mutation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const body: GitBranchRequest = await request.json();
@@ -96,6 +105,14 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'git-branch-get',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many git branch list requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const { searchParams } = new URL(request.url);
@@ -147,6 +164,14 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'git-branch-delete',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many git branch delete requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const body: GitBranchRequest = await request.json();

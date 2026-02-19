@@ -1002,3 +1002,15 @@ Implemented:
 Critical reading:
 1. This reduces abuse risk on one of the highest-impact endpoints (real shell command execution).
 2. Residual limitation remains: command-level safeguards still rely on local policy maps and require periodic review against new bypass patterns.
+
+## Delta 2026-02-19 XLV - Runtime control-plane limiter coverage uplift
+Implemented:
+1. Expanded shared limiter coverage to terminal control APIs (`action/create/close/input/kill/resize/sandbox`).
+2. Expanded coverage to chat orchestration/thread lifecycle APIs (list/detail/messages/clone/merge/orchestrator).
+3. Expanded coverage to git operation APIs (generic git endpoint + dedicated add/status/checkout/commit/pull/push/branch surfaces).
+4. Expanded coverage to job queue APIs (list/create/start/stop/stats/detail/retry/cancel).
+5. Updated critical scanner matrix so these scopes are CI-enforced.
+
+Critical reading:
+1. This significantly reduces abuse exposure on high-frequency operational endpoints that directly mutate runtime state.
+2. Residual limitation remains operational: full confidence still requires consolidated gate evidence and deployed Upstash-backed limiter mode.
