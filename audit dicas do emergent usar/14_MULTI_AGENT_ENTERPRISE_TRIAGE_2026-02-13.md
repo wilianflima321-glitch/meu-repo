@@ -1279,3 +1279,13 @@ Delivered:
 Triaged impact:
 1. Improves maintainability of media/cinematic runtime surfaces.
 2. Continues measurable architecture debt reduction without changing product scope.
+
+## Delta 2026-02-19 LXX - Oversized triage reduction via capture preset extraction
+Delivered:
+1. Split capture photo filter presets from `lib/capture/capture-system.tsx` into `lib/capture/capture-presets.ts`.
+2. Preserved runtime-facing behavior by importing preset catalog into capture runtime.
+3. Reduced oversized-file metric from `47` to `46` and tightened threshold to `<=46`.
+
+Triaged impact:
+1. Improves modularity of capture/photo-mode subsystem.
+2. Keeps architecture debt reduction incremental and contract-safe.

@@ -3264,3 +3264,21 @@ Validation status:
 Decision lock:
 1. Runtime-heavy media systems must keep shared contract/type surfaces extracted.
 2. Oversized threshold hardening continues only after measurable structural reduction.
+
+## 120) Delta 2026-02-19 LXXIV - Capture preset extraction
+
+Implemented:
+1. Extracted photo filter presets from capture runtime module:
+- new `lib/capture/capture-presets.ts`
+- `lib/capture/capture-system.tsx` now imports shared filter presets and keeps runtime behavior focused
+2. Preserved capture runtime behavior and preset contract (`PHOTO_FILTER_PRESETS`) through module import.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 46` (was `<=47`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Static media filter catalogs must remain extracted from runtime orchestration modules.
+2. Baseline tightening remains bound to real code-structure reduction only.

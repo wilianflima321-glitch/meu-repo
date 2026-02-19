@@ -1283,3 +1283,13 @@ Implemented:
 Critical reading:
 1. This strengthens separation between cutscene runtime behavior and shared contracts.
 2. Residual limitation remains: oversized debt still exists (`47` files) and must continue declining in next waves.
+
+## Delta 2026-02-19 LXXII - Capture preset decomposition
+Implemented:
+1. Moved photo filter preset catalog from `lib/capture/capture-system.tsx` to `lib/capture/capture-presets.ts`.
+2. Preserved runtime behavior by importing shared preset catalog back into capture runtime.
+3. Reduced architecture oversized debt baseline (`47 -> 46`) and tightened threshold to `<=46`.
+
+Critical reading:
+1. This further separates static media data from capture runtime orchestration.
+2. Residual limitation remains: oversized debt is still non-trivial (`46` files) and needs sustained follow-up waves.
