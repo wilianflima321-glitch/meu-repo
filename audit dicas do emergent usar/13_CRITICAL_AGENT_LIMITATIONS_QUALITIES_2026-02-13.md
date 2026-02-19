@@ -1273,3 +1273,13 @@ Implemented:
 Critical reading:
 1. This improves separation between core node runtime and high-level preset orchestration.
 2. Residual limitation remains: oversized debt is still significant (`48` files) and requires continued decomposition waves.
+
+## Delta 2026-02-19 LXXI - Cutscene contract type extraction
+Implemented:
+1. Moved cutscene type contracts from `lib/cutscene/cutscene-system.tsx` into `lib/cutscene/cutscene-types.ts`.
+2. Preserved API compatibility with explicit type re-export from cutscene runtime module.
+3. Reduced architecture oversized debt baseline (`48 -> 47`) and tightened threshold to `<=47`.
+
+Critical reading:
+1. This strengthens separation between cutscene runtime behavior and shared contracts.
+2. Residual limitation remains: oversized debt still exists (`47` files) and must continue declining in next waves.

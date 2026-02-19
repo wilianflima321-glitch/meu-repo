@@ -3246,3 +3246,21 @@ Validation status:
 Decision lock:
 1. Preset authoring logic should remain outside core behavior runtime where feasible.
 2. Contract-preserving delegation is the required path for large runtime-file reductions.
+
+## 119) Delta 2026-02-19 LXXIII - Cutscene type-surface extraction
+
+Implemented:
+1. Extracted cutscene contract types into dedicated module:
+- new `lib/cutscene/cutscene-types.ts`
+- `lib/cutscene/cutscene-system.tsx` now imports/re-exports cutscene contracts and keeps runtime playback logic focused
+2. Preserved cutscene runtime API compatibility via explicit type re-export.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 47` (was `<=48`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Runtime-heavy media systems must keep shared contract/type surfaces extracted.
+2. Oversized threshold hardening continues only after measurable structural reduction.

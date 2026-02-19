@@ -1269,3 +1269,13 @@ Delivered:
 Triaged impact:
 1. Further decouples core AI node runtime from high-level preset construction logic.
 2. Maintains contract stability while reducing monolith risk.
+
+## Delta 2026-02-19 LXIX - Oversized triage reduction via cutscene contract extraction
+Delivered:
+1. Split cutscene type contracts from `lib/cutscene/cutscene-system.tsx` into `lib/cutscene/cutscene-types.ts`.
+2. Preserved runtime-facing contract via type re-export in cutscene runtime module.
+3. Reduced oversized-file metric from `48` to `47` and tightened threshold to `<=47`.
+
+Triaged impact:
+1. Improves maintainability of media/cinematic runtime surfaces.
+2. Continues measurable architecture debt reduction without changing product scope.
