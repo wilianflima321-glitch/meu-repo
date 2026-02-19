@@ -71,7 +71,7 @@ jobs:
         run: |
           npm --prefix cloud-web-app/web run qa:mojibake
 
-      - name: Start server (web app with static fallback)
+      - name: Start server (web app required)
         run: |
           check_ready() {
             for i in $(seq 1 45); do
@@ -90,16 +90,10 @@ jobs:
             exit 0
           fi
 
-          echo "Web app did not start in time; switching to static audit site."
-          node tools/ide/ui-audit/static_server.js > /tmp/static-server.log 2>&1 &
-          if ! check_ready; then
-            echo "Static fallback did not become ready."
-            echo "--- portal-dev.log (tail) ---"
-            tail -n 80 /tmp/portal-dev.log || true
-            echo "--- static-server.log (tail) ---"
-            tail -n 80 /tmp/static-server.log || true
-            exit 1
-          fi
+          echo "Web app did not start in time."
+          echo "--- portal-dev.log (tail) ---"
+          tail -n 80 /tmp/portal-dev.log || true
+          exit 1
 
       - name: Run UI audit
         run: |
@@ -126,4 +120,3 @@ jobs:
             tools/ide/ui-audit/output
             .lighthouseci/
             /tmp/portal-dev.log
-            /tmp/static-server.log

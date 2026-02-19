@@ -1,17 +1,19 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-19T01:01:15.904Z`
+- Generated at: `2026-02-19T11:40:16.275Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
 
-- API route files: **245**
+- API route files: **246**
 - Deprecated component files (`components/_deprecated/*`): **0**
 - Frontend usage of file compatibility routes (`/api/files/read|write|list|...`): **0**
 - Frontend usage of deprecated workspace routes (`/api/workspace/*`): **0**
 - Redirect alias pages to `/ide?entry=`: **0**
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
+- Duplicate component basenames: **10**
+- Oversized source files (>=1200 lines): **56**
 
 ## Top Compatibility Call Sites
 
@@ -30,6 +32,84 @@
 | File | Referenced |
 | --- | --- |
 | `components/editor/MonacoEditor.tsx` | yes |
+
+## Duplicate Component Basenames
+
+- `breadcrumbs` (2)
+  - `components/Breadcrumbs.tsx`
+  - `components/editor/Breadcrumbs.tsx`
+- `button` (2)
+  - `components/Button.tsx`
+  - `components/ui/Button.tsx`
+- `contentbrowser` (2)
+  - `components/assets/ContentBrowser.tsx`
+  - `components/engine/ContentBrowser.tsx`
+- `debugpanel` (2)
+  - `components/debug/DebugPanel.tsx`
+  - `components/ide/DebugPanel.tsx`
+- `gitpanel` (2)
+  - `components/GitPanel.tsx`
+  - `components/git/GitPanel.tsx`
+- `jobqueuedashboard` (2)
+  - `components/admin/JobQueueDashboard.tsx`
+  - `components/dashboard/JobQueueDashboard.tsx`
+- `outputpanel` (2)
+  - `components/OutputPanel.tsx`
+  - `components/output/OutputPanel.tsx`
+- `quickopen` (2)
+  - `components/QuickOpen.tsx`
+  - `components/explorer/QuickOpen.tsx`
+- `securitydashboard` (2)
+  - `components/admin/SecurityDashboard.tsx`
+  - `components/dashboard/SecurityDashboard.tsx`
+- `timemachineslider` (2)
+  - `components/collaboration/TimeMachineSlider.tsx`
+  - `components/vcs/TimeMachineSlider.tsx`
+
+## Oversized Source Files (>=1200 lines)
+
+| File | Lines |
+| --- | ---: |
+| `components/AethelDashboard.tsx` | 3528 |
+| `lib/translations.ts` | 1699 |
+| `lib/ai-audio-engine.ts` | 1653 |
+| `components/video/VideoTimelineEditor.tsx` | 1572 |
+| `components/physics/FluidSimulationEditor.tsx` | 1570 |
+| `lib/vfx-graph-editor.ts` | 1505 |
+| `components/engine/ContentBrowser.tsx` | 1491 |
+| `components/media/MediaStudio.tsx` | 1487 |
+| `lib/fluid-simulation-system.ts` | 1482 |
+| `lib/openapi-spec.ts` | 1460 |
+| `lib/quest-mission-system.ts` | 1438 |
+| `components/engine/LevelEditor.tsx` | 1410 |
+| `lib/ai/behavior-tree-system.tsx` | 1400 |
+| `lib/motion-matching-system.ts` | 1399 |
+| `lib/webxr-vr-system.ts` | 1395 |
+| `lib/pbr-shader-pipeline.ts` | 1392 |
+| `components/animation/AnimationBlueprintEditor.tsx` | 1385 |
+| `lib/engine/scene-graph.ts` | 1380 |
+| `lib/cloth-simulation.ts` | 1369 |
+| `components/ide/AIChatPanelPro.tsx` | 1366 |
+| `components/terrain/TerrainSculptingEditor.tsx` | 1362 |
+| `lib/hot-reload/hot-reload-server.ts` | 1351 |
+| `components/scene-editor/SceneEditor.tsx` | 1348 |
+| `components/visual-scripting/VisualScriptEditor.tsx` | 1335 |
+| `components/engine/DetailsPanel.tsx` | 1334 |
+| `lib/physics/physics-system.ts` | 1332 |
+| `lib/engine/physics-engine.ts` | 1318 |
+| `lib/engine/particle-system.ts` | 1305 |
+| `lib/networking-multiplayer.ts` | 1305 |
+| `lib/theme/theme-service.ts` | 1305 |
+| `components/settings/SettingsUI.tsx` | 1295 |
+| `lib/mcp/aethel-mcp-server.ts` | 1294 |
+| `lib/hair-fur-system.ts` | 1292 |
+| `components/character/HairFurEditor.tsx` | 1284 |
+| `lib/postprocessing/post-processing-system.ts` | 1279 |
+| `components/engine/NiagaraVFX.tsx` | 1276 |
+| `lib/replay/replay-system.tsx` | 1269 |
+| `lib/behavior-tree.ts` | 1267 |
+| `lib/profiler-integrated.ts` | 1267 |
+| `components/physics/ClothSimulationEditor.tsx` | 1256 |
 
 ## Notes
 

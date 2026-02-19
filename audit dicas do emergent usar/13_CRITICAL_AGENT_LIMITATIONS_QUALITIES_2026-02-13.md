@@ -1133,3 +1133,23 @@ Implemented:
 Critical reading:
 1. This prevents hidden metric drift while avoiding false critical inflation from non-UI endpoints.
 2. Residual limitation remains: auxiliary `NOT_IMPLEMENTED` surfaces still require roadmap closure before L4/L5 promotion claims.
+
+## Delta 2026-02-19 LVII - Visual/architecture governance hardening
+Implemented:
+1. Visual regression workflow no longer tolerates missing baseline/compare report in PR flow.
+2. Architecture scan now tracks duplicate component basenames and oversized source files as explicit drift metrics.
+3. Route and architecture inventories were regenerated for current factual snapshot.
+
+Critical reading:
+1. This raises release confidence by eliminating silent visual-compare bypass behavior.
+2. Residual limitation remains: drift metrics are diagnostic until enforced by explicit fail thresholds in enterprise gate.
+
+## Delta 2026-02-19 LVIII - UI audit CI realism hardening
+Implemented:
+1. Removed static fallback startup path from visual regression compare workflow.
+2. Removed static fallback startup path from UI audit workflow.
+3. Both workflows now hard-fail on real app boot failure.
+
+Critical reading:
+1. This removes false-green risk where fixture pages pass while real app is broken.
+2. Residual limitation remains: full confidence still depends on end-to-end gate runs in CI after this change.

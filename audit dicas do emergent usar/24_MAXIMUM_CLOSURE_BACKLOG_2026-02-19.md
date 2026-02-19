@@ -78,6 +78,9 @@ Arquivos:
 Arquivos:
 - `.github/workflows/visual-regression-compare.yml`
 - `.github/workflows/ui-audit.yml`
+Status parcial:
+- `visual-regression-compare.yml` endurecido (baseline/report obrigatorios e sem fallback estatico).
+- `ui-audit.yml` endurecido (sem fallback estatico para evitar falso verde).
 
 ## 4) P2 (sem prometer nessa fase)
 1. Readiness gate de colaboracao avancada (locks, conflitos, reconexao, SLO).

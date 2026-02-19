@@ -1130,3 +1130,23 @@ Delivered:
 Triaged impact:
 1. Restores critical visual baseline guarantees without masking auxiliary capability debt.
 2. Improves triage signal quality for release decisioning and owner accountability.
+
+## Delta 2026-02-19 LV - Pipeline and architecture drift triage
+Delivered:
+1. Removed visual regression compare skip behavior for missing baseline/report paths.
+2. Added architecture drift visibility for duplicate component names and oversized files.
+3. Regenerated route/architecture inventories to support immediate consolidation planning.
+
+Triaged impact:
+1. Tightens PR gate reliability against false-green visual checks.
+2. Converts duplication/monolith debt into explicit, trackable work items for P1 closure.
+
+## Delta 2026-02-19 LVI - CI triage hardening for UI flows
+Delivered:
+1. Removed static fallback execution path from `ui-audit` workflow.
+2. Removed static fallback execution path from `visual-regression-compare` workflow.
+3. Enforced hard failure when real app readiness check does not pass.
+
+Triaged impact:
+1. Increases fidelity of CI as release gate for UI quality.
+2. Prevents hidden regressions from passing through fixture-based fallback runs.

@@ -55,6 +55,39 @@ function topFiles(map, limit = 10) {
     .slice(0, limit)
 }
 
+function basenameWithoutExt(filePath) {
+  return path.basename(filePath, path.extname(filePath)).toLowerCase()
+}
+
+async function collectDuplicateBasenames(files) {
+  const groups = new Map()
+  for (const file of files) {
+    const key = basenameWithoutExt(file)
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(file)
+  }
+
+  return [...groups.entries()]
+    .filter(([name, grouped]) => grouped.length > 1 && name !== 'index')
+    .map(([name, grouped]) => ({
+      name,
+      files: grouped.map((item) => rel(item)).sort(),
+    }))
+    .sort((a, b) => b.files.length - a.files.length || a.name.localeCompare(b.name))
+}
+
+async function collectOversizedFiles(files, threshold = 1200) {
+  const oversized = []
+  for (const file of files) {
+    const content = await fs.readFile(file, 'utf8')
+    const lines = content.split(/\r?\n/).length
+    if (lines >= threshold) {
+      oversized.push({ file: rel(file), lines })
+    }
+  }
+  return oversized.sort((a, b) => b.lines - a.lines)
+}
+
 async function detectUnreferencedCandidates(candidates, searchableFiles) {
   const result = []
   const contents = await Promise.all(
@@ -116,6 +149,9 @@ async function main() {
     [...appFiles, ...componentFiles, ...libFiles, ...hookFiles]
   )
 
+  const duplicateComponentBasenames = await collectDuplicateBasenames(componentFiles)
+  const oversizedFiles = await collectOversizedFiles([...appFiles, ...componentFiles, ...libFiles, ...hookFiles], 1200)
+
   const lines = []
   lines.push('# ARCHITECTURE_CRITICAL_TRIAGE')
   lines.push('')
@@ -131,6 +167,8 @@ async function main() {
   lines.push(`- Redirect alias pages to \`/ide?entry=\`: **${redirectAliases.count}**`)
   lines.push(`- API NOT_IMPLEMENTED markers (` + '`app/api/**/route.ts`' + `): **${notImplementedApi.count}**`)
   lines.push(`- File API compatibility wrappers (` + '`trackCompatibilityRouteHit`' + ` in ` + '`app/api/files/*`' + `): **${fileCompatWrappers.count}**`)
+  lines.push(`- Duplicate component basenames: **${duplicateComponentBasenames.length}**`)
+  lines.push(`- Oversized source files (>=1200 lines): **${oversizedFiles.length}**`)
   lines.push('')
   lines.push('## Top Compatibility Call Sites')
   lines.push('')
@@ -158,6 +196,33 @@ async function main() {
     lines.push(`| \`${item.file}\` | ${item.referenced ? 'yes' : 'no'} |`)
   }
   lines.push('')
+
+  lines.push('## Duplicate Component Basenames')
+  lines.push('')
+  if (duplicateComponentBasenames.length === 0) {
+    lines.push('- none')
+  } else {
+    for (const group of duplicateComponentBasenames.slice(0, 30)) {
+      lines.push(`- \`${group.name}\` (${group.files.length})`)
+      for (const file of group.files) {
+        lines.push(`  - \`${file}\``)
+      }
+    }
+  }
+  lines.push('')
+
+  lines.push('## Oversized Source Files (>=1200 lines)')
+  lines.push('')
+  if (oversizedFiles.length === 0) {
+    lines.push('- none')
+  } else {
+    lines.push('| File | Lines |')
+    lines.push('| --- | ---: |')
+    for (const item of oversizedFiles.slice(0, 40)) {
+      lines.push(`| \`${item.file}\` | ${item.lines} |`)
+    }
+  }
+  lines.push('')
   lines.push('## Notes')
   lines.push('')
   lines.push('- Compatibility routes can be intentional, but should have a time-boxed removal plan.')
@@ -169,7 +234,7 @@ async function main() {
   await fs.writeFile(OUTPUT_FILE, `${lines.join('\n')}\n`, 'utf8')
 
   console.log(
-    `ARCHITECTURE_CRITICAL_TRIAGE_OK apiRoutes=${routeFiles.length}, deprecatedComponents=${deprecatedComponents.length}, fileCompatUsage=${fileCompatUsage.count}, redirectAliases=${redirectAliases.count}, apiNotImplemented=${notImplementedApi.count}, fileCompatWrappers=${fileCompatWrappers.count}`
+    `ARCHITECTURE_CRITICAL_TRIAGE_OK apiRoutes=${routeFiles.length}, deprecatedComponents=${deprecatedComponents.length}, fileCompatUsage=${fileCompatUsage.count}, redirectAliases=${redirectAliases.count}, apiNotImplemented=${notImplementedApi.count}, fileCompatWrappers=${fileCompatWrappers.count}, duplicateBasenames=${duplicateComponentBasenames.length}, oversizedFiles=${oversizedFiles.length}`
   )
 }
 

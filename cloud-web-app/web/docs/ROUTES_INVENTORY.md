@@ -1,15 +1,15 @@
 # ROUTES_INVENTORY.md
-Generated: 2026-02-18T01:57:44.849Z
+Generated: 2026-02-19T11:40:29.617Z
 
 ## Summary
-- Total routes: 88
+- Total routes: 71
 - Admin routes: 44
 - Auth routes: 5
 - Core workbench routes: 1
-- Workbench redirect routes: 17
+- Workbench redirect routes: 0
 
 ## API Gate Status
-- Remaining NOT_IMPLEMENTED API markers: 8
+- Remaining NOT_IMPLEMENTED API markers: 10
 - Canonical file API: `/api/files/tree` + `/api/files/fs`
 - Deprecated file API: `/api/workspace/tree` + `/api/workspace/files` (410 DEPRECATED_ROUTE)
 - Checkout canonical web path: `/billing/checkout`
@@ -61,46 +61,29 @@ Generated: 2026-02-18T01:57:44.849Z
 - /admin/support (admin/support/page.tsx)
 - /admin/updates (admin/updates/page.tsx)
 - /admin/users (admin/users/page.tsx)
-- /ai-command (ai-command/page.tsx)
-- /animation-blueprint (animation-blueprint/page.tsx)
 - /billing (billing/page.tsx)
 - /billing/cancel (billing/cancel/page.tsx)
 - /billing/checkout (billing/checkout/page.tsx)
 - /billing/invoices (billing/invoices/page.tsx)
 - /billing/success (billing/success/page.tsx)
-- /blueprint-editor (blueprint-editor/page.tsx)
-- /chat (chat/page.tsx)
 - /contact (contact/page.tsx)
 - /contact-sales (contact-sales/page.tsx)
 - /dashboard (dashboard/page.tsx)
-- /debugger (debugger/page.tsx)
+- /dashboard/legacy (dashboard/legacy/page.tsx)
 - /docs (docs/page.tsx)
 - /download (download/page.tsx)
-- /editor-hub (editor-hub/page.tsx)
-- /explorer (explorer/page.tsx)
 - /forgot-password (forgot-password/page.tsx)
-- /git (git/page.tsx)
 - /health (health/page.tsx)
 - /help (help/page.tsx)
 - /ide (ide/page.tsx)
-- /landscape-editor (landscape-editor/page.tsx)
-- /level-editor (level-editor/page.tsx)
-- /live-preview (live-preview/page.tsx)
 - /login ((auth)/login/page.tsx)
 - /marketplace (marketplace/page.tsx)
-- /niagara-editor (niagara-editor/page.tsx)
-- /playground (playground/page.tsx)
-- /preview (preview/page.tsx)
 - /pricing (pricing/page.tsx)
 - /profile (profile/page.tsx)
 - /project-settings (project-settings/page.tsx)
 - /register ((auth)/register/page.tsx)
 - /reset-password (reset-password/page.tsx)
-- /search (search/page.tsx)
 - /settings (settings/page.tsx)
 - /status (status/page.tsx)
-- /terminal (terminal/page.tsx)
 - /terms (terms/page.tsx)
-- /testing (testing/page.tsx)
 - /verify-email (verify-email/page.tsx)
-- /vr-preview (vr-preview/page.tsx)

@@ -2980,3 +2980,39 @@ Validation status:
 Decision lock:
 1. Auxiliary `NOT_IMPLEMENTED` endpoints must stay visible in reporting, but cannot inflate critical UI baseline metrics.
 2. Any future increase on either not-implemented track requires explicit canonical delta and owner.
+
+## 105) Delta 2026-02-19 LIX - Visual regression strictness + architecture drift scan
+
+Implemented:
+1. Hardened visual regression workflow to remove skip behavior when baseline is absent:
+- `visual-regression-compare.yml` now requires baseline restore and compare report generation.
+- missing baseline or missing compare report now fails the workflow.
+2. Upgraded architecture triage scanner with high-signal drift metrics:
+- duplicate component basename detection (excluding `index` barrel files)
+- oversized source file inventory (`>=1200` lines)
+3. Regenerated architectural and route inventories for current snapshot:
+- `cloud-web-app/web/docs/ARCHITECTURE_CRITICAL_TRIAGE.md`
+- `cloud-web-app/web/docs/ROUTES_INVENTORY.md`
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `docs:routes-inventory`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. PR visual comparison must be baseline-backed; compare skip paths are not accepted for normal flow.
+2. Duplicate/oversized component drift is now tracked as engineering debt and must feed P1 consolidation waves.
+
+## 106) Delta 2026-02-19 LX - CI audit fallback removal (strict web-app requirement)
+
+Implemented:
+1. Removed static-site fallback from visual regression workflow startup.
+2. Removed static-site fallback from UI audit workflow startup.
+3. Both workflows now fail if the real web app does not boot within readiness window.
+
+Validation status:
+1. Workflow code updated in-repo; CI execution evidence pending next PR run.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. UI quality workflows must validate the real product surface, not fallback fixtures.
+2. Startup failures are release blockers and cannot be bypassed via static fallback paths.

@@ -120,3 +120,5 @@ Mandatory before completion:
 19. Studio Home now mirrors Full Access policy in UI via scope selector, plan-aware disabled options, and scope+TTL feedback from API metadata.
 20. Interface baseline recovered to zero on high-severity tracks after Studio Home accent drift correction.
 21. Interface scan now tracks auxiliary AI `NOT_IMPLEMENTED` surfaces separately (`not-implemented-noncritical=2`) while preserving critical UI ceiling (`not-implemented-ui=6`).
+22. Visual regression PR workflow now fails when baseline/report are missing (no compare skip path in normal flow).
+23. UI audit and visual compare workflows now require real web-app readiness (no static fallback path).
