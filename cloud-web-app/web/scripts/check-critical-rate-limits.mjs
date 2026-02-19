@@ -8,6 +8,12 @@ const ROOT = process.cwd()
 const ROUTE_EXPECTATIONS = [
   { file: 'app/api/auth/login/route.ts', scope: 'auth-login' },
   { file: 'app/api/auth/register/route.ts', scope: 'auth-register' },
+  { file: 'app/api/auth/2fa/setup/route.ts', scope: 'auth-2fa-setup' },
+  { file: 'app/api/auth/2fa/verify/route.ts', scope: 'auth-2fa-verify' },
+  { file: 'app/api/auth/2fa/validate/route.ts', scope: 'auth-2fa-validate' },
+  { file: 'app/api/auth/2fa/disable/route.ts', scope: 'auth-2fa-disable' },
+  { file: 'app/api/auth/2fa/backup-codes/route.ts', scope: 'auth-2fa-backup-codes' },
+  { file: 'app/api/auth/2fa/status/route.ts', scope: 'auth-2fa-status' },
   { file: 'app/api/ai/chat/route.ts', scope: 'ai-chat' },
   { file: 'app/api/ai/query/route.ts', scope: 'ai-query' },
   { file: 'app/api/ai/stream/route.ts', scope: 'ai-stream' },

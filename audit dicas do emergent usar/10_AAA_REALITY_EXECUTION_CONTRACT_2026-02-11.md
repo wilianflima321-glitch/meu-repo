@@ -2428,3 +2428,26 @@ Validation status:
 Decision lock:
 1. High-cost AI surfaces (`query`, `stream`) must remain explicitly throttled and contract-safe.
 2. Provider/backend absence must be machine-readable and never presented as runtime success.
+
+## 83) Delta 2026-02-19 XXXVII - Auth 2FA route hardening and de-duplication
+
+Implemented:
+1. Added explicit 2FA subroutes previously missing from filesystem:
+- `app/api/auth/2fa/disable/route.ts`
+- `app/api/auth/2fa/backup-codes/route.ts`
+- `app/api/auth/2fa/validate/route.ts`
+2. Hardened existing 2FA subroutes:
+- `app/api/auth/2fa/setup/route.ts`
+- `app/api/auth/2fa/verify/route.ts`
+- `app/api/auth/2fa/status/route.ts`
+3. 2FA routes now use cookie-compatible auth (`requireAuth`) and explicit rate limits by route scope.
+4. Deprecated aggregate `/api/auth/2fa` route to explicit `410 DEPRECATED_ROUTE` and pointed consumers to concrete subroutes.
+5. Expanded `qa:critical-rate-limit` scanner coverage for 2FA setup/verify/validate/disable/backup-codes/status.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Security-sensitive auth routes (including 2FA) must remain throttled and cookie-compatible.
+2. Aggregate auth route wrappers are deprecated in favor of explicit endpoint contracts.

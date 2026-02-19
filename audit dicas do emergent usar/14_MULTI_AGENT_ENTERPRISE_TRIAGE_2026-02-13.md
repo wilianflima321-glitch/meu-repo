@@ -901,3 +901,13 @@ Delivered:
 Triaged impact:
 1. Lower risk of cost spikes and runtime overload from unthrottled high-cost AI endpoints.
 2. Better contract consistency for clients handling provider/backend unavailability.
+
+## Delta 2026-02-19 XXXIV - Security triage: auth 2FA flow stabilization
+Delivered:
+1. Implemented missing explicit 2FA routes for disable/backup-codes/validate, aligning API surface with UI calls.
+2. Added route-level abuse controls for all 2FA endpoints and extended critical scanner matrix.
+3. Deprecated aggregate `/api/auth/2fa` wrapper route to explicit 410 contract.
+
+Triaged impact:
+1. Removes ambiguity and dead-path behavior in security settings journey.
+2. Improves hardening posture for brute-force sensitive 2FA operations.

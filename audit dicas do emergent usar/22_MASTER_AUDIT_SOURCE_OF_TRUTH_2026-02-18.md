@@ -232,6 +232,7 @@ Label: `PARTIAL_INTERNAL`
 - shared rate limiter added (Upstash-first with memory fallback)
 - applied to critical auth/ai core/billing/studio-start routes, studio task mutation endpoints, and studio control-plane endpoints (plan, session read/stop, cost polling, full access grant/revoke)
 - extended to additional high-cost AI endpoints (`ai-query`, `ai-stream`) with explicit contract coverage
+- extended auth hardening to explicit 2FA subroutes with missing paths implemented and wrapper route deprecated
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

@@ -64,7 +64,7 @@ Headers (when applicable):
 Validation status:
 1. `qa:route-contracts` PASS
 2. `qa:no-fake-success` PASS
-3. `qa:critical-rate-limit` enforces rate-limit presence on critical abuse-prone routes (`auth`, `ai core` including `query/stream`, `billing`, `studio session start`, `studio task mutation routes`, `studio control-plane routes`).
+3. `qa:critical-rate-limit` enforces rate-limit presence on critical abuse-prone routes (`auth` including `2fa setup/verify/validate/disable/backup-codes/status`, `ai core` including `query/stream`, `billing`, `studio session start`, `studio task mutation routes`, `studio control-plane routes`).
 4. `qa:no-fake-success` also enforces:
 - `PAYMENT_GATEWAY_NOT_IMPLEMENTED -> 501`
 - `AUTH_NOT_CONFIGURED -> 503`

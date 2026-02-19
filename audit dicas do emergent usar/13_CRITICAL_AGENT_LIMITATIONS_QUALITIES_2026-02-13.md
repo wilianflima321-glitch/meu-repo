@@ -909,3 +909,14 @@ Implemented:
 Critical reading:
 1. This closes another P0 abuse/cost vector in high-throughput AI surfaces.
 2. Remaining limitation is still operational: distributed backing depends on Upstash env presence in deployed runtime.
+
+## Delta 2026-02-19 XXXVI - Auth 2FA reliability and route clarity uplift
+Implemented:
+1. Added missing explicit 2FA endpoints (`disable`, `backup-codes`, `validate`) that were referenced by UI flows.
+2. Converted setup/verify/status subroutes to `requireAuth` for cookie-compatible auth path.
+3. Added dedicated rate limits across all 2FA endpoints and expanded CI scanner coverage.
+4. Deprecated aggregate `/api/auth/2fa` route to explicit `410 DEPRECATED_ROUTE` with subroute guidance.
+
+Critical reading:
+1. This closes a real journey break in Profile security flow (`/api/auth/2fa/disable` path now exists and is protected).
+2. Residual limitation remains operational around full gate evidence not yet rerun in this wave.

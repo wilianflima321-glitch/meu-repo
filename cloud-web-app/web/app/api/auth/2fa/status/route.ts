@@ -3,38 +3,37 @@
  * GET /api/auth/2fa/status
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth-server';
-import { twoFactorService } from '@/lib/security/two-factor-auth';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { twoFactorService } from '@/lib/security/two-factor-auth'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // Autenticação
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const auth = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-2fa-status',
+      key: auth.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many 2FA status requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
 
-    const decoded = verifyToken(authHeader.slice(7));
-    if (!decoded) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const status = await twoFactorService.getStatus(decoded.userId);
+    const status = await twoFactorService.getStatus(auth.userId)
 
     return NextResponse.json({
       twoFactorEnabled: status.enabled,
       verifiedAt: status.verifiedAt,
       backupCodesRemaining: status.backupCodesRemaining,
-    });
-
+    })
   } catch (error) {
-    console.error('2FA status error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    console.error('2FA status error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
