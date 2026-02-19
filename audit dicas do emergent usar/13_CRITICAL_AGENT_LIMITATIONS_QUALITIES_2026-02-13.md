@@ -1204,3 +1204,12 @@ Implemented:
 Critical reading:
 1. This prevents silent growth of monolith files beyond current known debt.
 2. Residual limitation remains: threshold tightening controls regression, but does not reduce existing oversized-module count by itself.
+
+## Delta 2026-02-19 LXIV - Duplicate import path regression guard
+Implemented:
+1. Extended canonical-component scanner with banned import rules for removed duplicate surfaces (`engine/debug/dashboard/admin/vcs` duplicate paths).
+2. Preserved canonical fallback mappings to active surfaces (`assets/ContentBrowser`, `ide/DebugPanel`, `collaboration/TimeMachineSlider`).
+
+Critical reading:
+1. This closes the most likely reintroduction path for duplicate components after file cleanup.
+2. Residual limitation remains: scanner blocks known duplicate paths, but architectural drift can still occur via new oversized files if refactor waves stall.

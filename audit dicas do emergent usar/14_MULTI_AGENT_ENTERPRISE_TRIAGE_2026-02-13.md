@@ -1200,3 +1200,12 @@ Delivered:
 Triaged impact:
 1. Prevents net growth of oversized monolith files in active waves.
 2. Keeps pressure on refactor prioritization without expanding scope in this phase.
+
+## Delta 2026-02-19 LXII - Canonical import triage lock for removed duplicates
+Delivered:
+1. Extended canonical-component scanner to fail on imports of removed duplicate paths (`engine/debug/dashboard/admin/vcs` legacy surfaces).
+2. Added explicit canonical replacement targets for each blocked path class.
+
+Triaged impact:
+1. Prevents low-friction backsliding to duplicate component trees.
+2. Improves long-term maintainability by enforcing single authoritative import paths.

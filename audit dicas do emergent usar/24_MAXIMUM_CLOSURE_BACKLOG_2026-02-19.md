@@ -86,6 +86,7 @@ Status:
 - concluido: removidas duplicidades legacy sem uso na raiz e nas superfícies restantes (`JobQueueDashboard`, `SecurityDashboard`, `debug/DebugPanel`, `engine/ContentBrowser`, `vcs/TimeMachineSlider`).
 - `duplicate component basenames`: 10 -> 0 (conforme `ARCHITECTURE_CRITICAL_TRIAGE.md`).
 - gate endurecido: `duplicateBasenames <= 0`.
+- scanner canonico endurecido: imports para paths removidos agora quebram em `qa:canonical-components`.
 
 ### P1-04 Hardening de visual regression pipeline
 1. Remover caminho de "compare skip" quando baseline nao existir; exigir baseline oficial por branch/pipeline.

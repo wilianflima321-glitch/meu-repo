@@ -3118,3 +3118,21 @@ Validation status:
 Decision lock:
 1. New oversized module creation above baseline is now blocked by default.
 2. Any threshold relaxation requires explicit canonical delta and owner sign-off.
+
+## 112) Delta 2026-02-19 LXVI - Canonical import guard for removed duplicate components
+
+Implemented:
+1. Expanded `qa:canonical-components` banned-import rules to block reintroduction of removed duplicate component paths:
+- `/engine/ContentBrowser` -> canonical `components/assets/ContentBrowser`
+- `/debug/DebugPanel` -> canonical `components/ide/DebugPanel`
+- `/dashboard|admin/(JobQueueDashboard|SecurityDashboard)` legacy duplicates
+- `/vcs/TimeMachineSlider` -> canonical `components/collaboration/TimeMachineSlider`
+2. Preserved existing command-palette/status-bar canonical import guards.
+
+Validation status:
+1. Executed in-wave: `qa:canonical-components` (PASS).
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Removed duplicate component paths are now explicitly blocked at scanner level.
+2. Any compatibility exception must be added as explicit, reviewed rule with canonical delta.

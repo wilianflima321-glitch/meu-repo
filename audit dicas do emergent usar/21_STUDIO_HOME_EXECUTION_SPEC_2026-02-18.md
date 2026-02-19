@@ -128,3 +128,4 @@ Mandatory before completion:
 26. Duplicate component drift was reduced to zero (`duplicate basenames 10 -> 0`) after removal of residual unused legacy duplicates.
 27. Architecture gate duplicate threshold was tightened to `duplicateBasenames <= 0` to prevent reintroduction.
 28. Architecture gate oversized-module threshold was tightened to `oversizedFiles <= 55` to freeze current monolith debt ceiling.
+29. Canonical component scan now blocks imports to removed duplicate paths (`engine/debug/dashboard/admin/vcs`) and enforces canonical replacements.

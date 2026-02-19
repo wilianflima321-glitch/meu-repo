@@ -264,6 +264,7 @@ Label: `PARTIAL_INTERNAL`
 - refreshed closure backlog and mandatory gate set to include architecture drift enforcement
 - reduced duplicate component basenames from 10 to 0 and tightened gate threshold to zero accordingly
 - tightened oversized-files architecture gate threshold to current factual baseline (`<=55`)
+- extended canonical component scanner with banned imports for removed duplicate paths (`engine/debug/dashboard/admin/vcs`)
 - normalized route inventory capability debt reporting (critical/non-critical/payment-gateway split)
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
