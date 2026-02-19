@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError, createAPIError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,8 +36,15 @@ async function requireAdminAccess(userId: string): Promise<void> {
 
 export async function GET(req: NextRequest) {
   try {
-    // 1. Verify Auth
     const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'admin-users-get',
+      key: auth.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many admin user list requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // 2. CRÍTICO: Verificar permissão de admin
     await requireAdminAccess(auth.userId);

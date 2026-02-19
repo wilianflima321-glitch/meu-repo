@@ -2830,7 +2830,10 @@ Implemented:
 - `app/api/templates/route.ts` (`GET`, `POST`)
 - `app/api/tasks/detect/route.ts`
 - `app/api/tasks/load/route.ts`
-4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
+4. Added explicit route-level limiter protection on remaining non-wrapper admin reads:
+- `app/api/admin/dashboard/route.ts`
+- `app/api/admin/users/route.ts`
+5. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
 
 Validation status:
 1. Full gate execution intentionally deferred in this wave (user request: run tests later).
@@ -2839,3 +2842,21 @@ Validation status:
 Decision lock:
 1. Product-adjacent operational APIs (analytics/experiments/notifications/onboarding/quotas/templates/tasks) are mandatory abuse-control baseline.
 2. Feature management mutations must remain throttled alongside read endpoints to prevent configuration churn abuse.
+
+## 99) Delta 2026-02-19 LIII - Admin wrapper-level abuse-control baseline
+
+Implemented:
+1. Added shared awaited limiter enforcement inside RBAC admin wrapper:
+- `cloud-web-app/web/lib/rbac.ts` (`withAdminAuth`)
+2. Wrapper now applies deterministic scope-permission-per-method throttling to every route using `withAdminAuth`.
+3. Method-aware policy added:
+- `GET`: higher burst tolerance
+- mutations (`POST|PUT|PATCH|DELETE`): tighter limits
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Any endpoint protected by `withAdminAuth` now inherits mandatory abuse-control baseline even when route-level limiter is absent.
+2. Route-level limiter may remain for stricter endpoint-specific policies; wrapper limiter is baseline floor, not replacement.

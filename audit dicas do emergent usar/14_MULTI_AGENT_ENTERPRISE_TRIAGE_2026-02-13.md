@@ -1052,8 +1052,19 @@ Delivered:
 1. Added shared limiter guardrails for analytics and experiments routes.
 2. Added shared limiter guardrails for feature/user operational routes (`feature-flags`, `feature-flag toggle`, `notifications`, `onboarding`, `quotas`).
 3. Added shared limiter guardrails for template/task helper routes (`templates`, `tasks/detect`, `tasks/load`).
-4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
+4. Added explicit route-level guardrails for non-wrapper admin reads (`admin/dashboard`, `admin/users`).
+5. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
 
 Triaged impact:
 1. Reduced abuse exposure in high-frequency product APIs that are typically called by dashboards, assistant workflows, and setup flows.
 2. Increased release confidence by enforcing these routes under mandatory CI throttle checks.
+
+## Delta 2026-02-19 XLIX - Security triage: admin wrapper baseline hardening
+Delivered:
+1. Added shared limiter guardrail directly in `withAdminAuth` (`lib/rbac.ts`).
+2. Enabled permission+method-scoped throttling for admin routes reusing this wrapper.
+3. Applied stricter baseline policy for mutation methods than read methods.
+
+Triaged impact:
+1. Reduced security risk from scattered admin route implementations that previously relied only on auth.
+2. Increased baseline resilience against admin-panel request storms even before per-route tightening.

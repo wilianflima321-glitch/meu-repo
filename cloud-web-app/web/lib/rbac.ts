@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify, SignJWT } from 'jose';
 import { prisma } from './db';
+import { enforceRateLimit } from './server/rate-limit';
 
 // ============================================================================
 // TIPOS
@@ -331,6 +332,19 @@ export function withAdminAuth(
         mfaEnabled: user.mfaEnabled || false,
         lastLoginAt: null,
       };
+
+      const scopeSuffix = String(requiredPermission || 'ops:dashboard:view')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const rateLimitResponse = await enforceRateLimit({
+        scope: `admin-rbac-${scopeSuffix}-${request.method.toLowerCase()}`,
+        key: adminUser.id,
+        max: request.method.toUpperCase() === 'GET' ? 720 : 240,
+        windowMs: 60 * 60 * 1000,
+        message: 'Too many admin requests. Please wait before retrying.',
+      });
+      if (rateLimitResponse) return rateLimitResponse;
       
       // Executa handler
       return handler(request, { user: adminUser });

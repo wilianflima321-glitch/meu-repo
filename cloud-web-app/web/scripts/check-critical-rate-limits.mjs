@@ -227,6 +227,8 @@ const ROUTE_EXPECTATIONS = [
   { file: 'app/api/templates/route.ts', scope: 'templates-post' },
   { file: 'app/api/tasks/detect/route.ts', scope: 'tasks-detect-post' },
   { file: 'app/api/tasks/load/route.ts', scope: 'tasks-load-post' },
+  { file: 'app/api/admin/dashboard/route.ts', scope: 'admin-dashboard-get' },
+  { file: 'app/api/admin/users/route.ts', scope: 'admin-users-get' },
   { file: 'app/api/admin/payments/route.ts', scope: 'admin-payments-get' },
   { file: 'app/api/admin/payments/gateway/route.ts', scope: 'admin-payments-gateway-get' },
   { file: 'app/api/admin/payments/gateway/route.ts', scope: 'admin-payments-gateway-put' },
