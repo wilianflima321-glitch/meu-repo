@@ -256,6 +256,7 @@ Label: `PARTIAL_INTERNAL`
 - aligned Studio Home Full Access UX with policy contract (scope selector + plan-aware option gating + metadata-based TTL feedback)
 - created canonical benchmark absorption register (`23_EXTERNAL_BENCHMARK_ABSORPTION_2026-02-19.md`) with verified-vs-assumption split
 - restored interface high-severity baseline to zero and split NOT_IMPLEMENTED reporting into critical-ui vs auxiliary tracks
+- created closure backlog (`24_MAXIMUM_CLOSURE_BACKLOG_2026-02-19.md`) with P0/P1/P2 execution order and file-level owners
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

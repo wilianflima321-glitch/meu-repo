@@ -29,6 +29,7 @@ This file defines the canonical source of truth for the Aethel platform. The ent
 - 21_STUDIO_HOME_EXECUTION_SPEC_2026-02-18.md
 - 22_MASTER_AUDIT_SOURCE_OF_TRUTH_2026-02-18.md
 - 23_EXTERNAL_BENCHMARK_ABSORPTION_2026-02-19.md
+- 24_MAXIMUM_CLOSURE_BACKLOG_2026-02-19.md
 
 ## Master Contract Policy
 - `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md` is the single execution master.
