@@ -3034,3 +3034,25 @@ Validation status:
 Decision lock:
 1. Duplicate/oversized component drift and compatibility-route debt are now release-governed metrics.
 2. Threshold changes require explicit canonical delta and owner sign-off.
+
+## 108) Delta 2026-02-19 LXII - Duplicate legacy component surface reduction
+
+Implemented:
+1. Removed unused duplicate root components that overlapped canonical surfaces:
+- `components/Breadcrumbs.tsx`
+- `components/Button.tsx`
+- `components/GitPanel.tsx`
+- `components/OutputPanel.tsx`
+- `components/QuickOpen.tsx`
+2. Updated internal sample/reference strings that pointed to removed `components/Button.tsx` to canonical `components/ui/Button.tsx`.
+3. Regenerated architecture triage and tightened architecture gate threshold:
+- duplicate component basenames reduced from `10` to `5`
+- `qa:architecture-gate` threshold updated to `duplicateBasenames <= 5`
+
+Validation status:
+1. Executed in-wave: `qa:architecture-gate` (PASS with updated threshold).
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Root-level duplicate component reintroduction is not allowed without explicit compatibility need and owner.
+2. Canonical UI primitives remain under `components/ui/*` and domain-specific folders.

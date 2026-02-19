@@ -125,3 +125,4 @@ Mandatory before completion:
 23. UI audit and visual compare workflows now require real web-app readiness (no static fallback path).
 24. Architecture drift gate is active (`qa:architecture-gate`) and currently passing on baseline thresholds.
 25. Enterprise gate now includes architecture drift checks as mandatory pre-release contract.
+26. Duplicate component drift was reduced (`duplicate basenames 10 -> 5`) and locked by updated architecture gate threshold.

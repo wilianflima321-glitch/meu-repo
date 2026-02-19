@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-19T11:49:25.761Z`
+- Generated at: `2026-02-19T11:52:05.270Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -12,7 +12,7 @@
 - Redirect alias pages to `/ide?entry=`: **0**
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
-- Duplicate component basenames: **10**
+- Duplicate component basenames: **5**
 - Oversized source files (>=1200 lines): **56**
 
 ## Top Compatibility Call Sites
@@ -35,30 +35,15 @@
 
 ## Duplicate Component Basenames
 
-- `breadcrumbs` (2)
-  - `components/Breadcrumbs.tsx`
-  - `components/editor/Breadcrumbs.tsx`
-- `button` (2)
-  - `components/Button.tsx`
-  - `components/ui/Button.tsx`
 - `contentbrowser` (2)
   - `components/assets/ContentBrowser.tsx`
   - `components/engine/ContentBrowser.tsx`
 - `debugpanel` (2)
   - `components/debug/DebugPanel.tsx`
   - `components/ide/DebugPanel.tsx`
-- `gitpanel` (2)
-  - `components/GitPanel.tsx`
-  - `components/git/GitPanel.tsx`
 - `jobqueuedashboard` (2)
   - `components/admin/JobQueueDashboard.tsx`
   - `components/dashboard/JobQueueDashboard.tsx`
-- `outputpanel` (2)
-  - `components/OutputPanel.tsx`
-  - `components/output/OutputPanel.tsx`
-- `quickopen` (2)
-  - `components/QuickOpen.tsx`
-  - `components/explorer/QuickOpen.tsx`
 - `securitydashboard` (2)
   - `components/admin/SecurityDashboard.tsx`
   - `components/dashboard/SecurityDashboard.tsx`

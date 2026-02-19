@@ -14,7 +14,7 @@ const THRESHOLDS = {
   redirectAliases: 0,
   apiNotImplemented: 8,
   fileCompatWrappers: 8,
-  duplicateBasenames: 10,
+  duplicateBasenames: 5,
   oversizedFiles: 56,
 }
 
@@ -78,4 +78,3 @@ main().catch((error) => {
   console.error('[architecture-gate] ERROR', error)
   process.exit(1)
 })
-

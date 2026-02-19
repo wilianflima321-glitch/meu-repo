@@ -1166,3 +1166,13 @@ Implemented:
 Critical reading:
 1. This converts architecture drift from advisory report into enforceable regression contract.
 2. Residual limitation remains: current thresholds are freeze-level and still require targeted refactor waves to reduce debt.
+
+## Delta 2026-02-19 LX - Duplicate surface cleanup on component root
+Implemented:
+1. Removed five unused duplicate components from root `components/` that overlapped canonical modules.
+2. Updated sample references to point to canonical `components/ui/Button.tsx`.
+3. Tightened architecture gate duplicate threshold to the new baseline (`<=5`).
+
+Critical reading:
+1. This reduces structural ambiguity for AI/editor tooling and lowers accidental import drift.
+2. Residual limitation remains: remaining duplicate basenames still need convergence in targeted P1 waves.
