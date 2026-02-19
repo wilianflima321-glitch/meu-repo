@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession } from '@/lib/server/studio-home-store'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,15 @@ export async function GET(
 ) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-session-read',
+      key: auth.userId,
+      max: 240,
+      windowMs: 60 * 1000,
+      message: 'Too many studio session read requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const session = await getStudioSession(auth.userId, ctx.params.id)
     if (!session) {
       return NextResponse.json(
@@ -35,4 +45,3 @@ export async function GET(
     return NextResponse.json({ error: 'STUDIO_SESSION_READ_FAILED', message }, { status: 500 })
   }
 }
-

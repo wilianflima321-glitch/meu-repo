@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { stopStudioSession } from '@/lib/server/studio-home-store'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,15 @@ export async function POST(
 ) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-session-stop',
+      key: auth.userId,
+      max: 60,
+      windowMs: 60 * 1000,
+      message: 'Too many studio session stop requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const session = await stopStudioSession(auth.userId, ctx.params.id)
     if (!session) {
       return NextResponse.json(
@@ -35,4 +45,3 @@ export async function POST(
     return NextResponse.json({ error: 'STUDIO_SESSION_STOP_FAILED', message }, { status: 500 })
   }
 }
-

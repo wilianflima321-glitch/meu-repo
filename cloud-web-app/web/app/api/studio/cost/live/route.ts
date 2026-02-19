@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession } from '@/lib/server/studio-home-store'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-cost-live',
+      key: auth.userId,
+      max: 240,
+      windowMs: 60 * 1000,
+      message: 'Too many studio cost polling requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const url = new URL(req.url)
     const sessionId = (url.searchParams.get('sessionId') || '').trim()
     if (!sessionId) {
@@ -47,4 +57,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'STUDIO_COST_LIVE_FAILED', message }, { status: 500 })
   }
 }
-

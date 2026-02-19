@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { revokeFullAccessGrant } from '@/lib/server/studio-home-store'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,15 @@ export async function DELETE(
 ) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-full-access-revoke',
+      key: auth.userId,
+      max: 60,
+      windowMs: 60 * 1000,
+      message: 'Too many full access revoke requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const url = new URL(req.url)
     const sessionId = (url.searchParams.get('sessionId') || '').trim()
     if (!sessionId) {
@@ -41,4 +51,3 @@ export async function DELETE(
     return NextResponse.json({ error: 'STUDIO_FULL_ACCESS_REVOKE_FAILED', message }, { status: 500 })
   }
 }
-

@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
 import { createFullAccessGrant } from '@/lib/server/studio-home-store'
 import { capabilityResponse } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,15 @@ function isTrialOrStarter(plan: string | null | undefined): boolean {
 export async function POST(req: NextRequest) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-full-access-grant',
+      key: auth.userId,
+      max: 30,
+      windowMs: 60 * 1000,
+      message: 'Too many full access grant requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = (await req.json().catch(() => ({}))) as Body
     const sessionId = String(body.sessionId || '').trim()
     if (!sessionId) {

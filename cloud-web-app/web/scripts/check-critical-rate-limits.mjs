@@ -17,10 +17,16 @@ const ROUTE_EXPECTATIONS = [
   { file: 'app/api/billing/checkout/route.ts', scope: 'billing-checkout' },
   { file: 'app/api/billing/checkout-link/route.ts', scope: 'billing-checkout-link' },
   { file: 'app/api/studio/session/start/route.ts', scope: 'studio-session-start' },
+  { file: 'app/api/studio/session/[id]/route.ts', scope: 'studio-session-read' },
+  { file: 'app/api/studio/session/[id]/stop/route.ts', scope: 'studio-session-stop' },
+  { file: 'app/api/studio/cost/live/route.ts', scope: 'studio-cost-live' },
+  { file: 'app/api/studio/tasks/plan/route.ts', scope: 'studio-task-plan' },
   { file: 'app/api/studio/tasks/[id]/run/route.ts', scope: 'studio-task-run' },
   { file: 'app/api/studio/tasks/[id]/validate/route.ts', scope: 'studio-task-validate' },
   { file: 'app/api/studio/tasks/[id]/apply/route.ts', scope: 'studio-task-apply' },
   { file: 'app/api/studio/tasks/[id]/rollback/route.ts', scope: 'studio-task-rollback' },
+  { file: 'app/api/studio/access/full/route.ts', scope: 'studio-full-access-grant' },
+  { file: 'app/api/studio/access/full/[id]/route.ts', scope: 'studio-full-access-revoke' },
 ]
 
 const failures = []

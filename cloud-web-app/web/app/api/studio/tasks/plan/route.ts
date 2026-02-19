@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession, planStudioTasks } from '@/lib/server/studio-home-store'
 import { capabilityResponse } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,15 @@ type Body = { sessionId?: string; force?: boolean }
 export async function POST(req: NextRequest) {
   try {
     const auth = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'studio-task-plan',
+      key: auth.userId,
+      max: 30,
+      windowMs: 60 * 1000,
+      message: 'Too many super plan requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = (await req.json().catch(() => ({}))) as Body
     const sessionId = String(body.sessionId || '').trim()
     if (!sessionId) {

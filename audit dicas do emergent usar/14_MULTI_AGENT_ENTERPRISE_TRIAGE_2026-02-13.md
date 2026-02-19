@@ -882,3 +882,12 @@ Delivered:
 Triaged impact:
 1. Immediate abuse resistance improved with explicit 429 responses and retry metadata.
 2. Remaining gap is environmental: instances without Upstash credentials run in fallback memory mode and should be promoted to distributed mode in production.
+
+## Delta 2026-02-19 XXXII - Security triage: studio control-plane guard expansion
+Delivered:
+1. Added abuse guard coverage for Studio control-plane routes (plan, session read/stop, cost polling, full access grant/revoke).
+2. Extended `qa:critical-rate-limit` scanner matrix to include these routes.
+
+Triaged impact:
+1. Reduced risk of orchestration endpoint saturation under aggressive polling or abusive clients.
+2. Increased release confidence by moving control-plane protection into mandatory CI contract.

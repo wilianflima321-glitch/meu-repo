@@ -890,3 +890,12 @@ Implemented:
 Critical reading:
 1. This closes an immediate P0 gap (abuse control baseline) without changing business scope.
 2. Residual risk remains explicit: deployments without Upstash configuration still run in fallback memory mode (`PARTIAL`).
+
+## Delta 2026-02-19 XXXIV - Studio control-plane protection uplift
+Implemented:
+1. Extended rate-limit guardrails to Studio control-plane endpoints: task plan, session read/stop, cost polling, full access grant/revoke.
+2. Expanded critical scanner coverage so these routes are now contract-gated in CI.
+
+Critical reading:
+1. This reduces abuse/spike risk on session orchestration polling and privileged access control endpoints.
+2. Residual limitation persists in fallback mode deployments where distributed backing is not configured.

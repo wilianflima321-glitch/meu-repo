@@ -2389,3 +2389,23 @@ Validation status:
 Decision lock:
 1. Rate limiting is now mandatory on critical endpoints and must remain explicit (429 with metadata).
 2. Upstash mode is canonical for multi-instance; in-memory remains only fallback/transitional.
+
+## 81) Delta 2026-02-19 XXXV - Studio control-plane abuse guard expansion
+
+Implemented:
+1. Extended rate limiting coverage for Studio control-plane endpoints:
+- `app/api/studio/tasks/plan/route.ts`
+- `app/api/studio/session/[id]/route.ts`
+- `app/api/studio/session/[id]/stop/route.ts`
+- `app/api/studio/cost/live/route.ts`
+- `app/api/studio/access/full/route.ts`
+- `app/api/studio/access/full/[id]/route.ts`
+2. Expanded `scripts/check-critical-rate-limits.mjs` expectations to include these Studio control-plane routes.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Studio control-plane endpoints must keep explicit abuse protection in CI and code.
+2. Session/cost polling endpoints must remain rate-limited to protect shared runtime stability.
