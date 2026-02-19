@@ -79,9 +79,10 @@ Arquivos:
 - `components/OutputPanel.tsx` vs `components/output/OutputPanel.tsx`
 - `components/QuickOpen.tsx` vs `components/explorer/QuickOpen.tsx`
 - `components/assets/ContentBrowser.tsx` vs `components/engine/ContentBrowser.tsx`
-Status parcial:
-- removidas duplicidades legacy sem uso (`Breadcrumbs`, `Button`, `GitPanel`, `OutputPanel`, `QuickOpen` na raiz de `components/`).
-- `duplicate component basenames`: 10 -> 5 (conforme `ARCHITECTURE_CRITICAL_TRIAGE.md`).
+Status:
+- concluido: removidas duplicidades legacy sem uso na raiz e nas superfícies restantes (`JobQueueDashboard`, `SecurityDashboard`, `debug/DebugPanel`, `engine/ContentBrowser`, `vcs/TimeMachineSlider`).
+- `duplicate component basenames`: 10 -> 0 (conforme `ARCHITECTURE_CRITICAL_TRIAGE.md`).
+- gate endurecido: `duplicateBasenames <= 0`.
 
 ### P1-04 Hardening de visual regression pipeline
 1. Remover caminho de "compare skip" quando baseline nao existir; exigir baseline oficial por branch/pipeline.

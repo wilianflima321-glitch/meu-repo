@@ -1185,3 +1185,13 @@ Implemented:
 Critical reading:
 1. This improves operational triage by aligning inventory numbers with interface-gate semantics.
 2. Residual limitation remains: classification policy still depends on explicit allowlist maintenance.
+
+## Delta 2026-02-19 LXII - Duplicate component residual closed
+Implemented:
+1. Removed remaining duplicate basename component files in dashboard/admin/debug/engine/vcs legacy surfaces.
+2. Updated affected barrel exports to keep only canonical component surfaces.
+3. Regenerated architecture triage and tightened duplicate threshold from `<=5` to `<=0`.
+
+Critical reading:
+1. This removes residual path ambiguity for humans and AI tooling and prevents accidental import drift.
+2. Residual limitation remains: oversized file debt (`>=1200` lines) is still high and requires dedicated refactor waves.

@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-19T11:52:05.270Z`
+- Generated at: `2026-02-19T22:45:04.602Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -12,8 +12,8 @@
 - Redirect alias pages to `/ide?entry=`: **0**
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
-- Duplicate component basenames: **5**
-- Oversized source files (>=1200 lines): **56**
+- Duplicate component basenames: **0**
+- Oversized source files (>=1200 lines): **55**
 
 ## Top Compatibility Call Sites
 
@@ -35,21 +35,7 @@
 
 ## Duplicate Component Basenames
 
-- `contentbrowser` (2)
-  - `components/assets/ContentBrowser.tsx`
-  - `components/engine/ContentBrowser.tsx`
-- `debugpanel` (2)
-  - `components/debug/DebugPanel.tsx`
-  - `components/ide/DebugPanel.tsx`
-- `jobqueuedashboard` (2)
-  - `components/admin/JobQueueDashboard.tsx`
-  - `components/dashboard/JobQueueDashboard.tsx`
-- `securitydashboard` (2)
-  - `components/admin/SecurityDashboard.tsx`
-  - `components/dashboard/SecurityDashboard.tsx`
-- `timemachineslider` (2)
-  - `components/collaboration/TimeMachineSlider.tsx`
-  - `components/vcs/TimeMachineSlider.tsx`
+- none
 
 ## Oversized Source Files (>=1200 lines)
 
@@ -61,7 +47,6 @@
 | `components/video/VideoTimelineEditor.tsx` | 1572 |
 | `components/physics/FluidSimulationEditor.tsx` | 1570 |
 | `lib/vfx-graph-editor.ts` | 1505 |
-| `components/engine/ContentBrowser.tsx` | 1491 |
 | `components/media/MediaStudio.tsx` | 1487 |
 | `lib/fluid-simulation-system.ts` | 1482 |
 | `lib/openapi-spec.ts` | 1460 |
@@ -95,6 +80,7 @@
 | `lib/behavior-tree.ts` | 1267 |
 | `lib/profiler-integrated.ts` | 1267 |
 | `components/physics/ClothSimulationEditor.tsx` | 1256 |
+| `components/export/ExportSystem.tsx` | 1254 |
 
 ## Notes
 

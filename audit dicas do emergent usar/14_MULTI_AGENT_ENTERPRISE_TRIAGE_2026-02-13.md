@@ -1179,3 +1179,13 @@ Delivered:
 Triaged impact:
 1. Removes ambiguity between route inventory and interface-gate debt views.
 2. Improves owner assignment for capability closure waves.
+
+## Delta 2026-02-19 LX - Duplicate basename triage closure
+Delivered:
+1. Removed remaining duplicate basename components across admin/dashboard/debug/engine/vcs legacy paths.
+2. Updated dashboard and engine barrel exports to remove deleted surfaces.
+3. Regenerated architecture triage and tightened architecture gate duplicate threshold to zero.
+
+Triaged impact:
+1. Eliminates residual duplicate surface ambiguity in active codebase.
+2. Shifts remaining architecture risk focus from duplication to oversized module refactoring.

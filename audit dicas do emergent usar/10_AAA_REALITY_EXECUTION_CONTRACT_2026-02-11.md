@@ -3077,3 +3077,29 @@ Validation status:
 Decision lock:
 1. Route inventory must expose capability debt by criticality to prevent triage ambiguity.
 2. Future non-critical reclassification requires explicit canonical delta.
+
+## 110) Delta 2026-02-19 LXIV - Duplicate component basename closure (0 residual)
+
+Implemented:
+1. Removed remaining unused duplicate component files:
+- `components/admin/JobQueueDashboard.tsx`
+- `components/dashboard/JobQueueDashboard.tsx`
+- `components/admin/SecurityDashboard.tsx`
+- `components/dashboard/SecurityDashboard.tsx`
+- `components/debug/DebugPanel.tsx` (legacy duplicate; canonical debug surface remains under `components/ide/DebugPanel.tsx`)
+- `components/engine/ContentBrowser.tsx` (canonical remains `components/assets/ContentBrowser.tsx`)
+- `components/vcs/TimeMachineSlider.tsx` (canonical remains `components/collaboration/TimeMachineSlider.tsx`)
+2. Updated barrel exports to stop exposing removed duplicates:
+- `components/engine/index.ts`
+- `components/dashboard/index.ts`
+3. Regenerated architecture triage and tightened architecture drift gate:
+- `duplicateBasenames` reduced from `5` to `0`
+- `qa:architecture-gate` threshold tightened to `duplicateBasenames <= 0`
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate` (PASS with `duplicateBasenames=0`).
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Duplicate component basename reintroduction is disallowed unless explicitly justified for compatibility and documented in canonical deltas.
+2. Canonical ownership remains single-surface per feature domain (assets, ide, collaboration, admin).

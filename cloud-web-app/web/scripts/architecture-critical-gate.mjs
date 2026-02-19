@@ -14,7 +14,7 @@ const THRESHOLDS = {
   redirectAliases: 0,
   apiNotImplemented: 8,
   fileCompatWrappers: 8,
-  duplicateBasenames: 5,
+  duplicateBasenames: 0,
   oversizedFiles: 56,
 }
 
