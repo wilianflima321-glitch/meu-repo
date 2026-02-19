@@ -127,6 +127,7 @@ Mandatory before completion:
 25. Enterprise gate now includes architecture drift checks as mandatory pre-release contract.
 26. Duplicate component drift was reduced to zero (`duplicate basenames 10 -> 0`) after removal of residual unused legacy duplicates.
 27. Architecture gate duplicate threshold was tightened to `duplicateBasenames <= 0` to prevent reintroduction.
-28. Architecture gate oversized-module threshold was tightened to `oversizedFiles <= 54` to freeze current monolith debt ceiling.
+28. Architecture gate oversized-module threshold was tightened to `oversizedFiles <= 53` to freeze current monolith debt ceiling.
 29. Canonical component scan now blocks imports to removed duplicate paths (`engine/debug/dashboard/admin/vcs`) and enforces canonical replacements.
-30. Export subsystem preset catalog was split from `ExportSystem.tsx`, reducing architecture oversized debt baseline and tightening limit to `oversizedFiles <= 54`.
+30. Export subsystem preset catalog was split from `ExportSystem.tsx`, reducing architecture oversized debt baseline.
+31. Facial animation static data tables were split from `FacialAnimationEditor.tsx`, reducing oversized debt baseline and tightening limit to `oversizedFiles <= 53`.

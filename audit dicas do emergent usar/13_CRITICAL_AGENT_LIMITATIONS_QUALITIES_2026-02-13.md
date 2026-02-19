@@ -1223,3 +1223,13 @@ Implemented:
 Critical reading:
 1. This is a structural reduction (real module split), not metric masking.
 2. Residual limitation remains: oversized debt is still substantial (`54` files) and requires continued targeted decomposition.
+
+## Delta 2026-02-19 LXVI - Facial animation editor data decomposition
+Implemented:
+1. Extracted static facial animation data/type tables from `components/character/FacialAnimationEditor.tsx` into `components/character/facial-animation-data.ts`.
+2. Reduced architecture oversized debt baseline (`54 -> 53`) without changing interactive editor behavior.
+3. Tightened oversized threshold to current factual baseline (`<=53`).
+
+Critical reading:
+1. This continues monolith reduction using low-risk static-data extraction.
+2. Residual limitation remains: oversized debt is still high (`53` files) and requires sustained targeted decomposition.

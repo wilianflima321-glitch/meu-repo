@@ -3154,3 +3154,21 @@ Validation status:
 Decision lock:
 1. Oversized-file reduction must be real code-structure reduction (not threshold-only adjustment).
 2. Split modules must preserve explicit capability behavior and avoid fake-success UI paths.
+
+## 114) Delta 2026-02-19 LXVIII - Oversized module reduction (FacialAnimationEditor data split)
+
+Implemented:
+1. Split static facial animation domain data out of UI runtime component:
+- extracted blend-shape categories, emotion presets, visemes, and FACS table into `components/character/facial-animation-data.ts`
+- kept interactive editor/runtime flow in `components/character/FacialAnimationEditor.tsx`
+2. Preserved editor surface contract and type usage through typed imports.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 53` (was `<=54`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Additional oversized reductions should prioritize extraction of static data and pure helpers before behavioral rewrites.
+2. Gate thresholds must track factual baseline only after real structural reduction.

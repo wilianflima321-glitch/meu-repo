@@ -1219,3 +1219,13 @@ Delivered:
 Triaged impact:
 1. Demonstrates measurable monolith-debt reduction without changing product scope.
 2. Improves maintainability of export subsystem while preserving existing runtime behavior.
+
+## Delta 2026-02-19 LXIV - Oversized triage reduction via facial data extraction
+Delivered:
+1. Split static facial animation datasets/tables from `components/character/FacialAnimationEditor.tsx` into `components/character/facial-animation-data.ts`.
+2. Reduced oversized-file metric from `54` to `53`.
+3. Tightened architecture gate oversized threshold to `<=53`.
+
+Triaged impact:
+1. Reduces editor-component complexity while preserving feature behavior.
+2. Keeps architecture debt burn-down measurable and governance-locked.
