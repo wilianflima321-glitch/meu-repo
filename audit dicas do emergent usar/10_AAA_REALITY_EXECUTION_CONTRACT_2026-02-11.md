@@ -3282,3 +3282,21 @@ Validation status:
 Decision lock:
 1. Static media filter catalogs must remain extracted from runtime orchestration modules.
 2. Baseline tightening remains bound to real code-structure reduction only.
+
+## 121) Delta 2026-02-19 LXXV - Skeletal animation type-surface extraction
+
+Implemented:
+1. Extracted skeletal animation contract interfaces into dedicated module:
+- new `lib/skeletal-animation-types.ts`
+- `lib/skeletal-animation.ts` now imports/re-exports skeletal contracts and keeps runtime/bone logic focused
+2. Preserved existing runtime contract compatibility via explicit type re-export.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 45` (was `<=46`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Animation runtime modules must keep shared contract types extracted from behavior-heavy runtime classes.
+2. Threshold hardening remains coupled to measurable structural reductions only.

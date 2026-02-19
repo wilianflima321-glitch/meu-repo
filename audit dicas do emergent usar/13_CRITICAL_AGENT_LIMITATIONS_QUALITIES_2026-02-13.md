@@ -1293,3 +1293,13 @@ Implemented:
 Critical reading:
 1. This further separates static media data from capture runtime orchestration.
 2. Residual limitation remains: oversized debt is still non-trivial (`46` files) and needs sustained follow-up waves.
+
+## Delta 2026-02-19 LXXIII - Skeletal animation contract extraction
+Implemented:
+1. Moved skeletal animation interfaces from `lib/skeletal-animation.ts` to `lib/skeletal-animation-types.ts`.
+2. Preserved public compatibility by importing/re-exporting contracts from skeletal runtime module.
+3. Reduced architecture oversized debt baseline (`46 -> 45`) and tightened threshold to `<=45`.
+
+Critical reading:
+1. This improves separation between skeletal runtime logic and shared animation contracts.
+2. Residual limitation remains: oversized debt still exists (`45` files) and needs continued decomposition.

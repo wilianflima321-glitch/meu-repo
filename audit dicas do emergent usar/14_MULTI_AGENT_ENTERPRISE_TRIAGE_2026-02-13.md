@@ -1289,3 +1289,13 @@ Delivered:
 Triaged impact:
 1. Improves modularity of capture/photo-mode subsystem.
 2. Keeps architecture debt reduction incremental and contract-safe.
+
+## Delta 2026-02-19 LXXI - Oversized triage reduction via skeletal contract extraction
+Delivered:
+1. Split skeletal animation type contracts from `lib/skeletal-animation.ts` into `lib/skeletal-animation-types.ts`.
+2. Preserved runtime-facing contract through explicit type re-export.
+3. Reduced oversized-file metric from `46` to `45` and tightened threshold to `<=45`.
+
+Triaged impact:
+1. Improves maintainability of animation runtime by isolating shared contracts.
+2. Continues controlled architecture debt burn-down without scope expansion.
