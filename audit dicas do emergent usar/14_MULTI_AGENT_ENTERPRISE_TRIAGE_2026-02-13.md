@@ -941,3 +941,14 @@ Delivered:
 Triaged impact:
 1. Reduced risk of cost and finance-surface abuse under burst traffic or misbehaving clients.
 2. Improved operational safety for admin configuration endpoints by preventing unthrottled mutation loops.
+
+## Delta 2026-02-19 XXXVIII - Security triage: projects/assets control expansion
+Delivered:
+1. Added abuse-control throttles to project lifecycle and collaboration routes (projects/detail/folders/members/invite-links/share/duplicate/commits/assets list).
+2. Added abuse-control throttles to project export routes (create/list/status/retry).
+3. Added abuse-control throttles to asset lifecycle routes (presign/upload/detail/confirm/download/duplicate/favorite).
+4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new project/asset scopes.
+
+Triaged impact:
+1. Reduced risk of burst abuse in high-volume asset and collaboration APIs.
+2. Improved reliability posture for export-control and asset-transfer surfaces with explicit throttle contracts.

@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
@@ -19,6 +20,14 @@ export async function PATCH(
 ) {
 	try {
 		const user = requireAuth(request);
+		const rateLimitResponse = await enforceRateLimit({
+		  scope: 'projects-member-detail-patch',
+		  key: user.userId,
+		  max: 90,
+		  windowMs: 60 * 60 * 1000,
+		  message: 'Too many member update attempts. Please wait before retrying.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 		const { id: projectId, memberId } = params;
 		const body = await request.json();
@@ -88,6 +97,14 @@ export async function DELETE(
 ) {
 	try {
 		const user = requireAuth(request);
+		const rateLimitResponse = await enforceRateLimit({
+		  scope: 'projects-member-detail-delete',
+		  key: user.userId,
+		  max: 60,
+		  windowMs: 60 * 60 * 1000,
+		  message: 'Too many member removal attempts. Please wait before retrying.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 		const { id: projectId, memberId } = params;
 

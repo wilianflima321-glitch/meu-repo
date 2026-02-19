@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db';
 import { verifyToken } from '@/lib/auth-server';
 import { getQueueRedis } from '@/lib/redis-queue';
 import { checkProjectAccess } from '@/lib/project-access';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 type ExportStatus =
   | 'queued'
@@ -57,6 +58,15 @@ export async function GET(
     if (!decoded) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-export-status-get',
+      key: decoded.userId || getRequestIp(request),
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many export status requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Permissão no projeto
     const access = await checkProjectAccess(decoded.userId, projectId, 'export');

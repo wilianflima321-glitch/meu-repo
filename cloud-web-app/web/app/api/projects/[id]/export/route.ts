@@ -19,6 +19,7 @@ import { getQueueRedis } from '@/lib/redis-queue';
 import { nanoid } from 'nanoid';
 import { checkProjectAccess } from '@/lib/project-access';
 import { deductBuildMinutes } from '@/lib/build-minutes';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 // ============================================================================
 // SCHEMAS
@@ -136,6 +137,15 @@ export async function POST(
         { status: 401 }
       );
     }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-export-post',
+      key: decoded.userId || getRequestIp(request),
+      max: 20,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many export creation attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Verifica acesso ao projeto
     const access = await checkProjectAccess(decoded.userId, projectId, 'export');
@@ -295,6 +305,15 @@ export async function GET(
         { status: 401 }
       );
     }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-export-list-get',
+      key: decoded.userId || getRequestIp(request),
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many export list requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Lista exports recentes do projeto
     const exports = await prisma.exportJob.findMany({

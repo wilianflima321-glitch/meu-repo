@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import crypto from 'crypto';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export async function POST(
   request: NextRequest,
@@ -14,6 +15,14 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession();
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-duplicate-post',
+      key: session?.user?.email || getRequestIp(request),
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project duplication attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     if (!session?.user) {
       return NextResponse.json(

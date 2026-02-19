@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { nanoid } from 'nanoid';
 import { buildAppUrl } from '@/lib/server/app-origin';
 
@@ -19,6 +20,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-invite-links-get',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many invite link list requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const projectId = params.id;
 
     // Verifica se é owner ou admin do projeto
@@ -87,6 +96,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-invite-links-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many invite link creation attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const projectId = params.id;
     const body = await request.json();
     const { role = 'viewer', expiresIn, maxUsage } = body;

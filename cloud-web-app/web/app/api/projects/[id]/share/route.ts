@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import crypto from 'crypto';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 interface ShareConfig {
   type: 'link' | 'email' | 'team';
@@ -22,6 +23,14 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession();
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-share-post',
+      key: session?.user?.email || getRequestIp(request),
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project share operations. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -88,6 +97,14 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession();
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-share-get',
+      key: session?.user?.email || getRequestIp(request),
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project share list requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     if (!session?.user) {
       return NextResponse.json(

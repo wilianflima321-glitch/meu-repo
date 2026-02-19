@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
@@ -19,6 +20,14 @@ export async function GET(
 ) {
 	try {
 		const user = requireAuth(request);
+		const rateLimitResponse = await enforceRateLimit({
+		  scope: 'projects-members-get',
+		  key: user.userId,
+		  max: 180,
+		  windowMs: 60 * 60 * 1000,
+		  message: 'Too many project members requests. Please try again later.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
 		const entitlements = await requireEntitlementsForUser(user.userId);
 		const projectId = params.id;
 
@@ -94,6 +103,14 @@ export async function POST(
 ) {
 	try {
 		const user = requireAuth(request);
+		const rateLimitResponse = await enforceRateLimit({
+		  scope: 'projects-members-post',
+		  key: user.userId,
+		  max: 60,
+		  windowMs: 60 * 60 * 1000,
+		  message: 'Too many member invitation attempts. Please wait before retrying.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
 		const entitlements = await requireEntitlementsForUser(user.userId);
 		const projectId = params.id;
 		const body = await request.json();

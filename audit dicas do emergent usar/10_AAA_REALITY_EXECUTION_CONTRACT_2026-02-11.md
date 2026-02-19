@@ -2548,3 +2548,40 @@ Validation status:
 Decision lock:
 1. Billing, wallet, and admin finance/security routes are now part of the mandatory abuse-control baseline.
 2. High-cost and privileged routes cannot be considered production-safe without explicit throttle coverage.
+
+## 88) Delta 2026-02-19 XLII - Projects/Assets abuse-control expansion
+
+Implemented:
+1. Added explicit rate-limit protection to project core surfaces:
+- `app/api/projects/route.ts` (`GET`, `POST`)
+- `app/api/projects/[id]/route.ts` (`GET`, `PATCH`, `DELETE`)
+- `app/api/projects/[id]/assets/route.ts`
+- `app/api/projects/[id]/commits/route.ts`
+- `app/api/projects/[id]/folders/route.ts` (`GET`, `POST`, `DELETE`)
+- `app/api/projects/[id]/members/route.ts` (`GET`, `POST`)
+- `app/api/projects/[id]/members/[memberId]/route.ts` (`PATCH`, `DELETE`)
+- `app/api/projects/[id]/invite-links/route.ts` (`GET`, `POST`)
+- `app/api/projects/[id]/invite-links/[linkId]/route.ts` (`DELETE`)
+- `app/api/projects/[id]/share/route.ts` (`GET`, `POST`)
+- `app/api/projects/[id]/duplicate/route.ts`
+2. Added explicit rate-limit protection to project export control surfaces:
+- `app/api/projects/[id]/export/route.ts` (`POST`, `GET`)
+- `app/api/projects/[id]/export/[exportId]/route.ts`
+- `app/api/projects/[id]/export/[exportId]/retry/route.ts`
+3. Added explicit rate-limit protection to asset upload/download/mutation surfaces:
+- `app/api/assets/presign/route.ts` (`POST`, `GET`)
+- `app/api/assets/upload/route.ts`
+- `app/api/assets/[id]/route.ts` (`GET`, `PATCH`, `DELETE`)
+- `app/api/assets/[id]/confirm/route.ts`
+- `app/api/assets/[id]/download/route.ts` (`GET`, `POST`)
+- `app/api/assets/[id]/duplicate/route.ts`
+- `app/api/assets/[id]/favorite/route.ts`
+4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all project/asset scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Project and asset endpoints are now part of the mandatory abuse-control baseline.
+2. Export/upload/download high-cost routes cannot run without explicit throttle coverage.

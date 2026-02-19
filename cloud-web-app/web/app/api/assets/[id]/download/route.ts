@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { generateDownloadUrl, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 
@@ -22,6 +23,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-download-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset download URL requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Find asset with access check (using only fields that exist in current schema)
     const asset = await prisma.asset.findFirst({
@@ -120,6 +129,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-download-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many batch download requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body = await request.json();
     const { assetIds } = body;

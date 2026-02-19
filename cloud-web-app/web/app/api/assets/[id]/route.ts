@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { deleteObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 
@@ -45,6 +46,14 @@ export async function GET(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-detail-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset detail requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const asset = await verifyAssetAccess(params.id, user.userId);
     
     if (!asset) {
@@ -87,6 +96,14 @@ export async function PATCH(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-detail-patch',
+      key: user.userId,
+      max: 90,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset update attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const asset = await verifyAssetAccess(params.id, user.userId);
     
     if (!asset) {
@@ -145,6 +162,14 @@ export async function DELETE(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-detail-delete',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset delete attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const asset = await verifyAssetAccess(params.id, user.userId);
     
     if (!asset) {

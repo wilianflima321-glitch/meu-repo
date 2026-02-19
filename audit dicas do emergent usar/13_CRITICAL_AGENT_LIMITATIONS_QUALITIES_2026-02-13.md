@@ -953,3 +953,14 @@ Implemented:
 Critical reading:
 1. This materially reduces abuse and cost-spike exposure in financially sensitive and high-polling API surfaces.
 2. Residual limitation remains operational: distributed limiter backing still depends on Upstash configuration in deployed environments.
+
+## Delta 2026-02-19 XL - Projects/Assets protection uplift
+Implemented:
+1. Added throttle controls across project lifecycle routes (`projects`, `project detail`, `folders`, `members`, `invite-links`, `share`, `duplicate`, `commits`, `project assets`).
+2. Added throttle controls across export control routes (`export create/list`, `export status`, `export retry`).
+3. Added throttle controls across asset lifecycle routes (`presign`, `upload`, `asset detail mutate/read`, `confirm`, `download`, `duplicate`, `favorite`).
+4. Expanded critical rate-limit scanner matrix to enforce all project/asset scopes in CI.
+
+Critical reading:
+1. This closes another major abuse vector in high-traffic collaboration and asset pipelines.
+2. Residual limitation remains operational: this wave still requires consolidated gate execution evidence and distributed limiter backing in production.

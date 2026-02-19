@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db';
 import { verifyToken } from '@/lib/auth-server';
 import { checkProjectAccess } from '@/lib/project-access';
 import { getQueueRedis } from '@/lib/redis-queue';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export async function POST(
   request: NextRequest,
@@ -29,6 +30,15 @@ export async function POST(
     if (!decoded) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-export-retry-post',
+      key: decoded.userId || getRequestIp(request),
+      max: 40,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many export retry attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const access = await checkProjectAccess(decoded.userId, projectId, 'export');
     if (!access.allowed) {

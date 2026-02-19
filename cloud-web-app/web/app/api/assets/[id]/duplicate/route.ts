@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { copyObject, headObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 import { copyFile, mkdir, stat } from 'fs/promises';
@@ -80,6 +81,14 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-duplicate-post',
+      key: user.userId,
+      max: 40,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset duplication attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const asset = await verifyAssetAccess(params.id, user.userId);
 
     if (!asset) {

@@ -16,6 +16,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { randomUUID } from 'crypto';
 import { checkStorageQuota, createQuotaExceededResponse } from '@/lib/storage-quota';
@@ -136,6 +137,14 @@ export async function POST(request: NextRequest) {
 
     // 1. Authenticate
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-presign-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many presign upload requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // 2. Parse request
     const body = await request.json();
@@ -260,6 +269,14 @@ export async function GET(request: NextRequest) {
     }
 
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-presign-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many presign download requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { searchParams } = new URL(request.url);
     const assetId = searchParams.get('assetId');

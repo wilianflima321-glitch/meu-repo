@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,14 @@ export async function DELETE(
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-invite-link-delete',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many invite link revocations. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { id: projectId, linkId } = params;
 
     // Verifica se é owner ou admin do projeto
