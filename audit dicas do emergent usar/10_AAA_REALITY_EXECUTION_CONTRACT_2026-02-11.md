@@ -3172,3 +3172,21 @@ Validation status:
 Decision lock:
 1. Additional oversized reductions should prioritize extraction of static data and pure helpers before behavioral rewrites.
 2. Gate thresholds must track factual baseline only after real structural reduction.
+
+## 115) Delta 2026-02-19 LXIX - Extension host type-surface extraction
+
+Implemented:
+1. Extracted extension host type contracts from runtime monolith:
+- moved exported interfaces into `lib/server/extension-host-types.ts`
+- `lib/server/extension-host-runtime.ts` now imports/re-exports those types and keeps runtime logic focused
+2. Preserved public type/export compatibility for consumers of extension host runtime module.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 52` (was `<=53`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Type-surface extraction is preferred for monolith reduction when behavior must remain unchanged.
+2. Runtime modules must keep compatibility by explicit type re-export when extracted.

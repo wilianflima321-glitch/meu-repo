@@ -1233,3 +1233,13 @@ Implemented:
 Critical reading:
 1. This continues monolith reduction using low-risk static-data extraction.
 2. Residual limitation remains: oversized debt is still high (`53` files) and requires sustained targeted decomposition.
+
+## Delta 2026-02-19 LXVII - Extension host runtime type-surface decomposition
+Implemented:
+1. Extracted extension host shared interfaces from `lib/server/extension-host-runtime.ts` into `lib/server/extension-host-types.ts`.
+2. Runtime module now imports/re-exports extracted types to preserve compatibility.
+3. Reduced architecture oversized debt baseline (`53 -> 52`) and tightened threshold to `<=52`.
+
+Critical reading:
+1. This is low-risk decomposition focused on API/type boundaries while preserving behavior.
+2. Residual limitation remains: oversized debt persists (`52` files) and still requires a multi-wave reduction plan.

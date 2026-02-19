@@ -1229,3 +1229,13 @@ Delivered:
 Triaged impact:
 1. Reduces editor-component complexity while preserving feature behavior.
 2. Keeps architecture debt burn-down measurable and governance-locked.
+
+## Delta 2026-02-19 LXV - Oversized triage reduction via extension-host type extraction
+Delivered:
+1. Split extension host shared interfaces from `lib/server/extension-host-runtime.ts` into `lib/server/extension-host-types.ts`.
+2. Kept backward compatibility via type re-export from runtime module.
+3. Reduced oversized-file metric from `53` to `52` and tightened threshold to `<=52`.
+
+Triaged impact:
+1. Reduces runtime monolith complexity without behavior change.
+2. Strengthens maintainability of extension subsystem contracts.
