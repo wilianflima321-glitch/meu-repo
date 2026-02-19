@@ -64,6 +64,7 @@ Define the execution spec for Studio Home as the authenticated entrypoint (`/das
 - `tasks/run` returns explicit blocked gate (`422 TASK_RUN_BLOCKED`) for orchestration failures
 - `tasks/run` returns explicit not-runnable gate (`422 TASK_RUN_NOT_ALLOWED`) for invalid state transitions
 - `tasks/run-wave` returns explicit missing-plan gate (`422 RUN_WAVE_REQUIRES_PLAN`) before orchestration execution
+- `tasks/run-wave` returns explicit completion gate (`409 RUN_WAVE_ALREADY_COMPLETE`) when no runnable steps remain
 - `tasks/validate` is reviewer-only and ready-state only (`REVIEW_GATE_REQUIRED`, `VALIDATION_NOT_READY`)
 - `tasks/apply` blocks replay (`409 APPLY_ALREADY_COMPLETED`) until rollback
 - `tasks/rollback` returns explicit token mismatch gate (`409 ROLLBACK_TOKEN_MISMATCH`)
@@ -113,3 +114,4 @@ Mandatory before completion:
 14. Route-contract scan covers rollback gate and gate-state replay markers.
 15. Studio run-wave endpoint is active with explicit gate contracts and scanner enforcement (`qa:route-contracts`, `qa:critical-rate-limit`).
 16. Studio session payload now includes mission domain/checklist metadata and orchestration mode/last-wave visibility for quality governance.
+17. IDE chat panel now surfaces trace summaries from advanced chat responses for decision/cost transparency.

@@ -1088,3 +1088,13 @@ Delivered:
 Triaged impact:
 1. Improves perceived parallelism and operator control without violating deterministic apply/rollback policy.
 2. Improves quality transparency for games/films/apps tasks while keeping runtime cost bounded under pressure.
+
+## Delta 2026-02-19 LI - Studio completion-state + chat trace triage
+Delivered:
+1. Added explicit `RUN_WAVE_ALREADY_COMPLETE` gate to stop redundant wave executions after plan completion.
+2. Added mission-domain metadata in run-wave success payload to improve downstream context handling.
+3. Added chat trace-summary visualization in IDE AI panel (decision + reasons + telemetry snapshot).
+
+Triaged impact:
+1. Reduces operator confusion and accidental duplicate wave runs.
+2. Improves explainability of multi-agent outputs without expanding scope to autonomous apply behavior.

@@ -20,6 +20,12 @@ type AdvancedProfile = {
   enableWebResearch: boolean
 }
 
+type TraceSummary = {
+  summary?: string
+  decisionRecord?: { decision?: string; reasons?: string[] }
+  telemetry?: { model?: string; tokensUsed?: number; latencyMs?: number }
+}
+
 const MODELS = [
   {
     id: 'gpt-4o-mini',
@@ -80,6 +86,13 @@ function inferAdvancedProfile(message: string): AdvancedProfile {
   ].some((token) => lower.includes(token))
 
   if (asksForDeepAudit) {
+    if (message.length > 6000) {
+      return {
+        qualityMode: 'studio',
+        agentCount: 2,
+        enableWebResearch: true,
+      }
+    }
     return {
       qualityMode: 'studio',
       agentCount: 3,
@@ -147,6 +160,39 @@ function tryParseJson(raw: string): Record<string, unknown> | null {
 
 function isAgentGateError(code: string): boolean {
   return code === 'FEATURE_NOT_ALLOWED' || code === 'AGENTS_LIMIT_EXCEEDED'
+}
+
+function toTraceSummary(input: unknown): TraceSummary | null {
+  if (!input || typeof input !== 'object') return null
+  const obj = input as Record<string, unknown>
+  const summary = typeof obj.summary === 'string' ? obj.summary : undefined
+  const decisionRecord =
+    obj.decisionRecord && typeof obj.decisionRecord === 'object'
+      ? (obj.decisionRecord as { decision?: string; reasons?: string[] })
+      : undefined
+  const telemetry =
+    obj.telemetry && typeof obj.telemetry === 'object'
+      ? (obj.telemetry as { model?: string; tokensUsed?: number; latencyMs?: number })
+      : undefined
+  if (!summary && !decisionRecord?.decision) return null
+  return { summary, decisionRecord, telemetry }
+}
+
+function formatTraceSummary(trace: TraceSummary): string {
+  const lines: string[] = []
+  lines.push(`Trace: ${trace.summary || 'Execution trace available.'}`)
+  if (trace.decisionRecord?.decision) lines.push(`Decision: ${trace.decisionRecord.decision}`)
+  if (Array.isArray(trace.decisionRecord?.reasons) && trace.decisionRecord.reasons.length > 0) {
+    lines.push(`Reasons: ${trace.decisionRecord.reasons.slice(0, 3).join(' | ')}`)
+  }
+  if (trace.telemetry?.model || typeof trace.telemetry?.tokensUsed === 'number') {
+    const telemetryParts: string[] = []
+    if (trace.telemetry?.model) telemetryParts.push(`model=${trace.telemetry.model}`)
+    if (typeof trace.telemetry?.tokensUsed === 'number') telemetryParts.push(`tokens=${trace.telemetry.tokensUsed}`)
+    if (typeof trace.telemetry?.latencyMs === 'number') telemetryParts.push(`latencyMs=${trace.telemetry.latencyMs}`)
+    lines.push(`Telemetry: ${telemetryParts.join(', ')}`)
+  }
+  return lines.join('\n')
 }
 
 function getProjectIdFromLocation(): string | undefined {
@@ -241,6 +287,7 @@ export default function AIChatPanelContainer() {
         const parsedResponse = tryParseJson(raw)
         const content = extractContent(raw)
         const tokenCount = typeof parsedResponse?.tokensUsed === 'number' ? parsedResponse.tokensUsed : undefined
+        const traceSummary = toTraceSummary(parsedResponse?.traceSummary)
         const assistantMessage: ChatMessage = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
@@ -250,7 +297,20 @@ export default function AIChatPanelContainer() {
           tokens: tokenCount,
         }
 
-        setMessages((prev) => [...prev, assistantMessage])
+        setMessages((prev) => {
+          const next = [...prev, assistantMessage]
+          if (traceSummary) {
+            next.push({
+              id: `system-trace-${Date.now()}`,
+              role: 'system',
+              content: formatTraceSummary(traceSummary),
+              timestamp: new Date(),
+              model: currentModel,
+              tokens: tokenCount,
+            })
+          }
+          return next
+        })
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'AI_REQUEST_FAILED: AI request failed.'

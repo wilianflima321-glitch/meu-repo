@@ -589,7 +589,8 @@ export default function StudioHome() {
                       busy ||
                       session.status !== 'active' ||
                       variableUsageBlocked ||
-                      session.tasks.length === 0
+                      session.tasks.length === 0 ||
+                      session.tasks.every((task) => task.status === 'done')
                     }
                     onClick={runWave}
                     className="rounded border border-indigo-500/40 bg-indigo-500/15 px-2 py-1 text-[11px] font-semibold text-indigo-100 hover:bg-indigo-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -612,6 +613,11 @@ export default function StudioHome() {
                   {session.orchestration.lastWaveAt
                     ? ` | last wave: ${new Date(session.orchestration.lastWaveAt).toLocaleTimeString()}`
                     : ''}
+                </div>
+              ) : null}
+              {session?.tasks.length && session.tasks.every((task) => task.status === 'done') ? (
+                <div className="mb-2 rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200">
+                  Wave execution complete. Validate/apply reviewer checkpoint or start a new mission.
                 </div>
               ) : null}
               <div className="space-y-2">

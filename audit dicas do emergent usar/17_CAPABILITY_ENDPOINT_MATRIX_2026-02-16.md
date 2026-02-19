@@ -11,7 +11,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 |---|---|---|---|
 | AI chat | `app/api/ai/chat/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
 | AI chat advanced | `app/api/ai/chat-advanced/route.ts` | `IMPLEMENTED` with explicit provider gates + quality controls | `501 NOT_IMPLEMENTED` on missing provider/model-provider mismatch; supports `qualityMode` + optional benchmark context |
-| AI chat panel orchestration | `components/ide/AIChatPanelContainer.tsx` | `IMPLEMENTED/PARTIAL` | routes through `/api/ai/chat-advanced`; auto-selects `qualityMode`/`agentCount`; falls back to single-agent when plan gate blocks multi-agent |
+| AI chat panel orchestration | `components/ide/AIChatPanelContainer.tsx` | `IMPLEMENTED/PARTIAL` | routes through `/api/ai/chat-advanced`; auto-selects `qualityMode`/`agentCount`; falls back to single-agent when plan gate blocks multi-agent; renders trace summary telemetry for explainability |
 | AI complete | `app/api/ai/complete/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | response canonical `suggestion` + alias `text` |
 | AI action | `app/api/ai/action/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
 | AI inline edit | `app/api/ai/inline-edit/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
@@ -28,7 +28,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Studio session stop | `app/api/studio/session/[id]/stop/route.ts` | `IMPLEMENTED` | explicit lifecycle stop contract |
 | Studio super plan | `app/api/studio/tasks/plan/route.ts` | `IMPLEMENTED/PARTIAL` | generates baseline plan task set; duplicate plan blocked by default (`409 PLAN_ALREADY_EXISTS`) unless `force=true` |
 | Studio task run | `app/api/studio/tasks/[id]/run/route.ts` | `IMPLEMENTED/PARTIAL` | orchestration-only checkpoint run (`executionMode=orchestration_only`) with plan-limit gate + explicit `SESSION_NOT_ACTIVE` (`409`), `TASK_RUN_BLOCKED` (`422`), and `TASK_RUN_NOT_ALLOWED` (`422`) |
-| Studio task run-wave | `app/api/studio/tasks/run-wave/route.ts` | `IMPLEMENTED/PARTIAL` | queued planner/coder/reviewer wave execution with explicit `SESSION_NOT_ACTIVE` (`409`), `RUN_WAVE_REQUIRES_PLAN` (`422`), and `TASK_RUN_BLOCKED` (`422`) gates |
+| Studio task run-wave | `app/api/studio/tasks/run-wave/route.ts` | `IMPLEMENTED/PARTIAL` | queued planner/coder/reviewer wave execution with explicit `SESSION_NOT_ACTIVE` (`409`), `RUN_WAVE_REQUIRES_PLAN` (`422`), `RUN_WAVE_ALREADY_COMPLETE` (`409`), and `TASK_RUN_BLOCKED` (`422`) gates |
 | Studio task validate | `app/api/studio/tasks/[id]/validate/route.ts` | `IMPLEMENTED/PARTIAL` | deterministic verdict (`passed` or `failed`) with explicit reviewer-only + readiness gates (`REVIEW_GATE_REQUIRED`, `VALIDATION_NOT_READY`) and inactive-session gate (`409 SESSION_NOT_ACTIVE`) |
 | Studio task apply | `app/api/studio/tasks/[id]/apply/route.ts` | `IMPLEMENTED/PARTIAL` | blocked until validation pass (`422 VALIDATION_REQUIRED`), inactive-session gate (`409 SESSION_NOT_ACTIVE`), and replay guard (`409 APPLY_ALREADY_COMPLETED`) |
 | Studio task rollback | `app/api/studio/tasks/[id]/rollback/route.ts` | `IMPLEMENTED/PARTIAL` | requires prior apply token/state, inactive-session gate (`409 SESSION_NOT_ACTIVE`), and explicit token mismatch gate (`409 ROLLBACK_TOKEN_MISMATCH`) |

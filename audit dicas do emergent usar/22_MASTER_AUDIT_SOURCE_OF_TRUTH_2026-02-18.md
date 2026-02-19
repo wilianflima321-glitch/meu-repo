@@ -250,6 +250,8 @@ Label: `PARTIAL_INTERNAL`
 - added wrapper-level limiter baseline in `withAdminAuth` for permission+method scoped protection across admin routes
 - added Studio queued wave orchestration endpoint (`/api/studio/tasks/run-wave`) with explicit capability gates and scanner coverage
 - added domain-aware Studio metadata (`missionDomain`, `qualityChecklist`) and cost-pressure-aware execution profile in Studio task runtime
+- added explicit wave completion gate (`RUN_WAVE_ALREADY_COMPLETE`) to prevent ambiguous reruns
+- added IDE chat trace-summary rendering for multi-agent decision and telemetry transparency
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

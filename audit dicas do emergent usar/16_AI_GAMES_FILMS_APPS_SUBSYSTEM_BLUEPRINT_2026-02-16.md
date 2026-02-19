@@ -184,3 +184,4 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 - multi-file/API/UX consistency constraints (apps)
 3. New `tasks/run-wave` endpoint executes planner/coder/reviewer in queued wave mode with explicit gates and no fake success.
 4. Cost-pressure-aware execution profile now reduces model/cost intensity when remaining budget drops, preserving quality policy while avoiding runaway consumption.
+5. IDE advanced chat now surfaces trace-summary metadata to expose agent decision path and cost/latency signals to operators.

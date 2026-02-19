@@ -2892,3 +2892,26 @@ Validation status:
 Decision lock:
 1. Studio parallelism remains queued and deterministic (`apply` stays serial and validation-gated).
 2. Domain-specific quality guidance is now explicit in orchestration metadata and must remain capability-truthful.
+
+## 101) Delta 2026-02-19 LV - Studio wave completion gate + chat trace transparency
+
+Implemented:
+1. Added explicit completion gate for `tasks/run-wave`:
+- `409 RUN_WAVE_ALREADY_COMPLETE` when all session tasks are already done.
+2. Added mission-domain metadata in successful run-wave response payload (`metadata.missionDomain`).
+3. Updated Studio Home task-board UX:
+- `Run Wave` button disabled when all tasks are done
+- explicit completion status message in task board
+4. Updated IDE AI chat panel transparency:
+- parses `traceSummary` from `/api/ai/chat-advanced`
+- adds a system trace message with decision and telemetry summary
+- keeps deterministic fallback when multi-agent gating blocks higher agent count
+5. Updated route-contract scanner for new `RUN_WAVE_ALREADY_COMPLETE` gate pattern.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Studio wave actions must not present repeatable-success behavior once the current plan is complete.
+2. AI chat transparency is additive and does not alter capability/error contracts.

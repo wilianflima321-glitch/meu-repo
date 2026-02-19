@@ -82,6 +82,17 @@ export async function POST(req: NextRequest) {
         metadata: { taskCount: 0 },
       })
     }
+    if (current.tasks.every((task) => task.status === 'done')) {
+      return capabilityResponse({
+        status: 409,
+        error: 'RUN_WAVE_ALREADY_COMPLETE',
+        message: 'All tasks are already complete for this session.',
+        capability: 'STUDIO_HOME_TASK_RUN_WAVE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: { taskCount: current.tasks.length },
+      })
+    }
 
     const result = await runStudioWave(auth.userId, sessionId, { maxSteps: normalizeMaxSteps(body.maxSteps) })
     if (!result.session) {
@@ -113,6 +124,7 @@ export async function POST(req: NextRequest) {
       metadata: {
         executionMode: 'parallel-wave-queued',
         applyPolicy: 'serial-review-gated',
+        missionDomain: result.session.missionDomain || 'general',
         executedTaskIds: result.executedTaskIds,
         blockedTaskIds: result.blockedTaskIds,
       },

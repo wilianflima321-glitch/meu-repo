@@ -224,6 +224,7 @@ const checks = [
       'capabilityResponse({',
       "error: 'SESSION_NOT_ACTIVE'",
       "error: 'RUN_WAVE_REQUIRES_PLAN'",
+      "error: 'RUN_WAVE_ALREADY_COMPLETE'",
       "error: 'TASK_RUN_BLOCKED'",
       "capability: 'STUDIO_HOME_TASK_RUN_WAVE'",
       "capabilityStatus: 'PARTIAL'",
