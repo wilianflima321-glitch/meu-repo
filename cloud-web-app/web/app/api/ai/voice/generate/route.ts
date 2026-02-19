@@ -16,12 +16,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
-import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
 import { capabilityResponse } from '@/lib/server/capability-response';
-
-// Rate limit: 50 voice generations per hour
-const VOICE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 50 };
 
 // Provider configurations
 const PROVIDERS = {
@@ -208,15 +204,6 @@ export async function POST(req: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // Rate limit
-  const rateLimit = checkRateLimit(req, VOICE_RATE_LIMIT);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', remaining: rateLimit.remaining },
-      { status: 429 }
-    );
   }
 
   try {

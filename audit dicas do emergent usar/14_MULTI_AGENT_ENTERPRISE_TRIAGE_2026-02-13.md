@@ -972,3 +972,12 @@ Delivered:
 Triaged impact:
 1. Reduced abuse and cost-spike risk in external web tool endpoints used by AI workflows.
 2. Prevented unthrottled control-plane mutation attempts on render cancel before queue/runtime implementation is complete.
+
+## Delta 2026-02-19 XLI - Security triage: AI media limiter unification
+Delivered:
+1. Removed legacy `checkRateLimit` calls from AI media generation handlers (`image`, `voice`, `music`, `3d`) to avoid dual limiter paths.
+2. Kept shared awaited limiter (`enforceRateLimit`) as the single policy enforcement mechanism.
+
+Triaged impact:
+1. Reduced inconsistency risk between in-memory fallback counters and canonical server limiter policy.
+2. Improved observability and enforceability for high-cost AI media traffic control.

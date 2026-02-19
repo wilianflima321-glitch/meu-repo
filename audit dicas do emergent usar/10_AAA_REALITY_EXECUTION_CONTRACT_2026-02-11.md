@@ -2632,3 +2632,21 @@ Validation status:
 Decision lock:
 1. External web-search/fetch routes are treated as high-cost abuse-prone surfaces and must remain explicitly throttled.
 2. Capability-gated mutation endpoints (render cancel) still require abuse control even before runtime wiring is implemented.
+
+## 91) Delta 2026-02-19 XLV - AI media limiter unification cleanup
+
+Implemented:
+1. Removed legacy in-route `checkRateLimit` duplication from AI media generation POST handlers:
+- `app/api/ai/image/generate/route.ts`
+- `app/api/ai/voice/generate/route.ts`
+- `app/api/ai/music/generate/route.ts`
+- `app/api/ai/3d/generate/route.ts`
+2. Kept shared awaited limiter (`enforceRateLimit`) as single authority for abuse-control on those routes.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Critical API surfaces must not run mixed limiter strategies in the same handler.
+2. Shared server limiter remains mandatory baseline for media generation routes.

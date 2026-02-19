@@ -984,3 +984,12 @@ Implemented:
 Critical reading:
 1. This closes an abuse vector where external fetch/search could be spammed outside the shared limiter baseline.
 2. Residual limitation remains operational: final wave still requires consolidated gate evidence and distributed limiter backing in deployed runtime.
+
+## Delta 2026-02-19 XLIII - AI media limiter strategy deduplication
+Implemented:
+1. Removed local in-memory `checkRateLimit` duplication from AI media generation routes (`image`, `voice`, `music`, `3d`).
+2. Standardized those handlers on shared awaited limiter (`enforceRateLimit`) as the single abuse-control path.
+
+Critical reading:
+1. This removes split-brain throttling behavior that could diverge across instances and hide real production traffic patterns.
+2. Residual limitation persists: distributed limiter strength still depends on Upstash-backed runtime configuration.
