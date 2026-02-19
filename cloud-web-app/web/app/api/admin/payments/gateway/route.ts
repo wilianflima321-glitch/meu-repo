@@ -10,9 +10,19 @@ import {
   type PaymentGateway,
   type PaymentGatewayConfig,
 } from '@/lib/server/payment-gateway-config';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
-async function getHandler(_request: NextRequest) {
+async function getHandler(_request: NextRequest, context: { user: { id: string } }) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'admin-payments-gateway-get',
+      key: context.user.id,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many payment gateway reads. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const config = await readPaymentGatewayConfig();
     return NextResponse.json({ config });
   } catch (error) {
@@ -23,6 +33,15 @@ async function getHandler(_request: NextRequest) {
 
 async function putHandler(request: NextRequest, context: { user: { id: string; email: string; role: string } }) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'admin-payments-gateway-put',
+      key: context.user.id,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many payment gateway updates. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json().catch(() => ({}));
 
     const base = normalizePaymentGatewayConfig(body);

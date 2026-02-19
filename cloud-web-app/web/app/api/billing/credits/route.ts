@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 interface CreditData {
   available: number;
@@ -23,6 +24,14 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação
     const session = await getServerSession();
     const userId = session?.user?.email || 'anonymous';
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-credits-get',
+      key: userId === 'anonymous' ? getRequestIp(request) : userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many credit balance checks. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Buscar ou criar créditos do usuário
     if (!userCredits[userId]) {
@@ -55,6 +64,14 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession();
     const userId = session?.user?.email || 'anonymous';
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-credits-post',
+      key: userId === 'anonymous' ? getRequestIp(request) : userId,
+      max: 40,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many credit mutation attempts. Please wait before trying again.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body = await request.json();
     const { action, amount } = body;

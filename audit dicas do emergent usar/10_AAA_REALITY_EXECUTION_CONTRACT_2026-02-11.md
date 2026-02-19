@@ -2519,3 +2519,32 @@ Validation status:
 Decision lock:
 1. File authority endpoints are now part of mandatory abuse-control baseline.
 2. Compatibility wrappers cannot bypass throttle policy while still active.
+
+## 87) Delta 2026-02-19 XLI - Billing/Wallet/Admin abuse-control expansion
+
+Implemented:
+1. Added explicit rate-limit protection to billing lifecycle and cost/usage endpoints:
+- `app/api/billing/plans/route.ts`
+- `app/api/billing/portal/route.ts` (`GET`, `POST`)
+- `app/api/billing/subscription/route.ts`
+- `app/api/billing/usage/route.ts`
+- `app/api/billing/credits/route.ts` (`GET`, `POST`)
+- `app/api/billing/webhook/route.ts`
+2. Added explicit rate-limit protection to wallet and usage-status endpoints:
+- `app/api/wallet/summary/route.ts`
+- `app/api/wallet/transactions/route.ts`
+- `app/api/wallet/purchase-intent/route.ts`
+- `app/api/usage/status/route.ts`
+3. Added explicit rate-limit protection to admin financial/security read-write surfaces:
+- `app/api/admin/payments/route.ts`
+- `app/api/admin/payments/gateway/route.ts` (`GET`, `PUT`)
+- `app/api/admin/security/overview/route.ts`
+4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Billing, wallet, and admin finance/security routes are now part of the mandatory abuse-control baseline.
+2. High-cost and privileged routes cannot be considered production-safe without explicit throttle coverage.

@@ -942,3 +942,14 @@ Implemented:
 Critical reading:
 1. This closes a high-impact abuse vector in file IO-heavy workflows.
 2. Remaining limitation is unchanged: consolidated validation gates are still pending explicit test wave.
+
+## Delta 2026-02-19 XXXIX - Billing/Wallet/Admin protection uplift
+Implemented:
+1. Added throttle controls across billing surfaces (`plans`, `portal`, `subscription`, `usage`, `credits`, `webhook`).
+2. Added throttle controls across wallet and quota-observability surfaces (`wallet/summary`, `wallet/transactions`, `wallet/purchase-intent`, `usage/status`).
+3. Added throttle controls across admin payment and security overview endpoints (`admin/payments`, `admin/payments/gateway`, `admin/security/overview`).
+4. Expanded critical rate-limit scanner matrix to enforce the new scopes in CI.
+
+Critical reading:
+1. This materially reduces abuse and cost-spike exposure in financially sensitive and high-polling API surfaces.
+2. Residual limitation remains operational: distributed limiter backing still depends on Upstash configuration in deployed environments.

@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { getBuildMinutesUsed } from '@/lib/build-minutes';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,14 @@ export async function GET(req: NextRequest) {
     }
 
     const userId = authUser.userId;
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-usage-get',
+      key: userId,
+      max: 90,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many billing usage requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Buscar dados do usuário
     const user = await prisma.user.findUnique({

@@ -930,3 +930,14 @@ Delivered:
 Triaged impact:
 1. Reduced risk of file IO endpoint saturation and abusive burst patterns.
 2. Preserved canonical/compatibility coexistence without opening unthrottled bypass paths.
+
+## Delta 2026-02-19 XXXVII - Security triage: billing/wallet/admin control expansion
+Delivered:
+1. Added abuse-control throttles to billing endpoints (`plans`, `portal`, `subscription`, `usage`, `credits`, `webhook`).
+2. Added abuse-control throttles to wallet and usage-status endpoints (`wallet/summary`, `wallet/transactions`, `wallet/purchase-intent`, `usage/status`).
+3. Added abuse-control throttles to admin financial/security overview endpoints (`admin/payments`, `admin/payments/gateway`, `admin/security/overview`).
+4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
+
+Triaged impact:
+1. Reduced risk of cost and finance-surface abuse under burst traffic or misbehaving clients.
+2. Improved operational safety for admin configuration endpoints by preventing unthrottled mutation loops.

@@ -8,11 +8,21 @@ import { prisma } from '@/lib/db';
 import Stripe from 'stripe';
 import { requireEnv } from '@/lib/env';
 import { getStripe } from '@/lib/stripe';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-webhook-post',
+      key: getRequestIp(req),
+      max: 1800,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many webhook requests. Please retry later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const webhookSecret = requireEnv('STRIPE_WEBHOOK_SECRET');
     const signature = req.headers.get('stripe-signature');
     if (!signature) {

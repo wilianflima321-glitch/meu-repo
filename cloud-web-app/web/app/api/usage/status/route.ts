@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { getUsageStatus } from '@/lib/plan-limits';
 import { getCreditBalance } from '@/lib/credit-wallet';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,15 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
-    
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'usage-status-get',
+      key: user.userId,
+      max: 1800,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many usage status checks. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const [status, creditBalance] = await Promise.all([
       getUsageStatus(user.userId),
       getCreditBalance(user.userId),

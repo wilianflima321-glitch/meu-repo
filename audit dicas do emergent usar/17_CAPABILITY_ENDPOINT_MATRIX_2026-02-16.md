@@ -64,7 +64,7 @@ Headers (when applicable):
 Validation status:
 1. `qa:route-contracts` PASS
 2. `qa:no-fake-success` PASS
-3. `qa:critical-rate-limit` enforces rate-limit presence on critical abuse-prone routes (`auth` including `2fa setup/verify/validate/disable/backup-codes/status`, `ai core` including `query/stream`, `billing`, `studio session start`, `studio task mutation routes`, `studio control-plane routes`).
+3. `qa:critical-rate-limit` enforces rate-limit presence on critical abuse-prone routes (`auth` including `2fa setup/verify/validate/disable/backup-codes/status`, `ai core` including `query/stream`, `billing` including `plans/portal/subscription/usage/credits/webhook`, `wallet` + `usage/status`, admin finance/security read-write surfaces, `studio session start`, `studio task mutation routes`, and `studio control-plane routes`).
 4. `qa:no-fake-success` also enforces:
 - `PAYMENT_GATEWAY_NOT_IMPLEMENTED -> 501`
 - `AUTH_NOT_CONFIGURED -> 503`
@@ -74,6 +74,7 @@ Validation status:
 7. Studio task gating routes now use shared capability envelope helper for header parity (`x-aethel-capability*`).
 8. Route contract scanner now includes `/api/auth/2fa` aggregate deprecation contract and explicit gate checks for `/api/ai/query` and `/api/ai/stream`.
 9. Critical rate-limit scanner now includes canonical + compatibility file routes to enforce abuse protection on file authority surface.
+10. Critical rate-limit scanner now also includes billing lifecycle, wallet, usage status, and admin payments/security endpoints.
 
 ## 3.2 Build/runtime reliability note (2026-02-17)
 1. Local config now sanitizes invalid Next IPC env keys to reduce ambiguous build/runtime IPC behavior.
