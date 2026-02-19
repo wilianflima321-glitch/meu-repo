@@ -1259,3 +1259,13 @@ Delivered:
 Triaged impact:
 1. Reduces state/runtime file complexity in core IDE and simulation surfaces.
 2. Continues measurable architecture debt burn-down while preserving behavior and scope.
+
+## Delta 2026-02-19 LXVIII - Oversized triage reduction via behavior preset extraction
+Delivered:
+1. Split boss/coward behavior preset builders from `lib/behavior-tree.ts` into `lib/behavior-tree-boss-preset.ts`.
+2. Preserved runtime-facing contract by delegating from `BehaviorPresets` methods.
+3. Reduced oversized-file metric from `49` to `48` and tightened threshold to `<=48`.
+
+Triaged impact:
+1. Further decouples core AI node runtime from high-level preset construction logic.
+2. Maintains contract stability while reducing monolith risk.

@@ -3228,3 +3228,21 @@ Validation status:
 Decision lock:
 1. Shared store contracts and reusable editor controls must stay extracted to prevent monolith regression.
 2. Architecture threshold updates remain allowed only after factual structural reduction.
+
+## 118) Delta 2026-02-19 LXXII - Behavior preset decomposition wave
+
+Implemented:
+1. Extracted behavior preset builders from core runtime module:
+- new `lib/behavior-tree-boss-preset.ts` with extracted `createBossBehaviorTree` and `createCowardBehaviorTree`
+- `lib/behavior-tree.ts` now delegates preset building via these helpers, keeping node/runtime core lean
+2. Preserved preset behavior contract (`BehaviorPresets.bossAI` and `BehaviorPresets.coward`) via delegation.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 48` (was `<=49`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Preset authoring logic should remain outside core behavior runtime where feasible.
+2. Contract-preserving delegation is the required path for large runtime-file reductions.

@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-19T23:32:24.644Z`
+- Generated at: `2026-02-19T23:36:58.249Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **49**
+- Oversized source files (>=1200 lines): **48**
 
 ## Top Compatibility Call Sites
 
@@ -77,10 +77,10 @@
 | `lib/postprocessing/post-processing-system.ts` | 1279 |
 | `components/engine/NiagaraVFX.tsx` | 1276 |
 | `lib/replay/replay-system.tsx` | 1269 |
-| `lib/behavior-tree.ts` | 1267 |
 | `lib/profiler-integrated.ts` | 1267 |
 | `components/audio/SoundCueEditor.tsx` | 1244 |
 | `lib/audio-synthesis.ts` | 1243 |
+| `lib/dialogue-cutscene-system.ts` | 1239 |
 
 ## Notes
 

@@ -1263,3 +1263,13 @@ Implemented:
 Critical reading:
 1. This removes duplicated static/control concerns from runtime-heavy files and improves maintainability.
 2. Residual limitation remains: oversized debt is still material (`49` files) and must keep decreasing in subsequent waves.
+
+## Delta 2026-02-19 LXX - Behavior preset decomposition
+Implemented:
+1. Moved boss/coward behavior preset builder logic out of `lib/behavior-tree.ts` into `lib/behavior-tree-boss-preset.ts`.
+2. Preserved public preset contract by delegating through `BehaviorPresets` in runtime module.
+3. Reduced architecture oversized debt baseline (`49 -> 48`) and tightened threshold to `<=48`.
+
+Critical reading:
+1. This improves separation between core node runtime and high-level preset orchestration.
+2. Residual limitation remains: oversized debt is still significant (`48` files) and requires continued decomposition waves.
