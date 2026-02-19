@@ -254,6 +254,7 @@ Label: `PARTIAL_INTERNAL`
 - added IDE chat trace-summary rendering for multi-agent decision and telemetry transparency
 - hardened Studio Full Access with plan-scoped allowed scopes and plan-tier TTL policy
 - aligned Studio Home Full Access UX with policy contract (scope selector + plan-aware option gating + metadata-based TTL feedback)
+- created canonical benchmark absorption register (`23_EXTERNAL_BENCHMARK_ABSORPTION_2026-02-19.md`) with verified-vs-assumption split
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:
