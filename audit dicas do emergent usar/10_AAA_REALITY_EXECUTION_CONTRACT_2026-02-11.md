@@ -3208,3 +3208,23 @@ Validation status:
 Decision lock:
 1. Shared curve/math tables should remain in dedicated modules to prevent runtime files from regressing into monoliths.
 2. Oversized threshold tightening remains coupled to actual code-structure reductions only.
+
+## 117) Delta 2026-02-19 LXXI - Workspace/cloth modular decomposition wave
+
+Implemented:
+1. Extracted workspace store state/action contracts into dedicated module:
+- new `lib/store/workspace-store-types.ts`
+- `lib/store/workspace-store.ts` now imports/re-exports these contracts and keeps store runtime focused
+2. Extracted cloth editor presets and reusable input controls:
+- new `components/physics/cloth-editor-controls.tsx`
+- `components/physics/ClothSimulationEditor.tsx` now consumes shared presets/types/controls
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 49` (was `<=51`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Shared store contracts and reusable editor controls must stay extracted to prevent monolith regression.
+2. Architecture threshold updates remain allowed only after factual structural reduction.

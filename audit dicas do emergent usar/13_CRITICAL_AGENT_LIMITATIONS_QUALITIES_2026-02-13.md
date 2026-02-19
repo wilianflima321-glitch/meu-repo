@@ -1253,3 +1253,13 @@ Implemented:
 Critical reading:
 1. This removes static math-table burden from runtime timeline module with low behavioral risk.
 2. Residual limitation remains: oversized debt still exists (`51` files) and requires sustained decomposition waves.
+
+## Delta 2026-02-19 LXIX - Workspace and cloth decomposition
+Implemented:
+1. Moved workspace store state/action contracts to `lib/store/workspace-store-types.ts`, keeping `workspace-store.ts` runtime-centric.
+2. Moved cloth editor presets + shared input controls to `components/physics/cloth-editor-controls.tsx`.
+3. Reduced architecture oversized debt baseline (`51 -> 49`) and tightened threshold to `<=49`.
+
+Critical reading:
+1. This removes duplicated static/control concerns from runtime-heavy files and improves maintainability.
+2. Residual limitation remains: oversized debt is still material (`49` files) and must keep decreasing in subsequent waves.

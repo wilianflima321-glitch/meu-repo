@@ -1249,3 +1249,13 @@ Delivered:
 Triaged impact:
 1. Improves separation between timeline runtime and shared interpolation curves.
 2. Keeps architecture debt reduction measurable without expanding product scope.
+
+## Delta 2026-02-19 LXVII - Oversized triage reduction via workspace/cloth modularization
+Delivered:
+1. Split workspace store contract types from `lib/store/workspace-store.ts` into `lib/store/workspace-store-types.ts`.
+2. Split cloth editor presets/reusable controls from `components/physics/ClothSimulationEditor.tsx` into `components/physics/cloth-editor-controls.tsx`.
+3. Reduced oversized-file metric from `51` to `49` and tightened threshold to `<=49`.
+
+Triaged impact:
+1. Reduces state/runtime file complexity in core IDE and simulation surfaces.
+2. Continues measurable architecture debt burn-down while preserving behavior and scope.

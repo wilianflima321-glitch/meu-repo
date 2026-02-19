@@ -263,12 +263,13 @@ Label: `PARTIAL_INTERNAL`
 - introduced architecture drift gate (`qa:architecture-gate`) and wired it into enterprise-gate + UI workflows
 - refreshed closure backlog and mandatory gate set to include architecture drift enforcement
 - reduced duplicate component basenames from 10 to 0 and tightened gate threshold to zero accordingly
-- tightened oversized-files architecture gate threshold to current factual baseline (`<=51`)
+- tightened oversized-files architecture gate threshold to current factual baseline (`<=49`)
 - extended canonical component scanner with banned imports for removed duplicate paths (`engine/debug/dashboard/admin/vcs`)
 - split export preset catalog out of `components/export/ExportSystem.tsx`, reducing oversized-file debt by one module
 - split static facial animation datasets out of `components/character/FacialAnimationEditor.tsx`, reducing oversized-file debt by one additional module
 - split extension host shared interfaces out of `lib/server/extension-host-runtime.ts`, reducing oversized-file debt by one additional module
 - split sequencer easing curves/type out of `lib/sequencer-cinematics.ts`, reducing oversized-file debt by one additional module
+- split workspace store contracts out of `lib/store/workspace-store.ts` and cloth editor controls/presets out of `components/physics/ClothSimulationEditor.tsx`, reducing oversized-file debt by two additional modules
 - normalized route inventory capability debt reporting (critical/non-critical/payment-gateway split)
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
