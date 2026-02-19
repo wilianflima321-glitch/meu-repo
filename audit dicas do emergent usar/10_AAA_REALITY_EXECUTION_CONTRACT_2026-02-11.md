@@ -3016,3 +3016,21 @@ Validation status:
 Decision lock:
 1. UI quality workflows must validate the real product surface, not fallback fixtures.
 2. Startup failures are release blockers and cannot be bypassed via static fallback paths.
+
+## 107) Delta 2026-02-19 LXI - Architecture drift gate activation
+
+Implemented:
+1. Added dedicated architecture gate script:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs`
+2. Wired architecture gate into enterprise pipeline contract:
+- `package.json` now includes `qa:architecture-gate`
+- `qa:enterprise-gate` now executes architecture gate before build/typecheck stages
+3. Wired architecture gate into UI workflows (`ui-audit`, `visual-regression-compare`) as pre-audit/pre-compare check.
+
+Validation status:
+1. Executed in-wave: `qa:architecture-gate` (PASS on current baseline thresholds).
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Duplicate/oversized component drift and compatibility-route debt are now release-governed metrics.
+2. Threshold changes require explicit canonical delta and owner sign-off.

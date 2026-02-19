@@ -148,8 +148,9 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. `npm run typecheck`
 3. `npm run build`
 4. `npm run qa:interface-gate`
-5. `npm run qa:canonical-components`
-6. `npm run qa:route-contracts`
-7. `npm run qa:no-fake-success`
-8. `npm run qa:mojibake`
-9. `npm run qa:enterprise-gate`
+5. `npm run qa:architecture-gate`
+6. `npm run qa:canonical-components`
+7. `npm run qa:route-contracts`
+8. `npm run qa:no-fake-success`
+9. `npm run qa:mojibake`
+10. `npm run qa:enterprise-gate`

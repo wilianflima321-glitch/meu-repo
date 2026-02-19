@@ -1153,3 +1153,16 @@ Implemented:
 Critical reading:
 1. This removes false-green risk where fixture pages pass while real app is broken.
 2. Residual limitation remains: full confidence still depends on end-to-end gate runs in CI after this change.
+
+## Delta 2026-02-19 LIX - Architecture gate operationalized
+Implemented:
+1. Added explicit architecture gate (`qa:architecture-gate`) with thresholds for:
+- compatibility route usage
+- deprecated surface drift
+- duplicate component basenames
+- oversized source file count
+2. Embedded architecture gate into enterprise gate and UI-related CI workflows.
+
+Critical reading:
+1. This converts architecture drift from advisory report into enforceable regression contract.
+2. Residual limitation remains: current thresholds are freeze-level and still require targeted refactor waves to reduce debt.

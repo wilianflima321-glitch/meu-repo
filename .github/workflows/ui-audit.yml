@@ -63,6 +63,10 @@ jobs:
         run: |
           npm --prefix cloud-web-app/web run qa:route-contracts
 
+      - name: Architecture gate (pre-audit)
+        run: |
+          npm --prefix cloud-web-app/web run qa:architecture-gate
+
       - name: Anti fake-success gate (pre-audit)
         run: |
           npm --prefix cloud-web-app/web run qa:no-fake-success

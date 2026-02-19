@@ -15,6 +15,7 @@ Consolidar o que ainda falta para fechamento de fase com qualidade enterprise, s
 - `not-implemented-ui=6`
 - `not-implemented-noncritical=2`
 3. Deltas canônicos continuam `PARTIAL_INTERNAL` até rerun completo de gates enterprise.
+4. `qa:architecture-gate`: PASS no baseline atual.
 
 ## 2) P0 de fechamento (bloqueadores)
 ### P0-01 Consolidacao final de gates
@@ -23,6 +24,7 @@ Consolidar o que ainda falta para fechamento de fase com qualidade enterprise, s
 - `typecheck`
 - `build`
 - `qa:interface-gate`
+- `qa:architecture-gate`
 - `qa:canonical-components`
 - `qa:route-contracts`
 - `qa:critical-rate-limit`

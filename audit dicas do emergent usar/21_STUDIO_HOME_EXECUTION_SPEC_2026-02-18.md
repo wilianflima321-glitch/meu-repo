@@ -84,9 +84,10 @@ Mandatory before completion:
 4. `npm run qa:interface-gate`
 5. `npm run qa:canonical-components`
 6. `npm run qa:route-contracts`
-7. `npm run qa:no-fake-success`
-8. `npm run qa:mojibake`
-9. `npm run qa:enterprise-gate`
+7. `npm run qa:architecture-gate`
+8. `npm run qa:no-fake-success`
+9. `npm run qa:mojibake`
+10. `npm run qa:enterprise-gate`
 
 ## 8) Residual risk
 1. Session state persistence currently reuses workflow JSON and is not yet isolated in dedicated tables.
@@ -122,3 +123,5 @@ Mandatory before completion:
 21. Interface scan now tracks auxiliary AI `NOT_IMPLEMENTED` surfaces separately (`not-implemented-noncritical=2`) while preserving critical UI ceiling (`not-implemented-ui=6`).
 22. Visual regression PR workflow now fails when baseline/report are missing (no compare skip path in normal flow).
 23. UI audit and visual compare workflows now require real web-app readiness (no static fallback path).
+24. Architecture drift gate is active (`qa:architecture-gate`) and currently passing on baseline thresholds.
+25. Enterprise gate now includes architecture drift checks as mandatory pre-release contract.

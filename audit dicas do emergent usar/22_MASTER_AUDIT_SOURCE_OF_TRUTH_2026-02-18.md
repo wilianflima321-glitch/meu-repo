@@ -192,6 +192,7 @@ Resolution: only claim what is implemented and validated.
 - `typecheck`
 - `build`
 - `qa:interface-gate`
+- `qa:architecture-gate`
 - `qa:canonical-components`
 - `qa:route-contracts`
 - `qa:no-fake-success`
@@ -259,6 +260,8 @@ Label: `PARTIAL_INTERNAL`
 - created closure backlog (`24_MAXIMUM_CLOSURE_BACKLOG_2026-02-19.md`) with P0/P1/P2 execution order and file-level owners
 - hardened visual-regression workflow to fail on missing baseline/report and regenerated architecture/route inventories for drift tracking
 - removed static fallback paths from UI audit/visual regression workflows to enforce real app readiness in CI
+- introduced architecture drift gate (`qa:architecture-gate`) and wired it into enterprise-gate + UI workflows
+- refreshed closure backlog and mandatory gate set to include architecture drift enforcement
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

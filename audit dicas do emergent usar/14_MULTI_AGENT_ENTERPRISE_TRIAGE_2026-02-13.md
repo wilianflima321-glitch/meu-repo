@@ -1150,3 +1150,13 @@ Delivered:
 Triaged impact:
 1. Increases fidelity of CI as release gate for UI quality.
 2. Prevents hidden regressions from passing through fixture-based fallback runs.
+
+## Delta 2026-02-19 LVII - Architecture governance triage
+Delivered:
+1. Promoted architecture drift scan into enforced gate (`qa:architecture-gate`).
+2. Hooked the new gate into enterprise pipeline and UI-focused CI workflows.
+3. Refreshed architecture + route inventories after gate activation.
+
+Triaged impact:
+1. Prevents silent growth of duplicate surfaces and oversized monolith files.
+2. Improves predictability for P1 consolidation planning with stable threshold governance.
