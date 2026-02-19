@@ -1058,3 +1058,14 @@ Implemented:
 Critical reading:
 1. This closes high-impact abuse vectors where backup, test execution, or MCP traffic could saturate runtime resources.
 2. Residual limitation remains unchanged: production confidence still requires consolidated gate execution evidence and distributed limiter backing in deployed runtime.
+
+## Delta 2026-02-19 L - Product-adjacent operational limiter coverage uplift
+Implemented:
+1. Added shared limiter coverage to analytics/experiments routes (`analytics GET/POST`, `experiments GET/POST`).
+2. Added shared limiter coverage to feature and user-ops routes (`feature-flags GET/POST`, `feature-flag toggle`, `notifications GET/POST/PATCH/DELETE`, `onboarding GET/POST`, `quotas GET/POST`).
+3. Added shared limiter coverage to template/task helper routes (`templates GET/POST`, `tasks/detect POST`, `tasks/load POST`).
+4. Expanded critical rate-limit scanner matrix to enforce all new scopes in CI.
+
+Critical reading:
+1. This closes abuse vectors in high-frequency product helper APIs that can be hammered by UI polling or automation loops.
+2. Residual limitation remains unchanged: final confidence still depends on consolidated gate execution evidence and distributed limiter backing in deployed runtime.

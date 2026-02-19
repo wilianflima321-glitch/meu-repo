@@ -2813,3 +2813,29 @@ Validation status:
 Decision lock:
 1. Backup/restore, test-run, and MCP surfaces are high-impact operational routes and are mandatory abuse-control baseline.
 2. Public status endpoints (`mcp GET`) must remain explicitly throttled to prevent polling storms.
+
+## 98) Delta 2026-02-19 LII - Product-adjacent operational route abuse-control expansion
+
+Implemented:
+1. Added shared awaited limiter protection on product analytics and experiments routes:
+- `app/api/analytics/route.ts` (`GET`, `POST`)
+- `app/api/experiments/route.ts` (`GET`, `POST`)
+2. Added shared awaited limiter protection on feature-management and user-ops routes:
+- `app/api/feature-flags/route.ts` (`GET`, `POST`)
+- `app/api/feature-flags/[key]/toggle/route.ts`
+- `app/api/notifications/route.ts` (`GET`, `POST`, `PATCH`, `DELETE`)
+- `app/api/onboarding/route.ts` (`GET`, `POST`)
+- `app/api/quotas/route.ts` (`GET`, `POST`)
+3. Added shared awaited limiter protection on template/task helper routes:
+- `app/api/templates/route.ts` (`GET`, `POST`)
+- `app/api/tasks/detect/route.ts`
+- `app/api/tasks/load/route.ts`
+4. Expanded `qa:critical-rate-limit` scanner matrix to enforce all scopes above.
+
+Validation status:
+1. Full gate execution intentionally deferred in this wave (user request: run tests later).
+2. Delta remains `PARTIAL_INTERNAL` pending consolidated gate run.
+
+Decision lock:
+1. Product-adjacent operational APIs (analytics/experiments/notifications/onboarding/quotas/templates/tasks) are mandatory abuse-control baseline.
+2. Feature management mutations must remain throttled alongside read endpoints to prevent configuration churn abuse.

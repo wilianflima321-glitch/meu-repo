@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,14 @@ const ONBOARDING_STEPS = [
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'onboarding-get',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many onboarding status requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     let progress = onboardingProgress.get(user.userId);
     
@@ -79,6 +88,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'onboarding-post',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many onboarding update requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json();
     
     const { action, step, tour, achievement, stat, value } = body;

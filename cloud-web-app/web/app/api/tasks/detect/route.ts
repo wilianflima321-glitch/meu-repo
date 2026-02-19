@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface DetectTasksRequest {
   workspaceRoot: string;
@@ -26,6 +27,14 @@ export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
 		await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'tasks-detect-post',
+      key: user.userId,
+      max: 300,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many task detection requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body: DetectTasksRequest = await request.json();
     const { workspaceRoot } = body;

@@ -1046,3 +1046,14 @@ Delivered:
 Triaged impact:
 1. Reduced resource-saturation risk on heavy operational routes (backup restore, test execution, MCP transport).
 2. Increased CI confidence by moving another execution-sensitive route family under mandatory throttle checks.
+
+## Delta 2026-02-19 XLVIII - Security triage: product operational control expansion
+Delivered:
+1. Added shared limiter guardrails for analytics and experiments routes.
+2. Added shared limiter guardrails for feature/user operational routes (`feature-flags`, `feature-flag toggle`, `notifications`, `onboarding`, `quotas`).
+3. Added shared limiter guardrails for template/task helper routes (`templates`, `tasks/detect`, `tasks/load`).
+4. Extended `qa:critical-rate-limit` scanner matrix to enforce all new scopes.
+
+Triaged impact:
+1. Reduced abuse exposure in high-frequency product APIs that are typically called by dashboards, assistant workflows, and setup flows.
+2. Increased release confidence by enforcing these routes under mandatory CI throttle checks.

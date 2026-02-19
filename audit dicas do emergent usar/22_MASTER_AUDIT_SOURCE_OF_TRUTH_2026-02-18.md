@@ -246,6 +246,7 @@ Label: `PARTIAL_INTERNAL`
 - expanded shared limiter + scanner coverage to copilot workflow/control, dap/lsp, workspace search/replace, and collaboration room control endpoints
 - expanded shared limiter + scanner coverage to auth recovery/verification, contact/email messaging, and credits transfer endpoints
 - expanded shared limiter + scanner coverage to backup lifecycle, test discovery/run, and mcp ingress/status endpoints
+- expanded shared limiter + scanner coverage to analytics/experiments, feature management, notifications/onboarding/quotas, templates, and task helper endpoints
 - security headers added globally
 - CI guard added (`qa:critical-rate-limit`) for protected endpoints
 2. Remaining for `SEC-001` completion:

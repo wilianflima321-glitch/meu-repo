@@ -12,6 +12,7 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { getPlanLimits, getUsageStatus, recordTokenUsage } from '@/lib/plan-limits';
 import { getUserStorageUsed } from '@/lib/storage-quota';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,14 @@ function getMonthKey(): string {
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'quotas-get',
+      key: user.userId,
+      max: 720,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many quota status requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     // Busca usuário para pegar plano
     const dbUser = await prisma.user.findUnique({
@@ -99,6 +108,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'quotas-post',
+      key: user.userId,
+      max: 420,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many quota operation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json();
     
     const action = body?.action;

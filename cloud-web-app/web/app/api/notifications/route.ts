@@ -12,12 +12,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'notifications-get',
+      key: user.userId,
+      max: 900,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many notification fetch requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
@@ -64,6 +73,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'notifications-post',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many notification create requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json();
     const { type, title, message, data, userId } = body;
     
@@ -105,6 +122,14 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'notifications-patch',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many notification update requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json();
     const { ids, markAllRead } = body;
     
@@ -154,6 +179,14 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'notifications-delete',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many notification delete requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const deleteAll = searchParams.get('all') === 'true';
