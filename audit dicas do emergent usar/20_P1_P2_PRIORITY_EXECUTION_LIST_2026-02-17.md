@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`14`) to next threshold gate (`<=12`).
+2. Continue oversized module decomposition from current baseline (`12`) to next threshold gate (`<=10`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -239,3 +239,10 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 16. Reduced oversized source baseline from `15` to `14` via Scene Editor panel extraction:
 - `components/scene-editor/SceneEditorPanels.tsx`
 - `components/scene-editor/SceneEditor.tsx` runtime/panel concern separation
+17. Reduced oversized source baseline from `14` to `13` via AI Chat panel decomposition:
+- `components/ide/AIChatPanelPro.types.ts`
+- `components/ide/AIChatPanelPro.format.ts`
+- `components/ide/AIChatPanelPro.tsx` contract/helper import surface
+18. Reduced oversized source baseline from `13` to `12` via Terrain panel decomposition:
+- `components/terrain/TerrainSculptingPanels.tsx`
+- `components/terrain/TerrainSculptingEditor.tsx` runtime/panel concern separation

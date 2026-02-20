@@ -1566,3 +1566,26 @@ Critical reading:
 1. Oversized baseline dropped from `16` to `14`.
 2. Remaining oversized debt is now concentrated in top dashboard/media/AI/editor monoliths.
 3. Residual risk shifts from mixed UI/runtime coupling to fewer, heavier product surfaces, improving targeting precision for next waves.
+
+## Delta 2026-02-20 XCVII - AIChatPanelPro decomposition to 13 oversized files
+Implemented:
+1. Extracted AI chat contracts/default model set into `components/ide/AIChatPanelPro.types.ts`.
+2. Extracted chat formatter helpers into `components/ide/AIChatPanelPro.format.ts`.
+3. Updated `components/ide/AIChatPanelPro.tsx` to consume extracted modules with no behavior change.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `14` to `13`.
+2. Remaining oversized set no longer includes core IDE chat surface, reducing one high-frequency maintenance hotspot.
+3. Backlog concentration now shifts further toward dashboard/media/physics/render monoliths, improving next-wave targeting.
+
+## Delta 2026-02-20 XCVIII - Terrain panel decomposition to 12 oversized files
+Implemented:
+1. Extracted toolbar/brush/layers/erosion panel UI into `components/terrain/TerrainSculptingPanels.tsx`.
+2. Updated `components/terrain/TerrainSculptingEditor.tsx` to keep viewport and terrain runtime concerns.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `13` to `12` (threshold reached).
+2. Terrain editing surface now has cleaner runtime-vs-panel boundaries and lower maintenance risk.
+3. Remaining oversized debt is concentrated in dashboard/media/audio/physics/rendering-core monoliths.

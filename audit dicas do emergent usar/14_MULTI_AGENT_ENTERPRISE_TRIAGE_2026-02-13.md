@@ -1586,3 +1586,26 @@ Triaged impact:
 1. Oversized source count reduced `16 -> 14`.
 2. Decomposition now removes two high-change editor surfaces from oversized backlog in one wave.
 3. Remaining backlog is concentrated in fewer, clearer targets for P1/P2 extraction planning.
+
+## Delta 2026-02-20 XCVIII - AIChatPanelPro decomposition wave
+Delivered:
+1. Split AI chat contracts/defaults to `components/ide/AIChatPanelPro.types.ts`.
+2. Split formatter helpers to `components/ide/AIChatPanelPro.format.ts`.
+3. Updated `components/ide/AIChatPanelPro.tsx` to import extracted modules and keep behavior stable.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `14 -> 13`.
+2. Removed one core IDE interaction surface from oversized backlog with compatibility preserved.
+3. Residual oversized backlog is now concentrated in dashboard/media/physics/render heavy modules.
+
+## Delta 2026-02-20 XCIX - Terrain panel decomposition wave
+Delivered:
+1. Split terrain editor panel/UI surfaces into `components/terrain/TerrainSculptingPanels.tsx`.
+2. Updated `components/terrain/TerrainSculptingEditor.tsx` to keep runtime/viewport concerns isolated.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `13 -> 12` (threshold reached).
+2. Terrain editing path now has clearer module boundaries and lower regression blast radius.
+3. Remaining oversized backlog is concentrated in fewer system-level monoliths for targeted extraction.

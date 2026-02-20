@@ -3816,3 +3816,40 @@ Validation snapshot:
 Decision lock:
 1. Preserve compatibility exports from `VisualScriptEditor.tsx` while downstream modules migrate gradually.
 2. Keep decomposition waves focused on behavior-preserving boundary extraction in remaining top monoliths.
+
+## 148) Delta 2026-02-20 CII - AIChatPanelPro decomposition reached 13 oversized files
+
+Implemented:
+1. Extracted chat types/defaults to:
+- `cloud-web-app/web/components/ide/AIChatPanelPro.types.ts`
+2. Extracted formatting helpers to:
+- `cloud-web-app/web/components/ide/AIChatPanelPro.format.ts`
+3. Updated `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` to consume extracted modules while preserving runtime behavior.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `14` to `13`.
+3. `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` reduced to `1196` lines (no longer oversized).
+
+Decision lock:
+1. Keep chat panel behavior unchanged while moving contracts/helpers into bounded modules.
+2. Continue next wave on highest-risk monoliths (`AethelDashboard`, media, physics, rendering graph).
+
+## 149) Delta 2026-02-20 CIII - Terrain panel decomposition reached <=12 oversized threshold
+
+Implemented:
+1. Split Terrain Editor panel surfaces into:
+- `cloud-web-app/web/components/terrain/TerrainSculptingPanels.tsx`
+2. Updated `cloud-web-app/web/components/terrain/TerrainSculptingEditor.tsx` to keep viewport/runtime concerns and consume extracted panel components.
+3. Preserved existing runtime brush/erosion/layer behavior and panel contracts.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `13` to `12` (current threshold reached).
+3. `cloud-web-app/web/components/terrain/TerrainSculptingEditor.tsx` reduced to `800` lines.
+
+Decision lock:
+1. Keep terrain panel behavior stable while continuing structural extraction on remaining monoliths.
+2. Prioritize remaining oversized targets by user-path criticality and coupling risk.
