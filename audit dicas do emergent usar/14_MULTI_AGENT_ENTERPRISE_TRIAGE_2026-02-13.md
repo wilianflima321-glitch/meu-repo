@@ -1455,3 +1455,13 @@ Delivered:
 Triaged impact:
 1. Oversized source count reduced `30 -> 29`.
 2. Priority concentration improved further on highest-change monoliths.
+
+## Delta 2026-02-20 LXXXVII - Networking threshold closure
+Delivered:
+1. Extracted networking contracts to `lib/networking-multiplayer-types.ts`.
+2. Updated `lib/networking-multiplayer.ts` with contract import/re-export compatibility.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `29 -> 28`.
+2. Decomposition P1 threshold reached; next step is risk-based ordering of remaining heavy modules.

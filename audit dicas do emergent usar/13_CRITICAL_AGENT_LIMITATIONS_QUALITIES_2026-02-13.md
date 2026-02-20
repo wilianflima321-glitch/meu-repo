@@ -1438,3 +1438,14 @@ Critical reading:
 1. Oversized baseline dropped from `30` to `29`.
 2. Residual risk remains focused in editor/media/physics monoliths where behavior-coupling is stronger.
 3. Next extractions must be scoped with stricter regression controls because remaining files are more stateful.
+
+## Delta 2026-02-20 LXXXVI - Networking runtime decomposition
+Implemented:
+1. Moved networking contracts/enums to `cloud-web-app/web/lib/networking-multiplayer-types.ts`.
+2. Kept compatibility through type/enum re-exports in `cloud-web-app/web/lib/networking-multiplayer.ts`.
+3. Regenerated architecture triage baseline.
+
+Critical reading:
+1. Oversized baseline dropped from `29` to `28` (threshold achieved).
+2. Remaining oversized set is now increasingly concentrated in complex editor/media/physics services.
+3. Next waves should prefer test-backed extractions in stateful gameplay/render modules.

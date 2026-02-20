@@ -1,114 +1,24 @@
-/**
- * Networking & Multiplayer System - Sistema Completo de Rede
- * 
- * Sistema profissional de networking para jogos multiplayer:
- * - WebSocket para comunicação real-time
- * - WebRTC para P2P e voz
- * - Rollback netcode para jogos de luta
- * - Server reconciliation
- * - Client-side prediction
- * - Interpolação e extrapolação
- * - Serialização eficiente (binary)
- * - Matchmaking
- * - Lobby system
- * - Chat integrado
- */
+﻿/** Networking and multiplayer runtime core. */
+import {
+  MessageType,
+  type Lobby,
+  type NetworkConfig,
+  type NetworkInput,
+  type NetworkMessage,
+  type NetworkPlayer,
+  type PlayerState,
+} from './networking-multiplayer-types';
 
-// ============================================================================
-// TIPOS E INTERFACES
-// ============================================================================
-
-export interface NetworkConfig {
-  serverUrl: string;
-  maxPlayers: number;
-  tickRate: number; // Server ticks per second
-  interpolationDelay: number; // ms
-  predictionEnabled: boolean;
-  rollbackFrames: number; // For fighting games
-}
-
-export interface NetworkPlayer {
-  id: string;
-  name: string;
-  isHost: boolean;
-  isLocal: boolean;
-  ping: number;
-  state: PlayerState;
-  lastInputTime: number;
-  connection?: RTCPeerConnection;
-}
-
-export interface PlayerState {
-  position: { x: number; y: number; z: number };
-  rotation: { x: number; y: number; z: number; w: number };
-  velocity: { x: number; y: number; z: number };
-  animation: string;
-  health: number;
-  customData: Record<string, unknown>;
-}
-
-export interface NetworkInput {
-  timestamp: number;
-  sequence: number;
-  playerId: string;
-  keys: Set<string>;
-  mouseX: number;
-  mouseY: number;
-  mouseButtons: number;
-  actions: string[];
-}
-
-export interface NetworkMessage {
-  type: MessageType;
-  timestamp: number;
-  sequence: number;
-  payload: unknown;
-}
-
-export enum MessageType {
-  // Connection
-  CONNECT = 'connect',
-  DISCONNECT = 'disconnect',
-  PING = 'ping',
-  PONG = 'pong',
-  
-  // Lobby
-  JOIN_LOBBY = 'join_lobby',
-  LEAVE_LOBBY = 'leave_lobby',
-  LOBBY_UPDATE = 'lobby_update',
-  CHAT = 'chat',
-  
-  // Game
-  GAME_START = 'game_start',
-  GAME_END = 'game_end',
-  STATE_UPDATE = 'state_update',
-  INPUT = 'input',
-  ACTION = 'action',
-  
-  // Sync
-  FULL_STATE = 'full_state',
-  DELTA_STATE = 'delta_state',
-  SNAPSHOT = 'snapshot',
-  
-  // RPC
-  RPC = 'rpc',
-  RPC_RESPONSE = 'rpc_response',
-}
-
-export interface Lobby {
-  id: string;
-  name: string;
-  host: string;
-  players: NetworkPlayer[];
-  maxPlayers: number;
-  isPrivate: boolean;
-  gameMode: string;
-  settings: Record<string, unknown>;
-}
-
-// ============================================================================
+export { MessageType };
+export type {
+  Lobby,
+  NetworkConfig,
+  NetworkInput,
+  NetworkMessage,
+  NetworkPlayer,
+  PlayerState,
+} from './networking-multiplayer-types';
 // BINARY SERIALIZATION
-// ============================================================================
 
 export class NetworkSerializer {
   private static textEncoder = new TextEncoder();
@@ -329,9 +239,7 @@ export class NetworkSerializer {
   }
 }
 
-// ============================================================================
 // INPUT BUFFER FOR ROLLBACK
-// ============================================================================
 
 export class InputBuffer {
   private inputs: Map<number, NetworkInput> = new Map();
@@ -381,9 +289,7 @@ export class InputBuffer {
   }
 }
 
-// ============================================================================
 // STATE INTERPOLATION
-// ============================================================================
 
 export class StateInterpolator {
   private stateBuffer: { timestamp: number; state: PlayerState }[] = [];
@@ -496,9 +402,7 @@ export class StateInterpolator {
   }
 }
 
-// ============================================================================
 // CLIENT-SIDE PREDICTION
-// ============================================================================
 
 export class ClientPrediction {
   private pendingInputs: NetworkInput[] = [];
@@ -543,9 +447,7 @@ export class ClientPrediction {
   }
 }
 
-// ============================================================================
 // ROLLBACK NETCODE
-// ============================================================================
 
 export interface RollbackState {
   frame: number;
@@ -675,9 +577,7 @@ export class RollbackNetcode {
   }
 }
 
-// ============================================================================
 // NETWORK CLIENT
-// ============================================================================
 
 type NetworkEventHandler = (data: unknown) => void;
 
@@ -962,9 +862,7 @@ export class NetworkClient {
   }
 }
 
-// ============================================================================
 // WEBRTC PEER CONNECTION (P2P and Voice)
-// ============================================================================
 
 export interface WebRTCConfig {
   iceServers: RTCIceServer[];
@@ -1095,9 +993,7 @@ export class WebRTCConnection {
   }
 }
 
-// ============================================================================
 // MATCHMAKING
-// ============================================================================
 
 export interface MatchmakingConfig {
   gameMode: string;
@@ -1171,9 +1067,7 @@ export class Matchmaker {
   }
 }
 
-// ============================================================================
 // NETWORK MANAGER (HIGH-LEVEL API)
-// ============================================================================
 
 export class NetworkManager {
   private client: NetworkClient | null = null;
@@ -1272,9 +1166,7 @@ export class NetworkManager {
   }
 }
 
-// ============================================================================
 // EXPORTS
-// ============================================================================
 
 export const networkManager = new NetworkManager();
 

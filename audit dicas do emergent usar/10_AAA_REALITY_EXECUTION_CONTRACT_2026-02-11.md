@@ -3613,3 +3613,18 @@ Validation snapshot:
 Decision lock:
 1. Continue extracting static contracts from oversized runtime services before invasive logic refactors.
 2. Keep canonical architecture triage regenerated after each decomposition wave.
+
+## 137) Delta 2026-02-20 XCI - Networking runtime threshold closure
+
+Implemented:
+1. Extracted networking contracts and enums to `cloud-web-app/web/lib/networking-multiplayer-types.ts`.
+2. Updated `cloud-web-app/web/lib/networking-multiplayer.ts` to consume/re-export shared contracts.
+3. Reduced non-functional section-marker noise in networking runtime module.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `29` to `28` (P1 threshold reached).
+
+Decision lock:
+1. Keep extracting state contracts from remaining monoliths before deep behavior edits.
+2. Preserve compatibility exports on original module paths during decomposition waves.
