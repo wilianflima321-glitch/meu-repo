@@ -154,3 +154,23 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 8. `npm run qa:no-fake-success`
 9. `npm run qa:mojibake`
 10. `npm run qa:enterprise-gate`
+
+## Delta 2026-02-20 - Post-connectivity residual backlog
+
+### P1 (next closure wave)
+1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
+2. Continue oversized module decomposition from current baseline (`34`) to next threshold gate.
+3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
+4. Normalize root historical README encoding/copy drift and keep canonical references only.
+
+### P2 (structural)
+1. Evaluate nested `meu-repo/` tree (`EXTERNAL_ONLY`) for extraction/archive to reduce repo cognitive load.
+2. Promote connectivity scanner from path checks to include dead-script detection and stale workflow trigger detection.
+
+### Delivered in this wave
+1. Added `.github/CODEOWNERS` baseline ownership mapping for critical surfaces (`dashboard`, `ide`, `admin`, `api`, `ai`, `billing`, governance/docs).
+
+### Delivered in this wave (governance)
+1. Added workflow governance scan + canonical matrix (`26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`).
+2. Reduced authority workflow governance issues to zero.
+3. Added governance gate evidence requirement in PR templates and branch policy.

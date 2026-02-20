@@ -127,3 +127,32 @@ CI workflows:
 4. Keep `not-implemented-ui` explicit for gated capabilities.
 5. Run gate suite before claiming completion.
 6. Do not reintroduce redirect-alias pages; keep alias policy centralized in `next.config.js`.
+
+## Delta 2026-02-20 - Surface/ownership alignment with repository connectivity
+
+### Surface ownership lock
+- `dashboard` (Studio Home): `cloud-web-app/web/app/dashboard/page.tsx` + `cloud-web-app/web/components/studio/*`
+- `ide` (advanced shell): `cloud-web-app/web/app/ide/page.tsx` + `cloud-web-app/web/components/ide/*`
+- `admin`: `cloud-web-app/web/app/admin/*`
+- `api`: `cloud-web-app/web/app/api/*`
+- `billing`: `cloud-web-app/web/app/api/billing/*` + `cloud-web-app/web/app/api/admin/payments/*`
+- `ai`: `cloud-web-app/web/app/api/ai/*` + `cloud-web-app/web/lib/ai*`
+- `repo governance`: root `package.json`, `.github/workflows/*`, `tools/repo-connectivity-scan.mjs`
+
+### Entry contract confirmation
+- Entry UX stays `/dashboard`.
+- Advanced shell stays `/ide`.
+- Handoff query contract remains `projectId`, `file`, `entry`, and optional session context.
+
+### Connectivity note
+- Placeholder workflow removed and replaced by blocking connectivity gate.
+- Stale root/submodule references removed from canonical root config.
+
+### Workflow governance surface
+- scanner: `tools/workflow-governance-scan.mjs`
+- report: `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`
+- gate command: `npm run qa:workflow-governance`
+
+### Legacy surface exposure policy
+- `cloud-web-app/web/components/studio/StudioHome.tsx` exposes legacy dashboard CTA only when `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.
+- Default production path keeps legacy CTA hidden to avoid duplicate primary journey.

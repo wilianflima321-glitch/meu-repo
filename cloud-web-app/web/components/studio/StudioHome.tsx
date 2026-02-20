@@ -15,6 +15,7 @@ const AIChatPanelContainer = dynamic(() => import('@/components/ide/AIChatPanelC
 const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
+const LEGACY_DASHBOARD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD === 'true'
 type FullAccessScope = 'project' | 'workspace' | 'web_tools'
 type MissionDomain = 'games' | 'films' | 'apps' | 'general'
 type MissionDomainSelection = MissionDomain | 'auto'
@@ -750,12 +751,14 @@ export default function StudioHome() {
             >
               Copy Session Link
             </button>
-            <button
-              onClick={() => router.push('/dashboard?legacy=1')}
-              className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-            >
-              Legacy dashboard
-            </button>
+            {LEGACY_DASHBOARD_ENABLED && (
+              <button
+                onClick={() => router.push('/dashboard?legacy=1')}
+                className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+              >
+                Legacy dashboard
+              </button>
+            )}
           </div>
         </div>
 

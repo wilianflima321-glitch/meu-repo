@@ -1380,3 +1380,26 @@ Implemented:
 Critical reading:
 1. This further separates static/default and contract surfaces from replay/VFX runtime orchestration.
 2. Residual limitation remains: oversized debt still remains (`34` files) and requires continued decomposition waves.
+
+## Delta 2026-02-20 LXXXI - Connectivity and governance limitations hardening
+Implemented:
+1. Added explicit repository connectivity scanner (`tools/repo-connectivity-scan.mjs`) with merge-blocking mode (`--fail-on-missing`).
+2. Removed stale root-level structural references (`.gitmodules` and root `tsconfig` dead reference).
+3. Converted missing-path operational scripts to guarded execution instead of implicit failure.
+4. Hardened CI workflows to avoid broken path assumptions in optional trees.
+
+Critical reading:
+1. The largest residual risk is now documentation/control-plane sprawl, not missing path references.
+2. Optional desktop paths remain intentionally unsupported in this branch and are explicitly guard-wrapped (`optionalMissing=2`).
+3. Repository-level coherence improved, but legacy surface reduction still requires ongoing P1 cleanup (`legacy_active` trees and oversized module debt).
+
+## Delta 2026-02-20 LXXXII - Workflow governance residual-risk hardening
+Implemented:
+1. Added `qa:workflow-governance` to detect missing connectivity checks in authority workflows.
+2. Added canonical workflow governance report (`26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`) with classification and issue count.
+3. Integrated governance gate into CI authority surfaces.
+
+Critical reading:
+1. Governance risk reduced from implicit workflow sprawl to explicit classified control-plane.
+2. Residual risk remains in `LEGACY_CANDIDATE` workflow surfaces pending explicit keep/archive decision.
+3. This wave improves release reliability without changing product/runtime feature scope.

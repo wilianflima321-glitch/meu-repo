@@ -105,3 +105,10 @@ Validation status:
 ## 5) Notes
 1. This matrix is contract-aligned with `10`, `13`, `14`, `15`, and `16`.
 2. If any endpoint behavior changes, this matrix must be updated in the same wave.
+
+## 6) Delta 2026-02-20 - Contract stability under connectivity hardening
+1. No public endpoint behavior changed in this wave.
+2. Capability/deprecation contracts remain unchanged:
+- `501 NOT_IMPLEMENTED` for unavailable AI/runtime capabilities.
+- `410 DEPRECATED_ROUTE` with cycle metadata for legacy routes.
+3. CI/PR governance now additionally requires repository connectivity gate evidence (`qa:repo-connectivity`) to prevent path-level contract regressions in build/test automation.

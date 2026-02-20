@@ -43,6 +43,12 @@ jobs:
         working-directory: cloud-web-app/web
         run: npm run lint
 
+      - name: Repository connectivity gate
+        run: npm run qa:repo-connectivity
+
+      - name: Workflow governance gate
+        run: npm run qa:workflow-governance
+
       - name: Anti fake-success contracts
         working-directory: cloud-web-app/web
         run: npm run qa:no-fake-success
@@ -165,37 +171,34 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Repo syntax check (PowerShell)
-        shell: pwsh
-        run: powershell -ExecutionPolicy Bypass -File build/check_syntax.ps1
-
-      - name: TypeScript check (ai-ide package)
-        # If the theia fork tree isn't present in this repo (it often isn't in
-        # lightweight forks), skip the ai-ide tsc step instead of failing the
-        # whole job. This keeps CI green for other checks while preserving the
-        # intended tsc invocation when the tree is present.
-        shell: bash
         run: |
-          if [ -f "cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json" ]; then
-            (cd cloud-ide-desktop/aethel_theia_fork && npx -y tsc --noEmit -p packages/ai-ide/tsconfig.json)
+          if [ -f package-lock.json ]; then
+            npm ci
           else
-            echo "::warning::ai-ide tsconfig not present in repo; skipping ai-ide TypeScript check"
+            npm install --no-audit --no-fund
           fi
 
+      - name: Repo syntax check (PowerShell)
+        run: npm run check:syntax:root
+
+      - name: TypeScript check (ai-ide package)
+        run: npm run check:ai-ide-ts
+
       - name: Run ai-ide unit tests
-        shell: pwsh
+        shell: bash
         run: |
-          Push-Location cloud-ide-desktop/aethel_theia_fork/packages/ai-ide
-          node ./test/run-mocha.js
-          Pop-Location
+          if [ -f "cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js" ]; then
+            (cd cloud-ide-desktop/aethel_theia_fork/packages/ai-ide && node ./test/run-mocha.js)
+          else
+            echo "::warning::ai-ide tests not present in repo; skipping ai-ide unit tests"
+          fi
 
       - name: Upload windows logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: windows-logs
+          if-no-files-found: ignore
           path: |
             cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/*.log
 
@@ -217,7 +220,12 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -235,7 +243,7 @@ jobs:
       - name: Start dev mock backend + proxy shim
         run: |
           # Start the dev mock backend on port 8011 and capture logs
-          nohup env PORT=8011 node tools/dev-mock-backend/server.js > dev-mock.log 2>&1 &
+          nohup env PORT=8011 node tools/llm-mock/server.js > dev-mock.log 2>&1 &
           # Start the proxy shim on port 8010 which forwards to the mock backend
           nohup env LISTEN_PORT=8010 TARGET_PORT=8011 node tools/ci/proxy-shim.js > proxy-shim.log 2>&1 &
 

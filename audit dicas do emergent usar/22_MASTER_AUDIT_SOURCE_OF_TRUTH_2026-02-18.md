@@ -292,3 +292,30 @@ Label: `PARTIAL_INTERNAL`
 This file consolidates the full detailed report provided by the user on 2026-02-18 and converts it into execution-safe canonical guidance.
 
 It does not replace the master execution contract (`10`), but acts as a high-detail, no-gap triage source tied to canonical rules.
+
+## 10) Delta 2026-02-20 - Repository connectivity source-of-truth integration
+Label: `VERIFIED_INTERNAL`
+
+1. New canonical connectivity matrix added:
+- `25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+2. Current generated snapshot:
+- `requiredMissing=0`
+- `optionalMissing=2` (desktop scripts, explicit guard)
+- `markdownTotal=3630`
+- `markdownCanonical=28`
+- `markdownHistorical=3602`
+3. Governance lock:
+- root/workflow path references must pass `qa:repo-connectivity`.
+
+## 11) Delta 2026-02-20 - Workflow governance source-of-truth integration
+Label: `VERIFIED_INTERNAL`
+
+1. New canonical workflow governance matrix:
+- `26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`
+2. Current generated snapshot:
+- `totalWorkflows=14`
+- `activeAuthority=5`
+- `legacyCandidate=2`
+- `issues=0`
+3. Governance lock:
+- authority workflows must retain connectivity gate coverage.

@@ -43,6 +43,9 @@ jobs:
         run: |
           npm --prefix cloud-web-app/web ci
 
+      - name: Repository connectivity gate (pre-compare)
+        run: npm run qa:repo-connectivity
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 

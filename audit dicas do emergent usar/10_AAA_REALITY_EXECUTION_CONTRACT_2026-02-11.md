@@ -3463,3 +3463,80 @@ Validation status:
 Decision lock:
 1. Global settings and project settings remain separate surfaces with explicit entry points and no duplicated behavior claims.
 2. Rate-limit deploy readiness requires production evidence via diagnostics payload; fallback counters must be monitored before claiming closure of P0-02.
+
+## 130) Delta 2026-02-20 LXXXIV - Repository connectivity hardening wave
+
+Implemented:
+1. Root script entrypoints were realigned to the active web shell:
+- `start`, `ide`, and `dev` now route through `portal:*` scripts.
+2. Missing-path scripts were converted to explicit guarded execution:
+- `test:ai-ide`, `desktop:dev`, `desktop:build`, `test:llm`, `test:browser`, `test:trading` now short-circuit with explicit warning when target trees are absent.
+3. Root TypeScript project references were normalized:
+- `tsconfig.json` now references only `./src` (removed stale `cloud-ide-desktop/...` reference).
+4. Stale submodule pointer removed:
+- deleted `.gitmodules` entry for absent `cloud-ide-desktop/aethel_theia_fork`.
+5. Added blocking connectivity audit scanner:
+- `tools/repo-connectivity-scan.mjs`
+- root command: `npm run qa:repo-connectivity`
+- canonical generated report: `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`.
+6. CI hardening for missing-tree safety:
+- `.github/workflows/ci.yml` now uses lock-aware install fallback at root,
+- replaces broken `build/check_syntax.ps1` call,
+- guards ai-ide unit test execution behind file existence,
+- fixes dev mock backend path to `tools/llm-mock/server.js`,
+- adds connectivity gate step.
+7. Replaced placeholder workflow with blocking connectivity workflow:
+- `.github/workflows/main.yml` now enforces `qa:repo-connectivity` on PR/push.
+8. PR governance template alignment:
+- `.github/pull_request_template.md` and `.github/PR_BODY.md` now require connectivity + enterprise evidence.
+9. Ownership baseline added:
+- `.github/CODEOWNERS` now maps critical product/API/governance surfaces to explicit reviewer ownership.
+
+Validation snapshot (connectivity wave):
+1. `node tools/repo-connectivity-scan.mjs --fail-on-missing --report "audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md"` -> PASS
+2. Generated summary:
+- `totalChecks=27`
+- `requiredMissing=0`
+- `optionalMissing=2` (desktop scripts, guarded by exists checks).
+
+Decision lock:
+1. Required missing path references in root scripts/config/workflows are now release-blocking.
+2. Optional missing references are allowed only when explicitly guard-wrapped and documented.
+3. Any new root/workflow path reference must pass `qa:repo-connectivity` before merge.
+
+## 131) Delta 2026-02-20 LXXXV - Workflow governance hardening wave
+
+Implemented:
+1. Added workflow governance scanner:
+- `tools/workflow-governance-scan.mjs`
+- root command: `npm run qa:workflow-governance`
+- canonical report: `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+2. Promoted workflow governance checks into blocking CI surfaces:
+- `.github/workflows/main.yml` now runs both `qa:repo-connectivity` and `qa:workflow-governance`.
+- `.github/workflows/ci.yml` adds `Workflow governance gate` in core lint/typecheck chain.
+- `.github/workflows/cloud-web-app.yml` now runs connectivity gate before web test/build flow.
+3. Updated branch and PR governance artifacts:
+- `.github/BRANCH_PROTECTION_POLICY.md` includes `qa:workflow-governance`.
+- `.github/pull_request_template.md` and `.github/PR_BODY.md` require governance evidence.
+4. Added new canonical governance artifact to source-of-truth list:
+- `26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `node tools/workflow-governance-scan.mjs --fail-on-issues --report "audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md"` -> PASS (`issues=0`).
+2. `node tools/repo-connectivity-scan.mjs --fail-on-missing --report "audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md"` -> PASS (`requiredMissing=0`).
+
+Decision lock:
+1. Active authority workflows must keep connectivity governance checks.
+2. Legacy-candidate workflows (`ci-playwright.yml`, `merge-unrelated-histories.yml`) require explicit keep/archive decision before promotion to authority tier.
+
+## 132) Delta 2026-02-20 LXXXVI - Studio Home critical-path clarity hardening
+
+Implemented:
+1. Legacy dashboard shortcut in Studio Home is now feature-flagged:
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+- `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true` required to render legacy CTA.
+2. Default user journey remains focused on Studio Home + IDE without duplicate legacy path exposure.
+
+Decision lock:
+1. Legacy surfaces remain available for phased transition, but must not be primary CTA in default production UX.
+2. Any future legacy link re-introduction on primary surfaces requires explicit flag + canonical delta.

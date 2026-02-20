@@ -11,7 +11,8 @@ For `main` and release branches, configure GitHub branch protection to require:
 3. `Cloud Web App CI/CD / Test`
 4. `UI Audit (Playwright + axe) / ui-audit`
 5. `Visual Regression - Compare vs Baseline / compare`
-6. Any workflow job that runs `qa:enterprise-gate`
+6. `Repository Connectivity Gate / connectivity`
+7. Any workflow job that runs `qa:enterprise-gate`
 
 ## Mandatory gates (must be green)
 
@@ -26,9 +27,12 @@ From `cloud-web-app/web`:
 7. `npm run qa:no-fake-success`
 8. `npm run qa:mojibake`
 9. `npm run qa:enterprise-gate`
+10. `npm run qa:repo-connectivity`
+11. `npm run qa:workflow-governance`
 
 ## No-bypass rule
 
 1. Do not allow direct pushes to protected branches.
 2. Do not merge with failing/pending required checks.
 3. Do not use admin override outside a formally declared incident.
+4. Require CODEOWNERS review for critical surfaces.

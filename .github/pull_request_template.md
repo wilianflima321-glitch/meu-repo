@@ -4,7 +4,7 @@
 
 ## Scope
 
-- [ ] No new product/shell added outside `/ide`
+- [ ] No new product/shell added outside `/dashboard` + `/ide`
 - [ ] No business-scope expansion in this PR
 - [ ] Legacy behavior remains phased (no abrupt removal without telemetry policy)
 
@@ -20,6 +20,9 @@ npm --prefix cloud-web-app/web run qa:canonical-components
 npm --prefix cloud-web-app/web run qa:route-contracts
 npm --prefix cloud-web-app/web run qa:no-fake-success
 npm --prefix cloud-web-app/web run qa:mojibake
+npm run qa:repo-connectivity
+npm run qa:workflow-governance
+npm --prefix cloud-web-app/web run qa:enterprise-gate
 ```
 
 ## Contract Compliance (Required)

@@ -1376,3 +1376,43 @@ Delivered:
 Triaged impact:
 1. Reduces static/default burden in replay and VFX runtime/editor surfaces without changing feature scope.
 2. Keeps architecture debt burn-down measurable and governance-locked.
+
+## Delta 2026-02-20 LXXIX - Repository connectivity triage closure
+Delivered:
+1. Closed required missing path references in root scripts/config/workflows (`requiredMissing=0`).
+2. Added canonical connectivity matrix with directory classification:
+- `ACTIVE`, `LEGACY_ACTIVE`, `EXTERNAL_ONLY`.
+3. Classified optional desktop paths as guarded and non-blocking (`optionalMissing=2`, both guarded).
+4. Updated PR/CI governance to require connectivity gate evidence.
+
+Triaged impact:
+1. Onboarding/CI reliability improved by removing dead path assumptions.
+2. Repo governance now has an explicit mechanism to prevent reintroduction of disconnected references.
+3. Remaining risk shifted to legacy-surface ownership and modular debt, not path coherence.
+
+## Delta 2026-02-20 LXXX - Ownership governance baseline
+Delivered:
+1. Added repository `CODEOWNERS` mapping for dashboard/ide/admin/api/ai/billing/governance surfaces.
+2. Updated branch-protection policy to require CODEOWNERS review on critical surfaces.
+
+Triaged impact:
+1. Reduced ambiguity in review responsibility.
+2. Tightened release governance without changing product scope.
+
+## Delta 2026-02-20 LXXXI - Workflow governance triage closure
+Delivered:
+1. Added workflow-governance matrix and gate (`qa:workflow-governance`).
+2. Reduced governance issues in authority workflows to zero (`issues=0`).
+3. Classified workflow set into `ACTIVE_AUTHORITY`, `SUPPORTING`, and `LEGACY_CANDIDATE`.
+
+Triaged impact:
+1. CI authority is now explicit and machine-validated.
+2. Remaining triage decision moved to legacy workflow lifecycle, not hidden breakage.
+
+## Delta 2026-02-20 LXXXII - Studio legacy-path UX triage hardening
+Delivered:
+1. Legacy dashboard CTA removed from default Studio Home path and gated behind explicit feature flag.
+
+Triaged impact:
+1. Reduced duplicate-journey exposure in default entry UX.
+2. Preserved phased-transition capability without making legacy path a default user option.
