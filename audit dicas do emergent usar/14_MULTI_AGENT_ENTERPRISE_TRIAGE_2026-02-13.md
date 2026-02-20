@@ -1547,3 +1547,14 @@ Triaged impact:
 1. Oversized source count reduced `20 -> 19`.
 2. Motion runtime orchestration is now leaner and easier to maintain.
 3. Residual backlog concentration remains in UI/editor/dashboard/media monoliths.
+
+## Delta 2026-02-20 XCV - Cloth GPU decomposition wave
+Delivered:
+1. Extracted cloth GPU simulation and presets to `lib/cloth-simulation-gpu.ts`.
+2. Updated `lib/cloth-simulation.ts` with import/re-export compatibility for GPU runtime and presets.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `19 -> 18`.
+2. Cloth runtime orchestration now has clearer CPU/GPU separation.
+3. Remaining oversized backlog is focused on UI editor/dashboard/media surfaces.

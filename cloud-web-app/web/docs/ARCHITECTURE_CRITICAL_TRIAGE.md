@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T03:41:24.224Z`
+- Generated at: `2026-02-20T04:02:07.770Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **19**
+- Oversized source files (>=1200 lines): **18**
 
 ## Top Compatibility Call Sites
 
@@ -54,7 +54,6 @@
 | `components/engine/LevelEditor.tsx` | 1410 |
 | `lib/ai/behavior-tree-system.tsx` | 1400 |
 | `components/animation/AnimationBlueprintEditor.tsx` | 1385 |
-| `lib/cloth-simulation.ts` | 1369 |
 | `components/ide/AIChatPanelPro.tsx` | 1366 |
 | `components/terrain/TerrainSculptingEditor.tsx` | 1362 |
 | `components/scene-editor/SceneEditor.tsx` | 1348 |

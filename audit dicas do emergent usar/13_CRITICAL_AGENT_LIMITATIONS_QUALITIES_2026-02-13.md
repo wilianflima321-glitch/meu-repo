@@ -1532,3 +1532,14 @@ Critical reading:
 1. Oversized baseline dropped from `20` to `19`.
 2. Debt concentration is now almost entirely in high-coupling UI/editor/media modules.
 3. Additional reductions should focus on user-path critical modules and preserve behavior compatibility.
+
+## Delta 2026-02-20 XCIV - Cloth decomposition to 18 oversized files
+Implemented:
+1. Extracted cloth GPU simulation and presets into `cloud-web-app/web/lib/cloth-simulation-gpu.ts`.
+2. Updated `cloud-web-app/web/lib/cloth-simulation.ts` to import/re-export extracted runtime surfaces.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `19` to `18`.
+2. Residual oversized backlog is now strongly concentrated in top editor/dashboard/media UI modules.
+3. Next waves should target high-frequency user-path components and keep compatibility boundaries explicit.

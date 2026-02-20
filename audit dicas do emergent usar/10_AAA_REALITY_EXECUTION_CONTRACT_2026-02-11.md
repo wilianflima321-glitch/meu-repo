@@ -3752,3 +3752,20 @@ Validation snapshot:
 Decision lock:
 1. Preserve compatibility exports on original motion-matching module path during progressive extraction.
 2. Continue next wave on highest-impact editor/dashboard/media modules under freeze-gate controls.
+
+## 145) Delta 2026-02-20 XCIX - Cloth GPU/preset decomposition reached 18 oversized files
+
+Implemented:
+1. Extracted cloth GPU simulation and preset catalog to `cloud-web-app/web/lib/cloth-simulation-gpu.ts`.
+2. Updated `cloud-web-app/web/lib/cloth-simulation.ts` to import/re-export extracted GPU and preset surfaces.
+3. Preserved `ClothSimulation` default export and runtime API compatibility.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `19` to `18`.
+3. `cloud-web-app/web/lib/cloth-simulation.ts` reduced to `1112` lines (no longer oversized).
+
+Decision lock:
+1. Keep compatibility exports stable while continuing decomposition of remaining UI-heavy monoliths.
+2. Maintain behavior-preserving extraction strategy until full freeze-gate execution.
