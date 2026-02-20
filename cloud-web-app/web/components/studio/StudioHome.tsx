@@ -12,21 +12,17 @@ import type {
   WalletSummary,
 } from './studio-home.types'
 import {
-  canApplyTask,
-  canRollbackTask,
-  canRunTask,
-  canValidateTask,
   defaultFullAccessScope,
   domainTemplate,
   fullAccessAllowedScopesForPlan,
   fullAccessScopeLabel,
   isTypingTarget,
-  missionDomainLabel,
   parseJson,
-  roleLabel,
-  runStatusTone,
-  statusTone,
 } from './studio-home.utils'
+import { StudioHomeMissionPanel } from './StudioHomeMissionPanel'
+import { StudioHomeTaskBoard } from './StudioHomeTaskBoard'
+import { StudioHomeTeamChat } from './StudioHomeTeamChat'
+import { StudioHomeOpsBar, StudioHomePreviewPanel } from './StudioHomeRightRail'
 
 const PreviewPanel = dynamic(() => import('@/components/ide/PreviewPanel'), {
   ssr: false,
@@ -424,6 +420,14 @@ export default function StudioHome() {
     }
   }, [session?.id])
 
+  const applyMissionDomainPreset = useCallback(
+    (domain: MissionDomain) => {
+      setMissionDomainSelection(domain)
+      if (!trimmedMission) setMission(domainTemplate(domain))
+    },
+    [trimmedMission]
+  )
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey) return
@@ -581,485 +585,84 @@ export default function StudioHome() {
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(420px,1fr)_460px]">
           <section className="space-y-4">
-            <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
-              <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Mission</div>
-              <form onSubmit={startSession} className="space-y-3">
-                <label className="sr-only" htmlFor="studio-mission">
-                  Mission description
-                </label>
-                <textarea
-                  id="studio-mission"
-                  value={mission}
-                  onChange={(event) => setMission(event.target.value)}
-                  placeholder="Describe mission: what to build, quality target, constraints, and expected output."
-                  required
-                  className="h-32 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            <StudioHomeMissionPanel
+              mission={mission}
+              projectId={projectId}
+              budgetCap={budgetCap}
+              qualityMode={qualityMode}
+              missionDomainSelection={missionDomainSelection}
+              trimmedMission={trimmedMission}
+              busy={busy}
+              variableUsageBlocked={variableUsageBlocked}
+              session={session}
+              onMissionChange={setMission}
+              onProjectIdChange={setProjectId}
+              onBudgetCapChange={setBudgetCap}
+              onMissionDomainChange={setMissionDomainSelection}
+              onQualityModeChange={setQualityMode}
+              onApplyDomainPreset={applyMissionDomainPreset}
+              onStartSession={startSession}
+            />
+
+            <StudioHomeTaskBoard
+              session={session}
+              busy={busy}
+              variableUsageBlocked={variableUsageBlocked}
+              taskProgress={taskProgress}
+              onCreateSuperPlan={createSuperPlan}
+              onRunWave={runWave}
+              onRunTask={runTask}
+              onValidateTask={validateTask}
+              onApplyTask={applyTask}
+              onRollbackTask={rollbackTask}
+            />
+          </section>
+
+          <section className="space-y-4">
+            <StudioHomeTeamChat
+              session={session}
+              recentAgentRuns={recentAgentRuns}
+              showAgentWorkspace={showAgentWorkspace}
+              onToggleAgentWorkspace={() => setShowAgentWorkspace((prev) => !prev)}
+              agentWorkspaceNode={<AIChatPanelContainer />}
+            />
+          </section>
+
+          <section className="space-y-4">
+            <StudioHomePreviewPanel
+              showRuntimePreview={showRuntimePreview}
+              onToggleRuntimePreview={() => setShowRuntimePreview((prev) => !prev)}
+              previewContent={previewContent}
+              previewRuntimeNode={
+                <PreviewPanel
+                  title="Interactive Preview"
+                  filePath="studio-home.md"
+                  content={previewContent}
+                  projectId={session?.projectId || projectId}
+                  isStale={Boolean(session?.status === 'stopped')}
+                  onRefresh={() => {
+                    if (session?.id) {
+                      void withAction(async () => refreshSession(session.id))
+                    }
+                  }}
                 />
-                <div className="grid grid-cols-2 gap-2">
-                  <label className="sr-only" htmlFor="studio-project-id">
-                    Project id
-                  </label>
-                  <input
-                    id="studio-project-id"
-                    value={projectId}
-                    onChange={(event) => setProjectId(event.target.value)}
-                    placeholder="projectId"
-                    className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  />
-                  <label className="sr-only" htmlFor="studio-budget-cap">
-                    Budget cap
-                  </label>
-                  <input
-                    id="studio-budget-cap"
-                    value={budgetCap}
-                    onChange={(event) => setBudgetCap(Number(event.target.value))}
-                    type="number"
-                    min={5}
-                    max={100000}
-                    step={1}
-                    className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-slate-400" htmlFor="mission-domain">
-                    Mission domain
-                  </label>
-                  <select
-                    id="mission-domain"
-                    value={missionDomainSelection}
-                    onChange={(event) => setMissionDomainSelection(event.target.value as MissionDomainSelection)}
-                    className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  >
-                    <option value="auto">auto</option>
-                    <option value="games">games</option>
-                    <option value="films">films</option>
-                    <option value="apps">apps</option>
-                    <option value="general">general</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-slate-400" htmlFor="quality-mode">
-                    Quality mode
-                  </label>
-                  <select
-                    id="quality-mode"
-                    value={qualityMode}
-                    onChange={(event) => setQualityMode(event.target.value as 'standard' | 'delivery' | 'studio')}
-                    className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  >
-                    <option value="standard">standard</option>
-                    <option value="delivery">delivery</option>
-                    <option value="studio">studio</option>
-                  </select>
-                </div>
-                <div className="rounded border border-slate-800 bg-slate-950 px-2 py-2">
-                  <div className="mb-1 text-[11px] text-slate-500">Quick mission presets</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(['games', 'films', 'apps', 'general'] as MissionDomain[]).map((domain) => (
-                      <button
-                        key={domain}
-                        type="button"
-                        onClick={() => {
-                          setMissionDomainSelection(domain)
-                          if (!trimmedMission) setMission(domainTemplate(domain))
-                        }}
-                        className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      >
-                        {missionDomainLabel(domain)}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-2 text-[11px] text-slate-500">
-                    Domain strategy: {missionDomainLabel(missionDomainSelection)}.{' '}
-                    {missionDomainSelection === 'auto'
-                      ? 'The backend infers domain from mission text.'
-                      : 'Domain is locked for this session to keep checklist and validation aligned.'}
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={busy || variableUsageBlocked || !trimmedMission}
-                  className="w-full rounded border border-blue-500/40 bg-blue-500/20 px-3 py-2 text-xs font-semibold text-blue-100 hover:bg-blue-500/30 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                >
-                  Start Studio Session
-                </button>
-                <div className="rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
-                  Shortcuts: <code>Ctrl/Cmd+Enter</code> start session, <code>Ctrl/Cmd+Shift+P</code> super plan,{' '}
-                  <code>Ctrl/Cmd+Shift+R</code> run wave, <code>Ctrl/Cmd+.</code> stop, <code>Ctrl/Cmd+I</code> open
-                  IDE, <code>Ctrl/Cmd+,</code> settings.
-                </div>
-              </form>
-              {session?.missionDomain && (
-                <div className="mt-3 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-300">
-                  <div className="font-semibold uppercase tracking-wide text-slate-400">
-                    Domain: {session.missionDomain}
-                  </div>
-                  <div className="mt-1 text-slate-400">Quality checklist</div>
-                  <ul className="mt-1 list-disc space-y-1 pl-4 text-slate-300">
-                    {(session.qualityChecklist || []).map((item, index) => (
-                      <li key={`${item}-${index}`}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+              }
+            />
 
-            <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Task Board</div>
-                <div className="flex items-center gap-1">
-                  <button
-                    disabled={
-                      !session ||
-                      busy ||
-                      session.status !== 'active' ||
-                      variableUsageBlocked ||
-                      session.tasks.length > 0
-                    }
-                    onClick={createSuperPlan}
-                    className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-                  >
-                    Super Plan
-                  </button>
-                  <button
-                    disabled={
-                      !session ||
-                      busy ||
-                      session.status !== 'active' ||
-                      variableUsageBlocked ||
-                      session.tasks.length === 0 ||
-                      session.tasks.every((task) => task.status === 'done')
-                    }
-                    onClick={runWave}
-                    className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-                  >
-                    Run Wave
-                  </button>
-                </div>
-              </div>
-              {taskProgress.total > 0 && (
-                <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1.5 text-[11px] text-slate-400">
-                  <div className="mb-1 flex items-center justify-between">
-                    <span>
-                      Progress: {taskProgress.done}/{taskProgress.total} ({taskProgress.percent}%)
-                    </span>
-                    <span>
-                      active {taskProgress.active} | blocked {taskProgress.blocked} | failed {taskProgress.failed}
-                    </span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded bg-slate-800">
-                    <div
-                      className="h-full bg-sky-500 transition-all"
-                      style={{ width: `${taskProgress.percent}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-              {session?.tasks.length ? (
-                <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-400">
-                  Super plan already created for this session. Complete or stop this session before opening a new plan.
-                </div>
-              ) : null}
-              <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
-                Validation/apply/rollback are restricted to reviewer checkpoints.
-              </div>
-              {session?.orchestration ? (
-                <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-400">
-                  Orchestration: {session.orchestration.mode} | policy: {session.orchestration.applyPolicy}
-                  {session.orchestration.lastWaveAt
-                    ? ` | last wave: ${new Date(session.orchestration.lastWaveAt).toLocaleTimeString()}`
-                    : ''}
-                </div>
-              ) : null}
-              {session?.tasks.length && session.tasks.every((task) => task.status === 'done') ? (
-                <div className="mb-2 rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200">
-                  Wave execution complete. Validate/apply reviewer checkpoint or start a new mission.
-                </div>
-              ) : null}
-              <div className="space-y-2">
-                {(session?.tasks || []).map((task) => (
-                  <div key={task.id} className={`rounded border px-3 py-2 text-xs ${statusTone(task.status)}`}>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="font-medium text-slate-100">{task.title}</div>
-                      <div className="text-[10px] uppercase tracking-wide">{task.status}</div>
-                    </div>
-                    <div className="mt-1 text-[11px] text-slate-300">
-                      {roleLabel(task.ownerRole)} | {task.estimateCredits} credits | {task.estimateSeconds}s | verdict:{' '}
-                      {task.validationVerdict}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      <button
-                        disabled={
-                          busy ||
-                          !session ||
-                          variableUsageBlocked ||
-                          !canRunTask(task, session.status, session.tasks)
-                        }
-                        onClick={() => runTask(task.id)}
-                        className="rounded border border-slate-600 px-2 py-1 text-[10px] hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-                      >
-                        Run
-                      </button>
-                      <button
-                        disabled={busy || !session || !canValidateTask(task, session.status)}
-                        onClick={() => validateTask(task.id)}
-                        className="rounded border border-slate-600 px-2 py-1 text-[10px] hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-                      >
-                        Validate
-                      </button>
-                      <button
-                        disabled={busy || !session || !canApplyTask(task, session.status)}
-                        onClick={() => applyTask(task.id)}
-                        className="rounded border border-slate-600 px-2 py-1 text-[10px] hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-                      >
-                        Apply
-                      </button>
-                      <button
-                        disabled={busy || !session || !canRollbackTask(task, session.status)}
-                        onClick={() => rollbackTask(task.id, task.applyToken)}
-                        className="rounded border border-slate-600 px-2 py-1 text-[10px] hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-                      >
-                        Rollback
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {!session?.tasks?.length && (
-                  <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-500">
-                    No tasks yet. Start session and generate Super Plan.
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
-              <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Team Chat Live</div>
-              <div className="mb-2 flex items-center justify-end">
-                <button
-                  onClick={() => setShowAgentWorkspace((prev) => !prev)}
-                  className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-                >
-                  {showAgentWorkspace ? 'Hide Agent Workspace' : 'Open Agent Workspace'}
-                </button>
-              </div>
-              <div aria-live="polite" className="max-h-64 space-y-2 overflow-auto pr-1">
-                {(session?.messages || []).map((message) => (
-                  <div key={message.id} className="rounded border border-slate-800 bg-slate-950 px-3 py-2 text-xs">
-                    <div className="mb-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
-                      <span>
-                        {message.role}
-                        {message.agentRole ? `/${message.agentRole}` : ''}
-                      </span>
-                      <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
-                    </div>
-                    <p className="whitespace-pre-wrap text-slate-200">{message.content}</p>
-                  </div>
-                ))}
-                {!session?.messages?.length && (
-                  <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-500">
-                    Session messages will appear here.
-                  </div>
-                )}
-              </div>
-              <div className="mt-3 rounded border border-slate-800 bg-slate-950 px-2 py-2">
-                <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                  Agent Runs
-                </div>
-                <div className="space-y-1">
-                  {recentAgentRuns.map((run) => (
-                    <div
-                      key={run.id}
-                      className={`rounded border px-2 py-1 text-[11px] ${runStatusTone(run.status)}`}
-                    >
-                      <div className="flex items-center justify-between gap-2 text-slate-100">
-                        <span>
-                          {roleLabel(run.role)} · {run.model}
-                        </span>
-                        <span>{run.latencyMs}ms</span>
-                      </div>
-                      <div className="text-slate-300">
-                        tokens {run.tokensIn}/{run.tokensOut} · cost {run.cost}
-                      </div>
-                    </div>
-                  ))}
-                  {recentAgentRuns.length === 0 && (
-                    <div className="rounded border border-slate-800 bg-slate-900 px-2 py-1 text-[11px] text-slate-500">
-                      No agent runs yet.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {showAgentWorkspace ? (
-              <div className="rounded border border-slate-800 bg-slate-900/60 p-2">
-                <AIChatPanelContainer />
-              </div>
-            ) : (
-              <div className="rounded border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-400">
-                Agent workspace is collapsed to keep the home surface responsive. Use the button above when you need
-                deep chat actions.
-              </div>
-            )}
-          </section>
-
-          <section className="space-y-4">
-            <div className="overflow-hidden rounded border border-slate-800 bg-slate-900/60">
-              <div className="flex items-center justify-between border-b border-slate-800 px-3 py-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Interactive Preview</div>
-                <button
-                  onClick={() => setShowRuntimePreview((prev) => !prev)}
-                  className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-                >
-                  {showRuntimePreview ? 'Use Lite Preview' : 'Enable Runtime Preview'}
-                </button>
-              </div>
-              {showRuntimePreview ? (
-                <div className="h-[460px]">
-                  <PreviewPanel
-                    title="Interactive Preview"
-                    filePath="studio-home.md"
-                    content={previewContent}
-                    projectId={session?.projectId || projectId}
-                    isStale={Boolean(session?.status === 'stopped')}
-                    onRefresh={() => {
-                      if (session?.id) {
-                        void withAction(async () => refreshSession(session.id))
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="h-[460px] overflow-auto p-3">
-                  <pre className="whitespace-pre-wrap text-xs leading-5 text-slate-300">{previewContent}</pre>
-                </div>
-              )}
-            </div>
-
-            <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
-              <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Ops Bar</div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
-                  <div className="text-slate-500">Plan</div>
-                  <div className="font-semibold text-slate-100">{usage?.plan || '-'}</div>
-                </div>
-                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
-                  <div className="text-slate-500">Wallet</div>
-                  <div className="font-semibold text-slate-100">
-                    {wallet ? `${wallet.balance.toLocaleString()} ${wallet.currency}` : '-'}
-                  </div>
-                </div>
-                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
-                  <div className="text-slate-500">Budget cap</div>
-                  <div className="font-semibold text-slate-100">{session?.cost.budgetCap ?? budgetCap}</div>
-                </div>
-                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
-                  <div className="text-slate-500">Used credits</div>
-                  <div className="font-semibold text-slate-100">{session?.cost.usedCredits ?? 0}</div>
-                </div>
-                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
-                  <div className="text-slate-500">Remaining credits</div>
-                  <div className="font-semibold text-slate-100">{session?.cost.remainingCredits ?? '-'}</div>
-                </div>
-                <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
-                  <div className="text-slate-500">Cost pressure</div>
-                  <div className="font-semibold text-slate-100">
-                    {session && session.cost.budgetCap > 0 && session.cost.remainingCredits / session.cost.budgetCap <= 0.3
-                      ? 'high'
-                      : 'normal'}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-2 py-1.5 text-[11px] text-slate-400">
-                <div className="mb-1 flex items-center justify-between">
-                  <span>Budget usage: {budgetProgress.percent}%</span>
-                  <span>
-                    {budgetProgress.pressure === 'critical'
-                      ? 'critical'
-                      : budgetProgress.pressure === 'high'
-                        ? 'high'
-                        : budgetProgress.pressure === 'medium'
-                          ? 'medium'
-                          : 'normal'}
-                  </span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded bg-slate-800">
-                  <div
-                    className={`h-full transition-all ${
-                      budgetProgress.pressure === 'critical'
-                        ? 'bg-rose-500'
-                        : budgetProgress.pressure === 'high'
-                          ? 'bg-amber-500'
-                          : budgetProgress.pressure === 'medium'
-                            ? 'bg-yellow-500'
-                            : 'bg-emerald-500'
-                    }`}
-                    style={{ width: `${budgetProgress.percent}%` }}
-                  />
-                </div>
-              </div>
-              {budgetProgress.pressure === 'critical' && (
-                <div className="mt-2 rounded border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-100">
-                  Budget is almost exhausted. Finish validation/apply now or stop session to prevent forced blocking.
-                </div>
-              )}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  disabled={!session || busy || session.status !== 'active'}
-                  onClick={stopSession}
-                  className="rounded border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 hover:bg-rose-500/20 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
-                >
-                  Stop
-                </button>
-                <button
-                  disabled={!session || busy || session.status !== 'active'}
-                  onClick={toggleFullAccess}
-                  className="rounded border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/20 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-                >
-                  {activeGrant ? 'Revoke Full Access' : `Full Access (${fullAccessScopeLabel(fullAccessScope)})`}
-                </button>
-                <label className="sr-only" htmlFor="studio-full-access-scope">
-                  Full access scope
-                </label>
-                <select
-                  id="studio-full-access-scope"
-                  value={fullAccessScope}
-                  onChange={(event) => setFullAccessScope(event.target.value as FullAccessScope)}
-                  disabled={!session || busy || session.status !== 'active' || Boolean(activeGrant)}
-                  className="rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-40"
-                >
-                  <option value="project">Project</option>
-                  <option value="workspace" disabled={!allowedFullAccessScopes.includes('workspace')}>
-                    Workspace
-                  </option>
-                  <option value="web_tools" disabled={!allowedFullAccessScopes.includes('web_tools')}>
-                    Web + Tools
-                  </option>
-                </select>
-              </div>
-              {activeGrant && (
-                <div className="mt-2 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-100">
-                  Active grant: {fullAccessScopeLabel(activeGrant.scope)} until{' '}
-                  {new Date(activeGrant.expiresAt).toLocaleTimeString()}
-                </div>
-              )}
-              <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-                Allowed scopes for current plan: {allowedFullAccessScopes.map(fullAccessScopeLabel).join(', ')}.
-              </div>
-              <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-                Note: Studio Home apply/rollback controls manage mission checkpoints. File-level patch apply remains in
-                `/ide` deterministic flows.
-              </div>
-              {usage?.usageEntitlement && !usage.usageEntitlement.variableUsageAllowed && (
-                <div className="mt-2 rounded border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-100">
-                  Variable AI usage is blocked (
-                  <code>{usage.usageEntitlement.blockedReason || 'CREDITS_EXHAUSTED'}</code>).
-                  Premium interface features remain active until cycle end.
-                </div>
-              )}
-            </div>
+            <StudioHomeOpsBar
+              session={session}
+              usage={usage}
+              wallet={wallet}
+              budgetCap={budgetCap}
+              budgetProgress={budgetProgress}
+              busy={busy}
+              activeGrant={activeGrant}
+              fullAccessScope={fullAccessScope}
+              allowedFullAccessScopes={allowedFullAccessScopes}
+              onStopSession={stopSession}
+              onToggleFullAccess={toggleFullAccess}
+              onFullAccessScopeChange={setFullAccessScope}
+            />
           </section>
         </div>
 

@@ -1694,3 +1694,18 @@ Critical reading:
 1. Repository-level governance risk decreased from "known optional debt" to explicit zero-missing baseline (`optionalMissing=0`, `deadScriptReferences=0`).
 2. Workflow trigger drift now has deterministic detection (`staleTriggerPaths=0` currently, blocking if regresses).
 3. Residual risk remains in historical legacy trees (`cloud-admin-ia`, nested `meu-repo/`) intentionally out of critical secret scan scope and must stay classified as legacy/external surfaces.
+
+## Delta 2026-02-20 CVII - Studio Home UI shell decomposition
+Implemented:
+1. Decomposed Studio Home UI from single file to block-level components:
+- `StudioHomeMissionPanel.tsx`
+- `StudioHomeTaskBoard.tsx`
+- `StudioHomeTeamChat.tsx`
+- `StudioHomeRightRail.tsx`
+2. Preserved existing runtime/capability semantics by keeping `StudioHome.tsx` as orchestration-only shell.
+3. Updated interface surface map with new block ownership paths and secret hygiene gate linkage.
+
+Critical reading:
+1. Maintenance risk moved from one dense UI shell to scoped blocks with clearer ownership boundaries.
+2. Residual risk remains behavioral parity (needs freeze gate suite), not structural coupling.
+3. No claim uplift introduced; this is UX/maintainability hardening under current scope.

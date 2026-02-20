@@ -1716,3 +1716,14 @@ Triaged impact:
 1. Connectivity matrix improved from optional debt to full closure (`requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`).
 2. Workflow governance retains zero issues with explicit stale-trigger visibility (`staleTriggerPaths=0`).
 3. Governance backlog now shifts from "broken references" to legacy footprint decisions and freeze-gate evidence.
+
+## Delta 2026-02-20 CVIII - Studio Home surface decomposition triage
+Delivered:
+1. Split Studio Home entry surface into block components for mission/taskboard/chat/right-rail.
+2. Kept shell orchestration in `StudioHome.tsx` and preserved `/dashboard -> /ide` handoff semantics.
+3. Updated canonical surface map (`18`) to point Claude/agents to exact files per block.
+
+Triaged impact:
+1. UI ownership clarity improved: each high-change block now has isolated file boundary.
+2. UX polish velocity increases (targeted edits without touching orchestration shell).
+3. No scope drift: capabilities, API contracts, and gating behavior remain unchanged.

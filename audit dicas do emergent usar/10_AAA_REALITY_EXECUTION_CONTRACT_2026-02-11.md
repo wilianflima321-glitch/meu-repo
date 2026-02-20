@@ -4046,3 +4046,24 @@ Validation snapshot:
 Decision lock:
 1. Root governance now blocks missing refs, dead script chains, stale workflow path filters, and critical secret leaks before merge.
 2. Legacy workflow candidate remains explicit (`merge-unrelated-histories.yml`) and does not override authority-gate policy.
+
+## 158) Delta 2026-02-20 CXII - Studio Home interface modularization and surface-map alignment
+
+Implemented:
+1. Split Studio Home monolithic UI surface into dedicated blocks:
+- `cloud-web-app/web/components/studio/StudioHomeMissionPanel.tsx`
+- `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`
+- `cloud-web-app/web/components/studio/StudioHomeTeamChat.tsx`
+- `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`
+2. Kept `cloud-web-app/web/components/studio/StudioHome.tsx` as orchestration shell (session/runtime/action callbacks + handoff).
+3. Removed mojibake-prone separators in live run feed and normalized to ASCII-safe text rendering.
+4. Updated canonical interface map:
+- `audit dicas do emergent usar/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+- added Studio Home block-level paths and secret hygiene gate references.
+5. Regenerated architecture evidence:
+- `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage`
+- `oversizedFiles=0`, `duplicateBasenames=0`.
+
+Decision lock:
+1. Studio Home remains chat/preview-first entry with deterministic session flow and no scope expansion.
+2. Block modularization is structural/UX hardening only; capability contracts and route behavior remain unchanged.

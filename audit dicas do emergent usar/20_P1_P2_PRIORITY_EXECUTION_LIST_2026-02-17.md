@@ -310,3 +310,13 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 1. Keep legacy-candidate workflow owner decision explicit (`merge-unrelated-histories.yml`).
 2. Decide archival boundary for nested `meu-repo/` tree (`EXTERNAL_ONLY` classification).
 3. Run full freeze gates in one batch as planned (deferred by request in this wave).
+
+### Delivered in this wave (Studio Home interface organization)
+1. Decomposed `/dashboard` shell UI into focused blocks:
+- `cloud-web-app/web/components/studio/StudioHomeMissionPanel.tsx`
+- `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`
+- `cloud-web-app/web/components/studio/StudioHomeTeamChat.tsx`
+- `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`
+2. Preserved `cloud-web-app/web/components/studio/StudioHome.tsx` as orchestration boundary.
+3. Updated `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md` with new block-level entry points.
+4. Revalidated architecture triage baseline with decomposition preserved (`oversizedFiles=0`, `duplicateBasenames=0`).

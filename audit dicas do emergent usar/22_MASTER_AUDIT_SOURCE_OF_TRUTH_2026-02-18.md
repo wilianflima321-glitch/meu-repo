@@ -341,3 +341,17 @@ Label: `VERIFIED_INTERNAL`
 - added `.gh_token` ignore policy in root `.gitignore`.
 5. Governance lock:
 - no merge with missing refs, dead script chains, stale workflow path filters, or critical secret leaks in active surfaces.
+
+## 13) Delta 2026-02-20 - Studio Home interface decomposition refresh
+Label: `VERIFIED_INTERNAL`
+
+1. Split Studio Home surface into block-level components:
+- mission
+- task board
+- team chat
+- preview/ops right rail
+2. Preserved orchestration shell semantics in `StudioHome.tsx`.
+3. Updated canonical interface map to reference new block-level paths.
+4. Architecture triage reconfirmed:
+- `oversizedFiles=0`
+- `duplicateBasenames=0`.

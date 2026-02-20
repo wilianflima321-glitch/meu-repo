@@ -15,14 +15,18 @@ Non-negotiable:
 ## 1. Core Entry Surfaces
 1. Studio Home entry: `cloud-web-app/web/app/dashboard/page.tsx`
 2. Legacy dashboard fallback route: `cloud-web-app/web/app/dashboard/legacy/page.tsx`
-3. Studio Home UI: `cloud-web-app/web/components/studio/StudioHome.tsx`
-4. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
-5. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
-6. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
-7. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
-8. Global settings workspace route: `cloud-web-app/web/app/settings/page.tsx`
-9. Project settings route: `cloud-web-app/web/app/project-settings/page.tsx`
-10. Canonical settings surface: `cloud-web-app/web/components/settings/SettingsPage.tsx`
+3. Studio Home UI shell: `cloud-web-app/web/components/studio/StudioHome.tsx`
+4. Studio Home mission block: `cloud-web-app/web/components/studio/StudioHomeMissionPanel.tsx`
+5. Studio Home task board block: `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`
+6. Studio Home team chat block: `cloud-web-app/web/components/studio/StudioHomeTeamChat.tsx`
+7. Studio Home preview/ops block: `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`
+8. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
+9. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
+10. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
+11. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
+12. Global settings workspace route: `cloud-web-app/web/app/settings/page.tsx`
+13. Project settings route: `cloud-web-app/web/app/project-settings/page.tsx`
+14. Canonical settings surface: `cloud-web-app/web/components/settings/SettingsPage.tsx`
 
 ## 2. IDE UI Surfaces (Primary)
 ### 2.1 Left/center/bottom shell blocks
@@ -152,6 +156,11 @@ CI workflows:
 - scanner: `tools/workflow-governance-scan.mjs`
 - report: `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`
 - gate command: `npm run qa:workflow-governance`
+
+### Secret hygiene surface
+- scanner: `tools/critical-secret-scan.mjs`
+- report: `audit dicas do emergent usar/27_CRITICAL_SECRET_SCAN_2026-02-20.md`
+- gate command: `npm run qa:secrets-critical`
 
 ### Legacy surface exposure policy
 - `cloud-web-app/web/components/studio/StudioHome.tsx` exposes legacy dashboard CTA only when `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.
