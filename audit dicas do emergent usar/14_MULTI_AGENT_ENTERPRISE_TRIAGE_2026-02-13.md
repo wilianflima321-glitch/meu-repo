@@ -1445,3 +1445,13 @@ Delivered:
 Triaged impact:
 1. Oversized source count reduced `31 -> 30`.
 2. Residual debt is now more concentrated in top heavy modules, improving prioritization clarity for next wave.
+
+## Delta 2026-02-20 LXXXVI - Theme service threshold closure
+Delivered:
+1. Extracted theme contracts to `lib/theme/theme-types.ts`.
+2. Updated `lib/theme/theme-service.ts` with type import/re-export compatibility.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `30 -> 29`.
+2. Priority concentration improved further on highest-change monoliths.

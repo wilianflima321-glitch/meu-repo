@@ -3598,3 +3598,18 @@ Validation snapshot:
 Decision lock:
 1. Continue oversized-debt burn-down with contract extraction first, then logic slicing.
 2. Preserve runtime/export compatibility for all extracted contract modules.
+
+## 136) Delta 2026-02-20 XC - Theme service contract extraction
+
+Implemented:
+1. Extracted theme contracts into `cloud-web-app/web/lib/theme/theme-types.ts`.
+2. Updated `cloud-web-app/web/lib/theme/theme-service.ts` to import/re-export theme contracts.
+3. Preserved type-level compatibility on existing `theme-service` import surface.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `30` to `29`.
+
+Decision lock:
+1. Continue extracting static contracts from oversized runtime services before invasive logic refactors.
+2. Keep canonical architecture triage regenerated after each decomposition wave.

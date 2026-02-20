@@ -1427,3 +1427,14 @@ Critical reading:
 1. Oversized baseline dropped from `31` to `30`.
 2. Residual limitation remains: concentration of large files in dashboard/media/physics surfaces still drives maintenance risk.
 3. Further reductions should prioritize high-change modules, not only low-risk contract extraction.
+
+## Delta 2026-02-20 LXXXV - Theme service decomposition
+Implemented:
+1. Moved theme model contracts to `cloud-web-app/web/lib/theme/theme-types.ts`.
+2. Kept `theme-service` as compatibility surface via type re-export.
+3. Regenerated architecture triage baseline.
+
+Critical reading:
+1. Oversized baseline dropped from `30` to `29`.
+2. Residual risk remains focused in editor/media/physics monoliths where behavior-coupling is stronger.
+3. Next extractions must be scoped with stricter regression controls because remaining files are more stateful.

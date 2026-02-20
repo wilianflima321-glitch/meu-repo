@@ -4,198 +4,22 @@
  */
 
 import { EventEmitter } from 'events';
+import type {
+  IconTheme,
+  ThemeDefinition,
+  ThemeServiceEvents,
+  ThemeType,
+} from './theme-types';
 
-// ============================================================================
-// Type Definitions
-// ============================================================================
-
-export type ThemeType = 'light' | 'dark';
-
-export interface SyntaxColors {
-  keyword: string;
-  string: string;
-  number: string;
-  comment: string;
-  function: string;
-  variable: string;
-  type: string;
-  operator: string;
-  punctuation: string;
-  constant: string;
-  class: string;
-  parameter: string;
-  property: string;
-  tag: string;
-  attribute: string;
-  regex: string;
-  escape: string;
-  invalid: string;
-}
-
-export interface EditorColors {
-  background: string;
-  foreground: string;
-  lineHighlight: string;
-  selection: string;
-  selectionHighlight: string;
-  cursor: string;
-  whitespace: string;
-  indentGuide: string;
-  activeIndentGuide: string;
-  matchingBracket: string;
-  gutter: string;
-  lineNumberForeground: string;
-  lineNumberActiveForeground: string;
-  rulerForeground: string;
-  findMatch: string;
-  findMatchHighlight: string;
-  wordHighlight: string;
-  wordHighlightStrong: string;
-}
-
-export interface UIColors {
-  background: string;
-  foreground: string;
-  border: string;
-  focusBorder: string;
-  shadow: string;
-  
-  // Panel
-  panelBackground: string;
-  panelBorder: string;
-  panelForeground: string;
-  
-  // Button
-  buttonBackground: string;
-  buttonForeground: string;
-  buttonHoverBackground: string;
-  buttonSecondaryBackground: string;
-  buttonSecondaryForeground: string;
-  buttonSecondaryHoverBackground: string;
-  
-  // Input
-  inputBackground: string;
-  inputForeground: string;
-  inputBorder: string;
-  inputPlaceholder: string;
-  inputActiveBackground: string;
-  inputActiveBorder: string;
-  
-  // List
-  listActiveSelectionBackground: string;
-  listActiveSelectionForeground: string;
-  listHoverBackground: string;
-  listHoverForeground: string;
-  listInactiveSelectionBackground: string;
-  listFocusBackground: string;
-  
-  // Sidebar
-  sideBarBackground: string;
-  sideBarForeground: string;
-  sideBarBorder: string;
-  sideBarSectionHeaderBackground: string;
-  sideBarSectionHeaderForeground: string;
-  
-  // Activity Bar
-  activityBarBackground: string;
-  activityBarForeground: string;
-  activityBarInactiveForeground: string;
-  activityBarBorder: string;
-  activityBarBadgeBackground: string;
-  activityBarBadgeForeground: string;
-  
-  // Status Bar
-  statusBarBackground: string;
-  statusBarForeground: string;
-  statusBarBorder: string;
-  statusBarDebuggingBackground: string;
-  statusBarNoFolderBackground: string;
-  
-  // Tab
-  tabActiveBackground: string;
-  tabActiveForeground: string;
-  tabInactiveBackground: string;
-  tabInactiveForeground: string;
-  tabBorder: string;
-  tabActiveBorder: string;
-  tabActiveBorderTop: string;
-  
-  // Title Bar
-  titleBarActiveBackground: string;
-  titleBarActiveForeground: string;
-  titleBarInactiveBackground: string;
-  titleBarInactiveForeground: string;
-  titleBarBorder: string;
-  
-  // Menu
-  menuBackground: string;
-  menuForeground: string;
-  menuBorder: string;
-  menuSelectionBackground: string;
-  menuSelectionForeground: string;
-  menuSeparator: string;
-  
-  // Scrollbar
-  scrollbarSliderBackground: string;
-  scrollbarSliderHoverBackground: string;
-  scrollbarSliderActiveBackground: string;
-  
-  // Notification
-  notificationBackground: string;
-  notificationForeground: string;
-  notificationBorder: string;
-  
-  // Error/Warning/Info
-  errorForeground: string;
-  errorBackground: string;
-  warningForeground: string;
-  warningBackground: string;
-  infoForeground: string;
-  infoBackground: string;
-  successForeground: string;
-  successBackground: string;
-  
-  // Links
-  linkForeground: string;
-  linkActiveForeground: string;
-  
-  // Badges
-  badgeBackground: string;
-  badgeForeground: string;
-  
-  // Progress
-  progressBarBackground: string;
-}
-
-export interface IconTheme {
-  id: string;
-  name: string;
-  folder: string;
-  folderExpanded: string;
-  file: string;
-  fileExtensions: Record<string, string>;
-}
-
-export interface ThemeDefinition {
-  id: string;
-  name: string;
-  type: ThemeType;
-  author?: string;
-  description?: string;
-  colors: {
-    editor: EditorColors;
-    syntax: SyntaxColors;
-    ui: UIColors;
-  };
-  iconTheme?: IconTheme;
-}
-
-export interface ThemeServiceEvents {
-  themeChanged: (theme: ThemeDefinition) => void;
-  themeAdded: (theme: ThemeDefinition) => void;
-  themeRemoved: (themeId: string) => void;
-  iconThemeChanged: (iconTheme: IconTheme | null) => void;
-}
+export type {
+  EditorColors,
+  IconTheme,
+  SyntaxColors,
+  ThemeDefinition,
+  ThemeServiceEvents,
+  ThemeType,
+  UIColors,
+} from './theme-types';
 
 // ============================================================================
 // Built-in Themes

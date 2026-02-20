@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`30`) to next threshold gate (`<=28`).
+2. Continue oversized module decomposition from current baseline (`29`) to next threshold gate (`<=28`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -187,3 +187,6 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. Reduced oversized source baseline from `31` to `30` via Hair/Fur runtime contract extraction:
 - `lib/hair-fur-types.ts`
 - `lib/hair-fur-system.ts` type import/re-export update
+3. Reduced oversized source baseline from `30` to `29` via Theme service contract extraction:
+- `lib/theme/theme-types.ts`
+- `lib/theme/theme-service.ts` type import/re-export update
