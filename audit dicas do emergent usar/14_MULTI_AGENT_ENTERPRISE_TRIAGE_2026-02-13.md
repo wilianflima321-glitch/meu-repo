@@ -1309,3 +1309,13 @@ Delivered:
 Triaged impact:
 1. Reduces interactive editor component complexity while preserving behavior.
 2. Maintains measurable architecture debt reduction under strict gate governance.
+
+## Delta 2026-02-20 LXXIII - Oversized triage reduction via sound-cue contract extraction
+Delivered:
+1. Split sound cue graph contracts and node-definition catalog from `components/audio/SoundCueEditor.tsx` into `components/audio/sound-cue-definitions.ts`.
+2. Preserved editor-facing type contract compatibility with explicit type re-export from `SoundCueEditor.tsx`.
+3. Reduced oversized-file metric from `44` to `43` and tightened threshold to `<=43`.
+
+Triaged impact:
+1. Reduces runtime editor monolith weight without changing scope or behavior semantics.
+2. Keeps architecture debt burn-down measurable and release-governed.

@@ -3318,3 +3318,21 @@ Validation status:
 Decision lock:
 1. Editor contract/type surfaces should remain extracted from large interactive components.
 2. Baseline tightening remains coupled to actual structural reduction evidence.
+
+## 123) Delta 2026-02-20 LXXVII - Sound cue contract/data extraction
+
+Implemented:
+1. Extracted sound cue node contracts and static node catalog definitions into dedicated module:
+- new `components/audio/sound-cue-definitions.ts`
+- `components/audio/SoundCueEditor.tsx` now imports `nodeDefinitions` and shared types from extracted module
+2. Preserved editor-facing compatibility by re-exporting extracted contracts from `SoundCueEditor.tsx`.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 43` (was `<=44`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Large editor surfaces must keep static catalogs and shared contracts extracted from runtime UI components.
+2. Threshold hardening remains coupled to measurable structural reductions only.

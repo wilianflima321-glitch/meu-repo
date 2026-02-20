@@ -1313,3 +1313,13 @@ Implemented:
 Critical reading:
 1. This reduces non-runtime contract noise inside a large interactive editor component.
 2. Residual limitation remains: oversized debt still remains (`44` files) and requires ongoing reduction waves.
+
+## Delta 2026-02-20 LXXV - Sound cue definition extraction
+Implemented:
+1. Moved sound cue graph contracts and static node-definition catalog from `components/audio/SoundCueEditor.tsx` to `components/audio/sound-cue-definitions.ts`.
+2. Preserved editor-level contract compatibility by importing/re-exporting shared types from `SoundCueEditor.tsx`.
+3. Reduced architecture oversized debt baseline (`44 -> 43`) and tightened threshold to `<=43`.
+
+Critical reading:
+1. This removes static catalog and type-surface weight from a runtime-heavy interactive editor without behavior rewrite.
+2. Residual limitation remains: oversized debt still remains (`43` files) and requires continued decomposition waves.
