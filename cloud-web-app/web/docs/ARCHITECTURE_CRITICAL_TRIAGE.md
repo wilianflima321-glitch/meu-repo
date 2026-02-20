@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T02:18:42.617Z`
+- Generated at: `2026-02-20T02:30:07.315Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **31**
+- Oversized source files (>=1200 lines): **30**
 
 ## Top Compatibility Call Sites
 
@@ -71,7 +71,6 @@
 | `lib/networking-multiplayer.ts` | 1305 |
 | `lib/theme/theme-service.ts` | 1305 |
 | `lib/mcp/aethel-mcp-server.ts` | 1294 |
-| `lib/hair-fur-system.ts` | 1292 |
 
 ## Notes
 

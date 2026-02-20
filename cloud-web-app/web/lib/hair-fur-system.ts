@@ -1,107 +1,26 @@
-/**
- * HAIR & FUR SIMULATION SYSTEM - Aethel Engine
- * 
- * Sistema profissional de cabelo e pelos para renderização realista.
- * Baseado em técnicas da indústria (TressFX, HairWorks).
- * 
- * FEATURES:
- * - Strand-based hair rendering
- * - Shell-based fur
- * - Physics simulation (Verlet)
- * - Wind response
- * - Collision detection
- * - Level of Detail
- * - GPU instancing
- * - Self-shadowing
- * - Anisotropic lighting (Marschner model)
- * - Groom tools
- */
+﻿/** Hair/Fur simulation runtime core. */
 
 import * as THREE from 'three';
+import type {
+  FurConfig,
+  GroomGuide,
+  HairClump,
+  HairCollider,
+  HairConfig,
+  HairSegment,
+  HairStrand,
+} from './hair-fur-types';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+export type {
+  FurConfig,
+  GroomGuide,
+  HairClump,
+  HairCollider,
+  HairConfig,
+  HairSegment,
+  HairStrand,
+} from './hair-fur-types';
 
-export interface HairConfig {
-  strandCount: number;
-  segmentsPerStrand: number;
-  rootWidth: number;
-  tipWidth: number;
-  length: number;
-  lengthVariation: number;
-  curl: number;
-  curlFrequency: number;
-  clumpSize: number;
-  clumpStrength: number;
-  noise: number;
-  gravity: number;
-  stiffness: number;
-  damping: number;
-  color: THREE.Color;
-  colorVariation: number;
-  specularColor: THREE.Color;
-  specularPower: number;
-  shadowDensity: number;
-}
-
-export interface FurConfig {
-  shellCount: number;
-  density: number;
-  length: number;
-  lengthVariation: number;
-  thickness: number;
-  curvature: number;
-  gravity: number;
-  windResponse: number;
-  baseColor: THREE.Color;
-  tipColor: THREE.Color;
-  occlusionStrength: number;
-}
-
-export interface HairStrand {
-  id: number;
-  rootPosition: THREE.Vector3;
-  rootNormal: THREE.Vector3;
-  segments: HairSegment[];
-  clumpId: number;
-  lengthScale: number;
-  colorVariation: THREE.Color;
-}
-
-export interface HairSegment {
-  position: THREE.Vector3;
-  previousPosition: THREE.Vector3;
-  velocity: THREE.Vector3;
-  restLength: number;
-  width: number;
-}
-
-export interface HairClump {
-  id: number;
-  center: THREE.Vector3;
-  strands: number[];
-  guideStrand: number;
-}
-
-export interface HairCollider {
-  type: 'sphere' | 'capsule' | 'mesh';
-  position: THREE.Vector3;
-  radius?: number;
-  height?: number;
-  direction?: THREE.Vector3;
-}
-
-export interface GroomGuide {
-  id: number;
-  rootPosition: THREE.Vector3;
-  controlPoints: THREE.Vector3[];
-  influence: number;
-}
-
-// ============================================================================
-// MARSCHNER HAIR SHADING MODEL
-// ============================================================================
 
 export class MarschnerHairShader {
   private longitudinalWidth: number = 10; // degrees
@@ -231,9 +150,6 @@ export class MarschnerHairShader {
   }
 }
 
-// ============================================================================
-// HAIR PHYSICS SIMULATION
-// ============================================================================
 
 export class HairPhysicsSimulation {
   private strands: HairStrand[] = [];
@@ -411,9 +327,6 @@ export class HairPhysicsSimulation {
   }
 }
 
-// ============================================================================
-// HAIR GROOM SYSTEM
-// ============================================================================
 
 export class HairGroomSystem {
   private guides: GroomGuide[] = [];
@@ -644,9 +557,6 @@ export class HairGroomSystem {
   }
 }
 
-// ============================================================================
-// SHELL-BASED FUR SYSTEM
-// ============================================================================
 
 export class ShellFurSystem {
   private config: FurConfig;
@@ -961,9 +871,6 @@ export class ShellFurSystem {
   }
 }
 
-// ============================================================================
-// MAIN HAIR SYSTEM
-// ============================================================================
 
 export class HairFurSystem {
   private hairConfig: HairConfig;
@@ -1278,9 +1185,6 @@ export class HairFurSystem {
   }
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export const createHairSystem = (config?: Partial<HairConfig>): HairFurSystem => {
   return new HairFurSystem(config);

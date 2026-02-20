@@ -1435,3 +1435,13 @@ Triaged impact:
 1. Oversized files reduced from `34` to `31`.
 2. Decomposition priority now shifts to largest high-risk modules (`components/AethelDashboard.tsx`, media/physics/editor monoliths).
 3. No scope expansion introduced; this was a structural quality hardening wave.
+
+## Delta 2026-02-20 LXXXV - Hair/Fur threshold closure
+Delivered:
+1. Extracted Hair/Fur runtime contracts to `lib/hair-fur-types.ts`.
+2. Updated `lib/hair-fur-system.ts` to consume/re-export shared contracts.
+3. Regenerated architecture triage baseline.
+
+Triaged impact:
+1. Oversized source count reduced `31 -> 30`.
+2. Residual debt is now more concentrated in top heavy modules, improving prioritization clarity for next wave.

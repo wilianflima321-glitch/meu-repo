@@ -3582,3 +3582,19 @@ Validation snapshot:
 Decision lock:
 1. Continue decomposition waves with behavior-preserving extraction first (types/defaults/utils before runtime rewrites).
 2. Keep runtime contracts stable while reducing oversized-module debt until gate reaches target threshold.
+
+## 135) Delta 2026-02-20 LXXXIX - Hair/Fur runtime threshold closure
+
+Implemented:
+1. Extracted Hair/Fur runtime shared contracts:
+- `cloud-web-app/web/lib/hair-fur-types.ts`
+- `cloud-web-app/web/lib/hair-fur-system.ts` now imports/re-exports shared contracts.
+2. Reduced non-functional comment overhead in `hair-fur-system` to close oversized threshold without behavior change.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `31` to `30`.
+
+Decision lock:
+1. Continue oversized-debt burn-down with contract extraction first, then logic slicing.
+2. Preserve runtime/export compatibility for all extracted contract modules.

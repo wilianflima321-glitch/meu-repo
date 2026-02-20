@@ -1416,3 +1416,14 @@ Critical reading:
 1. Oversized source-file debt reduced from `34` to `31` without changing declared product scope.
 2. Main residual limitation remains concentrated in very large legacy runtime/editor modules (`AethelDashboard`, media/physics/editor stacks).
 3. Next risk is regression from large-file behavior churn; mitigation remains incremental extraction + freeze-gate validation.
+
+## Delta 2026-02-20 LXXXIV - Hair/Fur system decomposition
+Implemented:
+1. Moved Hair/Fur shared interfaces into `cloud-web-app/web/lib/hair-fur-types.ts`.
+2. Preserved `hair-fur-system` external compatibility via type re-exports.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `31` to `30`.
+2. Residual limitation remains: concentration of large files in dashboard/media/physics surfaces still drives maintenance risk.
+3. Further reductions should prioritize high-change modules, not only low-risk contract extraction.
