@@ -3374,3 +3374,21 @@ Validation status:
 Decision lock:
 1. Runtime-heavy media modules must keep shared contracts/static preset catalogs extracted from execution classes.
 2. Threshold hardening remains coupled to measurable structural reductions only.
+
+## 126) Delta 2026-02-20 LXXX - Profiler contract extraction
+
+Implemented:
+1. Extracted integrated profiler shared contracts into dedicated module:
+- new `lib/profiler-integrated-types.ts`
+- `lib/profiler-integrated.ts` now imports/re-exports profiler contracts while keeping runtime collectors/analyzers focused
+2. Preserved profiler runtime API compatibility via explicit type re-export.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 40` (was `<=41`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Profiler runtime modules must keep shared DTO/config contracts extracted from runtime execution classes.
+2. Threshold hardening remains coupled to measurable structural reductions only.

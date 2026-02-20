@@ -1340,3 +1340,13 @@ Delivered:
 Triaged impact:
 1. Improves maintainability of audio runtime by isolating shared contracts and static preset catalog.
 2. Keeps architecture debt burn-down measurable and contract-safe.
+
+## Delta 2026-02-20 LXXVI - Oversized triage reduction via profiler contract extraction
+Delivered:
+1. Split profiler shared contracts from `lib/profiler-integrated.ts` into `lib/profiler-integrated-types.ts`.
+2. Preserved runtime-facing API compatibility via explicit type re-export.
+3. Reduced oversized-file metric from `41` to `40` and tightened threshold to `<=40`.
+
+Triaged impact:
+1. Improves maintainability of performance-observability runtime by isolating shared contract surface.
+2. Continues measurable architecture debt burn-down under strict gate governance.

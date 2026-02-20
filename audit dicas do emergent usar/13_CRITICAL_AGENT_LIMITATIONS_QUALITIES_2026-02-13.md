@@ -1344,3 +1344,13 @@ Implemented:
 Critical reading:
 1. This reduces static contract/catalog surface inside a runtime-heavy audio execution module without behavior rewrite.
 2. Residual limitation remains: oversized debt still remains (`41` files) and requires continued decomposition waves.
+
+## Delta 2026-02-20 LXXVIII - Integrated profiler contract extraction
+Implemented:
+1. Moved profiler shared contracts from `lib/profiler-integrated.ts` to `lib/profiler-integrated-types.ts`.
+2. Preserved runtime-level API compatibility by importing/re-exporting extracted contracts from `profiler-integrated.ts`.
+3. Reduced architecture oversized debt baseline (`41 -> 40`) and tightened threshold to `<=40`.
+
+Critical reading:
+1. This separates monitoring data contracts from runtime collectors, improving maintainability with low migration risk.
+2. Residual limitation remains: oversized debt still remains (`40` files) and requires ongoing decomposition waves.
