@@ -3769,3 +3769,50 @@ Validation snapshot:
 Decision lock:
 1. Keep compatibility exports stable while continuing decomposition of remaining UI-heavy monoliths.
 2. Maintain behavior-preserving extraction strategy until full freeze-gate execution.
+
+## 146) Delta 2026-02-20 C - i18n and DetailsPanel decomposition reached 16 oversized files
+
+Implemented:
+1. Split i18n translation surface:
+- `cloud-web-app/web/lib/translations-types.ts`
+- `cloud-web-app/web/lib/translations-locales.ts`
+- `cloud-web-app/web/lib/translations-locale-en.ts`
+- `cloud-web-app/web/lib/translations-locale-pt.ts`
+- `cloud-web-app/web/lib/translations-locale-es.ts`
+- `cloud-web-app/web/lib/translations.ts` now a thin compatibility wrapper.
+2. Split Details Panel editors into dedicated module:
+- `cloud-web-app/web/components/engine/DetailsPanelEditors.tsx`
+- `cloud-web-app/web/components/engine/DetailsPanel.tsx` now focuses on section orchestration.
+3. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `18` to `16`.
+3. `cloud-web-app/web/components/engine/DetailsPanel.tsx` reduced to `932` lines (no longer oversized).
+4. `cloud-web-app/web/lib/translations.ts` reduced to `24` lines; locales split into bounded modules.
+
+Decision lock:
+1. Keep i18n compatibility exports on `lib/translations.ts` while locale dictionaries stay sharded.
+2. Continue decomposition on remaining editor/dashboard/media monoliths under freeze-gate controls.
+
+## 147) Delta 2026-02-20 CI - Scene/VisualScript decomposition reached 14 oversized files
+
+Implemented:
+1. Split Visual Scripting contracts and node catalog into:
+- `cloud-web-app/web/components/visual-scripting/visual-script-types.ts`
+- `cloud-web-app/web/components/visual-scripting/visual-script-catalog.ts`
+2. Updated `cloud-web-app/web/components/visual-scripting/VisualScriptEditor.tsx` to consume/re-export the extracted surfaces.
+3. Split Scene Editor UI surfaces into:
+- `cloud-web-app/web/components/scene-editor/SceneEditorPanels.tsx`
+4. Updated `cloud-web-app/web/components/scene-editor/SceneEditor.tsx` to keep canvas/runtime orchestration and delegate hierarchy/properties/toolbar UI.
+5. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `16` to `14`.
+3. `cloud-web-app/web/components/visual-scripting/VisualScriptEditor.tsx` reduced to `711` lines.
+4. `cloud-web-app/web/components/scene-editor/SceneEditor.tsx` reduced to `666` lines.
+
+Decision lock:
+1. Preserve compatibility exports from `VisualScriptEditor.tsx` while downstream modules migrate gradually.
+2. Keep decomposition waves focused on behavior-preserving boundary extraction in remaining top monoliths.

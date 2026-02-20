@@ -1558,3 +1558,31 @@ Triaged impact:
 1. Oversized source count reduced `19 -> 18`.
 2. Cloth runtime orchestration now has clearer CPU/GPU separation.
 3. Remaining oversized backlog is focused on UI editor/dashboard/media surfaces.
+
+## Delta 2026-02-20 XCVI - i18n + DetailsPanel decomposition wave
+Delivered:
+1. Split translation dictionaries and i18n contract surface into sharded locale modules.
+2. Split Details Panel property editors into `components/engine/DetailsPanelEditors.tsx`.
+3. Preserved compatibility exports on `lib/translations.ts` and editor behavior surface.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `18 -> 16`.
+2. UI editor module boundaries are cleaner and i18n payload is no longer monolithic.
+3. Remaining oversized backlog is concentrated in highest-coupling editor/dashboard/media modules.
+
+## Delta 2026-02-20 XCVII - Scene/VisualScript decomposition wave
+Delivered:
+1. Split Visual Scripting shared contracts and catalog:
+- `components/visual-scripting/visual-script-types.ts`
+- `components/visual-scripting/visual-script-catalog.ts`
+2. Updated `components/visual-scripting/VisualScriptEditor.tsx` with import/re-export compatibility.
+3. Split Scene Editor panel surfaces:
+- `components/scene-editor/SceneEditorPanels.tsx`
+4. Updated `components/scene-editor/SceneEditor.tsx` to keep runtime/canvas concerns isolated from panel UI concerns.
+5. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `16 -> 14`.
+2. Decomposition now removes two high-change editor surfaces from oversized backlog in one wave.
+3. Remaining backlog is concentrated in fewer, clearer targets for P1/P2 extraction planning.

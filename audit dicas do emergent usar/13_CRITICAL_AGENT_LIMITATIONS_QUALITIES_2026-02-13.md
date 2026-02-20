@@ -1543,3 +1543,26 @@ Critical reading:
 1. Oversized baseline dropped from `19` to `18`.
 2. Residual oversized backlog is now strongly concentrated in top editor/dashboard/media UI modules.
 3. Next waves should target high-frequency user-path components and keep compatibility boundaries explicit.
+
+## Delta 2026-02-20 XCV - i18n and DetailsPanel decomposition to 16 oversized files
+Implemented:
+1. Split translation dictionaries/types into dedicated locale modules and wrapper surface.
+2. Split Details Panel property editors to `components/engine/DetailsPanelEditors.tsx`.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `18` to `16`.
+2. Remaining oversized debt is now more narrowly concentrated in top editor/dashboard/media monoliths.
+3. Next reductions should focus on highest user-path impact modules with strict behavior-compatibility boundaries.
+
+## Delta 2026-02-20 XCVI - Scene/VisualScript decomposition to 14 oversized files
+Implemented:
+1. Split Visual Script contracts/catalog into dedicated modules and kept re-export compatibility in `VisualScriptEditor.tsx`.
+2. Split Scene Editor hierarchy/properties/toolbar UI into `components/scene-editor/SceneEditorPanels.tsx`.
+3. Kept `SceneEditor.tsx` focused on canvas/runtime orchestration.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `16` to `14`.
+2. Remaining oversized debt is now concentrated in top dashboard/media/AI/editor monoliths.
+3. Residual risk shifts from mixed UI/runtime coupling to fewer, heavier product surfaces, improving targeting precision for next waves.

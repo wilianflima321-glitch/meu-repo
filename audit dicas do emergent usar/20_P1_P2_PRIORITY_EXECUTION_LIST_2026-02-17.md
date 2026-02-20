@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`18`) to next threshold gate (`<=16`).
+2. Continue oversized module decomposition from current baseline (`14`) to next threshold gate (`<=12`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -222,3 +222,20 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 12. Reduced oversized source baseline from `19` to `18` via cloth GPU decomposition:
 - `lib/cloth-simulation-gpu.ts`
 - `lib/cloth-simulation.ts` runtime import/re-export update
+13. Reduced oversized source baseline from `18` to `17` via i18n dictionary sharding:
+- `lib/translations-types.ts`
+- `lib/translations-locales.ts`
+- `lib/translations-locale-en.ts`
+- `lib/translations-locale-pt.ts`
+- `lib/translations-locale-es.ts`
+- `lib/translations.ts` compatibility wrapper update
+14. Reduced oversized source baseline from `17` to `16` via DetailsPanel editor extraction:
+- `components/engine/DetailsPanelEditors.tsx`
+- `components/engine/DetailsPanel.tsx` orchestration-only refactor
+15. Reduced oversized source baseline from `16` to `15` via Visual Scripting catalog/type extraction:
+- `components/visual-scripting/visual-script-types.ts`
+- `components/visual-scripting/visual-script-catalog.ts`
+- `components/visual-scripting/VisualScriptEditor.tsx` import/re-export compatibility update
+16. Reduced oversized source baseline from `15` to `14` via Scene Editor panel extraction:
+- `components/scene-editor/SceneEditorPanels.tsx`
+- `components/scene-editor/SceneEditor.tsx` runtime/panel concern separation
