@@ -1319,3 +1319,24 @@ Delivered:
 Triaged impact:
 1. Reduces runtime editor monolith weight without changing scope or behavior semantics.
 2. Keeps architecture debt burn-down measurable and release-governed.
+
+## Delta 2026-02-20 LXXIV - Oversized triage reduction via dialogue/cutscene contract extraction
+Delivered:
+1. Split narrative and cutscene shared contracts from `lib/dialogue-cutscene-system.ts` into `lib/dialogue-cutscene-types.ts`.
+2. Preserved runtime-facing contract compatibility with explicit type re-export.
+3. Reduced oversized-file metric from `43` to `42` and tightened threshold to `<=42`.
+
+Triaged impact:
+1. Improves maintainability of dialogue/cutscene runtime orchestration without changing feature scope.
+2. Continues measurable architecture debt burn-down under strict gate governance.
+
+## Delta 2026-02-20 LXXV - Oversized triage reduction via audio synthesis modular extraction
+Delivered:
+1. Split synthesis shared contracts from `lib/audio-synthesis.ts` into `lib/audio-synthesis-types.ts`.
+2. Split built-in synth preset catalog from `lib/audio-synthesis.ts` into `lib/audio-synthesis-presets.ts`.
+3. Preserved runtime-facing API compatibility via imports/re-exports in `audio-synthesis.ts`.
+4. Reduced oversized-file metric from `42` to `41` and tightened threshold to `<=41`.
+
+Triaged impact:
+1. Improves maintainability of audio runtime by isolating shared contracts and static preset catalog.
+2. Keeps architecture debt burn-down measurable and contract-safe.

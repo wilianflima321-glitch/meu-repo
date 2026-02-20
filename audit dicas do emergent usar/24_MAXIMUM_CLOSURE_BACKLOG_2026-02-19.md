@@ -18,7 +18,7 @@ Consolidar o que ainda falta para fechamento de fase com qualidade enterprise, s
 4. `qa:architecture-gate`: PASS no baseline atual.
 5. Baseline arquitetural travado:
 - `duplicateBasenames=0` (gate `<=0`)
-- `oversizedFiles=43` (gate `<=43`)
+- `oversizedFiles=41` (gate `<=41`)
 6. `ROUTES_INVENTORY.md` normalizado:
 - `NOT_IMPLEMENTED total=10`
 - `critical=8`

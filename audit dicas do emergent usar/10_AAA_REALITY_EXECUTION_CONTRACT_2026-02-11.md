@@ -3336,3 +3336,41 @@ Validation status:
 Decision lock:
 1. Large editor surfaces must keep static catalogs and shared contracts extracted from runtime UI components.
 2. Threshold hardening remains coupled to measurable structural reductions only.
+
+## 124) Delta 2026-02-20 LXXVIII - Dialogue/cutscene contract extraction
+
+Implemented:
+1. Extracted dialogue/cutscene shared contracts into dedicated module:
+- new `lib/dialogue-cutscene-types.ts`
+- `lib/dialogue-cutscene-system.ts` now imports/re-exports shared contracts while keeping runtime behavior surface focused
+2. Preserved runtime-facing compatibility via explicit type re-export.
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 42` (was `<=43`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Narrative/cinematic runtime modules must keep shared contracts and data-model surfaces extracted from execution logic.
+2. Threshold hardening remains coupled to measurable structural reductions only.
+
+## 125) Delta 2026-02-20 LXXIX - Audio synthesis modular decomposition
+
+Implemented:
+1. Extracted shared synthesis contracts into dedicated module:
+- new `lib/audio-synthesis-types.ts`
+- `lib/audio-synthesis.ts` now imports/re-exports synthesis contracts while keeping runtime execution logic focused
+2. Extracted built-in synth preset catalog into dedicated module:
+- new `lib/audio-synthesis-presets.ts`
+- `lib/audio-synthesis.ts` imports/re-exports `SynthPresets` and preserves factory API behavior
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 41` (was `<=42`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Runtime-heavy media modules must keep shared contracts/static preset catalogs extracted from execution classes.
+2. Threshold hardening remains coupled to measurable structural reductions only.

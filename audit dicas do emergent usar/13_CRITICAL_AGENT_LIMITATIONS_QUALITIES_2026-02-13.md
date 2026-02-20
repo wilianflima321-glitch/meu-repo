@@ -1323,3 +1323,24 @@ Implemented:
 Critical reading:
 1. This removes static catalog and type-surface weight from a runtime-heavy interactive editor without behavior rewrite.
 2. Residual limitation remains: oversized debt still remains (`43` files) and requires continued decomposition waves.
+
+## Delta 2026-02-20 LXXVI - Dialogue/cutscene contract extraction
+Implemented:
+1. Moved dialogue/cutscene shared contracts from `lib/dialogue-cutscene-system.ts` to `lib/dialogue-cutscene-types.ts`.
+2. Preserved runtime-level API compatibility by importing/re-exporting extracted contracts from `dialogue-cutscene-system.ts`.
+3. Reduced architecture oversized debt baseline (`43 -> 42`) and tightened threshold to `<=42`.
+
+Critical reading:
+1. This improves separation between narrative runtime behavior and shared data contracts with low migration risk.
+2. Residual limitation remains: oversized debt still remains (`42` files) and requires ongoing decomposition waves.
+
+## Delta 2026-02-20 LXXVII - Audio synthesis type/preset extraction
+Implemented:
+1. Moved audio synthesis shared contracts from `lib/audio-synthesis.ts` to `lib/audio-synthesis-types.ts`.
+2. Moved built-in synth preset catalog from `lib/audio-synthesis.ts` to `lib/audio-synthesis-presets.ts`.
+3. Preserved runtime-level API compatibility via imports/re-exports in `audio-synthesis.ts`.
+4. Reduced architecture oversized debt baseline (`42 -> 41`) and tightened threshold to `<=41`.
+
+Critical reading:
+1. This reduces static contract/catalog surface inside a runtime-heavy audio execution module without behavior rewrite.
+2. Residual limitation remains: oversized debt still remains (`41` files) and requires continued decomposition waves.
