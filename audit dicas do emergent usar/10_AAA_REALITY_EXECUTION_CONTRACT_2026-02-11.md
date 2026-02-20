@@ -3392,3 +3392,51 @@ Validation status:
 Decision lock:
 1. Profiler runtime modules must keep shared DTO/config contracts extracted from runtime execution classes.
 2. Threshold hardening remains coupled to measurable structural reductions only.
+
+## 127) Delta 2026-02-20 LXXXI - Save/settings/particles/settings-page decomposition wave
+
+Implemented:
+1. Extracted save manager shared contracts into dedicated module:
+- new `lib/save/save-manager-types.ts`
+- `lib/save/save-manager.tsx` now imports/re-exports contracts and keeps runtime serializer/manager flow focused
+2. Extracted settings runtime shared contracts:
+- new `lib/settings/settings-types.ts`
+- `lib/settings/settings-system.tsx` now imports/re-exports contracts and keeps runtime behavior/default orchestration focused
+3. Extracted advanced particle runtime shared contracts:
+- new `lib/particles/advanced-particle-types.ts`
+- `lib/particles/advanced-particle-system.ts` now imports/re-exports contracts and keeps runtime emitter/simulation logic focused
+4. Extracted settings page static configuration:
+- new `components/settings/settings-page-config.ts`
+- `components/settings/SettingsPage.tsx` now imports `DEFAULT_SETTINGS` and `SETTING_ITEMS`, keeping UI runtime interaction-focused
+5. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 36` (was `<=40`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Runtime-heavy modules and large settings surfaces must keep shared contracts/static config extracted from runtime interaction code.
+2. Threshold hardening remains coupled to measurable structural reductions only.
+
+## 128) Delta 2026-02-20 LXXXII - Replay/Niagara decomposition wave
+
+Implemented:
+1. Extracted replay shared contracts and input serializer:
+- new `lib/replay/replay-types.ts`
+- new `lib/replay/replay-input-serializer.ts`
+- `lib/replay/replay-system.tsx` now imports/re-exports these surfaces and keeps runtime recording/playback orchestration focused
+2. Extracted Niagara shared contracts and graph seed defaults:
+- new `components/engine/niagara-vfx-types.ts`
+- new `components/engine/niagara-vfx-defaults.ts`
+- `components/engine/NiagaraVFX.tsx` now imports/re-exports contracts and default graph data, keeping runtime/editor interaction focused
+3. Tightened architecture gate oversized threshold to new factual baseline:
+- `oversizedFiles <= 34` (was `<=36`)
+
+Validation status:
+1. Executed in-wave: `docs:architecture-triage`, `qa:architecture-gate`, `qa:canonical-components`.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Runtime-heavy replay/editor surfaces must keep shared contracts and default graph/config payloads extracted from runtime orchestration.
+2. Threshold hardening remains coupled to measurable structural reductions only.

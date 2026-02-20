@@ -1350,3 +1350,29 @@ Delivered:
 Triaged impact:
 1. Improves maintainability of performance-observability runtime by isolating shared contract surface.
 2. Continues measurable architecture debt burn-down under strict gate governance.
+
+## Delta 2026-02-20 LXXVII - Oversized triage reduction via save/settings/particles/settings-page decomposition
+Delivered:
+1. Split save manager shared contracts into `lib/save/save-manager-types.ts`.
+2. Split settings runtime shared contracts into `lib/settings/settings-types.ts`.
+3. Split advanced particle runtime shared contracts into `lib/particles/advanced-particle-types.ts`.
+4. Split settings page static defaults/items into `components/settings/settings-page-config.ts`.
+5. Preserved runtime-facing compatibility via imports/re-exports and UI config imports.
+6. Reduced oversized-file metric from `40` to `36` and tightened threshold to `<=36`.
+
+Triaged impact:
+1. Reduces static/config burden across gameplay runtime + settings UX surfaces without scope change.
+2. Keeps architecture debt burn-down highly measurable and governance-locked.
+
+## Delta 2026-02-20 LXXVIII - Oversized triage reduction via replay/Niagara decomposition
+Delivered:
+1. Split replay shared contracts into `lib/replay/replay-types.ts`.
+2. Split replay input serializer into `lib/replay/replay-input-serializer.ts`.
+3. Split Niagara shared contracts into `components/engine/niagara-vfx-types.ts`.
+4. Split Niagara default emitter/graph seed data into `components/engine/niagara-vfx-defaults.ts`.
+5. Preserved runtime-facing compatibility via imports/re-exports and defaults imports.
+6. Reduced oversized-file metric from `36` to `34` and tightened threshold to `<=34`.
+
+Triaged impact:
+1. Reduces static/default burden in replay and VFX runtime/editor surfaces without changing feature scope.
+2. Keeps architecture debt burn-down measurable and governance-locked.

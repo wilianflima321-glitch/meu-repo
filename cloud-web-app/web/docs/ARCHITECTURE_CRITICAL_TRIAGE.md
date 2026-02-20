@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T00:16:38.275Z`
+- Generated at: `2026-02-20T00:30:48.965Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **40**
+- Oversized source files (>=1200 lines): **34**
 
 ## Top Compatibility Call Sites
 
@@ -75,12 +75,6 @@
 | `lib/hair-fur-system.ts` | 1292 |
 | `components/character/HairFurEditor.tsx` | 1284 |
 | `lib/postprocessing/post-processing-system.ts` | 1279 |
-| `components/engine/NiagaraVFX.tsx` | 1276 |
-| `lib/replay/replay-system.tsx` | 1269 |
-| `lib/save/save-manager.tsx` | 1237 |
-| `components/settings/SettingsPage.tsx` | 1236 |
-| `lib/settings/settings-system.tsx` | 1234 |
-| `lib/particles/advanced-particle-system.ts` | 1223 |
 
 ## Notes
 

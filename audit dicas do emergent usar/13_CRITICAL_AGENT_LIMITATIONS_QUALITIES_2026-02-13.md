@@ -1354,3 +1354,29 @@ Implemented:
 Critical reading:
 1. This separates monitoring data contracts from runtime collectors, improving maintainability with low migration risk.
 2. Residual limitation remains: oversized debt still remains (`40` files) and requires ongoing decomposition waves.
+
+## Delta 2026-02-20 LXXIX - Save/settings/particles/settings-page decomposition
+Implemented:
+1. Moved save-manager shared contracts to `lib/save/save-manager-types.ts`.
+2. Moved settings-system shared contracts to `lib/settings/settings-types.ts`.
+3. Moved advanced particle shared contracts to `lib/particles/advanced-particle-types.ts`.
+4. Moved settings page static defaults/item catalog to `components/settings/settings-page-config.ts`.
+5. Preserved runtime-level API/UI compatibility through imports/re-exports in runtime surfaces.
+6. Reduced architecture oversized debt baseline (`40 -> 36`) and tightened threshold to `<=36`.
+
+Critical reading:
+1. This wave removes a large amount of static contract/config noise from runtime-heavy files while preserving behavior.
+2. Residual limitation remains: oversized debt still remains (`36` files) and requires continued decomposition waves.
+
+## Delta 2026-02-20 LXXX - Replay/Niagara contract/default extraction
+Implemented:
+1. Moved replay shared contracts to `lib/replay/replay-types.ts`.
+2. Moved replay input serializer to `lib/replay/replay-input-serializer.ts`.
+3. Moved Niagara shared contracts to `components/engine/niagara-vfx-types.ts`.
+4. Moved Niagara default emitter/graph seed data to `components/engine/niagara-vfx-defaults.ts`.
+5. Preserved runtime-level API/UI compatibility via imports/re-exports and config imports.
+6. Reduced architecture oversized debt baseline (`36 -> 34`) and tightened threshold to `<=34`.
+
+Critical reading:
+1. This further separates static/default and contract surfaces from replay/VFX runtime orchestration.
+2. Residual limitation remains: oversized debt still remains (`34` files) and requires continued decomposition waves.

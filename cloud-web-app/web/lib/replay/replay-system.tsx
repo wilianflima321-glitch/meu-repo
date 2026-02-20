@@ -21,152 +21,38 @@ import { EventEmitter } from 'events';
 // TYPES
 // ============================================================================
 
-export interface ReplayFrame {
-  frameNumber: number;
-  timestamp: number;
-  deltaTime: number;
-  inputs: InputState[];
-  events: ReplayEvent[];
-  snapshot?: StateSnapshot;
-}
+import type {
+  EntitySnapshot,
+  InputState,
+  PlaybackState,
+  PlayerInfo,
+  Recording,
+  RecordingMetadata,
+  ReplayConfig,
+  ReplayEvent,
+  ReplayFrame,
+  StateSnapshot,
+} from './replay-types';
 
-export interface InputState {
-  playerId: string;
-  keys: Set<string>;
-  mousePosition: { x: number; y: number };
-  mouseButtons: Set<number>;
-  axes: Map<string, number>;
-}
-
-export interface ReplayEvent {
-  type: string;
-  timestamp: number;
-  data: unknown;
-}
-
-export interface StateSnapshot {
-  entities: EntitySnapshot[];
-  globals: Map<string, unknown>;
-  random: number;
-}
-
-export interface EntitySnapshot {
-  id: string;
-  type: string;
-  components: Map<string, unknown>;
-  parent?: string;
-  children?: string[];
-}
-
-export interface Recording {
-  id: string;
-  name: string;
-  startTime: number;
-  endTime: number;
-  duration: number;
-  frameCount: number;
-  frames: ReplayFrame[];
-  keyframes: number[];
-  metadata: RecordingMetadata;
-  compressed?: boolean;
-}
-
-export interface RecordingMetadata {
-  version: string;
-  gameName: string;
-  mapName: string;
-  players: PlayerInfo[];
-  customData: Record<string, unknown>;
-}
-
-export interface PlayerInfo {
-  id: string;
-  name: string;
-  team?: string;
-}
-
-export interface PlaybackState {
-  isPlaying: boolean;
-  isPaused: boolean;
-  currentFrame: number;
-  currentTime: number;
-  speed: number;
-  loop: boolean;
-}
-
-export interface ReplayConfig {
-  snapshotInterval: number;
-  maxFrames: number;
-  compressOnSave: boolean;
-  interpolate: boolean;
-  recordInputs: boolean;
-  recordEvents: boolean;
-}
+export type {
+  EntitySnapshot,
+  InputState,
+  PlaybackState,
+  PlayerInfo,
+  Recording,
+  RecordingMetadata,
+  ReplayConfig,
+  ReplayEvent,
+  ReplayFrame,
+  StateSnapshot,
+} from './replay-types';
 
 // ============================================================================
 // INPUT SERIALIZER
 // ============================================================================
 
-export class InputSerializer {
-  serializeInputs(inputs: Map<string, InputState>): InputState[] {
-    const result: InputState[] = [];
-    
-    for (const [, input] of inputs) {
-      result.push({
-        playerId: input.playerId,
-        keys: new Set(input.keys),
-        mousePosition: { ...input.mousePosition },
-        mouseButtons: new Set(input.mouseButtons),
-        axes: new Map(input.axes),
-      });
-    }
-    
-    return result;
-  }
-  
-  deserializeInputs(data: InputState[]): Map<string, InputState> {
-    const map = new Map<string, InputState>();
-    
-    for (const input of data) {
-      map.set(input.playerId, {
-        playerId: input.playerId,
-        keys: new Set(input.keys),
-        mousePosition: { ...input.mousePosition },
-        mouseButtons: new Set(input.mouseButtons),
-        axes: new Map(input.axes),
-      });
-    }
-    
-    return map;
-  }
-  
-  toJSON(inputs: InputState[]): string {
-    return JSON.stringify(inputs.map(input => ({
-      playerId: input.playerId,
-      keys: Array.from(input.keys),
-      mousePosition: input.mousePosition,
-      mouseButtons: Array.from(input.mouseButtons),
-      axes: Array.from(input.axes.entries()),
-    })));
-  }
-  
-  fromJSON(json: string): InputState[] {
-    const data = JSON.parse(json);
-    return data.map((input: { 
-      playerId: string;
-      keys: string[];
-      mousePosition: { x: number; y: number };
-      mouseButtons: number[];
-      axes: [string, number][];
-    }) => ({
-      playerId: input.playerId,
-      keys: new Set(input.keys),
-      mousePosition: input.mousePosition,
-      mouseButtons: new Set(input.mouseButtons),
-      axes: new Map(input.axes),
-    }));
-  }
-}
+import { InputSerializer } from './replay-input-serializer';
+export { InputSerializer } from './replay-input-serializer';
 
 // ============================================================================
 // STATE SERIALIZER

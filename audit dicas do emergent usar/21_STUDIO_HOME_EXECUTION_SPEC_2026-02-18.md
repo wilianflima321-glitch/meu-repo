@@ -127,7 +127,7 @@ Mandatory before completion:
 25. Enterprise gate now includes architecture drift checks as mandatory pre-release contract.
 26. Duplicate component drift was reduced to zero (`duplicate basenames 10 -> 0`) after removal of residual unused legacy duplicates.
 27. Architecture gate duplicate threshold was tightened to `duplicateBasenames <= 0` to prevent reintroduction.
-28. Architecture gate oversized-module threshold was tightened to `oversizedFiles <= 40` to freeze current monolith debt ceiling.
+28. Architecture gate oversized-module threshold was tightened to `oversizedFiles <= 34` to freeze current monolith debt ceiling.
 29. Canonical component scan now blocks imports to removed duplicate paths (`engine/debug/dashboard/admin/vcs`) and enforces canonical replacements.
 30. Export subsystem preset catalog was split from `ExportSystem.tsx`, reducing architecture oversized debt baseline.
 31. Facial animation static data tables were split from `FacialAnimationEditor.tsx`, reducing oversized debt baseline.
@@ -143,3 +143,5 @@ Mandatory before completion:
 41. Dialogue/cutscene shared contracts were split into `dialogue-cutscene-types.ts`, reducing oversized debt baseline and tightening limit to `oversizedFiles <= 42`.
 42. Audio synthesis shared contracts/preset catalog were split into `audio-synthesis-types.ts` and `audio-synthesis-presets.ts`, reducing oversized debt baseline and tightening limit to `oversizedFiles <= 41`.
 43. Integrated profiler shared contracts were split into `profiler-integrated-types.ts`, reducing oversized debt baseline and tightening limit to `oversizedFiles <= 40`.
+44. Save manager/settings runtime/advanced particle shared contracts and settings-page static config were split into dedicated modules (`save-manager-types.ts`, `settings-types.ts`, `advanced-particle-types.ts`, `settings-page-config.ts`), reducing oversized debt baseline and tightening limit to `oversizedFiles <= 36`.
+45. Replay/Niagara shared contracts and default graph/config surfaces were split into dedicated modules (`replay-types.ts`, `replay-input-serializer.ts`, `niagara-vfx-types.ts`, `niagara-vfx-defaults.ts`), reducing oversized debt baseline and tightening limit to `oversizedFiles <= 34`.
