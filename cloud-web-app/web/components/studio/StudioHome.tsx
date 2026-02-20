@@ -3,6 +3,30 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import type {
+  FullAccessScope,
+  MissionDomain,
+  MissionDomainSelection,
+  StudioSession,
+  UsageSummary,
+  WalletSummary,
+} from './studio-home.types'
+import {
+  canApplyTask,
+  canRollbackTask,
+  canRunTask,
+  canValidateTask,
+  defaultFullAccessScope,
+  domainTemplate,
+  fullAccessAllowedScopesForPlan,
+  fullAccessScopeLabel,
+  isTypingTarget,
+  missionDomainLabel,
+  parseJson,
+  roleLabel,
+  runStatusTone,
+  statusTone,
+} from './studio-home.utils'
 
 const PreviewPanel = dynamic(() => import('@/components/ide/PreviewPanel'), {
   ssr: false,
@@ -16,213 +40,6 @@ const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
 const LEGACY_DASHBOARD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD === 'true'
-type FullAccessScope = 'project' | 'workspace' | 'web_tools'
-type MissionDomain = 'games' | 'films' | 'apps' | 'general'
-type MissionDomainSelection = MissionDomain | 'auto'
-
-type StudioTask = {
-  id: string
-  title: string
-  ownerRole: 'planner' | 'coder' | 'reviewer'
-  status: 'queued' | 'planning' | 'building' | 'validating' | 'blocked' | 'done' | 'error'
-  estimateCredits: number
-  estimateSeconds: number
-  result?: string
-  validationVerdict: 'pending' | 'passed' | 'failed'
-  applyToken?: string
-}
-
-type StudioMessage = {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  agentRole?: 'planner' | 'coder' | 'reviewer'
-  content: string
-  timestamp: string
-  status?: string
-}
-
-type FullAccessGrant = {
-  id: string
-  scope: FullAccessScope
-  expiresAt: string
-  revokedAt?: string
-}
-
-type StudioAgentRun = {
-  id: string
-  taskId: string
-  role: 'planner' | 'coder' | 'reviewer'
-  model: string
-  status: 'running' | 'success' | 'error'
-  tokensIn: number
-  tokensOut: number
-  latencyMs: number
-  cost: number
-  startedAt: string
-  finishedAt?: string
-  message: string
-}
-
-type StudioSession = {
-  id: string
-  projectId: string
-  mission: string
-  missionDomain?: 'games' | 'films' | 'apps' | 'general'
-  qualityMode: 'standard' | 'delivery' | 'studio'
-  qualityChecklist?: string[]
-  status: 'active' | 'stopped' | 'completed'
-  tasks: StudioTask[]
-  agentRuns: StudioAgentRun[]
-  messages: StudioMessage[]
-  orchestration?: {
-    mode: 'serial' | 'parallel_wave'
-    conversationPolicy: 'peer_review'
-    applyPolicy: 'serial_after_validation'
-    lastWaveAt?: string
-  }
-  fullAccessGrants: FullAccessGrant[]
-  cost: {
-    estimatedCredits: number
-    usedCredits: number
-    budgetCap: number
-    remainingCredits: number
-  }
-}
-
-type WalletSummary = {
-  balance: number
-  currency: string
-}
-
-type UsageSummary = {
-  plan: string
-  usage: { tokens: { used: number; limit: number; remaining: number; percentUsed: number } }
-  usageEntitlement?: {
-    creditBalance: number
-    variableUsageAllowed: boolean
-    blockedReason: string | null
-  }
-}
-
-function roleLabel(role: StudioTask['ownerRole']) {
-  if (role === 'planner') return 'Planner'
-  if (role === 'coder') return 'Coder'
-  return 'Reviewer'
-}
-
-function statusTone(status: StudioTask['status']): string {
-  if (status === 'done') return 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10'
-  if (status === 'error') return 'text-rose-300 border-rose-500/30 bg-rose-500/10'
-  if (status === 'blocked') return 'text-amber-300 border-amber-500/30 bg-amber-500/10'
-  if (status === 'planning' || status === 'building' || status === 'validating') {
-    return 'text-sky-300 border-sky-500/30 bg-sky-500/10'
-  }
-  return 'text-slate-300 border-slate-600/40 bg-slate-700/20'
-}
-
-function fullAccessScopeLabel(scope: FullAccessScope): string {
-  if (scope === 'web_tools') return 'Web + Tools'
-  if (scope === 'workspace') return 'Workspace'
-  return 'Project'
-}
-
-function missionDomainLabel(domain: MissionDomainSelection): string {
-  if (domain === 'auto') return 'Auto'
-  if (domain === 'games') return 'Games'
-  if (domain === 'films') return 'Films'
-  if (domain === 'apps') return 'Apps'
-  return 'General'
-}
-
-function domainTemplate(domain: MissionDomain): string {
-  if (domain === 'games') {
-    return 'Create a gameplay-ready feature with deterministic state, asset/runtime validation, and rollback-safe apply plan.'
-  }
-  if (domain === 'films') {
-    return 'Build a render/export workflow with temporal consistency checks, preview validation, and explicit runtime limits.'
-  }
-  if (domain === 'apps') {
-    return 'Implement a production-ready feature with multi-file dependency checks, accessibility states, and verified apply criteria.'
-  }
-  return 'Define a mission with explicit scope, acceptance criteria, cost cap, and deterministic validation before apply.'
-}
-
-function runStatusTone(status: StudioAgentRun['status']): string {
-  if (status === 'success') return 'text-emerald-200 border-emerald-500/30 bg-emerald-500/10'
-  if (status === 'error') return 'text-rose-200 border-rose-500/30 bg-rose-500/10'
-  return 'text-sky-200 border-sky-500/30 bg-sky-500/10'
-}
-
-function fullAccessAllowedScopesForPlan(plan: string | null | undefined): FullAccessScope[] {
-  const normalized = String(plan || '').trim().toLowerCase()
-  if (normalized === 'basic') return ['project', 'workspace']
-  if (normalized === 'pro' || normalized === 'studio' || normalized === 'enterprise') {
-    return ['project', 'workspace', 'web_tools']
-  }
-  return ['project']
-}
-
-function defaultFullAccessScope(scopes: FullAccessScope[]): FullAccessScope {
-  if (scopes.includes('workspace')) return 'workspace'
-  return scopes[0] || 'project'
-}
-
-function canRunTask(
-  task: StudioTask,
-  sessionStatus: StudioSession['status'] | null,
-  allTasks: StudioTask[]
-): boolean {
-  if (sessionStatus !== 'active') return false
-  const runEligible =
-    task.status === 'queued' ||
-    task.status === 'blocked' ||
-    task.status === 'error' ||
-    (task.ownerRole === 'planner' && task.status === 'planning')
-  if (!runEligible) return false
-  if (task.ownerRole === 'coder') {
-    return allTasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
-  }
-  if (task.ownerRole === 'reviewer') {
-    return allTasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
-  }
-  return true
-}
-
-function canValidateTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
-  if (sessionStatus !== 'active') return false
-  if (task.ownerRole !== 'reviewer') return false
-  return task.status === 'done' && task.validationVerdict === 'pending'
-}
-
-function canApplyTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
-  if (sessionStatus !== 'active') return false
-  if (task.ownerRole !== 'reviewer') return false
-  if (task.status !== 'done') return false
-  if (task.applyToken) return false
-  return task.validationVerdict === 'passed'
-}
-
-function canRollbackTask(task: StudioTask, sessionStatus: StudioSession['status'] | null): boolean {
-  if (sessionStatus !== 'active') return false
-  if (task.ownerRole !== 'reviewer') return false
-  return Boolean(task.applyToken)
-}
-
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false
-  const tag = target.tagName.toLowerCase()
-  return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable
-}
-
-async function parseJson(res: Response): Promise<any> {
-  const text = await res.text()
-  if (!text) return {}
-  try {
-    return JSON.parse(text)
-  } catch {
-    return { message: text }
-  }
-}
 
 export default function StudioHome() {
   const router = useRouter()

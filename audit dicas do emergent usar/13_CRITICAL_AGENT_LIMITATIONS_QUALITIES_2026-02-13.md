@@ -1403,3 +1403,16 @@ Critical reading:
 1. Governance risk reduced from implicit workflow sprawl to explicit classified control-plane.
 2. Residual risk remains in `LEGACY_CANDIDATE` workflow surfaces pending explicit keep/archive decision.
 3. This wave improves release reliability without changing product/runtime feature scope.
+
+## Delta 2026-02-20 LXXXIII - Oversized-module debt reduction (31 baseline)
+Implemented:
+1. Extracted Studio Home types and orchestration helpers into dedicated modules.
+2. Extracted post-processing type/shader chunks from runtime orchestration file.
+3. Extracted Hair/Fur editor core generation/types/default presets into shared core module.
+4. Extracted Settings UI model contracts and default setting catalog into dedicated files with type re-export compatibility.
+5. Regenerated architecture triage report with updated baseline.
+
+Critical reading:
+1. Oversized source-file debt reduced from `34` to `31` without changing declared product scope.
+2. Main residual limitation remains concentrated in very large legacy runtime/editor modules (`AethelDashboard`, media/physics/editor stacks).
+3. Next risk is regression from large-file behavior churn; mitigation remains incremental extraction + freeze-gate validation.

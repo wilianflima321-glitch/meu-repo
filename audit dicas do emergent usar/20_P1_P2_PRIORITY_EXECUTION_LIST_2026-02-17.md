@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`34`) to next threshold gate.
+2. Continue oversized module decomposition from current baseline (`31`) to next threshold gate (`<=28`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -177,3 +177,10 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### Residual governance note
 1. Remaining legacy workflow candidate after hardening: `.github/workflows/merge-unrelated-histories.yml` (manual-only utility).
+
+### Delivered in this wave (architecture debt)
+1. Reduced oversized source baseline from `34` to `31` via structural extraction:
+- `StudioHome`: types/utils split
+- `post-processing-system`: types/shader chunks split
+- `HairFurEditor`: shared core split
+- `SettingsUI`: models/default settings split

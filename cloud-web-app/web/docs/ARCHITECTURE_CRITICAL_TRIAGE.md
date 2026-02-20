@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T00:43:28.385Z`
+- Generated at: `2026-02-20T02:18:42.617Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **34**
+- Oversized source files (>=1200 lines): **31**
 
 ## Top Compatibility Call Sites
 
@@ -70,11 +70,8 @@
 | `lib/engine/particle-system.ts` | 1305 |
 | `lib/networking-multiplayer.ts` | 1305 |
 | `lib/theme/theme-service.ts` | 1305 |
-| `components/settings/SettingsUI.tsx` | 1295 |
 | `lib/mcp/aethel-mcp-server.ts` | 1294 |
 | `lib/hair-fur-system.ts` | 1292 |
-| `components/character/HairFurEditor.tsx` | 1284 |
-| `lib/postprocessing/post-processing-system.ts` | 1279 |
 
 ## Notes
 

@@ -15,163 +15,36 @@
 
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
+import type {
+  BloomSettings,
+  ChromaticAberrationSettings,
+  ColorGradingSettings,
+  DOFSettings,
+  FilmGrainSettings,
+  LensDistortionSettings,
+  MotionBlurSettings,
+  PostProcessingSettings,
+  SSAOSettings,
+  SSRSettings,
+  TonemappingMode,
+  VignetteSettings,
+} from './post-processing-types';
+import { COMMON_SHADER, TONEMAPPING_FUNCTIONS } from './post-processing-shader-chunks';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface PostProcessingSettings {
-  enabled: boolean;
-  antialiasing: 'none' | 'fxaa' | 'smaa' | 'taa';
-  tonemapping: TonemappingMode;
-  exposure: number;
-}
-
-export type TonemappingMode = 
-  | 'none'
-  | 'linear'
-  | 'reinhard'
-  | 'cineon'
-  | 'aces'
-  | 'filmic';
-
-export interface BloomSettings {
-  [key: string]: unknown;
-  enabled: boolean;
-  intensity: number;
-  threshold: number;
-  radius: number;
-  softKnee: number;
-  mipLevels: number;
-}
-
-export interface DOFSettings {
-  enabled: boolean;
-  focusDistance: number;
-  focalLength: number;
-  aperture: number;
-  maxBlur: number;
-  bokehShape: 'circle' | 'hexagon' | 'octagon';
-  samples: number;
-}
-
-export interface SSAOSettings {
-  enabled: boolean;
-  radius: number;
-  intensity: number;
-  bias: number;
-  samples: number;
-  minDistance: number;
-  maxDistance: number;
-}
-
-export interface SSRSettings {
-  enabled: boolean;
-  intensity: number;
-  maxRoughness: number;
-  thickness: number;
-  stride: number;
-  maxSteps: number;
-  fresnel: boolean;
-}
-
-export interface MotionBlurSettings {
-  enabled: boolean;
-  intensity: number;
-  samples: number;
-  maxVelocity: number;
-}
-
-export interface ColorGradingSettings {
-  [key: string]: unknown;
-  enabled: boolean;
-  brightness: number;
-  contrast: number;
-  saturation: number;
-  hueShift: number;
-  temperature: number;
-  tint: number;
-  shadows: THREE.Color;
-  midtones: THREE.Color;
-  highlights: THREE.Color;
-  shadowsWeight: number;
-  midtonesWeight: number;
-  highlightsWeight: number;
-  lutTexture?: THREE.Texture;
-  lutIntensity: number;
-}
-
-export interface VignetteSettings {
-  [key: string]: unknown;
-  enabled: boolean;
-  intensity: number;
-  smoothness: number;
-  roundness: number;
-  color: THREE.Color;
-}
-
-export interface FilmGrainSettings {
-  [key: string]: unknown;
-  enabled: boolean;
-  intensity: number;
-  size: number;
-  animated: boolean;
-}
-
-export interface ChromaticAberrationSettings {
-  [key: string]: unknown;
-  enabled: boolean;
-  intensity: number;
-  radialModulation: boolean;
-}
-
-export interface LensDistortionSettings {
-  enabled: boolean;
-  intensity: number;
-  cubicDistortion: number;
-  scale: number;
-}
-
-// ============================================================================
-// SHADER CHUNKS
-// ============================================================================
-
-const COMMON_SHADER = `
-  varying vec2 vUv;
-  
-  vec3 saturate3(vec3 x) {
-    return clamp(x, 0.0, 1.0);
-  }
-  
-  float luminance(vec3 color) {
-    return dot(color, vec3(0.2126, 0.7152, 0.0722));
-  }
-`;
-
-const TONEMAPPING_FUNCTIONS = `
-  vec3 tonemapReinhard(vec3 color) {
-    return color / (1.0 + color);
-  }
-  
-  vec3 tonemapCineon(vec3 color) {
-    color = max(vec3(0.0), color - 0.004);
-    return pow((color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06), vec3(2.2));
-  }
-  
-  vec3 tonemapACES(vec3 color) {
-    float a = 2.51;
-    float b = 0.03;
-    float c = 2.43;
-    float d = 0.59;
-    float e = 0.14;
-    return saturate3((color * (a * color + b)) / (color * (c * color + d) + e));
-  }
-  
-  vec3 tonemapFilmic(vec3 color) {
-    vec3 x = max(vec3(0.0), color - 0.004);
-    return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
-  }
-`;
+export type {
+  BloomSettings,
+  ChromaticAberrationSettings,
+  ColorGradingSettings,
+  DOFSettings,
+  FilmGrainSettings,
+  LensDistortionSettings,
+  MotionBlurSettings,
+  PostProcessingSettings,
+  SSAOSettings,
+  SSRSettings,
+  TonemappingMode,
+  VignetteSettings,
+} from './post-processing-types';
 
 // ============================================================================
 // POST PROCESSING PASS

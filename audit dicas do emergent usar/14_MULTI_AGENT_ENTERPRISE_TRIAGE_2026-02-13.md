@@ -1424,3 +1424,14 @@ Delivered:
 Triaged impact:
 1. Reduced CI noise and contradictory signal from non-authority workflows.
 2. Legacy workflow footprint reduced (`legacyCandidate: 1`).
+
+## Delta 2026-02-20 LXXXIV - Architecture decomposition triage update
+Delivered:
+1. Split static/shared contracts from Studio Home, post-processing, Hair/Fur editor, and Settings UI into dedicated modules.
+2. Preserved compatibility by re-exporting shared types where previous import surfaces could depend on legacy paths.
+3. Regenerated architecture triage baseline.
+
+Triaged impact:
+1. Oversized files reduced from `34` to `31`.
+2. Decomposition priority now shifts to largest high-risk modules (`components/AethelDashboard.tsx`, media/physics/editor monoliths).
+3. No scope expansion introduced; this was a structural quality hardening wave.

@@ -3555,3 +3555,30 @@ Validation snapshot:
 
 Decision lock:
 1. Legacy workflows cannot auto-trigger on core product branches unless explicitly promoted back to authority tier via canonical delta.
+
+## 134) Delta 2026-02-20 LXXXVIII - Architecture oversized-module decomposition wave
+
+Implemented:
+1. Split Studio Home static contracts/utilities:
+- `cloud-web-app/web/components/studio/studio-home.types.ts`
+- `cloud-web-app/web/components/studio/studio-home.utils.ts`
+- `cloud-web-app/web/components/studio/StudioHome.tsx` now focused on orchestration/UI.
+2. Split post-processing shared contracts/shader chunks:
+- `cloud-web-app/web/lib/postprocessing/post-processing-types.ts`
+- `cloud-web-app/web/lib/postprocessing/post-processing-shader-chunks.ts`
+- `cloud-web-app/web/lib/postprocessing/post-processing-system.ts` now imports/re-exports shared contracts.
+3. Split Hair/Fur editor shared core:
+- `cloud-web-app/web/components/character/hair-fur-core.ts`
+- `cloud-web-app/web/components/character/HairFurEditor.tsx` now consumes shared core.
+4. Split Settings UI static data/contracts:
+- `cloud-web-app/web/components/settings/settings-models.ts`
+- `cloud-web-app/web/components/settings/settings-defaults.ts`
+- `cloud-web-app/web/components/settings/SettingsUI.tsx` re-exports model types for compatibility.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `34` to `31` in `cloud-web-app/web/docs/ARCHITECTURE_CRITICAL_TRIAGE.md`.
+
+Decision lock:
+1. Continue decomposition waves with behavior-preserving extraction first (types/defaults/utils before runtime rewrites).
+2. Keep runtime contracts stable while reducing oversized-module debt until gate reaches target threshold.
