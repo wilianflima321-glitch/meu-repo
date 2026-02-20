@@ -47,6 +47,9 @@ Consolidar o que ainda falta para fechamento de fase com qualidade enterprise, s
 Arquivos:
 - `audit dicas do emergent usar/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
 - `audit dicas do emergent usar/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
+Status:
+- parcial: endpoint admin `GET /api/admin/rate-limits` agora expõe `diagnostics` com backend configurado e contadores de fallback (`memoryFallbackHits`, `lastFallbackAt`).
+- pendente: validar em ambiente de produção e anexar evidência temporal no contrato mestre.
 
 ### P0-03 Trilha de capacidades `NOT_IMPLEMENTED` critica
 1. Manter os 6 endpoints criticos explicitamente gated, sem CTA enganoso.

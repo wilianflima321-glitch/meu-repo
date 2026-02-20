@@ -3440,3 +3440,26 @@ Validation status:
 Decision lock:
 1. Runtime-heavy replay/editor surfaces must keep shared contracts and default graph/config payloads extracted from runtime orchestration.
 2. Threshold hardening remains coupled to measurable structural reductions only.
+
+## 129) Delta 2026-02-20 LXXXIII - Settings IA alignment + rate-limit diagnostics hardening
+
+Implemented:
+1. Consolidated settings information architecture:
+- `/settings` now acts as global settings workspace shell backed by canonical `components/settings/SettingsPage.tsx`
+- `/project-settings` now acts as project-scoped settings shell with explicit `projectId` context and IDE return handoff
+2. Removed route-level ambiguity between legacy settings surface and canonical settings surface.
+3. Studio/IDE navigation now points to the correct settings routes:
+- Studio Home header adds direct actions to `/settings` and `/project-settings`
+- Studio Home adds keyboard shortcut `Ctrl/Cmd+,` to open settings
+- Workbench `onOpenSettings` now routes directly to `/settings`
+4. Added operational diagnostics for route-level limiter backend:
+- `lib/server/rate-limit.ts` now exports runtime diagnostics (`configuredBackend`, fallback policy, runtime fallback counters)
+- `GET /api/admin/rate-limits` now returns `diagnostics` payload so ops can verify Upstash-vs-memory behavior in real time
+
+Validation status:
+1. Code/docs updated for route and runbook coherence.
+2. Full enterprise gate remains pending consolidated closing run.
+
+Decision lock:
+1. Global settings and project settings remain separate surfaces with explicit entry points and no duplicated behavior claims.
+2. Rate-limit deploy readiness requires production evidence via diagnostics payload; fallback counters must be monitored before claiming closure of P0-02.
