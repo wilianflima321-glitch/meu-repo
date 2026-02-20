@@ -1589,3 +1589,25 @@ Critical reading:
 1. Oversized baseline dropped from `13` to `12` (threshold reached).
 2. Terrain editing surface now has cleaner runtime-vs-panel boundaries and lower maintenance risk.
 3. Remaining oversized debt is concentrated in dashboard/media/audio/physics/rendering-core monoliths.
+
+## Delta 2026-02-20 XCIX - OpenAPI decomposition to 11 oversized files
+Implemented:
+1. Extracted OpenAPI paths and component schema payloads into dedicated modules.
+2. Updated `lib/openapi-spec.ts` to compose extracted payload modules.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `12` to `11`.
+2. Static-heavy API contract payload is no longer coupled to a single oversized file.
+3. Residual oversized set remains concentrated in dashboard/media/audio/physics/rendering orchestration modules.
+
+## Delta 2026-02-20 C - Animation Blueprint decomposition to 10 oversized files
+Implemented:
+1. Extracted animation editor panels/modals to `components/animation/AnimationBlueprintPanels.tsx`.
+2. Updated `components/animation/AnimationBlueprintEditor.tsx` to retain graph/runtime concerns and import extracted UI surfaces.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `11` to `10` (threshold reached).
+2. Core animation editor is no longer oversized, reducing UI-path regression blast radius.
+3. Next waves should prioritize the remaining product monoliths by user-path criticality and coupling risk.

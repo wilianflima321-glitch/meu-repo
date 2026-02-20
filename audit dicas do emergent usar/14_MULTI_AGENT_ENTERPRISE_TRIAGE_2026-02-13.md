@@ -1609,3 +1609,26 @@ Triaged impact:
 1. Oversized source count reduced `13 -> 12` (threshold reached).
 2. Terrain editing path now has clearer module boundaries and lower regression blast radius.
 3. Remaining oversized backlog is concentrated in fewer system-level monoliths for targeted extraction.
+
+## Delta 2026-02-20 C - OpenAPI decomposition wave
+Delivered:
+1. Split OpenAPI paths into `lib/openapi-spec-paths.ts`.
+2. Split OpenAPI component schemas into `lib/openapi-spec-components.ts`.
+3. Updated `lib/openapi-spec.ts` to compose extracted modules.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `12 -> 11`.
+2. API contract payload management is now less coupled and easier to maintain.
+3. Remaining oversized backlog stays concentrated in dashboard/media/audio/physics/render modules.
+
+## Delta 2026-02-20 CI - Animation Blueprint decomposition wave
+Delivered:
+1. Split animation editor panels/modals into `components/animation/AnimationBlueprintPanels.tsx`.
+2. Updated `components/animation/AnimationBlueprintEditor.tsx` to keep graph/runtime concerns isolated.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `11 -> 10` (threshold reached).
+2. Animation authoring surface now has cleaner module boundaries.
+3. Remaining oversized backlog is constrained to 10 monoliths with clear next targeting order.

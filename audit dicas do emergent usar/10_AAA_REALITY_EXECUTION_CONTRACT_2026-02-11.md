@@ -3853,3 +3853,38 @@ Validation snapshot:
 Decision lock:
 1. Keep terrain panel behavior stable while continuing structural extraction on remaining monoliths.
 2. Prioritize remaining oversized targets by user-path criticality and coupling risk.
+
+## 150) Delta 2026-02-20 CIV - OpenAPI decomposition reached 11 oversized files
+
+Implemented:
+1. Split OpenAPI spec payload into dedicated modules:
+- `cloud-web-app/web/lib/openapi-spec-paths.ts`
+- `cloud-web-app/web/lib/openapi-spec-components.ts`
+2. Updated `cloud-web-app/web/lib/openapi-spec.ts` to compose `openApiPaths` + `openApiComponents` with compatibility preserved.
+3. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `12` to `11`.
+3. `cloud-web-app/web/lib/openapi-spec.ts` reduced to `86` lines.
+
+Decision lock:
+1. Keep OpenAPI export surface stable while continuing decomposition waves.
+2. Prefer payload extraction for static-heavy monoliths before runtime behavior refactors.
+
+## 151) Delta 2026-02-20 CV - Animation Blueprint decomposition reached <=10 oversized threshold
+
+Implemented:
+1. Split animation blueprint side panels/modals into:
+- `cloud-web-app/web/components/animation/AnimationBlueprintPanels.tsx`
+2. Updated `cloud-web-app/web/components/animation/AnimationBlueprintEditor.tsx` to keep graph/runtime concerns and import extracted UI surfaces.
+3. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `11` to `10` (threshold reached).
+3. `cloud-web-app/web/components/animation/AnimationBlueprintEditor.tsx` reduced to `711` lines.
+
+Decision lock:
+1. Preserve current animation editor behavior while enforcing module boundaries.
+2. Next extraction target should move from threshold closure to risk-ranked monoliths (`AethelDashboard`, media, audio, physics, render graph).

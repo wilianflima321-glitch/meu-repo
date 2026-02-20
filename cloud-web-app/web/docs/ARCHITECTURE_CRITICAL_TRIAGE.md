@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T04:33:56.672Z`
+- Generated at: `2026-02-20T04:40:20.252Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **12**
+- Oversized source files (>=1200 lines): **10**
 
 ## Top Compatibility Call Sites
 
@@ -48,11 +48,9 @@
 | `lib/vfx-graph-editor.ts` | 1505 |
 | `components/media/MediaStudio.tsx` | 1487 |
 | `lib/fluid-simulation-system.ts` | 1482 |
-| `lib/openapi-spec.ts` | 1460 |
 | `lib/quest-mission-system.ts` | 1438 |
 | `components/engine/LevelEditor.tsx` | 1410 |
 | `lib/ai/behavior-tree-system.tsx` | 1400 |
-| `components/animation/AnimationBlueprintEditor.tsx` | 1385 |
 
 ## Notes
 
