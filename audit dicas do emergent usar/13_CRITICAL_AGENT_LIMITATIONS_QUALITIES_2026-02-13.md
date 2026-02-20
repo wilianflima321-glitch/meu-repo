@@ -1496,3 +1496,15 @@ Critical reading:
 1. Oversized baseline dropped from `23` to `22` (current threshold reached).
 2. Remaining debt is now concentrated in UI-heavy editing surfaces with higher coupling and regression risk.
 3. Future reductions should be paired with full freeze-gate validation before release claims.
+
+## Delta 2026-02-20 XCI - PBR shader source split to 21 oversized files
+Implemented:
+1. Extracted PBR GLSL shader sources into `cloud-web-app/web/lib/pbr-shader-sources.ts`.
+2. Updated `cloud-web-app/web/lib/pbr-shader-pipeline.ts` to consume the shared shader-source module.
+3. Preserved compatibility exports for shader constants on the original pipeline surface.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `22` to `21`.
+2. This removed static shader payload from runtime orchestration and lowers maintenance churn in render pipeline code.
+3. Remaining oversized backlog is now concentrated in editor/dashboard/media modules with higher UI-path risk.

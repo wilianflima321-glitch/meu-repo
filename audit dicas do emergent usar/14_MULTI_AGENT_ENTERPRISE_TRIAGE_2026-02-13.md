@@ -1511,3 +1511,15 @@ Triaged impact:
 1. Oversized source count reduced `23 -> 22` (target threshold reached).
 2. Scene runtime compatibility preserved while reducing contract and built-in component coupling.
 3. Next backlog should prioritize the top UI/editor monoliths by change frequency and user-path impact.
+
+## Delta 2026-02-20 XCII - PBR shader-source decomposition wave
+Delivered:
+1. Extracted large GLSL shader constants to `lib/pbr-shader-sources.ts`.
+2. Updated `lib/pbr-shader-pipeline.ts` to import shared shader sources.
+3. Preserved shader export compatibility from the original pipeline path.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `22 -> 21`.
+2. Render pipeline orchestration is now significantly slimmer and easier to maintain.
+3. Residual decomposition backlog remains concentrated in UI/editor/media monoliths.

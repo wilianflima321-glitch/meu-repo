@@ -3701,3 +3701,20 @@ Validation snapshot:
 Decision lock:
 1. Keep re-export compatibility on original scene-graph module path during incremental extraction.
 2. Prioritize remaining highest-coupling UI/editor/media modules for next decomposition waves.
+
+## 142) Delta 2026-02-20 XCVI - PBR shader source split and oversized debt reduction
+
+Implemented:
+1. Extracted large GLSL shader source constants into `cloud-web-app/web/lib/pbr-shader-sources.ts`.
+2. Updated `cloud-web-app/web/lib/pbr-shader-pipeline.ts` to import shared shader sources.
+3. Preserved shader export compatibility on original pipeline module surface.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `22` to `21`.
+3. `cloud-web-app/web/lib/pbr-shader-pipeline.ts` reduced to `869` lines (no longer oversized).
+
+Decision lock:
+1. Continue moving large static payloads out of runtime orchestration modules first.
+2. Keep all compatibility exports stable until full freeze-gate validation.

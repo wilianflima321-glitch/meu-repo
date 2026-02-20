@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`22`) to next threshold gate (`<=20`).
+2. Continue oversized module decomposition from current baseline (`21`) to next threshold gate (`<=20`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -208,3 +208,6 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `lib/engine/scene-graph-types.ts`
 - `lib/engine/scene-graph-builtins.ts`
 - `lib/engine/scene-graph.ts` contract and built-in import/re-export updates
+9. Reduced oversized source baseline from `22` to `21` via PBR shader-source decomposition:
+- `lib/pbr-shader-sources.ts`
+- `lib/pbr-shader-pipeline.ts` shader source import/export compatibility update
