@@ -174,3 +174,6 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 1. Added workflow governance scan + canonical matrix (`26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`).
 2. Reduced authority workflow governance issues to zero.
 3. Added governance gate evidence requirement in PR templates and branch policy.
+
+### Residual governance note
+1. Remaining legacy workflow candidate after hardening: `.github/workflows/merge-unrelated-histories.yml` (manual-only utility).

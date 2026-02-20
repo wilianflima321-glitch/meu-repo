@@ -1,10 +1,7 @@
 name: CI — Jest and Playwright
 
 on:
-  pull_request:
-    branches: [ main, master ]
-  push:
-    branches: [ infra/playwright-ci-ensemble, infra/playwright-ci-ensemble-workflow-fix ]
+  workflow_dispatch: {}
 
 jobs:
   test:

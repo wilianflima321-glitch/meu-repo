@@ -1,12 +1,12 @@
 # 26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20
 Status: GENERATED WORKFLOW GOVERNANCE SWEEP
-Generated: 2026-02-20T01:57:42.604Z
+Generated: 2026-02-20T02:02:02.054Z
 
 ## Summary
 - Total workflows: 14
 - Active authority workflows: 5
-- Supporting workflows: 7
-- Legacy-candidate workflows: 2
+- Supporting workflows: 8
+- Legacy-candidate workflows: 1
 - Placeholder workflows: 0
 - Governance issues: 0
 
@@ -15,7 +15,7 @@ Generated: 2026-02-20T01:57:42.604Z
 | --- | --- | --- | --- | --- | --- | --- |
 | `cd-deploy.yml` | CD - Deploy | SUPPORTING | workflow_dispatch, push | no | no | no |
 | `ci-metrics-aggregate.yml` | CI Metrics Aggregation | SUPPORTING | workflow_dispatch, schedule | no | no | no |
-| `ci-playwright.yml` | CI — Jest and Playwright | LEGACY_CANDIDATE | pull_request, push | no | no | no |
+| `ci-playwright.yml` | CI — Jest and Playwright | SUPPORTING | workflow_dispatch | no | no | no |
 | `ci-worker-image.yml` | CI Worker Image | SUPPORTING | workflow_dispatch, pull_request, push | no | no | no |
 | `ci.yml` | CI | ACTIVE_AUTHORITY | workflow_dispatch, pull_request, push | yes | no | no |
 | `cloud-web-app.yml` | Cloud Web App CI/CD | ACTIVE_AUTHORITY | pull_request, push | yes | no | no |

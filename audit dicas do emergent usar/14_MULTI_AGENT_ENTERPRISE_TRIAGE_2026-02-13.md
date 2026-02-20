@@ -1416,3 +1416,11 @@ Delivered:
 Triaged impact:
 1. Reduced duplicate-journey exposure in default entry UX.
 2. Preserved phased-transition capability without making legacy path a default user option.
+
+## Delta 2026-02-20 LXXXIII - Legacy workflow trigger hardening
+Delivered:
+1. Moved `ci-playwright.yml` to manual-only trigger (`workflow_dispatch`) to prevent duplicate/legacy auto-execution on PRs.
+
+Triaged impact:
+1. Reduced CI noise and contradictory signal from non-authority workflows.
+2. Legacy workflow footprint reduced (`legacyCandidate: 1`).

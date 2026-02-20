@@ -3540,3 +3540,18 @@ Implemented:
 Decision lock:
 1. Legacy surfaces remain available for phased transition, but must not be primary CTA in default production UX.
 2. Any future legacy link re-introduction on primary surfaces requires explicit flag + canonical delta.
+
+## 133) Delta 2026-02-20 LXXXVII - Legacy workflow exposure reduction
+
+Implemented:
+1. Restricted legacy-heavy Playwright workflow to manual execution only:
+- `.github/workflows/ci-playwright.yml` now uses `workflow_dispatch` only.
+2. Reduced unintended duplicate CI execution risk on `pull_request` for non-authority legacy workflow.
+
+Validation snapshot:
+1. `workflow governance` matrix updated:
+- `legacyCandidate` reduced from `2` to `1`
+- `issues=0`
+
+Decision lock:
+1. Legacy workflows cannot auto-trigger on core product branches unless explicitly promoted back to authority tier via canonical delta.
