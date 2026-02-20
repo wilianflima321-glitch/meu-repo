@@ -1666,3 +1666,18 @@ Critical reading:
 1. Oversized baseline dropped from `7` to `1` (`AethelDashboard.tsx` only).
 2. Risk concentration is now explicit: the remaining monolith is product-entry orchestration, not deep runtime subsystems.
 3. Residual limitation: functional gates are still pending freeze wave; this iteration validated architecture drift only.
+
+## Delta 2026-02-20 CV - Dashboard decomposition to zero oversized files
+Implemented:
+1. Split dashboard tab content into:
+- `components/dashboard/AethelDashboardPrimaryTabContent.tsx`
+- `components/dashboard/AethelDashboardSecondaryTabContent.tsx`
+2. Extracted dashboard action/derived logic into:
+- `components/dashboard/useAethelDashboardDerived.ts`
+3. Updated `components/AethelDashboard.tsx` to shell orchestration only.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `1` to `0`.
+2. Structural architectural debt gate is now fully clear (`oversizedFiles=0`, `duplicateBasenames=0`).
+3. Residual risk shifts from module size to runtime behavior parity and must be covered in freeze-gate execution.

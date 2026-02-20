@@ -1684,3 +1684,18 @@ Triaged impact:
 1. Oversized source count reduced `7 -> 1`.
 2. Remaining oversized backlog is isolated to `components/AethelDashboard.tsx`.
 3. Next closure wave is unambiguous: dashboard modularization with strict behavior parity.
+
+## Delta 2026-02-20 CVI - Dashboard closure decomposition wave
+Delivered:
+1. Extracted dashboard tab content into:
+- `components/dashboard/AethelDashboardPrimaryTabContent.tsx`
+- `components/dashboard/AethelDashboardSecondaryTabContent.tsx`
+2. Extracted dashboard action/derived layer into:
+- `components/dashboard/useAethelDashboardDerived.ts`
+3. Updated `components/AethelDashboard.tsx` to shell/header/sidebar orchestration and delegated tab/action responsibilities.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `1 -> 0`.
+2. Architecture drift gate now has no oversized monolith files in `app/components/lib/hooks`.
+3. Residual backlog focus moves to behavior hardening and freeze-gate verification rather than structural decomposition.

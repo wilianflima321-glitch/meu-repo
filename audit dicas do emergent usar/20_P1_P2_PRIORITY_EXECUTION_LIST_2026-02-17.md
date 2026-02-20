@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`1`) to closure threshold (`<=0`) by modularizing `components/AethelDashboard.tsx`.
+2. Preserve `oversizedFiles=0` and block regressions in new PRs (no new monoliths `>=1200` lines).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -271,3 +271,8 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `lib/ai/behavior-tree-utility.ts`
 - `lib/ai/behavior-tree-react.tsx`
 - `lib/fluid-surface-reconstructor.ts`
+25. Reduced oversized source baseline from `1` to `0` via dashboard decomposition:
+- `components/dashboard/AethelDashboardPrimaryTabContent.tsx`
+- `components/dashboard/AethelDashboardSecondaryTabContent.tsx`
+- `components/dashboard/useAethelDashboardDerived.ts`
+- `components/AethelDashboard.tsx` shell orchestration refactor

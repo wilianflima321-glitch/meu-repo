@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T05:18:52.144Z`
+- Generated at: `2026-02-20T07:21:39.706Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **1**
+- Oversized source files (>=1200 lines): **0**
 
 ## Top Compatibility Call Sites
 
@@ -39,9 +39,7 @@
 
 ## Oversized Source Files (>=1200 lines)
 
-| File | Lines |
-| --- | ---: |
-| `components/AethelDashboard.tsx` | 3528 |
+- none
 
 ## Notes
 

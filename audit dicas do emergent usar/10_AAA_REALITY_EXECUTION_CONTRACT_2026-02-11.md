@@ -3982,3 +3982,25 @@ Validation snapshot:
 Decision lock:
 1. Keep behavior-preserving decomposition strategy (contract extraction + orchestration isolation) until dashboard monolith is split.
 2. Full functional gates remain deferred to freeze wave as requested; this wave used architecture scans only.
+
+## 156) Delta 2026-02-20 CX - Dashboard decomposition wave reached zero oversized files
+
+Implemented:
+1. Split dashboard content surfaces into:
+- `cloud-web-app/web/components/dashboard/AethelDashboardPrimaryTabContent.tsx`
+- `cloud-web-app/web/components/dashboard/AethelDashboardSecondaryTabContent.tsx`
+2. Extracted dashboard action/derived logic to:
+- `cloud-web-app/web/components/dashboard/useAethelDashboardDerived.ts`
+3. Updated `cloud-web-app/web/components/AethelDashboard.tsx` to:
+- keep shell/header/sidebar orchestration in one file
+- delegate tab rendering and action logic to extracted modules.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `1` to `0`.
+3. Duplicate basenames remain `0`; compatibility route usage remains `0`.
+
+Decision lock:
+1. Dashboard is no longer a structural monolith; next waves focus on behavior hardening and full freeze gates.
+2. No scope expansion was introduced; changes are decomposition-only with existing contracts preserved.
