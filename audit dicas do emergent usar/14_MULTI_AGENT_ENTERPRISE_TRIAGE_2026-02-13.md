@@ -1699,3 +1699,20 @@ Triaged impact:
 1. Oversized source count reduced `1 -> 0`.
 2. Architecture drift gate now has no oversized monolith files in `app/components/lib/hooks`.
 3. Residual backlog focus moves to behavior hardening and freeze-gate verification rather than structural decomposition.
+
+## Delta 2026-02-20 CVII - Repo governance closure wave (connectivity + workflow + secret hygiene)
+Delivered:
+1. Upgraded connectivity scanner to detect dead script chains in root `package.json` execution graph.
+2. Upgraded workflow governance scanner to detect stale `paths` / `paths-ignore` trigger filters.
+3. Replaced desktop inline script wrappers with reusable guarded helper:
+- `tools/run-optional-workspace-script.mjs`
+4. Added critical secret hygiene scanner:
+- `tools/critical-secret-scan.mjs`
+- canonical report `27_CRITICAL_SECRET_SCAN_2026-02-20.md`
+- CI integration in authority workflows (`ci.yml`, `main.yml`).
+5. Removed tracked token artifact and blocked recurrence via `.gitignore`.
+
+Triaged impact:
+1. Connectivity matrix improved from optional debt to full closure (`requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`).
+2. Workflow governance retains zero issues with explicit stale-trigger visibility (`staleTriggerPaths=0`).
+3. Governance backlog now shifts from "broken references" to legacy footprint decisions and freeze-gate evidence.

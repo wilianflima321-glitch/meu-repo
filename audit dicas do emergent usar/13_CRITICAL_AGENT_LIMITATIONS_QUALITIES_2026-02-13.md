@@ -1681,3 +1681,16 @@ Critical reading:
 1. Oversized baseline dropped from `1` to `0`.
 2. Structural architectural debt gate is now fully clear (`oversizedFiles=0`, `duplicateBasenames=0`).
 3. Residual risk shifts from module size to runtime behavior parity and must be covered in freeze-gate execution.
+
+## Delta 2026-02-20 CVI - Governance and secret hygiene hardening
+Implemented:
+1. Connectivity governance upgraded with dead-script detection (`tools/repo-connectivity-scan.mjs`).
+2. Workflow governance upgraded with stale trigger path detection (`tools/workflow-governance-scan.mjs`).
+3. Security hygiene added with active-surface secret scan (`tools/critical-secret-scan.mjs`) and CI blocking integration.
+4. Fragile optional desktop inline scripts replaced by guarded reusable helper (`tools/run-optional-workspace-script.mjs`).
+5. Tracked token artifact removed (`meu-repo/.gh_token`) and ignored by policy (`.gitignore`).
+
+Critical reading:
+1. Repository-level governance risk decreased from "known optional debt" to explicit zero-missing baseline (`optionalMissing=0`, `deadScriptReferences=0`).
+2. Workflow trigger drift now has deterministic detection (`staleTriggerPaths=0` currently, blocking if regresses).
+3. Residual risk remains in historical legacy trees (`cloud-admin-ia`, nested `meu-repo/`) intentionally out of critical secret scan scope and must stay classified as legacy/external surfaces.

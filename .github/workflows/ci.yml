@@ -49,6 +49,9 @@ jobs:
       - name: Workflow governance gate
         run: npm run qa:workflow-governance
 
+      - name: Critical secret hygiene gate
+        run: npm run qa:secrets-critical
+
       - name: Anti fake-success contracts
         working-directory: cloud-web-app/web
         run: npm run qa:no-fake-success

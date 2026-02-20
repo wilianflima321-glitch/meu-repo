@@ -4004,3 +4004,45 @@ Validation snapshot:
 Decision lock:
 1. Dashboard is no longer a structural monolith; next waves focus on behavior hardening and full freeze gates.
 2. No scope expansion was introduced; changes are decomposition-only with existing contracts preserved.
+
+## 157) Delta 2026-02-20 CXI - Governance hardening: connectivity + workflow + secret hygiene
+
+Implemented:
+1. Hardened repository connectivity scanner:
+- added dead script reference detection for `npm run` and `npm --prefix ... run ...` chains in root scripts
+- promoted dead script references to blocking failures under `--fail-on-missing`.
+2. Hardened workflow governance scanner:
+- added stale trigger path filter detection for workflow `paths` / `paths-ignore` blocks
+- exposed stale-path counts per workflow in canonical matrix output.
+3. Closed script-path optional debt:
+- replaced fragile inline desktop scripts with reusable guarded helper:
+  - `tools/run-optional-workspace-script.mjs`
+  - `package.json` scripts: `desktop:dev`, `desktop:build`.
+4. Added secret hygiene gate for active surfaces:
+- `tools/critical-secret-scan.mjs`
+- root script `qa:secrets-critical`
+- CI integration in:
+  - `.github/workflows/ci.yml`
+  - `.github/workflows/main.yml`
+5. Removed tracked GitHub token artifact from nested utility tree and blocked recurrence:
+- deleted `meu-repo/.gh_token`
+- added `.gh_token` patterns to `.gitignore`.
+6. Regenerated governance reports:
+- `25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`
+- `27_CRITICAL_SECRET_SCAN_2026-02-20.md`.
+
+Validation snapshot:
+1. `node tools/repo-connectivity-scan.mjs --report ...` -> PASS:
+- `requiredMissing=0`
+- `optionalMissing=0`
+- `deadScriptReferences=0`.
+2. `node tools/workflow-governance-scan.mjs --report ...` -> PASS:
+- `staleTriggerPaths=0`
+- `issues=0`.
+3. `node tools/critical-secret-scan.mjs --report ...` -> PASS:
+- `findings=0` across active-surface scan roots.
+
+Decision lock:
+1. Root governance now blocks missing refs, dead script chains, stale workflow path filters, and critical secret leaks before merge.
+2. Legacy workflow candidate remains explicit (`merge-unrelated-histories.yml`) and does not override authority-gate policy.

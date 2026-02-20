@@ -1,14 +1,15 @@
 # 25_REPO_CONNECTIVITY_MATRIX_2026-02-20
 Status: GENERATED CONNECTIVITY SWEEP
-Generated: 2026-02-20T02:01:51.319Z
+Generated: 2026-02-20T22:17:31.127Z
 
 ## Summary
-- Total checks: 29
-- Resolved references: 27
+- Total checks: 30
+- Resolved references: 30
 - Missing required references: 0
-- Missing optional references: 2
-- Markdown files (total): 3631
-- Markdown files (canonical): 29
+- Missing optional references: 0
+- Dead script references: 0
+- Markdown files (total): 3632
+- Markdown files (canonical): 30
 - Markdown files (historical/outside canonical): 3602
 
 ## Required Missing References
@@ -19,8 +20,12 @@ Generated: 2026-02-20T02:01:51.319Z
 ## Optional Missing References
 | Source | Key | Path | Status | Notes |
 | --- | --- | --- | --- | --- |
-| package.json | scripts.desktop:dev | `cloud-ide-desktop/desktop-app` | missing_optional | guarded_by_exists_sync |
-| package.json | scripts.desktop:build | `cloud-ide-desktop/desktop-app` | missing_optional | guarded_by_exists_sync |
+| - | - | - | none | - |
+
+## Dead Script References
+| Source | Source Script | Command Type | Target Script | Target Package | Notes |
+| --- | --- | --- | --- | --- | --- |
+| - | - | - | - | - | none |
 
 ## Top-Level Directory Classification
 | Directory | References | Classification |
@@ -44,7 +49,7 @@ Generated: 2026-02-20T02:01:51.319Z
 | `shared` | 0 | ACTIVE |
 | `src` | 2 | ACTIVE |
 | `tests` | 0 | ACTIVE |
-| `tools` | 15 | ACTIVE |
+| `tools` | 18 | ACTIVE |
 | `visual-regression.spec.ts-snapshots` | 0 | LEGACY_ACTIVE |
 
 ## Surface Ownership Matrix

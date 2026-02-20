@@ -44,8 +44,60 @@ function classify(fileName, content) {
   return 'SUPPORTING'
 }
 
+function hasGlobChars(segment) {
+  return /[*?[\]{}!]/.test(segment)
+}
+
+function extractPathFilters(content) {
+  const lines = content.split(/\r?\n/)
+  const values = []
+  let index = 0
+  while (index < lines.length) {
+    const line = lines[index]
+    const match = line.match(/^(\s*)paths(?:-ignore)?:\s*$/)
+    if (!match) {
+      index += 1
+      continue
+    }
+    const blockIndent = match[1].length
+    index += 1
+    while (index < lines.length) {
+      const candidate = lines[index]
+      if (!candidate.trim()) {
+        index += 1
+        continue
+      }
+      const indent = candidate.match(/^(\s*)/)?.[1]?.length ?? 0
+      if (indent <= blockIndent) break
+      const valueMatch = candidate.match(/^\s*-\s*["']?(.+?)["']?\s*$/)
+      if (valueMatch) {
+        const value = valueMatch[1].trim()
+        if (value) values.push(value)
+      }
+      index += 1
+    }
+  }
+  return values
+}
+
+function hasStablePrefix(globPath) {
+  const normalized = globPath.replace(/\\/g, '/').replace(/^!+/, '').trim()
+  if (!normalized || normalized.includes('${{')) return true
+  const segments = normalized.split('/').filter(Boolean)
+  if (!segments.length) return true
+  const prefix = []
+  for (const segment of segments) {
+    if (hasGlobChars(segment)) break
+    prefix.push(segment)
+  }
+  if (!prefix.length) return true
+  const stablePath = prefix.join('/')
+  return fs.existsSync(path.join(repoRoot, stablePath))
+}
+
 const rows = []
 const issues = []
+const stalePathRows = []
 
 for (const fileName of files) {
   const fullPath = path.join(workflowsDir, fileName)
@@ -57,6 +109,8 @@ for (const fileName of files) {
     content.includes('qa:repo-connectivity') || content.includes('repo-connectivity-scan.mjs')
   const hasEnterpriseGate = content.includes('qa:enterprise-gate')
   const hasContinueOnError = content.includes('continue-on-error: true')
+  const triggerPaths = extractPathFilters(content)
+  const staleTriggerPaths = triggerPaths.filter((item) => !hasStablePrefix(item))
 
   rows.push({
     fileName,
@@ -66,10 +120,18 @@ for (const fileName of files) {
     hasConnectivityGate,
     hasEnterpriseGate,
     hasContinueOnError,
+    staleTriggerPaths,
   })
+
+  for (const stalePath of staleTriggerPaths) {
+    stalePathRows.push({ fileName, stalePath })
+  }
 
   if (classification === 'ACTIVE_AUTHORITY' && !hasConnectivityGate) {
     issues.push(`${fileName}: missing connectivity gate`) 
+  }
+  if (staleTriggerPaths.length > 0) {
+    issues.push(`${fileName}: stale trigger path filter(s): ${staleTriggerPaths.join(', ')}`)
   }
 }
 
@@ -80,6 +142,7 @@ const summary = {
   supporting: rows.filter((r) => r.classification === 'SUPPORTING').length,
   legacyCandidate: rows.filter((r) => r.classification === 'LEGACY_CANDIDATE').length,
   placeholder: rows.filter((r) => r.classification === 'PLACEHOLDER').length,
+  staleTriggerPaths: stalePathRows.length,
   issues: issues.length,
 }
 
@@ -94,12 +157,20 @@ const markdown = [
   `- Supporting workflows: ${summary.supporting}`,
   `- Legacy-candidate workflows: ${summary.legacyCandidate}`,
   `- Placeholder workflows: ${summary.placeholder}`,
+  `- Stale trigger path filters: ${summary.staleTriggerPaths}`,
   `- Governance issues: ${summary.issues}`,
   '',
   '## Workflow Matrix',
-  '| Workflow file | Name | Class | Triggers | Connectivity gate | Enterprise gate | continue-on-error |',
-  '| --- | --- | --- | --- | --- | --- | --- |',
-  ...rows.map((row) => `| \`${row.fileName}\` | ${row.name} | ${row.classification} | ${row.triggers} | ${row.hasConnectivityGate ? 'yes' : 'no'} | ${row.hasEnterpriseGate ? 'yes' : 'no'} | ${row.hasContinueOnError ? 'yes' : 'no'} |`),
+  '| Workflow file | Name | Class | Triggers | Connectivity gate | Enterprise gate | continue-on-error | stale trigger paths |',
+  '| --- | --- | --- | --- | --- | --- | --- | ---: |',
+  ...rows.map((row) => `| \`${row.fileName}\` | ${row.name} | ${row.classification} | ${row.triggers} | ${row.hasConnectivityGate ? 'yes' : 'no'} | ${row.hasEnterpriseGate ? 'yes' : 'no'} | ${row.hasContinueOnError ? 'yes' : 'no'} | ${row.staleTriggerPaths.length} |`),
+  '',
+  '## Stale Trigger Path Filters',
+  '| Workflow file | Path filter |',
+  '| --- | --- |',
+  ...(stalePathRows.length
+    ? stalePathRows.map((item) => `| \`${item.fileName}\` | \`${item.stalePath}\` |`)
+    : ['| - | none |']),
   '',
   '## Governance Issues',
   ...(issues.length ? issues.map((issue) => `- ${issue}`) : ['- none']),

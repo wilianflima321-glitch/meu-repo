@@ -319,3 +319,25 @@ Label: `VERIFIED_INTERNAL`
 - `issues=0`
 3. Governance lock:
 - authority workflows must retain connectivity gate coverage.
+
+## 12) Delta 2026-02-20 - Governance hardening refresh (connectivity + stale workflow paths + secret hygiene)
+Label: `VERIFIED_INTERNAL`
+
+1. Connectivity matrix refresh:
+- `requiredMissing=0`
+- `optionalMissing=0` (previous desktop optional debt removed)
+- `deadScriptReferences=0` (new metric).
+2. Workflow governance matrix refresh:
+- `totalWorkflows=14`
+- `activeAuthority=5`
+- `legacyCandidate=1`
+- `staleTriggerPaths=0`
+- `issues=0`.
+3. New canonical secret hygiene evidence:
+- `27_CRITICAL_SECRET_SCAN_2026-02-20.md`
+- `findings=0` in active product/governance surfaces.
+4. Source-control hygiene:
+- removed tracked token file `meu-repo/.gh_token`
+- added `.gh_token` ignore policy in root `.gitignore`.
+5. Governance lock:
+- no merge with missing refs, dead script chains, stale workflow path filters, or critical secret leaks in active surfaces.

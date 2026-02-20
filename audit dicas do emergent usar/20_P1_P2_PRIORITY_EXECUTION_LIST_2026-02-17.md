@@ -276,3 +276,37 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `components/dashboard/AethelDashboardSecondaryTabContent.tsx`
 - `components/dashboard/useAethelDashboardDerived.ts`
 - `components/AethelDashboard.tsx` shell orchestration refactor
+
+## Delta 2026-02-20 - Governance closure update
+
+### Delivered in this wave (governance + security hygiene)
+1. Connectivity scanner upgraded with dead script-chain detection (`deadScriptReferences` metric).
+2. Workflow governance scanner upgraded with stale trigger-path detection (`staleTriggerPaths` metric).
+3. Script-path optional debt removed:
+- `desktop:dev` and `desktop:build` now use guarded helper `tools/run-optional-workspace-script.mjs`.
+4. New critical secret hygiene gate delivered:
+- `tools/critical-secret-scan.mjs`
+- `npm run qa:secrets-critical`
+- canonical evidence: `27_CRITICAL_SECRET_SCAN_2026-02-20.md`.
+5. CI authority wiring updated:
+- `.github/workflows/ci.yml`
+- `.github/workflows/main.yml`
+6. Tracked token artifact removed and ignore policy added:
+- deleted `meu-repo/.gh_token`
+- `.gitignore` includes `.gh_token` patterns.
+
+### Updated factual baseline
+1. `25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`:
+- `requiredMissing=0`
+- `optionalMissing=0`
+- `deadScriptReferences=0`.
+2. `26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`:
+- `staleTriggerPaths=0`
+- `issues=0`.
+3. `27_CRITICAL_SECRET_SCAN_2026-02-20.md`:
+- `findings=0` (active surfaces).
+
+### Residual backlog (unchanged priority)
+1. Keep legacy-candidate workflow owner decision explicit (`merge-unrelated-histories.yml`).
+2. Decide archival boundary for nested `meu-repo/` tree (`EXTERNAL_ONLY` classification).
+3. Run full freeze gates in one batch as planned (deferred by request in this wave).

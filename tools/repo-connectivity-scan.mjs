@@ -59,6 +59,8 @@ function readJson(filePath) {
 
 const checks = []
 const seen = new Set()
+const deadScriptRefs = []
+const deadScriptSeen = new Set()
 
 function addCheck({ source, key, target, optional = false, reason = '' }) {
   const normalized = normalizeCandidate(target)
@@ -86,6 +88,48 @@ function extractPathMatches(command, regex) {
     if (candidate) matches.push(candidate)
   }
   return matches
+}
+
+function normalizeScriptName(raw) {
+  if (!raw) return ''
+  return normalizeCandidate(raw).replace(/^npm\s+run\s+/i, '').trim()
+}
+
+function readScriptsFromPackage(relativeDir) {
+  const packageJsonPath = path.resolve(repoRoot, relativeDir, 'package.json')
+  if (!fs.existsSync(packageJsonPath)) return null
+  const pkg = readJson(packageJsonPath)
+  return new Set(Object.keys(pkg.scripts || {}))
+}
+
+function addDeadScriptRef({
+  source,
+  sourceScript,
+  commandType,
+  targetScript,
+  targetPackage = '.',
+  reason = '',
+}) {
+  const normalizedTargetScript = normalizeScriptName(targetScript)
+  if (!normalizedTargetScript) return
+  const normalizedTargetPackage = normalizeCandidate(targetPackage || '.')
+  const key = [
+    source,
+    sourceScript,
+    commandType,
+    normalizedTargetScript,
+    normalizedTargetPackage || '.',
+  ].join('::')
+  if (deadScriptSeen.has(key)) return
+  deadScriptSeen.add(key)
+  deadScriptRefs.push({
+    source,
+    sourceScript,
+    commandType,
+    targetScript: normalizedTargetScript,
+    targetPackage: normalizedTargetPackage || '.',
+    reason,
+  })
 }
 
 function scriptContainsGuard(scriptCommand, targetPath) {
@@ -118,6 +162,7 @@ function scanPackageScripts() {
   if (!fs.existsSync(pkgPath)) return
   const pkg = readJson(pkgPath)
   const scripts = pkg.scripts || {}
+  const rootScriptNames = new Set(Object.keys(scripts))
 
   for (const [name, command] of Object.entries(scripts)) {
     if (typeof command !== 'string') continue
@@ -158,6 +203,43 @@ function scanPackageScripts() {
         optional: scriptContainsGuard(command, match),
         reason: scriptContainsGuard(command, match) ? 'guarded_by_exists_sync' : '',
       })
+    }
+
+    const prefixRunRegex = /(?:^|[;&|]\s*|&&\s*|\|\|\s*)npm\s+--prefix\s+([^\s;&|]+)\s+run\s+([^\s;&|]+)/g
+    let prefixRunMatch
+    while ((prefixRunMatch = prefixRunRegex.exec(command)) !== null) {
+      const packageDir = normalizeCandidate(prefixRunMatch[1])
+      const scriptName = normalizeScriptName(prefixRunMatch[2])
+      if (!packageDir || !scriptName) continue
+      if (!existsRelative(packageDir)) continue
+      const targetScripts = readScriptsFromPackage(packageDir)
+      if (!targetScripts || !targetScripts.has(scriptName)) {
+        addDeadScriptRef({
+          source: 'package.json',
+          sourceScript: name,
+          commandType: 'npm--prefix-run',
+          targetScript: scriptName,
+          targetPackage: packageDir,
+          reason: targetScripts ? 'missing_script_in_target_package' : 'missing_target_package_json',
+        })
+      }
+    }
+
+    const localRunRegex = /(?:^|[;&|]\s*|&&\s*|\|\|\s*)npm\s+run\s+([^\s;&|]+)/g
+    let localRunMatch
+    while ((localRunMatch = localRunRegex.exec(command)) !== null) {
+      const scriptName = normalizeScriptName(localRunMatch[1])
+      if (!scriptName) continue
+      if (!rootScriptNames.has(scriptName)) {
+        addDeadScriptRef({
+          source: 'package.json',
+          sourceScript: name,
+          commandType: 'npm-run',
+          targetScript: scriptName,
+          targetPackage: '.',
+          reason: 'missing_script_in_root_package',
+        })
+      }
     }
   }
 }
@@ -283,6 +365,7 @@ const summary = {
   resolved: resolved.length,
   requiredMissing: requiredMissing.length,
   optionalMissing: optionalMissing.length,
+  deadScriptReferences: deadScriptRefs.length,
   markdownTotal: countMarkdownFiles(repoRoot),
   markdownCanonical: countMarkdownFiles(path.join(repoRoot, 'audit dicas do emergent usar')),
 }
@@ -316,6 +399,7 @@ const markdown = [
   `- Resolved references: ${summary.resolved}`,
   `- Missing required references: ${summary.requiredMissing}`,
   `- Missing optional references: ${summary.optionalMissing}`,
+  `- Dead script references: ${summary.deadScriptReferences}`,
   `- Markdown files (total): ${summary.markdownTotal}`,
   `- Markdown files (canonical): ${summary.markdownCanonical}`,
   `- Markdown files (historical/outside canonical): ${summary.markdownHistorical}`,
@@ -329,6 +413,16 @@ const markdown = [
   '| Source | Key | Path | Status | Notes |',
   '| --- | --- | --- | --- | --- |',
   ...(optionalMissing.length ? optionalMissing.map(rowForCheck) : ['| - | - | - | none | - |']),
+  '',
+  '## Dead Script References',
+  '| Source | Source Script | Command Type | Target Script | Target Package | Notes |',
+  '| --- | --- | --- | --- | --- | --- |',
+  ...(deadScriptRefs.length
+    ? deadScriptRefs.map(
+        (entry) =>
+          `| ${entry.source} | \`${entry.sourceScript}\` | ${entry.commandType} | \`${entry.targetScript}\` | \`${entry.targetPackage}\` | ${entry.reason || '-'} |`
+      )
+    : ['| - | - | - | - | - | none |']),
   '',
   '## Top-Level Directory Classification',
   '| Directory | References | Classification |',
@@ -356,5 +450,9 @@ if (reportPath) {
 console.log(JSON.stringify(summary, null, 2))
 
 if (failOnMissing && requiredMissing.length > 0) {
+  process.exit(1)
+}
+
+if (failOnMissing && deadScriptRefs.length > 0) {
   process.exit(1)
 }
