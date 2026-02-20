@@ -16,6 +16,7 @@
 
 import { EventEmitter } from 'events';
 import { PHOTO_FILTER_PRESETS } from './capture-presets';
+export { PHOTO_FILTER_PRESETS } from './capture-presets';
 
 // ============================================================================
 // TYPES
@@ -131,6 +132,7 @@ export interface CaptureConfig {
   maxGallerySize: number;
   replayBufferEnabled: boolean;
   replayBufferDuration: number;
+}
 // ============================================================================
 // CAPTURE SYSTEM
 // ============================================================================

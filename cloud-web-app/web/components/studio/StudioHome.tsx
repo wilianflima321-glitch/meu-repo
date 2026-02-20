@@ -16,6 +16,8 @@ const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
 type FullAccessScope = 'project' | 'workspace' | 'web_tools'
+type MissionDomain = 'games' | 'films' | 'apps' | 'general'
+type MissionDomainSelection = MissionDomain | 'auto'
 
 type StudioTask = {
   id: string
@@ -45,6 +47,21 @@ type FullAccessGrant = {
   revokedAt?: string
 }
 
+type StudioAgentRun = {
+  id: string
+  taskId: string
+  role: 'planner' | 'coder' | 'reviewer'
+  model: string
+  status: 'running' | 'success' | 'error'
+  tokensIn: number
+  tokensOut: number
+  latencyMs: number
+  cost: number
+  startedAt: string
+  finishedAt?: string
+  message: string
+}
+
 type StudioSession = {
   id: string
   projectId: string
@@ -54,6 +71,7 @@ type StudioSession = {
   qualityChecklist?: string[]
   status: 'active' | 'stopped' | 'completed'
   tasks: StudioTask[]
+  agentRuns: StudioAgentRun[]
   messages: StudioMessage[]
   orchestration?: {
     mode: 'serial' | 'parallel_wave'
@@ -105,6 +123,33 @@ function fullAccessScopeLabel(scope: FullAccessScope): string {
   if (scope === 'web_tools') return 'Web + Tools'
   if (scope === 'workspace') return 'Workspace'
   return 'Project'
+}
+
+function missionDomainLabel(domain: MissionDomainSelection): string {
+  if (domain === 'auto') return 'Auto'
+  if (domain === 'games') return 'Games'
+  if (domain === 'films') return 'Films'
+  if (domain === 'apps') return 'Apps'
+  return 'General'
+}
+
+function domainTemplate(domain: MissionDomain): string {
+  if (domain === 'games') {
+    return 'Create a gameplay-ready feature with deterministic state, asset/runtime validation, and rollback-safe apply plan.'
+  }
+  if (domain === 'films') {
+    return 'Build a render/export workflow with temporal consistency checks, preview validation, and explicit runtime limits.'
+  }
+  if (domain === 'apps') {
+    return 'Implement a production-ready feature with multi-file dependency checks, accessibility states, and verified apply criteria.'
+  }
+  return 'Define a mission with explicit scope, acceptance criteria, cost cap, and deterministic validation before apply.'
+}
+
+function runStatusTone(status: StudioAgentRun['status']): string {
+  if (status === 'success') return 'text-emerald-200 border-emerald-500/30 bg-emerald-500/10'
+  if (status === 'error') return 'text-rose-200 border-rose-500/30 bg-rose-500/10'
+  return 'text-sky-200 border-sky-500/30 bg-sky-500/10'
 }
 
 function fullAccessAllowedScopesForPlan(plan: string | null | undefined): FullAccessScope[] {
@@ -162,6 +207,12 @@ function canRollbackTask(task: StudioTask, sessionStatus: StudioSession['status'
   return Boolean(task.applyToken)
 }
 
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  const tag = target.tagName.toLowerCase()
+  return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable
+}
+
 async function parseJson(res: Response): Promise<any> {
   const text = await res.text()
   if (!text) return {}
@@ -175,6 +226,7 @@ async function parseJson(res: Response): Promise<any> {
 export default function StudioHome() {
   const router = useRouter()
   const [mission, setMission] = useState('')
+  const [missionDomainSelection, setMissionDomainSelection] = useState<MissionDomainSelection>('auto')
   const [projectId, setProjectId] = useState('default')
   const [budgetCap, setBudgetCap] = useState(30)
   const [qualityMode, setQualityMode] = useState<'standard' | 'delivery' | 'studio'>('studio')
@@ -188,6 +240,9 @@ export default function StudioHome() {
   const [error, setError] = useState<string | null>(null)
   const [sessionBootstrapped, setSessionBootstrapped] = useState(false)
   const [fullAccessScope, setFullAccessScope] = useState<FullAccessScope>('workspace')
+  const trimmedMission = useMemo(() => mission.trim(), [mission])
+  const selectedMissionDomain = missionDomainSelection === 'auto' ? undefined : missionDomainSelection
+  const recentAgentRuns = useMemo(() => (session?.agentRuns || []).slice(-6).reverse(), [session?.agentRuns])
 
   const activeGrant = useMemo(
     () =>
@@ -210,6 +265,28 @@ export default function StudioHome() {
     if (mission.trim()) return `# Mission\n\n${mission.trim()}`
     return '# Studio Home\n\nCreate a mission to generate a super plan.'
   }, [selectedTask, mission])
+
+  const taskProgress = useMemo(() => {
+    const tasks = session?.tasks || []
+    const total = tasks.length
+    const done = tasks.filter((task) => task.status === 'done').length
+    const blocked = tasks.filter((task) => task.status === 'blocked').length
+    const failed = tasks.filter((task) => task.status === 'error').length
+    const active = tasks.filter((task) =>
+      task.status === 'planning' || task.status === 'building' || task.status === 'validating'
+    ).length
+    const percent = total > 0 ? Math.round((done / total) * 100) : 0
+    return { total, done, blocked, failed, active, percent }
+  }, [session?.tasks])
+
+  const budgetProgress = useMemo(() => {
+    const cap = Number(session?.cost.budgetCap ?? budgetCap)
+    const used = Number(session?.cost.usedCredits ?? 0)
+    const safeCap = cap > 0 ? cap : 1
+    const percent = Math.max(0, Math.min(100, Math.round((used / safeCap) * 100)))
+    const pressure = percent >= 90 ? 'critical' : percent >= 70 ? 'high' : percent >= 50 ? 'medium' : 'normal'
+    return { percent, pressure }
+  }, [session?.cost.budgetCap, session?.cost.usedCredits, budgetCap])
 
   const loadOps = useCallback(async () => {
     const [walletRes, usageRes] = await Promise.allSettled([
@@ -274,32 +351,42 @@ export default function StudioHome() {
     setFullAccessScope(defaultFullAccessScope(allowedFullAccessScopes))
   }, [activeGrant, allowedFullAccessScopes, fullAccessScope])
 
+  useEffect(() => {
+    if (!session?.missionDomain) return
+    setMissionDomainSelection(session.missionDomain)
+  }, [session?.missionDomain])
+
   const requireSessionId = useCallback(() => {
     if (!session?.id) throw new Error('Start a studio session first.')
     return session.id
   }, [session?.id])
 
+  const startSessionAction = useCallback(async () => {
+    await withAction(async () => {
+      const res = await fetch('/api/studio/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mission: trimmedMission,
+          missionDomain: selectedMissionDomain,
+          projectId,
+          qualityMode,
+          budgetCap,
+        }),
+      })
+      const data = await parseJson(res)
+      if (!res.ok) throw new Error(data.message || data.error || 'Failed to start session.')
+      setSession(data.session as StudioSession)
+      setToast('Studio session started.')
+    })
+  }, [withAction, trimmedMission, selectedMissionDomain, projectId, qualityMode, budgetCap])
+
   const startSession = useCallback(
     async (event: FormEvent) => {
       event.preventDefault()
-      await withAction(async () => {
-        const res = await fetch('/api/studio/session/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mission,
-            projectId,
-            qualityMode,
-            budgetCap,
-          }),
-        })
-        const data = await parseJson(res)
-        if (!res.ok) throw new Error(data.message || data.error || 'Failed to start session.')
-        setSession(data.session as StudioSession)
-        setToast('Studio session started.')
-      })
+      await startSessionAction()
     },
-    [withAction, mission, projectId, qualityMode, budgetCap]
+    [startSessionAction]
   )
 
   const refreshSession = useCallback(
@@ -506,6 +593,106 @@ export default function StudioHome() {
     router.push(`/ide?${params.toString()}`)
   }, [router, session?.projectId, session?.id, projectId, selectedTask?.id])
 
+  const copySessionLink = useCallback(async () => {
+    if (!session?.id) return
+    try {
+      const url = new URL(window.location.href)
+      url.searchParams.set('sessionId', session.id)
+      await navigator.clipboard.writeText(url.toString())
+      setError(null)
+      setToast('Session link copied.')
+    } catch {
+      setError('Failed to copy session link.')
+    }
+  }, [session?.id])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return
+      const key = event.key.toLowerCase()
+      const typing = isTypingTarget(event.target)
+
+      if (key === 'i') {
+        event.preventDefault()
+        openIde()
+        return
+      }
+
+      if (key === 'enter') {
+        if (!trimmedMission || busy || variableUsageBlocked) return
+        if (session?.id) return
+        if (!typing || event.target instanceof HTMLTextAreaElement) {
+          event.preventDefault()
+          void startSessionAction()
+        }
+        return
+      }
+
+      if (typing) return
+
+      if (event.shiftKey && key === 'r') {
+        event.preventDefault()
+        if (
+          session &&
+          session.status === 'active' &&
+          !busy &&
+          !variableUsageBlocked &&
+          session.tasks.length > 0 &&
+          !session.tasks.every((task) => task.status === 'done')
+        ) {
+          void runWave()
+        }
+        return
+      }
+
+      if (event.shiftKey && key === 'p') {
+        event.preventDefault()
+        if (
+          session &&
+          session.status === 'active' &&
+          !busy &&
+          !variableUsageBlocked &&
+          session.tasks.length === 0
+        ) {
+          void createSuperPlan()
+        }
+        return
+      }
+
+      if (key === '.') {
+        event.preventDefault()
+        if (session && session.status === 'active' && !busy) {
+          void stopSession()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [
+    openIde,
+    trimmedMission,
+    busy,
+    variableUsageBlocked,
+    session,
+    startSessionAction,
+    runWave,
+    createSuperPlan,
+    stopSession,
+  ])
+
+  if (!sessionBootstrapped) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-slate-100">
+        <div className="mx-auto flex min-h-screen max-w-[1600px] items-center justify-center px-4 py-4">
+          <div className="rounded border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-slate-300">
+            Restoring Studio Home session...
+          </div>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto max-w-[1600px] px-4 py-4">
@@ -522,11 +709,25 @@ export default function StudioHome() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            {busy && (
+              <span className="rounded border border-blue-500/30 bg-blue-500/10 px-2 py-1 text-[11px] text-blue-200">
+                Running...
+              </span>
+            )}
             <button
               onClick={openIde}
               className="rounded border border-cyan-500/40 bg-cyan-500/15 px-3 py-1.5 text-xs font-medium text-cyan-100 hover:bg-cyan-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
             >
               Open IDE
+            </button>
+            <button
+              onClick={() => {
+                void copySessionLink()
+              }}
+              disabled={!session}
+              className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+            >
+              Copy Session Link
             </button>
             <button
               onClick={() => router.push('/dashboard?legacy=1')}
@@ -550,6 +751,7 @@ export default function StudioHome() {
                   value={mission}
                   onChange={(event) => setMission(event.target.value)}
                   placeholder="Describe mission: what to build, quality target, constraints, and expected output."
+                  required
                   className="h-32 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 />
                 <div className="grid grid-cols-2 gap-2">
@@ -578,6 +780,23 @@ export default function StudioHome() {
                   />
                 </div>
                 <div className="flex items-center gap-2">
+                  <label className="text-xs text-slate-400" htmlFor="mission-domain">
+                    Mission domain
+                  </label>
+                  <select
+                    id="mission-domain"
+                    value={missionDomainSelection}
+                    onChange={(event) => setMissionDomainSelection(event.target.value as MissionDomainSelection)}
+                    className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  >
+                    <option value="auto">auto</option>
+                    <option value="games">games</option>
+                    <option value="films">films</option>
+                    <option value="apps">apps</option>
+                    <option value="general">general</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
                   <label className="text-xs text-slate-400" htmlFor="quality-mode">
                     Quality mode
                   </label>
@@ -592,13 +811,42 @@ export default function StudioHome() {
                     <option value="studio">studio</option>
                   </select>
                 </div>
+                <div className="rounded border border-slate-800 bg-slate-950 px-2 py-2">
+                  <div className="mb-1 text-[11px] text-slate-500">Quick mission presets</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(['games', 'films', 'apps', 'general'] as MissionDomain[]).map((domain) => (
+                      <button
+                        key={domain}
+                        type="button"
+                        onClick={() => {
+                          setMissionDomainSelection(domain)
+                          if (!trimmedMission) setMission(domainTemplate(domain))
+                        }}
+                        className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      >
+                        {missionDomainLabel(domain)}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-2 text-[11px] text-slate-500">
+                    Domain strategy: {missionDomainLabel(missionDomainSelection)}.{' '}
+                    {missionDomainSelection === 'auto'
+                      ? 'The backend infers domain from mission text.'
+                      : 'Domain is locked for this session to keep checklist and validation aligned.'}
+                  </div>
+                </div>
                 <button
                   type="submit"
-                  disabled={busy || variableUsageBlocked}
+                  disabled={busy || variableUsageBlocked || !trimmedMission}
                   className="w-full rounded border border-blue-500/40 bg-blue-500/20 px-3 py-2 text-xs font-semibold text-blue-100 hover:bg-blue-500/30 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Start Studio Session
                 </button>
+                <div className="rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
+                  Shortcuts: <code>Ctrl/Cmd+Enter</code> start session, <code>Ctrl/Cmd+Shift+P</code> super plan,{' '}
+                  <code>Ctrl/Cmd+Shift+R</code> run wave, <code>Ctrl/Cmd+.</code> stop, <code>Ctrl/Cmd+I</code> open
+                  IDE.
+                </div>
               </form>
               {session?.missionDomain && (
                 <div className="mt-3 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-300">
@@ -648,6 +896,24 @@ export default function StudioHome() {
                   </button>
                 </div>
               </div>
+              {taskProgress.total > 0 && (
+                <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1.5 text-[11px] text-slate-400">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span>
+                      Progress: {taskProgress.done}/{taskProgress.total} ({taskProgress.percent}%)
+                    </span>
+                    <span>
+                      active {taskProgress.active} | blocked {taskProgress.blocked} | failed {taskProgress.failed}
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded bg-slate-800">
+                    <div
+                      className="h-full bg-sky-500 transition-all"
+                      style={{ width: `${taskProgress.percent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
               {session?.tasks.length ? (
                 <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-400">
                   Super plan already created for this session. Complete or stop this session before opening a new plan.
@@ -677,7 +943,8 @@ export default function StudioHome() {
                       <div className="text-[10px] uppercase tracking-wide">{task.status}</div>
                     </div>
                     <div className="mt-1 text-[11px] text-slate-300">
-                      {roleLabel(task.ownerRole)} | {task.estimateCredits} credits | {task.estimateSeconds}s
+                      {roleLabel(task.ownerRole)} | {task.estimateCredits} credits | {task.estimateSeconds}s | verdict:{' '}
+                      {task.validationVerdict}
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       <button
@@ -754,6 +1021,34 @@ export default function StudioHome() {
                     Session messages will appear here.
                   </div>
                 )}
+              </div>
+              <div className="mt-3 rounded border border-slate-800 bg-slate-950 px-2 py-2">
+                <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  Agent Runs
+                </div>
+                <div className="space-y-1">
+                  {recentAgentRuns.map((run) => (
+                    <div
+                      key={run.id}
+                      className={`rounded border px-2 py-1 text-[11px] ${runStatusTone(run.status)}`}
+                    >
+                      <div className="flex items-center justify-between gap-2 text-slate-100">
+                        <span>
+                          {roleLabel(run.role)} · {run.model}
+                        </span>
+                        <span>{run.latencyMs}ms</span>
+                      </div>
+                      <div className="text-slate-300">
+                        tokens {run.tokensIn}/{run.tokensOut} · cost {run.cost}
+                      </div>
+                    </div>
+                  ))}
+                  {recentAgentRuns.length === 0 && (
+                    <div className="rounded border border-slate-800 bg-slate-900 px-2 py-1 text-[11px] text-slate-500">
+                      No agent runs yet.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -836,6 +1131,39 @@ export default function StudioHome() {
                   </div>
                 </div>
               </div>
+              <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-2 py-1.5 text-[11px] text-slate-400">
+                <div className="mb-1 flex items-center justify-between">
+                  <span>Budget usage: {budgetProgress.percent}%</span>
+                  <span>
+                    {budgetProgress.pressure === 'critical'
+                      ? 'critical'
+                      : budgetProgress.pressure === 'high'
+                        ? 'high'
+                        : budgetProgress.pressure === 'medium'
+                          ? 'medium'
+                          : 'normal'}
+                  </span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded bg-slate-800">
+                  <div
+                    className={`h-full transition-all ${
+                      budgetProgress.pressure === 'critical'
+                        ? 'bg-rose-500'
+                        : budgetProgress.pressure === 'high'
+                          ? 'bg-amber-500'
+                          : budgetProgress.pressure === 'medium'
+                            ? 'bg-yellow-500'
+                            : 'bg-emerald-500'
+                    }`}
+                    style={{ width: `${budgetProgress.percent}%` }}
+                  />
+                </div>
+              </div>
+              {budgetProgress.pressure === 'critical' && (
+                <div className="mt-2 rounded border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-100">
+                  Budget is almost exhausted. Finish validation/apply now or stop session to prevent forced blocking.
+                </div>
+              )}
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   disabled={!session || busy || session.status !== 'active'}

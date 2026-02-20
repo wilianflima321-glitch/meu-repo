@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 type Body = {
   projectId?: string
   mission?: string
+  missionDomain?: 'games' | 'films' | 'apps' | 'general'
   qualityMode?: 'standard' | 'delivery' | 'studio'
   budgetCap?: number
 }
@@ -33,6 +34,14 @@ function sanitizeQualityMode(value: unknown): 'standard' | 'delivery' | 'studio'
   return 'studio'
 }
 
+function sanitizeMissionDomain(value: unknown): 'games' | 'films' | 'apps' | 'general' | undefined {
+  const domain = String(value || '').trim().toLowerCase()
+  if (domain === 'games' || domain === 'films' || domain === 'apps' || domain === 'general') {
+    return domain
+  }
+  return undefined
+}
+
 function sanitizeBudgetCap(value: unknown): number {
   const n = Number(value)
   if (!Number.isFinite(n)) return 30
@@ -56,6 +65,7 @@ export async function POST(req: NextRequest) {
       userId: auth.userId,
       projectId: sanitizeProjectId(body.projectId),
       mission: sanitizeMission(body.mission),
+      missionDomain: sanitizeMissionDomain(body.missionDomain),
       qualityMode: sanitizeQualityMode(body.qualityMode),
       budgetCap: sanitizeBudgetCap(body.budgetCap),
     })

@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 
-interface ParticleSystemState {
+export interface ParticleSystemState {
   id: string;
   name: string;
   emitters: EmitterConfig[];
@@ -13,7 +13,7 @@ interface ParticleSystemState {
   looping: boolean;
 }
 
-interface EmitterConfig {
+export interface EmitterConfig {
   id: string;
   name: string;
   enabled: boolean;
@@ -58,23 +58,23 @@ interface EmitterConfig {
   sortMode: 'none' | 'byDistance' | 'byAge';
 }
 
-interface VelocityCurve {
+export interface VelocityCurve {
   time: number;
   multiplier: number;
 }
 
-interface SizeCurve {
+export interface SizeCurve {
   time: number;
   size: number;
 }
 
-interface ColorGradient {
+export interface ColorGradient {
   time: number;
   color: THREE.Color;
   alpha: number;
 }
 
-interface Particle {
+export interface Particle {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
   age: number;

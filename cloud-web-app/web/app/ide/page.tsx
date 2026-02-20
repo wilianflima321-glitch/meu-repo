@@ -431,6 +431,7 @@ function IDEPageInner() {
   const startupEntry = (searchParams.get('entry')?.trim().toLowerCase() || null) as WorkbenchEntry | null
   const startupSessionId = searchParams.get('sessionId')?.trim() || null
   const startupTaskId = searchParams.get('taskId')?.trim() || null
+  const [showContextBanner, setShowContextBanner] = useState(true)
   const startupFileHandledRef = useRef(false)
   const startupEntryHandledRef = useRef(false)
   const startupSessionHandledRef = useRef(false)
@@ -920,6 +921,20 @@ function IDEPageInner() {
     setPreviewKey((key) => key + 1)
   }, [])
 
+  const contextBannerMessage = useMemo(() => {
+    const parts: string[] = []
+    if (startupEntry) parts.push(`entry: ${startupEntry}`)
+    if (startupSessionId) parts.push(`studio session: ${startupSessionId.slice(0, 8)}`)
+    if (startupTaskId) parts.push(`task: ${startupTaskId.slice(0, 8)}`)
+    return parts.length > 0 ? parts.join(' | ') : null
+  }, [startupEntry, startupSessionId, startupTaskId])
+
+  useEffect(() => {
+    if (!showContextBanner || !contextBannerMessage) return
+    const timeout = window.setTimeout(() => setShowContextBanner(false), 12000)
+    return () => window.clearTimeout(timeout)
+  }, [showContextBanner, contextBannerMessage])
+
   const statusNode = (
     <span>
       {statusMessage ||
@@ -1037,6 +1052,19 @@ function IDEPageInner() {
         }
       >
         <div className="relative h-full flex flex-col">
+          {showContextBanner && contextBannerMessage ? (
+            <div className="flex items-center justify-between gap-2 border-b border-cyan-500/25 bg-cyan-500/10 px-3 py-1.5 text-[11px] text-cyan-100">
+              <span>{contextBannerMessage}</span>
+              <button
+                type="button"
+                onClick={() => setShowContextBanner(false)}
+                className="rounded border border-cyan-500/30 px-2 py-0.5 text-[10px] text-cyan-100 hover:bg-cyan-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                aria-label="Dismiss handoff context banner"
+              >
+                Dismiss
+              </button>
+            </div>
+          ) : null}
           <TabBar />
           <div className="flex-1 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
             <div className="min-w-0 border-r border-slate-800">

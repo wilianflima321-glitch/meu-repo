@@ -6,6 +6,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { consumeRollbackSnapshot, getRollbackSnapshot } from '@/lib/server/change-apply-runtime'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   resolveScopedWorkspacePath,
   toVirtualWorkspacePath,

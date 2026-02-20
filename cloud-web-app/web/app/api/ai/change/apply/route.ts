@@ -7,6 +7,7 @@ import { validateAiChange } from '@/lib/server/change-validation'
 import { createRollbackSnapshot } from '@/lib/server/change-apply-runtime'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,

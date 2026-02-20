@@ -16,7 +16,7 @@
  * - Account
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef, type ChangeEvent } from 'react'
 import {
   Settings,
   Code,
@@ -191,7 +191,9 @@ function SettingToggle({ setting, value, onChange }: SettingInputProps) {
       onClick={() => onChange(!value)}
       className={`relative w-11 h-6 rounded-full transition-colors ${
         value ? 'bg-sky-600' : 'bg-slate-600'
-      }`}
+      } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}
+      aria-label={setting.label}
+      aria-pressed={Boolean(value)}
     >
       <span
         className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -207,7 +209,8 @@ function SettingSelect({ setting, value, onChange }: SettingInputProps) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[200px]"
+      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[200px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+      aria-label={setting.label}
     >
       {setting.options?.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -227,7 +230,8 @@ function SettingNumber({ setting, value, onChange }: SettingInputProps) {
       min={setting.min}
       max={setting.max}
       step={setting.step || 1}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white w-24"
+      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white w-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+      aria-label={setting.label}
     />
   )
 }
@@ -238,7 +242,8 @@ function SettingText({ setting, value, onChange }: SettingInputProps) {
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[300px]"
+      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[300px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+      aria-label={setting.label}
     />
   )
 }
@@ -253,7 +258,8 @@ function SettingSlider({ setting, value, onChange }: SettingInputProps) {
         min={setting.min}
         max={setting.max}
         step={setting.step || 1}
-        className="w-32 accent-sky-500"
+        className="w-32 accent-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+        aria-label={setting.label}
       />
       <span className="text-sm text-slate-400 w-12">{value}</span>
     </div>
@@ -326,7 +332,17 @@ export default function SettingsPage() {
   const [selectedCategory, setSelectedCategory] = useState('editor')
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
+  const importInputRef = useRef<HTMLInputElement | null>(null)
   
+  const notify = useCallback((message: string) => {
+    setStatusMessage(message)
+    window.setTimeout(() => {
+      setStatusMessage((current) => (current === message ? null : current))
+    }, 2400)
+  }, [])
+
   // Load settings from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('aethel-settings')
@@ -342,7 +358,8 @@ export default function SettingsPage() {
   // Save settings
   const saveSettings = useCallback(() => {
     localStorage.setItem('aethel-settings', JSON.stringify(settings))
-  }, [settings])
+    notify('Settings saved.')
+  }, [settings, notify])
   
   // Update setting
   const updateSetting = useCallback((id: string, value: any) => {
@@ -366,7 +383,45 @@ export default function SettingsPage() {
   const resetAllSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS)
     localStorage.setItem('aethel-settings', JSON.stringify(DEFAULT_SETTINGS))
-  }, [])
+    notify('All settings reset to defaults.')
+  }, [notify])
+
+  const importSettings = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result || '{}'))
+        const next = { ...DEFAULT_SETTINGS, ...(parsed || {}) }
+        setSettings(next)
+        localStorage.setItem('aethel-settings', JSON.stringify(next))
+        notify('Settings imported.')
+      } catch {
+        notify('Invalid settings file.')
+      } finally {
+        event.target.value = ''
+      }
+    }
+    reader.readAsText(file)
+  }, [notify])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey)) return
+      const key = event.key.toLowerCase()
+      if (key === 'f') {
+        event.preventDefault()
+        searchInputRef.current?.focus()
+      }
+      if (key === 's') {
+        event.preventDefault()
+        saveSettings()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [saveSettings])
   
   // Filter settings by category and search
   const filteredSettings = useMemo(() => {
@@ -408,12 +463,23 @@ export default function SettingsPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search settings..."
-              className="w-full bg-slate-800 border border-slate-700 rounded pl-9 pr-3 py-2 text-sm text-white placeholder:text-slate-500"
+              className="w-full bg-slate-800 border border-slate-700 rounded pl-9 pr-10 py-2 text-sm text-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              aria-label="Search settings"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
         
@@ -431,7 +497,7 @@ export default function SettingsPage() {
                   selectedCategory === category.id && !selectedSubcategory
                     ? 'bg-sky-600/20 text-sky-400'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                }`}
+                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}
               >
                 {category.icon}
                 <span className="text-sm">{category.label}</span>
@@ -448,7 +514,7 @@ export default function SettingsPage() {
                         selectedSubcategory === sub.id
                           ? 'text-sky-400'
                           : 'text-slate-500 hover:text-white'
-                      }`}
+                      } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}
                     >
                       {sub.label}
                     </button>
@@ -467,7 +533,7 @@ export default function SettingsPage() {
           <div className="flex gap-2">
             <button
               onClick={resetAllSettings}
-              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs"
+              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               <RotateCcw className="w-3 h-3" />
               Reset All
@@ -481,12 +547,30 @@ export default function SettingsPage() {
                 a.href = url
                 a.download = 'aethel-settings.json'
                 a.click()
+                URL.revokeObjectURL(url)
+                notify('Settings exported.')
               }}
-              className="p-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded"
+              className="p-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
               title="Export settings"
+              aria-label="Export settings"
             >
               <Download className="w-3 h-3" />
             </button>
+            <button
+              onClick={() => importInputRef.current?.click()}
+              className="p-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              title="Import settings"
+              aria-label="Import settings"
+            >
+              <Upload className="w-3 h-3" />
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={importSettings}
+            />
           </div>
         </div>
       </div>
@@ -505,9 +589,14 @@ export default function SettingsPage() {
             </p>
           )}
           {searchQuery && (
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1" role="status" aria-live="polite">
               {filteredSettings.length} results for {`"${searchQuery}"`}
             </p>
+          )}
+          {statusMessage && (
+            <div className="mt-2 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-200" role="status" aria-live="polite">
+              {statusMessage}
+            </div>
           )}
         </div>
         

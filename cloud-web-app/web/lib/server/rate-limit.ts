@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Ratelimit } from '@upstash/ratelimit'
+import { Ratelimit, type Duration } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 
 type RateLimitEntry = {
@@ -59,11 +59,11 @@ function getRedisClient(): Redis | null {
   return globalRef[REDIS_KEY] as Redis
 }
 
-function windowToDuration(windowMs: number): string {
+function windowToDuration(windowMs: number): Duration {
   const seconds = Math.max(1, Math.ceil(windowMs / 1000))
-  if (seconds % 3600 === 0) return `${seconds / 3600} h`
-  if (seconds % 60 === 0) return `${seconds / 60} m`
-  return `${seconds} s`
+  if (seconds % 3600 === 0) return `${seconds / 3600} h` as Duration
+  if (seconds % 60 === 0) return `${seconds / 60} m` as Duration
+  return `${seconds} s` as Duration
 }
 
 function getUpstashLimiter(scope: string, max: number, windowMs: number): Ratelimit | null {

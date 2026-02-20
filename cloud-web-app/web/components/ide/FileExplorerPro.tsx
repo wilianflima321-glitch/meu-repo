@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import Codicon, { type CodiconName } from './Codicon'
 
 // ============= Types =============
@@ -96,6 +96,7 @@ interface FileTreeNodeProps {
   depth: number
   selectedFile: string | null
   expandedFolders: Set<string>
+  forceExpanded?: boolean
   onSelect: (file: FileNode) => void
   onToggle: (folderId: string) => void
   onContextMenu: (e: React.MouseEvent, file: FileNode) => void
@@ -106,12 +107,13 @@ function FileTreeNode({
   depth,
   selectedFile,
   expandedFolders,
+  forceExpanded = false,
   onSelect,
   onToggle,
   onContextMenu,
 }: FileTreeNodeProps) {
   const isFolder = node.type === 'folder'
-  const isExpanded = expandedFolders.has(node.id)
+  const isExpanded = forceExpanded || expandedFolders.has(node.id)
   const isSelected = selectedFile === node.id
   const fileIcon = getFileIcon(node.name, isExpanded)
   const nodeIcon = isFolder
@@ -123,6 +125,9 @@ function FileTreeNode({
       <button
         onClick={() => isFolder ? onToggle(node.id) : onSelect(node)}
         onContextMenu={(e) => onContextMenu(e, node)}
+        aria-expanded={isFolder ? isExpanded : undefined}
+        aria-selected={isSelected}
+        role="treeitem"
         className={`
           w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
           hover:bg-white/5 active:bg-white/10 transition-colors
@@ -164,6 +169,7 @@ function FileTreeNode({
               depth={depth + 1}
               selectedFile={selectedFile}
               expandedFolders={expandedFolders}
+              forceExpanded={forceExpanded}
               onSelect={onSelect}
               onToggle={onToggle}
               onContextMenu={onContextMenu}
@@ -210,6 +216,8 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
       <div
         className="fixed z-50 min-w-48 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl"
         style={{ left: x, top: y }}
+        role="menu"
+        aria-label={`File actions for ${file.name}`}
       >
         {menuItems.map((item, i) => (
           item.divider ? (
@@ -221,6 +229,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
                 onAction(item.id!)
                 onClose()
               }}
+              role="menuitem"
               className={`
                 w-full flex items-center gap-2 px-3 py-1.5 text-xs
                 ${item.danger ? 'text-red-400 hover:bg-red-500/20' : 'text-slate-300 hover:bg-slate-700'}
@@ -262,6 +271,8 @@ export default function FileExplorerPro({
     y: number
     file: FileNode
   } | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
 
   const usingExternalFiles = Array.isArray(files)
   const resolvedFiles = files ?? internalFiles
@@ -303,6 +314,47 @@ export default function FileExplorerPro({
       fetchWorkspaceTree()
     }
   }, [files, fetchWorkspaceTree])
+
+  useEffect(() => {
+    if (!showSearch) return
+    searchInputRef.current?.focus()
+  }, [showSearch])
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      const withinExplorer =
+        containerRef.current &&
+        event.target instanceof Node &&
+        containerRef.current.contains(event.target)
+
+      if (event.key === 'Escape') {
+        if (contextMenu) {
+          event.preventDefault()
+          setContextMenu(null)
+          return
+        }
+        if (showSearch && withinExplorer) {
+          event.preventDefault()
+          if (searchQuery.trim()) {
+            setSearchQuery('')
+          } else {
+            setShowSearch(false)
+          }
+        }
+        return
+      }
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return
+      if (event.key.toLowerCase() === 'f') {
+        if (!withinExplorer) return
+        event.preventDefault()
+        setShowSearch(true)
+        requestAnimationFrame(() => searchInputRef.current?.focus())
+      }
+    }
+
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [showSearch, searchQuery, contextMenu])
 
   // Toggle folder expansion
   const toggleFolder = useCallback((folderId: string) => {
@@ -382,7 +434,12 @@ export default function FileExplorerPro({
   }, [resolvedFiles, searchQuery])
 
   return (
-    <div className={`h-full flex flex-col ${className}`}>
+    <div
+      ref={containerRef}
+      className={`h-full flex flex-col ${className}`}
+      tabIndex={0}
+      aria-label="File explorer"
+    >
       {/* Header */}
       <div className="density-header flex items-center justify-between px-2 border-b border-slate-800">
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
@@ -393,6 +450,8 @@ export default function FileExplorerPro({
             onClick={() => setShowSearch(!showSearch)}
             className={`p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${showSearch ? 'text-blue-300' : 'text-slate-400'}`}
             title="Search Files"
+            aria-label="Search files"
+            aria-pressed={showSearch}
           >
             <Codicon name="search" />
           </button>
@@ -400,6 +459,7 @@ export default function FileExplorerPro({
             onClick={() => onFileCreate?.('/', 'file')}
             className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="New File"
+            aria-label="Create new file"
           >
             <Codicon name="new-file" />
           </button>
@@ -407,6 +467,7 @@ export default function FileExplorerPro({
             onClick={() => onFileCreate?.('/', 'folder')}
             className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="New Folder"
+            aria-label="Create new folder"
           >
             <Codicon name="new-folder" />
           </button>
@@ -414,6 +475,7 @@ export default function FileExplorerPro({
             onClick={handleRefresh}
             className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="Refresh"
+            aria-label="Refresh file tree"
           >
             <Codicon name="refresh" />
           </button>
@@ -426,19 +488,31 @@ export default function FileExplorerPro({
           <div className="relative">
             <Codicon name="search" className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search files..."
+              aria-label="Search files in workspace"
               className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-              autoFocus
             />
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                aria-label="Clear search"
+                title="Clear search"
+              >
+                <Codicon name="x" />
+              </button>
+            ) : null}
           </div>
         </div>
       )}
 
       {/* File Tree */}
-      <div className="flex-1 overflow-y-auto py-1">
+      <div className="flex-1 overflow-y-auto py-1" role="tree" aria-label="Workspace files">
         {effectiveError && (
           <div className="px-3 py-2 text-xs text-red-400">
             {effectiveError}
@@ -458,6 +532,7 @@ export default function FileExplorerPro({
             depth={0}
             selectedFile={selectedFile}
             expandedFolders={expandedFolders}
+            forceExpanded={Boolean(searchQuery)}
             onSelect={handleSelect}
             onToggle={toggleFolder}
             onContextMenu={handleContextMenu}

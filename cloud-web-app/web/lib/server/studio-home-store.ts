@@ -568,6 +568,7 @@ export async function createStudioSession(params: {
   mission: string
   qualityMode: StudioQualityMode
   budgetCap: number
+  missionDomain?: StudioMissionDomain
 }): Promise<StudioSession> {
   const created = await prisma.copilotWorkflow.create({
     data: {
@@ -587,7 +588,7 @@ export async function createStudioSession(params: {
     projectId: params.projectId,
     createdAt: created.createdAt.toISOString(),
   })
-  const missionDomain = inferMissionDomain(params.mission)
+  const missionDomain = normalizeMissionDomain(params.missionDomain, params.mission)
   const checklist = buildDomainChecklist(missionDomain)
 
   session = {
@@ -915,13 +916,14 @@ export async function runStudioWave(
   executedTaskIds: string[]
   blockedTaskIds: string[]
 }> {
-  let session = await getStudioSession(userId, sessionId)
+  const session = await getStudioSession(userId, sessionId)
   if (!session) {
     return { session: null, executedTaskIds: [], blockedTaskIds: [] }
   }
   if (session.status !== 'active') {
     return { session, executedTaskIds: [], blockedTaskIds: [] }
   }
+  let activeSession: StudioSession = session
 
   const maxSteps = Math.max(1, Math.min(3, Math.floor(options?.maxSteps ?? 3)))
   const roleOrder: StudioTaskOwnerRole[] = ['planner', 'coder', 'reviewer']
@@ -930,8 +932,8 @@ export async function runStudioWave(
 
   for (const role of roleOrder) {
     if (executedTaskIds.length + blockedTaskIds.length >= maxSteps) break
-    const candidate = session.tasks.find(
-      (task) => task.ownerRole === role && canRunTaskWithDependencies(task, session.tasks)
+    const candidate = activeSession.tasks.find(
+      (task) => task.ownerRole === role && canRunTaskWithDependencies(task, activeSession.tasks)
     )
     if (!candidate) continue
 
@@ -943,11 +945,11 @@ export async function runStudioWave(
     } else if (updatedTask?.status === 'blocked' || updatedTask?.status === 'error') {
       blockedTaskIds.push(candidate.id)
     }
-    session = next
-    if (session.status !== 'active') break
+    activeSession = next
+    if (activeSession.status !== 'active') break
   }
 
-  return { session, executedTaskIds, blockedTaskIds }
+  return { session: activeSession, executedTaskIds, blockedTaskIds }
 }
 
 export async function validateStudioTask(userId: string, sessionId: string, taskId: string): Promise<StudioSession | null> {

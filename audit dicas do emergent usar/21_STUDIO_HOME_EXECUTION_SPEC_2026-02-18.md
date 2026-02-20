@@ -145,3 +145,5 @@ Mandatory before completion:
 43. Integrated profiler shared contracts were split into `profiler-integrated-types.ts`, reducing oversized debt baseline and tightening limit to `oversizedFiles <= 40`.
 44. Save manager/settings runtime/advanced particle shared contracts and settings-page static config were split into dedicated modules (`save-manager-types.ts`, `settings-types.ts`, `advanced-particle-types.ts`, `settings-page-config.ts`), reducing oversized debt baseline and tightening limit to `oversizedFiles <= 36`.
 45. Replay/Niagara shared contracts and default graph/config surfaces were split into dedicated modules (`replay-types.ts`, `replay-input-serializer.ts`, `niagara-vfx-types.ts`, `niagara-vfx-defaults.ts`), reducing oversized debt baseline and tightening limit to `oversizedFiles <= 34`.
+46. Studio session start now accepts an optional `missionDomain` override (`games|films|apps|general`) to lock checklist/governance when auto-inference is not desired.
+47. Studio Home now surfaces recent per-agent execution telemetry (model, latency, token counts, cost) and a budget-pressure progress bar to keep cost decisions visible during session runtime.
