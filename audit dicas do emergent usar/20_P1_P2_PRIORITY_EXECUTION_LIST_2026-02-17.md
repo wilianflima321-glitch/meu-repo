@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`9`) to next threshold gate (`<=8`).
+2. Continue oversized module decomposition from current baseline (`7`) to next threshold gate (`<=6`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -256,3 +256,9 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 21. Reduced oversized source baseline from `10` to `9` via Level Editor panel decomposition:
 - `components/engine/LevelEditorPanels.tsx`
 - `components/engine/LevelEditor.tsx` runtime/panel concern separation
+22. Reduced oversized source baseline from `9` to `8` via Fluid Simulation Editor panel decomposition:
+- `components/physics/FluidSimulationEditorPanels.tsx`
+- `components/physics/FluidSimulationEditor.tsx` runtime/panel concern separation
+23. Reduced oversized source baseline from `8` to `7` via Quest renderer decomposition:
+- `lib/quest-mission-renderers.ts`
+- `lib/quest-mission-system.ts` runtime/renderer concern separation

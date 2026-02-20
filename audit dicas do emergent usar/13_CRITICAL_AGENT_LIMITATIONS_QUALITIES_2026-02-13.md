@@ -1622,3 +1622,25 @@ Critical reading:
 1. Oversized baseline dropped from `10` to `9`.
 2. One more high-frequency editor surface is now below oversized threshold, reducing maintenance blast radius.
 3. Remaining oversized debt is concentrated in dashboard/media/audio/physics/render and AI behavior monoliths.
+
+## Delta 2026-02-20 CII - Fluid Simulation Editor decomposition to 8 oversized files
+Implemented:
+1. Extracted fluid editor panel/viewport helper components into `components/physics/FluidSimulationEditorPanels.tsx`.
+2. Updated `components/physics/FluidSimulationEditor.tsx` to retain runtime simulation orchestration and import extracted surfaces.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `9` to `8` (threshold reached).
+2. Fluid authoring path now has cleaner runtime/UI boundaries with lower maintenance risk.
+3. Remaining oversized debt is concentrated in highest-coupling product monoliths (`AethelDashboard`, media/video, audio/physics/render, AI behavior runtime).
+
+## Delta 2026-02-20 CIII - Quest system renderer decomposition to 7 oversized files
+Implemented:
+1. Extracted quest UI/marker renderer classes into `lib/quest-mission-renderers.ts`.
+2. Updated `lib/quest-mission-system.ts` to keep quest runtime orchestration and import extracted renderer classes.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `8` to `7`.
+2. Quest runtime and rendering responsibilities are now separated with compatibility factories preserved.
+3. Residual oversized debt is now concentrated in 7 highest-coupling orchestration modules.

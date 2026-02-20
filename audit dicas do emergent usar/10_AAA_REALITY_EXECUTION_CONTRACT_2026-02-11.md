@@ -3911,3 +3911,41 @@ Validation snapshot:
 Decision lock:
 1. Keep level editor behavior stable while continuing modular extraction.
 2. Residual oversized targets remain top monoliths (`AethelDashboard`, media/video, audio/physics/render graph, AI behavior runtime).
+
+## 153) Delta 2026-02-20 CVII - Fluid Simulation Editor decomposition reached <=8 oversized threshold
+
+Implemented:
+1. Split Fluid Simulation Editor panel/viewport helper components to:
+- `cloud-web-app/web/components/physics/FluidSimulationEditorPanels.tsx`
+2. Updated `cloud-web-app/web/components/physics/FluidSimulationEditor.tsx` to keep simulation runtime/editor orchestration and consume extracted panel/viewport helpers.
+3. Preserved existing editor contracts and UI behavior surface (`Slider`, `Toolbar`, `SimulationStats`, `FluidParticles3D`, `BoundaryBox`, `FlowArrows`).
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `9` to `8` (threshold reached).
+3. `cloud-web-app/web/components/physics/FluidSimulationEditor.tsx` reduced to `1081` lines.
+
+Decision lock:
+1. Keep fluid editor behavior stable while preserving new module boundaries.
+2. Next extractions should target remaining monoliths by product-path criticality (`AethelDashboard`, media/video, core audio/physics/render/AI runtime).
+
+## 154) Delta 2026-02-20 CVIII - Quest system renderer decomposition reached 7 oversized files
+
+Implemented:
+1. Split quest rendering surfaces into:
+- `cloud-web-app/web/lib/quest-mission-renderers.ts`
+2. Updated `cloud-web-app/web/lib/quest-mission-system.ts` to keep quest runtime/state machine orchestration and import renderer classes.
+3. Preserved factory API compatibility:
+- `createQuestUI(...)`
+- `createQuestMarkerRenderer(...)`
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `8` to `7`.
+3. `cloud-web-app/web/lib/quest-mission-system.ts` reduced to `1015` lines.
+
+Decision lock:
+1. Keep quest runtime behavior stable while separating renderer responsibilities.
+2. Remaining oversized targets are now strongly concentrated in top orchestration monoliths (`AethelDashboard`, media/video, ai-audio, fluid runtime, vfx graph, AI behavior runtime).

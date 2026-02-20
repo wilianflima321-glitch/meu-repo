@@ -1643,3 +1643,25 @@ Triaged impact:
 1. Oversized source count reduced `10 -> 9`.
 2. Level editor is no longer in oversized backlog, reducing risk in a critical authoring path.
 3. Remaining backlog is concentrated in large dashboard/media/audio/physics/render/AI runtime modules.
+
+## Delta 2026-02-20 CIII - Fluid Simulation Editor decomposition wave
+Delivered:
+1. Split fluid editor panel/viewport helper surfaces into `components/physics/FluidSimulationEditorPanels.tsx`.
+2. Updated `components/physics/FluidSimulationEditor.tsx` to keep simulation runtime orchestration and import extracted helper surfaces.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `9 -> 8` (threshold reached).
+2. Fluid editor path now has explicit runtime/UI boundaries.
+3. Residual oversized backlog is constrained to 8 monoliths with clear targeting order.
+
+## Delta 2026-02-20 CIV - Quest renderer decomposition wave
+Delivered:
+1. Split quest UI + marker renderer classes into `lib/quest-mission-renderers.ts`.
+2. Updated `lib/quest-mission-system.ts` to keep quest runtime/state machine surface and import extracted renderer classes.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `8 -> 7`.
+2. Quest runtime path now has explicit separation between progression logic and rendering.
+3. Remaining oversized backlog is now constrained to 7 monoliths.
