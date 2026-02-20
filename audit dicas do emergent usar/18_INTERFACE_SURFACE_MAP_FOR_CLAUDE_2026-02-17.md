@@ -20,6 +20,9 @@ Non-negotiable:
 5. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
 6. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
 7. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
+8. Global settings workspace route: `cloud-web-app/web/app/settings/page.tsx`
+9. Project settings route: `cloud-web-app/web/app/project-settings/page.tsx`
+10. Canonical settings surface: `cloud-web-app/web/components/settings/SettingsPage.tsx`
 
 ## 2. IDE UI Surfaces (Primary)
 ### 2.1 Left/center/bottom shell blocks

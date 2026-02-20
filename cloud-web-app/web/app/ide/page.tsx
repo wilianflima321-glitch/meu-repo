@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import IDELayout from '@/components/ide/IDELayout'
 import FileExplorerPro from '@/components/ide/FileExplorerPro'
@@ -414,6 +414,7 @@ async function fsRequest(payload: Record<string, unknown>, projectId: string) {
 }
 
 function IDEPageInner() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const queryProjectId = searchParams.get('projectId')
   const { tabs, activeTabId, openTab, closeTab, markTabDirty } = useTabBar()
@@ -1005,7 +1006,7 @@ function IDEPageInner() {
       onToggleTerminal={() => window.dispatchEvent(new Event('aethel.layout.toggleTerminal'))}
       onAIChat={() => window.dispatchEvent(new Event('aethel.layout.toggleAI'))}
       onRollbackLastAIPatch={() => window.dispatchEvent(new Event('aethel.editor.rollbackInlinePatch'))}
-      onOpenSettings={() => pushMessage('Global IDE settings are managed under Admin > IDE Settings.')}
+      onOpenSettings={() => router.push('/settings')}
     >
       <IDELayout
         fileExplorer={
@@ -1050,6 +1051,7 @@ function IDEPageInner() {
         onCommandPalette={() =>
           window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode: 'commands' } }))
         }
+        onSettings={() => router.push('/settings')}
       >
         <div className="relative h-full flex flex-col">
           {showContextBanner && contextBannerMessage ? (

@@ -618,6 +618,12 @@ export default function StudioHome() {
         return
       }
 
+      if (key === ',') {
+        event.preventDefault()
+        router.push('/settings')
+        return
+      }
+
       if (key === 'enter') {
         if (!trimmedMission || busy || variableUsageBlocked) return
         if (session?.id) return
@@ -670,6 +676,7 @@ export default function StudioHome() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [
+    router,
     openIde,
     trimmedMission,
     busy,
@@ -719,6 +726,20 @@ export default function StudioHome() {
               className="rounded border border-cyan-500/40 bg-cyan-500/15 px-3 py-1.5 text-xs font-medium text-cyan-100 hover:bg-cyan-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
             >
               Open IDE
+            </button>
+            <button
+              onClick={() => router.push('/settings')}
+              className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+            >
+              Settings
+            </button>
+            <button
+              onClick={() =>
+                router.push(`/project-settings?projectId=${encodeURIComponent(session?.projectId || projectId || 'default')}`)
+              }
+              className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+            >
+              Project Settings
             </button>
             <button
               onClick={() => {
@@ -845,7 +866,7 @@ export default function StudioHome() {
                 <div className="rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
                   Shortcuts: <code>Ctrl/Cmd+Enter</code> start session, <code>Ctrl/Cmd+Shift+P</code> super plan,{' '}
                   <code>Ctrl/Cmd+Shift+R</code> run wave, <code>Ctrl/Cmd+.</code> stop, <code>Ctrl/Cmd+I</code> open
-                  IDE.
+                  IDE, <code>Ctrl/Cmd+,</code> settings.
                 </div>
               </form>
               {session?.missionDomain && (

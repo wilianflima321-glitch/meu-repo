@@ -147,3 +147,4 @@ Mandatory before completion:
 45. Replay/Niagara shared contracts and default graph/config surfaces were split into dedicated modules (`replay-types.ts`, `replay-input-serializer.ts`, `niagara-vfx-types.ts`, `niagara-vfx-defaults.ts`), reducing oversized debt baseline and tightening limit to `oversizedFiles <= 34`.
 46. Studio session start now accepts an optional `missionDomain` override (`games|films|apps|general`) to lock checklist/governance when auto-inference is not desired.
 47. Studio Home now surfaces recent per-agent execution telemetry (model, latency, token counts, cost) and a budget-pressure progress bar to keep cost decisions visible during session runtime.
+48. Settings information architecture is now explicit: `/settings` for global preferences and `/project-settings` for project-scoped runtime controls, both linked from Studio Home and IDE surfaces.
