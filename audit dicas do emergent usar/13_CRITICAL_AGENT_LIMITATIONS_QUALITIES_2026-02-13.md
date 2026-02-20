@@ -1644,3 +1644,25 @@ Critical reading:
 1. Oversized baseline dropped from `8` to `7`.
 2. Quest runtime and rendering responsibilities are now separated with compatibility factories preserved.
 3. Residual oversized debt is now concentrated in 7 highest-coupling orchestration modules.
+
+## Delta 2026-02-20 CIV - Cross-runtime decomposition to 1 oversized file
+Implemented:
+1. Extracted AI audio contracts/analyzers into:
+- `lib/ai-audio-engine.types.ts`
+- `lib/ai-audio-engine-analysis.ts`
+2. Extracted VFX built-in registry payload into:
+- `lib/vfx-graph-builtins.ts`
+3. Extracted video/media helper and panel surfaces into:
+- `components/video/VideoTimelineEditorPanels.tsx`
+- `components/media/MediaStudio.utils.ts`
+4. Extracted behavior-tree utility and React adapter into:
+- `lib/ai/behavior-tree-utility.ts`
+- `lib/ai/behavior-tree-react.tsx`
+5. Extracted fluid marching-cubes runtime into:
+- `lib/fluid-surface-reconstructor.ts`
+6. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `7` to `1` (`AethelDashboard.tsx` only).
+2. Risk concentration is now explicit: the remaining monolith is product-entry orchestration, not deep runtime subsystems.
+3. Residual limitation: functional gates are still pending freeze wave; this iteration validated architecture drift only.

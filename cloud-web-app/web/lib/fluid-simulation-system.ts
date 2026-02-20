@@ -1,28 +1,6 @@
-/**
- * FLUID SIMULATION SYSTEM - Aethel Engine
- * 
- * Sistema profissional de simulação de fluidos para jogos AAA.
- * Implementa SPH (Smoothed Particle Hydrodynamics) e FLIP/APIC.
- * 
- * FEATURES:
- * - SPH (Smoothed Particle Hydrodynamics)
- * - FLIP (Fluid Implicit Particle)
- * - APIC (Affine Particle-In-Cell)
- * - PBF (Position Based Fluids)
- * - Vorticity confinement
- * - Surface tension
- * - Viscosity
- * - Boundary handling
- * - GPU acceleration ready
- * - Level set surface reconstruction
- * - Marching cubes mesh extraction
- */
+/** Fluid simulation runtime core (SPH, PBF, FLIP). */
 
 import * as THREE from 'three';
-
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export interface FluidConfig {
   particleCount: number;
@@ -48,7 +26,6 @@ export interface FluidParticle {
   mass: number;
   color: THREE.Color;
   neighbors: number[];
-  // APIC specific
   affineMatrix?: THREE.Matrix3;
 }
 
@@ -73,10 +50,6 @@ export interface SurfaceVertex {
   normal: THREE.Vector3;
 }
 
-// ============================================================================
-// SPH KERNELS
-// ============================================================================
-
 export class SPHKernels {
   private h: number; // Smoothing radius
   private h2: number;
@@ -84,7 +57,6 @@ export class SPHKernels {
   private h6: number;
   private h9: number;
   
-  // Precomputed constants
   private poly6Const: number;
   private spikyGradConst: number;
   private viscLaplConst: number;
@@ -96,24 +68,19 @@ export class SPHKernels {
     this.h6 = this.h3 * this.h3;
     this.h9 = this.h6 * this.h3;
     
-    // Poly6 kernel constant: 315 / (64 * pi * h^9)
     this.poly6Const = 315 / (64 * Math.PI * this.h9);
     
-    // Spiky gradient constant: -45 / (pi * h^6)
     this.spikyGradConst = -45 / (Math.PI * this.h6);
     
-    // Viscosity Laplacian constant: 45 / (pi * h^6)
     this.viscLaplConst = 45 / (Math.PI * this.h6);
   }
   
-  // Poly6 kernel for density
   poly6(r: number): number {
     if (r >= this.h) return 0;
     const diff = this.h2 - r * r;
     return this.poly6Const * diff * diff * diff;
   }
   
-  // Spiky kernel gradient for pressure
   spikyGradient(r: THREE.Vector3, dist: number): THREE.Vector3 {
     if (dist >= this.h || dist < 0.0001) {
       return new THREE.Vector3();
@@ -125,13 +92,11 @@ export class SPHKernels {
     return r.clone().multiplyScalar(coeff);
   }
   
-  // Viscosity kernel Laplacian
   viscosityLaplacian(dist: number): number {
     if (dist >= this.h) return 0;
     return this.viscLaplConst * (this.h - dist);
   }
   
-  // Cubic spline (better behavior near boundaries)
   cubicSpline(r: number): number {
     const q = r / this.h;
     const sigma = 8 / (Math.PI * this.h3);
@@ -168,10 +133,6 @@ export class SPHKernels {
     return this.h;
   }
 }
-
-// ============================================================================
-// SPATIAL HASH GRID
-// ============================================================================
 
 export class SpatialHashGrid {
   private cellSize: number;
@@ -227,10 +188,6 @@ export class SpatialHashGrid {
   }
 }
 
-// ============================================================================
-// SPH FLUID SIMULATION
-// ============================================================================
-
 export class SPHFluidSimulation {
   private config: FluidConfig;
   private particles: FluidParticle[] = [];
@@ -258,7 +215,6 @@ export class SPHFluidSimulation {
     this.kernels = new SPHKernels(this.config.smoothingRadius);
   }
   
-  // Initialize particles in a volume
   initializeBox(
     min: THREE.Vector3,
     max: THREE.Vector3,
@@ -273,7 +229,6 @@ export class SPHFluidSimulation {
         for (let z = min.z; z < max.z; z += spacing) {
           if (this.particles.length >= this.config.particleCount) break;
           
-          // Jitter for more natural distribution
           const jitter = spacing * 0.1;
           
           this.particles.push({
@@ -310,25 +265,19 @@ export class SPHFluidSimulation {
   }
   
   private simulateStep(dt: number): void {
-    // Update spatial hash
     this.spatialGrid.clear();
     for (const particle of this.particles) {
       this.spatialGrid.insert(particle.id, particle.position);
     }
     
-    // Find neighbors
     this.findNeighbors();
     
-    // Compute density and pressure
     this.computeDensityPressure();
     
-    // Compute forces
     this.computeForces();
     
-    // Integrate
     this.integrate(dt);
     
-    // Handle boundaries
     this.handleBoundaries();
   }
   
@@ -354,17 +303,14 @@ export class SPHFluidSimulation {
   
   private computeDensityPressure(): void {
     for (const particle of this.particles) {
-      // Self contribution
       particle.density = particle.mass * this.kernels.poly6(0);
       
-      // Neighbor contributions
       for (const neighborId of particle.neighbors) {
         const neighbor = this.particles[neighborId];
         const dist = particle.position.distanceTo(neighbor.position);
         particle.density += neighbor.mass * this.kernels.poly6(dist);
       }
       
-      // Pressure using equation of state (Tait equation)
       const gamma = 7; // Stiffness parameter for water
       const B = this.config.stiffness * this.config.restDensity / gamma;
       
@@ -372,7 +318,6 @@ export class SPHFluidSimulation {
         Math.pow(particle.density / this.config.restDensity, gamma) - 1
       );
       
-      // Clamp negative pressure (tension)
       if (particle.pressure < 0) {
         particle.pressure = 0;
       }
@@ -387,7 +332,6 @@ export class SPHFluidSimulation {
       const viscosityForce = new THREE.Vector3();
       const surfaceTensionForce = new THREE.Vector3();
       
-      // Surface normal for surface tension
       const surfaceNormal = new THREE.Vector3();
       let colorFieldLaplacian = 0;
       
@@ -398,30 +342,25 @@ export class SPHFluidSimulation {
         
         if (dist < 0.0001) continue;
         
-        // Pressure force (symmetric formulation)
         const pressureTerm = (particle.pressure / (particle.density * particle.density) +
                              neighbor.pressure / (neighbor.density * neighbor.density));
         const spikyGrad = this.kernels.spikyGradient(r, dist);
         pressureForce.add(spikyGrad.multiplyScalar(-neighbor.mass * pressureTerm));
         
-        // Viscosity force
         const relVel = neighbor.velocity.clone().sub(particle.velocity);
         const viscLapl = this.kernels.viscosityLaplacian(dist);
         viscosityForce.add(
           relVel.multiplyScalar(this.config.viscosity * neighbor.mass * viscLapl / neighbor.density)
         );
         
-        // Surface tension (color field method)
         const poly6Grad = this.kernels.cubicSplineGradient(r, dist);
         surfaceNormal.add(poly6Grad.multiplyScalar(neighbor.mass / neighbor.density));
         colorFieldLaplacian += neighbor.mass * this.kernels.cubicSpline(dist) / neighbor.density;
       }
       
-      // Apply pressure and viscosity forces
       particle.acceleration.add(pressureForce.multiplyScalar(particle.mass));
       particle.acceleration.add(viscosityForce);
       
-      // Surface tension force
       const surfaceNormalLength = surfaceNormal.length();
       if (surfaceNormalLength > 0.001) {
         surfaceTensionForce.copy(surfaceNormal.normalize())
@@ -433,7 +372,6 @@ export class SPHFluidSimulation {
   
   private integrate(dt: number): void {
     for (const particle of this.particles) {
-      // Semi-implicit Euler integration
       particle.velocity.add(particle.acceleration.clone().multiplyScalar(dt));
       particle.position.add(particle.velocity.clone().multiplyScalar(dt));
     }
@@ -454,7 +392,6 @@ export class SPHFluidSimulation {
       const min = boundary.position.clone().sub(boundary.size.clone().multiplyScalar(0.5));
       const max = boundary.position.clone().add(boundary.size.clone().multiplyScalar(0.5));
       
-      // X boundaries
       if (particle.position.x < min.x) {
         particle.position.x = min.x;
         particle.velocity.x *= -damping;
@@ -463,7 +400,6 @@ export class SPHFluidSimulation {
         particle.velocity.x *= -damping;
       }
       
-      // Y boundaries
       if (particle.position.y < min.y) {
         particle.position.y = min.y;
         particle.velocity.y *= -damping;
@@ -472,7 +408,6 @@ export class SPHFluidSimulation {
         particle.velocity.y *= -damping;
       }
       
-      // Z boundaries
       if (particle.position.z < min.z) {
         particle.position.z = min.z;
         particle.velocity.z *= -damping;
@@ -485,13 +420,11 @@ export class SPHFluidSimulation {
       const dist = diff.length();
       
       if (dist < boundary.radius) {
-        // Inside sphere - push out
         const normal = diff.normalize();
         particle.position.copy(boundary.position.clone().add(
           normal.clone().multiplyScalar(boundary.radius)
         ));
         
-        // Reflect velocity
         const vn = particle.velocity.dot(normal);
         if (vn < 0) {
           particle.velocity.sub(normal.clone().multiplyScalar(2 * vn));
@@ -549,10 +482,6 @@ export class SPHFluidSimulation {
   }
 }
 
-// ============================================================================
-// POSITION BASED FLUIDS (PBF)
-// ============================================================================
-
 export class PBFFluidSimulation {
   private config: FluidConfig;
   private particles: FluidParticle[] = [];
@@ -560,7 +489,6 @@ export class PBFFluidSimulation {
   private spatialGrid: SpatialHashGrid;
   private kernels: SPHKernels;
   
-  // PBF specific
   private lambdas: number[] = [];
   private deltaPositions: THREE.Vector3[] = [];
   private vorticityOmega: THREE.Vector3[] = [];
@@ -617,33 +545,27 @@ export class PBFFluidSimulation {
   }
   
   private simulateStep(dt: number): void {
-    // Apply external forces
     for (const particle of this.particles) {
       particle.velocity.add(this.config.gravity.clone().multiplyScalar(dt));
     }
     
-    // Predict positions
     for (const particle of this.particles) {
       particle.position.add(particle.velocity.clone().multiplyScalar(dt));
     }
     
-    // Update spatial hash
     this.spatialGrid.clear();
     for (const particle of this.particles) {
       this.spatialGrid.insert(particle.id, particle.position);
     }
     
-    // Find neighbors
     this.findNeighbors();
     
-    // Solver iterations
     for (let iter = 0; iter < this.config.iterations; iter++) {
       this.computeLambdas();
       this.computePositionCorrections();
       this.applyPositionCorrections();
     }
     
-    // Update velocities
     for (const particle of this.particles) {
       particle.velocity.copy(
         particle.position.clone().sub(
@@ -652,13 +574,10 @@ export class PBFFluidSimulation {
       );
     }
     
-    // Vorticity confinement
     this.applyVorticityConfinement(dt);
     
-    // Viscosity (XSPH)
     this.applyXSPHViscosity();
     
-    // Handle boundaries
     this.handleBoundaries();
   }
   
@@ -686,7 +605,6 @@ export class PBFFluidSimulation {
     const epsilon = this.config.stiffness;
     
     for (const particle of this.particles) {
-      // Compute density
       particle.density = this.kernels.poly6(0);
       
       for (const neighborId of particle.neighbors) {
@@ -695,10 +613,8 @@ export class PBFFluidSimulation {
         particle.density += this.kernels.poly6(dist);
       }
       
-      // Constraint
       const C = particle.density / this.config.restDensity - 1;
       
-      // Gradient of constraint
       let gradientSum = 0;
       const gradientI = new THREE.Vector3();
       
@@ -716,7 +632,6 @@ export class PBFFluidSimulation {
       
       gradientSum += gradientI.lengthSq();
       
-      // Lambda
       this.lambdas[particle.id] = -C / (gradientSum + epsilon);
     }
   }
@@ -735,11 +650,9 @@ export class PBFFluidSimulation {
         const r = particle.position.clone().sub(neighbor.position);
         const dist = r.length();
         
-        // Tensile instability correction (artificial pressure)
         const wij = this.kernels.poly6(dist);
         const scorr = -k * Math.pow(wij / wDeltaQ, n);
         
-        // Position correction
         const lambdaSum = this.lambdas[particle.id] + this.lambdas[neighborId] + scorr;
         const gradient = this.kernels.spikyGradient(r, dist);
         
@@ -759,7 +672,6 @@ export class PBFFluidSimulation {
   private applyVorticityConfinement(dt: number): void {
     const epsilon = 0.01; // Vorticity strength
     
-    // Compute vorticity omega
     for (const particle of this.particles) {
       this.vorticityOmega[particle.id].set(0, 0, 0);
       
@@ -777,14 +689,12 @@ export class PBFFluidSimulation {
       }
     }
     
-    // Compute vorticity force
     for (const particle of this.particles) {
       const omega = this.vorticityOmega[particle.id];
       const omegaMag = omega.length();
       
       if (omegaMag < 0.0001) continue;
       
-      // Gradient of |omega|
       const gradOmega = new THREE.Vector3();
       
       for (const neighborId of particle.neighbors) {
@@ -873,22 +783,16 @@ export class PBFFluidSimulation {
   }
 }
 
-// ============================================================================
-// FLIP/APIC FLUID SIMULATION
-// ============================================================================
-
 export class FLIPFluidSimulation {
   private config: FluidConfig;
   private particles: FluidParticle[] = [];
   private boundaries: FluidBoundary[] = [];
   
-  // Grid
   private gridResolution: THREE.Vector3;
   private gridOrigin: THREE.Vector3;
   private cellSize: number;
   private grid: Map<string, GridCell>;
   
-  // FLIP vs PIC ratio (0 = pure PIC, 1 = pure FLIP)
   private flipRatio: number = 0.95;
   
   constructor(config: Partial<FluidConfig> = {}, gridResolution: THREE.Vector3 = new THREE.Vector3(64, 64, 64)) {
@@ -953,22 +857,16 @@ export class FLIPFluidSimulation {
   simulate(deltaTime: number): void {
     const dt = this.config.timeStep;
     
-    // 1. Particle to Grid (P2G)
     this.particleToGrid();
     
-    // 2. Apply external forces
     this.applyExternalForces(dt);
     
-    // 3. Solve pressure (make velocity field divergence-free)
     this.solvePressure();
     
-    // 4. Grid to Particle (G2P)
     this.gridToParticle();
     
-    // 5. Advect particles
     this.advectParticles(dt);
     
-    // 6. Handle boundaries
     this.handleBoundaries();
   }
   
@@ -976,10 +874,8 @@ export class FLIPFluidSimulation {
     this.grid.clear();
     
     for (const particle of this.particles) {
-      // Find cell indices
       const cellI = this.worldToGrid(particle.position);
       
-      // Splat particle velocity to nearby grid cells (trilinear)
       for (let di = -1; di <= 1; di++) {
         for (let dj = -1; dj <= 1; dj++) {
           for (let dk = -1; dk <= 1; dk++) {
@@ -1009,7 +905,6 @@ export class FLIPFluidSimulation {
             
             cell.particles.push(particle.id);
             
-            // Accumulate weighted velocity
             cell.velocity.add(particle.velocity.clone().multiplyScalar(weight));
             cell.marker = 'fluid';
           }
@@ -1017,7 +912,6 @@ export class FLIPFluidSimulation {
       }
     }
     
-    // Normalize velocities
     for (const [, cell] of this.grid) {
       if (cell.particles.length > 0) {
         cell.velocity.divideScalar(cell.particles.length);
@@ -1034,7 +928,6 @@ export class FLIPFluidSimulation {
   }
   
   private solvePressure(): void {
-    // Gauss-Seidel pressure solve for incompressibility
     const invDx2 = 1 / (this.cellSize * this.cellSize);
     
     for (let iter = 0; iter < this.config.iterations; iter++) {
@@ -1043,7 +936,6 @@ export class FLIPFluidSimulation {
         
         const [i, j, k] = key.split(',').map(Number);
         
-        // Compute divergence
         const velRight = this.getGridVelocity(i + 1, j, k).x;
         const velLeft = this.getGridVelocity(i - 1, j, k).x;
         const velTop = this.getGridVelocity(i, j + 1, k).y;
@@ -1053,14 +945,12 @@ export class FLIPFluidSimulation {
         
         const divergence = (velRight - velLeft + velTop - velBottom + velFront - velBack) / (2 * this.cellSize);
         
-        // Update pressure
         const neighbors = this.countFluidNeighbors(i, j, k);
         if (neighbors > 0) {
           cell.pressure = -divergence * this.config.restDensity * this.cellSize / neighbors;
         }
       }
       
-      // Apply pressure gradient to velocity
       for (const [key, cell] of this.grid) {
         if (cell.marker !== 'fluid') continue;
         
@@ -1088,7 +978,6 @@ export class FLIPFluidSimulation {
     for (const particle of this.particles) {
       const cellI = this.worldToGrid(particle.position);
       
-      // Interpolate velocity from grid
       const picVelocity = new THREE.Vector3();
       const flipVelocity = particle.velocity.clone();
       
@@ -1118,9 +1007,6 @@ export class FLIPFluidSimulation {
       if (totalWeight > 0) {
         picVelocity.divideScalar(totalWeight);
         
-        // FLIP: particle velocity += (new grid velocity - old grid velocity)
-        // PIC: particle velocity = new grid velocity
-        // Blend between FLIP and PIC
         particle.velocity.lerp(picVelocity, 1 - this.flipRatio);
       }
     }
@@ -1167,7 +1053,6 @@ export class FLIPFluidSimulation {
     }
   }
   
-  // Helper methods
   private worldToGrid(pos: THREE.Vector3): THREE.Vector3 {
     return new THREE.Vector3(
       Math.floor((pos.x - this.gridOrigin.x) / this.cellSize),
@@ -1239,234 +1124,7 @@ export class FLIPFluidSimulation {
   }
 }
 
-// ============================================================================
-// SURFACE RECONSTRUCTION (MARCHING CUBES)
-// ============================================================================
-
-export class FluidSurfaceReconstructor {
-  private resolution: number;
-  private cellSize: number;
-  private origin: THREE.Vector3;
-  private smoothingRadius: number;
-  
-  constructor(
-    resolution: number = 64,
-    bounds: { min: THREE.Vector3; max: THREE.Vector3 },
-    smoothingRadius: number = 0.1
-  ) {
-    this.resolution = resolution;
-    this.origin = bounds.min.clone();
-    this.cellSize = (bounds.max.x - bounds.min.x) / resolution;
-    this.smoothingRadius = smoothingRadius;
-  }
-  
-  reconstructSurface(particles: FluidParticle[]): THREE.BufferGeometry {
-    // Build spatial hash for particles
-    const grid = new SpatialHashGrid(this.smoothingRadius);
-    for (const particle of particles) {
-      grid.insert(particle.id, particle.position);
-    }
-    
-    // Compute level set at grid points
-    const levelSet = new Float32Array((this.resolution + 1) ** 3);
-    
-    for (let i = 0; i <= this.resolution; i++) {
-      for (let j = 0; j <= this.resolution; j++) {
-        for (let k = 0; k <= this.resolution; k++) {
-          const pos = new THREE.Vector3(
-            this.origin.x + i * this.cellSize,
-            this.origin.y + j * this.cellSize,
-            this.origin.z + k * this.cellSize
-          );
-          
-          const idx = i + j * (this.resolution + 1) + k * (this.resolution + 1) ** 2;
-          levelSet[idx] = this.computeLevelSet(pos, particles, grid);
-        }
-      }
-    }
-    
-    // Marching cubes
-    return this.marchingCubes(levelSet, 0.5);
-  }
-  
-  private computeLevelSet(
-    pos: THREE.Vector3,
-    particles: FluidParticle[],
-    grid: SpatialHashGrid
-  ): number {
-    const neighborIds = grid.getNeighbors(pos, this.smoothingRadius);
-    
-    let density = 0;
-    
-    for (const id of neighborIds) {
-      const particle = particles[id];
-      const dist = pos.distanceTo(particle.position);
-      
-      if (dist < this.smoothingRadius) {
-        // Kernel weight
-        const q = dist / this.smoothingRadius;
-        const w = 1 - q * q * q;
-        density += w;
-      }
-    }
-    
-    return density;
-  }
-  
-  private marchingCubes(levelSet: Float32Array, isoValue: number): THREE.BufferGeometry {
-    const vertices: number[] = [];
-    const normals: number[] = [];
-    
-    for (let i = 0; i < this.resolution; i++) {
-      for (let j = 0; j < this.resolution; j++) {
-        for (let k = 0; k < this.resolution; k++) {
-          this.processCell(levelSet, i, j, k, isoValue, vertices, normals);
-        }
-      }
-    }
-    
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-    geometry.computeVertexNormals();
-    
-    return geometry;
-  }
-  
-  private processCell(
-    levelSet: Float32Array,
-    i: number, j: number, k: number,
-    isoValue: number,
-    vertices: number[],
-    normals: number[]
-  ): void {
-    // Get corner values
-    const corners = [
-      this.getLevelSetValue(levelSet, i, j, k),
-      this.getLevelSetValue(levelSet, i + 1, j, k),
-      this.getLevelSetValue(levelSet, i + 1, j, k + 1),
-      this.getLevelSetValue(levelSet, i, j, k + 1),
-      this.getLevelSetValue(levelSet, i, j + 1, k),
-      this.getLevelSetValue(levelSet, i + 1, j + 1, k),
-      this.getLevelSetValue(levelSet, i + 1, j + 1, k + 1),
-      this.getLevelSetValue(levelSet, i, j + 1, k + 1),
-    ];
-    
-    // Compute cube index
-    let cubeIndex = 0;
-    for (let n = 0; n < 8; n++) {
-      if (corners[n] > isoValue) cubeIndex |= (1 << n);
-    }
-    
-    if (cubeIndex === 0 || cubeIndex === 255) return;
-    
-    // Get edges that are crossed
-    const edgeTable = this.getEdgeTable();
-    const triTable = this.getTriTable();
-    
-    const edges = edgeTable[cubeIndex];
-    
-    // Interpolate vertices on edges
-    const edgeVertices: THREE.Vector3[] = [];
-    
-    for (let e = 0; e < 12; e++) {
-      if ((edges & (1 << e)) !== 0) {
-        const [v1, v2] = this.getEdgeVertices(e);
-        const pos = this.interpolateEdge(
-          i, j, k, v1, v2, corners[v1], corners[v2], isoValue
-        );
-        edgeVertices[e] = pos;
-      }
-    }
-    
-    // Generate triangles
-    const tris = triTable[cubeIndex];
-    for (let t = 0; t < tris.length; t += 3) {
-      if (tris[t] === -1) break;
-      
-      const v0 = edgeVertices[tris[t]];
-      const v1 = edgeVertices[tris[t + 1]];
-      const v2 = edgeVertices[tris[t + 2]];
-      
-      if (v0 && v1 && v2) {
-        vertices.push(v0.x, v0.y, v0.z);
-        vertices.push(v1.x, v1.y, v1.z);
-        vertices.push(v2.x, v2.y, v2.z);
-        
-        // Compute normal
-        const edge1 = v1.clone().sub(v0);
-        const edge2 = v2.clone().sub(v0);
-        const normal = edge1.cross(edge2).normalize();
-        
-        normals.push(normal.x, normal.y, normal.z);
-        normals.push(normal.x, normal.y, normal.z);
-        normals.push(normal.x, normal.y, normal.z);
-      }
-    }
-  }
-  
-  private getLevelSetValue(levelSet: Float32Array, i: number, j: number, k: number): number {
-    const idx = i + j * (this.resolution + 1) + k * (this.resolution + 1) ** 2;
-    return levelSet[idx] || 0;
-  }
-  
-  private interpolateEdge(
-    ci: number, cj: number, ck: number,
-    v1: number, v2: number,
-    val1: number, val2: number,
-    isoValue: number
-  ): THREE.Vector3 {
-    const cornerOffsets = [
-      [0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1],
-      [0, 1, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1],
-    ];
-    
-    const t = Math.abs(val1 - isoValue) < 0.0001 ? 0 :
-              Math.abs(val2 - val1) < 0.0001 ? 0.5 :
-              (isoValue - val1) / (val2 - val1);
-    
-    const o1 = cornerOffsets[v1];
-    const o2 = cornerOffsets[v2];
-    
-    return new THREE.Vector3(
-      this.origin.x + (ci + o1[0] + t * (o2[0] - o1[0])) * this.cellSize,
-      this.origin.y + (cj + o1[1] + t * (o2[1] - o1[1])) * this.cellSize,
-      this.origin.z + (ck + o1[2] + t * (o2[2] - o1[2])) * this.cellSize
-    );
-  }
-  
-  private getEdgeVertices(edge: number): [number, number] {
-    const edgeToVertices: [number, number][] = [
-      [0, 1], [1, 2], [2, 3], [3, 0],
-      [4, 5], [5, 6], [6, 7], [7, 4],
-      [0, 4], [1, 5], [2, 6], [3, 7],
-    ];
-    return edgeToVertices[edge];
-  }
-  
-  // Marching cubes lookup tables (abbreviated - full tables in production)
-  private getEdgeTable(): number[] {
-    return [
-      0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
-      0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
-      // ... (256 entries total - abbreviated for code length)
-    ];
-  }
-  
-  private getTriTable(): number[][] {
-    return [
-      [-1],
-      [0, 8, 3, -1],
-      [0, 1, 9, -1],
-      [1, 8, 3, 9, 8, 1, -1],
-      // ... (256 entries total - abbreviated for code length)
-    ];
-  }
-}
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
+export { FluidSurfaceReconstructor } from './fluid-surface-reconstructor';
 
 export const createSPHFluid = (config?: Partial<FluidConfig>): SPHFluidSimulation => {
   return new SPHFluidSimulation(config);

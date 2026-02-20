@@ -3949,3 +3949,36 @@ Validation snapshot:
 Decision lock:
 1. Keep quest runtime behavior stable while separating renderer responsibilities.
 2. Remaining oversized targets are now strongly concentrated in top orchestration monoliths (`AethelDashboard`, media/video, ai-audio, fluid runtime, vfx graph, AI behavior runtime).
+
+## 155) Delta 2026-02-20 CIX - Cross-domain decomposition wave reached 1 oversized file
+
+Implemented:
+1. Split AI audio contracts and analyzers:
+- `cloud-web-app/web/lib/ai-audio-engine.types.ts`
+- `cloud-web-app/web/lib/ai-audio-engine-analysis.ts`
+- `cloud-web-app/web/lib/ai-audio-engine.ts` kept as orchestration surface with compatibility re-exports.
+2. Split VFX built-in node catalog:
+- `cloud-web-app/web/lib/vfx-graph-builtins.ts`
+- `cloud-web-app/web/lib/vfx-graph-editor.ts` now keeps registry/graph/runtime orchestration.
+3. Split video/media UI helper surfaces:
+- `cloud-web-app/web/components/video/VideoTimelineEditorPanels.tsx`
+- `cloud-web-app/web/components/media/MediaStudio.utils.ts`
+- `cloud-web-app/web/components/video/VideoTimelineEditor.tsx`
+- `cloud-web-app/web/components/media/MediaStudio.tsx`
+4. Split behavior-tree utility and React adapter:
+- `cloud-web-app/web/lib/ai/behavior-tree-utility.ts`
+- `cloud-web-app/web/lib/ai/behavior-tree-react.tsx`
+- `cloud-web-app/web/lib/ai/behavior-tree-system.tsx` now focused on runtime nodes/agent/manager orchestration.
+5. Split fluid surface reconstruction runtime:
+- `cloud-web-app/web/lib/fluid-surface-reconstructor.ts`
+- `cloud-web-app/web/lib/fluid-simulation-system.ts` now focused on SPH/PBF/FLIP runtime.
+6. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `7` to `1`.
+3. Remaining oversized target: `cloud-web-app/web/components/AethelDashboard.tsx`.
+
+Decision lock:
+1. Keep behavior-preserving decomposition strategy (contract extraction + orchestration isolation) until dashboard monolith is split.
+2. Full functional gates remain deferred to freeze wave as requested; this wave used architecture scans only.

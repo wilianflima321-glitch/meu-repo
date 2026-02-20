@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T04:57:54.727Z`
+- Generated at: `2026-02-20T05:18:52.144Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **7**
+- Oversized source files (>=1200 lines): **1**
 
 ## Top Compatibility Call Sites
 
@@ -42,12 +42,6 @@
 | File | Lines |
 | --- | ---: |
 | `components/AethelDashboard.tsx` | 3528 |
-| `lib/ai-audio-engine.ts` | 1653 |
-| `components/video/VideoTimelineEditor.tsx` | 1572 |
-| `lib/vfx-graph-editor.ts` | 1505 |
-| `components/media/MediaStudio.tsx` | 1487 |
-| `lib/fluid-simulation-system.ts` | 1482 |
-| `lib/ai/behavior-tree-system.tsx` | 1400 |
 
 ## Notes
 

@@ -1,24 +1,13 @@
-/**
- * AI Behavior Tree System - Sistema de Árvores de Comportamento para IA
- * 
- * Sistema completo de IA com:
- * - Behavior Trees com todos os node types
- * - Blackboard para memória compartilhada
- * - Decorators (Inverter, Repeater, Succeeder, etc.)
- * - Composite nodes (Sequence, Selector, Parallel)
- * - Utility AI integration
- * - Perception system (sight, hearing, memory)
- * - Navigation integration ready
- * 
- * @module lib/ai/behavior-tree-system
- */
+/** Behavior Tree runtime core (nodes, agents, manager). */
 
 import { EventEmitter } from 'events';
 import * as THREE from 'three';
+import { AIProvider, useAI, useAgent } from './behavior-tree-react';
+import { UtilityAI } from './behavior-tree-utility';
 
-// ============================================================================
+export { AIProvider, useAI, useAgent, UtilityAI };
+export type { UtilityAction, UtilityConsideration } from './behavior-tree-utility';
 // TYPES
-// ============================================================================
 
 export type NodeStatus = 'success' | 'failure' | 'running';
 export type NodeType = 'composite' | 'decorator' | 'leaf' | 'root';
@@ -63,10 +52,7 @@ export interface NavPath {
   currentIndex: number;
   isComplete: boolean;
 }
-
-// ============================================================================
 // BLACKBOARD
-// ============================================================================
 
 export class Blackboard {
   private data: Map<string, unknown> = new Map();
@@ -149,10 +135,7 @@ export class Blackboard {
     }
   }
 }
-
-// ============================================================================
 // BASE NODES
-// ============================================================================
 
 abstract class BaseNode implements BTNode {
   id: string;
@@ -174,10 +157,7 @@ abstract class BaseNode implements BTNode {
     // Override in subclasses
   }
 }
-
-// ============================================================================
 // COMPOSITE NODES
-// ============================================================================
 
 export class SequenceNode extends BaseNode {
   type: NodeType = 'composite';
@@ -410,10 +390,7 @@ export class RandomSelectorNode extends BaseNode {
     this.reset();
   }
 }
-
-// ============================================================================
 // DECORATOR NODES
-// ============================================================================
 
 export class InverterNode extends BaseNode {
   type: NodeType = 'decorator';
@@ -667,10 +644,7 @@ export class ConditionNode extends BaseNode {
     this.child.abort();
   }
 }
-
-// ============================================================================
 // LEAF NODES
-// ============================================================================
 
 export class ActionNode extends BaseNode {
   type: NodeType = 'leaf';
@@ -767,10 +741,7 @@ export class SetBlackboardNode extends BaseNode {
     return 'success';
   }
 }
-
-// ============================================================================
 // BEHAVIOR TREE
-// ============================================================================
 
 export class BehaviorTree {
   private root: BTNode;
@@ -807,10 +778,7 @@ export class BehaviorTree {
     this.root = root;
   }
 }
-
-// ============================================================================
 // PERCEPTION SYSTEM
-// ============================================================================
 
 export class PerceptionSystem {
   private targets: Map<string, PerceptionTarget> = new Map();
@@ -933,10 +901,7 @@ export class PerceptionSystem {
     this.memoryDuration = duration;
   }
 }
-
-// ============================================================================
 // AI AGENT
-// ============================================================================
 
 export class AIAgent extends EventEmitter {
   id: string;
@@ -1130,10 +1095,7 @@ export class AIAgent extends EventEmitter {
     this.emit('pathCancelled');
   }
 }
-
-// ============================================================================
 // AI MANAGER
-// ============================================================================
 
 export class AIManager extends EventEmitter {
   private agents: Map<string, AIAgent> = new Map();
@@ -1195,173 +1157,6 @@ export class AIManager extends EventEmitter {
     this.worldTargets = [];
     this.removeAllListeners();
   }
-}
-
-// ============================================================================
-// UTILITY AI
-// ============================================================================
-
-export interface UtilityAction {
-  name: string;
-  considerations: UtilityConsideration[];
-  action: (context: BehaviorContext) => NodeStatus;
-}
-
-export interface UtilityConsideration {
-  name: string;
-  evaluate: (context: BehaviorContext) => number; // Returns 0-1
-  weight: number;
-}
-
-export class UtilityAI {
-  private actions: UtilityAction[] = [];
-  private currentAction: UtilityAction | null = null;
-  
-  addAction(action: UtilityAction): void {
-    this.actions.push(action);
-  }
-  
-  removeAction(name: string): void {
-    const index = this.actions.findIndex((a) => a.name === name);
-    if (index >= 0) {
-      this.actions.splice(index, 1);
-    }
-  }
-  
-  evaluate(context: BehaviorContext): UtilityAction | null {
-    let bestAction: UtilityAction | null = null;
-    let bestScore = -Infinity;
-    
-    for (const action of this.actions) {
-      let score = 1;
-      
-      for (const consideration of action.considerations) {
-        const value = consideration.evaluate(context);
-        const weighted = Math.pow(value, consideration.weight);
-        score *= weighted;
-      }
-      
-      if (score > bestScore) {
-        bestScore = score;
-        bestAction = action;
-      }
-    }
-    
-    return bestAction;
-  }
-  
-  tick(context: BehaviorContext): NodeStatus {
-    // Re-evaluate if no current action or current action finished
-    if (!this.currentAction) {
-      this.currentAction = this.evaluate(context);
-    }
-    
-    if (!this.currentAction) {
-      return 'failure';
-    }
-    
-    const status = this.currentAction.action(context);
-    
-    if (status !== 'running') {
-      this.currentAction = null;
-    }
-    
-    return status;
-  }
-  
-  getCurrentAction(): string | null {
-    return this.currentAction?.name || null;
-  }
-}
-
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
-
-import { useState, useRef, useEffect, useContext, createContext, useCallback } from 'react';
-
-const AIContext = createContext<AIManager | null>(null);
-
-export function AIProvider({ children }: { children: React.ReactNode }) {
-  const managerRef = useRef<AIManager>(new AIManager());
-  
-  useEffect(() => {
-    const manager = managerRef.current;
-    return () => {
-      manager.dispose();
-    };
-  }, []);
-  
-  return (
-    <AIContext.Provider value={managerRef.current}>
-      {children}
-    </AIContext.Provider>
-  );
-}
-
-export function useAI() {
-  const manager = useContext(AIContext);
-  if (!manager) {
-    throw new Error('useAI must be used within an AIProvider');
-  }
-  
-  const [agents, setAgents] = useState<AIAgent[]>([]);
-  
-  useEffect(() => {
-    const updateAgents = () => setAgents(manager.getAllAgents());
-    
-    manager.on('agentCreated', updateAgents);
-    manager.on('agentRemoved', updateAgents);
-    
-    updateAgents();
-    
-    return () => {
-      manager.off('agentCreated', updateAgents);
-      manager.off('agentRemoved', updateAgents);
-    };
-  }, [manager]);
-  
-  const createAgent = useCallback((config: AgentConfig) => {
-    return manager.createAgent(config);
-  }, [manager]);
-  
-  const removeAgent = useCallback((id: string) => {
-    manager.removeAgent(id);
-  }, [manager]);
-  
-  return {
-    manager,
-    agents,
-    createAgent,
-    removeAgent,
-    registerTarget: manager.registerWorldTarget.bind(manager),
-    unregisterTarget: manager.unregisterWorldTarget.bind(manager),
-  };
-}
-
-export function useAgent(agentId: string) {
-  const { manager } = useAI();
-  const [agent, setAgent] = useState<AIAgent | undefined>(manager.getAgent(agentId));
-  
-  useEffect(() => {
-    const currentAgent = manager.getAgent(agentId);
-    setAgent(currentAgent);
-    
-    if (currentAgent) {
-      const onUpdate = () => setAgent(manager.getAgent(agentId));
-      currentAgent.on('updated', onUpdate);
-      currentAgent.on('stateChanged', onUpdate);
-      currentAgent.on('damaged', onUpdate);
-      
-      return () => {
-        currentAgent.off('updated', onUpdate);
-        currentAgent.off('stateChanged', onUpdate);
-        currentAgent.off('damaged', onUpdate);
-      };
-    }
-  }, [manager, agentId]);
-  
-  return agent;
 }
 
 const __defaultExport = {

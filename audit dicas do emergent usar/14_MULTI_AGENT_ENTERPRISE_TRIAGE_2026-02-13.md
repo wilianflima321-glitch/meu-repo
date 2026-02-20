@@ -1665,3 +1665,22 @@ Triaged impact:
 1. Oversized source count reduced `8 -> 7`.
 2. Quest runtime path now has explicit separation between progression logic and rendering.
 3. Remaining oversized backlog is now constrained to 7 monoliths.
+
+## Delta 2026-02-20 CV - Cross-domain decomposition wave
+Delivered:
+1. Split AI audio contracts/analyzers (`lib/ai-audio-engine.types.ts`, `lib/ai-audio-engine-analysis.ts`) and kept compatibility in `lib/ai-audio-engine.ts`.
+2. Split VFX built-in nodes to `lib/vfx-graph-builtins.ts` and kept registry/graph/runtime orchestration in `lib/vfx-graph-editor.ts`.
+3. Split timeline/media UI surfaces:
+- `components/video/VideoTimelineEditorPanels.tsx`
+- `components/media/MediaStudio.utils.ts`
+4. Split behavior-tree utility/react integration:
+- `lib/ai/behavior-tree-utility.ts`
+- `lib/ai/behavior-tree-react.tsx`
+5. Split fluid surface reconstruction:
+- `lib/fluid-surface-reconstructor.ts`
+6. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `7 -> 1`.
+2. Remaining oversized backlog is isolated to `components/AethelDashboard.tsx`.
+3. Next closure wave is unambiguous: dashboard modularization with strict behavior parity.

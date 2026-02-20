@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`7`) to next threshold gate (`<=6`).
+2. Continue oversized module decomposition from current baseline (`1`) to closure threshold (`<=0`) by modularizing `components/AethelDashboard.tsx`.
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -262,3 +262,12 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 23. Reduced oversized source baseline from `8` to `7` via Quest renderer decomposition:
 - `lib/quest-mission-renderers.ts`
 - `lib/quest-mission-system.ts` runtime/renderer concern separation
+24. Reduced oversized source baseline from `7` to `1` via cross-domain decomposition wave:
+- `lib/ai-audio-engine.types.ts`
+- `lib/ai-audio-engine-analysis.ts`
+- `lib/vfx-graph-builtins.ts`
+- `components/video/VideoTimelineEditorPanels.tsx`
+- `components/media/MediaStudio.utils.ts`
+- `lib/ai/behavior-tree-utility.ts`
+- `lib/ai/behavior-tree-react.tsx`
+- `lib/fluid-surface-reconstructor.ts`
