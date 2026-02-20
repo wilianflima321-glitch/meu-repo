@@ -3718,3 +3718,37 @@ Validation snapshot:
 Decision lock:
 1. Continue moving large static payloads out of runtime orchestration modules first.
 2. Keep all compatibility exports stable until full freeze-gate validation.
+
+## 143) Delta 2026-02-20 XCVII - WebXR system decomposition reached <=20 oversized threshold
+
+Implemented:
+1. Extracted WebXR contracts to `cloud-web-app/web/lib/webxr-vr-types.ts`.
+2. Extracted haptics and VR UI panel runtime classes to `cloud-web-app/web/lib/webxr-vr-ui-haptics.ts`.
+3. Updated `cloud-web-app/web/lib/webxr-vr-system.ts` to consume/re-export extracted contracts and runtime helpers.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `21` to `20` (target threshold reached).
+3. `cloud-web-app/web/lib/webxr-vr-system.ts` reduced to `1124` lines (no longer oversized).
+
+Decision lock:
+1. Keep compatibility re-exports from `webxr-vr-system.ts` while extraction waves continue.
+2. Prioritize next reductions on remaining editor/dashboard/media monoliths with behavior-risk controls.
+
+## 144) Delta 2026-02-20 XCVIII - Motion-matching decomposition reached 19 oversized files
+
+Implemented:
+1. Extracted motion-matching contracts to `cloud-web-app/web/lib/motion-matching-types.ts`.
+2. Extracted motion runtime helpers (`FootLockingIK`, `TrajectoryPredictor`) to `cloud-web-app/web/lib/motion-matching-runtime-helpers.ts`.
+3. Updated `cloud-web-app/web/lib/motion-matching-system.ts` to import/re-export extracted contracts and helpers.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `20` to `19`.
+3. `cloud-web-app/web/lib/motion-matching-system.ts` reduced to `1119` lines (no longer oversized).
+
+Decision lock:
+1. Preserve compatibility exports on original motion-matching module path during progressive extraction.
+2. Continue next wave on highest-impact editor/dashboard/media modules under freeze-gate controls.

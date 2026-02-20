@@ -16,100 +16,34 @@
  */
 
 import * as THREE from 'three';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface MotionMatchingConfig {
-  featureWeights: FeatureWeights;
-  searchRadius: number;
-  blendTime: number;
-  minTimeBetweenSearches: number;
-  trajectoryPredictionTime: number;
-  trajectoryPoints: number;
-  footLockingEnabled: boolean;
-  rootMotionEnabled: boolean;
-}
-
-export interface FeatureWeights {
-  leftFootPosition: number;
-  rightFootPosition: number;
-  leftFootVelocity: number;
-  rightFootVelocity: number;
-  hipPosition: number;
-  hipVelocity: number;
-  trajectory: number;
-  facing: number;
-}
-
-export interface PoseFeature {
-  // Bone positions relative to root
-  leftFootPosition: THREE.Vector3;
-  rightFootPosition: THREE.Vector3;
-  leftHandPosition: THREE.Vector3;
-  rightHandPosition: THREE.Vector3;
-  hipPosition: THREE.Vector3;
-  
-  // Velocities
-  leftFootVelocity: THREE.Vector3;
-  rightFootVelocity: THREE.Vector3;
-  hipVelocity: THREE.Vector3;
-  
-  // Root motion
-  rootVelocity: THREE.Vector3;
-  rootAngularVelocity: number;
-}
-
-export interface TrajectoryPoint {
-  position: THREE.Vector3;
-  facing: THREE.Vector2;  // 2D facing direction
-  time: number;
-}
-
-export interface MotionFeature {
-  pose: PoseFeature;
-  trajectory: TrajectoryPoint[];
-  tags: string[];
-}
-
-export interface AnimationPoseData {
-  animationId: string;
-  frameIndex: number;
-  time: number;
-  feature: MotionFeature;
-  rootPosition: THREE.Vector3;
-  rootRotation: THREE.Quaternion;
-  boneTransforms: Map<string, { position: THREE.Vector3; rotation: THREE.Quaternion }>;
-}
-
-export interface MotionDatabase {
-  poses: AnimationPoseData[];
-  animations: Map<string, AnimationData>;
-}
-
-export interface AnimationData {
-  id: string;
-  name: string;
-  duration: number;
-  frameRate: number;
-  looping: boolean;
-  tags: string[];
-  rootMotion: boolean;
-}
-
-export interface MotionMatchResult {
-  poseData: AnimationPoseData;
-  cost: number;
-  featureCosts: FeatureCosts;
-}
-
-export interface FeatureCosts {
-  pose: number;
-  velocity: number;
-  trajectory: number;
-  total: number;
-}
+import { FootLockingIK, TrajectoryPredictor } from './motion-matching-runtime-helpers';
+import type {
+  AnimationData,
+  AnimationPoseData,
+  FeatureCosts,
+  FeatureWeights,
+  FootLockState,
+  MotionDatabase,
+  MotionFeature,
+  MotionMatchResult,
+  MotionMatchingConfig,
+  PoseFeature,
+  TrajectoryPoint,
+} from './motion-matching-types';
+export { FootLockingIK, TrajectoryPredictor } from './motion-matching-runtime-helpers';
+export type {
+  AnimationData,
+  AnimationPoseData,
+  FeatureCosts,
+  FeatureWeights,
+  FootLockState,
+  MotionDatabase,
+  MotionFeature,
+  MotionMatchResult,
+  MotionMatchingConfig,
+  PoseFeature,
+  TrajectoryPoint,
+} from './motion-matching-types';
 
 // ============================================================================
 // KD-TREE FOR EFFICIENT SEARCH
@@ -442,219 +376,6 @@ export class InertializationBlender {
   
   getIsBlending(): boolean {
     return this.isBlending;
-  }
-}
-
-// ============================================================================
-// FOOT LOCKING IK
-// ============================================================================
-
-export interface FootLockState {
-  locked: boolean;
-  lockPosition: THREE.Vector3;
-  lockRotation: THREE.Quaternion;
-  unlockProgress: number;
-}
-
-export class FootLockingIK {
-  private leftFootState: FootLockState = {
-    locked: false,
-    lockPosition: new THREE.Vector3(),
-    lockRotation: new THREE.Quaternion(),
-    unlockProgress: 1,
-  };
-  
-  private rightFootState: FootLockState = {
-    locked: false,
-    lockPosition: new THREE.Vector3(),
-    lockRotation: new THREE.Quaternion(),
-    unlockProgress: 1,
-  };
-  
-  private lockThreshold: number = 0.1; // Velocity threshold for locking
-  private unlockThreshold: number = 0.3; // Velocity threshold for unlocking
-  private maxLockDistance: number = 0.3; // Max distance before forced unlock
-  
-  update(
-    leftFootPos: THREE.Vector3,
-    leftFootVel: THREE.Vector3,
-    leftFootRot: THREE.Quaternion,
-    rightFootPos: THREE.Vector3,
-    rightFootVel: THREE.Vector3,
-    rightFootRot: THREE.Quaternion,
-    deltaTime: number
-  ): { leftFoot: { position: THREE.Vector3; rotation: THREE.Quaternion }; rightFoot: { position: THREE.Vector3; rotation: THREE.Quaternion } } {
-    // Update left foot
-    const leftResult = this.updateFoot(
-      this.leftFootState,
-      leftFootPos,
-      leftFootVel,
-      leftFootRot,
-      deltaTime
-    );
-    
-    // Update right foot
-    const rightResult = this.updateFoot(
-      this.rightFootState,
-      rightFootPos,
-      rightFootVel,
-      rightFootRot,
-      deltaTime
-    );
-    
-    return {
-      leftFoot: leftResult,
-      rightFoot: rightResult,
-    };
-  }
-  
-  private updateFoot(
-    state: FootLockState,
-    position: THREE.Vector3,
-    velocity: THREE.Vector3,
-    rotation: THREE.Quaternion,
-    deltaTime: number
-  ): { position: THREE.Vector3; rotation: THREE.Quaternion } {
-    const speed = velocity.length();
-    
-    if (!state.locked) {
-      // Check if we should lock
-      if (speed < this.lockThreshold) {
-        state.locked = true;
-        state.lockPosition.copy(position);
-        state.lockRotation.copy(rotation);
-        state.unlockProgress = 0;
-      }
-      return { position, rotation };
-    }
-    
-    // We're locked - check if we should unlock
-    const distance = position.distanceTo(state.lockPosition);
-    
-    if (speed > this.unlockThreshold || distance > this.maxLockDistance) {
-      // Start unlocking
-      state.unlockProgress += deltaTime * 5; // Unlock over 0.2 seconds
-      
-      if (state.unlockProgress >= 1) {
-        state.locked = false;
-        state.unlockProgress = 1;
-        return { position, rotation };
-      }
-    }
-    
-    // Blend between locked and animated position
-    const t = state.unlockProgress;
-    const blendedPosition = state.lockPosition.clone().lerp(position, t);
-    const blendedRotation = state.lockRotation.clone().slerp(rotation, t);
-    
-    return { position: blendedPosition, rotation: blendedRotation };
-  }
-  
-  reset(): void {
-    this.leftFootState.locked = false;
-    this.leftFootState.unlockProgress = 1;
-    this.rightFootState.locked = false;
-    this.rightFootState.unlockProgress = 1;
-  }
-}
-
-// ============================================================================
-// TRAJECTORY PREDICTOR
-// ============================================================================
-
-export class TrajectoryPredictor {
-  private predictionTime: number;
-  private pointCount: number;
-  
-  constructor(predictionTime: number = 1.0, pointCount: number = 5) {
-    this.predictionTime = predictionTime;
-    this.pointCount = pointCount;
-  }
-  
-  predict(
-    currentPosition: THREE.Vector3,
-    currentVelocity: THREE.Vector3,
-    currentFacing: THREE.Vector2,
-    desiredVelocity: THREE.Vector3,
-    desiredFacing: THREE.Vector2,
-    stickInput: THREE.Vector2
-  ): TrajectoryPoint[] {
-    const points: TrajectoryPoint[] = [];
-    const dt = this.predictionTime / this.pointCount;
-    
-    let pos = currentPosition.clone();
-    let vel = currentVelocity.clone();
-    let facing = currentFacing.clone();
-    
-    // Acceleration towards desired velocity
-    const acceleration = 10; // m/s²
-    const turnSpeed = 5; // rad/s
-    
-    for (let i = 0; i < this.pointCount; i++) {
-      const t = (i + 1) * dt;
-      
-      // Accelerate towards desired velocity
-      const velDiff = desiredVelocity.clone().sub(vel);
-      const velDiffLength = velDiff.length();
-      
-      if (velDiffLength > 0.01) {
-        const accel = velDiff.normalize().multiplyScalar(Math.min(acceleration * dt, velDiffLength));
-        vel.add(accel);
-      }
-      
-      // Update position
-      pos = pos.clone().add(vel.clone().multiplyScalar(dt));
-      
-      // Turn towards desired facing
-      const facingDiff = desiredFacing.clone().sub(facing);
-      const maxTurn = turnSpeed * dt;
-      
-      if (facingDiff.length() > maxTurn) {
-        facingDiff.normalize().multiplyScalar(maxTurn);
-      }
-      facing.add(facingDiff).normalize();
-      
-      points.push({
-        position: pos.clone(),
-        facing: facing.clone(),
-        time: t,
-      });
-    }
-    
-    return points;
-  }
-  
-  predictFromInput(
-    currentPosition: THREE.Vector3,
-    currentVelocity: THREE.Vector3,
-    currentFacing: number, // Yaw angle
-    inputDirection: THREE.Vector2,
-    inputMagnitude: number,
-    maxSpeed: number
-  ): TrajectoryPoint[] {
-    const desiredVelocity = new THREE.Vector3(
-      inputDirection.x * inputMagnitude * maxSpeed,
-      0,
-      inputDirection.y * inputMagnitude * maxSpeed
-    );
-    
-    const desiredFacing = inputMagnitude > 0.1
-      ? new THREE.Vector2(inputDirection.x, inputDirection.y).normalize()
-      : new THREE.Vector2(Math.sin(currentFacing), Math.cos(currentFacing));
-    
-    const currentFacingVec = new THREE.Vector2(
-      Math.sin(currentFacing),
-      Math.cos(currentFacing)
-    );
-    
-    return this.predict(
-      currentPosition,
-      currentVelocity,
-      currentFacingVec,
-      desiredVelocity,
-      desiredFacing,
-      inputDirection
-    );
   }
 }
 

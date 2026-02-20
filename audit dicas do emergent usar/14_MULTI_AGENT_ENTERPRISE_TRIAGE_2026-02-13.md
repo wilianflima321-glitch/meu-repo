@@ -1523,3 +1523,27 @@ Triaged impact:
 1. Oversized source count reduced `22 -> 21`.
 2. Render pipeline orchestration is now significantly slimmer and easier to maintain.
 3. Residual decomposition backlog remains concentrated in UI/editor/media monoliths.
+
+## Delta 2026-02-20 XCIII - WebXR decomposition wave
+Delivered:
+1. Extracted WebXR contracts to `lib/webxr-vr-types.ts`.
+2. Extracted haptics and VR UI panel runtime helpers to `lib/webxr-vr-ui-haptics.ts`.
+3. Updated `lib/webxr-vr-system.ts` with contract/runtime import-reexport compatibility.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `21 -> 20` (threshold reached).
+2. WebXR orchestration is now slimmer with lower static/runtime coupling.
+3. Remaining oversized backlog is concentrated in editor/dashboard/media modules.
+
+## Delta 2026-02-20 XCIV - Motion-matching decomposition wave
+Delivered:
+1. Extracted motion-matching contracts to `lib/motion-matching-types.ts`.
+2. Extracted runtime helpers (`FootLockingIK`, `TrajectoryPredictor`) to `lib/motion-matching-runtime-helpers.ts`.
+3. Updated `lib/motion-matching-system.ts` with contract/helper import-reexport compatibility.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `20 -> 19`.
+2. Motion runtime orchestration is now leaner and easier to maintain.
+3. Residual backlog concentration remains in UI/editor/dashboard/media monoliths.

@@ -1508,3 +1508,27 @@ Critical reading:
 1. Oversized baseline dropped from `22` to `21`.
 2. This removed static shader payload from runtime orchestration and lowers maintenance churn in render pipeline code.
 3. Remaining oversized backlog is now concentrated in editor/dashboard/media modules with higher UI-path risk.
+
+## Delta 2026-02-20 XCII - WebXR system decomposition to 20 oversized files
+Implemented:
+1. Extracted WebXR contracts into `cloud-web-app/web/lib/webxr-vr-types.ts`.
+2. Extracted haptics and VR UI panel runtime classes into `cloud-web-app/web/lib/webxr-vr-ui-haptics.ts`.
+3. Updated `cloud-web-app/web/lib/webxr-vr-system.ts` to import/re-export extracted modules.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `21` to `20` (current threshold reached).
+2. Residual oversized debt is now concentrated in UI editor/dashboard/media surfaces with higher coupling.
+3. Next reductions should continue with compatibility-preserving extraction and full freeze-gate validation.
+
+## Delta 2026-02-20 XCIII - Motion-matching decomposition to 19 oversized files
+Implemented:
+1. Extracted motion-matching contracts into `cloud-web-app/web/lib/motion-matching-types.ts`.
+2. Extracted runtime helpers into `cloud-web-app/web/lib/motion-matching-runtime-helpers.ts`.
+3. Updated `cloud-web-app/web/lib/motion-matching-system.ts` to import/re-export contracts and helpers.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `20` to `19`.
+2. Debt concentration is now almost entirely in high-coupling UI/editor/media modules.
+3. Additional reductions should focus on user-path critical modules and preserve behavior compatibility.

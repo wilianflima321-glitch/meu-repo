@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`21`) to next threshold gate (`<=20`).
+2. Continue oversized module decomposition from current baseline (`19`) to next threshold gate (`<=17`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -211,3 +211,11 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 9. Reduced oversized source baseline from `22` to `21` via PBR shader-source decomposition:
 - `lib/pbr-shader-sources.ts`
 - `lib/pbr-shader-pipeline.ts` shader source import/export compatibility update
+10. Reduced oversized source baseline from `21` to `20` via WebXR decomposition:
+- `lib/webxr-vr-types.ts`
+- `lib/webxr-vr-ui-haptics.ts`
+- `lib/webxr-vr-system.ts` contract/runtime import-re-export update
+11. Reduced oversized source baseline from `20` to `19` via motion-matching decomposition:
+- `lib/motion-matching-types.ts`
+- `lib/motion-matching-runtime-helpers.ts`
+- `lib/motion-matching-system.ts` contract/runtime import-re-export update

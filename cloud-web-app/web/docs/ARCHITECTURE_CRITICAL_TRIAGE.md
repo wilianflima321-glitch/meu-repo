@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T03:31:09.510Z`
+- Generated at: `2026-02-20T03:41:24.224Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **21**
+- Oversized source files (>=1200 lines): **19**
 
 ## Top Compatibility Call Sites
 
@@ -53,8 +53,6 @@
 | `lib/quest-mission-system.ts` | 1438 |
 | `components/engine/LevelEditor.tsx` | 1410 |
 | `lib/ai/behavior-tree-system.tsx` | 1400 |
-| `lib/motion-matching-system.ts` | 1399 |
-| `lib/webxr-vr-system.ts` | 1395 |
 | `components/animation/AnimationBlueprintEditor.tsx` | 1385 |
 | `lib/cloth-simulation.ts` | 1369 |
 | `components/ide/AIChatPanelPro.tsx` | 1366 |
