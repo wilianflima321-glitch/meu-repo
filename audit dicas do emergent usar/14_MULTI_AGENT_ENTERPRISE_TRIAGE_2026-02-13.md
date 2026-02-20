@@ -1632,3 +1632,14 @@ Triaged impact:
 1. Oversized source count reduced `11 -> 10` (threshold reached).
 2. Animation authoring surface now has cleaner module boundaries.
 3. Remaining oversized backlog is constrained to 10 monoliths with clear next targeting order.
+
+## Delta 2026-02-20 CII - Level Editor decomposition wave
+Delivered:
+1. Split level editor panel surfaces into `components/engine/LevelEditorPanels.tsx`.
+2. Updated `components/engine/LevelEditor.tsx` to keep runtime/viewport orchestration and import extracted panel surfaces.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `10 -> 9`.
+2. Level editor is no longer in oversized backlog, reducing risk in a critical authoring path.
+3. Remaining backlog is concentrated in large dashboard/media/audio/physics/render/AI runtime modules.

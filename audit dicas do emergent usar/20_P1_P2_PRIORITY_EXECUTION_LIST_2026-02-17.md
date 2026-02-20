@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`10`) to next threshold gate (`<=8`).
+2. Continue oversized module decomposition from current baseline (`9`) to next threshold gate (`<=8`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -253,3 +253,6 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 20. Reduced oversized source baseline from `11` to `10` via Animation Blueprint panel decomposition:
 - `components/animation/AnimationBlueprintPanels.tsx`
 - `components/animation/AnimationBlueprintEditor.tsx` runtime/panel concern separation
+21. Reduced oversized source baseline from `10` to `9` via Level Editor panel decomposition:
+- `components/engine/LevelEditorPanels.tsx`
+- `components/engine/LevelEditor.tsx` runtime/panel concern separation

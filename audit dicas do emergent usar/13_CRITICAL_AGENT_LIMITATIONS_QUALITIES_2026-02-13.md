@@ -1611,3 +1611,14 @@ Critical reading:
 1. Oversized baseline dropped from `11` to `10` (threshold reached).
 2. Core animation editor is no longer oversized, reducing UI-path regression blast radius.
 3. Next waves should prioritize the remaining product monoliths by user-path criticality and coupling risk.
+
+## Delta 2026-02-20 CI - Level Editor decomposition to 9 oversized files
+Implemented:
+1. Extracted level editor toolbar/outliner/details UI into `components/engine/LevelEditorPanels.tsx`.
+2. Updated `components/engine/LevelEditor.tsx` to keep runtime/viewport concerns and consume extracted panel module.
+3. Exported panel-facing type contracts from `LevelEditor.tsx` and regenerated architecture triage.
+
+Critical reading:
+1. Oversized baseline dropped from `10` to `9`.
+2. One more high-frequency editor surface is now below oversized threshold, reducing maintenance blast radius.
+3. Remaining oversized debt is concentrated in dashboard/media/audio/physics/render and AI behavior monoliths.

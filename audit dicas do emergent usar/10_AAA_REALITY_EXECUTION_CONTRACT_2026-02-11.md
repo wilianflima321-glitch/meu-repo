@@ -3888,3 +3888,26 @@ Validation snapshot:
 Decision lock:
 1. Preserve current animation editor behavior while enforcing module boundaries.
 2. Next extraction target should move from threshold closure to risk-ranked monoliths (`AethelDashboard`, media, audio, physics, render graph).
+
+## 152) Delta 2026-02-20 CVI - Level Editor decomposition reached 9 oversized files
+
+Implemented:
+1. Split level editor panel surfaces into:
+- `cloud-web-app/web/components/engine/LevelEditorPanels.tsx`
+2. Updated `cloud-web-app/web/components/engine/LevelEditor.tsx` to keep scene/runtime orchestration and consume extracted toolbar/outliner/details panels.
+3. Exported shared panel-facing contracts from `LevelEditor.tsx`:
+- `TransformMode`
+- `ViewportMode`
+- `SnapMode`
+- `LevelObject`
+- `LevelComponent`
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `10` to `9`.
+3. `cloud-web-app/web/components/engine/LevelEditor.tsx` reduced to `956` lines.
+
+Decision lock:
+1. Keep level editor behavior stable while continuing modular extraction.
+2. Residual oversized targets remain top monoliths (`AethelDashboard`, media/video, audio/physics/render graph, AI behavior runtime).
