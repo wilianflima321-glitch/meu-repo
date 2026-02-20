@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`25`) to next threshold gate (`<=22`).
+2. Continue oversized module decomposition from current baseline (`22`) to next threshold gate (`<=20`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -197,3 +197,14 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `lib/engine/particle-system-types.ts`
 - `lib/engine/physics-engine-types.ts`
 - `lib/mcp/aethel-mcp-filesystem.ts`
+6. Reduced oversized source baseline from `25` to `24` via physics-system decomposition:
+- `lib/physics/physics-system-types.ts`
+- `lib/physics/physics-aabb.ts`
+- `lib/physics/physics-system.ts` contract import/re-export update
+7. Reduced oversized source baseline from `24` to `23` via hot-reload decomposition:
+- `lib/hot-reload/hot-reload-server-types.ts`
+- `lib/hot-reload/hot-reload-server.ts` contract import/re-export update
+8. Reduced oversized source baseline from `23` to `22` via scene-graph decomposition:
+- `lib/engine/scene-graph-types.ts`
+- `lib/engine/scene-graph-builtins.ts`
+- `lib/engine/scene-graph.ts` contract and built-in import/re-export updates

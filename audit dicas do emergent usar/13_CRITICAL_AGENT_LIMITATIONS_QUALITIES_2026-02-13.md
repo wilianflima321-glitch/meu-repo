@@ -1461,3 +1461,38 @@ Critical reading:
 1. Oversized baseline dropped from `28` to `25` (current closure target met).
 2. Residual risk is now concentrated in the largest orchestration modules (dashboard/media/editor pipelines).
 3. Further reductions should be coupled with full freeze-gate validation due higher behavior-coupling risk.
+
+## Delta 2026-02-20 LXXXVIII - Physics-system decomposition to 24 oversized files
+Implemented:
+1. Extracted physics contracts into `cloud-web-app/web/lib/physics/physics-system-types.ts`.
+2. Extracted AABB primitive into `cloud-web-app/web/lib/physics/physics-aabb.ts`.
+3. Updated `cloud-web-app/web/lib/physics/physics-system.ts` to import/re-export extracted contracts and AABB.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `25` to `24`.
+2. Risk concentration is increasingly in UI/editor orchestration monoliths rather than shared systems contracts.
+3. Next extractions should prioritize high-change modules with stricter runtime regression controls.
+
+## Delta 2026-02-20 LXXXIX - Hot-reload server decomposition to 23 oversized files
+Implemented:
+1. Extracted hot-reload contracts into `cloud-web-app/web/lib/hot-reload/hot-reload-server-types.ts`.
+2. Updated `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` to consume and re-export extracted contracts.
+3. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `24` to `23`.
+2. Debt concentration is now more explicitly in dashboard/media/editor monoliths with higher behavior coupling.
+3. Next waves require stricter regression control because low-risk shared contract targets are shrinking.
+
+## Delta 2026-02-20 XC - Scene-graph decomposition to 22 oversized files
+Implemented:
+1. Extracted scene-graph contracts into `cloud-web-app/web/lib/engine/scene-graph-types.ts`.
+2. Extracted built-in scene components into `cloud-web-app/web/lib/engine/scene-graph-builtins.ts`.
+3. Updated `cloud-web-app/web/lib/engine/scene-graph.ts` with contract/built-in import-reexport compatibility.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `23` to `22` (current threshold reached).
+2. Remaining debt is now concentrated in UI-heavy editing surfaces with higher coupling and regression risk.
+3. Future reductions should be paired with full freeze-gate validation before release claims.

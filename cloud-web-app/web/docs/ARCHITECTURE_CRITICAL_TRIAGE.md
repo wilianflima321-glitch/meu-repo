@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-20T02:51:21.794Z`
+- Generated at: `2026-02-20T03:11:26.870Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
@@ -13,7 +13,7 @@
 - API NOT_IMPLEMENTED markers (`app/api/**/route.ts`): **8**
 - File API compatibility wrappers (`trackCompatibilityRouteHit` in `app/api/files/*`): **8**
 - Duplicate component basenames: **0**
-- Oversized source files (>=1200 lines): **25**
+- Oversized source files (>=1200 lines): **22**
 
 ## Top Compatibility Call Sites
 
@@ -57,15 +57,12 @@
 | `lib/webxr-vr-system.ts` | 1395 |
 | `lib/pbr-shader-pipeline.ts` | 1392 |
 | `components/animation/AnimationBlueprintEditor.tsx` | 1385 |
-| `lib/engine/scene-graph.ts` | 1380 |
 | `lib/cloth-simulation.ts` | 1369 |
 | `components/ide/AIChatPanelPro.tsx` | 1366 |
 | `components/terrain/TerrainSculptingEditor.tsx` | 1362 |
-| `lib/hot-reload/hot-reload-server.ts` | 1351 |
 | `components/scene-editor/SceneEditor.tsx` | 1348 |
 | `components/visual-scripting/VisualScriptEditor.tsx` | 1335 |
 | `components/engine/DetailsPanel.tsx` | 1334 |
-| `lib/physics/physics-system.ts` | 1332 |
 
 ## Notes
 

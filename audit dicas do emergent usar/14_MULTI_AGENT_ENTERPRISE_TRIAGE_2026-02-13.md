@@ -1476,3 +1476,38 @@ Delivered:
 Triaged impact:
 1. Oversized source count reduced `28 -> 25`.
 2. Current P1 decomposition target was met; remaining work should prioritize high-risk behavior modules.
+
+## Delta 2026-02-20 LXXXIX - Physics-system decomposition wave
+Delivered:
+1. Extracted physics contracts to `lib/physics/physics-system-types.ts`.
+2. Extracted AABB primitive to `lib/physics/physics-aabb.ts`.
+3. Updated `lib/physics/physics-system.ts` to consume and re-export extracted modules.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `25 -> 24`.
+2. Maintains compatibility while removing low-level geometry/type payload from core runtime class file.
+3. Decomposition backlog is now more concentrated on top UI/editor/media monoliths.
+
+## Delta 2026-02-20 XC - Hot-reload server decomposition wave
+Delivered:
+1. Extracted hot-reload contracts to `lib/hot-reload/hot-reload-server-types.ts`.
+2. Updated `lib/hot-reload/hot-reload-server.ts` with contract import/re-export compatibility.
+3. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `24 -> 23`.
+2. Reduced static contract payload in a stateful runtime service without changing runtime behavior.
+3. Remaining decomposition backlog now concentrates on highest-coupling UI/editor/media modules.
+
+## Delta 2026-02-20 XCI - Scene-graph decomposition wave
+Delivered:
+1. Extracted scene-graph contracts to `lib/engine/scene-graph-types.ts`.
+2. Extracted built-in scene components to `lib/engine/scene-graph-builtins.ts`.
+3. Updated `lib/engine/scene-graph.ts` with compatibility import/re-export boundaries.
+4. Regenerated architecture triage report.
+
+Triaged impact:
+1. Oversized source count reduced `23 -> 22` (target threshold reached).
+2. Scene runtime compatibility preserved while reducing contract and built-in component coupling.
+3. Next backlog should prioritize the top UI/editor monoliths by change frequency and user-path impact.

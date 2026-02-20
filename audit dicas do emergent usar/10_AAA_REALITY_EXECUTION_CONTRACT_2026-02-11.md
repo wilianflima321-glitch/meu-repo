@@ -3650,3 +3650,54 @@ Validation snapshot:
 Decision lock:
 1. Next decomposition waves should focus on high-change monoliths with behavior risk controls.
 2. Keep compatibility re-exports while reducing module size debt.
+
+## 139) Delta 2026-02-20 XCIII - Physics-system decomposition below oversized threshold
+
+Implemented:
+1. Extracted physics contracts into `cloud-web-app/web/lib/physics/physics-system-types.ts`.
+2. Extracted AABB primitive into `cloud-web-app/web/lib/physics/physics-aabb.ts`.
+3. Updated `cloud-web-app/web/lib/physics/physics-system.ts` to consume and re-export extracted contracts and AABB.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `25` to `24`.
+3. `cloud-web-app/web/lib/physics/physics-system.ts` reduced to `1193` lines (no longer oversized).
+
+Decision lock:
+1. Continue behavior-preserving extraction first on remaining oversized modules.
+2. Preserve compatibility exports on existing module paths during decomposition waves.
+
+## 140) Delta 2026-02-20 XCIV - Hot-reload server decomposition below oversized threshold
+
+Implemented:
+1. Extracted hot-reload server contracts into `cloud-web-app/web/lib/hot-reload/hot-reload-server-types.ts`.
+2. Updated `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` to consume/re-export extracted contracts.
+3. Preserved runtime compatibility of factory exports and event/message types on existing module path.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `24` to `23`.
+3. `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` reduced to `1190` lines (no longer oversized).
+
+Decision lock:
+1. Keep decompositions focused on contract/data extraction before behavior rewrites.
+2. Prioritize top UI/editor/media monoliths next, with compatibility-preserving boundaries.
+
+## 141) Delta 2026-02-20 XCV - Scene-graph decomposition reached <=22 oversized threshold
+
+Implemented:
+1. Extracted scene-graph data contracts into `cloud-web-app/web/lib/engine/scene-graph-types.ts`.
+2. Extracted built-in scene components into `cloud-web-app/web/lib/engine/scene-graph-builtins.ts`.
+3. Updated `cloud-web-app/web/lib/engine/scene-graph.ts` to consume/re-export extracted contracts and built-ins.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `23` to `22` (next threshold reached).
+3. `cloud-web-app/web/lib/engine/scene-graph.ts` reduced to `1187` lines (no longer oversized).
+
+Decision lock:
+1. Keep re-export compatibility on original scene-graph module path during incremental extraction.
+2. Prioritize remaining highest-coupling UI/editor/media modules for next decomposition waves.

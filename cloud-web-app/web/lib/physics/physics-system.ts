@@ -14,168 +14,30 @@
 
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type ColliderType = 'box' | 'sphere' | 'capsule' | 'cylinder' | 'plane' | 'mesh' | 'convex';
-export type BodyType = 'dynamic' | 'static' | 'kinematic';
-export type ConstraintType = 'fixed' | 'hinge' | 'slider' | 'ball' | 'spring' | 'distance';
-
-export interface PhysicsSettings {
-  gravity: THREE.Vector3;
-  fixedTimeStep: number;
-  maxSubSteps: number;
-  broadphase: 'naive' | 'sap' | 'grid';
-  solverIterations: number;
-  allowSleep: boolean;
-  sleepThreshold: number;
-  collisionGroups: number;
-}
-
-export interface ColliderShape {
-  type: ColliderType;
-  offset: THREE.Vector3;
-  rotation: THREE.Quaternion;
-  // Box
-  halfExtents?: THREE.Vector3;
-  // Sphere
-  radius?: number;
-  // Capsule/Cylinder
-  height?: number;
-  // Mesh
-  vertices?: Float32Array;
-  indices?: Uint32Array;
-  scale?: THREE.Vector3;
-}
-
-export interface Material {
-  friction: number;
-  restitution: number;
-  density: number;
-  rollingFriction: number;
-}
-
-export interface RigidBodyConfig {
-  type: BodyType;
-  mass: number;
-  material: Material;
-  linearDamping: number;
-  angularDamping: number;
-  linearVelocity: THREE.Vector3;
-  angularVelocity: THREE.Vector3;
-  allowSleep: boolean;
-  isTrigger: boolean;
-  collisionGroup: number;
-  collisionMask: number;
-  fixedRotation: boolean;
-  gravityScale: number;
-}
-
-export interface CollisionContact {
-  point: THREE.Vector3;
-  normal: THREE.Vector3;
-  penetration: number;
-  impulse: number;
-}
-
-export interface CollisionEvent {
-  bodyA: RigidBody;
-  bodyB: RigidBody;
-  contacts: CollisionContact[];
-}
-
-export interface RaycastHit {
-  body: RigidBody;
-  point: THREE.Vector3;
-  normal: THREE.Vector3;
-  distance: number;
-}
-
-export interface ConstraintConfig {
-  type: ConstraintType;
-  bodyA: RigidBody;
-  bodyB: RigidBody | null;
-  pivotA: THREE.Vector3;
-  pivotB: THREE.Vector3;
-  axisA?: THREE.Vector3;
-  axisB?: THREE.Vector3;
-  // Hinge
-  lowerLimit?: number;
-  upperLimit?: number;
-  // Spring
-  stiffness?: number;
-  damping?: number;
-  restLength?: number;
-  // Distance
-  minDistance?: number;
-  maxDistance?: number;
-}
-
-// ============================================================================
-// AABB (Axis-Aligned Bounding Box)
-// ============================================================================
-
-export class AABB {
-  min: THREE.Vector3;
-  max: THREE.Vector3;
-  
-  constructor(
-    min = new THREE.Vector3(-Infinity, -Infinity, -Infinity),
-    max = new THREE.Vector3(Infinity, Infinity, Infinity)
-  ) {
-    this.min = min.clone();
-    this.max = max.clone();
-  }
-  
-  setFromCenterAndSize(center: THREE.Vector3, size: THREE.Vector3): this {
-    const halfSize = size.clone().multiplyScalar(0.5);
-    this.min.copy(center).sub(halfSize);
-    this.max.copy(center).add(halfSize);
-    return this;
-  }
-  
-  intersects(other: AABB): boolean {
-    return (
-      this.min.x <= other.max.x && this.max.x >= other.min.x &&
-      this.min.y <= other.max.y && this.max.y >= other.min.y &&
-      this.min.z <= other.max.z && this.max.z >= other.min.z
-    );
-  }
-  
-  containsPoint(point: THREE.Vector3): boolean {
-    return (
-      point.x >= this.min.x && point.x <= this.max.x &&
-      point.y >= this.min.y && point.y <= this.max.y &&
-      point.z >= this.min.z && point.z <= this.max.z
-    );
-  }
-  
-  expand(amount: number): this {
-    this.min.subScalar(amount);
-    this.max.addScalar(amount);
-    return this;
-  }
-  
-  union(other: AABB): this {
-    this.min.min(other.min);
-    this.max.max(other.max);
-    return this;
-  }
-  
-  getCenter(target: THREE.Vector3): THREE.Vector3 {
-    return target.addVectors(this.min, this.max).multiplyScalar(0.5);
-  }
-  
-  getSize(target: THREE.Vector3): THREE.Vector3 {
-    return target.subVectors(this.max, this.min);
-  }
-  
-  clone(): AABB {
-    return new AABB(this.min.clone(), this.max.clone());
-  }
-}
+import { AABB } from './physics-aabb';
+import type {
+  ColliderShape,
+  CollisionContact,
+  CollisionEvent,
+  ConstraintConfig,
+  PhysicsSettings,
+  RaycastHit,
+  RigidBodyConfig,
+} from './physics-system-types';
+export { AABB } from './physics-aabb';
+export type {
+  BodyType,
+  ColliderType,
+  ColliderShape,
+  CollisionContact,
+  CollisionEvent,
+  ConstraintConfig,
+  ConstraintType,
+  Material,
+  PhysicsSettings,
+  RaycastHit,
+  RigidBodyConfig,
+} from './physics-system-types';
 
 // ============================================================================
 // RIGID BODY
