@@ -133,13 +133,35 @@ export function TerminalSkeleton() {
   )
 }
 
-export function EmptyEditorState() {
+export function EmptyEditorState({
+  onOpenFile,
+  onNewFile,
+}: {
+  onOpenFile?: () => void
+  onNewFile?: () => void
+}) {
   return (
     <div className="h-full flex items-center justify-center px-8 text-center">
-      <div>
+      <div className="max-w-md">
         <div className="text-sm font-medium text-slate-300 mb-2">No file selected</div>
         <div className="text-xs text-slate-500">
           Open a file from Explorer or use <span className="font-mono text-slate-400">Ctrl+O</span> to load a path.
+        </div>
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenFile}
+            className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+          >
+            Open File
+          </button>
+          <button
+            type="button"
+            onClick={onNewFile}
+            className="rounded border border-sky-500/40 bg-sky-500/20 px-3 py-1.5 text-xs font-semibold text-sky-100 hover:bg-sky-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+          >
+            New File
+          </button>
         </div>
       </div>
     </div>

@@ -1726,3 +1726,25 @@ Critical reading:
 1. Structural maintainability improved in a high-change route (`app/ide/page.tsx`), but this file remains a central orchestration boundary and should keep strict ownership.
 2. Primary residual risk is now coherence and claim discipline (historical-doc drift and capability overstatement), not monolith file size.
 3. Capability limitations remain explicit (`NOT_IMPLEMENTED` markers in API matrix) and must continue to avoid CTA-driven user dead-ends.
+
+## Delta 2026-02-20 CIX - Canonical document governance hardening
+Implemented:
+1. Added blocking scanner for canonical doc integrity:
+- `tools/canonical-doc-governance-scan.mjs`
+2. Added report baseline:
+- `29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+3. Added CI blocking integration in authority workflows and root script.
+
+Critical reading:
+1. Governance now covers not only path connectivity/workflows/secrets but also canonical document integrity.
+2. Residual documentation risk remains large historical corpus volume (`historical markdown > 3600`) and must be managed by archival policy, not by claim inflation.
+3. `unindexedCanonicalMarkdown=3` is explicit informational debt and should stay visible until intentional indexing/archival decision.
+
+## Delta 2026-02-20 CX - IDE first-minute UX hardening
+Implemented:
+1. Empty editor now has direct actions (`Open File`, `New File`) instead of passive instruction-only state.
+2. Status line moved to dedicated component with unsaved-count and keyboard hint support.
+
+Critical reading:
+1. This reduces onboarding friction in `/ide` without changing shell contract.
+2. Residual UX risk remains in feature-capability discoverability where endpoints are intentionally gated.

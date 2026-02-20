@@ -1745,3 +1745,29 @@ Triaged impact:
 1. IDE orchestration remains single route entry with reduced local concern density and clearer ownership boundaries.
 2. Governance evidence remains green (`25/26/27`) with no regression in connectivity/workflow/security hygiene.
 3. Residual backlog focus remains on capability-gate UX clarity and historical-doc noise reduction, not structural decomposition.
+
+## Delta 2026-02-20 CX - Canonical doc governance triage wave
+Delivered:
+1. Added canonical doc governance scanner + blocking gate:
+- `tools/canonical-doc-governance-scan.mjs`
+- `npm run qa:canonical-doc-governance`
+2. Added canonical governance evidence:
+- `29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+3. Wired governance gate into authority workflows:
+- `.github/workflows/ci.yml`
+- `.github/workflows/main.yml`
+
+Triaged impact:
+1. Canonical source drift risk reduced by enforcing missing-doc and duplicate-canonical-name blockers.
+2. Historical markdown sprawl remains explicit and measurable (still >3600 outside canonical folder).
+3. Backlog priority remains archival/ownership policy, not additional shell expansion.
+
+## Delta 2026-02-20 CXI - IDE first-minute UX triage wave
+Delivered:
+1. Added action-capable empty state in `/ide` editor area.
+2. Added dedicated status bar composition with unsaved count and shortcut hints.
+3. Kept route and capability contracts unchanged.
+
+Triaged impact:
+1. Reduced first-action latency for new sessions in advanced shell.
+2. Improved operational clarity for session state without adding fake capabilities.

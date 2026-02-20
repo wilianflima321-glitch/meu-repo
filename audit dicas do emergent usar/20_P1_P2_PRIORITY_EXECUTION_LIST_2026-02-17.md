@@ -344,3 +344,29 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `25`: `requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`
 - `26`: `staleTriggerPaths=0`, `issues=0`
 - `27`: `findings=0`
+
+### Delivered in this wave (canonical doc governance hardening)
+1. Added scanner:
+- `tools/canonical-doc-governance-scan.mjs`
+2. Added root gate:
+- `npm run qa:canonical-doc-governance`
+3. Added CI enforcement:
+- `.github/workflows/ci.yml`
+- `.github/workflows/main.yml`
+4. Added canonical evidence:
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+5. Refreshed governance baselines:
+- `25`: `totalChecks=31`, `requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`, `markdownTotal=3634`, `markdownCanonical=32`
+- `26`: `staleTriggerPaths=0`, `issues=0`
+- `27`: `findings=0`
+- `29`: `missingListedCanonicalDocs=0`, `canonicalNameConflictsOutside=0`
+
+### Delivered in this wave (IDE first-minute UX hardening)
+1. Added interactive empty state actions in IDE editor region:
+- `Open File`
+- `New File`
+2. Added dedicated IDE status bar component with:
+- unsaved file counter
+- project/workspace/file context
+- session hint and shortcut hint
+3. Updated surface map (`18`) with `WorkbenchStatusBar.tsx`.

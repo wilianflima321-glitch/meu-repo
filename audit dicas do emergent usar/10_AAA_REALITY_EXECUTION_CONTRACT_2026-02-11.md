@@ -4106,3 +4106,49 @@ Implemented:
 Decision lock:
 1. Next waves are constrained to closure and reliability hardening, not scope expansion.
 2. Benchmark claims remain evidence-gated and must follow canonical claim policy.
+
+## 161) Delta 2026-02-20 CXV - Canonical document governance gate
+
+Implemented:
+1. Added canonical document governance scanner:
+- `tools/canonical-doc-governance-scan.mjs`
+2. Added blocking root gate command:
+- `npm run qa:canonical-doc-governance`
+3. Added CI blocking integration in authority workflows:
+- `.github/workflows/ci.yml`
+- `.github/workflows/main.yml`
+4. Added canonical governance evidence report:
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+5. Registered report in canonical index:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+
+Validation snapshot:
+1. `qa:canonical-doc-governance` -> PASS:
+- `missingListedCanonicalDocs=0`
+- `canonicalNameConflictsOutside=0`
+- `unindexedCanonicalMarkdown=3` (informational)
+2. Governance scanners refreshed:
+- `qa:repo-connectivity` -> PASS (`requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`)
+- `qa:workflow-governance` -> PASS (`staleTriggerPaths=0`, `issues=0`)
+- `qa:secrets-critical` -> PASS (`findings=0`)
+
+Decision lock:
+1. Canonical filename conflicts outside `audit dicas do emergent usar/` are now merge-blocking.
+2. Missing files listed in `00_FONTE_CANONICA.md` are merge-blocking.
+3. Unindexed markdown files inside canonical folder remain triaged as informational until archival policy wave.
+
+## 162) Delta 2026-02-20 CXVI - IDE first-minute UX hardening
+
+Implemented:
+1. Added action-ready empty editor surface:
+- `cloud-web-app/web/components/ide/workbench-utils.tsx` (`EmptyEditorState` now provides `Open File` and `New File` actions).
+2. Added structured status bar component:
+- `cloud-web-app/web/components/ide/WorkbenchStatusBar.tsx`
+3. Updated `/ide` route orchestration to use new status component and unsaved-file counter:
+- `cloud-web-app/web/app/ide/page.tsx`
+4. Updated canonical interface map with status bar surface:
+- `audit dicas do emergent usar/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+
+Decision lock:
+1. No new capability claims; this wave is UX hardening on existing behavior.
+2. Empty editor no longer depends on implicit discovery in file explorer only.

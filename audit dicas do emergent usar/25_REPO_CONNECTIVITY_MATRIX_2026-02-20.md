@@ -1,15 +1,15 @@
 # 25_REPO_CONNECTIVITY_MATRIX_2026-02-20
 Status: GENERATED CONNECTIVITY SWEEP
-Generated: 2026-02-20T23:26:33.596Z
+Generated: 2026-02-20T23:47:32.114Z
 
 ## Summary
-- Total checks: 30
-- Resolved references: 30
+- Total checks: 31
+- Resolved references: 31
 - Missing required references: 0
 - Missing optional references: 0
 - Dead script references: 0
-- Markdown files (total): 3633
-- Markdown files (canonical): 31
+- Markdown files (total): 3634
+- Markdown files (canonical): 32
 - Markdown files (historical/outside canonical): 3602
 
 ## Required Missing References
@@ -49,7 +49,7 @@ Generated: 2026-02-20T23:26:33.596Z
 | `shared` | 0 | ACTIVE |
 | `src` | 2 | ACTIVE |
 | `tests` | 0 | ACTIVE |
-| `tools` | 18 | ACTIVE |
+| `tools` | 19 | ACTIVE |
 | `visual-regression.spec.ts-snapshots` | 0 | LEGACY_ACTIVE |
 
 ## Surface Ownership Matrix

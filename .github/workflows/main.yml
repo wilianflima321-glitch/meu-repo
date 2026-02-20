@@ -33,5 +33,8 @@ jobs:
       - name: Workflow governance scan (blocking)
         run: npm run qa:workflow-governance
 
+      - name: Canonical doc governance scan (blocking)
+        run: npm run qa:canonical-doc-governance
+
       - name: Critical secret hygiene scan (blocking)
         run: npm run qa:secrets-critical

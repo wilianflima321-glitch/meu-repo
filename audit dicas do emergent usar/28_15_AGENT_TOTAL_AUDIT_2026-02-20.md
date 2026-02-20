@@ -15,8 +15,8 @@ Close real gaps with zero scope expansion, keeping:
 - `requiredMissing=0`
 - `optionalMissing=0`
 - `deadScriptReferences=0`
-- `markdownTotal=3633`
-- `markdownCanonical=31`
+- `markdownTotal=3634`
+- `markdownCanonical=32`
 - `markdownHistorical=3602`
 2. Workflow governance sweep (`26`):
 - `totalWorkflows=14`
@@ -26,14 +26,18 @@ Close real gaps with zero scope expansion, keeping:
 - `issues=0`
 3. Secret hygiene sweep (`27`):
 - `findings=0`
-4. Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
+4. Canonical doc governance sweep (`29`):
+- `missingListedCanonicalDocs=0`
+- `canonicalNameConflictsOutside=0`
+- `unindexedCanonicalMarkdown=3` (informational)
+5. Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
 - `legacy-accent-tokens=0`
 - `admin-light-theme-tokens=0`
 - `admin-status-light-tokens=0`
 - `blocking-browser-dialogs=0`
 - `not-implemented-ui=6`
 - `not-implemented-noncritical=2`
-5. Architecture critical triage (`cloud-web-app/web/docs/ARCHITECTURE_CRITICAL_TRIAGE.md`):
+6. Architecture critical triage (`cloud-web-app/web/docs/ARCHITECTURE_CRITICAL_TRIAGE.md`):
 - `oversizedFiles>=1200 = 0`
 - `duplicateBasenames = 0`
 - `apiNotImplementedMarkers = 8`
@@ -51,6 +55,7 @@ Close real gaps with zero scope expansion, keeping:
 3. `8` compatibility wrappers in `/api/files/*` remain intentional debt and need telemetry-driven cutoff planning.
 4. One workflow is still `LEGACY_CANDIDATE` (`merge-unrelated-histories.yml`) and needs final owner decision.
 5. `/ide` route orchestration is still a large convergence point; it is better now but remains a high-change file.
+6. Three markdown files inside canonical folder remain intentionally unindexed (`00`, `11`, `12`) and require explicit archival/indexing decision.
 
 ## 5. 15-agent execution board (owner-locked)
 | Agent | Current verdict | Mandatory next action |
@@ -81,6 +86,7 @@ Close real gaps with zero scope expansion, keeping:
 2. Preserve zero-regression governance baseline in `25/26/27`.
 3. Keep `NOT_IMPLEMENTED` surfaces explicit and non-clickable in critical UX paths.
 4. Keep `/dashboard -> /ide` handoff deterministic with `projectId`, `file`, `entry`, `sessionId`, `taskId`.
+5. Keep first-minute `/ide` usability explicit (actionable empty state + status clarity) for non-expert users.
 
 ## 7. P1 residual backlog (frozen for next wave)
 1. Compatibility wrapper reduction strategy for `/api/files/*` (usage-based, non-breaking).

@@ -49,6 +49,9 @@ jobs:
       - name: Workflow governance gate
         run: npm run qa:workflow-governance
 
+      - name: Canonical doc governance gate
+        run: npm run qa:canonical-doc-governance
+
       - name: Critical secret hygiene gate
         run: npm run qa:secrets-critical
 

@@ -11,6 +11,7 @@ import TabBar, { TabProvider, useTabBar } from '@/components/editor/TabBar'
 import MonacoEditorPro from '@/components/editor/MonacoEditorPro'
 import CommandPaletteProvider from '@/components/ide/CommandPalette'
 import { WorkbenchContextBanner } from '@/components/ide/WorkbenchContextBanner'
+import { WorkbenchStatusBar } from '@/components/ide/WorkbenchStatusBar'
 import {
   ConfirmDialog,
   PromptDialog,
@@ -104,6 +105,10 @@ function IDEPageInner() {
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || null
   const activePath = activeTab?.path || null
   const activeState = activePath ? fileStates[activePath] : null
+  const unsavedCount = useMemo(
+    () => Object.values(fileStates).filter((state) => state.content !== state.savedContent).length,
+    [fileStates]
+  )
 
   useEffect(() => {
     if (queryProjectId && queryProjectId.trim()) {
@@ -603,12 +608,15 @@ function IDEPageInner() {
   }, [showContextBanner, contextBannerMessage])
 
   const statusNode = (
-    <span>
-      {statusMessage ||
-        (activePath
-          ? `Project: ${projectId} | Workspace: ${workspaceRoot} | ${activePath}${activeState?.content !== activeState?.savedContent ? ' (unsaved)' : ''}${startupSessionId ? ` | Studio: ${startupSessionId.slice(0, 8)}` : ''}`
-          : `Project: ${projectId} | Workspace: ${workspaceRoot}${startupSessionId ? ` | Studio: ${startupSessionId.slice(0, 8)}` : ''}`)}
-    </span>
+    <WorkbenchStatusBar
+      statusMessage={statusMessage}
+      projectId={projectId}
+      workspaceRoot={workspaceRoot}
+      activePath={activePath}
+      isActiveDirty={!!activeState && activeState.content !== activeState.savedContent}
+      unsavedCount={unsavedCount}
+      studioSessionId={startupSessionId}
+    />
   )
 
   return (
@@ -692,7 +700,12 @@ function IDEPageInner() {
                   enableAISuggestions
                 />
               ) : (
-                <EmptyEditorState />
+                <EmptyEditorState
+                  onOpenFile={handleOpenFile}
+                  onNewFile={() => {
+                    void handleCreate(workspaceRoot, 'file')
+                  }}
+                />
               )}
             </div>
             <PreviewPanel

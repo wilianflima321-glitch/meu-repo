@@ -33,6 +33,7 @@
     "portal:start": "npm --prefix cloud-web-app/web run start",
     "portal:build": "npm --prefix cloud-web-app/web run build",
     "qa:repo-connectivity": "node tools/repo-connectivity-scan.mjs --fail-on-missing --report \"audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md\"",
+    "qa:canonical-doc-governance": "node tools/canonical-doc-governance-scan.mjs --fail-on-issues --report \"audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md\"",
     "qa:secrets-critical": "node tools/critical-secret-scan.mjs --fail-on-findings --report \"audit dicas do emergent usar/27_CRITICAL_SECRET_SCAN_2026-02-20.md\"",
     "check:syntax:root": "npm run check:src-ts && npm run check:ai-ide-ts && npm run check:js-syntax",
     "qa:workflow-governance": "node tools/workflow-governance-scan.mjs --fail-on-issues --report \"audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md\""

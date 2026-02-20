@@ -373,3 +373,29 @@ Label: `VERIFIED_INTERNAL`
 - `25`: `requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`, `markdownTotal=3633`, `markdownCanonical=31`
 - `26`: `staleTriggerPaths=0`, `issues=0`, `legacyCandidate=1`
 - `27`: `findings=0`
+
+## 15) Delta 2026-02-20 - Canonical doc governance gate integration
+Label: `VERIFIED_INTERNAL`
+
+1. Added governance scanner:
+- `tools/canonical-doc-governance-scan.mjs`
+2. Added blocking root gate:
+- `npm run qa:canonical-doc-governance`
+3. Added CI authority enforcement:
+- `.github/workflows/ci.yml`
+- `.github/workflows/main.yml`
+4. Added canonical evidence report:
+- `29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+5. Refreshed governance evidence snapshot:
+- `25`: `requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`, `totalChecks=31`, `markdownTotal=3634`, `markdownCanonical=32`
+- `26`: `staleTriggerPaths=0`, `issues=0`
+- `27`: `findings=0`
+- `29`: `missingListedCanonicalDocs=0`, `canonicalNameConflictsOutside=0`, `unindexedCanonicalMarkdown=3`
+
+## 16) Delta 2026-02-20 - IDE first-minute UX hardening
+Label: `VERIFIED_INTERNAL`
+
+1. Added action-capable empty editor state in `workbench-utils.tsx`.
+2. Added `WorkbenchStatusBar.tsx` and wired it from `/app/ide/page.tsx`.
+3. Updated surface map (`18`) to include status-bar component path.
+4. Scope remains UX hardening only; no endpoint contract changes.

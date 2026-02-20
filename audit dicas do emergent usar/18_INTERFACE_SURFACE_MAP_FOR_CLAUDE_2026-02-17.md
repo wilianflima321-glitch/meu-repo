@@ -39,6 +39,7 @@ Non-negotiable:
 7. Workbench context mapping/query helpers: `cloud-web-app/web/components/ide/workbench-context.ts`
 8. Workbench info panels (search/git/output/problems/debug/ports): `cloud-web-app/web/components/ide/WorkbenchPanels.tsx`
 9. Workbench handoff banner component: `cloud-web-app/web/components/ide/WorkbenchContextBanner.tsx`
+10. Workbench status bar composition: `cloud-web-app/web/components/ide/WorkbenchStatusBar.tsx`
 
 ### 2.2 Editor experience
 1. Monaco editor core: `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
@@ -167,6 +168,11 @@ CI workflows:
 - report: `audit dicas do emergent usar/27_CRITICAL_SECRET_SCAN_2026-02-20.md`
 - gate command: `npm run qa:secrets-critical`
 
+### Canonical docs governance surface
+- scanner: `tools/canonical-doc-governance-scan.mjs`
+- report: `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- gate command: `npm run qa:canonical-doc-governance`
+
 ### Legacy surface exposure policy
 - `cloud-web-app/web/components/studio/StudioHome.tsx` exposes legacy dashboard CTA only when `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.
 - Default production path keeps legacy CTA hidden to avoid duplicate primary journey.
@@ -176,3 +182,4 @@ CI workflows:
 - Shared query/entry maps moved to `cloud-web-app/web/components/ide/workbench-context.ts`.
 - Common panel rendering moved to `cloud-web-app/web/components/ide/WorkbenchPanels.tsx`.
 - Prompt/confirm/status hooks moved to `cloud-web-app/web/components/ide/WorkbenchDialogs.tsx`.
+- Status line composition moved to `cloud-web-app/web/components/ide/WorkbenchStatusBar.tsx`.
