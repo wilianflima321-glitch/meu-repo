@@ -33,6 +33,7 @@ This file defines the canonical source of truth for the Aethel platform. The ent
 - 25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md
 - 26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md
 - 27_CRITICAL_SECRET_SCAN_2026-02-20.md
+- 28_15_AGENT_TOTAL_AUDIT_2026-02-20.md
 
 ## Master Contract Policy
 - `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md` is the single execution master.

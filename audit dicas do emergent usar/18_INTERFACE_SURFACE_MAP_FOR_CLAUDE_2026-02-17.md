@@ -34,6 +34,11 @@ Non-negotiable:
 2. Preview panel: `cloud-web-app/web/components/ide/PreviewPanel.tsx`
 3. AI side panel container: `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
 4. Command palette (canonical): `cloud-web-app/web/components/ide/CommandPalette.tsx`
+5. Workbench dialogs/hook contracts: `cloud-web-app/web/components/ide/WorkbenchDialogs.tsx`
+6. Workbench shared file-tree/path helpers: `cloud-web-app/web/components/ide/workbench-utils.tsx`
+7. Workbench context mapping/query helpers: `cloud-web-app/web/components/ide/workbench-context.ts`
+8. Workbench info panels (search/git/output/problems/debug/ports): `cloud-web-app/web/components/ide/WorkbenchPanels.tsx`
+9. Workbench handoff banner component: `cloud-web-app/web/components/ide/WorkbenchContextBanner.tsx`
 
 ### 2.2 Editor experience
 1. Monaco editor core: `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
@@ -165,3 +170,9 @@ CI workflows:
 ### Legacy surface exposure policy
 - `cloud-web-app/web/components/studio/StudioHome.tsx` exposes legacy dashboard CTA only when `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.
 - Default production path keeps legacy CTA hidden to avoid duplicate primary journey.
+
+### IDE orchestration modularization
+- `cloud-web-app/web/app/ide/page.tsx` remains route orchestrator only.
+- Shared query/entry maps moved to `cloud-web-app/web/components/ide/workbench-context.ts`.
+- Common panel rendering moved to `cloud-web-app/web/components/ide/WorkbenchPanels.tsx`.
+- Prompt/confirm/status hooks moved to `cloud-web-app/web/components/ide/WorkbenchDialogs.tsx`.

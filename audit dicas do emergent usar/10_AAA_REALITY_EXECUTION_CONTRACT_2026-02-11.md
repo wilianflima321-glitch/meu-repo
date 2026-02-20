@@ -4067,3 +4067,42 @@ Implemented:
 Decision lock:
 1. Studio Home remains chat/preview-first entry with deterministic session flow and no scope expansion.
 2. Block modularization is structural/UX hardening only; capability contracts and route behavior remain unchanged.
+
+## 159) Delta 2026-02-20 CXIII - IDE orchestration modularization wave
+
+Implemented:
+1. Extracted Workbench dialog and status hooks from `/ide` route orchestrator:
+- `cloud-web-app/web/components/ide/WorkbenchDialogs.tsx`
+2. Extracted shared file-tree/path/language utility surface:
+- `cloud-web-app/web/components/ide/workbench-utils.tsx`
+3. Extracted query entry maps and context message helpers:
+- `cloud-web-app/web/components/ide/workbench-context.ts`
+4. Extracted static workbench side/bottom informational panel components:
+- `cloud-web-app/web/components/ide/WorkbenchPanels.tsx`
+5. Extracted handoff context banner surface:
+- `cloud-web-app/web/components/ide/WorkbenchContextBanner.tsx`
+6. Updated IDE route orchestrator to consume extracted modules:
+- `cloud-web-app/web/app/ide/page.tsx`
+7. Updated canonical surface map:
+- `audit dicas do emergent usar/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+
+Decision lock:
+1. `/ide` remains the advanced shell route; extraction is structural only.
+2. Query/handoff contracts remain unchanged (`projectId`, `file`, `entry`, `sessionId`, `taskId`).
+3. No feature claim change introduced.
+
+## 160) Delta 2026-02-20 CXIV - 15-agent total audit baseline publication
+
+Implemented:
+1. Added canonical total-audit execution package:
+- `audit dicas do emergent usar/28_15_AGENT_TOTAL_AUDIT_2026-02-20.md`
+2. Registered document in canonical source list:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+3. Refreshed factual governance baselines from generated evidence:
+- `25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md` (`requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`)
+- `26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md` (`staleTriggerPaths=0`, `issues=0`)
+- `27_CRITICAL_SECRET_SCAN_2026-02-20.md` (`findings=0`)
+
+Decision lock:
+1. Next waves are constrained to closure and reliability hardening, not scope expansion.
+2. Benchmark claims remain evidence-gated and must follow canonical claim policy.

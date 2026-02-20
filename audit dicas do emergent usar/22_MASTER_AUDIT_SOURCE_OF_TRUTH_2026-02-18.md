@@ -355,3 +355,21 @@ Label: `VERIFIED_INTERNAL`
 4. Architecture triage reconfirmed:
 - `oversizedFiles=0`
 - `duplicateBasenames=0`.
+
+## 14) Delta 2026-02-20 - IDE modularization + 15-agent closure register
+Label: `VERIFIED_INTERNAL`
+
+1. `/ide` route decomposition delivered:
+- `WorkbenchDialogs.tsx`
+- `workbench-utils.tsx`
+- `workbench-context.ts`
+- `WorkbenchPanels.tsx`
+- `WorkbenchContextBanner.tsx`
+2. Route orchestrator updated:
+- `cloud-web-app/web/app/ide/page.tsx` now delegates dialog, context maps, panel rendering, and banner rendering to dedicated modules.
+3. New canonical total audit register:
+- `28_15_AGENT_TOTAL_AUDIT_2026-02-20.md`
+4. Governance evidence refreshed:
+- `25`: `requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`, `markdownTotal=3633`, `markdownCanonical=31`
+- `26`: `staleTriggerPaths=0`, `issues=0`, `legacyCandidate=1`
+- `27`: `findings=0`

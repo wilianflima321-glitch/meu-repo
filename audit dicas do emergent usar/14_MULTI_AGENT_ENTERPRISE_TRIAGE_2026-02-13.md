@@ -1727,3 +1727,21 @@ Triaged impact:
 1. UI ownership clarity improved: each high-change block now has isolated file boundary.
 2. UX polish velocity increases (targeted edits without touching orchestration shell).
 3. No scope drift: capabilities, API contracts, and gating behavior remain unchanged.
+
+## Delta 2026-02-20 CIX - IDE route decomposition + 15-agent total audit triage
+Delivered:
+1. Split `/ide` route supporting concerns into dedicated modules:
+- `components/ide/WorkbenchDialogs.tsx`
+- `components/ide/workbench-utils.tsx`
+- `components/ide/workbench-context.ts`
+- `components/ide/WorkbenchPanels.tsx`
+- `components/ide/WorkbenchContextBanner.tsx`
+2. Updated route orchestrator to consume extracted modules:
+- `app/ide/page.tsx`
+3. Published cross-domain closure audit:
+- `28_15_AGENT_TOTAL_AUDIT_2026-02-20.md`
+
+Triaged impact:
+1. IDE orchestration remains single route entry with reduced local concern density and clearer ownership boundaries.
+2. Governance evidence remains green (`25/26/27`) with no regression in connectivity/workflow/security hygiene.
+3. Residual backlog focus remains on capability-gate UX clarity and historical-doc noise reduction, not structural decomposition.

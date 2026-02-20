@@ -320,3 +320,27 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. Preserved `cloud-web-app/web/components/studio/StudioHome.tsx` as orchestration boundary.
 3. Updated `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md` with new block-level entry points.
 4. Revalidated architecture triage baseline with decomposition preserved (`oversizedFiles=0`, `duplicateBasenames=0`).
+
+### Delivered in this wave (IDE route modularization)
+1. Extracted `/ide` route dialog/status hooks into:
+- `cloud-web-app/web/components/ide/WorkbenchDialogs.tsx`
+2. Extracted shared workbench utils into:
+- `cloud-web-app/web/components/ide/workbench-utils.tsx`
+3. Extracted entry/query context maps into:
+- `cloud-web-app/web/components/ide/workbench-context.ts`
+4. Extracted static workbench info panel surfaces into:
+- `cloud-web-app/web/components/ide/WorkbenchPanels.tsx`
+5. Extracted handoff context banner into:
+- `cloud-web-app/web/components/ide/WorkbenchContextBanner.tsx`
+6. Updated `cloud-web-app/web/app/ide/page.tsx` to orchestration boundary using the extracted modules.
+7. Updated `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md` with new IDE surface boundaries.
+
+### Delivered in this wave (15-agent total audit package)
+1. Added canonical closure/audit pack:
+- `audit dicas do emergent usar/28_15_AGENT_TOTAL_AUDIT_2026-02-20.md`
+2. Registered in canonical index:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+3. Refreshed generated governance evidence baselines:
+- `25`: `requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`
+- `26`: `staleTriggerPaths=0`, `issues=0`
+- `27`: `findings=0`

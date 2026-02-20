@@ -1709,3 +1709,20 @@ Critical reading:
 1. Maintenance risk moved from one dense UI shell to scoped blocks with clearer ownership boundaries.
 2. Residual risk remains behavioral parity (needs freeze gate suite), not structural coupling.
 3. No claim uplift introduced; this is UX/maintainability hardening under current scope.
+
+## Delta 2026-02-20 CVIII - IDE orchestration decomposition and 15-agent closure audit
+Implemented:
+1. `/ide` route helper/UI decomposition:
+- dialogs/status hooks moved to `components/ide/WorkbenchDialogs.tsx`
+- shared path/tree helpers moved to `components/ide/workbench-utils.tsx`
+- entry/query mapping moved to `components/ide/workbench-context.ts`
+- informational panel rendering moved to `components/ide/WorkbenchPanels.tsx`
+- handoff banner moved to `components/ide/WorkbenchContextBanner.tsx`
+2. Canonical 15-agent execution audit published:
+- `28_15_AGENT_TOTAL_AUDIT_2026-02-20.md`
+3. Governance evidence refreshed (`25/26/27`) with current generated snapshots.
+
+Critical reading:
+1. Structural maintainability improved in a high-change route (`app/ide/page.tsx`), but this file remains a central orchestration boundary and should keep strict ownership.
+2. Primary residual risk is now coherence and claim discipline (historical-doc drift and capability overstatement), not monolith file size.
+3. Capability limitations remain explicit (`NOT_IMPLEMENTED` markers in API matrix) and must continue to avoid CTA-driven user dead-ends.
