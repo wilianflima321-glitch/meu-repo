@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Aethel MCP Server - Built-in Tools Server
  * 
  * Servidor MCP nativo do Aethel IDE com todas as ferramentas
@@ -11,280 +11,9 @@
 
 import { MCPServer, MCPTool, MCPToolResult, MCPResource, MCPPrompt } from './mcp-core';
 import { prisma } from '@/lib/db';
+import { getFileSystemAdapter } from './aethel-mcp-filesystem';
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
-
-// Verifica se deve usar filesystem real ou Prisma
-const USE_REAL_FILESYSTEM = typeof process !== 'undefined' && 
-  process.env.USE_REAL_FILESYSTEM === 'true';
-
-// Workspace root para operações de filesystem real
-const WORKSPACE_ROOT = typeof process !== 'undefined' 
-  ? process.env.WORKSPACE_ROOT || process.cwd()
-  : '/workspace';
-
-// Helper para resolver paths seguros
-function resolveSecurePath(basePath: string, relativePath: string): string | null {
-  const path = typeof require !== 'undefined' ? require('path') : null;
-  if (!path) return null;
-  
-  const resolved = path.resolve(basePath, relativePath);
-  // Previne path traversal
-  if (!resolved.startsWith(basePath)) {
-    return null;
-  }
-  return resolved;
-}
-
-// ============================================================================
-// FILESYSTEM ABSTRACTION LAYER
-// ============================================================================
-
-interface FileSystemAdapter {
-  readFile(filePath: string, options?: { startLine?: number; endLine?: number }): Promise<{ content: string; language?: string } | null>;
-  writeFile(filePath: string, content: string): Promise<boolean>;
-  deleteFile(filePath: string): Promise<boolean>;
-  listDirectory(dirPath: string, recursive?: boolean): Promise<string[]>;
-  exists(filePath: string): Promise<boolean>;
-  mkdir(dirPath: string): Promise<boolean>;
-}
-
-// Real Filesystem Adapter (Node.js)
-async function createRealFSAdapter(): Promise<FileSystemAdapter | null> {
-  if (typeof require === 'undefined') return null;
-  
-  try {
-    const fs = require('fs').promises;
-    const path = require('path');
-    
-    return {
-      async readFile(filePath, options) {
-        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
-        if (!fullPath) return null;
-        
-        try {
-          let content = await fs.readFile(fullPath, 'utf-8');
-          
-          if (options?.startLine || options?.endLine) {
-            const lines = content.split('\n');
-            const start = Math.max(0, (options.startLine || 1) - 1);
-            const end = Math.min(lines.length, options.endLine || lines.length);
-            content = lines.slice(start, end).join('\n');
-          }
-          
-          // Inferir linguagem pela extensão
-          const ext = path.extname(filePath).toLowerCase();
-          const langMap: Record<string, string> = {
-            '.ts': 'typescript', '.tsx': 'typescript',
-            '.js': 'javascript', '.jsx': 'javascript',
-            '.json': 'json', '.css': 'css', '.html': 'html',
-            '.py': 'python', '.rs': 'rust', '.go': 'go',
-            '.md': 'markdown', '.yaml': 'yaml', '.yml': 'yaml',
-          };
-          
-          return { content, language: langMap[ext] };
-        } catch {
-          return null;
-        }
-      },
-      
-      async writeFile(filePath, content) {
-        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
-        if (!fullPath) return false;
-        
-        try {
-          const dir = path.dirname(fullPath);
-          await fs.mkdir(dir, { recursive: true });
-          await fs.writeFile(fullPath, content, 'utf-8');
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      
-      async deleteFile(filePath) {
-        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
-        if (!fullPath) return false;
-        
-        try {
-          await fs.unlink(fullPath);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      
-      async listDirectory(dirPath, recursive = false) {
-        const fullPath = resolveSecurePath(WORKSPACE_ROOT, dirPath);
-        if (!fullPath) return [];
-        
-        try {
-          if (recursive) {
-            const results: string[] = [];
-            async function walk(dir: string, base: string) {
-              const entries = await fs.readdir(dir, { withFileTypes: true });
-              for (const entry of entries) {
-                const rel = path.join(base, entry.name);
-                results.push(rel);
-                if (entry.isDirectory()) {
-                  await walk(path.join(dir, entry.name), rel);
-                }
-              }
-            }
-            await walk(fullPath, dirPath);
-            return results;
-          } else {
-            const entries = await fs.readdir(fullPath, { withFileTypes: true });
-            return entries.map(e => path.join(dirPath, e.name + (e.isDirectory() ? '/' : '')));
-          }
-        } catch {
-          return [];
-        }
-      },
-      
-      async exists(filePath) {
-        const fullPath = resolveSecurePath(WORKSPACE_ROOT, filePath);
-        if (!fullPath) return false;
-        
-        try {
-          await fs.access(fullPath);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      
-      async mkdir(dirPath) {
-        const fullPath = resolveSecurePath(WORKSPACE_ROOT, dirPath);
-        if (!fullPath) return false;
-        
-        try {
-          await fs.mkdir(fullPath, { recursive: true });
-          return true;
-        } catch {
-          return false;
-        }
-      },
-    };
-  } catch {
-    return null;
-  }
-}
-
-// Prisma Database Adapter
-const prismaAdapter: FileSystemAdapter = {
-  async readFile(filePath, options) {
-    try {
-      const file = await prisma.file.findFirst({
-        where: { path: { contains: filePath } },
-        select: { content: true, language: true },
-      });
-      
-      if (!file) return null;
-      
-      let content = file.content || '';
-      
-      if (options?.startLine || options?.endLine) {
-        const lines = content.split('\n');
-        const start = Math.max(0, (options.startLine || 1) - 1);
-        const end = Math.min(lines.length, options.endLine || lines.length);
-        content = lines.slice(start, end).join('\n');
-      }
-      
-      return { content, language: file.language || undefined };
-    } catch {
-      return null;
-    }
-  },
-  
-  async writeFile(filePath, content) {
-    try {
-      await prisma.file.upsert({
-        where: { id: filePath },
-        create: { path: filePath, content, projectId: 'default' },
-        update: { content },
-      });
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  
-  async deleteFile(filePath) {
-    try {
-      await prisma.file.deleteMany({ where: { path: filePath } });
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  
-  async listDirectory(dirPath, recursive = false) {
-    try {
-      const files = await prisma.file.findMany({
-        where: { path: { startsWith: dirPath } },
-        select: { path: true },
-      });
-      
-      const items = files.map(f => f.path);
-      
-      if (!recursive) {
-        const depth = dirPath.split('/').filter(Boolean).length;
-        return items.filter(p => p.split('/').filter(Boolean).length === depth + 1);
-      }
-      
-      return items;
-    } catch {
-      return [];
-    }
-  },
-  
-  async exists(filePath) {
-    try {
-      const file = await prisma.file.findFirst({ where: { path: filePath } });
-      return !!file;
-    } catch {
-      return false;
-    }
-  },
-  
-  async mkdir() {
-    // Prisma não precisa criar diretórios
-    return true;
-  },
-};
-
-// Get the appropriate adapter
-let fsAdapter: FileSystemAdapter = prismaAdapter;
-
-// Initialize real FS adapter if enabled
-if (USE_REAL_FILESYSTEM) {
-  createRealFSAdapter().then(adapter => {
-    if (adapter) {
-      fsAdapter = adapter;
-      console.log('[MCP] Using real filesystem adapter');
-    } else {
-      console.log('[MCP] Falling back to Prisma adapter');
-    }
-  });
-}
-
-// Export for external use
-export function getFileSystemAdapter(): FileSystemAdapter {
-  return fsAdapter;
-}
-
-export function setFileSystemMode(useRealFS: boolean): void {
-  if (useRealFS) {
-    createRealFSAdapter().then(adapter => {
-      if (adapter) fsAdapter = adapter;
-    });
-  } else {
-    fsAdapter = prismaAdapter;
-  }
-}
+export { getFileSystemAdapter, setFileSystemMode } from './aethel-mcp-filesystem';
 
 // ============================================================================
 // AETHEL MCP SERVER INSTANCE
@@ -299,7 +28,7 @@ export const aethelMCPServer = new MCPServer('aethel-ide', '1.0.0');
 aethelMCPServer.registerTool(
   {
     name: 'read_file',
-    description: 'Lê o conteúdo de um arquivo do projeto',
+    description: 'LÃª o conteÃºdo de um arquivo do projeto',
     inputSchema: {
       type: 'object',
       properties: {
@@ -314,10 +43,10 @@ aethelMCPServer.registerTool(
     const { path, startLine, endLine } = args as { path: string; startLine?: number; endLine?: number };
     
     try {
-      const result = await fsAdapter.readFile(path, { startLine, endLine });
+      const result = await getFileSystemAdapter().readFile(path, { startLine, endLine });
       
       if (!result) {
-        return { content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], isError: true };
+        return { content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${path}` }], isError: true };
       }
       
       return { content: [{ type: 'text', text: result.content }] };
@@ -338,7 +67,7 @@ aethelMCPServer.registerTool(
       type: 'object',
       properties: {
         path: { type: 'string', description: 'Caminho do arquivo' },
-        content: { type: 'string', description: 'Conteúdo do arquivo' },
+        content: { type: 'string', description: 'ConteÃºdo do arquivo' },
       },
       required: ['path', 'content'],
     },
@@ -347,7 +76,7 @@ aethelMCPServer.registerTool(
     const { path, content } = args as { path: string; content: string };
     
     try {
-      const success = await fsAdapter.writeFile(path, content);
+      const success = await getFileSystemAdapter().writeFile(path, content);
       
       if (!success) {
         return { content: [{ type: 'text', text: `Erro ao salvar arquivo: ${path}` }], isError: true };
@@ -379,7 +108,7 @@ aethelMCPServer.registerTool(
     const { path } = args as { path: string };
     
     try {
-      const success = await fsAdapter.deleteFile(path);
+      const success = await getFileSystemAdapter().deleteFile(path);
       
       if (!success) {
         return { content: [{ type: 'text', text: `Erro ao deletar arquivo: ${path}` }], isError: true };
@@ -398,11 +127,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'create_directory',
-    description: 'Cria um diretório no projeto',
+    description: 'Cria um diretÃ³rio no projeto',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do diretório' },
+        path: { type: 'string', description: 'Caminho do diretÃ³rio' },
       },
       required: ['path'],
     },
@@ -411,16 +140,16 @@ aethelMCPServer.registerTool(
     const { path } = args as { path: string };
     
     try {
-      const success = await fsAdapter.mkdir(path);
+      const success = await getFileSystemAdapter().mkdir(path);
       
       if (!success) {
-        return { content: [{ type: 'text', text: `Erro ao criar diretório: ${path}` }], isError: true };
+        return { content: [{ type: 'text', text: `Erro ao criar diretÃ³rio: ${path}` }], isError: true };
       }
       
-      return { content: [{ type: 'text', text: `Diretório criado: ${path}` }] };
+      return { content: [{ type: 'text', text: `DiretÃ³rio criado: ${path}` }] };
     } catch (error) {
       return { 
-        content: [{ type: 'text', text: `Erro ao criar diretório: ${error}` }], 
+        content: [{ type: 'text', text: `Erro ao criar diretÃ³rio: ${error}` }], 
         isError: true 
       };
     }
@@ -443,7 +172,7 @@ aethelMCPServer.registerTool(
     const { path } = args as { path: string };
     
     try {
-      const exists = await fsAdapter.exists(path);
+      const exists = await getFileSystemAdapter().exists(path);
       return { content: [{ type: 'text', text: exists ? 'true' : 'false' }] };
     } catch (error) {
       return { 
@@ -457,18 +186,18 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'edit_file',
-    description: 'Edita uma parte específica de um arquivo (replace, insert, delete)',
+    description: 'Edita uma parte especÃ­fica de um arquivo (replace, insert, delete)',
     inputSchema: {
       type: 'object',
       properties: {
         path: { type: 'string', description: 'Caminho do arquivo' },
         operation: { 
           type: 'string', 
-          description: 'Tipo de operação',
+          description: 'Tipo de operaÃ§Ã£o',
           enum: ['replace', 'insert_before', 'insert_after', 'delete'],
         },
         search: { type: 'string', description: 'Texto a ser encontrado' },
-        replace: { type: 'string', description: 'Texto de substituição/inserção' },
+        replace: { type: 'string', description: 'Texto de substituiÃ§Ã£o/inserÃ§Ã£o' },
       },
       required: ['path', 'operation', 'search'],
     },
@@ -482,16 +211,16 @@ aethelMCPServer.registerTool(
     };
     
     try {
-      const file = await fsAdapter.readFile(path);
+      const file = await getFileSystemAdapter().readFile(path);
       if (!file) {
-        return { content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], isError: true };
+        return { content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${path}` }], isError: true };
       }
       
       let content = file.content;
       const index = content.indexOf(search);
       
       if (index === -1) {
-        return { content: [{ type: 'text', text: `Texto não encontrado no arquivo` }], isError: true };
+        return { content: [{ type: 'text', text: `Texto nÃ£o encontrado no arquivo` }], isError: true };
       }
       
       switch (operation) {
@@ -509,9 +238,9 @@ aethelMCPServer.registerTool(
           break;
       }
       
-      const success = await fsAdapter.writeFile(path, content);
+      const success = await getFileSystemAdapter().writeFile(path, content);
       if (!success) {
-        return { content: [{ type: 'text', text: `Erro ao salvar edição` }], isError: true };
+        return { content: [{ type: 'text', text: `Erro ao salvar ediÃ§Ã£o` }], isError: true };
       }
       
       return { content: [{ type: 'text', text: `Arquivo editado: ${path}` }] };
@@ -524,11 +253,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'list_directory',
-    description: 'Lista arquivos e pastas em um diretório',
+    description: 'Lista arquivos e pastas em um diretÃ³rio',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do diretório' },
+        path: { type: 'string', description: 'Caminho do diretÃ³rio' },
         recursive: { type: 'boolean', description: 'Listar recursivamente' },
       },
       required: ['path'],
@@ -538,8 +267,8 @@ aethelMCPServer.registerTool(
     const { path, recursive } = args as { path: string; recursive?: boolean };
     
     try {
-      const items = await fsAdapter.listDirectory(path, recursive);
-      return { content: [{ type: 'text', text: items.join('\n') || 'Diretório vazio' }] };
+      const items = await getFileSystemAdapter().listDirectory(path, recursive);
+      return { content: [{ type: 'text', text: items.join('\n') || 'DiretÃ³rio vazio' }] };
     } catch (error) {
       return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
     }
@@ -560,7 +289,7 @@ aethelMCPServer.registerTool(
         query: { type: 'string', description: 'Texto ou regex para buscar' },
         isRegex: { type: 'boolean', description: 'Tratar como regex' },
         filePattern: { type: 'string', description: 'Filtro de arquivos (glob)' },
-        maxResults: { type: 'number', description: 'Máximo de resultados' },
+        maxResults: { type: 'number', description: 'MÃ¡ximo de resultados' },
       },
       required: ['query'],
     },
@@ -618,14 +347,14 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'get_definitions',
-    description: 'Encontra definições de funções, classes, variáveis',
+    description: 'Encontra definiÃ§Ãµes de funÃ§Ãµes, classes, variÃ¡veis',
     inputSchema: {
       type: 'object',
       properties: {
-        symbol: { type: 'string', description: 'Nome do símbolo' },
+        symbol: { type: 'string', description: 'Nome do sÃ­mbolo' },
         type: { 
           type: 'string', 
-          description: 'Tipo de símbolo',
+          description: 'Tipo de sÃ­mbolo',
           enum: ['function', 'class', 'interface', 'type', 'variable', 'any'],
         },
       },
@@ -680,7 +409,7 @@ aethelMCPServer.registerTool(
           type: 'text', 
           text: results.length > 0 
             ? results.join('\n') 
-            : `Nenhuma definição encontrada para "${symbol}"` 
+            : `Nenhuma definiÃ§Ã£o encontrada para "${symbol}"` 
         }] 
       };
     } catch (error) {
@@ -701,7 +430,7 @@ aethelMCPServer.registerTool(
       type: 'object',
       properties: {
         command: { type: 'string', description: 'Comando a executar' },
-        cwd: { type: 'string', description: 'Diretório de trabalho' },
+        cwd: { type: 'string', description: 'DiretÃ³rio de trabalho' },
         timeout: { type: 'number', description: 'Timeout em ms (default: 30000)' },
       },
       required: ['command'],
@@ -747,7 +476,7 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'git_status',
-    description: 'Mostra o status do repositório Git',
+    description: 'Mostra o status do repositÃ³rio Git',
     inputSchema: {
       type: 'object',
       properties: {},
@@ -768,11 +497,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'git_diff',
-    description: 'Mostra as diferenças de arquivos modificados',
+    description: 'Mostra as diferenÃ§as de arquivos modificados',
     inputSchema: {
       type: 'object',
       properties: {
-        file: { type: 'string', description: 'Arquivo específico (opcional)' },
+        file: { type: 'string', description: 'Arquivo especÃ­fico (opcional)' },
         staged: { type: 'boolean', description: 'Mostrar apenas staged' },
       },
     },
@@ -798,7 +527,7 @@ aethelMCPServer.registerTool(
         diffText += data.unstaged.map((f: any) => `${f.status}: ${f.path}`).join('\n');
       }
       
-      return { content: [{ type: 'text', text: diffText || 'Nenhuma mudança' }] };
+      return { content: [{ type: 'text', text: diffText || 'Nenhuma mudanÃ§a' }] };
     } catch (error) {
       return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
     }
@@ -808,12 +537,12 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'git_commit',
-    description: 'Cria um commit com as mudanças staged',
+    description: 'Cria um commit com as mudanÃ§as staged',
     inputSchema: {
       type: 'object',
       properties: {
         message: { type: 'string', description: 'Mensagem do commit' },
-        files: { type: 'string', description: 'Arquivos específicos (separados por vírgula)' },
+        files: { type: 'string', description: 'Arquivos especÃ­ficos (separados por vÃ­rgula)' },
       },
       required: ['message'],
     },
@@ -859,7 +588,7 @@ aethelMCPServer.registerTool(
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Termo de busca' },
-        numResults: { type: 'number', description: 'Número de resultados (1-10)' },
+        numResults: { type: 'number', description: 'NÃºmero de resultados (1-10)' },
       },
       required: ['query'],
     },
@@ -882,7 +611,7 @@ aethelMCPServer.registerTool(
       }
       
       if (data.RelatedTopics) {
-        results.push('\n### Tópicos Relacionados:');
+        results.push('\n### TÃ³picos Relacionados:');
         data.RelatedTopics.slice(0, numResults).forEach((topic: any) => {
           if (topic.Text) {
             results.push(`- ${topic.Text}`);
@@ -905,7 +634,7 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'fetch_url',
-    description: 'Lê o conteúdo de uma URL',
+    description: 'LÃª o conteÃºdo de uma URL',
     inputSchema: {
       type: 'object',
       properties: {
@@ -988,11 +717,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'create_level',
-    description: 'Cria um novo nível/mapa',
+    description: 'Cria um novo nÃ­vel/mapa',
     inputSchema: {
       type: 'object',
       properties: {
-        name: { type: 'string', description: 'Nome do nível' },
+        name: { type: 'string', description: 'Nome do nÃ­vel' },
         template: { 
           type: 'string', 
           description: 'Template base',
@@ -1034,7 +763,7 @@ aethelMCPServer.registerTool(
     return { 
       content: [{ 
         type: 'text', 
-        text: `Nível criado: ${name}\n\n${JSON.stringify(levelData, null, 2)}` 
+        text: `NÃ­vel criado: ${name}\n\n${JSON.stringify(levelData, null, 2)}` 
       }] 
     };
   }
@@ -1063,7 +792,7 @@ aethelMCPServer.registerResource(
   {
     uri: 'aethel://config/settings',
     name: 'IDE Settings',
-    description: 'Configurações atuais do IDE',
+    description: 'ConfiguraÃ§Ãµes atuais do IDE',
     mimeType: 'application/json',
   },
   async () => {
@@ -1084,41 +813,41 @@ aethelMCPServer.registerResource(
 aethelMCPServer.registerPrompt(
   {
     name: 'code_review',
-    description: 'Analisa código e sugere melhorias',
+    description: 'Analisa cÃ³digo e sugere melhorias',
     arguments: [
       { name: 'file', description: 'Arquivo para revisar', required: true },
     ],
   },
   async (args) => {
     const file = args.file as string;
-    return `Analise o arquivo ${file} e forneça:
+    return `Analise o arquivo ${file} e forneÃ§a:
 1. Bugs potenciais
 2. Melhorias de performance
-3. Melhores práticas não seguidas
-4. Sugestões de refatoração
-5. Problemas de segurança`;
+3. Melhores prÃ¡ticas nÃ£o seguidas
+4. SugestÃµes de refatoraÃ§Ã£o
+5. Problemas de seguranÃ§a`;
   }
 );
 
 aethelMCPServer.registerPrompt(
   {
     name: 'explain_code',
-    description: 'Explica o que um trecho de código faz',
+    description: 'Explica o que um trecho de cÃ³digo faz',
     arguments: [
-      { name: 'code', description: 'Código para explicar', required: true },
+      { name: 'code', description: 'CÃ³digo para explicar', required: true },
     ],
   },
   async (args) => {
-    return `Explique detalhadamente o que este código faz:
+    return `Explique detalhadamente o que este cÃ³digo faz:
 
 \`\`\`
 ${args.code}
 \`\`\`
 
 Inclua:
-1. Propósito geral
-2. Explicação linha por linha
-3. Dependências e efeitos colaterais
+1. PropÃ³sito geral
+2. ExplicaÃ§Ã£o linha por linha
+3. DependÃªncias e efeitos colaterais
 4. Exemplos de uso`;
   }
 );
@@ -1126,19 +855,19 @@ Inclua:
 aethelMCPServer.registerPrompt(
   {
     name: 'generate_tests',
-    description: 'Gera testes unitários para código',
+    description: 'Gera testes unitÃ¡rios para cÃ³digo',
     arguments: [
       { name: 'file', description: 'Arquivo para testar', required: true },
     ],
   },
   async (args) => {
-    return `Gere testes unitários completos para o arquivo ${args.file}:
+    return `Gere testes unitÃ¡rios completos para o arquivo ${args.file}:
 
 1. Use Jest como framework
 2. Cubra todos os casos de borda
-3. Inclua mocks quando necessário
+3. Inclua mocks quando necessÃ¡rio
 4. Teste tanto casos de sucesso quanto de erro
-5. Adicione descrições claras para cada teste`;
+5. Adicione descriÃ§Ãµes claras para cada teste`;
   }
 );
 
@@ -1149,12 +878,12 @@ aethelMCPServer.registerPrompt(
 aethelMCPServer.registerTool(
   {
     name: 'delete_file',
-    description: 'Deleta um arquivo ou diretório do projeto',
+    description: 'Deleta um arquivo ou diretÃ³rio do projeto',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do arquivo/diretório a deletar' },
-        recursive: { type: 'boolean', description: 'Deletar recursivamente (para diretórios)' },
+        path: { type: 'string', description: 'Caminho do arquivo/diretÃ³rio a deletar' },
+        recursive: { type: 'boolean', description: 'Deletar recursivamente (para diretÃ³rios)' },
       },
       required: ['path'],
     },
@@ -1181,13 +910,13 @@ aethelMCPServer.registerTool(
         return { 
           content: [{ 
             type: 'text', 
-            text: `Diretório deletado: ${path} (${deleted.count} arquivos)` 
+            text: `DiretÃ³rio deletado: ${path} (${deleted.count} arquivos)` 
           }] 
         };
       }
       
       return { 
-        content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], 
+        content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${path}` }], 
         isError: true 
       };
     } catch (error) {
@@ -1206,11 +935,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'create_directory',
-    description: 'Cria um novo diretório no projeto',
+    description: 'Cria um novo diretÃ³rio no projeto',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do diretório a criar' },
+        path: { type: 'string', description: 'Caminho do diretÃ³rio a criar' },
       },
       required: ['path'],
     },
@@ -1228,10 +957,10 @@ aethelMCPServer.registerTool(
         }
       });
       
-      return { content: [{ type: 'text', text: `Diretório criado: ${path}` }] };
+      return { content: [{ type: 'text', text: `DiretÃ³rio criado: ${path}` }] };
     } catch (error) {
       return { 
-        content: [{ type: 'text', text: `Erro ao criar diretório: ${error}` }], 
+        content: [{ type: 'text', text: `Erro ao criar diretÃ³rio: ${error}` }], 
         isError: true 
       };
     }
@@ -1265,7 +994,7 @@ aethelMCPServer.registerTool(
       
       if (!file) {
         return { 
-          content: [{ type: 'text', text: `Arquivo não encontrado: ${oldPath}` }], 
+          content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${oldPath}` }], 
           isError: true 
         };
       }

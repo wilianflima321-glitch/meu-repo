@@ -3628,3 +3628,25 @@ Validation snapshot:
 Decision lock:
 1. Keep extracting state contracts from remaining monoliths before deep behavior edits.
 2. Preserve compatibility exports on original module paths during decomposition waves.
+
+## 138) Delta 2026-02-20 XCII - Oversized debt threshold <=25 reached
+
+Implemented:
+1. Extracted particle runtime contracts:
+- `cloud-web-app/web/lib/engine/particle-system-types.ts`
+- `cloud-web-app/web/lib/engine/particle-system.ts` updated with type imports/re-exports.
+2. Extracted physics runtime contracts:
+- `cloud-web-app/web/lib/engine/physics-engine-types.ts`
+- `cloud-web-app/web/lib/engine/physics-engine.ts` updated with type imports/re-exports.
+3. Extracted MCP filesystem adapter layer:
+- `cloud-web-app/web/lib/mcp/aethel-mcp-filesystem.ts`
+- `cloud-web-app/web/lib/mcp/aethel-mcp-server.ts` now consumes adapter via explicit module contract.
+4. Regenerated architecture triage baseline.
+
+Validation snapshot:
+1. `cmd /c npm --prefix cloud-web-app/web run docs:architecture-triage` -> PASS.
+2. Oversized source files reduced from `28` to `25` (threshold met).
+
+Decision lock:
+1. Next decomposition waves should focus on high-change monoliths with behavior risk controls.
+2. Keep compatibility re-exports while reducing module size debt.

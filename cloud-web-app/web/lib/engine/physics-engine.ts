@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Aethel Engine - Physics System
  * 
  * Full 2D/3D physics engine with collision detection, rigid body dynamics,
@@ -6,41 +6,33 @@
  */
 
 import { EventEmitter } from 'events';
+import type {
+  AABB,
+  BodyType,
+  ColliderConfig,
+  ColliderType,
+  PhysicsConfig,
+  Quaternion,
+  RigidBodyConfig,
+  Transform,
+  Vector,
+  Vector2,
+  Vector3,
+} from './physics-engine-types';
 
-// ============================================================================
-// Types & Interfaces
-// ============================================================================
-
-export interface Vector2 {
-  x: number;
-  y: number;
-}
-
-export interface Vector3 {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface Quaternion {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-}
-
-export type Vector = Vector2 | Vector3;
-
-export interface Transform {
-  position: Vector3;
-  rotation: Quaternion;
-  scale: Vector3;
-}
-
-export interface AABB {
-  min: Vector3;
-  max: Vector3;
-}
+export type {
+  AABB,
+  BodyType,
+  ColliderConfig,
+  ColliderType,
+  PhysicsConfig,
+  Quaternion,
+  RigidBodyConfig,
+  Transform,
+  Vector,
+  Vector2,
+  Vector3,
+} from './physics-engine-types';
 
 export interface RaycastResult {
   hit: boolean;
@@ -59,51 +51,6 @@ export interface CollisionInfo {
   impulse: number;
 }
 
-export type ColliderType = 'box' | 'sphere' | 'capsule' | 'mesh' | 'plane';
-export type BodyType = 'dynamic' | 'static' | 'kinematic';
-
-export interface ColliderConfig {
-  type: ColliderType;
-  // Box collider
-  size?: Vector3;
-  // Sphere/Capsule collider
-  radius?: number;
-  height?: number;
-  // Mesh collider
-  vertices?: Vector3[];
-  indices?: number[];
-  // Material
-  friction?: number;
-  restitution?: number;
-  isTrigger?: boolean;
-}
-
-export interface RigidBodyConfig {
-  type: BodyType;
-  mass?: number;
-  linearDamping?: number;
-  angularDamping?: number;
-  gravityScale?: number;
-  fixedRotation?: boolean;
-  collider?: ColliderConfig;
-  position?: Vector3;
-  rotation?: Quaternion;
-}
-
-export interface PhysicsConfig {
-  gravity: Vector3;
-  fixedTimeStep: number;
-  maxSubSteps: number;
-  velocityIterations: number;
-  positionIterations: number;
-  broadphaseType: 'aabb' | 'sap' | 'bvh';
-  enableSleeping: boolean;
-  sleepThreshold: number;
-}
-
-// ============================================================================
-// Math Utilities
-// ============================================================================
 
 export const Vec3 = {
   create(x = 0, y = 0, z = 0): Vector3 {
@@ -256,9 +203,6 @@ export const Quat = {
   },
 };
 
-// ============================================================================
-// Collider Classes
-// ============================================================================
 
 export abstract class Collider {
   public body: RigidBody | null = null;
@@ -365,7 +309,6 @@ export class CapsuleCollider extends Collider {
   }
 
   computeInertia(mass: number): Vector3 {
-    // Approximation using cylinder + sphere masses
     const cylinderHeight = this.height - 2 * this.radius;
     const sphereVolume = (4 / 3) * Math.PI * this.radius ** 3;
     const cylinderVolume = Math.PI * this.radius ** 2 * cylinderHeight;
@@ -401,7 +344,6 @@ export class PlaneCollider extends Collider {
   }
 
   getAABB(): AABB {
-    // Infinite plane - return huge AABB
     const inf = 1e10;
     return {
       min: { x: -inf, y: -inf, z: -inf },
@@ -410,54 +352,41 @@ export class PlaneCollider extends Collider {
   }
 
   computeInertia(_mass: number): Vector3 {
-    // Planes are always static
     return { x: 0, y: 0, z: 0 };
   }
 }
 
-// ============================================================================
-// Rigid Body
-// ============================================================================
 
 export class RigidBody {
   public id: string;
   public type: BodyType;
   public collider: Collider | null = null;
   
-  // Transform
   public position: Vector3;
   public rotation: Quaternion;
   public scale: Vector3 = { x: 1, y: 1, z: 1 };
   
-  // Velocity
   public linearVelocity: Vector3 = Vec3.zero();
   public angularVelocity: Vector3 = Vec3.zero();
   
-  // Mass properties
   public mass: number;
   public inverseMass: number;
   public inertia: Vector3 = { x: 1, y: 1, z: 1 };
   public inverseInertia: Vector3 = { x: 1, y: 1, z: 1 };
   
-  // Damping
   public linearDamping = 0.01;
   public angularDamping = 0.01;
   
-  // Gravity
   public gravityScale = 1;
   
-  // Constraints
   public fixedRotation = false;
   
-  // Sleeping
   public isSleeping = false;
   public sleepTimer = 0;
   
-  // Forces
   private forceAccumulator: Vector3 = Vec3.zero();
   private torqueAccumulator: Vector3 = Vec3.zero();
   
-  // User data
   public userData: Record<string, unknown> = {};
 
   constructor(config: RigidBodyConfig) {
@@ -466,7 +395,6 @@ export class RigidBody {
     this.position = config.position ?? Vec3.zero();
     this.rotation = config.rotation ?? Quat.identity();
     
-    // Set mass
     if (config.type === 'static') {
       this.mass = 0;
       this.inverseMass = 0;
@@ -480,7 +408,6 @@ export class RigidBody {
     this.gravityScale = config.gravityScale ?? 1;
     this.fixedRotation = config.fixedRotation ?? false;
     
-    // Create collider
     if (config.collider) {
       this.setCollider(config.collider);
     }
@@ -513,7 +440,6 @@ export class RigidBody {
     
     this.collider = collider;
     
-    // Compute inertia
     if (this.mass > 0) {
       this.inertia = collider.computeInertia(this.mass);
       this.inverseInertia = {
@@ -531,7 +457,6 @@ export class RigidBody {
     this.forceAccumulator = Vec3.add(this.forceAccumulator, force);
     
     if (point) {
-      // Apply torque from force at point
       const r = Vec3.sub(point, this.position);
       const torque = Vec3.cross(r, force);
       this.torqueAccumulator = Vec3.add(this.torqueAccumulator, torque);
@@ -571,17 +496,14 @@ export class RigidBody {
   integrateForces(dt: number, gravity: Vector3): void {
     if (this.type === 'static' || this.isSleeping) return;
     
-    // Apply gravity
     const gravityForce = Vec3.scale(gravity, this.mass * this.gravityScale);
     const totalForce = Vec3.add(this.forceAccumulator, gravityForce);
     
-    // Update linear velocity: v += (F / m) * dt
     this.linearVelocity = Vec3.add(
       this.linearVelocity,
       Vec3.scale(totalForce, this.inverseMass * dt)
     );
     
-    // Update angular velocity: ω += (τ / I) * dt
     if (!this.fixedRotation) {
       this.angularVelocity = Vec3.add(
         this.angularVelocity,
@@ -593,7 +515,6 @@ export class RigidBody {
       );
     }
     
-    // Apply damping
     this.linearVelocity = Vec3.scale(
       this.linearVelocity,
       1 / (1 + this.linearDamping * dt)
@@ -603,7 +524,6 @@ export class RigidBody {
       1 / (1 + this.angularDamping * dt)
     );
     
-    // Clear accumulators
     this.forceAccumulator = Vec3.zero();
     this.torqueAccumulator = Vec3.zero();
   }
@@ -611,13 +531,11 @@ export class RigidBody {
   integrateVelocity(dt: number): void {
     if (this.type === 'static' || this.isSleeping) return;
     
-    // Update position: p += v * dt
     this.position = Vec3.add(
       this.position,
       Vec3.scale(this.linearVelocity, dt)
     );
     
-    // Update rotation: q += 0.5 * ω * q * dt
     if (!this.fixedRotation) {
       const omega = this.angularVelocity;
       const dq: Quaternion = {
@@ -662,9 +580,6 @@ export class RigidBody {
   }
 }
 
-// ============================================================================
-// Collision Detection
-// ============================================================================
 
 class CollisionDetector {
   static sphereVsSphere(a: SphereCollider, b: SphereCollider): CollisionInfo | null {
@@ -715,16 +630,13 @@ class CollisionDetector {
     const bodyA = a.body!;
     const bodyB = b.body!;
     
-    // AABB vs AABB (simplified - ignores rotation)
     const aabbA = a.getAABB();
     const aabbB = b.getAABB();
     
-    // Check for separation on each axis
     if (aabbA.max.x < aabbB.min.x || aabbA.min.x > aabbB.max.x) return null;
     if (aabbA.max.y < aabbB.min.y || aabbA.min.y > aabbB.max.y) return null;
     if (aabbA.max.z < aabbB.min.z || aabbA.min.z > aabbB.max.z) return null;
     
-    // Find penetration on each axis
     const overlapX = Math.min(aabbA.max.x - aabbB.min.x, aabbB.max.x - aabbA.min.x);
     const overlapY = Math.min(aabbA.max.y - aabbB.min.y, aabbB.max.y - aabbA.min.y);
     const overlapZ = Math.min(aabbA.max.z - aabbB.min.z, aabbB.max.z - aabbA.min.z);
@@ -759,7 +671,6 @@ class CollisionDetector {
     const boxBody = box.body!;
     const sphereBody = sphere.body!;
     
-    // Find closest point on box to sphere center
     const aabb = box.getAABB();
     const closest: Vector3 = {
       x: Math.max(aabb.min.x, Math.min(sphereBody.position.x, aabb.max.x)),
@@ -801,7 +712,6 @@ class CollisionDetector {
     if (typeA === 'plane' && typeB === 'sphere') {
       const result = this.sphereVsPlane(b as SphereCollider, a as PlaneCollider);
       if (result) {
-        // Swap bodies and flip normal
         [result.bodyA, result.bodyB] = [result.bodyB, result.bodyA];
         result.normal = Vec3.scale(result.normal, -1);
       }
@@ -829,9 +739,6 @@ class CollisionDetector {
   }
 }
 
-// ============================================================================
-// Constraint Solver
-// ============================================================================
 
 class ContactConstraint {
   collision: CollisionInfo;
@@ -841,7 +748,6 @@ class ContactConstraint {
   constructor(collision: CollisionInfo) {
     this.collision = collision;
     
-    // Average friction and restitution
     const colliderA = collision.bodyA.collider;
     const colliderB = collision.bodyB.collider;
     
@@ -857,10 +763,8 @@ class ContactConstraint {
   resolve(): void {
     const { bodyA, bodyB, normal, point, penetration } = this.collision;
     
-    // Skip if both are static
     if (bodyA.inverseMass === 0 && bodyB.inverseMass === 0) return;
     
-    // Relative velocity at contact point
     const rA = Vec3.sub(point, bodyA.position);
     const rB = Vec3.sub(point, bodyB.position);
     
@@ -868,13 +772,10 @@ class ContactConstraint {
     const velB = Vec3.add(bodyB.linearVelocity, Vec3.cross(bodyB.angularVelocity, rB));
     const relativeVel = Vec3.sub(velA, velB);
     
-    // Normal impulse
     const contactVel = Vec3.dot(relativeVel, normal);
     
-    // Only resolve if objects are approaching
     if (contactVel > 0) return;
     
-    // Calculate impulse scalar
     const rAxN = Vec3.cross(rA, normal);
     const rBxN = Vec3.cross(rB, normal);
     
@@ -893,12 +794,10 @@ class ContactConstraint {
     let j = -(1 + this.restitution) * contactVel;
     j /= invMassSum;
     
-    // Apply normal impulse
     const impulse = Vec3.scale(normal, j);
     bodyA.applyImpulse(impulse, point);
     bodyB.applyImpulse(Vec3.scale(impulse, -1), point);
     
-    // Friction impulse
     let tangent = Vec3.sub(relativeVel, Vec3.scale(normal, contactVel));
     const tangentLen = Vec3.length(tangent);
     
@@ -908,7 +807,6 @@ class ContactConstraint {
       let jt = -Vec3.dot(relativeVel, tangent);
       jt /= invMassSum;
       
-      // Coulomb's law
       const frictionImpulse = Math.abs(jt) < j * this.friction
         ? Vec3.scale(tangent, jt)
         : Vec3.scale(tangent, -j * this.friction);
@@ -917,7 +815,6 @@ class ContactConstraint {
       bodyB.applyImpulse(Vec3.scale(frictionImpulse, -1), point);
     }
     
-    // Positional correction (prevent sinking)
     const slop = 0.01;
     const percent = 0.8;
     const correction = Vec3.scale(
@@ -932,9 +829,6 @@ class ContactConstraint {
   }
 }
 
-// ============================================================================
-// Broadphase
-// ============================================================================
 
 interface BroadphasePair {
   a: RigidBody;
@@ -953,16 +847,13 @@ class AABBBroadphase {
       for (let j = i + 1; j < bodies.length; j++) {
         const b = bodies[j];
         
-        // Skip if both static
         if (a.type === 'static' && b.type === 'static') continue;
         
-        // Skip if both sleeping
         if (a.isSleeping && b.isSleeping) continue;
         
         const aabbB = b.getAABB();
         if (!aabbB) continue;
         
-        // AABB overlap test
         if (
           aabbA.max.x >= aabbB.min.x && aabbA.min.x <= aabbB.max.x &&
           aabbA.max.y >= aabbB.min.y && aabbA.min.y <= aabbB.max.y &&
@@ -977,9 +868,6 @@ class AABBBroadphase {
   }
 }
 
-// ============================================================================
-// Physics World
-// ============================================================================
 
 export class PhysicsWorld extends EventEmitter {
   private bodies: RigidBody[] = [];
@@ -1038,24 +926,19 @@ export class PhysicsWorld extends EventEmitter {
       steps++;
     }
     
-    // Interpolation factor for smooth rendering
     const alpha = this.accumulator / this.config.fixedTimeStep;
     this.emit('interpolate', alpha);
   }
 
   private fixedStep(dt: number): void {
-    // Clear previous collisions
     this.collisions = [];
     
-    // Integrate forces
     for (const body of this.bodies) {
       body.integrateForces(dt, this.config.gravity);
     }
     
-    // Broadphase
     const pairs = this.broadphase.getPairs(this.bodies);
     
-    // Narrowphase and generate contacts
     const constraints: ContactConstraint[] = [];
     
     for (const { a, b } of pairs) {
@@ -1065,7 +948,6 @@ export class PhysicsWorld extends EventEmitter {
       if (collision) {
         this.collisions.push(collision);
         
-        // Handle triggers
         if (a.collider.isTrigger || b.collider.isTrigger) {
           this.emit('trigger', collision);
           continue;
@@ -1076,19 +958,16 @@ export class PhysicsWorld extends EventEmitter {
       }
     }
     
-    // Solve velocity constraints
     for (let i = 0; i < this.config.velocityIterations; i++) {
       for (const constraint of constraints) {
         constraint.resolve();
       }
     }
     
-    // Integrate velocity
     for (const body of this.bodies) {
       body.integrateVelocity(dt);
     }
     
-    // Sleeping
     if (this.config.enableSleeping) {
       this.updateSleeping(dt);
     }
@@ -1188,7 +1067,6 @@ export class PhysicsWorld extends EventEmitter {
     
     const point = Vec3.add(origin, Vec3.scale(dir, tmin));
     
-    // Determine hit face normal
     const epsilon = 0.0001;
     let normal: Vector3;
     
@@ -1240,9 +1118,6 @@ export class PhysicsWorld extends EventEmitter {
   }
 }
 
-// ============================================================================
-// Physics Engine Singleton
-// ============================================================================
 
 export class PhysicsEngine {
   private static instance: PhysicsEngine | null = null;
@@ -1302,7 +1177,6 @@ export class PhysicsEngine {
     this.animationFrameId = requestAnimationFrame(this.tick);
   };
 
-  // Convenience methods
   createBody(config: RigidBodyConfig): RigidBody {
     const body = new RigidBody(config);
     this.world.addBody(body);

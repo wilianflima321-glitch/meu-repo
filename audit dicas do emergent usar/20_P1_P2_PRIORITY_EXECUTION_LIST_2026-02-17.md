@@ -159,7 +159,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 
 ### P1 (next closure wave)
 1. Reduce `LEGACY_ACTIVE` directory footprint (`cloud-admin-ia`, `infra-playwright-ci-agent`, snapshots) with explicit keep/remove decisions.
-2. Continue oversized module decomposition from current baseline (`28`) to next threshold gate (`<=25`).
+2. Continue oversized module decomposition from current baseline (`25`) to next threshold gate (`<=22`).
 3. Collapse remaining workflow overlap into a single CI authority map with owner + trigger scope.
 4. Normalize root historical README encoding/copy drift and keep canonical references only.
 
@@ -193,3 +193,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 4. Reduced oversized source baseline from `29` to `28` via Networking runtime contract extraction:
 - `lib/networking-multiplayer-types.ts`
 - `lib/networking-multiplayer.ts` contract import/re-export update
+5. Reduced oversized source baseline from `28` to `25` via multi-module extraction:
+- `lib/engine/particle-system-types.ts`
+- `lib/engine/physics-engine-types.ts`
+- `lib/mcp/aethel-mcp-filesystem.ts`

@@ -1449,3 +1449,15 @@ Critical reading:
 1. Oversized baseline dropped from `29` to `28` (threshold achieved).
 2. Remaining oversized set is now increasingly concentrated in complex editor/media/physics services.
 3. Next waves should prefer test-backed extractions in stateful gameplay/render modules.
+
+## Delta 2026-02-20 LXXXVII - Threshold closure at 25 oversized files
+Implemented:
+1. Extracted particle system type contracts into `lib/engine/particle-system-types.ts`.
+2. Extracted physics engine type contracts into `lib/engine/physics-engine-types.ts`.
+3. Extracted MCP filesystem adapter runtime into `lib/mcp/aethel-mcp-filesystem.ts`.
+4. Regenerated architecture triage report.
+
+Critical reading:
+1. Oversized baseline dropped from `28` to `25` (current closure target met).
+2. Residual risk is now concentrated in the largest orchestration modules (dashboard/media/editor pipelines).
+3. Further reductions should be coupled with full freeze-gate validation due higher behavior-coupling risk.

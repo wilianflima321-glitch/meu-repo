@@ -1465,3 +1465,14 @@ Delivered:
 Triaged impact:
 1. Oversized source count reduced `29 -> 28`.
 2. Decomposition P1 threshold reached; next step is risk-based ordering of remaining heavy modules.
+
+## Delta 2026-02-20 LXXXVIII - Structural decomposition wave (particle/physics/mcp)
+Delivered:
+1. `particle-system` contracts extracted to `lib/engine/particle-system-types.ts`.
+2. `physics-engine` contracts extracted to `lib/engine/physics-engine-types.ts`.
+3. MCP filesystem layer extracted to `lib/mcp/aethel-mcp-filesystem.ts`.
+4. Architecture triage regenerated.
+
+Triaged impact:
+1. Oversized source count reduced `28 -> 25`.
+2. Current P1 decomposition target was met; remaining work should prioritize high-risk behavior modules.
