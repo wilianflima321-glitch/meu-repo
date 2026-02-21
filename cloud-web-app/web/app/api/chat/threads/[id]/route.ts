@@ -7,6 +7,9 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_THREAD_ID_LENGTH = 120;
+const normalizeThreadId = (value?: string) => String(value ?? '').trim();
+
 async function assertThreadOwnership(userId: string, threadId: string) {
   const thread = await prisma.chatThread.findFirst({
     where: { id: threadId, userId },
@@ -28,7 +31,13 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const threadId = ctx.params.id;
+    const threadId = normalizeThreadId(ctx.params?.id);
+    if (!threadId || threadId.length > MAX_THREAD_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_THREAD_ID', message: 'threadId e obrigatorio e deve ter ate 120 caracteres.' },
+        { status: 400 }
+      );
+    }
     const thread = await assertThreadOwnership(user.userId, threadId);
 
     if (!thread) {
@@ -56,7 +65,13 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const threadId = ctx.params.id;
+    const threadId = normalizeThreadId(ctx.params?.id);
+    if (!threadId || threadId.length > MAX_THREAD_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_THREAD_ID', message: 'threadId e obrigatorio e deve ter ate 120 caracteres.' },
+        { status: 400 }
+      );
+    }
     const existing = await assertThreadOwnership(user.userId, threadId);
     if (!existing) {
       return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
@@ -103,7 +118,13 @@ export async function DELETE(req: NextRequest, ctx: { params: { id: string } }) 
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const threadId = ctx.params.id;
+    const threadId = normalizeThreadId(ctx.params?.id);
+    if (!threadId || threadId.length > MAX_THREAD_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_THREAD_ID', message: 'threadId e obrigatorio e deve ter ate 120 caracteres.' },
+        { status: 400 }
+      );
+    }
     const existing = await assertThreadOwnership(user.userId, threadId);
     if (!existing) {
       return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
