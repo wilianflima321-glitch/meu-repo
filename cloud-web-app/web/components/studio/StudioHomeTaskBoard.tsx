@@ -126,6 +126,11 @@ export function StudioHomeTaskBoard({
               {roleLabel(task.ownerRole)} | {task.estimateCredits} credits | {task.estimateSeconds}s | verdict:{' '}
               {task.validationVerdict}
             </div>
+            {task.result ? (
+              <div className="mt-1 text-[11px] text-slate-400">
+                {task.result.length > 180 ? `${task.result.slice(0, 180)}…` : task.result}
+              </div>
+            ) : null}
             <div className="mt-2 flex flex-wrap gap-1">
               <button
                 disabled={busy || !session || variableUsageBlocked || !canRunTask(task, session.status, session.tasks)}
