@@ -4294,3 +4294,20 @@ Validation snapshot:
 
 Decision lock:
 1. No feature-scope expansion; this is reliability/UX hardening of existing observability flow.
+
+## 170) Delta 2026-02-21 CXXIV - Admin long-tail observability hardening
+
+Implemented:
+1. Added shared authenticated fetch helper for admin client surfaces:
+- `cloud-web-app/web/components/admin/adminAuthFetch.ts`
+2. Refactored:
+- `cloud-web-app/web/app/admin/analytics/page.tsx`
+- `cloud-web-app/web/app/admin/real-time/page.tsx`
+3. Aligned `cloud-web-app/web/app/admin/ai-monitor/page.tsx` to the shared helper.
+4. Normalized modified admin operation pages to UTF-8 encoding.
+
+Validation snapshot:
+1. Targeted lint on modified admin pages + helper -> PASS.
+
+Decision lock:
+1. No capability expansion; this wave reduces operational UX/auth inconsistency in existing admin telemetry flows.

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -21,7 +21,6 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
-import { getToken } from '@/lib/auth';
 import {
   AdminPageShell,
   AdminPrimaryButton,
@@ -29,6 +28,7 @@ import {
   AdminStatusBanner,
   AdminTableStateRow,
 } from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 interface AICall {
   id: string;
@@ -62,18 +62,7 @@ type EmergencyState = {
   reason?: string;
 };
 
-function authFetcher(url: string) {
-  const token = getToken();
-  return fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  }).then(async (response) => {
-    const payload = await response.json().catch(() => null);
-    if (!response.ok) {
-      throw new Error(payload?.error || payload?.message || `Request failed: ${url}`);
-    }
-    return payload;
-  });
-}
+const authFetcher = adminJsonFetch;
 
 function MetricCard({
   icon: Icon,
@@ -310,7 +299,7 @@ export default function AgentMonitorPage() {
         <div className='mb-6'>
           <AdminStatusBanner tone={emergencyState.level === 'shutdown' ? 'danger' : 'warning'}>
             Modo de emergencia: <strong>{emergencyState.level.toUpperCase()}</strong>
-            {emergencyState.reason ? ` � ${emergencyState.reason}` : ''}
+            {emergencyState.reason ? ` • ${emergencyState.reason}` : ''}
             <Link
               href='/admin/emergency'
               className='ml-3 inline-flex rounded bg-rose-600 px-2 py-1 text-xs text-white hover:bg-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300'
@@ -427,3 +416,4 @@ export default function AgentMonitorPage() {
     </AdminPageShell>
   );
 }
+

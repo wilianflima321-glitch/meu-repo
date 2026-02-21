@@ -1,6 +1,15 @@
-'use client';
+﻿'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type AdminAnalyticsMetrics = {
   activeUsers: number;
@@ -8,6 +17,24 @@ type AdminAnalyticsMetrics = {
   aiTokens: number;
   requestsPerMinute: number;
   aiCostToday: number;
+};
+
+type QuickStatsResponse = {
+  stats?: {
+    activeUsers?: number;
+    requestsPerMinute?: number;
+    aiCostToday?: number;
+  };
+};
+
+type FinanceResponse = {
+  dailyRevenue?: number;
+};
+
+type AIResponse = {
+  metrics?: {
+    totalTokens?: number;
+  };
 };
 
 export default function AdminAnalytics() {
@@ -19,19 +46,11 @@ export default function AdminAnalytics() {
   const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true);
-      const [quickStatsRes, financeRes, aiRes] = await Promise.all([
-        fetch('/api/admin/quick-stats'),
-        fetch('/api/admin/finance/metrics?range=today'),
-        fetch('/api/admin/ai/metrics'),
+      const [quickStats, finance, ai] = await Promise.all([
+        adminJsonFetch<QuickStatsResponse>('/api/admin/quick-stats'),
+        adminJsonFetch<FinanceResponse>('/api/admin/finance/metrics?range=today'),
+        adminJsonFetch<AIResponse>('/api/admin/ai/metrics'),
       ]);
-
-      if (!quickStatsRes.ok) throw new Error('Falha ao carregar estatísticas rápidas');
-      if (!financeRes.ok) throw new Error('Falha ao carregar métricas financeiras');
-      if (!aiRes.ok) throw new Error('Falha ao carregar métricas de IA');
-
-      const quickStats = await quickStatsRes.json();
-      const finance = await financeRes.json();
-      const ai = await aiRes.json();
 
       setMetrics({
         activeUsers: quickStats?.stats?.activeUsers ?? 0,
@@ -43,7 +62,7 @@ export default function AdminAnalytics() {
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar métricas');
+      setError(err instanceof Error ? err.message : 'Erro ao carregar metricas');
     } finally {
       setLoading(false);
     }
@@ -68,66 +87,80 @@ export default function AdminAnalytics() {
     URL.revokeObjectURL(url);
   }, [metrics]);
 
+  const cards = useMemo(
+    () => [
+      {
+        label: 'Usuarios ativos (1h)',
+        value: metrics?.activeUsers ?? 0,
+        subtitle: `Req/min: ${metrics?.requestsPerMinute ?? 0}`,
+      },
+      {
+        label: 'Receita diaria (USD)',
+        value: (metrics?.dailyRevenue ?? 0).toFixed(2),
+        subtitle: `Custo IA hoje: $${(metrics?.aiCostToday ?? 0).toFixed(2)}`,
+      },
+      {
+        label: 'Uso IA (tokens/24h)',
+        value: (metrics?.aiTokens ?? 0).toLocaleString(),
+        subtitle: 'Total consolidado por telemetria operacional',
+      },
+    ],
+    [metrics],
+  );
+
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className='text-3xl font-bold'>Análises e relatórios</h1>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Analises e relatorios'
+      description='Consolidado operacional de usuarios, receita e custo de IA.'
+      subtitle={lastUpdated ? `Atualizado em ${lastUpdated.toLocaleString()}` : undefined}
+      actions={
+        <>
+          <AdminPrimaryButton onClick={handleExport} disabled={!metrics}>
+            Exportar relatorio
+          </AdminPrimaryButton>
+          <AdminPrimaryButton onClick={fetchMetrics}>Atualizar</AdminPrimaryButton>
+        </>
+      }
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>
+            {error}
+            <button className='ml-3 underline' onClick={fetchMetrics}>
+              Tentar novamente
+            </button>
+          </AdminStatusBanner>
         </div>
-        <div className="flex items-center gap-3">
-          <button className='bg-blue-500 text-white px-4 py-2 rounded' onClick={handleExport}>
-            Exportar Relatório
-          </button>
-          <button className='bg-zinc-800/70 text-zinc-300 px-4 py-2 rounded' onClick={fetchMetrics}>
-            Atualizar
-          </button>
-        </div>
-      </div>
+      ) : null}
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">
-          {error}
-          <button className='ml-3 text-sm underline' onClick={fetchMetrics}>
-            Tentar novamente
-          </button>
-        </div>
-      )}
+      <AdminSection>
+        <AdminStatGrid>
+          <AdminStatCard label='Usuarios ativos (1h)' value={loading ? '...' : cards[0].value} tone='sky' />
+          <AdminStatCard label='Receita diaria (USD)' value={loading ? '...' : cards[1].value} tone='emerald' />
+          <AdminStatCard label='Uso IA (tokens/24h)' value={loading ? '...' : cards[2].value} tone='amber' />
+          <AdminStatCard
+            label='Custo IA hoje (USD)'
+            value={loading ? '...' : (metrics?.aiCostToday ?? 0).toFixed(2)}
+            tone='rose'
+          />
+        </AdminStatGrid>
+      </AdminSection>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-        {(loading ? Array.from({ length: 3 }) : [1, 2, 3]).map((_, index) => (
-          <div key={index} className='bg-zinc-900/70 p-4 rounded-lg shadow'>
+      <div className='mt-4 grid grid-cols-1 gap-4 md:grid-cols-3'>
+        {cards.map((card) => (
+          <AdminSection key={card.label} title={card.label}>
             {loading ? (
-              <div className="h-16 bg-zinc-800/70 rounded animate-pulse" />
+              <div className='h-16 animate-pulse rounded bg-zinc-800/70' />
             ) : (
               <>
-                {index === 0 && (
-                  <>
-                    <h3 className='text-lg font-semibold'>Usuários Ativos (1h)</h3>
-                    <p className='text-2xl'>{metrics?.activeUsers ?? 0}</p>
-                    <p className='text-xs text-zinc-500'>Req/min: {metrics?.requestsPerMinute ?? 0}</p>
-                  </>
-                )}
-                {index === 1 && (
-                  <>
-                    <h3 className='text-lg font-semibold'>Receita diária (US$)</h3>
-                    <p className='text-2xl'>{(metrics?.dailyRevenue ?? 0).toFixed(2)}</p>
-                    <p className='text-xs text-zinc-500'>Custo de IA hoje: ${(metrics?.aiCostToday ?? 0).toFixed(2)}</p>
-                  </>
-                )}
-                {index === 2 && (
-                  <>
-                    <h3 className='text-lg font-semibold'>Uso de IA (tokens/24h)</h3>
-                    <p className='text-2xl'>{metrics?.aiTokens?.toLocaleString() ?? '0'}</p>
-                  </>
-                )}
+                <p className='text-2xl font-semibold text-zinc-100'>{card.value}</p>
+                <p className='mt-1 text-xs text-zinc-500'>{card.subtitle}</p>
               </>
             )}
-          </div>
+          </AdminSection>
         ))}
       </div>
-    </div>
+    </AdminPageShell>
   );
 }
+

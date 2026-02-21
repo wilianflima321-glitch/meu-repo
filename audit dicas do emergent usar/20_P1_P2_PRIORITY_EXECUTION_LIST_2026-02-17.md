@@ -420,3 +420,11 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - removed duplicate header/action surfaces
 - unified operational copy and emergency CTA
 - added explicit authenticated fetch + error/loading states.
+
+### Delivered in this wave (Admin long-tail consistency)
+1. Added shared helper:
+- `cloud-web-app/web/components/admin/adminAuthFetch.ts`
+2. Refactored:
+- `cloud-web-app/web/app/admin/analytics/page.tsx`
+- `cloud-web-app/web/app/admin/real-time/page.tsx`
+3. Normalized touched admin operation pages to UTF-8 encoding to avoid tooling drift.

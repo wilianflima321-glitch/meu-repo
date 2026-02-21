@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getToken } from '@/lib/auth';
@@ -204,3 +204,4 @@ export default function AdminSecurity() {
     </AdminPageShell>
   );
 }
+

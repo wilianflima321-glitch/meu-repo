@@ -63,6 +63,8 @@ Priority admin pages:
 4. `cloud-web-app/web/app/admin/security/page.tsx`
 5. `cloud-web-app/web/app/admin/emergency/page.tsx`
 6. `cloud-web-app/web/app/admin/ai-monitor/page.tsx`
+7. `cloud-web-app/web/app/admin/analytics/page.tsx`
+8. `cloud-web-app/web/app/admin/real-time/page.tsx`
 
 Admin layout and shared frame:
 1. `cloud-web-app/web/app/admin/layout.tsx`
@@ -191,6 +193,8 @@ CI workflows:
 ### Admin consistency surface
 - Shared shell/section/banner/stat/button/table-state primitives are centralized in:
   - `cloud-web-app/web/components/admin/AdminSurface.tsx`
+- Shared authenticated client fetch helper:
+  - `cloud-web-app/web/components/admin/adminAuthFetch.ts`
 - High-traffic admin pages now use the shared primitives:
   - `cloud-web-app/web/app/admin/page.tsx`
   - `cloud-web-app/web/app/admin/payments/page.tsx`

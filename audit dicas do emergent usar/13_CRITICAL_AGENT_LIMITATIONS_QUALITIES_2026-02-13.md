@@ -1814,3 +1814,13 @@ Implemented:
 Critical reading:
 1. Observability UX quality improved without adding new backend capabilities.
 2. Residual risk remains in other long-tail admin pages that still need the same cleanup pattern.
+
+## Delta 2026-02-21 CXVIII - Long-tail admin auth/state drift reduction
+Implemented:
+1. Introduced shared authenticated client fetch helper for admin pages.
+2. Applied consistency pattern to analytics and real-time admin surfaces.
+3. Updated AI monitor to consume the shared helper.
+
+Critical reading:
+1. This lowers risk of inconsistent auth behavior across admin observability pages.
+2. Residual risk remains in additional admin pages still using bespoke fetch/state patterns.

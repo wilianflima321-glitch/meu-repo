@@ -1,4 +1,4 @@
-'use client';
+ï»¿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getToken } from '@/lib/auth';
@@ -160,9 +160,9 @@ export default function EmergencyAdminPage() {
       <div className='mb-6'>
         <AdminStatusBanner tone={levelTone as 'neutral' | 'info' | 'success' | 'warning' | 'danger'}>
           Current level: <strong>{state?.level ?? 'unknown'}</strong>
-          {state?.activatedBy ? ` • activated by ${state.activatedBy}` : ''}
-          {state?.activatedAt ? ` • ${new Date(state.activatedAt).toLocaleString()}` : ''}
-          {state?.reason ? ` • ${state.reason}` : ''}
+          {state?.activatedBy ? ` â€¢ activated by ${state.activatedBy}` : ''}
+          {state?.activatedAt ? ` â€¢ ${new Date(state.activatedAt).toLocaleString()}` : ''}
+          {state?.reason ? ` â€¢ ${state.reason}` : ''}
         </AdminStatusBanner>
       </div>
 
@@ -319,3 +319,4 @@ function InputNumber({
     </label>
   );
 }
+

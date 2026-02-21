@@ -467,3 +467,15 @@ Label: `VERIFIED_INTERNAL`
 2. Added authenticated SWR fetcher, explicit error/loading behavior, and cleaned operational copy.
 3. Emergency alert CTA aligned to `/admin/emergency`.
 4. Targeted lint verification for modified page: PASS.
+
+## 24) Delta 2026-02-21 - Admin long-tail consistency hardening
+Label: `VERIFIED_INTERNAL`
+
+1. Added shared admin authenticated client fetch helper:
+- `cloud-web-app/web/components/admin/adminAuthFetch.ts`
+2. Refactored:
+- `cloud-web-app/web/app/admin/analytics/page.tsx`
+- `cloud-web-app/web/app/admin/real-time/page.tsx`
+3. Updated AI monitor page to use shared helper.
+4. Normalized touched admin operation pages to UTF-8.
+5. Targeted lint verification for modified files: PASS.
