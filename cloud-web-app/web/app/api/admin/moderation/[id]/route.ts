@@ -6,12 +6,21 @@ import { withAdminAuth, logAdminAction, applyShadowBan, AdminUser } from '@/lib/
 // MODERATION ACTION API
 // =============================================================================
 
+const MAX_MODERATION_ID_LENGTH = 120;
+const normalizeModerationId = (value?: string) => String(value ?? '').trim();
+
 async function actionHandler(
   req: NextRequest,
   { user }: { user: AdminUser }
 ) {
   const url = new URL(req.url);
-  const id = url.pathname.split('/').pop() || '';
+  const id = normalizeModerationId(url.pathname.split('/').pop());
+  if (!id || id.length > MAX_MODERATION_ID_LENGTH) {
+    return NextResponse.json(
+      { error: 'INVALID_MODERATION_ID', message: 'id is required and must be under 120 characters.' },
+      { status: 400 }
+    );
+  }
   const body = await req.json();
   const { action, notes } = body;
   

@@ -37,6 +37,8 @@ const OAUTH_PROVIDERS = {
 
 type Provider = keyof typeof OAUTH_PROVIDERS;
 
+const MAX_PROVIDER_LENGTH = 40;
+
 interface OAuthUserInfo {
   email: string;
   name: string;
@@ -161,7 +163,11 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { provider: string } }
 ) {
-  const provider = params.provider as Provider;
+  const providerRaw = String(params.provider || '').trim().toLowerCase();
+  if (!providerRaw || providerRaw.length > MAX_PROVIDER_LENGTH) {
+    return NextResponse.redirect(new URL('/login?error=invalid_provider', req.url));
+  }
+  const provider = providerRaw as Provider;
 
   if (!OAUTH_PROVIDERS[provider]) {
     return NextResponse.redirect(new URL('/login?error=invalid_provider', req.url));

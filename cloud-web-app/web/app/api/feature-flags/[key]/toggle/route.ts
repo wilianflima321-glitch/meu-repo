@@ -11,6 +11,9 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_FLAG_KEY_LENGTH = 120;
+const normalizeFlagKey = (value?: string) => String(value ?? '').trim();
+
 async function toggleHandler(
   request: NextRequest,
   context: { user: { id: string } }
@@ -28,7 +31,14 @@ async function toggleHandler(
     // Extract key from URL path
     const url = new URL(request.url);
     const pathParts = url.pathname.split('/');
-    const key = pathParts[pathParts.indexOf('feature-flags') + 1];
+    const rawKey = pathParts[pathParts.indexOf('feature-flags') + 1];
+    const key = normalizeFlagKey(rawKey);
+    if (!key || key.length > MAX_FLAG_KEY_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_FLAG_KEY', message: 'key is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
     
     const { enabled } = await request.json();
 

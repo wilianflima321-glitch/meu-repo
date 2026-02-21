@@ -43,6 +43,8 @@ const OAUTH_PROVIDERS = {
 
 type Provider = keyof typeof OAUTH_PROVIDERS;
 
+const MAX_PROVIDER_LENGTH = 40;
+
 function getCallbackUrl(provider: string): string {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   return `${baseUrl}/api/auth/oauth/${provider}/callback`;
@@ -56,7 +58,14 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { provider: string } }
 ) {
-  const provider = params.provider as Provider;
+  const providerRaw = String(params.provider || '').trim().toLowerCase();
+  if (!providerRaw || providerRaw.length > MAX_PROVIDER_LENGTH) {
+    return NextResponse.json(
+      { error: 'INVALID_PROVIDER', message: 'provider is required and must be under 40 characters.' },
+      { status: 400 }
+    );
+  }
+  const provider = providerRaw as Provider;
   
   if (!OAUTH_PROVIDERS[provider]) {
     return NextResponse.json(
