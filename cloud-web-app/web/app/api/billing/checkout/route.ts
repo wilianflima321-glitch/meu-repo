@@ -21,6 +21,17 @@ interface CheckoutRequest {
   cancelUrl?: string;
 }
 
+function resolveReturnUrl(value: unknown, fallback: string, allowedOrigin: string): string {
+  if (typeof value !== 'string' || !value.trim()) return fallback
+  try {
+    const candidate = new URL(value, allowedOrigin)
+    if (candidate.origin !== allowedOrigin) return fallback
+    return candidate.toString()
+  } catch {
+    return fallback
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
@@ -35,7 +46,9 @@ export async function POST(req: NextRequest) {
 
     const body: CheckoutRequest = await req.json();
 
-    const { planId, successUrl, cancelUrl } = body;
+    const planIdRaw = typeof body.planId === 'string' ? body.planId : '';
+    const planId = planIdRaw.trim().toLowerCase();
+    const { successUrl, cancelUrl } = body;
 
     if (!planId) {
       return NextResponse.json(
@@ -94,8 +107,10 @@ export async function POST(req: NextRequest) {
     }
 
     const appUrl = (gatewayConfig.checkoutOrigin || optionalEnv('NEXT_PUBLIC_APP_URL') || buildAppUrl('', req)).replace(/\/+$/, '');
-    const resolvedSuccessUrl = successUrl || `${appUrl}/billing/success?plan=${encodeURIComponent(planId)}`;
-    const resolvedCancelUrl = cancelUrl || `${appUrl}/billing/cancel`;
+    const successFallback = `${appUrl}/billing/success?plan=${encodeURIComponent(planId)}`;
+    const cancelFallback = `${appUrl}/billing/cancel`;
+    const resolvedSuccessUrl = resolveReturnUrl(successUrl, successFallback, appUrl);
+    const resolvedCancelUrl = resolveReturnUrl(cancelUrl, cancelFallback, appUrl);
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
