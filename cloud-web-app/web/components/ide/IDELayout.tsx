@@ -546,6 +546,7 @@ export default function IDELayout({
             onClick={toggleLeftSidebar}
             className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.leftSidebar ? 'text-blue-300' : 'text-slate-400'}`}
             title="Toggle Sidebar"
+            aria-label="Toggle sidebar"
             aria-pressed={panels.leftSidebar}
           >
             <Codicon name="layout-sidebar-left" />
@@ -554,6 +555,7 @@ export default function IDELayout({
             onClick={toggleBottomPanel}
             className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.bottomPanel ? 'text-blue-300' : 'text-slate-400'}`}
             title="Toggle Panel"
+            aria-label="Toggle bottom panel"
             aria-pressed={panels.bottomPanel}
           >
             <Codicon name="layout-panel" />
@@ -562,6 +564,7 @@ export default function IDELayout({
             onClick={toggleRightSidebar}
             className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.rightSidebar ? 'text-blue-300' : 'text-slate-400'}`}
             title="Toggle AI Panel"
+            aria-label="Toggle AI panel"
             aria-pressed={panels.rightSidebar}
           >
             <Codicon name="sparkle" />
@@ -584,6 +587,7 @@ export default function IDELayout({
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/80 focus-visible:text-white focus-visible:bg-slate-800/80'
               }`}
               title={`${tab.label} (${tab.shortcut})`}
+              aria-label={tab.label}
               aria-pressed={activeSidebarTab === tab.id && panels.leftSidebar}
             >
               <Codicon name={tab.icon} className="text-[14px]" />
