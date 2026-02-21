@@ -36,6 +36,7 @@ const AIChatPanelContainer = dynamic(() => import('@/components/ide/AIChatPanelC
 const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
+const STUDIO_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId'
 const LEGACY_DASHBOARD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD === 'true'
 
 type StudioLiveCost = {
@@ -152,6 +153,10 @@ export default function StudioHome() {
     if (persisted === '1') setShowAgentWorkspace(true)
     const previewPersisted = window.localStorage.getItem(PREVIEW_RUNTIME_STORAGE_KEY)
     if (previewPersisted === '1') setShowRuntimePreview(true)
+    const storedProjectId = window.localStorage.getItem(STUDIO_PROJECT_STORAGE_KEY)
+    if (storedProjectId && projectId === 'default') {
+      setProjectId(sanitizeStudioProjectId(storedProjectId))
+    }
   }, [])
 
   useEffect(() => {
@@ -161,6 +166,10 @@ export default function StudioHome() {
   useEffect(() => {
     window.localStorage.setItem(PREVIEW_RUNTIME_STORAGE_KEY, showRuntimePreview ? '1' : '0')
   }, [showRuntimePreview])
+
+  useEffect(() => {
+    window.localStorage.setItem(STUDIO_PROJECT_STORAGE_KEY, projectId)
+  }, [projectId])
 
   useEffect(() => {
     if (!session?.id || session.status !== 'active') {
