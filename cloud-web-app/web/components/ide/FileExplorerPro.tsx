@@ -127,6 +127,7 @@ function FileTreeNode({
         onContextMenu={(e) => onContextMenu(e, node)}
         aria-expanded={isFolder ? isExpanded : undefined}
         aria-selected={isSelected}
+        aria-level={depth + 1}
         role="treeitem"
         className={`
           w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
@@ -161,7 +162,7 @@ function FileTreeNode({
 
       {/* Children */}
       {isFolder && isExpanded && node.children && (
-        <div>
+        <div role="group">
           {node.children.map(child => (
             <FileTreeNode
               key={child.id}
