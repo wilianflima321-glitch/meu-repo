@@ -136,9 +136,11 @@ export function TerminalSkeleton() {
 export function EmptyEditorState({
   onOpenFile,
   onNewFile,
+  onOpenStudioHome,
 }: {
   onOpenFile?: () => void
   onNewFile?: () => void
+  onOpenStudioHome?: () => void
 }) {
   return (
     <div className="h-full flex items-center justify-center px-8 text-center">
@@ -162,6 +164,15 @@ export function EmptyEditorState({
           >
             New File
           </button>
+          {onOpenStudioHome && (
+            <button
+              type="button"
+              onClick={onOpenStudioHome}
+              className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+            >
+              Studio Home
+            </button>
+          )}
         </div>
       </div>
     </div>

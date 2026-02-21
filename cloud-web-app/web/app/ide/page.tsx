@@ -705,6 +705,7 @@ function IDEPageInner() {
                   onNewFile={() => {
                     void handleCreate(workspaceRoot, 'file')
                   }}
+                  onOpenStudioHome={() => router.push('/dashboard')}
                 />
               )}
             </div>
