@@ -51,6 +51,13 @@ export const ENTRY_BOTTOM_MAP: Partial<
   testing: 'problems',
 }
 
+const ENTRY_PARTIAL_HINTS: Partial<Record<WorkbenchEntry, string>> = {
+  search: 'search index is not active',
+  git: 'git bridge is not enabled',
+  debugger: 'debug adapter is gated',
+  ports: 'port forwarding is not active',
+}
+
 export function buildContextBannerMessage({
   entry,
   sessionId,
@@ -62,8 +69,10 @@ export function buildContextBannerMessage({
 }): string | null {
   const parts: string[] = []
   if (entry) parts.push(`entry: ${entry}`)
+  if (entry && ENTRY_PARTIAL_HINTS[entry]) {
+    parts.push(`status: PARTIAL (${ENTRY_PARTIAL_HINTS[entry]})`)
+  }
   if (sessionId) parts.push(`studio session: ${sessionId.slice(0, 8)}`)
   if (taskId) parts.push(`task: ${taskId.slice(0, 8)}`)
   return parts.length > 0 ? parts.join(' | ') : null
 }
-
