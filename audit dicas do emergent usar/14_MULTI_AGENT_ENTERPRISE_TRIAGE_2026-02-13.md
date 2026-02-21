@@ -1929,3 +1929,11 @@ Triaged impact:
 - `missing AdminPageShell=20`
 - `direct fetch without adminJsonFetch=25`
 - `mojibake candidates=0`
+
+## Delta 2026-02-21 (Admin hardening wave 4)
+1. Root admin console now consumes authenticated shared fetch helper (`adminJsonFetch`) and unified copy style.
+2. Admin residual scan updated with lower direct-fetch drift.
+3. Current residual baseline:
+- `missing AdminPageShell=20`
+- `direct fetch without adminJsonFetch=24`
+- `mojibake candidates=0`

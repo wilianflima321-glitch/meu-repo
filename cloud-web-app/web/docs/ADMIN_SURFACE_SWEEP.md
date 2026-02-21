@@ -1,9 +1,9 @@
 # Admin Surface Sweep
 
-- Generated at: `2026-02-21T01:49:36.210Z`
+- Generated at: `2026-02-21T01:52:32.499Z`
 - Files scanned: `45`
 - Missing `AdminPageShell`: `20`
-- Direct `fetch(...)` without `adminJsonFetch`: `25`
+- Direct `fetch(...)` without `adminJsonFetch`: `24`
 - Mojibake candidates: `0`
 
 ## Detailed Matrix
@@ -43,7 +43,7 @@
 | `app/admin/multi-tenancy/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/notifications/page.tsx` | no | no | no | no | no |
 | `app/admin/onboarding/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/page.tsx` | no | yes | no | no | no |
+| `app/admin/page.tsx` | no | no | no | no | no |
 | `app/admin/payments/page.tsx` | no | yes | no | no | no |
 | `app/admin/promotions/page.tsx` | no | no | no | no | no |
 | `app/admin/rate-limiting/page.tsx` | no | no | no | no | no |

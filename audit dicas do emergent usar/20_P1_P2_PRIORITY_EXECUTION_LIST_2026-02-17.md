@@ -506,3 +506,14 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 1. `missing AdminPageShell: 20` (from 23)
 2. `direct fetch without adminJsonFetch: 25` (from 28)
 3. `mojibake candidates: 0`
+
+## Delta 2026-02-21 - Admin conversion wave 4
+
+### Delivered in this wave
+1. Refactored `cloud-web-app/web/app/admin/page.tsx` to use `adminJsonFetch` and removed local token fetcher duplication.
+2. Standardized copy and state messaging in the root admin console.
+
+### Updated residual from `qa:admin-surface`
+1. `missing AdminPageShell: 20`
+2. `direct fetch without adminJsonFetch: 24` (from 25)
+3. `mojibake candidates: 0`
