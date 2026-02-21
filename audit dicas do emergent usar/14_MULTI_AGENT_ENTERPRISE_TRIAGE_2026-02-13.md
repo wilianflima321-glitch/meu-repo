@@ -1791,6 +1791,10 @@ Triaged impact:
 1. Reduced first-session ambiguity in `/dashboard` mission control.
 2. Improved readability/operational trust in parallel-agent run telemetry.
 
+## Delta 2026-02-21 (Studio Home session handoff)
+1. Studio Home now restores sessions from `?sessionId=` query in addition to local storage.
+2. Share link generated in Studio Home now resolves to a real session restore path.
+
 ## Delta 2026-02-21 CXIV - Admin enterprise consistency triage
 Delivered:
 1. Added shared admin UI primitives for shell/sections/banners/stats/buttons/table-states:

@@ -225,7 +225,9 @@ export default function StudioHome() {
   useEffect(() => {
     if (sessionBootstrapped) return
     const restore = async () => {
-      const persistedSessionId = window.localStorage.getItem(STUDIO_SESSION_STORAGE_KEY)?.trim()
+      const params = new URLSearchParams(window.location.search)
+      const querySessionId = params.get('sessionId')?.trim()
+      const persistedSessionId = querySessionId || window.localStorage.getItem(STUDIO_SESSION_STORAGE_KEY)?.trim()
       if (!persistedSessionId) {
         setSessionBootstrapped(true)
         return
