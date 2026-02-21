@@ -6,9 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import crypto from 'crypto';
 import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 const MAX_PROJECT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 
@@ -85,7 +85,7 @@ export async function POST(
     }
 
     const body: ShareConfig = await request.json();
-    const { type, emails, teamId, permissions, expiresIn } = body;
+    const { type, emails, teamId, permissions } = body;
 
     if (!type || !permissions) {
       return NextResponse.json(
@@ -94,37 +94,11 @@ export async function POST(
       );
     }
 
-    const shareId = crypto.randomUUID();
-    const expiresAt = expiresIn 
-      ? new Date(Date.now() + expiresIn * 60 * 60 * 1000).toISOString()
-      : null;
-
-    const shareResult: Record<string, unknown> = {
-      shareId,
-      projectId,
-      type,
-      permissions,
-      createdAt: new Date().toISOString(),
-      createdBy: session.user.email,
-      expiresAt,
-    };
-
-    if (type === 'link') {
-      // Gerar link de compartilhamento
-      shareResult.shareUrl = `https://aethel.studio/share/${shareId}`;
-    } else if (type === 'email' && emails) {
-      // Em producao, enviar emails
-      shareResult.invitedEmails = emails;
-      shareResult.message = `Convites enviados para ${emails.length} usuario(s)`;
-    } else if (type === 'team' && teamId) {
-      shareResult.teamId = teamId;
-      shareResult.message = 'Projeto compartilhado com o time';
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Projeto compartilhado com sucesso',
-      share: shareResult,
+    return notImplementedCapability({
+      message: 'Project sharing is not wired to persistence yet.',
+      capability: 'PROJECT_SHARE',
+      milestone: 'P1',
+      metadata: { projectId, type, permissions, hasEmails: Boolean(emails?.length), hasTeam: Boolean(teamId) },
     });
   } catch (error) {
     console.error('Erro ao compartilhar projeto:', error);
@@ -199,23 +173,11 @@ export async function GET(
       );
     }
 
-    
-    // Em producao, buscar compartilhamentos do banco
-    const shares = [
-      {
-        shareId: 'share-1',
-        type: 'link',
-        permissions: 'view',
-        createdAt: new Date().toISOString(),
-        expiresAt: null,
-        shareUrl: `https://aethel.studio/share/share-1`,
-      },
-    ];
-
-    return NextResponse.json({
-      projectId,
-      shares,
-      totalShares: shares.length,
+    return notImplementedCapability({
+      message: 'Project share listing is not wired to persistence yet.',
+      capability: 'PROJECT_SHARE',
+      milestone: 'P1',
+      metadata: { projectId },
     });
   } catch (error) {
     console.error('Erro ao buscar compartilhamentos:', error);
