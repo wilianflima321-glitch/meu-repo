@@ -41,7 +41,8 @@ export function StudioHomeMissionPanel({
   onApplyDomainPreset,
   onStartSession,
 }: StudioHomeMissionPanelProps) {
-  const startDisabled = busy || variableUsageBlocked || !trimmedMission || session?.status === 'active'
+  const sessionLocked = session?.status === 'active'
+  const startDisabled = busy || variableUsageBlocked || !trimmedMission || sessionLocked
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -60,6 +61,7 @@ export function StudioHomeMissionPanel({
           onChange={(event) => onMissionChange(event.target.value)}
           placeholder="Describe mission: what to build, quality target, constraints, and expected output."
           required
+          disabled={sessionLocked}
           className="h-32 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         />
         <div className="grid grid-cols-2 gap-2">
@@ -71,6 +73,7 @@ export function StudioHomeMissionPanel({
             value={projectId}
             onChange={(event) => onProjectIdChange(event.target.value)}
             placeholder="projectId"
+            disabled={sessionLocked}
             className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           />
           <label className="sr-only" htmlFor="studio-budget-cap">
@@ -84,6 +87,7 @@ export function StudioHomeMissionPanel({
             min={5}
             max={100000}
             step={1}
+            disabled={sessionLocked}
             className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           />
         </div>
@@ -99,6 +103,7 @@ export function StudioHomeMissionPanel({
             id="mission-domain"
             value={missionDomainSelection}
             onChange={(event) => onMissionDomainChange(event.target.value as MissionDomainSelection)}
+            disabled={sessionLocked}
             className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <option value="auto">auto</option>
@@ -116,6 +121,7 @@ export function StudioHomeMissionPanel({
             id="quality-mode"
             value={qualityMode}
             onChange={(event) => onQualityModeChange(event.target.value as 'standard' | 'delivery' | 'studio')}
+            disabled={sessionLocked}
             className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <option value="standard">standard</option>
@@ -131,6 +137,7 @@ export function StudioHomeMissionPanel({
                 key={domain}
                 type="button"
                 onClick={() => onApplyDomainPreset(domain)}
+                disabled={sessionLocked}
                 className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {missionDomainLabel(domain)}
