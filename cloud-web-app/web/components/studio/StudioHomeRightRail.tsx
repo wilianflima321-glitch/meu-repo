@@ -23,6 +23,13 @@ type StudioHomeOpsBarProps = {
   budgetCap: number
   budgetProgress: BudgetProgress
   busy: boolean
+  liveCost?: {
+    cost?: StudioSession['cost']
+    runsByRole?: Record<string, number>
+    totalRuns?: number
+    budgetExceeded?: boolean
+    updatedAt?: string
+  } | null
   activeGrant: { id: string; scope: FullAccessScope; expiresAt: string } | null
   fullAccessScope: FullAccessScope
   allowedFullAccessScopes: FullAccessScope[]
@@ -90,6 +97,7 @@ export function StudioHomeOpsBar({
   budgetCap,
   budgetProgress,
   busy,
+  liveCost,
   activeGrant,
   fullAccessScope,
   allowedFullAccessScopes,
@@ -112,6 +120,9 @@ export function StudioHomeOpsBar({
   const grantExpiryLabel = activeGrant
     ? new Date(activeGrant.expiresAt).toLocaleTimeString()
     : ''
+  const liveRuns = liveCost?.totalRuns ?? 0
+  const liveUpdatedAt = liveCost?.updatedAt ? new Date(liveCost.updatedAt).toLocaleTimeString() : null
+  const liveByRole = liveCost?.runsByRole || {}
 
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
@@ -158,6 +169,11 @@ export function StudioHomeOpsBar({
           Budget is almost exhausted. Finish validation/apply now or stop session to prevent forced blocking.
         </div>
       )}
+      {liveCost?.budgetExceeded && (
+        <div className="mt-2 rounded border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-100">
+          Live telemetry indicates budget is exhausted. Variable operations are blocked until credits are restored.
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
@@ -202,6 +218,13 @@ export function StudioHomeOpsBar({
 
       <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
         Allowed scopes for current plan: {allowedScopesLabel}.
+      </div>
+      <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
+        Live telemetry: {liveRuns} runs
+        {liveUpdatedAt ? ` | updated ${liveUpdatedAt}` : ''}.
+        <span className="ml-1">
+          Planner {Number(liveByRole.planner || 0).toFixed(2)} · Coder {Number(liveByRole.coder || 0).toFixed(2)} · Reviewer {Number(liveByRole.reviewer || 0).toFixed(2)}
+        </span>
       </div>
       <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
         Note: Studio Home apply/rollback controls manage mission checkpoints. File-level patch apply remains in `/ide`

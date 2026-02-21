@@ -38,6 +38,14 @@ const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
 const LEGACY_DASHBOARD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD === 'true'
 
+type StudioLiveCost = {
+  cost: StudioSession['cost']
+  runsByRole: Record<string, number>
+  totalRuns: number
+  budgetExceeded: boolean
+  updatedAt: string
+}
+
 export default function StudioHome() {
   const router = useRouter()
   const [mission, setMission] = useState('')
@@ -50,6 +58,7 @@ export default function StudioHome() {
   const [session, setSession] = useState<StudioSession | null>(null)
   const [wallet, setWallet] = useState<WalletSummary | null>(null)
   const [usage, setUsage] = useState<UsageSummary | null>(null)
+  const [liveCost, setLiveCost] = useState<StudioLiveCost | null>(null)
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -95,13 +104,14 @@ export default function StudioHome() {
   }, [session?.tasks])
 
   const budgetProgress = useMemo(() => {
-    const cap = Number(session?.cost.budgetCap ?? budgetCap)
-    const used = Number(session?.cost.usedCredits ?? 0)
+    const costSnapshot = liveCost?.cost || session?.cost
+    const cap = Number(costSnapshot?.budgetCap ?? budgetCap)
+    const used = Number(costSnapshot?.usedCredits ?? 0)
     const safeCap = cap > 0 ? cap : 1
     const percent = Math.max(0, Math.min(100, Math.round((used / safeCap) * 100)))
     const pressure = percent >= 90 ? 'critical' : percent >= 70 ? 'high' : percent >= 50 ? 'medium' : 'normal'
     return { percent, pressure }
-  }, [session?.cost.budgetCap, session?.cost.usedCredits, budgetCap])
+  }, [liveCost?.cost, session?.cost, budgetCap])
 
   const loadOps = useCallback(async () => {
     const [walletRes, usageRes] = await Promise.allSettled([
@@ -214,6 +224,24 @@ export default function StudioHome() {
     []
   )
 
+  const refreshLiveCost = useCallback(
+    async (sessionId: string) => {
+      const res = await fetch(`/api/studio/cost/live?sessionId=${encodeURIComponent(sessionId)}`, {
+        cache: 'no-store',
+      })
+      const data = await parseJson(res)
+      if (!res.ok) throw new Error(data.message || data.error || 'Failed to load live cost telemetry.')
+      setLiveCost({
+        cost: data.cost as StudioSession['cost'],
+        runsByRole: (data.runsByRole as Record<string, number>) || {},
+        totalRuns: Number(data.totalRuns || 0),
+        budgetExceeded: Boolean(data.budgetExceeded),
+        updatedAt: new Date().toISOString(),
+      })
+    },
+    []
+  )
+
   useEffect(() => {
     if (!session?.id || session.status !== 'active' || busy) return
     const interval = window.setInterval(() => {
@@ -221,6 +249,18 @@ export default function StudioHome() {
     }, 8000)
     return () => window.clearInterval(interval)
   }, [session?.id, session?.status, busy, refreshSession])
+
+  useEffect(() => {
+    if (!session?.id || session.status !== 'active') {
+      setLiveCost(null)
+      return
+    }
+    void refreshLiveCost(session.id).catch(() => {})
+    const interval = window.setInterval(() => {
+      void refreshLiveCost(session.id).catch(() => {})
+    }, 10000)
+    return () => window.clearInterval(interval)
+  }, [session?.id, session?.status, refreshLiveCost])
 
   useEffect(() => {
     if (sessionBootstrapped) return
@@ -667,6 +707,7 @@ export default function StudioHome() {
               budgetCap={budgetCap}
               budgetProgress={budgetProgress}
               busy={busy}
+              liveCost={liveCost}
               activeGrant={activeGrant}
               fullAccessScope={fullAccessScope}
               allowedFullAccessScopes={allowedFullAccessScopes}
