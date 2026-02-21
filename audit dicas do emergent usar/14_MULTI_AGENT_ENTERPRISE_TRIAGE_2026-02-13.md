@@ -1961,3 +1961,7 @@ Triaged impact:
 - `missing AdminPageShell=0`
 - `direct fetch without adminJsonFetch=0`
 - `mojibake candidates=0`
+
+## Delta 2026-02-21 (Admin surface gate)
+1. Added `qa:admin-surface` into `qa:enterprise-gate` for CI enforcement.
+2. Admin surface drift is now blocked during enterprise gate runs.
