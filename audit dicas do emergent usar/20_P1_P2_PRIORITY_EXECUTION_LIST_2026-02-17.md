@@ -446,3 +446,23 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `cloud-web-app/web/app/admin/feature-flags/page.tsx`
 - `cloud-web-app/web/app/admin/promotions/page.tsx`
 2. Applied shared shell/state patterns and authenticated admin fetch behavior for read/write flows.
+
+## Delta 2026-02-21 - Admin surface normalization wave
+
+### Delivered in this wave
+1. Standardized `cloud-web-app/web/app/admin/notifications/page.tsx` to shared admin UX primitives (`AdminPageShell`, status banner, stat grid, table state rows).
+2. Standardized `cloud-web-app/web/app/admin/subscriptions/page.tsx` with authenticated fetch flow and explicit state handling.
+3. Standardized `cloud-web-app/web/app/admin/audit-logs/page.tsx` with shared shell, auth fetch, and deterministic export action.
+4. Added sweep tooling: `cloud-web-app/web/scripts/admin-surface-scan.mjs` + `cloud-web-app/web/docs/ADMIN_SURFACE_SWEEP.md`.
+5. Added scripts in `cloud-web-app/web/package.json`:
+- `qa:admin-surface`
+- `docs:admin-surface-sweep`
+
+### Current residual from sweep
+1. `missing AdminPageShell`: `28`
+2. `direct fetch without adminJsonFetch`: `33`
+3. `mojibake candidates`: `0`
+
+### Next P1 execution target
+1. Prioritize remaining high-traffic admin pages for conversion: `finance`, `automation`, `compliance`, `cost-optimization`, `roles`, `rate-limiting`.
+2. Keep scan report regenerated on each admin-hardening wave.

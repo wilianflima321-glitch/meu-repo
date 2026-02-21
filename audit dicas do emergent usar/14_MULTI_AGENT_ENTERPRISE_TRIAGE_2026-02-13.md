@@ -1904,3 +1904,12 @@ Delivered:
 Triaged impact:
 1. Reduced config-management UX drift in feature rollout and promotion operations.
 2. Improved operational clarity by standardizing table/form/action states.
+
+## Delta 2026-02-21 (Admin hardening continuation)
+1. Refactored admin notifications, subscriptions, and audit logs to shared enterprise patterns (`AdminPageShell`, `adminJsonFetch`, explicit status/table states).
+2. Added `cloud-web-app/web/scripts/admin-surface-scan.mjs` and generated `cloud-web-app/web/docs/ADMIN_SURFACE_SWEEP.md`.
+3. Current sweep baseline:
+- `missing AdminPageShell=28`
+- `direct fetch without adminJsonFetch=33`
+- `mojibake candidates=0`
+4. Next wave remains focused on high-traffic residual admin pages, no scope expansion.
