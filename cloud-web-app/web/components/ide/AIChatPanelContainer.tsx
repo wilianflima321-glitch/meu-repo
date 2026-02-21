@@ -55,6 +55,7 @@ const MODELS = [
     supportsVoice: false,
   },
 ]
+const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId'
 
 function extractContent(raw: string): string {
   try {
@@ -198,8 +199,10 @@ function formatTraceSummary(trace: TraceSummary): string {
 function getProjectIdFromLocation(): string | undefined {
   if (typeof window === 'undefined') return undefined
   const value = new URLSearchParams(window.location.search).get('projectId')
-  if (!value || !value.trim()) return undefined
-  return value.trim()
+  if (value && value.trim()) return value.trim()
+  const stored = window.localStorage.getItem(WORKBENCH_PROJECT_STORAGE_KEY)
+  if (stored && stored.trim()) return stored.trim()
+  return undefined
 }
 
 export default function AIChatPanelContainer() {
@@ -246,10 +249,11 @@ export default function AIChatPanelContainer() {
 
       try {
         const profile = inferAdvancedProfile(message)
+        const resolvedProjectId = getProjectIdFromLocation() || projectId
         const payload = {
           model: currentModel,
           messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
-          projectId,
+          projectId: resolvedProjectId,
           qualityMode: profile.qualityMode,
           agentCount: profile.agentCount,
           enableWebResearch: profile.enableWebResearch,
