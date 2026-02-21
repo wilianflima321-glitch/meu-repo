@@ -1831,3 +1831,12 @@ Delivered:
 Triaged impact:
 1. Closed a route-level UX gap where emergency API existed without matching operations surface.
 2. Removed emergency-control discoverability ambiguity in admin operations flow.
+
+## Delta 2026-02-21 CXVII - Legacy dashboard route gate closure
+Delivered:
+1. Added legacy route guard:
+- `cloud-web-app/web/app/dashboard/legacy/page.tsx` now redirects to `/dashboard` when `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD` is not enabled.
+
+Triaged impact:
+1. Prevents accidental exposure of legacy dashboard surface in default production path.
+2. Keeps entry UX contract stable on Studio Home-first flow.

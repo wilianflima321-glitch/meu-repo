@@ -410,3 +410,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 1. Added missing emergency admin surface:
 - `cloud-web-app/web/app/admin/emergency/page.tsx`
 2. Updated admin shell nav + CTA to point to `/admin/emergency` now that the route exists.
+
+### Delivered in this wave (Legacy route guard)
+1. Updated `cloud-web-app/web/app/dashboard/legacy/page.tsx`:
+- redirect to `/dashboard` unless `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.

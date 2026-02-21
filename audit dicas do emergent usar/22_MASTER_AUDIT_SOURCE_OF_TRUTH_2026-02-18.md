@@ -452,3 +452,10 @@ Label: `VERIFIED_INTERNAL`
 1. Added `cloud-web-app/web/app/admin/emergency/page.tsx` backed by `/api/admin/emergency`.
 2. Updated `cloud-web-app/web/app/admin/layout.tsx` nav and bottom CTA to `/admin/emergency`.
 3. Targeted lint verification for modified emergency/layout surfaces: PASS.
+
+## 22) Delta 2026-02-21 - Legacy dashboard route gate
+Label: `VERIFIED_INTERNAL`
+
+1. Updated `cloud-web-app/web/app/dashboard/legacy/page.tsx` to enforce flag gate.
+2. Route now redirects to `/dashboard` when `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD` is not enabled.
+3. Targeted lint verification for modified route: PASS.

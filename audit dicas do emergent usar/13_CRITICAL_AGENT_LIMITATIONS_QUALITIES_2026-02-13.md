@@ -1796,3 +1796,11 @@ Implemented:
 Critical reading:
 1. Admin emergency control is now explicit and reachable; API-only exposure risk is closed.
 2. Residual risk remains permission-level UX messaging under restricted roles (403 handling by policy).
+
+## Delta 2026-02-21 CXVI - Legacy route exposure tightening
+Implemented:
+1. Added hard gate on `/dashboard/legacy` to redirect unless legacy flag is explicitly enabled.
+
+Critical reading:
+1. This reduces accidental drift back to monolithic legacy dashboard in default production path.
+2. Residual risk remains maintenance cost of legacy dashboard code while opt-in path exists.

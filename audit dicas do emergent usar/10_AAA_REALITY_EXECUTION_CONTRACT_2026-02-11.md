@@ -4261,3 +4261,18 @@ Validation snapshot:
 Decision lock:
 1. No new backend scope; this wave exposes already-existing emergency controls through an explicit admin route.
 2. Capability/deprecation contracts unchanged.
+
+## 168) Delta 2026-02-21 CXXII - Legacy dashboard route hard gate
+
+Implemented:
+1. Added route-level guard in:
+- `cloud-web-app/web/app/dashboard/legacy/page.tsx`
+2. Behavior:
+- redirect to `/dashboard` unless `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.
+
+Validation snapshot:
+1. Targeted lint on legacy route page -> PASS.
+
+Decision lock:
+1. Entry contract remains Studio Home-first by default.
+2. Legacy surface remains opt-in via explicit flag.

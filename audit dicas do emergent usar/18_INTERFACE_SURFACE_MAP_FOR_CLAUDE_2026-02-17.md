@@ -178,6 +178,7 @@ CI workflows:
 ### Legacy surface exposure policy
 - `cloud-web-app/web/components/studio/StudioHome.tsx` exposes legacy dashboard CTA only when `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.
 - Default production path keeps legacy CTA hidden to avoid duplicate primary journey.
+- `cloud-web-app/web/app/dashboard/legacy/page.tsx` redirects to `/dashboard` when legacy flag is disabled.
 
 ### IDE orchestration modularization
 - `cloud-web-app/web/app/ide/page.tsx` remains route orchestrator only.
