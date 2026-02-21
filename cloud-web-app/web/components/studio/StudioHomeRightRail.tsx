@@ -106,6 +106,12 @@ export function StudioHomeOpsBar({
         : pressureLabel === 'medium'
           ? 'medium'
           : 'normal'
+  const allowedScopesLabel = allowedFullAccessScopes.length
+    ? allowedFullAccessScopes.map(fullAccessScopeLabel).join(', ')
+    : 'none'
+  const grantExpiryLabel = activeGrant
+    ? new Date(activeGrant.expiresAt).toLocaleTimeString()
+    : ''
 
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
@@ -190,12 +196,12 @@ export function StudioHomeOpsBar({
 
       {activeGrant && (
         <div className="mt-2 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-100">
-          Active grant: {fullAccessScopeLabel(activeGrant.scope)} until {new Date(activeGrant.expiresAt).toLocaleTimeString()}
+          Active grant: {fullAccessScopeLabel(activeGrant.scope)} until {grantExpiryLabel}
         </div>
       )}
 
       <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-        Allowed scopes for current plan: {allowedFullAccessScopes.map(fullAccessScopeLabel).join(', ')}.
+        Allowed scopes for current plan: {allowedScopesLabel}.
       </div>
       <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
         Note: Studio Home apply/rollback controls manage mission checkpoints. File-level patch apply remains in `/ide`
