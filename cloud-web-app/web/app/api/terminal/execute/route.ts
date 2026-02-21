@@ -28,6 +28,8 @@ const execAsync = promisify(exec);
 const rateLimiter = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 100; // commands per minute
 const RATE_WINDOW = 60000; // 1 minute
+const MAX_SESSION_ID_LENGTH = 120;
+const normalizeSessionId = (value?: string) => String(value ?? '').trim();
 
 // Security: blocked commands that could be dangerous
 const BLOCKED_COMMANDS = new Set([
@@ -321,6 +323,16 @@ export async function POST(req: NextRequest): Promise<Response> {
       timeout = 30000,
       env: customEnv = {},
     } = body;
+
+    const normalizedSessionId = normalizeSessionId(sessionId);
+    if (normalizedSessionId.length > MAX_SESSION_ID_LENGTH) {
+      return NextResponse.json({
+        output: '',
+        error: 'Invalid sessionId length.',
+        exitCode: 1,
+        cwd: requestCwd || os.homedir(),
+      }, { status: 400 });
+    }
     
     // Validate input
     if (!command || typeof command !== 'string') {
@@ -355,7 +367,8 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
     
     // Get or create session (scoped to user)
-    const userSessionId = `${user.userId}:${sessionId}`;
+    const effectiveSessionId = normalizedSessionId || `user-${user.userId}`;
+    const userSessionId = `${user.userId}:${effectiveSessionId}`;
     let session = sessions.get(userSessionId);
     if (!session) {
       session = {
@@ -518,8 +531,23 @@ export async function POST(req: NextRequest): Promise<Response> {
 
 // GET endpoint for session info
 export async function GET(req: NextRequest) {
-  const sessionId = req.nextUrl.searchParams.get('sessionId') || 'default';
-  const session = sessions.get(sessionId);
+  let user: AuthUser;
+  try {
+    user = requireAuth(req);
+  } catch (error) {
+    return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+  }
+
+  const sessionId = normalizeSessionId(req.nextUrl.searchParams.get('sessionId'));
+  if (sessionId.length > MAX_SESSION_ID_LENGTH) {
+    return NextResponse.json(
+      { error: 'Invalid sessionId length.' },
+      { status: 400 }
+    );
+  }
+
+  const effectiveSessionId = sessionId || `user-${user.userId}`;
+  const session = sessions.get(`${user.userId}:${effectiveSessionId}`);
   
   return NextResponse.json({
     exists: !!session,
@@ -533,8 +561,23 @@ export async function GET(req: NextRequest) {
 
 // DELETE endpoint to clear session
 export async function DELETE(req: NextRequest) {
-  const sessionId = req.nextUrl.searchParams.get('sessionId') || 'default';
-  const deleted = sessions.delete(sessionId);
+  let user: AuthUser;
+  try {
+    user = requireAuth(req);
+  } catch (error) {
+    return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+  }
+
+  const sessionId = normalizeSessionId(req.nextUrl.searchParams.get('sessionId'));
+  if (sessionId.length > MAX_SESSION_ID_LENGTH) {
+    return NextResponse.json(
+      { error: 'Invalid sessionId length.' },
+      { status: 400 }
+    );
+  }
+
+  const effectiveSessionId = sessionId || `user-${user.userId}`;
+  const deleted = sessions.delete(`${user.userId}:${effectiveSessionId}`);
   
   return NextResponse.json({
     success: deleted,
