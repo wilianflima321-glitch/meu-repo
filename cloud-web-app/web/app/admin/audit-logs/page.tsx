@@ -1,6 +1,16 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type AuditLog = {
   id: string;
@@ -17,44 +27,66 @@ type AuditLog = {
   createdAt: string;
 };
 
+type AuditPayload = {
+  logs?: AuditLog[];
+};
+
+type FilterState = {
+  adminEmail: string;
+  action: string;
+  severity: 'all' | 'info' | 'warning' | 'critical';
+  dateFrom: string;
+  dateTo: string;
+};
+
+const severityLabels: Record<string, string> = {
+  info: 'Info',
+  warning: 'Warning',
+  critical: 'Critical',
+};
+
+const emptyFilters: FilterState = {
+  adminEmail: '',
+  action: '',
+  severity: 'all',
+  dateFrom: '',
+  dateTo: '',
+};
+
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [filter, setFilter] = useState({
-    adminEmail: '',
-    action: '',
-    severity: 'all',
-    dateFrom: '',
-    dateTo: '',
-  });
-
-  const severityLabels: Record<string, string> = {
-    info: 'informação',
-    warning: 'aviso',
-    critical: 'crítico',
-  };
+  const [filter, setFilter] = useState<FilterState>(emptyFilters);
 
   const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       params.set('limit', '100');
-      if (filter.adminEmail) params.set('adminEmail', filter.adminEmail);
-      if (filter.action) params.set('action', filter.action);
-      if (filter.severity !== 'all') params.set('severity', filter.severity);
-      if (filter.dateFrom) params.set('startDate', filter.dateFrom);
-      if (filter.dateTo) params.set('endDate', filter.dateTo);
+      if (filter.adminEmail) {
+        params.set('adminEmail', filter.adminEmail);
+      }
+      if (filter.action) {
+        params.set('action', filter.action);
+      }
+      if (filter.severity !== 'all') {
+        params.set('severity', filter.severity);
+      }
+      if (filter.dateFrom) {
+        params.set('startDate', filter.dateFrom);
+      }
+      if (filter.dateTo) {
+        params.set('endDate', filter.dateTo);
+      }
 
-      const res = await fetch(`/api/admin/audit?${params.toString()}`);
-      if (!res.ok) throw new Error('Falha ao carregar logs');
-      const data = await res.json();
+      const data = await adminJsonFetch<AuditPayload>(`/api/admin/audit?${params.toString()}`);
       setLogs(Array.isArray(data?.logs) ? data.logs : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar logs');
+      setError(err instanceof Error ? err.message : 'Failed to load audit logs');
     } finally {
       setLoading(false);
     }
@@ -64,7 +96,16 @@ export default function AuditLogsPage() {
     fetchLogs();
   }, [fetchLogs]);
 
-  const handleExport = () => {
+  const summary = useMemo(
+    () => ({
+      total: logs.length,
+      warning: logs.filter((log) => log.severity === 'warning').length,
+      critical: logs.filter((log) => log.severity === 'critical').length,
+    }),
+    [logs],
+  );
+
+  const handleExport = useCallback(() => {
     const payload = {
       generatedAt: new Date().toISOString(),
       filters: filter,
@@ -77,149 +118,128 @@ export default function AuditLogsPage() {
     link.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  };
-
-  const summary = {
-    total: logs.length,
-    critical: logs.filter((log) => log.severity === 'critical').length,
-    warning: logs.filter((log) => log.severity === 'warning').length,
-  };
+  }, [filter, logs]);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Logs de auditoria avançados</h1>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Audit Logs'
+      description='Inspect admin actions with explicit filtering for actor, severity, and time range.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={
+        <>
+          <AdminPrimaryButton onClick={handleExport} disabled={logs.length === 0}>
+            Export JSON
+          </AdminPrimaryButton>
+          <AdminPrimaryButton onClick={fetchLogs}>Refresh</AdminPrimaryButton>
+        </>
+      }
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExport}
-            className="px-3 py-2 rounded bg-blue-600 text-white text-sm"
-          >
-            Exportar
-          </button>
-          <button
-            onClick={fetchLogs}
-            className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-          >
-            Atualizar
-          </button>
-        </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total logs' value={summary.total} tone='sky' />
+          <AdminStatCard label='Warnings' value={summary.warning} tone='amber' />
+          <AdminStatCard label='Critical' value={summary.critical} tone='rose' />
+          <AdminStatCard label='Filtered' value={logs.length} tone='neutral' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Avisos</h3>
-          <p className="text-2xl font-bold text-yellow-600">{summary.warning}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Críticos</h3>
-          <p className="text-2xl font-bold text-red-600">{summary.critical}</p>
-        </div>
-      </div>
-      
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Filtros</h2>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <AdminSection title='Filters' className='mb-6'>
+        <div className='grid grid-cols-1 gap-3 md:grid-cols-5'>
           <input
-            type="text"
-            placeholder="Admin (e-mail)"
+            type='text'
+            placeholder='Admin email'
             value={filter.adminEmail}
-            onChange={(e) => setFilter({ ...filter, adminEmail: e.target.value })}
-            className="border p-2"
+            onChange={(event) => setFilter((prev) => ({ ...prev, adminEmail: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
           <input
-            type="text"
-            placeholder="Ação"
+            type='text'
+            placeholder='Action'
             value={filter.action}
-            onChange={(e) => setFilter({ ...filter, action: e.target.value })}
-            className="border p-2"
+            onChange={(event) => setFilter((prev) => ({ ...prev, action: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
           <select
             value={filter.severity}
-            onChange={(e) => setFilter({ ...filter, severity: e.target.value })}
-            className="border p-2"
+            onChange={(event) => setFilter((prev) => ({ ...prev, severity: event.target.value as FilterState['severity'] }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           >
-            <option value="all">Severidade</option>
-            <option value="info">Informação</option>
-            <option value="warning">Aviso</option>
-            <option value="critical">Crítico</option>
+            <option value='all'>All severities</option>
+            <option value='info'>Info</option>
+            <option value='warning'>Warning</option>
+            <option value='critical'>Critical</option>
           </select>
           <input
-            type="date"
+            type='date'
             value={filter.dateFrom}
-            onChange={(e) => setFilter({ ...filter, dateFrom: e.target.value })}
-            className="border p-2"
+            onChange={(event) => setFilter((prev) => ({ ...prev, dateFrom: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
           <input
-            type="date"
+            type='date'
             value={filter.dateTo}
-            onChange={(e) => setFilter({ ...filter, dateTo: e.target.value })}
-            className="border p-2"
+            onChange={(event) => setFilter((prev) => ({ ...prev, dateTo: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
         </div>
-      </div>
+      </AdminSection>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Logs de Auditoria</h2>
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-10 bg-zinc-800/70 rounded animate-pulse" />
-            ))}
-          </div>
-        ) : error ? (
-          <p className="text-sm text-red-500">{error}</p>
-        ) : logs.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhum log encontrado.</p>
-        ) : (
-          <table className="w-full">
+      <AdminSection title='Events' className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
             <thead>
-              <tr className="border-b text-xs text-zinc-500">
-                <th className="text-left p-2">Admin</th>
-                <th className="text-left p-2">Ação</th>
-                <th className="text-left p-2">Categoria</th>
-                <th className="text-left p-2">Severidade</th>
-                <th className="text-left p-2">Alvo</th>
-                <th className="text-left p-2">Data/Hora</th>
-                <th className="text-left p-2">IP</th>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Admin</th>
+                <th className='p-3 text-left'>Action</th>
+                <th className='p-3 text-left'>Category</th>
+                <th className='p-3 text-left'>Severity</th>
+                <th className='p-3 text-left'>Target</th>
+                <th className='p-3 text-left'>Timestamp</th>
+                <th className='p-3 text-left'>IP</th>
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
-                <tr key={log.id} className="border-b hover:bg-zinc-900/60 text-sm">
-                  <td className="p-2">{log.adminEmail || log.userId || '—'}</td>
-                  <td className="p-2">{log.action || '—'}</td>
-                  <td className="p-2">{log.category || '—'}</td>
-                  <td className="p-2">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      log.severity === 'critical'
-                        ? 'bg-rose-500/15 text-rose-300'
-                        : log.severity === 'warning'
-                        ? 'bg-amber-500/15 text-amber-300'
-                        : 'bg-zinc-800/70 text-zinc-400'
-                    }`}>
-                      {severityLabels[log.severity || 'info'] ?? log.severity ?? 'informação'}
-                    </span>
-                  </td>
-                  <td className="p-2">
-                    {log.targetType ? `${log.targetType}:${log.targetId?.slice(0, 8) || ''}` : '—'}
-                  </td>
-                  <td className="p-2">{new Date(log.createdAt).toLocaleString()}</td>
-                  <td className="p-2">{log.ipAddress || '—'}</td>
-                </tr>
-              ))}
+              {loading ? (
+                <AdminTableStateRow colSpan={7} message='Loading audit logs...' />
+              ) : logs.length === 0 ? (
+                <AdminTableStateRow colSpan={7} message='No audit logs found for current filters.' />
+              ) : (
+                logs.map((log) => (
+                  <tr key={log.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3'>{log.adminEmail || log.userId || '-'}</td>
+                    <td className='p-3 text-zinc-100'>{log.action || '-'}</td>
+                    <td className='p-3'>{log.category || '-'}</td>
+                    <td className='p-3'>
+                      <span
+                        className={`rounded px-2 py-1 text-xs ${
+                          log.severity === 'critical'
+                            ? 'bg-rose-500/15 text-rose-300'
+                            : log.severity === 'warning'
+                              ? 'bg-amber-500/15 text-amber-300'
+                              : 'bg-zinc-800/70 text-zinc-300'
+                        }`}
+                      >
+                        {severityLabels[log.severity || 'info'] ?? log.severity ?? 'Info'}
+                      </span>
+                    </td>
+                    <td className='p-3'>
+                      {log.targetType ? `${log.targetType}:${log.targetId?.slice(0, 8) || ''}` : '-'}
+                    </td>
+                    <td className='p-3 text-zinc-500'>{new Date(log.createdAt).toLocaleString()}</td>
+                    <td className='p-3'>{log.ipAddress || '-'}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-        )}
-      </div>
-    </div>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }
