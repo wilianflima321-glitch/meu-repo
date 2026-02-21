@@ -387,3 +387,13 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. Added explicit disabled-state reasoning for mission start and task board actions.
 3. Improved professional telemetry readability in Team Chat (role/cost formatting).
 4. Aligned ops pressure label with canonical budget-pressure computation.
+
+### Delivered in this wave (Admin enterprise consistency pass)
+1. Introduced shared admin primitives:
+- `cloud-web-app/web/components/admin/AdminSurface.tsx`
+2. Refactored high-traffic admin pages to shared primitives and consistent state handling:
+- `cloud-web-app/web/app/admin/page.tsx`
+- `cloud-web-app/web/app/admin/payments/page.tsx`
+- `cloud-web-app/web/app/admin/apis/page.tsx`
+- `cloud-web-app/web/app/admin/security/page.tsx`
+3. Standardized operational copy and removed mojibake-prone strings in payment admin flow.

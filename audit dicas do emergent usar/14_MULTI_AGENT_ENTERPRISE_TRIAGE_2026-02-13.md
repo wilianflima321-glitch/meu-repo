@@ -1790,3 +1790,19 @@ Delivered:
 Triaged impact:
 1. Reduced first-session ambiguity in `/dashboard` mission control.
 2. Improved readability/operational trust in parallel-agent run telemetry.
+
+## Delta 2026-02-21 CXIV - Admin enterprise consistency triage
+Delivered:
+1. Added shared admin UI primitives for shell/sections/banners/stats/buttons/table-states:
+- `cloud-web-app/web/components/admin/AdminSurface.tsx`
+2. Refactored high-traffic admin pages to the shared primitives:
+- `cloud-web-app/web/app/admin/page.tsx`
+- `cloud-web-app/web/app/admin/payments/page.tsx`
+- `cloud-web-app/web/app/admin/apis/page.tsx`
+- `cloud-web-app/web/app/admin/security/page.tsx`
+3. Removed mojibake-prone copy from payments flow and standardized operational wording.
+
+Triaged impact:
+1. Loading/error/empty/success behavior is now consistent across core admin surfaces.
+2. Keyboard focus visibility and interaction affordances are now aligned without introducing new scope.
+3. Admin actionability improved while preserving existing route and capability contracts.

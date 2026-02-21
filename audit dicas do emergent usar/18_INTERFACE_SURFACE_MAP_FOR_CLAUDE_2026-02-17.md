@@ -64,6 +64,7 @@ Priority admin pages:
 
 Admin layout and shared frame:
 1. `cloud-web-app/web/app/admin/layout.tsx`
+2. `cloud-web-app/web/components/admin/AdminSurface.tsx`
 
 All other admin surface directories:
 1. `cloud-web-app/web/app/admin/*/page.tsx`
@@ -183,3 +184,12 @@ CI workflows:
 - Common panel rendering moved to `cloud-web-app/web/components/ide/WorkbenchPanels.tsx`.
 - Prompt/confirm/status hooks moved to `cloud-web-app/web/components/ide/WorkbenchDialogs.tsx`.
 - Status line composition moved to `cloud-web-app/web/components/ide/WorkbenchStatusBar.tsx`.
+
+### Admin consistency surface
+- Shared shell/section/banner/stat/button/table-state primitives are centralized in:
+  - `cloud-web-app/web/components/admin/AdminSurface.tsx`
+- High-traffic admin pages now use the shared primitives:
+  - `cloud-web-app/web/app/admin/page.tsx`
+  - `cloud-web-app/web/app/admin/payments/page.tsx`
+  - `cloud-web-app/web/app/admin/apis/page.tsx`
+  - `cloud-web-app/web/app/admin/security/page.tsx`
