@@ -1824,3 +1824,13 @@ Implemented:
 Critical reading:
 1. This lowers risk of inconsistent auth behavior across admin observability pages.
 2. Residual risk remains in additional admin pages still using bespoke fetch/state patterns.
+
+## Delta 2026-02-21 CXIX - AI-upgrades/updates page drift reduction
+Implemented:
+1. Standardized admin shell, action layout, and state handling in AI upgrades and updates pages.
+2. Unified authenticated fetch behavior using the shared admin helper.
+3. Removed encoding-degraded text in these long-tail surfaces.
+
+Critical reading:
+1. UX coherence improved in lower-traffic but decision-relevant admin pages.
+2. Residual risk remains in additional legacy admin pages that have not yet adopted shared primitives.

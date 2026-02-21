@@ -4311,3 +4311,18 @@ Validation snapshot:
 
 Decision lock:
 1. No capability expansion; this wave reduces operational UX/auth inconsistency in existing admin telemetry flows.
+
+## 171) Delta 2026-02-21 CXXV - Admin management-surface hardening (AI upgrades + updates)
+
+Implemented:
+1. Refactored:
+- `cloud-web-app/web/app/admin/ai-upgrades/page.tsx`
+- `cloud-web-app/web/app/admin/updates/page.tsx`
+2. Aligned both pages to admin consistency primitives and authenticated fetch behavior.
+3. Removed encoding-degraded copy and normalized action/state wording.
+
+Validation snapshot:
+1. Targeted lint on `ai-upgrades`, `updates`, and shared fetch helper -> PASS.
+
+Decision lock:
+1. No new capability claims; this wave is UX/auth hardening for existing admin management surfaces.

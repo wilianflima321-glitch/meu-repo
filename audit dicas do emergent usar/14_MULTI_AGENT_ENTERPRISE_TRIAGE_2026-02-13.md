@@ -1868,3 +1868,15 @@ Triaged impact:
 1. Reduced auth/fetch drift across admin pages that previously relied on anonymous requests.
 2. Standardized loading/error/action handling in long-tail observability pages.
 3. Reduced encoding/tooling friction in active admin surfaces.
+
+## Delta 2026-02-21 CXX - Admin AI-upgrades/updates consistency wave
+Delivered:
+1. Refactored:
+- `cloud-web-app/web/app/admin/ai-upgrades/page.tsx`
+- `cloud-web-app/web/app/admin/updates/page.tsx`
+2. Applied shared admin shell/state patterns and authenticated fetch helper usage.
+3. Removed mojibake-prone copy and normalized operational wording.
+
+Triaged impact:
+1. Reduced UX/style drift in long-tail admin management surfaces.
+2. Improved trust by keeping action flows explicit and consistent with core admin pages.

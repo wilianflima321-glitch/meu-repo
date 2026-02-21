@@ -1,7 +1,14 @@
-
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type UpgradeStatus = 'planned' | 'partial' | 'missing' | 'applied';
 
@@ -14,10 +21,10 @@ interface Upgrade {
 }
 
 const statusLabels: Record<UpgradeStatus, string> = {
-  applied: 'Aplicado',
-  partial: 'Parcial',
-  missing: 'Faltando',
-  planned: 'Planejado',
+  applied: 'Applied',
+  partial: 'Partial',
+  missing: 'Missing',
+  planned: 'Planned',
 };
 
 const statusColors: Record<UpgradeStatus, string> = {
@@ -27,22 +34,38 @@ const statusColors: Record<UpgradeStatus, string> = {
   planned: 'bg-sky-500/15 text-sky-200 border-sky-500/40',
 };
 
+const strengths = [
+  'IDE integration focused on development workflows and tuned operations.',
+  'Agent + bias detection baseline already available with explicit governance.',
+  'Cost-aware execution path with optimization controls.',
+  'Modular architecture with explicit fallback behavior.',
+];
+
+const gaps = [
+  'Reasoning stability varies for high-complexity contexts and still requires reviewer validation.',
+  'Multimodal coverage is partial and needs consistent ingestion/runtime handling.',
+  'Creative generation quality still depends on human curation for narrative/art outputs.',
+  'Large-file processing and streaming need further memory/I/O hardening.',
+  'Agent planning/execution needs deeper multi-agent orchestration maturity.',
+  'Ethics filtering needs richer dashboards and rule policy controls.',
+];
+
 export default function AIUpgrades() {
   const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchUpgrades = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/ai/enhancements');
-      if (!res.ok) throw new Error('Falha ao carregar melhorias');
-      const json = await res.json();
-      setUpgrades(json.items || []);
+      const json = await adminJsonFetch<{ items?: Upgrade[] }>('/api/admin/ai/enhancements');
+      setUpgrades(Array.isArray(json.items) ? json.items : []);
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar melhorias');
+      setError(err instanceof Error ? err.message : 'Failed to load upgrades');
     } finally {
       setLoading(false);
     }
@@ -54,104 +77,117 @@ export default function AIUpgrades() {
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return upgrades.filter((u) => !term || u.name.toLowerCase().includes(term) || (u.description || '').toLowerCase().includes(term));
+    return upgrades.filter(
+      (upgrade) =>
+        !term ||
+        upgrade.name.toLowerCase().includes(term) ||
+        (upgrade.description || '').toLowerCase().includes(term),
+    );
   }, [upgrades, search]);
 
-  const applyUpgrade = async (upgrade: Upgrade) => {
-    try {
-      const res = await fetch('/api/admin/ai/enhancements', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: upgrade.id, applied: !upgrade.applied, status: upgrade.applied ? upgrade.status : 'applied' }),
-      });
-      if (!res.ok) throw new Error('Falha ao atualizar melhoria');
-      await fetchUpgrades();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar melhoria');
-    }
-  };
+  const applyUpgrade = useCallback(
+    async (upgrade: Upgrade) => {
+      try {
+        await adminJsonFetch('/api/admin/ai/enhancements', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: upgrade.id,
+            applied: !upgrade.applied,
+            status: upgrade.applied ? upgrade.status : 'applied',
+          }),
+        });
+        await fetchUpgrades();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update upgrade');
+      }
+    },
+    [fetchUpgrades],
+  );
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-6'>Melhorias para IA Aethel</h1>
-      <p className='mb-4 text-zinc-400'>Matriz de maturidade: capacidades atuais, lacunas e melhorias priorizadas com governança.</p>
+    <AdminPageShell
+      title='AI Upgrades Matrix'
+      description='Maturity matrix for AI capabilities, gaps, and controlled upgrade actions.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchUpgrades}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
+        </div>
+      ) : null}
 
-      <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>O que Aethel Já Tem (Pontos Fortes)</h2>
-        <ul className='list-disc ml-5 space-y-2'>
-          <li><strong>Integração IDE:</strong> Foco em desenvolvimento, fine-tuning personalizado.</li>
-          <li><strong>Agentes e Detecção de Viés:</strong> Modo agent básico, correção ética.</li>
-          <li><strong>Eficiência:</strong> Treinamento otimizado, custo-eficiente.</li>
-          <li><strong>Modularidade:</strong> Seguro, sem conflitos, escalável.</li>
-        </ul>
+      <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-2'>
+        <AdminSection title='Current strengths'>
+          <ul className='list-disc space-y-1 pl-5 text-sm text-zinc-300'>
+            {strengths.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </AdminSection>
+        <AdminSection title='Known gaps'>
+          <ul className='list-disc space-y-1 pl-5 text-sm text-zinc-300'>
+            {gaps.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </AdminSection>
       </div>
 
-      <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>Lacunas Identificadas (Benchmark interno)</h2>
-        <ul className='list-disc ml-5 space-y-2'>
-          <li><strong>Raciocínio:</strong> Robustez variável em contextos complexos; requer validação e revisão humana.</li>
-          <li><strong>Multimodal:</strong> Cobertura parcial de imagem/áudio/vídeo; precisa de pipeline consistente.</li>
-          <li><strong>Criatividade:</strong> Forte em engenharia, limitada para arte e narrativa sem curadoria.</li>
-          <li><strong>Processamento:</strong> Arquivos grandes e streaming precisam de otimização de memória e I/O.</li>
-          <li><strong>Programação:</strong> Alta performance, porém ainda há gaps em domínios específicos e otimização fina.</li>
-          <li><strong>Modo Agent:</strong> Colaboração e planejamento multi‑agente em evolução.</li>
-          <li><strong>Ética e Filtros:</strong> Detecção boa, mas faltam dashboards visuais e regras dinâmicas avançadas.</li>
-        </ul>
-      </div>
-
-      <div className='mb-6'>
-        <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-xl font-semibold'>Melhorias Propostas</h2>
+      <AdminSection title='Proposed upgrades'>
+        <div className='mb-4'>
           <input
-            className='border p-2 rounded text-sm'
-            placeholder='Buscar melhoria'
+            className='w-full max-w-sm rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+            placeholder='Search upgrades'
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
           />
         </div>
-        {error && (
-          <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
-            {error}
-          </div>
-        )}
-        {loading ? (
-          <p className='text-sm text-zinc-500'>Carregando melhorias...</p>
-        ) : filtered.length === 0 ? (
-          <p className='text-sm text-zinc-500'>Nenhuma melhoria encontrada.</p>
-        ) : (
-          <div className='space-y-4'>
-            {filtered.map((upgrade) => (
-              <div key={upgrade.id} className='p-4 bg-slate-800 rounded-lg shadow-md border-l-4'>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className='text-lg font-semibold text-slate-100'>{upgrade.name}</h3>
-                    <p className={`text-sm font-medium px-2 py-0.5 rounded-full inline-block ${statusColors[upgrade.status]}`}>
-                      Status: {statusLabels[upgrade.status]}
-                    </p>
-                    <p className="mt-2 text-slate-400">{upgrade.description || 'Sem descrição'}</p>
-                  </div>
-                  <button
-                    onClick={() => applyUpgrade(upgrade)}
-                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-                  >
-                    {upgrade.applied ? 'Reverter' : 'Aplicar melhoria'}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      <div className='p-4 bg-sky-500/15 rounded-lg'>
-        <h3 className='font-semibold'>Diretrizes de Evolução:</h3>
-        <ul className='list-disc ml-5'>
-          <li>Priorize confiabilidade com validação, métricas e aprovação por ambiente.</li>
-          <li>Expanda multimodal com curadoria e limites de custo/qualidade.</li>
-          <li>Eleve o modo agente com planejamento, execução auditável e rollback.</li>
-          <li>Reforce segurança, compliance e observabilidade em todas as rotas.</li>
-        </ul>
-      </div>
-    </div>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Name</th>
+                <th className='p-3 text-left'>Status</th>
+                <th className='p-3 text-left'>Description</th>
+                <th className='p-3 text-left'>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={4} message='Loading upgrades...' />
+              ) : filtered.length === 0 ? (
+                <AdminTableStateRow colSpan={4} message='No upgrades found for current filters.' />
+              ) : (
+                filtered.map((upgrade) => (
+                  <tr key={upgrade.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3 font-medium text-zinc-100'>{upgrade.name}</td>
+                    <td className='p-3'>
+                      <span className={`inline-flex rounded border px-2 py-1 text-xs ${statusColors[upgrade.status]}`}>
+                        {statusLabels[upgrade.status]}
+                      </span>
+                    </td>
+                    <td className='p-3 text-zinc-400'>{upgrade.description || 'No description'}</td>
+                    <td className='p-3'>
+                      <button
+                        type='button'
+                        onClick={() => applyUpgrade(upgrade)}
+                        className={`rounded px-3 py-1.5 text-xs font-semibold text-white ${
+                          upgrade.applied ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-blue-600 hover:bg-blue-500'
+                        }`}
+                      >
+                        {upgrade.applied ? 'Revert' : 'Apply'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

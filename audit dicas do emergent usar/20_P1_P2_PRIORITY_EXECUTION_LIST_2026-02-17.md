@@ -428,3 +428,9 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `cloud-web-app/web/app/admin/analytics/page.tsx`
 - `cloud-web-app/web/app/admin/real-time/page.tsx`
 3. Normalized touched admin operation pages to UTF-8 encoding to avoid tooling drift.
+
+### Delivered in this wave (Admin management surfaces)
+1. Refactored:
+- `cloud-web-app/web/app/admin/ai-upgrades/page.tsx`
+- `cloud-web-app/web/app/admin/updates/page.tsx`
+2. Applied consistent shell/state patterns and authenticated admin fetch behavior.

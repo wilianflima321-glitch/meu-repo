@@ -479,3 +479,13 @@ Label: `VERIFIED_INTERNAL`
 3. Updated AI monitor page to use shared helper.
 4. Normalized touched admin operation pages to UTF-8.
 5. Targeted lint verification for modified files: PASS.
+
+## 25) Delta 2026-02-21 - AI-upgrades/updates management hardening
+Label: `VERIFIED_INTERNAL`
+
+1. Refactored:
+- `cloud-web-app/web/app/admin/ai-upgrades/page.tsx`
+- `cloud-web-app/web/app/admin/updates/page.tsx`
+2. Aligned both surfaces with shared admin shell/state patterns and authenticated fetch behavior.
+3. Removed mojibake-prone copy in the refactored pages.
+4. Targeted lint verification for modified files: PASS.
