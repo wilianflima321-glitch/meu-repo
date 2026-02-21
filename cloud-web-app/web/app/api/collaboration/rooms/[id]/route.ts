@@ -14,10 +14,13 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_ROOM_ID_LENGTH = 120;
+const normalizeRoomId = (value?: string) => String(value ?? '').trim();
+
 function requireCollaborationEnabled(collaboratorsLimit: number): void {
 	if (collaboratorsLimit === 0) {
 		throw Object.assign(
-			new Error('FEATURE_NOT_AVAILABLE: colaboração requer plano Basic ou superior.'),
+			new Error('FEATURE_NOT_AVAILABLE: colaboracao requer plano Basic ou superior.'),
 			{ code: 'FEATURE_NOT_AVAILABLE' }
 		);
 	}
@@ -39,10 +42,16 @@ export async function GET(
     if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
-    const { id } = params;
+    const roomId = normalizeRoomId(params?.id);
+    if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_ROOM_ID', message: 'roomId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     const room = await prisma.collaborationRoom.findUnique({
-      where: { id },
+      where: { id: roomId },
       include: {
         participants: { select: { userId: true, status: true, lastSeen: true } },
       },
@@ -52,7 +61,7 @@ export async function GET(
       throw Object.assign(new Error('ROOM_NOT_FOUND'), { code: 'ROOM_NOT_FOUND' });
     }
 
-    // Autorização: participante OU acesso ao projeto (se houver projectId)
+    // Autorizacao: participante OU acesso ao projeto (se houver projectId)
     const isParticipant = room.participants.some((p) => p.userId === user.userId);
     if (!isParticipant) {
       if (room.projectId) {
@@ -110,19 +119,25 @@ export async function POST(
     if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
-    const { id } = params;
+    const roomId = normalizeRoomId(params?.id);
+    if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_ROOM_ID', message: 'roomId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
     const body = await request.json().catch(() => ({}));
     const action = String(body?.action || 'join');
 
     const room = await prisma.collaborationRoom.findUnique({
-      where: { id },
+      where: { id: roomId },
       select: { id: true, projectId: true, maxParticipants: true },
     });
     if (!room) {
       throw Object.assign(new Error('ROOM_NOT_FOUND'), { code: 'ROOM_NOT_FOUND' });
     }
 
-    // Se a sala é de projeto, precisa de acesso ao projeto.
+    // Se a sala e de projeto, precisa de acesso ao projeto.
     if (room.projectId) {
       const allowed = await prisma.project.findFirst({
         where: {
@@ -200,10 +215,16 @@ export async function DELETE(
     if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
-    const { id } = params;
+    const roomId = normalizeRoomId(params?.id);
+    if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_ROOM_ID', message: 'roomId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     await prisma.collaborationRoomParticipant.delete({
-      where: { roomId_userId: { roomId: id, userId: user.userId } },
+      where: { roomId_userId: { roomId: roomId, userId: user.userId } },
     }).catch(() => null);
 
     return NextResponse.json({ success: true });
