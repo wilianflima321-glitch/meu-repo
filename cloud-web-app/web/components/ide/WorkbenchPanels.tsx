@@ -30,6 +30,9 @@ export function OutputPanel({ projectId, workspaceRoot }: { projectId: string; w
   return (
     <div className="h-full p-3 text-xs text-slate-300 space-y-2">
       <div className="font-medium text-slate-200">Output</div>
+      <div className="rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
+        Status: PARTIAL - output stream is not wired in this shell.
+      </div>
       <div className="text-slate-400">Workbench runtime is active. Use Terminal for process logs.</div>
       <div className="text-slate-500">Project: {projectId}</div>
       <div className="text-slate-500">Workspace: {workspaceRoot}</div>
