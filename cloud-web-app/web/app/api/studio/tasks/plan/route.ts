@@ -6,6 +6,8 @@ import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
+const MAX_ROUTE_ID_LENGTH = 120
+
 type Body = { sessionId?: string; force?: boolean }
 
 export async function POST(req: NextRequest) {
@@ -22,9 +24,12 @@ export async function POST(req: NextRequest) {
 
     const body = (await req.json().catch(() => ({}))) as Body
     const sessionId = String(body.sessionId || '').trim()
-    if (!sessionId) {
+    if (!sessionId || sessionId.length > MAX_ROUTE_ID_LENGTH) {
       return NextResponse.json(
-        { error: 'SESSION_ID_REQUIRED', message: 'sessionId is required to generate super plan.' },
+        {
+          error: 'SESSION_ID_REQUIRED',
+          message: 'sessionId is required and must be under 120 characters.',
+        },
         { status: 400 }
       )
     }

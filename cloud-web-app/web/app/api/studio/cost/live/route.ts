@@ -5,6 +5,8 @@ import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
+const MAX_ROUTE_ID_LENGTH = 120
+
 export async function GET(req: NextRequest) {
   try {
     const auth = requireAuth(req)
@@ -19,9 +21,12 @@ export async function GET(req: NextRequest) {
 
     const url = new URL(req.url)
     const sessionId = (url.searchParams.get('sessionId') || '').trim()
-    if (!sessionId) {
+    if (!sessionId || sessionId.length > MAX_ROUTE_ID_LENGTH) {
       return NextResponse.json(
-        { error: 'SESSION_ID_REQUIRED', message: 'sessionId query is required.' },
+        {
+          error: 'SESSION_ID_REQUIRED',
+          message: 'sessionId query is required and must be under 120 characters.',
+        },
         { status: 400 }
       )
     }
