@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import type { StudioAgentRun, StudioMessage, StudioSession } from './studio-home.types'
-import { roleLabel, runStatusTone } from './studio-home.utils'
+import { formatRunCost, roleLabel, runStatusTone } from './studio-home.utils'
 
 type StudioHomeTeamChatProps = {
   session: StudioSession | null
@@ -19,8 +19,8 @@ function MessageList({ messages }: { messages: StudioMessage[] }) {
         <div key={message.id} className="rounded border border-slate-800 bg-slate-950 px-3 py-2 text-xs">
           <div className="mb-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
             <span>
-              {message.role}
-              {message.agentRole ? `/${message.agentRole}` : ''}
+              {message.role.toUpperCase()}
+              {message.agentRole ? ` / ${roleLabel(message.agentRole)}` : ''}
             </span>
             <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
           </div>
@@ -48,7 +48,7 @@ function AgentRunList({ runs }: { runs: StudioAgentRun[] }) {
             <span>{run.latencyMs}ms</span>
           </div>
           <div className="text-slate-300">
-            tokens {run.tokensIn}/{run.tokensOut} - cost {run.cost}
+            tokens {run.tokensIn}/{run.tokensOut} - cost {formatRunCost(run.cost)}
           </div>
         </div>
       ))}

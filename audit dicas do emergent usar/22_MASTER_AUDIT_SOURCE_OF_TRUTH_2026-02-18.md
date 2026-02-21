@@ -414,3 +414,11 @@ Label: `VERIFIED_INTERNAL`
 - `26` workflow governance: pass
 - `27` secrets critical: pass
 - `29` canonical governance: pass
+
+## 18) Delta 2026-02-21 - Studio Home professionalism hardening
+Label: `VERIFIED_INTERNAL`
+
+1. Updated Studio Home mission controls with normalized project id and budget cap handlers.
+2. Added explicit disabled-state guidance in mission and task-board actions.
+3. Improved Team Chat run telemetry readability and ops pressure consistency.
+4. Targeted lint verification for modified Studio Home files: PASS.

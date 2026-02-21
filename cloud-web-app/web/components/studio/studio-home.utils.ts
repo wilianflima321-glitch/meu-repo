@@ -13,6 +13,18 @@ export function roleLabel(role: StudioTask['ownerRole']) {
   return 'Reviewer'
 }
 
+export function sanitizeStudioProjectId(value: string): string {
+  const raw = String(value || '').trim()
+  if (!raw) return 'default'
+  const sanitized = raw.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80)
+  return sanitized || 'default'
+}
+
+export function normalizeBudgetCap(value: number): number {
+  if (!Number.isFinite(value)) return 30
+  return Math.max(5, Math.min(100000, Math.round(value)))
+}
+
 export function statusTone(status: StudioTask['status']): string {
   if (status === 'done') return 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10'
   if (status === 'error') return 'text-rose-300 border-rose-500/30 bg-rose-500/10'
@@ -54,6 +66,11 @@ export function runStatusTone(status: StudioAgentRun['status']): string {
   if (status === 'success') return 'text-emerald-200 border-emerald-500/30 bg-emerald-500/10'
   if (status === 'error') return 'text-rose-200 border-rose-500/30 bg-rose-500/10'
   return 'text-sky-200 border-sky-500/30 bg-sky-500/10'
+}
+
+export function formatRunCost(cost: number): string {
+  if (!Number.isFinite(cost)) return '-'
+  return cost.toFixed(2)
 }
 
 export function fullAccessAllowedScopesForPlan(plan: string | null | undefined): FullAccessScope[] {

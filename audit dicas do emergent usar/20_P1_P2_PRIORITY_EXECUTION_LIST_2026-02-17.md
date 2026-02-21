@@ -379,3 +379,11 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `tools/canonical-doc-governance-scan.mjs` now handles backtick-listed markdown entries.
 3. Canonical governance baseline now reconciled:
 - `29`: `canonicalListedDocs=32`, `canonicalMarkdownFiles=32`, `unindexedCanonicalMarkdown=0`.
+
+### Delivered in this wave (Studio Home quality pass)
+1. Added normalized mission input handlers in Studio Home:
+- project id sanitization
+- budget cap clamping
+2. Added explicit disabled-state reasoning for mission start and task board actions.
+3. Improved professional telemetry readability in Team Chat (role/cost formatting).
+4. Aligned ops pressure label with canonical budget-pressure computation.

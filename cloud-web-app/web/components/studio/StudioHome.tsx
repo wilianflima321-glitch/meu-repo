@@ -15,7 +15,8 @@ import {
   defaultFullAccessScope,
   domainTemplate,
   fullAccessAllowedScopesForPlan,
-  fullAccessScopeLabel,
+  normalizeBudgetCap,
+  sanitizeStudioProjectId,
   isTypingTarget,
   parseJson,
 } from './studio-home.utils'
@@ -428,6 +429,14 @@ export default function StudioHome() {
     [trimmedMission]
   )
 
+  const handleProjectIdChange = useCallback((value: string) => {
+    setProjectId(sanitizeStudioProjectId(value))
+  }, [])
+
+  const handleBudgetCapChange = useCallback((value: number) => {
+    setBudgetCap(normalizeBudgetCap(value))
+  }, [])
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey) return
@@ -596,8 +605,8 @@ export default function StudioHome() {
               variableUsageBlocked={variableUsageBlocked}
               session={session}
               onMissionChange={setMission}
-              onProjectIdChange={setProjectId}
-              onBudgetCapChange={setBudgetCap}
+              onProjectIdChange={handleProjectIdChange}
+              onBudgetCapChange={handleBudgetCapChange}
               onMissionDomainChange={setMissionDomainSelection}
               onQualityModeChange={setQualityMode}
               onApplyDomainPreset={applyMissionDomainPreset}

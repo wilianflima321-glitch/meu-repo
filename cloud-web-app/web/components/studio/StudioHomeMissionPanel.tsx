@@ -41,9 +41,15 @@ export function StudioHomeMissionPanel({
   onApplyDomainPreset,
   onStartSession,
 }: StudioHomeMissionPanelProps) {
+  const startDisabled = busy || variableUsageBlocked || !trimmedMission
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
-      <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Mission</div>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Mission</div>
+        <div className="rounded border border-slate-700 bg-slate-950 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-400">
+          Studio Mode
+        </div>
+      </div>
       <form onSubmit={onStartSession} className="space-y-3">
         <label className="sr-only" htmlFor="studio-mission">
           Mission description
@@ -136,11 +142,20 @@ export function StudioHomeMissionPanel({
         </div>
         <button
           type="submit"
-          disabled={busy || variableUsageBlocked || !trimmedMission}
+          disabled={startDisabled}
           className="w-full rounded border border-blue-500/40 bg-blue-500/20 px-3 py-2 text-xs font-semibold text-blue-100 hover:bg-blue-500/30 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           Start Studio Session
         </button>
+        {startDisabled ? (
+          <div className="rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
+            {busy
+              ? 'A session action is already running.'
+              : variableUsageBlocked
+                ? 'Variable AI usage is blocked for this account at the moment.'
+                : 'Describe the mission to start the session.'}
+          </div>
+        ) : null}
         <div className="rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
           Shortcuts: <code>Ctrl/Cmd+Enter</code> start session, <code>Ctrl/Cmd+Shift+P</code> super plan,{' '}
           <code>Ctrl/Cmd+Shift+R</code> run wave, <code>Ctrl/Cmd+.</code> stop, <code>Ctrl/Cmd+I</code> open IDE,{' '}

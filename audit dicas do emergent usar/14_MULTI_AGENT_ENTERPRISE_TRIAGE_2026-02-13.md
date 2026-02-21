@@ -1780,3 +1780,13 @@ Delivered:
 Triaged impact:
 1. User-facing/system-facing text quality regression risk reduced (`mojibake findings=0`).
 2. Canonical governance baseline reached full reconciliation (`listedDocs=32`, `canonicalFiles=32`, `unindexed=0`).
+
+## Delta 2026-02-21 CXIII - Studio Home interaction-quality triage
+Delivered:
+1. Professionalized mission/task/ops/chat copy and interaction hints.
+2. Added normalized mission input handling for stable project and budget controls.
+3. Unified pressure label semantics with budget-progress logic.
+
+Triaged impact:
+1. Reduced first-session ambiguity in `/dashboard` mission control.
+2. Improved readability/operational trust in parallel-agent run telemetry.

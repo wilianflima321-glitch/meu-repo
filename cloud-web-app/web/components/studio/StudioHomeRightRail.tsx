@@ -69,7 +69,7 @@ export function StudioHomePreviewPanel({
           onClick={onToggleRuntimePreview}
           className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
         >
-          {showRuntimePreview ? 'Use Lite Preview' : 'Enable Runtime Preview'}
+          {showRuntimePreview ? 'Use Text Preview' : 'Enable Runtime Preview'}
         </button>
       </div>
       {showRuntimePreview ? (
@@ -97,6 +97,16 @@ export function StudioHomeOpsBar({
   onToggleFullAccess,
   onFullAccessScopeChange,
 }: StudioHomeOpsBarProps) {
+  const pressureLabel = budgetProgress.pressure
+  const pressureText =
+    pressureLabel === 'critical'
+      ? 'critical'
+      : pressureLabel === 'high'
+        ? 'high'
+        : pressureLabel === 'medium'
+          ? 'medium'
+          : 'normal'
+
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
       <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Ops Bar</div>
@@ -125,11 +135,7 @@ export function StudioHomeOpsBar({
         </div>
         <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
           <div className="text-slate-500">Cost pressure</div>
-          <div className="font-semibold text-slate-100">
-            {session && session.cost.budgetCap > 0 && session.cost.remainingCredits / session.cost.budgetCap <= 0.3
-              ? 'high'
-              : 'normal'}
-          </div>
+          <div className="font-semibold text-slate-100">{pressureText}</div>
         </div>
       </div>
 

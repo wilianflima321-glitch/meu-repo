@@ -4181,3 +4181,30 @@ Validation snapshot:
 Decision lock:
 1. Character encoding regressions in canonical active surfaces are now treated as quality debt, not tolerated baseline.
 2. Canonical index and canonical folder are now numerically reconciled (`listed == files`).
+
+## 164) Delta 2026-02-21 CXVIII - Studio Home professionalism hardening (no scope expansion)
+
+Implemented:
+1. Hardened mission input controls in Studio Home:
+- project id normalization (`sanitizeStudioProjectId`)
+- budget cap normalization/clamp (`normalizeBudgetCap`)
+2. Improved first-action UX signals:
+- explicit disabled-state reason in mission start action
+- stronger mission header treatment for studio-mode context.
+3. Refined task board behavior messaging:
+- clear operational state when actions are unavailable
+- consistent enable/disable conditions for `Super Plan` and `Run Wave`.
+4. Refined Team Chat/agent run readability:
+- standardized role labeling
+- normalized cost formatting for run telemetry.
+5. Refined ops/preview copy for professional tone:
+- `Text Preview` wording
+- cost pressure label aligned with shared budget-pressure calculation.
+
+Validation snapshot:
+1. Targeted lint pass on all modified Studio Home surfaces -> PASS.
+2. No capability contract changes introduced.
+
+Decision lock:
+1. This wave improves UX quality and operational clarity only.
+2. `/dashboard` remains entry and `/ide` remains advanced shell.

@@ -1757,3 +1757,13 @@ Implemented:
 Critical reading:
 1. Encoding quality risk in active MCP-facing copy dropped from visible degradation to zero findings.
 2. Documentation governance moved from partial (`unindexed=3`) to reconciled (`unindexed=0`), reducing source-of-truth ambiguity.
+
+## Delta 2026-02-21 CXII - Studio Home UX professionalism pass
+Implemented:
+1. Normalized mission input controls (project id + budget cap).
+2. Added explicit disabled-action explanations to reduce ambiguous UI states.
+3. Standardized agent run copy/formatting and aligned ops pressure label semantics.
+
+Critical reading:
+1. UX quality improved without introducing new features or fake-success paths.
+2. Residual risk remains broader journey consistency across legacy dashboard surfaces still outside this targeted pass.

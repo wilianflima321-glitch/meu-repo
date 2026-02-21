@@ -37,27 +37,30 @@ export function StudioHomeTaskBoard({
   onApplyTask,
   onRollbackTask,
 }: StudioHomeTaskBoardProps) {
+  const canCreateSuperPlan =
+    !!session && !busy && session.status === 'active' && !variableUsageBlocked && session.tasks.length === 0
+  const canRunWaveNow =
+    !!session &&
+    !busy &&
+    session.status === 'active' &&
+    !variableUsageBlocked &&
+    session.tasks.length > 0 &&
+    !session.tasks.every((task) => task.status === 'done')
+
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Task Board</div>
         <div className="flex items-center gap-1">
           <button
-            disabled={!session || busy || session.status !== 'active' || variableUsageBlocked || session.tasks.length > 0}
+            disabled={!canCreateSuperPlan}
             onClick={onCreateSuperPlan}
             className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
           >
             Super Plan
           </button>
           <button
-            disabled={
-              !session ||
-              busy ||
-              session.status !== 'active' ||
-              variableUsageBlocked ||
-              session.tasks.length === 0 ||
-              session.tasks.every((task) => task.status === 'done')
-            }
+            disabled={!canRunWaveNow}
             onClick={onRunWave}
             className="rounded border border-sky-500/40 bg-sky-500/15 px-2 py-1 text-[11px] font-semibold text-sky-100 hover:bg-sky-500/25 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
           >
@@ -83,6 +86,11 @@ export function StudioHomeTaskBoard({
       {session?.tasks.length ? (
         <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-400">
           Super plan already created for this session. Complete or stop this session before opening a new plan.
+        </div>
+      ) : null}
+      {!canCreateSuperPlan || !canRunWaveNow ? (
+        <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
+          Actions are available only for active sessions with variable usage enabled.
         </div>
       ) : null}
       <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
