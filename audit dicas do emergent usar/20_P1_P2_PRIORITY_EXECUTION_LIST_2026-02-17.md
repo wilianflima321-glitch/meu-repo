@@ -492,3 +492,17 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 3. `moderation`
 4. `marketplace`
 5. `infrastructure`
+
+## Delta 2026-02-21 - Admin conversion wave 3
+
+### Delivered in this wave
+1. Refactored admin pages to shared enterprise surfaces:
+- `cloud-web-app/web/app/admin/backup/page.tsx`
+- `cloud-web-app/web/app/admin/marketplace/page.tsx`
+- `cloud-web-app/web/app/admin/ip-registry/page.tsx`
+2. Added explicit action feedback and authenticated API handling for backup/restore and IP registry operations.
+
+### Updated residual from `qa:admin-surface`
+1. `missing AdminPageShell: 20` (from 23)
+2. `direct fetch without adminJsonFetch: 25` (from 28)
+3. `mojibake candidates: 0`

@@ -1921,3 +1921,11 @@ Triaged impact:
 - `missing AdminPageShell=23`
 - `direct fetch without adminJsonFetch=28`
 - `mojibake candidates=0`
+
+## Delta 2026-02-21 (Admin hardening wave 3)
+1. Converted backup, marketplace, and IP registry pages to shared `AdminPageShell` and `adminJsonFetch` patterns.
+2. Regenerated admin surface sweep after conversion.
+3. Current residual baseline:
+- `missing AdminPageShell=20`
+- `direct fetch without adminJsonFetch=25`
+- `mojibake candidates=0`

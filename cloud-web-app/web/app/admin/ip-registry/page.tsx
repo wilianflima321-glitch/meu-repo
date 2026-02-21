@@ -1,5 +1,15 @@
-"use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 interface LicenseEntry {
   status: string;
@@ -13,6 +23,12 @@ interface Registry {
   licenses: Record<string, LicenseEntry>;
   allowed: string[];
 }
+
+const statusLabels: Record<string, string> = {
+  licensed: 'Licensed',
+  owned: 'Owned',
+  restricted: 'Restricted',
+};
 
 export default function AdminIpRegistryPage() {
   const [data, setData] = useState<Registry | null>(null);
@@ -28,22 +44,17 @@ export default function AdminIpRegistryPage() {
     notes: '',
   });
   const [message, setMessage] = useState<string | null>(null);
-  const statusLabels: Record<string, string> = {
-    licensed: 'Licenciado',
-    owned: 'Proprietário',
-    restricted: 'Restrito',
-  };
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchRegistry = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/admin/ip-registry');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const j = await res.json();
-      setData(j);
-    } catch (e: any) {
-      setError(e.message || "Erro ao carregar registro");
+      const payload = await adminJsonFetch<Registry>('/api/admin/ip-registry');
+      setData(payload);
+      setLastUpdated(new Date());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load IP registry');
     } finally {
       setLoading(false);
     }
@@ -53,52 +64,52 @@ export default function AdminIpRegistryPage() {
     fetchRegistry();
   }, [fetchRegistry]);
 
-  const saveRegistry = async () => {
+  const saveRegistry = useCallback(async () => {
     if (!data) return;
     setLoading(true);
     setError(null);
+    setMessage(null);
     try {
-      const res = await fetch('/api/admin/ip-registry', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      await adminJsonFetch('/api/admin/ip-registry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setMessage('Registro salvo com sucesso.');
+      setMessage('Registry saved successfully.');
       await fetchRegistry();
-    } catch (e: any) {
-      setError(e.message || "Erro ao salvar registro");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save registry');
     } finally {
       setLoading(false);
     }
-  };
+  }, [data, fetchRegistry]);
 
-  const ingestIp = async (ip: string) => {
+  const ingestIp = useCallback(async (ip: string) => {
     setLoading(true);
     setError(null);
+    setMessage(null);
     try {
-      const res = await fetch('/api/admin/ip-registry/ingest', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      await adminJsonFetch('/api/admin/ip-registry/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ip }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setMessage(`Ingestão solicitada para ${ip}.`);
-    } catch (e: any) {
-      setError(e.message || "Erro ao ingerir RAG");
+      setMessage(`Ingest requested for ${ip}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to ingest IP data');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const addAllowed = () => {
+  const addAllowed = useCallback(() => {
     if (!data || !allowedInput.trim()) return;
     const slug = allowedInput.toLowerCase().trim();
     setData({ ...data, allowed: Array.from(new Set([...(data.allowed || []), slug])) });
     setAllowedInput('');
-  };
+  }, [allowedInput, data]);
 
-  const addLicense = () => {
+  const addLicense = useCallback(() => {
     if (!data || !licenseForm.slug.trim()) return;
     const slug = licenseForm.slug.toLowerCase().trim();
     setData({
@@ -115,112 +126,144 @@ export default function AdminIpRegistryPage() {
       },
     });
     setLicenseForm({ slug: '', status: 'licensed', holder: '', since: '', until: '', notes: '' });
-  };
+  }, [data, licenseForm]);
 
   const allowedList = useMemo(() => data?.allowed || [], [data]);
   const licensesList = useMemo(() => Object.entries(data?.licenses || {}), [data]);
 
-  if (loading && !data) return <div className="p-6">Carregando…</div>;
-  if (error) return <div className="p-6 text-red-600">Erro: {error}</div>;
-
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Registro de IPs</h1>
-          <p className="text-sm text-zinc-500">Controle de permissões e licenças com auditoria.</p>
+    <AdminPageShell
+      title='IP Registry'
+      description='Manage allowed IP assets and license records with auditable ingest actions.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={
+        <>
+          <AdminPrimaryButton onClick={fetchRegistry}>Refresh</AdminPrimaryButton>
+          <AdminPrimaryButton onClick={saveRegistry} className='bg-blue-600 text-white hover:bg-blue-500'>
+            Save registry
+          </AdminPrimaryButton>
+        </>
+      }
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <div className="flex gap-2">
-          <button className="px-3 py-1 bg-gray-200 rounded" onClick={fetchRegistry}>Atualizar</button>
-          <button className="px-3 py-1 bg-blue-600 text-white rounded" onClick={saveRegistry}>Salvar</button>
+      ) : null}
+      {message ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='success'>{message}</AdminStatusBanner>
         </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Allowed slugs' value={allowedList.length} tone='sky' />
+          <AdminStatCard label='License entries' value={licensesList.length} tone='emerald' />
+          <AdminStatCard label='Loading' value={loading ? 'yes' : 'no'} tone='amber' />
+          <AdminStatCard label='Pending changes' value={data ? 'tracked' : 'none'} tone='neutral' />
+        </AdminStatGrid>
       </div>
 
-      {message && <div className="bg-green-50 border border-green-200 text-emerald-300 p-3 rounded">{message}</div>}
-
-      {!data ? <div>Nenhum dado disponível.</div> : (
-        <div className="grid md:grid-cols-2 gap-6">
-          <section className="bg-zinc-900/70 p-4 rounded-lg shadow">
-            <h2 className="text-xl font-medium mb-2">IPs permitidos</h2>
-            <div className="flex gap-2 mb-4">
+      {!data ? (
+        <AdminSection>
+          <p className='text-sm text-zinc-500'>{loading ? 'Loading registry...' : 'No registry data available.'}</p>
+        </AdminSection>
+      ) : (
+        <div className='grid gap-6 md:grid-cols-2'>
+          <AdminSection title='Allowed assets'>
+            <div className='mb-4 flex gap-2'>
               <input
                 value={allowedInput}
-                onChange={(e) => setAllowedInput(e.target.value)}
-                className="border p-2 rounded text-sm flex-1"
-                placeholder="Adicionar identificador"
+                onChange={(event) => setAllowedInput(event.target.value)}
+                className='flex-1 rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+                placeholder='Add asset slug'
               />
-              <button className="px-3 py-2 bg-green-600 text-white rounded" onClick={addAllowed}>Adicionar</button>
+              <AdminPrimaryButton onClick={addAllowed} className='bg-emerald-600 text-white hover:bg-emerald-500'>
+                Add
+              </AdminPrimaryButton>
             </div>
-            <ul className="list-disc pl-5 space-y-1">
-              {allowedList.map(ip => (
-                <li key={ip} className="flex items-center gap-2">
+            <ul className='space-y-2'>
+              {allowedList.map((ip) => (
+                <li key={ip} className='flex items-center justify-between rounded border border-zinc-800/70 p-2 text-sm'>
                   <span>{ip}</span>
-                  <button className="text-xs text-blue-600 underline" onClick={() => ingestIp(ip)}>Ingerir RAG</button>
+                  <button
+                    className='text-xs text-sky-300 underline'
+                    onClick={() => ingestIp(ip)}
+                    type='button'
+                  >
+                    Ingest
+                  </button>
                 </li>
               ))}
+              {allowedList.length === 0 ? <li className='text-sm text-zinc-500'>No allowed assets configured.</li> : null}
             </ul>
-          </section>
-          <section className="bg-zinc-900/70 p-4 rounded-lg shadow">
-            <h2 className="text-xl font-medium mb-2">Licenças</h2>
-            <div className="grid grid-cols-1 gap-2 mb-4">
+          </AdminSection>
+
+          <AdminSection title='Licenses'>
+            <div className='mb-4 grid grid-cols-1 gap-2'>
               <input
-                className="border p-2 rounded text-sm"
-                placeholder="Identificador"
+                className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+                placeholder='Asset slug'
                 value={licenseForm.slug}
-                onChange={(e) => setLicenseForm((prev) => ({ ...prev, slug: e.target.value }))}
+                onChange={(event) => setLicenseForm((prev) => ({ ...prev, slug: event.target.value }))}
               />
               <select
-                className="border p-2 rounded text-sm"
+                className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
                 value={licenseForm.status}
-                onChange={(e) => setLicenseForm((prev) => ({ ...prev, status: e.target.value }))}
+                onChange={(event) => setLicenseForm((prev) => ({ ...prev, status: event.target.value }))}
               >
-                <option value="licensed">Licenciado</option>
-                <option value="owned">Proprietário</option>
-                <option value="restricted">Restrito</option>
+                <option value='licensed'>Licensed</option>
+                <option value='owned'>Owned</option>
+                <option value='restricted'>Restricted</option>
               </select>
               <input
-                className="border p-2 rounded text-sm"
-                placeholder="Titular"
+                className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+                placeholder='Rights holder'
                 value={licenseForm.holder}
-                onChange={(e) => setLicenseForm((prev) => ({ ...prev, holder: e.target.value }))}
+                onChange={(event) => setLicenseForm((prev) => ({ ...prev, holder: event.target.value }))}
               />
-              <div className="grid grid-cols-2 gap-2">
+              <div className='grid grid-cols-2 gap-2'>
                 <input
-                  className="border p-2 rounded text-sm"
-                  type="date"
+                  className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+                  type='date'
                   value={licenseForm.since}
-                  onChange={(e) => setLicenseForm((prev) => ({ ...prev, since: e.target.value }))}
+                  onChange={(event) => setLicenseForm((prev) => ({ ...prev, since: event.target.value }))}
                 />
                 <input
-                  className="border p-2 rounded text-sm"
-                  type="date"
+                  className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+                  type='date'
                   value={licenseForm.until}
-                  onChange={(e) => setLicenseForm((prev) => ({ ...prev, until: e.target.value }))}
+                  onChange={(event) => setLicenseForm((prev) => ({ ...prev, until: event.target.value }))}
                 />
               </div>
               <input
-                className="border p-2 rounded text-sm"
-                placeholder="Notas"
+                className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+                placeholder='Notes'
                 value={licenseForm.notes}
-                onChange={(e) => setLicenseForm((prev) => ({ ...prev, notes: e.target.value }))}
+                onChange={(event) => setLicenseForm((prev) => ({ ...prev, notes: event.target.value }))}
               />
-              <button className="px-3 py-2 bg-sky-600 text-white rounded" onClick={addLicense}>Adicionar</button>
+              <AdminPrimaryButton onClick={addLicense} className='bg-sky-600 text-white hover:bg-sky-500'>
+                Add license
+              </AdminPrimaryButton>
             </div>
-            <ul className="space-y-2">
+
+            <ul className='space-y-2'>
               {licensesList.map(([ip, lic]) => (
-                <li key={ip} className="border rounded p-3">
-                  <div className="font-semibold">{ip}</div>
-                  <div className="text-sm text-zinc-400">Status: {statusLabels[lic.status] ?? lic.status}</div>
-                  {lic.holder && <div className="text-sm">Titular: {lic.holder}</div>}
-                  {lic.since && <div className="text-sm">Desde: {lic.since}</div>}
-                  {lic.until && <div className="text-sm">Até: {lic.until}</div>}
-                  {lic.notes && <div className="text-sm">Notas: {lic.notes}</div>}
+                <li key={ip} className='rounded border border-zinc-800/70 p-3'>
+                  <div className='font-semibold'>{ip}</div>
+                  <div className='text-sm text-zinc-400'>Status: {statusLabels[lic.status] ?? lic.status}</div>
+                  {lic.holder ? <div className='text-sm'>Holder: {lic.holder}</div> : null}
+                  {lic.since ? <div className='text-sm'>Since: {lic.since}</div> : null}
+                  {lic.until ? <div className='text-sm'>Until: {lic.until}</div> : null}
+                  {lic.notes ? <div className='text-sm'>Notes: {lic.notes}</div> : null}
                 </li>
               ))}
+              {licensesList.length === 0 ? <li className='text-sm text-zinc-500'>No license entries configured.</li> : null}
             </ul>
-          </section>
+          </AdminSection>
         </div>
       )}
-    </div>
+    </AdminPageShell>
   );
 }

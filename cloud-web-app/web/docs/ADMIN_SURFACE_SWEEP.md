@@ -1,9 +1,9 @@
 # Admin Surface Sweep
 
-- Generated at: `2026-02-21T01:44:27.204Z`
+- Generated at: `2026-02-21T01:49:36.210Z`
 - Files scanned: `45`
-- Missing `AdminPageShell`: `23`
-- Direct `fetch(...)` without `adminJsonFetch`: `28`
+- Missing `AdminPageShell`: `20`
+- Direct `fetch(...)` without `adminJsonFetch`: `25`
 - Mojibake candidates: `0`
 
 ## Detailed Matrix
@@ -21,7 +21,7 @@
 | `app/admin/arpu-churn/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/audit-logs/page.tsx` | no | no | no | no | no |
 | `app/admin/automation/page.tsx` | no | no | no | no | no |
-| `app/admin/backup/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/backup/page.tsx` | no | no | no | no | no |
 | `app/admin/bias-detection/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/chat/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/collaboration/page.tsx` | yes | yes | maybe | maybe | no |
@@ -37,8 +37,8 @@
 | `app/admin/ide-settings/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/indexing/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/infrastructure/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/ip-registry/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/marketplace/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/ip-registry/page.tsx` | no | no | no | no | no |
+| `app/admin/marketplace/page.tsx` | no | no | no | no | no |
 | `app/admin/moderation/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/multi-tenancy/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/notifications/page.tsx` | no | no | no | no | no |
