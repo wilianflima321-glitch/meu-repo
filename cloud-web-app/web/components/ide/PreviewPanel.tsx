@@ -336,6 +336,7 @@ export default function PreviewPanel({
                   src={rawAssetUrl}
                   alt={filePath || 'preview'}
                   fill
+                  sizes="100vw"
                   unoptimized
                   className="object-contain"
                   onError={() => setMediaLoadError('Unable to render image preview from file runtime endpoint.')}
@@ -347,6 +348,7 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="w-full max-w-xl"
+                preload="metadata"
                 onError={() => setMediaLoadError('Audio preview failed (unsupported codec or missing runtime source).')}
               />
             )}
@@ -355,6 +357,7 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="max-w-full max-h-full bg-black"
+                preload="metadata"
                 onError={() => setMediaLoadError('Video preview failed (unsupported codec or missing runtime source).')}
               />
             )}
