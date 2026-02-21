@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import AIChatPanelPro from '@/components/ide/AIChatPanelPro'
@@ -349,3 +349,4 @@ export default function AIChatPanelContainer() {
     />
   )
 }
+
