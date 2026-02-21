@@ -5,12 +5,25 @@ import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
+const MAX_ROUTE_ID_LENGTH = 120
+const normalizeRouteId = (value?: string) => String(value ?? '').trim()
+
 export async function DELETE(
   req: NextRequest,
   ctx: { params: { id: string } }
 ) {
   try {
     const auth = requireAuth(req)
+    const grantId = normalizeRouteId(ctx.params?.id)
+    if (!grantId || grantId.length > MAX_ROUTE_ID_LENGTH) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_GRANT_ID',
+          message: 'grantId is required and must be under 120 characters.',
+        },
+        { status: 400 }
+      )
+    }
     const rateLimitResponse = await enforceRateLimit({
       scope: 'studio-full-access-revoke',
       key: auth.userId,
@@ -22,14 +35,17 @@ export async function DELETE(
 
     const url = new URL(req.url)
     const sessionId = (url.searchParams.get('sessionId') || '').trim()
-    if (!sessionId) {
+    if (!sessionId || sessionId.length > MAX_ROUTE_ID_LENGTH) {
       return NextResponse.json(
-        { error: 'SESSION_ID_REQUIRED', message: 'sessionId query is required.' },
+        {
+          error: 'SESSION_ID_REQUIRED',
+          message: 'sessionId query is required and must be under 120 characters.',
+        },
         { status: 400 }
       )
     }
 
-    const session = await revokeFullAccessGrant(auth.userId, sessionId, ctx.params.id)
+    const session = await revokeFullAccessGrant(auth.userId, sessionId, grantId)
     if (!session) {
       return NextResponse.json(
         { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },

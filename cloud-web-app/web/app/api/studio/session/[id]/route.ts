@@ -5,12 +5,25 @@ import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
+const MAX_ROUTE_ID_LENGTH = 120
+const normalizeRouteId = (value?: string) => String(value ?? '').trim()
+
 export async function GET(
   req: NextRequest,
   ctx: { params: { id: string } }
 ) {
   try {
     const auth = requireAuth(req)
+    const sessionId = normalizeRouteId(ctx.params?.id)
+    if (!sessionId || sessionId.length > MAX_ROUTE_ID_LENGTH) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_SESSION_ID',
+          message: 'sessionId is required and must be under 120 characters.',
+        },
+        { status: 400 }
+      )
+    }
     const rateLimitResponse = await enforceRateLimit({
       scope: 'studio-session-read',
       key: auth.userId,
@@ -20,7 +33,7 @@ export async function GET(
     })
     if (rateLimitResponse) return rateLimitResponse
 
-    const session = await getStudioSession(auth.userId, ctx.params.id)
+    const session = await getStudioSession(auth.userId, sessionId)
     if (!session) {
       return NextResponse.json(
         {

@@ -6,6 +6,9 @@ import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
+const MAX_ROUTE_ID_LENGTH = 120
+const normalizeRouteId = (value?: string) => String(value ?? '').trim()
+
 type Body = {
   sessionId?: string
   applyToken?: string
@@ -17,6 +20,16 @@ export async function POST(
 ) {
   try {
     const auth = requireAuth(req)
+    const taskId = normalizeRouteId(ctx.params?.id)
+    if (!taskId || taskId.length > MAX_ROUTE_ID_LENGTH) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_TASK_ID',
+          message: 'taskId is required and must be under 120 characters.',
+        },
+        { status: 400 }
+      )
+    }
     const rateLimitResponse = await enforceRateLimit({
       scope: 'studio-task-rollback',
       key: auth.userId,
@@ -28,9 +41,12 @@ export async function POST(
 
     const body = (await req.json().catch(() => ({}))) as Body
     const sessionId = String(body.sessionId || '').trim()
-    if (!sessionId) {
+    if (!sessionId || sessionId.length > MAX_ROUTE_ID_LENGTH) {
       return NextResponse.json(
-        { error: 'SESSION_ID_REQUIRED', message: 'sessionId is required.' },
+        {
+          error: 'SESSION_ID_REQUIRED',
+          message: 'sessionId is required and must be under 120 characters.',
+        },
         { status: 400 }
       )
     }
@@ -52,7 +68,7 @@ export async function POST(
         milestone: 'P1',
       })
     }
-    const currentTask = current.tasks.find((item) => item.id === ctx.params.id)
+    const currentTask = current.tasks.find((item) => item.id === taskId)
     if (!currentTask) {
       return NextResponse.json(
         { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
@@ -84,7 +100,7 @@ export async function POST(
       })
     }
 
-    const session = await rollbackStudioTask(auth.userId, sessionId, ctx.params.id, body.applyToken)
+    const session = await rollbackStudioTask(auth.userId, sessionId, taskId, body.applyToken)
     if (!session) {
       return NextResponse.json(
         { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
@@ -92,7 +108,7 @@ export async function POST(
       )
     }
 
-    const task = session.tasks.find((item) => item.id === ctx.params.id)
+    const task = session.tasks.find((item) => item.id === taskId)
     if (!task) {
       return NextResponse.json(
         { error: 'TASK_NOT_FOUND', message: 'Task not found in session.' },
