@@ -41,7 +41,7 @@ export function StudioHomeMissionPanel({
   onApplyDomainPreset,
   onStartSession,
 }: StudioHomeMissionPanelProps) {
-  const startDisabled = busy || variableUsageBlocked || !trimmedMission
+  const startDisabled = busy || variableUsageBlocked || !trimmedMission || session?.status === 'active'
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -155,6 +155,8 @@ export function StudioHomeMissionPanel({
           <div className="rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
             {busy
               ? 'A session action is already running.'
+              : session?.status === 'active'
+                ? 'Stop the current session before starting a new mission.'
               : variableUsageBlocked
                 ? 'Variable AI usage is blocked for this account at the moment.'
                 : 'Describe the mission to start the session.'}
