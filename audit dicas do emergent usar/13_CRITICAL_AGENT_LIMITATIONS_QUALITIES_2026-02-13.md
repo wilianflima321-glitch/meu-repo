@@ -1843,3 +1843,12 @@ Implemented:
 Critical reading:
 1. This reduces operational inconsistency on account/support management paths.
 2. Residual risk remains in other niche admin pages still using bespoke local UI patterns.
+
+## Delta 2026-02-21 CXXI - Feature-flags/promotions page drift reduction
+Implemented:
+1. Standardized feature-flags and promotions pages with shared admin shell/state patterns.
+2. Unified authenticated fetch behavior for list and mutation actions.
+
+Critical reading:
+1. This reduces governance UX drift in rollout and growth operations.
+2. Residual risk remains in remaining niche admin pages not yet migrated to shared patterns.

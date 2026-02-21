@@ -440,3 +440,9 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `cloud-web-app/web/app/admin/users/page.tsx`
 - `cloud-web-app/web/app/admin/support/page.tsx`
 2. Applied shared primitives for table states, filter actions, and authenticated fetch behavior.
+
+### Delivered in this wave (Admin flags/promotions surfaces)
+1. Refactored:
+- `cloud-web-app/web/app/admin/feature-flags/page.tsx`
+- `cloud-web-app/web/app/admin/promotions/page.tsx`
+2. Applied shared shell/state patterns and authenticated admin fetch behavior for read/write flows.

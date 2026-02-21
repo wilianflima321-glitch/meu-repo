@@ -498,3 +498,12 @@ Label: `VERIFIED_INTERNAL`
 - `cloud-web-app/web/app/admin/support/page.tsx`
 2. Aligned with shared admin shell/state and authenticated fetch helper patterns.
 3. Targeted lint verification for modified users/support surfaces: PASS.
+
+## 27) Delta 2026-02-21 - Feature-flags/promotions management hardening
+Label: `VERIFIED_INTERNAL`
+
+1. Refactored:
+- `cloud-web-app/web/app/admin/feature-flags/page.tsx`
+- `cloud-web-app/web/app/admin/promotions/page.tsx`
+2. Aligned both pages with shared admin shell/state and authenticated fetch behavior.
+3. Targeted lint verification for modified feature-flags/promotions surfaces: PASS.

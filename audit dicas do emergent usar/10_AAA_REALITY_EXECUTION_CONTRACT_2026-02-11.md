@@ -4343,3 +4343,18 @@ Validation snapshot:
 
 Decision lock:
 1. No scope expansion; this is consistency and reliability hardening in existing admin operations.
+
+## 173) Delta 2026-02-21 CXXVII - Admin rollout/marketing ops hardening
+
+Implemented:
+1. Refactored:
+- `cloud-web-app/web/app/admin/feature-flags/page.tsx`
+- `cloud-web-app/web/app/admin/promotions/page.tsx`
+2. Aligned both pages with shared admin shell/state patterns and authenticated fetch flow.
+3. Standardized create/toggle/list action states and table behavior.
+
+Validation snapshot:
+1. Targeted lint on feature-flags/promotions pages -> PASS.
+
+Decision lock:
+1. No new capability claims; this wave hardens existing rollout and promotions operations UX.

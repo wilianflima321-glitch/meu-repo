@@ -1892,3 +1892,15 @@ Delivered:
 Triaged impact:
 1. Reduced operational drift in account/support management surfaces.
 2. Removed remaining low-traffic pages using old visual/state patterns in this wave.
+
+## Delta 2026-02-21 CXXII - Admin flags/promotions consistency wave
+Delivered:
+1. Refactored:
+- `cloud-web-app/web/app/admin/feature-flags/page.tsx`
+- `cloud-web-app/web/app/admin/promotions/page.tsx`
+2. Unified both surfaces with shared admin shell/state primitives.
+3. Applied authenticated admin fetch behavior for create/toggle/list actions.
+
+Triaged impact:
+1. Reduced config-management UX drift in feature rollout and promotion operations.
+2. Improved operational clarity by standardizing table/form/action states.

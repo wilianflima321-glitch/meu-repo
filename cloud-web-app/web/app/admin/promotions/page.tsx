@@ -1,6 +1,16 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Promotion = {
   id: string;
@@ -13,8 +23,12 @@ type Promotion = {
   expiresAt: string | null;
 };
 
+type PromotionsPayload = {
+  promotions?: Promotion[];
+};
+
 function formatDiscount(promo: Promotion) {
-  if (promo.discount == null) return 'N/D';
+  if (promo.discount == null) return 'N/A';
   if (promo.type === 'percentage') return `${promo.discount}%`;
   if (promo.type === 'fixed') return `US$${promo.discount.toFixed(2)}`;
   return `${promo.discount}`;
@@ -42,15 +56,12 @@ export default function PromotionsPage() {
   const fetchPromotions = useCallback(async () => {
     try {
       setError(null);
-      const res = await fetch('/api/admin/promotions');
-      if (!res.ok) {
-        throw new Error('Falha ao carregar promoções');
-      }
-      const data = await res.json();
+      setLoading(true);
+      const data = await adminJsonFetch<PromotionsPayload>('/api/admin/promotions');
       setPromotions(Array.isArray(data?.promotions) ? data.promotions : []);
       setLastUpdated(new Date());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado');
+      setError(err instanceof Error ? err.message : 'Unexpected error');
     } finally {
       setLoading(false);
     }
@@ -60,7 +71,7 @@ export default function PromotionsPage() {
     fetchPromotions();
   }, [fetchPromotions]);
 
-  const handleCreate = async () => {
+  const handleCreate = useCallback(async () => {
     if (creating) return;
     setFormError(null);
     setCreating(true);
@@ -76,16 +87,11 @@ export default function PromotionsPage() {
         currency: newPromo.currency,
       };
 
-      const res = await fetch('/api/admin/promotions', {
+      await adminJsonFetch('/api/admin/promotions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Falha ao criar promoção');
-      }
 
       setNewPromo({
         name: '',
@@ -98,42 +104,37 @@ export default function PromotionsPage() {
       });
       await fetchPromotions();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Erro inesperado');
+      setFormError(err instanceof Error ? err.message : 'Unexpected error');
     } finally {
       setCreating(false);
     }
-  };
+  }, [creating, fetchPromotions, newPromo]);
 
-  const handleToggle = async (promo: Promotion) => {
-    try {
-      const res = await fetch('/api/admin/promotions', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: promo.id, active: !promo.active }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Falha ao atualizar promoção');
+  const handleToggle = useCallback(
+    async (promo: Promotion) => {
+      try {
+        await adminJsonFetch('/api/admin/promotions', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: promo.id, active: !promo.active }),
+        });
+        await fetchPromotions();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unexpected error');
       }
+    },
+    [fetchPromotions],
+  );
 
-      await fetchPromotions();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado');
-    }
-  };
-
-  const filteredPromotions = promotions.filter((promo) => {
-    const term = search.trim().toLowerCase();
-    const matchesSearch =
-      !term ||
-      promo.name.toLowerCase().includes(term) ||
-      (promo.code || '').toLowerCase().includes(term);
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' ? promo.active : !promo.active);
-    return matchesSearch && matchesStatus;
-  });
+  const filteredPromotions = useMemo(() => {
+    return promotions.filter((promo) => {
+      const term = search.trim().toLowerCase();
+      const matchesSearch =
+        !term || promo.name.toLowerCase().includes(term) || (promo.code || '').toLowerCase().includes(term);
+      const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? promo.active : !promo.active);
+      return matchesSearch && matchesStatus;
+    });
+  }, [promotions, search, statusFilter]);
 
   const summary = {
     total: promotions.length,
@@ -142,184 +143,177 @@ export default function PromotionsPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Promoções e cupons</h1>
-          <p className="text-sm text-zinc-400">
-            Gestão completa via Stripe diretamente no painel admin.
-          </p>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Promotions and coupons'
+      description='Stripe-backed promotion lifecycle management in admin operations.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchPromotions}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchPromotions}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total' value={summary.total} tone='sky' />
+          <AdminStatCard label='Active' value={summary.active} tone='emerald' />
+          <AdminStatCard label='Inactive' value={summary.inactive} tone='neutral' />
+          <AdminStatCard label='Filtered' value={filteredPromotions.length} tone='amber' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Ativas</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.active}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Inativas</h3>
-          <p className="text-2xl font-bold text-zinc-400">{summary.inactive}</p>
-        </div>
-      </div>
-
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Criar promoção</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <AdminSection title='Create promotion' className='mb-6'>
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <input
-            type="text"
-            placeholder="Nome"
+            type='text'
+            placeholder='Name'
             value={newPromo.name}
-            onChange={(e) => setNewPromo((prev) => ({ ...prev, name: e.target.value }))}
-            className="border p-2 rounded"
+            onChange={(event) => setNewPromo((prev) => ({ ...prev, name: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500'
           />
           <input
-            type="text"
-            placeholder="Código (ex: BF2026)"
+            type='text'
+            placeholder='Code (e.g. BF2026)'
             value={newPromo.code}
-            onChange={(e) => setNewPromo((prev) => ({ ...prev, code: e.target.value }))}
-            className="border p-2 rounded"
+            onChange={(event) => setNewPromo((prev) => ({ ...prev, code: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500'
           />
           <select
             value={newPromo.type}
-            onChange={(e) => setNewPromo((prev) => ({ ...prev, type: e.target.value as 'percentage' | 'fixed' }))}
-            className="border p-2 rounded"
+            onChange={(event) => setNewPromo((prev) => ({ ...prev, type: event.target.value as 'percentage' | 'fixed' }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100'
           >
-            <option value="percentage">Percentual (%)</option>
-            <option value="fixed">Valor fixo (US$)</option>
+            <option value='percentage'>Percentage (%)</option>
+            <option value='fixed'>Fixed value (US$)</option>
           </select>
           <input
-            type="number"
-            placeholder="Desconto"
+            type='number'
+            placeholder='Discount'
             value={newPromo.discount}
-            onChange={(e) => setNewPromo((prev) => ({ ...prev, discount: e.target.value }))}
-            className="border p-2 rounded"
+            onChange={(event) => setNewPromo((prev) => ({ ...prev, discount: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500'
           />
           <input
-            type="number"
-            placeholder="Máx. resgates (opcional)"
+            type='number'
+            placeholder='Max redemptions (optional)'
             value={newPromo.maxRedemptions}
-            onChange={(e) => setNewPromo((prev) => ({ ...prev, maxRedemptions: e.target.value }))}
-            className="border p-2 rounded"
+            onChange={(event) => setNewPromo((prev) => ({ ...prev, maxRedemptions: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500'
           />
           <input
-            type="date"
-            placeholder="Expiração"
+            type='date'
             value={newPromo.expiresAt}
-            onChange={(e) => setNewPromo((prev) => ({ ...prev, expiresAt: e.target.value }))}
-            className="border p-2 rounded"
+            onChange={(event) => setNewPromo((prev) => ({ ...prev, expiresAt: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100'
           />
-          {newPromo.type === 'fixed' && (
+          {newPromo.type === 'fixed' ? (
             <input
-              type="text"
-              placeholder="Moeda (ex: USD)"
+              type='text'
+              placeholder='Currency (USD)'
               value={newPromo.currency}
-              onChange={(e) => setNewPromo((prev) => ({ ...prev, currency: e.target.value }))}
-              className="border p-2 rounded"
+              onChange={(event) => setNewPromo((prev) => ({ ...prev, currency: event.target.value }))}
+              className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500'
             />
-          )}
+          ) : null}
         </div>
-        {formError && <p className="text-sm text-red-600 mt-2">{formError}</p>}
-        <button
+
+        {formError ? <p className='mt-2 text-sm text-rose-300'>{formError}</p> : null}
+
+        <AdminPrimaryButton
           onClick={handleCreate}
           disabled={creating}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-60"
+          className='mt-4 bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-60'
         >
-          {creating ? 'Criando...' : 'Criar promoção'}
-        </button>
-      </div>
+          {creating ? 'Creating...' : 'Create promotion'}
+        </AdminPrimaryButton>
+      </AdminSection>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Promoções</h2>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+      <AdminSection title='Promotions'>
+        <div className='mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
           <input
-            type="text"
-            placeholder="Buscar por nome ou código"
+            type='text'
+            placeholder='Search by name or code'
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border p-2 rounded w-full md:max-w-sm"
+            onChange={(event) => setSearch(event.target.value)}
+            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500 md:max-w-sm'
           />
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             {(['all', 'active', 'inactive'] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1 rounded text-xs font-semibold ${
-                  statusFilter === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-zinc-800/70 text-zinc-400'
+                className={`rounded px-3 py-1 text-xs font-semibold ${
+                  statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-300 hover:bg-zinc-700/80'
                 }`}
               >
-                {status === 'all' ? 'Todas' : status === 'active' ? 'Ativas' : 'Inativas'}
+                {status === 'all' ? 'All' : status === 'active' ? 'Active' : 'Inactive'}
               </button>
             ))}
           </div>
         </div>
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-16 bg-zinc-800/70 rounded animate-pulse" />
-            ))}
-          </div>
-        ) : error ? (
-          <p className="text-sm text-red-600">{error}</p>
-        ) : filteredPromotions.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma promoção encontrada no Stripe.</p>
-        ) : (
-          <ul>
-            {filteredPromotions.map((promo) => (
-              <li key={promo.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-4 border-b">
-                <div>
-                  <h3 className="font-semibold">{promo.name}</h3>
-                  <p className="text-sm text-zinc-400">
-                    Código: {promo.code || 'N/D'} | Desconto: {formatDiscount(promo)}
-                  </p>
-                  <p className="text-xs text-zinc-500">
-                    Resgates: {promo.timesRedeemed ?? 0} | Expira em:{' '}
-                    {promo.expiresAt ? new Date(promo.expiresAt).toLocaleDateString() : 'Sem expiração'}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 mt-2 md:mt-0">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-semibold ${
-                      promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
-                    }`}
-                  >
-                    {promo.active ? 'Ativa' : 'Inativa'}
-                  </span>
-                  <button
-                    onClick={() => handleToggle(promo)}
-                    className="px-3 py-1 rounded text-xs bg-amber-500/15 text-amber-200"
-                  >
-                    {promo.active ? 'Desativar' : 'Ativar'}
-                  </button>
-                  {promo.code && (
-                    <button
-                      onClick={() => navigator.clipboard.writeText(promo.code || '')}
-                      className="px-3 py-1 rounded text-xs bg-zinc-800/70 text-zinc-300"
-                    >
-                      Copiar código
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-2 text-left'>Name</th>
+                <th className='p-2 text-left'>Code</th>
+                <th className='p-2 text-left'>Discount</th>
+                <th className='p-2 text-left'>Redeemed</th>
+                <th className='p-2 text-left'>Expires</th>
+                <th className='p-2 text-left'>Status</th>
+                <th className='p-2 text-left'>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={7} message='Loading promotions...' />
+              ) : filteredPromotions.length === 0 ? (
+                <AdminTableStateRow colSpan={7} message='No promotions found.' />
+              ) : (
+                filteredPromotions.map((promo) => (
+                  <tr key={promo.id} className='border-t border-zinc-800/70'>
+                    <td className='p-2 text-zinc-100'>{promo.name}</td>
+                    <td className='p-2 text-zinc-300'>{promo.code || 'N/A'}</td>
+                    <td className='p-2'>{formatDiscount(promo)}</td>
+                    <td className='p-2'>{promo.timesRedeemed ?? 0}</td>
+                    <td className='p-2 text-zinc-500'>
+                      {promo.expiresAt ? new Date(promo.expiresAt).toLocaleDateString() : 'No expiration'}
+                    </td>
+                    <td className='p-2'>
+                      <span className={`rounded px-2 py-1 text-xs ${promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-300'}`}>
+                        {promo.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className='p-2'>
+                      <div className='flex items-center gap-2'>
+                        <button
+                          onClick={() => handleToggle(promo)}
+                          className='rounded bg-amber-500/15 px-3 py-1 text-xs text-amber-200 hover:bg-amber-500/25'
+                          type='button'
+                        >
+                          {promo.active ? 'Disable' : 'Enable'}
+                        </button>
+                        {promo.code ? (
+                          <button
+                            onClick={() => navigator.clipboard.writeText(promo.code || '')}
+                            className='rounded bg-zinc-800/70 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-700/80'
+                            type='button'
+                          >
+                            Copy code
+                          </button>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }
