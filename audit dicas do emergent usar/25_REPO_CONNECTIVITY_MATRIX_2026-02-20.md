@@ -1,6 +1,6 @@
 # 25_REPO_CONNECTIVITY_MATRIX_2026-02-20
 Status: GENERATED CONNECTIVITY SWEEP
-Generated: 2026-02-20T23:58:38.401Z
+Generated: 2026-02-21T03:08:50.910Z
 
 ## Summary
 - Total checks: 31
@@ -8,9 +8,9 @@ Generated: 2026-02-20T23:58:38.401Z
 - Missing required references: 0
 - Missing optional references: 0
 - Dead script references: 0
-- Markdown files (total): 3634
+- Markdown files (total): 3635
 - Markdown files (canonical): 32
-- Markdown files (historical/outside canonical): 3602
+- Markdown files (historical/outside canonical): 3603
 
 ## Required Missing References
 | Source | Key | Path | Status | Notes |
