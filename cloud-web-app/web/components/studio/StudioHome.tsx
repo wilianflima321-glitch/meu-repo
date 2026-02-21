@@ -191,6 +191,11 @@ export default function StudioHome() {
     setMissionDomainSelection(session.missionDomain)
   }, [session?.missionDomain])
 
+  useEffect(() => {
+    if (!session?.projectId) return
+    setProjectId(sanitizeStudioProjectId(session.projectId))
+  }, [session?.projectId])
+
   const requireSessionId = useCallback(() => {
     if (!session?.id) throw new Error('Start a studio session first.')
     return session.id
