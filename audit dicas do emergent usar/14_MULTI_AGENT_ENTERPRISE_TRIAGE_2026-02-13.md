@@ -1820,3 +1820,14 @@ Triaged impact:
 1. Admin shell no longer exposes a broken navigation path in core operations layout.
 2. Operational trust improved by explicit status when telemetry cannot be loaded.
 3. Type reliability improved by removing a blocking parse error in engine type definitions.
+
+## Delta 2026-02-21 CXVI - Emergency operations surface closure triage
+Delivered:
+1. Added missing admin emergency page backed by existing emergency API:
+- `cloud-web-app/web/app/admin/emergency/page.tsx`
+2. Restored direct emergency navigation in admin shell:
+- `cloud-web-app/web/app/admin/layout.tsx` (`/admin/emergency` entry + CTA target).
+
+Triaged impact:
+1. Closed a route-level UX gap where emergency API existed without matching operations surface.
+2. Removed emergency-control discoverability ambiguity in admin operations flow.

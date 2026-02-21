@@ -4246,3 +4246,18 @@ Validation snapshot:
 Decision lock:
 1. No scope expansion; this wave removes dead-end routing and syntax reliability debt.
 2. Existing API capability/deprecation contracts remain unchanged.
+
+## 167) Delta 2026-02-21 CXXI - Emergency admin surface enablement
+
+Implemented:
+1. Added emergency operations UI page aligned to existing API contract:
+- `cloud-web-app/web/app/admin/emergency/page.tsx`
+2. Updated admin shell navigation/CTA to target operational emergency surface:
+- `cloud-web-app/web/app/admin/layout.tsx`
+
+Validation snapshot:
+1. Targeted lint on `admin/layout` + `admin/emergency/page` -> PASS.
+
+Decision lock:
+1. No new backend scope; this wave exposes already-existing emergency controls through an explicit admin route.
+2. Capability/deprecation contracts unchanged.

@@ -44,6 +44,7 @@ const navItems = [
   { title: 'Finance', href: '/admin/finance', icon: CreditCard, badge: 'MRR' },
   { title: 'Users', href: '/admin/users', icon: Users },
   { title: 'AI Monitor', href: '/admin/ai-monitor', icon: Brain, badge: 'Live' },
+  { title: 'Emergency', href: '/admin/emergency', icon: AlertTriangle, badge: 'Ops' },
   { title: 'Infrastructure', href: '/admin/infrastructure', icon: Server },
   { title: 'Moderation', href: '/admin/moderation', icon: Shield },
   { title: 'Analytics', href: '/admin/analytics', icon: TrendingUp },
@@ -140,11 +141,11 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 
         <div className="absolute bottom-0 left-0 right-0 border-t border-zinc-800 p-3">
           <Link
-            href="/admin/security"
+            href="/admin/emergency"
             className="flex w-full items-center justify-center gap-2 rounded bg-red-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-red-500"
           >
             <AlertTriangle className="h-3.5 w-3.5" />
-            Security Console
+            Emergency Mode
           </Link>
         </div>
       </aside>

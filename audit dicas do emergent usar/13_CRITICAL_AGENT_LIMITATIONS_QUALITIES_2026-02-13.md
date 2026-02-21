@@ -1787,3 +1787,12 @@ Implemented:
 Critical reading:
 1. Broken navigation risk in the admin shell dropped from user-facing to closed.
 2. Residual risk remains in broader admin IA pages where operational widgets are still partially informative.
+
+## Delta 2026-02-21 CXV - Emergency route parity closure
+Implemented:
+1. Added `/admin/emergency` operations page to match existing `/api/admin/emergency` controls.
+2. Rewired shell emergency CTA and nav to use the concrete emergency route.
+
+Critical reading:
+1. Admin emergency control is now explicit and reachable; API-only exposure risk is closed.
+2. Residual risk remains permission-level UX messaging under restricted roles (403 handling by policy).

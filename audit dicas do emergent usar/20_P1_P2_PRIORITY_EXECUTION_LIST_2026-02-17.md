@@ -405,3 +405,8 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - removed dead-end shell action by targeting `/admin/security`
 2. Fixed engine type syntax blocker:
 - `cloud-web-app/web/lib/engine/particle-system-types.ts` interface closure restored.
+
+### Delivered in this wave (Emergency operations parity)
+1. Added missing emergency admin surface:
+- `cloud-web-app/web/app/admin/emergency/page.tsx`
+2. Updated admin shell nav + CTA to point to `/admin/emergency` now that the route exists.
