@@ -158,6 +158,29 @@ Execution interpretation:
 Implemented in code:
 1. Static-heavy API routes now explicitly opt out of static cache generation where operational data is runtime-scoped:
 - `cloud-web-app/web/app/api/exports/metrics/route.ts`
+
+## 0.6 Delta Update 2026-02-21 (Security + telemetry + smoke coverage)
+Implemented in code:
+1. Security headers hardened for all responses:
+- `cloud-web-app/web/next.config.js` now adds `X-DNS-Prefetch-Control`, `X-Permitted-Cross-Domain-Policies`, and `Strict-Transport-Security` in production.
+2. Billing checkout hardening:
+- `/api/billing/checkout` now normalizes `planId` and restricts `successUrl/cancelUrl` to same-origin to prevent open redirects.
+3. Studio Home telemetry:
+- `/api/studio/cost/live` is now polled in Studio Home for live cost + per-role run cost breakdown.
+- Ops Bar surfaces live telemetry with last update timestamp.
+4. Preview runtime UX:
+- Preview media now sets `sizes` and `preload=metadata` for better perceived performance.
+5. IDE accessibility:
+- File explorer tree now uses `aria-level` and `role="group"` for nested items.
+6. External report reconciliation:
+- Canonical absorption document added: `30_EXTERNAL_REPORT_RECONCILIATION_2026-02-21.md`.
+
+Smoke coverage added (not executed in this delta):
+- `tests/e2e/studio-home.spec.ts`
+- `tests/e2e/ide-smoke.spec.ts`
+
+Validation status:
+- No tests executed per execution policy (tests deferred to freeze).
 - `cloud-web-app/web/app/api/jobs/stats/route.ts`
 - `cloud-web-app/web/app/api/multiplayer/health/route.ts`
 2. Multiplayer health route copy/comments were normalized to clean ASCII English to remove encoding drift.
