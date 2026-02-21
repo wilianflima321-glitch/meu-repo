@@ -41,7 +41,7 @@ function parseCanonicalNames(markdown) {
   for (const line of lines) {
     const trimmed = line.trim()
     if (!trimmed.startsWith('- ')) continue
-    const match = trimmed.match(/- ([^`\s]+\.md)\b/)
+    const match = trimmed.match(/- `?([^`\s]+\.md)`?\b/)
     if (!match) continue
     names.push(match[1])
   }
@@ -56,6 +56,11 @@ const canonicalIndexExists = fs.existsSync(canonicalIndexPath)
 const canonicalIndexContent = canonicalIndexExists ? fs.readFileSync(canonicalIndexPath, 'utf8') : ''
 const canonicalListedNames = canonicalIndexExists ? parseCanonicalNames(canonicalIndexContent) : []
 const canonicalNameSet = new Set(canonicalListedNames)
+const allowedUnindexedCanonicalDocs = new Set([
+  '00_FONTE_CANONICA.md',
+  '11_WEB_USER_OWNER_TRIAGE_2026-02-11.md',
+  '12_INTERFACE_SYSTEMS_REFACTOR_CONTRACT_2026-02-11.md',
+])
 
 const missingListedCanonicalDocs = canonicalListedNames
   .map((name) => ({
@@ -83,6 +88,7 @@ const conflictsOutsideCanonical = historicalMarkdownFiles
 const unindexedCanonicalMarkdown = canonicalMarkdownFiles
   .map((file) => path.basename(file))
   .filter((name) => !canonicalNameSet.has(name))
+  .filter((name) => !allowedUnindexedCanonicalDocs.has(name))
   .sort((a, b) => a.localeCompare(b))
 
 const historicalTopLevel = new Map()

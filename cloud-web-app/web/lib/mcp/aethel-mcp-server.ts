@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Aethel MCP Server - Built-in Tools Server
  * 
  * Servidor MCP nativo do Aethel IDE com todas as ferramentas
@@ -28,7 +28,7 @@ export const aethelMCPServer = new MCPServer('aethel-ide', '1.0.0');
 aethelMCPServer.registerTool(
   {
     name: 'read_file',
-    description: 'LÃª o conteÃºdo de um arquivo do projeto',
+    description: 'Lê o conteúdo de um arquivo do projeto',
     inputSchema: {
       type: 'object',
       properties: {
@@ -46,7 +46,7 @@ aethelMCPServer.registerTool(
       const result = await getFileSystemAdapter().readFile(path, { startLine, endLine });
       
       if (!result) {
-        return { content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${path}` }], isError: true };
+        return { content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], isError: true };
       }
       
       return { content: [{ type: 'text', text: result.content }] };
@@ -67,7 +67,7 @@ aethelMCPServer.registerTool(
       type: 'object',
       properties: {
         path: { type: 'string', description: 'Caminho do arquivo' },
-        content: { type: 'string', description: 'ConteÃºdo do arquivo' },
+        content: { type: 'string', description: 'Conteúdo do arquivo' },
       },
       required: ['path', 'content'],
     },
@@ -127,11 +127,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'create_directory',
-    description: 'Cria um diretÃ³rio no projeto',
+    description: 'Cria um diretório no projeto',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do diretÃ³rio' },
+        path: { type: 'string', description: 'Caminho do diretório' },
       },
       required: ['path'],
     },
@@ -143,13 +143,13 @@ aethelMCPServer.registerTool(
       const success = await getFileSystemAdapter().mkdir(path);
       
       if (!success) {
-        return { content: [{ type: 'text', text: `Erro ao criar diretÃ³rio: ${path}` }], isError: true };
+        return { content: [{ type: 'text', text: `Erro ao criar diretório: ${path}` }], isError: true };
       }
       
-      return { content: [{ type: 'text', text: `DiretÃ³rio criado: ${path}` }] };
+      return { content: [{ type: 'text', text: `Diretório criado: ${path}` }] };
     } catch (error) {
       return { 
-        content: [{ type: 'text', text: `Erro ao criar diretÃ³rio: ${error}` }], 
+        content: [{ type: 'text', text: `Erro ao criar diretório: ${error}` }], 
         isError: true 
       };
     }
@@ -186,18 +186,18 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'edit_file',
-    description: 'Edita uma parte especÃ­fica de um arquivo (replace, insert, delete)',
+    description: 'Edita uma parte específica de um arquivo (replace, insert, delete)',
     inputSchema: {
       type: 'object',
       properties: {
         path: { type: 'string', description: 'Caminho do arquivo' },
         operation: { 
           type: 'string', 
-          description: 'Tipo de operaÃ§Ã£o',
+          description: 'Tipo de operação',
           enum: ['replace', 'insert_before', 'insert_after', 'delete'],
         },
         search: { type: 'string', description: 'Texto a ser encontrado' },
-        replace: { type: 'string', description: 'Texto de substituiÃ§Ã£o/inserÃ§Ã£o' },
+        replace: { type: 'string', description: 'Texto de substituição/inserção' },
       },
       required: ['path', 'operation', 'search'],
     },
@@ -213,14 +213,14 @@ aethelMCPServer.registerTool(
     try {
       const file = await getFileSystemAdapter().readFile(path);
       if (!file) {
-        return { content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${path}` }], isError: true };
+        return { content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], isError: true };
       }
       
       let content = file.content;
       const index = content.indexOf(search);
       
       if (index === -1) {
-        return { content: [{ type: 'text', text: `Texto nÃ£o encontrado no arquivo` }], isError: true };
+        return { content: [{ type: 'text', text: `Texto não encontrado no arquivo` }], isError: true };
       }
       
       switch (operation) {
@@ -240,7 +240,7 @@ aethelMCPServer.registerTool(
       
       const success = await getFileSystemAdapter().writeFile(path, content);
       if (!success) {
-        return { content: [{ type: 'text', text: `Erro ao salvar ediÃ§Ã£o` }], isError: true };
+        return { content: [{ type: 'text', text: `Erro ao salvar edição` }], isError: true };
       }
       
       return { content: [{ type: 'text', text: `Arquivo editado: ${path}` }] };
@@ -253,11 +253,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'list_directory',
-    description: 'Lista arquivos e pastas em um diretÃ³rio',
+    description: 'Lista arquivos e pastas em um diretório',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do diretÃ³rio' },
+        path: { type: 'string', description: 'Caminho do diretório' },
         recursive: { type: 'boolean', description: 'Listar recursivamente' },
       },
       required: ['path'],
@@ -268,7 +268,7 @@ aethelMCPServer.registerTool(
     
     try {
       const items = await getFileSystemAdapter().listDirectory(path, recursive);
-      return { content: [{ type: 'text', text: items.join('\n') || 'DiretÃ³rio vazio' }] };
+      return { content: [{ type: 'text', text: items.join('\n') || 'Diretório vazio' }] };
     } catch (error) {
       return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
     }
@@ -289,7 +289,7 @@ aethelMCPServer.registerTool(
         query: { type: 'string', description: 'Texto ou regex para buscar' },
         isRegex: { type: 'boolean', description: 'Tratar como regex' },
         filePattern: { type: 'string', description: 'Filtro de arquivos (glob)' },
-        maxResults: { type: 'number', description: 'MÃ¡ximo de resultados' },
+        maxResults: { type: 'number', description: 'Máximo de resultados' },
       },
       required: ['query'],
     },
@@ -347,14 +347,14 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'get_definitions',
-    description: 'Encontra definiÃ§Ãµes de funÃ§Ãµes, classes, variÃ¡veis',
+    description: 'Encontra definições de funções, classes, variáveis',
     inputSchema: {
       type: 'object',
       properties: {
-        symbol: { type: 'string', description: 'Nome do sÃ­mbolo' },
+        symbol: { type: 'string', description: 'Nome do símbolo' },
         type: { 
           type: 'string', 
-          description: 'Tipo de sÃ­mbolo',
+          description: 'Tipo de símbolo',
           enum: ['function', 'class', 'interface', 'type', 'variable', 'any'],
         },
       },
@@ -409,7 +409,7 @@ aethelMCPServer.registerTool(
           type: 'text', 
           text: results.length > 0 
             ? results.join('\n') 
-            : `Nenhuma definiÃ§Ã£o encontrada para "${symbol}"` 
+            : `Nenhuma definição encontrada para "${symbol}"` 
         }] 
       };
     } catch (error) {
@@ -430,7 +430,7 @@ aethelMCPServer.registerTool(
       type: 'object',
       properties: {
         command: { type: 'string', description: 'Comando a executar' },
-        cwd: { type: 'string', description: 'DiretÃ³rio de trabalho' },
+        cwd: { type: 'string', description: 'Diretório de trabalho' },
         timeout: { type: 'number', description: 'Timeout em ms (default: 30000)' },
       },
       required: ['command'],
@@ -476,7 +476,7 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'git_status',
-    description: 'Mostra o status do repositÃ³rio Git',
+    description: 'Mostra o status do repositório Git',
     inputSchema: {
       type: 'object',
       properties: {},
@@ -497,11 +497,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'git_diff',
-    description: 'Mostra as diferenÃ§as de arquivos modificados',
+    description: 'Mostra as diferenças de arquivos modificados',
     inputSchema: {
       type: 'object',
       properties: {
-        file: { type: 'string', description: 'Arquivo especÃ­fico (opcional)' },
+        file: { type: 'string', description: 'Arquivo específico (opcional)' },
         staged: { type: 'boolean', description: 'Mostrar apenas staged' },
       },
     },
@@ -527,7 +527,7 @@ aethelMCPServer.registerTool(
         diffText += data.unstaged.map((f: any) => `${f.status}: ${f.path}`).join('\n');
       }
       
-      return { content: [{ type: 'text', text: diffText || 'Nenhuma mudanÃ§a' }] };
+      return { content: [{ type: 'text', text: diffText || 'Nenhuma mudança' }] };
     } catch (error) {
       return { content: [{ type: 'text', text: `Erro: ${error}` }], isError: true };
     }
@@ -537,12 +537,12 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'git_commit',
-    description: 'Cria um commit com as mudanÃ§as staged',
+    description: 'Cria um commit com as mudanças staged',
     inputSchema: {
       type: 'object',
       properties: {
         message: { type: 'string', description: 'Mensagem do commit' },
-        files: { type: 'string', description: 'Arquivos especÃ­ficos (separados por vÃ­rgula)' },
+        files: { type: 'string', description: 'Arquivos específicos (separados por vírgula)' },
       },
       required: ['message'],
     },
@@ -588,7 +588,7 @@ aethelMCPServer.registerTool(
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Termo de busca' },
-        numResults: { type: 'number', description: 'NÃºmero de resultados (1-10)' },
+        numResults: { type: 'number', description: 'Número de resultados (1-10)' },
       },
       required: ['query'],
     },
@@ -611,7 +611,7 @@ aethelMCPServer.registerTool(
       }
       
       if (data.RelatedTopics) {
-        results.push('\n### TÃ³picos Relacionados:');
+        results.push('\n### Tópicos Relacionados:');
         data.RelatedTopics.slice(0, numResults).forEach((topic: any) => {
           if (topic.Text) {
             results.push(`- ${topic.Text}`);
@@ -634,7 +634,7 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'fetch_url',
-    description: 'LÃª o conteÃºdo de uma URL',
+    description: 'Lê o conteúdo de uma URL',
     inputSchema: {
       type: 'object',
       properties: {
@@ -717,11 +717,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'create_level',
-    description: 'Cria um novo nÃ­vel/mapa',
+    description: 'Cria um novo nível/mapa',
     inputSchema: {
       type: 'object',
       properties: {
-        name: { type: 'string', description: 'Nome do nÃ­vel' },
+        name: { type: 'string', description: 'Nome do nível' },
         template: { 
           type: 'string', 
           description: 'Template base',
@@ -763,7 +763,7 @@ aethelMCPServer.registerTool(
     return { 
       content: [{ 
         type: 'text', 
-        text: `NÃ­vel criado: ${name}\n\n${JSON.stringify(levelData, null, 2)}` 
+        text: `Nível criado: ${name}\n\n${JSON.stringify(levelData, null, 2)}` 
       }] 
     };
   }
@@ -792,7 +792,7 @@ aethelMCPServer.registerResource(
   {
     uri: 'aethel://config/settings',
     name: 'IDE Settings',
-    description: 'ConfiguraÃ§Ãµes atuais do IDE',
+    description: 'Configurações atuais do IDE',
     mimeType: 'application/json',
   },
   async () => {
@@ -813,41 +813,41 @@ aethelMCPServer.registerResource(
 aethelMCPServer.registerPrompt(
   {
     name: 'code_review',
-    description: 'Analisa cÃ³digo e sugere melhorias',
+    description: 'Analisa código e sugere melhorias',
     arguments: [
       { name: 'file', description: 'Arquivo para revisar', required: true },
     ],
   },
   async (args) => {
     const file = args.file as string;
-    return `Analise o arquivo ${file} e forneÃ§a:
+    return `Analise o arquivo ${file} e forneça:
 1. Bugs potenciais
 2. Melhorias de performance
-3. Melhores prÃ¡ticas nÃ£o seguidas
-4. SugestÃµes de refatoraÃ§Ã£o
-5. Problemas de seguranÃ§a`;
+3. Melhores práticas não seguidas
+4. Sugestões de refatoração
+5. Problemas de segurança`;
   }
 );
 
 aethelMCPServer.registerPrompt(
   {
     name: 'explain_code',
-    description: 'Explica o que um trecho de cÃ³digo faz',
+    description: 'Explica o que um trecho de código faz',
     arguments: [
-      { name: 'code', description: 'CÃ³digo para explicar', required: true },
+      { name: 'code', description: 'Código para explicar', required: true },
     ],
   },
   async (args) => {
-    return `Explique detalhadamente o que este cÃ³digo faz:
+    return `Explique detalhadamente o que este código faz:
 
 \`\`\`
 ${args.code}
 \`\`\`
 
 Inclua:
-1. PropÃ³sito geral
-2. ExplicaÃ§Ã£o linha por linha
-3. DependÃªncias e efeitos colaterais
+1. Propósito geral
+2. Explicação linha por linha
+3. Dependências e efeitos colaterais
 4. Exemplos de uso`;
   }
 );
@@ -855,19 +855,19 @@ Inclua:
 aethelMCPServer.registerPrompt(
   {
     name: 'generate_tests',
-    description: 'Gera testes unitÃ¡rios para cÃ³digo',
+    description: 'Gera testes unitários para código',
     arguments: [
       { name: 'file', description: 'Arquivo para testar', required: true },
     ],
   },
   async (args) => {
-    return `Gere testes unitÃ¡rios completos para o arquivo ${args.file}:
+    return `Gere testes unitários completos para o arquivo ${args.file}:
 
 1. Use Jest como framework
 2. Cubra todos os casos de borda
-3. Inclua mocks quando necessÃ¡rio
+3. Inclua mocks quando necessário
 4. Teste tanto casos de sucesso quanto de erro
-5. Adicione descriÃ§Ãµes claras para cada teste`;
+5. Adicione descrições claras para cada teste`;
   }
 );
 
@@ -878,12 +878,12 @@ aethelMCPServer.registerPrompt(
 aethelMCPServer.registerTool(
   {
     name: 'delete_file',
-    description: 'Deleta um arquivo ou diretÃ³rio do projeto',
+    description: 'Deleta um arquivo ou diretório do projeto',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do arquivo/diretÃ³rio a deletar' },
-        recursive: { type: 'boolean', description: 'Deletar recursivamente (para diretÃ³rios)' },
+        path: { type: 'string', description: 'Caminho do arquivo/diretório a deletar' },
+        recursive: { type: 'boolean', description: 'Deletar recursivamente (para diretórios)' },
       },
       required: ['path'],
     },
@@ -910,13 +910,13 @@ aethelMCPServer.registerTool(
         return { 
           content: [{ 
             type: 'text', 
-            text: `DiretÃ³rio deletado: ${path} (${deleted.count} arquivos)` 
+            text: `Diretório deletado: ${path} (${deleted.count} arquivos)` 
           }] 
         };
       }
       
       return { 
-        content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${path}` }], 
+        content: [{ type: 'text', text: `Arquivo não encontrado: ${path}` }], 
         isError: true 
       };
     } catch (error) {
@@ -935,11 +935,11 @@ aethelMCPServer.registerTool(
 aethelMCPServer.registerTool(
   {
     name: 'create_directory',
-    description: 'Cria um novo diretÃ³rio no projeto',
+    description: 'Cria um novo diretório no projeto',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Caminho do diretÃ³rio a criar' },
+        path: { type: 'string', description: 'Caminho do diretório a criar' },
       },
       required: ['path'],
     },
@@ -957,10 +957,10 @@ aethelMCPServer.registerTool(
         }
       });
       
-      return { content: [{ type: 'text', text: `DiretÃ³rio criado: ${path}` }] };
+      return { content: [{ type: 'text', text: `Diretório criado: ${path}` }] };
     } catch (error) {
       return { 
-        content: [{ type: 'text', text: `Erro ao criar diretÃ³rio: ${error}` }], 
+        content: [{ type: 'text', text: `Erro ao criar diretório: ${error}` }], 
         isError: true 
       };
     }
@@ -994,7 +994,7 @@ aethelMCPServer.registerTool(
       
       if (!file) {
         return { 
-          content: [{ type: 'text', text: `Arquivo nÃ£o encontrado: ${oldPath}` }], 
+          content: [{ type: 'text', text: `Arquivo não encontrado: ${oldPath}` }], 
           isError: true 
         };
       }

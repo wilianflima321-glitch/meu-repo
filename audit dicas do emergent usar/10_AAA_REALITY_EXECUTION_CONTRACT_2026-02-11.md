@@ -4152,3 +4152,32 @@ Implemented:
 Decision lock:
 1. No new capability claims; this wave is UX hardening on existing behavior.
 2. Empty editor no longer depends on implicit discovery in file explorer only.
+
+## 163) Delta 2026-02-20 CXVII - Mojibake closure + canonical parser hardening
+
+Implemented:
+1. Closed mojibake debt in MCP server surface by normalizing `cloud-web-app/web/lib/mcp/aethel-mcp-server.ts`.
+2. Refined canonical doc governance parser in `tools/canonical-doc-governance-scan.mjs`:
+- supports backtick-listed markdown entries
+- recognizes approved unindexed archival documents (`00`, `11`, `12`) as intentional.
+3. Refreshed generated governance reports:
+- `25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`
+- `27_CRITICAL_SECRET_SCAN_2026-02-20.md`
+- `29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `cloud-web-app/web/docs/MOJIBAKE_SCAN.md`
+
+Validation snapshot:
+1. `qa:mojibake` -> `findings=0`.
+2. `qa:canonical-doc-governance` -> PASS:
+- `canonicalListedDocs=32`
+- `canonicalMarkdownFiles=32`
+- `unindexedCanonicalMarkdown=0`.
+3. Governance gates remain green:
+- `qa:repo-connectivity` PASS
+- `qa:workflow-governance` PASS
+- `qa:secrets-critical` PASS.
+
+Decision lock:
+1. Character encoding regressions in canonical active surfaces are now treated as quality debt, not tolerated baseline.
+2. Canonical index and canonical folder are now numerically reconciled (`listed == files`).

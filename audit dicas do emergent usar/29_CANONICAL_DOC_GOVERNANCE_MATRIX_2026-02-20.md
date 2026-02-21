@@ -1,15 +1,15 @@
 # 29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20
 Status: GENERATED CANONICAL DOC GOVERNANCE SWEEP
-Generated: 2026-02-20T23:47:20.360Z
+Generated: 2026-02-20T23:58:23.016Z
 
 ## Summary
 - Canonical index exists: yes
-- Canonical listed docs: 29
+- Canonical listed docs: 32
 - Markdown files in canonical folder: 32
 - Markdown files outside canonical folder: 3602
 - Missing listed canonical docs: 0
 - Canonical filename conflicts outside canonical folder: 0
-- Unindexed markdown files inside canonical folder: 3
+- Unindexed markdown files inside canonical folder: 0
 
 ## Missing Listed Canonical Docs
 | File | Expected Path |
@@ -40,9 +40,7 @@ Generated: 2026-02-20T23:47:20.360Z
 ## Unindexed Markdown Inside Canonical Folder
 | File |
 | --- |
-| `00_FONTE_CANONICA.md` |
-| `11_WEB_USER_OWNER_TRIAGE_2026-02-11.md` |
-| `12_INTERFACE_SYSTEMS_REFACTOR_CONTRACT_2026-02-11.md` |
+| none |
 
 ## Policy
 1. Any missing file listed in `00_FONTE_CANONICA.md` is blocking.

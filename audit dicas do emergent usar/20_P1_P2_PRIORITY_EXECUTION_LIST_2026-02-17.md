@@ -370,3 +370,12 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - project/workspace/file context
 - session hint and shortcut hint
 3. Updated surface map (`18`) with `WorkbenchStatusBar.tsx`.
+
+### Delivered in this wave (encoding + canonical governance closure)
+1. Reduced `qa:mojibake` findings to zero:
+- `cloud-web-app/web/lib/mcp/aethel-mcp-server.ts`
+- `cloud-web-app/web/docs/MOJIBAKE_SCAN.md`
+2. Hardened canonical parser:
+- `tools/canonical-doc-governance-scan.mjs` now handles backtick-listed markdown entries.
+3. Canonical governance baseline now reconciled:
+- `29`: `canonicalListedDocs=32`, `canonicalMarkdownFiles=32`, `unindexedCanonicalMarkdown=0`.

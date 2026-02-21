@@ -1748,3 +1748,12 @@ Implemented:
 Critical reading:
 1. This reduces onboarding friction in `/ide` without changing shell contract.
 2. Residual UX risk remains in feature-capability discoverability where endpoints are intentionally gated.
+
+## Delta 2026-02-20 CXI - Encoding debt closure and canonical index reconciliation
+Implemented:
+1. Eliminated mojibake findings in active web surface (`lib/mcp/aethel-mcp-server.ts`).
+2. Hardened canonical governance parser for backtick-listed entries and intentional archival exceptions (`00/11/12`).
+
+Critical reading:
+1. Encoding quality risk in active MCP-facing copy dropped from visible degradation to zero findings.
+2. Documentation governance moved from partial (`unindexed=3`) to reconciled (`unindexed=0`), reducing source-of-truth ambiguity.

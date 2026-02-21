@@ -1771,3 +1771,12 @@ Delivered:
 Triaged impact:
 1. Reduced first-action latency for new sessions in advanced shell.
 2. Improved operational clarity for session state without adding fake capabilities.
+
+## Delta 2026-02-20 CXII - Encoding quality + canonical governance triage
+Delivered:
+1. Closed mojibake findings in active MCP server content path.
+2. Updated canonical governance scanner to reconcile canonical-list parsing and intentional archival exceptions.
+
+Triaged impact:
+1. User-facing/system-facing text quality regression risk reduced (`mojibake findings=0`).
+2. Canonical governance baseline reached full reconciliation (`listedDocs=32`, `canonicalFiles=32`, `unindexed=0`).

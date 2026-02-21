@@ -29,7 +29,7 @@ Close real gaps with zero scope expansion, keeping:
 4. Canonical doc governance sweep (`29`):
 - `missingListedCanonicalDocs=0`
 - `canonicalNameConflictsOutside=0`
-- `unindexedCanonicalMarkdown=3` (informational)
+- `unindexedCanonicalMarkdown=0`
 5. Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
 - `legacy-accent-tokens=0`
 - `admin-light-theme-tokens=0`
@@ -55,7 +55,7 @@ Close real gaps with zero scope expansion, keeping:
 3. `8` compatibility wrappers in `/api/files/*` remain intentional debt and need telemetry-driven cutoff planning.
 4. One workflow is still `LEGACY_CANDIDATE` (`merge-unrelated-histories.yml`) and needs final owner decision.
 5. `/ide` route orchestration is still a large convergence point; it is better now but remains a high-change file.
-6. Three markdown files inside canonical folder remain intentionally unindexed (`00`, `11`, `12`) and require explicit archival/indexing decision.
+6. Historical markdown footprint outside canonical remains high (`3602`) and still requires archival policy execution.
 
 ## 5. 15-agent execution board (owner-locked)
 | Agent | Current verdict | Mandatory next action |

@@ -399,3 +399,18 @@ Label: `VERIFIED_INTERNAL`
 2. Added `WorkbenchStatusBar.tsx` and wired it from `/app/ide/page.tsx`.
 3. Updated surface map (`18`) to include status-bar component path.
 4. Scope remains UX hardening only; no endpoint contract changes.
+
+## 17) Delta 2026-02-20 - Mojibake closure + canonical governance reconciliation
+Label: `VERIFIED_INTERNAL`
+
+1. Mojibake scan baseline moved to zero findings (`qa:mojibake`).
+2. Updated `tools/canonical-doc-governance-scan.mjs` parser and exception handling for canonical archival docs.
+3. Canonical governance snapshot:
+- `canonicalListedDocs=32`
+- `canonicalMarkdownFiles=32`
+- `unindexedCanonicalMarkdown=0`
+4. Governance scans remain green:
+- `25` connectivity: pass
+- `26` workflow governance: pass
+- `27` secrets critical: pass
+- `29` canonical governance: pass
