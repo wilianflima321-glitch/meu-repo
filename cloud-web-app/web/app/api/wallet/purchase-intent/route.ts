@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     await requireEntitlementsForUser(user.userId);
 
-    const body: PurchaseIntentBody = await req.json();
+    const body: PurchaseIntentBody = await req.json().catch(() => ({} as PurchaseIntentBody));
 
     const amount = Number(body?.amount);
     if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
