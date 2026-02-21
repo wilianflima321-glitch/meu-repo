@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { getUsageStatus } from '@/lib/plan-limits';
 import { getCreditBalance } from '@/lib/credit-wallet';
@@ -76,3 +76,4 @@ export async function GET(req: NextRequest) {
     }, { status: 500 });
   }
 }
+
