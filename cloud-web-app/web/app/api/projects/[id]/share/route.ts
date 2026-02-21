@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import crypto from 'crypto';
 import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 
 interface ShareConfig {
   type: 'link' | 'email' | 'team';
@@ -39,7 +41,14 @@ export async function POST(
       );
     }
 
-    const projectId = params.id;
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const body: ShareConfig = await request.json();
     const { type, emails, teamId, permissions, expiresIn } = body;
 
@@ -113,8 +122,15 @@ export async function GET(
       );
     }
 
-    const projectId = params.id;
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
+    
     // Em produção, buscar compartilhamentos do banco
     const shares = [
       {

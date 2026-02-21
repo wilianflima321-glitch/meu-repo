@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import crypto from 'crypto';
 import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 
 export async function POST(
   request: NextRequest,
@@ -23,6 +25,14 @@ export async function POST(
       message: 'Too many project duplication attempts. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
     
     if (!session?.user) {
       return NextResponse.json(
@@ -31,8 +41,7 @@ export async function POST(
       );
     }
 
-    const projectId = params.id;
-    const body = await request.json().catch(() => ({}));
+        const body = await request.json().catch(() => ({}));
     const { newName } = body;
 
     // Em produção, buscar projeto do banco e verificar permissões

@@ -13,6 +13,8 @@ import { requireAuth } from '@/lib/auth-server';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { headObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
 
 // ============================================================================
 // POST - Confirm Upload
@@ -33,10 +35,18 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
+    const assetId = normalizeAssetId(params?.id);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     // Find asset with access check
     const asset = await prisma.asset.findFirst({
       where: {
-        id: params.id,
+        id: assetId,
         project: {
           OR: [
             { userId: user.userId },
@@ -89,7 +99,7 @@ export async function POST(
     // Update size if different
     if (actualSize !== asset.size) {
       await prisma.asset.update({
-        where: { id: params.id },
+        where: { id: assetId },
         data: { size: actualSize },
       });
     }

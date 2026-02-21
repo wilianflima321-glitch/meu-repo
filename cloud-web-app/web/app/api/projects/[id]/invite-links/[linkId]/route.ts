@@ -10,6 +10,11 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_PROJECT_ID_LENGTH = 120;
+const MAX_LINK_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+const normalizeLinkId = (value?: string) => String(value ?? '').trim();
+
 // DELETE /api/projects/[id]/invite-links/[linkId] - Revoga link de convite
 export async function DELETE(
   request: NextRequest,
@@ -25,6 +30,21 @@ export async function DELETE(
       message: 'Too many invite link revocations. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = normalizeProjectId(params?.id);
+    const linkId = normalizeLinkId(params?.linkId);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    if (!linkId || linkId.length > MAX_LINK_ID_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_LINK_ID', message: 'linkId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
     const { id: projectId, linkId } = params;
 
     // Verifica se é owner ou admin do projeto

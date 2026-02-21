@@ -10,6 +10,8 @@ import { requireAuth } from '@/lib/auth-server';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +50,14 @@ export async function GET(
       message: 'Too many commit history requests. Please try again later.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
     const { id: projectId } = await params;
     const { searchParams } = new URL(req.url);
     

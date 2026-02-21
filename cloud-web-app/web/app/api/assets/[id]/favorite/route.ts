@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
 
 export async function POST(
   request: NextRequest,
@@ -25,10 +27,18 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
+    const assetId = normalizeAssetId(params?.id);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     // Find asset with access check
     const asset = await prisma.asset.findFirst({
       where: {
-        id: params.id,
+        id: assetId,
         project: {
           OR: [
             { userId: user.userId },

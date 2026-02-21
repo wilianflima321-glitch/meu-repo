@@ -7,6 +7,9 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_WORKFLOW_ID_LENGTH = 120;
+const normalizeWorkflowId = (value?: string) => String(value ?? '').trim();
+
 async function getOwnedWorkflow(userId: string, id: string) {
   const prismaAny = prisma as any;
   return prismaAny.copilotWorkflow.findFirst({
@@ -39,7 +42,15 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const workflow = await getOwnedWorkflow(user.userId, ctx.params.id);
+    const workflowId = normalizeWorkflowId(ctx.params?.id);
+    if (!workflowId || workflowId.length > MAX_WORKFLOW_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_WORKFLOW_ID', message: 'workflowId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
+    const workflow = await getOwnedWorkflow(user.userId, workflowId);
     if (!workflow) {
       return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow não encontrado.' }, { status: 404 });
     }
@@ -65,9 +76,17 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
     });
     if (rateLimitResponse) return rateLimitResponse;
 
+    const workflowId = normalizeWorkflowId(ctx.params?.id);
+    if (!workflowId || workflowId.length > MAX_WORKFLOW_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_WORKFLOW_ID', message: 'workflowId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const prismaAny = prisma as any;
 
-    const id = ctx.params.id;
+    const id = workflowId;
     const existing = await prismaAny.copilotWorkflow.findFirst({ where: { id, userId: user.userId }, select: { id: true } });
     if (!existing) {
       return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow não encontrado.' }, { status: 404 });

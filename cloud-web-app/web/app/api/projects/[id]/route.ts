@@ -4,6 +4,9 @@ import { requireAuth } from '@/lib/auth-server';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+
 
 // GET /api/projects/[id] - Get single project
 export async function GET(
@@ -22,9 +25,17 @@ export async function GET(
     if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const project = await prisma.project.findFirst({
       where: {
-        id: params.id,
+        id: projectId,
         OR: [
           { userId: user.userId },
           { members: { some: { userId: user.userId } } },
@@ -67,11 +78,19 @@ export async function PATCH(
     if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const data = await req.json();
 
     // Verify ownership
     const existing = await prisma.project.findFirst({
-      where: { id: params.id, userId: user.userId },
+      where: { id: projectId, userId: user.userId },
     });
 
     if (!existing) {
@@ -79,7 +98,7 @@ export async function PATCH(
     }
 
     const project = await prisma.project.update({
-      where: { id: params.id },
+      where: { id: projectId },
       data: {
         name: data.name,
         template: data.template,
@@ -113,9 +132,17 @@ export async function DELETE(
     if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     // Verify ownership
     const existing = await prisma.project.findFirst({
-      where: { id: params.id, userId: user.userId },
+      where: { id: projectId, userId: user.userId },
     });
 
     if (!existing) {
@@ -123,7 +150,7 @@ export async function DELETE(
     }
 
     await prisma.project.delete({
-      where: { id: params.id },
+      where: { id: projectId },
     });
 
     return NextResponse.json({ success: true });

@@ -13,6 +13,9 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+
 // GET /api/projects/[id]/members
 export async function GET(
 	request: NextRequest,
@@ -29,7 +32,15 @@ export async function GET(
 		});
 		if (rateLimitResponse) return rateLimitResponse;
 		const entitlements = await requireEntitlementsForUser(user.userId);
-		const projectId = params.id;
+		const projectId = normalizeProjectId(params?.id);
+		if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+			return NextResponse.json(
+				{ success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+				{ status: 400 }
+			);
+		}
+
+		
 
 		// Verifica se tem acesso ao projeto (owner ou membro)
 		const project = await prisma.project.findFirst({
@@ -112,7 +123,15 @@ export async function POST(
 		});
 		if (rateLimitResponse) return rateLimitResponse;
 		const entitlements = await requireEntitlementsForUser(user.userId);
-		const projectId = params.id;
+		const projectId = normalizeProjectId(params?.id);
+		if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+			return NextResponse.json(
+				{ success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+				{ status: 400 }
+			);
+		}
+
+		
 		const body = await request.json();
 		const { email, role = 'viewer' } = body;
 

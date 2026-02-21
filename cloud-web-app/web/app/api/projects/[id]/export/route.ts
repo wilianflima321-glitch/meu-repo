@@ -20,6 +20,8 @@ import { nanoid } from 'nanoid';
 import { checkProjectAccess } from '@/lib/project-access';
 import { deductBuildMinutes } from '@/lib/build-minutes';
 import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 
 // ============================================================================
 // SCHEMAS
@@ -116,8 +118,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const projectId = params.id;
-
+    
     const redis = await getQueueRedis();
 
     // Autenticação
@@ -146,6 +147,14 @@ export async function POST(
       message: 'Too many export creation attempts. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     // Verifica acesso ao projeto
     const access = await checkProjectAccess(decoded.userId, projectId, 'export');
@@ -286,8 +295,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const projectId = params.id;
-    
+        
     // Autenticação
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -314,6 +322,14 @@ export async function GET(
       message: 'Too many export list requests. Please try again later.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     // Lista exports recentes do projeto
     const exports = await prisma.exportJob.findMany({

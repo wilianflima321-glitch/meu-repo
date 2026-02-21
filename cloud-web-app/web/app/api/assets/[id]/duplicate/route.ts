@@ -11,6 +11,8 @@ import { copyObject, headObject, isS3Available, S3_BUCKET } from '@/lib/storage/
 import { copyFile, mkdir, stat } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
 
 export const dynamic = 'force-dynamic';
 
@@ -89,7 +91,15 @@ export async function POST(
       message: 'Too many asset duplication attempts. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
-    const asset = await verifyAssetAccess(params.id, user.userId);
+
+    const assetId = normalizeAssetId(params?.id);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    const asset = await verifyAssetAccess(assetId, user.userId);
 
     if (!asset) {
       return NextResponse.json({ error: 'Asset not found or access denied' }, { status: 404 });

@@ -17,6 +17,9 @@ import { existsSync } from 'fs';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+
 // Asset type mapping based on file extension
 const EXTENSION_TO_TYPE: Record<string, string> = {
   // 3D Models
@@ -97,6 +100,14 @@ export async function GET(
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
     const type = searchParams.get('type') || '';
@@ -107,7 +118,7 @@ export async function GET(
     // Verify project access
     const project = await prisma.project.findFirst({
       where: {
-        id: params.id,
+        id: projectId,
         OR: [
           { userId: user.userId },
           { members: { some: { userId: user.userId } } },
@@ -122,7 +133,7 @@ export async function GET(
     // Get assets from database (metadata)
     const dbAssets = await prisma.asset.findMany({
       where: {
-        projectId: params.id,
+        projectId: projectId,
         ...(search && {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
@@ -137,11 +148,11 @@ export async function GET(
     });
 
     // Also scan filesystem for any unregistered assets
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', params.id);
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', projectId);
     let fileSystemAssets: AssetFile[] = [];
 
     if (existsSync(uploadsDir)) {
-      fileSystemAssets = await scanDirectory(uploadsDir, params.id);
+      fileSystemAssets = await scanDirectory(uploadsDir, projectId);
     }
 
     // Merge database assets with filesystem (DB takes priority).
@@ -174,7 +185,7 @@ export async function GET(
     // Get total count
     const totalCount = await prisma.asset.count({
       where: {
-        projectId: params.id,
+        projectId: projectId,
         ...(search && {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },

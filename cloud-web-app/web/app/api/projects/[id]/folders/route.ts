@@ -10,6 +10,8 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 
 function normalizeFolderPath(input: string): string {
   const base = (input || '/Content').replace(/\\/g, '/').trim();
@@ -74,7 +76,15 @@ export async function GET(
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const project = await ensureProjectAccess(params.id, user.userId, false);
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
+    const project = await ensureProjectAccess(projectId, user.userId, false);
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found or access denied' },
@@ -88,7 +98,7 @@ export async function GET(
 
     const folders = await prisma.folder.findMany({
       where: {
-        projectId: params.id,
+        projectId: projectId,
         ...(parentPathParam && !includeAll
           ? { parentPath: normalizeFolderPath(parentPathParam) }
           : {}),
@@ -141,7 +151,15 @@ export async function POST(
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const project = await ensureProjectAccess(params.id, user.userId, true);
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
+    const project = await ensureProjectAccess(projectId, user.userId, true);
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found or access denied' },
@@ -181,7 +199,7 @@ export async function POST(
         path: fullPath,
         parentPath,
         color: color || null,
-        projectId: params.id,
+        projectId: projectId,
         createdById: user.userId,
       },
       select: {
@@ -240,7 +258,15 @@ export async function DELETE(
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const project = await ensureProjectAccess(params.id, user.userId, true);
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
+    const project = await ensureProjectAccess(projectId, user.userId, true);
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found or access denied' },
@@ -257,7 +283,7 @@ export async function DELETE(
       targetPath = normalizeFolderPath(body.path);
     } else if (folderId) {
       const folderById = await prisma.folder.findFirst({
-        where: { id: folderId, projectId: params.id },
+        where: { id: folderId, projectId: projectId },
         select: { path: true },
       });
       targetPath = folderById?.path || '';
@@ -271,7 +297,7 @@ export async function DELETE(
     }
 
     const folder = await prisma.folder.findFirst({
-      where: { projectId: params.id, path: targetPath },
+      where: { projectId: projectId, path: targetPath },
       select: { id: true, path: true },
     });
     if (!folder) {
@@ -280,7 +306,7 @@ export async function DELETE(
 
     const childCount = await prisma.folder.count({
       where: {
-        projectId: params.id,
+        projectId: projectId,
         path: { startsWith: `${targetPath}/` },
       },
     });
@@ -298,7 +324,7 @@ export async function DELETE(
 
     const deleted = await prisma.folder.deleteMany({
       where: {
-        projectId: params.id,
+        projectId: projectId,
         OR: recursive
           ? [{ path: targetPath }, { path: { startsWith: `${targetPath}/` } }]
           : [{ path: targetPath }],

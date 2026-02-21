@@ -13,6 +13,9 @@ import { buildAppUrl } from '@/lib/server/app-origin';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+
 // GET /api/projects/[id]/invite-links
 export async function GET(
   request: NextRequest,
@@ -28,7 +31,13 @@ export async function GET(
       message: 'Too many invite link list requests. Please try again later.',
     });
     if (rateLimitResponse) return rateLimitResponse;
-    const projectId = params.id;
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     // Verifica se é owner ou admin do projeto
     const project = await prisma.project.findFirst({
@@ -104,7 +113,13 @@ export async function POST(
       message: 'Too many invite link creation attempts. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
-    const projectId = params.id;
+    const projectId = normalizeProjectId(params?.id);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
     const body = await request.json();
     const { role = 'viewer', expiresIn, maxUsage } = body;
 

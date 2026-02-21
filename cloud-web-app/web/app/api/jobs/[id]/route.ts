@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
+const MAX_JOB_ID_LENGTH = 120;
+const normalizeJobId = (value?: string) => String(value ?? '').trim();
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -40,6 +42,14 @@ export async function GET(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
+    const jobId = normalizeJobId(params?.id);
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const available = await queueManager.isAvailable();
     if (!available) {
       return NextResponse.json(
@@ -51,7 +61,7 @@ export async function GET(
       );
     }
 
-    const job = await queueManager.getJobById(params.id);
+    const job = await queueManager.getJobById(jobId);
     if (!job) {
       return NextResponse.json(
         { error: 'Job nao encontrado' },
@@ -113,6 +123,14 @@ export async function DELETE(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
+    const jobId = normalizeJobId(params?.id);
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const available = await queueManager.isAvailable();
     if (!available) {
       return NextResponse.json(
@@ -124,7 +142,7 @@ export async function DELETE(
       );
     }
 
-    const result = await queueManager.cancelJob(params.id);
+    const result = await queueManager.cancelJob(jobId);
     if (!result.found) {
       return NextResponse.json({ error: 'Job nao encontrado' }, { status: 404 });
     }
@@ -151,7 +169,7 @@ export async function DELETE(
       success: true,
       message: 'Job cancelado com sucesso',
       job: {
-        id: params.id,
+        id: jobId,
         status: 'cancelled',
         cancelledAt: new Date().toISOString(),
       },

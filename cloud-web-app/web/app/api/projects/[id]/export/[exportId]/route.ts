@@ -11,6 +11,10 @@ import { verifyToken } from '@/lib/auth-server';
 import { getQueueRedis } from '@/lib/redis-queue';
 import { checkProjectAccess } from '@/lib/project-access';
 import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
+const MAX_PROJECT_ID_LENGTH = 120;
+const MAX_EXPORT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+const normalizeExportId = (value?: string) => String(value ?? '').trim();
 
 type ExportStatus =
   | 'queued'
@@ -44,8 +48,7 @@ export async function GET(
   { params }: { params: { id: string; exportId: string } }
 ) {
   try {
-    const projectId = params.id;
-    const exportId = params.exportId;
+        const exportId = exportId;
 
     // Auth (mesmo padrão da rota de export existente)
     const authHeader = request.headers.get('authorization');
@@ -67,6 +70,21 @@ export async function GET(
       message: 'Too many export status requests. Please try again later.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = normalizeProjectId(params?.id);
+    const exportId = normalizeExportId(params?.exportId);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    if (!exportId || exportId.length > MAX_EXPORT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_EXPORT_ID', message: 'exportId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     // Permissão no projeto
     const access = await checkProjectAccess(decoded.userId, projectId, 'export');

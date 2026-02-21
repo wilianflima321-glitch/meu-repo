@@ -13,6 +13,11 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_PROJECT_ID_LENGTH = 120;
+const MAX_MEMBER_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+const normalizeMemberId = (value?: string) => String(value ?? '').trim();
+
 // PATCH /api/projects/[id]/members/[memberId]
 export async function PATCH(
 	request: NextRequest,
@@ -29,7 +34,22 @@ export async function PATCH(
 		});
 		if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
-		const { id: projectId, memberId } = params;
+		const projectId = normalizeProjectId(params?.id);
+		const memberId = normalizeMemberId(params?.memberId);
+		if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+			return NextResponse.json(
+				{ success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+				{ status: 400 }
+			);
+		}
+		if (!memberId || memberId.length > MAX_MEMBER_ID_LENGTH) {
+			return NextResponse.json(
+				{ success: false, error: 'INVALID_MEMBER_ID', message: 'memberId is required and must be under 120 characters.' },
+				{ status: 400 }
+			);
+		}
+
+		
 		const body = await request.json();
 		const { role } = body;
 
@@ -106,7 +126,22 @@ export async function DELETE(
 		});
 		if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
-		const { id: projectId, memberId } = params;
+		const projectId = normalizeProjectId(params?.id);
+		const memberId = normalizeMemberId(params?.memberId);
+		if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+			return NextResponse.json(
+				{ success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+				{ status: 400 }
+			);
+		}
+		if (!memberId || memberId.length > MAX_MEMBER_ID_LENGTH) {
+			return NextResponse.json(
+				{ success: false, error: 'INVALID_MEMBER_ID', message: 'memberId is required and must be under 120 characters.' },
+				{ status: 400 }
+			);
+		}
+
+		
 
 		// Verifica se é owner do projeto
 		const project = await prisma.project.findFirst({

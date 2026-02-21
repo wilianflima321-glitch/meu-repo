@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
+const MAX_JOB_ID_LENGTH = 120;
+const normalizeJobId = (value?: string) => String(value ?? '').trim();
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -32,6 +34,14 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
+    const jobId = normalizeJobId(params?.id);
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
     const available = await queueManager.isAvailable();
     if (!available) {
       return NextResponse.json(
@@ -43,7 +53,7 @@ export async function POST(
       );
     }
 
-    const result = await queueManager.retryJob(params.id);
+    const result = await queueManager.retryJob(jobId);
     if (!result.found) {
       return NextResponse.json({ error: 'Job nao encontrado' }, { status: 404 });
     }
@@ -61,7 +71,7 @@ export async function POST(
       success: true,
       message: 'Job reenfileirado com sucesso',
       job: {
-        id: params.id,
+        id: jobId,
         status: 'queued',
         retriedAt: new Date().toISOString(),
       },
