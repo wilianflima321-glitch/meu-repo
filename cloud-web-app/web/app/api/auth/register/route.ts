@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { generateTokenWithRole } from '@/lib/auth-server';
@@ -88,3 +88,4 @@ export async function POST(req: NextRequest) {
     return apiInternalError();
   }
 }
+
