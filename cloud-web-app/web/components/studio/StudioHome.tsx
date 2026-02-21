@@ -675,7 +675,7 @@ export default function StudioHome() {
               recentAgentRuns={recentAgentRuns}
               showAgentWorkspace={showAgentWorkspace}
               onToggleAgentWorkspace={() => setShowAgentWorkspace((prev) => !prev)}
-              agentWorkspaceNode={<AIChatPanelContainer />}
+              agentWorkspaceNode={showAgentWorkspace ? <AIChatPanelContainer /> : null}
             />
           </section>
 
@@ -685,18 +685,20 @@ export default function StudioHome() {
               onToggleRuntimePreview={() => setShowRuntimePreview((prev) => !prev)}
               previewContent={previewContent}
               previewRuntimeNode={
-                <PreviewPanel
-                  title="Interactive Preview"
-                  filePath="studio-home.md"
-                  content={previewContent}
-                  projectId={session?.projectId || projectId}
-                  isStale={Boolean(session?.status === 'stopped')}
-                  onRefresh={() => {
-                    if (session?.id) {
-                      void withAction(async () => refreshSession(session.id))
-                    }
-                  }}
-                />
+                showRuntimePreview ? (
+                  <PreviewPanel
+                    title="Interactive Preview"
+                    filePath="studio-home.md"
+                    content={previewContent}
+                    projectId={session?.projectId || projectId}
+                    isStale={Boolean(session?.status === 'stopped')}
+                    onRefresh={() => {
+                      if (session?.id) {
+                        void withAction(async () => refreshSession(session.id))
+                      }
+                    }}
+                  />
+                ) : null
               }
             />
 

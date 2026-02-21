@@ -46,6 +46,12 @@ export function StudioHomeTaskBoard({
     !variableUsageBlocked &&
     session.tasks.length > 0 &&
     !session.tasks.every((task) => task.status === 'done')
+  const actionHint = (() => {
+    if (!session) return 'Start a session to unlock planning and execution actions.'
+    if (session.status !== 'active') return `Session is ${session.status}. Start a new mission to resume execution.`
+    if (variableUsageBlocked) return 'Variable AI usage is blocked. Restore credits to run planner/coder/reviewer.'
+    return null
+  })()
 
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
@@ -88,9 +94,9 @@ export function StudioHomeTaskBoard({
           Super plan already created for this session. Complete or stop this session before opening a new plan.
         </div>
       ) : null}
-      {!canCreateSuperPlan || !canRunWaveNow ? (
+      {actionHint ? (
         <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
-          Actions are available only for active sessions with variable usage enabled.
+          {actionHint}
         </div>
       ) : null}
       <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-2 py-1 text-[11px] text-slate-500">
@@ -129,7 +135,7 @@ export function StudioHomeTaskBoard({
                 Run
               </button>
               <button
-                disabled={busy || !session || !canValidateTask(task, session.status)}
+                disabled={busy || !session || variableUsageBlocked || !canValidateTask(task, session.status)}
                 onClick={() => onValidateTask(task.id)}
                 className="rounded border border-slate-600 px-2 py-1 text-[10px] hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               >

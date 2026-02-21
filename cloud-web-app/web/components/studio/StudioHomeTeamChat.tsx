@@ -72,6 +72,11 @@ export function StudioHomeTeamChat({
     <>
       <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
         <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Team Chat Live</div>
+        {!session && (
+          <div className="mb-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-500">
+            Start a Studio session to populate the live agent feed and reviewer checkpoints.
+          </div>
+        )}
         <div className="mb-2 flex items-center justify-end">
           <button
             onClick={onToggleAgentWorkspace}

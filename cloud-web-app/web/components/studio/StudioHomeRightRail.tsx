@@ -120,13 +120,23 @@ export function StudioHomeOpsBar({
   const grantExpiryLabel = activeGrant
     ? new Date(activeGrant.expiresAt).toLocaleTimeString()
     : ''
+  const costSnapshot = liveCost?.cost || session?.cost || null
+  const usedCredits = costSnapshot?.usedCredits
+  const remainingCredits = costSnapshot?.remainingCredits
+  const budgetCapValue = costSnapshot?.budgetCap ?? budgetCap
   const liveRuns = liveCost?.totalRuns ?? 0
   const liveUpdatedAt = liveCost?.updatedAt ? new Date(liveCost.updatedAt).toLocaleTimeString() : null
   const liveByRole = liveCost?.runsByRole || {}
+  const formatValue = (value?: number | null) => (Number.isFinite(value as number) ? String(value) : '-')
 
   return (
     <div className="rounded border border-slate-800 bg-slate-900/60 p-4">
       <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Ops Bar</div>
+      {!session && (
+        <div className="mb-3 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
+          No active Studio session yet. Start a mission to unlock live telemetry and apply controls.
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
           <div className="text-slate-500">Plan</div>
@@ -140,15 +150,15 @@ export function StudioHomeOpsBar({
         </div>
         <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
           <div className="text-slate-500">Budget cap</div>
-          <div className="font-semibold text-slate-100">{session?.cost.budgetCap ?? budgetCap}</div>
+          <div className="font-semibold text-slate-100">{budgetCapValue}</div>
         </div>
         <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
           <div className="text-slate-500">Used credits</div>
-          <div className="font-semibold text-slate-100">{session?.cost.usedCredits ?? 0}</div>
+          <div className="font-semibold text-slate-100">{formatValue(usedCredits)}</div>
         </div>
         <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
           <div className="text-slate-500">Remaining credits</div>
-          <div className="font-semibold text-slate-100">{session?.cost.remainingCredits ?? '-'}</div>
+          <div className="font-semibold text-slate-100">{formatValue(remainingCredits)}</div>
         </div>
         <div className="rounded border border-slate-800 bg-slate-950 px-3 py-2">
           <div className="text-slate-500">Cost pressure</div>
@@ -223,7 +233,7 @@ export function StudioHomeOpsBar({
         Live telemetry: {liveRuns} runs
         {liveUpdatedAt ? ` | updated ${liveUpdatedAt}` : ''}.
         <span className="ml-1">
-          Planner {Number(liveByRole.planner || 0).toFixed(2)} · Coder {Number(liveByRole.coder || 0).toFixed(2)} · Reviewer {Number(liveByRole.reviewer || 0).toFixed(2)}
+          Planner {Number(liveByRole.planner || 0).toFixed(2)} | Coder {Number(liveByRole.coder || 0).toFixed(2)} | Reviewer {Number(liveByRole.reviewer || 0).toFixed(2)}
         </span>
       </div>
       <div className="mt-2 rounded border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
@@ -240,3 +250,4 @@ export function StudioHomeOpsBar({
     </div>
   )
 }
+
