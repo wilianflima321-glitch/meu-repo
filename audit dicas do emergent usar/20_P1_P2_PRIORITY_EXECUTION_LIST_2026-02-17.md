@@ -447,6 +447,10 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `cloud-web-app/web/app/admin/promotions/page.tsx`
 2. Applied shared shell/state patterns and authenticated admin fetch behavior for read/write flows.
 
+### Delta 2026-02-21 - Admin surface closure + gate enforcement
+1. Admin surface residual now closed (`missing shell=0`, `missing admin auth fetch=0`).
+2. `qa:admin-surface` added to `qa:enterprise-gate` for CI enforcement.
+
 ## Delta 2026-02-21 - Admin surface normalization wave
 
 ### Delivered in this wave
