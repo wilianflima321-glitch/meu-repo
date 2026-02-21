@@ -60,6 +60,7 @@ export default function StudioHome() {
   const [wallet, setWallet] = useState<WalletSummary | null>(null)
   const [usage, setUsage] = useState<UsageSummary | null>(null)
   const [liveCost, setLiveCost] = useState<StudioLiveCost | null>(null)
+  const [liveCostError, setLiveCostError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -235,18 +236,24 @@ export default function StudioHome() {
 
   const refreshLiveCost = useCallback(
     async (sessionId: string) => {
-      const res = await fetch(`/api/studio/cost/live?sessionId=${encodeURIComponent(sessionId)}`, {
-        cache: 'no-store',
-      })
-      const data = await parseJson(res)
-      if (!res.ok) throw new Error(data.message || data.error || 'Failed to load live cost telemetry.')
-      setLiveCost({
-        cost: data.cost as StudioSession['cost'],
-        runsByRole: (data.runsByRole as Record<string, number>) || {},
-        totalRuns: Number(data.totalRuns || 0),
-        budgetExceeded: Boolean(data.budgetExceeded),
-        updatedAt: new Date().toISOString(),
-      })
+      try {
+        const res = await fetch(`/api/studio/cost/live?sessionId=${encodeURIComponent(sessionId)}`, {
+          cache: 'no-store',
+        })
+        const data = await parseJson(res)
+        if (!res.ok) throw new Error(data.message || data.error || 'Failed to load live cost telemetry.')
+        setLiveCost({
+          cost: data.cost as StudioSession['cost'],
+          runsByRole: (data.runsByRole as Record<string, number>) || {},
+          totalRuns: Number(data.totalRuns || 0),
+          budgetExceeded: Boolean(data.budgetExceeded),
+          updatedAt: new Date().toISOString(),
+        })
+        setLiveCostError(null)
+      } catch (err) {
+        setLiveCostError(err instanceof Error ? err.message : 'Failed to load live telemetry.')
+        throw err
+      }
     },
     []
   )
@@ -262,6 +269,7 @@ export default function StudioHome() {
   useEffect(() => {
     if (!session?.id || session.status !== 'active') {
       setLiveCost(null)
+      setLiveCostError(null)
       return
     }
     void refreshLiveCost(session.id).catch(() => {})
@@ -719,6 +727,7 @@ export default function StudioHome() {
               budgetProgress={budgetProgress}
               busy={busy}
               liveCost={liveCost}
+              liveCostError={liveCostError}
               activeGrant={activeGrant}
               fullAccessScope={fullAccessScope}
               allowedFullAccessScopes={allowedFullAccessScopes}

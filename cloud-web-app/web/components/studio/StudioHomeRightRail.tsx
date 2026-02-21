@@ -30,6 +30,7 @@ type StudioHomeOpsBarProps = {
     budgetExceeded?: boolean
     updatedAt?: string
   } | null
+  liveCostError?: string | null
   activeGrant: { id: string; scope: FullAccessScope; expiresAt: string } | null
   fullAccessScope: FullAccessScope
   allowedFullAccessScopes: FullAccessScope[]
@@ -98,6 +99,7 @@ export function StudioHomeOpsBar({
   budgetProgress,
   busy,
   liveCost,
+  liveCostError,
   activeGrant,
   fullAccessScope,
   allowedFullAccessScopes,
@@ -177,6 +179,11 @@ export function StudioHomeOpsBar({
       {budgetProgress.pressure === 'critical' && (
         <div className="mt-2 rounded border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-100">
           Budget is almost exhausted. Finish validation/apply now or stop session to prevent forced blocking.
+        </div>
+      )}
+      {liveCostError && (
+        <div className="mt-2 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-100">
+          Live telemetry warning: {liveCostError}
         </div>
       )}
       {liveCost?.budgetExceeded && (
