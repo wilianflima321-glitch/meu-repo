@@ -466,3 +466,29 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 ### Next P1 execution target
 1. Prioritize remaining high-traffic admin pages for conversion: `finance`, `automation`, `compliance`, `cost-optimization`, `roles`, `rate-limiting`.
 2. Keep scan report regenerated on each admin-hardening wave.
+
+## Delta 2026-02-21 - Admin conversion wave 2
+
+### Delivered in this wave
+1. Refactored admin pages to shared enterprise surfaces:
+- `cloud-web-app/web/app/admin/automation/page.tsx`
+- `cloud-web-app/web/app/admin/compliance/page.tsx`
+- `cloud-web-app/web/app/admin/cost-optimization/page.tsx`
+- `cloud-web-app/web/app/admin/roles/page.tsx`
+- `cloud-web-app/web/app/admin/rate-limiting/page.tsx`
+2. All five pages now use:
+- `AdminPageShell`
+- `adminJsonFetch`
+- explicit table/loading/error state patterns.
+
+### Updated residual from `qa:admin-surface`
+1. `missing AdminPageShell: 23` (from 28)
+2. `direct fetch without adminJsonFetch: 28` (from 33)
+3. `mojibake candidates: 0`
+
+### Next target set
+1. `finance`
+2. `backup`
+3. `moderation`
+4. `marketplace`
+5. `infrastructure`

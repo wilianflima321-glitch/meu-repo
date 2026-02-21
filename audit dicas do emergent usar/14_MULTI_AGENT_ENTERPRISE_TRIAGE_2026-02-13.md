@@ -1913,3 +1913,11 @@ Triaged impact:
 - `direct fetch without adminJsonFetch=33`
 - `mojibake candidates=0`
 4. Next wave remains focused on high-traffic residual admin pages, no scope expansion.
+
+## Delta 2026-02-21 (Admin hardening wave 2)
+1. Converted automation/compliance/cost-optimization/roles/rate-limiting to shared admin surface and authenticated fetch patterns.
+2. Regenerated `cloud-web-app/web/docs/ADMIN_SURFACE_SWEEP.md` with updated residual counts.
+3. Current residual baseline:
+- `missing AdminPageShell=23`
+- `direct fetch without adminJsonFetch=28`
+- `mojibake candidates=0`

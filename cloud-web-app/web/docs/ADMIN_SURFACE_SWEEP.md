@@ -1,9 +1,9 @@
 # Admin Surface Sweep
 
-- Generated at: `2026-02-21T01:36:22.871Z`
+- Generated at: `2026-02-21T01:44:27.204Z`
 - Files scanned: `45`
-- Missing `AdminPageShell`: `28`
-- Direct `fetch(...)` without `adminJsonFetch`: `33`
+- Missing `AdminPageShell`: `23`
+- Direct `fetch(...)` without `adminJsonFetch`: `28`
 - Mojibake candidates: `0`
 
 ## Detailed Matrix
@@ -20,13 +20,13 @@
 | `app/admin/apis/page.tsx` | no | yes | no | no | no |
 | `app/admin/arpu-churn/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/audit-logs/page.tsx` | no | no | no | no | no |
-| `app/admin/automation/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/automation/page.tsx` | no | no | no | no | no |
 | `app/admin/backup/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/bias-detection/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/chat/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/collaboration/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/compliance/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/cost-optimization/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/compliance/page.tsx` | no | no | no | no | no |
+| `app/admin/cost-optimization/page.tsx` | no | no | no | no | no |
 | `app/admin/deploy/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/emergency/page.tsx` | no | yes | maybe | no | no |
 | `app/admin/feature-flags/page.tsx` | no | no | no | no | no |
@@ -46,9 +46,9 @@
 | `app/admin/page.tsx` | no | yes | no | no | no |
 | `app/admin/payments/page.tsx` | no | yes | no | no | no |
 | `app/admin/promotions/page.tsx` | no | no | no | no | no |
-| `app/admin/rate-limiting/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/rate-limiting/page.tsx` | no | no | no | no | no |
 | `app/admin/real-time/page.tsx` | no | no | no | no | no |
-| `app/admin/roles/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/roles/page.tsx` | no | no | no | no | no |
 | `app/admin/scalability/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/security/page.tsx` | no | yes | no | no | no |
 | `app/admin/subscriptions/page.tsx` | no | no | no | no | no |

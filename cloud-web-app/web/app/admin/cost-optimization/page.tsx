@@ -1,6 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type FinanceMetrics = {
   dailyRevenue: number;
@@ -13,17 +22,24 @@ type FinanceMetrics = {
   alerts: { type: 'warning' | 'critical'; message: string; metric: string }[];
 };
 
+function currency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export default function CostOptimization() {
   const [metrics, setMetrics] = useState<FinanceMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/finance/metrics?range=30d');
-      if (!res.ok) throw new Error('Falha ao carregar métricas financeiras');
-      const data = await res.json();
+      const data = await adminJsonFetch<Partial<FinanceMetrics>>('/api/admin/finance/metrics?range=30d');
       setMetrics({
         dailyRevenue: data?.dailyRevenue ?? 0,
         dailyAICost: data?.dailyAICost ?? 0,
@@ -34,9 +50,10 @@ export default function CostOptimization() {
         runway: data?.runway ?? 0,
         alerts: Array.isArray(data?.alerts) ? data.alerts : [],
       });
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar custos');
+      setError(err instanceof Error ? err.message : 'Failed to load cost metrics');
     } finally {
       setLoading(false);
     }
@@ -46,91 +63,97 @@ export default function CostOptimization() {
     fetchMetrics();
   }, [fetchMetrics]);
 
-  if (loading) {
-    return (
-      <div className='p-6 max-w-4xl mx-auto'>
-        <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
-        <p className='text-sm text-zinc-500'>Carregando métricas...</p>
-      </div>
-    );
-  }
+  const kpis = useMemo(() => {
+    const current = metrics ?? {
+      dailyRevenue: 0,
+      dailyAICost: 0,
+      dailyInfraCost: 0,
+      dailyProfit: 0,
+      profitMargin: 0,
+      burnRate: 0,
+      runway: 0,
+      alerts: [],
+    };
 
-  if (error) {
-    return (
-      <div className='p-6 max-w-4xl mx-auto'>
-        <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
-        <p className='text-sm text-red-500'>{error}</p>
-        <button className='mt-4 bg-blue-500 text-white px-4 py-2 rounded' onClick={fetchMetrics}>
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  const dailyInfra = metrics?.dailyInfraCost ?? 0;
-  const dailyAI = metrics?.dailyAICost ?? 0;
-  const dailyRevenue = metrics?.dailyRevenue ?? 0;
-  const dailyProfit = metrics?.dailyProfit ?? 0;
+    return {
+      ...current,
+      totalDailyCost: current.dailyAICost + current.dailyInfraCost,
+    };
+  }, [metrics]);
 
   return (
-    <div className='p-6 max-w-4xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-6'>Otimização de Custos</h1>
-      <p className='mb-4 text-zinc-400'>Custos e margem baseados em dados financeiros reais.</p>
+    <AdminPageShell
+      title='Cost Optimization'
+      description='Track AI and infrastructure cost against revenue with explicit margin and runway signals.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchMetrics}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
+        </div>
+      ) : null}
 
       <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>Resumo de Custos (30 dias)</h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
-            <h3 className='font-semibold'>IA (diário)</h3>
-            <p className='text-2xl'>${dailyAI.toFixed(2)}</p>
-            <p className='text-sm text-zinc-400'>Custo médio diário de IA</p>
-          </div>
-          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
-            <h3 className='font-semibold'>Infra (diário)</h3>
-            <p className='text-2xl'>${dailyInfra.toFixed(2)}</p>
-            <p className='text-sm text-zinc-400'>Infra configurada por ambiente</p>
-          </div>
-          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
-            <h3 className='font-semibold'>Receita (diária)</h3>
-            <p className='text-2xl'>${dailyRevenue.toFixed(2)}</p>
-            <p className='text-sm text-zinc-400'>Baseada em pagamentos confirmados</p>
-          </div>
-          <div className={`p-4 rounded-lg shadow ${dailyProfit >= 0 ? 'bg-emerald-500/15' : 'bg-rose-500/15'}`}>
-            <h3 className='font-semibold'>Lucro (diário)</h3>
-            <p className='text-2xl'>${dailyProfit.toFixed(2)}</p>
-            <p className='text-sm text-zinc-400'>Margem: {metrics?.profitMargin?.toFixed(1)}%</p>
-          </div>
-        </div>
+        <AdminStatGrid>
+          <AdminStatCard label='Revenue / day' value={currency(kpis.dailyRevenue)} tone='sky' />
+          <AdminStatCard label='AI cost / day' value={currency(kpis.dailyAICost)} tone='amber' />
+          <AdminStatCard label='Infra cost / day' value={currency(kpis.dailyInfraCost)} tone='rose' />
+          <AdminStatCard label='Profit / day' value={currency(kpis.dailyProfit)} tone={kpis.dailyProfit >= 0 ? 'emerald' : 'rose'} />
+        </AdminStatGrid>
       </div>
 
-      <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-4'>Queima diária e fôlego</h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
-            <h3 className='font-semibold'>Queima diária</h3>
-            <p className='text-2xl'>${(metrics?.burnRate ?? 0).toFixed(2)}/dia</p>
-            <p className='text-sm text-zinc-400'>Diferença custo - receita</p>
+      <AdminSection title='Operational economics' className='mb-6'>
+        {loading ? (
+          <p className='text-sm text-zinc-500'>Loading financial metrics...</p>
+        ) : (
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            <div className='rounded border border-zinc-800/70 bg-zinc-950/50 p-4'>
+              <p className='text-xs uppercase tracking-[0.08em] text-zinc-500'>Total cost / day</p>
+              <p className='mt-2 text-2xl font-semibold text-zinc-100'>{currency(kpis.totalDailyCost)}</p>
+              <p className='mt-1 text-xs text-zinc-500'>AI + infrastructure spend</p>
+            </div>
+            <div className='rounded border border-zinc-800/70 bg-zinc-950/50 p-4'>
+              <p className='text-xs uppercase tracking-[0.08em] text-zinc-500'>Profit margin</p>
+              <p className='mt-2 text-2xl font-semibold text-zinc-100'>{kpis.profitMargin.toFixed(1)}%</p>
+              <p className='mt-1 text-xs text-zinc-500'>Based on current daily revenue</p>
+            </div>
+            <div className='rounded border border-zinc-800/70 bg-zinc-950/50 p-4'>
+              <p className='text-xs uppercase tracking-[0.08em] text-zinc-500'>Burn rate</p>
+              <p className='mt-2 text-2xl font-semibold text-zinc-100'>{currency(kpis.burnRate)} / day</p>
+              <p className='mt-1 text-xs text-zinc-500'>Net daily deficit after revenue</p>
+            </div>
+            <div className='rounded border border-zinc-800/70 bg-zinc-950/50 p-4'>
+              <p className='text-xs uppercase tracking-[0.08em] text-zinc-500'>Runway</p>
+              <p className='mt-2 text-2xl font-semibold text-zinc-100'>{kpis.runway} months</p>
+              <p className='mt-1 text-xs text-zinc-500'>Estimated with configured reserves</p>
+            </div>
           </div>
-          <div className='p-4 bg-zinc-900/70 rounded-lg shadow'>
-            <h3 className='font-semibold'>Fôlego</h3>
-            <p className='text-2xl'>{metrics?.runway ?? 0} meses</p>
-            <p className='text-sm text-zinc-400'>Baseado em caixa configurado</p>
-          </div>
-        </div>
-      </div>
+        )}
+      </AdminSection>
 
-      <div className='mt-6 p-4 bg-sky-500/15 rounded-lg'>
-        <h3 className='font-semibold'>Recomendações</h3>
-        {metrics?.alerts?.length ? (
-          <ul className='list-disc ml-5'>
-            {metrics.alerts.map((alert, index) => (
-              <li key={`${alert.metric}-${index}`}>{alert.message}</li>
+      <AdminSection title='Recommendations'>
+        {loading ? (
+          <p className='text-sm text-zinc-500'>Waiting for recommendations...</p>
+        ) : kpis.alerts.length > 0 ? (
+          <ul className='space-y-2'>
+            {kpis.alerts.map((alert, index) => (
+              <li
+                key={`${alert.metric}-${index}`}
+                className={`rounded border px-3 py-2 text-sm ${
+                  alert.type === 'critical'
+                    ? 'border-rose-500/40 bg-rose-500/10 text-rose-200'
+                    : 'border-amber-500/40 bg-amber-500/10 text-amber-200'
+                }`}
+              >
+                {alert.message}
+              </li>
             ))}
           </ul>
         ) : (
-          <p className='text-sm text-zinc-300'>Nenhuma recomendação crítica no momento.</p>
+          <AdminStatusBanner tone='success'>No critical cost recommendations right now.</AdminStatusBanner>
         )}
-      </div>
-    </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

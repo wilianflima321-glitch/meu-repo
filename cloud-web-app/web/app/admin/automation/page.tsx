@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type AutomationItem = {
   id: string;
@@ -12,8 +22,14 @@ type AutomationItem = {
 };
 
 type AutomationPayload = {
-  items: AutomationItem[];
-  summary: { total: number; warning: number; critical: number };
+  items?: AutomationItem[];
+  summary?: { total: number; warning: number; critical: number };
+};
+
+const severityLabels: Record<string, string> = {
+  warning: 'Warning',
+  critical: 'Critical',
+  info: 'Info',
 };
 
 export default function Automation() {
@@ -24,23 +40,15 @@ export default function Automation() {
   const [severity, setSeverity] = useState<'all' | 'warning' | 'critical'>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const severityLabels: Record<string, string> = {
-    warning: 'aviso',
-    critical: 'crítico',
-    info: 'informação',
-  };
-
   const fetchAutomation = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/automation');
-      if (!res.ok) throw new Error('Falha ao carregar automações');
-      const json = await res.json();
+      const json = await adminJsonFetch<AutomationPayload>('/api/admin/automation');
       setData(json);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar automações');
+      setError(err instanceof Error ? err.message : 'Failed to load automation events');
     } finally {
       setLoading(false);
     }
@@ -50,120 +58,112 @@ export default function Automation() {
     fetchAutomation();
   }, [fetchAutomation]);
 
-  const filteredItems = (data?.items || []).filter((item) => {
-    const term = search.trim().toLowerCase();
-    const matchesTerm = !term ||
-      (item.action || '').toLowerCase().includes(term) ||
-      (item.category || '').toLowerCase().includes(term) ||
-      (item.resource || '').toLowerCase().includes(term);
-    const matchesSeverity = severity === 'all' || item.severity === severity;
-    return matchesTerm && matchesSeverity;
-  });
+  const filteredItems = useMemo(() => {
+    return (data?.items || []).filter((item) => {
+      const term = search.trim().toLowerCase();
+      const matchesTerm =
+        !term ||
+        (item.action || '').toLowerCase().includes(term) ||
+        (item.category || '').toLowerCase().includes(term) ||
+        (item.resource || '').toLowerCase().includes(term);
+      const matchesSeverity = severity === 'all' || item.severity === severity;
+      return matchesTerm && matchesSeverity;
+    });
+  }, [data?.items, search, severity]);
+
+  const summary = data?.summary ?? {
+    total: filteredItems.length,
+    warning: filteredItems.filter((item) => item.severity === 'warning').length,
+    critical: filteredItems.filter((item) => item.severity === 'critical').length,
+  };
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Automação de fluxos</h1>
-          <p className='text-sm text-zinc-500'>Eventos e regras automatizadas derivadas dos logs operacionais.</p>
-          {lastUpdated && (
-            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Automation'
+      description='Review automation-triggered operational events derived from audit telemetry.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchAutomation}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchAutomation}
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Events' value={summary.total} tone='sky' />
+          <AdminStatCard label='Warnings' value={summary.warning} tone='amber' />
+          <AdminStatCard label='Critical' value={summary.critical} tone='rose' />
+          <AdminStatCard label='Filtered' value={filteredItems.length} tone='neutral' />
+        </AdminStatGrid>
       </div>
 
-      {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
-          {error}
+      <AdminSection className='mb-4'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+          <input
+            type='text'
+            placeholder='Search by action, category, or resource'
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          />
+          <select
+            value={severity}
+            onChange={(event) => setSeverity(event.target.value as typeof severity)}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          >
+            <option value='all'>All severities</option>
+            <option value='warning'>Warning</option>
+            <option value='critical'>Critical</option>
+          </select>
         </div>
-      )}
+      </AdminSection>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Eventos</h3>
-          <p className='text-2xl font-bold text-blue-600'>{data?.summary.total ?? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Avisos</h3>
-          <p className='text-2xl font-bold text-yellow-600'>{data?.summary.warning ?? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Críticos</h3>
-          <p className='text-2xl font-bold text-red-600'>{data?.summary.critical ?? 0}</p>
-        </div>
-      </div>
-
-      <div className='bg-zinc-900/70 rounded-lg shadow p-4'>
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
-          <h2 className='text-xl font-semibold'>Histórico de Automação</h2>
-          <div className='flex gap-2'>
-            <input
-              type='text'
-              placeholder='Buscar por ação, categoria ou recurso'
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className='border p-2 rounded text-sm'
-            />
-            <select
-              value={severity}
-              onChange={(e) => setSeverity(e.target.value as typeof severity)}
-              className='border p-2 rounded text-sm'
-            >
-              <option value='all'>Todas</option>
-              <option value='warning'>Aviso</option>
-              <option value='critical'>Crítica</option>
-            </select>
-          </div>
-        </div>
-        <table className='w-full table-auto'>
-          <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
-              <th className='p-2 text-left'>Ação</th>
-              <th className='p-2 text-left'>Categoria</th>
-              <th className='p-2 text-left'>Severidade</th>
-              <th className='p-2 text-left'>Recurso</th>
-              <th className='p-2 text-left'>Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando automações...</td>
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Action</th>
+                <th className='p-3 text-left'>Category</th>
+                <th className='p-3 text-left'>Severity</th>
+                <th className='p-3 text-left'>Resource</th>
+                <th className='p-3 text-left'>Created</th>
               </tr>
-            ) : filteredItems.length === 0 ? (
-              <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum evento encontrado.</td>
-              </tr>
-            ) : (
-              filteredItems.map((item) => (
-                <tr key={item.id} className='border-t'>
-                  <td className='p-2'>{item.action || '—'}</td>
-                  <td className='p-2'>{item.category || '—'}</td>
-                  <td className='p-2'>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      item.severity === 'critical'
-                        ? 'bg-rose-500/15 text-rose-300'
-                        : item.severity === 'warning'
-                        ? 'bg-amber-500/15 text-amber-300'
-                        : 'bg-zinc-800/70 text-zinc-400'
-                    }`}>
-                      {severityLabels[item.severity || 'info'] ?? item.severity ?? 'informação'}
-                    </span>
-                  </td>
-                  <td className='p-2'>{item.resource || '—'}</td>
-                  <td className='p-2'>{new Date(item.createdAt).toLocaleString()}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Loading automation events...' />
+              ) : filteredItems.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='No automation events found for current filters.' />
+              ) : (
+                filteredItems.map((item) => (
+                  <tr key={item.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-zinc-100'>{item.action || '-'}</td>
+                    <td className='p-3'>{item.category || '-'}</td>
+                    <td className='p-3'>
+                      <span
+                        className={`rounded px-2 py-1 text-xs ${
+                          item.severity === 'critical'
+                            ? 'bg-rose-500/15 text-rose-300'
+                            : item.severity === 'warning'
+                              ? 'bg-amber-500/15 text-amber-300'
+                              : 'bg-zinc-800/70 text-zinc-300'
+                        }`}
+                      >
+                        {severityLabels[item.severity || 'info'] ?? item.severity ?? 'Info'}
+                      </span>
+                    </td>
+                    <td className='p-3'>{item.resource || '-'}</td>
+                    <td className='p-3 text-zinc-500'>{new Date(item.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }
