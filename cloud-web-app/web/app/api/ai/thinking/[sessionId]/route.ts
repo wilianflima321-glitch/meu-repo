@@ -13,6 +13,9 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_THINKING_SESSION_ID_LENGTH = 120;
+const normalizeThinkingSessionId = (value?: string) => String(value ?? '').trim();
+
 interface ThinkingStep {
   id: string;
   type: 'analyze' | 'plan' | 'research' | 'implement' | 'validate' | 'complete';
@@ -74,8 +77,16 @@ export async function GET(
     });
     if (rateLimitResponse) return rateLimitResponse;
     const { sessionId } = await params;
+    const normalizedSessionId = normalizeThinkingSessionId(sessionId);
 
-    const session = sessions.get(sessionId);
+    if (!normalizedSessionId || normalizedSessionId.length > MAX_THINKING_SESSION_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_SESSION_ID', message: 'sessionId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
+    const session = sessions.get(normalizedSessionId);
     
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
@@ -109,11 +120,18 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
     const { sessionId } = await params;
+    const normalizedSessionId = normalizeThinkingSessionId(sessionId);
+    if (!normalizedSessionId || normalizedSessionId.length > MAX_THINKING_SESSION_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_SESSION_ID', message: 'sessionId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
     const body = await req.json();
 
     // Criar nova sessão de pensamento
     const session: ThinkingSession = {
-      id: sessionId,
+      id: normalizedSessionId,
       userId: user.userId,
       prompt: body.prompt || '',
       status: 'thinking',
@@ -124,10 +142,10 @@ export async function POST(
       runtimeMode: 'simulated_preview',
     };
 
-    sessions.set(sessionId, session);
+    sessions.set(normalizedSessionId, session);
 
     // Simular progresso (em produção, seria streaming real)
-    simulateThinkingProgress(sessionId);
+    simulateThinkingProgress(normalizedSessionId);
 
     return NextResponse.json(
       {

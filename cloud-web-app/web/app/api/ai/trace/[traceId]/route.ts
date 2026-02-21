@@ -4,6 +4,9 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getAITraceForUser } from '@/lib/ai-trace-store';
 
+const MAX_TRACE_ID_LENGTH = 120;
+const normalizeTraceId = (value?: string) => String(value ?? '').trim();
+
 export async function GET(
   req: NextRequest,
   ctx: { params: Promise<{ traceId: string }> }
@@ -19,12 +22,16 @@ export async function GET(
     });
     if (rateLimitResponse) return rateLimitResponse;
     const { traceId } = await ctx.params;
+    const normalizedTraceId = normalizeTraceId(traceId);
 
-    if (!traceId) {
-      return NextResponse.json({ error: 'TRACE_ID_REQUIRED' }, { status: 400 });
+    if (!normalizedTraceId || normalizedTraceId.length > MAX_TRACE_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'TRACE_ID_REQUIRED', message: 'traceId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
     }
 
-    const trace = await getAITraceForUser({ userId: auth.userId, traceId });
+    const trace = await getAITraceForUser({ userId: auth.userId, traceId: normalizedTraceId });
     if (!trace) {
       return NextResponse.json({ error: 'TRACE_NOT_FOUND' }, { status: 404 });
     }

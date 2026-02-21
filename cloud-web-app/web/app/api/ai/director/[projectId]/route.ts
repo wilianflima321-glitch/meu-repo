@@ -15,6 +15,9 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+
 // Cache de análises (em produção, usar Redis)
 const analysisCache = new Map<string, {
   session: DirectorSession;
@@ -82,11 +85,18 @@ export async function GET(
     });
     if (rateLimitResponse) return rateLimitResponse;
     const { projectId } = await params;
+    const normalizedProjectId = normalizeProjectId(projectId);
+    if (!normalizedProjectId || normalizedProjectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     // Verificar se projeto existe e pertence ao usuário
     const project = await prisma.project.findFirst({
       where: {
-        id: projectId,
+        id: normalizedProjectId,
         userId: user.userId,
       },
     });
@@ -96,16 +106,16 @@ export async function GET(
     }
 
     // Verificar cache
-    const cached = analysisCache.get(projectId);
+    const cached = analysisCache.get(normalizedProjectId);
     if (cached && Date.now() - cached.timestamp < 300000) { // 5 min cache
       return NextResponse.json(withDirectorMeta(cached.session));
     }
 
     // Buscar ou criar sessão
-    const session = await getOrCreateDirectorSession(projectId, project);
+    const session = await getOrCreateDirectorSession(normalizedProjectId, project);
     
     // Cachear
-    analysisCache.set(projectId, {
+    analysisCache.set(normalizedProjectId, {
       session,
       timestamp: Date.now(),
     });
