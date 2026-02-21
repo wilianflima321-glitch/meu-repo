@@ -6,6 +6,9 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 
 export const dynamic = 'force-dynamic'
 
+const MAX_JOB_ID_LENGTH = 120
+const normalizeJobId = (value?: string) => String(value ?? '').trim()
+
 /**
  * POST /api/render/jobs/{jobId}/cancel
  *
@@ -26,10 +29,12 @@ export async function POST(
     })
     if (rateLimitResponse) return rateLimitResponse
 
-    const { jobId } = params
-
-    if (!jobId) {
-      return NextResponse.json({ error: 'jobId is required' }, { status: 400 })
+    const jobId = normalizeJobId(params?.jobId)
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
+      )
     }
 
     return notImplementedCapability({

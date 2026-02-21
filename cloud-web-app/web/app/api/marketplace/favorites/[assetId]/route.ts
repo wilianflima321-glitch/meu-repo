@@ -12,6 +12,9 @@ import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
+
 const FAVORITES_KEY = 'marketplaceFavorites';
 type PreferencesObject = Record<string, unknown>;
 
@@ -86,9 +89,12 @@ async function handleMutation(
       message: 'Too many favorite mutation requests. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
-    const assetId = params.assetId?.trim();
-    if (!assetId) {
-      return NextResponse.json({ error: 'assetId is required' }, { status: 400 });
+    const assetId = normalizeAssetId(params?.assetId);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
     }
 
     const favorites = await updateFavorites(user.userId, assetId, mode);
