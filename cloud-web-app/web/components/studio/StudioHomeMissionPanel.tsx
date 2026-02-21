@@ -87,6 +87,10 @@ export function StudioHomeMissionPanel({
             className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           />
         </div>
+        <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+          <span>Project context for Studio + IDE handoff.</span>
+          <span>Budget cap in credits. Variable usage pauses when exhausted.</span>
+        </div>
         <div className="flex items-center gap-2">
           <label className="text-xs text-slate-400" htmlFor="mission-domain">
             Mission domain
