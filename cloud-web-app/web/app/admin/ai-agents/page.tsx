@@ -1,6 +1,16 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Workflow = {
   id: string;
@@ -9,6 +19,10 @@ type Workflow = {
   projectName: string | null;
   updatedAt: string;
   lastUsedAt: string | null;
+};
+
+type WorkflowsResponse = {
+  workflows?: Workflow[];
 };
 
 export default function AIAgentsPage() {
@@ -22,14 +36,12 @@ export default function AIAgentsPage() {
   const fetchWorkflows = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/ai/agents');
-      if (!res.ok) throw new Error('Falha ao carregar fluxos');
-      const data = await res.json();
-      setWorkflows(Array.isArray(data?.workflows) ? data.workflows : []);
+      const payload = await adminJsonFetch<WorkflowsResponse>('/api/admin/ai/agents');
+      setWorkflows(Array.isArray(payload?.workflows) ? payload.workflows : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar fluxos');
+      setError(err instanceof Error ? err.message : 'Failed to load workflows');
     } finally {
       setLoading(false);
     }
@@ -39,120 +51,108 @@ export default function AIAgentsPage() {
     fetchWorkflows();
   }, [fetchWorkflows]);
 
-  const projects = Array.from(
-    new Set(workflows.map((workflow) => workflow.projectName || 'Sem projeto'))
-  ).sort();
+  const projectOptions = useMemo(() => {
+    return Array.from(new Set(workflows.map((workflow) => workflow.projectName || 'Unassigned'))).sort();
+  }, [workflows]);
 
-  const filteredWorkflows = workflows.filter((workflow) => {
+  const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    const matchesSearch =
-      !term ||
-      workflow.title.toLowerCase().includes(term) ||
-      workflow.userEmail.toLowerCase().includes(term);
-    const projectName = workflow.projectName || 'Sem projeto';
-    const matchesProject = projectFilter === 'all' || projectFilter === projectName;
-    return matchesSearch && matchesProject;
-  });
-
-  const summary = {
-    total: workflows.length,
-    withProject: workflows.filter((workflow) => workflow.projectName).length,
-    withoutProject: workflows.filter((workflow) => !workflow.projectName).length,
-  };
+    return workflows.filter((workflow) => {
+      const projectLabel = workflow.projectName || 'Unassigned';
+      const projectMatches = projectFilter === 'all' || projectFilter === projectLabel;
+      const searchMatches =
+        !term ||
+        workflow.title.toLowerCase().includes(term) ||
+        workflow.userEmail.toLowerCase().includes(term) ||
+        projectLabel.toLowerCase().includes(term);
+      return projectMatches && searchMatches;
+    });
+  }, [projectFilter, search, workflows]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Fluxos de agentes de IA</h1>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='AI Agent Workflows'
+      description='Monitor mission workflows executed by agent orchestration and validate active usage.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchWorkflows}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchWorkflows}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total Workflows' value={workflows.length} tone='sky' />
+          <AdminStatCard label='Filtered Workflows' value={filtered.length} tone='neutral' />
+          <AdminStatCard label='Projects' value={projectOptions.length} tone='emerald' />
+          <AdminStatCard
+            label='Recently Used'
+            value={workflows.filter((workflow) => workflow.lastUsedAt).length}
+            tone='amber'
+          />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Com projeto</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.withProject}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Sem projeto</h3>
-          <p className="text-2xl font-bold text-zinc-400">{summary.withoutProject}</p>
-        </div>
-      </div>
-
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <input
-          type="text"
-          placeholder="Buscar por título ou responsável"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full md:max-w-sm"
-        />
-        <select
-          value={projectFilter}
-          onChange={(e) => setProjectFilter(e.target.value)}
-          className="border p-2 rounded text-sm"
-        >
-          <option value="all">Todos os projetos</option>
-          {projects.map((project) => (
-            <option key={project} value={project}>
-              {project}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Fluxos ativos</h2>
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-12 bg-zinc-800/70 rounded animate-pulse" />
+      <AdminSection className='mb-4'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+          <input
+            type='text'
+            placeholder='Search title, user or project'
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          />
+          <select
+            value={projectFilter}
+            onChange={(event) => setProjectFilter(event.target.value)}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          >
+            <option value='all'>All projects</option>
+            {projectOptions.map((project) => (
+              <option key={project} value={project}>
+                {project}
+              </option>
             ))}
-          </div>
-        ) : error ? (
-          <div>
-            <p className="text-sm text-red-500">{error}</p>
-            <button className="mt-3 bg-blue-500 text-white px-3 py-1 rounded" onClick={fetchWorkflows}>
-              Tentar novamente
-            </button>
-          </div>
-        ) : filteredWorkflows.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhum fluxo ativo encontrado.</p>
-        ) : (
-          <ul>
-            {filteredWorkflows.map((workflow) => (
-              <li key={workflow.id} className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 p-2 border-b">
-                <div>
-                  <h3 className="font-semibold">{workflow.title}</h3>
-                  <p className="text-sm text-zinc-400">Responsável: {workflow.userEmail}</p>
-                  {workflow.projectName && (
-                    <p className="text-xs text-zinc-500">Projeto: {workflow.projectName}</p>
-                  )}
-                </div>
-                <div className="text-xs text-zinc-500">
-                  Atualizado: {new Date(workflow.updatedAt).toLocaleString()}
-                  {workflow.lastUsedAt && (
-                    <div>Último uso: {new Date(workflow.lastUsedAt).toLocaleString()}</div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+          </select>
+        </div>
+      </AdminSection>
+
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Workflow</th>
+                <th className='p-3 text-left'>User</th>
+                <th className='p-3 text-left'>Project</th>
+                <th className='p-3 text-left'>Last used</th>
+                <th className='p-3 text-left'>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Loading agent workflows...' />
+              ) : filtered.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='No workflows found for current filters.' />
+              ) : (
+                filtered.map((workflow) => (
+                  <tr key={workflow.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-zinc-100'>{workflow.title}</td>
+                    <td className='p-3'>{workflow.userEmail}</td>
+                    <td className='p-3'>{workflow.projectName || 'Unassigned'}</td>
+                    <td className='p-3 text-zinc-500'>
+                      {workflow.lastUsedAt ? new Date(workflow.lastUsedAt).toLocaleString() : '-'}
+                    </td>
+                    <td className='p-3 text-zinc-500'>{new Date(workflow.updatedAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

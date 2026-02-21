@@ -1,6 +1,16 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Dataset = {
   id: string;
@@ -15,203 +25,265 @@ type Job = {
   status: string;
   epochs: number;
   learningRate: number;
-  dataset: Dataset;
+  dataset?: Dataset;
   createdAt: string;
+};
+
+type DatasetsResponse = {
+  items?: Dataset[];
+};
+
+type JobsResponse = {
+  items?: Job[];
 };
 
 export default function FineTuningPage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [newDataset, setNewDataset] = useState<{ name: string; file: File | null }>({ name: '', file: null });
-  const [selectedDataset, setSelectedDataset] = useState('');
-  const [epochs, setEpochs] = useState(5);
-  const [learningRate, setLearningRate] = useState(0.001);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [savingDataset, setSavingDataset] = useState(false);
+  const [savingJob, setSavingJob] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const fetchDatasets = useCallback(async () => {
-    const res = await fetch('/api/admin/fine-tuning/datasets');
-    if (!res.ok) throw new Error('Falha ao carregar conjuntos de dados');
-    const json = await res.json();
-    setDatasets(json.items || []);
-  }, []);
+  const [datasetName, setDatasetName] = useState('');
+  const [datasetFile, setDatasetFile] = useState<File | null>(null);
+  const [selectedDataset, setSelectedDataset] = useState('');
+  const [epochs, setEpochs] = useState(5);
+  const [learningRate, setLearningRate] = useState(0.001);
 
-  const fetchJobs = useCallback(async () => {
-    const res = await fetch('/api/admin/fine-tuning/jobs');
-    if (!res.ok) throw new Error('Falha ao carregar tarefas');
-    const json = await res.json();
-    setJobs(json.items || []);
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        await Promise.all([fetchDatasets(), fetchJobs()]);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [fetchDatasets, fetchJobs]);
-
-  const handleUpload = async () => {
-    if (!newDataset.name || !newDataset.file) return;
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/fine-tuning/datasets', {
+      const [datasetPayload, jobsPayload] = await Promise.all([
+        adminJsonFetch<DatasetsResponse>('/api/admin/fine-tuning/datasets'),
+        adminJsonFetch<JobsResponse>('/api/admin/fine-tuning/jobs'),
+      ]);
+      const datasetItems = Array.isArray(datasetPayload?.items) ? datasetPayload.items : [];
+      setDatasets(datasetItems);
+      setJobs(Array.isArray(jobsPayload?.items) ? jobsPayload.items : []);
+      if (!selectedDataset && datasetItems.length > 0) {
+        setSelectedDataset(datasetItems[0].id);
+      }
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load fine-tuning data');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDataset]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const createDataset = useCallback(async () => {
+    if (!datasetName.trim() || !datasetFile) {
+      setError('Dataset name and file are required.');
+      return;
+    }
+
+    try {
+      setSavingDataset(true);
+      const payload = await adminJsonFetch<{ uploadUrl?: string }>('/api/admin/fine-tuning/datasets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: newDataset.name,
-          size: newDataset.file.size,
-          contentType: newDataset.file.type || 'application/octet-stream',
+          name: datasetName.trim(),
+          size: datasetFile.size,
+          contentType: datasetFile.type || 'application/octet-stream',
         }),
       });
-      if (!res.ok) throw new Error('Falha ao criar conjunto de dados');
-      const json = await res.json();
-      const dataset = json.dataset as Dataset;
-      const uploadUrl = json.uploadUrl as string | null;
-
-      if (uploadUrl) {
-        const uploadRes = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': newDataset.file.type || 'application/octet-stream' },
-          body: newDataset.file,
-        });
-        if (!uploadRes.ok) throw new Error('Falha no upload do arquivo');
-
-        await fetch('/api/admin/fine-tuning/datasets', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: dataset.id, status: 'uploaded' }),
-        });
-        setMessage('Conjunto de dados enviado com sucesso.');
-      } else {
-        setMessage('Storage indisponível. Conjunto de dados registrado, envio pendente.');
-      }
-
-      setNewDataset({ name: '', file: null });
-      await fetchDatasets();
+      setMessage(payload?.uploadUrl ? 'Dataset registered. Upload URL generated.' : 'Dataset registered. Storage URL unavailable.');
+      setDatasetName('');
+      setDatasetFile(null);
+      setError(null);
+      await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao fazer upload');
+      setError(err instanceof Error ? err.message : 'Failed to create dataset');
     } finally {
-      setLoading(false);
+      setSavingDataset(false);
     }
-  };
+  }, [datasetFile, datasetName, fetchData]);
 
-  const handleStartTraining = async () => {
-    if (!selectedDataset) return;
+  const createJob = useCallback(async () => {
+    if (!selectedDataset) {
+      setError('Select a dataset first.');
+      return;
+    }
+
     try {
-      setLoading(true);
-      const res = await fetch('/api/admin/fine-tuning/jobs', {
+      setSavingJob(true);
+      await adminJsonFetch('/api/admin/fine-tuning/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ datasetId: selectedDataset, epochs, learningRate }),
+        body: JSON.stringify({
+          datasetId: selectedDataset,
+          epochs,
+          learningRate,
+        }),
       });
-      if (!res.ok) throw new Error('Falha ao iniciar treinamento');
-      setMessage('Tarefa de ajuste fino criada.');
-      await fetchJobs();
+      setMessage('Fine-tuning job queued.');
+      setError(null);
+      await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao iniciar treinamento');
+      setError(err instanceof Error ? err.message : 'Failed to create fine-tuning job');
     } finally {
-      setLoading(false);
+      setSavingJob(false);
     }
-  };
+  }, [epochs, fetchData, learningRate, selectedDataset]);
+
+  const pendingUploads = useMemo(() => datasets.filter((dataset) => dataset.status === 'pending_upload').length, [datasets]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Ajuste fino detalhado</h1>
-          <p className="text-sm text-zinc-500">Pipeline de conjuntos de dados e tarefas com auditoria.</p>
+    <AdminPageShell
+      title='Fine-Tuning'
+      description='Manage training datasets and launch fine-tuning jobs with explicit queue visibility.'
+      actions={<AdminPrimaryButton onClick={fetchData}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button onClick={() => Promise.all([fetchDatasets(), fetchJobs()])} className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm">Atualizar</button>
+      ) : null}
+      {message ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='success'>{message}</AdminStatusBanner>
+        </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Datasets' value={datasets.length} tone='sky' />
+          <AdminStatCard label='Pending Upload' value={pendingUploads} tone='amber' />
+          <AdminStatCard label='Jobs' value={jobs.length} tone='neutral' />
+          <AdminStatCard label='Running Jobs' value={jobs.filter((job) => job.status === 'running').length} tone='emerald' />
+        </AdminStatGrid>
       </div>
 
-      {error && <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">{error}</div>}
-      {message && <div className="bg-green-50 border border-green-200 text-emerald-300 p-3 rounded mb-4">{message}</div>}
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+        <AdminSection title='Register Dataset'>
+          <div className='space-y-3'>
+            <input
+              value={datasetName}
+              onChange={(event) => setDatasetName(event.target.value)}
+              placeholder='Dataset name'
+              className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+            />
+            <input
+              type='file'
+              onChange={(event) => setDatasetFile(event.target.files?.[0] ?? null)}
+              className='w-full text-sm text-zinc-400 file:mr-3 file:rounded file:border-0 file:bg-zinc-800 file:px-3 file:py-2 file:text-zinc-200 hover:file:bg-zinc-700'
+            />
+            <div className='flex justify-end'>
+              <AdminPrimaryButton onClick={createDataset} disabled={savingDataset}>
+                {savingDataset ? 'Saving...' : 'Create dataset'}
+              </AdminPrimaryButton>
+            </div>
+          </div>
+        </AdminSection>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Envio de conjunto de dados</h2>
-        <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Nome do conjunto de dados"
-            value={newDataset.name}
-            onChange={(e) => setNewDataset({ ...newDataset, name: e.target.value })}
-            className="border p-2 flex-1"
-          />
-          <input
-            type="file"
-            onChange={(e) => {
-              const files = (e.target as HTMLInputElement).files;
-              setNewDataset({ ...newDataset, file: files && files[0] ? files[0] : null });
-            }}
-            className="border p-2"
-          />
-          <button onClick={handleUpload} disabled={loading} className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50">Enviar</button>
-        </div>
-      </div>
-
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Configurações de treinamento</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium">Conjunto de dados</label>
-            <select value={selectedDataset} onChange={(e) => setSelectedDataset(e.target.value)} className="border p-2 w-full">
-              <option value="">Selecione</option>
+        <AdminSection title='Launch Fine-Tuning Job'>
+          <div className='space-y-3'>
+            <select
+              value={selectedDataset}
+              onChange={(event) => setSelectedDataset(event.target.value)}
+              className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+            >
+              <option value=''>Select dataset</option>
               {datasets.map((dataset) => (
-                <option key={dataset.id} value={dataset.id}>{dataset.name}</option>
+                <option key={dataset.id} value={dataset.id}>
+                  {dataset.name}
+                </option>
               ))}
             </select>
+            <div className='grid grid-cols-2 gap-3'>
+              <input
+                type='number'
+                min='1'
+                value={epochs}
+                onChange={(event) => setEpochs(Number(event.target.value) || 1)}
+                className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+              />
+              <input
+                type='number'
+                min='0.0001'
+                step='0.0001'
+                value={learningRate}
+                onChange={(event) => setLearningRate(Number(event.target.value) || 0.001)}
+                className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+              />
+            </div>
+            <div className='flex justify-end'>
+              <AdminPrimaryButton onClick={createJob} disabled={savingJob}>
+                {savingJob ? 'Queuing...' : 'Queue job'}
+              </AdminPrimaryButton>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium">Épocas</label>
-            <input type="number" value={epochs} onChange={(e) => setEpochs(Number(e.target.value))} className="border p-2 w-full" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Taxa de aprendizado</label>
-            <input type="number" step="0.001" value={learningRate} onChange={(e) => setLearningRate(Number(e.target.value))} className="border p-2 w-full" />
-          </div>
-        </div>
-        <button onClick={handleStartTraining} disabled={loading || !selectedDataset} className="mt-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50">Iniciar treinamento</button>
+        </AdminSection>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Conjuntos de dados carregados</h2>
-        {loading ? (
-          <p className="text-sm text-zinc-500">Carregando conjuntos de dados...</p>
-        ) : (
-          <ul>
-            {datasets.map(dataset => (
-              <li key={dataset.id} className="flex justify-between items-center p-2 border-b">
-                <span>{dataset.name} - {(dataset.size / 1024 / 1024).toFixed(1)}MB</span>
-                <span className="px-2 py-1 rounded text-xs bg-zinc-800/70">{dataset.status}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <div className='mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2'>
+        <AdminSection title='Datasets' className='p-0'>
+          <div className='overflow-x-auto'>
+            <table className='w-full table-auto text-sm'>
+              <thead>
+                <tr className='bg-zinc-800/70'>
+                  <th className='p-3 text-left'>Name</th>
+                  <th className='p-3 text-left'>Size</th>
+                  <th className='p-3 text-left'>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <AdminTableStateRow colSpan={3} message='Loading datasets...' />
+                ) : datasets.length === 0 ? (
+                  <AdminTableStateRow colSpan={3} message='No datasets available.' />
+                ) : (
+                  datasets.map((dataset) => (
+                    <tr key={dataset.id} className='border-t border-zinc-800/70'>
+                      <td className='p-3'>{dataset.name}</td>
+                      <td className='p-3'>{(dataset.size / 1024 / 1024).toFixed(2)} MB</td>
+                      <td className='p-3'>{dataset.status}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </AdminSection>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Tarefas recentes</h2>
-        {jobs.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma tarefa encontrada.</p>
-        ) : (
-          <ul className="space-y-2">
-            {jobs.map((job) => (
-              <li key={job.id} className="border rounded p-3">
-                <div className="font-medium">{job.dataset?.name || 'Conjunto de dados'}</div>
-                <div className="text-sm text-zinc-400">Status: {job.status} • Épocas: {job.epochs} • Taxa: {job.learningRate}</div>
-              </li>
-            ))}
-          </ul>
-        )}
+        <AdminSection title='Jobs' className='p-0'>
+          <div className='overflow-x-auto'>
+            <table className='w-full table-auto text-sm'>
+              <thead>
+                <tr className='bg-zinc-800/70'>
+                  <th className='p-3 text-left'>Dataset</th>
+                  <th className='p-3 text-left'>Status</th>
+                  <th className='p-3 text-left'>Epochs</th>
+                  <th className='p-3 text-left'>LR</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <AdminTableStateRow colSpan={4} message='Loading jobs...' />
+                ) : jobs.length === 0 ? (
+                  <AdminTableStateRow colSpan={4} message='No jobs queued.' />
+                ) : (
+                  jobs.map((job) => (
+                    <tr key={job.id} className='border-t border-zinc-800/70'>
+                      <td className='p-3'>{job.dataset?.name || '-'}</td>
+                      <td className='p-3'>{job.status}</td>
+                      <td className='p-3'>{job.epochs}</td>
+                      <td className='p-3'>{job.learningRate}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </AdminSection>
       </div>
-    </div>
+    </AdminPageShell>
   );
 }

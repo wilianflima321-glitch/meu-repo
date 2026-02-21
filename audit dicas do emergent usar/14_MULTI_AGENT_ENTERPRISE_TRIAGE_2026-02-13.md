@@ -1953,3 +1953,11 @@ Triaged impact:
 - `missing AdminPageShell=13`
 - `direct fetch without adminJsonFetch=13`
 - `mojibake candidates=0`
+
+## Delta 2026-02-21 (Admin hardening wave 7 - closure)
+1. Converted remaining admin surfaces to shared `AdminPageShell` + `adminJsonFetch`.
+2. Regenerated `cloud-web-app/web/docs/ADMIN_SURFACE_SWEEP.md`.
+3. Current residual baseline:
+- `missing AdminPageShell=0`
+- `direct fetch without adminJsonFetch=0`
+- `mojibake candidates=0`
