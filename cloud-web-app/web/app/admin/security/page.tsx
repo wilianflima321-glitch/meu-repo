@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getToken } from '@/lib/auth';
 import {
   AdminPageShell,
   AdminPrimaryButton,
@@ -11,6 +10,7 @@ import {
   AdminStatusBanner,
   AdminTableStateRow,
 } from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type SecurityLog = {
   id: string;
@@ -43,25 +43,10 @@ export default function AdminSecurity() {
     info: 'Informacao',
   };
 
-  const getAuthHeaders = useCallback(() => {
-    const token = getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  }, []);
-
   const fetchSecurity = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/security/overview', {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        const payload = await res.json().catch(() => null);
-        throw new Error(payload?.message || payload?.error || 'Falha ao carregar seguranca');
-      }
-      const json = await res.json();
+      const json = await adminJsonFetch<SecurityOverview>('/api/admin/security/overview');
       setData(json);
       setLastUpdated(new Date());
       setError(null);
@@ -70,7 +55,7 @@ export default function AdminSecurity() {
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   useEffect(() => {
     fetchSecurity();

@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getToken } from '@/lib/auth';
 import {
   AdminPageShell,
   AdminPrimaryButton,
@@ -10,6 +9,7 @@ import {
   AdminStatGrid,
   AdminStatusBanner,
 } from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type EmergencyLevel = 'normal' | 'warning' | 'critical' | 'shutdown';
 
@@ -77,20 +77,11 @@ export default function EmergencyAdminPage() {
   const [reason, setReason] = useState('');
   const [settingsDraft, setSettingsDraft] = useState<EmergencySettings | null>(null);
 
-  const authHeaders = useCallback(() => {
-    const token = getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  }, []);
-
   const loadState = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/emergency', { headers: authHeaders() });
-      const payload = (await response.json().catch(() => null)) as EmergencyResponse | null;
-      if (!response.ok || !payload?.success || !payload.data) {
+      const payload = await adminJsonFetch<EmergencyResponse>('/api/admin/emergency');
+      if (!payload?.success || !payload.data) {
         throw new Error(payload?.error || payload?.message || 'Failed to load emergency state');
       }
       setState(payload.data);
@@ -101,7 +92,7 @@ export default function EmergencyAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [authHeaders]);
+  }, []);
 
   useEffect(() => {
     loadState();
@@ -112,13 +103,12 @@ export default function EmergencyAdminPage() {
       try {
         setSaving(true);
         setSuccess(null);
-        const response = await fetch('/api/admin/emergency', {
+        const payload = await adminJsonFetch<EmergencyResponse>('/api/admin/emergency', {
           method,
-          headers: authHeaders(),
+          headers: { 'Content-Type': 'application/json' },
           body: body ? JSON.stringify(body) : undefined,
         });
-        const payload = (await response.json().catch(() => null)) as EmergencyResponse | null;
-        if (!response.ok || !payload?.success) {
+        if (!payload?.success) {
           throw new Error(payload?.error || payload?.message || 'Emergency action failed');
         }
         setSuccess(payload?.message || 'Action completed');
@@ -129,7 +119,7 @@ export default function EmergencyAdminPage() {
         setSaving(false);
       }
     },
-    [authHeaders, loadState],
+    [loadState],
   );
 
   const levelTone = useMemo(() => {

@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getToken } from '@/lib/auth';
 import {
   AdminPageShell,
   AdminPrimaryButton,
@@ -11,6 +10,7 @@ import {
   AdminStatusBanner,
   AdminTableStateRow,
 } from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Integration = {
   id: string;
@@ -43,37 +43,27 @@ export default function APIs() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'configured' | 'missing'>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const getAuthHeaders = () => {
-    const token = getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  };
-
   const fetchIntegrations = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/apis', { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error('Falha ao carregar integracoes');
-      const data = await res.json();
+      const data = await adminJsonFetch<{ integrations?: Integration[] }>('/api/admin/apis');
       setIntegrations(Array.isArray(data?.integrations) ? data.integrations : []);
       setLastUpdated(new Date());
       setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar integracoes');
+    }
 
-      const compatRes = await fetch('/api/admin/compatibility-routes', { headers: getAuthHeaders() });
-      if (!compatRes.ok) throw new Error('Falha ao carregar rotas de compatibilidade');
-      const compatData = await compatRes.json();
+    try {
+      const compatData = await adminJsonFetch<{
+        routes?: CompatibilityRouteMetric[];
+        removalCandidates?: string[];
+      }>('/api/admin/compatibility-routes');
       setCompatRoutes(Array.isArray(compatData?.routes) ? compatData.routes : []);
       setRemovalCandidates(Array.isArray(compatData?.removalCandidates) ? compatData.removalCandidates : []);
       setCompatError(null);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao carregar integracoes';
-      if (message.includes('compatibilidade')) {
-        setCompatError(message);
-      } else {
-        setError(message);
-      }
+      setCompatError(err instanceof Error ? err.message : 'Erro ao carregar rotas de compatibilidade');
     } finally {
       setLoading(false);
     }

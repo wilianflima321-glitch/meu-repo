@@ -517,3 +517,18 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 1. `missing AdminPageShell: 20`
 2. `direct fetch without adminJsonFetch: 24` (from 25)
 3. `mojibake candidates: 0`
+
+## Delta 2026-02-21 - Admin auth-fetch convergence wave
+
+### Delivered in this wave
+1. Replaced local token/header fetch patterns with `adminJsonFetch` in:
+- `cloud-web-app/web/app/admin/apis/page.tsx`
+- `cloud-web-app/web/app/admin/payments/page.tsx`
+- `cloud-web-app/web/app/admin/security/page.tsx`
+- `cloud-web-app/web/app/admin/emergency/page.tsx`
+2. Reduced duplicated auth-header code and standardized API error handling in these high-impact admin pages.
+
+### Updated residual from `qa:admin-surface`
+1. `missing AdminPageShell: 20`
+2. `direct fetch without adminJsonFetch: 20` (from 24)
+3. `mojibake candidates: 0`

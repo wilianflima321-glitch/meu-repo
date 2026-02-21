@@ -1937,3 +1937,11 @@ Triaged impact:
 - `missing AdminPageShell=20`
 - `direct fetch without adminJsonFetch=24`
 - `mojibake candidates=0`
+
+## Delta 2026-02-21 (Admin hardening wave 5)
+1. Standardized authenticated admin data access for APIs, payments, security, and emergency surfaces.
+2. Lowered auth-fetch drift without widening scope.
+3. Current residual baseline:
+- `missing AdminPageShell=20`
+- `direct fetch without adminJsonFetch=20`
+- `mojibake candidates=0`

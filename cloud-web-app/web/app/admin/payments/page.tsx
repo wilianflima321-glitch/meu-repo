@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getToken } from '@/lib/auth';
 import {
   AdminPageShell,
   AdminPrimaryButton,
@@ -11,6 +10,7 @@ import {
   AdminStatusBanner,
   AdminTableStateRow,
 } from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type PaymentItem = {
   id: string;
@@ -71,18 +71,8 @@ export default function Payments() {
     failed: 'Falhou',
   };
 
-  const getAuthHeaders = () => {
-    const token = getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  };
-
   const fetchGateway = useCallback(async () => {
-    const res = await fetch('/api/admin/payments/gateway', { headers: getAuthHeaders() });
-    if (!res.ok) throw new Error('Falha ao carregar configuracao de gateway');
-    const data = await res.json();
+    const data = await adminJsonFetch<{ config?: GatewayConfig }>('/api/admin/payments/gateway');
     setGateway(data?.config || DEFAULT_GATEWAY);
   }, []);
 
@@ -91,11 +81,7 @@ export default function Payments() {
       setLoading(true);
       const params = new URLSearchParams();
       params.set('status', statusFilter);
-      const res = await fetch(`/api/admin/payments?${params.toString()}`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error('Falha ao carregar pagamentos');
-      const data = await res.json();
+      const data = await adminJsonFetch<{ items?: PaymentItem[]; totals?: Totals }>(`/api/admin/payments?${params.toString()}`);
       setItems(Array.isArray(data?.items) ? data.items : []);
       setTotals(data?.totals ?? { total: 0, succeeded: 0, pending: 0, failed: 0 });
       setLastUpdated(new Date());
@@ -117,15 +103,11 @@ export default function Payments() {
   const saveGateway = useCallback(async () => {
     try {
       setSavingGateway(true);
-      const res = await fetch('/api/admin/payments/gateway', {
+      const payload = await adminJsonFetch<{ config?: GatewayConfig }>('/api/admin/payments/gateway', {
         method: 'PUT',
-        headers: getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(gateway),
       });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(payload?.error || 'Falha ao salvar gateway');
-      }
       setGateway(payload?.config || gateway);
       setLastUpdated(new Date());
       setError(null);
