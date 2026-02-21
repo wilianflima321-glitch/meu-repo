@@ -11,7 +11,11 @@ export function WorkbenchContextBanner({
 }) {
   if (!show || !message) return null
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-cyan-500/25 bg-cyan-500/10 px-3 py-1.5 text-[11px] text-cyan-100">
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center justify-between gap-2 border-b border-cyan-500/25 bg-cyan-500/10 px-3 py-1.5 text-[11px] text-cyan-100"
+    >
       <span>{message}</span>
       <button
         type="button"
@@ -24,4 +28,3 @@ export function WorkbenchContextBanner({
     </div>
   )
 }
-
