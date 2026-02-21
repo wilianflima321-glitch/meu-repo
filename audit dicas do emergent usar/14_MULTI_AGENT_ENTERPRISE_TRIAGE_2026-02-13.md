@@ -1806,3 +1806,17 @@ Triaged impact:
 1. Loading/error/empty/success behavior is now consistent across core admin surfaces.
 2. Keyboard focus visibility and interaction affordances are now aligned without introducing new scope.
 3. Admin actionability improved while preserving existing route and capability contracts.
+
+## Delta 2026-02-21 CXV - Admin layout actionability + engine type reliability triage
+Delivered:
+1. Hardened admin shell data fetches with authenticated SWR fetcher in:
+- `cloud-web-app/web/app/admin/layout.tsx`
+2. Removed dead-end emergency CTA by routing the bottom action to an existing operational surface (`/admin/security`).
+3. Added explicit telemetry-unavailable hints in admin header when status/quick-stats feeds are absent.
+4. Closed syntax debt in particle engine type contract:
+- `cloud-web-app/web/lib/engine/particle-system-types.ts` (interface closure restored).
+
+Triaged impact:
+1. Admin shell no longer exposes a broken navigation path in core operations layout.
+2. Operational trust improved by explicit status when telemetry cannot be loaded.
+3. Type reliability improved by removing a blocking parse error in engine type definitions.

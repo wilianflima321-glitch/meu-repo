@@ -4228,3 +4228,21 @@ Validation snapshot:
 Decision lock:
 1. This wave is consistency hardening only; no new feature claims.
 2. Capability/deprecation contracts remain unchanged.
+
+## 166) Delta 2026-02-21 CXX - Admin shell route reliability + engine type syntax closure
+
+Implemented:
+1. Added authenticated SWR fetcher for admin shell status streams in:
+- `cloud-web-app/web/app/admin/layout.tsx`
+2. Replaced broken emergency CTA target with existing security operations surface:
+- `/admin/security`
+3. Added explicit telemetry-unavailable indicators in admin header when live feeds are absent.
+4. Fixed particle engine type syntax debt:
+- `cloud-web-app/web/lib/engine/particle-system-types.ts` (`ParticleEmitterConfig` interface closure).
+
+Validation snapshot:
+1. Targeted lint on modified files -> PASS.
+
+Decision lock:
+1. No scope expansion; this wave removes dead-end routing and syntax reliability debt.
+2. Existing API capability/deprecation contracts remain unchanged.

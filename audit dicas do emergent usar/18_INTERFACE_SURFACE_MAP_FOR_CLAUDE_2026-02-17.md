@@ -193,3 +193,6 @@ CI workflows:
   - `cloud-web-app/web/app/admin/payments/page.tsx`
   - `cloud-web-app/web/app/admin/apis/page.tsx`
   - `cloud-web-app/web/app/admin/security/page.tsx`
+- Admin shell reliability updates:
+  - `cloud-web-app/web/app/admin/layout.tsx` now uses authenticated SWR fetches for status streams.
+  - Shell bottom action targets an existing route (`/admin/security`) to avoid dead-end navigation.

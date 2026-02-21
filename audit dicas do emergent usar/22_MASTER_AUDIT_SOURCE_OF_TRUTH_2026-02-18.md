@@ -436,3 +436,12 @@ Label: `VERIFIED_INTERNAL`
 3. Normalized state rendering (loading/error/empty) and focus-visible behavior in these pages.
 4. Removed mojibake-prone payment copy and kept route/capability contracts unchanged.
 5. Targeted lint verification for modified admin files: PASS.
+
+## 20) Delta 2026-02-21 - Admin shell dead-end removal + type reliability patch
+Label: `VERIFIED_INTERNAL`
+
+1. `cloud-web-app/web/app/admin/layout.tsx` now uses authenticated fetches for status/quick-stats streams.
+2. Admin shell bottom action now points to existing `/admin/security` surface (no broken route).
+3. Header now exposes explicit telemetry-unavailable state when live feeds are absent.
+4. Fixed parse-level syntax debt in `cloud-web-app/web/lib/engine/particle-system-types.ts`.
+5. Targeted lint verification for modified files: PASS.

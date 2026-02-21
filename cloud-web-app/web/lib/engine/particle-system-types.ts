@@ -141,3 +141,4 @@ export interface ParticleEmitterConfig {
   duration?: number;
   loop?: boolean;
   prewarm?: boolean;
+}

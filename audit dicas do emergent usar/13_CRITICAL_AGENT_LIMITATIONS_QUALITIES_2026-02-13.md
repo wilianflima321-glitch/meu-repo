@@ -1777,3 +1777,13 @@ Implemented:
 Critical reading:
 1. This directly reduces UX drift risk across high-traffic admin operations without adding scope.
 2. Residual risk remains in low-traffic admin routes that still use mixed local patterns.
+
+## Delta 2026-02-21 CXIV - Admin shell dead-end removal + particle type fix
+Implemented:
+1. Removed dead-end admin CTA by repointing shell emergency action to existing `/admin/security`.
+2. Added explicit unavailable-state messaging for missing status/quick-stats telemetry in admin header.
+3. Fixed parse-level type defect in `lib/engine/particle-system-types.ts`.
+
+Critical reading:
+1. Broken navigation risk in the admin shell dropped from user-facing to closed.
+2. Residual risk remains in broader admin IA pages where operational widgets are still partially informative.

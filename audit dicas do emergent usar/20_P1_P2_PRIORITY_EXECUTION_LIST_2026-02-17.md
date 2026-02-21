@@ -397,3 +397,11 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `cloud-web-app/web/app/admin/apis/page.tsx`
 - `cloud-web-app/web/app/admin/security/page.tsx`
 3. Standardized operational copy and removed mojibake-prone strings in payment admin flow.
+
+### Delivered in this wave (Admin shell reliability + engine type closure)
+1. Updated `cloud-web-app/web/app/admin/layout.tsx`:
+- authenticated SWR fetcher for `/api/admin/status` and `/api/admin/quick-stats`
+- explicit unavailable-state hints for telemetry gaps
+- removed dead-end shell action by targeting `/admin/security`
+2. Fixed engine type syntax blocker:
+- `cloud-web-app/web/lib/engine/particle-system-types.ts` interface closure restored.
