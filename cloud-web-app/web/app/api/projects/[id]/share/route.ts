@@ -1,7 +1,7 @@
 /**
  * AETHEL ENGINE - Project Share API
  * 
- * Compartilha um projeto com outros usuários ou gera link público.
+ * Compartilha um projeto com outros usuarios ou gera link publico.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -36,7 +36,7 @@ export async function POST(
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
+        { error: 'Nao autorizado' },
         { status: 401 }
       );
     }
@@ -54,7 +54,7 @@ export async function POST(
 
     if (!type || !permissions) {
       return NextResponse.json(
-        { error: 'Tipo de compartilhamento e permissões são obrigatórios' },
+        { error: 'Tipo de compartilhamento e permissoes sao obrigatorios' },
         { status: 400 }
       );
     }
@@ -78,9 +78,9 @@ export async function POST(
       // Gerar link de compartilhamento
       shareResult.shareUrl = `https://aethel.studio/share/${shareId}`;
     } else if (type === 'email' && emails) {
-      // Em produção, enviar emails
+      // Em producao, enviar emails
       shareResult.invitedEmails = emails;
-      shareResult.message = `Convites enviados para ${emails.length} usuário(s)`;
+      shareResult.message = `Convites enviados para ${emails.length} usuario(s)`;
     } else if (type === 'team' && teamId) {
       shareResult.teamId = teamId;
       shareResult.message = 'Projeto compartilhado com o time';
@@ -117,7 +117,7 @@ export async function GET(
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
+        { error: 'Nao autorizado' },
         { status: 401 }
       );
     }
@@ -131,7 +131,7 @@ export async function GET(
     }
 
     
-    // Em produção, buscar compartilhamentos do banco
+    // Em producao, buscar compartilhamentos do banco
     const shares = [
       {
         shareId: 'share-1',
