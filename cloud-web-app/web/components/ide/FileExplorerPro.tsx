@@ -25,6 +25,7 @@ interface FileExplorerProps {
   onFileDelete?: (file: FileNode) => void
   onFileRename?: (file: FileNode, newName?: string) => void
   onRefresh?: () => void
+  onOpenStudioHome?: () => void
   workspaceName?: string
   className?: string
 }
@@ -257,6 +258,7 @@ export default function FileExplorerPro({
   onFileDelete,
   onFileRename,
   onRefresh,
+  onOpenStudioHome,
   workspaceName = 'aethel-engine',
   className = '',
 }: FileExplorerProps) {
@@ -579,6 +581,14 @@ export default function FileExplorerPro({
                 >
                   New Folder
                 </button>
+                {onOpenStudioHome && (
+                  <button
+                    onClick={onOpenStudioHome}
+                    className="px-2.5 py-1.5 rounded border border-slate-700 bg-slate-800/70 text-[11px] text-slate-200 hover:bg-slate-700/80"
+                  >
+                    Studio Home
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -646,6 +646,7 @@ function IDEPageInner() {
             onFileDelete={handleDelete}
             onFileRename={handleRename}
             onRefresh={refreshTree}
+            onOpenStudioHome={() => router.push('/dashboard')}
             workspaceName={workspaceRoot === '/' ? 'workspace' : workspaceRoot.split(/[\\/]/).pop() || workspaceRoot}
             className="text-slate-200"
           />
