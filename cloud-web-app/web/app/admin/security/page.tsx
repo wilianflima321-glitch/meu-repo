@@ -102,6 +102,9 @@ export default function AdminSecurity() {
           <p className='text-sm text-zinc-500'>Carregando configuracoes...</p>
         ) : (
           <div className='space-y-3'>
+            <AdminStatusBanner tone='info'>
+              Controles nesta superficie refletem politicas server-side. Ajustes sao aplicados via ambiente/ops.
+            </AdminStatusBanner>
             <div className='flex items-center justify-between gap-3'>
               <div>
                 <p className='font-medium'>2FA obrigatorio</p>

@@ -116,6 +116,14 @@ export default function APIs() {
           <AdminStatCard label='Cutoff candidates' value={removalCandidates.length} tone='emerald' />
         </AdminStatGrid>
       </div>
+      {summary.missing > 0 ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='warning'>
+            Existem integracoes ausentes. Recursos dependentes (IA, render, externos) retornarao erro explicito ate que as
+            chaves de ambiente estejam configuradas.
+          </AdminStatusBanner>
+        </div>
+      ) : null}
 
       <AdminSection className='mb-4'>
         <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
