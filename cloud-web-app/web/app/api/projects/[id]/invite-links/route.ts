@@ -10,6 +10,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { nanoid } from 'nanoid';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,9 +74,12 @@ export async function GET(
         orderBy: { createdAt: 'desc' },
       });
     } catch {
-      // InviteLink model não existe - retorna array vazio
-      // Em produção, criar migration para adicionar modelo InviteLink
-      inviteLinks = [];
+      return notImplementedCapability({
+        message: 'Invite links storage is not available. Run migrations to enable this feature.',
+        capability: 'PROJECT_INVITE_LINKS',
+        milestone: 'P1',
+        metadata: { projectId },
+      });
     }
 
     return NextResponse.json({

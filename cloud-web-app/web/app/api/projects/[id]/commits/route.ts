@@ -2,7 +2,7 @@
  * Project Commits API - Para TimeMachine
  * GET /api/projects/[id]/commits
  * 
- * Retorna histórico de commits/snapshots do projeto
+ * Retorna historico de commits/snapshots do projeto
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -14,6 +14,8 @@ const MAX_PROJECT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 
 export const dynamic = 'force-dynamic';
+
+const COMMITS_SIMULATED_WARNING = 'COMMITS_SIMULATED_PREVIEW: commit history is generated for UX preview only.';
 
 interface ProjectCommit {
   id: string;
@@ -51,14 +53,14 @@ export async function GET(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
+    const { id: rawProjectId } = await params;
+    const projectId = normalizeProjectId(rawProjectId);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
         { status: 400 }
       );
     }
-    const { id: projectId } = await params;
     const { searchParams } = new URL(req.url);
     
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -77,7 +79,7 @@ export async function GET(
     }
 
     // Buscar commits do projeto (tabela projectSnapshot ou similar)
-    // Em produção, isso viria do banco + Git real
+    // Em producao, isso viria do banco + Git real
     const commits = await generateProjectCommits(project, {
       limit,
       offset,
@@ -85,12 +87,25 @@ export async function GET(
       until: until ? new Date(until) : undefined,
     });
 
-    return NextResponse.json({
-      projectId,
-      commits,
-      total: commits.length + offset, // Simplified
-      hasMore: commits.length === limit,
-    });
+    return NextResponse.json(
+      {
+        projectId,
+        commits,
+        total: commits.length + offset, // Simplified
+        hasMore: commits.length === limit,
+        capability: 'PROJECT_COMMITS',
+        capabilityStatus: 'PARTIAL',
+        runtimeMode: 'simulated_preview',
+        warning: COMMITS_SIMULATED_WARNING,
+      },
+      {
+        headers: {
+          'x-aethel-capability': 'PROJECT_COMMITS',
+          'x-aethel-capability-status': 'PARTIAL',
+          'x-aethel-runtime-mode': 'simulated_preview',
+        },
+      }
+    );
   } catch (error) {
     console.error('Commits API error:', error);
     const mapped = apiErrorToResponse(error);
@@ -108,16 +123,16 @@ async function generateProjectCommits(
   
   // Gerar commits baseados na idade do projeto
   const commitMessages = [
-    { msg: 'feat: Adicionado sistema de partículas', type: 'feature' as const },
-    { msg: 'fix: Corrigido bug de colisão', type: 'fix' as const },
+    { msg: 'feat: Adicionado sistema de particulas', type: 'feature' as const },
+    { msg: 'fix: Corrigido bug de colisao', type: 'fix' as const },
     { msg: 'asset: Novos modelos de personagem', type: 'asset' as const },
     { msg: 'refactor: Otimizado sistema de LOD', type: 'refactor' as const },
     { msg: 'feat: Implementado ciclo dia/noite', type: 'feature' as const },
-    { msg: 'fix: Vazamento de memória em texturas', type: 'fix' as const },
+    { msg: 'fix: Vazamento de memoria em texturas', type: 'fix' as const },
     { msg: 'asset: Texturas PBR atualizadas', type: 'asset' as const },
-    { msg: 'config: Ajustes de qualidade gráfica', type: 'config' as const },
+    { msg: 'config: Ajustes de qualidade grafica', type: 'config' as const },
     { msg: 'feat: Sistema de save/load', type: 'feature' as const },
-    { msg: 'auto: Snapshot automático', type: 'auto' as const },
+    { msg: 'auto: Snapshot automatico', type: 'auto' as const },
   ];
 
   const numCommits = Math.min(options.limit, 50);
@@ -137,7 +152,7 @@ async function generateProjectCommits(
       shortHash: hash.slice(0, 7),
       message: msgData.msg,
       author: {
-        name: 'Você',
+        name: 'Voce',
         email: 'user@aethel.studio',
       },
       date: commitTime.toISOString(),
