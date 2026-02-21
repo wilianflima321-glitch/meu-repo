@@ -1840,3 +1840,16 @@ Delivered:
 Triaged impact:
 1. Prevents accidental exposure of legacy dashboard surface in default production path.
 2. Keeps entry UX contract stable on Studio Home-first flow.
+
+## Delta 2026-02-21 CXVIII - AI monitor admin UX hardening
+Delivered:
+1. Rebuilt `cloud-web-app/web/app/admin/ai-monitor/page.tsx` for operational consistency:
+- removed duplicate header blocks
+- fixed mojibake-prone strings
+- added authenticated data fetch behavior
+- added explicit error/loading handling
+- aligned emergency alert CTA with `/admin/emergency`
+
+Triaged impact:
+1. Reduced ambiguity and duplicate UI flows in a high-observability admin page.
+2. Improved operational trust with explicit failure states and cleaner telemetry presentation.

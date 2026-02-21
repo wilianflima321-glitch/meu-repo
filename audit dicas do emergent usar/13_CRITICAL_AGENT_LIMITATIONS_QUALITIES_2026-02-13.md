@@ -1804,3 +1804,13 @@ Implemented:
 Critical reading:
 1. This reduces accidental drift back to monolithic legacy dashboard in default production path.
 2. Residual risk remains maintenance cost of legacy dashboard code while opt-in path exists.
+
+## Delta 2026-02-21 CXVII - AI monitor surface cleanup
+Implemented:
+1. Consolidated duplicate header/actions in admin AI monitor page.
+2. Added explicit error/loading behavior and authenticated API fetch path.
+3. Removed mojibake-prone copy in a high-frequency operational surface.
+
+Critical reading:
+1. Observability UX quality improved without adding new backend capabilities.
+2. Residual risk remains in other long-tail admin pages that still need the same cleanup pattern.

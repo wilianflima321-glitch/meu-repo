@@ -414,3 +414,9 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 ### Delivered in this wave (Legacy route guard)
 1. Updated `cloud-web-app/web/app/dashboard/legacy/page.tsx`:
 - redirect to `/dashboard` unless `NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD=true`.
+
+### Delivered in this wave (AI monitor cleanup)
+1. Refactored `cloud-web-app/web/app/admin/ai-monitor/page.tsx`:
+- removed duplicate header/action surfaces
+- unified operational copy and emergency CTA
+- added explicit authenticated fetch + error/loading states.

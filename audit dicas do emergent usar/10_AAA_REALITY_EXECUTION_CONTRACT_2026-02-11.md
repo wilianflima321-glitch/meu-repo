@@ -4276,3 +4276,21 @@ Validation snapshot:
 Decision lock:
 1. Entry contract remains Studio Home-first by default.
 2. Legacy surface remains opt-in via explicit flag.
+
+## 169) Delta 2026-02-21 CXXIII - Admin AI monitor consistency wave
+
+Implemented:
+1. Refactored AI monitor admin surface:
+- `cloud-web-app/web/app/admin/ai-monitor/page.tsx`
+2. Changes:
+- removed duplicate headers and conflicting action bars
+- normalized text/copy (mojibake cleanup)
+- authenticated SWR fetches for admin API endpoints
+- explicit error/loading states
+- emergency management CTA aligned to `/admin/emergency`
+
+Validation snapshot:
+1. Targeted lint on `admin/ai-monitor/page` -> PASS.
+
+Decision lock:
+1. No feature-scope expansion; this is reliability/UX hardening of existing observability flow.
