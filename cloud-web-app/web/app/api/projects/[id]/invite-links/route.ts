@@ -1,7 +1,7 @@
 /**
  * Invite Links API - Aethel Engine
- * GET /api/projects/[id]/invite-links - Lista links de convite
- * POST /api/projects/[id]/invite-links - Cria novo link de convite
+ * GET /api/projects/[id]/invite-links - list invite links
+ * POST /api/projects/[id]/invite-links - create invite link
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -32,15 +32,19 @@ export async function GET(
       message: 'Too many invite link list requests. Please try again later.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
     const projectId = normalizeProjectId(params?.id);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
-        { success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        {
+          success: false,
+          error: 'INVALID_PROJECT_ID',
+          message: 'projectId is required and must be under 120 characters.',
+        },
         { status: 400 }
       );
     }
 
-    // Verifica se é owner ou admin do projeto
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
@@ -52,24 +56,15 @@ export async function GET(
     });
 
     if (!project) {
-      return NextResponse.json(
-        { success: false, error: 'Not authorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
     }
 
-    // Busca links de convite existentes
     let inviteLinks: any[] = [];
-    
     try {
-      // Tenta buscar do modelo InviteLink se existir
       inviteLinks = await (prisma as any).inviteLink.findMany({
-        where: { 
+        where: {
           projectId,
-          OR: [
-            { expiresAt: { gt: new Date() } },
-            { expiresAt: null },
-          ],
+          OR: [{ expiresAt: { gt: new Date() } }, { expiresAt: null }],
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -102,7 +97,7 @@ export async function GET(
   }
 }
 
-// POST /api/projects/[id]/invite-links - Cria link de convite
+// POST /api/projects/[id]/invite-links - create invite link
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -117,25 +112,28 @@ export async function POST(
       message: 'Too many invite link creation attempts. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
     const projectId = normalizeProjectId(params?.id);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
-        { success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        {
+          success: false,
+          error: 'INVALID_PROJECT_ID',
+          message: 'projectId is required and must be under 120 characters.',
+        },
         { status: 400 }
       );
     }
+
     const body = await request.json();
-    const { role = 'viewer', expiresIn, maxUsage } = body;
+    const role = body?.role || 'viewer';
+    const expiresInMs = Number.isFinite(Number(body?.expiresIn)) ? Number(body.expiresIn) : undefined;
+    const maxUsageNormalized = Number.isFinite(Number(body?.maxUsage)) ? Number(body.maxUsage) : null;
 
-    // Validar role
     if (!['editor', 'viewer'].includes(role)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid role' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 });
     }
 
-    // Verifica se é owner ou admin do projeto
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
@@ -147,46 +145,35 @@ export async function POST(
     });
 
     if (!project) {
-      return NextResponse.json(
-        { success: false, error: 'Not authorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
     }
 
-    // Gera código único
     const code = nanoid(16);
-    
-    // Calcula expiração (default: 7 dias)
-    const expiresAt = expiresIn 
-      ? new Date(Date.now() + expiresIn)
+    const expiresAt = expiresInMs
+      ? new Date(Date.now() + expiresInMs)
       : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     let inviteLink: any;
-    
     try {
-      // Tenta criar no modelo InviteLink se existir
       inviteLink = await (prisma as any).inviteLink.create({
         data: {
           projectId,
           code,
           role,
           expiresAt,
-          maxUsage: maxUsage || null,
+          maxUsage: maxUsageNormalized,
           usageCount: 0,
           createdBy: user.userId,
         },
       });
     } catch (err) {
-      // InviteLink model não existe - retorna erro e instrução
       console.error('[Invite Links API] InviteLink model not available:', err);
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invite links feature not available. Please run prisma generate to sync the database schema.',
-          details: 'The InviteLink model may not be defined in your Prisma schema.'
-        },
-        { status: 503 }
-      );
+      return notImplementedCapability({
+        message: 'Invite links storage is not available. Run migrations to enable this feature.',
+        capability: 'PROJECT_INVITE_LINKS',
+        milestone: 'P1',
+        metadata: { projectId },
+      });
     }
 
     return NextResponse.json({

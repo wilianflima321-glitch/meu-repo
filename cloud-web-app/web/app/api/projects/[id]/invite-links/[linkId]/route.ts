@@ -1,12 +1,13 @@
 /**
  * Invite Link Management API - Aethel Engine
- * DELETE /api/projects/[id]/invite-links/[linkId] - Revoga link
+ * DELETE /api/projects/[id]/invite-links/[linkId] - revoke invite link
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ const MAX_LINK_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 const normalizeLinkId = (value?: string) => String(value ?? '').trim();
 
-// DELETE /api/projects/[id]/invite-links/[linkId] - Revoga link de convite
+// DELETE /api/projects/[id]/invite-links/[linkId] - revoke invite link
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string; linkId: string } }
@@ -33,21 +34,29 @@ export async function DELETE(
 
     const projectId = normalizeProjectId(params?.id);
     const linkId = normalizeLinkId(params?.linkId);
+
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
-        { success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        {
+          success: false,
+          error: 'INVALID_PROJECT_ID',
+          message: 'projectId is required and must be under 120 characters.',
+        },
         { status: 400 }
       );
     }
+
     if (!linkId || linkId.length > MAX_LINK_ID_LENGTH) {
       return NextResponse.json(
-        { success: false, error: 'INVALID_LINK_ID', message: 'linkId is required and must be under 120 characters.' },
+        {
+          success: false,
+          error: 'INVALID_LINK_ID',
+          message: 'linkId is required and must be under 120 characters.',
+        },
         { status: 400 }
       );
     }
-    const { id: projectId, linkId } = params;
 
-    // Verifica se é owner ou admin do projeto
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
@@ -59,23 +68,31 @@ export async function DELETE(
     });
 
     if (!project) {
-      return NextResponse.json(
-        { success: false, error: 'Not authorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
     }
 
     try {
-      // Tenta deletar do modelo InviteLink se existir
       await (prisma as any).inviteLink.delete({
         where: {
           id: linkId,
           projectId,
         },
       });
-    } catch {
-      // InviteLink model não existe ou link não encontrado
-      // Em produção, isso seria um erro real
+    } catch (err) {
+      const code = (err as { code?: string })?.code;
+      if (code === 'P2025') {
+        return NextResponse.json(
+          { success: false, error: 'INVITE_LINK_NOT_FOUND', message: 'Invite link not found.' },
+          { status: 404 }
+        );
+      }
+
+      return notImplementedCapability({
+        message: 'Invite links storage is not available. Run migrations to enable this feature.',
+        capability: 'PROJECT_INVITE_LINKS',
+        milestone: 'P1',
+        metadata: { projectId, linkId },
+      });
     }
 
     return NextResponse.json({
