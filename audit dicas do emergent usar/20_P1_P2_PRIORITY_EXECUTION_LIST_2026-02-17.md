@@ -90,6 +90,36 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - runtime preview loaded only on explicit opt-in
 - no regression in session orchestration or IDE handoff
 
+### P1-07 Security Baseline (External report absorption)
+1. Objective: harden critical auth/AI/billing endpoints with explicit protection.
+2. Files:
+- `cloud-web-app/web/lib/server/rate-limit.ts`
+- `cloud-web-app/web/app/api/**/route.ts` (critical only)
+- `cloud-web-app/web/next.config.js`
+3. Done criteria:
+- rate limit enforced on critical endpoints
+- security headers present in `next.config.js`
+- input validation for high-risk endpoints
+
+### P1-08 Test Confidence Baseline (External report absorption)
+1. Objective: add smoke/e2e coverage on Studio Home and Workbench flows.
+2. Files:
+- `cloud-web-app/web/tests/**`
+- `cloud-web-app/web/playwright.config.ts`
+3. Done criteria:
+- minimal smoke suite for `/dashboard` and `/ide`
+- regression tests flagged in CI (no bypass)
+
+### P1-09 Performance Telemetry Baseline (External report absorption)
+1. Objective: capture minimal performance and cost metrics for core flows.
+2. Files:
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+- `cloud-web-app/web/app/api/studio/cost/live/route.ts`
+- `cloud-web-app/web/docs/AI_RUNTIME_SLO.md`
+3. Done criteria:
+- session cost/latency metrics visible
+- performance budget targets documented (no claims without evidence)
+
 ## 2. P2 Priorities (After P1 Freeze)
 ### P2-01 Collaboration Readiness Gate
 1. Objective: formalize stability claims before promotion.
@@ -138,10 +168,13 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 4. P1-04
 5. P1-05
 6. P1-06
-7. P2-01
-8. P2-02
-9. P2-03
-10. P2-04
+7. P1-07
+8. P1-08
+9. P1-09
+10. P2-01
+11. P2-02
+12. P2-03
+13. P2-04
 
 ## 4. Mandatory Gate Before Marking Any Item Done
 1. `npm run lint`

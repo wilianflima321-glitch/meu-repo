@@ -7,6 +7,7 @@ Scope: Absorver feedback externo sem inflar claims, mantendo contrato canonico a
 ## 1) Fonte de entrada
 1. Relatorio externo fornecido pelo usuario em 2026-02-19 com comparativos de mercado (Unity/Unreal/VS Code/Cursor/GitHub Copilot/Sora/Veo/Hailuo).
 2. Este documento NAO substitui a fonte canonica.
+3. Relatorio externo adicional (2026-02-18) reconciliado em `30_EXTERNAL_REPORT_RECONCILIATION_2026-02-21.md`.
 3. Regras de absorcao:
 - Se houver evidencia no repositorio/codigo/docs canonicos: marcar `VERIFIED_INTERNAL`.
 - Se for benchmark plausivel sem prova interna: marcar `EXTERNAL_BENCHMARK_ASSUMPTION`.
@@ -73,3 +74,7 @@ Scope: Absorver feedback externo sem inflar claims, mantendo contrato canonico a
 - rerun consolidado do gate enterprise completo
 - validacao operacional de Upstash em ambiente de deploy
 - fechamento de claims `PARTIAL_INTERNAL` em `10`/`22` somente com evidencia de gate final
+
+## Delta 2026-02-21 - Absorcao do relatorio externo detalhado
+1. Relatorio externo de 2026-02-18 reconciliado em `30_EXTERNAL_REPORT_RECONCILIATION_2026-02-21.md`.
+2. Itens de seguranca, testes e performance permanecem como backlog direcional ate evidencia interna.

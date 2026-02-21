@@ -234,7 +234,14 @@ export default function PreviewPanel({
 }: PreviewPanelProps) {
   const [mediaLoadError, setMediaLoadError] = useState<string | null>(null)
   const ext = getExtension(filePath)
-  const mode = useMemo(() => resolvePreviewMode(filePath), [filePath])
+  const mode = useMemo(() => {
+    if (!filePath) {
+      if (typeof html === 'string' && html.trim()) return 'html'
+      if (typeof content === 'string' && content.trim()) return 'text'
+      return 'text'
+    }
+    return resolvePreviewMode(filePath)
+  }, [filePath, html, content])
   const textContent = typeof content === 'string' ? content : typeof html === 'string' ? html : ''
   const hasText = textContent.length > 0
   const isLargeTextPreview = hasText && textContent.length > MAX_INLINE_PREVIEW_CHARS
@@ -310,6 +317,8 @@ export default function PreviewPanel({
             sandbox="allow-scripts"
             className="w-full h-full bg-white"
             srcDoc={runtimeDoc}
+            loading="lazy"
+            referrerPolicy="no-referrer"
           />
         )}
 
