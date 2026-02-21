@@ -292,7 +292,7 @@ export default function FileExplorerPro({
         },
         body: JSON.stringify({ path: '/', maxDepth: 6, projectId }),
       })
-      if (!res.ok) throw new Error('Falha ao carregar workspace')
+      if (!res.ok) throw new Error('Failed to load workspace tree.')
       const data = await res.json()
       const tree = Array.isArray(data?.children)
         ? data.children
@@ -302,7 +302,7 @@ export default function FileExplorerPro({
       const mapped = tree.map(mapWorkspaceNode)
       setInternalFiles(mapped)
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : 'Erro ao carregar arquivos')
+      setLoadError(error instanceof Error ? error.message : 'Failed to load files.')
       setInternalFiles([])
     } finally {
       setIsLoading(false)
@@ -512,10 +512,24 @@ export default function FileExplorerPro({
       )}
 
       {/* File Tree */}
-      <div className="flex-1 overflow-y-auto py-1" role="tree" aria-label="Workspace files">
+      <div
+        className="flex-1 overflow-y-auto py-1"
+        role="tree"
+        aria-label="Workspace files"
+        aria-busy={effectiveLoading}
+      >
         {effectiveError && (
-          <div className="px-3 py-2 text-xs text-red-400">
-            {effectiveError}
+          <div className="px-3 py-2 text-xs text-red-400" role="alert">
+            <div className="flex items-center justify-between gap-2">
+              <span>{effectiveError}</span>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className="rounded border border-slate-700 bg-slate-800/60 px-2 py-1 text-[10px] text-slate-200 hover:bg-slate-700/80"
+              >
+                Retry
+              </button>
+            </div>
           </div>
         )}
         {effectiveLoading && !effectiveError && (
