@@ -4326,3 +4326,20 @@ Validation snapshot:
 
 Decision lock:
 1. No new capability claims; this wave is UX/auth hardening for existing admin management surfaces.
+
+## 172) Delta 2026-02-21 CXXVI - Admin account/support surface hardening
+
+Implemented:
+1. Refactored:
+- `cloud-web-app/web/app/admin/users/page.tsx`
+- `cloud-web-app/web/app/admin/support/page.tsx`
+2. Aligned both pages with:
+- `AdminSurface` layout/state primitives
+- shared authenticated admin fetch helper (`adminJsonFetch`)
+3. Standardized filter/table/action behavior and cleaned legacy copy patterns.
+
+Validation snapshot:
+1. Targeted lint on users/support/upgrades/updates/admin fetch helper -> PASS.
+
+Decision lock:
+1. No scope expansion; this is consistency and reliability hardening in existing admin operations.

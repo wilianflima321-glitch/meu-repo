@@ -434,3 +434,9 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `cloud-web-app/web/app/admin/ai-upgrades/page.tsx`
 - `cloud-web-app/web/app/admin/updates/page.tsx`
 2. Applied consistent shell/state patterns and authenticated admin fetch behavior.
+
+### Delivered in this wave (Admin users/support surfaces)
+1. Refactored:
+- `cloud-web-app/web/app/admin/users/page.tsx`
+- `cloud-web-app/web/app/admin/support/page.tsx`
+2. Applied shared primitives for table states, filter actions, and authenticated fetch behavior.

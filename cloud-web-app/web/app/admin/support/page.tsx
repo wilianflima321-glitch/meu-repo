@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Ticket = {
   id: string;
@@ -13,6 +23,10 @@ type Ticket = {
   createdAt: string;
 };
 
+type TicketsPayload = {
+  tickets?: Ticket[];
+};
+
 export default function Support() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,30 +37,28 @@ export default function Support() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const statusLabels: Record<string, string> = {
-    open: 'Aberto',
-    pending: 'Pendente',
-    resolved: 'Resolvido',
-    closed: 'Fechado',
+    open: 'Open',
+    pending: 'Pending',
+    resolved: 'Resolved',
+    closed: 'Closed',
   };
 
   const priorityLabels: Record<string, string> = {
-    low: 'Baixa',
+    low: 'Low',
     normal: 'Normal',
-    high: 'Alta',
-    urgent: 'Urgente',
+    high: 'High',
+    urgent: 'Urgent',
   };
 
   const fetchTickets = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/support/tickets');
-      if (!res.ok) throw new Error('Falha ao carregar chamados');
-      const data = await res.json();
+      const data = await adminJsonFetch<TicketsPayload>('/api/admin/support/tickets');
       setTickets(Array.isArray(data?.tickets) ? data.tickets : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar chamados');
+      setError(err instanceof Error ? err.message : 'Failed to load support tickets');
     } finally {
       setLoading(false);
     }
@@ -56,159 +68,152 @@ export default function Support() {
     fetchTickets();
   }, [fetchTickets]);
 
-  const filteredTickets = tickets.filter((ticket) => {
-    const term = search.trim().toLowerCase();
-    const matchesSearch =
-      !term ||
-      ticket.email.toLowerCase().includes(term) ||
-      ticket.subject.toLowerCase().includes(term);
-    const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  const filteredTickets = useMemo(
+    () =>
+      tickets.filter((ticket) => {
+        const term = search.trim().toLowerCase();
+        const matchesSearch =
+          !term ||
+          ticket.email.toLowerCase().includes(term) ||
+          ticket.subject.toLowerCase().includes(term);
+        const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
+        const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
+        return matchesSearch && matchesStatus && matchesPriority;
+      }),
+    [tickets, search, statusFilter, priorityFilter],
+  );
 
-  const summary = {
-    total: tickets.length,
-    open: tickets.filter((ticket) => ticket.status === 'open').length,
-    pending: tickets.filter((ticket) => ticket.status === 'pending').length,
-    urgent: tickets.filter((ticket) => ticket.priority === 'urgent').length,
-  };
+  const summary = useMemo(
+    () => ({
+      total: tickets.length,
+      open: tickets.filter((ticket) => ticket.status === 'open').length,
+      pending: tickets.filter((ticket) => ticket.status === 'pending').length,
+      urgent: tickets.filter((ticket) => ticket.priority === 'urgent').length,
+    }),
+    [tickets],
+  );
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className='text-3xl font-bold'>Suporte ao usuário</h1>
-          <p className='text-zinc-400'>Chamados reais do sistema de suporte.</p>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Support Operations'
+      description='Track and triage real support tickets from production users.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchTickets}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchTickets}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total tickets' value={summary.total} tone='sky' />
+          <AdminStatCard label='Open' value={summary.open} tone='emerald' />
+          <AdminStatCard label='Pending' value={summary.pending} tone='amber' />
+          <AdminStatCard label='Urgent' value={summary.urgent} tone='rose' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
+      <AdminSection className='mb-4'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+          <input
+            type='text'
+            placeholder='Search by email or subject'
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          />
+          <div className='flex items-center gap-2 flex-wrap'>
+            {(['all', 'open', 'pending', 'resolved', 'closed'] as const).map((status) => (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                className={`rounded px-3 py-1 text-xs font-semibold ${
+                  statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-300 hover:bg-zinc-700/80'
+                }`}
+              >
+                {status === 'all' ? 'All statuses' : (statusLabels[status] ?? status)}
+              </button>
+            ))}
+            {(['all', 'low', 'normal', 'high', 'urgent'] as const).map((priority) => (
+              <button
+                key={priority}
+                onClick={() => setPriorityFilter(priority)}
+                className={`rounded px-3 py-1 text-xs font-semibold ${
+                  priorityFilter === priority ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-300 hover:bg-zinc-700/80'
+                }`}
+              >
+                {priority === 'all' ? 'All priorities' : (priorityLabels[priority] ?? priority)}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Abertos</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.open}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Pendentes</h3>
-          <p className="text-2xl font-bold text-yellow-600">{summary.pending}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Urgentes</h3>
-          <p className="text-2xl font-bold text-red-600">{summary.urgent}</p>
-        </div>
-      </div>
+      </AdminSection>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <input
-          type="text"
-          placeholder="Buscar por e-mail ou assunto"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full md:max-w-sm"
-        />
-        <div className="flex items-center gap-2 flex-wrap">
-          {(['all', 'open', 'pending', 'resolved', 'closed'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
-              }`}
-            >
-              {status === 'all' ? 'Todos' : (statusLabels[status] ?? status)}
-            </button>
-          ))}
-          {(['all', 'low', 'normal', 'high', 'urgent'] as const).map((priority) => (
-            <button
-              key={priority}
-              onClick={() => setPriorityFilter(priority)}
-              className={`px-3 py-1 rounded text-xs font-semibold ${
-                priorityFilter === priority ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
-              }`}
-            >
-              {priority === 'all' ? 'Todas prioridades' : (priorityLabels[priority] ?? priority)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
-        <thead>
-          <tr className='bg-zinc-800/70'>
-            <th className='p-2'>ID</th>
-            <th className='p-2'>Usuário</th>
-            <th className='p-2'>Assunto</th>
-            <th className='p-2'>Status</th>
-            <th className='p-2'>Prioridade</th>
-            <th className='p-2'>Mensagens</th>
-            <th className='p-2'>Data</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={7}>Carregando chamados...</td>
-            </tr>
-          ) : error ? (
-            <tr>
-              <td className='p-2 text-sm text-red-500' colSpan={7}>{error}</td>
-            </tr>
-          ) : filteredTickets.length === 0 ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={7}>Nenhum chamado encontrado.</td>
-            </tr>
-          ) : (
-            filteredTickets.map((ticket) => (
-              <tr key={ticket.id}>
-                <td className='p-2'>{ticket.id.slice(-6)}</td>
-                <td className='p-2'>
-                  <div className="flex items-center gap-2">
-                    <span>{ticket.email}</span>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(ticket.email)}
-                      className="text-xs text-zinc-500 hover:text-zinc-200"
-                    >
-                      Copiar
-                    </button>
-                  </div>
-                </td>
-                <td className='p-2'>{ticket.subject}</td>
-                <td className='p-2'>
-                  <span className="px-2 py-1 rounded text-xs bg-zinc-800/70 text-zinc-400">
-                    {statusLabels[ticket.status] ?? ticket.status}
-                  </span>
-                </td>
-                <td className='p-2'>
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    ticket.priority === 'urgent'
-                      ? 'bg-rose-500/15 text-rose-300'
-                      : ticket.priority === 'high'
-                      ? 'bg-amber-500/15 text-amber-300'
-                      : 'bg-zinc-800/70 text-zinc-400'
-                  }`}>
-                    {priorityLabels[ticket.priority] ?? ticket.priority}
-                  </span>
-                </td>
-                <td className='p-2'>{ticket.messageCount}</td>
-                <td className='p-2'>{new Date(ticket.createdAt).toLocaleDateString()}</td>
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-2 text-left'>ID</th>
+                <th className='p-2 text-left'>User</th>
+                <th className='p-2 text-left'>Subject</th>
+                <th className='p-2 text-left'>Status</th>
+                <th className='p-2 text-left'>Priority</th>
+                <th className='p-2 text-left'>Messages</th>
+                <th className='p-2 text-left'>Date</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={7} message='Loading tickets...' />
+              ) : filteredTickets.length === 0 ? (
+                <AdminTableStateRow colSpan={7} message='No tickets found for current filters.' />
+              ) : (
+                filteredTickets.map((ticket) => (
+                  <tr key={ticket.id} className='border-t border-zinc-800/70'>
+                    <td className='p-2 text-zinc-500'>{ticket.id.slice(-6)}</td>
+                    <td className='p-2'>
+                      <div className='flex items-center gap-2'>
+                        <span>{ticket.email}</span>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(ticket.email)}
+                          className='text-xs text-zinc-500 hover:text-zinc-200'
+                          type='button'
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </td>
+                    <td className='p-2 text-zinc-200'>{ticket.subject}</td>
+                    <td className='p-2'>
+                      <span className='rounded bg-zinc-800/70 px-2 py-1 text-xs text-zinc-300'>
+                        {statusLabels[ticket.status] ?? ticket.status}
+                      </span>
+                    </td>
+                    <td className='p-2'>
+                      <span
+                        className={`rounded px-2 py-1 text-xs ${
+                          ticket.priority === 'urgent'
+                            ? 'bg-rose-500/15 text-rose-300'
+                            : ticket.priority === 'high'
+                              ? 'bg-amber-500/15 text-amber-300'
+                              : 'bg-zinc-800/70 text-zinc-300'
+                        }`}
+                      >
+                        {priorityLabels[ticket.priority] ?? ticket.priority}
+                      </span>
+                    </td>
+                    <td className='p-2'>{ticket.messageCount}</td>
+                    <td className='p-2 text-zinc-500'>{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

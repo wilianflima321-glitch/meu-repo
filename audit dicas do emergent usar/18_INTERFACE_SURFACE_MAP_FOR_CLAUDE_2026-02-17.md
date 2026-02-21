@@ -67,6 +67,8 @@ Priority admin pages:
 8. `cloud-web-app/web/app/admin/real-time/page.tsx`
 9. `cloud-web-app/web/app/admin/ai-upgrades/page.tsx`
 10. `cloud-web-app/web/app/admin/updates/page.tsx`
+11. `cloud-web-app/web/app/admin/users/page.tsx`
+12. `cloud-web-app/web/app/admin/support/page.tsx`
 
 Admin layout and shared frame:
 1. `cloud-web-app/web/app/admin/layout.tsx`

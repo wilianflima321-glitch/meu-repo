@@ -489,3 +489,12 @@ Label: `VERIFIED_INTERNAL`
 2. Aligned both surfaces with shared admin shell/state patterns and authenticated fetch behavior.
 3. Removed mojibake-prone copy in the refactored pages.
 4. Targeted lint verification for modified files: PASS.
+
+## 26) Delta 2026-02-21 - Users/support management hardening
+Label: `VERIFIED_INTERNAL`
+
+1. Refactored:
+- `cloud-web-app/web/app/admin/users/page.tsx`
+- `cloud-web-app/web/app/admin/support/page.tsx`
+2. Aligned with shared admin shell/state and authenticated fetch helper patterns.
+3. Targeted lint verification for modified users/support surfaces: PASS.

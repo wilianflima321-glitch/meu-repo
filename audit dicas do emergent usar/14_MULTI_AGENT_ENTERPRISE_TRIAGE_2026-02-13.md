@@ -1880,3 +1880,15 @@ Delivered:
 Triaged impact:
 1. Reduced UX/style drift in long-tail admin management surfaces.
 2. Improved trust by keeping action flows explicit and consistent with core admin pages.
+
+## Delta 2026-02-21 CXXI - Admin users/support operational consistency wave
+Delivered:
+1. Refactored:
+- `cloud-web-app/web/app/admin/users/page.tsx`
+- `cloud-web-app/web/app/admin/support/page.tsx`
+2. Unified both pages with `AdminSurface` primitives and authenticated admin fetch flow.
+3. Standardized table/filter/action states with consistent keyboard-focus behavior.
+
+Triaged impact:
+1. Reduced operational drift in account/support management surfaces.
+2. Removed remaining low-traffic pages using old visual/state patterns in this wave.

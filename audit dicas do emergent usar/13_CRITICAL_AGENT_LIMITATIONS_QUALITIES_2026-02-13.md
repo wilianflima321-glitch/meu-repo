@@ -1834,3 +1834,12 @@ Implemented:
 Critical reading:
 1. UX coherence improved in lower-traffic but decision-relevant admin pages.
 2. Residual risk remains in additional legacy admin pages that have not yet adopted shared primitives.
+
+## Delta 2026-02-21 CXX - Users/support page drift reduction
+Implemented:
+1. Standardized admin users and support pages using shared admin shell/state patterns.
+2. Unified authenticated fetch behavior and explicit empty/error/loading table states.
+
+Critical reading:
+1. This reduces operational inconsistency on account/support management paths.
+2. Residual risk remains in other niche admin pages still using bespoke local UI patterns.
