@@ -133,6 +133,9 @@ export default function Payments() {
       : gateway.checkoutEnabled
         ? 'Gateway ativo com checkout habilitado.'
         : 'Gateway ativo com checkout bloqueado por politica operacional.';
+  const originNote = gateway.checkoutOrigin
+    ? `Checkout origin configurado: ${gateway.checkoutOrigin}`
+    : 'Checkout origin nao definido. O sistema usara o dominio principal configurado em ambiente.';
 
   return (
     <AdminPageShell
@@ -200,6 +203,11 @@ export default function Payments() {
           <AdminStatusBanner tone={gateway.activeGateway === 'disabled' ? 'warning' : 'info'}>
             {gatewayOperationalNote}
           </AdminStatusBanner>
+          <div className='mt-2'>
+            <AdminStatusBanner tone={gateway.checkoutOrigin ? 'neutral' : 'warning'}>
+              {originNote}
+            </AdminStatusBanner>
+          </div>
         </div>
       </AdminSection>
 
