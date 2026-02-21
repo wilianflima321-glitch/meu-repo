@@ -1,6 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type ChatMessage = {
   id: string;
@@ -10,6 +19,15 @@ type ChatMessage = {
   createdAt: string;
 };
 
+type ChatPayload = {
+  messages?: ChatMessage[];
+};
+
+const priorityLabels: Record<string, string> = {
+  normal: 'Normal',
+  urgent: 'Urgent',
+};
+
 export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -17,21 +35,17 @@ export default function Chat() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const priorityLabels: Record<string, string> = {
-    normal: 'Normal',
-    urgent: 'Urgente',
-  };
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchMessages = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/chat');
-      if (!res.ok) throw new Error('Falha ao carregar chat');
-      const json = await res.json();
-      setMessages(json.messages || []);
+      const payload = await adminJsonFetch<ChatPayload>('/api/admin/chat');
+      setMessages(Array.isArray(payload?.messages) ? payload.messages : []);
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar chat');
+      setError(err instanceof Error ? err.message : 'Failed to load chat messages');
     } finally {
       setLoading(false);
     }
@@ -41,26 +55,25 @@ export default function Chat() {
     fetchMessages();
   }, [fetchMessages]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!newMessage.trim()) return;
     try {
       setSending(true);
-      const res = await fetch('/api/admin/chat', {
+      await adminJsonFetch('/api/admin/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: newMessage, priority }),
+        body: JSON.stringify({ text: newMessage.trim(), priority }),
       });
-      if (!res.ok) throw new Error('Falha ao enviar mensagem');
       setNewMessage('');
       await fetchMessages();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao enviar mensagem');
+      setError(err instanceof Error ? err.message : 'Failed to send chat message');
     } finally {
       setSending(false);
     }
-  };
+  }, [fetchMessages, newMessage, priority]);
 
-  const exportHistory = () => {
+  const exportHistory = useCallback(() => {
     const blob = new Blob([JSON.stringify(messages, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -68,65 +81,89 @@ export default function Chat() {
     link.download = `admin-chat-${new Date().toISOString()}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  };
+  }, [messages]);
+
+  const summary = useMemo(
+    () => ({
+      total: messages.length,
+      urgent: messages.filter((message) => message.priority === 'urgent').length,
+      admins: new Set(messages.map((message) => message.sender)).size,
+    }),
+    [messages],
+  );
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Chat Prioritário com IA</h1>
-          <p className='text-sm text-zinc-500'>Histórico persistente e prioridade operacional.</p>
+    <AdminPageShell
+      title='Admin Chat'
+      description='Operational messaging channel with persisted history and message priority.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchMessages}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button onClick={fetchMessages} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Messages' value={summary.total} tone='sky' />
+          <AdminStatCard label='Urgent' value={summary.urgent} tone='amber' />
+          <AdminStatCard label='Senders' value={summary.admins} tone='neutral' />
+          <AdminStatCard label='Draft size' value={newMessage.length} tone='emerald' />
+        </AdminStatGrid>
       </div>
 
-      {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
-          {error}
+      <AdminSection className='mb-6'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-center'>
+          <select
+            value={priority}
+            onChange={(event) => setPriority(event.target.value)}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          >
+            <option value='normal'>Normal</option>
+            <option value='urgent'>Urgent</option>
+          </select>
+          <input
+            type='text'
+            value={newMessage}
+            onChange={(event) => setNewMessage(event.target.value)}
+            placeholder='Type your message...'
+            className='flex-1 rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          />
+          <AdminPrimaryButton
+            onClick={sendMessage}
+            disabled={sending || !newMessage.trim()}
+            className='bg-blue-600 text-white hover:bg-blue-500'
+          >
+            {sending ? 'Sending...' : 'Send'}
+          </AdminPrimaryButton>
         </div>
-      )}
+      </AdminSection>
 
-      <div className='mb-6 flex flex-col md:flex-row md:items-center gap-3'>
-        <select value={priority} onChange={(e) => setPriority(e.target.value)} className='p-2 border rounded'>
-          <option value='normal'>Normal</option>
-          <option value='urgent'>Urgente</option>
-        </select>
-        <input
-          type='text'
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder='Digite sua mensagem...'
-          className='p-2 border rounded flex-1'
-        />
-        <button
-          onClick={sendMessage}
-          disabled={sending}
-          className='px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50'
-        >
-          {sending ? 'Enviando...' : 'Enviar'}
-        </button>
-      </div>
-
-      <div className='border rounded p-4 h-96 overflow-y-auto bg-zinc-900/70'>
+      <AdminSection className='mb-4'>
         {loading ? (
-          <p className='text-sm text-zinc-500'>Carregando mensagens...</p>
+          <p className='text-sm text-zinc-500'>Loading messages...</p>
         ) : messages.length === 0 ? (
-          <p className='text-sm text-zinc-500'>Nenhuma mensagem registrada.</p>
+          <p className='text-sm text-zinc-500'>No messages recorded.</p>
         ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className="mb-2 p-2 rounded border">
-              <strong>{msg.sender.toUpperCase()} ({priorityLabels[msg.priority] ?? msg.priority}):</strong> {msg.text}
-              <div className='text-xs text-zinc-500 mt-1'>{new Date(msg.createdAt).toLocaleString()}</div>
-            </div>
-          ))
+          <div className='max-h-96 space-y-2 overflow-y-auto'>
+            {messages.map((message) => (
+              <div key={message.id} className='rounded border border-zinc-800/70 p-3 text-sm'>
+                <div>
+                  <strong>{message.sender.toUpperCase()}</strong> ({priorityLabels[message.priority] ?? message.priority})
+                </div>
+                <div className='mt-1 text-zinc-200'>{message.text}</div>
+                <div className='mt-1 text-xs text-zinc-500'>{new Date(message.createdAt).toLocaleString()}</div>
+              </div>
+            ))}
+          </div>
         )}
-      </div>
+      </AdminSection>
 
-      <div className='mt-4'>
-        <button onClick={exportHistory} className='px-4 py-2 bg-green-600 text-white rounded'>Exportar Histórico</button>
-      </div>
-    </div>
+      <AdminPrimaryButton onClick={exportHistory} className='bg-emerald-600 text-white hover:bg-emerald-500'>
+        Export history
+      </AdminPrimaryButton>
+    </AdminPageShell>
   );
 }

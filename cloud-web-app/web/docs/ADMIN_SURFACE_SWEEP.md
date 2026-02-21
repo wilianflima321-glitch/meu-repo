@@ -1,9 +1,9 @@
 # Admin Surface Sweep
 
-- Generated at: `2026-02-21T01:55:19.455Z`
+- Generated at: `2026-02-21T02:01:27.272Z`
 - Files scanned: `45`
-- Missing `AdminPageShell`: `20`
-- Direct `fetch(...)` without `adminJsonFetch`: `20`
+- Missing `AdminPageShell`: `13`
+- Direct `fetch(...)` without `adminJsonFetch`: `13`
 - Mojibake candidates: `0`
 
 ## Detailed Matrix
@@ -18,16 +18,16 @@
 | `app/admin/ai-upgrades/page.tsx` | no | no | no | no | no |
 | `app/admin/analytics/page.tsx` | no | no | no | no | no |
 | `app/admin/apis/page.tsx` | no | no | no | no | no |
-| `app/admin/arpu-churn/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/arpu-churn/page.tsx` | no | no | no | no | no |
 | `app/admin/audit-logs/page.tsx` | no | no | no | no | no |
 | `app/admin/automation/page.tsx` | no | no | no | no | no |
 | `app/admin/backup/page.tsx` | no | no | no | no | no |
 | `app/admin/bias-detection/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/chat/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/collaboration/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/chat/page.tsx` | no | no | no | no | no |
+| `app/admin/collaboration/page.tsx` | no | no | no | no | no |
 | `app/admin/compliance/page.tsx` | no | no | no | no | no |
 | `app/admin/cost-optimization/page.tsx` | no | no | no | no | no |
-| `app/admin/deploy/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/deploy/page.tsx` | no | no | no | no | no |
 | `app/admin/emergency/page.tsx` | no | no | no | no | no |
 | `app/admin/feature-flags/page.tsx` | no | no | no | no | no |
 | `app/admin/feedback/page.tsx` | yes | yes | maybe | maybe | no |
@@ -35,14 +35,14 @@
 | `app/admin/fine-tuning/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/god-view/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/ide-settings/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/indexing/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/indexing/page.tsx` | no | no | no | no | no |
 | `app/admin/infrastructure/page.tsx` | yes | yes | maybe | maybe | no |
 | `app/admin/ip-registry/page.tsx` | no | no | no | no | no |
 | `app/admin/marketplace/page.tsx` | no | no | no | no | no |
 | `app/admin/moderation/page.tsx` | yes | yes | maybe | maybe | no |
-| `app/admin/multi-tenancy/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/multi-tenancy/page.tsx` | no | no | no | no | no |
 | `app/admin/notifications/page.tsx` | no | no | no | no | no |
-| `app/admin/onboarding/page.tsx` | yes | yes | maybe | maybe | no |
+| `app/admin/onboarding/page.tsx` | no | no | no | no | no |
 | `app/admin/page.tsx` | no | no | no | no | no |
 | `app/admin/payments/page.tsx` | no | no | no | no | no |
 | `app/admin/promotions/page.tsx` | no | no | no | no | no |

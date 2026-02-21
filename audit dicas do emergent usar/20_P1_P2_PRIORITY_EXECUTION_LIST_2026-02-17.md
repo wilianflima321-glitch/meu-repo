@@ -532,3 +532,21 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 1. `missing AdminPageShell: 20`
 2. `direct fetch without adminJsonFetch: 20` (from 24)
 3. `mojibake candidates: 0`
+
+## Delta 2026-02-21 - Admin conversion wave 6
+
+### Delivered in this wave
+1. Converted to shared admin surfaces and authenticated helper:
+- `cloud-web-app/web/app/admin/arpu-churn/page.tsx`
+- `cloud-web-app/web/app/admin/onboarding/page.tsx`
+- `cloud-web-app/web/app/admin/collaboration/page.tsx`
+- `cloud-web-app/web/app/admin/multi-tenancy/page.tsx`
+- `cloud-web-app/web/app/admin/chat/page.tsx`
+- `cloud-web-app/web/app/admin/indexing/page.tsx`
+- `cloud-web-app/web/app/admin/deploy/page.tsx`
+2. Standardized explicit loading/error/empty flows and removed route-local fetch/header duplication.
+
+### Updated residual from `qa:admin-surface`
+1. `missing AdminPageShell: 13` (from 20)
+2. `direct fetch without adminJsonFetch: 13` (from 20)
+3. `mojibake candidates: 0`

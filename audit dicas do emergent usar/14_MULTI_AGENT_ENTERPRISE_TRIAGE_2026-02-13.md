@@ -1945,3 +1945,11 @@ Triaged impact:
 - `missing AdminPageShell=20`
 - `direct fetch without adminJsonFetch=20`
 - `mojibake candidates=0`
+
+## Delta 2026-02-21 (Admin hardening wave 6)
+1. Converted seven additional admin operational pages to shared shell/state patterns.
+2. Reduced admin-surface residual by 35% in one wave.
+3. Current residual baseline:
+- `missing AdminPageShell=13`
+- `direct fetch without adminJsonFetch=13`
+- `mojibake candidates=0`

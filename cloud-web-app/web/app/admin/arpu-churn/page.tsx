@@ -1,6 +1,15 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type FinanceMetrics = {
   mrr: number;
@@ -12,21 +21,21 @@ export default function ArpuChurnPage() {
   const [metrics, setMetrics] = useState<FinanceMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/finance/metrics?range=30d');
-      if (!res.ok) throw new Error('Falha ao carregar métricas financeiras');
-      const data = await res.json();
+      const data = await adminJsonFetch<Partial<FinanceMetrics>>('/api/admin/finance/metrics?range=30d');
       setMetrics({
         mrr: data?.mrr ?? 0,
         activeSubscriptions: data?.activeSubscriptions ?? 0,
         churnRate: data?.churnRate ?? 0,
       });
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar métricas');
+      setError(err instanceof Error ? err.message : 'Failed to load ARPU/churn metrics');
     } finally {
       setLoading(false);
     }
@@ -36,55 +45,42 @@ export default function ArpuChurnPage() {
     fetchMetrics();
   }, [fetchMetrics]);
 
-  if (loading) {
-    return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
-        <p className="text-sm text-zinc-500">Carregando métricas...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
-        <p className="text-sm text-red-500">{error}</p>
-        <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onClick={fetchMetrics}>
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  const activeSubs = metrics?.activeSubscriptions ?? 0;
-  const arpu = activeSubs > 0 ? (metrics?.mrr ?? 0) / activeSubs : 0;
-  const churnRate = metrics?.churnRate ?? 0;
-  const retentionRate = Math.max(0, 100 - churnRate);
+  const computed = useMemo(() => {
+    const current = metrics ?? { mrr: 0, activeSubscriptions: 0, churnRate: 0 };
+    const arpu = current.activeSubscriptions > 0 ? current.mrr / current.activeSubscriptions : 0;
+    const retentionRate = Math.max(0, 100 - current.churnRate);
+    return { ...current, arpu, retentionRate };
+  }, [metrics]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
-      
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">ARPU (30d)</h3>
-          <p className="text-2xl font-bold text-green-600">${arpu.toFixed(2)}</p>
+    <AdminPageShell
+      title='ARPU and Churn'
+      description='Track monetization efficiency and retention risk from real subscription metrics.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchMetrics}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Taxa de Churn</h3>
-          <p className="text-2xl font-bold text-red-600">{churnRate.toFixed(1)}%</p>
-        </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Taxa de Retenção</h3>
-          <p className="text-2xl font-bold text-blue-600">{retentionRate.toFixed(1)}%</p>
-        </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='ARPU (30d)' value={`$${computed.arpu.toFixed(2)}`} tone='emerald' />
+          <AdminStatCard label='Churn rate' value={`${computed.churnRate.toFixed(1)}%`} tone='rose' />
+          <AdminStatCard label='Retention rate' value={`${computed.retentionRate.toFixed(1)}%`} tone='sky' />
+          <AdminStatCard label='Active subs' value={computed.activeSubscriptions} tone='neutral' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Dados Históricos</h2>
-        <p className="text-sm text-zinc-500">Nenhuma série histórica consolidada disponível no momento.</p>
-      </div>
-    </div>
+      <AdminSection title='Data availability'>
+        {loading ? (
+          <p className='text-sm text-zinc-500'>Loading financial historical baseline...</p>
+        ) : (
+          <p className='text-sm text-zinc-500'>No consolidated long-term ARPU/churn time series is currently exposed in this panel.</p>
+        )}
+      </AdminSection>
+    </AdminPageShell>
   );
 }
