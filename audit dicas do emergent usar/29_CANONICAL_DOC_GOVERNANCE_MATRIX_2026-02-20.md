@@ -1,12 +1,12 @@
 # 29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20
 Status: GENERATED CANONICAL DOC GOVERNANCE SWEEP
-Generated: 2026-02-20T23:58:23.016Z
+Generated: 2026-02-21T03:15:59.528Z
 
 ## Summary
 - Canonical index exists: yes
 - Canonical listed docs: 32
 - Markdown files in canonical folder: 32
-- Markdown files outside canonical folder: 3602
+- Markdown files outside canonical folder: 3603
 - Missing listed canonical docs: 0
 - Canonical filename conflicts outside canonical folder: 0
 - Unindexed markdown files inside canonical folder: 0
@@ -28,7 +28,7 @@ Generated: 2026-02-20T23:58:23.016Z
 | `shared` | 1293 |
 | `docs` | 173 |
 | `(repo-root)` | 119 |
-| `cloud-web-app` | 35 |
+| `cloud-web-app` | 36 |
 | `meu-repo` | 7 |
 | `diagnostics` | 6 |
 | `.github` | 5 |
