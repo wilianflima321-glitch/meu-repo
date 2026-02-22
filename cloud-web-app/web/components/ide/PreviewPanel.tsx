@@ -384,7 +384,7 @@ export default function PreviewPanel({
                 Extension &quot;{ext || 'unknown'}&quot; is outside the validated runtime preview scope.
               </div>
               <div className="mt-2 text-slate-500 text-xs">
-                Capability status: NOT_IMPLEMENTED. Use export or runtime build for advanced preview.
+                Capability status: UNSUPPORTED_RUNTIME. Use export or runtime build for advanced preview.
               </div>
             </div>
           </div>

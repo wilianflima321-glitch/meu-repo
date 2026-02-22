@@ -15,13 +15,14 @@ const MAX_PROJECT_ID_LENGTH = 120;
 const MAX_EXPORT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 const normalizeExportId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string; exportId: string }> };
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string; exportId: string } }
+  ctx: RouteContext
 ) {
   try {
-        const exportId = exportId;
+    const resolvedParams = await ctx.params;
 
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -43,8 +44,8 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
-    const exportId = normalizeExportId(params?.exportId);
+    const projectId = normalizeProjectId(resolvedParams?.id);
+    const exportId = normalizeExportId(resolvedParams?.exportId);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },

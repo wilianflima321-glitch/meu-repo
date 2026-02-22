@@ -27,20 +27,12 @@ function mapToTreeNode(entry: FileInfo, scopedRoot: string) {
 
 async function handleList(
   request: NextRequest,
+  userId: string,
   bodyPath?: string,
   bodyRecursive?: boolean,
   body?: Record<string, unknown>
 ) {
-  const user = requireAuth(request)
-  const rateLimitResponse = await enforceRateLimit({
-    scope: request.method === 'POST' ? 'files-list-post' : 'files-list-get',
-    key: user.userId,
-    max: 120,
-    windowMs: 60 * 1000,
-    message: 'Too many file list requests. Please retry shortly.',
-  })
-  if (rateLimitResponse) return rateLimitResponse
-  await requireEntitlementsForUser(user.userId)
+  await requireEntitlementsForUser(userId)
   const projectId = getScopedProjectId(request, body)
 
   const url = new URL(request.url)
@@ -49,7 +41,7 @@ async function handleList(
 
   const runtime = getFileSystemRuntime()
   const { absolutePath: resolvedPath, root: scopedRoot } = resolveScopedWorkspacePath({
-    userId: user.userId,
+    userId,
     projectId,
     requestedPath: path,
   })
@@ -87,7 +79,16 @@ async function handleList(
 
 export async function GET(request: NextRequest) {
   try {
-    return await handleList(request)
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-list-get',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many file list requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+    return await handleList(request, user.userId)
   } catch (error) {
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
@@ -97,8 +98,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-list-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many file list requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     const body = await request.json().catch(() => ({} as Record<string, unknown>))
-    return await handleList(request, body?.path as string | undefined, body?.recursive as boolean | undefined, body)
+    return await handleList(
+      request,
+      user.userId,
+      body?.path as string | undefined,
+      body?.recursive as boolean | undefined,
+      body
+    )
   } catch (error) {
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped

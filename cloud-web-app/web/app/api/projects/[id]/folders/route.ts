@@ -12,6 +12,12 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 const MAX_PROJECT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+async function resolveProjectId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeProjectId(resolvedParams?.id);
+}
 
 function normalizeFolderPath(input: string): string {
   const base = (input || '/Content').replace(/\\/g, '/').trim();
@@ -62,7 +68,7 @@ async function ensureProjectAccess(projectId: string, userId: string, writeAcces
 // ============================================================================
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
@@ -76,7 +82,7 @@ export async function GET(
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
@@ -137,7 +143,7 @@ export async function GET(
 // ============================================================================
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
@@ -151,7 +157,7 @@ export async function POST(
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
@@ -244,7 +250,7 @@ export async function POST(
 // ============================================================================
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
@@ -258,7 +264,7 @@ export async function DELETE(
     if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },

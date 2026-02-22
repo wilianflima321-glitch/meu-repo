@@ -13,8 +13,14 @@ import path from 'path';
 import { existsSync } from 'fs';
 const MAX_ASSET_ID_LENGTH = 120;
 const normalizeAssetId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
 export const dynamic = 'force-dynamic';
+
+async function resolveAssetId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeAssetId(resolvedParams?.id);
+}
 
 async function verifyAssetAccess(assetId: string, userId: string) {
   return prisma.asset.findFirst({
@@ -79,7 +85,7 @@ async function copyLocalUpload(sourceUrl: string, baseName: string) {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
@@ -92,7 +98,7 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const assetId = normalizeAssetId(params?.id);
+    const assetId = await resolveAssetId(ctx);
     if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
