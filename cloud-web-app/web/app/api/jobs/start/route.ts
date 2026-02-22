@@ -1,5 +1,5 @@
 /**
- * AETHEL ENGINE - Job Queue Start API
+ * Aethel Engine - Job Queue Start API
  *
  * POST /api/jobs/start => resume all queues
  * GET  /api/jobs/start => queue backend availability + aggregate snapshot
@@ -9,13 +9,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
-function isUnauthorizedError(error: unknown): boolean {
-  return error instanceof Error && error.message === 'Unauthorized';
+function authErrorResponse(error: unknown): NextResponse | null {
+  if (error instanceof Error && error.message === 'Unauthorized') {
+    return NextResponse.json({ error: 'UNAUTHORIZED', message: 'Authentication required.' }, { status: 401 });
+  }
+  if (error instanceof Error && String((error as { code?: string }).code || '') === 'AUTH_NOT_CONFIGURED') {
+    return NextResponse.json(
+      { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
+      { status: 503 }
+    );
+  }
+  return null;
 }
 
-function isAuthNotConfigured(error: unknown): boolean {
-  return error instanceof Error && String((error as any).code || '') === 'AUTH_NOT_CONFIGURED';
+function queueUnavailableResponse() {
+  return NextResponse.json(
+    {
+      error: 'QUEUE_BACKEND_UNAVAILABLE',
+      message: 'Queue backend is not configured.',
+      capability: 'JOB_QUEUE_CONTROL',
+      capabilityStatus: 'PARTIAL',
+    },
+    { status: 503 }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -31,38 +49,22 @@ export async function POST(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     const result = await queueManager.setAllQueuesPaused(false);
-    if (!result.available) {
-      return NextResponse.json(
-        {
-          error: 'QUEUE_BACKEND_UNAVAILABLE',
-          message: 'Queue backend is not configured.',
-        },
-        { status: 503 }
-      );
-    }
+    if (!result.available) return queueUnavailableResponse();
 
     return NextResponse.json({
       success: true,
       status: 'running',
-      message: 'Filas retomadas com sucesso',
+      message: 'Queues resumed.',
       queues: result.queues,
       startedAt: new Date().toISOString(),
     });
   } catch (error) {
-    if (isUnauthorizedError(error)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    if (isAuthNotConfigured(error)) {
-      return NextResponse.json(
-        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
-        { status: 503 }
-      );
-    }
-    console.error('Erro ao iniciar fila:', error);
-    return NextResponse.json(
-      { error: 'Erro interno ao iniciar fila' },
-      { status: 500 }
-    );
+    const authError = authErrorResponse(error);
+    if (authError) return authError;
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    console.error('Job queue start error:', error);
+    return apiInternalError();
   }
 }
 
@@ -74,7 +76,7 @@ export async function GET(request: NextRequest) {
       key: user.userId,
       max: 360,
       windowMs: 60 * 60 * 1000,
-      message: 'Too many job queue start status requests. Please wait before retrying.',
+      message: 'Too many job queue status requests. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
 
@@ -85,6 +87,8 @@ export async function GET(request: NextRequest) {
           isRunning: false,
           status: 'unavailable',
           error: 'QUEUE_BACKEND_UNAVAILABLE',
+          capability: 'JOB_QUEUE_CONTROL',
+          capabilityStatus: 'PARTIAL',
         },
         { status: 503 }
       );
@@ -111,19 +115,11 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    if (isUnauthorizedError(error)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    if (isAuthNotConfigured(error)) {
-      return NextResponse.json(
-        { error: 'AUTH_NOT_CONFIGURED', message: 'Set JWT_SECRET to enable protected APIs.' },
-        { status: 503 }
-      );
-    }
-    console.error('Erro ao buscar status da fila:', error);
-    return NextResponse.json(
-      { error: 'Falha ao buscar status da fila' },
-      { status: 500 }
-    );
+    const authError = authErrorResponse(error);
+    if (authError) return authError;
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    console.error('Job queue status error:', error);
+    return apiInternalError();
   }
 }
