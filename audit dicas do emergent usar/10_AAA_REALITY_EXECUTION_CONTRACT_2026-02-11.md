@@ -4398,7 +4398,11 @@ Implemented:
 - `cloud-web-app/web/app/api/chat/threads/[id]/route.ts`
 - `cloud-web-app/web/app/api/chat/threads/[id]/messages/route.ts`
 - `cloud-web-app/web/app/api/copilot/workflows/[id]/route.ts`
-3. Regenerated repository connectivity evidence:
+3. Hardened queue job detail/cancel/retry routes with awaited params, explicit validation, and capability-envelope response for unavailable queue runtime:
+- `cloud-web-app/web/app/api/jobs/[id]/route.ts`
+- `cloud-web-app/web/app/api/jobs/[id]/cancel/route.ts`
+- `cloud-web-app/web/app/api/jobs/[id]/retry/route.ts`
+4. Regenerated repository connectivity evidence:
 - `requiredMissing=0`
 - `optionalMissing=0`
 - `deadScriptReferences=0`

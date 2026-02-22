@@ -8,10 +8,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
+const MAX_JOB_ID_LENGTH = 120;
+const normalizeJobId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -21,10 +22,23 @@ function isAuthNotConfigured(error: unknown): boolean {
   return error instanceof Error && String((error as any).code || '') === 'AUTH_NOT_CONFIGURED';
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+async function resolveJobId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeJobId(resolved?.id);
+}
+
+function queueUnavailableResponse() {
+  return capabilityResponse({
+    status: 503,
+    error: 'QUEUE_BACKEND_UNAVAILABLE',
+    message: 'Queue backend is not configured.',
+    capability: 'JOB_QUEUE_RUNTIME',
+    capabilityStatus: 'PARTIAL',
+    milestone: 'P1',
+  });
+}
+
+export async function POST(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
     const rateLimitResponse = await enforceRateLimit({
@@ -35,38 +49,39 @@ export async function POST(
       message: 'Too many job cancel requests. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
-    const { id } = await params;
 
-    const available = await queueManager.isAvailable();
-    if (!available) {
+    const jobId = await resolveJobId(ctx);
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
       return NextResponse.json(
-        {
-          error: 'QUEUE_BACKEND_UNAVAILABLE',
-          message: 'Queue backend is not configured.',
-        },
-        { status: 503 }
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
       );
     }
 
-    const result = await queueManager.cancelJob(id);
+    const available = await queueManager.isAvailable();
+    if (!available) {
+      return queueUnavailableResponse();
+    }
+
+    const result = await queueManager.cancelJob(jobId);
     if (!result.found) {
-      return NextResponse.json({ error: 'Job nao encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'JOB_NOT_FOUND', message: 'Job not found.' }, { status: 404 });
     }
     if (!result.cancelled) {
       if (result.reason === 'JOB_ACTIVE_CANNOT_CANCEL') {
         return NextResponse.json(
-          { error: 'Job ativo nao pode ser cancelado imediatamente', state: result.state },
+          { error: 'JOB_ACTIVE_CANNOT_CANCEL', message: 'Active jobs cannot be cancelled immediately.', state: result.state },
           { status: 409 }
         );
       }
       if (result.reason === 'JOB_ALREADY_FINALIZED') {
         return NextResponse.json(
-          { error: 'Job ja finalizado', state: result.state },
+          { error: 'JOB_ALREADY_FINALIZED', message: 'Job is already finalized.', state: result.state },
           { status: 400 }
         );
       }
       return NextResponse.json(
-        { error: result.reason || 'Cancelamento indisponivel', state: result.state },
+        { error: result.reason || 'JOB_CANCEL_NOT_AVAILABLE', message: 'Job cancellation is not available.', state: result.state },
         { status: 400 }
       );
     }
@@ -74,7 +89,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       job: {
-        id,
+        id: jobId,
         status: 'cancelled',
         cancelledAt: new Date().toISOString(),
       },
@@ -89,10 +104,7 @@ export async function POST(
         { status: 503 }
       );
     }
-    console.error('Erro ao cancelar job:', error);
-    return NextResponse.json(
-      { error: 'Erro interno ao cancelar job' },
-      { status: 500 }
-    );
+    console.error('Failed to cancel job:', error);
+    return NextResponse.json({ error: 'JOB_CANCEL_FAILED', message: 'Failed to cancel job.' }, { status: 500 });
   }
 }

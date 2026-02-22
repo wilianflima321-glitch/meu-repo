@@ -524,7 +524,8 @@ Label: `VERIFIED_INTERNAL`
 - `cloud-web-app/web/app/api/chat/threads/[id]/route.ts`
 - `cloud-web-app/web/app/api/chat/threads/[id]/messages/route.ts`
 - `cloud-web-app/web/app/api/copilot/workflows/[id]/route.ts`
-3. Repository connectivity matrix regenerated:
+3. Hardened queue job detail/cancel/retry routes with explicit `jobId` validation and queue-unavailable capability envelope.
+4. Repository connectivity matrix regenerated:
 - `requiredMissing=0`
 - `optionalMissing=0`
 - `deadScriptReferences=0`

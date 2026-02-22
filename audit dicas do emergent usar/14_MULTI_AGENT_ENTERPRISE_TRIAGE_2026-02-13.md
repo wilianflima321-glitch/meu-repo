@@ -1973,11 +1973,12 @@ Triaged impact:
 ## Delta 2026-02-22 (Route-context reliability + connectivity refresh)
 1. Hardened dynamic route-context handling in studio orchestration and render cancel endpoints by switching to awaited params contract.
 2. Hardened chat thread detail/messages and copilot workflow detail route-context handling to the same awaited-params contract, with normalized operator-facing copy.
-3. Refreshed connectivity evidence (`25`) with latest repository metrics:
+3. Hardened queue job detail/cancel/retry endpoints with explicit validation and queue-unavailable capability envelope.
+4. Refreshed connectivity evidence (`25`) with latest repository metrics:
 - `requiredMissing=0`
 - `optionalMissing=0`
 - `deadScriptReferences=0`
 - `markdownTotal=3636`
 - `markdownCanonical=33`
 - `markdownHistorical=3603`
-4. No business-scope change; this wave is reliability and governance only.
+5. No business-scope change; this wave is reliability and governance only.

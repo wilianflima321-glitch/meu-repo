@@ -117,3 +117,8 @@ Validation status:
 1. No endpoint payload contract changes in this wave.
 2. Studio orchestration and render-cancel dynamic handlers now consume awaited route params (`params: Promise<...>`) for runtime consistency.
 3. Capability/deprecation/error envelopes are unchanged and remain authoritative.
+
+## 8) Delta 2026-02-22 - Job queue contract normalization
+1. `/api/jobs/[id]`, `/api/jobs/[id]/cancel`, and `/api/jobs/[id]/retry` now validate `jobId` consistently and consume awaited dynamic params.
+2. Queue backend unavailability on these routes now uses canonical capability envelope semantics (`QUEUE_BACKEND_UNAVAILABLE`, status `503`).
+3. No deprecation/feature-claim promotion introduced in this wave.
