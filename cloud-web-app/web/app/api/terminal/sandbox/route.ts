@@ -14,11 +14,16 @@ import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { sandboxManager } from '@/lib/server/sandbox-manager';
 import { prisma } from '@/lib/db';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Track sandbox creation rate per user
 const sandboxRateStore = new Map<string, { count: number; resetTime: number }>();
 const SANDBOX_RATE_LIMIT = 10; // max per hour
 const SANDBOX_RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+const MAX_WORKSPACE_ID_LENGTH = 120;
+const MAX_SESSION_ID_LENGTH = 120;
+const MAX_WORKSPACE_PATH_LENGTH = 2048;
+const normalizeRouteValue = (value: unknown) => String(value ?? '').trim();
 
 function checkSandboxRateLimit(userId: string): boolean {
   const now = Date.now();
@@ -86,11 +91,24 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { workspaceId, workspacePath } = body;
+    const workspaceId = normalizeRouteValue(body?.workspaceId);
+    const workspacePath = normalizeRouteValue(body?.workspacePath);
 
     if (!workspaceId || !workspacePath) {
       return NextResponse.json(
         { error: 'Missing required fields: workspaceId, workspacePath' },
+        { status: 400 }
+      );
+    }
+    if (workspaceId.length > MAX_WORKSPACE_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_WORKSPACE_ID', message: 'workspaceId must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    if (workspacePath.length > MAX_WORKSPACE_PATH_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_WORKSPACE_PATH', message: 'workspacePath must be under 2048 characters.' },
         { status: 400 }
       );
     }
@@ -112,14 +130,18 @@ export async function POST(req: NextRequest) {
 
     // Check if sandbox mode is available
     if (!sandboxManager.isSandboxAvailable) {
-      return NextResponse.json(
-        { 
-          error: 'Sandbox mode not available',
+      return capabilityResponse({
+        error: 'QUEUE_BACKEND_UNAVAILABLE',
+        message: 'Sandbox backend is unavailable for this environment.',
+        status: 503,
+        capability: 'TERMINAL_SANDBOX',
+        capabilityStatus: 'PARTIAL',
+        runtimeMode: 'direct_fallback_available',
+        metadata: {
+          workspaceId,
           fallback: 'direct',
-          message: 'Container runtime not available. Using direct execution mode.',
         },
-        { status: 503 }
-      );
+      });
     }
 
     // Get user tier for resource limits
@@ -183,11 +205,17 @@ export async function DELETE(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('sessionId');
+    const sessionId = normalizeRouteValue(searchParams.get('sessionId'));
 
     if (!sessionId) {
       return NextResponse.json(
         { error: 'Missing sessionId parameter' },
+        { status: 400 }
+      );
+    }
+    if (sessionId.length > MAX_SESSION_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_SESSION_ID', message: 'sessionId must be under 120 characters.' },
         { status: 400 }
       );
     }
@@ -246,10 +274,16 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('sessionId');
+    const sessionId = normalizeRouteValue(searchParams.get('sessionId'));
 
     // If sessionId provided, get specific session
     if (sessionId) {
+      if (sessionId.length > MAX_SESSION_ID_LENGTH) {
+        return NextResponse.json(
+          { error: 'INVALID_SESSION_ID', message: 'sessionId must be under 120 characters.' },
+          { status: 400 }
+        );
+      }
       const session = sandboxManager.getSession(sessionId);
       
       if (!session) {
