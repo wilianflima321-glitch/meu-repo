@@ -42,6 +42,7 @@ const OAUTH_PROVIDERS = {
 } as const;
 
 type Provider = keyof typeof OAUTH_PROVIDERS;
+type RouteContext = { params: Promise<{ provider: string }> };
 
 const MAX_PROVIDER_LENGTH = 40;
 
@@ -56,9 +57,10 @@ function getCallbackUrl(provider: string): string {
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: RouteContext
 ) {
-  const providerRaw = String(params.provider || '').trim().toLowerCase();
+  const resolved = await params;
+  const providerRaw = String(resolved?.provider || '').trim().toLowerCase();
   if (!providerRaw || providerRaw.length > MAX_PROVIDER_LENGTH) {
     return NextResponse.json(
       { error: 'INVALID_PROVIDER', message: 'provider is required and must be under 40 characters.' },

@@ -1869,8 +1869,9 @@ Implemented:
 1. Migrated project share/invite route handlers to awaited dynamic params contract and normalized validation copy.
 2. Normalized project member management routes (`members` and `members/[memberId]`) to awaited params + deterministic role/error contracts.
 3. Normalized collaboration room detail route (`collaboration/rooms/[id]`) to awaited params contract.
-4. Hardened request-body parsing in share/invite creation paths to return deterministic `400` on malformed payloads.
-5. Preserved capability gates for non-persistent collaboration flows (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
+4. Normalized OAuth provider callback route params to awaited dynamic contract (`auth/oauth/[provider]` + `callback`).
+5. Hardened request-body parsing in share/invite creation paths to return deterministic `400` on malformed payloads.
+6. Preserved capability gates for non-persistent collaboration flows (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
 
 Critical reading:
 1. This closes reliability debt in high-impact collaboration routes without expanding feature scope.

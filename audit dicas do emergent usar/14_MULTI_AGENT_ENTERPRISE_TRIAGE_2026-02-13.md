@@ -1989,8 +1989,10 @@ Triaged impact:
 - `projects/[id]/duplicate`
 - `projects/[id]/invite-links`
 - `projects/[id]/invite-links/[linkId]`
-- `projects/[id]/members`
-- `projects/[id]/members/[memberId]`
+ - `projects/[id]/members`
+ - `projects/[id]/members/[memberId]`
  - `collaboration/rooms/[id]`
+ - `auth/oauth/[provider]`
+ - `auth/oauth/[provider]/callback`
 2. Preserved explicit capability gates where persistence is not fully wired (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
 3. No product-scope expansion; this wave closes reliability and copy consistency debt only.

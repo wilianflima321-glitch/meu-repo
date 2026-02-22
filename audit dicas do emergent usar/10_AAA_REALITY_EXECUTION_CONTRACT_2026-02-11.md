@@ -4426,9 +4426,11 @@ Implemented:
 - `cloud-web-app/web/app/api/projects/[id]/duplicate/route.ts`
 - `cloud-web-app/web/app/api/projects/[id]/invite-links/route.ts`
 - `cloud-web-app/web/app/api/projects/[id]/invite-links/[linkId]/route.ts`
-- `cloud-web-app/web/app/api/projects/[id]/members/route.ts`
-- `cloud-web-app/web/app/api/projects/[id]/members/[memberId]/route.ts`
+ - `cloud-web-app/web/app/api/projects/[id]/members/route.ts`
+ - `cloud-web-app/web/app/api/projects/[id]/members/[memberId]/route.ts`
  - `cloud-web-app/web/app/api/collaboration/rooms/[id]/route.ts`
+ - `cloud-web-app/web/app/api/auth/oauth/[provider]/route.ts`
+ - `cloud-web-app/web/app/api/auth/oauth/[provider]/callback/route.ts`
 2. Added safer request-body handling for share/invite creation paths (invalid JSON now returns explicit `400 INVALID_BODY`).
 3. Preserved explicit capability gate semantics for non-persistent share/invite capabilities (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
 
