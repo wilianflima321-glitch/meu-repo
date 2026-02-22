@@ -1867,8 +1867,9 @@ Critical reading:
 ## Delta 2026-02-22 CXXIII - Project collaboration route contract hardening
 Implemented:
 1. Migrated project share/invite route handlers to awaited dynamic params contract and normalized validation copy.
-2. Hardened request-body parsing in share/invite creation paths to return deterministic `400` on malformed payloads.
-3. Preserved capability gates for non-persistent collaboration flows (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
+2. Normalized project member management routes (`members` and `members/[memberId]`) to awaited params + deterministic role/error contracts.
+3. Hardened request-body parsing in share/invite creation paths to return deterministic `400` on malformed payloads.
+4. Preserved capability gates for non-persistent collaboration flows (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
 
 Critical reading:
 1. This closes reliability debt in high-impact collaboration routes without expanding feature scope.

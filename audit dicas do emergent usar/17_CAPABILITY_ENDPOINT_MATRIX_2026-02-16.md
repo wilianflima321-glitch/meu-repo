@@ -124,6 +124,6 @@ Validation status:
 3. No deprecation/feature-claim promotion introduced in this wave.
 
 ## 9) Delta 2026-02-22 - Project collaboration route normalization
-1. `/api/projects/[id]/share`, `/api/projects/[id]/duplicate`, `/api/projects/[id]/invite-links`, and `/api/projects/[id]/invite-links/[linkId]` now consume awaited dynamic params.
+1. `/api/projects/[id]/share`, `/api/projects/[id]/duplicate`, `/api/projects/[id]/invite-links`, `/api/projects/[id]/invite-links/[linkId]`, `/api/projects/[id]/members`, and `/api/projects/[id]/members/[memberId]` now consume awaited dynamic params.
 2. Input validation and operator-facing error copy are normalized across these endpoints.
 3. Existing capability-gated collaboration behavior remains unchanged (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).

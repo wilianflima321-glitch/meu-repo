@@ -1,7 +1,7 @@
 /**
  * Project Members API - Aethel Engine
- * GET /api/projects/[id]/members - Lista membros
- * POST /api/projects/[id]/members - Adiciona membro
+ * GET /api/projects/[id]/members - list members
+ * POST /api/projects/[id]/members - add member
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,252 +15,246 @@ export const dynamic = 'force-dynamic';
 
 const MAX_PROJECT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
-// GET /api/projects/[id]/members
-export async function GET(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
-) {
-	try {
-		const user = requireAuth(request);
-		const rateLimitResponse = await enforceRateLimit({
-		  scope: 'projects-members-get',
-		  key: user.userId,
-		  max: 180,
-		  windowMs: 60 * 60 * 1000,
-		  message: 'Too many project members requests. Please try again later.',
-		});
-		if (rateLimitResponse) return rateLimitResponse;
-		const entitlements = await requireEntitlementsForUser(user.userId);
-		const projectId = normalizeProjectId(params?.id);
-		if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
-			return NextResponse.json(
-				{ success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
-				{ status: 400 }
-			);
-		}
+type ProjectRole = 'viewer' | 'editor';
 
-		
-
-		// Verifica se tem acesso ao projeto (owner ou membro)
-		const project = await prisma.project.findFirst({
-			where: {
-				id: projectId,
-				OR: [
-					{ userId: user.userId },
-					{ members: { some: { userId: user.userId } } },
-				],
-			},
-			select: { id: true, userId: true, name: true },
-		});
-
-		if (!project) {
-			return NextResponse.json(
-				{ success: false, error: 'Project not found' },
-				{ status: 404 }
-			);
-		}
-
-		const members = await prisma.projectMember.findMany({
-			where: { projectId },
-			select: {
-				id: true,
-				userId: true,
-				role: true,
-				createdAt: true,
-				user: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-						avatar: true,
-					},
-				},
-			},
-			orderBy: { createdAt: 'asc' },
-		});
-
-		// Inclui o owner na lista
-		const owner = await prisma.user.findUnique({
-			where: { id: project.userId },
-			select: { id: true, name: true, email: true, avatar: true },
-		});
-
-		return NextResponse.json({
-			success: true,
-			projectId,
-			owner: owner ? { ...owner, role: 'owner' } : null,
-			members: members.map((m) => ({
-				id: m.id,
-				userId: m.userId,
-				role: m.role,
-				createdAt: m.createdAt,
-				user: m.user,
-			})),
-			collaboratorsLimit: entitlements.plan.limits.collaborators,
-		});
-	} catch (error) {
-		console.error('Failed to list members:', error);
-		const mapped = apiErrorToResponse(error);
-		if (mapped) return mapped;
-		return apiInternalError();
-	}
+interface AddMemberBody {
+  email?: string;
+  role?: ProjectRole;
 }
 
-// POST /api/projects/[id]/members - Adiciona membro
-export async function POST(
-	request: NextRequest,
-	{ params }: { params: { id: string } }
-) {
-	try {
-		const user = requireAuth(request);
-		const rateLimitResponse = await enforceRateLimit({
-		  scope: 'projects-members-post',
-		  key: user.userId,
-		  max: 60,
-		  windowMs: 60 * 60 * 1000,
-		  message: 'Too many member invitation attempts. Please wait before retrying.',
-		});
-		if (rateLimitResponse) return rateLimitResponse;
-		const entitlements = await requireEntitlementsForUser(user.userId);
-		const projectId = normalizeProjectId(params?.id);
-		if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
-			return NextResponse.json(
-				{ success: false, error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
-				{ status: 400 }
-			);
-		}
+async function resolveProjectId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeProjectId(resolved?.id);
+}
 
-		
-		const body = await request.json();
-		const { email, role = 'viewer' } = body;
+function invalidProjectIdResponse() {
+  return NextResponse.json(
+    { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+    { status: 400 }
+  );
+}
 
-		if (!email) {
-			return NextResponse.json(
-				{ success: false, error: 'Email is required' },
-				{ status: 400 }
-			);
-		}
+export async function GET(request: NextRequest, ctx: RouteContext) {
+  try {
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-members-get',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project members requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
-		if (!['viewer', 'editor'].includes(role)) {
-			return NextResponse.json(
-				{ success: false, error: 'Role must be viewer or editor' },
-				{ status: 400 }
-			);
-		}
+    const entitlements = await requireEntitlementsForUser(user.userId);
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return invalidProjectIdResponse();
+    }
 
-		// Verifica se é owner do projeto
-		const project = await prisma.project.findFirst({
-			where: { id: projectId, userId: user.userId },
-			select: { id: true, userId: true },
-		});
+    const project = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        OR: [{ userId: user.userId }, { members: { some: { userId: user.userId } } }],
+      },
+      select: { id: true, userId: true },
+    });
 
-		if (!project) {
-			return NextResponse.json(
-				{ success: false, error: 'Only project owner can add members' },
-				{ status: 403 }
-			);
-		}
+    if (!project) {
+      return NextResponse.json(
+        { error: 'PROJECT_NOT_FOUND', message: 'Project not found or access denied.' },
+        { status: 404 }
+      );
+    }
 
-		// Verifica limite de colaboradores do plano
-		const collaboratorsLimit = entitlements.plan.limits.collaborators;
-		if (collaboratorsLimit !== -1) {
-			const currentCount = await prisma.projectMember.count({
-				where: { projectId },
-			});
-			if (currentCount >= collaboratorsLimit) {
-				return NextResponse.json(
-					{
-						success: false,
-						error: 'COLLABORATOR_LIMIT_REACHED',
-						message: `Limite de ${collaboratorsLimit} colaboradores atingido. Faça upgrade para adicionar mais.`,
-						plan: entitlements.plan.id,
-					},
-					{ status: 402 }
-				);
-			}
-		}
+    const members = await prisma.projectMember.findMany({
+      where: { projectId },
+      select: {
+        id: true,
+        userId: true,
+        role: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
 
-		// Busca usuário pelo email
-		const targetUser = await prisma.user.findUnique({
-			where: { email: email.toLowerCase().trim() },
-			select: { id: true, name: true, email: true, avatar: true },
-		});
+    const owner = await prisma.user.findUnique({
+      where: { id: project.userId },
+      select: { id: true, name: true, email: true, avatar: true },
+    });
 
-		if (!targetUser) {
-			return NextResponse.json(
-				{ success: false, error: 'User not found with this email' },
-				{ status: 404 }
-			);
-		}
+    return NextResponse.json({
+      success: true,
+      projectId,
+      owner: owner ? { ...owner, role: 'owner' } : null,
+      members: members.map((member) => ({
+        id: member.id,
+        userId: member.userId,
+        role: member.role,
+        createdAt: member.createdAt,
+        user: member.user,
+      })),
+      collaboratorsLimit: entitlements.plan.limits.collaborators,
+    });
+  } catch (error) {
+    console.error('Failed to list members:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
+  }
+}
 
-		// Não pode adicionar o próprio owner
-		if (targetUser.id === project.userId) {
-			return NextResponse.json(
-				{ success: false, error: 'Cannot add project owner as member' },
-				{ status: 400 }
-			);
-		}
+export async function POST(request: NextRequest, ctx: RouteContext) {
+  try {
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-members-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many member invitation attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
-		// Verifica se já é membro
-		const existing = await prisma.projectMember.findUnique({
-			where: { projectId_userId: { projectId, userId: targetUser.id } },
-		});
+    const entitlements = await requireEntitlementsForUser(user.userId);
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return invalidProjectIdResponse();
+    }
 
-		if (existing) {
-			// Atualiza role se diferente
-			if (existing.role !== role) {
-				const updated = await prisma.projectMember.update({
-					where: { id: existing.id },
-					data: { role },
-					select: {
-						id: true,
-						userId: true,
-						role: true,
-						createdAt: true,
-						user: {
-							select: { id: true, name: true, email: true, avatar: true },
-						},
-					},
-				});
-				return NextResponse.json({
-					success: true,
-					member: updated,
-					message: 'Member role updated',
-				});
-			}
-			return NextResponse.json(
-				{ success: false, error: 'User is already a member' },
-				{ status: 409 }
-			);
-		}
+    const body = (await request.json().catch(() => null)) as AddMemberBody | null;
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'INVALID_BODY', message: 'Body must be a valid JSON object.' },
+        { status: 400 }
+      );
+    }
 
-		// Adiciona membro
-		const member = await prisma.projectMember.create({
-			data: {
-				projectId,
-				userId: targetUser.id,
-				role,
-			},
-			select: {
-				id: true,
-				userId: true,
-				role: true,
-				createdAt: true,
-				user: {
-					select: { id: true, name: true, email: true, avatar: true },
-				},
-			},
-		});
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const role: ProjectRole = body.role === 'editor' ? 'editor' : 'viewer';
 
-		return NextResponse.json({
-			success: true,
-			member,
-		}, { status: 201 });
-	} catch (error) {
-		console.error('Failed to add member:', error);
-		const mapped = apiErrorToResponse(error);
-		if (mapped) return mapped;
-		return apiInternalError();
-	}
+    if (!email) {
+      return NextResponse.json({ error: 'EMAIL_REQUIRED', message: 'email is required.' }, { status: 400 });
+    }
+
+    if (!['viewer', 'editor'].includes(role)) {
+      return NextResponse.json(
+        { error: 'INVALID_ROLE', message: 'role must be viewer or editor.' },
+        { status: 400 }
+      );
+    }
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, userId: user.userId },
+      select: { id: true, userId: true },
+    });
+
+    if (!project) {
+      return NextResponse.json(
+        { error: 'PROJECT_OWNER_REQUIRED', message: 'Only the project owner can add members.' },
+        { status: 403 }
+      );
+    }
+
+    const collaboratorsLimit = entitlements.plan.limits.collaborators;
+    if (collaboratorsLimit !== -1) {
+      const currentCount = await prisma.projectMember.count({ where: { projectId } });
+      if (currentCount >= collaboratorsLimit) {
+        return NextResponse.json(
+          {
+            error: 'COLLABORATOR_LIMIT_REACHED',
+            message: `Collaborator limit (${collaboratorsLimit}) reached. Upgrade to add more.`,
+            plan: entitlements.plan.id,
+          },
+          { status: 402 }
+        );
+      }
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, name: true, email: true, avatar: true },
+    });
+
+    if (!targetUser) {
+      return NextResponse.json(
+        { error: 'TARGET_USER_NOT_FOUND', message: 'No user found for this email.' },
+        { status: 404 }
+      );
+    }
+
+    if (targetUser.id === project.userId) {
+      return NextResponse.json(
+        { error: 'OWNER_CANNOT_BE_MEMBER', message: 'Project owner cannot be added as member.' },
+        { status: 400 }
+      );
+    }
+
+    const existing = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId: targetUser.id } },
+    });
+
+    if (existing) {
+      if (existing.role !== role) {
+        const updated = await prisma.projectMember.update({
+          where: { id: existing.id },
+          data: { role },
+          select: {
+            id: true,
+            userId: true,
+            role: true,
+            createdAt: true,
+            user: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          member: updated,
+          message: 'Member role updated.',
+        });
+      }
+
+      return NextResponse.json(
+        { error: 'MEMBER_ALREADY_EXISTS', message: 'User is already a member.' },
+        { status: 409 }
+      );
+    }
+
+    const member = await prisma.projectMember.create({
+      data: {
+        projectId,
+        userId: targetUser.id,
+        role,
+      },
+      select: {
+        id: true,
+        userId: true,
+        role: true,
+        createdAt: true,
+        user: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true, member }, { status: 201 });
+  } catch (error) {
+    console.error('Failed to add member:', error);
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
+  }
 }
