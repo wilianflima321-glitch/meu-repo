@@ -11,13 +11,13 @@ Close real gaps with zero scope expansion, keeping:
 4. Anti-fake-success in all critical journeys.
 
 ## 2. Factual baseline used in this audit
-1. Repository connectivity sweep (`25`):
+1. Repository connectivity sweep (`25`, latest refresh):
 - `requiredMissing=0`
 - `optionalMissing=0`
 - `deadScriptReferences=0`
-- `markdownTotal=3634`
-- `markdownCanonical=32`
-- `markdownHistorical=3602`
+- `markdownTotal=3636`
+- `markdownCanonical=33`
+- `markdownHistorical=3603`
 2. Workflow governance sweep (`26`):
 - `totalWorkflows=14`
 - `activeAuthority=5`
@@ -50,12 +50,12 @@ Close real gaps with zero scope expansion, keeping:
 4. Capability/deprecation contracts are explicit and machine-readable in critical APIs.
 
 ## 4. What is still weak (real residual risk)
-1. Canonical-vs-historical markdown volume remains high (`3602` historical files), increasing decision noise risk.
+1. Canonical-vs-historical markdown volume remains high (`3603` historical files), increasing decision noise risk.
 2. `NOT_IMPLEMENTED` remains visible in API surface (`8`) and must stay hard-gated in UX to avoid false expectations.
 3. `8` compatibility wrappers in `/api/files/*` remain intentional debt and need telemetry-driven cutoff planning.
 4. One workflow is still `LEGACY_CANDIDATE` (`merge-unrelated-histories.yml`) and needs final owner decision.
 5. `/ide` route orchestration is still a large convergence point; it is better now but remains a high-change file.
-6. Historical markdown footprint outside canonical remains high (`3602`) and still requires archival policy execution.
+6. Historical markdown footprint outside canonical remains high (`3603`) and still requires archival policy execution.
 
 ## 5. 15-agent execution board (owner-locked)
 | Agent | Current verdict | Mandatory next action |

@@ -7,14 +7,16 @@ export const dynamic = 'force-dynamic'
 
 const MAX_ROUTE_ID_LENGTH = 120
 const normalizeRouteId = (value?: string) => String(value ?? '').trim()
+type RouteContext = { params: Promise<{ id: string }> }
 
 export async function POST(
   req: NextRequest,
-  ctx: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const auth = requireAuth(req)
-    const sessionId = normalizeRouteId(ctx.params?.id)
+    const resolved = await ctx.params
+    const sessionId = normalizeRouteId(resolved?.id)
     if (!sessionId || sessionId.length > MAX_ROUTE_ID_LENGTH) {
       return NextResponse.json(
         {

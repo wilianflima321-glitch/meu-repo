@@ -1969,3 +1969,14 @@ Triaged impact:
 ## Delta 2026-02-21 (Admin surface gate)
 1. Added `qa:admin-surface` into `qa:enterprise-gate` for CI enforcement.
 2. Admin surface drift is now blocked during enterprise gate runs.
+
+## Delta 2026-02-22 (Route-context reliability + connectivity refresh)
+1. Hardened dynamic route-context handling in studio orchestration and render cancel endpoints by switching to awaited params contract.
+2. Refreshed connectivity evidence (`25`) with latest repository metrics:
+- `requiredMissing=0`
+- `optionalMissing=0`
+- `deadScriptReferences=0`
+- `markdownTotal=3636`
+- `markdownCanonical=33`
+- `markdownHistorical=3603`
+3. No business-scope change; this wave is reliability and governance only.

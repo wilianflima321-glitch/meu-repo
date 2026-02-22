@@ -507,3 +507,23 @@ Label: `VERIFIED_INTERNAL`
 - `cloud-web-app/web/app/admin/promotions/page.tsx`
 2. Aligned both pages with shared admin shell/state and authenticated fetch behavior.
 3. Targeted lint verification for modified feature-flags/promotions surfaces: PASS.
+
+## 28) Delta 2026-02-22 - Route-context hardening + connectivity refresh
+Label: `VERIFIED_INTERNAL`
+
+1. Dynamic route-context contract hardened to awaited params in critical orchestration paths:
+- `cloud-web-app/web/app/api/studio/session/[id]/route.ts`
+- `cloud-web-app/web/app/api/studio/session/[id]/stop/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/validate/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/apply/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/rollback/route.ts`
+- `cloud-web-app/web/app/api/studio/access/full/[id]/route.ts`
+- `cloud-web-app/web/app/api/render/jobs/[jobId]/cancel/route.ts`
+2. Repository connectivity matrix regenerated:
+- `requiredMissing=0`
+- `optionalMissing=0`
+- `deadScriptReferences=0`
+- `markdownTotal=3636`
+- `markdownCanonical=33`
+- `markdownHistorical=3603`

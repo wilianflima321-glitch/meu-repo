@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const MAX_JOB_ID_LENGTH = 120
 const normalizeJobId = (value?: string) => String(value ?? '').trim()
+type RouteContext = { params: Promise<{ jobId: string }> }
 
 /**
  * POST /api/render/jobs/{jobId}/cancel
@@ -16,7 +17,7 @@ const normalizeJobId = (value?: string) => String(value ?? '').trim()
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: RouteContext
 ) {
   try {
     const user = requireAuth(request)
@@ -29,7 +30,8 @@ export async function POST(
     })
     if (rateLimitResponse) return rateLimitResponse
 
-    const jobId = normalizeJobId(params?.jobId)
+    const resolved = await params
+    const jobId = normalizeJobId(resolved?.jobId)
     if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },

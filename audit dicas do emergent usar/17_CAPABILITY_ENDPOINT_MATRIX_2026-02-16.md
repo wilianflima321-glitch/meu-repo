@@ -112,3 +112,8 @@ Validation status:
 - `501 NOT_IMPLEMENTED` for unavailable AI/runtime capabilities.
 - `410 DEPRECATED_ROUTE` with cycle metadata for legacy routes.
 3. CI/PR governance now additionally requires repository connectivity gate evidence (`qa:repo-connectivity`) to prevent path-level contract regressions in build/test automation.
+
+## 7) Delta 2026-02-22 - Dynamic route-context hardening
+1. No endpoint payload contract changes in this wave.
+2. Studio orchestration and render-cancel dynamic handlers now consume awaited route params (`params: Promise<...>`) for runtime consistency.
+3. Capability/deprecation/error envelopes are unchanged and remain authoritative.

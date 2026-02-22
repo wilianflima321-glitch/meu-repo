@@ -1852,3 +1852,12 @@ Implemented:
 Critical reading:
 1. This reduces governance UX drift in rollout and growth operations.
 2. Residual risk remains in remaining niche admin pages not yet migrated to shared patterns.
+
+## Delta 2026-02-22 CXXII - Studio route-context contract alignment
+Implemented:
+1. Migrated critical studio/render dynamic routes to awaited route params contract (`params: Promise<...>`), reducing runtime ambiguity in dynamic segment access.
+2. Regenerated connectivity matrix with current markdown distribution (`total=3636`, `canonical=33`, `historical=3603`).
+
+Critical reading:
+1. This is a reliability hardening wave, not capability expansion.
+2. Residual risk remains high in historical markdown volume outside canonical docs and still requires archival governance.

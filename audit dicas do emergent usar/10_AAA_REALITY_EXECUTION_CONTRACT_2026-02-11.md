@@ -4381,3 +4381,31 @@ Validation snapshot:
 
 Decision lock:
 1. No new capability claims; this wave hardens existing rollout and promotions operations UX.
+
+## 174) Delta 2026-02-22 CXXVIII - Studio route-context hardening + connectivity refresh
+
+Implemented:
+1. Updated dynamic route handlers to consume awaited `params` in orchestration-critical APIs:
+- `cloud-web-app/web/app/api/studio/session/[id]/route.ts`
+- `cloud-web-app/web/app/api/studio/session/[id]/stop/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/validate/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/apply/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/rollback/route.ts`
+- `cloud-web-app/web/app/api/studio/access/full/[id]/route.ts`
+- `cloud-web-app/web/app/api/render/jobs/[jobId]/cancel/route.ts`
+2. Regenerated repository connectivity evidence:
+- `requiredMissing=0`
+- `optionalMissing=0`
+- `deadScriptReferences=0`
+- `markdownTotal=3636`
+- `markdownCanonical=33`
+- `markdownHistorical=3603`
+
+Validation snapshot:
+1. `node tools/repo-connectivity-scan.mjs --report "audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md"` -> PASS.
+2. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS.
+
+Decision lock:
+1. No scope expansion; this wave hardens contract reliability and repository governance only.
+2. Capability/deprecation policy remains unchanged.
