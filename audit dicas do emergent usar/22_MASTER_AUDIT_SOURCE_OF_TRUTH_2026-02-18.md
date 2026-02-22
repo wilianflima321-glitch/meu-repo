@@ -520,7 +520,11 @@ Label: `VERIFIED_INTERNAL`
 - `cloud-web-app/web/app/api/studio/tasks/[id]/rollback/route.ts`
 - `cloud-web-app/web/app/api/studio/access/full/[id]/route.ts`
 - `cloud-web-app/web/app/api/render/jobs/[jobId]/cancel/route.ts`
-2. Repository connectivity matrix regenerated:
+2. Extended awaited-params and copy normalization to high-traffic conversational routes:
+- `cloud-web-app/web/app/api/chat/threads/[id]/route.ts`
+- `cloud-web-app/web/app/api/chat/threads/[id]/messages/route.ts`
+- `cloud-web-app/web/app/api/copilot/workflows/[id]/route.ts`
+3. Repository connectivity matrix regenerated:
 - `requiredMissing=0`
 - `optionalMissing=0`
 - `deadScriptReferences=0`

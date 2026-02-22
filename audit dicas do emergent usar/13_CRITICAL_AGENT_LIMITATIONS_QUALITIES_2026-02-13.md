@@ -1856,7 +1856,8 @@ Critical reading:
 ## Delta 2026-02-22 CXXII - Studio route-context contract alignment
 Implemented:
 1. Migrated critical studio/render dynamic routes to awaited route params contract (`params: Promise<...>`), reducing runtime ambiguity in dynamic segment access.
-2. Regenerated connectivity matrix with current markdown distribution (`total=3636`, `canonical=33`, `historical=3603`).
+2. Applied the same awaited-params contract + copy normalization to high-traffic chat/copilot detail endpoints.
+3. Regenerated connectivity matrix with current markdown distribution (`total=3636`, `canonical=33`, `historical=3603`).
 
 Critical reading:
 1. This is a reliability hardening wave, not capability expansion.

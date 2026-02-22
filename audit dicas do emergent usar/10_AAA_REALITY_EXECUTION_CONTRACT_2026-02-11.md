@@ -4394,7 +4394,11 @@ Implemented:
 - `cloud-web-app/web/app/api/studio/tasks/[id]/rollback/route.ts`
 - `cloud-web-app/web/app/api/studio/access/full/[id]/route.ts`
 - `cloud-web-app/web/app/api/render/jobs/[jobId]/cancel/route.ts`
-2. Regenerated repository connectivity evidence:
+2. Extended awaited-params + copy normalization hardening to high-traffic conversational surfaces:
+- `cloud-web-app/web/app/api/chat/threads/[id]/route.ts`
+- `cloud-web-app/web/app/api/chat/threads/[id]/messages/route.ts`
+- `cloud-web-app/web/app/api/copilot/workflows/[id]/route.ts`
+3. Regenerated repository connectivity evidence:
 - `requiredMissing=0`
 - `optionalMissing=0`
 - `deadScriptReferences=0`
