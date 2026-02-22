@@ -1,8 +1,8 @@
 /**
  * Collaboration Room Detail API - Aethel Engine
- * GET /api/collaboration/rooms/[id] - Detalhes da sala
- * POST /api/collaboration/rooms/[id]/join - Entrar na sala
- * POST /api/collaboration/rooms/[id]/leave - Sair da sala
+ * GET /api/collaboration/rooms/[id]    - room details
+ * POST /api/collaboration/rooms/[id]   - join or touch room participant state
+ * DELETE /api/collaboration/rooms/[id] - leave room
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,12 +18,50 @@ const MAX_ROOM_ID_LENGTH = 120;
 const normalizeRoomId = (value?: string) => String(value ?? '').trim();
 
 function requireCollaborationEnabled(collaboratorsLimit: number): void {
-	if (collaboratorsLimit === 0) {
-		throw Object.assign(
-			new Error('FEATURE_NOT_AVAILABLE: colaboracao requer plano Basic ou superior.'),
-			{ code: 'FEATURE_NOT_AVAILABLE' }
-		);
-	}
+  if (collaboratorsLimit === 0) {
+    throw Object.assign(
+      new Error('FEATURE_NOT_AVAILABLE: collaboration requires Basic plan or higher.'),
+      { code: 'FEATURE_NOT_AVAILABLE' }
+    );
+  }
+}
+
+async function assertRoomAccess(roomId: string, userId: string) {
+  const room = await prisma.collaborationRoom.findUnique({
+    where: { id: roomId },
+    include: {
+      participants: { select: { userId: true, status: true, lastSeen: true } },
+    },
+  });
+  if (!room) {
+    return { error: NextResponse.json({ success: false, error: 'ROOM_NOT_FOUND' }, { status: 404 }), room: null };
+  }
+
+  const isParticipant = room.participants.some((p) => p.userId === userId);
+  if (!isParticipant) {
+    if (!room.projectId) {
+      return {
+        error: NextResponse.json({ success: false, error: 'PROJECT_ACCESS_DENIED' }, { status: 403 }),
+        room: null,
+      };
+    }
+
+    const allowed = await prisma.project.findFirst({
+      where: {
+        id: room.projectId,
+        OR: [{ userId }, { members: { some: { userId } } }],
+      },
+      select: { id: true },
+    });
+    if (!allowed) {
+      return {
+        error: NextResponse.json({ success: false, error: 'PROJECT_ACCESS_DENIED' }, { status: 403 }),
+        room: null,
+      };
+    }
+  }
+
+  return { error: null, room };
 }
 
 export async function GET(
@@ -40,8 +78,10 @@ export async function GET(
       message: 'Too many collaboration room detail requests. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
+
     const roomId = normalizeRoomId(params?.id);
     if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
       return NextResponse.json(
@@ -50,45 +90,16 @@ export async function GET(
       );
     }
 
-    const room = await prisma.collaborationRoom.findUnique({
-      where: { id: roomId },
-      include: {
-        participants: { select: { userId: true, status: true, lastSeen: true } },
-      },
-    });
-
-    if (!room) {
-      throw Object.assign(new Error('ROOM_NOT_FOUND'), { code: 'ROOM_NOT_FOUND' });
-    }
-
-    // Autorizacao: participante OU acesso ao projeto (se houver projectId)
-    const isParticipant = room.participants.some((p) => p.userId === user.userId);
-    if (!isParticipant) {
-      if (room.projectId) {
-        const allowed = await prisma.project.findFirst({
-          where: {
-            id: room.projectId,
-            OR: [
-              { userId: user.userId },
-              { members: { some: { userId: user.userId } } },
-            ],
-          },
-          select: { id: true },
-        });
-        if (!allowed) {
-          throw Object.assign(new Error('PROJECT_ACCESS_DENIED'), { code: 'PROJECT_ACCESS_DENIED' });
-        }
-      } else {
-        throw Object.assign(new Error('PROJECT_ACCESS_DENIED'), { code: 'PROJECT_ACCESS_DENIED' });
-      }
-    }
+    const { error, room } = await assertRoomAccess(roomId, user.userId);
+    if (error) return error;
+    if (!room) return apiInternalError();
 
     const presence = room.participants.map((p) => ({
       userId: p.userId,
       status: p.status,
       lastSeen: p.lastSeen,
     }));
-    
+
     return NextResponse.json({
       success: true,
       room,
@@ -102,7 +113,6 @@ export async function GET(
   }
 }
 
-// POST /api/collaboration/rooms/[id]  { action: 'join' | 'touch' }
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -117,8 +127,10 @@ export async function POST(
       message: 'Too many collaboration room action requests. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
+
     const roomId = normalizeRoomId(params?.id);
     if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
       return NextResponse.json(
@@ -126,52 +138,41 @@ export async function POST(
         { status: 400 }
       );
     }
+
     const body = await request.json().catch(() => ({}));
-    const action = String(body?.action || 'join');
+    const action = String(body?.action || 'join').trim().toLowerCase();
+    if (action !== 'join' && action !== 'touch') {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_ACTION', message: 'action must be join or touch.' },
+        { status: 400 }
+      );
+    }
 
     const room = await prisma.collaborationRoom.findUnique({
       where: { id: roomId },
       select: { id: true, projectId: true, maxParticipants: true },
     });
     if (!room) {
-      throw Object.assign(new Error('ROOM_NOT_FOUND'), { code: 'ROOM_NOT_FOUND' });
+      return NextResponse.json({ success: false, error: 'ROOM_NOT_FOUND' }, { status: 404 });
     }
 
-    // Se a sala e de projeto, precisa de acesso ao projeto.
     if (room.projectId) {
       const allowed = await prisma.project.findFirst({
         where: {
           id: room.projectId,
-          OR: [
-            { userId: user.userId },
-            { members: { some: { userId: user.userId } } },
-          ],
+          OR: [{ userId: user.userId }, { members: { some: { userId: user.userId } } }],
         },
         select: { id: true },
       });
       if (!allowed) {
-        throw Object.assign(new Error('PROJECT_ACCESS_DENIED'), { code: 'PROJECT_ACCESS_DENIED' });
+        return NextResponse.json({ success: false, error: 'PROJECT_ACCESS_DENIED' }, { status: 403 });
       }
     }
 
-    if (action !== 'join' && action !== 'touch') {
-      return NextResponse.json(
-        { success: false, error: 'Invalid action' },
-        { status: 400 }
-      );
-    }
-
-    if (action === 'join') {
-      if (typeof room.maxParticipants === 'number') {
-        const count = await prisma.collaborationRoomParticipant.count({
-          where: { roomId: room.id },
-        });
-        if (count >= room.maxParticipants) {
-          return NextResponse.json(
-            { success: false, error: 'ROOM_FULL' },
-            { status: 409 }
-          );
-        }
+    if (action === 'join' && typeof room.maxParticipants === 'number') {
+      const count = await prisma.collaborationRoomParticipant.count({ where: { roomId: room.id } });
+      if (count >= room.maxParticipants) {
+        return NextResponse.json({ success: false, error: 'ROOM_FULL' }, { status: 409 });
       }
     }
 
@@ -198,7 +199,6 @@ export async function POST(
   }
 }
 
-// DELETE /api/collaboration/rooms/[id] - leave
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -213,8 +213,10 @@ export async function DELETE(
       message: 'Too many collaboration room leave requests. Please wait before retrying.',
     });
     if (rateLimitResponse) return rateLimitResponse;
+
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
+
     const roomId = normalizeRoomId(params?.id);
     if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
       return NextResponse.json(
@@ -223,9 +225,11 @@ export async function DELETE(
       );
     }
 
-    await prisma.collaborationRoomParticipant.delete({
-      where: { roomId_userId: { roomId: roomId, userId: user.userId } },
-    }).catch(() => null);
+    await prisma.collaborationRoomParticipant
+      .delete({
+        where: { roomId_userId: { roomId, userId: user.userId } },
+      })
+      .catch(() => null);
 
     return NextResponse.json({ success: true });
   } catch (error) {
