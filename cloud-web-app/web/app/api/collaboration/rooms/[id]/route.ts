@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 
 const MAX_ROOM_ID_LENGTH = 120;
 const normalizeRoomId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
 function requireCollaborationEnabled(collaboratorsLimit: number): void {
   if (collaboratorsLimit === 0) {
@@ -64,9 +65,14 @@ async function assertRoomAccess(roomId: string, userId: string) {
   return { error: null, room };
 }
 
+async function resolveRoomId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeRoomId(resolved?.id);
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
@@ -82,7 +88,7 @@ export async function GET(
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
 
-    const roomId = normalizeRoomId(params?.id);
+    const roomId = await resolveRoomId(ctx);
     if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
       return NextResponse.json(
         { success: false, error: 'INVALID_ROOM_ID', message: 'roomId is required and must be under 120 characters.' },
@@ -115,7 +121,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
@@ -131,7 +137,7 @@ export async function POST(
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
 
-    const roomId = normalizeRoomId(params?.id);
+    const roomId = await resolveRoomId(ctx);
     if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
       return NextResponse.json(
         { success: false, error: 'INVALID_ROOM_ID', message: 'roomId is required and must be under 120 characters.' },
@@ -201,7 +207,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
@@ -217,7 +223,7 @@ export async function DELETE(
     const entitlements = await requireEntitlementsForUser(user.userId);
     requireCollaborationEnabled(entitlements.plan.limits.collaborators);
 
-    const roomId = normalizeRoomId(params?.id);
+    const roomId = await resolveRoomId(ctx);
     if (!roomId || roomId.length > MAX_ROOM_ID_LENGTH) {
       return NextResponse.json(
         { success: false, error: 'INVALID_ROOM_ID', message: 'roomId is required and must be under 120 characters.' },

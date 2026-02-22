@@ -541,7 +541,8 @@ Label: `VERIFIED_INTERNAL`
 - `cloud-web-app/web/app/api/projects/[id]/duplicate/route.ts`
 - `cloud-web-app/web/app/api/projects/[id]/invite-links/route.ts`
 - `cloud-web-app/web/app/api/projects/[id]/invite-links/[linkId]/route.ts`
- - `cloud-web-app/web/app/api/projects/[id]/members/route.ts`
- - `cloud-web-app/web/app/api/projects/[id]/members/[memberId]/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/members/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/members/[memberId]/route.ts`
+ - `cloud-web-app/web/app/api/collaboration/rooms/[id]/route.ts`
 2. Share/invite input validation is deterministic (`INVALID_BODY` for malformed payloads, normalized ID validation).
 3. Capability gates for partial persistence remain explicit (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`), with no feature-claim promotion.
