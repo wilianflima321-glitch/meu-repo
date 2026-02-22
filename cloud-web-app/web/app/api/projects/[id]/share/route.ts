@@ -14,6 +14,7 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 const MAX_PROJECT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
 interface ShareConfig {
   type: 'link' | 'email' | 'team';
@@ -42,10 +43,12 @@ async function assertProjectAccess(projectId: string, userId: string) {
   return null;
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+async function resolveProjectId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeProjectId(resolved?.id);
+}
+
+export async function POST(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
     const rateLimitResponse = await enforceRateLimit({
@@ -57,7 +60,7 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
@@ -68,11 +71,18 @@ export async function POST(
     const accessError = await assertProjectAccess(projectId, user.userId);
     if (accessError) return accessError;
 
-    const body: ShareConfig = await request.json();
-    const type = body?.type;
-    const permissions = body?.permissions;
-    const emails = Array.isArray(body?.emails) ? body.emails : [];
-    const teamId = typeof body?.teamId === 'string' ? body.teamId.trim() : '';
+    const body = (await request.json().catch(() => null)) as ShareConfig | null;
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'INVALID_SHARE_CONFIG', message: 'Body must be a valid JSON object.' },
+        { status: 400 }
+      );
+    }
+
+    const type = body.type;
+    const permissions = body.permissions;
+    const emails = Array.isArray(body.emails) ? body.emails : [];
+    const teamId = typeof body.teamId === 'string' ? body.teamId.trim() : '';
 
     if (!type || !permissions) {
       return NextResponse.json(
@@ -101,10 +111,7 @@ export async function POST(
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
     const rateLimitResponse = await enforceRateLimit({
@@ -116,7 +123,7 @@ export async function GET(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },

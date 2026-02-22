@@ -532,3 +532,14 @@ Label: `VERIFIED_INTERNAL`
 - `markdownTotal=3636`
 - `markdownCanonical=33`
 - `markdownHistorical=3603`
+
+## 29) Delta 2026-02-22 - Project collaboration contract hardening
+Label: `VERIFIED_INTERNAL`
+
+1. Dynamic params for project collaboration routes now use awaited contract:
+- `cloud-web-app/web/app/api/projects/[id]/share/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/duplicate/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/invite-links/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/invite-links/[linkId]/route.ts`
+2. Share/invite input validation is deterministic (`INVALID_BODY` for malformed payloads, normalized ID validation).
+3. Capability gates for partial persistence remain explicit (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`), with no feature-claim promotion.

@@ -4417,3 +4417,21 @@ Validation snapshot:
 Decision lock:
 1. No scope expansion; this wave hardens contract reliability and repository governance only.
 2. Capability/deprecation policy remains unchanged.
+
+## 175) Delta 2026-02-22 CXXIX - Project share/invite route hardening
+
+Implemented:
+1. Hardened project collaboration route params to awaited dynamic contract and normalized validation/error messaging:
+- `cloud-web-app/web/app/api/projects/[id]/share/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/duplicate/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/invite-links/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/invite-links/[linkId]/route.ts`
+2. Added safer request-body handling for share/invite creation paths (invalid JSON now returns explicit `400 INVALID_BODY`).
+3. Preserved explicit capability gate semantics for non-persistent share/invite capabilities (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
+
+Validation snapshot:
+1. Tests intentionally deferred to final freeze, per current execution policy for this wave.
+
+Decision lock:
+1. No scope expansion; changes are route-contract reliability and UX copy normalization only.
+2. Feature capability status remains unchanged (`PARTIAL/NOT_IMPLEMENTED` where already gated).

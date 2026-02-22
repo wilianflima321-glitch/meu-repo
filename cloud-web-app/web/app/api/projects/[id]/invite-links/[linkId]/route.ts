@@ -15,12 +15,47 @@ const MAX_PROJECT_ID_LENGTH = 120;
 const MAX_LINK_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
 const normalizeLinkId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string; linkId: string }> };
 
-// DELETE /api/projects/[id]/invite-links/[linkId] - revoke invite link
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string; linkId: string } }
-) {
+async function resolveRouteParams(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return {
+    projectId: normalizeProjectId(resolved?.id),
+    linkId: normalizeLinkId(resolved?.linkId),
+  };
+}
+
+function invalidProjectIdResponse() {
+  return NextResponse.json(
+    {
+      error: 'INVALID_PROJECT_ID',
+      message: 'projectId is required and must be under 120 characters.',
+    },
+    { status: 400 }
+  );
+}
+
+function invalidLinkIdResponse() {
+  return NextResponse.json(
+    {
+      error: 'INVALID_LINK_ID',
+      message: 'linkId is required and must be under 120 characters.',
+    },
+    { status: 400 }
+  );
+}
+
+function notAuthorizedResponse() {
+  return NextResponse.json(
+    {
+      error: 'PROJECT_ACCESS_DENIED',
+      message: 'Project access denied.',
+    },
+    { status: 403 }
+  );
+}
+
+export async function DELETE(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
     const rateLimitResponse = await enforceRateLimit({
@@ -32,43 +67,26 @@ export async function DELETE(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
-    const linkId = normalizeLinkId(params?.linkId);
+    const { projectId, linkId } = await resolveRouteParams(ctx);
 
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'INVALID_PROJECT_ID',
-          message: 'projectId is required and must be under 120 characters.',
-        },
-        { status: 400 }
-      );
+      return invalidProjectIdResponse();
     }
 
     if (!linkId || linkId.length > MAX_LINK_ID_LENGTH) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'INVALID_LINK_ID',
-          message: 'linkId is required and must be under 120 characters.',
-        },
-        { status: 400 }
-      );
+      return invalidLinkIdResponse();
     }
 
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
-        OR: [
-          { userId: user.userId },
-          { members: { some: { userId: user.userId, role: 'admin' } } },
-        ],
+        OR: [{ userId: user.userId }, { members: { some: { userId: user.userId, role: 'admin' } } }],
       },
+      select: { id: true },
     });
 
     if (!project) {
-      return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
+      return notAuthorizedResponse();
     }
 
     try {
@@ -78,11 +96,11 @@ export async function DELETE(
           projectId,
         },
       });
-    } catch (err) {
-      const code = (err as { code?: string })?.code;
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
       if (code === 'P2025') {
         return NextResponse.json(
-          { success: false, error: 'INVITE_LINK_NOT_FOUND', message: 'Invite link not found.' },
+          { error: 'INVITE_LINK_NOT_FOUND', message: 'Invite link not found.' },
           { status: 404 }
         );
       }
@@ -97,12 +115,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Invite link revoked',
+      message: 'Invite link revoked.',
     });
   } catch (error) {
     console.error('[Invite Link Delete API] Error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { error: 'INVITE_LINK_DELETE_FAILED', message: 'Failed to revoke invite link.' },
       { status: 500 }
     );
   }

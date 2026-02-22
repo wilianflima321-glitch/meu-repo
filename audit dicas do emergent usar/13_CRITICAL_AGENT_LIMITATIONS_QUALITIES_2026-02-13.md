@@ -1863,3 +1863,13 @@ Implemented:
 Critical reading:
 1. This is a reliability hardening wave, not capability expansion.
 2. Residual risk remains high in historical markdown volume outside canonical docs and still requires archival governance.
+
+## Delta 2026-02-22 CXXIII - Project collaboration route contract hardening
+Implemented:
+1. Migrated project share/invite route handlers to awaited dynamic params contract and normalized validation copy.
+2. Hardened request-body parsing in share/invite creation paths to return deterministic `400` on malformed payloads.
+3. Preserved capability gates for non-persistent collaboration flows (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
+
+Critical reading:
+1. This closes reliability debt in high-impact collaboration routes without expanding feature scope.
+2. Residual risk remains in broader project member/folder/export surfaces that still need the same contract normalization pass.

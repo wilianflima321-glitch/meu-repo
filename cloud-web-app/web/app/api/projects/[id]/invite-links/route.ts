@@ -16,12 +16,52 @@ export const dynamic = 'force-dynamic';
 
 const MAX_PROJECT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
-// GET /api/projects/[id]/invite-links
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+interface InviteLinkBody {
+  role?: 'editor' | 'viewer';
+  expiresIn?: number;
+  maxUsage?: number;
+}
+
+async function resolveProjectId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeProjectId(resolved?.id);
+}
+
+function invalidProjectIdResponse() {
+  return NextResponse.json(
+    {
+      error: 'INVALID_PROJECT_ID',
+      message: 'projectId is required and must be under 120 characters.',
+    },
+    { status: 400 }
+  );
+}
+
+function notAuthorizedResponse() {
+  return NextResponse.json(
+    {
+      error: 'PROJECT_ACCESS_DENIED',
+      message: 'Project access denied.',
+    },
+    { status: 403 }
+  );
+}
+
+async function assertProjectAdminAccess(projectId: string, userId: string) {
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      OR: [{ userId }, { members: { some: { userId, role: 'admin' } } }],
+    },
+    select: { id: true },
+  });
+
+  return project;
+}
+
+export async function GET(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
     const rateLimitResponse = await enforceRateLimit({
@@ -33,30 +73,14 @@ export async function GET(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'INVALID_PROJECT_ID',
-          message: 'projectId is required and must be under 120 characters.',
-        },
-        { status: 400 }
-      );
+      return invalidProjectIdResponse();
     }
 
-    const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        OR: [
-          { userId: user.userId },
-          { members: { some: { userId: user.userId, role: 'admin' } } },
-        ],
-      },
-    });
-
+    const project = await assertProjectAdminAccess(projectId, user.userId);
     if (!project) {
-      return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
+      return notAuthorizedResponse();
     }
 
     let inviteLinks: any[] = [];
@@ -91,17 +115,13 @@ export async function GET(
   } catch (error) {
     console.error('[Invite Links API] Error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { error: 'INVITE_LINKS_READ_FAILED', message: 'Failed to read invite links.' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/projects/[id]/invite-links - create invite link
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
     const rateLimitResponse = await enforceRateLimit({
@@ -113,39 +133,33 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return invalidProjectIdResponse();
+    }
+
+    const body = (await request.json().catch(() => null)) as InviteLinkBody | null;
+    if (!body || typeof body !== 'object') {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'INVALID_PROJECT_ID',
-          message: 'projectId is required and must be under 120 characters.',
-        },
+        { error: 'INVALID_BODY', message: 'Body must be a valid JSON object.' },
         { status: 400 }
       );
     }
 
-    const body = await request.json();
-    const role = body?.role || 'viewer';
-    const expiresInMs = Number.isFinite(Number(body?.expiresIn)) ? Number(body.expiresIn) : undefined;
-    const maxUsageNormalized = Number.isFinite(Number(body?.maxUsage)) ? Number(body.maxUsage) : null;
+    const role = body.role || 'viewer';
+    const expiresInMs = Number.isFinite(Number(body.expiresIn)) ? Number(body.expiresIn) : undefined;
+    const maxUsageNormalized = Number.isFinite(Number(body.maxUsage)) ? Number(body.maxUsage) : null;
 
     if (!['editor', 'viewer'].includes(role)) {
-      return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'INVALID_ROLE', message: 'role must be editor or viewer.' },
+        { status: 400 }
+      );
     }
 
-    const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        OR: [
-          { userId: user.userId },
-          { members: { some: { userId: user.userId, role: 'admin' } } },
-        ],
-      },
-    });
-
+    const project = await assertProjectAdminAccess(projectId, user.userId);
     if (!project) {
-      return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
+      return notAuthorizedResponse();
     }
 
     const code = nanoid(16);
@@ -166,8 +180,8 @@ export async function POST(
           createdBy: user.userId,
         },
       });
-    } catch (err) {
-      console.error('[Invite Links API] InviteLink model not available:', err);
+    } catch (error) {
+      console.error('[Invite Links API] InviteLink model not available:', error);
       return notImplementedCapability({
         message: 'Invite links storage is not available. Run migrations to enable this feature.',
         capability: 'PROJECT_INVITE_LINKS',
@@ -191,7 +205,7 @@ export async function POST(
   } catch (error) {
     console.error('[Invite Links API] Error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { error: 'INVITE_LINK_CREATE_FAILED', message: 'Failed to create invite link.' },
       { status: 500 }
     );
   }

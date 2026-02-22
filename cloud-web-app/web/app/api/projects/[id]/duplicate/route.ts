@@ -11,11 +11,14 @@ import { notImplementedCapability } from '@/lib/server/capability-response';
 
 const MAX_PROJECT_ID_LENGTH = 120;
 const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+async function resolveProjectId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeProjectId(resolved?.id);
+}
+
+export async function POST(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
     const rateLimitResponse = await enforceRateLimit({
@@ -27,7 +30,7 @@ export async function POST(
     });
     if (rateLimitResponse) return rateLimitResponse;
 
-    const projectId = normalizeProjectId(params?.id);
+    const projectId = await resolveProjectId(ctx);
     if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
         {
@@ -53,7 +56,7 @@ export async function POST(
   } catch (error) {
     console.error('Project duplicate endpoint error:', error);
     return NextResponse.json(
-      { error: 'Failed to process project duplication request.' },
+      { error: 'PROJECT_DUPLICATE_FAILED', message: 'Failed to process project duplication request.' },
       { status: 500 }
     );
   }

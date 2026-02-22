@@ -1982,3 +1982,12 @@ Triaged impact:
 - `markdownCanonical=33`
 - `markdownHistorical=3603`
 5. No business-scope change; this wave is reliability and governance only.
+
+## Delta 2026-02-22 (Project collaboration route hardening extension)
+1. Hardened awaited-route params and input validation for:
+- `projects/[id]/share`
+- `projects/[id]/duplicate`
+- `projects/[id]/invite-links`
+- `projects/[id]/invite-links/[linkId]`
+2. Preserved explicit capability gates where persistence is not fully wired (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
+3. No product-scope expansion; this wave closes reliability and copy consistency debt only.
