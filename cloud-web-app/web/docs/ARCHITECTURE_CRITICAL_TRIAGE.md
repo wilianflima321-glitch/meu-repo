@@ -1,6 +1,6 @@
 # ARCHITECTURE_CRITICAL_TRIAGE
 
-- Generated at: `2026-02-22T01:01:20.622Z`
+- Generated at: `2026-02-22T01:02:49.848Z`
 - Scope: `app/`, `components/`, `lib/`, `hooks/`
 
 ## Core Metrics
