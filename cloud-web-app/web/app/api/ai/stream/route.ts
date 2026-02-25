@@ -9,7 +9,7 @@ import {
 	releaseConcurrencyLease,
 } from '@/lib/metering';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
-import { notImplementedCapability } from '@/lib/server/capability-response';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 function getBackendBaseUrl(): string {
 	const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -125,12 +125,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		if (mapped) return mapped;
 
 		if ((error as any)?.code === 'AI_BACKEND_NOT_CONFIGURED') {
-			return notImplementedCapability({
-				error: 'NOT_IMPLEMENTED',
-				status: 501,
+			return capabilityResponse({
+				error: 'AI_BACKEND_NOT_CONFIGURED',
 				message: (error as Error).message,
+				status: 503,
 				capability: 'AI_STREAM_BACKEND',
+				capabilityStatus: 'PARTIAL',
 				milestone: 'P0',
+				metadata: {
+					reason: 'missing_backend_base_url',
+				},
 			});
 		}
 

@@ -72,9 +72,9 @@ export interface MusicParameters {
   tempo: number;
   key: string;
   mode: 'major' | 'minor' | 'dorian' | 'phrygian' | 'lydian' | 'mixolydian';
-  timeSignature: [number, number];
-  intensity: number;
-  complexity: number;
+  timeSignature?: [number, number];
+  intensity?: number;
+  complexity?: number;
   genre:
     | 'orchestral'
     | 'electronic'
@@ -82,30 +82,41 @@ export interface MusicParameters {
     | 'rock'
     | 'jazz'
     | 'ethnic'
-    | 'hybrid';
-  instrumentation: string[];
+    | 'hybrid'
+    | 'folk';
+  instrumentation?: string[];
   dynamics: 'pp' | 'p' | 'mp' | 'mf' | 'f' | 'ff';
-  harmonicTension: number;
-  rhythmicDensity: number;
-  melodyProminence: number;
-  bassPresence: number;
-  percussionIntensity: number;
-  effects: string[];
+  harmonicTension?: number;
+  rhythmicDensity?: number;
+  melodyProminence?: number;
+  bassPresence?: number;
+  percussionIntensity?: number;
+  effects?: string[];
+  articulation?: 'legato' | 'staccato' | 'tenuto' | 'marcato';
+  texture?: 'sparse' | 'medium' | 'dense';
+  repetition?: number;
+  variation?: number;
   instruments: InstrumentConfig[];
 }
 
 export interface InstrumentConfig {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
+  type?: string;
   family: 'strings' | 'brass' | 'woodwind' | 'percussion' | 'keys' | 'synth' | 'voice';
   volume: number;
   pan: number;
-  reverb: number;
-  delay: number;
-  eq: {
+  reverb?: number;
+  delay?: number;
+  eq?: {
     low: number;
     mid: number;
     high: number;
+  };
+  filter?: {
+    type: 'lowpass' | 'highpass' | 'bandpass';
+    frequency: number;
+    resonance?: number;
   };
   enabled: boolean;
 }
@@ -113,57 +124,74 @@ export interface InstrumentConfig {
 export interface MusicStem {
   id: string;
   name: string;
-  category: 'rhythm' | 'bass' | 'harmony' | 'melody' | 'fx' | 'atmosphere';
-  audioBuffer: AudioBuffer;
+  category: 'rhythm' | 'bass' | 'harmony' | 'melody' | 'fx' | 'atmosphere' | 'drums' | 'ambient';
+  audioBuffer?: AudioBuffer;
+  audioUrl?: string;
   volume: number;
+  pan?: number;
   enabled: boolean;
-  loop: boolean;
-  syncToBeat: boolean;
-  fadeInTime: number;
-  fadeOutTime: number;
+  loop?: boolean;
+  syncToBeat?: boolean;
+  fadeInTime?: number;
+  fadeOutTime?: number;
   triggerConditions?: {
     sceneTypes?: string[];
     emotionThreshold?: number;
     intensityRange?: [number, number];
+  };
+  conditions?: {
+    minIntensity?: number;
+    maxIntensity?: number;
+    emotions?: string[];
+    events?: string[];
   };
 }
 
 export interface MusicComposition {
   id: string;
   name: string;
+  description?: string;
   duration: number;
-  bpm: number;
-  key: string;
+  bpm?: number;
+  key?: string;
   parameters: MusicParameters;
   stems: MusicStem[];
   masterBuffer?: AudioBuffer;
-  markers: Array<{
+  markers?: Array<{
     time: number;
     label: string;
     type: 'verse' | 'chorus' | 'bridge' | 'transition' | 'climax' | 'ending';
   }>;
   emotionProfile: EmotionalContext;
-  metadata: {
+  metadata?: {
     generatedAt: number;
     generationTime: number;
     model?: string;
     prompt?: string;
   };
+  stingers?: Record<string, string>;
+  tags?: string[];
 }
 
 export interface SFXParameters {
-  type: 'footstep' | 'impact' | 'explosion' | 'ambient' | 'ui' | 'weapon' | 'magic' | 'custom';
+  type?: 'footstep' | 'impact' | 'explosion' | 'ambient' | 'ui' | 'weapon' | 'magic' | 'custom' | 'foley';
+  category?: 'footstep' | 'impact' | 'explosion' | 'ambient' | 'ui' | 'weapon' | 'magic' | 'custom' | 'foley';
   material?: 'wood' | 'metal' | 'stone' | 'water' | 'grass' | 'sand' | 'snow' | 'flesh';
   intensity: number;
-  pitch: number;
+  pitch?: number;
   duration: number;
-  spatial?: {
+  spatial?: boolean | {
     x: number;
     y: number;
     z: number;
     distance: number;
   };
-  variation: number;
+  position?: { x: number; y: number; z: number };
+  distance?: number;
+  pitchVariation?: number;
+  reverb?: number;
+  size?: 'tiny' | 'small' | 'medium' | 'large' | 'huge';
+  variation?: number;
   layers?: string[];
   customParams?: Record<string, any>;
 }
@@ -177,6 +205,10 @@ export interface FoleyEvent {
     position: { x: number; y: number; z: number };
     velocity?: { x: number; y: number; z: number };
   };
+  position?: { x: number; y: number; z: number };
+  velocity?: number;
+  weight?: number;
+  material?: SFXParameters['material'];
   context: SceneContext;
   priority: number;
 }

@@ -9,8 +9,10 @@ import {
   consumeMeteredUsage,
   releaseConcurrencyLease,
 } from '@/lib/metering';
-import { notImplementedCapability } from '@/lib/server/capability-response';
+import { capabilityResponse, notImplementedCapability } from '@/lib/server/capability-response';
 import { enforceRateLimit } from '@/lib/server/rate-limit';
+
+const SUPPORTED_PROVIDERS = ['openai', 'anthropic', 'google', 'groq'] as const;
 
 function resolveBackendBaseUrl(): string | null {
   const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -39,6 +41,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 });
     }
+
+    const requestedProviderRaw =
+      typeof (body as any).provider === 'string' ? String((body as any).provider).trim().toLowerCase() : '';
+    if (
+      requestedProviderRaw &&
+      !SUPPORTED_PROVIDERS.includes(requestedProviderRaw as (typeof SUPPORTED_PROVIDERS)[number])
+    ) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_PROVIDER',
+          message: 'Requested provider is not supported.',
+          supportedProviders: [...SUPPORTED_PROVIDERS],
+        },
+        { status: 400 }
+      );
+    }
+    const requestedProvider = requestedProviderRaw
+      ? (requestedProviderRaw as (typeof SUPPORTED_PROVIDERS)[number])
+      : undefined;
 
     const messages = Array.isArray((body as any).messages) ? (body as any).messages : [];
     const promptText = messages
@@ -98,13 +119,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       });
     }
 
-    if (aiService.getAvailableProviders().length === 0) {
+    const availableProviders = aiService.getAvailableProviders();
+    if (availableProviders.length === 0) {
       return notImplementedCapability({
         error: 'NOT_IMPLEMENTED',
         status: 501,
         message: 'AI provider not configured.',
         capability: 'AI_CHAT',
         milestone: 'P0',
+      });
+    }
+    if (requestedProvider && !availableProviders.includes(requestedProvider as (typeof availableProviders)[number])) {
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: 'Requested AI provider is not configured for current runtime.',
+        status: 503,
+        capability: 'AI_CHAT',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P0',
+        metadata: {
+          requestedProvider,
+          availableProviders,
+        },
       });
     }
 
@@ -115,7 +151,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const response = await aiService.chat({
       messages: aiMessages,
       model: typeof (body as any).model === 'string' ? (body as any).model : undefined,
-      provider: typeof (body as any).provider === 'string' ? (body as any).provider : undefined,
+      provider: requestedProvider,
       temperature: typeof (body as any).temperature === 'number' ? (body as any).temperature : undefined,
       maxTokens: resolvedMaxTokens,
     });

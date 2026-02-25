@@ -10,7 +10,7 @@ import type {
   SnapMode,
   TransformMode,
   ViewportMode,
-} from './LevelEditor';
+} from './LevelEditor.types';
 
 export interface ToolbarProps {
   transformMode: TransformMode;

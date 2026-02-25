@@ -2,7 +2,7 @@
  * Shared photo filter presets for capture/photo mode.
  */
 
-import type { ScreenshotEffect } from './capture-system';
+import type { ScreenshotEffect } from './capture-types';
 
 export const PHOTO_FILTER_PRESETS: Record<string, ScreenshotEffect[]> = {
   'none': [],

@@ -24,10 +24,19 @@ on:
         required: false
         default: true
         type: boolean
+      confirm_high_risk:
+        description: 'High-risk operation confirmation (must be true to run)'
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   merge-unrelated-histories:
+    if: ${{ github.event.inputs.confirm_high_risk == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     
     steps:
       - name: Checkout repository

@@ -1,6 +1,6 @@
 # Admin Surface Sweep
 
-- Generated at: `2026-02-22T01:08:48.444Z`
+- Generated at: `2026-02-25T00:03:46.422Z`
 - Files scanned: `45`
 - Missing `AdminPageShell`: `0`
 - Direct `fetch(...)` without `adminJsonFetch`: `0`

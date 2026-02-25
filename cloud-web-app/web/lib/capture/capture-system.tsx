@@ -17,122 +17,45 @@
 import { EventEmitter } from 'events';
 import { PHOTO_FILTER_PRESETS } from './capture-presets';
 export { PHOTO_FILTER_PRESETS } from './capture-presets';
+import {
+  canvasToBlob,
+  createMediaEntry,
+  createProcessedCanvas,
+  flashCaptureScreen,
+  generateFilename,
+} from './capture-system-media';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+import type {
+  CaptureConfig,
+  CapturedMedia,
+  CaptureSource,
+  CaptureState,
+  GifOptions,
+  ImageFormat,
+  PhotoModeSettings,
+  ReplayBufferOptions,
+  ScreenshotEffect,
+  ScreenshotOptions,
+  VideoFormat,
+  VideoRecordingOptions,
+  WatermarkConfig,
+} from './capture-types';
+export type {
+  CaptureConfig,
+  CapturedMedia,
+  CaptureSource,
+  CaptureState,
+  GifOptions,
+  ImageFormat,
+  PhotoModeSettings,
+  ReplayBufferOptions,
+  ScreenshotEffect,
+  ScreenshotOptions,
+  VideoFormat,
+  VideoRecordingOptions,
+  WatermarkConfig,
+} from './capture-types';
 
-export type ImageFormat = 'png' | 'jpeg' | 'webp';
-export type VideoFormat = 'webm' | 'mp4';
-export type CaptureSource = 'canvas' | 'screen' | 'window' | 'element';
-export type CaptureState = 'idle' | 'recording' | 'paused' | 'processing';
-
-export interface ScreenshotOptions {
-  format?: ImageFormat;
-  quality?: number; // 0-1 for jpeg/webp
-  width?: number;
-  height?: number;
-  watermark?: WatermarkConfig;
-  includeUI?: boolean;
-  filename?: string;
-  timestamp?: boolean;
-  effects?: ScreenshotEffect[];
-}
-
-export interface VideoRecordingOptions {
-  format?: VideoFormat;
-  frameRate?: number;
-  bitrate?: number;
-  width?: number;
-  height?: number;
-  audio?: boolean;
-  microphone?: boolean;
-  watermark?: WatermarkConfig;
-  maxDuration?: number; // seconds
-  filename?: string;
-}
-
-export interface GifOptions {
-  frameRate?: number;
-  width?: number;
-  height?: number;
-  quality?: number; // 1-30 (1 = best)
-  maxDuration?: number; // seconds
-  workers?: number;
-  filename?: string;
-}
-
-export interface ReplayBufferOptions {
-  duration: number; // seconds to keep
-  frameRate?: number;
-  width?: number;
-  height?: number;
-}
-
-export interface WatermarkConfig {
-  image?: string;
-  text?: string;
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-  opacity?: number;
-  margin?: number;
-  fontSize?: number;
-  fontFamily?: string;
-  fontColor?: string;
-}
-
-export interface ScreenshotEffect {
-  type: 'brightness' | 'contrast' | 'saturation' | 'blur' | 'grayscale' | 'sepia' | 'vignette' | 'grain';
-  value: number;
-}
-
-export interface CapturedMedia {
-  id: string;
-  type: 'screenshot' | 'video' | 'gif';
-  blob: Blob;
-  url: string;
-  width: number;
-  height: number;
-  size: number;
-  timestamp: number;
-  filename: string;
-  format: string;
-  duration?: number;
-  thumbnail?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface PhotoModeSettings {
-  enabled: boolean;
-  fov: number;
-  dof: { enabled: boolean; focus: number; aperture: number };
-  exposure: number;
-  contrast: number;
-  saturation: number;
-  vignette: number;
-  grain: number;
-  filterPreset: string | null;
-  cameraPosition: { x: number; y: number; z: number };
-  cameraRotation: { x: number; y: number; z: number };
-  hideUI: boolean;
-  freezeTime: boolean;
-}
-
-export interface CaptureConfig {
-  defaultImageFormat: ImageFormat;
-  defaultImageQuality: number;
-  defaultVideoFormat: VideoFormat;
-  defaultVideoFrameRate: number;
-  defaultVideoBitrate: number;
-  autoSave: boolean;
-  saveDirectory: string;
-  filenamePattern: string;
-  captureSound: boolean;
-  flashEffect: boolean;
-  notifyOnCapture: boolean;
-  maxGallerySize: number;
-  replayBufferEnabled: boolean;
-  replayBufferDuration: number;
-}
 // ============================================================================
 // CAPTURE SYSTEM
 // ============================================================================
@@ -226,7 +149,7 @@ export class CaptureSystem extends EventEmitter {
       
       // Apply resizing if needed
       if (width || height || effects.length > 0 || watermark) {
-        captureCanvas = this.createProcessedCanvas(
+        captureCanvas = createProcessedCanvas(
           this.canvas,
           width,
           height,
@@ -237,14 +160,14 @@ export class CaptureSystem extends EventEmitter {
       
       // Convert to blob
       const mimeType = `image/${format}`;
-      const blob = await this.canvasToBlob(captureCanvas, mimeType, quality);
+      const blob = await canvasToBlob(captureCanvas, mimeType, quality);
       
       // Create media entry
-      const media = this.createMediaEntry('screenshot', blob, {
+      const media = createMediaEntry('screenshot', blob, {
         width: captureCanvas.width,
         height: captureCanvas.height,
         format,
-        filename: filename || this.generateFilename('screenshot', format),
+        filename: filename || generateFilename('screenshot', format),
       });
       
       // Add to gallery
@@ -252,10 +175,10 @@ export class CaptureSystem extends EventEmitter {
       
       // Effects
       if (this.config.flashEffect) {
-        this.flashScreen();
+        flashCaptureScreen();
       }
       if (this.config.captureSound) {
-        this.playCaptureSound();
+        this.emit('captureSound');
       }
       
       this.emit('captureComplete', media);
@@ -266,147 +189,6 @@ export class CaptureSystem extends EventEmitter {
       this.emit('captureError', error);
       return null;
     }
-  }
-  
-  private createProcessedCanvas(
-    source: HTMLCanvasElement,
-    width?: number,
-    height?: number,
-    effects: ScreenshotEffect[] = [],
-    watermark?: WatermarkConfig
-  ): HTMLCanvasElement {
-    const targetWidth = width || source.width;
-    const targetHeight = height || source.height;
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    
-    const ctx = canvas.getContext('2d')!;
-    
-    // Build filter string
-    const filters = effects.map(effect => {
-      switch (effect.type) {
-        case 'brightness': return `brightness(${effect.value})`;
-        case 'contrast': return `contrast(${effect.value})`;
-        case 'saturation': return `saturate(${effect.value})`;
-        case 'blur': return `blur(${effect.value}px)`;
-        case 'grayscale': return `grayscale(${effect.value})`;
-        case 'sepia': return `sepia(${effect.value})`;
-        default: return '';
-      }
-    }).filter(Boolean).join(' ');
-    
-    if (filters) {
-      ctx.filter = filters;
-    }
-    
-    // Draw source
-    ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
-    
-    // Reset filter for watermark
-    ctx.filter = 'none';
-    
-    // Apply vignette
-    const vignette = effects.find(e => e.type === 'vignette');
-    if (vignette) {
-      this.applyVignette(ctx, targetWidth, targetHeight, vignette.value);
-    }
-    
-    // Apply grain
-    const grain = effects.find(e => e.type === 'grain');
-    if (grain) {
-      this.applyGrain(ctx, targetWidth, targetHeight, grain.value);
-    }
-    
-    // Apply watermark
-    if (watermark) {
-      this.applyWatermark(ctx, targetWidth, targetHeight, watermark);
-    }
-    
-    return canvas;
-  }
-  
-  private applyVignette(ctx: CanvasRenderingContext2D, width: number, height: number, intensity: number): void {
-    const gradient = ctx.createRadialGradient(
-      width / 2, height / 2, 0,
-      width / 2, height / 2, Math.max(width, height) / 2
-    );
-    
-    gradient.addColorStop(0, 'rgba(0,0,0,0)');
-    gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
-    gradient.addColorStop(1, `rgba(0,0,0,${intensity})`);
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-  }
-  
-  private applyGrain(ctx: CanvasRenderingContext2D, width: number, height: number, intensity: number): void {
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    
-    for (let i = 0; i < data.length; i += 4) {
-      const noise = (Math.random() - 0.5) * intensity * 50;
-      data[i] += noise;
-      data[i + 1] += noise;
-      data[i + 2] += noise;
-    }
-    
-    ctx.putImageData(imageData, 0, 0);
-  }
-  
-  private applyWatermark(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    watermark: WatermarkConfig
-  ): void {
-    const margin = watermark.margin ?? 20;
-    const opacity = watermark.opacity ?? 0.7;
-    
-    ctx.globalAlpha = opacity;
-    
-    let x = margin;
-    let y = margin;
-    
-    switch (watermark.position) {
-      case 'top-right':
-        x = width - margin;
-        break;
-      case 'bottom-left':
-        y = height - margin;
-        break;
-      case 'bottom-right':
-        x = width - margin;
-        y = height - margin;
-        break;
-      case 'center':
-        x = width / 2;
-        y = height / 2;
-        break;
-    }
-    
-    if (watermark.text) {
-      ctx.font = `${watermark.fontSize ?? 16}px ${watermark.fontFamily ?? 'Arial'}`;
-      ctx.fillStyle = watermark.fontColor ?? 'white';
-      ctx.textAlign = watermark.position.includes('right') ? 'right' : 
-                      watermark.position === 'center' ? 'center' : 'left';
-      ctx.textBaseline = watermark.position.includes('bottom') ? 'bottom' : 
-                         watermark.position === 'center' ? 'middle' : 'top';
-      ctx.fillText(watermark.text, x, y);
-    }
-    
-    ctx.globalAlpha = 1;
-  }
-  
-  private async canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      canvas.toBlob(
-        blob => blob ? resolve(blob) : reject(new Error('Failed to create blob')),
-        type,
-        quality
-      );
-    });
   }
   
   // ============================================================================
@@ -534,11 +316,11 @@ export class CaptureSystem extends EventEmitter {
       const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
       const duration = (Date.now() - this.recordingStartTime) / 1000;
       
-      const media = this.createMediaEntry('video', blob, {
+      const media = createMediaEntry('video', blob, {
         width: this.canvas?.width ?? 0,
         height: this.canvas?.height ?? 0,
         format: options.format || 'webm',
-        filename: options.filename || this.generateFilename('video', 'webm'),
+        filename: options.filename || generateFilename('video', 'webm'),
         duration,
       });
       
@@ -640,7 +422,7 @@ export class CaptureSystem extends EventEmitter {
     this.replayInterval = setInterval(async () => {
       if (!this.canvas) return;
       
-      const blob = await this.canvasToBlob(this.canvas, 'image/jpeg', 0.8);
+      const blob = await canvasToBlob(this.canvas, 'image/jpeg', 0.8);
       this.replayBuffer.push(blob);
       
       // Keep only last N frames
@@ -667,11 +449,11 @@ export class CaptureSystem extends EventEmitter {
     // Convert frames to video (simplified - real implementation would use proper video encoding)
     const blob = new Blob(this.replayBuffer, { type: 'video/webm' });
     
-    const media = this.createMediaEntry('video', blob, {
+    const media = createMediaEntry('video', blob, {
       width: this.canvas?.width ?? 0,
       height: this.canvas?.height ?? 0,
       format: 'webm',
-      filename: this.generateFilename('replay', 'webm'),
+      filename: generateFilename('replay', 'webm'),
       duration: this.replayBuffer.length / 30,
     });
     
@@ -859,76 +641,6 @@ export class CaptureSystem extends EventEmitter {
   // ============================================================================
   // UTILITIES
   // ============================================================================
-  
-  private createMediaEntry(
-    type: 'screenshot' | 'video' | 'gif',
-    blob: Blob,
-    data: {
-      width: number;
-      height: number;
-      format: string;
-      filename: string;
-      duration?: number;
-    }
-  ): CapturedMedia {
-    return {
-      id: `capture_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-      type,
-      blob,
-      url: URL.createObjectURL(blob),
-      width: data.width,
-      height: data.height,
-      size: blob.size,
-      timestamp: Date.now(),
-      filename: data.filename,
-      format: data.format,
-      duration: data.duration,
-    };
-  }
-  
-  private generateFilename(type: string, extension: string): string {
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    return `${type}_${timestamp}.${extension}`;
-  }
-  
-  private flashScreen(): void {
-    if (typeof document === 'undefined') return;
-    
-    const flash = document.createElement('div');
-    flash.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: white;
-      opacity: 0.8;
-      pointer-events: none;
-      z-index: 99999;
-      animation: flash 0.15s ease-out forwards;
-    `;
-    
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes flash {
-        to { opacity: 0; }
-      }
-    `;
-    
-    document.head.appendChild(style);
-    document.body.appendChild(flash);
-    
-    setTimeout(() => {
-      flash.remove();
-      style.remove();
-    }, 200);
-  }
-  
-  private playCaptureSound(): void {
-    // In a real implementation, play a shutter sound
-    this.emit('captureSound');
-  }
   
   getState(): CaptureState {
     return this.state;

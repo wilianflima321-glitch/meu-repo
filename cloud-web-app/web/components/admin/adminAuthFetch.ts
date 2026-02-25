@@ -7,14 +7,13 @@ export async function adminJsonFetch<T = unknown>(
   init?: RequestInit,
 ): Promise<T> {
   const token = getToken();
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
-  const mergedHeaders = {
-    ...authHeaders,
-    ...(init?.headers as Record<string, string> | undefined),
-  };
+  const mergedHeaders = new Headers(init?.headers);
+  if (token) {
+    mergedHeaders.set('Authorization', `Bearer ${token}`);
+  }
   const response = await fetch(url, {
     ...init,
-    headers: Object.keys(mergedHeaders).length > 0 ? mergedHeaders : undefined,
+    headers: mergedHeaders,
   });
   const payload = await response.json().catch(() => null);
   if (!response.ok) {

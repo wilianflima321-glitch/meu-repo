@@ -31,26 +31,38 @@ import {
   Controls,
   Background,
   MiniMap,
-  Handle,
-  Position,
-  NodeProps,
   MarkerType,
   Panel,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { OBJECTIVE_ICONS, QUEST_CATEGORIES } from './QuestEditor.catalog';
+import { initialQuestEdges, initialQuestNodes } from './QuestEditor.initial-data';
+import { questNodeTypes } from './QuestEditor.nodes';
+import type {
+  ObjectiveType,
+  QuestNodeData,
+  QuestObjective,
+  QuestReward,
+  RewardType,
+  QuestState,
+  QuestPrerequisite,
+} from './QuestEditor.types';
+export type {
+  ObjectiveType,
+  QuestCategory,
+  QuestNodeData,
+  QuestObjective,
+  QuestPrerequisite,
+  QuestReward,
+  QuestState,
+  RewardType,
+} from './QuestEditor.types';
+
 import {
   Scroll,
-  Target,
   CheckCircle2,
-  XCircle,
   Clock,
-  Gift,
-  Users,
-  MapPin,
-  Swords,
   Package,
-  MessageCircle,
-  Shield,
   Star,
   Plus,
   Trash2,
@@ -60,332 +72,11 @@ import {
   ChevronDown,
   ChevronRight,
   Eye,
-  Play,
   Link,
-  Unlink,
   Flag,
   Award,
   Coins,
-  Zap,
 } from 'lucide-react';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type QuestState = 'unavailable' | 'available' | 'active' | 'completed' | 'failed';
-
-export type ObjectiveType = 
-  | 'collect' 
-  | 'kill' 
-  | 'explore' 
-  | 'talk' 
-  | 'escort' 
-  | 'defend' 
-  | 'craft'
-  | 'deliver'
-  | 'custom';
-
-export type RewardType = 'xp' | 'gold' | 'item' | 'reputation' | 'skill' | 'unlock';
-
-export interface QuestObjective {
-  id: string;
-  type: ObjectiveType;
-  description: string;
-  targetId?: string;
-  targetCount: number;
-  currentCount: number;
-  isOptional: boolean;
-  isHidden: boolean;
-  timeLimit?: number;
-  hints: string[];
-  onComplete?: string;
-}
-
-export interface QuestReward {
-  id: string;
-  type: RewardType;
-  itemId?: string;
-  amount: number;
-  description: string;
-}
-
-export interface QuestPrerequisite {
-  type: 'quest' | 'level' | 'reputation' | 'item' | 'variable';
-  questId?: string;
-  level?: number;
-  faction?: string;
-  reputationAmount?: number;
-  itemId?: string;
-  variable?: string;
-  value?: any;
-}
-
-export interface QuestNodeData extends Record<string, unknown> {
-  questId: string;
-  title: string;
-  description: string;
-  state: QuestState;
-  category: string;
-  level: number;
-  isMainQuest: boolean;
-  objectives: QuestObjective[];
-  rewards: QuestReward[];
-  prerequisites: QuestPrerequisite[];
-  giver?: string;
-  location?: string;
-  timeLimit?: number;
-  repeatableAfter?: number;
-  journalEntry?: string;
-}
-
-export interface QuestCategory {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-}
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const QUEST_CATEGORIES: QuestCategory[] = [
-  { id: 'main', name: 'Main Story', color: '#eab308', icon: '⭐' },
-  { id: 'side', name: 'Side Quest', color: '#3b82f6', icon: '📜' },
-  { id: 'faction', name: 'Faction', color: '#8b5cf6', icon: '🛡️' },
-  { id: 'bounty', name: 'Bounty', color: '#ef4444', icon: '⚔️' },
-  { id: 'exploration', name: 'Exploration', color: '#22c55e', icon: '🗺️' },
-  { id: 'crafting', name: 'Crafting', color: '#f97316', icon: '🔨' },
-];
-
-const OBJECTIVE_ICONS: Record<ObjectiveType, React.ReactNode> = {
-  collect: <Package className="w-4 h-4" />,
-  kill: <Swords className="w-4 h-4" />,
-  explore: <MapPin className="w-4 h-4" />,
-  talk: <MessageCircle className="w-4 h-4" />,
-  escort: <Users className="w-4 h-4" />,
-  defend: <Shield className="w-4 h-4" />,
-  craft: <Zap className="w-4 h-4" />,
-  deliver: <Gift className="w-4 h-4" />,
-  custom: <Target className="w-4 h-4" />,
-};
-
-// ============================================================================
-// QUEST NODE COMPONENT
-// ============================================================================
-
-function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
-  const category = QUEST_CATEGORIES.find((c) => c.id === data.category);
-  const completedObjectives = data.objectives.filter((o) => o.currentCount >= o.targetCount).length;
-  const totalObjectives = data.objectives.length;
-  
-  const stateColors: Record<QuestState, string> = {
-    unavailable: 'border-slate-600 bg-slate-800/50',
-    available: 'border-yellow-500 bg-yellow-900/20',
-    active: 'border-blue-500 bg-blue-900/20',
-    completed: 'border-green-500 bg-green-900/20',
-    failed: 'border-red-500 bg-red-900/20',
-  };
-  
-  const stateIcons: Record<QuestState, React.ReactNode> = {
-    unavailable: <Unlink className="w-4 h-4 text-slate-500" />,
-    available: <Star className="w-4 h-4 text-yellow-400" />,
-    active: <Play className="w-4 h-4 text-blue-400" />,
-    completed: <CheckCircle2 className="w-4 h-4 text-green-400" />,
-    failed: <XCircle className="w-4 h-4 text-red-400" />,
-  };
-  
-  return (
-    <div 
-      className={`w-72 rounded-lg border-2 shadow-lg ${stateColors[data.state]} ${
-        selected ? 'ring-2 ring-white' : ''
-      }`}
-    >
-      <Handle type="target" position={Position.Top} className="!bg-slate-400" />
-      
-      {/* Header */}
-      <div 
-        className="px-3 py-2 rounded-t-md flex items-center gap-2"
-        style={{ borderBottom: `2px solid ${category?.color || '#64748b'}` }}
-      >
-        <span className="text-lg">{category?.icon}</span>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-sm text-white truncate">{data.title}</span>
-            {data.isMainQuest && <Star className="w-3 h-3 text-yellow-400 flex-shrink-0" />}
-          </div>
-          <div className="text-[10px] text-slate-400">Lvl {data.level} • {category?.name}</div>
-        </div>
-        {stateIcons[data.state]}
-      </div>
-      
-      {/* Description */}
-      <div className="px-3 py-2 text-xs text-slate-300 line-clamp-2 border-b border-slate-700/50">
-        {data.description}
-      </div>
-      
-      {/* Objectives preview */}
-      <div className="px-3 py-2">
-        <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-          <span>Objectives</span>
-          <span>{completedObjectives}/{totalObjectives}</span>
-        </div>
-        <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all"
-            style={{ width: `${totalObjectives > 0 ? (completedObjectives / totalObjectives) * 100 : 0}%` }}
-          />
-        </div>
-        
-        {/* Show first 2 objectives */}
-        <div className="mt-2 space-y-1">
-          {data.objectives.slice(0, 2).map((obj) => (
-            <div 
-              key={obj.id}
-              className={`flex items-center gap-1.5 text-[10px] ${
-                obj.currentCount >= obj.targetCount ? 'text-green-400' : 'text-slate-400'
-              }`}
-            >
-              {OBJECTIVE_ICONS[obj.type]}
-              <span className="truncate flex-1">{obj.description}</span>
-              <span>{obj.currentCount}/{obj.targetCount}</span>
-            </div>
-          ))}
-          {data.objectives.length > 2 && (
-            <div className="text-[10px] text-slate-500 italic">
-              +{data.objectives.length - 2} more...
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Rewards preview */}
-      {data.rewards.length > 0 && (
-        <div className="px-3 py-2 border-t border-slate-700/50">
-          <div className="flex items-center gap-2 flex-wrap">
-            {data.rewards.map((reward) => (
-              <div 
-                key={reward.id}
-                className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-700/50 rounded text-[10px]"
-              >
-                {reward.type === 'xp' && <Star className="w-3 h-3 text-blue-400" />}
-                {reward.type === 'gold' && <Coins className="w-3 h-3 text-yellow-400" />}
-                {reward.type === 'item' && <Package className="w-3 h-3 text-blue-400" />}
-                {reward.type === 'reputation' && <Award className="w-3 h-3 text-green-400" />}
-                <span>{reward.amount}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      <Handle type="source" position={Position.Bottom} className="!bg-slate-400" />
-    </div>
-  );
-}
-
-// ============================================================================
-// NODE TYPES
-// ============================================================================
-
-const nodeTypes = {
-  quest: QuestNode,
-};
-
-// ============================================================================
-// INITIAL DATA
-// ============================================================================
-
-const initialNodes: Node<QuestNodeData>[] = [
-  {
-    id: 'q1',
-    type: 'quest',
-    position: { x: 100, y: 50 },
-    data: {
-      questId: 'main_001',
-      title: 'The Lost Artifact',
-      description: 'An ancient artifact has been discovered in the ruins. Retrieve it before the enemy forces do.',
-      state: 'available',
-      category: 'main',
-      level: 5,
-      isMainQuest: true,
-      objectives: [
-        { id: 'o1', type: 'explore', description: 'Find the Ancient Ruins', targetCount: 1, currentCount: 0, isOptional: false, isHidden: false, hints: [] },
-        { id: 'o2', type: 'collect', description: 'Retrieve the Artifact', targetId: 'artifact_001', targetCount: 1, currentCount: 0, isOptional: false, isHidden: false, hints: [] },
-        { id: 'o3', type: 'kill', description: 'Defeat the Guardian', targetId: 'guardian_boss', targetCount: 1, currentCount: 0, isOptional: false, isHidden: false, hints: [] },
-      ],
-      rewards: [
-        { id: 'r1', type: 'xp', amount: 500, description: '500 XP' },
-        { id: 'r2', type: 'gold', amount: 100, description: '100 Gold' },
-      ],
-      prerequisites: [],
-      giver: 'Elder Mage',
-      location: 'Ancient Ruins',
-    },
-  },
-  {
-    id: 'q2',
-    type: 'quest',
-    position: { x: 100, y: 350 },
-    data: {
-      questId: 'main_002',
-      title: 'Deciphering the Past',
-      description: 'The artifact contains mysterious inscriptions. Find someone who can translate them.',
-      state: 'unavailable',
-      category: 'main',
-      level: 7,
-      isMainQuest: true,
-      objectives: [
-        { id: 'o1', type: 'talk', description: 'Speak to the Scholar', targetId: 'npc_scholar', targetCount: 1, currentCount: 0, isOptional: false, isHidden: false, hints: [] },
-        { id: 'o2', type: 'collect', description: 'Gather Research Materials', targetId: 'research_mat', targetCount: 5, currentCount: 0, isOptional: false, isHidden: false, hints: [] },
-      ],
-      rewards: [
-        { id: 'r1', type: 'xp', amount: 750, description: '750 XP' },
-        { id: 'r2', type: 'item', itemId: 'translation_book', amount: 1, description: 'Ancient Translation Guide' },
-      ],
-      prerequisites: [{ type: 'quest', questId: 'main_001' }],
-      giver: 'Elder Mage',
-    },
-  },
-  {
-    id: 'q3',
-    type: 'quest',
-    position: { x: 450, y: 150 },
-    data: {
-      questId: 'side_001',
-      title: "Merchant's Request",
-      description: 'The local merchant needs help dealing with bandits on the trade route.',
-      state: 'available',
-      category: 'side',
-      level: 4,
-      isMainQuest: false,
-      objectives: [
-        { id: 'o1', type: 'kill', description: 'Clear Bandits from Trade Route', targetId: 'bandit', targetCount: 10, currentCount: 0, isOptional: false, isHidden: false, hints: [] },
-      ],
-      rewards: [
-        { id: 'r1', type: 'xp', amount: 200, description: '200 XP' },
-        { id: 'r2', type: 'gold', amount: 50, description: '50 Gold' },
-        { id: 'r3', type: 'reputation', amount: 10, description: '+10 Merchant Guild Rep' },
-      ],
-      prerequisites: [],
-      giver: 'Traveling Merchant',
-    },
-  },
-];
-
-const initialEdges: Edge[] = [
-  { 
-    id: 'e1', 
-    source: 'q1', 
-    target: 'q2', 
-    markerEnd: { type: MarkerType.ArrowClosed },
-    style: { stroke: '#eab308', strokeWidth: 2 },
-    label: 'requires',
-    labelStyle: { fill: '#eab308', fontSize: 10 },
-    labelBgStyle: { fill: '#1e293b' },
-  },
-];
 
 // ============================================================================
 // OBJECTIVE EDITOR
@@ -1006,8 +697,8 @@ export default function QuestEditor({
   onExport,
 }: QuestEditorProps) {
   // Flow state
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialQuestNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialQuestEdges);
   
   // Selection
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
@@ -1084,7 +775,7 @@ export default function QuestEditor({
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onSelectionChange={onSelectionChange}
-          nodeTypes={nodeTypes}
+          nodeTypes={questNodeTypes}
           fitView
           snapToGrid
           snapGrid={[20, 20]}

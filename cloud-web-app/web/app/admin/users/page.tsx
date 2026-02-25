@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AdminBadge,
+  AdminFilterPill,
   AdminPageShell,
   AdminPrimaryButton,
+  AdminSearchInput,
   AdminSection,
   AdminStatCard,
   AdminStatGrid,
@@ -121,24 +124,21 @@ export default function AdminUsers() {
 
       <AdminSection className='mb-4'>
         <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-          <input
+          <AdminSearchInput
             type='text'
             placeholder='Search by name or email'
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
           <div className='flex items-center gap-2 flex-wrap'>
             {(['all', 'starter', 'basic', 'pro', 'studio', 'enterprise'] as const).map((plan) => (
-              <button
+              <AdminFilterPill
                 key={plan}
                 onClick={() => setPlanFilter(plan)}
-                className={`rounded px-3 py-1 text-xs font-semibold ${
-                  planFilter === plan ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-300 hover:bg-zinc-700/80'
-                }`}
+                active={planFilter === plan}
               >
                 {plan === 'all' ? 'All' : (planLabels[plan] ?? plan)}
-              </button>
+              </AdminFilterPill>
             ))}
           </div>
         </div>
@@ -171,14 +171,26 @@ export default function AdminUsers() {
                         <span>{user.email}</span>
                         <button
                           onClick={() => navigator.clipboard.writeText(user.email)}
-                          className='text-xs text-zinc-500 hover:text-zinc-200'
+                          className='text-xs text-zinc-500 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 rounded px-1 py-0.5'
                           type='button'
                         >
                           Copy
                         </button>
                       </div>
                     </td>
-                    <td className='p-3'>{planLabels[user.plan || 'starter'] ?? (user.plan || 'starter')}</td>
+                    <td className='p-3'>
+                      <AdminBadge
+                        tone={
+                          (user.plan || 'starter') === 'enterprise'
+                            ? 'emerald'
+                            : (user.plan || 'starter') === 'pro' || (user.plan || 'starter') === 'studio'
+                              ? 'sky'
+                              : 'neutral'
+                        }
+                      >
+                        {planLabels[user.plan || 'starter'] ?? (user.plan || 'starter')}
+                      </AdminBadge>
+                    </td>
                     <td className='p-3'>{user.projects}</td>
                     <td className='p-3'>{user.sessions}</td>
                     <td className='p-3 text-zinc-500'>{new Date(user.createdAt).toLocaleDateString()}</td>

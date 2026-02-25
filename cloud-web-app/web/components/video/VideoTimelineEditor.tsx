@@ -291,7 +291,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
     const effect: ClipEffect = {
       id: crypto.randomUUID(),
       type: effectType,
-      name: availableEffects.find(e => e.type === effectType)?.name || effectType,
+      name: effectType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
       enabled: true,
       parameters: {},
       keyframes: [],

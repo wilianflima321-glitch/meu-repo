@@ -16,166 +16,38 @@
  */
 
 import * as THREE from 'three';
-
 // ============================================================================
 // TYPES
 // ============================================================================
 
 import { Easings } from './sequencer-easings'
 import type { EasingFunction } from './sequencer-easings'
+import { KeyframeInterpolator } from './sequencer-keyframe-interpolator'
 
 export { Easings } from './sequencer-easings'
 export type { EasingFunction } from './sequencer-easings'
+export { KeyframeInterpolator } from './sequencer-keyframe-interpolator'
 
-export type KeyframeValue = number | THREE.Vector3 | THREE.Quaternion | THREE.Color | boolean | string;
+import type {
+  CameraCut,
+  Keyframe,
+  KeyframeValue,
+  Section,
+  SequenceConfig,
+  Track,
+} from './sequencer-cinematics.types';
 
-export interface Keyframe<T = KeyframeValue> {
-  time: number;
-  value: T;
-  easing: EasingFunction;
-  tangentIn?: number;
-  tangentOut?: number;
-}
-
-export interface Track {
-  id: string;
-  name: string;
-  type: 'transform' | 'property' | 'event' | 'audio' | 'camera' | 'visibility';
-  targetId: string;
-  property?: string;
-  keyframes: Keyframe[];
-  enabled: boolean;
-  locked: boolean;
-  muted: boolean;
-}
-
-export interface Section {
-  id: string;
-  name: string;
-  startTime: number;
-  endTime: number;
-  color: string;
-  tracks: string[]; // Track IDs
-}
-
-export interface SequenceConfig {
-  name: string;
-  duration: number;
-  frameRate: number;
-  playbackSpeed: number;
-  loop: boolean;
-  autoPlay: boolean;
-}
-
-export interface CameraCut {
-  time: number;
-  cameraId: string;
-  blendTime: number;
-  blendType: 'cut' | 'linear' | 'ease';
-}
-
+export type {
+  CameraCut,
+  Keyframe,
+  KeyframeValue,
+  Section,
+  SequenceConfig,
+  Track,
+} from './sequencer-cinematics.types';
 // ============================================================================
 // KEYFRAME INTERPOLATION
 // ============================================================================
-
-export class KeyframeInterpolator {
-  static interpolateNumber(keyframes: Keyframe<number>[], time: number): number {
-    if (keyframes.length === 0) return 0;
-    if (keyframes.length === 1) return keyframes[0].value;
-    
-    // Find surrounding keyframes
-    let k1 = keyframes[0];
-    let k2 = keyframes[keyframes.length - 1];
-    
-    for (let i = 0; i < keyframes.length - 1; i++) {
-      if (time >= keyframes[i].time && time <= keyframes[i + 1].time) {
-        k1 = keyframes[i];
-        k2 = keyframes[i + 1];
-        break;
-      }
-    }
-    
-    if (time <= k1.time) return k1.value;
-    if (time >= k2.time) return k2.value;
-    
-    const t = (time - k1.time) / (k2.time - k1.time);
-    const easedT = k1.easing(t);
-    
-    return k1.value + (k2.value - k1.value) * easedT;
-  }
-  
-  static interpolateVector3(keyframes: Keyframe<THREE.Vector3>[], time: number): THREE.Vector3 {
-    if (keyframes.length === 0) return new THREE.Vector3();
-    if (keyframes.length === 1) return keyframes[0].value.clone();
-    
-    let k1 = keyframes[0];
-    let k2 = keyframes[keyframes.length - 1];
-    
-    for (let i = 0; i < keyframes.length - 1; i++) {
-      if (time >= keyframes[i].time && time <= keyframes[i + 1].time) {
-        k1 = keyframes[i];
-        k2 = keyframes[i + 1];
-        break;
-      }
-    }
-    
-    if (time <= k1.time) return k1.value.clone();
-    if (time >= k2.time) return k2.value.clone();
-    
-    const t = (time - k1.time) / (k2.time - k1.time);
-    const easedT = k1.easing(t);
-    
-    return new THREE.Vector3().lerpVectors(k1.value, k2.value, easedT);
-  }
-  
-  static interpolateQuaternion(keyframes: Keyframe<THREE.Quaternion>[], time: number): THREE.Quaternion {
-    if (keyframes.length === 0) return new THREE.Quaternion();
-    if (keyframes.length === 1) return keyframes[0].value.clone();
-    
-    let k1 = keyframes[0];
-    let k2 = keyframes[keyframes.length - 1];
-    
-    for (let i = 0; i < keyframes.length - 1; i++) {
-      if (time >= keyframes[i].time && time <= keyframes[i + 1].time) {
-        k1 = keyframes[i];
-        k2 = keyframes[i + 1];
-        break;
-      }
-    }
-    
-    if (time <= k1.time) return k1.value.clone();
-    if (time >= k2.time) return k2.value.clone();
-    
-    const t = (time - k1.time) / (k2.time - k1.time);
-    const easedT = k1.easing(t);
-    
-    return new THREE.Quaternion().slerpQuaternions(k1.value, k2.value, easedT);
-  }
-  
-  static interpolateColor(keyframes: Keyframe<THREE.Color>[], time: number): THREE.Color {
-    if (keyframes.length === 0) return new THREE.Color();
-    if (keyframes.length === 1) return keyframes[0].value.clone();
-    
-    let k1 = keyframes[0];
-    let k2 = keyframes[keyframes.length - 1];
-    
-    for (let i = 0; i < keyframes.length - 1; i++) {
-      if (time >= keyframes[i].time && time <= keyframes[i + 1].time) {
-        k1 = keyframes[i];
-        k2 = keyframes[i + 1];
-        break;
-      }
-    }
-    
-    if (time <= k1.time) return k1.value.clone();
-    if (time >= k2.time) return k2.value.clone();
-    
-    const t = (time - k1.time) / (k2.time - k1.time);
-    const easedT = k1.easing(t);
-    
-    return new THREE.Color().lerpColors(k1.value, k2.value, easedT);
-  }
-}
 
 // ============================================================================
 // ANIMATION TRACK

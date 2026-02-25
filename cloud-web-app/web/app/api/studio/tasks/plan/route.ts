@@ -84,7 +84,12 @@ export async function POST(req: NextRequest) {
       ok: true,
       session,
       capability: 'STUDIO_HOME_SUPER_PLAN',
-      capabilityStatus: 'IMPLEMENTED',
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        planMode: 'template-heuristic',
+        executionReality: 'orchestration-checkpoint',
+        applyPolicy: 'manual-reviewed',
+      },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to generate super plan'

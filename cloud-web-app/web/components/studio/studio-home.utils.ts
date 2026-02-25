@@ -13,6 +13,13 @@ export function roleLabel(role: StudioTask['ownerRole']) {
   return 'Reviewer'
 }
 
+export function orchestrationModeLabel(mode?: 'serial' | 'role_sequenced_wave' | 'parallel_wave'): string {
+  if (mode === 'role_sequenced_wave' || mode === 'parallel_wave') {
+    return 'Role-Sequenced Wave'
+  }
+  return 'Serial'
+}
+
 export function sanitizeStudioProjectId(value: string): string {
   const raw = String(value || '').trim()
   if (!raw) return 'default'

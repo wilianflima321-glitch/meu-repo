@@ -32,7 +32,7 @@ import '@xyflow/react/dist/style.css'
 
 import { isAuthenticated } from '@/lib/auth'
 import { useAssetDownload, useJobQueue, useRenderProgress } from '@/hooks/useAethelGateway'
-import { RenderQueue, type RenderJob } from './dashboard/RenderProgress'
+import { RenderQueue } from './dashboard/RenderProgress'
 import { AIThinkingPanel } from './ai/AIThinkingPanel'
 import { DirectorNotePanel } from './ai/DirectorNotePanel'
 import { TimeMachineSlider } from './collaboration/TimeMachineSlider'
@@ -40,428 +40,41 @@ import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialo
 import { AethelDashboardPrimaryTabContent } from './dashboard/AethelDashboardPrimaryTabContent'
 import { AethelDashboardSecondaryTabContent } from './dashboard/AethelDashboardSecondaryTabContent'
 import { useAethelDashboardDerived } from './dashboard/useAethelDashboardDerived'
+import { useAethelDashboardRenderData } from './dashboard/useAethelDashboardRenderData'
 
-interface WorkflowTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  nodes: any[];
-  edges: any[];
-  thumbnail?: string;
-}
-
-interface UseCase {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  sharedBy: string;
-  views: number;
-  likes: number;
-  tags: string[];
-  preview?: string;
-}
-
-interface DashboardSettings {
-  theme: 'dark' | 'light';
-  autoSave: boolean;
-  notifications: boolean;
-}
-
-type SessionFilter = 'all' | 'favorites' | 'scheduled';
-
-type ActiveTab =
-  | 'overview'
-  | 'projects'
-  | 'ai-chat'
-  | 'agent-canvas'
-  | 'content-creation'
-  | 'unreal'
-  | 'wallet'
-  | 'billing'
-  | 'connectivity'
-  | 'templates'
-  | 'use-cases'
-  | 'download'
-  | 'admin';
-
-type ToastType = 'success' | 'error' | 'info';
-
-interface ToastState {
-  message: string;
-  type: ToastType;
-}
-
-interface SessionEntry {
-  id: string;
-  name: string;
-  timestamp: number;
-  chatHistory: ChatMessage[];
-  livePreviewSuggestions: string[];
-  favorite?: boolean;
-  scheduled?: boolean;
-  settings?: DashboardSettings;
-}
-
-interface Project {
-  id: number;
-  name: string;
-  type: 'code' | 'unreal' | 'web' | string;
-  status: 'active' | 'paused' | 'completed' | 'planning' | string;
-}
-
-const DEFAULT_SETTINGS: DashboardSettings = {
-  theme: 'dark',
-  autoSave: true,
-  notifications: true,
-};
-
-const STORAGE_KEYS = {
-  sessionHistory: 'aethel-dashboard::session-history',
-  settings: 'aethel-dashboard::settings',
-  activeTab: 'aethel-dashboard::active-tab',
-  chatHistory: 'aethel-dashboard::chat-history',
-} as const;
-
-const DASHBOARD_TABS: ActiveTab[] = [
-  'overview',
-  'projects',
-  'ai-chat',
-  'agent-canvas',
-  'content-creation',
-  'unreal',
-  'wallet',
-  'billing',
-  'connectivity',
-  'templates',
-  'use-cases',
-  'download',
-  'admin',
-];
-
-const isChatMessage = (value: unknown): value is ChatMessage => {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-  const candidate = value as { role?: unknown; content?: unknown };
-  if (typeof candidate.content !== 'string') {
-    return false;
-  }
-  return candidate.role === 'user' || candidate.role === 'assistant' || candidate.role === 'system';
-};
-
-const coerceBoolean = (value: unknown, fallback: boolean): boolean => {
-  if (typeof value === 'boolean') {
-    return value;
-  }
-  if (typeof value === 'string') {
-    const normalised = value.trim().toLowerCase();
-    if (normalised === 'true') {
-      return true;
-    }
-    if (normalised === 'false') {
-      return false;
-    }
-  }
-  if (typeof value === 'number') {
-    return value !== 0;
-  }
-  return fallback;
-};
-
-const sanitizeSessionEntry = (entry: unknown): SessionEntry | null => {
-  if (!entry || typeof entry !== 'object') {
-    return null;
-  }
-
-  const candidate = entry as Partial<SessionEntry> & {
-    settings?: Partial<DashboardSettings>;
-  };
-
-  if (typeof candidate.id !== 'string' || typeof candidate.name !== 'string' || typeof candidate.timestamp !== 'number') {
-    return null;
-  }
-
-  const chatHistory = Array.isArray(candidate.chatHistory)
-    ? candidate.chatHistory.filter(isChatMessage)
-    : [];
-
-  const livePreviewSuggestions = Array.isArray(candidate.livePreviewSuggestions)
-    ? candidate.livePreviewSuggestions.filter((item): item is string => typeof item === 'string')
-    : [];
-
-  const settings: DashboardSettings | undefined = candidate.settings
-    ? {
-        theme: candidate.settings.theme === 'light' ? 'light' : 'dark',
-        autoSave: coerceBoolean(candidate.settings.autoSave, DEFAULT_SETTINGS.autoSave),
-        notifications: coerceBoolean(candidate.settings.notifications, DEFAULT_SETTINGS.notifications),
-      }
-    : undefined;
-
-  return {
-    id: candidate.id,
-    name: candidate.name,
-    timestamp: candidate.timestamp,
-    chatHistory,
-    livePreviewSuggestions,
-    favorite: coerceBoolean(candidate.favorite, false),
-    scheduled: coerceBoolean(candidate.scheduled, false),
-    settings,
-  };
-};
-
-const resolveStoredSessions = (raw: string | null): SessionEntry[] => {
-  if (!raw) {
-    return [];
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed
-      .map(sanitizeSessionEntry)
-      .filter((session): session is SessionEntry => session !== null)
-      .slice(0, 10);
-  } catch (error) {
-    console.warn('Failed to parse stored sessions', error);
-    return [];
-  }
-};
-
-const resolveStoredSettings = (raw: string | null): DashboardSettings => {
-  if (!raw) {
-    return { ...DEFAULT_SETTINGS };
-  }
-  try {
-    const parsed = JSON.parse(raw) as Partial<DashboardSettings> | null;
-    if (!parsed) {
-      return { ...DEFAULT_SETTINGS };
-    }
-    return {
-      theme: parsed.theme === 'light' ? 'light' : 'dark',
-      autoSave: coerceBoolean(parsed.autoSave, DEFAULT_SETTINGS.autoSave),
-      notifications: coerceBoolean(parsed.notifications, DEFAULT_SETTINGS.notifications),
-    };
-  } catch (error) {
-    console.warn('Failed to parse stored settings', error);
-    return { ...DEFAULT_SETTINGS };
-  }
-};
-
-const resolveStoredActiveTab = (raw: string | null): ActiveTab => {
-  if (raw && DASHBOARD_TABS.includes(raw as ActiveTab)) {
-    return raw as ActiveTab;
-  }
-  return 'overview';
-};
-
-const resolveStoredChatHistory = (raw: string | null): ChatMessage[] => {
-  if (!raw) {
-    return [];
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed.filter(isChatMessage)
-      .map(message => ({ role: message.role, content: message.content } as ChatMessage))
-      .slice(-200);
-  } catch (error) {
-    console.warn('Failed to parse stored chat history', error);
-    return [];
-  }
-};
-
-const clearStoredDashboardState = () => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-  try {
-    window.localStorage.removeItem(STORAGE_KEYS.sessionHistory);
-    window.localStorage.removeItem(STORAGE_KEYS.settings);
-    window.localStorage.removeItem(STORAGE_KEYS.activeTab);
-    window.localStorage.removeItem(STORAGE_KEYS.chatHistory);
-  } catch (error) {
-    console.warn('Failed to clear stored dashboard state', error);
-  }
-};
-
-const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
-  {
-    id: '1',
-    name: 'Assistente de pesquisa com IA',
-    description: 'Fluxo multiagente para coletar, resumir e reportar descobertas',
-    category: 'Pesquisa',
-    nodes: [],
-    edges: [],
-  },
-  {
-    id: '2',
-    name: 'Pipeline de dados',
-    description: 'Processamento e visualização de dados ponta a ponta',
-    category: 'Ciência de Dados',
-    nodes: [],
-    edges: [],
-  },
-  {
-    id: '3',
-    name: 'Suíte de criação de conteúdo',
-    description: 'Geração e edição de conteúdo em múltiplas etapas',
-    category: 'Criativo',
-    nodes: [],
-    edges: [],
-  },
-  {
-    id: '4',
-    name: 'Pesquisa e análise',
-    description: 'Fluxo completo de pesquisa e análise',
-    category: 'Pesquisa',
-    nodes: [],
-    edges: [],
-  },
-]
-
-const DEFAULT_USE_CASES: UseCase[] = [
-  {
-    id: '1',
-    title: 'Criar um dashboard em React',
-    description: 'Fluxo completo para criar um dashboard moderno em React com assistência de IA',
-    category: 'Desenvolvimento',
-    sharedBy: 'Comunidade',
-    views: 1250,
-    likes: 89,
-    tags: ['React', 'Painel', 'Front-end'],
-    preview: 'https://example.com/preview1.png',
-  },
-  {
-    id: '2',
-    title: 'Suíte de visualização de dados',
-    description: 'Pipeline de análise e visualização de dados ponta a ponta',
-    category: 'Ciência de Dados',
-    sharedBy: 'EspecialistaDados',
-    views: 890,
-    likes: 67,
-    tags: ['Python', 'Visualização', 'Análises'],
-    preview: 'https://example.com/preview2.png',
-  },
-  {
-    id: '3',
-    title: 'Estratégia de marketing de conteúdo',
-    description: 'Criação de conteúdo com IA e desenvolvimento de estratégia de marketing',
-    category: 'Marketing',
-    sharedBy: 'MarketingPro',
-    views: 2100,
-    likes: 145,
-    tags: ['Marketing', 'Conteúdo', 'Estratégia'],
-    preview: 'https://example.com/preview3.png',
-  },
-]
-
-const DEFAULT_PROJECTS: Project[] = [
-  { id: 1, name: 'Estúdio de Conteúdo IA', type: 'code', status: 'active' },
-  { id: 2, name: 'Hub do Metaverso', type: 'unreal', status: 'active' },
-  { id: 3, name: 'Funil de automação', type: 'web', status: 'planning' },
-]
-
-const INITIAL_NODES: Node[] = [
-  {
-    id: '1',
-    position: { x: 80, y: 40 },
-    data: { label: 'Sinal de entrada' },
-    type: 'input',
-  },
-  {
-    id: '2',
-    position: { x: 320, y: 140 },
-    data: { label: 'Orquestrador IA' },
-  },
-  {
-    id: '3',
-    position: { x: 560, y: 40 },
-    data: { label: 'Saída' },
-    type: 'output',
-  },
-]
-
-const INITIAL_EDGES: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3' },
-]
-
-const HEALTH_KEY = 'health::status'
-const CONNECTIVITY_KEY = 'connectivity::status'
-const BILLING_PLANS_KEY = 'billing::plans'
-const WALLET_KEY = 'wallet::summary'
-const CURRENT_PLAN_KEY = 'billing::current-plan'
-const CREDITS_KEY = 'billing::credits'
-
-const CHAT_THREAD_KEY_BASE = 'chat::activeThreadId'
-const COPILOT_WORKFLOW_KEY_BASE = 'copilot::activeWorkflowId'
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'pendente',
-  processing: 'processando',
-  paid: 'pago',
-  succeeded: 'confirmado',
-  success: 'confirmado',
-  completed: 'concluído',
-  failed: 'falhou',
-  canceled: 'cancelado',
-  cancelled: 'cancelado',
-  awaiting_settlement: 'aguardando liquidação',
-  refunded: 'reembolsado',
-  requires_action: 'requer ação',
-  requires_payment_method: 'requer método de pagamento',
-  requires_confirmation: 'requer confirmação',
-  requires_capture: 'requer captura',
-}
-
-const CONNECTIVITY_STATUS_LABELS: Record<string, string> = {
-  healthy: 'saudável',
-  degraded: 'degradado',
-  down: 'indisponível',
-  unavailable: 'indisponível',
-  unknown: 'desconhecido',
-}
-
-function formatStatusLabel(rawStatus: unknown) {
-  if (typeof rawStatus !== 'string' || !rawStatus.trim()) {
-    return 'confirmado'
-  }
-  const normalized = rawStatus.toLowerCase()
-  return STATUS_LABELS[normalized] ?? rawStatus
-}
-
-function formatConnectivityStatus(rawStatus?: string | null) {
-  if (!rawStatus) {
-    return CONNECTIVITY_STATUS_LABELS.unknown
-  }
-  const normalized = rawStatus.toLowerCase()
-  return CONNECTIVITY_STATUS_LABELS[normalized] ?? rawStatus
-}
-
-function formatCurrencyLabel(currency?: string | null) {
-  if (!currency) {
-    return 'créditos'
-  }
-  if (currency.toLowerCase() === 'credits') {
-    return 'créditos'
-  }
-  return currency
-}
-
-function getScopedKeys(projectId: string | null) {
-  const suffix = projectId ? `::${projectId}` : ''
-  return {
-    chatThreadKey: `${CHAT_THREAD_KEY_BASE}${suffix}`,
-    workflowKey: `${COPILOT_WORKFLOW_KEY_BASE}${suffix}`,
-    legacyChatThreadKey: CHAT_THREAD_KEY_BASE,
-    legacyWorkflowKey: COPILOT_WORKFLOW_KEY_BASE,
-  }
-}
+import {
+  BILLING_PLANS_KEY,
+  CONNECTIVITY_KEY,
+  CREDITS_KEY,
+  CURRENT_PLAN_KEY,
+  DEFAULT_PROJECTS,
+  DEFAULT_SETTINGS,
+  DEFAULT_USE_CASES,
+  DEFAULT_WORKFLOW_TEMPLATES,
+  HEALTH_KEY,
+  INITIAL_EDGES,
+  INITIAL_NODES,
+  STORAGE_KEYS,
+  WALLET_KEY,
+  clearStoredDashboardState,
+  formatConnectivityStatus,
+  formatCurrencyLabel,
+  formatStatusLabel,
+  getScopedKeys,
+  resolveStoredActiveTab,
+  resolveStoredChatHistory,
+  resolveStoredSessions,
+  resolveStoredSettings,
+  type ActiveTab,
+  type DashboardSettings,
+  type Project,
+  type SessionEntry,
+  type SessionFilter,
+  type ToastState,
+  type ToastType,
+  type UseCase,
+  type WorkflowTemplate,
+} from './dashboard/AethelDashboard.config'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -534,64 +147,7 @@ export default function AethelDashboard() {
   const { renders, cancelRender } = useRenderProgress()
   const { jobs: queueJobs } = useJobQueue()
 
-  const renderJobs = useMemo<RenderJob[]>(() => {
-    return renders.map((render, index) => {
-      const totalFrames = render.totalFrames && render.totalFrames > 0 ? render.totalFrames : 1
-      const currentFrame = render.currentFrame && render.currentFrame > 0 ? render.currentFrame : 0
-      const statusMap: Record<string, RenderJob['status']> = {
-        pending: 'queued',
-        rendering: 'rendering',
-        complete: 'completed',
-        failed: 'failed',
-        cancelled: 'cancelled'
-      }
-
-      return {
-        id: render.jobId,
-        name: render.message || `Renderização ${index + 1}`,
-        type: totalFrames > 1 ? 'sequence' : 'image',
-        status: statusMap[render.status] || 'queued',
-        progress: render.progress ?? 0,
-        currentFrame,
-        totalFrames,
-        estimatedTimeRemaining: render.eta,
-        output: render.output,
-        error: render.error,
-        resolution: { width: 1920, height: 1080 },
-        samples: render.totalSamples ?? 0,
-        engine: 'cycles',
-        peakMemory: render.memory,
-        frames: []
-      }
-    })
-  }, [renders])
-
-  const exportJobs = useMemo(() => {
-    return queueJobs.filter(job => job.type.toLowerCase().includes('export'))
-  }, [queueJobs])
-
-  const formatBytes = useCallback((bytes: number) => {
-    if (!Number.isFinite(bytes)) return '-'
-    if (bytes < 1024) return `${bytes} B`
-    const kb = bytes / 1024
-    if (kb < 1024) return `${kb.toFixed(1)} KB`
-    const mb = kb / 1024
-    if (mb < 1024) return `${mb.toFixed(1)} MB`
-    const gb = mb / 1024
-    return `${gb.toFixed(2)} GB`
-  }, [])
-
-  const formatCurrency = useCallback((value: number, currency: string) => {
-    try {
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency,
-        maximumFractionDigits: 2,
-      }).format(value)
-    } catch {
-      return `${currency} ${value.toFixed(2)}`
-    }
-  }, [])
+  const { renderJobs, exportJobs, formatBytes, formatCurrency } = useAethelDashboardRenderData(renders, queueJobs)
 
   // Show toast notification (must be declared before callbacks that use it)
   const showToastMessage = useCallback((message: string, type: ToastType = 'info') => {

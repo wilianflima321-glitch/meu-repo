@@ -11,22 +11,26 @@ Non-negotiable:
 2. Keep explicit capability gates (`NOT_IMPLEMENTED`, `DEPRECATED_ROUTE`, `QUEUE_BACKEND_UNAVAILABLE`, `AUTH_NOT_CONFIGURED`).
 3. Do not create a second app shell.
 4. Do not remove deprecation contracts from legacy routes.
+5. Treat `win_dx12` as Windows export-target setting only; browser runtime remains WebGL/WebGPU.
 
 ## 1. Core Entry Surfaces
 1. Studio Home entry: `cloud-web-app/web/app/dashboard/page.tsx`
 2. Legacy dashboard fallback route: `cloud-web-app/web/app/dashboard/legacy/page.tsx`
-3. Studio Home UI shell: `cloud-web-app/web/components/studio/StudioHome.tsx`
-4. Studio Home mission block: `cloud-web-app/web/components/studio/StudioHomeMissionPanel.tsx`
-5. Studio Home task board block: `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`
-6. Studio Home team chat block: `cloud-web-app/web/components/studio/StudioHomeTeamChat.tsx`
-7. Studio Home preview/ops block: `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`
-8. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
-9. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
-10. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
-11. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
-12. Global settings workspace route: `cloud-web-app/web/app/settings/page.tsx`
-13. Project settings route: `cloud-web-app/web/app/project-settings/page.tsx`
-14. Canonical settings surface: `cloud-web-app/web/components/settings/SettingsPage.tsx`
+3. Legacy gateway wrapper + transition banner: `cloud-web-app/web/components/AethelDashboardGateway.tsx`
+4. Studio Home UI shell: `cloud-web-app/web/components/studio/StudioHome.tsx`
+5. Studio Home mission block: `cloud-web-app/web/components/studio/StudioHomeMissionPanel.tsx`
+6. Studio Home task board block: `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`
+7. Studio Home team chat block: `cloud-web-app/web/components/studio/StudioHomeTeamChat.tsx`
+8. Studio Home preview/ops block: `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`
+9. Studio Home top action rail: `cloud-web-app/web/components/studio/StudioHomeHeader.tsx`
+10. Studio Home KPI strip: `cloud-web-app/web/components/studio/StudioHomeKpiStrip.tsx`
+11. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
+12. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
+13. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
+14. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
+15. Global settings workspace route: `cloud-web-app/web/app/settings/page.tsx`
+16. Project settings route: `cloud-web-app/web/app/project-settings/page.tsx`
+17. Canonical settings surface: `cloud-web-app/web/components/settings/SettingsPage.tsx`
 
 ## 2. IDE UI Surfaces (Primary)
 ### 2.1 Left/center/bottom shell blocks
@@ -208,4 +212,24 @@ CI workflows:
   - `cloud-web-app/web/app/admin/security/page.tsx`
 - Admin shell reliability updates:
   - `cloud-web-app/web/app/admin/layout.tsx` now uses authenticated SWR fetches for status streams.
-  - Shell bottom action targets an existing route (`/admin/security`) to avoid dead-end navigation.
+- Shell bottom action targets an existing route (`/admin/security`) to avoid dead-end navigation.
+
+### Dashboard decomposition surface
+- Primary tab orchestrator:
+  - `cloud-web-app/web/components/dashboard/AethelDashboardPrimaryTabContent.tsx`
+- Extracted wallet tab:
+  - `cloud-web-app/web/components/dashboard/AethelDashboardWalletTab.tsx`
+- Extracted billing tab:
+  - `cloud-web-app/web/components/dashboard/AethelDashboardBillingTab.tsx`
+- Extracted render/currency helper hook:
+  - `cloud-web-app/web/components/dashboard/useAethelDashboardRenderData.ts`
+- Marketplace shared UI primitives:
+  - `cloud-web-app/web/components/marketplace/CreatorDashboard.shared.tsx`
+- Marketplace section modules:
+  - `cloud-web-app/web/components/marketplace/CreatorDashboard.sections.tsx`
+
+### Engine/media decomposition surface
+- Project settings schema:
+  - `cloud-web-app/web/components/engine/ProjectSettings.schema.ts`
+- Media studio initial project builder:
+  - `cloud-web-app/web/components/media/MediaStudio.initial-project.ts`

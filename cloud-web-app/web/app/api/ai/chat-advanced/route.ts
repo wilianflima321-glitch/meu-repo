@@ -13,7 +13,14 @@ import { apiErrorToResponse } from '@/lib/api-errors';
 import { aiService } from '@/lib/ai-service';
 import { aiTools, ToolResult } from '@/lib/ai-tools-registry';
 import { AgentExecutor, AGENTS } from '@/lib/ai-agent-system';
-import { checkAIQuota, recordTokenUsage, checkModelAccess, checkFeatureAccess, getPlanLimits } from '@/lib/plan-limits';
+import {
+  checkAIQuota,
+  recordTokenUsage,
+  checkModelAccess,
+  checkFeatureAccess,
+  getPlanLimits,
+  normalizeQualityModeForPlan,
+} from '@/lib/plan-limits';
 import { prisma } from '@/lib/prisma';
 import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
@@ -65,6 +72,12 @@ interface ChatResponse {
   agentExecution?: {
     steps: number;
     artifacts: number;
+  };
+  metadata?: {
+    requestedQualityMode: 'standard' | 'delivery' | 'studio';
+    appliedQualityMode: 'standard' | 'delivery' | 'studio';
+    qualityModeDowngraded: boolean;
+    allowedQualityModes: Array<'standard' | 'delivery' | 'studio'>;
   };
   traceId?: string;
   traceSummary?: AITraceSummary;
@@ -251,10 +264,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     } = body;
 
     const model = normalizeModelName(rawModel);
-    const qualityMode: 'standard' | 'delivery' | 'studio' =
+    const requestedQualityMode: 'standard' | 'delivery' | 'studio' =
       rawQualityMode === 'standard' || rawQualityMode === 'delivery' || rawQualityMode === 'studio'
         ? rawQualityMode
         : 'studio';
+    let qualityMode: 'standard' | 'delivery' | 'studio' = requestedQualityMode;
 
     const traceId = createAITraceId();
     const availableProviders = aiService.getAvailableProviders();
@@ -280,6 +294,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Heurística conservadora: ~4 chars/token + overhead.
     const userPlan = await prisma.user.findFirst({ where: { id: userId }, select: { plan: true } });
     const limits = getPlanLimits(userPlan?.plan || 'starter_trial');
+    const qualityResolution = normalizeQualityModeForPlan(userPlan?.plan || 'starter_trial', requestedQualityMode);
+    qualityMode = qualityResolution.qualityMode;
     const rawChars = messages.map((m) => String(m.content || '')).join('\n').length;
     const estimatedTokensPerRole = Math.max(800, Math.ceil(rawChars / 4) + 800);
     const agentCount = clampAgentCount(requestedAgentCount);
@@ -522,6 +538,12 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
         message: response,
         tokensUsed: totalTokens,
         toolsExecuted: toolsExecuted.length > 0 ? toolsExecuted : undefined,
+        metadata: {
+          requestedQualityMode: qualityResolution.requestedQualityMode,
+          appliedQualityMode: qualityResolution.qualityMode,
+          qualityModeDowngraded: qualityResolution.downgraded,
+          allowedQualityModes: qualityResolution.allowedModes,
+        },
         traceId: includeTrace ? traceId : undefined,
         traceSummary: includeTrace
           ? {
@@ -535,6 +557,15 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
               { kind: 'context', label: `historyContextMessages=${messages.length - 1}` },
               { kind: 'other', label: `agentCount=${agentCount}` },
               { kind: 'other', label: `qualityMode=${qualityMode}` },
+              ...(qualityResolution.downgraded
+                ? ([
+                    {
+                      kind: 'other' as const,
+                      label: 'qualityModeAdjusted',
+                      detail: `${qualityResolution.requestedQualityMode}->${qualityResolution.qualityMode}`,
+                    },
+                  ] as const)
+                : []),
               { kind: 'other', label: `models`, detail: `architect=${architectModel}; engineer=${engineerModel}${agentCount === 3 ? `; critic=${criticModel}` : ''}` },
               { kind: 'other', label: 'architectOutput', detail: clampText(architectResult.content, 800) },
               ...(webBenchmark.evidence.map((ref) => ({
@@ -592,6 +623,12 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
       message: response,
       tokensUsed: totalTokens,
       toolsExecuted: toolsExecuted.length > 0 ? toolsExecuted : undefined,
+      metadata: {
+        requestedQualityMode: qualityResolution.requestedQualityMode,
+        appliedQualityMode: qualityResolution.qualityMode,
+        qualityModeDowngraded: qualityResolution.downgraded,
+        allowedQualityModes: qualityResolution.allowedModes,
+      },
       traceId: includeTrace ? traceId : undefined,
       traceSummary: includeTrace
         ? {
@@ -615,6 +652,15 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
                   ] as const)
                 : []),
               { kind: 'other', label: `qualityMode=${qualityMode}` },
+              ...(qualityResolution.downgraded
+                ? ([
+                    {
+                      kind: 'other' as const,
+                      label: 'qualityModeAdjusted',
+                      detail: `${qualityResolution.requestedQualityMode}->${qualityResolution.qualityMode}`,
+                    },
+                  ] as const)
+                : []),
               ...(webBenchmark.evidence.map((ref) => ({
                 kind: 'search' as const,
                 label: ref.title,

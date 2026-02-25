@@ -1,6 +1,31 @@
 import { randomUUID } from 'node:crypto'
 import { prisma } from '@/lib/db'
-import type { Prisma } from '@prisma/client'
+import {
+  buildCoderCheckpointResult,
+  buildDomainChecklist,
+  buildPlannerCheckpointResult,
+  buildReviewerCheckpointResult,
+  canRunTaskWithDependencies,
+  evaluateReviewerValidation,
+  hasEnoughBudget,
+  inferMissionDomain,
+  normalizeChecklist,
+  normalizeMissionDomain,
+  resolveRoleExecutionProfile,
+  stableSeed,
+} from './studio-home-runtime-helpers'
+
+import {
+  appendMessage,
+  clampBudget,
+  extractStudioFromContext,
+  findOwnedWorkflow,
+  normalizeSession,
+  nowIso,
+  persistSession,
+} from './studio-home-store-normalizers'
+import type { WorkflowRecord } from './studio-home-store-normalizers'
+
 
 export type StudioQualityMode = 'standard' | 'delivery' | 'studio'
 export type StudioMissionDomain = 'games' | 'films' | 'apps' | 'general'
@@ -26,6 +51,11 @@ export type StudioTask = {
   estimateSeconds: number
   result?: string
   validationVerdict: StudioValidationVerdict
+  validationReport?: {
+    totalChecks: number
+    failedIds: string[]
+    failedMessages: string[]
+  }
   startedAt?: string
   finishedAt?: string
   applyToken?: string
@@ -88,7 +118,7 @@ export type StudioSession = {
   cost: StudioCostSummary
   fullAccessGrants: FullAccessGrant[]
   orchestration?: {
-    mode: 'serial' | 'parallel_wave'
+    mode: 'serial' | 'role_sequenced_wave'
     conversationPolicy: 'peer_review'
     applyPolicy: 'serial_after_validation'
     lastWaveAt?: string
@@ -98,469 +128,8 @@ export type StudioSession = {
   endedAt?: string
 }
 
-const CONTEXT_KEY = 'studioHome'
-
-type WorkflowRecord = {
-  id: string
-  userId: string
-  projectId: string | null
-  context: unknown
-  createdAt: Date
-  updatedAt: Date
-}
-
-function nowIso(): string {
-  return new Date().toISOString()
-}
-
-function toStringSafe(value: unknown, fallback: string): string {
-  if (typeof value === 'string' && value.trim()) return value.trim()
-  return fallback
-}
-
-function toNumberSafe(value: unknown, fallback: number): number {
-  const n = Number(value)
-  if (!Number.isFinite(n)) return fallback
-  return n
-}
-
-function clampBudget(value: number): number {
-  return Math.min(100_000, Math.max(5, Math.round(value)))
-}
-
-function inferMissionDomain(mission: string): StudioMissionDomain {
-  const lower = mission.toLowerCase()
-  const gameTokens = ['game', 'jogo', 'level', 'npc', 'gameplay', 'shader', '3d', 'unity', 'unreal']
-  const filmTokens = ['film', 'filme', 'video', 'trailer', 'shot', 'scene', 'timeline', 'editing', 'render']
-  const appTokens = ['app', 'api', 'backend', 'frontend', 'dashboard', 'web', 'mobile', 'saas', 'crud']
-  if (gameTokens.some((token) => lower.includes(token))) return 'games'
-  if (filmTokens.some((token) => lower.includes(token))) return 'films'
-  if (appTokens.some((token) => lower.includes(token))) return 'apps'
-  return 'general'
-}
-
-function buildDomainChecklist(domain: StudioMissionDomain): string[] {
-  if (domain === 'games') {
-    return [
-      'Deterministic gameplay logic and state transitions',
-      'Asset import/runtime smoke pass with explicit fallback',
-      'Frame-time and memory constraints documented',
-    ]
-  }
-  if (domain === 'films') {
-    return [
-      'Temporal consistency rules for sequence outputs',
-      'Explicit render/export constraints and fallback',
-      'Audio/video sync validation before publish',
-    ]
-  }
-  if (domain === 'apps') {
-    return [
-      'Multi-file dependency impact reviewed before apply',
-      'Error/empty/loading and keyboard-focus states explicit',
-      'Security and API contract checks for changed surfaces',
-    ]
-  }
-  return [
-    'Scope and acceptance criteria explicitly defined',
-    'Validation gates before apply with rollback path',
-    'Cost/latency envelope kept inside budget cap',
-  ]
-}
-
-function normalizeMissionDomain(input: unknown, mission: string): StudioMissionDomain {
-  const value = String(input || '').trim().toLowerCase()
-  if (value === 'games' || value === 'films' || value === 'apps' || value === 'general') {
-    return value
-  }
-  return inferMissionDomain(mission)
-}
-
-function normalizeChecklist(input: unknown, domain: StudioMissionDomain): string[] {
-  if (Array.isArray(input)) {
-    const list = input
-      .filter((item) => typeof item === 'string')
-      .map((item) => String(item).trim())
-      .filter(Boolean)
-      .slice(0, 8)
-    if (list.length > 0) return list
-  }
-  return buildDomainChecklist(domain)
-}
-
-function getCostPressure(session: StudioSession): 'normal' | 'high' {
-  const budget = Math.max(1, session.cost.budgetCap)
-  const remainingRatio = session.cost.remainingCredits / budget
-  return remainingRatio <= 0.3 ? 'high' : 'normal'
-}
-
-function resolveRoleExecutionProfile(
-  session: StudioSession,
-  role: StudioTaskOwnerRole,
-  seed: number
-): {
-  model: string
-  tokensIn: number
-  tokensOut: number
-  costFactor: number
-} {
-  const costPressure = getCostPressure(session)
-  const economy = costPressure === 'high'
-  if (session.qualityMode === 'standard' || economy) {
-    const baseModel =
-      role === 'planner'
-        ? 'gpt-4o-mini'
-        : role === 'coder'
-          ? 'claude-3-5-haiku-20241022'
-          : 'gemini-1.5-flash'
-    return {
-      model: baseModel,
-      tokensIn: 360 + (seed % 160),
-      tokensOut: 120 + ((seed >>> 2) % 100),
-      costFactor: 0.26,
-    }
-  }
-  if (session.qualityMode === 'delivery') {
-    return {
-      model:
-        role === 'planner'
-          ? 'gpt-4o-mini'
-          : role === 'coder'
-            ? 'claude-3-5-haiku-20241022'
-            : 'gemini-1.5-flash',
-      tokensIn: 560 + (seed % 220),
-      tokensOut: 210 + ((seed >>> 3) % 140),
-      costFactor: 0.38,
-    }
-  }
-  return {
-    model:
-      role === 'planner'
-        ? 'gpt-4o'
-        : role === 'coder'
-          ? 'claude-3-5-sonnet-20241022'
-          : 'gemini-1.5-pro',
-    tokensIn: 760 + (seed % 260),
-    tokensOut: 280 + ((seed >>> 4) % 180),
-    costFactor: 0.52,
-  }
-}
-
-function buildPlannerCheckpointResult(session: StudioSession): string {
-  const checklist = (session.qualityChecklist || []).slice(0, 3).map((item) => `- ${item}`).join('\n')
-  return [
-    `Planner checkpoint for ${session.missionDomain || 'general'} completed.`,
-    'Acceptance criteria and risk notes prepared for coder/reviewer handoff.',
-    checklist || '- No domain checklist available.',
-    '(executionMode=orchestration-only)',
-  ].join('\n')
-}
-
-function buildCoderCheckpointResult(session: StudioSession): string {
-  const checklist = (session.qualityChecklist || []).slice(0, 2).map((item) => `- ${item}`).join('\n')
-  return [
-    `Coder checkpoint completed for ${session.missionDomain || 'general'}.`,
-    'Generated change proposal with impact boundaries and deterministic handoff.',
-    checklist || '- Quality checklist unavailable.',
-    '[requires-manual-apply]',
-  ].join('\n')
-}
-
-function buildReviewerCheckpointResult(session: StudioSession): string {
-  return [
-    `Reviewer checkpoint completed for ${session.missionDomain || 'general'}.`,
-    'Cross-agent critique captured (planner -> coder -> reviewer).',
-    'Validation readiness asserted for apply gate.',
-    '[review-ok]',
-  ].join('\n')
-}
-
-function canRunTaskWithDependencies(task: StudioTask, allTasks: StudioTask[]): boolean {
-  const runEligible =
-    task.status === 'queued' ||
-    task.status === 'blocked' ||
-    task.status === 'error' ||
-    (task.ownerRole === 'planner' && task.status === 'planning')
-  if (!runEligible) return false
-  if (task.ownerRole === 'coder') {
-    return allTasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
-  }
-  if (task.ownerRole === 'reviewer') {
-    return allTasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
-  }
-  return true
-}
-
-function stableSeed(value: string): number {
-  let hash = 0
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
-  }
-  return hash
-}
-
-function hasEnoughBudget(session: StudioSession, expectedCost: number): boolean {
-  return session.cost.remainingCredits >= expectedCost
-}
-
-function isStudioContextContainer(input: unknown): input is Record<string, unknown> {
-  return !!input && typeof input === 'object' && !Array.isArray(input)
-}
-
-function normalizeTask(input: unknown): StudioTask | null {
-  if (!input || typeof input !== 'object') return null
-  const raw = input as Partial<StudioTask>
-  if (!raw.id || !raw.title || !raw.ownerRole || !raw.status) return null
-  if (!['planner', 'coder', 'reviewer'].includes(raw.ownerRole)) return null
-  if (!['queued', 'planning', 'building', 'validating', 'blocked', 'done', 'error'].includes(raw.status)) return null
-
-  const validationVerdict = ['pending', 'passed', 'failed'].includes(String(raw.validationVerdict))
-    ? (raw.validationVerdict as StudioValidationVerdict)
-    : 'pending'
-
-  return {
-    id: String(raw.id),
-    title: String(raw.title),
-    ownerRole: raw.ownerRole as StudioTaskOwnerRole,
-    status: raw.status as StudioTaskStatus,
-    estimateCredits: Math.max(0, Math.round(toNumberSafe(raw.estimateCredits, 0))),
-    estimateSeconds: Math.max(5, Math.round(toNumberSafe(raw.estimateSeconds, 30))),
-    result: typeof raw.result === 'string' ? raw.result : undefined,
-    validationVerdict,
-    startedAt: typeof raw.startedAt === 'string' ? raw.startedAt : undefined,
-    finishedAt: typeof raw.finishedAt === 'string' ? raw.finishedAt : undefined,
-    applyToken: typeof raw.applyToken === 'string' ? raw.applyToken : undefined,
-  }
-}
-
-function normalizeAgentRun(input: unknown): StudioAgentRun | null {
-  if (!input || typeof input !== 'object') return null
-  const raw = input as Partial<StudioAgentRun>
-  if (!raw.id || !raw.taskId || !raw.role || !raw.model || !raw.status || !raw.startedAt || !raw.message) return null
-  if (!['planner', 'coder', 'reviewer'].includes(raw.role)) return null
-  if (!['running', 'success', 'error'].includes(raw.status)) return null
-
-  return {
-    id: String(raw.id),
-    taskId: String(raw.taskId),
-    role: raw.role as StudioTaskOwnerRole,
-    model: String(raw.model),
-    status: raw.status as StudioAgentRunStatus,
-    tokensIn: Math.max(0, Math.round(toNumberSafe(raw.tokensIn, 0))),
-    tokensOut: Math.max(0, Math.round(toNumberSafe(raw.tokensOut, 0))),
-    latencyMs: Math.max(1, Math.round(toNumberSafe(raw.latencyMs, 1))),
-    cost: Math.max(0, toNumberSafe(raw.cost, 0)),
-    startedAt: String(raw.startedAt),
-    finishedAt: typeof raw.finishedAt === 'string' ? raw.finishedAt : undefined,
-    message: String(raw.message),
-  }
-}
-
-function normalizeMessage(input: unknown): StudioSessionMessage | null {
-  if (!input || typeof input !== 'object') return null
-  const raw = input as Partial<StudioSessionMessage>
-  if (!raw.id || !raw.role || !raw.content || !raw.timestamp) return null
-  if (!['user', 'assistant', 'system'].includes(raw.role)) return null
-
-  const message: StudioSessionMessage = {
-    id: String(raw.id),
-    role: raw.role as 'user' | 'assistant' | 'system',
-    content: String(raw.content),
-    timestamp: String(raw.timestamp),
-  }
-  if (raw.agentRole && ['planner', 'coder', 'reviewer'].includes(raw.agentRole)) {
-    message.agentRole = raw.agentRole as StudioTaskOwnerRole
-  }
-  if (raw.status && ['queued', 'planning', 'building', 'validating', 'blocked', 'done', 'error'].includes(raw.status)) {
-    message.status = raw.status as StudioTaskStatus
-  }
-  return message
-}
-
-function normalizeFullAccessGrant(input: unknown): FullAccessGrant | null {
-  if (!input || typeof input !== 'object') return null
-  const raw = input as Partial<FullAccessGrant>
-  if (!raw.id || !raw.scope || !raw.createdAt || !raw.expiresAt || !raw.auditRef) return null
-  if (!['project', 'workspace', 'web_tools'].includes(raw.scope)) return null
-  return {
-    id: String(raw.id),
-    scope: raw.scope as FullAccessScope,
-    createdAt: String(raw.createdAt),
-    expiresAt: String(raw.expiresAt),
-    revokedAt: typeof raw.revokedAt === 'string' ? raw.revokedAt : undefined,
-    auditRef: String(raw.auditRef),
-  }
-}
-
-function computeCost(session: Omit<StudioSession, 'cost'> & { cost?: Partial<StudioCostSummary> }): StudioCostSummary {
-  const estimatedCredits = session.tasks.reduce((sum, item) => sum + item.estimateCredits, 0)
-  const usedByRuns = session.agentRuns.reduce((sum, item) => sum + item.cost, 0)
-  const existingUsed = toNumberSafe(session.cost?.usedCredits, 0)
-  const usedCredits = Math.max(existingUsed, Math.round((usedByRuns + Number.EPSILON) * 1000) / 1000)
-  const budgetCap = clampBudget(toNumberSafe(session.cost?.budgetCap, estimatedCredits || 30))
-  const remainingCredits = Math.max(0, Math.round((budgetCap - usedCredits) * 1000) / 1000)
-
-  return {
-    estimatedCredits,
-    usedCredits,
-    budgetCap,
-    remainingCredits,
-  }
-}
-
-function normalizeSession(raw: unknown, fallback: { id: string; userId: string; projectId: string; createdAt: string }): StudioSession {
-  if (!raw || typeof raw !== 'object') {
-    const mission = 'No mission defined.'
-    const missionDomain = inferMissionDomain(mission)
-    const base: StudioSession = {
-      id: fallback.id,
-      userId: fallback.userId,
-      projectId: fallback.projectId,
-      mission,
-      missionDomain,
-      qualityMode: 'studio',
-      qualityChecklist: buildDomainChecklist(missionDomain),
-      status: 'active',
-      tasks: [],
-      agentRuns: [],
-      messages: [],
-      cost: { estimatedCredits: 0, usedCredits: 0, budgetCap: 30, remainingCredits: 30 },
-      fullAccessGrants: [],
-      orchestration: {
-        mode: 'serial',
-        conversationPolicy: 'peer_review',
-        applyPolicy: 'serial_after_validation',
-      },
-      createdAt: fallback.createdAt,
-      lastActivityAt: fallback.createdAt,
-    }
-    base.cost = computeCost(base)
-    return base
-  }
-
-  const input = raw as Partial<StudioSession>
-  const tasks = Array.isArray(input.tasks) ? input.tasks.map(normalizeTask).filter((item): item is StudioTask => item !== null) : []
-  const agentRuns = Array.isArray(input.agentRuns)
-    ? input.agentRuns.map(normalizeAgentRun).filter((item): item is StudioAgentRun => item !== null)
-    : []
-  const messages = Array.isArray(input.messages)
-    ? input.messages.map(normalizeMessage).filter((item): item is StudioSessionMessage => item !== null)
-    : []
-  const fullAccessGrants = Array.isArray(input.fullAccessGrants)
-    ? input.fullAccessGrants.map(normalizeFullAccessGrant).filter((item): item is FullAccessGrant => item !== null)
-    : []
-
-  const mission = toStringSafe(input.mission, 'No mission defined.')
-  const missionDomain = normalizeMissionDomain((input as { missionDomain?: unknown }).missionDomain, mission)
-  const qualityChecklist = normalizeChecklist((input as { qualityChecklist?: unknown }).qualityChecklist, missionDomain)
-  const orchestrationInput = (input as { orchestration?: unknown }).orchestration
-  const base: StudioSession = {
-    id: toStringSafe(input.id, fallback.id),
-    userId: toStringSafe(input.userId, fallback.userId),
-    projectId: toStringSafe(input.projectId, fallback.projectId),
-    mission,
-    missionDomain,
-    qualityMode: ['standard', 'delivery', 'studio'].includes(String(input.qualityMode))
-      ? (input.qualityMode as StudioQualityMode)
-      : 'studio',
-    qualityChecklist,
-    status: ['active', 'stopped', 'completed'].includes(String(input.status))
-      ? (input.status as StudioSessionStatus)
-      : 'active',
-    tasks,
-    agentRuns,
-    messages,
-    cost: {
-      estimatedCredits: Math.max(0, toNumberSafe(input.cost?.estimatedCredits, 0)),
-      usedCredits: Math.max(0, toNumberSafe(input.cost?.usedCredits, 0)),
-      budgetCap: clampBudget(toNumberSafe(input.cost?.budgetCap, 30)),
-      remainingCredits: Math.max(0, toNumberSafe(input.cost?.remainingCredits, 30)),
-    },
-    fullAccessGrants,
-    orchestration: {
-      mode:
-        orchestrationInput &&
-        typeof orchestrationInput === 'object' &&
-        (orchestrationInput as { mode?: unknown }).mode === 'parallel_wave'
-          ? 'parallel_wave'
-          : 'serial',
-      conversationPolicy: 'peer_review',
-      applyPolicy: 'serial_after_validation',
-      ...(orchestrationInput &&
-      typeof orchestrationInput === 'object' &&
-      typeof (orchestrationInput as { lastWaveAt?: unknown }).lastWaveAt === 'string'
-        ? { lastWaveAt: (orchestrationInput as { lastWaveAt?: string }).lastWaveAt }
-        : {}),
-    },
-    createdAt: toStringSafe(input.createdAt, fallback.createdAt),
-    lastActivityAt: toStringSafe(input.lastActivityAt, fallback.createdAt),
-    endedAt: typeof input.endedAt === 'string' ? input.endedAt : undefined,
-  }
-  base.cost = computeCost(base)
-  return base
-}
-
-function mergeStudioIntoContext(context: unknown, session: StudioSession): Prisma.InputJsonValue {
-  const root = isStudioContextContainer(context) ? { ...context } : {}
-  root[CONTEXT_KEY] = session
-  return root as unknown as Prisma.InputJsonValue
-}
-
-function extractStudioFromContext(context: unknown): unknown {
-  if (!isStudioContextContainer(context)) return null
-  return context[CONTEXT_KEY] ?? null
-}
-
-async function findOwnedWorkflow(userId: string, sessionId: string): Promise<WorkflowRecord | null> {
-  const workflow = await prisma.copilotWorkflow.findFirst({
-    where: { id: sessionId, userId },
-    select: { id: true, userId: true, projectId: true, context: true, createdAt: true, updatedAt: true },
-  })
-  return workflow as WorkflowRecord | null
-}
-
-async function persistSession(workflow: WorkflowRecord, session: StudioSession): Promise<StudioSession> {
-  const context = mergeStudioIntoContext(workflow.context, session)
-  const updated = await prisma.copilotWorkflow.update({
-    where: { id: workflow.id },
-    data: {
-      context,
-      contextVersion: { increment: 1 },
-      lastUsedAt: new Date(),
-      updatedAt: new Date(),
-    },
-    select: { id: true, userId: true, projectId: true, context: true, createdAt: true, updatedAt: true },
-  })
-  return normalizeSession(extractStudioFromContext(updated.context), {
-    id: updated.id,
-    userId: updated.userId,
-    projectId: updated.projectId || 'default',
-    createdAt: updated.createdAt.toISOString(),
-  })
-}
-
-function appendMessage(
-  session: StudioSession,
-  input: Omit<StudioSessionMessage, 'id' | 'timestamp'>
-): StudioSession {
-  const next: StudioSession = {
-    ...session,
-    messages: [
-      ...session.messages,
-      {
-        id: randomUUID(),
-        timestamp: nowIso(),
-        role: input.role,
-        content: input.content,
-        ...(input.agentRole ? { agentRole: input.agentRole } : {}),
-        ...(input.status ? { status: input.status } : {}),
-      },
-    ],
-    lastActivityAt: nowIso(),
-  }
-  next.cost = computeCost(next)
-  return next
-}
+const MAX_STORED_TASKS = 60
+const MAX_STORED_AGENT_RUNS = 300
 
 export async function createStudioSession(params: {
   userId: string
@@ -723,7 +292,7 @@ export async function planStudioTasks(userId: string, sessionId: string): Promis
         conversationPolicy: 'peer_review',
         applyPolicy: 'serial_after_validation',
       }),
-      mode: 'parallel_wave',
+      mode: 'role_sequenced_wave',
     },
     lastActivityAt: nowIso(),
   }
@@ -755,7 +324,12 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
   if (index === -1) return current
 
   const target = current.tasks[index]
-  if (!canRunTaskWithDependencies(target, current.tasks)) return current
+  const runEligible =
+    target.status === 'queued' ||
+    target.status === 'blocked' ||
+    target.status === 'error' ||
+    (target.ownerRole === 'planner' && target.status === 'planning')
+  if (!runEligible) return current
 
   const plannerDone = current.tasks.some((item) => item.ownerRole === 'planner' && item.status === 'done')
   const coderDone = current.tasks.some((item) => item.ownerRole === 'coder' && item.status === 'done')
@@ -845,27 +419,25 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
 
   const tasks = [...current.tasks]
   tasks[index] = updatedTask
+  const agentRun: StudioAgentRun = {
+    id: runId,
+    taskId: target.id,
+    role: target.ownerRole,
+    model: roleModel,
+    status: 'success',
+    tokensIn,
+    tokensOut,
+    latencyMs: Math.max(200, target.estimateSeconds * 120),
+    cost: runCost,
+    startedAt,
+    finishedAt,
+    message: updatedTask.result || 'Task run complete.',
+  }
 
   let next: StudioSession = {
     ...current,
     tasks,
-    agentRuns: [
-      ...current.agentRuns,
-      {
-        id: runId,
-        taskId: target.id,
-        role: target.ownerRole,
-        model: roleModel,
-        status: 'success',
-        tokensIn,
-        tokensOut,
-        latencyMs: Math.max(200, target.estimateSeconds * 120),
-        cost: runCost,
-        startedAt,
-        finishedAt,
-        message: updatedTask.result || 'Task run complete.',
-      },
-    ],
+    agentRuns: [...current.agentRuns, agentRun].slice(-MAX_STORED_AGENT_RUNS),
     orchestration: {
       ...(current.orchestration || {
         mode: 'serial',
@@ -910,22 +482,60 @@ export async function runStudioTask(userId: string, sessionId: string, taskId: s
 export async function runStudioWave(
   userId: string,
   sessionId: string,
-  options?: { maxSteps?: number }
+  options?: { maxSteps?: number; strategy?: 'balanced' | 'cost_guarded' | 'quality_first' }
 ): Promise<{
   session: StudioSession | null
   executedTaskIds: string[]
   blockedTaskIds: string[]
+  strategy: 'balanced' | 'cost_guarded' | 'quality_first'
+  maxStepsApplied: number
+  strategyReason: string
 }> {
+  const strategy = options?.strategy === 'cost_guarded' || options?.strategy === 'quality_first'
+    ? options.strategy
+    : 'balanced'
   const session = await getStudioSession(userId, sessionId)
   if (!session) {
-    return { session: null, executedTaskIds: [], blockedTaskIds: [] }
+    return {
+      session: null,
+      executedTaskIds: [],
+      blockedTaskIds: [],
+      strategy,
+      maxStepsApplied: 0,
+      strategyReason: 'session-not-found',
+    }
   }
   if (session.status !== 'active') {
-    return { session, executedTaskIds: [], blockedTaskIds: [] }
+    return {
+      session,
+      executedTaskIds: [],
+      blockedTaskIds: [],
+      strategy,
+      maxStepsApplied: 0,
+      strategyReason: 'session-not-active',
+    }
   }
   let activeSession: StudioSession = session
 
-  const maxSteps = Math.max(1, Math.min(3, Math.floor(options?.maxSteps ?? 3)))
+  const requestedMaxSteps = Math.max(1, Math.min(3, Math.floor(options?.maxSteps ?? 3)))
+  const budgetRatio = activeSession.cost.budgetCap > 0
+    ? activeSession.cost.remainingCredits / activeSession.cost.budgetCap
+    : 1
+  const maxSteps = (() => {
+    if (strategy === 'quality_first') return 1
+    if (strategy === 'cost_guarded') {
+      return Math.max(1, Math.min(requestedMaxSteps, budgetRatio <= 0.2 ? 1 : 2))
+    }
+    return requestedMaxSteps
+  })()
+  const strategyReason =
+    strategy === 'quality_first'
+      ? 'quality-first-single-step'
+      : strategy === 'cost_guarded'
+        ? budgetRatio <= 0.2
+          ? 'budget-pressure-hard-cap'
+          : 'budget-pressure-soft-cap'
+        : 'balanced-requested-steps'
   const roleOrder: StudioTaskOwnerRole[] = ['planner', 'coder', 'reviewer']
   const executedTaskIds: string[] = []
   const blockedTaskIds: string[] = []
@@ -949,7 +559,14 @@ export async function runStudioWave(
     if (activeSession.status !== 'active') break
   }
 
-  return { session: activeSession, executedTaskIds, blockedTaskIds }
+  return {
+    session: activeSession,
+    executedTaskIds,
+    blockedTaskIds,
+    strategy,
+    maxStepsApplied: maxSteps,
+    strategyReason,
+  }
 }
 
 export async function validateStudioTask(userId: string, sessionId: string, taskId: string): Promise<StudioSession | null> {
@@ -970,15 +587,20 @@ export async function validateStudioTask(userId: string, sessionId: string, task
   if (target.status !== 'done') return current
   if (target.validationVerdict !== 'pending') return current
 
-  const hasResult =
-    target.ownerRole === 'reviewer' &&
-    Boolean(target.result && target.result.includes('[review-ok]') && target.result.trim().length > 12)
-  const verdict: StudioValidationVerdict = hasResult ? 'passed' : 'failed'
-  const status: StudioTaskStatus = hasResult ? 'done' : 'error'
+  const validation = evaluateReviewerValidation(current, target.result)
+  const { checks, failedChecks, passed } = validation
+  const verdict: StudioValidationVerdict = passed ? 'passed' : 'failed'
+  const status: StudioTaskStatus = passed ? 'done' : 'error'
   const task: StudioTask = {
     ...target,
     status,
     validationVerdict: verdict,
+    validationReport: {
+      totalChecks: checks.length,
+      failedIds: failedChecks.map((item) => item.id),
+      failedMessages: failedChecks.map((item) => item.message),
+    },
+    result: `${target.result || ''}\n[validation:${passed ? 'passed' : 'failed'}]`,
     finishedAt: nowIso(),
   }
 
@@ -989,11 +611,19 @@ export async function validateStudioTask(userId: string, sessionId: string, task
   next = appendMessage(next, {
     role: 'assistant',
     agentRole: 'reviewer',
-    content: hasResult
-      ? `Validation passed for task "${target.title}".`
-      : `Validation failed for task "${target.title}". Missing deterministic result payload.`,
+    content: passed
+      ? `Validation passed for task "${target.title}". Checks: ${checks.length}/${checks.length}.`
+      : `Validation failed for task "${target.title}". Failed checks: ${failedChecks.map((item) => item.id).join(', ')}.`,
     status: 'validating',
   })
+  if (!passed) {
+    next = appendMessage(next, {
+      role: 'system',
+      agentRole: 'reviewer',
+      content: `Validation report:\n${failedChecks.map((item) => `- ${item.message}`).join('\n')}`,
+      status: 'error',
+    })
+  }
 
   return persistSession(workflow, next)
 }
@@ -1064,6 +694,7 @@ export async function rollbackStudioTask(
     status: 'blocked',
     applyToken: undefined,
     validationVerdict: 'pending',
+    validationReport: undefined,
     finishedAt: nowIso(),
   }
   const tasks = [...current.tasks]

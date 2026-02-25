@@ -130,7 +130,12 @@ export async function POST(
       session,
       applyToken: updatedTask.applyToken ?? null,
       capability: 'STUDIO_HOME_TASK_APPLY',
-      capabilityStatus: 'IMPLEMENTED',
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        applyMode: 'checkpoint-token-only',
+        executionReality: 'orchestration-checkpoint',
+        externalApplyRequired: true,
+      },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to apply studio task'

@@ -2,10 +2,12 @@
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const TARGET_DIRS = ['app', 'components'].map((p) => path.join(ROOT, p))
 const OUTPUT_FILE = path.join(ROOT, 'docs', 'INTERFACE_CRITICAL_SWEEP.md')
+const UI_MONOLITH_LINE_THRESHOLD = 650
 
 const METRICS = [
   {
@@ -47,6 +49,20 @@ const METRICS = [
     regex: /\bNOT_IMPLEMENTED\b/g,
     severity: 'info',
     include: /[/\\]app[/\\]api[/\\]ai[/\\](query|stream)[/\\]route\.ts$/,
+  },
+  {
+    id: 'provider-not-configured-ui',
+    label: 'Explicit PROVIDER_NOT_CONFIGURED capability states',
+    regex: /\bPROVIDER_NOT_CONFIGURED\b/g,
+    severity: 'info',
+    include: /[/\\]app[/\\]api[/\\]ai[/\\].+[/\\]route\.ts$/,
+  },
+  {
+    id: 'queue-backend-unavailable-ui',
+    label: 'Explicit QUEUE_BACKEND_UNAVAILABLE capability states',
+    regex: /\bQUEUE_BACKEND_UNAVAILABLE\b/g,
+    severity: 'info',
+    include: /[/\\]app[/\\]api[/\\].+[/\\]route\.ts$/,
   },
   {
     id: 'deprecated-surface-usage',
@@ -114,6 +130,11 @@ function getTopFiles(byFile, top = 20) {
     .slice(0, top)
 }
 
+function countLines(content) {
+  if (!content) return 0
+  return content.split(/\r?\n/).length
+}
+
 async function main() {
   const files = (await Promise.all(TARGET_DIRS.map(listFiles))).flat()
   const scannedFiles = files.map(normalizePath)
@@ -137,10 +158,17 @@ async function main() {
       topFiles: [],
     }
   })
+  const uiMonoliths = []
 
   for (const absPath of files) {
     const content = await fs.readFile(absPath, 'utf8')
     const relPath = normalizePath(absPath)
+    if (absPath.endsWith('.tsx')) {
+      const lineCount = countLines(content)
+      if (lineCount >= UI_MONOLITH_LINE_THRESHOLD) {
+        uiMonoliths.push({ file: relPath, lines: lineCount })
+      }
+    }
     for (const metric of metricResults) {
       if (metric.include && !metric.include.test(absPath)) continue
       if (metric.exclude && metric.exclude.test(absPath)) continue
@@ -154,6 +182,7 @@ async function main() {
   for (const metric of metricResults) {
     metric.topFiles = getTopFiles(metric.byFile, 20)
   }
+  uiMonoliths.sort((a, b) => b.lines - a.lines)
 
   const lines = []
   lines.push('# Interface Critical Sweep')
@@ -167,7 +196,27 @@ async function main() {
   for (const metric of metricResults) {
     lines.push(`- \`${metric.id}\` (${metric.severity}): ${metric.total}`)
   }
+  lines.push(`- \`ui-monolith-files-gte-${UI_MONOLITH_LINE_THRESHOLD}\` (medium): ${uiMonoliths.length}`)
   lines.push('')
+
+  lines.push(`## UI Monolith Pressure (>= ${UI_MONOLITH_LINE_THRESHOLD} lines)`)
+  lines.push('')
+  lines.push('- Metric ID: `ui-monolith-files`')
+  lines.push('- Severity: `medium`')
+  lines.push(`- Threshold: \`${UI_MONOLITH_LINE_THRESHOLD}\``)
+  lines.push(`- Files above threshold: \`${uiMonoliths.length}\``)
+  lines.push('')
+  if (uiMonoliths.length === 0) {
+    lines.push('- No UI monolith files above threshold')
+    lines.push('')
+  } else {
+    lines.push('| File | Lines |')
+    lines.push('| --- | ---: |')
+    for (const item of uiMonoliths.slice(0, 25)) {
+      lines.push(`| \`${item.file}\` | ${item.lines} |`)
+    }
+    lines.push('')
+  }
 
   for (const metric of metricResults) {
     lines.push(`## ${metric.label}`)

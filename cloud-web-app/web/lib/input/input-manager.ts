@@ -13,130 +13,38 @@
  */
 
 import { EventEmitter } from 'events';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type InputDeviceType = 'keyboard' | 'mouse' | 'gamepad' | 'touch';
-
-export type KeyCode = string; // e.g., 'KeyW', 'Space', 'ArrowUp'
-
-export type MouseButton = 'left' | 'right' | 'middle' | 'back' | 'forward';
-
-export type GamepadButton = 
-  | 'a' | 'b' | 'x' | 'y'
-  | 'lb' | 'rb' | 'lt' | 'rt'
-  | 'back' | 'start' | 'guide'
-  | 'ls' | 'rs'
-  | 'dpad_up' | 'dpad_down' | 'dpad_left' | 'dpad_right';
-
-export type GamepadAxis = 
-  | 'left_x' | 'left_y' 
-  | 'right_x' | 'right_y'
-  | 'lt' | 'rt';
-
-export interface InputBinding {
-  device: InputDeviceType;
-  key?: KeyCode;
-  button?: MouseButton | GamepadButton;
-  axis?: GamepadAxis;
-  modifiers?: {
-    ctrl?: boolean;
-    alt?: boolean;
-    shift?: boolean;
-    meta?: boolean;
-  };
-  scale?: number;
-  deadzone?: number;
-}
-
-export interface InputAction {
-  name: string;
-  bindings: InputBinding[];
-  consumeInput?: boolean;
-}
-
-export interface InputAxis {
-  name: string;
-  positiveBindings: InputBinding[];
-  negativeBindings: InputBinding[];
-  gravity?: number;
-  sensitivity?: number;
-  snap?: boolean;
-  deadzone?: number;
-}
-
-export interface InputState {
-  actions: Map<string, boolean>;
-  axes: Map<string, number>;
-  mousePosition: { x: number; y: number };
-  mouseDelta: { x: number; y: number };
-  scroll: { x: number; y: number };
-  touches: Touch[];
-}
-
-export interface Touch {
-  id: number;
-  position: { x: number; y: number };
-  startPosition: { x: number; y: number };
-  delta: { x: number; y: number };
-  pressure: number;
-  isActive: boolean;
-}
-
-export interface Gesture {
-  type: 'tap' | 'double_tap' | 'long_press' | 'swipe' | 'pinch' | 'rotate';
-  position?: { x: number; y: number };
-  direction?: 'up' | 'down' | 'left' | 'right';
-  scale?: number;
-  rotation?: number;
-}
-
-export interface InputBuffer {
-  action: string;
-  timestamp: number;
-  device: InputDeviceType;
-}
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const MOUSE_BUTTON_MAP: Record<number, MouseButton> = {
-  0: 'left',
-  1: 'middle',
-  2: 'right',
-  3: 'back',
-  4: 'forward',
-};
-
-const GAMEPAD_BUTTON_MAP: Record<number, GamepadButton> = {
-  0: 'a',
-  1: 'b',
-  2: 'x',
-  3: 'y',
-  4: 'lb',
-  5: 'rb',
-  6: 'lt',
-  7: 'rt',
-  8: 'back',
-  9: 'start',
-  10: 'guide',
-  11: 'ls',
-  12: 'rs',
-  13: 'dpad_up',
-  14: 'dpad_down',
-  15: 'dpad_left',
-  16: 'dpad_right',
-};
-
-const GAMEPAD_AXIS_MAP: Record<number, GamepadAxis> = {
-  0: 'left_x',
-  1: 'left_y',
-  2: 'right_x',
-  3: 'right_y',
-};
+import { registerDefaultInputMappings } from './input-manager-default-mappings';
+import {
+  GAMEPAD_AXIS_MAP,
+  GAMEPAD_BUTTON_MAP,
+  MOUSE_BUTTON_MAP,
+  type GamepadAxis,
+  type GamepadButton,
+  type Gesture,
+  type InputAction,
+  type InputAxis,
+  type InputBinding,
+  type InputBuffer,
+  type InputDeviceType,
+  type InputState,
+  type KeyCode,
+  type MouseButton,
+  type Touch,
+} from './input-manager-types';
+export type {
+  GamepadAxis,
+  GamepadButton,
+  Gesture,
+  InputAction,
+  InputAxis,
+  InputBinding,
+  InputBuffer,
+  InputDeviceType,
+  InputState,
+  KeyCode,
+  MouseButton,
+  Touch,
+} from './input-manager-types';
 
 // ============================================================================
 // INPUT MANAGER
@@ -797,141 +705,12 @@ export class InputManager extends EventEmitter {
   // ============================================================================
   
   private setupDefaultMappings(): void {
-    // Default movement actions
-    this.registerAction({
-      name: 'move_forward',
-      bindings: [
-        { device: 'keyboard', key: 'KeyW' },
-        { device: 'keyboard', key: 'ArrowUp' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'move_backward',
-      bindings: [
-        { device: 'keyboard', key: 'KeyS' },
-        { device: 'keyboard', key: 'ArrowDown' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'move_left',
-      bindings: [
-        { device: 'keyboard', key: 'KeyA' },
-        { device: 'keyboard', key: 'ArrowLeft' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'move_right',
-      bindings: [
-        { device: 'keyboard', key: 'KeyD' },
-        { device: 'keyboard', key: 'ArrowRight' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'jump',
-      bindings: [
-        { device: 'keyboard', key: 'Space' },
-        { device: 'gamepad', button: 'a' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'crouch',
-      bindings: [
-        { device: 'keyboard', key: 'ControlLeft' },
-        { device: 'gamepad', button: 'b' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'sprint',
-      bindings: [
-        { device: 'keyboard', key: 'ShiftLeft' },
-        { device: 'gamepad', button: 'ls' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'interact',
-      bindings: [
-        { device: 'keyboard', key: 'KeyE' },
-        { device: 'gamepad', button: 'x' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'attack',
-      bindings: [
-        { device: 'mouse', button: 'left' },
-        { device: 'gamepad', button: 'rt' },
-      ],
-    });
-    
-    this.registerAction({
-      name: 'aim',
-      bindings: [
-        { device: 'mouse', button: 'right' },
-        { device: 'gamepad', button: 'lt' },
-      ],
-    });
-    
-    // Default axes
-    this.registerAxis({
-      name: 'horizontal',
-      positiveBindings: [
-        { device: 'keyboard', key: 'KeyD' },
-        { device: 'keyboard', key: 'ArrowRight' },
-        { device: 'gamepad', axis: 'left_x' },
-      ],
-      negativeBindings: [
-        { device: 'keyboard', key: 'KeyA' },
-        { device: 'keyboard', key: 'ArrowLeft' },
-      ],
-      gravity: 3,
-      sensitivity: 3,
-      snap: true,
-    });
-    
-    this.registerAxis({
-      name: 'vertical',
-      positiveBindings: [
-        { device: 'keyboard', key: 'KeyW' },
-        { device: 'keyboard', key: 'ArrowUp' },
-      ],
-      negativeBindings: [
-        { device: 'keyboard', key: 'KeyS' },
-        { device: 'keyboard', key: 'ArrowDown' },
-        { device: 'gamepad', axis: 'left_y' },
-      ],
-      gravity: 3,
-      sensitivity: 3,
-      snap: true,
-    });
-    
-    this.registerAxis({
-      name: 'look_horizontal',
-      positiveBindings: [
-        { device: 'gamepad', axis: 'right_x' },
-      ],
-      negativeBindings: [],
-      gravity: 0,
-      sensitivity: 1,
-    });
-    
-    this.registerAxis({
-      name: 'look_vertical',
-      positiveBindings: [],
-      negativeBindings: [
-        { device: 'gamepad', axis: 'right_y' },
-      ],
-      gravity: 0,
-      sensitivity: 1,
-    });
+    registerDefaultInputMappings(
+      (action) => this.registerAction(action),
+      (axis) => this.registerAxis(axis)
+    );
   }
-  
+
   // ============================================================================
   // SERIALIZATION
   // ============================================================================

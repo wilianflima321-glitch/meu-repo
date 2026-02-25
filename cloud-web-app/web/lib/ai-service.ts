@@ -1,13 +1,13 @@
 /**
- * AI Service - Conexão Real com Providers LLM
- * 
- * Este serviço conecta DIRETAMENTE com OpenAI, Anthropic, Google e Groq
- * Não é mock, não é placeholder - FUNCIONA DE VERDADE!
- * 
- * INTEGRAÇÃO COM EMERGENCY MODE:
- * - Controle de custos em tempo real
- * - Downgrade automático para modelos baratos em emergência
- * - Shadow ban para usuários abusivos
+ * AI Service - Runtime provider integration for the web control plane.
+ *
+ * Current configured providers in this runtime:
+ * - OpenAI
+ * - Anthropic
+ * - Google
+ *
+ * Groq is kept in provider typing for compatibility, but requires explicit
+ * runtime integration before being treated as configured.
  */
 
 import OpenAI from 'openai';
@@ -193,6 +193,8 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
         case 'google':
           response = await this.queryGoogle(messages, { ...options, model }, startTime);
           break;
+        case 'groq':
+          throw new Error('Provider not configured: groq');
         default:
           throw new Error(`Provider não suportado: ${provider}`);
       }

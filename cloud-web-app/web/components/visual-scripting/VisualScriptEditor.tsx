@@ -33,6 +33,16 @@ import type { NodeCategory, NodeDefinition, VisualNodeType } from './visual-scri
 export { NODE_CATALOG } from './visual-script-catalog';
 export type { NodeCategory, NodeDefinition, PortDefinition, VisualNodeData, VisualNodeType } from './visual-script-types';
 
+const portColors: Record<string, string> = {
+  exec: '#ffffff',
+  boolean: '#e74c3c',
+  number: '#27ae60',
+  string: '#f39c12',
+  vector3: '#9b59b6',
+  object: '#3498db',
+  any: '#95a5a6',
+};
+
 // ============================================================================
 // TIPOS DE NÓS
 // ============================================================================

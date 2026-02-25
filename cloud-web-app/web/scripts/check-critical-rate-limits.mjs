@@ -2,8 +2,9 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 const ROUTE_EXPECTATIONS = [
   { file: 'app/api/auth/login/route.ts', scope: 'auth-login' },

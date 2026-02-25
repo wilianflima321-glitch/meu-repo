@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import type {
+  FullAccessPolicySummary,
   FullAccessScope,
   MissionDomain,
   MissionDomainSelection,
@@ -15,6 +16,7 @@ import {
   defaultFullAccessScope,
   domainTemplate,
   fullAccessAllowedScopesForPlan,
+  fullAccessScopeLabel,
   normalizeBudgetCap,
   sanitizeStudioProjectId,
   isTypingTarget,
@@ -24,6 +26,10 @@ import { StudioHomeMissionPanel } from './StudioHomeMissionPanel'
 import { StudioHomeTaskBoard } from './StudioHomeTaskBoard'
 import { StudioHomeTeamChat } from './StudioHomeTeamChat'
 import { StudioHomeOpsBar, StudioHomePreviewPanel } from './StudioHomeRightRail'
+import { StudioHomeHeader } from './StudioHomeHeader'
+import { StudioHomeKpiStrip } from './StudioHomeKpiStrip'
+import { getExecutionProfiles, getExecutionTarget } from '@/lib/execution-target'
+import { getStudioFullAccessPolicy } from '@/lib/studio/full-access-policy'
 
 const PreviewPanel = dynamic(() => import('@/components/ide/PreviewPanel'), {
   ssr: false,
@@ -37,18 +43,33 @@ const AGENT_WORKSPACE_STORAGE_KEY = 'aethel_studio_home_agent_workspace'
 const PREVIEW_RUNTIME_STORAGE_KEY = 'aethel_studio_home_runtime_preview'
 const STUDIO_SESSION_STORAGE_KEY = 'aethel_studio_home_session_id'
 const STUDIO_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId'
+const STUDIO_WAVE_STRATEGY_STORAGE_KEY = 'aethel_studio_home_wave_strategy'
 const LEGACY_DASHBOARD_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LEGACY_DASHBOARD === 'true'
 
 type StudioLiveCost = {
   cost: StudioSession['cost']
+  budgetAlert?: {
+    level: 'normal' | 'warning_50' | 'warning_80' | 'hard_stop_100'
+    percentUsed: number
+    thresholdReached: 0 | 50 | 80 | 100
+    nextThreshold: 50 | 80 | 100 | null
+    message: string
+  }
   runsByRole: Record<string, number>
   totalRuns: number
   budgetExceeded: boolean
   updatedAt: string
 }
+type BudgetPressure = 'normal' | 'medium' | 'high' | 'critical'
+type BudgetProgress = { percent: number; pressure: BudgetPressure }
 
 export default function StudioHome() {
   const router = useRouter()
+  const executionTarget = useMemo(() => getExecutionTarget(), [])
+  const executionProfiles = useMemo(
+    () => getExecutionProfiles(executionTarget),
+    [executionTarget]
+  )
   const [mission, setMission] = useState('')
   const [missionDomainSelection, setMissionDomainSelection] = useState<MissionDomainSelection>('auto')
   const [projectId, setProjectId] = useState('default')
@@ -66,6 +87,10 @@ export default function StudioHome() {
   const [error, setError] = useState<string | null>(null)
   const [sessionBootstrapped, setSessionBootstrapped] = useState(false)
   const [fullAccessScope, setFullAccessScope] = useState<FullAccessScope>('workspace')
+  const [waveStrategy, setWaveStrategy] = useState<'balanced' | 'cost_guarded' | 'quality_first'>('balanced')
+  const [networkOnline, setNetworkOnline] = useState(true)
+  const [lastActionAt, setLastActionAt] = useState<string | null>(null)
+  const [fullAccessPolicy, setFullAccessPolicy] = useState<FullAccessPolicySummary | null>(null)
   const trimmedMission = useMemo(() => mission.trim(), [mission])
   const selectedMissionDomain = missionDomainSelection === 'auto' ? undefined : missionDomainSelection
   const recentAgentRuns = useMemo(() => (session?.agentRuns || []).slice(-6).reverse(), [session?.agentRuns])
@@ -85,6 +110,10 @@ export default function StudioHome() {
     () => fullAccessAllowedScopesForPlan(usage?.plan),
     [usage?.plan]
   )
+  const resolvedFullAccessPolicy = useMemo(() => {
+    if (fullAccessPolicy) return fullAccessPolicy
+    return getStudioFullAccessPolicy(fullAccessScope, usage?.plan || null)
+  }, [fullAccessPolicy, fullAccessScope, usage?.plan])
 
   const previewContent = useMemo(() => {
     if (selectedTask?.result) return `# ${selectedTask.title}\n\n${selectedTask.result}`
@@ -105,13 +134,14 @@ export default function StudioHome() {
     return { total, done, blocked, failed, active, percent }
   }, [session?.tasks])
 
-  const budgetProgress = useMemo(() => {
+  const budgetProgress = useMemo<BudgetProgress>(() => {
     const costSnapshot = liveCost?.cost || session?.cost
     const cap = Number(costSnapshot?.budgetCap ?? budgetCap)
     const used = Number(costSnapshot?.usedCredits ?? 0)
     const safeCap = cap > 0 ? cap : 1
     const percent = Math.max(0, Math.min(100, Math.round((used / safeCap) * 100)))
-    const pressure = percent >= 90 ? 'critical' : percent >= 70 ? 'high' : percent >= 50 ? 'medium' : 'normal'
+    const pressure: BudgetPressure =
+      percent >= 90 ? 'critical' : percent >= 70 ? 'high' : percent >= 50 ? 'medium' : 'normal'
     return { percent, pressure }
   }, [liveCost?.cost, session?.cost, budgetCap])
 
@@ -138,6 +168,7 @@ export default function StudioHome() {
     try {
       await action()
       await loadOps()
+      setLastActionAt(new Date().toISOString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Operation failed.')
     } finally {
@@ -150,13 +181,35 @@ export default function StudioHome() {
   }, [loadOps])
 
   useEffect(() => {
+    setNetworkOnline(typeof navigator !== 'undefined' ? navigator.onLine : true)
+    const handleOnline = () => setNetworkOnline(true)
+    const handleOffline = () => setNetworkOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
+  useEffect(() => {
     const persisted = window.localStorage.getItem(AGENT_WORKSPACE_STORAGE_KEY)
     if (persisted === '1') setShowAgentWorkspace(true)
     const previewPersisted = window.localStorage.getItem(PREVIEW_RUNTIME_STORAGE_KEY)
     if (previewPersisted === '1') setShowRuntimePreview(true)
     const storedProjectId = window.localStorage.getItem(STUDIO_PROJECT_STORAGE_KEY)
-    if (storedProjectId && projectId === 'default') {
-      setProjectId(sanitizeStudioProjectId(storedProjectId))
+    if (storedProjectId) {
+      setProjectId((current) =>
+        current === 'default' ? sanitizeStudioProjectId(storedProjectId) : current
+      )
+    }
+    const storedWaveStrategy = window.localStorage.getItem(STUDIO_WAVE_STRATEGY_STORAGE_KEY)
+    if (
+      storedWaveStrategy === 'balanced' ||
+      storedWaveStrategy === 'cost_guarded' ||
+      storedWaveStrategy === 'quality_first'
+    ) {
+      setWaveStrategy(storedWaveStrategy)
     }
   }, [])
 
@@ -171,6 +224,10 @@ export default function StudioHome() {
   useEffect(() => {
     window.localStorage.setItem(STUDIO_PROJECT_STORAGE_KEY, projectId)
   }, [projectId])
+
+  useEffect(() => {
+    window.localStorage.setItem(STUDIO_WAVE_STRATEGY_STORAGE_KEY, waveStrategy)
+  }, [waveStrategy])
 
   useEffect(() => {
     if (!session?.id || session.status !== 'active') {
@@ -217,7 +274,14 @@ export default function StudioHome() {
       const data = await parseJson(res)
       if (!res.ok) throw new Error(data.message || data.error || 'Failed to start session.')
       setSession(data.session as StudioSession)
-      setToast('Studio session started.')
+      const qualityDowngraded = Boolean(data?.metadata?.qualityModeDowngraded)
+      if (qualityDowngraded) {
+        const requested = String(data?.metadata?.requestedQualityMode || qualityMode)
+        const applied = String(data?.metadata?.appliedQualityMode || 'standard')
+        setToast(`Studio session started. Quality mode adjusted from ${requested} to ${applied} for current plan.`)
+      } else {
+        setToast('Studio session started.')
+      }
     })
   }, [withAction, trimmedMission, selectedMissionDomain, projectId, qualityMode, budgetCap])
 
@@ -249,6 +313,7 @@ export default function StudioHome() {
         if (!res.ok) throw new Error(data.message || data.error || 'Failed to load live cost telemetry.')
         setLiveCost({
           cost: data.cost as StudioSession['cost'],
+          budgetAlert: data.budgetAlert as StudioLiveCost['budgetAlert'],
           runsByRole: (data.runsByRole as Record<string, number>) || {},
           totalRuns: Number(data.totalRuns || 0),
           budgetExceeded: Boolean(data.budgetExceeded),
@@ -283,6 +348,12 @@ export default function StudioHome() {
     }, 10000)
     return () => window.clearInterval(interval)
   }, [session?.id, session?.status, refreshLiveCost])
+
+  useEffect(() => {
+    if (!toast) return
+    const timeout = window.setTimeout(() => setToast(null), 5500)
+    return () => window.clearTimeout(timeout)
+  }, [toast])
 
   useEffect(() => {
     if (sessionBootstrapped) return
@@ -327,15 +398,19 @@ export default function StudioHome() {
       const res = await fetch('/api/studio/tasks/run-wave', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, maxSteps: 3 }),
+        body: JSON.stringify({ sessionId, maxSteps: 3, strategy: waveStrategy }),
       })
       const data = await parseJson(res)
       if (!res.ok) throw new Error(data.message || data.error || 'Failed to run wave.')
       setSession(data.session as StudioSession)
       const executed = Array.isArray(data?.metadata?.executedTaskIds) ? data.metadata.executedTaskIds.length : 0
-      setToast(`Wave executed with ${executed} completed step(s).`)
+      const maxStepsApplied =
+        Number.isFinite(Number(data?.metadata?.maxStepsApplied)) ? Number(data.metadata.maxStepsApplied) : 3
+      const strategyLabel =
+        waveStrategy === 'cost_guarded' ? 'Cost Guarded' : waveStrategy === 'quality_first' ? 'Quality First' : 'Balanced'
+      setToast(`Wave (${strategyLabel}, max ${maxStepsApplied}) executed with ${executed} completed step(s).`)
     })
-  }, [withAction, requireSessionId])
+  }, [withAction, requireSessionId, waveStrategy])
 
   const runTask = useCallback(
     async (taskId: string) => {
@@ -430,6 +505,7 @@ export default function StudioHome() {
         const data = await parseJson(res)
         if (!res.ok) throw new Error(data.message || data.error || 'Failed to revoke full access.')
         setSession(data.session as StudioSession)
+        setFullAccessPolicy(null)
         setToast('Full Access revoked.')
         return
       }
@@ -452,6 +528,9 @@ export default function StudioHome() {
         throw new Error(data.message || data.error || 'Failed to enable full access.')
       }
       setSession(data.session as StudioSession)
+      if (data?.metadata?.policy) {
+        setFullAccessPolicy(data.metadata.policy as FullAccessPolicySummary)
+      }
       const ttlMinutes = Number(data?.metadata?.ttlMinutes || 0)
       const grantedScope = (data?.metadata?.scope || fullAccessScope) as FullAccessScope
       setToast(
@@ -484,6 +563,14 @@ export default function StudioHome() {
       setError('Failed to copy session link.')
     }
   }, [session?.id])
+
+  const refreshLiveTelemetry = useCallback(async () => {
+    if (!session?.id) return
+    await withAction(async () => {
+      await Promise.all([refreshSession(session.id), refreshLiveCost(session.id)])
+      setToast('Live telemetry refreshed.')
+    })
+  }, [session?.id, withAction, refreshSession, refreshLiveCost])
 
   const applyMissionDomainPreset = useCallback(
     (domain: MissionDomain) => {
@@ -585,7 +672,7 @@ export default function StudioHome() {
 
   if (!sessionBootstrapped) {
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100">
+      <main className="studio-shell min-h-screen text-slate-100">
         <div className="mx-auto flex min-h-screen max-w-[1600px] items-center justify-center px-4 py-4">
           <div className="rounded border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-slate-300">
             Restoring Studio Home session...
@@ -596,64 +683,41 @@ export default function StudioHome() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="studio-shell min-h-screen text-slate-100">
       <div className="mx-auto max-w-[1600px] px-4 py-4">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-slate-800 bg-slate-900/60 px-4 py-3">
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight">Studio Home</h1>
-            <p className="text-xs text-slate-400">
-              Chat/preview-first mission control with deterministic apply/rollback and full handoff to IDE.
-            </p>
-            {session && (
-              <div className="mt-2 inline-flex items-center rounded border border-slate-700 bg-slate-950 px-2 py-0.5 text-[11px] text-slate-300">
-                Session {session.status.toUpperCase()} - {session.id.slice(0, 8)}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {busy && (
-              <span className="rounded border border-blue-500/30 bg-blue-500/10 px-2 py-1 text-[11px] text-blue-200">
-                Running...
-              </span>
-            )}
-            <button
-              onClick={openIde}
-              className="rounded border border-cyan-500/40 bg-cyan-500/15 px-3 py-1.5 text-xs font-medium text-cyan-100 hover:bg-cyan-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-            >
-              Open IDE
-            </button>
-            <button
-              onClick={() => router.push('/settings')}
-              className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-            >
-              Settings
-            </button>
-            <button
-              onClick={() =>
-                router.push(`/project-settings?projectId=${encodeURIComponent(session?.projectId || projectId || 'default')}`)
-              }
-              className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-            >
-              Project Settings
-            </button>
-            <button
-              onClick={() => {
-                void copySessionLink()
-              }}
-              disabled={!session}
-              className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-            >
-              Copy Session Link
-            </button>
-            {LEGACY_DASHBOARD_ENABLED && (
-              <button
-                onClick={() => router.push('/dashboard?legacy=1')}
-                className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
-              >
-                Legacy dashboard
-              </button>
-            )}
-          </div>
+        <a
+          href="#studio-mission"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:border focus:border-sky-500 focus:bg-slate-950 focus:px-3 focus:py-2 focus:text-xs focus:text-sky-100"
+        >
+          Skip to mission input
+        </a>
+        <StudioHomeHeader
+          busy={busy}
+          session={session}
+          projectId={session?.projectId || projectId || 'default'}
+          legacyDashboardEnabled={LEGACY_DASHBOARD_ENABLED}
+          onOpenIde={openIde}
+          onCopySessionLink={() => {
+            void copySessionLink()
+          }}
+          onOpenSettings={() => router.push('/settings')}
+          onOpenProjectSettings={() =>
+            router.push(`/project-settings?projectId=${encodeURIComponent(session?.projectId || projectId || 'default')}`)
+          }
+          onOpenLegacyDashboard={() => router.push('/dashboard?legacy=1')}
+        />
+        <StudioHomeKpiStrip
+          networkOnline={networkOnline}
+          sessionStatus={session?.status}
+          taskDone={taskProgress.done}
+          taskTotal={taskProgress.total}
+          budgetPercent={budgetProgress.percent}
+          variableUsageBlocked={variableUsageBlocked}
+          lastActionAt={lastActionAt}
+        />
+        <div className="mb-4 rounded border border-slate-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-400">
+          Pipeline: Planner -&gt; Coder -&gt; Reviewer. Apply remains validation-gated. `/ide` handoff keeps project and
+          session context. Partial capabilities stay explicit with no fake-success.
         </div>
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(420px,1fr)_460px]">
@@ -681,8 +745,10 @@ export default function StudioHome() {
               session={session}
               busy={busy}
               variableUsageBlocked={variableUsageBlocked}
+              waveStrategy={waveStrategy}
               taskProgress={taskProgress}
               onCreateSuperPlan={createSuperPlan}
+              onChangeWaveStrategy={setWaveStrategy}
               onRunWave={runWave}
               onRunTask={runTask}
               onValidateTask={validateTask}
@@ -695,13 +761,14 @@ export default function StudioHome() {
             <StudioHomeTeamChat
               session={session}
               recentAgentRuns={recentAgentRuns}
+              variableUsageBlocked={variableUsageBlocked}
               showAgentWorkspace={showAgentWorkspace}
               onToggleAgentWorkspace={() => setShowAgentWorkspace((prev) => !prev)}
               agentWorkspaceNode={showAgentWorkspace ? <AIChatPanelContainer /> : null}
             />
           </section>
 
-          <section className="space-y-4">
+          <section className="space-y-4 xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
             <StudioHomePreviewPanel
               showRuntimePreview={showRuntimePreview}
               onToggleRuntimePreview={() => setShowRuntimePreview((prev) => !prev)}
@@ -728,17 +795,23 @@ export default function StudioHome() {
               session={session}
               usage={usage}
               wallet={wallet}
+              executionTarget={executionTarget}
+              executionProfiles={executionProfiles}
               budgetCap={budgetCap}
               budgetProgress={budgetProgress}
               busy={busy}
               liveCost={liveCost}
               liveCostError={liveCostError}
+              fullAccessPolicy={resolvedFullAccessPolicy}
               activeGrant={activeGrant}
               fullAccessScope={fullAccessScope}
               allowedFullAccessScopes={allowedFullAccessScopes}
               onStopSession={stopSession}
               onToggleFullAccess={toggleFullAccess}
               onFullAccessScopeChange={setFullAccessScope}
+              onRefreshTelemetry={() => {
+                void refreshLiveTelemetry()
+              }}
             />
           </section>
         </div>

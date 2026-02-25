@@ -26,6 +26,13 @@ type TraceSummary = {
   telemetry?: { model?: string; tokensUsed?: number; latencyMs?: number }
 }
 
+type QualityMetadata = {
+  requestedQualityMode?: string
+  appliedQualityMode?: string
+  qualityModeDowngraded?: boolean
+  allowedQualityModes?: string[]
+}
+
 const MODELS = [
   {
     id: 'gpt-4o-mini',
@@ -179,6 +186,22 @@ function toTraceSummary(input: unknown): TraceSummary | null {
   return { summary, decisionRecord, telemetry }
 }
 
+function toQualityMetadata(input: unknown): QualityMetadata | null {
+  if (!input || typeof input !== 'object') return null
+  const obj = input as Record<string, unknown>
+  const qualityModeDowngraded = obj.qualityModeDowngraded === true
+  const requestedQualityMode =
+    typeof obj.requestedQualityMode === 'string' ? obj.requestedQualityMode : undefined
+  const appliedQualityMode =
+    typeof obj.appliedQualityMode === 'string' ? obj.appliedQualityMode : undefined
+  const allowedQualityModes = Array.isArray(obj.allowedQualityModes)
+    ? obj.allowedQualityModes.filter((item): item is string => typeof item === 'string')
+    : undefined
+
+  if (!qualityModeDowngraded && !requestedQualityMode && !appliedQualityMode) return null
+  return { requestedQualityMode, appliedQualityMode, qualityModeDowngraded, allowedQualityModes }
+}
+
 function formatTraceSummary(trace: TraceSummary): string {
   const lines: string[] = []
   lines.push(`Trace: ${trace.summary || 'Execution trace available.'}`)
@@ -292,6 +315,7 @@ export default function AIChatPanelContainer() {
         const content = extractContent(raw)
         const tokenCount = typeof parsedResponse?.tokensUsed === 'number' ? parsedResponse.tokensUsed : undefined
         const traceSummary = toTraceSummary(parsedResponse?.traceSummary)
+        const qualityMetadata = toQualityMetadata(parsedResponse?.metadata)
         const assistantMessage: ChatMessage = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
@@ -308,6 +332,21 @@ export default function AIChatPanelContainer() {
               id: `system-trace-${Date.now()}`,
               role: 'system',
               content: formatTraceSummary(traceSummary),
+              timestamp: new Date(),
+              model: currentModel,
+              tokens: tokenCount,
+            })
+          }
+          if (qualityMetadata?.qualityModeDowngraded) {
+            const requested = qualityMetadata.requestedQualityMode || 'studio'
+            const applied = qualityMetadata.appliedQualityMode || 'standard'
+            const allowed = (qualityMetadata.allowedQualityModes || []).join(', ')
+            next.push({
+              id: `system-quality-${Date.now()}`,
+              role: 'system',
+              content: `Quality mode adjusted by plan policy: requested=${requested}, applied=${applied}${
+                allowed ? `, allowed=[${allowed}]` : ''
+              }.`,
               timestamp: new Date(),
               model: currentModel,
               tokens: tokenCount,

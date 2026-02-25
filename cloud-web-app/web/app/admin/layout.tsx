@@ -157,6 +157,8 @@ function Header({
   onMenuClick,
   systemStatus,
   quickStats,
+  hasStatusData,
+  hasStatsData,
 }: {
   onMenuClick: () => void
   systemStatus: SystemStatus | null

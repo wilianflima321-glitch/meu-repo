@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getPlanLimits } from '@/lib/plan-limits'
 import { prisma } from '@/lib/db'
+import { getCreditBalance } from '@/lib/credit-wallet'
 import { getStudioSession, runStudioWave } from '@/lib/server/studio-home-store'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { enforceRateLimit } from '@/lib/server/rate-limit'
@@ -10,12 +11,22 @@ export const dynamic = 'force-dynamic'
 
 const MAX_ROUTE_ID_LENGTH = 120
 
-type Body = { sessionId?: string; maxSteps?: number }
+type Body = {
+  sessionId?: string
+  maxSteps?: number
+  strategy?: 'balanced' | 'cost_guarded' | 'quality_first'
+}
 
 function normalizeMaxSteps(value: unknown): number {
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) return 3
   return Math.max(1, Math.min(3, Math.floor(parsed)))
+}
+
+function normalizeStrategy(value: unknown): 'balanced' | 'cost_guarded' | 'quality_first' {
+  const strategy = String(value || '').trim().toLowerCase()
+  if (strategy === 'cost_guarded' || strategy === 'quality_first') return strategy
+  return 'balanced'
 }
 
 export async function POST(req: NextRequest) {
@@ -56,6 +67,23 @@ export async function POST(req: NextRequest) {
         capabilityStatus: 'PARTIAL',
         milestone: 'P1',
         metadata: { maxAgents: limits.maxAgents, required: 3, mode: 'run-wave' },
+      })
+    }
+    const creditBalance = await getCreditBalance(auth.userId)
+    if (creditBalance <= 0) {
+      return capabilityResponse({
+        status: 402,
+        error: 'VARIABLE_USAGE_BLOCKED',
+        message:
+          'Variable AI usage is blocked because credit balance is exhausted. Premium interface access remains active until cycle end.',
+        capability: 'STUDIO_HOME_VARIABLE_USAGE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          creditBalance,
+          blockedReason: 'CREDITS_EXHAUSTED',
+          policy: 'plan-time-entitlement-preserved',
+        },
       })
     }
 
@@ -99,7 +127,11 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const result = await runStudioWave(auth.userId, sessionId, { maxSteps: normalizeMaxSteps(body.maxSteps) })
+    const requestedStrategy = normalizeStrategy(body.strategy)
+    const result = await runStudioWave(auth.userId, sessionId, {
+      maxSteps: normalizeMaxSteps(body.maxSteps),
+      strategy: requestedStrategy,
+    })
     if (!result.session) {
       return NextResponse.json(
         { error: 'STUDIO_SESSION_NOT_FOUND', message: 'Studio session not found for current user.' },
@@ -117,6 +149,10 @@ export async function POST(req: NextRequest) {
         metadata: {
           blockedTaskIds: result.blockedTaskIds,
           executedTaskIds: result.executedTaskIds,
+          strategy: result.strategy,
+          strategyReason: result.strategyReason,
+          requestedStrategy,
+          maxStepsApplied: result.maxStepsApplied,
         },
       })
     }
@@ -125,10 +161,17 @@ export async function POST(req: NextRequest) {
       ok: true,
       session: result.session,
       capability: 'STUDIO_HOME_TASK_RUN_WAVE',
-      capabilityStatus: 'IMPLEMENTED',
+      capabilityStatus: 'PARTIAL',
       metadata: {
-        executionMode: 'parallel-wave-queued',
+        executionMode: 'role-sequenced-wave',
+        overlapGuard: 'enabled',
         applyPolicy: 'serial-review-gated',
+        executionReality: 'orchestration-checkpoint',
+        codeApplyMode: 'manual-reviewed',
+        strategy: result.strategy,
+        requestedStrategy,
+        maxStepsApplied: result.maxStepsApplied,
+        strategyReason: result.strategyReason,
         missionDomain: result.session.missionDomain || 'general',
         executedTaskIds: result.executedTaskIds,
         blockedTaskIds: result.blockedTaskIds,

@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import * as THREE from 'three';
-import type { FluidEditorState, FluidParams, FluidParticle, FluidToolType } from './FluidSimulationEditor';
+import type { FluidEditorState, FluidParams, FluidParticle, FluidToolType } from './fluid-simulation.types';
 
 export interface SliderProps {
   label: string;

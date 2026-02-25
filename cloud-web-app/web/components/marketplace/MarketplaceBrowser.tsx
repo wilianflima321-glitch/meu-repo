@@ -18,8 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Search, Filter, Grid, List, Heart, Star, Download, 
     ShoppingCart, ChevronDown, X, Check, Loader2, 
-    Package, Palette, Box, Music, Code, FileImage,
-    Zap, Crown, Clock, TrendingUp, Tag, ExternalLink
+    Clock, TrendingUp, Tag, ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -38,6 +37,12 @@ import { Tabs, TabContent, TabList, TabTrigger } from '@/components/ui/Tabs';
 import { ScrollArea } from '@/components/ui/ScrollArea';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
+import {
+    CATEGORIES,
+    LICENSE_OPTIONS,
+    SORT_OPTIONS,
+    type AssetCategory,
+} from './MarketplaceBrowser.constants';
 
 // ============================================================================
 // Types
@@ -79,18 +84,6 @@ interface Asset {
     updatedAt: string;
 }
 
-type AssetCategory = 
-    | '3d-models' 
-    | 'textures' 
-    | 'materials' 
-    | 'audio' 
-    | 'scripts' 
-    | 'animations'
-    | 'particles'
-    | 'shaders'
-    | 'prefabs'
-    | 'complete-projects';
-
 interface FilterState {
     query: string;
     categories: AssetCategory[];
@@ -108,37 +101,6 @@ interface MarketplaceResponse {
     pageSize: number;
     hasMore: boolean;
 }
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const CATEGORIES: { id: AssetCategory; name: string; icon: React.ReactNode }[] = [
-    { id: '3d-models', name: 'Modelos 3D', icon: <Box className="w-4 h-4" /> },
-    { id: 'textures', name: 'Texturas', icon: <FileImage className="w-4 h-4" /> },
-    { id: 'materials', name: 'Materiais', icon: <Palette className="w-4 h-4" /> },
-    { id: 'audio', name: 'Áudio', icon: <Music className="w-4 h-4" /> },
-    { id: 'scripts', name: 'Scripts', icon: <Code className="w-4 h-4" /> },
-    { id: 'animations', name: 'Animações', icon: <Zap className="w-4 h-4" /> },
-    { id: 'particles', name: 'Partículas', icon: <Zap className="w-4 h-4" /> },
-    { id: 'shaders', name: 'Shaders', icon: <Code className="w-4 h-4" /> },
-    { id: 'prefabs', name: 'Prefabs', icon: <Package className="w-4 h-4" /> },
-    { id: 'complete-projects', name: 'Projetos', icon: <Crown className="w-4 h-4" /> },
-];
-
-const SORT_OPTIONS = [
-    { value: 'popular', label: 'Mais Populares' },
-    { value: 'newest', label: 'Mais Recentes' },
-    { value: 'rating', label: 'Melhor Avaliados' },
-    { value: 'price-asc', label: 'Preço: Menor para Maior' },
-    { value: 'price-desc', label: 'Preço: Maior para Menor' },
-];
-
-const LICENSE_OPTIONS = [
-    { value: 'standard', label: 'Licença Padrão' },
-    { value: 'extended', label: 'Licença Estendida' },
-    { value: 'exclusive', label: 'Licença Exclusiva' },
-];
 
 // ============================================================================
 // API Functions

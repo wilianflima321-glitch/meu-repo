@@ -109,6 +109,9 @@ for (const fileName of files) {
     content.includes('qa:repo-connectivity') || content.includes('repo-connectivity-scan.mjs')
   const hasEnterpriseGate = content.includes('qa:enterprise-gate')
   const hasContinueOnError = content.includes('continue-on-error: true')
+  const hasHighRiskConfirmation =
+    content.includes('confirm_high_risk') &&
+    content.includes("github.event.inputs.confirm_high_risk == 'true'")
   const triggerPaths = extractPathFilters(content)
   const staleTriggerPaths = triggerPaths.filter((item) => !hasStablePrefix(item))
 
@@ -120,6 +123,7 @@ for (const fileName of files) {
     hasConnectivityGate,
     hasEnterpriseGate,
     hasContinueOnError,
+    hasHighRiskConfirmation,
     staleTriggerPaths,
   })
 
@@ -161,9 +165,9 @@ const markdown = [
   `- Governance issues: ${summary.issues}`,
   '',
   '## Workflow Matrix',
-  '| Workflow file | Name | Class | Triggers | Connectivity gate | Enterprise gate | continue-on-error | stale trigger paths |',
-  '| --- | --- | --- | --- | --- | --- | --- | ---: |',
-  ...rows.map((row) => `| \`${row.fileName}\` | ${row.name} | ${row.classification} | ${row.triggers} | ${row.hasConnectivityGate ? 'yes' : 'no'} | ${row.hasEnterpriseGate ? 'yes' : 'no'} | ${row.hasContinueOnError ? 'yes' : 'no'} | ${row.staleTriggerPaths.length} |`),
+  '| Workflow file | Name | Class | Triggers | Connectivity gate | Enterprise gate | continue-on-error | high-risk confirmation | stale trigger paths |',
+  '| --- | --- | --- | --- | --- | --- | --- | --- | ---: |',
+  ...rows.map((row) => `| \`${row.fileName}\` | ${row.name} | ${row.classification} | ${row.triggers} | ${row.hasConnectivityGate ? 'yes' : 'no'} | ${row.hasEnterpriseGate ? 'yes' : 'no'} | ${row.hasContinueOnError ? 'yes' : 'no'} | ${row.hasHighRiskConfirmation ? 'yes' : 'no'} | ${row.staleTriggerPaths.length} |`),
   '',
   '## Stale Trigger Path Filters',
   '| Workflow file | Path filter |',
@@ -179,6 +183,7 @@ const markdown = [
   '1. `ACTIVE_AUTHORITY` workflows must include connectivity gate.',
   '2. Enterprise gate responsibility can be centralized in CI authority workflows and branch protection.',
   '3. `LEGACY_CANDIDATE` workflows must have owner decision (keep, restrict, archive).',
+  '4. If kept, high-risk utility workflows must require explicit dispatch confirmation input.',
   '',
 ].join('\n')
 

@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   ReactFlow,
   Node,
@@ -25,10 +25,9 @@ import {
   NodeTypes,
   Handle,
   Position,
-  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport, Grid, Stats } from '@react-three/drei';
 import * as THREE from 'three';
 import {
@@ -36,6 +35,7 @@ import {
   initialEdges,
   initialNodes,
 } from './niagara-vfx-defaults';
+import { ParticleEmitter, ParticleRenderer } from './NiagaraVFX.runtime';
 
 // ============================================================================
 // TYPES
@@ -58,274 +58,6 @@ export type {
   SizeCurve,
   VelocityCurve,
 } from './niagara-vfx-types';
-
-// ============================================================================
-// PARTICLE SYSTEM CORE
-// ============================================================================
-
-class ParticleEmitter {
-  private particles: Particle[] = [];
-  private timeSinceLastSpawn: number = 0;
-  private burstIndex: number = 0;
-  private systemTime: number = 0;
-  
-  constructor(public config: EmitterConfig) {}
-  
-  update(deltaTime: number): Particle[] {
-    if (!this.config.enabled) return this.particles;
-    
-    this.systemTime += deltaTime;
-    
-    // Spawn particles
-    this.timeSinceLastSpawn += deltaTime;
-    const spawnInterval = 1 / this.config.spawnRate;
-    
-    while (this.timeSinceLastSpawn >= spawnInterval && this.particles.length < this.config.maxParticles) {
-      this.spawnParticle();
-      this.timeSinceLastSpawn -= spawnInterval;
-    }
-    
-    // Handle bursts
-    while (this.burstIndex < this.config.spawnBurst.length) {
-      const burst = this.config.spawnBurst[this.burstIndex];
-      if (this.systemTime >= burst.time) {
-        for (let i = 0; i < burst.count && this.particles.length < this.config.maxParticles; i++) {
-          this.spawnParticle();
-        }
-        this.burstIndex++;
-      } else {
-        break;
-      }
-    }
-    
-    // Update particles
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
-      p.age += deltaTime;
-      
-      if (p.age >= p.lifetime) {
-        this.particles.splice(i, 1);
-        continue;
-      }
-      
-      const normalizedAge = p.age / p.lifetime;
-      
-      // Apply forces
-      p.velocity.add(this.config.gravity.clone().multiplyScalar(deltaTime));
-      p.velocity.multiplyScalar(1 - this.config.drag * deltaTime);
-      
-      // Apply turbulence
-      if (this.config.turbulence.strength > 0) {
-        const turb = new THREE.Vector3(
-          Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.x),
-          Math.cos(this.systemTime * this.config.turbulence.frequency + p.position.y),
-          Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.z)
-        ).multiplyScalar(this.config.turbulence.strength * deltaTime);
-        p.velocity.add(turb);
-      }
-      
-      // Apply velocity over life
-      let velocityMult = 1;
-      for (let j = 0; j < this.config.velocityOverLife.length - 1; j++) {
-        const curr = this.config.velocityOverLife[j];
-        const next = this.config.velocityOverLife[j + 1];
-        if (normalizedAge >= curr.time && normalizedAge <= next.time) {
-          const t = (normalizedAge - curr.time) / (next.time - curr.time);
-          velocityMult = curr.multiplier + (next.multiplier - curr.multiplier) * t;
-          break;
-        }
-      }
-      
-      // Update position
-      p.position.add(p.velocity.clone().multiplyScalar(deltaTime * velocityMult));
-      
-      // Update size over life
-      for (let j = 0; j < this.config.sizeOverLife.length - 1; j++) {
-        const curr = this.config.sizeOverLife[j];
-        const next = this.config.sizeOverLife[j + 1];
-        if (normalizedAge >= curr.time && normalizedAge <= next.time) {
-          const t = (normalizedAge - curr.time) / (next.time - curr.time);
-          p.size = curr.size + (next.size - curr.size) * t;
-          break;
-        }
-      }
-      
-      // Update color over life
-      for (let j = 0; j < this.config.colorOverLife.length - 1; j++) {
-        const curr = this.config.colorOverLife[j];
-        const next = this.config.colorOverLife[j + 1];
-        if (normalizedAge >= curr.time && normalizedAge <= next.time) {
-          const t = (normalizedAge - curr.time) / (next.time - curr.time);
-          p.color.lerpColors(curr.color, next.color, t);
-          p.alpha = curr.alpha + (next.alpha - curr.alpha) * t;
-          break;
-        }
-      }
-      
-      // Update rotation
-      p.rotation += p.rotationRate * deltaTime;
-    }
-    
-    return this.particles;
-  }
-  
-  private spawnParticle(): void {
-    const position = this.getSpawnPosition();
-    
-    const velocity = new THREE.Vector3(
-      THREE.MathUtils.randFloat(this.config.initialVelocity.min.x, this.config.initialVelocity.max.x),
-      THREE.MathUtils.randFloat(this.config.initialVelocity.min.y, this.config.initialVelocity.max.y),
-      THREE.MathUtils.randFloat(this.config.initialVelocity.min.z, this.config.initialVelocity.max.z)
-    );
-    
-    const particle: Particle = {
-      position,
-      velocity,
-      age: 0,
-      lifetime: THREE.MathUtils.randFloat(this.config.lifetime.min, this.config.lifetime.max),
-      size: THREE.MathUtils.randFloat(this.config.initialSize.min, this.config.initialSize.max),
-      color: this.config.initialColor.clone(),
-      alpha: 1,
-      rotation: THREE.MathUtils.randFloat(this.config.initialRotation.min, this.config.initialRotation.max),
-      rotationRate: THREE.MathUtils.randFloat(this.config.rotationRate.min, this.config.rotationRate.max),
-    };
-    
-    this.particles.push(particle);
-  }
-  
-  private getSpawnPosition(): THREE.Vector3 {
-    const params = this.config.spawnShapeParams;
-    
-    switch (this.config.spawnShape) {
-      case 'point':
-        return new THREE.Vector3(0, 0, 0);
-        
-      case 'sphere': {
-        const radius = params.radius || 1;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        return new THREE.Vector3(
-          radius * Math.sin(phi) * Math.cos(theta),
-          radius * Math.sin(phi) * Math.sin(theta),
-          radius * Math.cos(phi)
-        );
-      }
-        
-      case 'box': {
-        const width = params.width || 1;
-        const height = params.height || 1;
-        const depth = params.depth || 1;
-        return new THREE.Vector3(
-          THREE.MathUtils.randFloatSpread(width),
-          THREE.MathUtils.randFloatSpread(height),
-          THREE.MathUtils.randFloatSpread(depth)
-        );
-      }
-        
-      case 'cone': {
-        const angle = params.angle || 45;
-        const radius = params.radius || 1;
-        const r = Math.random() * radius;
-        const theta = Math.random() * Math.PI * 2;
-        const y = Math.random() * Math.tan(angle * Math.PI / 180) * r;
-        return new THREE.Vector3(
-          r * Math.cos(theta),
-          y,
-          r * Math.sin(theta)
-        );
-      }
-        
-      case 'cylinder': {
-        const cylinderRadius = params.radius || 1;
-        const cylinderHeight = params.height || 2;
-        const cylinderTheta = Math.random() * Math.PI * 2;
-        return new THREE.Vector3(
-          cylinderRadius * Math.cos(cylinderTheta),
-          THREE.MathUtils.randFloatSpread(cylinderHeight),
-          cylinderRadius * Math.sin(cylinderTheta)
-        );
-      }
-        
-      default:
-        return new THREE.Vector3(0, 0, 0);
-    }
-  }
-  
-  reset(): void {
-    this.particles = [];
-    this.timeSinceLastSpawn = 0;
-    this.burstIndex = 0;
-    this.systemTime = 0;
-  }
-  
-  getParticleCount(): number {
-    return this.particles.length;
-  }
-}
-
-// ============================================================================
-// 3D PARTICLE RENDERER
-// ============================================================================
-
-interface ParticleRendererProps {
-  emitters: ParticleEmitter[];
-  isPlaying: boolean;
-}
-
-function ParticleRenderer({ emitters, isPlaying }: ParticleRendererProps) {
-  const pointsRef = useRef<THREE.Points>(null);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  
-  useFrame((_, delta) => {
-    if (!isPlaying) return;
-    
-    const allParticles: Particle[] = [];
-    for (const emitter of emitters) {
-      allParticles.push(...emitter.update(delta));
-    }
-    setParticles(allParticles);
-  });
-  
-  const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
-    const positions = new Float32Array(particles.length * 3);
-    const colors = new Float32Array(particles.length * 4);
-    const sizes = new Float32Array(particles.length);
-    
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      positions[i * 3] = p.position.x;
-      positions[i * 3 + 1] = p.position.y;
-      positions[i * 3 + 2] = p.position.z;
-      
-      colors[i * 4] = p.color.r;
-      colors[i * 4 + 1] = p.color.g;
-      colors[i * 4 + 2] = p.color.b;
-      colors[i * 4 + 3] = p.alpha;
-      
-      sizes[i] = p.size;
-    }
-    
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 4));
-    geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    
-    return geo;
-  }, [particles]);
-  
-  return (
-    <points ref={pointsRef} geometry={geometry}>
-      <pointsMaterial
-        size={0.2}
-        vertexColors
-        transparent
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-        sizeAttenuation
-      />
-    </points>
-  );
-}
 
 // ============================================================================
 // NODE COMPONENTS FOR REACTFLOW

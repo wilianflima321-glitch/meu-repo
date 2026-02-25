@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { queueBackendUnavailableCapability } from '@/lib/server/capability-response'
 import { enforceRateLimit } from '@/lib/server/rate-limit'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 
@@ -39,12 +39,11 @@ export async function POST(
       )
     }
 
-    return notImplementedCapability({
-      error: 'NOT_IMPLEMENTED',
-      message: 'Render job cancellation is not wired to queue/runtime yet.',
+    return queueBackendUnavailableCapability({
+      message: 'Render job cancellation requires queue backend wiring and is currently unavailable.',
       capability: 'RENDER_JOB_CANCEL',
       milestone: 'P1',
-      metadata: { jobId },
+      metadata: { jobId, reason: 'queue-runtime-not-wired' },
     })
   } catch (error) {
     console.error('[render/jobs/cancel] Error:', error)

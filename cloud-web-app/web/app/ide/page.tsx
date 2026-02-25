@@ -49,6 +49,7 @@ import {
   normalizeWorkspaceRoot,
   sanitizeProjectId,
 } from '@/components/ide/workbench-utils'
+import { getExecutionTarget } from '@/lib/execution-target'
 
 const MultiTerminalPanel = dynamic(
   () => import('@/components/terminal/XTerminal').then((mod) => ({ default: mod.MultiTerminalPanel })),
@@ -81,6 +82,7 @@ async function fsRequest(payload: Record<string, unknown>, projectId: string) {
 function IDEPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const executionTarget = useMemo(() => getExecutionTarget(), [])
   const queryProjectId = searchParams.get('projectId')
   const { tabs, activeTabId, openTab, closeTab, markTabDirty } = useTabBar()
   const [fileTree, setFileTree] = useState<FileNode[]>([])
@@ -616,6 +618,7 @@ function IDEPageInner() {
       isActiveDirty={!!activeState && activeState.content !== activeState.savedContent}
       unsavedCount={unsavedCount}
       studioSessionId={startupSessionId}
+      executionTarget={executionTarget}
     />
   )
 

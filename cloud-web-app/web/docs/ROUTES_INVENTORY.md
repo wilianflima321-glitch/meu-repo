@@ -1,18 +1,20 @@
 # ROUTES_INVENTORY.md
-Generated: 2026-02-19T11:59:14.530Z
+Generated: 2026-02-25T00:51:47.229Z
 
 ## Summary
-- Total routes: 71
-- Admin routes: 44
+- Total routes: 72
+- Admin routes: 45
 - Auth routes: 5
 - Core workbench routes: 1
 - Workbench redirect routes: 0
 
 ## API Gate Status
-- Remaining NOT_IMPLEMENTED API markers (total): 10
-- Critical NOT_IMPLEMENTED markers: 8
-- Non-critical NOT_IMPLEMENTED markers: 2
+- Remaining NOT_IMPLEMENTED API markers (total): 4
+- Critical NOT_IMPLEMENTED markers: 4
+- Non-critical NOT_IMPLEMENTED markers: 0
 - PAYMENT_GATEWAY_NOT_IMPLEMENTED markers: 2
+- PROVIDER_NOT_CONFIGURED markers: 13
+- QUEUE_BACKEND_UNAVAILABLE markers: 11
 - Canonical file API: `/api/files/tree` + `/api/files/fs`
 - Deprecated file API: `/api/workspace/tree` + `/api/workspace/files` (410 DEPRECATED_ROUTE)
 - Checkout canonical web path: `/billing/checkout`
@@ -39,6 +41,7 @@ Generated: 2026-02-19T11:59:14.530Z
 - /admin/compliance (admin/compliance/page.tsx)
 - /admin/cost-optimization (admin/cost-optimization/page.tsx)
 - /admin/deploy (admin/deploy/page.tsx)
+- /admin/emergency (admin/emergency/page.tsx)
 - /admin/feature-flags (admin/feature-flags/page.tsx)
 - /admin/feedback (admin/feedback/page.tsx)
 - /admin/finance (admin/finance/page.tsx)

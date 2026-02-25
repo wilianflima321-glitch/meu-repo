@@ -77,129 +77,29 @@ export type {
   WorldState,
 } from './save-manager-types';
 
-// ============================================================================
-// SAVE SERIALIZERS
-// ============================================================================
+import {
+  CompressedSerializer,
+  JSONSerializer,
+  SaveMigrator,
+  SaveValidator,
+} from './save-manager-core';
+import type { MigrationFn, SaveSerializer } from './save-manager-core';
+import {
+  SaveProvider,
+  usePlayTime,
+  useSaveManager,
+  useSaveOperations,
+  useSaveSlots,
+  useSaveStatus,
+} from './save-manager-hooks';
 
-export interface SaveSerializer {
-  serialize(state: GameState): string;
-  deserialize(data: string): GameState;
-}
-
-export class JSONSerializer implements SaveSerializer {
-  serialize(state: GameState): string {
-    return JSON.stringify(state);
-  }
-  
-  deserialize(data: string): GameState {
-    return JSON.parse(data);
-  }
-}
-
-export class CompressedSerializer implements SaveSerializer {
-  private base: SaveSerializer;
-  
-  constructor(base: SaveSerializer = new JSONSerializer()) {
-    this.base = base;
-  }
-  
-  serialize(state: GameState): string {
-    const json = this.base.serialize(state);
-    return this.compress(json);
-  }
-  
-  deserialize(data: string): GameState {
-    const json = this.decompress(data);
-    return this.base.deserialize(json);
-  }
-  
-  private compress(data: string): string {
-    // Simple compression using btoa and removing repeated patterns
-    // In production, use pako or similar
-    return btoa(unescape(encodeURIComponent(data)));
-  }
-  
-  private decompress(data: string): string {
-    return decodeURIComponent(escape(atob(data)));
-  }
-}
-
-// ============================================================================
-// SAVE MIGRATION
-// ============================================================================
-
-export type MigrationFn = (state: GameState) => GameState;
-
-export class SaveMigrator {
-  private migrations: Map<number, MigrationFn> = new Map();
-  
-  register(fromVersion: number, migration: MigrationFn): void {
-    this.migrations.set(fromVersion, migration);
-  }
-  
-  migrate(state: GameState, fromVersion: number, toVersion: number): GameState {
-    let current = state;
-    
-    for (let v = fromVersion; v < toVersion; v++) {
-      const migration = this.migrations.get(v);
-      if (migration) {
-        current = migration(current);
-      }
-    }
-    
-    return current;
-  }
-  
-  hasPath(fromVersion: number, toVersion: number): boolean {
-    for (let v = fromVersion; v < toVersion; v++) {
-      if (!this.migrations.has(v)) {
-        return false;
-      }
-    }
-    return true;
-  }
-}
-
-// ============================================================================
-// SAVE VALIDATION
-// ============================================================================
-
-export class SaveValidator {
-  private static calculateChecksum(data: string): string {
-    let hash = 0;
-    for (let i = 0; i < data.length; i++) {
-      const char = data.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash).toString(16).padStart(8, '0');
-  }
-  
-  static generateChecksum(state: GameState): string {
-    const json = JSON.stringify(state);
-    return this.calculateChecksum(json);
-  }
-  
-  static validateChecksum(data: SaveData): boolean {
-    const expected = data.metadata.checksum;
-    const actual = this.generateChecksum(data.state);
-    return expected === actual;
-  }
-  
-  static validateStructure(state: unknown): state is GameState {
-    if (!state || typeof state !== 'object') return false;
-    
-    const s = state as Record<string, unknown>;
-    
-    // Check required properties
-    if (!s.player || typeof s.player !== 'object') return false;
-    if (!s.world || typeof s.world !== 'object') return false;
-    if (!Array.isArray(s.quests)) return false;
-    if (!s.inventory || typeof s.inventory !== 'object') return false;
-    
-    return true;
-  }
-}
+export {
+  CompressedSerializer,
+  JSONSerializer,
+  SaveMigrator,
+  SaveValidator,
+} from './save-manager-core';
+export type { MigrationFn, SaveSerializer } from './save-manager-core';
 
 // ============================================================================
 // SAVE MANAGER
@@ -919,144 +819,14 @@ export class SaveManager extends EventEmitter {
   }
 }
 
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
-
-import { useState, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
-
-interface SaveContextValue {
-  manager: SaveManager;
-}
-
-const SaveContext = createContext<SaveContextValue | null>(null);
-
-export function SaveProvider({ 
-  children,
-  config,
-}: { 
-  children: React.ReactNode;
-  config?: Partial<SaveManagerConfig>;
-}) {
-  const value = useMemo(() => ({
-    manager: new SaveManager(config),
-  }), [config]);
-  
-  useEffect(() => {
-    if (value.manager.getConfig().autosaveEnabled) {
-      value.manager.startAutosave();
-    }
-    
-    return () => {
-      value.manager.dispose();
-    };
-  }, [value]);
-  
-  return (
-    <SaveContext.Provider value={value}>
-      {children}
-    </SaveContext.Provider>
-  );
-}
-
-export function useSaveManager() {
-  const context = useContext(SaveContext);
-  if (!context) {
-    return SaveManager.getInstance();
-  }
-  return context.manager;
-}
-
-export function useSaveSlots() {
-  const manager = useSaveManager();
-  const [slots, setSlots] = useState<SaveSlot[]>(manager.getSlots());
-  
-  useEffect(() => {
-    const update = () => setSlots(manager.getSlots());
-    
-    manager.on('saveComplete', update);
-    manager.on('saveDeleted', update);
-    manager.on('saveImported', update);
-    manager.on('savesLoaded', update);
-    
-    return () => {
-      manager.off('saveComplete', update);
-      manager.off('saveDeleted', update);
-      manager.off('saveImported', update);
-      manager.off('savesLoaded', update);
-    };
-  }, [manager]);
-  
-  return slots;
-}
-
-export function useSaveStatus() {
-  const manager = useSaveManager();
-  const [status, setStatus] = useState<SaveStatus>(manager.getStatus());
-  
-  useEffect(() => {
-    const updateStatus = () => setStatus(manager.getStatus());
-    
-    manager.on('saveStarted', updateStatus);
-    manager.on('saveComplete', updateStatus);
-    manager.on('saveError', updateStatus);
-    manager.on('loadStarted', updateStatus);
-    manager.on('loadComplete', updateStatus);
-    manager.on('loadError', updateStatus);
-    
-    return () => {
-      manager.off('saveStarted', updateStatus);
-      manager.off('saveComplete', updateStatus);
-      manager.off('saveError', updateStatus);
-      manager.off('loadStarted', updateStatus);
-      manager.off('loadComplete', updateStatus);
-      manager.off('loadError', updateStatus);
-    };
-  }, [manager]);
-  
-  return status;
-}
-
-export function useSaveOperations() {
-  const manager = useSaveManager();
-  
-  const save = useCallback(async (
-    slotIndex: number,
-    name: string,
-    type?: SaveType,
-    thumbnail?: string
-  ) => {
-    return manager.save(slotIndex, name, type, thumbnail);
-  }, [manager]);
-  
-  const load = useCallback(async (slotIndex: number) => {
-    return manager.load(slotIndex);
-  }, [manager]);
-  
-  const quickSave = useCallback(() => manager.quickSave(), [manager]);
-  const quickLoad = useCallback(() => manager.quickLoad(), [manager]);
-  
-  const deleteSave = useCallback(async (slotIndex: number) => {
-    return manager.deleteSave(slotIndex);
-  }, [manager]);
-  
-  return { save, load, quickSave, quickLoad, deleteSave };
-}
-
-export function usePlayTime() {
-  const manager = useSaveManager();
-  const [playTime, setPlayTime] = useState(manager.getTotalPlayTime());
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPlayTime(manager.getTotalPlayTime());
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [manager]);
-  
-  return playTime;
-}
+export {
+  SaveProvider,
+  usePlayTime,
+  useSaveManager,
+  useSaveOperations,
+  useSaveSlots,
+  useSaveStatus,
+} from './save-manager-hooks';
 
 const __defaultExport = {
   SaveManager,

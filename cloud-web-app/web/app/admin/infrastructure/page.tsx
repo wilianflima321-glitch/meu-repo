@@ -66,8 +66,8 @@ export default function InfrastructurePage() {
     fetchStatus();
   }, [fetchStatus]);
 
-  const services = payload.services ?? [];
-  const queues = payload.queues ?? [];
+  const services = useMemo(() => payload.services ?? [], [payload.services]);
+  const queues = useMemo(() => payload.queues ?? [], [payload.queues]);
   const healthyCount = useMemo(() => services.filter((service) => service.status === 'healthy').length, [services]);
 
   return (

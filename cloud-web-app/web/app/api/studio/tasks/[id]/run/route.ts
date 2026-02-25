@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getPlanLimits } from '@/lib/plan-limits'
 import { prisma } from '@/lib/db'
+import { getCreditBalance } from '@/lib/credit-wallet'
 import { getStudioSession, runStudioTask } from '@/lib/server/studio-home-store'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { enforceRateLimit } from '@/lib/server/rate-limit'
@@ -66,6 +67,23 @@ export async function POST(
         capabilityStatus: 'PARTIAL',
         milestone: 'P1',
         metadata: { maxAgents: limits.maxAgents, required: 3 },
+      })
+    }
+    const creditBalance = await getCreditBalance(auth.userId)
+    if (creditBalance <= 0) {
+      return capabilityResponse({
+        status: 402,
+        error: 'VARIABLE_USAGE_BLOCKED',
+        message:
+          'Variable AI usage is blocked because credit balance is exhausted. Premium interface access remains active until cycle end.',
+        capability: 'STUDIO_HOME_VARIABLE_USAGE',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          creditBalance,
+          blockedReason: 'CREDITS_EXHAUSTED',
+          policy: 'plan-time-entitlement-preserved',
+        },
       })
     }
 
@@ -133,7 +151,12 @@ export async function POST(
         capability: 'STUDIO_HOME_TASK_RUN',
         capabilityStatus: 'PARTIAL',
         milestone: 'P1',
-        metadata: { taskId: updatedTask.id, ownerRole: updatedTask.ownerRole },
+        metadata: {
+          taskId: updatedTask.id,
+          ownerRole: updatedTask.ownerRole,
+          blockedReason: updatedTask.result || null,
+          overlapGuard: 'enabled',
+        },
       })
     }
 
@@ -143,8 +166,10 @@ export async function POST(
       capability: 'STUDIO_HOME_TASK_RUN',
       capabilityStatus: 'PARTIAL',
       metadata: {
-        executionMode: 'orchestration_only',
+        executionMode: 'role-sequenced-single-task',
+        overlapGuard: 'enabled',
         applyPolicy: 'manual-review-before-ide-apply',
+        executionReality: 'orchestration-checkpoint',
       },
     })
   } catch (error) {

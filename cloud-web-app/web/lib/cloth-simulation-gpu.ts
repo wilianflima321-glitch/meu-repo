@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import type { ClothConfig } from './cloth-simulation';
+import type { ClothConfig } from './cloth-simulation.types';
 
 // ============================================================================
 // GPU CLOTH SIMULATION (WebGL Compute/Transform Feedback)

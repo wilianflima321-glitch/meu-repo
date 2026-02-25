@@ -16,6 +16,8 @@
  */
 
 import { EventEmitter } from 'events';
+import { ItemBuilder } from './inventory-builder';
+import { LootGenerator } from './inventory-loot';
 
 // ============================================================================
 // TYPES
@@ -120,6 +122,10 @@ export interface InventoryConfig {
   maxWeight?: number;
   allowOverweight?: boolean;
 }
+
+export { ItemBuilder } from './inventory-builder';
+export { LootGenerator } from './inventory-loot';
+export type { GeneratedLoot, LootEntry, LootTable } from './inventory-loot';
 
 // ============================================================================
 // ITEM REGISTRY
@@ -796,240 +802,6 @@ export interface EquipResult {
   reason?: string;
   slot?: EquipmentSlot;
 }
-
-// ============================================================================
-// LOOT TABLE
-// ============================================================================
-
-export interface LootEntry {
-  itemId: string;
-  weight: number;
-  minQuantity: number;
-  maxQuantity: number;
-  conditions?: {
-    minLevel?: number;
-    maxLevel?: number;
-    chance?: number;
-  };
-}
-
-export interface LootTable {
-  id: string;
-  entries: LootEntry[];
-  guaranteedDrops?: { itemId: string; quantity: number }[];
-  minDrops: number;
-  maxDrops: number;
-}
-
-export class LootGenerator {
-  private tables: Map<string, LootTable> = new Map();
-  
-  registerTable(table: LootTable): void {
-    this.tables.set(table.id, table);
-  }
-  
-  generateLoot(tableId: string, context?: { level?: number }): GeneratedLoot[] {
-    const table = this.tables.get(tableId);
-    if (!table) return [];
-    
-    const loot: GeneratedLoot[] = [];
-    
-    // Add guaranteed drops
-    if (table.guaranteedDrops) {
-      for (const drop of table.guaranteedDrops) {
-        loot.push({
-          itemId: drop.itemId,
-          quantity: drop.quantity,
-        });
-      }
-    }
-    
-    // Determine number of drops
-    const numDrops = Math.floor(
-      Math.random() * (table.maxDrops - table.minDrops + 1) + table.minDrops
-    );
-    
-    // Filter entries by conditions
-    const validEntries = table.entries.filter((entry) => {
-      if (!entry.conditions) return true;
-      
-      if (context?.level) {
-        if (entry.conditions.minLevel && context.level < entry.conditions.minLevel) {
-          return false;
-        }
-        if (entry.conditions.maxLevel && context.level > entry.conditions.maxLevel) {
-          return false;
-        }
-      }
-      
-      if (entry.conditions.chance && Math.random() > entry.conditions.chance) {
-        return false;
-      }
-      
-      return true;
-    });
-    
-    // Generate weighted random drops
-    const totalWeight = validEntries.reduce((sum, e) => sum + e.weight, 0);
-    
-    for (let i = 0; i < numDrops; i++) {
-      let roll = Math.random() * totalWeight;
-      
-      for (const entry of validEntries) {
-        roll -= entry.weight;
-        if (roll <= 0) {
-          const quantity = Math.floor(
-            Math.random() * (entry.maxQuantity - entry.minQuantity + 1) + entry.minQuantity
-          );
-          
-          loot.push({
-            itemId: entry.itemId,
-            quantity,
-          });
-          break;
-        }
-      }
-    }
-    
-    return loot;
-  }
-}
-
-export interface GeneratedLoot {
-  itemId: string;
-  quantity: number;
-}
-
-// ============================================================================
-// ITEM BUILDER
-// ============================================================================
-
-export class ItemBuilder {
-  private definition: Partial<ItemDefinition> = {
-    stackable: false,
-    maxStack: 1,
-    weight: 0,
-    value: 0,
-    tradeable: true,
-    droppable: true,
-  };
-  
-  static create(id: string): ItemBuilder {
-    return new ItemBuilder().id(id);
-  }
-  
-  id(id: string): this {
-    this.definition.id = id;
-    return this;
-  }
-  
-  name(name: string): this {
-    this.definition.name = name;
-    return this;
-  }
-  
-  description(desc: string): this {
-    this.definition.description = desc;
-    return this;
-  }
-  
-  type(type: ItemType): this {
-    this.definition.type = type;
-    return this;
-  }
-  
-  rarity(rarity: ItemRarity): this {
-    this.definition.rarity = rarity;
-    return this;
-  }
-  
-  icon(icon: string): this {
-    this.definition.icon = icon;
-    return this;
-  }
-  
-  model(model: string): this {
-    this.definition.model = model;
-    return this;
-  }
-  
-  stackable(maxStack = 99): this {
-    this.definition.stackable = true;
-    this.definition.maxStack = maxStack;
-    return this;
-  }
-  
-  weight(weight: number): this {
-    this.definition.weight = weight;
-    return this;
-  }
-  
-  value(value: number): this {
-    this.definition.value = value;
-    return this;
-  }
-  
-  level(level: number): this {
-    this.definition.level = level;
-    return this;
-  }
-  
-  equipSlot(slot: EquipmentSlot): this {
-    this.definition.equipSlot = slot;
-    return this;
-  }
-  
-  stats(stats: ItemStats): this {
-    this.definition.stats = stats;
-    return this;
-  }
-  
-  effect(effect: ItemEffect): this {
-    if (!this.definition.effects) {
-      this.definition.effects = [];
-    }
-    this.definition.effects.push(effect);
-    return this;
-  }
-  
-  usable(consumeOnUse = true): this {
-    this.definition.usable = true;
-    this.definition.consumeOnUse = consumeOnUse;
-    return this;
-  }
-  
-  questItem(): this {
-    this.definition.questItem = true;
-    this.definition.tradeable = false;
-    this.definition.droppable = false;
-    return this;
-  }
-  
-  requirement(req: NonNullable<ItemDefinition['requirements']>): this {
-    this.definition.requirements = req;
-    return this;
-  }
-  
-  tag(tag: string): this {
-    if (!this.definition.tags) {
-      this.definition.tags = [];
-    }
-    this.definition.tags.push(tag);
-    return this;
-  }
-  
-  build(): ItemDefinition {
-    if (!this.definition.id) throw new Error('Item ID is required');
-    if (!this.definition.name) throw new Error('Item name is required');
-    if (!this.definition.description) throw new Error('Item description is required');
-    if (!this.definition.type) throw new Error('Item type is required');
-    if (!this.definition.rarity) throw new Error('Item rarity is required');
-    
-    return this.definition as ItemDefinition;
-  }
-}
-
-// ============================================================================
 // REACT HOOKS
 // ============================================================================
 

@@ -24,6 +24,17 @@ export interface PlanLimits {
   features: string[];      // Features habilitadas
 }
 
+export type QualityMode = 'standard' | 'delivery' | 'studio';
+
+const PLAN_QUALITY_MODES: Record<string, QualityMode[]> = {
+  starter_trial: ['standard'],
+  starter: ['standard'],
+  basic: ['standard', 'delivery'],
+  pro: ['standard', 'delivery', 'studio'],
+  studio: ['standard', 'delivery', 'studio'],
+  enterprise: ['standard', 'delivery', 'studio'],
+};
+
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
   // Free trial - muito limitado
   'starter_trial': {
@@ -138,6 +149,46 @@ export function getPlanLimits(plan: string): PlanLimits {
   // Remover sufixo _trial se existir para fallback
   const basePlan = plan.replace('_trial', '');
   return PLAN_LIMITS[plan] || PLAN_LIMITS[basePlan] || PLAN_LIMITS['starter_trial'];
+}
+
+export function getAllowedQualityModes(plan: string): QualityMode[] {
+  const basePlan = String(plan || 'starter_trial').replace('_trial', '');
+  const direct = PLAN_QUALITY_MODES[plan];
+  if (direct && direct.length > 0) return [...direct];
+  const fallback = PLAN_QUALITY_MODES[basePlan];
+  if (fallback && fallback.length > 0) return [...fallback];
+  return ['standard'];
+}
+
+export function normalizeQualityModeForPlan(
+  plan: string,
+  requested: QualityMode
+): {
+  qualityMode: QualityMode;
+  requestedQualityMode: QualityMode;
+  allowedModes: QualityMode[];
+  downgraded: boolean;
+} {
+  const requestedQualityMode: QualityMode =
+    requested === 'standard' || requested === 'delivery' || requested === 'studio'
+      ? requested
+      : 'studio';
+  const allowedModes = getAllowedQualityModes(plan);
+  if (allowedModes.includes(requestedQualityMode)) {
+    return {
+      qualityMode: requestedQualityMode,
+      requestedQualityMode,
+      allowedModes,
+      downgraded: false,
+    };
+  }
+  const qualityMode = allowedModes[allowedModes.length - 1] || 'standard';
+  return {
+    qualityMode,
+    requestedQualityMode,
+    allowedModes,
+    downgraded: qualityMode !== requestedQualityMode,
+  };
 }
 
 /**

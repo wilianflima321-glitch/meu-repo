@@ -144,6 +144,8 @@ export async function POST(
           sessionId: session.id,
           taskId: updatedTask.id,
           ownerRole: updatedTask.ownerRole,
+          totalChecks: updatedTask.validationReport?.totalChecks ?? 0,
+          failedIds: updatedTask.validationReport?.failedIds ?? [],
         },
       })
     }
@@ -152,7 +154,14 @@ export async function POST(
       ok: true,
       session,
       capability: 'STUDIO_HOME_TASK_VALIDATE',
-      capabilityStatus: 'IMPLEMENTED',
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        validationMode: 'deterministic-checkpoint',
+        executionReality: 'orchestration-checkpoint',
+        applyPolicy: 'manual-reviewed',
+        totalChecks: updatedTask.validationReport?.totalChecks ?? 0,
+        failedIds: updatedTask.validationReport?.failedIds ?? [],
+      },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to validate studio task'

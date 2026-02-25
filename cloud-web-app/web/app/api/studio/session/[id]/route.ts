@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession } from '@/lib/server/studio-home-store'
 import { enforceRateLimit } from '@/lib/server/rate-limit'
+import { computeStudioBudgetAlert } from '@/lib/server/studio-budget'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,6 +52,9 @@ export async function GET(
       session,
       capability: 'STUDIO_HOME_SESSION',
       capabilityStatus: 'IMPLEMENTED',
+      metadata: {
+        budgetAlert: computeStudioBudgetAlert(session.cost),
+      },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to load studio session'

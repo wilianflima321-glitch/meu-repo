@@ -15,94 +15,39 @@
 
 import { EventEmitter } from 'events';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+import type {
+  Achievement,
+  AchievementCondition,
+  AchievementProgress,
+  AchievementRarity,
+  AchievementReward,
+  AchievementType,
+  ComparisonOperator,
+  Leaderboard,
+  LeaderboardEntry,
+  Statistic,
+  StatisticValue,
+} from './achievement-system.types';
+import {
+  AchievementProvider,
+  useAchievement,
+  useAchievements,
+  useStat,
+} from './achievement-system-hooks';
 
-export type AchievementType = 'standard' | 'hidden' | 'progressive' | 'milestone' | 'daily' | 'weekly';
-export type AchievementRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-export type ComparisonOperator = '==' | '!=' | '>' | '<' | '>=' | '<=';
-
-export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  hiddenDescription?: string; // Shown before unlock for hidden achievements
-  type: AchievementType;
-  rarity: AchievementRarity;
-  icon: string;
-  iconLocked?: string;
-  points: number;
-  category?: string;
-  tags?: string[];
-  sortOrder?: number;
-  conditions: AchievementCondition[];
-  rewards?: AchievementReward[];
-  prerequisiteIds?: string[];
-  expiresAt?: number; // For timed achievements
-  metadata?: Record<string, unknown>;
-}
-
-export interface AchievementCondition {
-  type: 'stat' | 'flag' | 'achievement' | 'custom';
-  statId?: string;
-  operator?: ComparisonOperator;
-  value?: number | string | boolean;
-  customCheck?: string; // ID for custom condition checker
-}
-
-export interface AchievementReward {
-  type: 'currency' | 'item' | 'cosmetic' | 'title' | 'badge' | 'xp' | 'custom';
-  id: string;
-  amount?: number;
-  metadata?: Record<string, unknown>;
-}
-
-export interface AchievementProgress {
-  achievementId: string;
-  currentValue: number;
-  targetValue: number;
-  isUnlocked: boolean;
-  unlockedAt?: number;
-  claimedRewards: boolean;
-  metadata?: Record<string, unknown>;
-}
-
-export interface Statistic {
-  id: string;
-  name: string;
-  description?: string;
-  type: 'int' | 'float' | 'max' | 'min' | 'set' | 'avg';
-  defaultValue: number;
-  displayFormat?: string;
-  category?: string;
-  isPublic: boolean;
-}
-
-export interface StatisticValue {
-  statId: string;
-  value: number;
-  lastUpdated: number;
-  history?: { value: number; timestamp: number }[];
-}
-
-export interface Leaderboard {
-  id: string;
-  name: string;
-  statId: string;
-  sortOrder: 'asc' | 'desc';
-  displayType: 'numeric' | 'time' | 'score';
-  resetPeriod?: 'daily' | 'weekly' | 'monthly' | 'never';
-}
-
-export interface LeaderboardEntry {
-  rank: number;
-  playerId: string;
-  playerName: string;
-  score: number;
-  timestamp: number;
-  metadata?: Record<string, unknown>;
-}
+export type {
+  Achievement,
+  AchievementCondition,
+  AchievementProgress,
+  AchievementRarity,
+  AchievementReward,
+  AchievementType,
+  ComparisonOperator,
+  Leaderboard,
+  LeaderboardEntry,
+  Statistic,
+  StatisticValue,
+} from './achievement-system.types';
 
 // ============================================================================
 // STATISTICS MANAGER
@@ -899,165 +844,12 @@ export class AchievementBuilder {
   }
 }
 
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
-
-import { useState, useRef, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
-
-const AchievementContext = createContext<AchievementManager | null>(null);
-
-export function AchievementProvider({ 
-  children,
-  achievements = [],
-  statistics = [],
-}: { 
-  children: React.ReactNode;
-  achievements?: Achievement[];
-  statistics?: Statistic[];
-}) {
-  const statsManager = useRef<StatisticsManager>(new StatisticsManager());
-  const managerRef = useRef<AchievementManager>(new AchievementManager(statsManager.current));
-  
-  useEffect(() => {
-    statsManager.current.registerStats(statistics);
-    managerRef.current.registerAchievements(achievements);
-  }, [achievements, statistics]);
-  
-  useEffect(() => {
-    const manager = managerRef.current;
-    return () => {
-      manager.dispose();
-    };
-  }, []);
-  
-  return (
-    <AchievementContext.Provider value={managerRef.current}>
-      {children}
-    </AchievementContext.Provider>
-  );
-}
-
-export function useAchievements() {
-  const manager = useContext(AchievementContext);
-  if (!manager) {
-    throw new Error('useAchievements must be used within an AchievementProvider');
-  }
-  
-  const [unlockedCount, setUnlockedCount] = useState(manager.getUnlockedAchievements().length);
-  const [totalPoints, setTotalPoints] = useState(manager.getTotalPoints());
-  const [recentUnlock, setRecentUnlock] = useState<Achievement | null>(null);
-  
-  useEffect(() => {
-    const updateStats = () => {
-      setUnlockedCount(manager.getUnlockedAchievements().length);
-      setTotalPoints(manager.getTotalPoints());
-    };
-    
-    const handleUnlock = ({ achievement }: { achievement: Achievement }) => {
-      updateStats();
-      setRecentUnlock(achievement);
-    };
-    
-    manager.on('achievementUnlocked', handleUnlock);
-    manager.on('rewardsClaimed', updateStats);
-    manager.on('dataRestored', updateStats);
-    
-    return () => {
-      manager.off('achievementUnlocked', handleUnlock);
-      manager.off('rewardsClaimed', updateStats);
-      manager.off('dataRestored', updateStats);
-    };
-  }, [manager]);
-  
-  const clearRecentUnlock = useCallback(() => {
-    setRecentUnlock(null);
-  }, []);
-  
-  return {
-    manager,
-    unlockedCount,
-    totalPoints,
-    maxPoints: manager.getMaxPoints(),
-    completionPercent: manager.getCompletionPercent(),
-    recentUnlock,
-    clearRecentUnlock,
-    getAllAchievements: manager.getAllAchievements.bind(manager),
-    getUnlocked: manager.getUnlockedAchievements.bind(manager),
-    getLocked: manager.getLockedAchievements.bind(manager),
-    getVisible: manager.getVisibleAchievements.bind(manager),
-    getCategories: manager.getCategories.bind(manager),
-    incrementStat: manager.incrementStat.bind(manager),
-    setStat: manager.setStat.bind(manager),
-    setFlag: manager.setFlag.bind(manager),
-    claimRewards: manager.claimRewards.bind(manager),
-  };
-}
-
-export function useAchievement(achievementId: string) {
-  const { manager } = useAchievements();
-  
-  const [progress, setProgress] = useState<AchievementProgress | undefined>(
-    manager.getProgress(achievementId)
-  );
-  
-  useEffect(() => {
-    const updateProgress = () => {
-      setProgress(manager.getProgress(achievementId));
-    };
-    
-    manager.on('progressUpdated', updateProgress);
-    manager.on('achievementUnlocked', updateProgress);
-    manager.on('dataRestored', updateProgress);
-    
-    return () => {
-      manager.off('progressUpdated', updateProgress);
-      manager.off('achievementUnlocked', updateProgress);
-      manager.off('dataRestored', updateProgress);
-    };
-  }, [manager, achievementId]);
-  
-  const achievement = useMemo(() => manager.getAchievement(achievementId), [manager, achievementId]);
-  
-  return {
-    achievement,
-    progress,
-    isUnlocked: progress?.isUnlocked ?? false,
-    progressPercent: manager.getProgressPercent(achievementId),
-    hasUnclaimedRewards: manager.hasUnclaimedRewards(achievementId),
-  };
-}
-
-export function useStat(statId: string) {
-  const { manager } = useAchievements();
-  const stats = manager.getStatistics();
-  
-  const [value, setValue] = useState(stats.getStat(statId));
-  
-  useEffect(() => {
-    const handleChange = ({ statId: changedId, newValue }: { statId: string; newValue: number }) => {
-      if (changedId === statId) {
-        setValue(newValue);
-      }
-    };
-    
-    stats.on('statChanged', handleChange);
-    
-    return () => {
-      stats.off('statChanged', handleChange);
-    };
-  }, [stats, statId]);
-  
-  const increment = useCallback((amount = 1) => {
-    stats.incrementStat(statId, amount);
-  }, [stats, statId]);
-  
-  const set = useCallback((newValue: number) => {
-    stats.setStat(statId, newValue);
-  }, [stats, statId]);
-  
-  return { value, increment, set, formatted: stats.formatStat(statId) };
-}
+export {
+  AchievementProvider,
+  useAchievement,
+  useAchievements,
+  useStat,
+} from './achievement-system-hooks';
 
 const __defaultExport = {
   AchievementManager,

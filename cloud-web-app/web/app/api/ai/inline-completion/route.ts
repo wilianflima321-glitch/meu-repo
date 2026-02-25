@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { aiService } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { capabilityResponse } from '@/lib/server/capability-response'
 import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 /**
@@ -19,6 +19,8 @@ Rules:
 - Do not add markdown or explanations.
 - Do not repeat prefix/suffix content.
 - Keep completion concise.`
+
+const SUPPORTED_PROVIDERS = ['openai', 'anthropic', 'google', 'groq'] as const
 
 function normalizeCompletion(text: string): string {
   return String(text || '')
@@ -46,7 +48,21 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = typeof (body as any).prompt === 'string' ? (body as any).prompt : ''
-    const provider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
+    const requestedProviderRaw =
+      typeof (body as any).provider === 'string' ? String((body as any).provider).trim().toLowerCase() : ''
+    if (requestedProviderRaw && !SUPPORTED_PROVIDERS.includes(requestedProviderRaw as (typeof SUPPORTED_PROVIDERS)[number])) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_PROVIDER',
+          message: 'Requested provider is not supported.',
+          supportedProviders: [...SUPPORTED_PROVIDERS],
+        },
+        { status: 400 }
+      )
+    }
+    const provider = requestedProviderRaw
+      ? (requestedProviderRaw as (typeof SUPPORTED_PROVIDERS)[number])
+      : undefined
     const model = typeof (body as any).model === 'string' ? (body as any).model : undefined
     const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(1, Math.floor((body as any).maxTokens)) : 256
     const temperature = typeof (body as any).temperature === 'number' ? Math.min(1, Math.max(0, (body as any).temperature)) : 0.1
@@ -83,13 +99,33 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (aiService.getAvailableProviders().length === 0) {
-      return notImplementedCapability({
-        error: 'NOT_IMPLEMENTED',
-        status: 501,
-        message: 'AI provider not configured.',
+    const availableProviders = aiService.getAvailableProviders()
+    if (availableProviders.length === 0) {
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: 'AI provider is not configured for current runtime.',
+        status: 503,
         capability: 'AI_INLINE_COMPLETION',
+        capabilityStatus: 'PARTIAL',
         milestone: 'P0',
+        metadata: {
+          requestedProvider: provider || null,
+          availableProviders: [],
+        },
+      })
+    }
+    if (provider && !availableProviders.includes(provider as (typeof availableProviders)[number])) {
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: 'Requested AI provider is not configured for current runtime.',
+        status: 503,
+        capability: 'AI_INLINE_COMPLETION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P0',
+        metadata: {
+          requestedProvider: provider,
+          availableProviders,
+        },
       })
     }
 

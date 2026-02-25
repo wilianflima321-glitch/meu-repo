@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AdminBadge,
+  AdminFilterPill,
   AdminPageShell,
   AdminPrimaryButton,
+  AdminSearchInput,
   AdminSection,
   AdminStatCard,
   AdminStatGrid,
@@ -166,11 +169,11 @@ export default function Payments() {
 
           <label className='text-sm'>
             <span className='mb-1 block text-zinc-400'>Origem web do checkout</span>
-            <input
+            <AdminSearchInput
               value={gateway.checkoutOrigin || ''}
               onChange={(e) => setGateway((prev) => ({ ...prev, checkoutOrigin: e.target.value.trim() || null }))}
               placeholder='https://seu-dominio.com'
-              className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+              className='max-w-none'
             />
           </label>
         </div>
@@ -222,24 +225,21 @@ export default function Payments() {
 
       <AdminSection className='mb-4'>
         <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-          <input
+          <AdminSearchInput
             type='text'
             placeholder='Buscar por e-mail ou ID'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
           <div className='flex items-center gap-2'>
             {(['all', 'succeeded', 'pending', 'failed'] as const).map((status) => (
-              <button
+              <AdminFilterPill
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`rounded px-3 py-1 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
-                  statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-300 hover:bg-zinc-700/80'
-                }`}
+                active={statusFilter === status}
               >
                 {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
-              </button>
+              </AdminFilterPill>
             ))}
           </div>
         </div>
@@ -269,17 +269,17 @@ export default function Payments() {
                     <td className='p-3'>{item.userEmail || '-'}</td>
                     <td className='p-3'>{formatCurrency(item.amount, item.currency)}</td>
                     <td className='p-3'>
-                      <span
-                        className={`rounded px-2 py-1 text-xs ${
+                      <AdminBadge
+                        tone={
                           item.status === 'succeeded'
-                            ? 'bg-emerald-500/15 text-emerald-300'
+                            ? 'emerald'
                             : item.status === 'pending'
-                              ? 'bg-amber-500/15 text-amber-300'
-                              : 'bg-rose-500/15 text-rose-300'
-                        }`}
+                              ? 'amber'
+                              : 'rose'
+                        }
                       >
                         {statusLabels[item.status] ?? item.status}
-                      </span>
+                      </AdminBadge>
                     </td>
                     <td className='p-3'>{new Date(item.createdAt).toLocaleDateString()}</td>
                   </tr>

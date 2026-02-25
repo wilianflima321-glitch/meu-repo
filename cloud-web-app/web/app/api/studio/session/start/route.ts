@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { createStudioSession } from '@/lib/server/studio-home-store'
+import { prisma } from '@/lib/db'
+import { normalizeQualityModeForPlan } from '@/lib/plan-limits'
 import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -61,12 +63,19 @@ export async function POST(req: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse
 
     const body = (await req.json().catch(() => ({}))) as Body
+    const requestedQualityMode = sanitizeQualityMode(body.qualityMode)
+    const user = await prisma.user.findUnique({
+      where: { id: auth.userId },
+      select: { plan: true },
+    })
+    const qualityResolution = normalizeQualityModeForPlan(user?.plan || 'starter_trial', requestedQualityMode)
+
     const session = await createStudioSession({
       userId: auth.userId,
       projectId: sanitizeProjectId(body.projectId),
       mission: sanitizeMission(body.mission),
       missionDomain: sanitizeMissionDomain(body.missionDomain),
-      qualityMode: sanitizeQualityMode(body.qualityMode),
+      qualityMode: qualityResolution.qualityMode,
       budgetCap: sanitizeBudgetCap(body.budgetCap),
     })
 
@@ -75,6 +84,12 @@ export async function POST(req: NextRequest) {
       session,
       capability: 'STUDIO_HOME_SESSION',
       capabilityStatus: 'IMPLEMENTED',
+      metadata: {
+        requestedQualityMode: qualityResolution.requestedQualityMode,
+        appliedQualityMode: qualityResolution.qualityMode,
+        qualityModeDowngraded: qualityResolution.downgraded,
+        allowedQualityModes: qualityResolution.allowedModes,
+      },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to start studio session'

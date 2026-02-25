@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AdminBadge,
   AdminPageShell,
   AdminPrimaryButton,
+  AdminSearchInput,
   AdminSection,
   AdminStatCard,
   AdminStatGrid,
@@ -111,11 +113,11 @@ export default function AdminSecurity() {
                 <p className='text-xs text-zinc-500'>Controlado por ambiente e politica global de autenticacao.</p>
               </div>
               <span
-                className={`rounded px-2 py-1 text-xs ${
-                  data?.settings.enforce2FA ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
-                }`}
+                className='inline-flex'
               >
-                {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
+                <AdminBadge tone={data?.settings.enforce2FA ? 'emerald' : 'neutral'}>
+                  {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
+                </AdminBadge>
               </span>
             </div>
             <div className='flex items-center justify-between gap-3'>
@@ -124,11 +126,11 @@ export default function AdminSecurity() {
                 <p className='text-xs text-zinc-500'>Controlado por regras server-side e observabilidade de rede.</p>
               </div>
               <span
-                className={`rounded px-2 py-1 text-xs ${
-                  data?.settings.blockSuspiciousIps ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
-                }`}
+                className='inline-flex'
               >
-                {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
+                <AdminBadge tone={data?.settings.blockSuspiciousIps ? 'emerald' : 'neutral'}>
+                  {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
+                </AdminBadge>
               </span>
             </div>
           </div>
@@ -137,12 +139,11 @@ export default function AdminSecurity() {
 
       <AdminSection title='Logs de Auditoria'>
         <div className='mb-4'>
-          <input
+          <AdminSearchInput
             type='text'
             placeholder='Buscar por acao, admin ou IP'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
         </div>
 
@@ -168,17 +169,17 @@ export default function AdminSecurity() {
                     <td className='p-3'>{log.action || '?'}</td>
                     <td className='p-3'>{log.adminEmail || '?'}</td>
                     <td className='p-3'>
-                      <span
-                        className={`rounded px-2 py-1 text-xs ${
+                      <AdminBadge
+                        tone={
                           log.severity === 'critical'
-                            ? 'bg-rose-500/15 text-rose-300'
+                            ? 'rose'
                             : log.severity === 'warning'
-                              ? 'bg-amber-500/15 text-amber-300'
-                              : 'bg-zinc-800/70 text-zinc-400'
-                        }`}
+                              ? 'amber'
+                              : 'neutral'
+                        }
                       >
                         {severityLabels[log.severity || 'info'] ?? log.severity ?? 'Informacao'}
-                      </span>
+                      </AdminBadge>
                     </td>
                     <td className='p-3'>{new Date(log.createdAt).toLocaleString()}</td>
                     <td className='p-3'>{log.ipAddress || '?'}</td>

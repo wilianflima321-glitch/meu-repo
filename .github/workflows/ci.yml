@@ -52,6 +52,12 @@ jobs:
       - name: Canonical doc governance gate
         run: npm run qa:canonical-doc-governance
 
+      - name: Legacy path reference governance gate
+        run: npm run qa:legacy-path-references
+
+      - name: Active large-file pressure governance gate
+        run: npm run qa:active-large-file-pressure
+
       - name: Critical secret hygiene gate
         run: npm run qa:secrets-critical
 
@@ -191,13 +197,7 @@ jobs:
         run: npm run check:ai-ide-ts
 
       - name: Run ai-ide unit tests
-        shell: bash
-        run: |
-          if [ -f "cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js" ]; then
-            (cd cloud-ide-desktop/aethel_theia_fork/packages/ai-ide && node ./test/run-mocha.js)
-          else
-            echo "::warning::ai-ide tests not present in repo; skipping ai-ide unit tests"
-          fi
+        run: npm run test:ai-ide
 
       - name: Upload windows logs
         if: always()
@@ -206,7 +206,7 @@ jobs:
           name: windows-logs
           if-no-files-found: ignore
           path: |
-            cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/*.log
+            **/packages/ai-ide/test/*.log
 
   e2e:
     name: Playwright E2E (optional)

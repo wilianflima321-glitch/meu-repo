@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AdminBadge,
+  AdminFilterPill,
   AdminPageShell,
   AdminPrimaryButton,
+  AdminSearchInput,
   AdminSection,
   AdminStatCard,
   AdminStatGrid,
@@ -127,24 +130,21 @@ export default function APIs() {
 
       <AdminSection className='mb-4'>
         <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-          <input
+          <AdminSearchInput
             type='text'
             placeholder='Buscar por nome ou ambiente'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
           <div className='flex items-center gap-2'>
             {(['all', 'configured', 'missing'] as const).map((status) => (
-              <button
+              <AdminFilterPill
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`rounded px-3 py-1 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
-                  statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-300 hover:bg-zinc-700/80'
-                }`}
+                active={statusFilter === status}
               >
                 {status === 'all' ? 'Todas' : status === 'configured' ? 'Configuradas' : 'Ausentes'}
-              </button>
+              </AdminFilterPill>
             ))}
           </div>
         </div>
@@ -174,13 +174,9 @@ export default function APIs() {
                       {integration.configured ? 'configured (masked)' : 'not configured'}
                     </td>
                     <td className='p-3'>
-                      <span
-                        className={`rounded px-2 py-1 text-xs ${
-                          integration.configured ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
-                        }`}
-                      >
+                      <AdminBadge tone={integration.configured ? 'emerald' : 'amber'}>
                         {integration.configured ? 'Configurada' : 'Ausente'}
-                      </span>
+                      </AdminBadge>
                     </td>
                     <td className='p-3 text-xs text-zinc-500'>{integration.envKey}</td>
                   </tr>
@@ -226,13 +222,9 @@ export default function APIs() {
                     </td>
                     <td className='p-2 text-zinc-500'>{route.removalCycleTarget || 'n/a'}</td>
                     <td className='p-2'>
-                      <span
-                        className={`rounded px-2 py-1 text-xs ${
-                          route.candidateForRemoval ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
-                        }`}
-                      >
+                      <AdminBadge tone={route.candidateForRemoval ? 'emerald' : 'amber'}>
                         {route.candidateForRemoval ? 'candidate' : 'monitor'}
-                      </span>
+                      </AdminBadge>
                       {typeof route.silenceDays === 'number' ? (
                         <span className='ml-2 text-[11px] text-zinc-500'>{route.silenceDays}d silence</span>
                       ) : null}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { API_BASE } from '@/lib/api';
 import {
+  AdminBadge,
   AdminPageShell,
   AdminPrimaryButton,
   AdminSection,
@@ -107,17 +108,17 @@ export default function Admin() {
                     <td className='p-3 font-medium'>{user.name || 'No name'}</td>
                     <td className='p-3 text-zinc-400'>{user.email}</td>
                     <td className='p-3'>
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs ${
+                      <AdminBadge
+                        tone={
                           user.plan === 'enterprise'
-                            ? 'bg-emerald-500/15 text-emerald-300'
+                            ? 'emerald'
                             : user.plan === 'pro'
-                              ? 'bg-sky-500/15 text-sky-300'
-                              : 'bg-zinc-800/70 text-zinc-300'
-                        }`}
+                              ? 'sky'
+                              : 'neutral'
+                        }
                       >
                         {planLabels[user.plan] ?? user.plan}
-                      </span>
+                      </AdminBadge>
                     </td>
                     <td className='p-3'>{user._count?.projects ?? 0}</td>
                     <td className='p-3 text-zinc-500'>{new Date(user.createdAt).toLocaleDateString()}</td>

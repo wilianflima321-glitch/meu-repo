@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { getStudioSession } from '@/lib/server/studio-home-store'
 import { enforceRateLimit } from '@/lib/server/rate-limit'
+import { computeStudioBudgetAlert } from '@/lib/server/studio-budget'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,6 +44,7 @@ export async function GET(req: NextRequest) {
       acc[run.role] = (acc[run.role] || 0) + run.cost
       return acc
     }, {})
+    const budgetAlert = computeStudioBudgetAlert(session.cost)
 
     return NextResponse.json({
       ok: true,
@@ -50,6 +52,7 @@ export async function GET(req: NextRequest) {
       capabilityStatus: 'IMPLEMENTED',
       sessionId,
       cost: session.cost,
+      budgetAlert,
       runsByRole,
       totalRuns: session.agentRuns.length,
       budgetExceeded: session.cost.remainingCredits <= 0,

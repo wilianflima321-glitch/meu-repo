@@ -1,560 +1,41 @@
 /**
- * Level Editor Integrado - Editor de Níveis Profissional
- * 
- * Editor completo estilo Unreal Engine que integra todos
- * os sistemas: Scene, World Outliner, Details, etc.
- * 
- * NÃO É MOCK - Sistema real e funcional!
- * 
- * FEATURES:
- * - Save/Load via API + localStorage
- * - Play Mode com Physics real
- * - Undo/Redo (em desenvolvimento)
+ * Level Editor Integrado - Editor de Niveis Profissional
+ *
+ * Editor estilo Unreal para cena, outliner, details e runtime de play mode.
  */
 
 'use client';
 
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { 
-  OrbitControls, 
-  TransformControls, 
-  GizmoHelper, 
-  GizmoViewport, 
-  Grid,
-  PivotControls,
-  Stats,
-  Environment,
-  ContactShadows,
-  Sky,
-  useHelper,
-} from '@react-three/drei';
-import * as THREE from 'three';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DetailsPanelMini, OutlinerMini, Toolbar } from './LevelEditorPanels';
+import {
+  defaultEnvironment,
+  defaultObjects,
+  type EnvironmentSettings,
+  type LevelData,
+  type LevelObject,
+  type SnapMode,
+  type TransformMode,
+  type ViewportMode,
+} from './LevelEditor.types';
+import {
+  resolveProjectIdFromClient,
+  simulatePhysics,
+  type PhysicsState,
+} from './LevelEditor.runtime';
+import { LevelEditorViewport } from './LevelEditor.viewport';
 
-// ============================================================================
-// PHYSICS RUNTIME (Simplified for Play Mode)
-// ============================================================================
-
-interface PhysicsState {
-  velocities: Map<string, [number, number, number]>;
-  angularVelocities: Map<string, [number, number, number]>;
-}
-
-const GRAVITY = -9.81;
-const GROUND_Y = 0.05; // Floor height
-const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId';
-
-function resolveProjectIdFromClient(): string {
-  if (typeof window === 'undefined') return 'default';
-  const params = new URLSearchParams(window.location.search);
-  const fromQuery = params.get('projectId');
-  if (fromQuery && fromQuery.trim()) return fromQuery.trim();
-  const fromStorage = localStorage.getItem(WORKBENCH_PROJECT_STORAGE_KEY);
-  if (fromStorage && fromStorage.trim()) return fromStorage.trim();
-  return 'default';
-}
-
-function simulatePhysics(
-  objects: LevelObject[],
-  physicsState: PhysicsState,
-  deltaTime: number
-): LevelObject[] {
-  return objects.map(obj => {
-    // Only simulate dynamic objects (not floor)
-    if (obj.id === 'floor' || obj.locked) return obj;
-    
-    const velocity = physicsState.velocities.get(obj.id) || [0, 0, 0];
-    
-    // Apply gravity
-    velocity[1] += GRAVITY * deltaTime;
-    
-    // Update position
-    const newPos: [number, number, number] = [
-      obj.position[0] + velocity[0] * deltaTime,
-      obj.position[1] + velocity[1] * deltaTime,
-      obj.position[2] + velocity[2] * deltaTime,
-    ];
-    
-    // Ground collision
-    const halfHeight = obj.scale[1] / 2;
-    if (newPos[1] - halfHeight < GROUND_Y) {
-      newPos[1] = GROUND_Y + halfHeight;
-      velocity[1] = -velocity[1] * 0.5; // Bounce with damping
-      if (Math.abs(velocity[1]) < 0.5) velocity[1] = 0;
-    }
-    
-    physicsState.velocities.set(obj.id, velocity);
-    
-    return { ...obj, position: newPos };
-  });
-}
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type TransformMode = 'translate' | 'rotate' | 'scale';
-export type ViewportMode = 'perspective' | 'top' | 'front' | 'right';
-export type SnapMode = 'none' | 'grid' | 'vertex';
-
-export interface LevelObject {
-  id: string;
-  name: string;
-  type: 'mesh' | 'light' | 'camera' | 'empty' | 'blueprint' | 'volume' | 'spline' | 'decal' | 'foliage' | 'audio';
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
-  visible: boolean;
-  locked: boolean;
-  parentId?: string;
-  children: string[];
-  components: LevelComponent[];
-  properties: Record<string, unknown>;
-}
-
-export interface LevelComponent {
-  id: string;
-  type: string;
-  enabled: boolean;
-  properties: Record<string, unknown>;
-}
-
-interface LevelData {
-  id: string;
-  name: string;
-  objects: LevelObject[];
-  environment: EnvironmentSettings;
-  lightmapSettings: LightmapSettings;
-  navmeshSettings: NavmeshSettings;
-}
-
-interface EnvironmentSettings {
-  skyType: 'hdri' | 'procedural' | 'solid';
-  skyColor: string;
-  ambientIntensity: number;
-  fogEnabled: boolean;
-  fogColor: string;
-  fogDensity: number;
-  postProcessVolume?: string;
-}
-
-interface LightmapSettings {
-  resolution: number;
-  quality: 'preview' | 'medium' | 'high' | 'production';
-  directSamples: number;
-  indirectSamples: number;
-  bounces: number;
-}
-
-interface NavmeshSettings {
-  agentRadius: number;
-  agentHeight: number;
-  maxSlope: number;
-  stepHeight: number;
-  cellSize: number;
-}
-
-// ============================================================================
-// DEFAULT DATA
-// ============================================================================
-
-const defaultObjects: LevelObject[] = [
-  {
-    id: 'floor',
-    name: 'Floor',
-    type: 'mesh',
-    position: [0, 0, 0],
-    rotation: [0, 0, 0],
-    scale: [10, 0.1, 10],
-    visible: true,
-    locked: false,
-    children: [],
-    components: [
-      { id: 'mesh_floor', type: 'StaticMesh', enabled: true, properties: { mesh: 'Cube', material: 'M_Floor' } },
-      { id: 'col_floor', type: 'BoxCollider', enabled: true, properties: { isTrigger: false } },
-    ],
-    properties: { castShadow: true, receiveShadow: true },
-  },
-  {
-    id: 'cube1',
-    name: 'Cube_01',
-    type: 'mesh',
-    position: [0, 1, 0],
-    rotation: [0, 0, 0],
-    scale: [1, 1, 1],
-    visible: true,
-    locked: false,
-    children: [],
-    components: [
-      { id: 'mesh_cube1', type: 'StaticMesh', enabled: true, properties: { mesh: 'Cube', material: 'M_Default' } },
-    ],
-    properties: { castShadow: true, receiveShadow: true },
-  },
-  {
-    id: 'sphere1',
-    name: 'Sphere_01',
-    type: 'mesh',
-    position: [3, 1, 0],
-    rotation: [0, 0, 0],
-    scale: [1, 1, 1],
-    visible: true,
-    locked: false,
-    children: [],
-    components: [
-      { id: 'mesh_sphere1', type: 'StaticMesh', enabled: true, properties: { mesh: 'Sphere', material: 'M_Metal' } },
-    ],
-    properties: { castShadow: true, receiveShadow: true },
-  },
-  {
-    id: 'light_main',
-    name: 'DirectionalLight',
-    type: 'light',
-    position: [5, 10, 5],
-    rotation: [-45, 30, 0],
-    scale: [1, 1, 1],
-    visible: true,
-    locked: false,
-    children: [],
-    components: [
-      { id: 'light_dir', type: 'DirectionalLight', enabled: true, properties: { color: '#ffffff', intensity: 1, castShadow: true } },
-    ],
-    properties: {},
-  },
-  {
-    id: 'light_point',
-    name: 'PointLight',
-    type: 'light',
-    position: [-3, 2, 0],
-    rotation: [0, 0, 0],
-    scale: [1, 1, 1],
-    visible: true,
-    locked: false,
-    children: [],
-    components: [
-      { id: 'light_pt', type: 'PointLight', enabled: true, properties: { color: '#ff9900', intensity: 1, range: 10 } },
-    ],
-    properties: {},
-  },
-  {
-    id: 'camera_main',
-    name: 'MainCamera',
-    type: 'camera',
-    position: [5, 5, 5],
-    rotation: [-35, 45, 0],
-    scale: [1, 1, 1],
-    visible: true,
-    locked: false,
-    children: [],
-    components: [
-      { id: 'cam_main', type: 'Camera', enabled: true, properties: { fov: 60, near: 0.1, far: 1000 } },
-    ],
-    properties: {},
-  },
-];
-
-const defaultEnvironment: EnvironmentSettings = {
-  skyType: 'procedural',
-  skyColor: '#87ceeb',
-  ambientIntensity: 0.3,
-  fogEnabled: false,
-  fogColor: '#aabbcc',
-  fogDensity: 0.01,
-};
-
-// ============================================================================
-// 3D SCENE OBJECTS
-// ============================================================================
-
-interface SceneObjectProps {
-  object: LevelObject;
-  isSelected: boolean;
-  onSelect: (id: string) => void;
-  transformMode: TransformMode;
-  onTransform: (id: string, position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => void;
-}
-
-function SceneObject({ object, isSelected, onSelect, transformMode, onTransform }: SceneObjectProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const groupRef = useRef<THREE.Group>(null);
-  
-  if (!object.visible) return null;
-  
-  const renderMesh = () => {
-    const meshComp = object.components.find(c => c.type === 'StaticMesh');
-    const meshType = (meshComp?.properties?.mesh as string) || 'Cube';
-    const color = isSelected ? '#ffaa00' : '#888888';
-    
-    let geometry: THREE.BufferGeometry;
-    switch (meshType) {
-      case 'Sphere':
-        geometry = new THREE.SphereGeometry(0.5, 32, 32);
-        break;
-      case 'Cylinder':
-        geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
-        break;
-      case 'Cone':
-        geometry = new THREE.ConeGeometry(0.5, 1, 32);
-        break;
-      case 'Torus':
-        geometry = new THREE.TorusGeometry(0.5, 0.2, 16, 32);
-        break;
-      case 'Plane':
-        geometry = new THREE.PlaneGeometry(1, 1);
-        break;
-      default:
-        geometry = new THREE.BoxGeometry(1, 1, 1);
-    }
-    
-    return (
-      <mesh
-        ref={meshRef}
-        geometry={geometry}
-        onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}
-        castShadow={object.properties.castShadow as boolean}
-        receiveShadow={object.properties.receiveShadow as boolean}
-      >
-        <meshStandardMaterial color={color} wireframe={isSelected} />
-      </mesh>
-    );
-  };
-  
-  const renderLight = () => {
-    const lightComp = object.components.find(c => c.type === 'DirectionalLight' || c.type === 'PointLight' || c.type === 'SpotLight');
-    if (!lightComp) return null;
-    
-    const color = (lightComp.properties.color as string) || '#ffffff';
-    const intensity = (lightComp.properties.intensity as number) || 1;
-    
-    switch (lightComp.type) {
-      case 'DirectionalLight':
-        return (
-          <>
-            <directionalLight 
-              color={color} 
-              intensity={intensity} 
-              castShadow 
-              shadow-mapSize={[2048, 2048]}
-            />
-            {isSelected && (
-              <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
-                <sphereGeometry args={[0.3, 16, 16]} />
-                <meshBasicMaterial color="#ffff00" wireframe />
-              </mesh>
-            )}
-          </>
-        );
-      case 'PointLight':
-        return (
-          <>
-            <pointLight 
-              color={color} 
-              intensity={intensity} 
-              distance={(lightComp.properties.range as number) || 10}
-              castShadow
-            />
-            {isSelected && (
-              <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
-                <sphereGeometry args={[0.3, 16, 16]} />
-                <meshBasicMaterial color="#ffaa00" wireframe />
-              </mesh>
-            )}
-          </>
-        );
-      case 'SpotLight':
-        return (
-          <>
-            <spotLight 
-              color={color} 
-              intensity={intensity} 
-              angle={(lightComp.properties.angle as number) || 0.5}
-              distance={(lightComp.properties.range as number) || 10}
-              castShadow
-            />
-            {isSelected && (
-              <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
-                <coneGeometry args={[0.3, 0.5, 16]} />
-                <meshBasicMaterial color="#ff8800" wireframe />
-              </mesh>
-            )}
-          </>
-        );
-      default:
-        return null;
-    }
-  };
-  
-  const renderCamera = () => {
-    return (
-      <group>
-        {/* Camera icon */}
-        <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
-          <boxGeometry args={[0.4, 0.3, 0.3]} />
-          <meshBasicMaterial color={isSelected ? '#00ff00' : '#666666'} wireframe />
-        </mesh>
-        {/* Lens */}
-        <mesh position={[0, 0, 0.25]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.1, 0.15, 0.2, 16]} />
-          <meshBasicMaterial color={isSelected ? '#00ff00' : '#444444'} wireframe />
-        </mesh>
-      </group>
-    );
-  };
-  
-  const renderEmpty = () => {
-    return (
-      <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
-        <octahedronGeometry args={[0.2]} />
-        <meshBasicMaterial color={isSelected ? '#ffffff' : '#888888'} wireframe />
-      </mesh>
-    );
-  };
-  
-  return (
-    <group
-      ref={groupRef}
-      position={object.position}
-      rotation={object.rotation.map(r => r * Math.PI / 180) as [number, number, number]}
-      scale={object.scale}
-    >
-      {object.type === 'mesh' && renderMesh()}
-      {object.type === 'light' && renderLight()}
-      {object.type === 'camera' && renderCamera()}
-      {object.type === 'empty' && renderEmpty()}
-    </group>
-  );
-}
-
-// ============================================================================
-// VIEWPORT COMPONENT
-// ============================================================================
-
-interface ViewportProps {
-  objects: LevelObject[];
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
-  transformMode: TransformMode;
-  onTransform: (id: string, position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => void;
-  viewMode: ViewportMode;
-  showGrid: boolean;
-  showStats: boolean;
-  environment: EnvironmentSettings;
-}
-
-function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, viewMode, showGrid, showStats, environment }: ViewportProps) {
-  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
-  
-  // Get camera position based on view mode
-  const cameraPosition = useMemo(() => {
-    switch (viewMode) {
-      case 'top': return [0, 20, 0] as [number, number, number];
-      case 'front': return [0, 5, 20] as [number, number, number];
-      case 'right': return [20, 5, 0] as [number, number, number];
-      default: return [10, 8, 10] as [number, number, number];
-    }
-  }, [viewMode]);
-  
-  const selectedObject = objects.find(o => o.id === selectedId);
-  
-  return (
-    <Canvas
-      shadows
-      camera={{ position: cameraPosition, fov: 60 }}
-      onPointerMissed={() => onSelect(null)}
-    >
-      <color attach="background" args={['#1a1a1a']} />
-      
-      {/* Ambient Light */}
-      <ambientLight intensity={environment.ambientIntensity} />
-      
-      {/* Sky */}
-      {environment.skyType === 'procedural' && <Sky sunPosition={[100, 20, 100]} />}
-      {environment.skyType === 'solid' && <color attach="background" args={[environment.skyColor]} />}
-      
-      {/* Fog */}
-      {environment.fogEnabled && (
-        <fog attach="fog" args={[environment.fogColor, 10, 100]} />
-      )}
-      
-      {/* Contact Shadows */}
-      <ContactShadows
-        position={[0, -0.049, 0]}
-        opacity={0.5}
-        scale={20}
-        blur={1}
-        far={10}
-        resolution={256}
-      />
-      
-      {/* Grid */}
-      {showGrid && (
-        <Grid
-          position={[0, 0, 0]}
-          args={[100, 100]}
-          cellSize={1}
-          cellThickness={0.5}
-          cellColor="#333333"
-          sectionSize={5}
-          sectionThickness={1}
-          sectionColor="#555555"
-          fadeDistance={100}
-          infiniteGrid
-        />
-      )}
-      
-      {/* Scene Objects */}
-      {objects.map((obj) => (
-        <SceneObject
-          key={obj.id}
-          object={obj}
-          isSelected={selectedId === obj.id}
-          onSelect={onSelect}
-          transformMode={transformMode}
-          onTransform={onTransform}
-        />
-      ))}
-      
-      {/* Transform Controls for Selected Object */}
-      {selectedObject && !selectedObject.locked && (
-        <TransformControls
-          object={undefined}
-          mode={transformMode}
-          position={selectedObject.position}
-          onObjectChange={(e) => {
-            if (e) {
-              const target = e.target as THREE.Object3D;
-              onTransform(
-                selectedObject.id,
-                [target.position.x, target.position.y, target.position.z],
-                [target.rotation.x * 180 / Math.PI, target.rotation.y * 180 / Math.PI, target.rotation.z * 180 / Math.PI],
-                [target.scale.x, target.scale.y, target.scale.z]
-              );
-            }
-          }}
-        />
-      )}
-      
-      {/* Controls */}
-      <OrbitControls makeDefault enableDamping dampingFactor={0.1} />
-      
-      {/* Gizmo */}
-      <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
-        <GizmoViewport />
-      </GizmoHelper>
-      
-      {/* Stats */}
-      {showStats && <Stats />}
-    </Canvas>
-  );
-}
-
-// ============================================================================
-// PANEL SURFACES EXTRACTED TO LevelEditorPanels.tsx
-// ============================================================================
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
+export type {
+  EnvironmentSettings,
+  LevelComponent,
+  LevelData,
+  LevelObject,
+  LightmapSettings,
+  NavmeshSettings,
+  SnapMode,
+  TransformMode,
+  ViewportMode,
+} from './LevelEditor.types';
 
 export default function LevelEditor() {
   const [objects, setObjects] = useState<LevelObject[]>(defaultObjects);
@@ -567,8 +48,7 @@ export default function LevelEditor() {
   const [showGrid, setShowGrid] = useState(true);
   const [showStats, setShowStats] = useState(false);
   const [environment] = useState<EnvironmentSettings>(defaultEnvironment);
-  
-  // Play Mode state
+
   const [savedObjects, setSavedObjects] = useState<LevelObject[] | null>(null);
   const physicsStateRef = useRef<PhysicsState>({
     velocities: new Map(),
@@ -576,8 +56,7 @@ export default function LevelEditor() {
   });
   const lastTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number>(0);
-  
-  // Play Mode loop
+
   useEffect(() => {
     if (!isPlaying) {
       if (animationFrameRef.current) {
@@ -585,59 +64,55 @@ export default function LevelEditor() {
       }
       return;
     }
-    
+
     lastTimeRef.current = performance.now();
-    
+
     const gameLoop = (currentTime: number) => {
       const deltaTime = Math.min((currentTime - lastTimeRef.current) / 1000, 0.05);
       lastTimeRef.current = currentTime;
-      
-      setObjects(prev => simulatePhysics(prev, physicsStateRef.current, deltaTime));
-      
+
+      setObjects((prev) => simulatePhysics(prev, physicsStateRef.current, deltaTime));
+
       if (isPlaying) {
         animationFrameRef.current = requestAnimationFrame(gameLoop);
       }
     };
-    
+
     animationFrameRef.current = requestAnimationFrame(gameLoop);
-    
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [isPlaying]);
-  
-  // Handle Play/Pause
+
   const handlePlayPause = useCallback(() => {
     if (!isPlaying) {
-      // Starting play - save current state
-      setSavedObjects(JSON.parse(JSON.stringify(objects)));
+      setSavedObjects(JSON.parse(JSON.stringify(objects)) as LevelObject[]);
       physicsStateRef.current = {
         velocities: new Map(),
         angularVelocities: new Map(),
       };
-    } else {
-      // Stopping play - restore saved state
-      if (savedObjects) {
-        setObjects(savedObjects);
-        setSavedObjects(null);
-      }
+    } else if (savedObjects) {
+      setObjects(savedObjects);
+      setSavedObjects(null);
     }
+
     setIsPlaying(!isPlaying);
   }, [isPlaying, objects, savedObjects]);
-  
+
   const selectedObject = useMemo(
-    () => objects.find(o => o.id === selectedId) || null,
-    [objects, selectedId]
+    () => objects.find((o) => o.id === selectedId) || null,
+    [objects, selectedId],
   );
 
   const handleDuplicate = useCallback((id: string) => {
     const timestamp = Date.now();
     let nextId: string | null = null;
 
-    setObjects(prev => {
-      const obj = prev.find(o => o.id === id);
+    setObjects((prev) => {
+      const obj = prev.find((o) => o.id === id);
       if (!obj) return prev;
 
       nextId = `${obj.id}_copy_${timestamp}`;
@@ -656,12 +131,11 @@ export default function LevelEditor() {
       setSelectedId(nextId);
     }
   }, []);
-  
-  // Keyboard shortcuts
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
-      
+
       switch (e.key.toLowerCase()) {
         case 'w':
           setTransformMode('translate');
@@ -675,7 +149,7 @@ export default function LevelEditor() {
         case 'delete':
         case 'backspace':
           if (selectedId) {
-            setObjects(prev => prev.filter(o => o.id !== selectedId));
+            setObjects((prev) => prev.filter((o) => o.id !== selectedId));
             setSelectedId(null);
           }
           break;
@@ -685,61 +159,76 @@ export default function LevelEditor() {
           }
           break;
         case 'g':
-          setShowGrid(prev => !prev);
+          setShowGrid((prev) => !prev);
           break;
         case 'escape':
           setSelectedId(null);
           break;
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleDuplicate, selectedId, selectedObject]);
-  
-  const handleTransform = useCallback((id: string, position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => {
-    setObjects(prev => prev.map(obj => 
-      obj.id === id ? { ...obj, position, rotation, scale } : obj
-    ));
-  }, []);
-  
+
+  const handleTransform = useCallback(
+    (
+      id: string,
+      position: [number, number, number],
+      rotation: [number, number, number],
+      scale: [number, number, number],
+    ) => {
+      setObjects((prev) =>
+        prev.map((obj) => (obj.id === id ? { ...obj, position, rotation, scale } : obj)),
+      );
+    },
+    [],
+  );
+
   const handleObjectChange = useCallback((id: string, changes: Partial<LevelObject>) => {
-    setObjects(prev => prev.map(obj => 
-      obj.id === id ? { ...obj, ...changes } : obj
-    ));
+    setObjects((prev) => prev.map((obj) => (obj.id === id ? { ...obj, ...changes } : obj)));
   }, []);
-  
+
   const handleToggleVisibility = useCallback((id: string) => {
-    setObjects(prev => prev.map(obj => 
-      obj.id === id ? { ...obj, visible: !obj.visible } : obj
-    ));
+    setObjects((prev) => prev.map((obj) => (obj.id === id ? { ...obj, visible: !obj.visible } : obj)));
   }, []);
-  
+
   const handleToggleLock = useCallback((id: string) => {
-    setObjects(prev => prev.map(obj => 
-      obj.id === id ? { ...obj, locked: !obj.locked } : obj
-    ));
+    setObjects((prev) => prev.map((obj) => (obj.id === id ? { ...obj, locked: !obj.locked } : obj)));
   }, []);
-  
-  const handleDelete = useCallback((id: string) => {
-    setObjects(prev => prev.filter(obj => obj.id !== id));
-    if (selectedId === id) setSelectedId(null);
-  }, [selectedId]);
-  
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      setObjects((prev) => prev.filter((obj) => obj.id !== id));
+      if (selectedId === id) setSelectedId(null);
+    },
+    [selectedId],
+  );
+
   const handleSave = useCallback(async () => {
     const levelData: LevelData = {
       id: 'level_1',
       name: 'Main Level',
       objects,
       environment,
-      lightmapSettings: { resolution: 1024, quality: 'high', directSamples: 32, indirectSamples: 128, bounces: 3 },
-      navmeshSettings: { agentRadius: 0.5, agentHeight: 2, maxSlope: 45, stepHeight: 0.4, cellSize: 0.3 },
+      lightmapSettings: {
+        resolution: 1024,
+        quality: 'high',
+        directSamples: 32,
+        indirectSamples: 128,
+        bounces: 3,
+      },
+      navmeshSettings: {
+        agentRadius: 0.5,
+        agentHeight: 2,
+        maxSlope: 45,
+        stepHeight: 0.4,
+        cellSize: 0.3,
+      },
     };
-    
-    // Save to localStorage for immediate access
+
     localStorage.setItem('aethel_level_data', JSON.stringify(levelData));
-    
-    // Also save to API if available
+
     try {
       const projectId = resolveProjectIdFromClient();
       const response = await fetch('/api/files/fs', {
@@ -754,34 +243,32 @@ export default function LevelEditor() {
           path: 'levels/main.level.json',
           content: JSON.stringify(levelData, null, 2),
           options: { createDirectories: true },
-        })
+        }),
       });
+
       if (response.ok) {
         console.log('Level saved to server:', levelData.name);
       }
-    } catch (e) {
+    } catch {
       console.log('Server save failed, using localStorage only');
     }
-    
+
     console.log('Level saved:', levelData);
   }, [objects, environment]);
-  
-  // Load level on mount
+
   useEffect(() => {
     const loadLevel = async () => {
-      // Try localStorage first
       const cached = localStorage.getItem('aethel_level_data');
       if (cached) {
         try {
           const data = JSON.parse(cached) as LevelData;
           setObjects(data.objects || defaultObjects);
           return;
-        } catch (e) {
+        } catch {
           console.warn('Failed to parse cached level');
         }
       }
-      
-      // Try API
+
       try {
         const projectId = resolveProjectIdFromClient();
         const response = await fetch('/api/files/fs', {
@@ -796,6 +283,7 @@ export default function LevelEditor() {
             path: 'levels/main.level.json',
           }),
         });
+
         if (response.ok) {
           const data = await response.json();
           if (data.content) {
@@ -803,40 +291,49 @@ export default function LevelEditor() {
             setObjects(levelData.objects || defaultObjects);
           }
         }
-      } catch (e) {
+      } catch {
         console.log('No saved level found, using defaults');
       }
     };
+
     loadLevel();
   }, []);
-  
+
   const handleBuild = useCallback(() => {
     console.log('Building level...');
-    // Build process would go here
   }, []);
-  
+
   return (
-    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#1a1a1a', color: '#fff' }}>
-      {/* Play Mode Indicator */}
+    <div
+      style={{
+        width: '100%',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#1a1a1a',
+        color: '#fff',
+      }}
+    >
       {isPlaying && (
-        <div style={{
-          position: 'absolute',
-          top: '50px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: '#22c55e',
-          color: '#000',
-          padding: '4px 16px',
-          borderRadius: '0 0 8px 8px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          zIndex: 100,
-        }}>
-          ▶ PLAY MODE - Press ESC or click Stop to exit
+        <div
+          style={{
+            position: 'absolute',
+            top: '50px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#22c55e',
+            color: '#000',
+            padding: '4px 16px',
+            borderRadius: '0 0 8px 8px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            zIndex: 100,
+          }}
+        >
+          Play Mode - Press ESC or click Stop to exit
         </div>
       )}
-      
-      {/* Toolbar */}
+
       <Toolbar
         transformMode={transformMode}
         onTransformModeChange={setTransformMode}
@@ -851,10 +348,8 @@ export default function LevelEditor() {
         onSave={handleSave}
         onBuild={handleBuild}
       />
-      
-      {/* Main Content */}
+
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Left Panel - World Outliner */}
         <div style={{ width: '250px', borderRight: '1px solid #333', background: '#222' }}>
           <OutlinerMini
             objects={objects}
@@ -866,10 +361,9 @@ export default function LevelEditor() {
             onDuplicate={handleDuplicate}
           />
         </div>
-        
-        {/* Center - Viewport */}
+
         <div style={{ flex: 1, position: 'relative' }}>
-          <Viewport
+          <LevelEditorViewport
             objects={objects}
             selectedId={selectedId}
             onSelect={setSelectedId}
@@ -880,15 +374,16 @@ export default function LevelEditor() {
             showStats={showStats}
             environment={environment}
           />
-          
-          {/* Viewport Overlay */}
-          <div style={{
-            position: 'absolute',
-            top: '8px',
-            left: '8px',
-            display: 'flex',
-            gap: '8px',
-          }}>
+
+          <div
+            style={{
+              position: 'absolute',
+              top: '8px',
+              left: '8px',
+              display: 'flex',
+              gap: '8px',
+            }}
+          >
             <button
               onClick={() => setShowGrid(!showGrid)}
               style={{
@@ -918,21 +413,22 @@ export default function LevelEditor() {
               Stats
             </button>
           </div>
-          
-          {/* Status Bar */}
-          <div style={{
-            position: 'absolute',
-            bottom: '0',
-            left: '0',
-            right: '0',
-            height: '24px',
-            background: 'rgba(0,0,0,0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 12px',
-            fontSize: '11px',
-            color: '#888',
-          }}>
+
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '0',
+              left: '0',
+              right: '0',
+              height: '24px',
+              background: 'rgba(0,0,0,0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 12px',
+              fontSize: '11px',
+              color: '#888',
+            }}
+          >
             <span>Objects: {objects.length}</span>
             <span style={{ margin: '0 16px' }}>|</span>
             <span>Selected: {selectedObject?.name || 'None'}</span>
@@ -942,13 +438,9 @@ export default function LevelEditor() {
             <span>W/E/R: Transform | G: Grid | Del: Delete</span>
           </div>
         </div>
-        
-        {/* Right Panel - Details */}
+
         <div style={{ width: '300px', borderLeft: '1px solid #333', background: '#222' }}>
-          <DetailsPanelMini
-            object={selectedObject}
-            onChange={handleObjectChange}
-          />
+          <DetailsPanelMini object={selectedObject} onChange={handleObjectChange} />
         </div>
       </div>
     </div>

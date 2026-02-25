@@ -15,338 +15,35 @@
  */
 
 import { EventEmitter } from 'events';
+import { useState, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface Vector3 {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface BoundingBox {
-  min: Vector3;
-  max: Vector3;
-}
-
-export interface Sphere {
-  center: Vector3;
-  radius: number;
-}
-
-export type ChunkState = 'unloaded' | 'loading' | 'loaded' | 'unloading' | 'error';
-export type LODLevel = 0 | 1 | 2 | 3 | 4; // 0 = highest detail
-
-export interface WorldChunk {
-  id: string;
-  position: Vector3;
-  size: Vector3;
-  bounds: BoundingBox;
-  state: ChunkState;
-  lodLevel: LODLevel;
-  priority: number;
-  data: any | null;
-  neighbors: string[];
-  lastAccessTime: number;
-  loadTime: number;
-  memorySize: number;
-  entities: string[];
-  terrainMesh: any | null;
-  collisionMesh: any | null;
-}
-
-export interface LODConfig {
-  level: LODLevel;
-  distance: number;
-  vertexReduction: number;
-  textureScale: number;
-  shadowsEnabled: boolean;
-  animationsEnabled: boolean;
-  updateFrequency: number; // updates per second
-}
-
-export interface StreamingConfig {
-  chunkSize: Vector3;
-  viewDistance: number;
-  loadDistance: number;
-  unloadDistance: number;
-  maxLoadedChunks: number;
-  maxConcurrentLoads: number;
-  lodLevels: LODConfig[];
-  prefetchEnabled: boolean;
-  prefetchDistance: number;
-  memoryBudgetMB: number;
-  enableOcclusionCulling: boolean;
-  updateInterval: number; // ms
-  priorityBoostForVisible: number;
-}
-
-export interface StreamingStats {
-  loadedChunks: number;
-  loadingChunks: number;
-  totalChunks: number;
-  memoryUsedMB: number;
-  memoryBudgetMB: number;
-  chunksLoadedThisFrame: number;
-  chunksUnloadedThisFrame: number;
-  averageLoadTime: number;
-  visibleChunks: number;
-  culledChunks: number;
-}
-
-export interface EntityLOD {
-  entityId: string;
-  currentLOD: LODLevel;
-  targetLOD: LODLevel;
-  distance: number;
-  isVisible: boolean;
-  lastUpdate: number;
-}
-
-// ============================================================================
-// OCTREE FOR SPATIAL PARTITIONING
-// ============================================================================
-
-interface OctreeNode<T> {
-  bounds: BoundingBox;
-  items: T[];
-  children: OctreeNode<T>[] | null;
-  depth: number;
-}
-
-export class Octree<T extends { bounds: BoundingBox }> {
-  private root: OctreeNode<T>;
-  private maxDepth: number;
-  private maxItemsPerNode: number;
-  
-  constructor(bounds: BoundingBox, maxDepth = 8, maxItemsPerNode = 8) {
-    this.maxDepth = maxDepth;
-    this.maxItemsPerNode = maxItemsPerNode;
-    this.root = this.createNode(bounds, 0);
-  }
-  
-  private createNode(bounds: BoundingBox, depth: number): OctreeNode<T> {
-    return {
-      bounds,
-      items: [],
-      children: null,
-      depth,
-    };
-  }
-  
-  insert(item: T): boolean {
-    return this.insertIntoNode(this.root, item);
-  }
-  
-  private insertIntoNode(node: OctreeNode<T>, item: T): boolean {
-    if (!this.boundsIntersect(node.bounds, item.bounds)) {
-      return false;
-    }
-    
-    // If node has children, try inserting into them
-    if (node.children) {
-      for (const child of node.children) {
-        if (this.boundsContains(child.bounds, item.bounds)) {
-          return this.insertIntoNode(child, item);
-        }
-      }
-      // Item spans multiple children, store in this node
-      node.items.push(item);
-      return true;
-    }
-    
-    // Add to this node
-    node.items.push(item);
-    
-    // Subdivide if needed
-    if (node.items.length > this.maxItemsPerNode && node.depth < this.maxDepth) {
-      this.subdivide(node);
-    }
-    
-    return true;
-  }
-  
-  private subdivide(node: OctreeNode<T>): void {
-    const { min, max } = node.bounds;
-    const mid = {
-      x: (min.x + max.x) / 2,
-      y: (min.y + max.y) / 2,
-      z: (min.z + max.z) / 2,
-    };
-    
-    node.children = [
-      this.createNode({ min: { x: min.x, y: min.y, z: min.z }, max: { x: mid.x, y: mid.y, z: mid.z } }, node.depth + 1),
-      this.createNode({ min: { x: mid.x, y: min.y, z: min.z }, max: { x: max.x, y: mid.y, z: mid.z } }, node.depth + 1),
-      this.createNode({ min: { x: min.x, y: mid.y, z: min.z }, max: { x: mid.x, y: max.y, z: mid.z } }, node.depth + 1),
-      this.createNode({ min: { x: mid.x, y: mid.y, z: min.z }, max: { x: max.x, y: max.y, z: mid.z } }, node.depth + 1),
-      this.createNode({ min: { x: min.x, y: min.y, z: mid.z }, max: { x: mid.x, y: mid.y, z: max.z } }, node.depth + 1),
-      this.createNode({ min: { x: mid.x, y: min.y, z: mid.z }, max: { x: max.x, y: mid.y, z: max.z } }, node.depth + 1),
-      this.createNode({ min: { x: min.x, y: mid.y, z: mid.z }, max: { x: mid.x, y: max.y, z: max.z } }, node.depth + 1),
-      this.createNode({ min: { x: mid.x, y: mid.y, z: mid.z }, max: { x: max.x, y: max.y, z: max.z } }, node.depth + 1),
-    ];
-    
-    // Redistribute items
-    const items = node.items;
-    node.items = [];
-    
-    for (const item of items) {
-      this.insertIntoNode(node, item);
-    }
-  }
-  
-  query(bounds: BoundingBox): T[] {
-    const results: T[] = [];
-    this.queryNode(this.root, bounds, results);
-    return results;
-  }
-  
-  private queryNode(node: OctreeNode<T>, bounds: BoundingBox, results: T[]): void {
-    if (!this.boundsIntersect(node.bounds, bounds)) {
-      return;
-    }
-    
-    for (const item of node.items) {
-      if (this.boundsIntersect(item.bounds, bounds)) {
-        results.push(item);
-      }
-    }
-    
-    if (node.children) {
-      for (const child of node.children) {
-        this.queryNode(child, bounds, results);
-      }
-    }
-  }
-  
-  queryRadius(center: Vector3, radius: number): T[] {
-    const bounds: BoundingBox = {
-      min: { x: center.x - radius, y: center.y - radius, z: center.z - radius },
-      max: { x: center.x + radius, y: center.y + radius, z: center.z + radius },
-    };
-    
-    return this.query(bounds).filter(item => {
-      const itemCenter = this.getBoundsCenter(item.bounds);
-      return this.distance(center, itemCenter) <= radius;
-    });
-  }
-  
-  remove(item: T): boolean {
-    return this.removeFromNode(this.root, item);
-  }
-  
-  private removeFromNode(node: OctreeNode<T>, item: T): boolean {
-    const index = node.items.indexOf(item);
-    if (index !== -1) {
-      node.items.splice(index, 1);
-      return true;
-    }
-    
-    if (node.children) {
-      for (const child of node.children) {
-        if (this.removeFromNode(child, item)) {
-          return true;
-        }
-      }
-    }
-    
-    return false;
-  }
-  
-  clear(): void {
-    this.root = this.createNode(this.root.bounds, 0);
-  }
-  
-  private boundsIntersect(a: BoundingBox, b: BoundingBox): boolean {
-    return (
-      a.min.x <= b.max.x && a.max.x >= b.min.x &&
-      a.min.y <= b.max.y && a.max.y >= b.min.y &&
-      a.min.z <= b.max.z && a.max.z >= b.min.z
-    );
-  }
-  
-  private boundsContains(outer: BoundingBox, inner: BoundingBox): boolean {
-    return (
-      outer.min.x <= inner.min.x && outer.max.x >= inner.max.x &&
-      outer.min.y <= inner.min.y && outer.max.y >= inner.max.y &&
-      outer.min.z <= inner.min.z && outer.max.z >= inner.max.z
-    );
-  }
-  
-  private getBoundsCenter(bounds: BoundingBox): Vector3 {
-    return {
-      x: (bounds.min.x + bounds.max.x) / 2,
-      y: (bounds.min.y + bounds.max.y) / 2,
-      z: (bounds.min.z + bounds.max.z) / 2,
-    };
-  }
-  
-  private distance(a: Vector3, b: Vector3): number {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-    const dz = a.z - b.z;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-  }
-}
-
-// ============================================================================
-// PRIORITY QUEUE
-// ============================================================================
-
-class PriorityQueue<T> {
-  private items: { item: T; priority: number }[] = [];
-  
-  enqueue(item: T, priority: number): void {
-    const newItem = { item, priority };
-    let added = false;
-    
-    for (let i = 0; i < this.items.length; i++) {
-      if (priority > this.items[i].priority) {
-        this.items.splice(i, 0, newItem);
-        added = true;
-        break;
-      }
-    }
-    
-    if (!added) {
-      this.items.push(newItem);
-    }
-  }
-  
-  dequeue(): T | undefined {
-    return this.items.shift()?.item;
-  }
-  
-  peek(): T | undefined {
-    return this.items[0]?.item;
-  }
-  
-  isEmpty(): boolean {
-    return this.items.length === 0;
-  }
-  
-  size(): number {
-    return this.items.length;
-  }
-  
-  clear(): void {
-    this.items = [];
-  }
-  
-  has(predicate: (item: T) => boolean): boolean {
-    return this.items.some(i => predicate(i.item));
-  }
-  
-  remove(predicate: (item: T) => boolean): boolean {
-    const index = this.items.findIndex(i => predicate(i.item));
-    if (index !== -1) {
-      this.items.splice(index, 1);
-      return true;
-    }
-    return false;
-  }
-}
+import type {
+  BoundingBox,
+  ChunkState,
+  EntityLOD,
+  LODConfig,
+  LODLevel,
+  Sphere,
+  StreamingConfig,
+  StreamingStats,
+  Vector3,
+  WorldChunk,
+} from './world-streaming-types';
+import { Octree } from './world-streaming-octree';
+import { PriorityQueue } from './world-streaming-priority-queue';
+export type {
+  BoundingBox,
+  ChunkState,
+  EntityLOD,
+  LODConfig,
+  LODLevel,
+  Sphere,
+  StreamingConfig,
+  StreamingStats,
+  Vector3,
+  WorldChunk,
+} from './world-streaming-types';
+export { Octree } from './world-streaming-octree';
 
 // ============================================================================
 // WORLD STREAMING SYSTEM
@@ -1005,8 +702,6 @@ export interface ChunkLoader {
 // ============================================================================
 // REACT HOOKS
 // ============================================================================
-
-import { useState, useEffect, useContext, createContext, useCallback, useMemo, useRef } from 'react';
 
 interface WorldStreamingContextValue {
   system: WorldStreamingSystem;

@@ -73,7 +73,7 @@ Define the execution spec for Studio Home as the authenticated entrypoint (`/das
 1. Uses existing `copilotWorkflow.context` as storage container for studio session state.
 2. No schema migration in this wave.
 3. Marked as `IMPLEMENTED/PARTIAL` for multi-instance durability until dedicated tables are introduced.
-4. Studio task run is orchestration-only (`capabilityStatus=PARTIAL`), with deterministic reviewer gate before apply.
+4. Studio task run is role-sequenced single-task orchestration (`executionMode=role-sequenced-single-task`, `capabilityStatus=PARTIAL`) with deterministic reviewer gate before apply.
 5. Rollback is strictly token-gated and requires prior apply token (`applyToken`) to avoid false-positive rollback semantics.
 
 ## 7) Validation and gates
@@ -148,3 +148,13 @@ Mandatory before completion:
 46. Studio session start now accepts an optional `missionDomain` override (`games|films|apps|general`) to lock checklist/governance when auto-inference is not desired.
 47. Studio Home now surfaces recent per-agent execution telemetry (model, latency, token counts, cost) and a budget-pressure progress bar to keep cost decisions visible during session runtime.
 48. Settings information architecture is now explicit: `/settings` for global preferences and `/project-settings` for project-scoped runtime controls, both linked from Studio Home and IDE surfaces.
+49. Studio session start and advanced chat now expose plan-quality normalization metadata (`requestedQualityMode`, `appliedQualityMode`, `qualityModeDowngraded`, `allowedQualityModes`) and IDE chat surfaces downgrade notices when quality mode is adjusted by plan policy.
+50. Studio cost/session APIs now expose server-calculated `budgetAlert` metadata for explicit threshold states (`50/80/100`) and operator guidance.
+51. Studio task execution APIs (`tasks/[id]/run`, `tasks/run-wave`) now enforce explicit `402 VARIABLE_USAGE_BLOCKED` capability gate when variable usage is exhausted, matching paid-plan dual entitlement policy.
+52. Studio persistence/orchestration module was structurally split with helper extraction (`studio-home-runtime-helpers.ts`) to reduce monolith risk while preserving runtime contracts.
+53. Studio task orchestration endpoints now explicitly expose checkpoint-reality metadata and remain `PARTIAL` where autonomous code-apply is not present (`plan/run/run-wave/validate/apply/rollback`).
+54. Long-session persistence bounds are now enforced in runtime store (`tasks<=60`, `agentRuns<=300`, `messages<=500`) to keep session payload growth controlled.
+55. `tasks/run-wave` now supports execution strategy input (`balanced|cost_guarded|quality_first`) and returns `requestedStrategy`, `maxStepsApplied` + `strategyReason` for cost/transparency telemetry.
+56. Reviewer validation now uses deterministic session checks (not marker-only), and failed checks are written to the session feed for operator diagnostics before apply.
+57. Reviewer validation is now domain-aware (`[domain:<missionDomain>]`) and surfaces task-level `validationReport` summary for UI actionability.
+58. Validate API now exposes deterministic-check summary metadata (`totalChecks`, `failedIds`) on both pass/fail paths for operator observability.

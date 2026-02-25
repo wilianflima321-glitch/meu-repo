@@ -7,6 +7,11 @@ const args = process.argv.slice(2)
 const failOnIssues = args.includes('--fail-on-issues')
 const reportFlagIndex = args.findIndex((arg) => arg === '--report')
 const reportPath = reportFlagIndex >= 0 ? args[reportFlagIndex + 1] : null
+const maxHistoricalIndex = args.findIndex((arg) => arg === '--max-historical-markdown')
+const maxHistoricalMarkdown =
+  maxHistoricalIndex >= 0 && args[maxHistoricalIndex + 1]
+    ? Number.parseInt(args[maxHistoricalIndex + 1], 10)
+    : null
 
 const repoRoot = process.cwd()
 const canonicalDirRelative = 'audit dicas do emergent usar'
@@ -112,10 +117,19 @@ const summary = {
   canonicalListedDocs: canonicalListedNames.length,
   canonicalMarkdownFiles: canonicalMarkdownFiles.length,
   historicalMarkdownFiles: historicalMarkdownFiles.length,
+  maxHistoricalMarkdown:
+    Number.isFinite(maxHistoricalMarkdown) && maxHistoricalMarkdown !== null
+      ? maxHistoricalMarkdown
+      : null,
   missingListedCanonicalDocs: missingListedCanonicalDocs.length,
   canonicalNameConflictsOutside: conflictsOutsideCanonical.length,
   unindexedCanonicalMarkdown: unindexedCanonicalMarkdown.length,
 }
+
+const historicalMarkdownLimitExceeded =
+  Number.isFinite(maxHistoricalMarkdown) &&
+  maxHistoricalMarkdown !== null &&
+  historicalMarkdownFiles.length > maxHistoricalMarkdown
 
 const markdown = [
   '# 29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20',
@@ -127,6 +141,14 @@ const markdown = [
   `- Canonical listed docs: ${summary.canonicalListedDocs}`,
   `- Markdown files in canonical folder: ${summary.canonicalMarkdownFiles}`,
   `- Markdown files outside canonical folder: ${summary.historicalMarkdownFiles}`,
+  ...(summary.maxHistoricalMarkdown !== null
+    ? [`- Historical markdown hard limit: ${summary.maxHistoricalMarkdown}`]
+    : []),
+  ...(historicalMarkdownLimitExceeded
+    ? [
+        `- Historical markdown limit exceeded: ${summary.historicalMarkdownFiles} > ${summary.maxHistoricalMarkdown}`,
+      ]
+    : []),
   `- Missing listed canonical docs: ${summary.missingListedCanonicalDocs}`,
   `- Canonical filename conflicts outside canonical folder: ${summary.canonicalNameConflictsOutside}`,
   `- Unindexed markdown files inside canonical folder: ${summary.unindexedCanonicalMarkdown}`,
@@ -164,6 +186,7 @@ const markdown = [
   '1. Any missing file listed in `00_FONTE_CANONICA.md` is blocking.',
   '2. Any canonical filename conflict outside canonical folder is blocking.',
   '3. Unindexed markdown inside canonical folder is informational and must be triaged in the master contract.',
+  '4. Historical markdown count must not grow above the configured hard limit when `--max-historical-markdown` is set.',
   '',
 ].join('\n')
 
@@ -182,5 +205,8 @@ if (missingListedCanonicalDocs.length > 0 && failOnIssues) {
   process.exit(1)
 }
 if (conflictsOutsideCanonical.length > 0 && failOnIssues) {
+  process.exit(1)
+}
+if (historicalMarkdownLimitExceeded && failOnIssues) {
   process.exit(1)
 }

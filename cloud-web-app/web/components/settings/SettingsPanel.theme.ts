@@ -1,0 +1,15 @@
+export const settingsPanelColors = {
+  base: '#1e1e2e',
+  surface0: '#313244',
+  surface1: '#45475a',
+  surface2: '#585b70',
+  text: '#cdd6f4',
+  subtext0: '#a6adc8',
+  subtext1: '#bac2de',
+  blue: '#89b4fa',
+  green: '#a6e3a1',
+  red: '#f38ba8',
+  yellow: '#f9e2af',
+  mauve: '#cba6f7',
+  overlay0: '#6c7086',
+} as const;

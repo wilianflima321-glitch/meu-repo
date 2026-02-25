@@ -7,6 +7,8 @@
 import React, { useState } from 'react';
 import type { SceneObject, TransformMode } from './SceneEditor';
 
+const PRIMITIVE_GEOMETRY_OPTIONS = ['box', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'capsule'] as const;
+
 export interface HierarchyPanelProps {
   objects: SceneObject[];
   primitiveGeometries: string[];
@@ -443,7 +445,7 @@ export function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                   color: '#fff',
                 }}
               >
-                {Object.keys(PRIMITIVE_GEOMETRIES).map(g => (
+                {PRIMITIVE_GEOMETRY_OPTIONS.map(g => (
                   <option key={g} value={g}>{g}</option>
                 ))}
               </select>

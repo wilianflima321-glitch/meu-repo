@@ -2,6 +2,15 @@ export type FullAccessScope = 'project' | 'workspace' | 'web_tools'
 export type MissionDomain = 'games' | 'films' | 'apps' | 'general'
 export type MissionDomainSelection = MissionDomain | 'auto'
 
+export type FullAccessPolicySummary = {
+  scope: FullAccessScope
+  plan: string
+  allowedActionClasses: string[]
+  manualConfirmActionClasses: string[]
+  blockedActionClasses: string[]
+  notes: string[]
+}
+
 export type StudioTask = {
   id: string
   title: string
@@ -11,6 +20,11 @@ export type StudioTask = {
   estimateSeconds: number
   result?: string
   validationVerdict: 'pending' | 'passed' | 'failed'
+  validationReport?: {
+    totalChecks: number
+    failedIds: string[]
+    failedMessages: string[]
+  }
   applyToken?: string
 }
 
@@ -57,7 +71,7 @@ export type StudioSession = {
   agentRuns: StudioAgentRun[]
   messages: StudioMessage[]
   orchestration?: {
-    mode: 'serial' | 'parallel_wave'
+    mode: 'serial' | 'role_sequenced_wave' | 'parallel_wave'
     conversationPolicy: 'peer_review'
     applyPolicy: 'serial_after_validation'
     lastWaveAt?: string

@@ -3,8 +3,9 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const REPORT_FILE = path.join(ROOT, 'docs', 'ARCHITECTURE_CRITICAL_TRIAGE.md')
 
 const THRESHOLDS = {
@@ -12,10 +13,11 @@ const THRESHOLDS = {
   fileCompatUsage: 0,
   workspaceDeprecatedUsage: 0,
   redirectAliases: 0,
-  apiNotImplemented: 8,
+  apiNotImplemented: 4,
   fileCompatWrappers: 8,
   duplicateBasenames: 0,
-  oversizedFiles: 34,
+  oversizedFiles: 0,
+  nearLimitFiles: 0,
 }
 
 function runScan() {
@@ -45,6 +47,7 @@ async function main() {
     fileCompatWrappers: parseMetric(content, 'File API compatibility wrappers \\(`trackCompatibilityRouteHit` in `app/api/files/\\*`\\)'),
     duplicateBasenames: parseMetric(content, 'Duplicate component basenames'),
     oversizedFiles: parseMetric(content, 'Oversized source files \\(>=1200 lines\\)'),
+    nearLimitFiles: parseMetric(content, 'Near-limit source files \\(1100-1199 lines\\)'),
   }
 
   for (const [metricId, value] of Object.entries(current)) {

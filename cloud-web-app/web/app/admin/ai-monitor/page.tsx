@@ -61,6 +61,9 @@ type EmergencyState = {
   level: 'normal' | 'warning' | 'critical' | 'shutdown';
   reason?: string;
 };
+type MetricsResponse = { metrics?: AIMetrics };
+type CallsResponse = { calls?: AICall[] };
+type EmergencyResponse = { data?: EmergencyState };
 
 const authFetcher = adminJsonFetch;
 
@@ -230,7 +233,7 @@ export default function AgentMonitorPage() {
     data: metricsData,
     error: metricsError,
     isLoading: metricsLoading,
-  } = useSWR('/api/admin/ai/metrics', authFetcher, {
+  } = useSWR<MetricsResponse>('/api/admin/ai/metrics', authFetcher, {
     refreshInterval: isPaused ? 0 : 10000,
   });
 
@@ -239,11 +242,11 @@ export default function AgentMonitorPage() {
     error: callsError,
     mutate: refreshCalls,
     isLoading: callsLoading,
-  } = useSWR(`/api/admin/ai/calls?limit=50&model=${modelFilter}&status=${statusFilter}`, authFetcher, {
+  } = useSWR<CallsResponse>(`/api/admin/ai/calls?limit=50&model=${modelFilter}&status=${statusFilter}`, authFetcher, {
     refreshInterval: isPaused ? 0 : 5000,
   });
 
-  const { data: emergencyData } = useSWR('/api/admin/emergency', authFetcher, {
+  const { data: emergencyData } = useSWR<EmergencyResponse>('/api/admin/emergency', authFetcher, {
     refreshInterval: isPaused ? 0 : 10000,
   });
 

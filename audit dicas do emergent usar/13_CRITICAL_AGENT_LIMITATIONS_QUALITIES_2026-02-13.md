@@ -1876,3 +1876,771 @@ Implemented:
 Critical reading:
 1. This closes reliability debt in high-impact collaboration routes without expanding feature scope.
 2. Residual risk remains in broader project member/folder/export surfaces that still need the same contract normalization pass.
+
+## Delta 2026-02-22 CXXIV - Quality closure checkpoint + rendering expectation clarification
+Implemented:
+1. Closed active lint debt in touched Studio Home/dashboard/admin surfaces (current lint baseline back to `0 warnings`).
+2. Preserved strict capability contracts while fixing type/runtime drift in admin, studio, scene/video, physics and AI-audio typed boundaries.
+3. Clarified `win_dx12` setting semantics to avoid misleading runtime expectations in web mode.
+
+Critical reading:
+1. Browser runtime remains WebGL/WebGPU-first; DirectX remains an export-target concern for Windows builds, not web renderer backend.
+2. Explicit capability gating remains stable (`not-implemented-ui=6`, `not-implemented-noncritical=2`) with critical interface metrics at zero.
+3. Governance evidence remains healthy (`repo-connectivity`, `workflow-governance`, `canonical-doc-governance`, `secrets-critical` all PASS on 2026-02-22).
+4. Enterprise gate is green on this checkpoint (`lint`, `typecheck`, `build`, and canonical QA checks all PASS).
+
+## Delta 2026-02-22 CXXV - Studio orchestration wording hardening
+Implemented:
+1. Replaced overclaim wording for Studio wave execution in API metadata and UI surface.
+2. Canonical mode naming now reflects real behavior: `role_sequenced_wave` (planner -> coder -> reviewer), with explicit overlap guard.
+3. Legacy mode string (`parallel_wave`) remains accepted on read path for compatibility only.
+
+Critical reading:
+1. This reduces claim inflation risk without reducing existing functionality.
+2. Multi-agent orchestration remains constrained by deterministic gating and budget guardrails, as intended for P0 reliability.
+
+## Delta 2026-02-22 CXXVI - Studio task-run no-op success closure
+Implemented:
+1. Removed dependency no-op path in studio task execution that could return unchanged task state without explicit block status.
+2. Task-run now persists deterministic blocked state when planner/coder prerequisites are missing.
+3. Task-run endpoint now returns richer blocked metadata (`blockedReason`, `overlapGuard`) and factual execution mode naming.
+4. Studio task board now exposes queue-by-role and next-runnable-role hints to reduce orchestration ambiguity.
+
+Critical reading:
+1. This closes a reliability gap where user action could appear accepted without actual progression.
+2. Residual limitation remains intentional: apply still requires reviewer validation gate and explicit tokenized rollback contract.
+
+## Delta 2026-02-22 CXXVII - AI query provider-error contract hardening
+Implemented:
+1. Replaced ambiguous provider failure behavior in `/api/ai/query` with explicit capability envelope for provider mismatch (`503 PROVIDER_NOT_CONFIGURED`, `capability=AI_QUERY`, `capabilityStatus=PARTIAL`).
+2. Added deterministic malformed-input gates (`400 INVALID_BODY`, `400 MISSING_QUERY`) to reduce hidden runtime ambiguity.
+3. Hardened Studio task-board interaction by disabling `Run Wave` when no role is runnable under dependency/budget guards and surfacing an explicit blocked-state hint.
+
+Critical reading:
+1. This is contract/UX reliability hardening, not scope expansion.
+2. Residual limitation remains intentional: no automatic apply on task run; reviewer validation and explicit apply/rollback remain mandatory.
+
+## Delta 2026-02-22 CXXVIII - Core AI provider-gate parity
+Implemented:
+1. Unified provider input semantics across core AI endpoints (`chat`, `complete`, `action`, `inline-edit`, `inline-completion`):
+- unsupported provider input -> `400 INVALID_PROVIDER`
+- requested-but-unconfigured provider -> explicit capability envelope `503 PROVIDER_NOT_CONFIGURED`.
+2. Kept global no-provider state deterministic (`501 NOT_IMPLEMENTED`) to preserve anti-fake-success policy.
+3. Updated route-contract scanner to enforce this behavior drift in future waves.
+
+Critical reading:
+1. This reduces operator ambiguity and removes silent provider fallback surprises on explicit provider requests.
+2. Residual limitation remains: accepted provider enum includes values that may be intentionally unconfigured per environment; runtime metadata remains the source of truth.
+
+## Delta 2026-02-22 CXXIX - Plan-quality normalization transparency
+Implemented:
+1. Added explicit plan-quality normalization (`standard|delivery|studio`) as backend policy primitive.
+2. Studio session start now returns explicit metadata when requested quality mode is downgraded by plan policy.
+3. Advanced chat and IDE chat surfaces now expose quality-downgrade information to avoid hidden quality/cost behavior.
+
+Critical reading:
+1. This reduces unexpected quality drops and makes plan behavior auditable to the end user.
+2. Residual limitation remains: quality normalization does not remove underlying model/provider availability constraints; those are still enforced separately by capability gates.
+
+## Delta 2026-02-22 CXXX - One-shot closure limitation matrix refresh
+Implemented:
+1. Refreshed factual limitation baseline from fresh local scanners and published one-shot closure checklist (`31_ONE_SHOT_CLOSURE_EXECUTION_2026-02-22.md`).
+2. Reconfirmed hard constraints that still block "100% closed" status:
+- freeze gate suite not executed yet in this wave (`lint/typecheck/build/qa:enterprise-gate`)
+- explicit capability gates remain in 10 API surfaces (`critical=8`, `noncritical=2`)
+- collaboration/L4/L5 claims remain evidence-gated.
+3. Reconfirmed structural risk profile:
+- oversized files `>=1200`: `0` (gate pass)
+- near-limit debt (`>=1100` in app/components/lib/hooks): `62` files.
+
+Critical reading:
+1. Platform is operationally tighter, but final closure still depends on freeze evidence and planned decomposition of near-limit monoliths.
+2. Any claim above L3 or "enterprise collaboration ready" remains prohibited until reproducible load/SLO evidence is attached.
+
+## Delta 2026-02-22 CXXXI - Variable-usage enforcement hardening
+Implemented:
+1. Studio execution endpoints now enforce exhausted-credit gate server-side (`402 VARIABLE_USAGE_BLOCKED`) before orchestration execution.
+2. Studio telemetry now exposes explicit budget thresholds (`50/80/100`) via `budgetAlert` contract metadata.
+3. UI now reflects threshold stages directly in Ops Bar, reducing late-stage operator surprise.
+
+Critical reading:
+1. This closes a bypass vector where UI was blocking variable usage but backend still depended mostly on session budget.
+2. Residual limitation remains: this is still session-level guardrail, not full per-tool dynamic pricing calibration.
+
+## Delta 2026-02-22 CXXXII - Structural maintainability hardening (Studio store)
+Implemented:
+1. Extracted runtime orchestration/domain helper set from `studio-home-store.ts` into `studio-home-runtime-helpers.ts`.
+2. Reduced monolith pressure in core Studio persistence/orchestration module (`996` lines after extraction).
+3. Preserved behavior and contracts (no endpoint semantic changes from this extraction).
+
+Critical reading:
+1. This lowers regression risk in future Studio waves and improves reviewability.
+2. Residual limitation remains: near-limit file debt is still high across other domains and must continue in decomposition wave.
+
+
+## Delta 2026-02-22 CXXXIII - UX false-CTA removal and debt reduction
+Implemented:
+1. Removed false CTA patterns from dashboard tabs that were visually actionable but runtime-gated.
+2. Replaced them with explicit PARTIAL capability cards and disabled controls to preserve anti-fake-success policy.
+3. Reduced maintainability risk by decomposing Media Studio shell layout into dedicated component.
+4. Updated structural baseline from near-limit `61` to `59` files (`>=1100` lines) with `oversizedFiles=0` unchanged.
+
+Critical reading:
+1. This improves user trust and clarity in entry experience without adding new product scope.
+2. Residual limitation remains: capability gates still intentionally present in AI/render/billing endpoints until corresponding runtime is implemented.
+
+
+## Delta 2026-02-22 CXXXIV - IDE chat maintainability hardening
+Implemented:
+1. Broke down `AIChatPanelPro` into smaller modules with `AIChatPanelPro.widgets.tsx`.
+2. Reduced high-risk near-limit pressure in IDE core from 1196 lines to 846 lines.
+3. Tightened architecture gate budget to baseline `nearLimitFiles <= 58`.
+
+Critical reading:
+1. This lowers regression risk in one of the most-used UX surfaces without changing behavior.
+2. Residual limitation remains: near-limit debt is still present in engine/networking domains and needs continued decomposition waves.
+
+
+## Delta 2026-02-22 CXXXV - Live preview interaction quality hardening
+Implemented:
+1. Standardized Live Preview chrome into structured dock/bars with explicit show/hide behavior.
+2. Removed duplicated control surface and non-deterministic debug logging from preview runtime shell.
+3. Kept capability boundaries explicit (no hidden claims beyond existing runtime).
+
+Critical reading:
+1. This improves perceived professionalism and navigation clarity without changing platform scope.
+2. Residual limitation remains: preview stays within current validated runtime set; advanced desktop parity remains out-of-scope.
+
+
+## Delta 2026-02-22 CXXXVI - Terminal UX modularization
+Implemented:
+1. Split terminal chrome (tabs/shell selector/search) into `XTerminal.chrome.tsx`.
+2. Reduced terminal runtime component size below near-limit threshold.
+3. Updated architecture anti-regression baseline (`nearLimitFiles <= 57`).
+
+Critical reading:
+1. This improves maintainability in a high-frequency UX surface without changing runtime contracts.
+2. Residual limitation remains: broader near-limit debt in engine/networking libs still requires additional waves.
+
+
+## Delta 2026-02-22 CXXXVII - Dashboard structure hardening
+Implemented:
+1. Split monolithic dashboard constants/types/parsers into dedicated config module.
+2. Reduced dashboard shell complexity and improved code organization for primary entry surface.
+3. Updated architecture anti-regression baseline to `nearLimitFiles <= 56`.
+
+Critical reading:
+1. This lowers change-risk on top-level UX without changing user-facing scope.
+2. Residual limitation remains: high near-limit debt still concentrated in engine/networking libraries.
+
+
+## Delta 2026-02-22 - Structural debt reduction (near-limit hardening)
+1. Near-limit source files (`1100-1199`) reduced to `52` after extraction wave.
+2. Gate tightened to `nearLimitFiles <= 52` to prevent silent regression.
+3. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite (`lint/typecheck/build/qa:enterprise-gate`) remains deferred to final freeze run.
+
+
+## Delta 2026-02-22 - Narrative editor modularization
+1. `DialogueEditor.tsx` was decomposed into `types`, `initial-data`, and `nodes` modules.
+2. Architecture near-limit count reduced to `51` with gate tightened to `<= 51`.
+3. Remaining limitations unchanged:
+- capability-gated endpoints still explicit by design;
+- full freeze suite remains deferred to final consolidated run.
+
+
+## Delta 2026-02-22 - Landscape editor modularization
+1. `LandscapeEditor.tsx` decomposed into `types` and `initial-data` modules.
+2. Architecture near-limit count reduced to `50`; gate tightened to `<= 50`.
+3. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- final freeze suite still pending the end-of-round run.
+
+
+## Delta 2026-02-22 - Input and Asset pipeline modularization
+1. `controller-mapper.tsx` and `aaa-asset-pipeline.ts` were decomposed into dedicated type/options modules.
+2. Near-limit architecture debt reduced to `48` with gate tightened to `<= 48`.
+3. Remaining limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite remains deferred to final consolidated run.
+
+
+## Delta 2026-02-22 - Hot reload modularization
+1. `hot-reload-system.ts` was decomposed by extracting `HotReloadOverlay` to `hot-reload-overlay.ts`.
+2. Near-limit architecture debt reduced to `47` with gate tightened to `<= 47`.
+3. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite remains deferred to end-of-round execution.
+
+
+## Delta 2026-02-22 - Fluid runtime decomposition
+1. `fluid-simulation-system.ts` was split into `types` and `kernels` modules.
+2. Near-limit architecture debt reduced to `46` with gate tightened to `<= 46`.
+3. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite remains deferred to the final consolidated run.
+
+
+## Delta 2026-02-22 - Onboarding system modularization
+1. `onboarding-system.ts` was decomposed into `types` and `content` modules.
+2. Near-limit architecture debt reduced to `45` with gate tightened to `<= 45`.
+3. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite remains deferred to final consolidated run.
+
+
+## Delta 2026-02-22 - Theme service modularization
+1. Built-in theme definitions were extracted from `theme-service.ts` to `theme-builtins.ts`.
+2. Near-limit architecture debt reduced to `44` with gate tightened to `<= 44`.
+3. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite remains deferred to final consolidated run.
+
+
+## Delta 2026-02-22 - Sequencer and marketplace modularization
+1. Sequencer shared types were extracted to `sequencer-cinematics.types.ts`.
+2. Creator dashboard data/types were extracted to `CreatorDashboard.api.ts` and `CreatorDashboard.types.ts`.
+3. Near-limit architecture debt reduced to `43` with gate tightened to `<= 43`.
+4. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite remains deferred to final consolidated run.
+
+
+## Delta 2026-02-22 - WebXR hand-tracker modularization
+1. Hand tracking class was extracted to `webxr-hand-tracker.ts` and re-exported by `webxr-vr-system.ts`.
+2. Near-limit architecture debt reduced to `42` with gate tightened to `<= 42`.
+3. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- full freeze suite remains deferred to final consolidated run.
+
+## Delta 2026-02-22 - Studio Home UX hardening and TS reliability repairs
+1. Studio Home critical-path UX now has explicit operator signals and reduced ambiguity:
+- mission-quality checks before session start;
+- per-action disable reasons in Task Board;
+- Agent Workspace blocked-state messaging;
+- telemetry staleness warning + manual refresh.
+2. Runtime/type reliability restored to green after this wave (`typecheck=PASS`) by fixing concrete type/import regressions in AI query, dashboard, landscape, preview joystick, marketplace, quest editor, and fluid type modules.
+3. Residual limitations unchanged:
+- `NOT_IMPLEMENTED` capabilities remain explicit and gated by contract;
+- L4/L5 + advanced collaboration claims remain blocked by evidence policy;
+- full freeze gate remains a separate final run step.
+
+## Delta 2026-02-22 - Studio UX consistency hardening
+1. Studio visual language is now standardized via dedicated `studio-*` primitives in global styles and applied consistently in Mission/Task/Chat/Ops/Preview surfaces.
+2. Interaction quality improvements:
+- clear action hierarchy and disabled-state semantics;
+- bounded scrolling in long feeds;
+- sticky right rail for workflow continuity on desktop.
+3. Limitations unchanged:
+- capability gates remain explicit (`NOT_IMPLEMENTED` policy);
+- claims beyond proven scope (L4/L5/collaboration advanced) remain blocked.
+
+## Delta 2026-02-22 - IDE workbench interaction/accessibility hardening
+1. Workbench status/context surfaces now expose clearer operator state with structured chips and handoff labeling.
+2. IDE layout controls (menu/sidebar/panels) received focus-visible and ARIA improvements to reduce keyboard-navigation friction.
+3. Limitations unchanged:
+- capability-gated surfaces remain explicit by contract;
+- advanced claims remain blocked until evidence gates are met.
+
+## Delta 2026-02-22 - Admin operational UX consistency
+1. Shared admin primitives now cover search/filter/status needs (`AdminSearchInput`, `AdminFilterPill`, `AdminBadge`) and are applied on core operation pages.
+2. Admin pages now reduce visual/interaction drift in payment/API/security workflows.
+3. Limitations unchanged:
+- capability-gated behavior remains explicit;
+- no new claims beyond implemented scope.
+
+## Delta 2026-02-22 - Freeze suite closure and residual risk reclassification
+1. Full freeze gate set is now executed and green (`lint`, `typecheck`, `build`, `qa:enterprise-gate` and constituent checks).
+2. Risk profile update:
+- release-blocking verification risk: reduced (freeze blocker closed);
+- residual risk now concentrated in:
+  - intentional capability gates (`NOT_IMPLEMENTED`, `PAYMENT_GATEWAY_NOT_IMPLEMENTED`);
+  - structural maintenance pressure (`nearLimitFiles=42` in `1100-1199` range).
+3. Claim policy remains unchanged:
+- no L4/L5 promotion without operational evidence;
+- no advanced collaboration readiness claim without SLO/scalability proof;
+- no desktop-parity communication beyond current web runtime limits.
+4. Governance rerun status:
+- connectivity/workflow/canonical-doc/secrets scans are green;
+- remaining governance risk is volume of historical markdown (`3603`) rather than canonical index integrity.
+
+## Delta 2026-02-22 - Structural risk reduction (near-limit 42->40)
+1. Extracted WebRTC transport and hair shading blocks into focused modules:
+- `lib/networking-multiplayer-webrtc.ts`
+- `lib/hair-fur-shader.ts`
+2. Preserved runtime contracts by re-exporting moved symbols from original modules.
+3. Updated architecture gate baseline to `nearLimitFiles <= 40` and validated green.
+4. Residual limitation remains:
+- capability gates are still explicit by policy (`NOT_IMPLEMENTED`, `PAYMENT_GATEWAY_NOT_IMPLEMENTED`);
+- near-limit debt still exists (`40`) and remains a P1 decomposition track.
+5. Post-wave integrated verification:
+- `qa:enterprise-gate` rerun remained green after this decomposition wave.
+
+## Delta 2026-02-22 - Structural risk reduction (near-limit 40->38) + root command reliability
+1. Additional decomposition performed:
+- extracted sequencer keyframe interpolator (`sequencer-keyframe-interpolator.ts`);
+- extracted SDK public types (`aethel-sdk.types.ts`).
+2. Architecture near-limit baseline reduced to `38` and gate tightened accordingly.
+3. Root syntax command reliability improved for mixed/partial environments via guarded checks:
+- explicit warning + skip when optional root dependencies are missing.
+4. Limitations unchanged:
+- capability-gated endpoints remain explicit by policy;
+- historical markdown volume remains high and is still a governance hygiene backlog item.
+5. Governance refresh confirmed no wiring regressions after root script updates (`requiredMissing=0`, `deadScriptReferences=0`).
+
+## Delta 2026-02-22 - Structural risk reduction (near-limit 38->37)
+1. Cutscene runtime easing map moved to dedicated module (`lib/cutscene/cutscene-easing.ts`).
+2. Architecture gate tightened to `nearLimitFiles <= 37` and remains green.
+3. Residual limitations unchanged:
+- capability gates remain explicit and intentional until runtime exists;
+- historical markdown volume remains high (`3603`) and is still a governance hygiene backlog.
+
+## Delta 2026-02-23 - Studio orchestration claim boundary + long-session stability
+1. Studio task surfaces now explicitly signal orchestration-checkpoint reality in API metadata (plan/run/run-wave/validate/apply/rollback).
+2. `apply`/`rollback` remain tokenized checkpoint controls and now declare partial status for claim safety (`externalApplyRequired=true`).
+3. Session persistence is now bounded (`tasks=60`, `agentRuns=300`, `messages=500`) to reduce long-session drift and UI degradation risk.
+4. Residual limitations unchanged:
+- no promotion to autonomous end-to-end agent apply from these endpoints in current phase;
+- L4/L5 and advanced collaboration claims remain blocked by operational evidence policy.
+
+## Delta 2026-02-23 - Structural risk reduction update
+1. Architecture near-limit pressure reduced (`36 -> 35`) through runtime extraction in Niagara VFX and validation-helper extraction in Studio store.
+2. Architecture gate tightened to keep this new ceiling (`nearLimitFiles <= 35`).
+3. Residual limitation remains:
+- near-limit debt still exists and continues as P1 decomposition track; no claim of full structural closure.
+
+## Delta 2026-02-23 - Structural risk reduction continuation
+1. Additional decomposition reduced near-limit pressure (`35 -> 34`) via Animation Blueprint node-surface extraction.
+2. Architecture gate ceiling tightened again (`nearLimitFiles <= 34`).
+3. Residual limitation unchanged:
+- near-limit debt persists as P1 structural track; this is incremental risk reduction, not full closure.
+
+## Delta 2026-02-23 - Structural risk reduction continuation (audio engine modularization)
+1. Additional decomposition reduced near-limit pressure (`34 -> 33`) by extracting AI audio music helper logic to dedicated module.
+2. Architecture gate ceiling tightened to `nearLimitFiles <= 33`.
+3. Residual limitation unchanged:
+- near-limit debt remains open (P1) until target `<=30` is reached.
+
+## Delta 2026-02-23 - Structural risk reduction continuation (Studio declutter + behavior-tree core)
+1. Additional decomposition waves reduced near-limit pressure from `33 -> 26`:
+- motion matching core extraction (`lib/motion-matching-search.ts`);
+- audio synthesis effect extraction (`lib/audio-synthesis-effects.ts`);
+- behavior tree foundational extraction (`lib/behavior-tree-core.ts`).
+2. Studio/IDE operational UX density was reduced without changing capability scope:
+- Studio Home action hierarchy and disclosure model hardened;
+- Workbench status bar secondary context moved to compact disclosures.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 26`.
+4. Residual limitation remains:
+- near-limit debt is still present in core runtime modules (`26` files in 1100-1199 range);
+- explicit capability gates remain open by policy (`NOT_IMPLEMENTED`/`PAYMENT_GATEWAY_NOT_IMPLEMENTED`);
+- final consolidated freeze suite is still pending end-of-round execution.
+
+## Delta 2026-02-23 - Structural risk reduction continuation (AI runtime blackboard extraction)
+1. Additional decomposition reduced near-limit pressure from `26 -> 25` by extracting blackboard/perception config structures from AI behavior-tree runtime:
+- new module `lib/ai/behavior-tree-system.blackboard.ts`.
+2. Architecture gate ceiling tightened to `nearLimitFiles <= 25`.
+3. Residual limitations unchanged:
+- near-limit debt remains open (`25` files);
+- capability-gated endpoints remain explicit by policy;
+- freeze suite remains deferred to final consolidated execution.
+
+## Delta 2026-02-23 - Structural risk reduction continuation (physics/UI/engine decomposition)
+1. Additional decomposition reduced near-limit pressure from `25 -> 22`:
+- collision/raycast detector extracted from physics runtime (`lib/physics/physics-collision-detector.ts`);
+- UI theme constants extracted from UI framework (`lib/ui/ui-framework-themes.ts`);
+- engine physics math primitives extracted (`lib/engine/physics-engine-math.ts`).
+2. Architecture gate ceiling tightened to `nearLimitFiles <= 22`.
+3. Residual limitations unchanged:
+- near-limit debt remains open (`22` files);
+- capability-gated endpoints remain explicit by policy;
+- freeze suite remains deferred to final consolidated execution.
+
+## Delta 2026-02-23 - Structural risk reduction continuation (hot reload decomposition)
+1. Additional decomposition reduced near-limit pressure from `22 -> 21` by extracting hot reload helper classes:
+- new module `lib/hot-reload/hot-reload-server-runtime-helpers.ts`.
+2. Architecture gate ceiling tightened to `nearLimitFiles <= 21`.
+3. Residual limitations unchanged:
+- near-limit debt remains open (`21` files);
+- capability-gated endpoints remain explicit by policy;
+- freeze suite remains deferred to final consolidated execution.
+
+## Delta 2026-02-23 - Structural risk reduction continuation (scene/collab/pixel/skeletal decomposition)
+1. Additional decomposition reduced near-limit pressure from `21 -> 15`:
+- `lib/engine/scene-graph-transform.ts` extracted from scene-graph monolith;
+- `lib/collaboration-realtime.types.ts` extracted for presence/cursor/event/color contracts;
+- `lib/pixel-streaming.types.ts` extracted for streaming contracts/defaults;
+- `lib/skeletal-animation-skeleton.ts` extracted for `Bone`/`Skeleton` runtime core.
+2. Architecture gate ceiling tightened to `nearLimitFiles <= 15`.
+3. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final full freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (profiler decomposition)
+1. Additional decomposition reduced near-limit pressure from `15 -> 14` by extracting profiler helper classes:
+- new module `lib/profiler-integrated-runtime-helpers.ts`.
+2. Architecture gate ceiling tightened to `nearLimitFiles <= 14`.
+3. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (world partition decomposition)
+1. Additional decomposition reduced near-limit pressure from `14 -> 13`:
+- new `lib/world-partition-types.ts` for shared contracts;
+- new `lib/world-partition-core.ts` for `SpatialHashGrid`, `LODManager`, `CellLoader`.
+2. Main world partition runtime now focuses on manager/HLOD orchestration with stable re-export contract.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 13`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (post-processing decomposition)
+1. Additional decomposition reduced near-limit pressure from `13 -> 12` by extracting post-processing pass implementations:
+- new module `lib/postprocessing/post-processing-passes.ts`.
+2. Main post-processing runtime now focuses on composer/hook orchestration with stable pass re-export contract.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 12`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (quest/replay decomposition)
+1. Additional decomposition reduced near-limit pressure from `12 -> 10`:
+- new `lib/quests/quest-system-types.ts` for quest contracts;
+- new `lib/replay/replay-state-serializer.ts` for replay snapshot serialization runtime.
+2. Quest and replay runtime files now focus on orchestration behavior with stable re-export contracts.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 10`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (capture/state decomposition)
+1. Additional decomposition reduced near-limit pressure from `10 -> 8`:
+- new `lib/capture/capture-types.ts` for capture contracts;
+- new `lib/state/game-state-manager-types.ts` for save/load state contracts.
+2. Capture and state runtime files now focus on orchestration behavior with stable re-export contracts.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 8`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (world streaming contracts)
+1. Additional decomposition reduced near-limit pressure from `8 -> 7` by extracting world streaming shared contracts:
+- new module `lib/world/world-streaming-types.ts`.
+2. World streaming runtime now focuses on octree and streaming behavior with stable re-export contract.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 7`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (navigation AI contracts)
+1. Additional decomposition reduced near-limit pressure from `7 -> 6` by extracting navigation AI shared contracts:
+- new module `lib/engine/navigation-ai-types.ts`.
+2. Navigation AI runtime now focuses on behavior/pathfinding logic with stable re-export contract.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 6`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (AI integration runtime-state)
+1. Additional decomposition reduced near-limit pressure from `6 -> 5` by extracting AI integration runtime-state surface:
+- new module `lib/ai-integration-runtime-state.ts`.
+2. AI integration runtime now separates state bootstrap from tool registration while preserving public contracts.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 5`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Post-wave analysis checkpoint
+1. Structural gate remains green with tightened ceiling (`nearLimitFiles <= 5`, `oversizedFiles=0`).
+2. Visual/interface critical metrics remain zeroed (`legacy-accent`, `admin-light`, `admin-status-light`, `blocking-dialogs`).
+3. Capability transparency remains explicit (`not-implemented-ui=6`, `noncritical=2`) and anti-fake-success check remains green.
+4. Residual structural backlog narrowed to 5 near-limit files; full freeze suite still pending by execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (water/ocean decomposition)
+1. Additional decomposition reduced near-limit pressure from `5 -> 4`:
+- contract extraction to `lib/water-ocean-types.ts`;
+- preset extraction to `lib/water-ocean-presets.ts`.
+2. Water/ocean runtime now focuses on simulation/orchestration behavior with stable re-export contracts.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 4`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (dialogue/water decomposition)
+1. Additional decomposition reduced near-limit pressure from `5 -> 3`:
+- dialogue/cutscene UI renderers moved to `lib/dialogue-cutscene-ui.ts`;
+- water contracts/presets moved to `lib/water-ocean-types.ts` and `lib/water-ocean-presets.ts`.
+2. Runtime files now focus on orchestration behavior with stable re-export contracts.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 3`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Post-wave analysis checkpoint (near-limit=3)
+1. Structural gate remains green with tightened ceiling (`nearLimitFiles <= 3`, `oversizedFiles=0`).
+2. Interface critical metrics remain zeroed and no-fake-success remains green.
+3. Residual structural backlog narrowed to 3 near-limit files.
+4. Capability-gated surfaces remain explicit and still require completion/claim decisions in the next closure wave.
+
+## Delta 2026-02-24 - Structural risk reduction continuation (AI 3D contracts)
+1. Additional decomposition reduced near-limit pressure from `3 -> 2` by extracting AI 3D generation shared contracts:
+- new module `lib/ai-3d-generation-types.ts`.
+2. AI 3D runtime now focuses on generation pipeline behavior with stable re-export contract.
+3. Architecture gate ceiling tightened to `nearLimitFiles <= 2`.
+4. Residual limitations remain explicit:
+- capability-gated endpoints remain open by policy;
+- final freeze suite remains deferred to end-of-round execution policy.
+
+## Delta 2026-02-24 - Structural risk reduction closure (multiplayer transport extraction)
+1. Additional decomposition reduced near-limit pressure from `2 -> 0` by extracting multiplayer transport contracts/runtime:
+- new module `lib/networking/multiplayer-transport.ts` (`NetworkTransport`, `WebSocketTransport`).
+2. `lib/networking/multiplayer-system.tsx` now focuses on multiplayer orchestration while re-exporting transport surface to preserve compatibility.
+3. Architecture gate is now hardened to `nearLimitFiles <= 0` and remains green.
+4. Residual limitations remain explicit:
+- capability-gated endpoints are still intentional and policy-driven (`NOT_IMPLEMENTED`/`DEPRECATED_ROUTE`);
+- full freeze suite is still pending by execution policy (targeted gates only in this wave).
+
+## Delta 2026-02-24 - Full freeze executed and green
+1. Full freeze suite is now executed and green (`lint`, `typecheck`, `build`, `qa:enterprise-gate`).
+2. Root governance/security gates are also green (`repo-connectivity`, `workflow-governance`, `canonical-doc-governance`, `secrets-critical`).
+3. Residual limitations remain:
+- explicit capability-gated surfaces are still present by policy (`not-implemented-ui=6`, `not-implemented-noncritical=2`);
+- historical markdown volume remains high and tracked as governance hygiene debt (`historical=3603`).
+
+## Delta 2026-02-24 - Capability contract precision improvement (render cancel)
+1. Render cancel endpoint moved from generic `NOT_IMPLEMENTED` to explicit `QUEUE_BACKEND_UNAVAILABLE` contract (`503`, `PARTIAL`) via shared capability helper.
+2. Interface capability debt metric improved from `not-implemented-ui=6` to `5` without masking runtime limitations.
+3. Residual limitations remain:
+- remaining UI-critical not-implemented capabilities are concentrated in AI provider-dependent endpoints;
+- historical markdown governance debt remains unchanged (`historical=3603`).
+
+## Delta 2026-02-24 - Non-core AI gate precision (query/stream)
+1. Query/stream endpoints no longer emit generic `NOT_IMPLEMENTED`; they now emit precise capability-unavailable contracts:
+- `/api/ai/query` -> `503 PROVIDER_NOT_CONFIGURED` (`PARTIAL`)
+- `/api/ai/stream` -> `503 AI_BACKEND_NOT_CONFIGURED` (`PARTIAL`)
+2. Resulting explicit capability metrics:
+- `not-implemented-ui` reduced to `5`
+- `not-implemented-noncritical` reduced to `0`.
+3. Residual limitations remain:
+- core AI endpoints still intentionally require `501 NOT_IMPLEMENTED` when provider is absent (policy-locked critical contract);
+- historical markdown governance debt remains unchanged (`historical=3603`).
+
+## Delta 2026-02-24 - Inline completion precision + capability debt reduction
+1. `/api/ai/inline-completion` no longer emits generic `NOT_IMPLEMENTED`; it now emits explicit `503 PROVIDER_NOT_CONFIGURED` (`AI_INLINE_COMPLETION`, `PARTIAL`) when no provider exists.
+2. Capability metrics after full freeze reconfirm:
+- `not-implemented-ui=4`
+- `not-implemented-noncritical=0`
+- `apiNotImplemented=4` (architecture gate).
+3. Residual limitations remain:
+- four core AI routes still intentionally use `501 NOT_IMPLEMENTED` when providers are absent (`chat`, `complete`, `action`, `inline-edit`);
+- historical markdown governance debt remains unchanged (`historical=3603`).
+
+## Delta 2026-02-24 - Capability metric transparency hardening
+1. Interface scanner now reports additional explicit-unavailability signals:
+- `provider-not-configured-ui=13`
+- `queue-backend-unavailable-ui=11`.
+2. Routes inventory now includes exact capability error-code counts for:
+- `NOT_IMPLEMENTED`
+- `PAYMENT_GATEWAY_NOT_IMPLEMENTED`
+- `PROVIDER_NOT_CONFIGURED`
+- `QUEUE_BACKEND_UNAVAILABLE`.
+3. Residual limitations remain:
+- core AI provider-absent contract is still intentionally `501 NOT_IMPLEMENTED` on four critical routes;
+- high historical markdown volume remains governance debt (`historical=3603`).
+
+## Delta 2026-02-24 - Hard-gate tightening after metric convergence
+1. Architecture gate tightened to `apiNotImplemented <= 4`.
+2. Interface gate tightened to:
+- `not-implemented-ui <= 4`
+- `not-implemented-noncritical <= 0`.
+3. Residual limitations remain unchanged:
+- four critical provider-absent AI routes intentionally remain on explicit `501 NOT_IMPLEMENTED`;
+- historical markdown governance debt remains high (`historical=3603`).
+
+## Delta 2026-02-25 - Policy-locked `NOT_IMPLEMENTED` boundary + deprecation telemetry hardening
+1. `NOT_IMPLEMENTED` usage is now hard-locked by gate:
+- `qa:not-implemented-policy` only allows four core AI routes (`chat`, `complete`, `action`, `inline-edit`).
+2. Deprecation cutoff readiness is now explicitly contract-enforced via route checks:
+- exact cycle metadata on all legacy `410 DEPRECATED_ROUTE` endpoints;
+- cutoff-report policy markers in `/api/admin/compatibility-routes` (`requiredSilentDays=14`, `deprecationMode=phaseout_after_2_cycles`, removal candidates).
+3. Canonical doc governance now has a hard non-growth guard:
+- `qa:canonical-doc-governance` enforces `--max-historical-markdown 3603`.
+4. Residual limitations remain:
+- four core provider-absent AI paths still block on real runtime/provider availability;
+- historical markdown volume remains governance debt (`historical=3603`) and requires ongoing reduction triage (growth is now blocked).
+
+## Delta 2026-02-25 - Deep repository reality check (4GB-class footprint)
+1. Full repository sweep confirms high storage/cognitive concentration outside core product runtime:
+- total repo `~3.831 GB`;
+- effective product/governance footprint (excluding `.git/.next/node_modules/.venv`) `~0.938 GB`.
+2. Active product hard size gates remain green (`oversized=0`, `nearLimit=0`), but medium-size pressure is still high (`118` files `>=900` lines in active surfaces).
+3. Legacy path mention risk is now explicitly controlled:
+- active-surface legacy mentions reduced to `3`;
+- growth hard-locked by `qa:legacy-path-references`.
+4. Residual limitations remain:
+- high historical markdown volume (`3603`) still creates decision-noise risk;
+- medium-size file concentration in active runtime remains the next structural maintenance risk.
+
+## Delta 2026-02-25 - Legacy-path governance hard lock (active=0)
+1. Active legacy-path reference footprint has been reduced from `3` to `0`.
+2. Root optional ai-ide scripts no longer carry hardcoded missing-path literals; they now resolve workspace dynamically.
+3. Residual limitations remain:
+- historical references are still extensive in archival docs (`645` mentions), but now isolated outside active surfaces;
+- structural maintainability risk remains concentrated in `>=900` line active files.
+
+## Delta 2026-02-25 - Active large-file pressure now explicitly gated
+1. Added governance visibility for medium-size monolith pressure in active product surfaces (`lineThreshold=900`).
+2. Current factual baseline:
+- `largeFileCount=136` (active surfaces).
+3. Residual limitation remains:
+- despite zero oversized/near-limit hard-gate violations, medium-size concentration is still high and requires decomposition waves.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 117`)
+1. Batch decomposition continued with capture/cloth runtime splits:
+- `cloud-web-app/web/lib/capture/capture-system.tsx` now composes extracted media runtime from `capture-system-media.ts`;
+- `cloud-web-app/web/lib/cloth-simulation.ts` now composes/re-exports core runtime from `cloth-simulation-core.ts`.
+2. Current factual baseline after governance scan refresh:
+- `largeFileCount=117` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+3. Governance state remains green:
+- `qa:legacy-path-references` (`activeMentions=0`);
+- `qa:repo-connectivity` (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` and `qa:workflow-governance` pass.
+4. Residual limitation remains:
+- medium-size concentration in active surfaces is still materially high (`117`) and remains the primary structural risk until next decomposition waves.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 116`)
+1. Landscape editor monolith was split into dedicated modules:
+- `LandscapeEditor.scene.tsx` (scene/runtime);
+- `LandscapeEditor.panels.tsx` (toolbar + brush/layers panels);
+- `LandscapeEditor.tsx` reduced to orchestration shell.
+2. Current factual baseline after scan refresh:
+- `largeFileCount=116` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+3. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+4. Residual limitation remains:
+- active medium-size concentration is still high (`116`) and stays the primary structural maintenance risk.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 115`)
+1. Material editor monolith was split by responsibility:
+- contracts extracted to `MaterialEditor.types.ts`;
+- node catalog extracted to `MaterialEditor.node-definitions.ts`;
+- editor runtime/compiler shell kept in `MaterialEditor.tsx`.
+2. Current factual baseline after scan refresh:
+- `largeFileCount=115` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+3. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+4. Residual limitation remains:
+- medium-size concentration is still high (`115`) and remains the main structural risk before final freeze.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 112`)
+1. Save/debug/achievement runtime monoliths were decomposed:
+- `save-manager.tsx` -> `save-manager-core.ts` + `save-manager-hooks.tsx`;
+- `real-debug-adapter.ts` -> `real-debug-adapter-types.ts`;
+- `achievement-system.tsx` -> `achievement-system.types.ts` + `achievement-system-hooks.tsx`.
+2. Current factual baseline after scan refresh:
+- `largeFileCount=112` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+3. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+4. Residual limitation remains:
+- medium-size active concentration (`112`) is still high and remains the primary structural debt before final freeze.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 111`)
+1. Video timeline editor panels were decomposed:
+- inspector/effects moved to `VideoTimelineEditorPanels.inspector.tsx`;
+- `VideoTimelineEditorPanels.tsx` reduced to timeline core with compatibility re-exports.
+2. Current factual baseline after scan refresh:
+- `largeFileCount=111` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+3. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+4. Residual limitation remains:
+- active medium-size concentration (`111`) is still high and remains the principal structural risk before full freeze.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 108`)
+1. Hair/fur runtime monolith was decomposed into dedicated modules:
+- `hair-fur-physics.ts`;
+- `hair-fur-groom.ts`;
+- `hair-fur-shell.ts`;
+- orchestration shell retained in `hair-fur-system.ts`.
+2. Fluid editor runtime/UI split was completed:
+- `fluid-simulation.types.ts`;
+- `fluid-simulation.defaults.ts`;
+- `fluid-simulation.runtime.ts`;
+- `FluidSimulationEditorSettingsPanel.tsx`;
+- `FluidSimulationEditor.tsx` reduced to orchestration shell.
+3. Video encoder stack was decomposed into focused modules:
+- `video-encoder-real.types.ts`;
+- `video-encoder-real.encoders.ts`;
+- `video-encoder-real.muxers.ts`;
+- `video-encoder-real.renderer.ts`;
+- `video-encoder-real.pipeline.ts`;
+- `video-encoder-real.screen-recorder.ts`;
+- compatibility barrel retained in `video-encoder-real.ts`.
+4. Current factual baseline after scan refresh:
+- `largeFileCount=108` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+5. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+6. Residual limitation remains:
+- medium-size active concentration (`108`) is still high and remains the principal structural risk before full freeze.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 106`)
+1. Project dashboard UI monolith was decomposed into explicit modules:
+- `ProjectsDashboard.types.ts`;
+- `ProjectsDashboard.constants.tsx`;
+- `ProjectsDashboard.cards.tsx`;
+- `ProjectsDashboard.modal.tsx`;
+- `ProjectsDashboard.tsx` reduced to orchestration shell.
+2. Networking runtime monolith was decomposed:
+- serializer/prediction/interpolation core moved to `networking-multiplayer-core.ts`;
+- `networking-multiplayer.ts` reduced to client/matchmaker/manager orchestration with compatibility exports.
+3. Current factual baseline after scan refresh:
+- `largeFileCount=106` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+4. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+5. Residual limitation remains:
+- medium-size active concentration (`106`) is still high and remains the principal structural risk before full freeze.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 104`)
+1. Fluid simulation runtime monolith was decomposed into dedicated modules:
+- `fluid-simulation-spatial-hash.ts`;
+- `fluid-simulation-sph.ts`;
+- `fluid-simulation-pbf.ts`;
+- `fluid-simulation-flip.ts`;
+- orchestration/factory barrel retained in `fluid-simulation-system.ts`.
+2. Quest system boundary was improved by extracting builder DSL:
+- `quests/quest-builder.ts`;
+- `quest-system.tsx` retains manager + hooks and compatibility re-export.
+3. Current factual baseline after scan refresh:
+- `largeFileCount=104` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+4. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+5. Residual limitation remains:
+- medium-size active concentration (`104`) is still high and remains the principal structural risk before full freeze.
+
+## Delta 2026-02-25 - Structural decomposition progress checkpoint (`136 -> 103`)
+1. Replay system monolith was decomposed into dedicated modules:
+- `replay-runtime.ts`;
+- `replay-manager.ts`;
+- `replay-hooks.tsx`;
+- `replay-system.tsx` reduced to composition/compatibility barrel.
+2. Current factual baseline after scan refresh:
+- `largeFileCount=103` (`lineThreshold=900`, `maxFiles=136`, `growthExceeded=false`).
+3. Governance status remains green:
+- `activeMentions=0`;
+- `requiredMissing=0`, `deadScriptReferences=0`;
+- canonical/workflow governance scans pass.
+4. Residual limitation remains:
+- medium-size active concentration (`103`) is still high and remains the principal structural risk before full freeze.

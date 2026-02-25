@@ -29,7 +29,7 @@ const rateLimiter = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 100; // commands per minute
 const RATE_WINDOW = 60000; // 1 minute
 const MAX_SESSION_ID_LENGTH = 120;
-const normalizeSessionId = (value?: string) => String(value ?? '').trim();
+const normalizeSessionId = (value?: string | null) => String(value ?? '').trim();
 
 // Security: blocked commands that could be dangerous
 const BLOCKED_COMMANDS = new Set([

@@ -1,12 +1,13 @@
 # 29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20
 Status: GENERATED CANONICAL DOC GOVERNANCE SWEEP
-Generated: 2026-02-21T03:15:59.528Z
+Generated: 2026-02-25T18:01:12.486Z
 
 ## Summary
 - Canonical index exists: yes
-- Canonical listed docs: 32
-- Markdown files in canonical folder: 32
+- Canonical listed docs: 45
+- Markdown files in canonical folder: 45
 - Markdown files outside canonical folder: 3603
+- Historical markdown hard limit: 3603
 - Missing listed canonical docs: 0
 - Canonical filename conflicts outside canonical folder: 0
 - Unindexed markdown files inside canonical folder: 0
@@ -46,3 +47,4 @@ Generated: 2026-02-21T03:15:59.528Z
 1. Any missing file listed in `00_FONTE_CANONICA.md` is blocking.
 2. Any canonical filename conflict outside canonical folder is blocking.
 3. Unindexed markdown inside canonical folder is informational and must be triaged in the master contract.
+4. Historical markdown count must not grow above the configured hard limit when `--max-historical-markdown` is set.

@@ -1,130 +1,177 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-server';
-import { aiService } from '@/lib/ai-service';
-import { prisma } from '@/lib/db';
-import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits';
-import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
-import { persistAITrace } from '@/lib/ai-trace-store';
-import { enforceRateLimit } from '@/lib/server/rate-limit';
-import { notImplementedCapability } from '@/lib/server/capability-response';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { aiService, type LLMProvider } from '@/lib/ai-service'
+import { prisma } from '@/lib/db'
+import { checkAIQuota, checkModelAccess, getPlanLimits, recordTokenUsage } from '@/lib/plan-limits'
+import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace'
+import { persistAITrace } from '@/lib/ai-trace-store'
+import { capabilityResponse } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
+
+type QueryBody = {
+  query?: unknown
+  context?: unknown
+  provider?: unknown
+  model?: unknown
+}
+
+const SUPPORTED_PROVIDERS = ['openai', 'anthropic', 'google', 'groq'] as const
+
+function asOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined
+}
+
+function providerConfigError(message: string): boolean {
+  const normalized = message.toLowerCase()
+  return (
+    normalized.includes('not configured') ||
+    normalized.includes('nao configurado') ||
+    normalized.includes('provider not supported') ||
+    normalized.includes('provider nao suportado')
+  )
+}
 
 /**
- * AI Query API - Conexão REAL com LLMs
  * POST /api/ai/query
- * 
- * Conecta diretamente com OpenAI, Anthropic ou Google Gemini.
- * Com ENFORCEMENT de limites por plano!
+ * Direct query endpoint with explicit entitlement and capability contracts.
  */
 export async function POST(req: NextRequest) {
   try {
-    const user = requireAuth(req);
+    const user = requireAuth(req)
     const rateLimitResponse = await enforceRateLimit({
       scope: 'ai-query',
       key: user.userId,
       max: 40,
       windowMs: 60 * 1000,
       message: 'Too many AI query requests. Please retry shortly.',
-    });
-    if (rateLimitResponse) return rateLimitResponse;
+    })
+    if (rateLimitResponse) return rateLimitResponse
 
-    const { query, context, provider, model } = await req.json();
-
-    const traceId = createAITraceId();
-
-    if (!query) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 });
+    const rawBody = (await req.json().catch(() => null)) as QueryBody | null
+    if (!rawBody || typeof rawBody !== 'object') {
+      return NextResponse.json(
+        { error: 'INVALID_BODY', message: 'Invalid JSON body.' },
+        { status: 400 }
+      )
     }
 
-    // =========================================
-    // ENFORCEMENT DE LIMITES - ANTES DE TUDO!
-    // =========================================
-    
-    // 1. Verificar quota de tokens (cap por request)
-    const userRow = await prisma.user.findUnique({ where: { id: user.userId }, select: { plan: true } });
-    const limits = getPlanLimits(userRow?.plan || 'starter_trial');
-    const estimatedTokens = Math.max(600, Math.ceil(String(query).length / 4) + 600);
+    const query = asOptionalString(rawBody.query) || ''
+    const context = asOptionalString(rawBody.context)
+    const requestedProvider = asOptionalString(rawBody.provider)
+    const model = asOptionalString(rawBody.model)
+    const traceId = createAITraceId()
+
+    if (!query) {
+      return NextResponse.json(
+        { error: 'MISSING_QUERY', message: 'Query is required.' },
+        { status: 400 }
+      )
+    }
+
+    const userRow = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { plan: true },
+    })
+    const limits = getPlanLimits(userRow?.plan || 'starter_trial')
+    const estimatedTokens = Math.max(600, Math.ceil(query.length / 4) + 600)
+
     if (estimatedTokens > limits.maxTokensPerRequest) {
       return NextResponse.json(
         {
           error: 'REQUEST_TOO_LARGE',
-          message: `Query muito grande para o seu plano. Limite estimado: ${limits.maxTokensPerRequest.toLocaleString()} tokens por request.`,
+          message: `Query too large for current plan. Limit: ${limits.maxTokensPerRequest.toLocaleString()} tokens per request.`,
           maxTokensPerRequest: limits.maxTokensPerRequest,
           upgradeUrl: '/pricing',
         },
         { status: 413 }
-      );
+      )
     }
 
-    const quotaCheck = await checkAIQuota(user.userId, estimatedTokens);
+    const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
     if (!quotaCheck.allowed) {
-      const status = quotaCheck.code === 'CREDITS_EXHAUSTED' ? 402 : 429;
-      return NextResponse.json({
-        error: quotaCheck.code,
-        message: quotaCheck.reason,
-        upgradeUrl: '/pricing',
-      }, { status });
-    }
-    
-    // 2. Verificar acesso ao modelo solicitado
-    if (model) {
-      const modelCheck = await checkModelAccess(user.userId, model);
-      if (!modelCheck.allowed) {
-        // Mostrar modelos disponíveis no plano atual do usuário.
-        return NextResponse.json({
-          error: modelCheck.code,
-          message: modelCheck.reason,
-          availableModels: limits.models,
+      const status = quotaCheck.code === 'CREDITS_EXHAUSTED' ? 402 : 429
+      return NextResponse.json(
+        {
+          error: quotaCheck.code,
+          message: quotaCheck.reason,
           upgradeUrl: '/pricing',
-        }, { status: 403 });
+        },
+        { status }
+      )
+    }
+
+    if (model) {
+      const modelCheck = await checkModelAccess(user.userId, model)
+      if (!modelCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: modelCheck.code,
+            message: modelCheck.reason,
+            availableModels: limits.models,
+            upgradeUrl: '/pricing',
+          },
+          { status: 403 }
+        )
       }
     }
 
-    // =========================================
-    // PROVIDERS DISPONÍVEIS
-    // =========================================
-    
-    const availableProviders = aiService.getAvailableProviders();
+    const availableProviders = aiService.getAvailableProviders()
+    if (requestedProvider && !SUPPORTED_PROVIDERS.includes(requestedProvider as (typeof SUPPORTED_PROVIDERS)[number])) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_PROVIDER',
+          message: 'Requested provider is not supported.',
+          supportedProviders: [...SUPPORTED_PROVIDERS],
+        },
+        { status: 400 }
+      )
+    }
     if (availableProviders.length === 0) {
-      return notImplementedCapability({
-        error: 'NOT_IMPLEMENTED',
-        status: 501,
-        message: 'AI provider not configured.',
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: 'AI provider is not configured for current runtime.',
+        status: 503,
         capability: 'AI_QUERY',
+        capabilityStatus: 'PARTIAL',
         milestone: 'P0',
-      });
+        metadata: {
+          requestedProvider: requestedProvider || null,
+          availableProviders: [],
+        },
+      })
+    }
+    if (requestedProvider && !availableProviders.includes(requestedProvider as (typeof availableProviders)[number])) {
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: 'Requested AI provider is not configured for current runtime.',
+        status: 503,
+        capability: 'AI_QUERY',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P0',
+        metadata: {
+          requestedProvider,
+          availableProviders,
+        },
+      })
     }
 
-    // =========================================
-    // CHAMAR IA REAL
-    // =========================================
-    
-    const response = await aiService.query(query, context, {
-      provider,
-      model,
-    });
+    const provider = requestedProvider as LLMProvider | undefined
+    const response = await aiService.query(query, context, { provider, model })
 
-    // =========================================
-    // REGISTRAR USO COM SERVIÇO CENTRALIZADO
-    // =========================================
-    
-    try {
-      await recordTokenUsage(user.userId, response.tokensUsed);
-    } catch (dbError) {
-      console.warn('[AI Query] Falha ao registrar uso:', dbError);
-      // Não falhar a request por causa de erro de tracking
-    }
+    recordTokenUsage(user.userId, response.tokensUsed).catch((dbError) => {
+      console.warn('[AI Query] Failed to record token usage:', dbError)
+    })
 
     const evidence: NonNullable<AITraceSummary['evidence']> = [
-      { kind: 'context', label: 'query', detail: `chars=${String(query).length}` },
-    ];
-
+      { kind: 'context', label: 'query', detail: `chars=${query.length}` },
+    ]
     if (context) {
-      evidence.push({ kind: 'context', label: 'context', detail: `chars=${String(context).length}` });
+      evidence.push({ kind: 'context', label: 'context', detail: `chars=${context.length}` })
     }
 
     const traceSummary: AITraceSummary = {
       traceId,
-      summary: 'Resposta gerada (modo query).',
+      summary: 'Response generated in query mode.',
       evidence,
       telemetry: {
         model: response.model,
@@ -133,14 +180,15 @@ export async function POST(req: NextRequest) {
         tokensUsed: response.tokensUsed,
         latencyMs: response.latencyMs,
       },
-    };
+    }
 
-    // Persistência para "Ver detalhes" (não bloqueia a resposta se falhar)
     persistAITrace({
       userId: user.userId,
       trace: traceSummary,
       kind: 'query',
-    }).catch((err) => console.warn('[AI Trace] Falha ao persistir trace:', err));
+    }).catch((traceError) => {
+      console.warn('[AI Trace] Failed to persist trace:', traceError)
+    })
 
     return NextResponse.json({
       answer: response.content,
@@ -151,27 +199,30 @@ export async function POST(req: NextRequest) {
       availableProviders,
       traceId,
       traceSummary,
-    });
-
+    })
   } catch (error) {
-    console.error('AI Query Error:', error);
-    
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const message = error instanceof Error ? error.message : 'AI query failed'
+    console.error('[AI Query] Error:', error)
+
+    if (message === 'Unauthorized' || message.includes('Not authenticated')) {
+      return NextResponse.json({ error: 'UNAUTHORIZED', message }, { status: 401 })
     }
-    
-    // Erro específico de provider
-    if (error instanceof Error && error.message.includes('não configurado')) {
-      return NextResponse.json({
+
+    if (providerConfigError(message)) {
+      return capabilityResponse({
         error: 'PROVIDER_NOT_CONFIGURED',
-        message: error.message,
-        availableProviders: aiService.getAvailableProviders(),
-      }, { status: 503 });
+        message: 'Requested AI provider is not configured for current runtime.',
+        status: 503,
+        capability: 'AI_QUERY',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P0',
+        metadata: {
+          availableProviders: aiService.getAvailableProviders(),
+          reason: message,
+        },
+      })
     }
-    
-    return NextResponse.json({ 
-      error: 'AI_ERROR',
-      message: error instanceof Error ? error.message : 'Erro interno ao processar IA'
-    }, { status: 500 });
+
+    return NextResponse.json({ error: 'AI_ERROR', message }, { status: 500 })
   }
 }

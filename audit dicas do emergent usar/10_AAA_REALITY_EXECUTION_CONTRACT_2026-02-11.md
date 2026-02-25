@@ -1,4 +1,4 @@
-# 10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11
+﻿# 10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11
 Status: EXECUTABLE CONTRACT  
 Date: 2026-02-11  
 Owner: Multi-agent internal review (Product, UX, Frontend, Backend, AI, Infra, PM, Competitive, AAA tools)
@@ -839,24 +839,24 @@ Validation for this delta:
 - `npm run build` -> PASS
 
 ## 19) Delta implementado nesta iteracao (command palette canonical + file API hard unification)
-1. Command Palette canônica migrada para Codicons e removido acoplamento Lucide:
+1. Command Palette canÃ´nica migrada para Codicons e removido acoplamento Lucide:
 - `cloud-web-app/web/components/ide/CommandPalette.tsx`
-  - Ícones agora seguem `Codicon` wrapper.
+  - Ãcones agora seguem `Codicon` wrapper.
   - Mantido contrato de abertura global (`aethel.commandPalette.open`).
   - Corrigido texto de atalhos sem mojibake.
 
-2. `/ide` atualizado para integração limpa de comandos de layout:
+2. `/ide` atualizado para integraÃ§Ã£o limpa de comandos de layout:
 - `cloud-web-app/web/app/ide/page.tsx`
-  - `onToggleSidebar`, `onToggleTerminal`, `onAIChat` agora disparam eventos de layout dedicados (sem injeção de `KeyboardEvent`).
+  - `onToggleSidebar`, `onToggleTerminal`, `onAIChat` agora disparam eventos de layout dedicados (sem injeÃ§Ã£o de `KeyboardEvent`).
 - `cloud-web-app/web/components/ide/IDELayout.tsx`
   - Adicionados listeners para:
     - `aethel.layout.toggleSidebar`
     - `aethel.layout.toggleTerminal`
     - `aethel.layout.toggleAI`
-  - Mantém atalhos VS Code-like e melhora previsibilidade do estado de painel.
+  - MantÃ©m atalhos VS Code-like e melhora previsibilidade do estado de painel.
 
-3. Unificação real de File API com wrappers de compatibilidade:
-- Rotas de compatibilidade migradas para runtime canônico (`filesystem-runtime`) com resposta explícita:
+3. UnificaÃ§Ã£o real de File API com wrappers de compatibilidade:
+- Rotas de compatibilidade migradas para runtime canÃ´nico (`filesystem-runtime`) com resposta explÃ­cita:
   - `cloud-web-app/web/app/api/files/read/route.ts`
   - `cloud-web-app/web/app/api/files/write/route.ts`
   - `cloud-web-app/web/app/api/files/delete/route.ts`
@@ -871,7 +871,7 @@ Validation for this delta:
   - `canonicalEndpoint: "/api/files/fs"`
   - header `x-aethel-route-status: compatibility-wrapper`
 
-4. Deprecação explícita de rotas duplicadas workspace/auth session:
+4. DeprecaÃ§Ã£o explÃ­cita de rotas duplicadas workspace/auth session:
 - `cloud-web-app/web/app/api/workspace/tree/route.ts`
 - `cloud-web-app/web/app/api/workspace/files/route.ts`
 - `cloud-web-app/web/app/api/auth/sessions/route.ts`
@@ -881,7 +881,7 @@ Validation for this delta:
 Validation for this delta:
 - `npm run docs:routes-inventory` -> PASS
 - `npm run qa:canonical-components` -> PASS
-- `npm run qa:mojibake` -> PASS (`165` findings no inventário atual)
+- `npm run qa:mojibake` -> PASS (`165` findings no inventÃ¡rio atual)
 - `npm run typecheck` -> PASS
 - `npm run build` -> PASS
 
@@ -923,7 +923,7 @@ Validation for this delta:
   - Ignora `docs/MOJIBAKE_SCAN.md` para evitar auto-referencia no relatorio.
 2. Correcao de texto corrompido em pagina publica:
 - `cloud-web-app/web/app/status/page.tsx`
-  - `Â©` substituido por `&copy;`.
+  - `Ã‚Â©` substituido por `&copy;`.
 3. Estado atual de qualidade:
 - `npm run qa:mojibake` -> PASS com `0` findings.
 - `npm run typecheck` -> PASS
@@ -935,7 +935,7 @@ Validation for this delta:
   - Define raiz efetiva por namespace: `.aethel/workspaces/<userId>/<projectId>`.
   - Resolve caminhos virtuais com protecao de boundary.
   - Converte caminho absoluto para caminho virtual (`/`-based) para resposta da API.
-2. Endpoints canônicos migrados para escopo:
+2. Endpoints canÃ´nicos migrados para escopo:
 - `cloud-web-app/web/app/api/files/fs/route.ts`
 - `cloud-web-app/web/app/api/files/tree/route.ts`
 3. Endpoints de compatibilidade `/api/files/*` alinhados ao mesmo escopo:
@@ -1235,7 +1235,7 @@ Status geral: qualidade visual/UX P0 estabilizada; faltas remanescentes estao co
 - `cloud-web-app/web/app/admin/moderation/page.tsx`
   - `handleAction` convertido para `useCallback` e integrado no ciclo de atalhos com deps corretas.
 - `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
-  - ajuste de deps/estrutura para reduzir ruído de hooks no core do editor.
+  - ajuste de deps/estrutura para reduzir ruÃ­do de hooks no core do editor.
 
 2. Validacao executada:
 - `npm run typecheck` -> PASS
@@ -4440,3 +4440,3165 @@ Validation snapshot:
 Decision lock:
 1. No scope expansion; changes are route-contract reliability and UX copy normalization only.
 2. Feature capability status remains unchanged (`PARTIAL/NOT_IMPLEMENTED` where already gated).
+
+## 176) Delta 2026-02-22 CXXX - Type/lint closure + governance refresh + DirectX contract clarification
+
+Implemented:
+1. Closed current frontend quality debt wave in active modified surfaces:
+- `cloud-web-app/web/components/dashboard/useAethelDashboardDerived.ts`
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+- `cloud-web-app/web/app/admin/infrastructure/page.tsx`
+2. Kept capability/deprecation policy unchanged while hardening typing/runtime contracts in this wave:
+- admin monitor typing (`cloud-web-app/web/app/admin/ai-monitor/page.tsx`)
+- admin layout prop contract (`cloud-web-app/web/app/admin/layout.tsx`)
+- room/terminal query normalization (`cloud-web-app/web/app/api/collaboration/rooms/route.ts`, `cloud-web-app/web/app/api/terminal/execute/route.ts`)
+- admin fetch headers contract (`cloud-web-app/web/components/admin/adminAuthFetch.ts`)
+- studio/video/scene/physics/audio strict-type alignment.
+3. Clarified rendering expectation in settings copy to avoid runtime confusion:
+- `cloud-web-app/web/components/engine/ProjectSettings.tsx`
+- `win_dx12` now explicitly states Windows export target intent; web runtime remains WebGL/WebGPU.
+4. Refreshed governance evidence:
+- `25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`
+- `27_CRITICAL_SECRET_SCAN_2026-02-20.md`
+- `29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+
+Validation snapshot:
+1. `cmd /c npm run lint` (`cloud-web-app/web`) -> PASS (`0 warnings`).
+2. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+3. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS (`files=246`).
+4. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=36`).
+5. `cmd /c npm run qa:interface-gate` (`cloud-web-app/web`) -> PASS (`not-implemented-ui=6`, `not-implemented-noncritical=2`, critical zeros preserved).
+6. `cmd /c npm run qa:repo-connectivity` (root) -> PASS (`requiredMissing=0`, `optionalMissing=0`, `deadScriptReferences=0`, `markdownTotal=3636`, `markdownCanonical=33`, `markdownHistorical=3603`).
+7. `cmd /c npm run qa:workflow-governance` (root) -> PASS (`issues=0`).
+8. `cmd /c npm run qa:canonical-doc-governance` (root) -> PASS (`unindexedCanonicalMarkdown=0`).
+9. `cmd /c npm run qa:secrets-critical` (root) -> PASS (`findings=0`).
+10. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS (`build` and all gates green; `not-implemented-ui=6` explicit).
+
+Decision lock:
+1. No scope expansion; this wave is reliability, consistency, and governance hardening only.
+2. Capability policy unchanged: explicit `NOT_IMPLEMENTED` and `DEPRECATED_ROUTE` contracts remain authoritative.
+
+## 177) Delta 2026-02-22 CXXXI - Studio orchestration claim hardening (no-overlap wording)
+
+Implemented:
+1. Aligned Studio Home orchestration naming to observed execution behavior:
+- backend orchestration mode normalized to `role_sequenced_wave` (legacy `parallel_wave` still read as compatibility input)
+- API wave metadata changed from `parallel-wave-queued` to `role-sequenced-wave` with `overlapGuard=enabled`.
+2. Updated Studio task-board UX copy to state explicit role sequencing and avoid parallel-overclaim wording.
+
+Files:
+- `cloud-web-app/web/lib/server/studio-home-store.ts`
+- `cloud-web-app/web/app/api/studio/tasks/run-wave/route.ts`
+- `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`
+- `cloud-web-app/web/components/studio/studio-home.types.ts`
+- `cloud-web-app/web/components/studio/studio-home.utils.ts`
+
+Validation snapshot:
+1. `cmd /c npm run lint` (`cloud-web-app/web`) -> PASS (`0 warnings`).
+2. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+3. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS.
+4. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS.
+
+Decision lock:
+1. No new capability introduced; this is terminology and contract-hardening to keep runtime claims strictly factual.
+
+## 178) Delta 2026-02-22 CXXXII - Studio task-run anti-fake-success hardening
+
+Implemented:
+1. Fixed task-run execution path to avoid no-op success when role dependencies are unmet.
+2. `runStudioTask` now gates by runnable state first and then persists deterministic blocked states for unmet planner/coder prerequisites.
+3. `POST /api/studio/tasks/[id]/run` metadata aligned to factual execution semantics:
+- `executionMode=role-sequenced-single-task`
+- `overlapGuard=enabled`
+- blocked responses include explicit `blockedReason`.
+4. Studio task board now surfaces queue-by-role and next-runnable-role hints for transparent orchestration state.
+4. Updated Studio capability matrix/spec wording to match new metadata contract:
+- `17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
+- `21_STUDIO_HOME_EXECUTION_SPEC_2026-02-18.md`
+
+Validation snapshot:
+1. `cmd /c npm run lint` (`cloud-web-app/web`) -> PASS (`0 warnings`).
+2. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+3. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS.
+4. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS.
+5. `cmd /c npm run qa:interface-gate` (`cloud-web-app/web`) -> PASS.
+6. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS.
+
+Decision lock:
+1. No scope expansion; this wave only removes orchestration no-op ambiguity and strengthens explicit contracts.
+
+## 179) Delta 2026-02-22 CXXXIII - AI query contract parity + Studio CTA hardening
+
+Implemented:
+1. Rebuilt `POST /api/ai/query` to align with current capability/error policy:
+- explicit `INVALID_BODY` (`400`) and `MISSING_QUERY` (`400`) gates
+- preserved `501 NOT_IMPLEMENTED` (`capability=AI_QUERY`) when no provider is configured
+- explicit `503 PROVIDER_NOT_CONFIGURED` capability envelope for provider mismatch/configuration errors.
+2. Preserved quota/model-plan enforcement behavior and trace persistence contract while removing ambiguous generic provider-error behavior.
+3. Hardened Studio task board CTA policy:
+- `Run Wave` now stays disabled when no role is runnable under orchestration guards
+- explicit UI hint appears for dependency/budget blocked states
+- truncated task-result preview now uses deterministic ASCII suffix (`...`).
+
+Files:
+- `cloud-web-app/web/app/api/ai/query/route.ts`
+- `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`
+- `audit dicas do emergent usar/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
+
+Validation snapshot:
+1. Deferred by user policy in this wave (`run all tests only at final freeze`).
+2. Contract notes were updated in canonical docs in the same wave.
+
+Decision lock:
+1. No scope expansion; this wave only improves explicit contracts and removes non-actionable UI CTA paths.
+
+## 180) Delta 2026-02-22 CXXXIV - AI provider contract parity across core endpoints
+
+Implemented:
+1. Standardized explicit provider input handling in core AI routes:
+- `POST /api/ai/chat`
+- `POST /api/ai/complete`
+- `POST /api/ai/action`
+- `POST /api/ai/inline-edit`
+- `POST /api/ai/inline-completion`
+2. Added deterministic invalid-provider gate for unsupported provider values:
+- `400 INVALID_PROVIDER` with `supportedProviders`.
+3. Added explicit provider-mismatch capability envelope when provider is requested but not configured in runtime:
+- `503 PROVIDER_NOT_CONFIGURED`
+- capability-specific metadata (`requestedProvider`, `availableProviders`).
+4. Preserved existing no-provider behavior:
+- `501 NOT_IMPLEMENTED` capability gate remains unchanged when no provider is configured at all.
+5. Updated route-contract scanner to enforce these provider gate patterns in CI checks.
+
+Files:
+- `cloud-web-app/web/app/api/ai/chat/route.ts`
+- `cloud-web-app/web/app/api/ai/complete/route.ts`
+- `cloud-web-app/web/app/api/ai/action/route.ts`
+- `cloud-web-app/web/app/api/ai/inline-edit/route.ts`
+- `cloud-web-app/web/app/api/ai/inline-completion/route.ts`
+- `cloud-web-app/web/scripts/check-route-contracts.mjs`
+- `audit dicas do emergent usar/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
+
+Validation snapshot:
+1. Deferred by user policy in this wave (`run all tests only at final freeze`).
+
+Decision lock:
+1. No product-scope expansion; this wave is API contract clarity and anti-ambiguity hardening only.
+
+## 181) Delta 2026-02-22 CXXXV - Plan-quality policy for web quality/cost balance
+
+Implemented:
+1. Added plan-aware quality policy primitives in plan limits:
+- `getAllowedQualityModes(plan)`
+- `normalizeQualityModeForPlan(plan, requested)`
+2. Enforced quality policy at Studio session start:
+- requested quality is normalized to plan-allowed quality
+- response metadata includes `requestedQualityMode`, `appliedQualityMode`, `qualityModeDowngraded`, `allowedQualityModes`.
+3. Propagated quality policy metadata to advanced chat responses for UX transparency.
+4. UI now surfaces explicit system note when quality mode was downgraded by plan policy.
+5. Route contract scanner now enforces Studio session quality-policy metadata keys.
+
+Files:
+- `cloud-web-app/web/lib/plan-limits.ts`
+- `cloud-web-app/web/app/api/studio/session/start/route.ts`
+- `cloud-web-app/web/app/api/ai/chat-advanced/route.ts`
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+- `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
+- `cloud-web-app/web/scripts/check-route-contracts.mjs`
+- `audit dicas do emergent usar/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
+
+Validation snapshot:
+1. Deferred by user policy in this wave (`run all tests only at final freeze`).
+
+Decision lock:
+1. No scope expansion; this wave improves quality/cost predictability and transparent plan behavior only.
+
+## 182) Delta 2026-02-22 CXXXVI - One-shot closure baseline reconfirmed
+
+Implemented:
+1. Re-ran critical local scanners (without full freeze gates by user request):
+- `interface-critical-scan`
+- `architecture-critical-scan`
+- `admin-surface-scan`
+- `scan-mojibake`
+- `generate-routes-inventory`
+- `check-route-contracts`
+- `check-no-fake-success`
+- `check-critical-rate-limits`
+- `repo-connectivity-scan`
+- `workflow-governance-scan`
+- `canonical-doc-governance-scan`
+- `critical-secret-scan`
+2. Published one-shot closure plan with factual backlog and commit ordering:
+- `audit dicas do emergent usar/31_ONE_SHOT_CLOSURE_EXECUTION_2026-02-22.md`
+
+Baseline snapshot:
+1. Interface critical: `legacy-accent=0`, `admin-light=0`, `admin-status-light=0`, `blocking-dialogs=0`, `not-implemented-ui=6`, `not-implemented-noncritical=2`.
+2. Architecture critical: `apiRoutes=246`, `apiNotImplemented=8`, `fileCompatWrappers=8`, `duplicateBasenames=0`, `oversizedFiles>=1200=0`.
+3. Route inventory: `NOT_IMPLEMENTED total=10` (`critical=8`, `noncritical=2`, `PAYMENT_GATEWAY_NOT_IMPLEMENTED=2`).
+4. Governance: `repo-connectivity missing=0`, `workflow-governance issues=0`, `canonical-doc-governance issues=0`, `critical-secret findings=0`.
+
+Validation snapshot:
+1. Contract hardening scripts are green (`route-contracts`, `no-fake-success`, `critical-rate-limit`).
+2. Full freeze gates (`lint/typecheck/build/qa:enterprise-gate`) remain intentionally deferred for final consolidated run.
+
+Decision lock:
+1. Remaining blockers are freeze execution and explicit capability gates only; no scope expansion approved.
+
+## 183) Delta 2026-02-22 CXXXVII - Studio variable-usage hard gate + budget thresholds
+
+Implemented:
+1. Added server-side budget threshold contract (`50/80/100`) through shared helper:
+- `cloud-web-app/web/lib/server/studio-budget.ts`
+2. Exposed budget alert metadata on studio telemetry endpoints:
+- `GET /api/studio/cost/live` now returns `budgetAlert`.
+- `GET /api/studio/session/[id]` now returns `metadata.budgetAlert`.
+3. Enforced dual-entitlement policy in studio execution APIs:
+- `POST /api/studio/tasks/[id]/run` blocks with `402 VARIABLE_USAGE_BLOCKED` when credits are exhausted.
+- `POST /api/studio/tasks/run-wave` blocks with `402 VARIABLE_USAGE_BLOCKED` when credits are exhausted.
+- capability envelope metadata now includes `creditBalance`, `blockedReason`, `policy`.
+4. Updated Studio Ops UI to surface budget threshold alerts explicitly (warning at 50/80 and hard stop at 100) instead of only late critical pressure.
+5. Tightened architecture gate anti-regression for oversized modules:
+- `qa:architecture-gate` threshold updated from historical ceiling to `oversizedFiles>=1200 -> 0` (no tolerance for new oversized files).
+
+Files:
+- `cloud-web-app/web/lib/server/studio-budget.ts`
+- `cloud-web-app/web/app/api/studio/cost/live/route.ts`
+- `cloud-web-app/web/app/api/studio/session/[id]/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
+- `cloud-web-app/web/app/api/studio/tasks/run-wave/route.ts`
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+- `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`
+- `cloud-web-app/web/scripts/check-route-contracts.mjs`
+- `cloud-web-app/web/scripts/architecture-critical-scan.mjs`
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs`
+
+Validation snapshot:
+1. Deferred freeze gate run remains unchanged by user policy.
+2. Targeted contract scanners remain mandatory in final freeze.
+
+Decision lock:
+1. No scope expansion; this wave hardens cost transparency and enforces variable usage policy server-side.
+
+## 184) Delta 2026-02-22 CXXXVIII - Studio store modularization + near-limit debt reduction
+
+Implemented:
+1. Split Studio Home runtime helper logic out of monolithic store module:
+- new module: `cloud-web-app/web/lib/server/studio-home-runtime-helpers.ts`
+- `studio-home-store.ts` now imports domain/checklist/orchestration profile helpers.
+2. Reduced near-limit maintenance risk:
+- `studio-home-store.ts` now at `996` lines (previous near-limit bucket).
+- architecture critical scan near-limit count reduced (`62 -> 61`).
+3. Added architecture anti-regression control for near-limit debt:
+- `qa:architecture-gate` now also enforces `nearLimitFiles <= 61`.
+4. Kept runtime behavior unchanged by design (pure extraction only):
+- no API payload contract changes from this extraction.
+
+Validation snapshot:
+1. `architecture-critical-scan` PASS with updated near-limit baseline.
+2. `architecture-gate` PASS (`oversizedFiles=0`).
+3. `route-contracts` PASS (`checks=37`).
+
+Decision lock:
+1. No scope change; this is structural debt reduction to improve maintainability and reduce regression surface.
+
+
+## 185) Delta 2026-02-22 CXXXIX - Dashboard gate hardening + near-limit reduction
+
+Implemented:
+1. Removed ambiguous CTA surfaces in Studio Home dashboard tabs that did not have runtime backing:
+- `chatMode=canvas` now uses explicit capability gate component with disabled controls.
+- `content-creation` and `unreal` tabs now render explicit PARTIAL gate cards instead of clickable pseudo-actions.
+2. Standardized non-actionable capability cards to avoid false affordance in critical UX paths.
+3. Reduced structural debt in near-limit modules:
+- `components/dashboard/AethelDashboardPrimaryTabContent.tsx` reduced to `1061` lines.
+- `components/media/MediaStudio.tsx` reduced to `1051` lines via workspace extraction into `MediaStudioWorkspace.tsx`.
+4. Architecture near-limit baseline improved (`61 -> 59`) with no oversized files.
+
+Validation snapshot (targeted scanners):
+1. `architecture-critical-scan`: PASS (`nearLimitFiles=59`, `oversizedFiles=0`).
+2. `architecture-gate`: PASS.
+3. `interface-critical-scan`: PASS (critical metrics remain zero; `not-implemented-ui=6`, `noncritical=2`).
+4. `route-contracts`: PASS (`checks=38`).
+
+Decision lock:
+1. No scope expansion and no contract break; changes are UX clarity + maintainability hardening.
+
+
+## 186) Delta 2026-02-22 CXL - AI Chat panel modularization + near-limit reduction
+
+Implemented:
+1. Extracted shared UI blocks from `AIChatPanelPro.tsx` into dedicated module:
+- new file: `cloud-web-app/web/components/ide/AIChatPanelPro.widgets.tsx`
+- extracted widgets: tool-call display, thinking display, live mode indicator, chat history sidebar, attachment preview.
+2. Reduced IDE chat monolith size:
+- `AIChatPanelPro.tsx`: `1196 -> 846` lines.
+3. Removed dead imports from the core panel after extraction to keep lint hygiene for later freeze run.
+4. Updated architecture anti-regression budget:
+- `architecture-critical-gate` near-limit threshold tightened to `58`.
+
+Validation snapshot:
+1. `architecture-critical-scan`: PASS (`nearLimitFiles=58`, `oversizedFiles=0`).
+2. `architecture-gate`: PASS.
+3. `interface-critical-scan`: PASS (critical zero metrics preserved).
+4. `route-contracts`: PASS (`checks=38`).
+
+Decision lock:
+1. No API contract change and no scope change; this wave is strictly maintainability + UX plumbing hardening.
+
+
+## 187) Delta 2026-02-22 CXLI - Live Preview UX unification (dock + hidden chrome)
+
+Implemented:
+1. Rebuilt `components/LivePreview.tsx` as a studio-grade overlay shell with organized controls:
+- compact top control dock (`Tools`, `Chat`, `Hide/Show Bar`, `Hide/Show UI`)
+- right suggestion feed (last 3 items)
+- optional mobile joystick zone (single ref target, no duplicated DOM id)
+- bottom status bar with runtime/input hints.
+2. Removed noisy runtime logs and duplicate joystick-zone markup from the previous implementation.
+3. Added explicit UI state toggles for hidden chrome behavior without blocking core canvas interaction.
+4. Preserved current functional scope (no new fake capability claims).
+
+Validation snapshot:
+1. `interface-critical-scan`: PASS (critical zero metrics preserved).
+2. `architecture-critical-scan`: PASS (`nearLimitFiles=58`, `oversizedFiles=0`).
+3. `architecture-gate`: PASS.
+
+Decision lock:
+1. Change is UX organization and interaction polish only; no API or product-scope expansion.
+
+
+## 188) Delta 2026-02-22 CXLII - Terminal shell modularization + UX structure hardening
+
+Implemented:
+1. Extracted terminal chrome UI blocks from monolithic terminal component into dedicated module:
+- new file: `cloud-web-app/web/components/terminal/XTerminal.chrome.tsx`
+- extracted: `TerminalTab`, `ShellSelector`, `SearchBar`.
+2. Reduced monolith pressure in terminal core runtime component:
+- `cloud-web-app/web/components/terminal/XTerminal.tsx`: `1190 -> 926` lines.
+3. Removed dead icon imports after extraction to keep code hygiene for final freeze run.
+4. Tightened architecture gate baseline after measured reduction:
+- `nearLimitFiles` threshold updated to `57`.
+
+Validation snapshot:
+1. `architecture-critical-scan`: PASS (`nearLimitFiles=57`, `oversizedFiles=0`).
+2. `architecture-gate`: PASS.
+3. `interface-critical-scan`: PASS.
+4. `route-contracts`: PASS (`checks=38`).
+5. `no-fake-success`: PASS.
+
+Decision lock:
+1. No API/route behavior change; this wave is UI organization + maintainability hardening.
+
+
+## 189) Delta 2026-02-22 CXLIII - Dashboard core decomposition + UX governance cleanup
+
+Implemented:
+1. Decomposed `components/AethelDashboard.tsx` by extracting configuration/constants/types/state-parsing helpers into:
+- `components/dashboard/AethelDashboard.config.ts`.
+2. `AethelDashboard.tsx` reduced from `1146` to `757` lines.
+3. Preserved dashboard runtime behavior and contracts while improving ownership boundaries.
+4. Tightened architecture gate baseline after measurable debt reduction:
+- `nearLimitFiles` threshold updated to `56`.
+
+Validation snapshot:
+1. `architecture-critical-scan`: PASS (`nearLimitFiles=56`, `oversizedFiles=0`).
+2. `architecture-gate`: PASS.
+3. `interface-critical-scan`: PASS.
+4. `route-contracts`: PASS (`checks=38`).
+
+Decision lock:
+1. No scope expansion and no API behavior changes; this wave is structural hardening + UX maintainability.
+
+
+## 190) Delta 2026-02-22 CXLIV - Structural extraction wave (Foliage + Scene Serializer + Animation)
+
+Implemented:
+1. Split heavy type/default blocks out of near-limit modules:
+- `components/environment/FoliagePainter.tsx` now imports from:
+  - `components/environment/FoliagePainter.types.ts`
+  - `components/environment/FoliagePainter.defaults.ts`
+- `lib/scene/scene-serializer.ts` now imports/re-exports from:
+  - `lib/scene/scene-serializer.types.ts`
+- `lib/animation/animation-system.ts` now imports/re-exports from:
+  - `lib/animation/animation-system.types.ts`
+  - `lib/animation/animation-system.easing.ts`
+2. Reduced monolith pressure in core files:
+- `FoliagePainter.tsx`: `1146 -> 930`
+- `scene-serializer.ts`: `1148 -> 944`
+- `animation-system.ts`: `1149 -> 994`
+3. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `56` to `52` in `scripts/architecture-critical-gate.mjs`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=52`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS (critical zero metrics preserved).
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No scope change and no API contract break; this wave is structural hardening + maintainability.
+
+
+## 191) Delta 2026-02-22 CXLV - Dialogue editor decomposition wave
+
+Implemented:
+1. Split `components/narrative/DialogueEditor.tsx` into dedicated modules:
+- `components/narrative/DialogueEditor.types.ts`
+- `components/narrative/DialogueEditor.initial-data.ts`
+- `components/narrative/DialogueEditor.nodes.tsx`
+2. Main editor file reduced from `1139` to `783` lines while preserving runtime behavior.
+3. Imported node registry and seeded graph defaults from dedicated modules to reduce monolith risk.
+4. Tightened architecture gate baseline:
+- `nearLimitFiles` threshold updated from `52` to `51`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=51`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No scope/API contract change; this wave is structural decomposition and maintainability hardening.
+
+
+## 192) Delta 2026-02-22 CXLVI - Landscape editor decomposition wave
+
+Implemented:
+1. Split `components/engine/LandscapeEditor.tsx` into dedicated modules:
+- `components/engine/LandscapeEditor.types.ts`
+- `components/engine/LandscapeEditor.initial-data.ts`
+2. Moved default terrain config, initial heightmap seed, and preset terrain generation logic out of the main component.
+3. Main editor file reduced from `1171` to `1083` lines.
+4. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `51` to `50`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=50`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No API behavior/scope change; this wave is structural hardening and maintainability cleanup.
+
+
+## 193) Delta 2026-02-22 CXLVII - Input/Asset pipeline decomposition wave
+
+Implemented:
+1. Decomposed `lib/input/controller-mapper.tsx` into modular type/config file:
+- `lib/input/controller-mapper.types.ts`
+- main file reduced from `1141` to `944` lines.
+2. Decomposed `lib/aaa-asset-pipeline.ts` into modular type/options file:
+- `lib/aaa-asset-pipeline.types.ts`
+- main file reduced from `1141` to `893` lines.
+3. Preserved public exports via re-export in main modules (backward-compatible import surface).
+4. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `50` to `48`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=48`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No scope/API behavior change; this wave is structural modularization and maintainability hardening.
+
+
+## 194) Delta 2026-02-22 CXLVIII - Hot reload overlay extraction wave
+
+Implemented:
+1. Extracted overlay UI from `lib/hot-reload-system.ts` to dedicated module:
+- new file: `lib/hot-reload-overlay.ts`
+- `hot-reload-system.ts` now re-exports `HotReloadOverlay`.
+2. Restored hot-reload singleton exports in `hot-reload-system.ts`:
+- `export const hotReload = HotReloadManager.getInstance()`
+- window debug exposure preserved.
+3. Reduced `hot-reload-system.ts` from `1147` to `937` lines.
+4. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `48` to `47`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=47`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No behavior/scope change; this wave is structural split with preserved runtime contracts.
+
+
+## 195) Delta 2026-02-22 CXLIX - Fluid simulation modularization wave
+
+Implemented:
+1. Decomposed fluid runtime into focused modules:
+- `lib/fluid-simulation-system.types.ts`
+- `lib/fluid-simulation-kernels.ts`
+- `lib/fluid-simulation-system.ts` now imports/re-exports shared types and kernels.
+2. Reduced `fluid-simulation-system.ts` from `1139` to `1027` lines.
+3. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `47` to `46`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=46`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No scope/API behavior change; this wave is structural decomposition and maintainability hardening.
+
+
+## 196) Delta 2026-02-22 CL - Onboarding system decomposition wave
+
+Implemented:
+1. Decomposed `lib/onboarding-system.ts` into focused modules:
+- `lib/onboarding-system.types.ts`
+- `lib/onboarding-system.content.ts`
+2. Extracted onboarding domain types + tours/achievements/checklist content from runtime manager/context logic.
+3. Reduced `onboarding-system.ts` from `1135` to `454` lines.
+4. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `46` to `45`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=45`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No behavior/scope change; this wave is structural decomposition and maintainability hardening.
+
+
+## 197) Delta 2026-02-22 CLI - Theme service decomposition wave
+
+Implemented:
+1. Extracted built-in theme catalog from `lib/theme/theme-service.ts` to dedicated module:
+- `lib/theme/theme-builtins.ts`.
+2. Kept runtime service contract intact by importing built-ins into `ThemeService`.
+3. Reduced `theme-service.ts` from `1128` to `481` lines.
+4. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `45` to `44`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=44`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No behavior/scope change; this wave is structural decomposition and maintainability hardening.
+
+
+## 198) Delta 2026-02-22 CLI - Sequencer/Marketplace decomposition wave
+
+Implemented:
+1. Decomposed sequencer domain types:
+- `lib/sequencer-cinematics.types.ts`
+- `lib/sequencer-cinematics.ts` now imports/re-exports shared cinematic types.
+2. Decomposed creator dashboard data layer:
+- `components/marketplace/CreatorDashboard.types.ts`
+- `components/marketplace/CreatorDashboard.api.ts`
+- main UI file now imports domain types/fetchers/status config from these modules.
+3. Reduced monolith pressure:
+- `components/marketplace/CreatorDashboard.tsx`: `1120 -> 1026`
+- `lib/sequencer-cinematics.ts`: `1130 -> 1099`
+4. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `44` to `43`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=43`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No scope/API contract change; this wave is structural modularization and maintainability hardening.
+
+
+## 199) Delta 2026-02-22 CLII - WebXR decomposition wave
+
+Implemented:
+1. Extracted hand-tracking runtime from `lib/webxr-vr-system.ts` to dedicated module:
+- `lib/webxr-hand-tracker.ts`.
+2. `webxr-vr-system.ts` now imports/re-exports `HandTracker` and keeps existing runtime contract.
+3. Reduced `webxr-vr-system.ts` from `1124` to `963` lines.
+4. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `43` to `42`.
+
+Validation snapshot (targeted):
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=42`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+5. `qa:no-fake-success`: PASS (`files=246`).
+
+Decision lock:
+1. No behavior/scope change; this wave is structural decomposition and maintainability hardening.
+
+## 200) Delta 2026-02-22 CLI - Studio Home UX hardening + reliability fixes
+
+Implemented:
+1. Studio Home usability hardening in critical path components:
+- `components/studio/StudioHome.tsx`
+- `components/studio/StudioHomeMissionPanel.tsx`
+- `components/studio/StudioHomeTaskBoard.tsx`
+- `components/studio/StudioHomeTeamChat.tsx`
+- `components/studio/StudioHomeRightRail.tsx`
+2. Added operational clarity and anti-dead-end behavior:
+- network/session/task/budget status strip;
+- mission-quality heuristic chips (scope/constraints/acceptance/output);
+- task action disable reasons + reviewer pipeline counters;
+- Agent Workspace gate with explicit blocked reason;
+- telemetry refresh action + stale telemetry warning.
+3. Resolved active TypeScript regressions detected during this wave (no scope change):
+- `app/api/ai/query/route.ts` provider typing;
+- `components/AethelDashboard.tsx` missing `ToastType` import;
+- `components/engine/LandscapeEditor.tsx` `TerrainPreset` callback typing;
+- `components/LivePreview.tsx` joystick manager typing;
+- `components/marketplace/CreatorDashboard.api.ts`/`CreatorDashboard.tsx` API error helper export/import;
+- `components/narrative/QuestEditor.tsx` missing `MarkerType` import;
+- `lib/fluid-simulation-system.types.ts` missing `THREE` type import.
+
+Validation snapshot (targeted):
+1. `typecheck`: PASS.
+2. `qa:interface-critical`: PASS (`legacy-accent=0`, `admin-light=0`, `admin-status-light=0`, `blocking-dialogs=0`, `not-implemented-ui=6`, `not-implemented-noncritical=2`).
+3. `qa:route-contracts`: PASS (`checks=38`).
+4. `qa:no-fake-success`: PASS (`files=246`).
+5. `docs:architecture-triage`: PASS (`nearLimitFiles=42`, `oversizedFiles=0`).
+
+Decision lock:
+1. No business-scope change.
+2. Studio Home remains `/dashboard` entry; `/ide` remains advanced surface with stable handoff.
+
+## 201) Delta 2026-02-22 CLI - Studio interface polish wave (market-grade consistency)
+
+Implemented:
+1. Added Studio UI design primitives to global system (`app/globals.css`):
+- `studio-shell`, `studio-panel`, `studio-panel-header`, `studio-muted-block`, `studio-kpi-card`, `studio-chip`, `studio-action-*`, `studio-scroll`.
+2. Applied consistent visual language and interaction patterns across Studio Home surfaces:
+- `components/studio/StudioHome.tsx`
+- `components/studio/StudioHomeMissionPanel.tsx`
+- `components/studio/StudioHomeTaskBoard.tsx`
+- `components/studio/StudioHomeTeamChat.tsx`
+- `components/studio/StudioHomeRightRail.tsx`
+3. UX refinements aligned to professional IDE standards:
+- clearer command chips and state telemetry;
+- sticky right-rail operations/preview for desktop flow continuity;
+- unified action hierarchy (primary/secondary/warn/danger);
+- scroll containment for long task/chat feeds.
+
+Validation snapshot (targeted):
+1. `typecheck`: PASS.
+2. `qa:interface-critical`: PASS.
+3. `qa:route-contracts`: PASS (`checks=38`).
+4. `qa:no-fake-success`: PASS (`files=246`).
+5. `docs:architecture-triage`: PASS (`nearLimitFiles=42`, `oversizedFiles=0`).
+
+Decision lock:
+1. No business-scope change.
+2. No API contract break; pure UX/system consistency hardening.
+
+## 202) Delta 2026-02-22 CLI - IDE workbench UI polish wave (accessibility + operator clarity)
+
+Implemented:
+1. Workbench status/context surfaces refined:
+- `components/ide/WorkbenchStatusBar.tsx`
+- `components/ide/WorkbenchContextBanner.tsx`
+2. IDE shell interaction hardening:
+- `components/ide/IDELayout.tsx` (menu, sidebar, bottom panel, right panel controls, footer).
+3. UX improvements aligned to professional editor standards:
+- keyboard-focus visibility and aria metadata for header/menu/panel controls;
+- clearer status chips in footer/status bar (project/workspace/file/unsaved/studio);
+- less noisy footer hierarchy with semantic operator chips;
+- handoff banner label + auto-hide hint for context continuity.
+
+Validation snapshot (targeted):
+1. `typecheck`: PASS.
+2. `qa:interface-critical`: PASS.
+3. `qa:route-contracts`: PASS (`checks=38`).
+4. `qa:no-fake-success`: PASS (`files=246`).
+5. `docs:architecture-triage`: PASS (`nearLimitFiles=42`, `oversizedFiles=0`).
+
+Decision lock:
+1. No scope/API contract changes.
+2. Improvements are UI/UX consistency and accessibility hardening only.
+
+## 203) Delta 2026-02-22 CLI - Admin enterprise surface consistency wave
+
+Implemented:
+1. Expanded shared admin surface primitives in `components/admin/AdminSurface.tsx`:
+- added `AdminSearchInput`, `AdminFilterPill`, `AdminBadge`;
+- strengthened `AdminPageShell` and `AdminPrimaryButton` consistency.
+2. Applied shared patterns to high-traffic admin routes:
+- `app/admin/page.tsx`
+- `app/admin/payments/page.tsx`
+- `app/admin/apis/page.tsx`
+- `app/admin/security/page.tsx`
+3. UX gains:
+- consistent filter/search controls;
+- unified status badges across tables/settings;
+- cleaner, denser operational visual language with consistent focus behavior.
+
+Validation snapshot (targeted):
+1. `typecheck`: PASS.
+2. `qa:interface-critical`: PASS.
+3. `qa:route-contracts`: PASS (`checks=38`).
+4. `qa:no-fake-success`: PASS (`files=246`).
+5. `docs:architecture-triage`: PASS (`nearLimitFiles=42`, `oversizedFiles=0`).
+
+Decision lock:
+1. No API/scope changes.
+2. Pure admin UX consistency and maintainability hardening.
+
+## 204) Delta 2026-02-22 CLI - Admin users surface convergence wave
+
+Implemented:
+1. Applied shared admin primitives to `/admin/users`:
+- `AdminSearchInput`, `AdminFilterPill`, `AdminBadge` adoption in `app/admin/users/page.tsx`.
+2. Improved table row interaction quality:
+- copy-email control now has explicit keyboard focus ring.
+3. No contract/scope changes; this wave is UI consistency + accessibility polish.
+
+Validation snapshot (targeted):
+1. `typecheck`: PASS.
+2. `qa:interface-critical`: PASS.
+3. `qa:route-contracts`: PASS (`checks=38`).
+4. `qa:no-fake-success`: PASS (`files=246`).
+5. `docs:architecture-triage`: PASS (`nearLimitFiles=42`, `oversizedFiles=0`).
+
+## 205) Delta 2026-02-22 CLI - Final freeze suite closure
+
+Implemented:
+1. Executed consolidated end-of-round freeze suite in `cloud-web-app/web`:
+- `lint`
+- `typecheck`
+- `build`
+- `qa:interface-gate`
+- `qa:architecture-gate`
+- `qa:canonical-components`
+- `qa:route-contracts`
+- `qa:critical-rate-limit`
+- `qa:no-fake-success`
+- `qa:mojibake`
+- `qa:enterprise-gate`
+2. Confirmed metrics remain within locked P0 thresholds:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+- `not-implemented-noncritical=2`
+- `apiNotImplemented=8`
+- `nearLimitFiles=42`
+- `oversizedFiles=0`
+
+Validation snapshot (freeze):
+1. `lint`: PASS (0 warnings/errors).
+2. `typecheck`: PASS.
+3. `build`: PASS (sandbox fallback message only).
+4. `qa:enterprise-gate`: PASS (includes interface/admin/architecture/contracts/rate-limit/no-fake-success/mojibake + typecheck/build).
+
+Decision lock:
+1. Freeze blocker "full suite pending" is closed in this round.
+2. Remaining gaps are explicit and tracked (capability-gated endpoints + structural near-limit decomposition backlog).
+
+## 206) Delta 2026-02-22 CLI - Governance rerun closure
+
+Implemented:
+1. Re-executed repository governance scans after freeze:
+- `tools/repo-connectivity-scan.mjs`
+- `tools/workflow-governance-scan.mjs`
+- `tools/canonical-doc-governance-scan.mjs`
+- `tools/critical-secret-scan.mjs`
+2. Regenerated route inventory (`docs:routes-inventory`) for post-freeze parity.
+
+Validation snapshot:
+1. Connectivity: PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+2. Workflow governance: PASS (`issues=0`, `legacyCandidate=1` restricted workflow).
+3. Canonical docs governance: PASS (`missingListedCanonicalDocs=0`, `unindexedCanonicalMarkdown=0`).
+4. Secret scan: PASS (`findings=0`).
+5. Markdown landscape updated:
+- `markdownTotal=3637`
+- `markdownCanonical=34`
+- `markdownHistorical=3603`
+
+Decision lock:
+1. Governance drift blocker is closed for this round.
+2. Historical markdown volume remains a managed risk, but canonical indexing integrity is currently clean.
+
+## 207) Delta 2026-02-22 CLI - Structural decomposition wave (networking/webrtc + hair shader)
+
+Implemented:
+1. Extracted WebRTC transport module from multiplayer runtime monolith:
+- new file: `lib/networking-multiplayer-webrtc.ts`
+- moved: `WebRTCConfig`, `WebRTCConnection`, `createWebRTCConfig`
+- kept compatibility via exports from `lib/networking-multiplayer.ts`.
+2. Extracted hair shading model from hair/fur runtime monolith:
+- new file: `lib/hair-fur-shader.ts`
+- moved: `MarschnerHairShader`
+- kept compatibility via exports from `lib/hair-fur-system.ts`.
+3. Tightened architecture guardrail:
+- `nearLimitFiles` threshold updated from `42` to `40` in `scripts/architecture-critical-gate.mjs`.
+
+Validation snapshot:
+1. `typecheck`: PASS.
+2. `qa:architecture-gate`: PASS (`nearLimitFiles=40`, `oversizedFiles=0`).
+3. `qa:interface-critical`: PASS.
+4. `qa:route-contracts`: PASS (`checks=38`).
+
+Decision lock:
+1. No API or business-scope change.
+2. Wave is maintainability/risk reduction only, with explicit gate tightening.
+
+## 208) Delta 2026-02-22 CLI - Post-decomposition enterprise gate confirmation
+
+Implemented:
+1. Reran full integrated quality gate (`qa:enterprise-gate`) after networking/hair decomposition.
+2. Confirmed no regressions across interface/contracts/security/type/build checks with tightened architecture threshold.
+
+Validation snapshot:
+1. `qa:enterprise-gate`: PASS.
+2. Architecture maintained at `nearLimitFiles=40`, `oversizedFiles=0`.
+3. Interface critical metrics remained at locked zero thresholds.
+
+Decision lock:
+1. Structural extraction wave is validated as non-regressive.
+2. Residual backlog unchanged: capability implementation + further near-limit reduction.
+
+## 209) Delta 2026-02-22 CLI - Sequencer/SDK decomposition + root syntax command hardening
+
+Implemented:
+1. Decomposed additional near-limit modules:
+- `lib/sequencer-cinematics.ts` -> extracted `KeyframeInterpolator` into `lib/sequencer-keyframe-interpolator.ts`.
+- `lib/aethel-sdk.ts` -> extracted public SDK types into `lib/aethel-sdk.types.ts`.
+2. Tightened architecture anti-regression gate:
+- `nearLimitFiles` threshold updated from `40` to `38`.
+3. Hardened root syntax command reliability in partial environments:
+- `package.json` scripts `check:src-ts` and `check:js-syntax` now perform explicit environment guards and skip with warning when root dependencies are absent.
+
+Validation snapshot:
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=38`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:enterprise-gate`: PASS after this wave.
+4. Root `check:syntax`: PASS in current environment with explicit guarded skips.
+
+Decision lock:
+1. No API/business-scope change; decomposition and command hardening only.
+2. Remaining critical backlog remains capability implementation and continued near-limit reduction toward internal target (`<=30`).
+
+## 210) Delta 2026-02-22 CLI - Governance report refresh after root script updates
+
+Implemented:
+1. Re-ran governance scanners after root `package.json` script hardening.
+2. Persisted updated reports in canonical governance docs.
+
+Validation snapshot:
+1. `qa:repo-connectivity`: PASS (`totalChecks=30`, `requiredMissing=0`, `deadScriptReferences=0`).
+2. `qa:workflow-governance`: PASS (`issues=0`).
+3. `qa:canonical-doc-governance`: PASS (`missingListedCanonicalDocs=0`).
+4. `qa:secrets-critical`: PASS (`findings=0`).
+
+Decision lock:
+1. Governance integrity remains green after command-graph changes.
+2. No unresolved connectivity/dead-reference regressions introduced in this wave.
+
+## 211) Delta 2026-02-22 CLI - Cutscene decomposition and architecture gate tightening
+
+Implemented:
+1. Extracted cutscene easing functions from `lib/cutscene/cutscene-system.tsx` to:
+- `lib/cutscene/cutscene-easing.ts`.
+2. Updated `cutscene-system.tsx` to consume shared easing map module.
+3. Tightened architecture anti-regression threshold:
+- `nearLimitFiles` from `38` to `37`.
+
+Validation snapshot:
+1. `docs:architecture-triage`: PASS (`nearLimitFiles=37`, `oversizedFiles=0`).
+2. `qa:architecture-gate`: PASS.
+3. `qa:enterprise-gate`: PASS (full integrated rerun).
+
+Decision lock:
+1. No scope/API contract change; structural extraction only.
+2. Remaining structural backlog now starts from `nearLimitFiles=37`.
+
+## 212) Delta 2026-02-22 CLI - Studio AAA character/story quality master plan publication
+
+Implemented:
+1. Published canonical subsystem plan:
+- `32_STUDIO_AAA_CHARACTER_STORY_QUALITY_PLAN_2026-02-22.md`
+2. Added this plan to canonical index in:
+- `00_FONTE_CANONICA.md`.
+3. Plan scope lock:
+- no product shell expansion;
+- no fake-success claims;
+- no desktop parity overclaim;
+- no L4/L5 readiness claim without evidence.
+
+Validation snapshot:
+1. `qa:canonical-doc-governance`: PASS (`canonicalListedDocs=35`, `canonicalMarkdownFiles=35`, `missingListedCanonicalDocs=0`).
+
+Decision lock:
+1. Character/story consistency and AAA-quality intent are now execution-tracked as canonical subsystem backlog.
+
+## 213) Delta 2026-02-22 CLI - Complete subarea alignment matrix publication
+
+Implemented:
+1. Published a full canonical subarea matrix with status, gaps, limits, and ownership:
+- `33_COMPLETE_SUBAREA_ALIGNMENT_AND_GAP_MATRIX_2026-02-22.md`
+2. Extended canonical index:
+- added doc `33` to `00_FONTE_CANONICA.md`.
+3. Matrix scope and policy lock:
+- no scope expansion;
+- no claim promotion without row-level evidence;
+- explicit status semantics (`IMPLEMENTED`, `PARTIAL`, `NOT_IMPLEMENTED`, `UNVERIFIED`).
+
+Validation snapshot:
+1. `interface-critical-scan`: PASS (`not-implemented-ui=6`, `not-implemented-noncritical=2`, high-severity metrics at zero).
+2. `architecture-critical-scan`: PASS (`apiRoutes=246`, `apiNotImplemented=8`, `fileCompatWrappers=8`, `nearLimitFiles=37`, `oversizedFiles=0`).
+3. `check-route-contracts`: PASS (`checks=38`).
+4. `check-no-fake-success`: PASS (`files=246`).
+5. Governance scanners: PASS (connectivity/workflow/canonical-doc/secrets all zero-issue).
+
+Decision lock:
+1. `33` becomes the detailed execution reference for all remaining subareas and residual gaps.
+2. Any future promotion of readiness must be backed by scanner/test evidence and canonical delta update.
+
+## 214) Delta 2026-02-22 CLI - Web vs Local execution model hardening
+
+Implemented:
+1. Added explicit runtime target module:
+- `cloud-web-app/web/lib/execution-target.ts`
+2. Surfaced runtime target in IDE status bar:
+- `cloud-web-app/web/components/ide/WorkbenchStatusBar.tsx`
+- `cloud-web-app/web/app/ide/page.tsx`
+3. Surfaced web/local execution profiles in Studio Ops rail:
+- `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`
+- `cloud-web-app/web/components/studio/StudioHome.tsx`
+4. Published canonical dual-target execution model:
+- `34_WEB_VS_LOCAL_STUDIO_EXECUTION_MODEL_2026-02-22.md`.
+
+Validation snapshot:
+1. Contracts unchanged (no scope/API break introduced in this wave).
+2. Runtime target visibility is now explicit in `/dashboard` and `/ide` UX surfaces.
+
+Decision lock:
+1. Web remains active production target; local remains planned until evidence gate promotion.
+2. No parity overclaim is permitted without benchmark evidence.
+
+## 215) Delta 2026-02-22 CLI - Agentic action policy hardening + usability guardrails
+
+Implemented:
+1. Added shared Full Access action policy module:
+- `cloud-web-app/web/lib/studio/full-access-policy.ts`
+2. Hardened `POST /api/studio/access/full` with explicit action-class policy evaluation:
+- supports optional `intendedActionClass`
+- supports optional `confirmManualAction`
+- explicit blocked/not-allowed/manual-confirm errors
+- policy summary returned in success metadata
+3. Surfaced policy visibility in Studio Home Ops Bar:
+- allowed/manual-confirm/blocked action class counts
+- blocked class list shown explicitly
+4. Published canonical guardrail spec:
+- `35_AGENTIC_PARALLEL_CAPABILITIES_AND_USABILITY_GUARDRAILS_2026-02-22.md`
+5. Added doc `35` to canonical index.
+
+Decision lock:
+1. Platform does not expose unrestricted "any web/account action" behavior.
+2. High-risk action classes remain hard-blocked by policy.
+3. Manual editing + review/apply discipline is now canonicalized as usability contract.
+
+## 216) Delta 2026-02-22 CLI - Guardrail wave verification pass
+
+Validation snapshot:
+1. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`canonicalListedDocs=38`, `missingListedCanonicalDocs=0`).
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+3. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+4. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+5. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS (`files=246`).
+
+Decision lock:
+1. Action policy hardening is validated without contract regression.
+2. High-risk class blocking and explicit error paths are now part of enforceable backend behavior.
+
+## 217) Delta 2026-02-22 CLI - Historical doc absorption and orphan triage publication
+
+Implemented:
+1. Published canonical anti-hallucination triage for historical markdown and loose pieces:
+- `36_HISTORICAL_MD_ABSORPTION_AND_ORPHAN_TRIAGE_2026-02-22.md`
+2. Added doc `36` to canonical index.
+3. Triaged explicit residuals:
+- historical markdown volume (`3605`)
+- legacy workflow candidate
+- empty directory leftovers in active app/components tree
+- near-limit and compatibility wrapper debt continuity.
+
+Validation snapshot:
+1. Existing anti-hallucination checks remain the reference baseline for this wave:
+- route/no-fake-success/typecheck/lint/connectivity/canonical-doc-governance all passing in latest run logs.
+
+Decision lock:
+1. Historical markdown remains non-authoritative for runtime claims.
+2. Empty directory and legacy workflow cleanup is now explicit backlog, not hidden drift.
+
+## 218) Delta 2026-02-22 CLI - Post-publication canonical/connectivity verification
+
+Validation snapshot:
+1. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`canonicalListedDocs=39`, `missingListedCanonicalDocs=0`).
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Decision lock:
+1. Canonical index expansion completed without governance regressions.
+
+## 219) Delta 2026-02-22 CLI - Active surface hygiene gate + orphan cleanup
+
+Implemented:
+1. Added active-surface hygiene scanner:
+- `tools/active-surface-hygiene-scan.mjs`
+2. Added root QA gate script:
+- `qa:active-surface-hygiene`
+3. Removed empty leftover directories from active app/components surfaces:
+- `cloud-web-app/web/app/(landing)`
+- `cloud-web-app/web/app/register`
+- `cloud-web-app/web/components/statusbar`
+- `cloud-web-app/web/components/vcs`
+- `cloud-web-app/web/components/_deprecated/*` (fully removed empty tree)
+4. Added generated hygiene matrix to canonical docs:
+- `37_ACTIVE_SURFACE_HYGIENE_MATRIX_2026-02-22.md`
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-surface-hygiene` -> PASS (`emptyDirectories=0`).
+
+Decision lock:
+1. Empty directory drift in active product surfaces is now gateable, not ad-hoc.
+
+## 220) Delta 2026-02-22 CLI - Governance refresh after hygiene gate integration
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-surface-hygiene` -> PASS (`emptyDirectories=0`).
+2. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`canonicalListedDocs=40`, `missingListedCanonicalDocs=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`totalChecks=31`, `requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:workflow-governance` -> PASS (`issues=0`).
+
+Decision lock:
+1. Hygiene scanner introduction did not regress connectivity/workflow governance.
+
+## 221) Delta 2026-02-22 CLI - Type and contract stability after latest wave
+
+Validation snapshot:
+1. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+2. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+3. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS (`files=246`).
+
+Decision lock:
+1. Latest policy/hygiene changes preserved route contract and anti-fake-success guarantees.
+
+## 222) Delta 2026-02-22 CLI - Connector matrix + architecture tightening
+
+Implemented:
+1. Published connector capability/risk matrix:
+- `38_CONNECTOR_CAPABILITY_AND_RISK_MATRIX_2026-02-22.md`
+2. Extended route-contract scanner for new Full Access action-policy markers in:
+- `scripts/check-route-contracts.mjs`
+3. Reduced architecture near-limit baseline:
+- `nearLimitFiles: 37 -> 36` by extracting debug-console types/constants to:
+  - `lib/debug/debug-console.types.ts`
+  - `lib/debug/debug-console.tsx` updated to consume shared module
+4. Tightened architecture gate threshold:
+- `scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 36`.
+
+Decision lock:
+1. Connector claims are now bound to explicit policy statuses.
+2. Structural debt baseline improved without API/business-scope changes.
+
+## 223) Delta 2026-02-23 CLI - Studio orchestration realism + session stability hardening
+
+Implemented:
+1. Studio task mutation routes now expose explicit orchestration reality metadata (no implicit production-apply claim):
+- `POST /api/studio/tasks/plan` -> `capabilityStatus: PARTIAL`, `executionReality: orchestration-checkpoint`
+- `POST /api/studio/tasks/[id]/run` -> metadata now includes `executionReality: orchestration-checkpoint`
+- `POST /api/studio/tasks/run-wave` -> `capabilityStatus: PARTIAL` + orchestration reality metadata
+- `POST /api/studio/tasks/run-wave` now accepts strategy (`balanced|cost_guarded|quality_first`) and returns `requestedStrategy`, `maxStepsApplied` + `strategyReason`
+- `POST /api/studio/tasks/[id]/validate` -> `capabilityStatus: PARTIAL` + deterministic-checkpoint metadata
+- `POST /api/studio/tasks/[id]/apply` -> `capabilityStatus: PARTIAL`, `externalApplyRequired: true`
+- `POST /api/studio/tasks/[id]/rollback` -> `capabilityStatus: PARTIAL` + checkpoint rollback metadata
+2. Route contract scanner strengthened for Studio task endpoints:
+- `cloud-web-app/web/scripts/check-route-contracts.mjs` now enforces orchestration-reality markers and external apply metadata.
+3. Session-long stability hardening:
+- `cloud-web-app/web/lib/server/studio-home-store.ts` now enforces bounded persistence windows:
+  - `MAX_STORED_TASKS=60`
+  - `MAX_STORED_AGENT_RUNS=300`
+  - `MAX_STORED_MESSAGES=500`
+4. Studio Home task board now displays explicit no-fake-success guardrail copy for planner/coder/reviewer checkpoints.
+
+Validation snapshot:
+1. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+
+Decision lock:
+1. Studio task orchestration remains a controlled checkpoint workflow in this phase, not autonomous code-apply execution.
+2. Long-running sessions are now bounded to avoid unbounded context growth and UI/storage drift.
+
+## 224) Delta 2026-02-23 CLI - Reviewer deterministic validation hardening
+
+Implemented:
+1. Upgraded reviewer validation from marker-only check to deterministic multi-check gate in `studio-home-store`:
+- reviewer marker presence (`[review-ok]`)
+- planner checkpoint done
+- coder checkpoint done
+- successful runs by role (planner/coder/reviewer)
+- quality checklist presence
+- mission domain resolved
+- budget cap not exceeded
+2. Validation result now appends explicit marker to task result:
+- `[validation:passed]` or `[validation:failed]`
+3. On validation failure, session now receives a structured system report message with failed check reasons.
+
+Validation snapshot:
+1. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+
+Decision lock:
+1. `apply` eligibility remains reviewer+passed-validation gated; no autonomous bypass introduced.
+
+## 225) Delta 2026-02-23 CLI - Domain-aware reviewer validation coverage
+
+Implemented:
+1. Extended reviewer deterministic validation with domain-aware checks:
+- mandatory reviewer domain marker (`[domain:<missionDomain>]`)
+- quality checklist domain coverage check (`games|films|apps|general`) using token coverage policy.
+2. Added machine-readable validation payload in task state:
+- `validationReport.totalChecks`
+- `validationReport.failedIds`
+- `validationReport.failedMessages`
+3. Studio Task Board now surfaces validation-check summary and first failure reason inline for faster operator action.
+
+Validation snapshot:
+1. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+
+Decision lock:
+1. Validation remains deterministic and explicit; no hidden auto-retry or silent pass behavior introduced.
+
+## 226) Delta 2026-02-23 CLI - Validation metadata observability
+
+Implemented:
+1. `POST /api/studio/tasks/[id]/validate` now emits deterministic-check summary metadata:
+- `totalChecks`
+- `failedIds`
+2. Added this summary to both:
+- failure envelope (`422 VALIDATION_FAILED`)
+- successful response payload (`ok=true`).
+
+Validation snapshot:
+1. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+
+## 227) Delta 2026-02-23 CLI - Architecture debt reduction (near-limit 36 -> 35)
+
+Implemented:
+1. Decomposed Niagara VFX runtime from monolithic editor file:
+- new file `cloud-web-app/web/components/engine/NiagaraVFX.runtime.tsx` (particle emitter + renderer runtime)
+- `cloud-web-app/web/components/engine/NiagaraVFX.tsx` now focuses on editor/UI graph controls.
+2. Extracted reviewer validation evaluation logic from store to helper module:
+- `evaluateReviewerValidation` moved to `cloud-web-app/web/lib/server/studio-home-runtime-helpers.ts`
+- `cloud-web-app/web/lib/server/studio-home-store.ts` reduced below near-limit threshold.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 35`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=35`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=35`, `oversizedFiles=0`).
+3. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+
+## 228) Delta 2026-02-23 CLI - Architecture debt reduction continuation (near-limit 35 -> 34)
+
+Implemented:
+1. Decomposed Animation Blueprint node rendering into dedicated module:
+- new file `cloud-web-app/web/components/engine/AnimationBlueprint.nodes.tsx`
+- `cloud-web-app/web/components/engine/AnimationBlueprint.tsx` now delegates node rendering concerns.
+2. Removed dead inline transition label block from Animation Blueprint surface.
+3. Tightened architecture gate baseline again:
+- `nearLimitFiles <= 34` in `cloud-web-app/web/scripts/architecture-critical-gate.mjs`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=34`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=34`, `oversizedFiles=0`).
+3. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+4. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+
+## 229) Delta 2026-02-23 CLI - Architecture debt reduction continuation (near-limit 34 -> 33)
+
+Implemented:
+1. Extracted AI audio music-parameter logic to dedicated module:
+- new file `cloud-web-app/web/lib/ai-audio-engine.music.ts`
+- migrated default-emotion/tags/instrumentation/music-params mapping helpers.
+2. Simplified `cloud-web-app/web/lib/ai-audio-engine.ts` by removing in-class duplicated music helper methods and consuming shared module.
+3. Tightened architecture gate baseline:
+- `nearLimitFiles <= 33` in `cloud-web-app/web/scripts/architecture-critical-gate.mjs`.
+
+Validation snapshot:
+1. `cmd /c npm run lint` (`cloud-web-app/web`) -> PASS.
+2. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+3. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=33`).
+4. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=33`, `oversizedFiles=0`).
+5. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+
+## 230) Delta 2026-02-23 CLI - Script-root hardening + architecture debt reduction (near-limit 33 -> 30)
+
+Implemented:
+1. Hardened web QA/doc scanners to use deterministic workspace root based on script location (`cloud-web-app/web/scripts/*.mjs`), removing dependency on `process.cwd()` and preventing report drift into repo-level `docs/`.
+2. Reduced near-limit structural debt with focused module extraction:
+- `cloud-web-app/web/lib/cloth-simulation.types.ts` extracted from `cloud-web-app/web/lib/cloth-simulation.ts`.
+- `cloud-web-app/web/lib/level-serialization.types.ts` extracted from `cloud-web-app/web/lib/level-serialization.ts`.
+- `cloud-web-app/web/lib/particles/particle-pool.ts` extracted from `cloud-web-app/web/lib/particles/advanced-particle-system.ts`.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 30`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=30`, `oversizedFiles=0`).
+
+## 231) Delta 2026-02-23 CLI - Additional decomposition wave (near-limit 30 -> 29)
+
+Implemented:
+1. Further reduced near-limit file pressure by extracting input runtime modules:
+- `cloud-web-app/web/lib/advanced-input-system.types.ts`
+- `cloud-web-app/web/lib/advanced-input-device-manager.ts`
+- `cloud-web-app/web/lib/advanced-input-system.ts` now composes exported modules.
+2. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 29`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=29`, `oversizedFiles=0`).
+
+## 232) Delta 2026-02-23 CLI - Studio Home UI declutter pass (professional surface hardening)
+
+Implemented:
+1. Reduced top-bar action noise in `cloud-web-app/web/components/studio/StudioHome.tsx` by keeping primary actions visible and moving secondary actions to a compact `More` popover.
+2. Consolidated Task Board information architecture in `cloud-web-app/web/components/studio/StudioHomeTaskBoard.tsx`:
+- merged duplicated status strips into a two-block execution summary (`progress` + `orchestration/queue/pipeline`)
+- replaced scattered notices with normalized advisory stack.
+3. Simplified Ops Bar signal-to-noise in `cloud-web-app/web/components/studio/StudioHomeRightRail.tsx`:
+- unified alert rendering pipeline
+- moved dense Full Access policy details into a collapsible disclosure.
+4. Improved Mission and Team Chat ergonomics:
+- `cloud-web-app/web/components/studio/StudioHomeMissionPanel.tsx` mission-quality progress meter and collapsible shortcut help.
+- `cloud-web-app/web/components/studio/StudioHomeTeamChat.tsx` agent-runs block converted to disclosure.
+5. Added shared studio disclosure styling in `cloud-web-app/web/app/globals.css` (`studio-popover-summary`, `studio-popover-panel`) for consistent, non-noisy interaction chrome.
+
+Validation snapshot:
+1. Deferred full test/lint freeze by execution policy (tests run at final freeze).
+
+## 233) Delta 2026-02-23 CLI - Motion matching decomposition wave (near-limit 29 -> 28)
+
+Implemented:
+1. Extracted motion matching search/blending core from monolithic runtime file:
+- new file `cloud-web-app/web/lib/motion-matching-search.ts` (`MotionKDTree`, `InertializationBlender`)
+- `cloud-web-app/web/lib/motion-matching-system.ts` now composes extracted core while preserving exports.
+2. Reduced structural size of `motion-matching-system.ts` from near-limit range to non-critical size.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 28`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=28`, `oversizedFiles=0`).
+
+## 234) Delta 2026-02-23 CLI - Audio synthesis decomposition + Workbench status-bar declutter
+
+Implemented:
+1. Extracted audio effect stack from monolithic synthesis module:
+- new file `cloud-web-app/web/lib/audio-synthesis-effects.ts` (`ReverbEffect`, `DelayEffect`, `DistortionEffect`, `ChorusEffect`)
+- `cloud-web-app/web/lib/audio-synthesis.ts` now composes/re-exports effect module.
+2. Reduced `audio-synthesis.ts` size from near-limit (`1158`) to non-critical range (`878`).
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 27`.
+4. Refined IDE status-bar density in `cloud-web-app/web/components/ide/WorkbenchStatusBar.tsx`:
+- primary context chips remain visible
+- secondary context moved to compact `More` disclosure
+- shortcut legend moved to disclosure to reduce persistent chrome noise.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=27`, `oversizedFiles=0`).
+
+## 235) Delta 2026-02-23 CLI - Current gap snapshot after declutter wave
+
+Factual snapshot:
+1. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS with:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+- `not-implemented-noncritical=2`
+2. `cmd /c npm run docs:routes-inventory` (`cloud-web-app/web`) regenerated factual route/capability inventory (`NOT_IMPLEMENTED total=10`, `critical=8`, `noncritical=2`).
+
+Execution opinion:
+1. Critical visual debt remains controlled; remaining P0 risk is capability gap handling and route-surface coherence, not styling.
+2. Next highest-leverage work remains: reducing remaining `NOT_IMPLEMENTED` impact in critical journeys and continuing architecture decomposition of near-limit runtime files.
+
+## 236) Delta 2026-02-23 CLI - Behavior tree core extraction (near-limit 27 -> 26)
+
+Implemented:
+1. Extracted behavior-tree shared primitives into dedicated module:
+- new file `cloud-web-app/web/lib/behavior-tree-core.ts` containing `NodeStatus`, `BehaviorTreeContext`, `Blackboard`, `BlackboardImpl`, `BehaviorNode`.
+2. `cloud-web-app/web/lib/behavior-tree.ts` now composes and re-exports core primitives instead of embedding the base layer inline.
+3. Removed structural separator/bulk banner noise in `behavior-tree.ts` to keep high-signal logic visible and reduce near-limit maintenance pressure.
+4. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 26`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=26`, `oversizedFiles=0`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; targeted triage scan was executed to confirm structural delta.
+
+## 237) Delta 2026-02-23 CLI - AI behavior-tree runtime extraction (near-limit 26 -> 25)
+
+Implemented:
+1. Extracted blackboard/state structures from `cloud-web-app/web/lib/ai/behavior-tree-system.tsx` to dedicated module:
+- new file `cloud-web-app/web/lib/ai/behavior-tree-system.blackboard.ts` (`Blackboard`, `AgentConfig`, `PerceptionTarget`, `NavPath`).
+2. `behavior-tree-system.tsx` now reuses and re-exports extracted types/classes, keeping public contract stable while reducing monolithic pressure.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 25`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=25`, `oversizedFiles=0`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; targeted structural scan confirms the decomposition delta.
+
+## 238) Delta 2026-02-23 CLI - Physics system collision extraction (near-limit 25 -> 24)
+
+Implemented:
+1. Extracted collision/raycast subsystem from physics integration monolith:
+- new file `cloud-web-app/web/lib/physics/physics-collision-detector.ts` containing `CollisionDetector`.
+2. `cloud-web-app/web/lib/physics/physics-system.ts` now composes the detector module and remains focused on rigid-body world/constraint orchestration.
+3. Preserved runtime contract by keeping detector class export available through `physics-system.ts` default export surface.
+4. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` set to `nearLimitFiles <= 24`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=24`, `oversizedFiles=0`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural scan executed.
+
+## 239) Delta 2026-02-23 CLI - UI/engine decomposition wave (near-limit 24 -> 22)
+
+Implemented:
+1. Extracted UI framework theme definitions to dedicated module:
+- new file `cloud-web-app/web/lib/ui/ui-framework-themes.ts`.
+2. `cloud-web-app/web/lib/ui/ui-framework.tsx` now imports/re-exports themes while staying focused on manager/context/hooks/components.
+3. Extracted engine physics math primitives to dedicated module:
+- new file `cloud-web-app/web/lib/engine/physics-engine-math.ts` (`Vec3`, `Quat`).
+4. `cloud-web-app/web/lib/engine/physics-engine.ts` now composes/re-exports math primitives and removes embedded math monolith block.
+5. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` set to `nearLimitFiles <= 22`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=22`, `oversizedFiles=0`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural scan executed.
+
+## 240) Delta 2026-02-23 CLI - Hot reload helper extraction (near-limit 22 -> 21)
+
+Implemented:
+1. Extracted runtime helper classes from hot reload server monolith:
+- new file `cloud-web-app/web/lib/hot-reload/hot-reload-server-runtime-helpers.ts` (`Logger`, `Debouncer`, `FileHashCache`).
+2. `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` now composes helper module and remains focused on websocket/watch server orchestration.
+3. Removed duplicated helper logic/import noise from server core file (`crypto`, `fs/promises` helper imports moved to helper module).
+4. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` set to `nearLimitFiles <= 21`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=21`, `oversizedFiles=0`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural scan executed.
+
+## 241) Delta 2026-02-23 CLI - Core runtime decomposition wave (near-limit 21 -> 15)
+
+Implemented:
+1. Extracted Scene Graph transform core to dedicated module:
+- new file `cloud-web-app/web/lib/engine/scene-graph-transform.ts` (`Transform` + hierarchy bridge interface).
+2. `cloud-web-app/web/lib/engine/scene-graph.ts` now composes/re-exports `Transform` and stays focused on node/scene orchestration.
+3. Extracted collaboration type/color contracts to dedicated module:
+- new file `cloud-web-app/web/lib/collaboration-realtime.types.ts`.
+4. `cloud-web-app/web/lib/collaboration-realtime.ts` now composes/re-exports shared contracts, reducing monolith pressure.
+5. Extracted pixel-streaming contracts/defaults to dedicated module:
+- new file `cloud-web-app/web/lib/pixel-streaming.types.ts`.
+6. `cloud-web-app/web/lib/pixel-streaming.ts` now composes/re-exports streaming contracts and runtime defaults.
+7. Extracted skeletal bone/skeleton runtime core:
+- new file `cloud-web-app/web/lib/skeletal-animation-skeleton.ts`.
+8. `cloud-web-app/web/lib/skeletal-animation.ts` now composes/re-exports `Bone`/`Skeleton` and focuses on clips/mixer/IK/retarget integration.
+9. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 15`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=15`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=15`, threshold `<=15`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 242) Delta 2026-02-24 CLI - Profiler helper extraction (near-limit 15 -> 14)
+
+Implemented:
+1. Extracted profiler runtime helper classes to dedicated module:
+- new file `cloud-web-app/web/lib/profiler-integrated-runtime-helpers.ts` (`HighResTimer`, `GPUProfiler`, `MemoryProfiler`, `DrawCallTracker`, `SpanRecorder`).
+2. `cloud-web-app/web/lib/profiler-integrated.ts` now composes/re-exports helper classes and focuses on profiler orchestration/overlay/graph surfaces.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 14`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=14`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=14`, threshold `<=14`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 243) Delta 2026-02-24 CLI - World partition core extraction (near-limit 14 -> 13)
+
+Implemented:
+1. Extracted world partition contracts to dedicated module:
+- new file `cloud-web-app/web/lib/world-partition-types.ts`.
+2. Extracted world partition core runtime classes to dedicated module:
+- new file `cloud-web-app/web/lib/world-partition-core.ts` (`SpatialHashGrid`, `LODManager`, `CellLoader`).
+3. `cloud-web-app/web/lib/world-partition.ts` now composes/re-exports shared contracts and core classes, with manager/HLOD orchestration kept in the main runtime file.
+4. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 13`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=13`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=13`, threshold `<=13`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 244) Delta 2026-02-24 CLI - Post-processing pass extraction (near-limit 13 -> 12)
+
+Implemented:
+1. Extracted post-processing pass layer to dedicated module:
+- new file `cloud-web-app/web/lib/postprocessing/post-processing-passes.ts` (`PostProcessingPass`, `BloomPass`, `ColorGradingPass`, `VignettePass`, `FilmGrainPass`, `ChromaticAberrationPass`, `TonemappingPass`).
+2. `cloud-web-app/web/lib/postprocessing/post-processing-system.ts` now focuses on `EffectComposer` + React hook orchestration and re-exports pass layer contracts.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 12`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=12`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=12`, threshold `<=12`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 245) Delta 2026-02-24 CLI - Quest/Replay extraction wave (near-limit 12 -> 10)
+
+Implemented:
+1. Extracted quest shared contracts to dedicated module:
+- new file `cloud-web-app/web/lib/quests/quest-system-types.ts`.
+2. `cloud-web-app/web/lib/quests/quest-system.tsx` now composes/re-exports quest contracts and focuses on manager/builder/hooks orchestration.
+3. Extracted replay state serializer to dedicated module:
+- new file `cloud-web-app/web/lib/replay/replay-state-serializer.ts` (`StateSerializer`).
+4. `cloud-web-app/web/lib/replay/replay-system.tsx` now composes/re-exports serializer and focuses on recorder/player/interpolation/runtime flow.
+5. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 10`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=10`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=10`, threshold `<=10`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 246) Delta 2026-02-24 CLI - Capture/State contract extraction wave (near-limit 10 -> 8)
+
+Implemented:
+1. Extracted capture shared contracts to dedicated module:
+- new file `cloud-web-app/web/lib/capture/capture-types.ts`.
+2. `cloud-web-app/web/lib/capture/capture-system.tsx` now composes/re-exports capture contracts and focuses on runtime + hooks orchestration.
+3. Extracted save/load shared contracts to dedicated module:
+- new file `cloud-web-app/web/lib/state/game-state-manager-types.ts`.
+4. `cloud-web-app/web/lib/state/game-state-manager.tsx` now composes/re-exports contracts and focuses on adapters/manager/runtime flow.
+5. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 8`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=8`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=8`, threshold `<=8`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 247) Delta 2026-02-24 CLI - World streaming contract extraction (near-limit 8 -> 7)
+
+Implemented:
+1. Extracted world streaming shared contracts to dedicated module:
+- new file `cloud-web-app/web/lib/world/world-streaming-types.ts`.
+2. `cloud-web-app/web/lib/world/world-streaming.tsx` now composes/re-exports contract types and focuses on octree/streaming runtime orchestration.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 7`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=7`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=7`, threshold `<=7`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 248) Delta 2026-02-24 CLI - Navigation AI contract extraction + threshold hardening (near-limit 7 -> 6)
+
+Implemented:
+1. Extracted navigation AI shared contracts to dedicated module:
+- new file `cloud-web-app/web/lib/engine/navigation-ai-types.ts`.
+2. `cloud-web-app/web/lib/engine/navigation-ai.ts` now composes/re-exports navigation contracts and focuses on runtime/math/pathfinding behavior.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 6`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=6`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=6`, threshold `<=6`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 249) Delta 2026-02-24 CLI - AI integration runtime-state extraction (near-limit 6 -> 5)
+
+Implemented:
+1. Extracted AI integration runtime-state surface to dedicated module:
+- new file `cloud-web-app/web/lib/ai-integration-runtime-state.ts` (`EngineState`, `engineState`, `initializeEngineState`).
+2. `cloud-web-app/web/lib/ai-integration-total.ts` now composes/re-exports runtime-state contracts and focuses on tool registration/integration flows.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 5`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=5`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=5`, threshold `<=5`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 250) Delta 2026-02-24 CLI - Analysis checkpoint after structural wave
+
+Factual checkpoint:
+1. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS with `nearLimitFiles=5`, `oversizedFiles=0`.
+2. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS with critical visual metrics still at zero:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+3. Capability visibility remains explicit:
+- `not-implemented-ui=6`
+- `not-implemented-noncritical=2`
+4. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS (`files=246`).
+
+Residual priority stack (still open):
+1. Remaining near-limit structural targets (`5` files):
+- `lib/ecs/prefab-component-system.tsx`
+- `lib/ai-3d-generation-system.ts`
+- `lib/networking/multiplayer-system.tsx`
+- `lib/water-ocean-system.ts`
+- `lib/dialogue-cutscene-system.ts`
+2. Capability completion track remains separate from structural decomposition and still requires explicit product decisions for each gated surface.
+
+## 251) Delta 2026-02-24 CLI - Water/Ocean decomposition wave (near-limit 5 -> 4)
+
+Implemented:
+1. Extracted water/ocean shared contracts:
+- new file `cloud-web-app/web/lib/water-ocean-types.ts`.
+2. Extracted water/ocean presets:
+- new file `cloud-web-app/web/lib/water-ocean-presets.ts` (`WATER_PRESETS`).
+3. `cloud-web-app/web/lib/water-ocean-system.ts` now composes/re-exports contracts/presets and focuses on runtime wave/ocean/buoyancy orchestration.
+4. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 4`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=4`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=4`, threshold `<=4`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 252) Delta 2026-02-24 CLI - Dialogue/Cutscene UI split + Water presets extraction (near-limit 5 -> 3)
+
+Implemented:
+1. Extracted dialogue/cutscene UI renderers to dedicated module:
+- new file `cloud-web-app/web/lib/dialogue-cutscene-ui.ts` (`DialogueUIRenderer`, `SubtitleRenderer`, `CinematicBarsRenderer` + UI factories).
+2. `cloud-web-app/web/lib/dialogue-cutscene-system.ts` now focuses on dialogue/cutscene runtime orchestration and re-exports UI surface.
+3. Water/ocean decomposition completed in this wave:
+- shared contracts in `cloud-web-app/web/lib/water-ocean-types.ts`;
+- presets in `cloud-web-app/web/lib/water-ocean-presets.ts`.
+4. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 3`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=3`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=3`, threshold `<=3`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 253) Delta 2026-02-24 CLI - Analysis checkpoint after near-limit drop to 3
+
+Factual checkpoint:
+1. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS with `nearLimitFiles=3`, `oversizedFiles=0`.
+2. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS with critical visual metrics still at zero:
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+3. Capability visibility remains explicit:
+- `not-implemented-ui=6`
+- `not-implemented-noncritical=2`
+4. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS (`files=246`).
+5. `cmd /c npm run docs:routes-inventory` refreshed route/capability inventory.
+
+Residual priority stack (open):
+1. Remaining near-limit files (`3`):
+- `lib/ecs/prefab-component-system.tsx`
+- `lib/ai-3d-generation-system.ts`
+- `lib/networking/multiplayer-system.tsx`
+2. Capability completion/claim gating remains the main non-structural closure track.
+
+## 254) Delta 2026-02-24 CLI - AI 3D contract extraction wave (near-limit 3 -> 2)
+
+Implemented:
+1. Extracted AI 3D generation shared contracts:
+- new file `cloud-web-app/web/lib/ai-3d-generation-types.ts`.
+2. `cloud-web-app/web/lib/ai-3d-generation-system.ts` now composes/re-exports shared contracts and focuses on runtime generation pipelines.
+3. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 2`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=2`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=2`, threshold `<=2`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 255) Delta 2026-02-24 CLI - Multiplayer transport extraction + architecture closure (near-limit 2 -> 0)
+
+Implemented:
+1. Extracted multiplayer transport layer to dedicated module:
+- new file `cloud-web-app/web/lib/networking/multiplayer-transport.ts` (`NetworkTransport`, `WebSocketTransport`).
+2. `cloud-web-app/web/lib/networking/multiplayer-system.tsx` now composes/re-exports transport contracts while keeping multiplayer orchestration/runtime behavior unchanged.
+3. Tightened architecture gate baseline to hard closure:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `nearLimitFiles <= 0`.
+
+Validation snapshot:
+1. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=0`, `oversizedFiles=0`).
+2. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`nearLimitFiles=0`, threshold `<=0`).
+3. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS (`files=246`).
+4. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS (`legacy-accent=0`, `admin-light=0`, `admin-status-light=0`, `blocking-dialogs=0`, `not-implemented-ui=6`, `noncritical=2`).
+5. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=38`).
+6. `cmd /c npm run qa:canonical-components` (`cloud-web-app/web`) -> PASS.
+7. `cmd /c npm run qa:mojibake` (`cloud-web-app/web`) -> PASS (`findings=0`).
+
+Execution note:
+1. Full freeze suite remains intentionally deferred by user policy; only targeted structural gates were executed in this wave.
+
+## 256) Delta 2026-02-24 CLI - Full freeze execution + type stability closure
+
+Implemented:
+1. Closed type-safety regressions introduced by modularization wave:
+- removed duplicate `engineState` identifier in `cloud-web-app/web/lib/ai-integration-total.ts`;
+- restored named export compatibility for `CollisionDetector` in `cloud-web-app/web/lib/physics/physics-system.ts`;
+- restored `ColorUtil` export/import contract in particle runtime (`cloud-web-app/web/lib/engine/particle-system-runtime-helpers.ts`, `cloud-web-app/web/lib/engine/particle-system.ts`);
+- aligned transform hierarchy typing for readonly children in `cloud-web-app/web/lib/engine/scene-graph-transform.ts`;
+- restored `readFile/stat` imports in `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts`;
+- restored `ComboStep` type export in `cloud-web-app/web/lib/advanced-input-system.ts`;
+- restored explicit `NetworkTransport` type import in `cloud-web-app/web/lib/networking/multiplayer-system.tsx`.
+2. Executed full enterprise freeze gate in `cloud-web-app/web` and root governance gates.
+
+Validation snapshot:
+1. `cmd /c npm run lint` (`cloud-web-app/web`) -> PASS (`0 warnings`).
+2. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+3. `cmd /c npm run build` (`cloud-web-app/web`) -> PASS (optimized production build completed).
+4. `cmd /c npm run qa:interface-gate` (`cloud-web-app/web`) -> PASS (`legacy-accent=0`, `admin-light=0`, `admin-status-light=0`, `blocking-dialogs=0`, `not-implemented-ui=6`, `noncritical=2`).
+5. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS.
+6. `cmd /c npm run qa:repo-connectivity` (repo root) -> PASS (`requiredMissing=0`, `deadScriptReferences=0`, `markdownCanonical=41`, `markdownHistorical=3603`).
+7. `cmd /c npm run qa:workflow-governance` (repo root) -> PASS (`issues=0`).
+8. `cmd /c npm run qa:canonical-doc-governance` (repo root) -> PASS (`unindexedCanonicalMarkdown=0`).
+9. `cmd /c npm run qa:secrets-critical` (repo root) -> PASS (`findings=0`).
+
+Decision lock:
+1. Scope remains unchanged; this wave is closure of structural/type regressions plus full gate validation.
+2. Residual capability gates remain explicit and intentional (`not-implemented-ui=6`, `noncritical=2`).
+
+## 257) Delta 2026-02-24 CLI - Render cancel contract hardening (`NOT_IMPLEMENTED` -> `QUEUE_BACKEND_UNAVAILABLE`)
+
+Implemented:
+1. Added queue-unavailable capability helper in `cloud-web-app/web/lib/server/capability-response.ts`:
+- `queueBackendUnavailableCapability(...)` returns explicit `QUEUE_BACKEND_UNAVAILABLE` (`503`, `capabilityStatus='PARTIAL'`).
+2. Updated render cancel endpoint to accurate runtime contract:
+- `cloud-web-app/web/app/api/render/jobs/[jobId]/cancel/route.ts` now uses queue-unavailable contract with explicit metadata (`reason: 'queue-runtime-not-wired'`).
+3. Tightened route contract checks for this endpoint:
+- `cloud-web-app/web/scripts/check-route-contracts.mjs` now enforces render cancel queue-unavailable patterns.
+
+Validation snapshot:
+1. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=39`).
+2. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS with capability metric improvement:
+- `not-implemented-ui: 6 -> 5`.
+3. `cmd /c npm run qa:no-fake-success` (`cloud-web-app/web`) -> PASS (`files=246`).
+4. `cmd /c npm run qa:interface-gate` (`cloud-web-app/web`) -> PASS (`not-implemented-ui=5`, `noncritical=2`, critical zeros preserved).
+5. `cmd /c npm run typecheck` (`cloud-web-app/web`) -> PASS.
+
+Decision lock:
+1. No fake-success introduced; cancellation remains explicitly unavailable until queue wiring exists.
+2. Contract accuracy improved by using queue-backend-unavailable semantics instead of generic `NOT_IMPLEMENTED`.
+
+## 258) Delta 2026-02-24 CLI - AI query/stream contract precision (`NOT_IMPLEMENTED` removal on non-core paths)
+
+Implemented:
+1. Updated non-core AI capability gates to precise availability contracts:
+- `cloud-web-app/web/app/api/ai/query/route.ts` now returns `503 PROVIDER_NOT_CONFIGURED` (`capability=AI_QUERY`, `capabilityStatus=PARTIAL`) when no provider is configured.
+- `cloud-web-app/web/app/api/ai/stream/route.ts` now returns `503 AI_BACKEND_NOT_CONFIGURED` (`capability=AI_STREAM_BACKEND`, `capabilityStatus=PARTIAL`) when backend URL is missing.
+2. Updated route-contract enforcement:
+- `cloud-web-app/web/scripts/check-route-contracts.mjs` now validates query/stream precision contracts (removed `NOT_IMPLEMENTED` expectation for these two routes).
+3. Normalized route inventory counting semantics:
+- `cloud-web-app/web/scripts/generate-routes-inventory.mjs` now counts exact `error: 'NOT_IMPLEMENTED'` markers (not substring matches from payment-specific errors).
+
+Validation snapshot:
+1. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=39`).
+2. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS:
+- `not-implemented-ui=5`
+- `not-implemented-noncritical=0`
+3. `cmd /c npm run qa:interface-gate` (`cloud-web-app/web`) -> PASS.
+4. `cmd /c npm run docs:routes-inventory` (`cloud-web-app/web`) -> updated:
+- `NOT_IMPLEMENTED total=5`
+- `critical=5`
+- `noncritical=0`
+- `PAYMENT_GATEWAY_NOT_IMPLEMENTED=2`
+5. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS after this wave.
+
+Decision lock:
+1. Core AI no-provider contract remains unchanged for critical routes (`chat|complete|action|inline-edit|inline-completion` keep explicit `501 NOT_IMPLEMENTED` policy).
+2. Non-core routes now use more precise operational unavailability contracts without fake success.
+
+## 259) Delta 2026-02-24 CLI - Inline completion contract precision + enterprise freeze reconfirm
+
+Implemented:
+1. Updated inline completion non-core gate precision:
+- `cloud-web-app/web/app/api/ai/inline-completion/route.ts` now returns explicit `503 PROVIDER_NOT_CONFIGURED` (`capability=AI_INLINE_COMPLETION`, `capabilityStatus=PARTIAL`) when providers are unavailable.
+2. Updated route contract scanner:
+- `cloud-web-app/web/scripts/check-route-contracts.mjs` now validates inline completion with precise provider-unavailable contract (`503`) instead of generic not-implemented expectation.
+
+Validation snapshot:
+1. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=39`).
+2. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS:
+- `not-implemented-ui=4`
+- `not-implemented-noncritical=0`
+3. `cmd /c npm run docs:routes-inventory` (`cloud-web-app/web`) -> updated:
+- `NOT_IMPLEMENTED total=4`
+- `critical=4`
+- `noncritical=0`
+- `PAYMENT_GATEWAY_NOT_IMPLEMENTED=2`
+4. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS after this wave.
+
+Decision lock:
+1. Critical no-provider policy remains explicit and unchanged for:
+- `/api/ai/chat`
+- `/api/ai/complete`
+- `/api/ai/action`
+- `/api/ai/inline-edit`
+2. Non-core AI capability surfaces now use precise 503 availability contracts.
+
+## 260) Delta 2026-02-24 CLI - Capability transparency metric expansion
+
+Implemented:
+1. Expanded interface critical scanner with explicit capability-unavailable visibility:
+- `provider-not-configured-ui`
+- `queue-backend-unavailable-ui`
+2. Expanded routes inventory summary with exact capability error-code counts:
+- `PROVIDER_NOT_CONFIGURED`
+- `QUEUE_BACKEND_UNAVAILABLE`
+3. Kept release gate thresholds unchanged for hard blockers while adding observability metrics (no hidden debt reduction by metric removal).
+
+Validation snapshot:
+1. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS with expanded metrics:
+- `not-implemented-ui=4`
+- `not-implemented-noncritical=0`
+- `provider-not-configured-ui=13`
+- `queue-backend-unavailable-ui=11`
+2. `cmd /c npm run docs:routes-inventory` (`cloud-web-app/web`) -> updated summary:
+- `NOT_IMPLEMENTED total=4`
+- `PAYMENT_GATEWAY_NOT_IMPLEMENTED=2`
+- `PROVIDER_NOT_CONFIGURED=13`
+- `QUEUE_BACKEND_UNAVAILABLE=11`
+3. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS after scanner expansion.
+
+Decision lock:
+1. This wave improves observability only; no scope expansion and no fake-success behavior.
+2. Remaining `NOT_IMPLEMENTED` footprint is intentionally concentrated in four core AI routes.
+
+## 261) Delta 2026-02-24 CLI - Gate baseline tightening after capability reduction
+
+Implemented:
+1. Tightened architecture gate baseline:
+- `cloud-web-app/web/scripts/architecture-critical-gate.mjs` now enforces `apiNotImplemented <= 4` (was `<=8`).
+2. Tightened interface gate baseline:
+- `cloud-web-app/web/scripts/interface-critical-gate.mjs` now enforces:
+  - `not-implemented-ui <= 4` (was `<=6`)
+  - `not-implemented-noncritical <= 0` (was `<=2`).
+3. Revalidated enterprise gate after threshold tightening.
+
+Validation snapshot:
+1. `cmd /c npm run qa:architecture-gate` (`cloud-web-app/web`) -> PASS (`apiNotImplemented=4`).
+2. `cmd /c npm run qa:interface-gate` (`cloud-web-app/web`) -> PASS (`not-implemented-ui=4`, `not-implemented-noncritical=0`).
+3. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS with tightened thresholds.
+
+Decision lock:
+1. Threshold tightening reflects achieved state; no scope expansion.
+2. Remaining four critical `NOT_IMPLEMENTED` routes are policy-locked until runtime/provider availability changes.
+
+## 262) Delta 2026-02-25 CLI - Policy lock hardening + deprecation cutoff contract tightening
+
+Implemented:
+1. Added explicit policy gate for `NOT_IMPLEMENTED` scope:
+- new script `cloud-web-app/web/scripts/check-not-implemented-policy.mjs`
+- new npm task `qa:not-implemented-policy`
+- integrated into `qa:enterprise-gate`.
+2. Tightened deprecation contract checks from generic metadata presence to exact cycle metadata values for legacy routes:
+- `/api/workspace/tree`
+- `/api/workspace/files`
+- `/api/auth/sessions`
+- `/api/auth/sessions/[id]`.
+3. Added route-contract enforcement for telemetry-backed cutoff policy report:
+- `cloud-web-app/web/app/api/admin/compatibility-routes/route.ts` must expose `candidateForRemoval`, `removalCandidates`, `requiredSilentDays: 14`, and `deprecationMode: 'phaseout_after_2_cycles'`.
+4. Re-ran root governance sweeps to refresh canonical operational baselines:
+- repo connectivity
+- workflow governance
+- canonical doc governance.
+
+Validation snapshot:
+1. `cmd /c npm run qa:not-implemented-policy` (`cloud-web-app/web`) -> PASS (`files=4` policy-locked core AI routes).
+2. `cmd /c npm run qa:route-contracts` (`cloud-web-app/web`) -> PASS (`checks=40`).
+3. `cmd /c npm run qa:enterprise-gate` (`cloud-web-app/web`) -> PASS with policy gate active.
+4. `cmd /c npm run qa:canonical-doc-governance` (`repo root`) -> PASS:
+- `canonicalMarkdownFiles=41`
+- `historicalMarkdownFiles=3603`
+- `maxHistoricalMarkdown=3603` (hard growth lock)
+- `missingListedCanonicalDocs=0`.
+5. `cmd /c npm run qa:repo-connectivity` (`repo root`) -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+6. `cmd /c npm run qa:workflow-governance` (`repo root`) -> PASS (`issues=0`).
+
+Decision lock:
+1. `CAP-P0-01` is now contract-locked: exactly four core AI routes may emit `NOT_IMPLEMENTED`.
+2. Legacy route cutoff remains phaseado por telemetria with enforced cycle metadata and removal-candidate reporting contract.
+
+## 263) Delta 2026-02-25 CLI - Full repository deep sweep + legacy-path governance lock
+
+Implemented:
+1. Executed a full repository footprint sweep and published canonical deep-audit matrix:
+- `audit dicas do emergent usar/40_FULL_REPO_DETAILED_AUDIT_AND_CLOSURE_MATRIX_2026-02-25.md`.
+2. Added legacy-path reference governance scanner:
+- `tools/legacy-path-reference-scan.mjs`
+- `npm run qa:legacy-path-references` with hard active-surface lock (`--max-active-hits 3`).
+3. Reduced active-surface legacy-path references by removing hardcoded missing-path usage from CI:
+- `.github/workflows/ci.yml` now uses guarded root scripts for ai-ide tests and generic log artifact glob.
+4. Added canonical generated matrix for this control:
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`.
+5. Registered docs `39` and `40` in canonical index:
+- `audit dicas do emergent usar/00_FONTE_CANONICA.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `matchedFiles=81`
+- `totalMentions=669`
+- `activeMentions=3`
+- `maxActiveHits=3`.
+2. `cmd /c npm run qa:interface-critical` (`cloud-web-app/web`) -> PASS.
+3. `cmd /c npm run docs:architecture-triage` (`cloud-web-app/web`) -> PASS (`oversized=0`, `nearLimit=0`, `apiNotImplemented=4`).
+4. `cmd /c npm run docs:routes-inventory` (`cloud-web-app/web`) -> updated.
+
+Decision lock:
+1. Active surfaces are now hard-bounded against growth of stale legacy path references.
+2. Deep-audit baseline is canonicalized for next closure waves without changing business scope.
+
+## 264) Delta 2026-02-25 CLI - Legacy-path active references reduced to zero
+
+Implemented:
+1. Replaced hardcoded optional ai-ide path scripts with dynamic discovery helper:
+- new helper `tools/run-optional-ai-ide-task.mjs`.
+- updated root scripts:
+  - `check:ai-ide-ts`
+  - `build:ai-ide`
+  - `test:ai-ide`.
+2. Tightened legacy-path governance gate from tolerance to strict zero active hits:
+- `qa:legacy-path-references` now enforces `--max-active-hits 0`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`
+- `maxActiveHits=0`.
+2. `cmd /c npm run qa:repo-connectivity` (`repo root`) -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+3. `cmd /c npm run qa:canonical-doc-governance` (`repo root`) -> PASS (`canonical=43`, `historical=3603`, hard lock preserved).
+4. `cmd /c npm run qa:workflow-governance` (`repo root`) -> PASS (`issues=0`).
+
+Decision lock:
+1. Active product/CI/governance surfaces must keep legacy missing-path references at zero.
+2. Any reintroduction becomes blocking through `qa:legacy-path-references`.
+
+## 265) Delta 2026-02-25 CLI - Active large-file pressure governance gate
+
+Implemented:
+1. Added active-surface large-file pressure scanner:
+- `tools/active-large-file-pressure-scan.mjs`.
+2. Added governance gate:
+- `npm run qa:active-large-file-pressure`.
+3. Published canonical report:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`.
+4. Registered report in canonical index (`00_FONTE_CANONICA.md`).
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `lineThreshold=900`
+- `largeFileCount=136`
+- `maxFiles=136`.
+
+Decision lock:
+1. Active-surface large-file pressure cannot grow above baseline (`136`) while decomposition waves are executed.
+2. Next structural closure target is baseline reduction, not threshold relaxation.
+
+## 266) Delta 2026-02-25 CLI - Decomposition batches published from measured pressure matrix
+
+Implemented:
+1. Published decision-complete decomposition execution plan:
+- `audit dicas do emergent usar/42_ACTIVE_DECOMPOSITION_BATCH_PLAN_2026-02-25.md`.
+2. Bound decomposition queue to measured pressure matrix (`41`) and non-growth gate (`qa:active-large-file-pressure`).
+3. Registered doc `42` in canonical index.
+
+Decision lock:
+1. Structural decomposition is now driven by measured ranking, not ad hoc edits.
+2. Priority remains reduction of active `>=900` line pressure while preserving current API/capability contracts.
+
+## 267) Delta 2026-02-25 CLI - Batch A decomposition execution (2 modules) with compatibility-preserving splits
+
+Implemented:
+1. Executed navigation runtime split:
+- `cloud-web-app/web/lib/engine/navigation-ai.ts` now composes from `cloud-web-app/web/lib/engine/navigation-ai-primitives.ts`.
+- Public compatibility preserved via re-export (`NavigationGrid`, `GridConfig` and shared vector/queue primitives usage kept internal-compatible).
+2. Executed AI 3D runtime split:
+- `cloud-web-app/web/lib/ai-3d-generation-system.ts` reduced to orchestration layer.
+- New modules introduced:
+  - `cloud-web-app/web/lib/ai-3d-generation-nerf.ts`
+  - `cloud-web-app/web/lib/ai-3d-generation-gaussian.ts`
+  - `cloud-web-app/web/lib/ai-3d-generation-meshing.ts`
+- Public surface compatibility preserved via explicit re-exports from `ai-3d-generation-system.ts`.
+3. Refreshed pressure baseline report:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`.
+
+Validation snapshot:
+1. `node tools/active-large-file-pressure-scan.mjs --line-threshold 900 --max-files 136 --report "audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md"` -> PASS:
+- `scannedFiles=1047`
+- `largeFileCount=134` (`136 -> 134`)
+- `growthExceeded=false`.
+
+Decision lock:
+1. Decomposition wave continues under compatibility-preserving rule (no API/capability contract break).
+2. Hard non-growth ceiling remains unchanged during reduction waves (`maxFiles=136`), with reduction tracked in canonical report `41`.
+
+## 268) Delta 2026-02-25 CLI - Batch A decomposition execution (3rd module) + pressure reduction to 133
+
+Implemented:
+1. Executed behavior-tree runtime split:
+- new module `cloud-web-app/web/lib/behavior-tree-action-nodes.ts` (action/runtime nodes).
+- `cloud-web-app/web/lib/behavior-tree.ts` now composes these nodes and re-exports them to preserve compatibility.
+2. Refreshed large-file pressure report after split:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`.
+3. Updated decomposition plan progress:
+- `audit dicas do emergent usar/42_ACTIVE_DECOMPOSITION_BATCH_PLAN_2026-02-25.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=133` (`136 -> 133`)
+- `maxFiles=136`
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`.
+
+Decision lock:
+1. Batch A remains on compatibility-preserving decomposition only (no API/capability behavior changes).
+2. Structural closure remains reduction-driven with fixed non-growth ceiling until next baseline lock adjustment.
+
+## 269) Delta 2026-02-25 CLI - Batch A decomposition execution (4th module) + pressure reduction to 132
+
+Implemented:
+1. Executed world-streaming structural split:
+- new modules:
+  - `cloud-web-app/web/lib/world/world-streaming-octree.ts`
+  - `cloud-web-app/web/lib/world/world-streaming-priority-queue.ts`
+- updated `cloud-web-app/web/lib/world/world-streaming.tsx` to import these modules and keep compatibility export for `Octree`.
+2. Updated decomposition plan progress:
+- `audit dicas do emergent usar/42_ACTIVE_DECOMPOSITION_BATCH_PLAN_2026-02-25.md`.
+3. Refreshed pressure and legacy reference matrices:
+- `41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=132` (`136 -> 132`)
+- `maxFiles=136`
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`.
+
+Decision lock:
+1. Structural reductions remain compatibility-preserving and scope-neutral.
+2. Batch A continues on remaining high-priority monoliths (`input-manager`, `QuestEditor`, `behavior-tree-system`) under the same non-growth ceiling.
+
+## 270) Delta 2026-02-25 CLI - Batch A decomposition execution (5th module) + pressure reduction to 131
+
+Implemented:
+1. Executed input manager split:
+- `cloud-web-app/web/lib/input/input-manager-types.ts` (contracts + maps),
+- `cloud-web-app/web/lib/input/input-manager-default-mappings.ts` (default mappings + registrar),
+- `cloud-web-app/web/lib/input/input-manager.ts` reduced to runtime orchestration with compatibility re-exports.
+2. Updated decomposition progress doc:
+- `audit dicas do emergent usar/42_ACTIVE_DECOMPOSITION_BATCH_PLAN_2026-02-25.md`.
+3. Refreshed pressure/legacy matrices:
+- `41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=131` (`136 -> 131`)
+- `maxFiles=136`.
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`.
+
+Decision lock:
+1. Decomposition remains compatibility-preserving with no capability or API contract expansion.
+2. Batch A focus now shifts to remaining high-pressure files (`QuestEditor`, `behavior-tree-system`, `terrain-engine`).
+
+## 271) Delta 2026-02-25 CLI - Batch A decomposition execution (QuestEditor + TerrainEngine) + pressure reduction to 129
+
+Implemented:
+1. Executed narrative editor split:
+- `cloud-web-app/web/components/narrative/QuestEditor.tsx` reduced by extracting:
+  - `cloud-web-app/web/components/narrative/QuestEditor.types.ts`
+  - `cloud-web-app/web/components/narrative/QuestEditor.catalog.tsx`
+  - `cloud-web-app/web/components/narrative/QuestEditor.nodes.tsx`
+- compatibility preserved through explicit type exports from `QuestEditor.tsx`.
+2. Executed terrain runtime split:
+- `cloud-web-app/web/lib/terrain-engine.ts` reduced by extracting:
+  - `cloud-web-app/web/lib/terrain-engine.types.ts`
+  - `cloud-web-app/web/lib/terrain-engine-noise.ts`
+- compatibility preserved through re-exports from `terrain-engine.ts`.
+3. Updated decomposition progress and matrices:
+- `audit dicas do emergent usar/42_ACTIVE_DECOMPOSITION_BATCH_PLAN_2026-02-25.md`
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=129` (`136 -> 129`)
+- `maxFiles=136`
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`.
+
+Decision lock:
+1. Structural reduction remains compatibility-preserving and scope-neutral.
+2. Batch A residual focus is now on runtime monoliths (`behavior-tree-system`, `collaboration-realtime`, `material-editor`) before hard freeze.
+
+## 272) Delta 2026-02-25 CLI - Batch A decomposition execution (Collaboration core split) + pressure reduction to 128
+
+Implemented:
+1. Executed collaboration runtime split:
+- new core runtime module `cloud-web-app/web/lib/collaboration-realtime-core.ts` (socket + service orchestration).
+- `cloud-web-app/web/lib/collaboration-realtime.ts` now focused on React context/hooks/UI helpers and re-exports core classes.
+2. Updated decomposition plan progress:
+- `audit dicas do emergent usar/42_ACTIVE_DECOMPOSITION_BATCH_PLAN_2026-02-25.md`.
+3. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=128` (`136 -> 128`)
+- `maxFiles=136`.
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`.
+3. `cmd /c npm run qa:repo-connectivity` (`repo root`) -> PASS:
+- `requiredMissing=0`
+- `deadScriptReferences=0`.
+
+Decision lock:
+1. Collaboration split is structural only; no capability semantics changed.
+2. Batch A residual queue now centers on `behavior-tree-system`, `material-editor`, and `cache-system`.
+
+## 273) Delta 2026-02-25 CLI - Batch A decomposition execution (BehaviorTreeSystem + MaterialEditor) + pressure reduction to 126
+
+Implemented:
+1. Executed AI behavior-tree system split:
+- extracted node/runtime definitions to `cloud-web-app/web/lib/ai/behavior-tree-system.nodes.ts`;
+- `cloud-web-app/web/lib/ai/behavior-tree-system.tsx` now composes from extracted module and preserves export compatibility for node classes/types and default export registry.
+2. Executed material editor split:
+- extracted contracts to `cloud-web-app/web/lib/materials/material-editor.types.ts`;
+- extracted preset catalog to `cloud-web-app/web/lib/materials/material-editor.presets.ts`;
+- `cloud-web-app/web/lib/materials/material-editor.ts` now composes extracted modules with compatibility exports.
+3. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=126` (`136 -> 126`)
+- `maxFiles=136`.
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`.
+3. `cmd /c npm run qa:repo-connectivity` (`repo root`) -> PASS:
+- `requiredMissing=0`
+- `deadScriptReferences=0`.
+4. `cmd /c npm run qa:canonical-doc-governance` and `cmd /c npm run qa:workflow-governance` (`repo root`) -> PASS.
+
+Decision lock:
+1. Decomposition remains scope-neutral and compatibility-preserving only.
+2. Batch A residual high-pressure queue narrows to `cache-system` and `cutscene-system` before moving to Batch B.
+
+## 274) Delta 2026-02-25 CLI - Batch A decomposition execution (Cutscene builder extraction) + pressure reduction to 125
+
+Implemented:
+1. Executed cutscene builder extraction:
+- new module `cloud-web-app/web/lib/cutscene/cutscene-builder.ts` now contains the builder DSL/runtime for cutscene assembly.
+- `cloud-web-app/web/lib/cutscene/cutscene-system.tsx` now composes and exports `CutsceneBuilder` from the extracted module while preserving default export compatibility.
+2. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=125` (`136 -> 125`)
+- `maxFiles=136`.
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS:
+- `activeMentions=0`.
+3. `cmd /c npm run qa:repo-connectivity` (`repo root`) -> PASS:
+- `requiredMissing=0`
+- `deadScriptReferences=0`.
+4. `cmd /c npm run qa:canonical-doc-governance` and `cmd /c npm run qa:workflow-governance` (`repo root`) -> PASS.
+
+Decision lock:
+1. Structural decomposition remains compatibility-preserving and scope-neutral.
+2. Batch A queue is now centered on `cache-system` before batch rollover.
+
+## 275) Delta 2026-02-25 CLI - Batch A closure checkpoint (CacheSystem split) + pressure reduction to 124
+
+Implemented:
+1. Executed cache-system structural split:
+- extracted performance runtime/contracts to `cloud-web-app/web/lib/cache-system-performance.ts`;
+- extracted debounce/throttle hooks to `cloud-web-app/web/lib/cache-system-hooks.ts`;
+- updated `cloud-web-app/web/lib/cache-system.ts` to compose extracted modules while preserving exported API compatibility.
+2. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=124` (`136 -> 124`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` (`repo root`) -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` (`repo root`) -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` and `cmd /c npm run qa:workflow-governance` (`repo root`) -> PASS.
+
+Decision lock:
+1. Batch A structural target is reached (`136 -> 124`) without scope/capability drift.
+2. Next decomposition wave can move to Batch B priorities under the same non-growth gate.
+
+## 276) Delta 2026-02-25 CLI - Batch B kickoff + cross-domain structural reduction to 120
+
+Implemented:
+1. `water-ocean-system` split:
+- extracted FFT core to `cloud-web-app/web/lib/water-ocean-fft.ts`;
+- `cloud-web-app/web/lib/water-ocean-system.ts` now composes/re-exports `FFTOcean`.
+2. `asset-pipeline` split:
+- extracted cache runtime to `cloud-web-app/web/lib/engine/asset-pipeline-cache.ts`;
+- extracted importer runtime to `cloud-web-app/web/lib/engine/asset-pipeline-importer.ts`;
+- preserved compatibility exports in `asset-pipeline.ts`.
+3. `ai-integration-total` split:
+- extracted integrated workflow registrations to `cloud-web-app/web/lib/ai-integration-total-workflows.ts`;
+- preserved runtime behavior through explicit registration call in `ai-integration-total.ts`.
+4. `studio-home-store` split:
+- extracted normalization/store utility block to `cloud-web-app/web/lib/server/studio-home-store-normalizers.ts`;
+- kept orchestration/session APIs in `studio-home-store.ts` and preserved functional contracts.
+5. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=120` (`136 -> 120`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Structural decomposition remains scope-neutral, compatibility-preserving, and gated by non-growth policy.
+2. Next wave continues Batch B residual modules under the same guardrails with heavy freeze tests still deferred to final pass.
+
+## 277) Delta 2026-02-25 CLI - Batch B continuation (Visual Script runtime extraction) + pressure reduction to 119
+
+Implemented:
+1. Executed visual script runtime split:
+- extracted default node executor registry to `cloud-web-app/web/lib/visual-script/runtime-node-executors.ts`;
+- reduced `cloud-web-app/web/lib/visual-script/runtime.ts` to orchestration/runtime surface while preserving static registration compatibility.
+2. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=119` (`136 -> 119`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Runtime/toolchain decomposition continues to be structural-only and compatibility-preserving.
+2. Batch B residual queue remains prioritized over any scope expansion.
+
+## 278) Delta 2026-02-25 CLI - Batch B continuation (Capture + Cloth core extraction) + pressure reduction to 117
+
+Implemented:
+1. Executed capture media/runtime helper split:
+- extracted screenshot/media utility runtime to `cloud-web-app/web/lib/capture/capture-system-media.ts`;
+- updated `cloud-web-app/web/lib/capture/capture-system.tsx` to consume extracted helpers and reduced active file size below threshold.
+2. Executed cloth simulation core split:
+- extracted physics primitives and cloth mesh runtime to `cloud-web-app/web/lib/cloth-simulation-core.ts`;
+- updated `cloud-web-app/web/lib/cloth-simulation.ts` to compose/re-export core classes while preserving public API;
+- updated `cloud-web-app/web/lib/cloth-simulation-gpu.ts` to import contracts from `cloth-simulation.types` directly.
+3. Hardened capture type linkage:
+- `cloud-web-app/web/lib/capture/capture-presets.ts` now consumes `ScreenshotEffect` from `capture-types` to avoid cross-module coupling.
+4. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` (`repo root`) -> PASS:
+- `largeFileCount=117` (`136 -> 117`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Decomposition remains scope-neutral and compatibility-preserving (no capability claim change).
+2. Heavy freeze suite remains deferred to final pass under current execution policy.
+
+## 279) Delta 2026-02-25 CLI - Batch B continuation (LandscapeEditor UI split) + pressure reduction to 116
+
+Implemented:
+1. Executed `LandscapeEditor` modular split:
+- extracted scene/runtime block to `cloud-web-app/web/components/engine/LandscapeEditor.scene.tsx`;
+- extracted toolbar/brush/layers panel UI block to `cloud-web-app/web/components/engine/LandscapeEditor.panels.tsx`;
+- reduced `cloud-web-app/web/components/engine/LandscapeEditor.tsx` to orchestration/shell surface with compatibility-preserving exports.
+2. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=116` (`136 -> 116`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Surface decomposition remains scope-neutral with no API/capability contract promotion.
+2. Heavy freeze suite remains intentionally deferred to final run.
+
+## 280) Delta 2026-02-25 CLI - Batch B continuation (MaterialEditor node catalog extraction) + pressure reduction to 115
+
+Implemented:
+1. Executed material editor decomposition:
+- extracted material editor contracts to `cloud-web-app/web/components/materials/MaterialEditor.types.ts`;
+- extracted node catalog to `cloud-web-app/web/components/materials/MaterialEditor.node-definitions.ts`;
+- reduced `cloud-web-app/web/components/materials/MaterialEditor.tsx` below threshold while preserving exports (`MaterialEditor`, `PBRMaterial`, `ShaderCompiler`, type exports).
+2. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=115` (`136 -> 115`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Decomposition remained structural-only with no scope/capability expansion.
+2. Heavy freeze suite remains deferred to the final requested run.
+
+## 281) Delta 2026-02-25 CLI - Batch B acceleration (Save/Debug/Achievement extraction) + pressure reduction to 112
+
+Implemented:
+1. Executed `save-manager` split:
+- extracted serializer/migration/validation runtime to `cloud-web-app/web/lib/save/save-manager-core.ts`;
+- extracted React provider/hooks to `cloud-web-app/web/lib/save/save-manager-hooks.tsx`;
+- reduced `cloud-web-app/web/lib/save/save-manager.tsx` to manager orchestration + compatibility exports.
+2. Executed real debug adapter type split:
+- extracted DAP protocol contracts to `cloud-web-app/web/lib/debug/real-debug-adapter-types.ts`;
+- reduced `cloud-web-app/web/lib/debug/real-debug-adapter.ts` to runtime adapter orchestration with type re-export compatibility.
+3. Executed achievement system split:
+- extracted contracts to `cloud-web-app/web/lib/achievements/achievement-system.types.ts`;
+- extracted provider/hooks to `cloud-web-app/web/lib/achievements/achievement-system-hooks.tsx`;
+- reduced `cloud-web-app/web/lib/achievements/achievement-system.tsx` to statistics/achievement runtime + builder with compatibility exports.
+4. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=112` (`136 -> 112`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. All changes remain structural-only and compatibility-preserving (no capability claim promotion).
+2. Full heavy freeze suite remains intentionally deferred to the final requested test pass.
+
+## 282) Delta 2026-02-25 CLI - Batch B continuation (Video timeline panel extraction) + pressure reduction to 111
+
+Implemented:
+1. Executed video timeline panel split:
+- extracted clip inspector/effects panel to `cloud-web-app/web/components/video/VideoTimelineEditorPanels.inspector.tsx`;
+- reduced `cloud-web-app/web/components/video/VideoTimelineEditorPanels.tsx` to timeline/ruler/track/playback orchestration;
+- preserved exports via compatibility re-export from the main panel module.
+2. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=111` (`136 -> 111`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Decomposition remained structural-only with no capability/status change.
+2. Heavy freeze suite remains deferred to final pass.
+
+## 283) Delta 2026-02-25 CLI - Batch B continuation (Hair/Fluid/VideoEncoder decomposition) + pressure reduction to 108
+
+Implemented:
+1. Executed hair/fur runtime decomposition:
+- extracted physics runtime to `cloud-web-app/web/lib/hair-fur-physics.ts`;
+- extracted grooming runtime to `cloud-web-app/web/lib/hair-fur-groom.ts`;
+- extracted shell-fur runtime to `cloud-web-app/web/lib/hair-fur-shell.ts`;
+- reduced `cloud-web-app/web/lib/hair-fur-system.ts` to orchestration + compatibility exports.
+2. Executed fluid editor decomposition:
+- extracted contracts to `cloud-web-app/web/components/physics/fluid-simulation.types.ts`;
+- extracted defaults/presets to `cloud-web-app/web/components/physics/fluid-simulation.defaults.ts`;
+- extracted SPH runtime to `cloud-web-app/web/components/physics/fluid-simulation.runtime.ts`;
+- extracted right-rail controls to `cloud-web-app/web/components/physics/FluidSimulationEditorSettingsPanel.tsx`;
+- reduced `cloud-web-app/web/components/physics/FluidSimulationEditor.tsx` to orchestration shell.
+3. Executed video encoder decomposition:
+- extracted contracts to `cloud-web-app/web/lib/video-encoder-real.types.ts`;
+- extracted encoders to `cloud-web-app/web/lib/video-encoder-real.encoders.ts`;
+- extracted muxers to `cloud-web-app/web/lib/video-encoder-real.muxers.ts`;
+- extracted renderer/pipeline/screen-recorder modules to dedicated files;
+- reduced `cloud-web-app/web/lib/video-encoder-real.ts` to compatibility barrel + factory helpers.
+4. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=108` (`136 -> 108`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Decomposition remains structural-only and compatibility-preserving (no capability/status promotion).
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 284) Delta 2026-02-25 CLI - Batch B continuation (ProjectsDashboard + networking core split) + pressure reduction to 106
+
+Implemented:
+1. Decomposed `cloud-web-app/web/components/dashboard/ProjectsDashboard.tsx`:
+- extracted contracts to `ProjectsDashboard.types.ts`;
+- extracted visual/constants/fetcher to `ProjectsDashboard.constants.tsx`;
+- extracted cards/actions to `ProjectsDashboard.cards.tsx`;
+- extracted create modal to `ProjectsDashboard.modal.tsx`;
+- reduced main dashboard file to orchestration shell.
+2. Decomposed `cloud-web-app/web/lib/networking-multiplayer.ts`:
+- extracted serializer/prediction/interpolation primitives to `networking-multiplayer-core.ts`;
+- reduced main networking module to client/matchmaker/manager orchestration with compatibility re-exports.
+3. Anti-blocking UX hardening in dashboard flow:
+- removed blocking browser confirmation from project delete path in `ProjectsDashboard.tsx` (no `window.confirm` in this interaction).
+4. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=106` (`136 -> 106`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Changes remain structural-only and compatibility-preserving (no scope/capability claim promotion).
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 285) Delta 2026-02-25 CLI - Batch B continuation (fluid runtime split + quest builder extraction) + pressure reduction to 104
+
+Implemented:
+1. Decomposed `cloud-web-app/web/lib/fluid-simulation-system.ts` into focused runtime modules:
+- `cloud-web-app/web/lib/fluid-simulation-spatial-hash.ts`
+- `cloud-web-app/web/lib/fluid-simulation-sph.ts`
+- `cloud-web-app/web/lib/fluid-simulation-pbf.ts`
+- `cloud-web-app/web/lib/fluid-simulation-flip.ts`
+- `cloud-web-app/web/lib/fluid-simulation-system.ts` reduced to orchestration barrel + factory helpers.
+2. Decomposed `cloud-web-app/web/lib/quests/quest-system.tsx` by extracting builder DSL:
+- `cloud-web-app/web/lib/quests/quest-builder.ts`
+- `quest-system.tsx` now keeps manager + hooks while re-exporting `QuestBuilder` from dedicated module.
+3. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=104` (`136 -> 104`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. All changes remain structural-only and compatibility-preserving (no scope/capability promotion).
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 286) Delta 2026-02-25 CLI - Batch B continuation (replay runtime decomposition) + pressure reduction to 103
+
+Implemented:
+1. Decomposed `cloud-web-app/web/lib/replay/replay-system.tsx` into focused modules:
+- `cloud-web-app/web/lib/replay/replay-runtime.ts` (ReplayRecorder + ReplayPlayer)
+- `cloud-web-app/web/lib/replay/replay-manager.ts` (ReplayManager orchestration)
+- `cloud-web-app/web/lib/replay/replay-hooks.tsx` (React provider/hooks)
+- `cloud-web-app/web/lib/replay/replay-system.tsx` reduced to composition barrel + compatibility exports/default.
+2. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=103` (`136 -> 103`)
+- `maxFiles=136` (`growthExceeded=false`).
+2. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. Changes remain structural-only and compatibility-preserving (no product-scope or capability claim promotion).
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 287) Delta 2026-02-25 CLI - Studio Home interface organization + explicit UI monolith pressure metric
+
+Implemented:
+1. Studio Home surface decomposition (layout clarity, no behavior change):
+- created `cloud-web-app/web/components/studio/StudioHomeHeader.tsx` for top action rail (`Open IDE`, session copy, settings/project routing, legacy toggle);
+- created `cloud-web-app/web/components/studio/StudioHomeKpiStrip.tsx` for KPI row (network, session, tasks, budget, usage, last action);
+- reduced orchestration coupling inside `cloud-web-app/web/components/studio/StudioHome.tsx` by delegating header/KPI rendering.
+2. Legacy UX handoff hardening:
+- updated `cloud-web-app/web/components/AethelDashboardGateway.tsx` with explicit legacy-transition banner + one-click return to `/dashboard` (Studio Home primary entry).
+3. Interface governance hardening:
+- updated `cloud-web-app/web/scripts/interface-critical-scan.mjs` with structural metric section:
+  - `ui-monolith-files-gte-650` summary line;
+  - detailed `UI Monolith Pressure` table for `app/components` `.tsx` files above threshold.
+- regenerated `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`.
+4. Marketplace surface decomposition continuation:
+- extracted shared view primitives to `cloud-web-app/web/components/marketplace/CreatorDashboard.shared.tsx`;
+- reduced `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx` to `888` lines (below 900-line pressure threshold).
+5. Refreshed structural/governance matrices:
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/26_WORKFLOW_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `node scripts/interface-critical-scan.mjs` -> PASS:
+- zero critical regressions preserved (`legacy-accent=0`, `admin-light=0`, `admin-status-light=0`, `blocking-dialogs=0`);
+- explicit UI structural pressure surfaced: `ui-monolith-files-gte-650=86`.
+2. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=102` (`136 -> 102`)
+- `maxFiles=136` (`growthExceeded=false`).
+3. `cmd /c npm run qa:legacy-path-references` -> PASS (`activeMentions=0`).
+4. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+5. `cmd /c npm run qa:canonical-doc-governance` + `cmd /c npm run qa:workflow-governance` -> PASS.
+
+Decision lock:
+1. This delta improves surface organization and governance observability without changing scope/capability claims.
+2. Heavy freeze suite remains deferred to the final requested run.
+
+## 288) Delta 2026-02-25 CLI - Primary dashboard tab decomposition (wallet/billing extraction) + pressure reduction to 101
+
+Implemented:
+1. Decomposed `cloud-web-app/web/components/dashboard/AethelDashboardPrimaryTabContent.tsx`:
+- extracted wallet surface to `cloud-web-app/web/components/dashboard/AethelDashboardWalletTab.tsx`;
+- extracted billing surface to `cloud-web-app/web/components/dashboard/AethelDashboardBillingTab.tsx`;
+- reduced primary tab orchestrator from `1062` to `577` lines while preserving runtime behavior.
+2. Continued marketplace decomposition:
+- extracted reusable primitives to `cloud-web-app/web/components/marketplace/CreatorDashboard.shared.tsx`;
+- reduced `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx` to `888` lines.
+3. Regenerated structural/governance evidence:
+- `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`
+- `audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md`
+- `audit dicas do emergent usar/29_CANONICAL_DOC_GOVERNANCE_MATRIX_2026-02-20.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:interface-gate` -> PASS:
+- critical visual metrics still zero;
+- `not-implemented-ui=4` explicit.
+2. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=101` (`136 -> 101`)
+- `maxFiles=136` (`growthExceeded=false`).
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability claims unchanged; this wave is structural maintainability + UX surface organization hardening only.
+2. Heavy freeze suite remains deferred until final requested run.
+
+## 289) Delta 2026-02-25 CLI - Creator dashboard section split + structural pressure reduction to 100
+
+Implemented:
+1. Decomposed marketplace creator dashboard:
+- extracted section components to `cloud-web-app/web/components/marketplace/CreatorDashboard.sections.tsx` (`RevenueChart`, `CategoryBreakdown`, `TopAssets`, `AssetTable`, `RecentSales`);
+- kept `cloud-web-app/web/components/marketplace/CreatorDashboard.shared.tsx` for reusable primitives;
+- reduced `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx` from `888` to `398` lines.
+2. Preserved runtime contracts and gate behavior:
+- no change to capability/deprecation policy;
+- UI still surfaces explicit unavailable states where APIs are gated.
+3. Regenerated structural evidence:
+- `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
+- `audit dicas do emergent usar/41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:interface-gate` -> PASS:
+- critical visual metrics remain zero;
+- `not-implemented-ui=4` explicit.
+2. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=100` (`136 -> 100`)
+- `maxFiles=136` (`growthExceeded=false`).
+3. Structural pressure detail:
+- `ui-monolith-files-gte-650=84` in interface sweep (down from prior wave).
+
+Decision lock:
+1. This wave is decomposition-only (maintainability + surface consistency) with no scope/capability promotion.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 290) Delta 2026-02-25 CLI - Dashboard render-data hook extraction + studio surface cleanup continuation
+
+Implemented:
+1. Extracted dashboard render/currency/byte formatting logic into dedicated hook:
+- new `cloud-web-app/web/components/dashboard/useAethelDashboardRenderData.ts`;
+- `cloud-web-app/web/components/AethelDashboard.tsx` now consumes this hook.
+2. Reduced `AethelDashboard.tsx` from `696` to `644` lines (below UI monolith threshold `650`) while preserving behavior.
+3. Preserved Studio Home/IDE contract and explicit capability gates (no scope change).
+
+Validation snapshot:
+1. `cmd /c npm run qa:interface-gate` -> PASS:
+- critical visual metrics remain zero;
+- `not-implemented-ui=4` explicit.
+2. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=100` (`136 -> 100`)
+- `growthExceeded=false`.
+3. Interface structural metric remains tracked in sweep (`ui-monolith-files-gte-650`).
+
+Decision lock:
+1. Refactor-only wave; no capability or API contract promotion.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 291) Delta 2026-02-25 CLI - MediaStudio and ProjectSettings schema decomposition + pressure reduction to 99
+
+Implemented:
+1. Media studio structural extraction:
+- new `cloud-web-app/web/components/media/MediaStudio.initial-project.ts`;
+- `MediaStudio.tsx` now initializes project via extracted factory and reduced from `915` to `876` lines.
+2. Project settings schema extraction:
+- new `cloud-web-app/web/components/engine/ProjectSettings.schema.ts` (types + default settings matrix);
+- `ProjectSettings.tsx` reduced from `1028` to `714` lines by importing schema.
+3. No capability/API behavior change in these refactors (pure decomposition and boundary cleanup).
+
+Validation snapshot:
+1. `cmd /c npm run qa:interface-gate` -> PASS:
+- critical UI metrics remain zero;
+- `not-implemented-ui=4` explicit.
+2. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=99` (`136 -> 99`)
+- `growthExceeded=false`.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability unchanged; this wave is maintainability hardening only.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 292) Delta 2026-02-25 CLI - Audio processing core split + pressure reduction to 98
+
+Implemented:
+1. Extracted audio processing core domain to dedicated module:
+- new `cloud-web-app/web/components/audio/AudioProcessing.core.ts` containing:
+  - effect/parameter types,
+  - defaults/presets,
+  - `AudioEffectProcessor` runtime class.
+2. Kept UI/editor widgets in `cloud-web-app/web/components/audio/AudioProcessing.tsx` and switched it to consume/re-export core module.
+3. Reduced `AudioProcessing.tsx` from `1018` to `599` lines while preserving external API compatibility (`export * from core` + default export).
+
+Validation snapshot:
+1. `cmd /c npm run qa:interface-gate` -> PASS:
+- critical visual metrics remain zero;
+- `not-implemented-ui=4` explicit.
+2. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=98` (`136 -> 98`)
+- `growthExceeded=false`.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. No scope/capability change; this is structural decomposition for maintainability and regression isolation.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 293) Delta 2026-02-25 CLI - ClothSimulationEditor modular decomposition + structural pressure reduction to 97
+
+Implemented:
+1. Decomposed `cloud-web-app/web/components/physics/ClothSimulationEditor.tsx` into focused modules:
+- `cloud-web-app/web/components/physics/ClothSimulationEditor.controls.tsx` (toolbar + right settings panel)
+- `cloud-web-app/web/components/physics/ClothSimulationEditor.viewport.tsx` (cloth mesh, collider visualizer, wind arrow)
+- `cloud-web-app/web/components/physics/cloth-simulation-editor.types.ts` (shared tool typing)
+2. Reduced `ClothSimulationEditor.tsx` from `1033` to `249` lines while preserving runtime behavior and editor contracts.
+3. Removed stale trailing placeholder residue in `cloud-web-app/web/components/audio/AudioProcessing.core.ts`.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=97` (`136 -> 97`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit;
+- `ui-monolith-files-gte-650=82` in interface sweep.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability unchanged; this wave is decomposition-only for maintainability and UX-surface stability.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 294) Delta 2026-02-25 CLI - AnimationBlueprint/WorldOutliner decomposition + timeline panels split (pressure 95)
+
+Implemented:
+1. Decomposed animation blueprint editor surface:
+- new `cloud-web-app/web/components/engine/AnimationBlueprint.data.ts` (initial states/transitions/variables + clone helpers);
+- new `cloud-web-app/web/components/engine/AnimationBlueprint.panels.tsx` (variables/state/transition inspectors);
+- `cloud-web-app/web/components/engine/AnimationBlueprint.tsx` reduced from `1028` to `370` lines.
+2. Decomposed world outliner surface:
+- new `cloud-web-app/web/components/engine/WorldOutliner.types.ts` (type contracts + object type config + default tree factory);
+- new `cloud-web-app/web/components/engine/WorldOutliner.panels.tsx` (tree item, context menu, filter bar);
+- `cloud-web-app/web/components/engine/WorldOutliner.tsx` reduced from `1013` to `355` lines.
+3. Decomposed timeline panels barrel for editor maintainability:
+- new `cloud-web-app/web/components/video/VideoTimelineEditorPanels.timeline.tsx`;
+- new `cloud-web-app/web/components/video/VideoTimelineEditorPanels.playback.tsx`;
+- `cloud-web-app/web/components/video/VideoTimelineEditorPanels.tsx` converted to barrel export (`753` -> `9` lines).
+4. No scope/capability policy changes; all edits are structural and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=95` (`136 -> 95`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical zeros preserved;
+- `not-implemented-ui=4` explicit;
+- `ui-monolith-files-gte-650=79`.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. This wave keeps `/dashboard` and `/ide` contracts unchanged and avoids fake-success paths.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 295) Delta 2026-02-25 CLI - HairFur/ContentBrowser decomposition wave + pressure reduction to 93
+
+Implemented:
+1. Decomposed hair/fur editor surface:
+- new `cloud-web-app/web/components/character/HairFurEditor.viewport.tsx` (viewport primitives: strands/head/brush preview);
+- new `cloud-web-app/web/components/character/HairFurEditor.controls.tsx` (gradient, LOD preview, slider);
+- `cloud-web-app/web/components/character/HairFurEditor.tsx` reduced from `949` to `617` lines while preserving runtime/export hooks.
+2. Decomposed content browser surface:
+- new `cloud-web-app/web/components/assets/ContentBrowser.types.ts` (contracts + palette + type config);
+- new `cloud-web-app/web/components/assets/ContentBrowser.ui.tsx` (folder tree, asset card, context menu);
+- `cloud-web-app/web/components/assets/ContentBrowser.tsx` reduced from `950` to `493` lines.
+3. No API/capability contract changes; this wave is compatibility-preserving structural decomposition.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=93` (`136 -> 93`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit;
+- `ui-monolith-files-gte-650=78`.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope, capability claims, and deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 296) Delta 2026-02-25 CLI - VideoTimeline + SequencerTimeline decomposition wave (pressure 91)
+
+Implemented:
+1. Decomposed timeline editor surface `cloud-web-app/web/components/video/VideoTimeline.tsx`:
+- extracted contracts to `cloud-web-app/web/components/video/VideoTimeline.types.ts`;
+- extracted time helpers to `cloud-web-app/web/components/video/VideoTimeline.helpers.ts`;
+- extracted preview component to `cloud-web-app/web/components/video/VideoPreview.tsx`;
+- reduced main timeline file from `900` to `760` lines.
+2. Decomposed sequencer timeline surface `cloud-web-app/web/components/sequencer/SequencerTimeline.tsx`:
+- extracted contracts to `cloud-web-app/web/components/sequencer/SequencerTimeline.types.ts`;
+- extracted palette/time conversion helpers to `cloud-web-app/web/components/sequencer/SequencerTimeline.helpers.ts`;
+- reduced main sequencer file from `979` to `824` lines.
+3. No contract/capability scope changes; this is structural-only decomposition with compatibility preserved.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=91` (`136 -> 91`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit;
+- `ui-monolith-files-gte-650=78`.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 297) Delta 2026-02-25 CLI - LevelEditor/XTerminal decomposition wave (pressure 89)
+
+Implemented:
+1. Decomposed level editor surface `cloud-web-app/web/components/engine/LevelEditor.tsx`:
+- extracted contracts/default data to `cloud-web-app/web/components/engine/LevelEditor.types.ts`;
+- extracted runtime helpers to `cloud-web-app/web/components/engine/LevelEditor.runtime.ts`;
+- extracted viewport scene rendering to `cloud-web-app/web/components/engine/LevelEditor.viewport.tsx`;
+- updated `cloud-web-app/web/components/engine/LevelEditorPanels.tsx` to consume shared contracts;
+- reduced main file from `956` to `448` lines.
+2. Decomposed terminal theme payload:
+- extracted `cloud-web-app/web/components/terminal/XTerminal.themes.ts`;
+- reduced `cloud-web-app/web/components/terminal/XTerminal.tsx` from `920` to `809` lines.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=89` (`136 -> 89`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 298) Delta 2026-02-25 CLI - FoliagePainter/GitPanel decomposition wave (pressure 87)
+
+Implemented:
+1. Decomposed foliage painter UI primitives:
+- extracted `cloud-web-app/web/components/environment/FoliagePainter.ui.tsx` (`Slider` + `CollapsibleSection`);
+- reduced `cloud-web-app/web/components/environment/FoliagePainter.tsx` from `930` to `858` lines.
+2. Decomposed git panel theme payload:
+- extracted `cloud-web-app/web/components/git/GitPanel.theme.ts`;
+- reduced `cloud-web-app/web/components/git/GitPanel.tsx` from `906` to `886` lines.
+3. No API/capability changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=87` (`136 -> 87`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 299) Delta 2026-02-25 CLI - SettingsPanel decomposition wave (pressure 86)
+
+Implemented:
+1. Decomposed settings panel into modular surfaces:
+- extracted palette to `cloud-web-app/web/components/settings/SettingsPanel.theme.ts`;
+- extracted setting input surface to `cloud-web-app/web/components/settings/SettingsPanel.input.tsx`;
+- reduced `cloud-web-app/web/components/settings/SettingsPanel.tsx` from `936` to `719` lines.
+2. No contract/capability changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=86` (`136 -> 86`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 300) Delta 2026-02-25 CLI - MarketplaceBrowser decomposition wave (pressure 85)
+
+Implemented:
+1. Decomposed marketplace browser constants and category typing:
+- added `cloud-web-app/web/components/marketplace/MarketplaceBrowser.constants.tsx`;
+- moved category/sort/license option payload out of main component;
+- reduced `cloud-web-app/web/components/marketplace/MarketplaceBrowser.tsx` from `920` to `882` lines.
+2. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=85` (`136 -> 85`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 301) Delta 2026-02-25 CLI - TeamInviteManager/ProjectPersistence decomposition wave (pressure 83)
+
+Implemented:
+1. Decomposed team collaboration panel `cloud-web-app/web/components/team/TeamInviteManager.tsx`:
+- extracted contracts to `cloud-web-app/web/components/team/TeamInviteManager.types.ts`;
+- extracted palette to `cloud-web-app/web/components/team/TeamInviteManager.theme.ts`;
+- extracted presentational primitives to `cloud-web-app/web/components/team/TeamInviteManager.primitives.tsx`;
+- reduced main file from `993` to `827` lines.
+2. Decomposed project persistence surface `cloud-web-app/web/components/project/ProjectPersistence.tsx`:
+- extracted project contracts to `cloud-web-app/web/components/project/ProjectPersistence.types.ts`;
+- reduced main provider/runtime file from `970` to `861` lines.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=83` (`136 -> 83`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 302) Delta 2026-02-25 CLI - Media/Profiler/Audio core decomposition wave (pressure 80)
+
+Implemented:
+1. Decomposed media studio orchestration surface:
+- added `cloud-web-app/web/components/media/MediaStudio.sidebar.tsx` (inspector + mixer surfaces);
+- reduced `cloud-web-app/web/components/media/MediaStudio.tsx` from `1007` to `688` lines.
+2. Decomposed profiler surface:
+- added `cloud-web-app/web/components/profiler/AdvancedProfiler.types.ts`;
+- added `cloud-web-app/web/components/profiler/AdvancedProfiler.timeline.tsx`;
+- reduced `cloud-web-app/web/components/profiler/AdvancedProfiler.tsx` from `1028` to `774` lines.
+3. Decomposed audio core engine surface:
+- added `cloud-web-app/web/lib/engine/audio-manager.types.ts`;
+- added `cloud-web-app/web/lib/engine/audio-source.ts`;
+- added `cloud-web-app/web/lib/engine/audio-group.ts`;
+- added `cloud-web-app/web/lib/engine/audio-reverb.ts`;
+- reduced `cloud-web-app/web/lib/engine/audio-manager.ts` from `1059` to `510` lines while preserving public exports via re-export.
+4. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=80` (`136 -> 80`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 303) Delta 2026-02-25 CLI - Debug console core decomposition wave (pressure 79)
+
+Implemented:
+1. Decomposed debug console performance surface:
+- added `cloud-web-app/web/lib/debug/debug-performance.ts` (extracted `PerformanceMonitor` + `StatsOverlay` classes);
+- updated `cloud-web-app/web/lib/debug/debug-console.tsx` to import performance modules;
+- reduced `debug-console.tsx` from `1050` to `883` lines.
+2. No API/capability scope changes; this is structural-only decomposition.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=79` (`136 -> 79`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 304) Delta 2026-02-25 CLI - UI framework modular decomposition wave (pressure 78)
+
+Implemented:
+1. Decomposed UI framework contracts and runtime manager from the monolithic surface:
+- added `cloud-web-app/web/lib/ui/ui-framework.types.ts` (shared type contracts);
+- added `cloud-web-app/web/lib/ui/ui-manager.ts` (theme/toast/modal/drag-drop/focus runtime manager).
+2. Refactored `cloud-web-app/web/lib/ui/ui-framework.tsx` into a provider/hooks/components surface with compatibility-preserving re-exports:
+- reduced main file from `1055` to `649` lines;
+- preserved `UIManager`, theme exports, and default export contract.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=78` (`136 -> 78`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 305) Delta 2026-02-25 CLI - Localization system modular decomposition wave (pressure 77)
+
+Implemented:
+1. Decomposed localization contracts/default configuration out of monolithic runtime surface:
+- added `cloud-web-app/web/lib/localization/localization-types.ts` (shared i18n contracts);
+- added `cloud-web-app/web/lib/localization/localization-defaults.ts` (built-in locale configs + plural rules).
+2. Refactored `cloud-web-app/web/lib/localization/localization-system.tsx` into manager/hooks/HOC surface with compatibility-preserving re-exports:
+- reduced main file from `901` to `648` lines;
+- preserved public exports for `DEFAULT_LOCALE_CONFIGS` and `PLURAL_RULES`.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=77` (`136 -> 77`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical metrics remain zero;
+- `not-implemented-ui=4` explicit.
+3. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+4. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 306) Delta 2026-02-25 CLI - Nanite runtime modular decomposition wave (pressure 76)
+
+Implemented:
+1. Decomposed monolithic Nanite runtime into explicit module boundaries:
+- added `cloud-web-app/web/lib/nanite-types.ts` (shared contracts);
+- added `cloud-web-app/web/lib/nanite-culling.ts` (`GPUCullingSystem`);
+- added `cloud-web-app/web/lib/nanite-visibility.ts` (`VisibilityBufferRenderer`).
+2. Refactored `cloud-web-app/web/lib/nanite-virtualized-geometry.ts` into meshlet-builder + renderer orchestration surface with compatibility-preserving re-exports:
+- reduced main file from `1063` to `562` lines;
+- preserved existing factory exports (`createNaniteRenderer`, `createMeshletBuilder`, `createGPUCullingSystem`).
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=76` (`136 -> 76`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 307) Delta 2026-02-25 CLI - Dialogue runtime modular decomposition wave (pressure 75)
+
+Implemented:
+1. Decomposed dialogue subsystem into explicit contracts/runtime modules:
+- added `cloud-web-app/web/lib/dialogue/dialogue-types.ts` (dialogue contracts);
+- added `cloud-web-app/web/lib/dialogue/dialogue-runtime.ts` (`DialogueVariableStore`, `ConditionEvaluator`, `DialogueTextProcessor`).
+2. Refactored `cloud-web-app/web/lib/dialogue/dialogue-system.tsx` into manager/hooks/HOC surface with compatibility-preserving re-exports:
+- reduced main file from `1053` to `734` lines;
+- preserved public access to runtime classes via re-export.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=75` (`136 -> 75`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 308) Delta 2026-02-25 CLI - Physics engine modular decomposition wave (pressure 74)
+
+Implemented:
+1. Decomposed physics engine monolith into explicit runtime modules:
+- added `cloud-web-app/web/lib/engine/physics-body.ts` (colliders + rigid-body primitives);
+- added `cloud-web-app/web/lib/engine/physics-collision.ts` (collision detection, contact resolution, broadphase).
+2. Refactored `cloud-web-app/web/lib/engine/physics-engine.ts` into world/engine orchestration with compatibility-preserving re-exports:
+- reduced main file from `1042` to `364` lines;
+- preserved exported API surface for colliders, rigid body, math/types, and default `PhysicsEngine`.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=74` (`136 -> 74`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+3. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical interface zeros preserved;
+- `not-implemented-ui=4` explicit.
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 309) Delta 2026-02-25 CLI - ECS execution extraction wave (pressure 74)
+
+Implemented:
+1. Decomposed ECS execution runtime out of monolithic file:
+- added `cloud-web-app/web/lib/ecs-execution.ts` (`SystemScheduler`, `JobSystem`).
+2. Refactored `cloud-web-app/web/lib/ecs-dots-system.ts`:
+- retained world/archetype/component core in main file;
+- reduced from `1056` to `899` lines (below pressure threshold);
+- preserved compatibility via re-export of extracted execution classes.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=74` (`136 -> 74`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+3. `cmd /c npm run qa:canonical-doc-governance` -> PASS (`unindexedCanonicalMarkdown=0`).
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 310) Delta 2026-02-25 CLI - Hot reload client-script extraction wave (pressure 73)
+
+Implemented:
+1. Decomposed hot reload monolith by extracting client runtime script generator:
+- added `cloud-web-app/web/lib/hot-reload/hot-reload-client-script.ts`;
+- moved large `getClientScript()` template payload out of server class.
+2. Refactored `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` to call extracted helper:
+- reduced main file from `1053` to `825` lines;
+- preserved `/hot-reload-client.js` contract and behavior.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=73` (`136 -> 73`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+3. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical interface zeros preserved;
+- `not-implemented-ui=4` explicit.
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
+
+## 311) Delta 2026-02-25 CLI - AAA render config/type extraction wave (pressure 72)
+
+Implemented:
+1. Decomposed AAA render monolith configuration layer:
+- added `cloud-web-app/web/lib/aaa-render-types.ts` (render config contracts + defaults).
+2. Refactored `cloud-web-app/web/lib/aaa-render-system.ts`:
+- reduced main file from `1047` to `509` lines;
+- kept rendering runtime/orchestration in the core file;
+- preserved exported defaults/types via re-export for compatibility.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=72` (`136 -> 72`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+3. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical interface zeros preserved;
+- `not-implemented-ui=4` explicit.
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.

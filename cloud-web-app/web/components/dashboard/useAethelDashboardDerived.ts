@@ -11,7 +11,7 @@ export function useAethelDashboardDerived(params: any) {
       .filter((m: any) => m && typeof m.content === 'string')
       .map((m: any) => ({ role: (m.role as any) || 'user', content: m.content }))
     setChatHistory(restored)
-  }, [])
+  }, [AethelAPIClient, setChatHistory])
 
   const refreshCopilotWorkflows = useCallback(async () => {
     setCopilotWorkflowsLoading(true)
@@ -23,7 +23,7 @@ export function useAethelDashboardDerived(params: any) {
     } finally {
       setCopilotWorkflowsLoading(false)
     }
-  }, [])
+  }, [AethelAPIClient, setCopilotWorkflows, setCopilotWorkflowsLoading])
 
   const switchCopilotWorkflow = useCallback(async (workflowId: string) => {
     const got = await AethelAPIClient.getCopilotWorkflow(workflowId)
@@ -52,7 +52,7 @@ export function useAethelDashboardDerived(params: any) {
     if (typeof window !== 'undefined') window.localStorage.setItem(keys.chatThreadKey, threadId)
 
     await loadChatHistoryForThread(threadId).catch(() => null)
-  }, [loadChatHistoryForThread, refreshCopilotWorkflows])
+  }, [AethelAPIClient, getScopedKeys, loadChatHistoryForThread, refreshCopilotWorkflows, setActiveChatThreadId, setActiveWorkflowId, setCopilotProjectId])
 
   const createCopilotWorkflow = useCallback(async () => {
     const title = `Workflow ${new Date().toLocaleString()}`
@@ -66,7 +66,7 @@ export function useAethelDashboardDerived(params: any) {
     const wfId = (createdWf as any)?.workflow?.id as string | undefined
     await refreshCopilotWorkflows().catch(() => null)
     if (wfId) await switchCopilotWorkflow(String(wfId)).catch(() => null)
-  }, [copilotProjectId, refreshCopilotWorkflows, switchCopilotWorkflow])
+  }, [AethelAPIClient, copilotProjectId, refreshCopilotWorkflows, switchCopilotWorkflow])
 
   const renameCopilotWorkflow = useCallback(async () => {
     if (!activeWorkflowId) return
@@ -83,7 +83,7 @@ export function useAethelDashboardDerived(params: any) {
     await AethelAPIClient.updateCopilotWorkflow(activeWorkflowId, { title: nextTitle.trim() }).catch(() => null)
     await refreshCopilotWorkflows().catch(() => null)
     showToastMessage('Trabalho renomeado.', 'success')
-  }, [activeWorkflowId, copilotWorkflows, refreshCopilotWorkflows, showToastMessage])
+  }, [AethelAPIClient, activeWorkflowId, copilotWorkflows, openPromptDialog, refreshCopilotWorkflows, showToastMessage])
 
   const archiveCopilotWorkflow = useCallback(async () => {
     if (!activeWorkflowId) return
@@ -100,7 +100,7 @@ export function useAethelDashboardDerived(params: any) {
     if (next) await switchCopilotWorkflow(String(next)).catch(() => null)
     else await createCopilotWorkflow().catch(() => null)
     showToastMessage('Trabalho arquivado.', 'info')
-  }, [activeWorkflowId, copilotWorkflows, createCopilotWorkflow, refreshCopilotWorkflows, switchCopilotWorkflow, showToastMessage])
+  }, [AethelAPIClient, activeWorkflowId, copilotWorkflows, createCopilotWorkflow, openConfirmDialog, refreshCopilotWorkflows, switchCopilotWorkflow, showToastMessage])
 
   const copyHistoryFromWorkflow = useCallback(async () => {
     if (!activeWorkflowId) return
@@ -140,7 +140,7 @@ export function useAethelDashboardDerived(params: any) {
     } finally {
       setConnectBusy(false)
     }
-  }, [activeWorkflowId, connectBusy, connectFromWorkflowId, copilotWorkflows, refreshCopilotWorkflows, switchCopilotWorkflow, showToastMessage])
+  }, [AethelAPIClient, activeWorkflowId, connectBusy, connectFromWorkflowId, copilotWorkflows, refreshCopilotWorkflows, setConnectBusy, setConnectFromWorkflowId, switchCopilotWorkflow, showToastMessage])
 
   const mergeFromWorkflow = useCallback(async () => {
     if (!activeWorkflowId) return
@@ -205,7 +205,7 @@ export function useAethelDashboardDerived(params: any) {
     } finally {
       setConnectBusy(false)
     }
-  }, [activeChatThreadId, activeWorkflowId, connectBusy, connectFromWorkflowId, copilotProjectId, copilotWorkflows, loadChatHistoryForThread, refreshCopilotWorkflows, showToastMessage])
+  }, [AethelAPIClient, activeChatThreadId, activeWorkflowId, connectBusy, connectFromWorkflowId, copilotProjectId, copilotWorkflows, loadChatHistoryForThread, refreshCopilotWorkflows, setActiveChatThreadId, setConnectBusy, setConnectFromWorkflowId, showToastMessage])
 
   const importContextFromWorkflow = useCallback(async () => {
     if (!activeWorkflowId) return
@@ -242,7 +242,7 @@ export function useAethelDashboardDerived(params: any) {
     } finally {
       setConnectBusy(false)
     }
-  }, [activeWorkflowId, connectBusy, connectFromWorkflowId, showToastMessage])
+  }, [AethelAPIClient, activeWorkflowId, connectBusy, connectFromWorkflowId, setConnectBusy, setConnectFromWorkflowId, showToastMessage])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -252,7 +252,7 @@ export function useAethelDashboardDerived(params: any) {
     const handleStorage = () => {
       try {
         setHasToken(isAuthenticated())
-      } catch (error) {
+      } catch (error: any) {
         setAuthError(error instanceof Error ? error : new Error('Falha ao verificar estado de autenticação'))
         setHasToken(false)
       }
@@ -260,7 +260,7 @@ export function useAethelDashboardDerived(params: any) {
 
     window.addEventListener('storage', handleStorage)
     return () => window.removeEventListener('storage', handleStorage)
-  }, [])
+  }, [isAuthenticated, setAuthError, setHasToken])
 
   const toggleTheme = useCallback(() => {
     setSettings(prev => {
@@ -270,7 +270,7 @@ export function useAethelDashboardDerived(params: any) {
       }
       return { ...prev, theme: nextTheme }
     })
-  }, [])
+  }, [setSettings])
 
   // Create new session
   const createNewSession = useCallback(() => {
@@ -318,7 +318,7 @@ export function useAethelDashboardDerived(params: any) {
         }
       })()
     }
-  }, [copilotProjectId, settings, showToastMessage])
+  }, [AethelAPIClient, copilotProjectId, getScopedKeys, isAuthenticated, setActiveChatThreadId, setActiveTab, setActiveWorkflowId, setChatHistory, setLivePreviewSuggestions, setSessionHistory, settings, showToastMessage])
 
   // Toggle favorite on session
   const toggleFavorite = (sessionId: string) => {
@@ -366,7 +366,7 @@ export function useAethelDashboardDerived(params: any) {
       }
       return [currentSession, ...prev.slice(0, 9)]
     })
-  }, [chatHistory, livePreviewSuggestions, settings])
+  }, [chatHistory, livePreviewSuggestions, setSessionHistory, settings])
 
   const clearDashboardState = useCallback(() => {
     clearStoredDashboardState()
@@ -378,7 +378,7 @@ export function useAethelDashboardDerived(params: any) {
     setActiveTab('overview')
     setSettings({ ...DEFAULT_SETTINGS })
     showToastMessage('Preferências do painel redefinidas.', 'success')
-  }, [showToastMessage])
+  }, [DEFAULT_SETTINGS, clearStoredDashboardState, setActiveTab, setChatHistory, setChatMessage, setLivePreviewSuggestions, setSessionFilter, setSessionHistory, setSettings, showToastMessage])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -404,7 +404,7 @@ export function useAethelDashboardDerived(params: any) {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [createNewSession, saveCurrentSession, showToastMessage, sidebarOpen]);
+  }, [createNewSession, saveCurrentSession, setSidebarOpen, showToastMessage, sidebarOpen]);
 
   const downloadUrls = useMemo(() => ({
     windows: process.env.NEXT_PUBLIC_IDE_DOWNLOAD_URL_WINDOWS,
@@ -424,7 +424,7 @@ export function useAethelDashboardDerived(params: any) {
       await startDownload(url, {
         filename: `aethel-ide-${platform}-v2.1.0${platform === 'windows' ? '.exe' : platform === 'mac' ? '.dmg' : '.tar.gz'}`,
       })
-    } catch (error) {
+    } catch (error: any) {
       showToastMessage(`Falha ao iniciar download para ${platform}.`, 'error')
     }
   }, [downloadUrls, showToastMessage, startDownload])
@@ -440,7 +440,7 @@ export function useAethelDashboardDerived(params: any) {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [sidebarOpen]);
+  }, [setSidebarOpen, sidebarOpen]);
 
   // Function to load a session
   const loadSession = (sessionId: string) => {
@@ -514,7 +514,7 @@ export function useAethelDashboardDerived(params: any) {
         scheduled: false
       }, ...prev.slice(0, 9)])
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
       const errorMessage: ChatMessage = {
         role: 'assistant',
@@ -600,7 +600,7 @@ export function useAethelDashboardDerived(params: any) {
 
       setLivePreviewSuggestions(prev => [...prev, suggestion])
       setAiActivity('Sugestão gerada para a área selecionada')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating live preview suggestion:', error)
       setAiActivity('Sugestão indisponível')
       showToastMessage('Sugestão indisponível (IA não configurada ou sem créditos).', 'error')
@@ -627,7 +627,7 @@ export function useAethelDashboardDerived(params: any) {
         setChatHistory(prev => [...prev, aiMessage])
         setAiActivity('Sugestão aplicada na prévia ao vivo')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending suggestion:', error)
       setAiActivity('Erro ao processar sugestão')
     }
@@ -764,7 +764,7 @@ export function useAethelDashboardDerived(params: any) {
       if (creditsKey) {
         await mutate(creditsKey)
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof APIError) {
         setWalletActionError(`Falha ao criar intenção (${error.status}): ${error.statusText}`)
       } else {
@@ -806,7 +806,7 @@ export function useAethelDashboardDerived(params: any) {
       if (creditsKey) {
         await mutate(creditsKey)
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof APIError) {
         setWalletActionError(
           error.status === 400
@@ -845,7 +845,7 @@ export function useAethelDashboardDerived(params: any) {
         await mutate(creditsKey)
       }
       await refreshWallet()
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof APIError) {
         setSubscribeError(`Não foi possível alterar o plano (${error.status}).`)
       } else {
@@ -869,10 +869,10 @@ export function useAethelDashboardDerived(params: any) {
         throw new Error(data?.error || 'Falha ao abrir portal')
       }
       window.location.assign(data.url)
-    } catch (error) {
+    } catch (error: any) {
       setSubscribeError('Não foi possível abrir o portal de cobrança.')
     }
-  }, [hasToken])
+  }, [hasToken, setSubscribeError])
 
   return { loadChatHistoryForThread, refreshCopilotWorkflows, switchCopilotWorkflow, createCopilotWorkflow, renameCopilotWorkflow, archiveCopilotWorkflow, copyHistoryFromWorkflow, mergeFromWorkflow, importContextFromWorkflow, toggleTheme, createNewSession, toggleFavorite, toggleScheduled, filteredSessions, saveCurrentSession, clearDashboardState, downloadUrls, handleDownload, loadSession, sendChatMessage, createProject, deleteProject, handleMagicWandSelect, handleSendSuggestion, handleAcceptSuggestion, walletTransactions, connectivityServices, lastWalletUpdate, creditEntries, receivableSummary, refreshWallet, refreshConnectivity, handlePurchaseIntentSubmit, handleTransferSubmit, handleSubscribe, handleManageSubscription }
 }

@@ -1,7 +1,37 @@
 'use client'
 
+import {
+  AgentUseCaseGrid,
+  CanvasCapabilityGate,
+  ContentCreationCapabilityGate,
+  UnrealCapabilityGate,
+} from './DashboardCapabilityPanels'
+import { AethelDashboardWalletTab } from './AethelDashboardWalletTab'
+import { AethelDashboardBillingTab } from './AethelDashboardBillingTab'
+
 export function AethelDashboardPrimaryTabContent(props: any) {
   const { AIThinkingPanel, APIError, AdminPanel, Background, BillingTab, Controls, DirectorNotePanel, Link, LivePreview, MiniMap, ReactFlow, RenderQueue, TimeMachineSlider, activeTab, activeWorkflowId, aiActivity, applyEdgeChanges, applyNodeChanges, archiveCopilotWorkflow, authReady, billingData, billingError, billingPlansForUI, cancelDownload, cancelRender, chatHistory, chatMessage, chatMode, connectBusy, connectFromWorkflowId, connectivityData, connectivityError, connectivityLoading, connectivityServices, copilotWorkflows, copilotWorkflowsLoading, copyHistoryFromWorkflow, createCopilotWorkflow, createProject, creditEntries, creditsError, creditsInfo, currentPlan, currentPlanError, deleteProject, downloads, edges, exportJobs, formatBytes, formatConnectivityStatus, formatCurrency, formatCurrencyLabel, formatStatusLabel, handleDownload, handleMagicWandSelect, handleManageSubscription, handlePurchaseIntentSubmit, handleSendSuggestion, handleSubscribe, handleTransferSubmit, hasToken, importContextFromWorkflow, isGenerating, isStreaming, lastPurchaseIntent, lastTransferReceipt, lastWalletUpdate, livePreviewSuggestions, mergeFromWorkflow, miniPreviewExpanded, newProjectName, newProjectType, nodes, projects, purchaseForm, receivableSummary, refreshConnectivity, refreshWallet, renameCopilotWorkflow, renderJobs, sendChatMessage, setChatMessage, setChatMode, setConnectFromWorkflowId, setEdges, setMiniPreviewExpanded, setNewProjectName, setNewProjectType, setNodes, setPurchaseForm, setShowToast, setTransferForm, showToast, showToastMessage, subscribeError, subscribeMessage, switchCopilotWorkflow, transferForm, useCases, walletActionError, walletActionMessage, walletData, walletError, walletLoading, walletSubmitting, walletTransactions, workflowTemplates } = props
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  let creditsUsedToday = 0
+  let creditsUsedThisMonth = 0
+  let creditsReceivedThisMonth = 0
+  for (const entry of walletTransactions || []) {
+    const createdAt = new Date(entry.created_at)
+    if (entry.entry_type === 'credit') {
+      if (createdAt >= startOfMonth) {
+        creditsReceivedThisMonth += Number(entry.amount || 0)
+      }
+      continue
+    }
+    if (createdAt >= startOfToday) {
+      creditsUsedToday += Number(entry.amount || 0)
+    }
+    if (createdAt >= startOfMonth) {
+      creditsUsedThisMonth += Number(entry.amount || 0)
+    }
+  }
   return (
     <>
           {activeTab === 'overview' && (
@@ -412,40 +442,7 @@ export function AethelDashboardPrimaryTabContent(props: any) {
                     Modo de agente autônomo — inspirado na plataforma Manus. A IA executará tarefas passo a passo e entregará resultados.
                   </div>
                   <div className="aethel-space-y-4 aethel-mb-4">
-                    <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-4">
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Pesquisa e análise</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Coletar informações, analisar dados e gerar insights</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Criação de conteúdo</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Gerar artigos, código, documentação e conteúdo criativo</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Automação</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Criar fluxos, scripts e processos automatizados</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Resolução de problemas</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Depurar código, otimizar performance e resolver issues complexas</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Geração de código</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Gerar, depurar e otimizar código em várias linguagens</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Análise de dados</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Analisar datasets, criar visualizações e extrair insights</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Design criativo</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Desenhar UI/UX, gráficos e conceitos criativos</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Estratégia de negócios</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Planejamento estratégico, análise de mercado e desenvolvimento de negócios</p>
-                      </button>
-                    </div>
+                    <AgentUseCaseGrid />
                   </div>
                   <div className="aethel-flex aethel-gap-2">
                     <input
@@ -467,341 +464,27 @@ export function AethelDashboardPrimaryTabContent(props: any) {
               )}
 
               {chatMode === 'canvas' && (
-                <div className="aethel-card aethel-p-6 aethel-max-w-6xl aethel-mx-auto">
-                  <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
-                    Canvas visual para trabalho colaborativo com IA. Desenhe, esboce ideias e colabore em tempo real.
-                  </div>
-                  <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-4 aethel-min-h-96 aethel-border aethel-border-slate-700 aethel-relative">
-                    <div className="aethel-absolute aethel-top-4 aethel-left-4 aethel-flex aethel-gap-2">
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Desenhar</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Formas</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Texto</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Melhorar com IA</button>
-                    </div>
-                    <div className="aethel-text-center aethel-text-slate-500 aethel-py-32">
-                      <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                      <p className="text-lg font-medium mb-2">Canvas interativo</p>
-                      <p className="text-sm">Em breve com recursos completos de desenho e colaboração</p>
-                    </div>
-                  </div>
-                </div>
+                <CanvasCapabilityGate />
               )}
             </div>
           )}
 
           {activeTab === 'content-creation' && (
-            <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Criação de conteúdo</h2>
-              <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
-                <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Conteúdo com IA</h3>
-                  <p className="aethel-text-slate-400 aethel-mb-4">Gere código, documentação e conteúdo criativo com assistência de IA.</p>
-                  <button className="aethel-button aethel-button-primary">Começar a criar</button>
-                </div>
-                <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Modelos</h3>
-                  <p className="aethel-text-slate-400 aethel-mb-4">Use modelos pré-prontos para tarefas comuns de desenvolvimento.</p>
-                  <button className="aethel-button aethel-button-secondary">Ver modelos</button>
-                </div>
-              </div>
-            </div>
+            <ContentCreationCapabilityGate />
           )}
 
           {activeTab === 'unreal' && (
-            <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Integração com Unreal Engine</h2>
-              <div className="aethel-card aethel-p-6">
-                <p className="aethel-text-slate-400 aethel-mb-4">Integre-se ao Unreal Engine para VR e desenvolvimento de jogos.</p>
-                <div className="aethel-flex aethel-gap-4">
-                  <button className="aethel-button aethel-button-primary">Conectar à Unreal</button>
-                  <button className="aethel-button aethel-button-secondary">Prévia VR</button>
-                </div>
-              </div>
-            </div>
+            <UnrealCapabilityGate />
           )}
 
           {activeTab === 'wallet' && (
-            <div className="aethel-p-6 aethel-space-y-6">
-              <div className="aethel-flex aethel-items-center aethel-justify-between">
-                <h2 className="aethel-text-2xl aethel-font-bold">Carteira</h2>
-                {authReady && hasToken && (
-                  <button onClick={refreshWallet} className="aethel-button aethel-button-secondary aethel-text-xs">
-                    Atualizar
-                  </button>
-                )}
-              </div>
-              {!authReady && <p className="aethel-text-sm aethel-text-slate-400">Verificando autenticação...</p>}
-              {authReady && !hasToken && (
-                <div className="aethel-card aethel-p-6 aethel-max-w-2xl">
-                  <p className="aethel-text-sm aethel-text-slate-300">
-                    Para visualizar o saldo e realizar operações, faça login no portal.
-                  </p>
-                </div>
-              )}
-              {authReady && hasToken && (
-                <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
-                  <div className="aethel-card aethel-p-6 aethel-space-y-4">
-                    <div>
-                      <h3 className="aethel-text-lg aethel-font-semibold">Saldo Atual</h3>
-                      {walletLoading && <p className="aethel-text-sm aethel-text-slate-400">Carregando carteira...</p>}
-                      {walletError && (
-                        <p className="aethel-text-sm aethel-text-red-400">
-                          Falha ao carregar os dados. Tente novamente.
-                        </p>
-                      )}
-                      {!walletLoading && !walletError && walletData && (
-                        <>
-                          <div className="aethel-text-4xl aethel-font-bold aethel-text-slate-100">
-                            {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                          </div>
-                          {creditsInfo && (
-                            <p className="aethel-text-xs aethel-text-slate-400">
-                              Créditos faturáveis: {creditsInfo.credits.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                            </p>
-                          )}
-                          <p className="aethel-text-xs aethel-text-slate-500">
-                            {walletTransactions.length} transações
-                          </p>
-                          {lastWalletUpdate && (
-                            <p className="aethel-text-xs aethel-text-slate-500">
-                              Atualizado em {new Date(lastWalletUpdate).toLocaleString()}
-                            </p>
-                          )}
-                          <div className="aethel-grid aethel-grid-cols-1 sm:aethel-grid-cols-3 aethel-gap-3 aethel-mt-4">
-                            <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                              <p className="aethel-text-xs aethel-text-slate-500">Gasto hoje</p>
-                              <p className="aethel-text-lg aethel-font-semibold aethel-text-rose-300">
-                                {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                              </p>
-                            </div>
-                            <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                              <p className="aethel-text-xs aethel-text-slate-500">Gasto no mês</p>
-                              <p className="aethel-text-lg aethel-font-semibold aethel-text-amber-300">
-                                {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                              </p>
-                            </div>
-                            <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                              <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
-                              <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                                {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                              </p>
-                            </div>
-                          </div>
-                          {lastPurchaseIntent && (
-                            <p className="aethel-text-xs aethel-text-slate-400 aethel-mt-2">
-                              Última intenção #{lastPurchaseIntent.intent_id} • +
-                              {lastPurchaseIntent.entry.amount.toLocaleString()} {formatCurrencyLabel(lastPurchaseIntent.entry.currency)}{' '}
-                              em {new Date(lastPurchaseIntent.entry.created_at).toLocaleString()}
-                            </p>
-                          )}
-                          {lastTransferReceipt && (
-                            <p className="aethel-text-xs aethel-text-slate-400">
-                              Última transferência #{lastTransferReceipt.transfer_id} • -
-                              {lastTransferReceipt.sender_entry.amount.toLocaleString()} {formatCurrencyLabel(lastTransferReceipt.sender_entry.currency)}{' '}
-                              em {new Date(lastTransferReceipt.sender_entry.created_at).toLocaleString()}
-                            </p>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    {(walletActionMessage || walletActionError) && (
-                      <div className={`aethel-text-sm ${walletActionError ? 'aethel-text-red-400' : 'aethel-text-emerald-400'}`}>
-                        {walletActionError || walletActionMessage}
-                      </div>
-                    )}
-                    <form className="aethel-space-y-3" onSubmit={handlePurchaseIntentSubmit}>
-                      <h4 className="aethel-text-sm aethel-font-semibold">Adicionar Créditos</h4>
-                      <div className="aethel-flex aethel-gap-2">
-                        <input
-                          type="number"
-                          min={1}
-                          value={purchaseForm.amount}
-                          onChange={(e) => setPurchaseForm(prev => ({ ...prev, amount: e.target.value }))}
-                          className="aethel-input"
-                          placeholder="Quantidade"
-                          required
-                        />
-                        <select
-                          value={purchaseForm.currency}
-                          onChange={(e) => setPurchaseForm(prev => ({ ...prev, currency: e.target.value }))}
-                          className="aethel-input aethel-w-32"
-                        >
-                          <option value="credits">Créditos</option>
-                        </select>
-                      </div>
-                      <input
-                        type="text"
-                        value={purchaseForm.reference}
-                        onChange={(e) => setPurchaseForm(prev => ({ ...prev, reference: e.target.value }))}
-                        className="aethel-input"
-                        placeholder="Referência (opcional)"
-                      />
-                      <button
-                        type="submit"
-                        className="aethel-button aethel-button-primary"
-                        disabled={walletSubmitting}
-                      >
-                        {walletSubmitting ? 'Processando...' : 'Confirmar Intenção'}
-                      </button>
-                    </form>
-                  </div>
-
-                  <div className="aethel-card aethel-p-6 aethel-space-y-4">
-                    <form className="aethel-space-y-3" onSubmit={handleTransferSubmit}>
-                      <h3 className="aethel-text-lg aethel-font-semibold">Transferir Créditos</h3>
-                      <input
-                        type="text"
-                        value={transferForm.targetUserId}
-                        onChange={(e) => setTransferForm(prev => ({ ...prev, targetUserId: e.target.value }))}
-                        className="aethel-input"
-                        placeholder="ID do usuário ou e-mail do destinatário"
-                        required
-                      />
-                      <div className="aethel-flex aethel-gap-2">
-                        <input
-                          type="number"
-                          min={1}
-                          value={transferForm.amount}
-                          onChange={(e) => setTransferForm(prev => ({ ...prev, amount: e.target.value }))}
-                          className="aethel-input"
-                          placeholder="Quantidade"
-                          required
-                        />
-                        <select
-                          value={transferForm.currency}
-                          onChange={(e) => setTransferForm(prev => ({ ...prev, currency: e.target.value }))}
-                          className="aethel-input aethel-w-32"
-                        >
-                          <option value="credits">Créditos</option>
-                        </select>
-                      </div>
-                      <input
-                        type="text"
-                        value={transferForm.reference}
-                        onChange={(e) => setTransferForm(prev => ({ ...prev, reference: e.target.value }))}
-                        className="aethel-input"
-                        placeholder="Referência (opcional)"
-                      />
-                      <button
-                        type="submit"
-                        className="aethel-button aethel-button-secondary"
-                        disabled={walletSubmitting}
-                      >
-                        {walletSubmitting ? 'Processando...' : 'Transferir'}
-                      </button>
-                    </form>
-
-                    <div>
-                      <h4 className="aethel-text-sm aethel-font-semibold aethel-mb-2">Histórico Recente</h4>
-                      <div className="aethel-space-y-2 aethel-max-h-64 aethel-overflow-y-auto">
-                        {walletTransactions.length === 0 && (
-                          <p className="aethel-text-sm aethel-text-slate-500">Nenhuma transação registrada.</p>
-                        )}
-                        {walletTransactions.slice().reverse().map(entry => (
-                          <div key={entry.id} className="aethel-border aethel-border-slate-800 aethel-rounded-lg aethel-p-3">
-                            <div className="aethel-flex aethel-justify-between aethel-items-center">
-                              <span className="aethel-text-sm aethel-font-medium">
-                                {entry.reference || entry.entry_type.toUpperCase()}
-                              </span>
-                              <span className={`aethel-text-sm aethel-font-semibold ${entry.entry_type === 'credit' ? 'aethel-text-emerald-400' : entry.entry_type === 'transfer' ? 'aethel-text-amber-300' : 'aethel-text-red-400'}`}>
-                                {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
-                              </span>
-                            </div>
-                            <div className="aethel-flex aethel-justify-between aethel-items-center aethel-mt-1">
-                              <span className="aethel-text-xs aethel-text-slate-400">
-                                Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
-                              </span>
-                              <span className="aethel-text-xs aethel-text-slate-500">
-                                {new Date(entry.created_at).toLocaleString()}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="aethel-card aethel-p-6 lg:aethel-col-span-2 aethel-space-y-4">
-                    <div className="aethel-flex aethel-items-center aethel-justify-between">
-                      <h3 className="aethel-text-lg aethel-font-semibold">Recebíveis</h3>
-                      <span className="aethel-text-xs aethel-text-slate-500">
-                        {creditEntries.length} lançamentos de entrada
-                      </span>
-                    </div>
-                    <div className="aethel-grid aethel-grid-cols-1 sm:aethel-grid-cols-3 aethel-gap-4">
-                      <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                        <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
-                        <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                          {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                        </p>
-                      </div>
-                      <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                        <p className="aethel-text-xs aethel-text-slate-500">Total creditado</p>
-                        <p className="aethel-text-lg aethel-font-semibold aethel-text-blue-300">
-                          {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                        </p>
-                      </div>
-                      <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                        <p className="aethel-text-xs aethel-text-slate-500">Pendente de conciliação</p>
-                        <p className="aethel-text-lg aethel-font-semibold aethel-text-amber-300">
-                          {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="aethel-overflow-x-auto">
-                      <table className="aethel-min-w-full aethel-text-xs aethel-text-left">
-                        <thead>
-                          <tr className="aethel-text-slate-400">
-                            <th className="aethel-py-2 aethel-pr-4">Referência</th>
-                            <th className="aethel-py-2 aethel-pr-4">Valor</th>
-                            <th className="aethel-py-2 aethel-pr-4">Status</th>
-                            <th className="aethel-py-2 aethel-pr-4">Saldo</th>
-                            <th className="aethel-py-2">Data</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {receivableSummary.recent.length === 0 && (
-                            <tr>
-                              <td className="aethel-py-3 aethel-text-slate-500" colSpan={5}>
-                                Nenhum recebimento registrado.
-                              </td>
-                            </tr>
-                          )}
-                          {receivableSummary.recent.map(entry => {
-                            const rawStatus = entry.metadata?.['status'] as unknown
-                            const statusLabel = formatStatusLabel(rawStatus)
-                            const invoice = entry.metadata?.['invoice_id'] as unknown
-                            const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
-                            const amountLabel = `+${entry.amount.toLocaleString()} ${formatCurrencyLabel(entry.currency)}`
-                            return (
-                              <tr key={entry.id} className="aethel-border-t aethel-border-slate-800">
-                                <td className="aethel-py-2 aethel-pr-4 aethel-font-medium aethel-text-slate-200">
-                                  {invoiceLabel || 'Recebimento'}
-                                </td>
-                                <td className="aethel-py-2 aethel-pr-4 aethel-text-emerald-300">
-                                  {amountLabel}
-                                </td>
-                                <td className="aethel-py-2 aethel-pr-4 aethel-uppercase">
-                                  {statusLabel}
-                                </td>
-                                <td className="aethel-py-2 aethel-pr-4 aethel-text-slate-400">
-                                  {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
-                                </td>
-                                <td className="aethel-py-2 aethel-text-slate-400">
-                                  {new Date(entry.created_at).toLocaleString()}
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <AethelDashboardWalletTab
+              activeTab={activeTab}
+              dashboard={props}
+              creditsUsedToday={creditsUsedToday}
+              creditsUsedThisMonth={creditsUsedThisMonth}
+              creditsReceivedThisMonth={creditsReceivedThisMonth}
+            />
           )}
 
           {activeTab === 'connectivity' && (
@@ -904,203 +587,13 @@ export function AethelDashboardPrimaryTabContent(props: any) {
           )}
 
           {activeTab === 'billing' && (
-            <div className="aethel-p-6 aethel-space-y-6">
-              <div className="aethel-flex aethel-flex-col md:aethel-flex-row md:aethel-items-end md:aethel-justify-between aethel-gap-4">
-                <div className="aethel-space-y-2">
-                  <h2 className="aethel-text-3xl aethel-font-bold">Faturamento &amp; Créditos</h2>
-                  <p className="aethel-text-slate-400 aethel-max-w-2xl">
-                    Acompanhe o plano ativo, créditos disponíveis e recebíveis em tempo real. Todas as operações refletem
-                    diretamente o que está registrado na carteira e nos endpoints de billing.
-                  </p>
-                </div>
-                <Link href="/terms" className="aethel-button aethel-button-secondary aethel-text-sm">
-                  Consultar Termos de Uso
-                </Link>
-              </div>
-
-              {(billingError || currentPlanError || creditsError) && (
-                <div className="aethel-card aethel-border aethel-border-amber-500/40 aethel-bg-amber-500/10 aethel-text-amber-200 aethel-text-sm aethel-p-4">
-                  <p>
-                    {billingError && 'Falha ao recuperar planos. '}
-                    {currentPlanError && 'Não foi possível identificar o plano atual. '}
-                    {creditsError && 'Não foi possível obter o saldo de créditos faturáveis.'}
-                  </p>
-                </div>
-              )}
-
-              {(subscribeMessage || subscribeError) && (
-                <div className={`aethel-card aethel-text-sm aethel-p-4 ${subscribeError ? 'aethel-text-red-300 aethel-bg-red-500/10 aethel-border aethel-border-red-500/40' : 'aethel-text-emerald-300 aethel-bg-emerald-500/10 aethel-border aethel-border-emerald-500/40'}`}>
-                  {subscribeError || subscribeMessage}
-                </div>
-              )}
-
-              <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 xl:aethel-grid-cols-4 aethel-gap-4">
-                <div className="aethel-card aethel-p-5 aethel-space-y-3">
-                  <p className="aethel-text-xs aethel-text-slate-500">Plano atual</p>
-                  <h3 className="aethel-text-xl aethel-font-semibold">
-                    {currentPlan?.name ?? 'Plano padrão'}
-                  </h3>
-                  <p className="aethel-text-sm aethel-text-slate-400">
-                    {currentPlan?.priceBRL !== undefined
-                      ? `${formatCurrency(currentPlan.priceBRL, 'BRL')}/mês`
-                      : currentPlan?.price !== undefined
-                        ? `${formatCurrency(currentPlan.price, 'USD')}/mês`
-                        : 'Valor conforme consumo'}
-                  </p>
-                  {currentPlan?.features && currentPlan.features.length > 0 && (
-                    <ul className="aethel-text-xs aethel-text-slate-400 aethel-space-y-1">
-                      {currentPlan.features.slice(0, 3).map(feature => (
-                        <li key={feature}>• {feature}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <div className="aethel-card aethel-p-5 aethel-space-y-3">
-                  <p className="aethel-text-xs aethel-text-slate-500">Saldo em créditos</p>
-                  <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-blue-300">
-                    {walletData ? `${walletData.balance.toLocaleString()} ${formatCurrencyLabel(walletData.currency)}` : '—'}
-                  </h3>
-                  <p className="aethel-text-xs aethel-text-slate-400">
-                    {creditsInfo
-                      ? `Créditos faturáveis: ${creditsInfo.credits.toLocaleString()} ${formatCurrencyLabel(walletData?.currency)}`
-                      : 'Sincronize após login para detalhar faturamento.'}
-                  </p>
-                </div>
-
-                <div className="aethel-card aethel-p-5 aethel-space-y-3">
-                  <p className="aethel-text-xs aethel-text-slate-500">Consumo mensal</p>
-                  <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-rose-300">
-                    {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                  </h3>
-                  <p className="aethel-text-xs aethel-text-slate-400">Inclui débitos e transferências realizadas desde o início do mês.</p>
-                </div>
-
-                <div className="aethel-card aethel-p-5 aethel-space-y-3">
-                  <p className="aethel-text-xs aethel-text-slate-500">Recebíveis pendentes</p>
-                  <h3 className="aethel-text-2xl aethel-font-semibold aethel-text-amber-300">
-                    {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                  </h3>
-                  <p className="aethel-text-xs aethel-text-slate-400">Baseado nos lançamentos com status pendente ou não conciliado.</p>
-                </div>
-              </div>
-
-              <div className="aethel-card aethel-p-6 aethel-space-y-4">
-                <div className="aethel-flex aethel-justify-between aethel-items-center">
-                  <h3 className="aethel-text-lg aethel-font-semibold">Saldo &amp; Recebíveis</h3>
-                  <span className="aethel-text-xs aethel-text-slate-500">Última atualização: {lastWalletUpdate ? new Date(lastWalletUpdate).toLocaleString() : '—'}</span>
-                </div>
-                <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 aethel-gap-4">
-                  <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                    <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
-                    <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                      {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                    </p>
-                  </div>
-                  <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                    <p className="aethel-text-xs aethel-text-slate-500">Gasto hoje</p>
-                    <p className="aethel-text-lg aethel-font-semibold aethel-text-rose-300">
-                      {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                    </p>
-                  </div>
-                  <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                    <p className="aethel-text-xs aethel-text-slate-500">Total creditado</p>
-                    <p className="aethel-text-lg aethel-font-semibold aethel-text-blue-300">
-                      {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                    </p>
-                  </div>
-                </div>
-                <div className="aethel-overflow-x-auto">
-                  <table className="aethel-min-w-full aethel-text-xs aethel-text-left">
-                    <thead>
-                      <tr className="aethel-text-slate-400">
-                        <th className="aethel-py-2 aethel-pr-4">Referência</th>
-                        <th className="aethel-py-2 aethel-pr-4">Valor</th>
-                        <th className="aethel-py-2 aethel-pr-4">Status</th>
-                        <th className="aethel-py-2 aethel-pr-4">Saldo</th>
-                        <th className="aethel-py-2">Data</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {receivableSummary.recent.length === 0 && (
-                        <tr>
-                          <td className="aethel-py-3 aethel-text-slate-500" colSpan={5}>
-                            Nenhum recebimento cadastrado neste período.
-                          </td>
-                        </tr>
-                      )}
-                      {receivableSummary.recent.map(entry => {
-                        const rawStatus = entry.metadata?.['status'] as unknown
-                        const statusLabel = formatStatusLabel(rawStatus)
-                        const invoice = entry.metadata?.['invoice_id'] as unknown
-                        const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
-                        const amountLabel = `+${entry.amount.toLocaleString()} ${formatCurrencyLabel(entry.currency)}`
-                        return (
-                          <tr key={entry.id} className="aethel-border-t aethel-border-slate-800">
-                            <td className="aethel-py-2 aethel-pr-4 aethel-font-medium aethel-text-slate-200">
-                              {invoiceLabel || 'Recebimento'}
-                            </td>
-                            <td className="aethel-py-2 aethel-pr-4 aethel-text-emerald-300">
-                              {amountLabel}
-                            </td>
-                            <td className="aethel-py-2 aethel-pr-4 aethel-uppercase">
-                              {statusLabel}
-                            </td>
-                            <td className="aethel-py-2 aethel-pr-4 aethel-text-slate-400">
-                              {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
-                            </td>
-                            <td className="aethel-py-2 aethel-text-slate-400">
-                              {new Date(entry.created_at).toLocaleString()}
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="aethel-card aethel-p-6 aethel-space-y-4">
-                <div className="aethel-flex aethel-items-center aethel-justify-between">
-                  <h3 className="aethel-text-lg aethel-font-semibold">Planos e assinatura</h3>
-                  <button
-                    type="button"
-                    onClick={handleManageSubscription}
-                    className="aethel-button aethel-button-ghost aethel-text-xs"
-                  >
-                    Gerenciar assinatura
-                  </button>
-                </div>
-                <BillingTab
-                  plans={billingPlansForUI}
-                  currentPlan={currentPlan?.id ?? ''}
-                  loading={!billingData && !billingError}
-                  onSelectPlan={handleSubscribe}
-                  onManageSubscription={handleManageSubscription}
-                  showHeader={false}
-                  showHighlights={false}
-                  showFaq={false}
-                  showCurrentPlanInfo={false}
-                />
-              </div>
-
-              <div className="aethel-card aethel-p-6 aethel-space-y-3">
-                <h3 className="aethel-text-lg aethel-font-semibold">Governança e conformidade</h3>
-                <p className="aethel-text-sm aethel-text-slate-400">
-                  Todas as operações de compra, transferência e recepção de créditos seguem os Termos de Uso e políticas de
-                  cobrança da plataforma Aethel. Certifique-se de compartilhar estes documentos com os times financeiro e
-                  jurídico antes de ativar automações de faturamento.
-                </p>
-                <div className="aethel-flex aethel-flex-wrap aethel-gap-3">
-                  <Link href="/terms" className="aethel-button aethel-button-ghost aethel-text-xs">
-                    Termos de Uso
-                  </Link>
-                  <a href="mailto:billing@aethel.ai" className="aethel-button aethel-button-ghost aethel-text-xs">
-                    Contato financeiro
-                  </a>
-                </div>
-              </div>
-            </div>
+            <AethelDashboardBillingTab
+              activeTab={activeTab}
+              dashboard={props}
+              creditsUsedToday={creditsUsedToday}
+              creditsUsedThisMonth={creditsUsedThisMonth}
+              creditsReceivedThisMonth={creditsReceivedThisMonth}
+            />
           )}
 
     </>

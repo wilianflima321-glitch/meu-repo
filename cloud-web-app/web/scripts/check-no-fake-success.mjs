@@ -2,8 +2,9 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const API_DIR = path.join(ROOT, 'app', 'api')
 
 const STATUS_BY_ERROR = {

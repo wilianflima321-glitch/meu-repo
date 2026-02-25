@@ -133,7 +133,11 @@ export async function POST(
       ok: true,
       session,
       capability: 'STUDIO_HOME_TASK_ROLLBACK',
-      capabilityStatus: 'IMPLEMENTED',
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        rollbackMode: 'checkpoint-token-only',
+        executionReality: 'orchestration-checkpoint',
+      },
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to rollback studio task'

@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 const MAX_PROJECT_ID_LENGTH = 120;
 const MAX_NAME_LENGTH = 200;
-const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+const normalizeProjectId = (value?: string | null) => String(value ?? '').trim();
 
 function requireCollaborationEnabled(collaboratorsLimit: number): void {
   if (collaboratorsLimit === 0) {

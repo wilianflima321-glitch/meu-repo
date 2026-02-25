@@ -1,4 +1,4 @@
-# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
+﻿# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
 Status: AUDITORIA EXECUTAVEL  
 Data: 2026-02-14  
 Direcao: Equilibrado + corte legado faseado + sem mudanca de escopo
@@ -103,7 +103,7 @@ Regra operacional:
 2. Claims externos podem orientar backlog, mas nao alteram status factual de prontidao.
 
 Delta operacional (2026-02-16, sem rodar suite completa):
-1. APIs de notificacao e confirmacao de asset agora expõem estado real de operacao deferida (sem fake success silencioso).
+1. APIs de notificacao e confirmacao de asset agora expÃµem estado real de operacao deferida (sem fake success silencioso).
 2. `TODO` de API critica zerado.
 3. `NOT_IMPLEMENTED` retirado de copy de UI; mantido apenas em contratos de API.
 4. Rotas legadas continuam 410 + telemetria, sem quebra abrupta.
@@ -1996,3 +1996,1614 @@ Triaged impact:
  - `auth/oauth/[provider]/callback`
 2. Preserved explicit capability gates where persistence is not fully wired (`PROJECT_SHARE`, `PROJECT_INVITE_LINKS`).
 3. No product-scope expansion; this wave closes reliability and copy consistency debt only.
+
+## Delta 2026-02-22 (P0 closure checkpoint: lint/type + governance + renderer contract)
+Delivered:
+1. Restored lint baseline to zero in active wave (`cloud-web-app/web`).
+2. Kept typecheck green after strict typing hardening across admin/studio/video/scene/physics/audio contracts.
+3. Reconfirmed route/capability integrity:
+- `qa:no-fake-success` PASS
+- `qa:route-contracts` PASS
+- `qa:interface-gate` PASS (`not-implemented-ui=6`, noncritical=2).
+4. Reconfirmed repository governance integrity:
+- `qa:repo-connectivity` PASS
+- `qa:workflow-governance` PASS
+- `qa:canonical-doc-governance` PASS
+- `qa:secrets-critical` PASS.
+5. Clarified rendering expectation in settings UI: `Use DirectX 12` is now explicitly labeled as Windows export-target scope, not web runtime backend.
+6. Revalidated integrated quality gate:
+- `qa:enterprise-gate` PASS (`lint`, `typecheck`, `build`, and all canonical QA checks).
+
+Triaged impact:
+1. Current residual risk is now mostly structural/scale (module size and orchestration complexity), not hidden contract drift.
+2. Scope integrity preserved: `/dashboard` entry + `/ide` advanced shell, explicit gates, and no fake-success expansion.
+
+## Delta 2026-02-22 (Studio orchestration semantics alignment)
+Delivered:
+1. Shifted Studio orchestration contract wording from parallel-overclaim to factual sequencing:
+- mode standardized as `role_sequenced_wave`
+- run-wave metadata standardized as `executionMode=role-sequenced-wave`, `overlapGuard=enabled`.
+2. Updated Studio task-board operational copy to reflect deterministic role sequencing.
+
+Triaged impact:
+1. Improves trust and reduces interpretation drift for users expecting deterministic no-overlap execution.
+2. Keeps same execution behavior and cost guardrails; no scope expansion.
+
+## Delta 2026-02-22 (Studio no-op progression risk closure)
+Delivered:
+1. Closed orchestration no-op progression gap in `runStudioTask` by enforcing persisted blocked status on unmet role prerequisites.
+2. Hardened `/api/studio/tasks/[id]/run` blocked metadata and execution mode semantics.
+3. Updated canonical capability/spec docs for endpoint wording parity.
+4. Added queue transparency in Studio task board (queue-by-role + next runnable role hint).
+
+Triaged impact:
+1. User-visible task actions now have deterministic outcome semantics (progressed vs explicitly blocked).
+2. Reduced false-positive success risk in mission execution loop without adding new product scope.
+
+## Delta 2026-02-22 (AI query and Studio CTA reliability pass)
+Delivered:
+1. Hardened `/api/ai/query` input + provider-failure contracts:
+- malformed body -> `400 INVALID_BODY`
+- missing query -> `400 MISSING_QUERY`
+- provider missing -> `501 NOT_IMPLEMENTED` with capability metadata
+- provider mismatch/not configured -> `503 PROVIDER_NOT_CONFIGURED` with capability metadata.
+2. Tightened Studio task-board interaction contract:
+- `Run Wave` CTA disabled when no role is runnable
+- explicit blocked-state hint rendered when orchestration guards prevent progress.
+
+Triaged impact:
+1. Lower API ambiguity and clearer operator behavior in AI query flows.
+2. Fewer dead-end clicks in Studio Home critical path, with explicit guidance instead of silent no-op attempts.
+
+## Delta 2026-02-22 (Core AI provider contract parity)
+Delivered:
+1. Standardized explicit provider handling in core AI routes (`chat`, `complete`, `action`, `inline-edit`, `inline-completion`):
+- unsupported provider -> `400 INVALID_PROVIDER`
+- requested provider unavailable in current runtime -> `503 PROVIDER_NOT_CONFIGURED` with capability metadata.
+2. Preserved canonical no-provider gate (`501 NOT_IMPLEMENTED`) for global provider absence.
+3. Extended route contract scanner coverage to enforce these provider-gate semantics.
+
+Triaged impact:
+1. Stronger trust in explicit provider selection behavior.
+2. Lower chance of implicit fallback behavior being interpreted as successful provider-specific execution.
+
+## Delta 2026-02-22 (Plan-quality transparency for web UX)
+Delivered:
+1. Added plan-aware quality normalization policy (`standard|delivery|studio`) in backend limits.
+2. Studio session start now returns explicit applied-vs-requested quality metadata.
+3. Advanced chat + IDE chat now surface quality downgrade events when plan policy adjusts requested mode.
+4. Route contract scanner now validates quality-policy metadata in studio-session contract.
+
+Triaged impact:
+1. Better quality/cost predictability across plans without hidden degradation.
+2. Lower user confusion in premium UX paths when runtime enforces plan constraints.
+
+## Delta 2026-02-22 (One-shot closure triage snapshot)
+Delivered:
+1. Consolidated factual closure execution doc:
+- `31_ONE_SHOT_CLOSURE_EXECUTION_2026-02-22.md`.
+2. Revalidated scanner baselines used for triage:
+- interface critical high-severity metrics remain zero
+- architecture critical (`duplicateBasenames=0`, `oversizedFiles>=1200=0`)
+- governance scans (`repo/workflow/canonical/secrets`) all without issues/findings.
+3. Reconfirmed residual blockers for phase closure:
+- freeze gate suite still pending consolidated run
+- explicit capability gates still intentionally present (`NOT_IMPLEMENTED/PAYMENT_GATEWAY_NOT_IMPLEMENTED` set)
+- collaboration/L4/L5 promotion still blocked by evidence gates.
+
+Triaged impact:
+1. Execution can proceed as single closure wave with no open decision dependencies.
+2. Remaining risk has shifted from discovery to disciplined freeze execution and structural decomposition debt reduction.
+
+## Delta 2026-02-22 (Studio execution cost-policy parity)
+Delivered:
+1. Backend parity with UI policy for exhausted credits:
+- `tasks/[id]/run` and `tasks/run-wave` now return explicit `402 VARIABLE_USAGE_BLOCKED` capability envelope before execution.
+2. Studio telemetry endpoints now return server-side `budgetAlert` stages for 50/80/100 thresholds.
+3. Ops Bar now surfaces those budget stages as explicit operator messages.
+
+Triaged impact:
+1. Reduced mismatch between frontend policy signaling and backend enforcement.
+2. Lower probability of hidden cost behavior in long sessions.
+
+## Delta 2026-02-22 (Studio store decomposition wave)
+Delivered:
+1. Extracted Studio runtime helper set into dedicated module (`studio-home-runtime-helpers.ts`).
+2. Reduced `studio-home-store.ts` from near-limit bucket to sub-1000 LOC.
+3. Reconfirmed architecture baseline after extraction: `oversizedFiles=0`, `nearLimitFiles=61`.
+
+Triaged impact:
+1. Improves maintainability and parallel delivery for Studio Home without changing scope.
+2. Keeps focus on remaining near-limit debt in other modules as next structural wave.
+
+
+## Delta 2026-02-22 (Triage - dashboard actionability and structural debt)
+Delivered:
+1. Dashboard tab triage moved non-operational actions to explicit capability gates (canvas/content-creation/unreal).
+2. Agent-mode support cards are now informational-only blocks (no hidden click paths).
+3. Media Studio shell extracted into `MediaStudioWorkspace` to reduce monolith pressure.
+4. Architecture scan baseline improved to `nearLimitFiles=59` (from `61`) while preserving `oversizedFiles=0`.
+
+Triaged impact:
+1. Lower chance of user dead-end interactions in Studio Home.
+2. Better code ownership boundaries for future decomposition waves.
+
+
+## Delta 2026-02-22 (Triage - IDE chat module boundaries)
+Delivered:
+1. Extracted cross-cutting UI widgets from `AIChatPanelPro` into standalone module.
+2. Reduced architecture near-limit count to `58` while keeping all critical contracts green.
+
+Triaged impact:
+1. Better ownership boundaries for IDE chat evolution.
+2. Lower merge/regression pressure in high-change files.
+
+
+## Delta 2026-02-22 (Triage - Live Preview shell)
+Delivered:
+1. Live Preview migrated to organized docked controls with optional hidden chrome.
+2. Removed duplicate joystick area and logging noise in runtime shell.
+
+Triaged impact:
+1. Better UX consistency with studio panels (clear controls and less clutter).
+2. Improved mobile ergonomics without introducing new capability claims.
+
+
+## Delta 2026-02-22 (Triage - terminal panel organization)
+Delivered:
+1. Extracted terminal shell chrome into dedicated module for clearer ownership boundaries.
+2. Reduced architecture near-limit baseline to `57`.
+
+Triaged impact:
+1. Better maintainability and safer future UX changes in terminal workspace.
+2. No contract drift in API/capability surfaces.
+
+
+## Delta 2026-02-22 (Triage - dashboard shell decomposition)
+Delivered:
+1. Extracted dashboard config/state helpers into `AethelDashboard.config.ts`.
+2. Reduced monolith pressure on main dashboard shell (`1146 -> 757`).
+3. Architecture near-limit baseline reduced to `56`.
+
+Triaged impact:
+1. Better maintainability for Studio Home entry workflows.
+2. Safer iteration path for UI unification changes.
+
+## Delta 2026-02-22 (Triage - Studio Home operational clarity wave)
+Delivered:
+1. Studio Home got a clearer operational UX for mission-control usage:
+- top status strip (network/session/tasks/budget/usage/last action);
+- mission-quality scoring hints to reduce low-signal prompts;
+- deterministic task action hints (why Run/Validate/Apply/Rollback are blocked);
+- reviewer pipeline counters to expose validation/apply backlog;
+- telemetry refresh + stale-warning in Ops Bar.
+2. Removed hidden dead-end behavior in Team Chat by disabling Agent Workspace with explicit reason when session is not active or usage is blocked.
+3. Fixed concrete type regressions uncovered during this wave and re-established `typecheck=PASS`.
+
+Triaged impact:
+1. Lower cognitive load for first-time and returning operators in `/dashboard`.
+2. Lower chance of invalid operator actions in mission lifecycle.
+3. Better runtime trust by exposing state and block reasons directly in the surface.
+
+## Delta 2026-02-22 (Triage - Studio component parity and visual cohesion)
+Delivered:
+1. Introduced shared Studio primitives (`studio-panel`, `studio-action-*`, `studio-kpi-card`, etc.) and applied them across all Home blocks.
+2. Reduced cross-component visual drift and interaction inconsistency in mission/task/chat/ops panels.
+3. Preserved all operational contracts while improving readability and action discoverability.
+
+Triaged impact:
+1. Better first-use comprehension and lower action ambiguity.
+2. Stronger parity with market-grade mission-control UIs without scope expansion.
+
+## Delta 2026-02-22 (Triage - IDE shell parity polish)
+Delivered:
+1. Workbench status and handoff banner refined for clearer context continuity.
+2. Header/menu/sidebar/panel controls now have stronger keyboard and accessibility semantics.
+3. Footer signal hierarchy cleaned to reduce visual noise while preserving operational cues.
+
+Triaged impact:
+1. Better parity with professional IDE UX patterns (discoverability, focus behavior, compact status telemetry).
+2. Lower operator friction in long editing sessions.
+
+## Delta 2026-02-22 (Triage - Admin parity polish)
+Delivered:
+1. Centralized admin controls (search/filter/status badges) in shared `AdminSurface` primitives.
+2. Applied those primitives to admin home/payments/apis/security, reducing repetitive styling logic and drift.
+3. Preserved operational semantics while improving readability and action discoverability.
+
+Triaged impact:
+1. Better parity with enterprise admin UX patterns.
+2. Lower maintenance cost via shared component usage.
+
+## Delta 2026-02-22 (Triage - Final freeze closure)
+Delivered:
+1. Executed full quality freeze in `cloud-web-app/web` with all required gates green:
+- `lint`, `typecheck`, `build`
+- `qa:interface-gate`
+- `qa:architecture-gate`
+- `qa:canonical-components`
+- `qa:route-contracts`
+- `qa:critical-rate-limit`
+- `qa:no-fake-success`
+- `qa:mojibake`
+- `qa:enterprise-gate`
+2. Reconfirmed critical baselines:
+- interface critical zeros preserved;
+- route/deprecation/capability contracts intact;
+- architecture integrity maintained (`oversizedFiles=0`, `nearLimitFiles=42`).
+
+Triaged impact:
+1. Round exits with verification debt closed (no deferred freeze blocker).
+2. Residual backlog is now strictly P1/P2: capability implementation (currently explicit gates) and ongoing near-limit decomposition.
+
+## Delta 2026-02-22 (Triage - governance integrity rerun)
+Delivered:
+1. Post-freeze governance scans rerun and green:
+- repo connectivity
+- workflow governance
+- canonical doc governance
+- critical secret scan
+2. Route inventory regenerated for parity with current route contracts.
+
+Triaged impact:
+1. Repository integrity risk moved from "unknown drift" to "known managed backlog".
+2. Main remaining execution pressure is now concentrated in product capabilities and structural decomposition (not governance breakage).
+
+## Delta 2026-02-22 (Triage - decomposition wave, architectural debt)
+Delivered:
+1. WebRTC runtime concerns split from `networking-multiplayer.ts` into `networking-multiplayer-webrtc.ts` with compatibility re-export.
+2. Hair shading model split from `hair-fur-system.ts` into `hair-fur-shader.ts` with compatibility re-export.
+3. Architecture gate tightened to current proven baseline (`nearLimitFiles <= 40`).
+
+Triaged impact:
+1. Reduced high-change-file merge/regression risk in networking and rendering subsystems.
+2. Kept product/API behavior stable while reducing structural debt backlog (`42 -> 40`).
+
+## Delta 2026-02-22 (Triage - post-wave enterprise gate verification)
+Delivered:
+1. Full `qa:enterprise-gate` rerun completed after decomposition wave.
+2. All integrated checks remained green with tightened architecture threshold (`nearLimitFiles=40`).
+
+Triaged impact:
+1. Confirms decomposition wave is operationally safe.
+2. Keeps next cycle focused on remaining P1 debt, not regression cleanup.
+
+## Delta 2026-02-22 (Triage - decomposition continuation + root command hardening)
+Delivered:
+1. Extracted reusable sequencer interpolation module and SDK type surface into dedicated files.
+2. Tightened architecture baseline again (`nearLimitFiles=38`).
+3. Improved root `check:syntax` behavior for partial local environments with explicit dependency guards.
+
+Triaged impact:
+1. Structural debt reduced without contract drift.
+2. Developer/operator friction lowered for mixed-workspace local runs while preserving explicit warnings.
+
+## Delta 2026-02-22 (Triage - governance refresh after command graph change)
+Delivered:
+1. Governance scan set rerun after root script updates.
+2. Connectivity remained green with updated check graph (`totalChecks=30`, zero missing/dead refs).
+
+Triaged impact:
+1. Confirms no hidden repo wiring regression after command hardening.
+2. Keeps remaining backlog centered on capability delivery and near-limit decomposition.
+
+## Delta 2026-02-22 (Triage - cutscene decomposition wave)
+Delivered:
+1. Extracted cutscene easing helper map to dedicated module.
+2. Tightened architecture baseline to `nearLimitFiles=37` and reran integrated gate.
+
+Triaged impact:
+1. Lower maintainability risk in cutscene runtime without behavioral changes.
+2. Confirms decomposition wave remains non-regressive under full enterprise gate.
+
+## Delta 2026-02-22 (Triage - AAA character/story subsystem coverage)
+Delivered:
+1. Published canonical deep plan for character identity, lore continuity, asset/audio/cinematic quality gates:
+- `32_STUDIO_AAA_CHARACTER_STORY_QUALITY_PLAN_2026-02-22.md`.
+2. Plan aligns all sub-areas to factual baseline and LIMITATIONS constraints.
+
+Triaged impact:
+1. Removes ambiguity on what "high quality in all senses" means in current scope.
+2. Converts broad ambition into executable waves with acceptance criteria and explicit non-claims.
+
+## Delta 2026-02-22 (Triage - complete subarea coverage matrix)
+Delivered:
+1. Published canonical full subarea matrix:
+- `33_COMPLETE_SUBAREA_ALIGNMENT_AND_GAP_MATRIX_2026-02-22.md`.
+2. Mapped all major dimensions into explicit row-level status:
+- Product/UX
+- Frontend/IDE
+- Backend/Infra
+- AI/Automation
+- Collaboration/DX
+- Business/Market
+- Governance/Security
+3. Added row-level owner and priority for each subarea.
+
+Triaged impact:
+1. Eliminates residual ambiguity on what is implemented vs partial vs not implemented.
+2. Gives direct execution order for closure without scope drift.
+
+## Delta 2026-02-22 (Triage - web vs local runtime model)
+Delivered:
+1. Added explicit runtime-target visibility in IDE and Studio Home operations rail.
+2. Published canonical dual-target execution model:
+- `34_WEB_VS_LOCAL_STUDIO_EXECUTION_MODEL_2026-02-22.md`.
+
+Triaged impact:
+1. Removes ambiguity between current web production path and planned local path.
+2. Locks claim boundary: local quality potential is acknowledged, but promotion is evidence-gated.
+
+## Delta 2026-02-22 (Triage - agentic action policy guardrails)
+Delivered:
+1. Full Access now has explicit action-class policy evaluation in backend route contract.
+2. Studio Ops rail now displays blocked high-risk classes to prevent expectation drift.
+3. Canonical guardrail spec published:
+- `35_AGENTIC_PARALLEL_CAPABILITIES_AND_USABILITY_GUARDRAILS_2026-02-22.md`.
+
+Triaged impact:
+1. Reduces risk of overpromise ("agents can do anything on web/accounts").
+2. Aligns capability, usability, and safety policy in one enforceable path.
+
+## Delta 2026-02-22 (Triage - guardrail verification)
+Delivered:
+1. Type and contract checks rerun after Full Access policy hardening.
+2. No regression in route/no-fake-success contracts.
+
+Triaged impact:
+1. Safety guardrails are now enforceable in runtime, not just documented.
+2. Canonical + connectivity governance remained green after this wave.
+
+## Delta 2026-02-22 (Triage - historical markdown and loose-piece audit)
+Delivered:
+1. Published canonical historical absorption and orphan triage:
+- `36_HISTORICAL_MD_ABSORPTION_AND_ORPHAN_TRIAGE_2026-02-22.md`
+2. Captured explicit loose-piece list:
+- empty directories in active app/components tree
+- legacy workflow candidate still pending owner decision
+- historical markdown volume still high.
+
+Triaged impact:
+1. Reduces risk of roadmap drift from old markdown content.
+2. Converts structural leftovers into explicit, auditable backlog.
+
+## Delta 2026-02-22 (Triage - active surface hygiene enforcement)
+Delivered:
+1. New scanner and QA gate for empty directories in active product surfaces.
+2. Cleanup wave removed empty leftovers in `app/` and `components/`.
+3. Canonical hygiene report published:
+- `37_ACTIVE_SURFACE_HYGIENE_MATRIX_2026-02-22.md`.
+
+Triaged impact:
+1. Reduces repository noise that causes false assumptions during implementation.
+2. Converts orphan-surface cleanup into repeatable governance control.
+
+## Delta 2026-02-22 (Triage - connector capability boundaries)
+Delivered:
+1. Published connector capability/risk matrix:
+- `38_CONNECTOR_CAPABILITY_AND_RISK_MATRIX_2026-02-22.md`.
+2. Explicitly mapped external automation claims to enforceable action classes and hard blocks.
+
+Triaged impact:
+1. Removes ambiguity in connector scope and risk policy.
+2. Prevents overclaim around unrestricted external account operations.
+
+## Delta 2026-02-23 (Triage - studio orchestration claim hardening + long-session stability)
+Delivered:
+1. Studio task routes (`plan/run/run-wave/validate/apply/rollback`) normalized to `capabilityStatus=PARTIAL` when behavior is orchestration checkpoint and not autonomous code apply.
+2. Studio route contracts now enforce `executionReality=orchestration-checkpoint` markers.
+3. Studio session store now bounds retained context to avoid long-session degradation:
+- tasks: 60
+- agent runs: 300
+- messages: 500
+4. Studio Task Board now surfaces no-fake-success copy for planner/coder/reviewer checkpoints.
+
+Triaged impact:
+1. Reduces claim inflation risk for agent autonomy.
+2. Improves usability transparency for power users deciding when to handoff to `/ide`.
+3. Reduces memory/context drift risk in prolonged sessions.
+
+## Delta 2026-02-23 (Triage - wave strategy transparency)
+Delivered:
+1. `run-wave` now exposes explicit strategy telemetry (`strategy`, `maxStepsApplied`, `strategyReason`) for operator clarity.
+2. `quality_first` strategy now enforces single-step cadence to reduce overlap/ambiguity in human review flow.
+3. Studio Task Board now includes strategy selector with persisted preference and explanatory copy.
+
+Triaged impact:
+1. Improves cost/quality predictability in multi-agent sessions.
+2. Reduces ambiguity about why a wave executed fewer steps than requested.
+
+## Delta 2026-02-23 (Triage - reviewer gate quality hardening)
+Delivered:
+1. Reviewer validation moved from marker-only to deterministic multi-check gate (prerequisites + run evidence + checklist/domain + budget compliance).
+2. Validation failure now emits explicit structured report message in session timeline.
+
+Triaged impact:
+1. Reduces false-positive validation pass risk.
+2. Strengthens anti-hallucination behavior before `apply`.
+
+## Delta 2026-02-23 (Triage - domain-aware validation transparency)
+Delivered:
+1. Reviewer validation now enforces domain marker and checklist-coverage checks by mission domain.
+2. Task-level validation report is available for operator diagnostics in UI flow.
+
+Triaged impact:
+1. Improves traceability of why validation failed in games/films/apps mission lanes.
+2. Reduces repeated trial-and-error cycles in Studio Task Board.
+
+## Delta 2026-02-23 (Triage - architecture decomposition wave)
+Delivered:
+1. Niagara runtime logic split from editor surface to dedicated runtime module.
+2. Reviewer validation computation split out of session store to helper module.
+3. Architecture gate tightened to new factual baseline (`nearLimitFiles <= 35`).
+
+Triaged impact:
+1. Reduces regression risk in large files and improves ownership boundaries.
+2. Keeps decomposition pressure explicit and measurable.
+
+## Delta 2026-02-23 (Triage - architecture decomposition continuation)
+Delivered:
+1. Animation Blueprint node rendering extracted to dedicated module and dead node-label code removed.
+2. Architecture baseline tightened to `nearLimitFiles <= 34`.
+
+Triaged impact:
+1. Further reduces monolith maintenance pressure in high-change editor surfaces.
+2. Improves boundary clarity between node rendering and editor workflow logic.
+
+## Delta 2026-02-23 (Triage - audio engine decomposition wave)
+Delivered:
+1. AI audio music parameter/tags/default logic extracted to dedicated helper module.
+2. Architecture baseline tightened to `nearLimitFiles <= 33`.
+
+Triaged impact:
+1. Reduces class-level complexity in audio runtime orchestration.
+2. Improves testability/reuse of deterministic music mapping logic.
+
+## Delta 2026-02-23 (Triage - deterministic scan roots + near-limit 30)
+Delivered:
+1. QA/doc scanner scripts in `cloud-web-app/web/scripts/*.mjs` now anchor root to script path, preventing accidental report generation in repo-level `docs/` when invoked from different working directories.
+2. Additional decomposition completed:
+- cloth simulation types extracted to `cloud-web-app/web/lib/cloth-simulation.types.ts`
+- level serialization types extracted to `cloud-web-app/web/lib/level-serialization.types.ts`
+- particle pool extracted to `cloud-web-app/web/lib/particles/particle-pool.ts`
+3. Architecture baseline tightened again to `nearLimitFiles <= 30`.
+
+Triaged impact:
+1. Eliminates scanner-output ambiguity and report drift risk.
+2. Lowers structural maintenance risk in core simulation/runtime files.
+
+## Delta 2026-02-23 (Triage - input runtime decomposition)
+Delivered:
+1. Input runtime split into dedicated type and device-manager modules:
+- `cloud-web-app/web/lib/advanced-input-system.types.ts`
+- `cloud-web-app/web/lib/advanced-input-device-manager.ts`
+2. `cloud-web-app/web/lib/advanced-input-system.ts` now focuses on orchestration of buffer/combo/gesture/recording logic.
+3. Architecture baseline tightened to `nearLimitFiles <= 29`.
+
+Triaged impact:
+1. Better ownership boundaries for input runtime evolution (devices vs orchestration).
+2. Lower regression surface in one of the historical near-limit files.
+
+## Delta 2026-02-23 (Triage - Studio Home declutter pass)
+Delivered:
+1. Studio Home header reduced to primary actions with secondary actions moved to compact disclosure popover.
+2. Task Board and Ops Bar informational density normalized by merging duplicate banners into structured summary and alert stacks.
+3. High-density technical policy details moved behind intentional disclosure components instead of always-on noise.
+4. Mission and Team Chat received progressive-disclosure UX improvements (shortcut and agent-run sections).
+
+Triaged impact:
+1. Cleaner professional visual hierarchy with lower cognitive load.
+2. Better default readability while preserving full operational detail on demand.
+
+## Delta 2026-02-23 (Triage - motion matching decomposition)
+Delivered:
+1. Motion matching search and inertialization primitives extracted into dedicated module `cloud-web-app/web/lib/motion-matching-search.ts`.
+2. `cloud-web-app/web/lib/motion-matching-system.ts` now focuses on orchestration/runtime flow instead of embedding full search + blending internals.
+3. Architecture baseline tightened to `nearLimitFiles <= 28`.
+
+Triaged impact:
+1. Better maintainability boundary in animation-runtime stack.
+2. Lower risk of regressions in high-frequency gameplay iteration code.
+
+## Delta 2026-02-23 (Triage - status-bar density + audio runtime decomposition)
+Delivered:
+1. Workbench status bar now keeps only primary context always visible and shifts secondary context/shortcut hints into compact disclosures.
+2. Audio synthesis effect classes extracted to dedicated module to improve maintenance boundaries and reduce monolithic file risk.
+3. Architecture baseline tightened to `nearLimitFiles <= 27`.
+
+Triaged impact:
+1. Cleaner IDE chrome with less persistent visual noise and better focus on active work.
+2. Lower regression risk in audio stack by isolating effect implementations.
+
+## Delta 2026-02-23 (Triage - factual gap snapshot refresh)
+Delivered:
+1. Interface critical scan reconfirmed all visual-zero gates and explicit remaining capability counts (`not-implemented-ui=6`, `noncritical=2`).
+2. Route inventory regenerated with factual API gate counts (`NOT_IMPLEMENTED total=10`, `critical=8`, `noncritical=2`).
+
+Triaged impact:
+1. Confirms remaining risk concentration in capability completion and backend/runtime coherence, not visual token debt.
+
+## Delta 2026-02-23 (Triage - behavior tree core decomposition)
+Delivered:
+1. Behavior tree foundational primitives extracted to `cloud-web-app/web/lib/behavior-tree-core.ts`.
+2. `cloud-web-app/web/lib/behavior-tree.ts` reduced to orchestration/runtime node logic and explicit re-exports of shared core primitives.
+3. Architecture gate tightened to `nearLimitFiles <= 26`.
+
+Triaged impact:
+1. Reduces maintenance pressure in one of the most complex AI runtime files.
+2. Improves boundary clarity between behavior-tree foundations and domain node implementation.
+
+## Delta 2026-02-23 (Triage - AI behavior-tree blackboard extraction)
+Delivered:
+1. Extracted AI runtime blackboard and perception config surface to `cloud-web-app/web/lib/ai/behavior-tree-system.blackboard.ts`.
+2. `cloud-web-app/web/lib/ai/behavior-tree-system.tsx` now imports/re-exports extracted structures while preserving existing surface contracts.
+3. Architecture gate tightened to `nearLimitFiles <= 25`.
+
+Triaged impact:
+1. Further reduces regression risk in a high-change AI runtime module.
+2. Improves ownership boundaries between node runtime and blackboard/state serialization logic.
+
+## Delta 2026-02-23 (Triage - physics collision subsystem extraction)
+Delivered:
+1. Collision/raycast detector extracted to `cloud-web-app/web/lib/physics/physics-collision-detector.ts`.
+2. `cloud-web-app/web/lib/physics/physics-system.ts` now focuses on rigid-body world and constraint orchestration.
+3. Architecture gate tightened to `nearLimitFiles <= 24`.
+
+Triaged impact:
+1. Reduces monolith pressure in core physics runtime.
+2. Lowers regression surface for collision math and raycast behavior changes.
+
+## Delta 2026-02-23 (Triage - UI/engine math extraction wave)
+Delivered:
+1. UI theme constants extracted to `cloud-web-app/web/lib/ui/ui-framework-themes.ts`.
+2. Engine physics math primitives extracted to `cloud-web-app/web/lib/engine/physics-engine-math.ts`.
+3. Composition/re-export contracts preserved in original modules (`ui-framework.tsx`, `physics-engine.ts`).
+4. Architecture gate tightened to `nearLimitFiles <= 22`.
+
+Triaged impact:
+1. Improves maintainability boundaries for UI theming and engine math layers.
+2. Reduces near-limit debt concentration in frequently edited runtime files.
+
+## Delta 2026-02-23 (Triage - hot reload helper extraction)
+Delivered:
+1. Extracted hot reload runtime helpers to `cloud-web-app/web/lib/hot-reload/hot-reload-server-runtime-helpers.ts`.
+2. `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` now focuses on transport/watch orchestration.
+3. Architecture gate tightened to `nearLimitFiles <= 21`.
+
+Triaged impact:
+1. Reduces maintenance pressure on a historically near-limit infrastructure runtime file.
+2. Improves ownership boundaries between helper utilities and server lifecycle logic.
+
+## Delta 2026-02-23 (Triage - scene/collab/pixel/skeletal decomposition wave)
+Delivered:
+1. Extracted Scene Graph transform runtime to `cloud-web-app/web/lib/engine/scene-graph-transform.ts` and preserved re-export contract in `scene-graph.ts`.
+2. Extracted collaboration shared contracts to `cloud-web-app/web/lib/collaboration-realtime.types.ts` and preserved module export surface.
+3. Extracted pixel-streaming shared contracts/defaults to `cloud-web-app/web/lib/pixel-streaming.types.ts` with stable re-export from `pixel-streaming.ts`.
+4. Extracted skeletal bone/skeleton runtime core to `cloud-web-app/web/lib/skeletal-animation-skeleton.ts` with stable re-export from `skeletal-animation.ts`.
+5. Architecture gate tightened to `nearLimitFiles <= 15` and validated green.
+
+Triaged impact:
+1. Reduced monolith risk across four high-change runtime domains (scene, collaboration, streaming, animation).
+2. Improved module boundaries while preserving existing public contracts.
+3. Lowered structural debt without expanding scope or changing capability claims.
+
+## Delta 2026-02-24 (Triage - profiler decomposition wave)
+Delivered:
+1. Extracted profiler helper layer to `cloud-web-app/web/lib/profiler-integrated-runtime-helpers.ts`.
+2. `cloud-web-app/web/lib/profiler-integrated.ts` now centers on orchestration/UI concerns with stable re-export contract for helpers.
+3. Architecture gate tightened to `nearLimitFiles <= 14` and validated green.
+
+Triaged impact:
+1. Reduced maintenance pressure in one of the heaviest performance-runtime files.
+2. Improved boundary clarity between sampling primitives and profiler orchestration surface.
+
+## Delta 2026-02-24 (Triage - world partition decomposition wave)
+Delivered:
+1. Extracted world partition contracts to `cloud-web-app/web/lib/world-partition-types.ts`.
+2. Extracted world partition core classes to `cloud-web-app/web/lib/world-partition-core.ts` (`SpatialHashGrid`, `LODManager`, `CellLoader`).
+3. `cloud-web-app/web/lib/world-partition.ts` now concentrates on manager/HLOD orchestration and preserves public contract via re-exports.
+4. Architecture gate tightened to `nearLimitFiles <= 13` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in world-streaming runtime surface.
+2. Improved ownership boundaries between contracts, core primitives, and orchestration layer.
+
+## Delta 2026-02-24 (Triage - post-processing decomposition wave)
+Delivered:
+1. Extracted post-processing pass layer to `cloud-web-app/web/lib/postprocessing/post-processing-passes.ts`.
+2. `cloud-web-app/web/lib/postprocessing/post-processing-system.ts` now concentrates on `EffectComposer` and hook orchestration with stable re-export contract for pass classes.
+3. Architecture gate tightened to `nearLimitFiles <= 12` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in rendering post-processing runtime.
+2. Clarified ownership boundaries between pass implementation details and orchestration surface.
+
+## Delta 2026-02-24 (Triage - quest/replay decomposition wave)
+Delivered:
+1. Extracted quest contracts to `cloud-web-app/web/lib/quests/quest-system-types.ts`.
+2. Extracted replay state serializer to `cloud-web-app/web/lib/replay/replay-state-serializer.ts`.
+3. Updated quest/replay runtime files to compose/re-export extracted modules while preserving public contracts.
+4. Architecture gate tightened to `nearLimitFiles <= 10` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in mission-critical progression/runtime surfaces (quests and replay).
+2. Improved module boundaries for easier maintenance and lower regression blast radius.
+
+## Delta 2026-02-24 (Triage - capture/state decomposition wave)
+Delivered:
+1. Extracted capture contracts to `cloud-web-app/web/lib/capture/capture-types.ts`.
+2. Extracted game state contracts to `cloud-web-app/web/lib/state/game-state-manager-types.ts`.
+3. Updated capture/state runtime files to compose/re-export extracted modules while preserving public contracts.
+4. Architecture gate tightened to `nearLimitFiles <= 8` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in media-capture and save/load runtime surfaces.
+2. Improved boundary clarity between contract layer and runtime orchestration.
+
+## Delta 2026-02-24 (Triage - world streaming contract extraction)
+Delivered:
+1. Extracted world streaming contracts to `cloud-web-app/web/lib/world/world-streaming-types.ts`.
+2. Updated `cloud-web-app/web/lib/world/world-streaming.tsx` to compose/re-export extracted contracts while preserving runtime behavior.
+3. Architecture gate tightened to `nearLimitFiles <= 7` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in large world-streaming runtime module.
+2. Clearer separation between contract layer and runtime orchestration.
+
+## Delta 2026-02-24 (Triage - navigation AI contract extraction)
+Delivered:
+1. Extracted navigation AI contracts to `cloud-web-app/web/lib/engine/navigation-ai-types.ts`.
+2. Updated `cloud-web-app/web/lib/engine/navigation-ai.ts` to compose/re-export extracted contracts while preserving runtime behavior.
+3. Architecture gate tightened to `nearLimitFiles <= 6` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in navigation/pathfinding runtime module.
+2. Improved boundary clarity between contract layer and runtime implementation.
+
+## Delta 2026-02-24 (Triage - AI integration runtime-state extraction)
+Delivered:
+1. Extracted AI integration state/bootstrap contracts to `cloud-web-app/web/lib/ai-integration-runtime-state.ts`.
+2. Updated `cloud-web-app/web/lib/ai-integration-total.ts` to compose/re-export extracted runtime-state surface while preserving registration behavior.
+3. Architecture gate tightened to `nearLimitFiles <= 5` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in one of the heaviest AI integration runtime modules.
+2. Improved boundary clarity between initialization/state and tool integration logic.
+
+## Delta 2026-02-24 (Triage - consolidated analysis checkpoint)
+Delivered:
+1. Confirmed structural gate at `nearLimitFiles=5` with no oversized files.
+2. Reconfirmed interface critical zero metrics and explicit capability counts.
+3. Reconfirmed anti-fake-success check green (`files=246`).
+
+Triaged impact:
+1. Risk center is now concentrated in remaining 5 structural monoliths + capability completion decisions, not visual regressions.
+2. Repo readiness improved for final freeze run once full suite execution is requested.
+
+## Delta 2026-02-24 (Triage - water/ocean decomposition)
+Delivered:
+1. Extracted water/ocean contracts to `cloud-web-app/web/lib/water-ocean-types.ts`.
+2. Extracted water/ocean presets to `cloud-web-app/web/lib/water-ocean-presets.ts`.
+3. Updated `cloud-web-app/web/lib/water-ocean-system.ts` to compose/re-export extracted modules while preserving runtime behavior.
+4. Architecture gate tightened to `nearLimitFiles <= 4` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in water/ocean simulation runtime.
+2. Improved boundary clarity between contracts, presets, and runtime execution.
+
+## Delta 2026-02-24 (Triage - dialogue/water decomposition wave)
+Delivered:
+1. Extracted dialogue/cutscene UI layer to `cloud-web-app/web/lib/dialogue-cutscene-ui.ts` and kept runtime/system contracts stable via re-export.
+2. Extracted water/ocean contracts and presets to dedicated modules (`water-ocean-types.ts`, `water-ocean-presets.ts`).
+3. Architecture gate tightened to `nearLimitFiles <= 3` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in narrative/cinematic runtime and water simulation stack.
+2. Improved boundaries between contracts, UI rendering layer, presets, and core runtime orchestration.
+
+## Delta 2026-02-24 (Triage - consolidated checkpoint after near-limit=3)
+Delivered:
+1. Confirmed architecture gate with `nearLimitFiles=3` and no oversized files.
+2. Reconfirmed interface critical zero metrics and explicit capability counts.
+3. Reconfirmed anti-fake-success check green and refreshed routes inventory.
+
+Triaged impact:
+1. Structural debt is now concentrated in 3 specific runtime files.
+2. Main remaining risk moved to capability completion/claim governance, not layout/style regressions.
+
+## Delta 2026-02-24 (Triage - AI 3D contract extraction)
+Delivered:
+1. Extracted AI 3D generation contracts to `cloud-web-app/web/lib/ai-3d-generation-types.ts`.
+2. Updated `cloud-web-app/web/lib/ai-3d-generation-system.ts` to compose/re-export extracted contracts while preserving runtime behavior.
+3. Architecture gate tightened to `nearLimitFiles <= 2` and validated green.
+
+Triaged impact:
+1. Reduced structural risk in AI-driven 3D generation runtime.
+2. Improved boundary clarity between contract layer and generation pipeline logic.
+
+## Delta 2026-02-24 (Triage - multiplayer transport extraction + near-limit closure)
+Delivered:
+1. Extracted networking transport surface to `cloud-web-app/web/lib/networking/multiplayer-transport.ts` (`NetworkTransport`, `WebSocketTransport`).
+2. Updated `cloud-web-app/web/lib/networking/multiplayer-system.tsx` to compose/re-export the transport layer while preserving multiplayer runtime behavior.
+3. Architecture gate tightened to `nearLimitFiles <= 0` and validated green.
+4. Revalidated non-regression targeted gates:
+- `qa:no-fake-success` PASS (`files=246`);
+- `qa:interface-critical` PASS with zero visual drift metrics.
+
+Triaged impact:
+1. Structural monolith risk on the near-limit frontier is now fully closed (`nearLimitFiles=0`, `oversizedFiles=0`).
+2. Current residual risk center is now capability completion/governance, not source-file structural size.
+
+## Delta 2026-02-24 (Triage - full freeze validation wave)
+Delivered:
+1. Fixed modularization regressions affecting type/build stability across AI integration, physics export surface, particle helpers, hot-reload imports, input type exports, scene transform typing, and multiplayer transport typing.
+2. Executed full `qa:enterprise-gate` in `cloud-web-app/web` with PASS status.
+3. Executed root governance/security gates with PASS status:
+- `qa:repo-connectivity`
+- `qa:workflow-governance`
+- `qa:canonical-doc-governance`
+- `qa:secrets-critical`.
+
+Triaged impact:
+1. Platform is now back to full freeze-green state with structural gate hardened (`nearLimitFiles=0`).
+2. Remaining closure work is product-capability completion/governance, not codebase integrity or CI baseline stability.
+
+## Delta 2026-02-24 (Triage - render cancel capability contract hardening)
+Delivered:
+1. Added shared `queueBackendUnavailableCapability` helper in capability response layer.
+2. Updated `/api/render/jobs/[jobId]/cancel` to explicit `QUEUE_BACKEND_UNAVAILABLE` semantics (no fake-success).
+3. Added route-contract check coverage for render cancel queue-unavailable contract.
+
+Triaged impact:
+1. Capability semantics are more precise for runtime-unavailable queue scenarios.
+2. `not-implemented-ui` metric improved (`6 -> 5`) while preserving explicit user-facing gating behavior.
+
+## Delta 2026-02-24 (Triage - query/stream precision + inventory normalization)
+Delivered:
+1. `/api/ai/query` migrated to explicit `503 PROVIDER_NOT_CONFIGURED` path for missing provider runtime.
+2. `/api/ai/stream` migrated to explicit `503 AI_BACKEND_NOT_CONFIGURED` path for missing stream backend URL.
+3. Route-contract scanner updated for these precision contracts.
+4. Route inventory scanner normalized to exact `error: 'NOT_IMPLEMENTED'` counting semantics.
+
+Triaged impact:
+1. Non-core capability gates now communicate operational unavailability more accurately.
+2. Capability debt metrics improved to `not-implemented-ui=5` and `not-implemented-noncritical=0`.
+
+## Delta 2026-02-24 (Triage - inline completion precision + freeze reconfirm)
+Delivered:
+1. `/api/ai/inline-completion` moved from generic not-implemented gate to explicit `503 PROVIDER_NOT_CONFIGURED` contract.
+2. Route-contract checks updated and passing for inline completion precision path.
+3. Enterprise gate rerun completed green after this change set.
+
+Triaged impact:
+1. Residual `NOT_IMPLEMENTED` footprint is now concentrated in four core AI endpoints only.
+2. Capability transparency improved without changing business scope or introducing fake-success behavior.
+
+## Delta 2026-02-24 (Triage - capability observability expansion)
+Delivered:
+1. Added explicit interface scanner metrics for capability-unavailable states (`PROVIDER_NOT_CONFIGURED`, `QUEUE_BACKEND_UNAVAILABLE`).
+2. Expanded route inventory summary to track exact error-code distribution across capability gates.
+3. Revalidated enterprise gate after scanner/reporting expansion (PASS).
+
+Triaged impact:
+1. Better operational visibility of partial capability surfaces without weakening hard quality gates.
+2. Prevents false perception of closure by preserving explicit counts for non-`NOT_IMPLEMENTED` unavailability states.
+
+## Delta 2026-02-24 (Triage - threshold hardening pass)
+Delivered:
+1. Architecture gate tightened to `apiNotImplemented <= 4`.
+2. Interface gate tightened to `not-implemented-ui <= 4` and `not-implemented-noncritical <= 0`.
+3. Enterprise gate rerun completed green with tightened thresholds.
+
+Triaged impact:
+1. Regression budget is now aligned with the current achieved state, reducing backslide risk.
+2. Remaining capability debt is clearly isolated to four policy-locked core AI routes.
+
+## Delta 2026-02-25 (Triage - policy lock + legacy cutoff telemetry contract)
+Delivered:
+1. Added dedicated policy gate `qa:not-implemented-policy` and integrated it into `qa:enterprise-gate`.
+2. Tightened route-contract checks to enforce exact deprecation cycle metadata on legacy routes.
+3. Added route-contract enforcement for `/api/admin/compatibility-routes` cutoff report semantics (`requiredSilentDays=14`, `deprecationMode=phaseout_after_2_cycles`, `removalCandidates`).
+4. Revalidated root governance scans (`repo-connectivity`, `workflow-governance`, `canonical-doc-governance`) with zero blocking issues.
+5. Added hard non-growth lock on historical markdown volume in canonical governance gate (`max-historical-markdown=3603`).
+
+Triaged impact:
+1. Remaining `NOT_IMPLEMENTED` footprint is now policy-bounded, auditable, and regression-protected.
+2. Legacy route phaseout remains measurable and operationally actionable through explicit telemetry/candidate contracts.
+
+## Delta 2026-02-25 (Triage - full repo deep sweep and structural closure queue)
+Delivered:
+1. Published full deep-audit matrix:
+- `40_FULL_REPO_DETAILED_AUDIT_AND_CLOSURE_MATRIX_2026-02-25.md`.
+2. Published legacy path reference matrix with hard active-surface lock:
+- `39_LEGACY_PATH_REFERENCE_MATRIX_2026-02-25.md`.
+3. Added new governance scanner:
+- `tools/legacy-path-reference-scan.mjs`
+- `qa:legacy-path-references` (`max-active-hits=3`).
+4. Reduced active legacy-path mentions by updating `.github/workflows/ci.yml`.
+
+Triaged impact:
+1. Repository-wide visibility is now explicit at storage, structural, and contract levels.
+2. Primary residual technical risk shifted to medium-size active file concentration (`>=900 lines`), not path/connectivity breakage.
+
+## Delta 2026-02-25 (Triage - active legacy-path elimination)
+Delivered:
+1. Added dynamic optional ai-ide task runner (`tools/run-optional-ai-ide-task.mjs`) and removed hardcoded missing-path literals from root scripts.
+2. Tightened `qa:legacy-path-references` baseline to strict zero active hits.
+3. Revalidated governance gates after tightening.
+
+Triaged impact:
+1. Active product/CI/governance surfaces now have `0` legacy missing-path references.
+2. Legacy reference debt is now isolated to historical docs and non-active files, reducing accidental drift risk in execution paths.
+
+## Delta 2026-02-25 (Triage - active medium-size pressure governance)
+Delivered:
+1. Added scanner + gate for active large-file pressure:
+- `tools/active-large-file-pressure-scan.mjs`
+- `qa:active-large-file-pressure`.
+2. Published canonical matrix `41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md`.
+
+Triaged impact:
+1. Medium-size structural debt (`>=900` lines) is now measurable and non-regressible (`maxFiles=136`).
+2. Closure work is now clearly targeted at reducing this baseline, not detecting it ad hoc.
+
+## Delta 2026-02-25 (Triage - Batch A decomposition execution started)
+Delivered:
+1. Navigation split executed:
+- `cloud-web-app/web/lib/engine/navigation-ai.ts` now composes from `cloud-web-app/web/lib/engine/navigation-ai-primitives.ts`.
+2. AI 3D split executed:
+- `cloud-web-app/web/lib/ai-3d-generation-system.ts` converted into orchestration layer with dedicated modules:
+  - `ai-3d-generation-nerf.ts`
+  - `ai-3d-generation-gaussian.ts`
+  - `ai-3d-generation-meshing.ts`.
+3. Canonical pressure matrix refreshed:
+- `41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25.md` now reports `largeFileCount=134`.
+
+Triaged impact:
+1. Active medium-size monolith pressure reduced (`136 -> 134`) without scope expansion.
+2. Public import surface preserved via compatibility re-exports, reducing regression risk while enabling faster next splits.
+
+## Delta 2026-02-25 (Triage - behavior tree action-node split)
+Delivered:
+1. Extracted behavior action/runtime nodes to `cloud-web-app/web/lib/behavior-tree-action-nodes.ts`.
+2. Updated `cloud-web-app/web/lib/behavior-tree.ts` to compose + re-export extracted nodes, preserving public import compatibility.
+3. Revalidated structural pressure gate:
+- `qa:active-large-file-pressure` PASS with `largeFileCount=133`.
+
+Triaged impact:
+1. Active medium-size structural pressure further reduced (`136 -> 133`) with no contract/scope change.
+2. Behavior-tree module boundaries are clearer (core/composite/decorator/condition in main file; action nodes in dedicated runtime module).
+
+## Delta 2026-02-25 (Triage - world streaming structural split)
+Delivered:
+1. Extracted world streaming spatial modules to:
+- `cloud-web-app/web/lib/world/world-streaming-octree.ts`
+- `cloud-web-app/web/lib/world/world-streaming-priority-queue.ts`.
+2. Updated `cloud-web-app/web/lib/world/world-streaming.tsx` to compose these modules and keep compatibility export for `Octree`.
+3. Revalidated structural pressure gate:
+- `qa:active-large-file-pressure` PASS with `largeFileCount=132`.
+
+Triaged impact:
+1. Active medium-size structural pressure reduced to `132` (`136 -> 132`) with no business-scope expansion.
+2. World-streaming responsibilities are now clearer: streaming orchestration in main module; spatial primitives isolated.
+
+## Delta 2026-02-25 (Triage - input manager contract/preset split)
+Delivered:
+1. Extracted input contracts and maps to `cloud-web-app/web/lib/input/input-manager-types.ts`.
+2. Extracted default action/axis mappings to `cloud-web-app/web/lib/input/input-manager-default-mappings.ts`.
+3. Updated `cloud-web-app/web/lib/input/input-manager.ts` to compose extracted modules and preserve compatibility exports.
+4. Revalidated structural pressure:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=131`).
+
+Triaged impact:
+1. Active medium-size pressure reduced further (`136 -> 131`) with no scope or contract expansion.
+2. Input manager is now split across clear boundaries (contracts/constants, default presets, runtime orchestration), lowering maintenance risk.
+
+## Delta 2026-02-25 (Triage - QuestEditor modular split)
+Delivered:
+1. Extracted narrative quest contracts to `cloud-web-app/web/components/narrative/QuestEditor.types.ts`.
+2. Extracted quest category/objective catalog to `cloud-web-app/web/components/narrative/QuestEditor.catalog.tsx`.
+3. Extracted quest node renderer/node-type mapping to `cloud-web-app/web/components/narrative/QuestEditor.nodes.tsx`.
+4. Updated `QuestEditor.tsx` to compose extracted modules with compatibility type exports.
+
+Triaged impact:
+1. UI monolith pressure reduced in critical narrative editor surface without behavior drift.
+2. Editor boundaries are clearer (types/catalog/node renderer/editor shell), improving maintainability.
+
+## Delta 2026-02-25 (Triage - terrain engine modular split)
+Delivered:
+1. Extracted terrain contracts to `cloud-web-app/web/lib/terrain-engine.types.ts`.
+2. Extracted noise/heightmap generation runtime to `cloud-web-app/web/lib/terrain-engine-noise.ts`.
+3. Updated `cloud-web-app/web/lib/terrain-engine.ts` to compose and re-export extracted modules.
+4. Revalidated pressure gate:
+- `qa:active-large-file-pressure` PASS with `largeFileCount=129`.
+
+Triaged impact:
+1. Active medium-size structural pressure reduced to `129` (`136 -> 129`) while preserving contracts.
+2. Terrain stack now separates reusable generation primitives from material/chunk/sculpt/runtime orchestration.
+
+## Delta 2026-02-25 (Triage - collaboration runtime split)
+Delivered:
+1. Extracted collaboration websocket/service runtime to `cloud-web-app/web/lib/collaboration-realtime-core.ts`.
+2. Kept hooks/context/UI helper surface in `cloud-web-app/web/lib/collaboration-realtime.ts` with compatibility class re-exports.
+3. Revalidated structural pressure + connectivity:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=128`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Triaged impact:
+1. Active medium-size structural pressure reduced to `128` (`136 -> 128`) with no scope/capability drift.
+2. Collaboration domain boundaries are clearer (core transport/service vs React integration layer), reducing regression blast radius.
+
+## Delta 2026-02-25 (Triage - behavior tree system + material editor splits)
+Delivered:
+1. Extracted behavior-tree nodes/runtime contracts to `cloud-web-app/web/lib/ai/behavior-tree-system.nodes.ts`.
+2. Updated `cloud-web-app/web/lib/ai/behavior-tree-system.tsx` to compose/re-export node contracts while preserving API compatibility.
+3. Extracted material editor contracts/presets to:
+- `cloud-web-app/web/lib/materials/material-editor.types.ts`
+- `cloud-web-app/web/lib/materials/material-editor.presets.ts`.
+4. Updated `cloud-web-app/web/lib/materials/material-editor.ts` to compose extracted modules and preserve public exports.
+5. Revalidated structural/governance controls:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=126`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Triaged impact:
+1. Active medium-size structural pressure reduced to `126` (`136 -> 126`) with no business-scope change.
+2. AI/runtime and material domain boundaries are clearer, reducing monolith regression surface before remaining Batch A closure.
+
+## Delta 2026-02-25 (Triage - cutscene builder extraction)
+Delivered:
+1. Extracted cutscene builder DSL into `cloud-web-app/web/lib/cutscene/cutscene-builder.ts`.
+2. Updated `cloud-web-app/web/lib/cutscene/cutscene-system.tsx` to compose/export `CutsceneBuilder` from the extracted module while preserving default export compatibility.
+3. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=125`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Triaged impact:
+1. Active medium-size pressure reduced to `125` (`136 -> 125`) without scope/capability expansion.
+2. Cutscene domain boundaries are clearer (player/audio/manager in system file, builder DSL isolated), lowering maintenance risk for cinematic flows.
+
+## Delta 2026-02-25 (Triage - cache system extraction and Batch A target hit)
+Delivered:
+1. Extracted cache performance runtime to `cloud-web-app/web/lib/cache-system-performance.ts`.
+2. Extracted debounce/throttle hooks to `cloud-web-app/web/lib/cache-system-hooks.ts`.
+3. Updated `cloud-web-app/web/lib/cache-system.ts` to compose extracted modules and preserve exports.
+4. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=124`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `124` (`136 -> 124`), meeting Batch A closure target.
+2. Cache domain boundaries are clearer (cache core, performance runtime, UI hooks), lowering maintenance and regression risk.
+
+## Delta 2026-02-25 (Triage - Batch B kickoff and store/runtime decompositions)
+Delivered:
+1. Extracted FFT ocean runtime to `cloud-web-app/web/lib/water-ocean-fft.ts` and reduced `water-ocean-system.ts` below threshold.
+2. Extracted asset pipeline cache/importer runtimes to:
+- `cloud-web-app/web/lib/engine/asset-pipeline-cache.ts`
+- `cloud-web-app/web/lib/engine/asset-pipeline-importer.ts`.
+3. Extracted integrated AI workflow tool registrations to `cloud-web-app/web/lib/ai-integration-total-workflows.ts`.
+4. Extracted studio-home normalization/store utility block to `cloud-web-app/web/lib/server/studio-home-store-normalizers.ts`.
+5. Revalidated structural/governance controls:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=120`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size structural pressure is now `120` (`136 -> 120`) with no business scope expansion.
+2. Runtime boundaries are significantly cleaner across water, asset, AI orchestration, and studio session domains, reducing regression blast radius for next waves.
+
+## Delta 2026-02-25 (Triage - visual script runtime executor extraction)
+Delivered:
+1. Extracted default visual-script node executors to `cloud-web-app/web/lib/visual-script/runtime-node-executors.ts`.
+2. Updated `cloud-web-app/web/lib/visual-script/runtime.ts` to import executor registry and keep runtime orchestration focused.
+3. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=119`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `119` (`136 -> 119`) with no capability drift.
+2. Visual scripting now has clearer boundaries (executor catalog vs runtime state machine), reducing maintenance risk.
+
+## Delta 2026-02-25 (Triage - capture media runtime + cloth core extraction)
+Delivered:
+1. Extracted capture screenshot/media helper runtime to `cloud-web-app/web/lib/capture/capture-system-media.ts`.
+2. Updated `cloud-web-app/web/lib/capture/capture-system.tsx` to consume extracted media helpers while preserving hook/API exports.
+3. Extracted cloth simulation primitives/mesh runtime to `cloud-web-app/web/lib/cloth-simulation-core.ts`.
+4. Updated `cloud-web-app/web/lib/cloth-simulation.ts` to compose and re-export core classes with compatibility preserved.
+5. Updated `cloud-web-app/web/lib/cloth-simulation-gpu.ts` to consume `ClothConfig` from `cloth-simulation.types`.
+6. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=117`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `117` (`136 -> 117`) with no business-scope expansion.
+2. Capture and cloth domains now have cleaner boundaries (runtime core vs orchestration layer), lowering regression risk and improving maintainability.
+
+## Delta 2026-02-25 (Triage - LandscapeEditor scene/panel split)
+Delivered:
+1. Extracted landscape scene runtime to `cloud-web-app/web/components/engine/LandscapeEditor.scene.tsx`.
+2. Extracted landscape toolbar/brush/layers panels to `cloud-web-app/web/components/engine/LandscapeEditor.panels.tsx`.
+3. Reduced `cloud-web-app/web/components/engine/LandscapeEditor.tsx` to editor orchestration shell with compatibility-preserving type exports.
+4. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=116`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `116` (`136 -> 116`) with no scope drift.
+2. Landscape editor now has clearer UI boundaries (scene runtime vs control panels vs orchestration shell), reducing maintenance risk.
+
+## Delta 2026-02-25 (Triage - MaterialEditor node-catalog extraction)
+Delivered:
+1. Extracted material editor contracts to `cloud-web-app/web/components/materials/MaterialEditor.types.ts`.
+2. Extracted node definition catalog to `cloud-web-app/web/components/materials/MaterialEditor.node-definitions.ts`.
+3. Updated `cloud-web-app/web/components/materials/MaterialEditor.tsx` to compose extracted modules and preserve public exports.
+4. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=115`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `115` (`136 -> 115`) with no product-scope change.
+2. Material editor boundaries are now explicit (contracts + node catalog + runtime UI/compiler), lowering maintenance and regression risk.
+
+## Delta 2026-02-25 (Triage - Save/Debug/Achievement extraction wave)
+Delivered:
+1. `save-manager` decomposition:
+- `save-manager-core.ts` for serializers/migration/validation;
+- `save-manager-hooks.tsx` for provider/hooks;
+- `save-manager.tsx` reduced to runtime manager shell with compatibility exports.
+2. Real debug adapter decomposition:
+- `real-debug-adapter-types.ts` extracted for DAP contracts;
+- `real-debug-adapter.ts` reduced to runtime adapter orchestration and type re-exports.
+3. Achievement system decomposition:
+- `achievement-system.types.ts` extracted for contracts;
+- `achievement-system-hooks.tsx` extracted for provider/hooks;
+- `achievement-system.tsx` reduced to runtime managers + builder with compatibility exports.
+4. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=112`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `112` (`136 -> 112`) without business-scope expansion.
+2. Save/debug/achievement domains now have explicit runtime vs contract/hook boundaries, reducing regression blast radius.
+
+## Delta 2026-02-25 (Triage - Video timeline inspector/effects extraction)
+Delivered:
+1. Extracted clip inspector + effects panel to `cloud-web-app/web/components/video/VideoTimelineEditorPanels.inspector.tsx`.
+2. Updated `cloud-web-app/web/components/video/VideoTimelineEditorPanels.tsx` to keep timeline core components and compatibility re-exports.
+3. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=111`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `111` (`136 -> 111`) with no product-scope change.
+2. Video timeline domain now has cleaner boundaries between timeline runtime and inspector/effects UI.
+
+## Delta 2026-02-25 (Triage - Hair/Fluid/VideoEncoder decomposition wave)
+Delivered:
+1. Hair/fur runtime modularization:
+- physics extracted to `cloud-web-app/web/lib/hair-fur-physics.ts`;
+- grooming extracted to `cloud-web-app/web/lib/hair-fur-groom.ts`;
+- shell fur extracted to `cloud-web-app/web/lib/hair-fur-shell.ts`;
+- `hair-fur-system.ts` reduced to orchestration shell with compatibility exports.
+2. Fluid editor modularization:
+- contracts/defaults/runtime split into `fluid-simulation.types.ts`, `fluid-simulation.defaults.ts`, `fluid-simulation.runtime.ts`;
+- settings rail extracted to `FluidSimulationEditorSettingsPanel.tsx`;
+- `FluidSimulationEditor.tsx` reduced to orchestration shell.
+3. Video encoder stack modularization:
+- contracts/encoders/muxers/renderer/pipeline/screen-recorder moved to dedicated files;
+- `video-encoder-real.ts` reduced to compatibility barrel and factories.
+4. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=108`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `108` (`136 -> 108`) without scope/capability claim change.
+2. Runtime boundaries are cleaner in hair/fur, fluid editor, and video export domains, reducing regression blast radius and maintenance overhead.
+
+## Delta 2026-02-25 (Triage - Dashboard + networking decomposition wave)
+Delivered:
+1. `ProjectsDashboard` decomposition:
+- split contracts/constants/cards/modal into dedicated files;
+- reduced `ProjectsDashboard.tsx` to orchestration shell.
+2. `networking-multiplayer` decomposition:
+- extracted serializer/prediction/interpolation shared primitives to `networking-multiplayer-core.ts`;
+- reduced `networking-multiplayer.ts` to networking orchestration layer with compatibility re-exports.
+3. UX hardening:
+- removed blocking confirmation dialog from project deletion path in dashboard.
+4. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=106`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `106` (`136 -> 106`) with no capability claim change.
+2. Dashboard and networking domains now have clearer boundaries, reducing maintenance complexity and regression blast radius.
+
+## Delta 2026-02-25 (Triage - fluid runtime + quest builder decomposition wave)
+Delivered:
+1. Fluid runtime decomposition into focused modules (`spatial-hash`, `sph`, `pbf`, `flip`) with orchestration barrel retained in `fluid-simulation-system.ts`.
+2. Quest system decomposition with builder DSL extraction to `quests/quest-builder.ts`, preserving `QuestBuilder` compatibility re-export via `quest-system.tsx`.
+3. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=104`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `104` (`136 -> 104`) without scope/capability claim change.
+2. Fluid and quest domains now have clearer module boundaries, reducing maintenance risk and regression blast radius.
+
+## Delta 2026-02-25 (Triage - replay decomposition wave)
+Delivered:
+1. Replay system decomposition into runtime/manager/hooks modules with compatibility barrel retained in `replay-system.tsx`.
+2. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=103`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Active medium-size pressure reduced to `103` (`136 -> 103`) without scope/capability claim change.
+2. Replay domain now has explicit module boundaries (runtime vs manager vs hooks), reducing maintenance and regression risk.
+
+## Delta 2026-02-25 (Triage - Studio Home interface organization + monolith observability)
+Delivered:
+1. Studio Home top surface decomposition:
+- extracted top action rail to `cloud-web-app/web/components/studio/StudioHomeHeader.tsx`;
+- extracted KPI strip to `cloud-web-app/web/components/studio/StudioHomeKpiStrip.tsx`;
+- kept `cloud-web-app/web/components/studio/StudioHome.tsx` as orchestration shell for mission/task/chat/preview/ops blocks.
+2. Legacy transition clarity:
+- `cloud-web-app/web/components/AethelDashboardGateway.tsx` now displays an explicit legacy-mode banner with direct return action to `/dashboard` (primary Studio Home entry).
+3. Interface critical scan now reports UI structural pressure:
+- added `ui-monolith-files-gte-650` in `cloud-web-app/web/scripts/interface-critical-scan.mjs`;
+- regenerated `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md` with monolith table (`86` files above threshold).
+4. Marketplace decomposition continuation:
+- extracted reusable loading/error/empty/stat blocks to `cloud-web-app/web/components/marketplace/CreatorDashboard.shared.tsx`;
+- reduced `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx` to `888` lines (`<900` pressure threshold).
+5. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=102`);
+- `qa:legacy-path-references` PASS (`activeMentions=0`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS;
+- `qa:workflow-governance` PASS.
+
+Triaged impact:
+1. Critical visual integrity remains clean while organizational risk became explicit and trackable in the interface sweep.
+2. Studio Home action placement is now modularized, reducing regression blast radius in the highest-traffic entry surface.
+
+## Delta 2026-02-25 (Triage - primary dashboard tabs decomposition + marketplace shared extraction)
+Delivered:
+1. Decomposed primary dashboard tab surface:
+- `AethelDashboardPrimaryTabContent.tsx` split by tab responsibility using:
+  - `AethelDashboardWalletTab.tsx`
+  - `AethelDashboardBillingTab.tsx`
+- primary orchestrator reduced from `1062` to `577` lines.
+2. Extracted shared marketplace dashboard primitives:
+- new `components/marketplace/CreatorDashboard.shared.tsx` for reusable loading/error/empty/stat blocks;
+- `CreatorDashboard.tsx` reduced to `888` lines.
+3. Revalidated structural checks:
+- `qa:interface-gate` PASS (critical zeros preserved, `not-implemented-ui=4`);
+- `qa:active-large-file-pressure` PASS (`largeFileCount=101`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`);
+- `qa:canonical-doc-governance` PASS.
+
+Triaged impact:
+1. User-facing dashboard organization improved with smaller, role-specific tab modules.
+2. Active large-file pressure continues downward (`136 -> 101`) with no scope/capability claim changes.
+
+## Delta 2026-02-25 (Triage - creator dashboard sections split)
+Delivered:
+1. Split `CreatorDashboard.tsx` into orchestration + section modules:
+- new `cloud-web-app/web/components/marketplace/CreatorDashboard.sections.tsx` for chart/table/sales sections;
+- existing shared primitives retained in `CreatorDashboard.shared.tsx`.
+2. Reduced creator dashboard orchestrator to `398` lines (`888 -> 398`).
+3. Revalidated checks:
+- `qa:interface-gate` PASS (`not-implemented-ui=4`, critical zeros preserved);
+- `qa:active-large-file-pressure` PASS (`largeFileCount=100`).
+
+Triaged impact:
+1. UI maintenance risk reduced by isolating large section logic from container orchestration.
+2. Interface monolith pressure dropped to `84` (`ui-monolith-files-gte-650`).
+
+## Delta 2026-02-25 (Triage - dashboard render data hook extraction)
+Delivered:
+1. New hook `cloud-web-app/web/components/dashboard/useAethelDashboardRenderData.ts` centralizes:
+- render job normalization;
+- export job filtering;
+- byte and currency formatter helpers.
+2. `cloud-web-app/web/components/AethelDashboard.tsx` migrated to hook consumption and reduced to `644` lines (`696 -> 644`).
+3. Revalidated interface/structure checks:
+- `qa:interface-gate` PASS;
+- `qa:active-large-file-pressure` PASS (`largeFileCount=100`).
+
+Triaged impact:
+1. Reduced complexity in legacy dashboard surface while preserving phased transition behavior.
+2. Render-domain logic now has explicit boundary for future decomposition/testing.
+
+## Delta 2026-02-25 (Triage - MediaStudio + ProjectSettings schema split)
+Delivered:
+1. Extracted media studio initial project builder to dedicated module:
+- `cloud-web-app/web/components/media/MediaStudio.initial-project.ts`;
+- `MediaStudio.tsx` reduced to `876` lines.
+2. Extracted project settings schema/types to dedicated module:
+- `cloud-web-app/web/components/engine/ProjectSettings.schema.ts`;
+- `ProjectSettings.tsx` reduced to `714` lines.
+3. Revalidated structural checks:
+- `qa:interface-gate` PASS;
+- `qa:active-large-file-pressure` PASS (`largeFileCount=99`);
+- `qa:repo-connectivity` PASS;
+- `qa:canonical-doc-governance` PASS.
+
+Triaged impact:
+1. Two high-pressure editor surfaces were decomposed without contract drift.
+2. Active large-file pressure is now below 100 (`136 -> 99`).
+
+## Delta 2026-02-25 (Triage - ClothSimulationEditor split + monolith pressure drop)
+Delivered:
+1. Split high-pressure cloth editor surface into orchestration + dedicated modules:
+- `cloud-web-app/web/components/physics/ClothSimulationEditor.controls.tsx`
+- `cloud-web-app/web/components/physics/ClothSimulationEditor.viewport.tsx`
+- `cloud-web-app/web/components/physics/cloth-simulation-editor.types.ts`
+2. Reduced `cloud-web-app/web/components/physics/ClothSimulationEditor.tsx` from `1033` to `249` lines.
+3. Cleaned stale extraction residue in `cloud-web-app/web/components/audio/AudioProcessing.core.ts`.
+4. Revalidated structural/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=97`);
+- `qa:interface-gate` PASS (`not-implemented-ui=4`, critical zeros preserved);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS.
+
+Triaged impact:
+1. Physics editor surface is now modular and easier to evolve without cross-panel regressions.
+2. Interface structural pressure improved (`ui-monolith-files-gte-650=82`; `largeFileCount` now `97`).
+
+## Delta 2026-02-25 (Triage - animation/world outliner decomposition + timeline panel split)
+Delivered:
+1. `AnimationBlueprint` split into orchestration + side-panel/data modules:
+- `cloud-web-app/web/components/engine/AnimationBlueprint.data.ts`
+- `cloud-web-app/web/components/engine/AnimationBlueprint.panels.tsx`
+- `cloud-web-app/web/components/engine/AnimationBlueprint.tsx` reduced to `370` lines.
+2. `WorldOutliner` split into orchestration + panel/type modules:
+- `cloud-web-app/web/components/engine/WorldOutliner.types.ts`
+- `cloud-web-app/web/components/engine/WorldOutliner.panels.tsx`
+- `cloud-web-app/web/components/engine/WorldOutliner.tsx` reduced to `355` lines.
+3. Video timeline panel decomposition for maintainability:
+- `cloud-web-app/web/components/video/VideoTimelineEditorPanels.timeline.tsx`
+- `cloud-web-app/web/components/video/VideoTimelineEditorPanels.playback.tsx`
+- `VideoTimelineEditorPanels.tsx` converted to re-export barrel.
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=95`);
+- `qa:interface-gate` PASS (`not-implemented-ui=4`, critical zeros preserved, `ui-monolith-files-gte-650=79`);
+- `qa:repo-connectivity` PASS;
+- `qa:canonical-doc-governance` PASS.
+
+Triaged impact:
+1. Two major editor surfaces were converted from monoliths to modular boundaries, reducing regression blast radius.
+2. Active structural pressure continues down (`136 -> 95`) with no capability claim inflation.
+
+## Delta 2026-02-25 (Triage - hair editor + content browser decomposition)
+Delivered:
+1. `HairFurEditor` split into orchestration + viewport/controls modules:
+- `cloud-web-app/web/components/character/HairFurEditor.viewport.tsx`
+- `cloud-web-app/web/components/character/HairFurEditor.controls.tsx`
+- `cloud-web-app/web/components/character/HairFurEditor.tsx` reduced to `617` lines.
+2. `ContentBrowser` split into orchestration + UI/contracts modules:
+- `cloud-web-app/web/components/assets/ContentBrowser.types.ts`
+- `cloud-web-app/web/components/assets/ContentBrowser.ui.tsx`
+- `cloud-web-app/web/components/assets/ContentBrowser.tsx` reduced to `493` lines.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=93`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`, `ui-monolith-files-gte-650=78`);
+- `qa:repo-connectivity` PASS;
+- `qa:canonical-doc-governance` PASS.
+
+Triaged impact:
+1. Asset and character authoring surfaces now have explicit UI/runtime boundaries, reducing editor regression blast radius.
+2. Active structural pressure continues down (`136 -> 93`) with no scope expansion.
+
+## Delta 2026-02-25 (Triage - video timeline + sequencer decomposition)
+Delivered:
+1. `VideoTimeline` decomposition with focused modules:
+- `cloud-web-app/web/components/video/VideoTimeline.types.ts`
+- `cloud-web-app/web/components/video/VideoTimeline.helpers.ts`
+- `cloud-web-app/web/components/video/VideoPreview.tsx`
+- `VideoTimeline.tsx` reduced from `900` to `760` lines.
+2. `SequencerTimeline` decomposition with contracts/helpers extraction:
+- `cloud-web-app/web/components/sequencer/SequencerTimeline.types.ts`
+- `cloud-web-app/web/components/sequencer/SequencerTimeline.helpers.ts`
+- `SequencerTimeline.tsx` reduced from `979` to `824` lines.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=91`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`, `ui-monolith-files-gte-650=78`);
+- `qa:repo-connectivity` PASS;
+- `qa:canonical-doc-governance` PASS.
+
+Triaged impact:
+1. Timeline authoring surfaces now have clearer boundaries (contracts/helpers/preview), reducing change blast radius.
+2. Structural pressure continued down (`136 -> 91`) without capability drift.
+
+## Delta 2026-02-25 (Triage - level editor + terminal theme extraction)
+Delivered:
+1. `LevelEditor` modular decomposition:
+- added `cloud-web-app/web/components/engine/LevelEditor.types.ts`;
+- added `cloud-web-app/web/components/engine/LevelEditor.runtime.ts`;
+- added `cloud-web-app/web/components/engine/LevelEditor.viewport.tsx`;
+- updated `cloud-web-app/web/components/engine/LevelEditorPanels.tsx` to import shared contracts from `LevelEditor.types.ts`;
+- reduced `LevelEditor.tsx` from `956` to `448` lines.
+2. `XTerminal` structural extraction:
+- added `cloud-web-app/web/components/terminal/XTerminal.themes.ts`;
+- reduced `cloud-web-app/web/components/terminal/XTerminal.tsx` from `920` to `809` lines.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=89`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Removed two active files from the >900 maintainability-pressure set in one wave.
+2. Editor/terminal surfaces are now easier to evolve with lower regression risk and unchanged product scope.
+
+## Delta 2026-02-25 (Triage - foliage painter + git panel decomposition)
+Delivered:
+1. `FoliagePainter` UI primitives extraction:
+- added `cloud-web-app/web/components/environment/FoliagePainter.ui.tsx`;
+- moved `Slider` + `CollapsibleSection` out of orchestrator;
+- reduced `FoliagePainter.tsx` from `930` to `858` lines.
+2. `GitPanel` theme extraction:
+- added `cloud-web-app/web/components/git/GitPanel.theme.ts`;
+- reduced `GitPanel.tsx` from `906` to `886` lines.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=87`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Removed two more files from the >900 pressure set.
+2. Active structural pressure improved to `136 -> 87` with no product-scope drift.
+
+## Delta 2026-02-25 (Triage - settings panel decomposition)
+Delivered:
+1. Split settings surface into reusable modules:
+- added `cloud-web-app/web/components/settings/SettingsPanel.theme.ts`;
+- added `cloud-web-app/web/components/settings/SettingsPanel.input.tsx`;
+- reduced `SettingsPanel.tsx` from `936` to `719` lines.
+2. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=86`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Another high-pressure settings surface moved below the >900 threshold.
+2. Structural pressure improved to `136 -> 86` while preserving behavior and scope.
+
+## Delta 2026-02-25 (Triage - marketplace browser constants extraction)
+Delivered:
+1. Split marketplace browser constants and category typing into:
+- `cloud-web-app/web/components/marketplace/MarketplaceBrowser.constants.tsx`.
+2. Updated `MarketplaceBrowser.tsx` to consume shared constants and reduced file size from `920` to `882` lines.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=85`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Removed another high-pressure UI surface from the >900 set.
+2. Active structural pressure improved to `136 -> 85` with unchanged product scope/contracts.
+
+## Delta 2026-02-25 (Triage - team invite + project persistence decomposition)
+Delivered:
+1. `TeamInviteManager` split into orchestration + shared modules:
+- `cloud-web-app/web/components/team/TeamInviteManager.types.ts`
+- `cloud-web-app/web/components/team/TeamInviteManager.theme.ts`
+- `cloud-web-app/web/components/team/TeamInviteManager.primitives.tsx`
+- `TeamInviteManager.tsx` reduced from `993` to `827` lines.
+2. `ProjectPersistence` split for contract isolation:
+- `cloud-web-app/web/components/project/ProjectPersistence.types.ts`
+- `ProjectPersistence.tsx` reduced from `970` to `861` lines.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=83`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Collaboration/project authoring surfaces now have clearer boundaries for types/theme/primitives.
+2. Active structural pressure improved to `136 -> 83` with no scope/capability drift.
+
+## Delta 2026-02-25 (Triage - media/profiler/audio core decomposition)
+Delivered:
+1. `MediaStudio` split into orchestration + sidebar surfaces:
+- `cloud-web-app/web/components/media/MediaStudio.sidebar.tsx`;
+- `MediaStudio.tsx` reduced from `1007` to `688` lines.
+2. `AdvancedProfiler` split into orchestration + typed/timeline modules:
+- `cloud-web-app/web/components/profiler/AdvancedProfiler.types.ts`;
+- `cloud-web-app/web/components/profiler/AdvancedProfiler.timeline.tsx`;
+- `AdvancedProfiler.tsx` reduced from `1028` to `774` lines.
+3. `audio-manager` split into core modules:
+- `cloud-web-app/web/lib/engine/audio-manager.types.ts`;
+- `cloud-web-app/web/lib/engine/audio-source.ts`;
+- `cloud-web-app/web/lib/engine/audio-group.ts`;
+- `cloud-web-app/web/lib/engine/audio-reverb.ts`;
+- `audio-manager.ts` reduced from `1059` to `510` lines with compatibility-preserving re-exports.
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=80`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Core media/profiler/audio surfaces now have explicit module boundaries (types/runtime/ui), improving maintainability and review quality.
+2. Active structural pressure improved to `136 -> 80` without scope drift.
+
+## Delta 2026-02-25 (Triage - debug console performance module extraction)
+Delivered:
+1. Extracted performance/overlay classes from debug console core:
+- `cloud-web-app/web/lib/debug/debug-performance.ts`;
+- `cloud-web-app/web/lib/debug/debug-console.tsx` now focused on command/log/watch/hook orchestration.
+2. Reduced `debug-console.tsx` from `1050` to `883` lines.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=79`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Debug stack now has cleaner boundaries between core console and perf overlay runtime.
+2. Active structural pressure improved to `136 -> 79` with no scope drift.
+
+## Delta 2026-02-25 (Triage - UI framework runtime/type extraction)
+Delivered:
+1. Decomposed monolithic UI framework into clear module boundaries:
+- `cloud-web-app/web/lib/ui/ui-framework.types.ts` (shared contracts);
+- `cloud-web-app/web/lib/ui/ui-manager.ts` (theme/toast/modal/drag-drop/focus runtime);
+- `cloud-web-app/web/lib/ui/ui-framework.tsx` retained as provider/hooks/components and compatibility export surface.
+2. Reduced `ui-framework.tsx` from `1055` to `649` lines without changing public usage contracts.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=78`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. UI runtime ownership is now explicit (`types` vs `manager` vs `React surface`), lowering review and regression risk.
+2. Active structural pressure improved to `136 -> 78` with unchanged scope/capability contracts.
+
+## Delta 2026-02-25 (Triage - localization runtime/type/default extraction)
+Delivered:
+1. Decomposed monolithic localization surface into explicit modules:
+- `cloud-web-app/web/lib/localization/localization-types.ts`;
+- `cloud-web-app/web/lib/localization/localization-defaults.ts`;
+- `cloud-web-app/web/lib/localization/localization-system.tsx` kept as runtime manager/hooks/HOC surface.
+2. Reduced `localization-system.tsx` from `901` to `648` lines while preserving exported constants via re-export.
+3. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=77`);
+- `qa:interface-gate` PASS (`critical zeros` preserved, `not-implemented-ui=4`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. Localization ownership is now explicit (contracts/defaults/runtime), reducing regression risk for i18n changes.
+2. Active structural pressure improved to `136 -> 77` with no scope or contract drift.
+
+## Delta 2026-02-25 (Triage - Nanite runtime extraction)
+Delivered:
+1. Split Nanite runtime into dedicated modules:
+- `cloud-web-app/web/lib/nanite-types.ts`;
+- `cloud-web-app/web/lib/nanite-culling.ts`;
+- `cloud-web-app/web/lib/nanite-visibility.ts`.
+2. Kept `cloud-web-app/web/lib/nanite-virtualized-geometry.ts` as meshlet-builder + renderer orchestration and compatibility export surface.
+3. Reduced `nanite-virtualized-geometry.ts` from `1063` to `562` lines.
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=76`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Triaged impact:
+1. Nanite subsystem now has clear boundaries (`types`, `culling`, `visibility`, `renderer`) for safer evolution.
+2. Active structural pressure improved to `136 -> 76` with unchanged product scope/contracts.
+
+## Delta 2026-02-25 (Triage - dialogue runtime/type extraction)
+Delivered:
+1. Decomposed dialogue subsystem into dedicated contracts/runtime modules:
+- `cloud-web-app/web/lib/dialogue/dialogue-types.ts`;
+- `cloud-web-app/web/lib/dialogue/dialogue-runtime.ts`.
+2. Kept `cloud-web-app/web/lib/dialogue/dialogue-system.tsx` as dialogue manager + React integration surface and compatibility exports.
+3. Reduced `dialogue-system.tsx` from `1053` to `734` lines.
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=75`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+
+Triaged impact:
+1. Dialogue layer now has explicit boundaries (`types`, runtime primitives, orchestration/UI), lowering maintenance risk.
+2. Active structural pressure improved to `136 -> 75` with no scope/capability drift.
+
+## Delta 2026-02-25 (Triage - physics runtime extraction)
+Delivered:
+1. Decomposed physics subsystem into dedicated runtime modules:
+- `cloud-web-app/web/lib/engine/physics-body.ts`;
+- `cloud-web-app/web/lib/engine/physics-collision.ts`.
+2. Refactored `cloud-web-app/web/lib/engine/physics-engine.ts` to world/engine orchestration and compatibility export surface.
+3. Reduced `physics-engine.ts` from `1042` to `364` lines.
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=74`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:interface-gate` PASS (critical zeros preserved).
+
+Triaged impact:
+1. Physics ownership is now explicit (`body`, `collision`, `world/engine`), reducing regression risk for deterministic runtime changes.
+2. Active structural pressure improved to `136 -> 74` with unchanged scope/capability contracts.
+
+## Delta 2026-02-25 (Triage - ECS execution extraction)
+Delivered:
+1. Extracted ECS execution runtime to `cloud-web-app/web/lib/ecs-execution.ts` (`SystemScheduler`, `JobSystem`).
+2. Refactored `cloud-web-app/web/lib/ecs-dots-system.ts` to keep component/archetype/world core and compatibility re-exports.
+3. Reduced `ecs-dots-system.ts` from `1056` to `899` lines (removed from pressure set).
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=74`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:canonical-doc-governance` PASS (`unindexedCanonicalMarkdown=0`).
+
+Triaged impact:
+1. ECS execution path is now isolated for parallel-runtime evolution without destabilizing core world/archetype code.
+2. Structural pressure remains locked at `136 -> 74` with no product scope drift.
+
+## Delta 2026-02-25 (Triage - hot reload client runtime extraction)
+Delivered:
+1. Extracted hot reload browser-client script payload to `cloud-web-app/web/lib/hot-reload/hot-reload-client-script.ts`.
+2. Refactored `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` to delegate client-script generation and keep server lifecycle/orchestration focused.
+3. Reduced `hot-reload-server.ts` from `1053` to `825` lines.
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=73`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:interface-gate` PASS (critical interface zeros preserved).
+
+Triaged impact:
+1. Hot reload boundaries are cleaner (`server runtime` vs `client payload`) with lower change-coupling risk.
+2. Active structural pressure improved to `136 -> 73` with unchanged scope/capability contracts.
+
+## Delta 2026-02-25 (Triage - AAA render config/type extraction)
+Delivered:
+1. Extracted render contracts/default stacks to `cloud-web-app/web/lib/aaa-render-types.ts`.
+2. Refactored `cloud-web-app/web/lib/aaa-render-system.ts` to keep runtime orchestration focused and consume extracted config/types.
+3. Reduced `aaa-render-system.ts` from `1047` to `509` lines.
+4. Revalidated structure/governance checks:
+- `qa:active-large-file-pressure` PASS (`largeFileCount=72`);
+- `qa:repo-connectivity` PASS (`requiredMissing=0`, `deadScriptReferences=0`);
+- `qa:interface-gate` PASS (critical interface zeros preserved).
+
+Triaged impact:
+1. Render subsystem now has clearer ownership split (`types/config defaults` vs `runtime`), reducing review risk in graphics changes.
+2. Active structural pressure improved to `136 -> 72` with unchanged scope/contracts.

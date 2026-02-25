@@ -2,8 +2,9 @@
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUTPUT_FILE = path.join(ROOT, 'docs', 'ARCHITECTURE_CRITICAL_TRIAGE.md')
 
 async function exists(target) {
@@ -88,6 +89,18 @@ async function collectOversizedFiles(files, threshold = 1200) {
   return oversized.sort((a, b) => b.lines - a.lines)
 }
 
+async function collectNearLimitFiles(files, threshold = 1100, maxThreshold = 1199) {
+  const nearLimit = []
+  for (const file of files) {
+    const content = await fs.readFile(file, 'utf8')
+    const lines = content.split(/\r?\n/).length
+    if (lines >= threshold && lines <= maxThreshold) {
+      nearLimit.push({ file: rel(file), lines })
+    }
+  }
+  return nearLimit.sort((a, b) => b.lines - a.lines)
+}
+
 async function detectUnreferencedCandidates(candidates, searchableFiles) {
   const result = []
   const contents = await Promise.all(
@@ -151,6 +164,7 @@ async function main() {
 
   const duplicateComponentBasenames = await collectDuplicateBasenames(componentFiles)
   const oversizedFiles = await collectOversizedFiles([...appFiles, ...componentFiles, ...libFiles, ...hookFiles], 1200)
+  const nearLimitFiles = await collectNearLimitFiles([...appFiles, ...componentFiles, ...libFiles, ...hookFiles], 1100, 1199)
 
   const lines = []
   lines.push('# ARCHITECTURE_CRITICAL_TRIAGE')
@@ -169,6 +183,7 @@ async function main() {
   lines.push(`- File API compatibility wrappers (` + '`trackCompatibilityRouteHit`' + ` in ` + '`app/api/files/*`' + `): **${fileCompatWrappers.count}**`)
   lines.push(`- Duplicate component basenames: **${duplicateComponentBasenames.length}**`)
   lines.push(`- Oversized source files (>=1200 lines): **${oversizedFiles.length}**`)
+  lines.push(`- Near-limit source files (1100-1199 lines): **${nearLimitFiles.length}**`)
   lines.push('')
   lines.push('## Top Compatibility Call Sites')
   lines.push('')
@@ -211,6 +226,19 @@ async function main() {
   }
   lines.push('')
 
+  lines.push('## Near-Limit Source Files (1100-1199 lines)')
+  lines.push('')
+  if (nearLimitFiles.length === 0) {
+    lines.push('- none')
+  } else {
+    lines.push('| File | Lines |')
+    lines.push('| --- | ---: |')
+    for (const item of nearLimitFiles.slice(0, 40)) {
+      lines.push(`| \`${item.file}\` | ${item.lines} |`)
+    }
+  }
+  lines.push('')
+
   lines.push('## Oversized Source Files (>=1200 lines)')
   lines.push('')
   if (oversizedFiles.length === 0) {
@@ -234,7 +262,7 @@ async function main() {
   await fs.writeFile(OUTPUT_FILE, `${lines.join('\n')}\n`, 'utf8')
 
   console.log(
-    `ARCHITECTURE_CRITICAL_TRIAGE_OK apiRoutes=${routeFiles.length}, deprecatedComponents=${deprecatedComponents.length}, fileCompatUsage=${fileCompatUsage.count}, redirectAliases=${redirectAliases.count}, apiNotImplemented=${notImplementedApi.count}, fileCompatWrappers=${fileCompatWrappers.count}, duplicateBasenames=${duplicateComponentBasenames.length}, oversizedFiles=${oversizedFiles.length}`
+    `ARCHITECTURE_CRITICAL_TRIAGE_OK apiRoutes=${routeFiles.length}, deprecatedComponents=${deprecatedComponents.length}, fileCompatUsage=${fileCompatUsage.count}, redirectAliases=${redirectAliases.count}, apiNotImplemented=${notImplementedApi.count}, fileCompatWrappers=${fileCompatWrappers.count}, duplicateBasenames=${duplicateComponentBasenames.length}, oversizedFiles=${oversizedFiles.length}, nearLimitFiles=${nearLimitFiles.length}`
   )
 }
 
