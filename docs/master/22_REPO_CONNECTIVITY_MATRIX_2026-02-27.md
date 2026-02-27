@@ -75,3 +75,4 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 8. Continued monolith decomposition in `AethelDashboard` by extracting defaults/constants/format helpers to `components/dashboard/aethel-dashboard-defaults.ts`.
 9. Enforced root connectivity gate in both visual workflows (`ui-audit.yml`, `visual-regression-compare.yml`) to block path regressions before browser steps.
 10. Expanded connectivity scanner coverage for loose web-root markdown, tracked secret-like files, and required canonical-doc presence checks.
+11. Continued dashboard split by extracting session-history creation/filter/toggle helpers to `components/dashboard/aethel-dashboard-session-utils.ts`.

@@ -1931,3 +1931,17 @@ Implemented:
 
 Impact:
 1. Prevents recurrence of documentation drift and accidental secret-like tracking in versioned source.
+
+## 0.40 Delta Update 2026-02-27 (Dashboard decomposition batch 3)
+Implemented:
+1. Extracted session-history helper operations into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-session-utils.ts`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- new session entry creation
+- saved session entry creation
+- favorite/scheduled toggles
+- session filtering
+
+Impact:
+1. Reduced inline mutation logic in dashboard shell.
+2. Increased maintainability for upcoming split of dashboard blocks by concern.

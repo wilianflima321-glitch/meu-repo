@@ -71,6 +71,13 @@ import {
   formatStatusLabel,
   getScopedKeys,
 } from './dashboard/aethel-dashboard-defaults'
+import {
+  createInitialSessionEntry,
+  createSavedSessionEntry,
+  filterSessionHistory,
+  toggleSessionFavorite,
+  toggleSessionScheduled,
+} from './dashboard/aethel-dashboard-session-utils'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -702,16 +709,7 @@ export default function AethelDashboard() {
   // Create new session
   const createNewSession = useCallback(() => {
     setSessionHistory(prev => {
-      const newSession: SessionEntry = {
-        id: Date.now().toString(),
-        name: `Sessão ${prev.length + 1}`,
-        timestamp: Date.now(),
-        chatHistory: [],
-        livePreviewSuggestions: [],
-        favorite: false,
-        scheduled: false,
-        settings: { ...settings },
-      }
+      const newSession = createInitialSessionEntry(prev.length, settings)
       return [newSession, ...prev]
     })
     setChatHistory([])
@@ -749,48 +747,29 @@ export default function AethelDashboard() {
 
   // Toggle favorite on session
   const toggleFavorite = (sessionId: string) => {
-    setSessionHistory(prev =>
-      prev.map(session =>
-        session.id === sessionId
-          ? { ...session, favorite: !Boolean(session.favorite) }
-          : session
-      )
-    );
-  };
+    setSessionHistory((prev) => toggleSessionFavorite(prev, sessionId))
+  }
 
   // Toggle scheduled on session
   const toggleScheduled = (sessionId: string) => {
-    setSessionHistory(prev =>
-      prev.map(session =>
-        session.id === sessionId
-          ? { ...session, scheduled: !Boolean(session.scheduled) }
-          : session
-      )
-    );
-  };
+    setSessionHistory((prev) => toggleSessionScheduled(prev, sessionId))
+  }
 
   // Filtered sessions
-  const filteredSessions = sessionHistory.filter(session => {
-    switch (sessionFilter) {
-      case 'favorites': return Boolean(session.favorite);
-      case 'scheduled': return Boolean(session.scheduled);
-      default: return true;
-    }
-  });
+  const filteredSessions = useMemo(
+    () => filterSessionHistory(sessionHistory, sessionFilter),
+    [sessionHistory, sessionFilter]
+  )
 
   // Function to save current session
   const saveCurrentSession = useCallback(() => {
     setSessionHistory(prev => {
-      const currentSession: SessionEntry = {
-        id: Date.now().toString(),
-        name: `Session ${prev.length + 1}`,
-        timestamp: Date.now(),
-        chatHistory: [...chatHistory],
-        livePreviewSuggestions: [...livePreviewSuggestions],
-        favorite: false,
-        scheduled: false,
-        settings: { ...settings },
-      }
+      const currentSession = createSavedSessionEntry(
+        prev.length,
+        chatHistory,
+        livePreviewSuggestions,
+        settings
+      )
       return [currentSession, ...prev.slice(0, 9)]
     })
   }, [chatHistory, livePreviewSuggestions, settings])
