@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import NexusCanvas from '@/components/NexusCanvas'
-import NexusChatMultimodal from '@/components/NexusChatMultimodal'
+import NexusChatMultimodal from '@/components/nexus/NexusChatMultimodal'
 import { 
   Search, Bell, Settings, User, Grid, Layout, 
   Activity, Zap, Shield, Database, Cloud, Share2, Plus, Home,

@@ -70,3 +70,4 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 3. Legacy Nexus canvas logic replaced by compatibility wrapper to canonical `NexusCanvasV2` runtime.
 4. Added automated connectivity gate script: `tools/check-repo-connectivity.mjs` (`npm run qa:repo-connectivity`).
 5. Moved loose web root Markdown docs to `docs/archive/web-status/` (kept `cloud-web-app/web/README.md` only in web root).
+6. Nexus chat surface canonicalized to `components/nexus/NexusChatMultimodal.tsx` with compatibility wrapper in legacy import path.

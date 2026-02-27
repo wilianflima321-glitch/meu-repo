@@ -22,6 +22,12 @@ Non-negotiable:
 6. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
 7. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
 
+## 1.1 Nexus Canonical Surfaces
+1. Canonical canvas runtime: `cloud-web-app/web/components/nexus/NexusCanvasV2.tsx`
+2. Compatibility canvas wrapper: `cloud-web-app/web/components/NexusCanvas.tsx`
+3. Canonical chat runtime: `cloud-web-app/web/components/nexus/NexusChatMultimodal.tsx`
+4. Compatibility chat wrapper: `cloud-web-app/web/components/NexusChatMultimodal.tsx`
+
 ## 2. IDE UI Surfaces (Primary)
 ### 2.1 Left/center/bottom shell blocks
 1. File explorer: `cloud-web-app/web/components/ide/FileExplorerPro.tsx`

@@ -1883,3 +1883,17 @@ Implemented:
 
 Validation snapshot:
 - `node tools/check-repo-connectivity.mjs` -> PASS
+
+## 0.36 Delta Update 2026-02-27 (CI resilience + Nexus chat canonicalization)
+Implemented:
+1. CI workflow `.github/workflows/ci.yml` hardened:
+- added root `qa:repo-connectivity` gate in web-lint job;
+- ai-ide unit test step now skips with warning when package tree is absent;
+- root install steps in optional windows/e2e jobs use `npm install` (no root lockfile in current snapshot).
+2. `NexusChatMultimodal` surface canonicalized:
+- canonical path: `cloud-web-app/web/components/nexus/NexusChatMultimodal.tsx`
+- compatibility wrapper preserved at `cloud-web-app/web/components/NexusChatMultimodal.tsx`.
+
+Execution interpretation:
+1. Reduces CI false failures caused by missing optional desktop/theia tree.
+2. Keeps Nexus surface stable while converging to canonical component paths.
