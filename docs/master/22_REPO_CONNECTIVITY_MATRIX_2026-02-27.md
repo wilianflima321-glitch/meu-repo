@@ -63,3 +63,8 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 2. Zero binário de ambiente local versionado (`.venv`, artefatos temporários).
 3. Índice canônico sem contradição de path/fonte.
 4. Top-offenders de tamanho com plano de decomposição e owner definido.
+
+## 7) Incremental closures (2026-02-27)
+1. Script path connectivity: fixed (`missing_script_paths=0`).
+2. `.venv` artifacts removed from versioned source.
+3. Legacy Nexus canvas logic replaced by compatibility wrapper to canonical `NexusCanvasV2` runtime.

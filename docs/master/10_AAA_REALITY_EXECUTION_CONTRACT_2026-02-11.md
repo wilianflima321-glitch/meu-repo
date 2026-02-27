@@ -7,18 +7,18 @@ Owner: Multi-agent internal review (Product, UX, Frontend, Backend, AI, Infra, P
 This contract is the continuation of the canonical audit folder and is written to be directly executable by another AI/engineer.
 
 Primary canonical sources:
-- `meu-repo/docs/master/00_FONTE_CANONICA.md`
-- `meu-repo/docs/master/00_REALITY_MATRIX_2026-02-04.md`
-- `meu-repo/docs/master/FULL_AUDIT.md`
-- `meu-repo/docs/master/DUPLICATIONS_AND_CONFLICTS.md`
-- `meu-repo/docs/master/LIMITATIONS.md`
-- `meu-repo/docs/master/COMPETITIVE_GAP.md`
-- `meu-repo/docs/master/WORKBENCH_SPEC.md`
-- `meu-repo/docs/master/AI_SYSTEM_SPEC.md`
-- `meu-repo/docs/master/EXECUTION_PLAN.md`
-- `meu-repo/docs/master/8_ADMIN_SYSTEM_SPEC.md`
-- `meu-repo/docs/master/9_BACKEND_SYSTEM_SPEC.md`
-- `meu-repo/docs/master/Relatorio_de_Continuacao_Auditoria_Multi-Agente.md`
+- `docs/master/00_FONTE_CANONICA.md`
+- `docs/master/00_REALITY_MATRIX_2026-02-04.md`
+- `docs/master/FULL_AUDIT.md`
+- `docs/master/DUPLICATIONS_AND_CONFLICTS.md`
+- `docs/master/LIMITATIONS.md`
+- `docs/master/COMPETITIVE_GAP.md`
+- `docs/master/WORKBENCH_SPEC.md`
+- `docs/master/AI_SYSTEM_SPEC.md`
+- `docs/master/EXECUTION_PLAN.md`
+- `docs/master/8_ADMIN_SYSTEM_SPEC.md`
+- `docs/master/9_BACKEND_SYSTEM_SPEC.md`
+- `docs/master/Relatorio_de_Continuacao_Auditoria_Multi-Agente.md`
 
 Implementation evidence also verified in codebase to avoid fake status.
 
@@ -208,7 +208,7 @@ Execution interpretation:
 
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
-   Source: `meu-repo/docs/master/LIMITATIONS.md`
+   Source: `docs/master/LIMITATIONS.md`
 2. The platform can still beat competitors in integrated workflow: AI-native + Workbench shell + one-click deploy + cloud collaboration.
 3. Current repo has substantial implementation, but still has explicit `NOT_IMPLEMENTED`, TODO, mock/in-memory paths, and overlapping systems.
 4. "AAA quality everywhere" must be redefined as:
@@ -353,8 +353,8 @@ Reality:
 - Without strict plan limits, scale is financially unsafe.
 
 Evidence:
-- `meu-repo/docs/master/LIMITATIONS.md`
-- `meu-repo/docs/master/8_ADMIN_SYSTEM_SPEC.md`
+- `docs/master/LIMITATIONS.md`
+- `docs/master/8_ADMIN_SYSTEM_SPEC.md`
 
 Decision:
 - Tie product growth to cost controls and entitlement enforcement.
@@ -1852,3 +1852,13 @@ Implemented in code:
 Execution interpretation:
 1. `/ide` critical journey is closer to production behavior (no mock success path).
 2. Context handoff from entry surfaces is now explicit and traceable by URL contract.
+
+## 0.33 Delta Update 2026-02-27 (Nexus surface canonicalization)
+Implemented in code:
+1. `cloud-web-app/web/components/NexusCanvas.tsx` converted into compatibility wrapper.
+2. Canonical implementation remains `cloud-web-app/web/components/nexus/NexusCanvasV2.tsx`.
+3. Duplicate render logic in legacy Nexus canvas surface was removed from active path.
+
+Execution interpretation:
+1. Reduces drift between legacy and canonical Nexus rendering paths.
+2. Keeps backwards compatibility for existing imports while enforcing one runtime implementation.

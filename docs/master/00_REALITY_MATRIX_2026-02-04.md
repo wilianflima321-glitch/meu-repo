@@ -3,7 +3,7 @@ Date: 2026-02-04
 Scope: Validation and conflict resolution based on the canonical audit folder.
 
 ## Validation Attempts (Local)
-All commands executed under `meu-repo/cloud-web-app/web`.
+All commands executed under `cloud-web-app/web`.
 
 - `npm run lint`
   - PowerShell: blocked by ExecutionPolicy (npm.ps1 not allowed).

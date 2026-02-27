@@ -32,7 +32,7 @@ corpo: (usar o template que já foi preparado; incluir checklist)
 adicionar reviewers se fornecidos.
 Se já existir, postar um comentário no PR com o objetivo do run e inputs que serão usados.
 Disparar workflow (dispatch)
-Trigger do workflow ci.yml no repositório:
+Trigger do workflow `.github/workflows/ci.yml` no repositório:
 Payload: { ref: branch, inputs: { run_e2e: run_e2e, run_proxy_tests: run_proxy_tests } }
 Salvar o run-id e link do run.
 Publicar um comentário no PR com o link do run e dizer “monitorando…”.
