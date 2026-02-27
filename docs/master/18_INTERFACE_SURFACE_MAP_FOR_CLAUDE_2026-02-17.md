@@ -17,9 +17,10 @@ Non-negotiable:
 1. Studio entry page: `cloud-web-app/web/app/dashboard/page.tsx`
 2. Gateway landing page: `cloud-web-app/web/app/page.tsx`
 3. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
-4. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
-5. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
-6. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
+4. Workbench runtime bridge: `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
+5. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
+6. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
+7. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
 
 ## 2. IDE UI Surfaces (Primary)
 ### 2.1 Left/center/bottom shell blocks

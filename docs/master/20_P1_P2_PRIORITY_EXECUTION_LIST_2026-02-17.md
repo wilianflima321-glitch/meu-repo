@@ -142,3 +142,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 ### P0-C Surface Consolidation
 1. Define canonical component for duplicate pairs (Nexus, notifications, dashboard blocks).
 2. Decompose top monoliths with owner scope.
+
+### P0 completion note (2026-02-27)
+1. `/ide` main bridge (`components/ide/FullscreenIDE.tsx`) now uses canonical file API instead of local mock tree in critical flow.
+2. URL handoff contract (`projectId`, `file`, `entry`) is consumed in runtime bridge.

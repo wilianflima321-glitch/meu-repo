@@ -1839,3 +1839,16 @@ Execution lock for next commits:
 1. Eliminate broken connectivity references before adding new surfaces.
 2. Keep interface/deprecation/capability contracts explicit.
 3. Decompose high-risk monolith files in owner-scoped batches.
+
+## 0.32 Delta Update 2026-02-27 (Workbench handoff integrity)
+Implemented in code:
+1. `cloud-web-app/web/components/ide/FullscreenIDE.tsx` now consumes real query context:
+- `projectId` (scope)
+- `file` (initial file open)
+- `entry` (semantic panel focus: explorer/ai/debug/terminal)
+2. Workbench no longer depends on local mock file tree in main IDE surface.
+3. File open/save path now runs against canonical `/api/files/fs` contract with explicit loading/error states.
+
+Execution interpretation:
+1. `/ide` critical journey is closer to production behavior (no mock success path).
+2. Context handoff from entry surfaces is now explicit and traceable by URL contract.
