@@ -68,3 +68,4 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 1. Script path connectivity: fixed (`missing_script_paths=0`).
 2. `.venv` artifacts removed from versioned source.
 3. Legacy Nexus canvas logic replaced by compatibility wrapper to canonical `NexusCanvasV2` runtime.
+4. Added automated connectivity gate script: `tools/check-repo-connectivity.mjs` (`npm run qa:repo-connectivity`).

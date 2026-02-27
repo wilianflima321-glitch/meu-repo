@@ -1869,3 +1869,17 @@ Implemented in code:
 - open file via canonical file read flow
 - toggle sidebar/terminal/AI via layout events
 2. Workbench shell remains keyboard-first while preserving explicit loading/error/saving states.
+
+## 0.35 Delta Update 2026-02-27 (Automated repo connectivity gate)
+Implemented:
+1. Added `tools/check-repo-connectivity.mjs`.
+2. Added root script `npm run qa:repo-connectivity`.
+3. Gate checks include:
+- missing script/config paths
+- broken tsconfig references
+- orphan `.gitmodules` paths
+- legacy artifact files
+- tracked `.venv` artifacts
+
+Validation snapshot:
+- `node tools/check-repo-connectivity.mjs` -> PASS
