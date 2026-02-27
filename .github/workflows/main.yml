@@ -1,14 +1,40 @@
-
-
-name: placeholder
+﻿name: Repository Connectivity Gate
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
   workflow_dispatch: {}
 
 jobs:
-  noop:
+  connectivity:
     runs-on: ubuntu-latest
     steps:
-      - name: Report status
-        run: echo "No default workflow defined yet."
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Repository connectivity scan (blocking)
+        run: npm run qa:repo-connectivity
+
+      - name: Workflow governance scan (blocking)
+        run: npm run qa:workflow-governance
+
+      - name: Canonical doc governance scan (blocking)
+        run: npm run qa:canonical-doc-governance
+
+      - name: Critical secret hygiene scan (blocking)
+        run: npm run qa:secrets-critical

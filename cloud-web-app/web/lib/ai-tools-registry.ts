@@ -252,7 +252,7 @@ aiTools.register({
   description: 'Cria um novo arquivo no projeto com o conteúdo especificado',
   category: 'code',
   parameters: [
-    { name: 'path', type: 'string', description: 'Caminho do arquivo (ex: src/components/Button.tsx)', required: true },
+    { name: 'path', type: 'string', description: 'Caminho do arquivo (ex: src/components/ui/Button.tsx)', required: true },
     { name: 'content', type: 'string', description: 'Conteúdo do arquivo', required: true },
     { name: 'language', type: 'string', description: 'Linguagem do arquivo', required: false, enum: ['typescript', 'javascript', 'python', 'rust', 'go', 'css', 'html', 'json'] },
   ],

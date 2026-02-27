@@ -1,546 +1,260 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  CreditCard,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
-  RefreshCw,
-  Download,
-  Filter,
-  Calendar,
-  Zap,
-  Server,
-  Bot,
-  PieChart
-} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
-// =============================================================================
-// TYPES
-// =============================================================================
+type FinanceAlert = {
+  type: 'warning' | 'critical';
+  message: string;
+  metric: string;
+};
 
-interface FinanceMetrics {
+type FinanceModelCost = {
+  model: string;
+  cost: number;
+  calls: number;
+  percentage: number;
+};
+
+type RevenueByPlan = {
+  plan: string;
+  users: number;
+  revenue: number;
+  percentage: number;
+};
+
+type Transaction = {
+  id: string;
+  type: string;
+  amount: number;
+  userId: string;
+  userEmail: string;
+  description: string;
+  createdAt: string;
+};
+
+type FinanceMetrics = {
   mrr: number;
-  mrrGrowth: number;
   arr: number;
-  
+  profitMargin: number;
+  runway: number;
   dailyRevenue: number;
   dailyAICost: number;
   dailyInfraCost: number;
   dailyProfit: number;
-  profitMargin: number;
-  
-  burnRate: number;
-  runway: number; // months
-  
   activeSubscriptions: number;
   churnRate: number;
-  ltv: number;
-  cac: number;
-  
-  aiCostBreakdown: {
-    model: string;
-    cost: number;
-    calls: number;
-    percentage: number;
-  }[];
-  
-  revenueByPlan: {
-    plan: string;
-    users: number;
-    revenue: number;
-    percentage: number;
-  }[];
-  
-  recentTransactions: {
-    id: string;
-    type: 'subscription' | 'usage' | 'refund' | 'credit';
-    amount: number;
-    userId: string;
-    userEmail: string;
-    description: string;
-    createdAt: string;
-  }[];
-  
-  alerts: {
-    type: 'warning' | 'critical';
-    message: string;
-    metric: string;
-    value: number;
-    threshold: number;
-  }[];
-}
+  aiCostBreakdown: FinanceModelCost[];
+  revenueByPlan: RevenueByPlan[];
+  recentTransactions: Transaction[];
+  alerts: FinanceAlert[];
+};
 
-interface DateRange {
-  start: Date;
-  end: Date;
-  label: string;
-}
+const defaults: FinanceMetrics = {
+  mrr: 0,
+  arr: 0,
+  profitMargin: 0,
+  runway: 0,
+  dailyRevenue: 0,
+  dailyAICost: 0,
+  dailyInfraCost: 0,
+  dailyProfit: 0,
+  activeSubscriptions: 0,
+  churnRate: 0,
+  aiCostBreakdown: [],
+  revenueByPlan: [],
+  recentTransactions: [],
+  alerts: [],
+};
 
-// =============================================================================
-// COMPONENTS
-// =============================================================================
-
-function MetricCard({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
-  prefix = '',
-  suffix = '',
-  trend,
-  subtitle
-}: {
-  title: string;
-  value: number | string;
-  change?: number;
-  icon: React.ElementType;
-  prefix?: string;
-  suffix?: string;
-  trend?: 'up' | 'down' | 'neutral';
-  subtitle?: string;
-}) {
-  const isPositive = trend === 'up' || (change && change > 0);
-  const isNegative = trend === 'down' || (change && change < 0);
-  
-  return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-zinc-500 uppercase tracking-wider">{title}</span>
-        <Icon className="w-4 h-4 text-zinc-500" />
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-white">
-          {prefix}{typeof value === 'number' ? value.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : value}{suffix}
-        </span>
-        {change !== undefined && (
-          <span className={`text-xs flex items-center ${
-            isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-zinc-500'
-          }`}>
-            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : isNegative ? <ArrowDownRight className="w-3 h-3" /> : null}
-            {Math.abs(change).toFixed(1)}%
-          </span>
-        )}
-      </div>
-      {subtitle && <p className="text-xs text-zinc-500 mt-1">{subtitle}</p>}
-    </div>
-  );
-}
-
-function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] }) {
-  const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'];
-  const total = data.reduce((sum, item) => sum + item.cost, 0);
-  
-  return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
-        <Bot className="w-4 h-4" />
-        Custo de IA por modelo
-      </h3>
-      
-      {/* Bar chart */}
-      <div className="space-y-3">
-        {data.map((item, i) => (
-          <div key={item.model}>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-zinc-300">{item.model}</span>
-              <span className="text-zinc-500">
-                ${item.cost.toFixed(2)} ({item.percentage.toFixed(1)}%)
-              </span>
-            </div>
-            <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
-              <div 
-                className="h-full rounded-full transition-all duration-500"
-                style={{ 
-                  width: `${item.percentage}%`,
-                  backgroundColor: colors[i % colors.length]
-                }}
-              />
-            </div>
-            <p className="text-[10px] text-zinc-500 mt-0.5">
-              {item.calls.toLocaleString()} chamadas
-            </p>
-          </div>
-        ))}
-      </div>
-      
-      <div className="mt-4 pt-4 border-t border-zinc-700">
-        <div className="flex justify-between text-sm">
-          <span className="text-zinc-500">Custo total de IA hoje</span>
-          <span className="text-white font-medium">${total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] }) {
-  const colors: Record<string, string> = {
-    'starter': '#6b7280',
-    'basic': '#3b82f6',
-    'pro': '#8b5cf6',
-    'studio': '#f59e0b',
-    'enterprise': '#10b981'
-  };
-  
-  return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
-        <PieChart className="w-4 h-4" />
-        Receita por plano
-      </h3>
-      
-      <div className="space-y-3">
-        {data.map((item) => (
-          <div key={item.plan} className="flex items-center gap-3">
-            <div 
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: colors[item.plan.toLowerCase()] || '#6366f1' }}
-            />
-            <div className="flex-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-zinc-300 capitalize">{item.plan}</span>
-                <span className="text-white font-medium">${item.revenue.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-xs text-zinc-500">
-                <span>{item.users} usuários</span>
-                <span>{item.percentage.toFixed(1)}%</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
-  if (alerts.length === 0) {
-    return (
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" />
-          Alertas financeiros
-        </h3>
-        <p className="text-sm text-zinc-500 text-center py-4">
-          Nenhum alerta no momento
-        </p>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
-        <AlertTriangle className="w-4 h-4" />
-        Alertas financeiros ({alerts.length})
-      </h3>
-      <div className="space-y-2">
-        {alerts.map((alert, i) => (
-          <div 
-            key={i}
-            className={`p-3 rounded-lg border ${
-              alert.type === 'critical' 
-                ? 'bg-red-500/10 border-red-500/30' 
-                : 'bg-yellow-500/10 border-yellow-500/30'
-            }`}
-          >
-            <p className={`text-sm ${
-              alert.type === 'critical' ? 'text-red-400' : 'text-yellow-400'
-            }`}>
-              {alert.message}
-            </p>
-            <p className="text-xs text-zinc-500 mt-1">
-              {alert.metric}: {alert.value} (limite: {alert.threshold})
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TransactionsTable({ transactions }: { transactions: FinanceMetrics['recentTransactions'] }) {
-  const typeColors: Record<string, string> = {
-    subscription: 'text-green-400',
-    usage: 'text-blue-400',
-    refund: 'text-red-400',
-    credit: 'text-cyan-400'
-  };
-
-  const typeLabels: Record<string, string> = {
-    subscription: 'assinatura',
-    usage: 'uso',
-    refund: 'reembolso',
-    credit: 'crédito',
-  };
-  
-  return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="p-4 border-b border-zinc-700 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-white flex items-center gap-2">
-          <CreditCard className="w-4 h-4" />
-          Transações recentes
-        </h3>
-        <button className="text-xs text-zinc-500 hover:text-white flex items-center gap-1">
-          <Download className="w-3 h-3" />
-          Exportar
-        </button>
-      </div>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-zinc-700">
-              <th className="text-left text-xs text-zinc-500 font-normal px-4 py-2">Tipo</th>
-              <th className="text-left text-xs text-zinc-500 font-normal px-4 py-2">Usuário</th>
-              <th className="text-left text-xs text-zinc-500 font-normal px-4 py-2">Descrição</th>
-              <th className="text-right text-xs text-zinc-500 font-normal px-4 py-2">Valor</th>
-              <th className="text-right text-xs text-zinc-500 font-normal px-4 py-2">Hora</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-zinc-800 hover:bg-zinc-800/80/50">
-                <td className="px-4 py-2">
-                  <span className={`capitalize ${typeColors[tx.type]}`}>
-                    {typeLabels[tx.type] ?? tx.type}
-                  </span>
-                </td>
-                <td className="px-4 py-2">
-                  <span className="text-zinc-300">{tx.userEmail}</span>
-                </td>
-                <td className="px-4 py-2">
-                  <span className="text-zinc-500">{tx.description}</span>
-                </td>
-                <td className="px-4 py-2 text-right">
-                  <span className={tx.type === 'refund' ? 'text-red-400' : 'text-green-400'}>
-                    {tx.type === 'refund' ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
-                  </span>
-                </td>
-                <td className="px-4 py-2 text-right text-zinc-500">
-                  {new Date(tx.createdAt).toLocaleTimeString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-// =============================================================================
-// MAIN PAGE
-// =============================================================================
-
-export default function FinanceDashboard() {
-  const [metrics, setMetrics] = useState<FinanceMetrics | null>(null);
+export default function FinancePage() {
+  const [metrics, setMetrics] = useState<FinanceMetrics>(defaults);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d' | 'mtd'>('today');
-  
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
   const fetchMetrics = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/finance/metrics?range=${dateRange}`);
-      if (!res.ok) throw new Error('Falha ao carregar métricas');
-      const data = await res.json();
-      setMetrics(data);
+      setLoading(true);
+      const payload = await adminJsonFetch<Partial<FinanceMetrics>>('/api/admin/finance/metrics');
+      setMetrics({
+        ...defaults,
+        ...payload,
+        aiCostBreakdown: Array.isArray(payload?.aiCostBreakdown) ? payload.aiCostBreakdown : [],
+        revenueByPlan: Array.isArray(payload?.revenueByPlan) ? payload.revenueByPlan : [],
+        recentTransactions: Array.isArray(payload?.recentTransactions) ? payload.recentTransactions : [],
+        alerts: Array.isArray(payload?.alerts) ? payload.alerts : [],
+      });
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setError(err instanceof Error ? err.message : 'Failed to load finance metrics');
     } finally {
       setLoading(false);
     }
-  }, [dateRange]);
-  
+  }, []);
+
   useEffect(() => {
     fetchMetrics();
-    
-    if (autoRefresh) {
-      const interval = setInterval(fetchMetrics, 30000); // 30s refresh
-      return () => clearInterval(interval);
-    }
-  }, [fetchMetrics, autoRefresh]);
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
-      </div>
-    );
-  }
-  
-  if (error || !metrics) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-red-400">{error || 'Sem dados disponíveis'}</p>
-        <button 
-          onClick={fetchMetrics}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
-        >
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-  
-  const profitColor = metrics.dailyProfit >= 0 ? 'text-green-400' : 'text-red-400';
-  
+  }, [fetchMetrics]);
+
+  const marginTone = useMemo(
+    () => (metrics.profitMargin < 0 ? 'rose' : metrics.profitMargin < 20 ? 'amber' : 'emerald'),
+    [metrics.profitMargin],
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-white">Saúde financeira</h1>
-          <p className="text-sm text-zinc-500">MRR, custos e métricas de rentabilidade</p>
+    <AdminPageShell
+      title='Finance Operations'
+      description='Track recurring revenue, AI cost pressure, and margin sustainability from live admin metrics.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchMetrics}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Date Range */}
-          <div className="flex items-center gap-1 bg-zinc-900/70 border border-zinc-700 rounded-lg p-1">
-            {(['today', '7d', '30d', 'mtd'] as const).map((range) => (
-              <button
-                key={range}
-                onClick={() => setDateRange(range)}
-                className={`px-3 py-1 text-xs rounded ${
-                  dateRange === range 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-zinc-500 hover:text-white'
-                }`}
-              >
-                {range === 'today' ? 'HOJE' : range === '7d' ? '7D' : range === '30d' ? '30D' : 'MTD'}
-              </button>
-            ))}
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='MRR' value={`$${metrics.mrr.toFixed(2)}`} tone='sky' />
+          <AdminStatCard label='ARR' value={`$${metrics.arr.toFixed(2)}`} tone='neutral' />
+          <AdminStatCard
+            label='Profit Margin'
+            value={`${metrics.profitMargin.toFixed(1)}%`}
+            tone={marginTone as 'neutral' | 'sky' | 'emerald' | 'amber' | 'rose'}
+          />
+          <AdminStatCard label='Runway (months)' value={metrics.runway.toFixed(1)} tone='amber' />
+        </AdminStatGrid>
+      </div>
+
+      {metrics.alerts.length > 0 ? (
+        <div className='mb-4 space-y-2'>
+          {metrics.alerts.map((alert, index) => (
+            <AdminStatusBanner key={`${alert.metric}-${index}`} tone={alert.type === 'critical' ? 'danger' : 'warning'}>
+              {alert.metric}: {alert.message}
+            </AdminStatusBanner>
+          ))}
+        </div>
+      ) : null}
+
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+        <AdminSection title='Daily Economics'>
+          <div className='space-y-2 text-sm text-zinc-300'>
+            <p>Revenue: ${metrics.dailyRevenue.toFixed(2)}</p>
+            <p>AI Cost: ${metrics.dailyAICost.toFixed(2)}</p>
+            <p>Infrastructure Cost: ${metrics.dailyInfraCost.toFixed(2)}</p>
+            <p className='font-semibold text-zinc-100'>Daily Profit: ${metrics.dailyProfit.toFixed(2)}</p>
+            <p>Active Subscriptions: {metrics.activeSubscriptions}</p>
+            <p>Churn Rate: {metrics.churnRate.toFixed(2)}%</p>
           </div>
-          
-          {/* Auto Refresh Toggle */}
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`p-2 rounded-lg border ${
-              autoRefresh 
-                ? 'border-green-500/30 bg-green-500/10 text-green-400' 
-                : 'border-zinc-700 text-zinc-500'
-            }`}
-            title={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
-          >
-            <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+        </AdminSection>
+
+        <AdminSection title='AI Cost Breakdown' className='p-0'>
+          <div className='overflow-x-auto'>
+            <table className='w-full table-auto text-sm'>
+              <thead>
+                <tr className='bg-zinc-800/70'>
+                  <th className='p-3 text-left'>Model</th>
+                  <th className='p-3 text-left'>Calls</th>
+                  <th className='p-3 text-left'>Cost</th>
+                  <th className='p-3 text-left'>Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <AdminTableStateRow colSpan={4} message='Loading model breakdown...' />
+                ) : metrics.aiCostBreakdown.length === 0 ? (
+                  <AdminTableStateRow colSpan={4} message='No AI cost breakdown available.' />
+                ) : (
+                  metrics.aiCostBreakdown.map((item) => (
+                    <tr key={item.model} className='border-t border-zinc-800/70'>
+                      <td className='p-3'>{item.model}</td>
+                      <td className='p-3'>{item.calls}</td>
+                      <td className='p-3'>${item.cost.toFixed(2)}</td>
+                      <td className='p-3'>{item.percentage.toFixed(1)}%</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </AdminSection>
       </div>
-      
-      {/* Critical Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard
-          title="MRR"
-          value={metrics.mrr}
-          change={metrics.mrrGrowth}
-          icon={TrendingUp}
-          prefix="$"
-          trend={metrics.mrrGrowth >= 0 ? 'up' : 'down'}
-          subtitle={`ARR: $${(metrics.arr / 1000).toFixed(0)}k`}
-        />
-        <MetricCard
-          title="Receita diária"
-          value={metrics.dailyRevenue}
-          icon={DollarSign}
-          prefix="$"
-        />
-        <MetricCard
-          title="Lucro diário"
-          value={metrics.dailyProfit}
-          icon={metrics.dailyProfit >= 0 ? TrendingUp : TrendingDown}
-          prefix="$"
-          trend={metrics.dailyProfit >= 0 ? 'up' : 'down'}
-          subtitle={`Margem: ${metrics.profitMargin.toFixed(1)}%`}
-        />
-        <MetricCard
-          title="Queima diária"
-          value={metrics.burnRate}
-          icon={Zap}
-          prefix="$"
-          suffix="/dia"
-          subtitle={`Fôlego: ${metrics.runway} meses`}
-        />
+
+      <div className='mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2'>
+        <AdminSection title='Revenue by Plan' className='p-0'>
+          <div className='overflow-x-auto'>
+            <table className='w-full table-auto text-sm'>
+              <thead>
+                <tr className='bg-zinc-800/70'>
+                  <th className='p-3 text-left'>Plan</th>
+                  <th className='p-3 text-left'>Users</th>
+                  <th className='p-3 text-left'>Revenue</th>
+                  <th className='p-3 text-left'>Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <AdminTableStateRow colSpan={4} message='Loading plan revenue...' />
+                ) : metrics.revenueByPlan.length === 0 ? (
+                  <AdminTableStateRow colSpan={4} message='No plan revenue data available.' />
+                ) : (
+                  metrics.revenueByPlan.map((row) => (
+                    <tr key={row.plan} className='border-t border-zinc-800/70'>
+                      <td className='p-3'>{row.plan}</td>
+                      <td className='p-3'>{row.users}</td>
+                      <td className='p-3'>${row.revenue.toFixed(2)}</td>
+                      <td className='p-3'>{row.percentage.toFixed(1)}%</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </AdminSection>
+
+        <AdminSection title='Recent Transactions' className='p-0'>
+          <div className='overflow-x-auto'>
+            <table className='w-full table-auto text-sm'>
+              <thead>
+                <tr className='bg-zinc-800/70'>
+                  <th className='p-3 text-left'>Type</th>
+                  <th className='p-3 text-left'>User</th>
+                  <th className='p-3 text-left'>Amount</th>
+                  <th className='p-3 text-left'>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <AdminTableStateRow colSpan={4} message='Loading transactions...' />
+                ) : metrics.recentTransactions.length === 0 ? (
+                  <AdminTableStateRow colSpan={4} message='No recent transactions.' />
+                ) : (
+                  metrics.recentTransactions.map((tx) => (
+                    <tr key={tx.id} className='border-t border-zinc-800/70'>
+                      <td className='p-3'>{tx.type}</td>
+                      <td className='p-3'>{tx.userEmail}</td>
+                      <td className='p-3'>${tx.amount.toFixed(2)}</td>
+                      <td className='p-3 text-zinc-500'>{new Date(tx.createdAt).toLocaleString()}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </AdminSection>
       </div>
-      
-      {/* Cost Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricCard
-          title="Custos de IA"
-          value={metrics.dailyAICost}
-          icon={Bot}
-          prefix="$"
-          subtitle="Gasto de IA hoje"
-        />
-        <MetricCard
-          title="Infraestrutura"
-          value={metrics.dailyInfraCost}
-          icon={Server}
-          prefix="$"
-          subtitle="Servidores, BD, CDN"
-        />
-        <MetricCard
-          title="Assinaturas ativas"
-          value={metrics.activeSubscriptions}
-          icon={Users}
-          subtitle={`Churn: ${metrics.churnRate.toFixed(1)}%`}
-        />
-      </div>
-      
-      {/* Unit Economics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard
-          title="LTV"
-          value={metrics.ltv}
-          icon={TrendingUp}
-          prefix="$"
-          subtitle="Valor do ciclo de vida"
-        />
-        <MetricCard
-          title="CAC"
-          value={metrics.cac}
-          icon={CreditCard}
-          prefix="$"
-          subtitle="Custo de aquisição"
-        />
-        <MetricCard
-          title="LTV:CAC"
-          value={(metrics.ltv / metrics.cac).toFixed(1)}
-          icon={PieChart}
-          suffix="x"
-          trend={(metrics.ltv / metrics.cac) >= 3 ? 'up' : 'down'}
-          subtitle={metrics.ltv / metrics.cac >= 3 ? 'Saudável' : 'Precisa melhorar'}
-        />
-        <MetricCard
-          title="Taxa de churn"
-          value={metrics.churnRate}
-          icon={TrendingDown}
-          suffix="%"
-          trend={metrics.churnRate <= 5 ? 'up' : 'down'}
-          subtitle="Mensal"
-        />
-      </div>
-      
-      {/* Alerts */}
-      {metrics.alerts.length > 0 && (
-        <AlertsPanel alerts={metrics.alerts} />
-      )}
-      
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CostBreakdownChart data={metrics.aiCostBreakdown} />
-        <RevenueByPlanChart data={metrics.revenueByPlan} />
-      </div>
-      
-      {/* Transactions */}
-      <TransactionsTable transactions={metrics.recentTransactions} />
-    </div>
+    </AdminPageShell>
   );
 }

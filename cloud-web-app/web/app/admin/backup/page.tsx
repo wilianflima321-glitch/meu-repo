@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type BackupItem = {
   id: string;
@@ -12,23 +22,37 @@ type BackupItem = {
   storageUrl?: string | null;
 };
 
+type BackupPayload = {
+  items?: BackupItem[];
+};
+
+function formatSize(size: number) {
+  const gb = size / (1024 * 1024 * 1024);
+  if (gb >= 1) {
+    return `${gb.toFixed(2)} GB`;
+  }
+  const mb = size / (1024 * 1024);
+  return `${mb.toFixed(2)} MB`;
+}
+
 export default function Backup() {
   const [backups, setBackups] = useState<BackupItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [description, setDescription] = useState('');
   const [working, setWorking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [description, setDescription] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchBackups = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/backup');
-      if (!res.ok) throw new Error('Falha ao carregar backups');
-      const json = await res.json();
-      setBackups(json.items || []);
+      const json = await adminJsonFetch<BackupPayload>('/api/admin/backup');
+      setBackups(Array.isArray(json?.items) ? json.items : []);
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar backups');
+      setError(err instanceof Error ? err.message : 'Failed to load backups');
     } finally {
       setLoading(false);
     }
@@ -38,129 +62,148 @@ export default function Backup() {
     fetchBackups();
   }, [fetchBackups]);
 
-  const requestBackup = async () => {
+  const requestBackup = useCallback(async () => {
     try {
       setWorking(true);
-      const res = await fetch('/api/admin/backup', {
+      setSuccess(null);
+      await adminJsonFetch('/api/admin/backup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description }),
+        body: JSON.stringify({ description: description.trim() || undefined }),
       });
-      if (!res.ok) throw new Error('Falha ao solicitar backup');
       setDescription('');
+      setSuccess('Manual backup requested successfully.');
       await fetchBackups();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao solicitar backup');
+      setError(err instanceof Error ? err.message : 'Failed to request backup');
     } finally {
       setWorking(false);
     }
-  };
+  }, [description, fetchBackups]);
 
-  const requestRestore = async (backupId: string) => {
+  const requestRestore = useCallback(async (backupId: string) => {
     try {
       setWorking(true);
-      const res = await fetch('/api/admin/backup/restore', {
+      setSuccess(null);
+      await adminJsonFetch('/api/admin/backup/restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ backupId }),
       });
-      if (!res.ok) throw new Error('Falha ao solicitar restauração');
+      setSuccess(`Restore request queued for backup ${backupId.slice(0, 8)}.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao solicitar restauração');
+      setError(err instanceof Error ? err.message : 'Failed to request restore');
     } finally {
       setWorking(false);
     }
-  };
+  }, []);
 
-  const formatSize = (size: number) => {
-    const gb = size / (1024 * 1024 * 1024);
-    if (gb >= 1) return `${gb.toFixed(2)}GB`;
-    const mb = size / (1024 * 1024);
-    return `${mb.toFixed(2)}MB`;
-  };
+  const summary = useMemo(
+    () => ({
+      total: backups.length,
+      ready: backups.filter((item) => item.status === 'completed').length,
+      pending: backups.filter((item) => item.status === 'pending').length,
+      totalSize: backups.reduce((sum, item) => sum + item.size, 0),
+    }),
+    [backups],
+  );
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Backup e recuperação</h1>
-          <p className='text-sm text-zinc-500'>Controle de backups com auditoria e restauração controlada.</p>
+    <AdminPageShell
+      title='Backup and Restore'
+      description='Manage manual backup requests and controlled restore operations.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchBackups}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button onClick={fetchBackups} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>Atualizar</button>
+      ) : null}
+      {success ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='success'>{success}</AdminStatusBanner>
+        </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Backups' value={summary.total} tone='sky' />
+          <AdminStatCard label='Completed' value={summary.ready} tone='emerald' />
+          <AdminStatCard label='Pending' value={summary.pending} tone='amber' />
+          <AdminStatCard label='Stored size' value={formatSize(summary.totalSize)} tone='neutral' />
+        </AdminStatGrid>
       </div>
 
-      {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
-          {error}
-        </div>
-      )}
-
-      <div className='mb-6 bg-zinc-900/70 p-4 rounded-lg shadow'>
-        <h2 className='text-xl font-semibold mb-3'>Solicitar Backup Manual</h2>
-        <div className='flex flex-col md:flex-row gap-3'>
+      <AdminSection title='Manual backup request' className='mb-6'>
+        <div className='flex flex-col gap-3 md:flex-row'>
           <input
-            className='border p-2 rounded text-sm flex-1'
-            placeholder='Descrição do backup (opcional)'
+            className='flex-1 rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+            placeholder='Optional description'
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(event) => setDescription(event.target.value)}
           />
-          <button onClick={requestBackup} disabled={working} className='px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50'>
-            {working ? 'Solicitando...' : 'Iniciar Backup Manual'}
-          </button>
+          <AdminPrimaryButton onClick={requestBackup} disabled={working} className='bg-blue-600 text-white hover:bg-blue-500'>
+            {working ? 'Processing...' : 'Start manual backup'}
+          </AdminPrimaryButton>
         </div>
-      </div>
+      </AdminSection>
 
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
-        <thead>
-          <tr className='bg-zinc-800/70'>
-            <th className='p-2 text-left'>ID</th>
-            <th className='p-2 text-left'>Data</th>
-            <th className='p-2 text-left'>Tamanho</th>
-            <th className='p-2 text-left'>Status</th>
-            <th className='p-2 text-left'>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando backups...</td>
-            </tr>
-          ) : backups.length === 0 ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum backup encontrado.</td>
-            </tr>
-          ) : (
-            backups.map((b) => (
-              <tr key={b.id} className='border-t'>
-                <td className='p-2 text-xs text-zinc-500'>{b.id.slice(0, 8)}</td>
-                <td className='p-2'>{new Date(b.date).toLocaleString()}</td>
-                <td className='p-2'>{formatSize(b.size)}</td>
-                <td className='p-2'>
-                  <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>{b.status}</span>
-                </td>
-                <td className='p-2'>
-                  {b.storageUrl ? (
-                    <a
-                      href={b.storageUrl}
-                      className='px-2 py-1 bg-yellow-500 text-white rounded mr-2 inline-block text-sm'
-                    >
-                      Baixar
-                    </a>
-                  ) : (
-                    <span className='text-xs text-zinc-500 mr-2'>Sem arquivo</span>
-                  )}
-                  <button
-                    onClick={() => requestRestore(b.id)}
-                    className='px-2 py-1 bg-red-500 text-white rounded text-sm'
-                  >
-                    Restaurar
-                  </button>
-                </td>
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>ID</th>
+                <th className='p-3 text-left'>Created</th>
+                <th className='p-3 text-left'>Size</th>
+                <th className='p-3 text-left'>Status</th>
+                <th className='p-3 text-left'>Actions</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Loading backups...' />
+              ) : backups.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='No backups available.' />
+              ) : (
+                backups.map((item) => (
+                  <tr key={item.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-zinc-400'>{item.id.slice(0, 8)}</td>
+                    <td className='p-3 text-zinc-500'>{new Date(item.date).toLocaleString()}</td>
+                    <td className='p-3'>{formatSize(item.size)}</td>
+                    <td className='p-3'>
+                      <span className='rounded bg-zinc-800/70 px-2 py-1 text-xs text-zinc-300'>{item.status}</span>
+                    </td>
+                    <td className='p-3'>
+                      <div className='flex items-center gap-2'>
+                        {item.storageUrl ? (
+                          <a
+                            href={item.storageUrl}
+                            className='rounded bg-amber-600 px-3 py-1 text-xs text-white hover:bg-amber-500'
+                          >
+                            Download
+                          </a>
+                        ) : (
+                          <span className='text-xs text-zinc-500'>No file</span>
+                        )}
+                        <button
+                          onClick={() => requestRestore(item.id)}
+                          className='rounded bg-rose-600 px-3 py-1 text-xs text-white hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-60'
+                          disabled={working}
+                          type='button'
+                        >
+                          Restore
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

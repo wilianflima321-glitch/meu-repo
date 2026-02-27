@@ -3,8 +3,19 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
+
+const MAX_WORKFLOW_ID_LENGTH = 120;
+const normalizeWorkflowId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+interface WorkflowPatchBody {
+  title?: string;
+  archived?: boolean;
+  chatThreadId?: string | null;
+}
 
 async function getOwnedWorkflow(userId: string, id: string) {
   const prismaAny = prisma as any;
@@ -25,14 +36,35 @@ async function getOwnedWorkflow(userId: string, id: string) {
   });
 }
 
-export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
+async function resolveWorkflowId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeWorkflowId(resolved?.id);
+}
+
+export async function GET(req: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(req);
     await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'copilot-workflow-detail-get',
+      key: user.userId,
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many copilot workflow read requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
-    const workflow = await getOwnedWorkflow(user.userId, ctx.params.id);
+    const workflowId = await resolveWorkflowId(ctx);
+    if (!workflowId || workflowId.length > MAX_WORKFLOW_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_WORKFLOW_ID', message: 'workflowId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+
+    const workflow = await getOwnedWorkflow(user.userId, workflowId);
     if (!workflow) {
-      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow não encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow not found.' }, { status: 404 });
     }
 
     return NextResponse.json({ workflow });
@@ -43,39 +75,60 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   }
 }
 
-export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(req);
     await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'copilot-workflow-detail-patch',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many copilot workflow update requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const workflowId = await resolveWorkflowId(ctx);
+    if (!workflowId || workflowId.length > MAX_WORKFLOW_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_WORKFLOW_ID', message: 'workflowId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     const prismaAny = prisma as any;
 
-    const id = ctx.params.id;
-    const existing = await prismaAny.copilotWorkflow.findFirst({ where: { id, userId: user.userId }, select: { id: true } });
+    const existing = await prismaAny.copilotWorkflow.findFirst({
+      where: { id: workflowId, userId: user.userId },
+      select: { id: true },
+    });
     if (!existing) {
-      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow não encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND', message: 'Workflow not found.' }, { status: 404 });
     }
 
-    const body = await req.json().catch(() => ({}));
+    const body = (await req.json().catch(() => ({}))) as WorkflowPatchBody;
     const title = typeof body?.title === 'string' ? body.title.trim() : '';
     const archived = typeof body?.archived === 'boolean' ? body.archived : undefined;
     const hasChatThreadId = Object.prototype.hasOwnProperty.call(body ?? {}, 'chatThreadId');
-    const chatThreadIdRaw = hasChatThreadId ? (body as any).chatThreadId : undefined;
+    const chatThreadIdRaw = hasChatThreadId ? body.chatThreadId : undefined;
     const chatThreadId =
       chatThreadIdRaw === null
         ? null
         : typeof chatThreadIdRaw === 'string' && chatThreadIdRaw.trim()
-        ? chatThreadIdRaw.trim()
-        : undefined;
+          ? chatThreadIdRaw.trim()
+          : undefined;
 
     if (!title && archived === undefined && !hasChatThreadId) {
-      return NextResponse.json({ error: 'INVALID_BODY', message: 'Envie { title } e/ou { archived } e/ou { chatThreadId }.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'INVALID_BODY', message: 'Send { title } and/or { archived } and/or { chatThreadId }.' },
+        { status: 400 }
+      );
     }
 
     if (hasChatThreadId) {
       if (chatThreadId !== null && chatThreadId === undefined) {
         return NextResponse.json(
-          { error: 'INVALID_BODY', message: 'Envie { chatThreadId: string | null }.' },
+          { error: 'INVALID_BODY', message: 'Send { chatThreadId: string | null }.' },
           { status: 400 }
         );
       }
@@ -86,16 +139,16 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
           select: { id: true },
         });
         if (!ownedThread) {
-          return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread não encontrada.' }, { status: 404 });
+          return NextResponse.json({ error: 'THREAD_NOT_FOUND', message: 'Thread not found.' }, { status: 404 });
         }
 
         const existingLink = await prismaAny.copilotWorkflow.findFirst({
           where: { chatThreadId },
           select: { id: true },
         });
-        if (existingLink && existingLink.id !== id) {
+        if (existingLink && existingLink.id !== workflowId) {
           return NextResponse.json(
-            { error: 'THREAD_ALREADY_LINKED', message: 'Essa thread já está ligada a um workflow.' },
+            { error: 'THREAD_ALREADY_LINKED', message: 'This thread is already linked to another workflow.' },
             { status: 409 }
           );
         }
@@ -103,7 +156,7 @@ export async function PATCH(req: NextRequest, ctx: { params: { id: string } }) {
     }
 
     const workflow = await prismaAny.copilotWorkflow.update({
-      where: { id },
+      where: { id: workflowId },
       data: {
         ...(title ? { title } : {}),
         ...(archived !== undefined ? { archived } : {}),

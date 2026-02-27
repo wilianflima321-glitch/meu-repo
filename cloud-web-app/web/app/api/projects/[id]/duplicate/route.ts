@@ -1,51 +1,62 @@
 /**
- * AETHEL ENGINE - Project Duplicate API
- * 
- * Duplica um projeto existente.
+ * Aethel Engine - Project Duplicate API
+ *
+ * This endpoint is explicitly gated until real duplicate workflow exists.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import crypto from 'crypto';
+import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+async function resolveProjectId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeProjectId(resolved?.id);
+}
+
+export async function POST(request: NextRequest, ctx: RouteContext) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user) {
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-duplicate-post',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project duplication attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
       return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
+        {
+          error: 'INVALID_PROJECT_ID',
+          message: 'projectId is required and must be under 120 characters.',
+        },
+        { status: 400 }
       );
     }
 
-    const projectId = params.id;
     const body = await request.json().catch(() => ({}));
-    const { newName } = body;
+    const requestedName = typeof body?.newName === 'string' ? body.newName.trim() : null;
 
-    // Em produção, buscar projeto do banco e verificar permissões
-    const newProjectId = crypto.randomUUID();
-    const duplicatedProject = {
-      id: newProjectId,
-      name: newName || `Cópia de Projeto ${projectId.slice(0, 8)}`,
-      originalProjectId: projectId,
-      createdAt: new Date().toISOString(),
-      createdBy: session.user.email,
-      status: 'created',
-    };
-
-    return NextResponse.json({
-      success: true,
-      message: 'Projeto duplicado com sucesso',
-      project: duplicatedProject,
+    return notImplementedCapability({
+      message: 'Project duplication is not implemented yet. Use export/import workflow in Workbench.',
+      capability: 'PROJECT_DUPLICATION',
+      milestone: 'P1',
+      metadata: {
+        projectId,
+        requestedName,
+      },
     });
   } catch (error) {
-    console.error('Erro ao duplicar projeto:', error);
+    console.error('Project duplicate endpoint error:', error);
     return NextResponse.json(
-      { error: 'Falha ao duplicar projeto' },
+      { error: 'PROJECT_DUPLICATE_FAILED', message: 'Failed to process project duplication request.' },
       { status: 500 }
     );
   }

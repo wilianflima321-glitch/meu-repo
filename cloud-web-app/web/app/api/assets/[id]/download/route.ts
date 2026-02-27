@@ -9,8 +9,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { generateDownloadUrl, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+async function resolveAssetId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeAssetId(resolvedParams?.id);
+}
 
 // ============================================================================
 // GET - Generate Download URL
@@ -18,15 +27,31 @@ import { generateDownloadUrl, isS3Available, S3_BUCKET } from '@/lib/storage/s3-
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-download-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset download URL requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const assetId = await resolveAssetId(ctx);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     // Find asset with access check (using only fields that exist in current schema)
     const asset = await prisma.asset.findFirst({
       where: {
-        id: params.id,
+        id: assetId,
         project: {
           OR: [
             { userId: user.userId },
@@ -116,10 +141,26 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-download-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many batch download requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const assetId = await resolveAssetId(ctx);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     const body = await request.json();
     const { assetIds } = body;

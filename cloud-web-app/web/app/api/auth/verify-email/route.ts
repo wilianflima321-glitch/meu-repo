@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import * as crypto from 'crypto';
 import { emailService } from '@/lib/email-system';
 import { verifyToken } from '@/lib/auth-server';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,15 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-verify-email-post',
+      key: getRequestIp(req),
+      max: 40,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many email verification attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { token, email } = await req.json();
 
     if (!token || !email) {
@@ -73,6 +83,15 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-verify-email-get',
+      key: getRequestIp(req),
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many verification email resend requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Get user from auth token
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '') || 

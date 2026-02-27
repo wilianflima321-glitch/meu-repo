@@ -7,19 +7,44 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+async function resolveAssetId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeAssetId(resolvedParams?.id);
+}
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-favorite-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset favorite toggles. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const assetId = await resolveAssetId(ctx);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     // Find asset with access check
     const asset = await prisma.asset.findFirst({
       where: {
-        id: params.id,
+        id: assetId,
         project: {
           OR: [
             { userId: user.userId },

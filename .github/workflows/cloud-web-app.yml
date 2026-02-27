@@ -42,6 +42,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cloud-web-app/web/package-lock.json
 
+      - name: Repository connectivity gate
+        run: node tools/repo-connectivity-scan.mjs --fail-on-missing --report "audit dicas do emergent usar/25_REPO_CONNECTIVITY_MATRIX_2026-02-20.md"
+
       - name: Install dependencies
         working-directory: cloud-web-app/web
         run: npm ci

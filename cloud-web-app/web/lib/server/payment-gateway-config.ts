@@ -23,6 +23,19 @@ export const DEFAULT_PAYMENT_GATEWAY_CONFIG: PaymentGatewayConfig = {
   updatedAt: null,
 };
 
+function normalizeCheckoutOrigin(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim().replace(/\/+$/, '');
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    return null;
+  }
+}
+
 export function getIdeSettingModel() {
   const ideSetting = (prisma as any).ideSetting;
   if (!ideSetting) {
@@ -42,10 +55,7 @@ export function normalizePaymentGatewayConfig(input: unknown): PaymentGatewayCon
     activeGateway: raw.activeGateway === 'disabled' ? 'disabled' : 'stripe',
     checkoutEnabled: raw.checkoutEnabled !== false,
     allowLocalIdeRedirect: raw.allowLocalIdeRedirect !== false,
-    checkoutOrigin:
-      typeof raw.checkoutOrigin === 'string' && raw.checkoutOrigin.trim()
-        ? raw.checkoutOrigin.trim().replace(/\/+$/, '')
-        : null,
+    checkoutOrigin: normalizeCheckoutOrigin(raw.checkoutOrigin),
     updatedBy: typeof raw.updatedBy === 'string' && raw.updatedBy.trim() ? raw.updatedBy.trim() : null,
     updatedAt: typeof raw.updatedAt === 'string' && raw.updatedAt.trim() ? raw.updatedAt.trim() : null,
   };

@@ -2,6 +2,7 @@
  * Workspace Manager
  * Manages multi-root workspaces, trust, and recommendations
  */
+import { readFileViaFs, writeFileViaFs } from '@/lib/client/files-fs'
 
 export interface WorkspaceFolder {
   uri: string;
@@ -291,18 +292,9 @@ export class WorkspaceManager {
     const fileName = `${name}.code-workspace`;
 
     // Save workspace file
-    const response = await fetch('/api/files/write', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        path: fileName,
-        content,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create workspace file');
-    }
+    await writeFileViaFs(fileName, content, {
+      writeOptions: { createDirectories: true, atomic: true },
+    })
 
     console.log(`[Workspace] Created workspace file: ${fileName}`);
     return fileName;
@@ -312,13 +304,8 @@ export class WorkspaceManager {
    * Load workspace from file
    */
   async loadWorkspaceFile(path: string): Promise<WorkspaceConfiguration> {
-    const response = await fetch(`/api/files/read?path=${encodeURIComponent(path)}`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to load workspace file');
-    }
-
-    const content = await response.text();
+    const content = await readFileViaFs(path)
+    if (!content) throw new Error('Failed to load workspace file')
     const workspace = JSON.parse(content) as WorkspaceConfiguration;
 
     this.configuration = workspace;
@@ -344,10 +331,8 @@ export class WorkspaceManager {
     try {
       // Try to load .code-workspace file
       const workspaceFile = `${workspaceUri}/.code-workspace`;
-      const response = await fetch(`/api/files/read?path=${encodeURIComponent(workspaceFile)}`);
-      
-      if (response.ok) {
-        const content = await response.text();
+      const content = await readFileViaFs(workspaceFile)
+      if (content) {
         this.configuration = JSON.parse(content);
         this.folders = this.configuration?.folders ?? [];
       } else {
@@ -381,14 +366,9 @@ export class WorkspaceManager {
     const content = JSON.stringify(this.configuration, null, 2);
     
     try {
-      await fetch('/api/files/write', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          path: '.code-workspace',
-          content,
-        }),
-      });
+      await writeFileViaFs('.code-workspace', content, {
+        writeOptions: { createDirectories: true, atomic: true },
+      })
     } catch (error) {
       console.error('[Workspace] Failed to save configuration:', error);
     }

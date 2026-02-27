@@ -1,15 +1,20 @@
 # ROUTES_INVENTORY.md
-Generated: 2026-02-16T04:18:58.582Z
+Generated: 2026-02-25T00:51:47.229Z
 
 ## Summary
-- Total routes: 88
-- Admin routes: 44
+- Total routes: 72
+- Admin routes: 45
 - Auth routes: 5
 - Core workbench routes: 1
-- Workbench redirect routes: 17
+- Workbench redirect routes: 0
 
 ## API Gate Status
-- Remaining NOT_IMPLEMENTED API markers: 6
+- Remaining NOT_IMPLEMENTED API markers (total): 4
+- Critical NOT_IMPLEMENTED markers: 4
+- Non-critical NOT_IMPLEMENTED markers: 0
+- PAYMENT_GATEWAY_NOT_IMPLEMENTED markers: 2
+- PROVIDER_NOT_CONFIGURED markers: 13
+- QUEUE_BACKEND_UNAVAILABLE markers: 11
 - Canonical file API: `/api/files/tree` + `/api/files/fs`
 - Deprecated file API: `/api/workspace/tree` + `/api/workspace/files` (410 DEPRECATED_ROUTE)
 - Checkout canonical web path: `/billing/checkout`
@@ -36,6 +41,7 @@ Generated: 2026-02-16T04:18:58.582Z
 - /admin/compliance (admin/compliance/page.tsx)
 - /admin/cost-optimization (admin/cost-optimization/page.tsx)
 - /admin/deploy (admin/deploy/page.tsx)
+- /admin/emergency (admin/emergency/page.tsx)
 - /admin/feature-flags (admin/feature-flags/page.tsx)
 - /admin/feedback (admin/feedback/page.tsx)
 - /admin/finance (admin/finance/page.tsx)
@@ -61,46 +67,29 @@ Generated: 2026-02-16T04:18:58.582Z
 - /admin/support (admin/support/page.tsx)
 - /admin/updates (admin/updates/page.tsx)
 - /admin/users (admin/users/page.tsx)
-- /ai-command (ai-command/page.tsx)
-- /animation-blueprint (animation-blueprint/page.tsx)
 - /billing (billing/page.tsx)
 - /billing/cancel (billing/cancel/page.tsx)
 - /billing/checkout (billing/checkout/page.tsx)
 - /billing/invoices (billing/invoices/page.tsx)
 - /billing/success (billing/success/page.tsx)
-- /blueprint-editor (blueprint-editor/page.tsx)
-- /chat (chat/page.tsx)
 - /contact (contact/page.tsx)
 - /contact-sales (contact-sales/page.tsx)
 - /dashboard (dashboard/page.tsx)
-- /debugger (debugger/page.tsx)
+- /dashboard/legacy (dashboard/legacy/page.tsx)
 - /docs (docs/page.tsx)
 - /download (download/page.tsx)
-- /editor-hub (editor-hub/page.tsx)
-- /explorer (explorer/page.tsx)
 - /forgot-password (forgot-password/page.tsx)
-- /git (git/page.tsx)
 - /health (health/page.tsx)
 - /help (help/page.tsx)
 - /ide (ide/page.tsx)
-- /landscape-editor (landscape-editor/page.tsx)
-- /level-editor (level-editor/page.tsx)
-- /live-preview (live-preview/page.tsx)
 - /login ((auth)/login/page.tsx)
 - /marketplace (marketplace/page.tsx)
-- /niagara-editor (niagara-editor/page.tsx)
-- /playground (playground/page.tsx)
-- /preview (preview/page.tsx)
 - /pricing (pricing/page.tsx)
 - /profile (profile/page.tsx)
 - /project-settings (project-settings/page.tsx)
 - /register ((auth)/register/page.tsx)
 - /reset-password (reset-password/page.tsx)
-- /search (search/page.tsx)
 - /settings (settings/page.tsx)
 - /status (status/page.tsx)
-- /terminal (terminal/page.tsx)
 - /terms (terms/page.tsx)
-- /testing (testing/page.tsx)
 - /verify-email (verify-email/page.tsx)
-- /vr-preview (vr-preview/page.tsx)

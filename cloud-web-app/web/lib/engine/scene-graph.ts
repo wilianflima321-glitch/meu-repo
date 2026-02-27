@@ -9,263 +9,34 @@
 
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
-
-// ============================================================================
-// MATH UTILITIES
-// ============================================================================
-
-export class Transform {
-  private _position: THREE.Vector3 = new THREE.Vector3();
-  private _rotation: THREE.Quaternion = new THREE.Quaternion();
-  private _scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1);
-  private _eulerAngles: THREE.Euler = new THREE.Euler();
-  
-  private _localMatrix: THREE.Matrix4 = new THREE.Matrix4();
-  private _worldMatrix: THREE.Matrix4 = new THREE.Matrix4();
-  private _inverseWorldMatrix: THREE.Matrix4 = new THREE.Matrix4();
-  
-  private _dirty: boolean = true;
-  private _parent: Transform | null = null;
-  private _node: SceneNode | null = null;
-  
-  constructor() {
-    this.updateMatrices();
-  }
-  
-  // Position
-  get position(): THREE.Vector3 { return this._position; }
-  set position(v: THREE.Vector3) { 
-    this._position.copy(v); 
-    this.markDirty(); 
-  }
-  
-  get localPosition(): THREE.Vector3 { return this._position; }
-  
-  get worldPosition(): THREE.Vector3 {
-    this.updateMatricesIfNeeded();
-    const pos = new THREE.Vector3();
-    pos.setFromMatrixPosition(this._worldMatrix);
-    return pos;
-  }
-  
-  setWorldPosition(pos: THREE.Vector3): void {
-    if (this._parent) {
-      this._parent.updateMatricesIfNeeded();
-      const invParent = this._parent._inverseWorldMatrix;
-      this._position.copy(pos).applyMatrix4(invParent);
-    } else {
-      this._position.copy(pos);
-    }
-    this.markDirty();
-  }
-  
-  // Rotation
-  get rotation(): THREE.Quaternion { return this._rotation; }
-  set rotation(q: THREE.Quaternion) { 
-    this._rotation.copy(q);
-    this._eulerAngles.setFromQuaternion(q);
-    this.markDirty(); 
-  }
-  
-  get eulerAngles(): THREE.Euler { return this._eulerAngles; }
-  set eulerAngles(e: THREE.Euler) {
-    this._eulerAngles.copy(e);
-    this._rotation.setFromEuler(e);
-    this.markDirty();
-  }
-  
-  get worldRotation(): THREE.Quaternion {
-    this.updateMatricesIfNeeded();
-    const quat = new THREE.Quaternion();
-    this._worldMatrix.decompose(new THREE.Vector3(), quat, new THREE.Vector3());
-    return quat;
-  }
-
-  setWorldRotation(worldQuat: THREE.Quaternion): void {
-    if (this._parent) {
-      const parentWorldRot = this._parent.worldRotation;
-      const local = parentWorldRot.clone().invert().multiply(worldQuat);
-      this.rotation = local;
-    } else {
-      this.rotation = worldQuat;
-    }
-  }
-  
-  // Scale
-  get scale(): THREE.Vector3 { return this._scale; }
-  set scale(v: THREE.Vector3) { 
-    this._scale.copy(v); 
-    this.markDirty(); 
-  }
-  
-  get lossyScale(): THREE.Vector3 {
-    this.updateMatricesIfNeeded();
-    const scale = new THREE.Vector3();
-    this._worldMatrix.decompose(new THREE.Vector3(), new THREE.Quaternion(), scale);
-    return scale;
-  }
-  
-  // Matrices
-  get localMatrix(): THREE.Matrix4 {
-    this.updateMatricesIfNeeded();
-    return this._localMatrix;
-  }
-  
-  get worldMatrix(): THREE.Matrix4 {
-    this.updateMatricesIfNeeded();
-    return this._worldMatrix;
-  }
-  
-  get inverseWorldMatrix(): THREE.Matrix4 {
-    this.updateMatricesIfNeeded();
-    return this._inverseWorldMatrix;
-  }
-  
-  // Direction vectors
-  get forward(): THREE.Vector3 {
-    return new THREE.Vector3(0, 0, -1).applyQuaternion(this.worldRotation);
-  }
-  
-  get right(): THREE.Vector3 {
-    return new THREE.Vector3(1, 0, 0).applyQuaternion(this.worldRotation);
-  }
-  
-  get up(): THREE.Vector3 {
-    return new THREE.Vector3(0, 1, 0).applyQuaternion(this.worldRotation);
-  }
-  
-  // Methods
-  translate(delta: THREE.Vector3, space: 'local' | 'world' = 'local'): void {
-    if (space === 'local') {
-      delta.applyQuaternion(this._rotation);
-    }
-    this._position.add(delta);
-    this.markDirty();
-  }
-  
-  rotate(axis: THREE.Vector3, angle: number, space: 'local' | 'world' = 'local'): void {
-    const q = new THREE.Quaternion().setFromAxisAngle(axis, angle);
-    if (space === 'local') {
-      this._rotation.multiply(q);
-    } else {
-      this._rotation.premultiply(q);
-    }
-    this._eulerAngles.setFromQuaternion(this._rotation);
-    this.markDirty();
-  }
-  
-  lookAt(target: THREE.Vector3, up: THREE.Vector3 = new THREE.Vector3(0, 1, 0)): void {
-    const mat = new THREE.Matrix4();
-    mat.lookAt(this.worldPosition, target, up);
-    this._rotation.setFromRotationMatrix(mat);
-    this._eulerAngles.setFromQuaternion(this._rotation);
-    this.markDirty();
-  }
-  
-  transformPoint(point: THREE.Vector3): THREE.Vector3 {
-    return point.clone().applyMatrix4(this.worldMatrix);
-  }
-  
-  inverseTransformPoint(point: THREE.Vector3): THREE.Vector3 {
-    return point.clone().applyMatrix4(this.inverseWorldMatrix);
-  }
-  
-  transformDirection(dir: THREE.Vector3): THREE.Vector3 {
-    return dir.clone().applyQuaternion(this.worldRotation);
-  }
-  
-  inverseTransformDirection(dir: THREE.Vector3): THREE.Vector3 {
-    const invRot = this.worldRotation.clone().invert();
-    return dir.clone().applyQuaternion(invRot);
-  }
-  
-  // Internal
-  setParent(parent: Transform | null): void {
-    this._parent = parent;
-    this.markDirty();
-  }
-  
-  setNode(node: SceneNode): void {
-    this._node = node;
-  }
-  
-  private markDirty(): void {
-    this._dirty = true;
-    // Propagar para filhos
-    if (this._node) {
-      for (const child of this._node.children) {
-        child.transform.markDirty();
-      }
-    }
-  }
-  
-  private updateMatricesIfNeeded(): void {
-    if (this._dirty) {
-      this.updateMatrices();
-    }
-  }
-  
-  private updateMatrices(): void {
-    this._localMatrix.compose(this._position, this._rotation, this._scale);
-    
-    if (this._parent) {
-      this._parent.updateMatricesIfNeeded();
-      this._worldMatrix.multiplyMatrices(this._parent._worldMatrix, this._localMatrix);
-    } else {
-      this._worldMatrix.copy(this._localMatrix);
-    }
-    
-    this._inverseWorldMatrix.copy(this._worldMatrix).invert();
-    this._dirty = false;
-  }
-  
-  // Serialization
-  toJSON(): TransformData {
-    return {
-      position: [this._position.x, this._position.y, this._position.z],
-      rotation: [this._rotation.x, this._rotation.y, this._rotation.z, this._rotation.w],
-      scale: [this._scale.x, this._scale.y, this._scale.z],
-    };
-  }
-  
-  fromJSON(data: TransformData): void {
-    this._position.set(...data.position);
-    this._rotation.set(...data.rotation);
-    this._scale.set(...data.scale);
-    this._eulerAngles.setFromQuaternion(this._rotation);
-    this.markDirty();
-  }
-}
-
-export interface TransformData {
-  position: [number, number, number];
-  rotation: [number, number, number, number];
-  scale: [number, number, number];
-}
+import { Transform } from './scene-graph-transform';
+import type {
+  ComponentData,
+  ContactPoint,
+  EnvironmentData,
+  NodeTag,
+  RaycastHit,
+  SceneData,
+  SceneNodeData,
+  SceneSettings,
+  TransformData,
+} from './scene-graph-types';
+export { Transform } from './scene-graph-transform';
+export type {
+  ComponentData,
+  ContactPoint,
+  EnvironmentData,
+  NodeTag,
+  RaycastHit,
+  SceneData,
+  SceneNodeData,
+  SceneSettings,
+  TransformData,
+} from './scene-graph-types';
 
 // ============================================================================
 // SCENE NODE
 // ============================================================================
-
-export type NodeTag = string;
-
-export interface SceneNodeData {
-  id: string;
-  name: string;
-  enabled: boolean;
-  tags: NodeTag[];
-  layer: number;
-  transform: TransformData;
-  components: ComponentData[];
-  children: SceneNodeData[];
-  prefabId?: string;
-}
-
-export interface ComponentData {
-  type: string;
-  enabled: boolean;
-  data: Record<string, unknown>;
-}
 
 let nodeIdCounter = 0;
 
@@ -751,42 +522,9 @@ export abstract class Component {
   }
 }
 
-export interface ContactPoint {
-  point: THREE.Vector3;
-  normal: THREE.Vector3;
-  impulse: number;
-}
-
 // ============================================================================
 // SCENE
 // ============================================================================
-
-export interface SceneData {
-  id: string;
-  name: string;
-  nodes: SceneNodeData[];
-  environment: EnvironmentData;
-  settings: SceneSettings;
-}
-
-export interface EnvironmentData {
-  ambientColor: [number, number, number];
-  ambientIntensity: number;
-  skybox?: string;
-  fog?: {
-    type: 'linear' | 'exponential' | 'exponential2';
-    color: [number, number, number];
-    near?: number;
-    far?: number;
-    density?: number;
-  };
-}
-
-export interface SceneSettings {
-  gravity: [number, number, number];
-  physicsIterations: number;
-  timeScale: number;
-}
 
 let sceneIdCounter = 0;
 
@@ -1031,14 +769,6 @@ export class Scene extends EventEmitter {
   }
 }
 
-export interface RaycastHit {
-  node: SceneNode;
-  point: THREE.Vector3;
-  normal: THREE.Vector3;
-  distance: number;
-  triangleIndex?: number;
-}
-
 // ============================================================================
 // COMPONENT REGISTRY
 // ============================================================================
@@ -1223,154 +953,7 @@ export class SceneManager extends EventEmitter {
 // ============================================================================
 // BUILT-IN COMPONENTS
 // ============================================================================
-
-export class MeshRenderer extends Component {
-  public geometry: THREE.BufferGeometry | null = null;
-  public material: THREE.Material | null = null;
-  public castShadow: boolean = true;
-  public receiveShadow: boolean = true;
-  
-  private _mesh: THREE.Mesh | null = null;
-  
-  onAwake(): void {
-    this.createMesh();
-  }
-  
-  private createMesh(): void {
-    if (!this.geometry || !this.material) return;
-    
-    this._mesh = new THREE.Mesh(this.geometry, this.material);
-    this._mesh.castShadow = this.castShadow;
-    this._mesh.receiveShadow = this.receiveShadow;
-    this.node.threeObject = this._mesh;
-    
-    if (this.scene) {
-      this.scene.threeScene.add(this._mesh);
-    }
-  }
-  
-  onUpdate(): void {
-    if (this._mesh) {
-      const worldMatrix = this.transform.worldMatrix;
-      this._mesh.matrix.copy(worldMatrix);
-      this._mesh.matrixAutoUpdate = false;
-    }
-  }
-  
-  onDestroy(): void {
-    if (this._mesh && this.scene) {
-      this.scene.threeScene.remove(this._mesh);
-    }
-  }
-  
-  serialize(): Record<string, unknown> {
-    return {
-      castShadow: this.castShadow,
-      receiveShadow: this.receiveShadow,
-    };
-  }
-  
-  deserialize(data: Record<string, unknown>): void {
-    this.castShadow = data.castShadow as boolean ?? true;
-    this.receiveShadow = data.receiveShadow as boolean ?? true;
-  }
-}
-
-export class LightComponent extends Component {
-  public type: 'directional' | 'point' | 'spot' | 'ambient' = 'point';
-  public color: THREE.Color = new THREE.Color(0xffffff);
-  public intensity: number = 1;
-  public castShadow: boolean = false;
-  public range: number = 10;
-  public angle: number = Math.PI / 4;
-  public penumbra: number = 0.1;
-  
-  private _light: THREE.Light | null = null;
-  
-  onAwake(): void {
-    this.createLight();
-  }
-  
-  private createLight(): void {
-    switch (this.type) {
-      case 'directional':
-        this._light = new THREE.DirectionalLight(this.color, this.intensity);
-        break;
-      case 'point':
-        this._light = new THREE.PointLight(this.color, this.intensity, this.range);
-        break;
-      case 'spot':
-        this._light = new THREE.SpotLight(this.color, this.intensity, this.range, this.angle, this.penumbra);
-        break;
-      case 'ambient':
-        this._light = new THREE.AmbientLight(this.color, this.intensity);
-        break;
-    }
-    
-    if (this._light) {
-      this._light.castShadow = this.castShadow;
-      this.node.threeObject = this._light;
-      
-      if (this.scene) {
-        this.scene.threeScene.add(this._light);
-      }
-    }
-  }
-  
-  onUpdate(): void {
-    if (this._light) {
-      const pos = this.transform.worldPosition;
-      this._light.position.copy(pos);
-      
-      if (this._light instanceof THREE.DirectionalLight || this._light instanceof THREE.SpotLight) {
-        const target = pos.clone().add(this.transform.forward);
-        this._light.target.position.copy(target);
-      }
-    }
-  }
-  
-  onDestroy(): void {
-    if (this._light && this.scene) {
-      this.scene.threeScene.remove(this._light);
-    }
-  }
-}
-
-export class CameraComponent extends Component {
-  public fov: number = 60;
-  public near: number = 0.1;
-  public far: number = 1000;
-  public isMain: boolean = false;
-  
-  private _camera: THREE.PerspectiveCamera | null = null;
-  
-  get camera(): THREE.PerspectiveCamera | null { return this._camera; }
-  
-  onAwake(): void {
-    this._camera = new THREE.PerspectiveCamera(this.fov, 16/9, this.near, this.far);
-    this.node.threeObject = this._camera;
-    
-    if (this.isMain && this.scene) {
-      this.scene.activeCamera = this.node;
-    }
-  }
-  
-  onUpdate(): void {
-    if (this._camera) {
-      const worldMatrix = this.transform.worldMatrix;
-      this._camera.matrix.copy(worldMatrix);
-      this._camera.matrixAutoUpdate = false;
-      this._camera.matrixWorldNeedsUpdate = true;
-    }
-  }
-  
-  setAspect(aspect: number): void {
-    if (this._camera) {
-      this._camera.aspect = aspect;
-      this._camera.updateProjectionMatrix();
-    }
-  }
-}
+export { CameraComponent, LightComponent, MeshRenderer } from './scene-graph-builtins';
 
 // ============================================================================
 // EXPORTS

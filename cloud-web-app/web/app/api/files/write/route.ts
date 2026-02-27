@@ -3,18 +3,28 @@ import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
   toVirtualWorkspacePath,
 } from '@/lib/server/workspace-scope'
 import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
+import { FILES_COMPAT_METADATA } from '@/lib/server/files-compat-policy'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-write',
+      key: user.userId,
+      max: 80,
+      windowMs: 60 * 1000,
+      message: 'Too many file write requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     await requireEntitlementsForUser(user.userId)
 
     const body = await request.json()
@@ -48,6 +58,7 @@ export async function POST(request: NextRequest) {
       route: '/api/files/write',
       replacement: '/api/files/fs?action=write',
       status: 'compatibility-wrapper',
+      ...FILES_COMPAT_METADATA,
     })
 
     return NextResponse.json(
@@ -60,6 +71,7 @@ export async function POST(request: NextRequest) {
         authority: 'canonical',
         compatibilityRoute: '/api/files/write',
         canonicalEndpoint: '/api/files/fs',
+        ...FILES_COMPAT_METADATA,
       },
       { headers: telemetryHeaders }
     )

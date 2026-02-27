@@ -64,6 +64,16 @@ This document does not change product scope.
 - `13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
 - `14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
 
+## 5.1 Upstash Operational Verification (P0 reliability)
+Use admin diagnostics to verify real backend mode for the active limiter:
+1. Call `GET /api/admin/rate-limits` as admin.
+2. Inspect `diagnostics` payload:
+- `hasUpstashConfig=true` means env is configured for distributed limiter.
+- `configuredBackend=upstash` is expected in production.
+- `runtime.memoryFallbackHits` must remain `0` in normal operation.
+3. If `memoryFallbackHits > 0`, investigate network/auth to Upstash and treat as reliability incident.
+4. Record result in contract delta (`10`) with timestamp and environment.
+
 ## 6. Exit Criteria for Closing This Runbook
 1. No unresolved runtime warning in build logs for `revalidateTag` invalid URL path.
 2. Environment prerequisites documented and reproducible for local + CI.

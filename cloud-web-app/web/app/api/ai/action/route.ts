@@ -3,7 +3,8 @@ import { requireAuth } from '@/lib/auth-server'
 import { aiService } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { capabilityResponse, notImplementedCapability } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 /**
  * POST /api/ai/action
@@ -31,9 +32,20 @@ const ACTION_PROMPTS: Record<string, (code: string, language: string) => string>
     `Optimize the following ${language} code for performance:\n\n\`\`\`${language}\n${code}\n\`\`\``,
 }
 
+const SUPPORTED_PROVIDERS = ['openai', 'anthropic', 'google', 'groq'] as const
+
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-action',
+      key: user.userId,
+      max: 40,
+      windowMs: 60 * 1000,
+      message: 'Too many AI action requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = await req.json().catch(() => null)
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 })
@@ -43,7 +55,21 @@ export async function POST(req: NextRequest) {
     const code = typeof (body as any).code === 'string' ? (body as any).code : ''
     const language = typeof (body as any).language === 'string' ? (body as any).language : 'text'
     const instruction = typeof (body as any).instruction === 'string' ? (body as any).instruction : ''
-    const provider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
+    const requestedProviderRaw =
+      typeof (body as any).provider === 'string' ? String((body as any).provider).trim().toLowerCase() : ''
+    if (requestedProviderRaw && !SUPPORTED_PROVIDERS.includes(requestedProviderRaw as (typeof SUPPORTED_PROVIDERS)[number])) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_PROVIDER',
+          message: 'Requested provider is not supported.',
+          supportedProviders: [...SUPPORTED_PROVIDERS],
+        },
+        { status: 400 }
+      )
+    }
+    const provider = requestedProviderRaw
+      ? (requestedProviderRaw as (typeof SUPPORTED_PROVIDERS)[number])
+      : undefined
     const model = typeof (body as any).model === 'string' ? (body as any).model : undefined
     const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(1, Math.floor((body as any).maxTokens)) : 2048
     const temperature = typeof (body as any).temperature === 'number' ? Math.min(1, Math.max(0, (body as any).temperature)) : 0.3
@@ -69,7 +95,8 @@ export async function POST(req: NextRequest) {
 
     const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
     if (!quotaCheck.allowed) {
-      return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status: 429 })
+      const status = quotaCheck.code === 'CREDITS_EXHAUSTED' ? 402 : 429
+      return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status })
     }
 
     if (model) {
@@ -82,13 +109,28 @@ export async function POST(req: NextRequest) {
     const promptBuilder = ACTION_PROMPTS[action]
     const prompt = instruction || (promptBuilder ? promptBuilder(code, language) : code)
 
-    if (aiService.getAvailableProviders().length === 0) {
+    const availableProviders = aiService.getAvailableProviders()
+    if (availableProviders.length === 0) {
       return notImplementedCapability({
         error: 'NOT_IMPLEMENTED',
         status: 501,
         message: 'AI provider not configured.',
         capability: 'AI_ACTION',
         milestone: 'P0',
+      })
+    }
+    if (provider && !availableProviders.includes(provider as (typeof availableProviders)[number])) {
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: 'Requested AI provider is not configured for current runtime.',
+        status: 503,
+        capability: 'AI_ACTION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P0',
+        metadata: {
+          requestedProvider: provider,
+          availableProviders,
+        },
       })
     }
 

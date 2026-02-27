@@ -1,54 +1,39 @@
-Summary
--------
+﻿# PR Body (Canonical)
 
-This PR adds deterministic runtime E2E coverage and unit tests for the new ensemble provider feature, plus a non-secret Gemini provider example and some dev-only mock endpoints used to support deterministic testing.
+## Summary
+- What was changed
+- Why this change is required
+- Which canonical docs were updated (`10/13/14/17/18/20/25` when applicable)
 
-Changes
--------
-- tools/llm-mock/server.js
-  - Added DELETE /api/llm/providers/:id (test cleanup)
-  - Added GET /api/llm/usage (filterable)
-  - Added POST /api/llm/dev/run-ensemble/:id (simulates ensemble runs by creating usage events)
-- tools/llm-mock/providers/gemini-example.json (new)
-- tools/llm-mock/README.md (updated to reference example)
-- examples/playwright/tests/ensemble-runtime.spec.ts (new runtime E2E)
-- examples/playwright/tests/ensemble.spec.ts (persistence E2E)
-- cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/src/browser/llm-providers/ensemble-provider.test.ts (unit tests)
+## Scope Lock
+- [ ] No business-scope expansion
+- [ ] No new shell outside `/dashboard` + `/ide`
+- [ ] No fake-success behavior introduced
+- [ ] Deprecated routes still follow phased policy (`410 DEPRECATED_ROUTE`)
 
-Testing
--------
-- Playwright tests (examples/playwright/tests): both persistence and runtime tests pass locally across Chromium/Firefox/WebKit.
-- Jest unit tests for `EnsembleProvider` passed locally.
-
-Notes
------
-- Dev-only endpoints are namespaced under `/api/llm/dev/*` for safety.
-- The Gemini example contains placeholder keys; do NOT commit real API keys. Use `/api/llm/secrets/encrypt` for dev-only encryption if needed (gated by `DEV_MODE`).
-
-Checklist
----------
-- [ ] Confirm CI runs Playwright + Jest (workflow included in this PR)
-- [ ] Security review for mock endpoints (dev-only)
-- [ ] Merge into `infra/playwright-ci` after review
-
-How to run locally
--------------------
-1. Start the mock server:
-
-```powershell
-Start-Process node -ArgumentList 'tools/llm-mock/server.js' -WorkingDirectory 'G:\repo' -NoNewWindow
-```
-
-2. Run Playwright tests:
-
+## Evidence (paste outputs)
 ```bash
-npx playwright test examples/playwright/tests/ensemble-runtime.spec.ts --config=playwright.config.ts
-npx playwright test examples/playwright/tests/ensemble.spec.ts --config=playwright.config.ts
+npm run qa:repo-connectivity
+npm run qa:workflow-governance
+npm --prefix cloud-web-app/web run lint
+npm --prefix cloud-web-app/web run typecheck
+npm --prefix cloud-web-app/web run qa:interface-gate
+npm --prefix cloud-web-app/web run qa:architecture-gate
+npm --prefix cloud-web-app/web run qa:canonical-components
+npm --prefix cloud-web-app/web run qa:route-contracts
+npm --prefix cloud-web-app/web run qa:no-fake-success
+npm --prefix cloud-web-app/web run qa:mojibake
+npm --prefix cloud-web-app/web run qa:enterprise-gate
 ```
 
-3. Run Jest unit tests in the `ai-ide` package:
+## Risk / Rollback
+- Main risk:
+- Rollback steps:
 
-```bash
-cd cloud-ide-desktop/aethel_theia_fork/packages/ai-ide
-npx jest --config jest.config.js src/browser/llm-providers/ensemble-provider.test.ts --runInBand
-```
+## UX/API Contract Notes
+- Any `PARTIAL` or `NOT_IMPLEMENTED` capability remains explicit and without misleading CTA.
+- Any public API compatibility alias includes deprecation/cutoff notes.
+
+## Screenshots (if UI changed)
+- Before:
+- After:

@@ -3,12 +3,14 @@ import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getFileSystemRuntime, type FileInfo } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
   toVirtualWorkspacePath,
 } from '@/lib/server/workspace-scope'
 import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
+import { FILES_COMPAT_METADATA } from '@/lib/server/files-compat-policy'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,12 +27,12 @@ function mapToTreeNode(entry: FileInfo, scopedRoot: string) {
 
 async function handleList(
   request: NextRequest,
+  userId: string,
   bodyPath?: string,
   bodyRecursive?: boolean,
   body?: Record<string, unknown>
 ) {
-  const user = requireAuth(request)
-  await requireEntitlementsForUser(user.userId)
+  await requireEntitlementsForUser(userId)
   const projectId = getScopedProjectId(request, body)
 
   const url = new URL(request.url)
@@ -39,7 +41,7 @@ async function handleList(
 
   const runtime = getFileSystemRuntime()
   const { absolutePath: resolvedPath, root: scopedRoot } = resolveScopedWorkspacePath({
-    userId: user.userId,
+    userId,
     projectId,
     requestedPath: path,
   })
@@ -54,6 +56,7 @@ async function handleList(
     route: '/api/files/list',
     replacement: '/api/files/fs?action=list',
     status: 'compatibility-wrapper',
+    ...FILES_COMPAT_METADATA,
   })
 
   return NextResponse.json(
@@ -68,6 +71,7 @@ async function handleList(
       authority: 'canonical',
       compatibilityRoute: '/api/files/list',
       canonicalEndpoint: '/api/files/fs',
+      ...FILES_COMPAT_METADATA,
     },
     { headers: telemetryHeaders }
   )
@@ -75,7 +79,16 @@ async function handleList(
 
 export async function GET(request: NextRequest) {
   try {
-    return await handleList(request)
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-list-get',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many file list requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+    return await handleList(request, user.userId)
   } catch (error) {
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
@@ -85,8 +98,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-list-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many file list requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     const body = await request.json().catch(() => ({} as Record<string, unknown>))
-    return await handleList(request, body?.path as string | undefined, body?.recursive as boolean | undefined, body)
+    return await handleList(
+      request,
+      user.userId,
+      body?.path as string | undefined,
+      body?.recursive as boolean | undefined,
+      body
+    )
   } catch (error) {
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped

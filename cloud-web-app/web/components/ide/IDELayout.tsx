@@ -493,9 +493,11 @@ export default function IDELayout({
               <div key={menu.label} className="relative">
                 <button
                   onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
-                  className={`px-1.5 py-1 rounded transition-colors ${
+                  className={`px-1.5 py-1 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                     activeMenu === menu.label ? 'bg-slate-700/90 text-white' : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`}
+                  aria-expanded={activeMenu === menu.label}
+                  aria-haspopup="menu"
                 >
                   {menu.label}
                 </button>
@@ -512,7 +514,7 @@ export default function IDELayout({
                             setActiveMenu(null)
                           }}
                           disabled={item.disabled ?? !item.action}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs ${
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                             item.disabled ?? !item.action
                               ? 'opacity-50 cursor-not-allowed'
                               : 'hover:bg-slate-700/70 focus-visible:bg-slate-700/70'
@@ -535,7 +537,7 @@ export default function IDELayout({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onCommandPalette?.()}
-            className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded border border-slate-700/80 bg-slate-900/40 text-[11px] text-slate-300 hover:bg-slate-800/80 focus-visible:bg-slate-800/80"
+            className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded border border-slate-700/80 bg-slate-900/40 text-[11px] text-slate-300 hover:bg-slate-800/80 focus-visible:bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             title="Command Palette (Ctrl+Shift+P)"
           >
             <Codicon name="sparkle" className="text-[12px]" />
@@ -544,24 +546,27 @@ export default function IDELayout({
           </button>
           <button
             onClick={toggleLeftSidebar}
-            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.leftSidebar ? 'text-blue-300' : 'text-slate-400'}`}
+            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${panels.leftSidebar ? 'text-blue-300' : 'text-slate-400'}`}
             title="Toggle Sidebar"
+            aria-label="Toggle sidebar"
             aria-pressed={panels.leftSidebar}
           >
             <Codicon name="layout-sidebar-left" />
           </button>
           <button
             onClick={toggleBottomPanel}
-            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.bottomPanel ? 'text-blue-300' : 'text-slate-400'}`}
+            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${panels.bottomPanel ? 'text-blue-300' : 'text-slate-400'}`}
             title="Toggle Panel"
+            aria-label="Toggle bottom panel"
             aria-pressed={panels.bottomPanel}
           >
             <Codicon name="layout-panel" />
           </button>
           <button
             onClick={toggleRightSidebar}
-            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.rightSidebar ? 'text-blue-300' : 'text-slate-400'}`}
+            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${panels.rightSidebar ? 'text-blue-300' : 'text-slate-400'}`}
             title="Toggle AI Panel"
+            aria-label="Toggle AI panel"
             aria-pressed={panels.rightSidebar}
           >
             <Codicon name="sparkle" />
@@ -582,8 +587,9 @@ export default function IDELayout({
                 activeSidebarTab === tab.id && panels.leftSidebar
                   ? 'text-white bg-slate-800/90'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/80 focus-visible:text-white focus-visible:bg-slate-800/80'
-              }`}
+              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}
               title={`${tab.label} (${tab.shortcut})`}
+              aria-label={tab.label}
               aria-pressed={activeSidebarTab === tab.id && panels.leftSidebar}
             >
               <Codicon name={tab.icon} className="text-[14px]" />
@@ -598,7 +604,12 @@ export default function IDELayout({
           >
             <div className="density-header flex items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400 border-b border-slate-800/70">
               {SIDEBAR_TABS.find((t) => t.id === activeSidebarTab)?.label}
-              <button onClick={toggleLeftSidebar} className="p-1 rounded hover:bg-slate-800/80">
+              <button
+                onClick={toggleLeftSidebar}
+                className="p-1 rounded hover:bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                title="Collapse sidebar"
+                aria-label="Collapse sidebar"
+              >
                 <Codicon name="chevron-left" />
               </button>
             </div>
@@ -654,11 +665,18 @@ export default function IDELayout({
 
                 <button
                   onClick={() => setBottomPanelHeight((h) => (h === 260 ? 380 : 260))}
-                  className="p-1 rounded hover:bg-slate-800/80 text-slate-400"
+                  className="p-1 rounded hover:bg-slate-800/80 text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  title={bottomPanelHeight === 260 ? 'Expand bottom panel' : 'Collapse bottom panel'}
+                  aria-label={bottomPanelHeight === 260 ? 'Expand bottom panel' : 'Collapse bottom panel'}
                 >
                   {bottomPanelHeight === 260 ? <Codicon name="fold-down" /> : <Codicon name="fold-up" />}
                 </button>
-                <button onClick={toggleBottomPanel} className="p-1 rounded hover:bg-slate-800/80 text-slate-400">
+                <button
+                  onClick={toggleBottomPanel}
+                  className="p-1 rounded hover:bg-slate-800/80 text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  title="Close bottom panel"
+                  aria-label="Close bottom panel"
+                >
                   <Codicon name="x" />
                 </button>
               </div>
@@ -671,7 +689,12 @@ export default function IDELayout({
           <div className="w-80 flex flex-col border-l border-slate-800/80 bg-[#10131a]">
             <div className="density-header flex items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400 border-b border-slate-800/70">
               AI Panel
-              <button onClick={toggleRightSidebar} className="p-1 rounded hover:bg-slate-800/80">
+              <button
+                onClick={toggleRightSidebar}
+                className="p-1 rounded hover:bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                title="Collapse AI panel"
+                aria-label="Collapse AI panel"
+              >
                 <Codicon name="chevron-right" />
               </button>
             </div>
@@ -682,21 +705,21 @@ export default function IDELayout({
         )}
       </div>
 
-      <footer className="h-5 flex items-center justify-between px-2 text-[10px] bg-[#11141c] border-t border-slate-800/80 text-slate-200">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 text-slate-300">
+      <footer className="h-6 flex items-center justify-between px-2 text-[10px] bg-[#11141c] border-t border-slate-800/80 text-slate-200">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1 rounded border border-slate-700 bg-slate-900/70 px-1.5 py-0.5 text-slate-300">
             <Codicon name="git-branch" className="text-[11px]" />
             main
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2">
           {statusBar}
-          <span className="text-slate-400">UTF-8</span>
-          <span className="flex items-center gap-1 text-slate-300">
+          <span className="hidden md:inline rounded border border-slate-700 bg-slate-900/70 px-1.5 py-0.5 text-slate-400">UTF-8</span>
+          <span className="hidden lg:flex items-center gap-1 rounded border border-slate-700 bg-slate-900/70 px-1.5 py-0.5 text-slate-300">
             <Codicon name="comment-discussion" className="text-[11px]" />
             Ready
           </span>
-          <span className="flex items-center gap-1 text-emerald-300">
+          <span className="flex items-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-emerald-300">
             <Codicon name="circle-filled" className="text-[8px]" />
             Synced
           </span>

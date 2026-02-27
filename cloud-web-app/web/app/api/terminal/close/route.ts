@@ -1,37 +1,77 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-server';
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
+import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
+import { getTerminalPtyManager, killTerminalSession } from '@/lib/server/terminal-pty-runtime'
+
+const MAX_SESSION_ID_LENGTH = 120
+const normalizeSessionId = (value?: string) => String(value ?? '').trim()
 
 /**
  * POST /api/terminal/close
- * 
- * Fecha uma sessão de terminal
+ *
+ * Closes a terminal session.
  */
 export async function POST(request: NextRequest) {
   try {
-    const user = requireAuth(request);
-    const { sessionId } = await request.json();
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'terminal-close-post',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many terminal close requests. Please wait before retrying.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+    await requireEntitlementsForUser(user.userId)
 
-    if (!sessionId) {
+    const { sessionId } = await request.json()
+    const normalizedSessionId = normalizeSessionId(sessionId)
+
+    if (!normalizedSessionId) {
       return NextResponse.json(
-        { error: 'sessionId é obrigatório' },
+        { error: 'sessionId is required.' },
         { status: 400 }
-      );
+      )
     }
 
-    // Em produção, isso enviaria comando para encerrar o processo PTY
-    // Por enquanto, apenas logamos e retornamos sucesso
-    console.log(`[terminal/close] Fechando sessão ${sessionId} para usuário ${user.userId}`);
+    if (normalizedSessionId.length > MAX_SESSION_ID_LENGTH) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_SESSION_ID',
+          message: 'sessionId must be under 120 characters.',
+        },
+        { status: 400 }
+      )
+    }
+
+    const manager = getTerminalPtyManager()
+    const session = manager.getSession(normalizedSessionId)
+    if (!session || session.userId !== user.userId) {
+      return NextResponse.json(
+        { error: 'TERMINAL_SESSION_NOT_FOUND', message: 'Terminal session not found.' },
+        { status: 404 }
+      )
+    }
+
+    const success = await killTerminalSession(normalizedSessionId)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'TERMINAL_SESSION_NOT_ACTIVE', message: 'Terminal session is not active.' },
+        { status: 409 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
-      sessionId,
-      message: 'Sessão de terminal encerrada',
-    });
+      sessionId: normalizedSessionId,
+      message: 'Terminal session closed.',
+    })
   } catch (error) {
-    console.error('[terminal/close] Error:', error);
+    console.error('[terminal/close] Error:', error)
     return NextResponse.json(
-      { error: 'Falha ao fechar terminal' },
+      { error: 'Failed to close terminal session.' },
       { status: 500 }
-    );
+    )
   }
 }

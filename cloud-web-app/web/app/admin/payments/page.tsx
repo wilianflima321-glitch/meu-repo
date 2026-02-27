@@ -1,7 +1,19 @@
-'use client';
+﻿'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { getToken } from '@/lib/auth';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminBadge,
+  AdminFilterPill,
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSearchInput,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type PaymentItem = {
   id: string;
@@ -37,6 +49,14 @@ const DEFAULT_GATEWAY: GatewayConfig = {
   updatedAt: null,
 };
 
+function formatCurrency(value: number, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export default function Payments() {
   const [items, setItems] = useState<PaymentItem[]>([]);
   const [totals, setTotals] = useState<Totals>({ total: 0, succeeded: 0, pending: 0, failed: 0 });
@@ -54,20 +74,8 @@ export default function Payments() {
     failed: 'Falhou',
   };
 
-  const getAuthHeaders = () => {
-    const token = getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  };
-
   const fetchGateway = useCallback(async () => {
-    const res = await fetch('/api/admin/payments/gateway', {
-      headers: getAuthHeaders(),
-    });
-    if (!res.ok) throw new Error('Falha ao carregar configuração de gateway');
-    const data = await res.json();
+    const data = await adminJsonFetch<{ config?: GatewayConfig }>('/api/admin/payments/gateway');
     setGateway(data?.config || DEFAULT_GATEWAY);
   }, []);
 
@@ -76,11 +84,7 @@ export default function Payments() {
       setLoading(true);
       const params = new URLSearchParams();
       params.set('status', statusFilter);
-      const res = await fetch(`/api/admin/payments?${params.toString()}`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error('Falha ao carregar pagamentos');
-      const data = await res.json();
+      const data = await adminJsonFetch<{ items?: PaymentItem[]; totals?: Totals }>(`/api/admin/payments?${params.toString()}`);
       setItems(Array.isArray(data?.items) ? data.items : []);
       setTotals(data?.totals ?? { total: 0, succeeded: 0, pending: 0, failed: 0 });
       setLastUpdated(new Date());
@@ -102,15 +106,11 @@ export default function Payments() {
   const saveGateway = useCallback(async () => {
     try {
       setSavingGateway(true);
-      const res = await fetch('/api/admin/payments/gateway', {
+      const payload = await adminJsonFetch<{ config?: GatewayConfig }>('/api/admin/payments/gateway', {
         method: 'PUT',
-        headers: getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(gateway),
       });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(payload?.error || 'Falha ao salvar gateway');
-      }
       setGateway(payload?.config || gateway);
       setLastUpdated(new Date());
       setError(null);
@@ -121,39 +121,46 @@ export default function Payments() {
     }
   }, [gateway]);
 
-  const filteredItems = items.filter((item) => {
-    const term = search.trim().toLowerCase();
-    return !term || (item.userEmail || '').toLowerCase().includes(term) || item.id.includes(term);
-  });
+  const filteredItems = useMemo(
+    () =>
+      items.filter((item) => {
+        const term = search.trim().toLowerCase();
+        return !term || (item.userEmail || '').toLowerCase().includes(term) || item.id.includes(term);
+      }),
+    [items, search],
+  );
+
+  const gatewayOperationalNote =
+    gateway.activeGateway === 'disabled'
+      ? 'Gateway desabilitado por administracao. Checkout web retorna status explicito sem sucesso falso.'
+      : gateway.checkoutEnabled
+        ? 'Gateway ativo com checkout habilitado.'
+        : 'Gateway ativo com checkout bloqueado por politica operacional.';
+  const originNote = gateway.checkoutOrigin
+    ? `Checkout origin configurado: ${gateway.checkoutOrigin}`
+    : 'Checkout origin nao definido. O sistema usara o dominio principal configurado em ambiente.';
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Pagamentos e Checkout</h1>
-          <p className='text-zinc-400'>Gateway controlado por admin e transações reais registradas.</p>
-          {lastUpdated && <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>}
+    <AdminPageShell
+      title='Pagamentos e Checkout'
+      description='Gateway controlado por admin e transacoes reais registradas.'
+      subtitle={lastUpdated ? `Atualizado em ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchPayments}>Atualizar</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button onClick={fetchPayments} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>
-          Atualizar
-        </button>
-      </div>
+      ) : null}
 
-      {error && (
-        <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
-          {error}
-        </div>
-      )}
-
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
-        <h2 className='text-lg font-semibold mb-4'>Gateway de pagamento (admin)</h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <AdminSection title='Gateway de pagamento (admin)' className='mb-6'>
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <label className='text-sm'>
-            <span className='block mb-1 text-zinc-400'>Gateway ativo</span>
+            <span className='mb-1 block text-zinc-400'>Gateway ativo</span>
             <select
               value={gateway.activeGateway}
               onChange={(e) => setGateway((prev) => ({ ...prev, activeGateway: e.target.value as 'stripe' | 'disabled' }))}
-              className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full'
+              className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
             >
               <option value='stripe'>Stripe</option>
               <option value='disabled'>Desabilitado</option>
@@ -161,17 +168,17 @@ export default function Payments() {
           </label>
 
           <label className='text-sm'>
-            <span className='block mb-1 text-zinc-400'>Origem web do checkout</span>
-            <input
+            <span className='mb-1 block text-zinc-400'>Origem web do checkout</span>
+            <AdminSearchInput
               value={gateway.checkoutOrigin || ''}
               onChange={(e) => setGateway((prev) => ({ ...prev, checkoutOrigin: e.target.value.trim() || null }))}
               placeholder='https://seu-dominio.com'
-              className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full'
+              className='max-w-none'
             />
           </label>
         </div>
 
-        <div className='flex flex-wrap items-center gap-4 mt-4'>
+        <div className='mt-4 flex flex-wrap items-center gap-4'>
           <label className='inline-flex items-center gap-2 text-sm'>
             <input
               type='checkbox'
@@ -190,110 +197,99 @@ export default function Payments() {
             Permitir redirecionamento da IDE local para web
           </label>
 
-          <button
-            onClick={saveGateway}
-            disabled={savingGateway}
-            className='px-3 py-2 rounded bg-blue-600 text-white text-sm disabled:opacity-60'
-          >
-            {savingGateway ? 'Salvando...' : 'Salvar configuração'}
-          </button>
+          <AdminPrimaryButton onClick={saveGateway} disabled={savingGateway} className='bg-blue-600 text-white hover:bg-blue-500'>
+            {savingGateway ? 'Salvando...' : 'Salvar configuracao'}
+          </AdminPrimaryButton>
         </div>
 
-        <div className='mt-4 rounded border border-zinc-800/70 bg-zinc-950/50 p-3 text-xs text-zinc-400'>
-          Estado operacional: gateway <span className='text-zinc-200'>{gateway.activeGateway}</span>, checkout{' '}
-          <span className='text-zinc-200'>{gateway.checkoutEnabled ? 'habilitado' : 'desabilitado'}</span>, redirecionamento da IDE local{' '}
-          <span className='text-zinc-200'>{gateway.allowLocalIdeRedirect ? 'habilitado' : 'desabilitado'}</span>.
+        <div className='mt-4'>
+          <AdminStatusBanner tone={gateway.activeGateway === 'disabled' ? 'warning' : 'info'}>
+            {gatewayOperationalNote}
+          </AdminStatusBanner>
+          <div className='mt-2'>
+            <AdminStatusBanner tone={gateway.checkoutOrigin ? 'neutral' : 'warning'}>
+              {originNote}
+            </AdminStatusBanner>
+          </div>
         </div>
+      </AdminSection>
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total' value={formatCurrency(totals.total)} tone='sky' />
+          <AdminStatCard label='Aprovados' value={formatCurrency(totals.succeeded)} tone='emerald' />
+          <AdminStatCard label='Pendentes' value={formatCurrency(totals.pending)} tone='amber' />
+          <AdminStatCard label='Falhas' value={formatCurrency(totals.failed)} tone='rose' />
+        </AdminStatGrid>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-blue-600'>US${totals.total.toFixed(2)}</p>
+      <AdminSection className='mb-4'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+          <AdminSearchInput
+            type='text'
+            placeholder='Buscar por e-mail ou ID'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className='flex items-center gap-2'>
+            {(['all', 'succeeded', 'pending', 'failed'] as const).map((status) => (
+              <AdminFilterPill
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                active={statusFilter === status}
+              >
+                {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
+              </AdminFilterPill>
+            ))}
+          </div>
         </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Aprovados</h3>
-          <p className='text-2xl font-bold text-green-600'>US${totals.succeeded.toFixed(2)}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Pendentes</h3>
-          <p className='text-2xl font-bold text-yellow-600'>US${totals.pending.toFixed(2)}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Falhas</h3>
-          <p className='text-2xl font-bold text-red-600'>US${totals.failed.toFixed(2)}</p>
-        </div>
-      </div>
+      </AdminSection>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
-        <input
-          type='text'
-          placeholder='Buscar por e-mail ou ID'
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full md:max-w-sm text-zinc-100 placeholder:text-zinc-500'
-        />
-        <div className='flex items-center gap-2'>
-          {(['all', 'succeeded', 'pending', 'failed'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
-              }`}
-            >
-              {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className='bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
-        <table className='w-full table-auto'>
-          <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
-              <th className='p-2'>ID</th>
-              <th className='p-2'>Usuário</th>
-              <th className='p-2'>Valor</th>
-              <th className='p-2'>Status</th>
-              <th className='p-2'>Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando pagamentos...</td>
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto'>
+            <thead>
+              <tr className='bg-zinc-800/70 text-sm'>
+                <th className='p-3 text-left'>ID</th>
+                <th className='p-3 text-left'>Usuario</th>
+                <th className='p-3 text-left'>Valor</th>
+                <th className='p-3 text-left'>Status</th>
+                <th className='p-3 text-left'>Data</th>
               </tr>
-            ) : filteredItems.length === 0 ? (
-              <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum pagamento encontrado.</td>
-              </tr>
-            ) : (
-              filteredItems.map((item) => (
-                <tr key={item.id} className='border-t'>
-                  <td className='p-2 text-xs text-zinc-500'>{item.id.slice(-6)}</td>
-                  <td className='p-2'>{item.userEmail || '—'}</td>
-                  <td className='p-2'>{item.currency.toUpperCase()} {item.amount.toFixed(2)}</td>
-                  <td className='p-2'>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        item.status === 'succeeded'
-                          ? 'bg-emerald-500/15 text-emerald-300'
-                          : item.status === 'pending'
-                          ? 'bg-amber-500/15 text-amber-300'
-                          : 'bg-rose-500/15 text-rose-300'
-                      }`}
-                    >
-                      {statusLabels[item.status] ?? item.status}
-                    </span>
-                  </td>
-                  <td className='p-2'>{new Date(item.createdAt).toLocaleDateString()}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Carregando pagamentos...' />
+              ) : filteredItems.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='Nenhum pagamento encontrado.' />
+              ) : (
+                filteredItems.map((item) => (
+                  <tr key={item.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-xs text-zinc-500'>{item.id.slice(-6)}</td>
+                    <td className='p-3'>{item.userEmail || '-'}</td>
+                    <td className='p-3'>{formatCurrency(item.amount, item.currency)}</td>
+                    <td className='p-3'>
+                      <AdminBadge
+                        tone={
+                          item.status === 'succeeded'
+                            ? 'emerald'
+                            : item.status === 'pending'
+                              ? 'amber'
+                              : 'rose'
+                        }
+                      >
+                        {statusLabels[item.status] ?? item.status}
+                      </AdminBadge>
+                    </td>
+                    <td className='p-3'>{new Date(item.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }
+

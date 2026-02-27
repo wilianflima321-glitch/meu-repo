@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { Prisma } from '@prisma/client';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,14 @@ async function getSettledBalance(userId: string): Promise<number> {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'credits-transfer-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many credit transfer requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const body: TransferBody = await req.json();

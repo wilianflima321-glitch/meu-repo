@@ -1,7 +1,18 @@
-'use client';
+﻿'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { getToken } from '@/lib/auth';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminBadge,
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSearchInput,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type SecurityLog = {
   id: string;
@@ -29,30 +40,15 @@ export default function AdminSecurity() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const severityLabels: Record<string, string> = {
-    critical: 'critico',
-    warning: 'aviso',
-    info: 'informacao',
+    critical: 'Critico',
+    warning: 'Aviso',
+    info: 'Informacao',
   };
-
-  const getAuthHeaders = useCallback(() => {
-    const token = getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  }, []);
 
   const fetchSecurity = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/security/overview', {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        const payload = await res.json().catch(() => null);
-        throw new Error(payload?.message || payload?.error || 'Falha ao carregar seguranca');
-      }
-      const json = await res.json();
+      const json = await adminJsonFetch<SecurityOverview>('/api/admin/security/overview');
       setData(json);
       setLastUpdated(new Date());
       setError(null);
@@ -61,151 +57,140 @@ export default function AdminSecurity() {
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   useEffect(() => {
     fetchSecurity();
   }, [fetchSecurity]);
 
-  const filteredLogs = (data?.logs || []).filter((log) => {
-    const term = search.trim().toLowerCase();
-    return (
-      !term ||
-      (log.action || '').toLowerCase().includes(term) ||
-      (log.adminEmail || '').toLowerCase().includes(term) ||
-      (log.ipAddress || '').toLowerCase().includes(term)
-    );
-  });
+  const filteredLogs = useMemo(
+    () =>
+      (data?.logs || []).filter((log) => {
+        const term = search.trim().toLowerCase();
+        return (
+          !term ||
+          (log.action || '').toLowerCase().includes(term) ||
+          (log.adminEmail || '').toLowerCase().includes(term) ||
+          (log.ipAddress || '').toLowerCase().includes(term)
+        );
+      }),
+    [data?.logs, search],
+  );
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Seguranca e Logs</h1>
-          <p className='text-zinc-400'>Visao operacional de hardening, eventos criticos e trilha de auditoria.</p>
-          {lastUpdated && <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>}
+    <AdminPageShell
+      title='Seguranca e Logs'
+      description='Visao operacional de hardening, eventos criticos e trilha de auditoria.'
+      subtitle={lastUpdated ? `Atualizado em ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchSecurity}>Atualizar</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchSecurity}
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm hover:bg-zinc-700/80'
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Eventos' value={data?.stats.total ?? 0} tone='sky' />
+          <AdminStatCard label='Avisos' value={data?.stats.warning ?? 0} tone='amber' />
+          <AdminStatCard label='Criticos' value={data?.stats.critical ?? 0} tone='rose' />
+          <AdminStatCard label='2FA obrigatorio' value={data?.settings.enforce2FA ? 'Ativo' : 'Inativo'} tone={data?.settings.enforce2FA ? 'emerald' : 'neutral'} />
+        </AdminStatGrid>
       </div>
 
-      {error && (
-        <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
-          {error}
-        </div>
-      )}
-
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Eventos</h3>
-          <p className='text-2xl font-bold text-blue-300'>{data?.stats.total ?? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Avisos</h3>
-          <p className='text-2xl font-bold text-amber-300'>{data?.stats.warning ?? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Criticos</h3>
-          <p className='text-2xl font-bold text-rose-300'>{data?.stats.critical ?? 0}</p>
-        </div>
-      </div>
-
-      <div className='mb-6 bg-zinc-900/70 rounded-lg shadow p-4'>
-        <h2 className='text-xl font-semibold mb-4'>Configuracoes de Seguranca</h2>
+      <AdminSection title='Configuracoes de Seguranca' className='mb-6'>
         {loading ? (
           <p className='text-sm text-zinc-500'>Carregando configuracoes...</p>
         ) : (
           <div className='space-y-3'>
-            <div className='flex items-center justify-between'>
+            <AdminStatusBanner tone='info'>
+              Controles nesta superficie refletem politicas server-side. Ajustes sao aplicados via ambiente/ops.
+            </AdminStatusBanner>
+            <div className='flex items-center justify-between gap-3'>
               <div>
                 <p className='font-medium'>2FA obrigatorio</p>
                 <p className='text-xs text-zinc-500'>Controlado por ambiente e politica global de autenticacao.</p>
               </div>
               <span
-                className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.enforce2FA ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
-                }`}
+                className='inline-flex'
               >
-                {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
+                <AdminBadge tone={data?.settings.enforce2FA ? 'emerald' : 'neutral'}>
+                  {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
+                </AdminBadge>
               </span>
             </div>
-            <div className='flex items-center justify-between'>
+            <div className='flex items-center justify-between gap-3'>
               <div>
                 <p className='font-medium'>Bloqueio de IP suspeito</p>
                 <p className='text-xs text-zinc-500'>Controlado por regras server-side e observabilidade de rede.</p>
               </div>
               <span
-                className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.blockSuspiciousIps ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
-                }`}
+                className='inline-flex'
               >
-                {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
+                <AdminBadge tone={data?.settings.blockSuspiciousIps ? 'emerald' : 'neutral'}>
+                  {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
+                </AdminBadge>
               </span>
             </div>
           </div>
         )}
-      </div>
+      </AdminSection>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow p-4'>
-        <div className='flex items-center justify-between mb-4 gap-3'>
-          <h2 className='text-xl font-semibold'>Logs de Auditoria</h2>
-          <input
+      <AdminSection title='Logs de Auditoria'>
+        <div className='mb-4'>
+          <AdminSearchInput
             type='text'
             placeholder='Buscar por acao, admin ou IP'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className='border border-zinc-700 bg-zinc-950/60 p-2 rounded text-sm text-zinc-100 placeholder:text-zinc-500'
           />
         </div>
-        <table className='w-full'>
-          <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
-              <th className='p-3 text-left'>Acao</th>
-              <th className='p-3 text-left'>Admin</th>
-              <th className='p-3 text-left'>Severidade</th>
-              <th className='p-3 text-left'>Data/Hora</th>
-              <th className='p-3 text-left'>IP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td className='p-3 text-sm text-zinc-500' colSpan={5}>Carregando logs...</td>
+
+        <div className='overflow-x-auto'>
+          <table className='w-full text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Acao</th>
+                <th className='p-3 text-left'>Admin</th>
+                <th className='p-3 text-left'>Severidade</th>
+                <th className='p-3 text-left'>Data/Hora</th>
+                <th className='p-3 text-left'>IP</th>
               </tr>
-            ) : filteredLogs.length === 0 ? (
-              <tr>
-                <td className='p-3 text-sm text-zinc-500' colSpan={5}>Nenhum log encontrado.</td>
-              </tr>
-            ) : (
-              filteredLogs.map((log) => (
-                <tr key={log.id} className='border-t border-zinc-800/70'>
-                  <td className='p-3'>{log.action || '?'}</td>
-                  <td className='p-3'>{log.adminEmail || '?'}</td>
-                  <td className='p-3'>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        log.severity === 'critical'
-                          ? 'bg-rose-500/15 text-rose-300'
-                          : log.severity === 'warning'
-                            ? 'bg-amber-500/15 text-amber-300'
-                            : 'bg-zinc-800/70 text-zinc-400'
-                      }`}
-                    >
-                      {severityLabels[log.severity || 'info'] ?? log.severity ?? 'informacao'}
-                    </span>
-                  </td>
-                  <td className='p-3'>{new Date(log.createdAt).toLocaleString()}</td>
-                  <td className='p-3'>{log.ipAddress || '?'}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Carregando logs...' />
+              ) : filteredLogs.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='Nenhum log encontrado.' />
+              ) : (
+                filteredLogs.map((log) => (
+                  <tr key={log.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3'>{log.action || '?'}</td>
+                    <td className='p-3'>{log.adminEmail || '?'}</td>
+                    <td className='p-3'>
+                      <AdminBadge
+                        tone={
+                          log.severity === 'critical'
+                            ? 'rose'
+                            : log.severity === 'warning'
+                              ? 'amber'
+                              : 'neutral'
+                        }
+                      >
+                        {severityLabels[log.severity || 'info'] ?? log.severity ?? 'Informacao'}
+                      </AdminBadge>
+                    </td>
+                    <td className='p-3'>{new Date(log.createdAt).toLocaleString()}</td>
+                    <td className='p-3'>{log.ipAddress || '?'}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }
+

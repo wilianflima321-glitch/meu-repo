@@ -14,10 +14,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
-
-// Rate limit: 20 3D generations per hour (expensive)
-const RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 20 };
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Provider configurations
 const PROVIDERS = {
@@ -25,7 +23,7 @@ const PROVIDERS = {
     name: 'Meshy',
     envKey: 'MESHY_API_KEY',
     baseUrl: 'https://api.meshy.ai',
-    modes: ['text-to-3d', 'image-to-3d', 'text-to-texture'],
+    modes: ['text-to-3d', 'image-to-3d'],
     formats: ['glb', 'fbx', 'obj', 'usdz'],
     styles: ['realistic', 'cartoon', 'sculpture', 'pbr'],
   },
@@ -43,7 +41,7 @@ type Provider = keyof typeof PROVIDERS;
 
 interface GenerateRequest {
   provider?: Provider;
-  mode: 'text-to-3d' | 'image-to-3d' | 'text-to-texture';
+  mode: 'text-to-3d' | 'image-to-3d';
   prompt?: string;
   imageUrl?: string;
   imageBase64?: string;
@@ -52,6 +50,12 @@ interface GenerateRequest {
   quality?: 'draft' | 'standard' | 'high';
   targetPolycount?: number;
   negativePrompt?: string;
+}
+
+function getAvailableProviders(): Provider[] {
+  return Object.entries(PROVIDERS)
+    .filter(([, config]) => Boolean(process.env[config.envKey]))
+    .map(([id]) => id as Provider);
 }
 
 // Meshy: Text-to-3D
@@ -262,16 +266,16 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-3d-generate-post',
+      key: user.userId,
+      max: 20,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many 3D generation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const rateLimit = checkRateLimit(req, RATE_LIMIT);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', remaining: rateLimit.remaining },
-      { status: 429 }
-    );
   }
 
   try {
@@ -297,21 +301,25 @@ export async function POST(req: NextRequest) {
 
     const providerConfig = PROVIDERS[provider as Provider];
     
-    // Check API key
+    // Keep provider selection explicit: do not auto-fallback to another provider.
     if (!process.env[providerConfig.envKey]) {
-      const availableProvider = Object.entries(PROVIDERS).find(
-        ([_, config]) => process.env[config.envKey]
-      );
-      
-      if (!availableProvider) {
-        return NextResponse.json(
-          { 
-            error: 'No 3D provider configured',
-            message: 'Please configure MESHY_API_KEY or TRIPO_API_KEY',
-          },
-          { status: 503 }
-        );
-      }
+      const availableProviders = getAvailableProviders();
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message:
+          availableProviders.length === 0
+            ? 'No 3D generation provider configured.'
+            : `Requested provider "${provider}" is not configured.`,
+        capability: 'AI_3D_GENERATION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1_PROVIDER_CONFIG',
+        metadata: {
+          requestedProvider: provider,
+          requiredEnv: providerConfig.envKey,
+          availableProviders,
+        },
+      });
     }
 
     // Validate mode
@@ -323,7 +331,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate input based on mode
-    if (mode === 'text-to-3d' || mode === 'text-to-texture') {
+    if (mode === 'text-to-3d') {
       if (!prompt || typeof prompt !== 'string') {
         return NextResponse.json({ error: 'Missing prompt for text-to-3d' }, { status: 400 });
       }
@@ -343,20 +351,16 @@ export async function POST(req: NextRequest) {
     if (provider === 'meshy') {
       if (mode === 'text-to-3d') {
         result = await meshyTextTo3D(prompt!, style, quality, negativePrompt);
-      } else if (mode === 'image-to-3d') {
+      } else {
         const resolvedImageUrl = imageUrl || `data:image/png;base64,${imageBase64}`;
         result = await meshyImageTo3D(resolvedImageUrl, quality);
-      } else {
-        return NextResponse.json({ error: 'Mode not implemented' }, { status: 501 });
       }
     } else if (provider === 'tripo3d') {
       if (mode === 'text-to-3d') {
         result = await tripoTextTo3D(prompt!, style);
-      } else if (mode === 'image-to-3d') {
+      } else {
         const resolvedImageUrl = imageUrl || `data:image/png;base64,${imageBase64}`;
         result = await tripoImageTo3D(resolvedImageUrl);
-      } else {
-        return NextResponse.json({ error: 'Mode not implemented' }, { status: 501 });
       }
     } else {
       return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });
@@ -392,7 +396,15 @@ export async function POST(req: NextRequest) {
 // GET - Check task status or list providers
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req);
+    const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-3d-generate-get',
+      key: auth.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many 3D status requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

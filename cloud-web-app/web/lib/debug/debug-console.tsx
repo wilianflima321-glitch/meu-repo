@@ -16,71 +16,28 @@
  */
 
 import { EventEmitter } from 'events';
+import {
+  DEFAULT_DEBUG_CONSOLE_CONFIG,
+  LOG_LEVEL_PRIORITY,
+  type Command,
+  type CommandContext,
+  type DebugConsoleConfig,
+  type LogEntry,
+  type LogLevel,
+  type PerformanceMetrics,
+  type WatchedVariable,
+} from './debug-console.types';
+import { PerformanceMonitor, StatsOverlay } from './debug-performance';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-
-export interface LogEntry {
-  id: string;
-  timestamp: number;
-  level: LogLevel;
-  message: string;
-  data?: unknown;
-  source?: string;
-  stack?: string;
-}
-
-export interface Command {
-  name: string;
-  description: string;
-  usage: string;
-  handler: CommandHandler;
-  aliases?: string[];
-  category?: string;
-  hidden?: boolean;
-}
-
-export type CommandHandler = (args: string[], context: CommandContext) => string | void | Promise<string | void>;
-
-export interface CommandContext {
-  console: DebugConsole;
-  log: (message: string, level?: LogLevel) => void;
-  getVariable: (name: string) => unknown;
-  setVariable: (name: string, value: unknown) => void;
-}
-
-export interface WatchedVariable {
-  name: string;
-  getter: () => unknown;
-  formatter?: (value: unknown) => string;
-  category?: string;
-}
-
-export interface PerformanceMetrics {
-  fps: number;
-  frameTime: number;
-  memory: {
-    usedJSHeapSize: number;
-    totalJSHeapSize: number;
-    jsHeapSizeLimit: number;
-  };
-  drawCalls: number;
-  triangles: number;
-  textures: number;
-  custom: Map<string, number>;
-}
-
-export interface DebugConsoleConfig {
-  maxLogEntries: number;
-  maxHistorySize: number;
-  defaultLogLevel: LogLevel;
-  showTimestamp: boolean;
-  showSource: boolean;
-  persistHistory: boolean;
-}
+export type {
+  Command,
+  CommandContext,
+  DebugConsoleConfig,
+  LogEntry,
+  LogLevel,
+  PerformanceMetrics,
+  WatchedVariable,
+} from './debug-console.types';
 
 // ============================================================================
 // DEBUG CONSOLE
@@ -102,25 +59,11 @@ export class DebugConsole extends EventEmitter {
   private logIdCounter = 0;
   private filters: Set<string> = new Set();
   
-  private static logLevelPriority: Record<LogLevel, number> = {
-    trace: 0,
-    debug: 1,
-    info: 2,
-    warn: 3,
-    error: 4,
-    fatal: 5,
-  };
-  
   constructor(config: Partial<DebugConsoleConfig> = {}) {
     super();
     
     this.config = {
-      maxLogEntries: 1000,
-      maxHistorySize: 100,
-      defaultLogLevel: 'info',
-      showTimestamp: true,
-      showSource: true,
-      persistHistory: true,
+      ...DEFAULT_DEBUG_CONSOLE_CONFIG,
       ...config,
     };
     
@@ -140,7 +83,7 @@ export class DebugConsole extends EventEmitter {
   // ============================================================================
   
   log(message: string, level: LogLevel = 'info', source?: string, data?: unknown): void {
-    if (DebugConsole.logLevelPriority[level] < DebugConsole.logLevelPriority[this.minLogLevel]) {
+    if (LOG_LEVEL_PRIORITY[level] < LOG_LEVEL_PRIORITY[this.minLogLevel]) {
       return;
     }
     
@@ -212,9 +155,9 @@ export class DebugConsole extends EventEmitter {
     let result = [...this.logs];
     
     if (options?.level) {
-      const minPriority = DebugConsole.logLevelPriority[options.level];
+      const minPriority = LOG_LEVEL_PRIORITY[options.level];
       result = result.filter(
-        (log) => DebugConsole.logLevelPriority[log.level] >= minPriority
+        (log) => LOG_LEVEL_PRIORITY[log.level] >= minPriority
       );
     }
     
@@ -776,174 +719,6 @@ export class DebugConsole extends EventEmitter {
     this.variables.clear();
     this.watchedVariables.clear();
     this.removeAllListeners();
-  }
-}
-
-// ============================================================================
-// PERFORMANCE MONITOR
-// ============================================================================
-
-export class PerformanceMonitor extends EventEmitter {
-  private fps = 0;
-  private frameTime = 0;
-  private frameTimes: number[] = [];
-  private lastFrameTime = 0;
-  private customMetrics: Map<string, number> = new Map();
-  private enabled = true;
-  
-  constructor() {
-    super();
-    this.lastFrameTime = performance.now();
-  }
-  
-  update(): void {
-    if (!this.enabled) return;
-    
-    const now = performance.now();
-    const delta = now - this.lastFrameTime;
-    this.lastFrameTime = now;
-    
-    this.frameTimes.push(delta);
-    if (this.frameTimes.length > 60) {
-      this.frameTimes.shift();
-    }
-    
-    this.frameTime = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
-    this.fps = 1000 / this.frameTime;
-    
-    this.emit('update', this.getMetrics());
-  }
-  
-  getMetrics(): PerformanceMetrics {
-    const perf = window.performance as Performance & {
-      memory?: {
-        usedJSHeapSize: number;
-        totalJSHeapSize: number;
-        jsHeapSizeLimit: number;
-      };
-    };
-    
-    return {
-      fps: Math.round(this.fps),
-      frameTime: this.frameTime,
-      memory: perf.memory ? {
-        usedJSHeapSize: perf.memory.usedJSHeapSize,
-        totalJSHeapSize: perf.memory.totalJSHeapSize,
-        jsHeapSizeLimit: perf.memory.jsHeapSizeLimit,
-      } : {
-        usedJSHeapSize: 0,
-        totalJSHeapSize: 0,
-        jsHeapSizeLimit: 0,
-      },
-      drawCalls: this.customMetrics.get('drawCalls') || 0,
-      triangles: this.customMetrics.get('triangles') || 0,
-      textures: this.customMetrics.get('textures') || 0,
-      custom: new Map(this.customMetrics),
-    };
-  }
-  
-  setMetric(name: string, value: number): void {
-    this.customMetrics.set(name, value);
-  }
-  
-  setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
-  }
-}
-
-// ============================================================================
-// STATS OVERLAY
-// ============================================================================
-
-export class StatsOverlay {
-  private container: HTMLDivElement | null = null;
-  private fpsElement: HTMLDivElement | null = null;
-  private memoryElement: HTMLDivElement | null = null;
-  private customElements: Map<string, HTMLDivElement> = new Map();
-  private visible = false;
-  
-  create(parentElement?: HTMLElement): void {
-    this.container = document.createElement('div');
-    this.container.style.cssText = `
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.8);
-      color: #0f0;
-      font-family: monospace;
-      font-size: 12px;
-      padding: 10px;
-      border-radius: 4px;
-      z-index: 9999;
-      min-width: 150px;
-      display: none;
-    `;
-    
-    this.fpsElement = document.createElement('div');
-    this.container.appendChild(this.fpsElement);
-    
-    this.memoryElement = document.createElement('div');
-    this.memoryElement.style.marginTop = '5px';
-    this.container.appendChild(this.memoryElement);
-    
-    (parentElement || document.body).appendChild(this.container);
-  }
-  
-  update(metrics: PerformanceMetrics): void {
-    if (!this.container || !this.visible) return;
-    
-    if (this.fpsElement) {
-      const color = metrics.fps >= 55 ? '#0f0' : metrics.fps >= 30 ? '#ff0' : '#f00';
-      this.fpsElement.innerHTML = `FPS: <span style="color: ${color}">${metrics.fps}</span> (${metrics.frameTime.toFixed(1)}ms)`;
-    }
-    
-    if (this.memoryElement && metrics.memory.usedJSHeapSize > 0) {
-      const usedMB = (metrics.memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
-      const totalMB = (metrics.memory.totalJSHeapSize / 1024 / 1024).toFixed(1);
-      this.memoryElement.textContent = `Memory: ${usedMB}/${totalMB} MB`;
-    }
-    
-    // Update custom metrics
-    for (const [name, value] of metrics.custom) {
-      let element = this.customElements.get(name);
-      if (!element) {
-        element = document.createElement('div');
-        element.style.marginTop = '2px';
-        this.container?.appendChild(element);
-        this.customElements.set(name, element);
-      }
-      element.textContent = `${name}: ${value}`;
-    }
-  }
-  
-  show(): void {
-    if (this.container) {
-      this.container.style.display = 'block';
-      this.visible = true;
-    }
-  }
-  
-  hide(): void {
-    if (this.container) {
-      this.container.style.display = 'none';
-      this.visible = false;
-    }
-  }
-  
-  toggle(): void {
-    if (this.visible) {
-      this.hide();
-    } else {
-      this.show();
-    }
-  }
-  
-  destroy(): void {
-    this.container?.remove();
-    this.container = null;
-    this.fpsElement = null;
-    this.memoryElement = null;
-    this.customElements.clear();
   }
 }
 

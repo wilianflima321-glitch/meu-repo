@@ -16,178 +16,25 @@
  * @version 2.0.0
  */
 
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
-
-export interface PixelStreamingConfig {
-    /** Streaming server URL (WebSocket signaling) */
-    serverUrl: string;
-    
-    /** Target resolution width */
-    width: number;
-    
-    /** Target resolution height */
-    height: number;
-    
-    /** Target framerate (30, 60, 120) */
-    targetFps: 30 | 60 | 120;
-    
-    /** Initial bitrate in kbps */
-    initialBitrate: number;
-    
-    /** Minimum bitrate in kbps */
-    minBitrate: number;
-    
-    /** Maximum bitrate in kbps */
-    maxBitrate: number;
-    
-    /** Preferred codec */
-    codec: 'h264' | 'vp9' | 'av1';
-    
-    /** Enable adaptive bitrate */
-    adaptiveBitrate: boolean;
-    
-    /** Enable dynamic resolution scaling */
-    dynamicResolution: boolean;
-    
-    /** Low latency mode (prioritizes latency over quality) */
-    lowLatencyMode: boolean;
-    
-    /** TURN/STUN servers for NAT traversal */
-    iceServers: RTCIceServer[];
-    
-    /** Audio streaming enabled */
-    audioEnabled: boolean;
-    
-    /** Cursor mode */
-    cursorMode: 'local' | 'remote' | 'hidden';
-}
-
-export interface StreamingStats {
-    /** Current bitrate in kbps */
-    bitrate: number;
-    
-    /** Current resolution */
-    resolution: { width: number; height: number };
-    
-    /** Actual framerate */
-    fps: number;
-    
-    /** Round-trip time in ms */
-    rtt: number;
-    
-    /** Packet loss percentage */
-    packetLoss: number;
-    
-    /** Jitter in ms */
-    jitter: number;
-    
-    /** Frames decoded */
-    framesDecoded: number;
-    
-    /** Frames dropped */
-    framesDropped: number;
-    
-    /** Current quality score (0-100) */
-    qualityScore: number;
-    
-    /** Current codec */
-    codec: string;
-    
-    /** Data received in bytes */
-    bytesReceived: number;
-    
-    /** Connection state */
-    connectionState: RTCPeerConnectionState;
-}
-
-export interface InputMessage {
-    type: 'mouse' | 'keyboard' | 'touch' | 'gamepad';
-    data: MouseInput | KeyboardInput | TouchInput | GamepadInput;
-    timestamp: number;
-}
-
-interface MouseInput {
-    event: 'move' | 'down' | 'up' | 'wheel';
-    x: number;
-    y: number;
-    button?: number;
-    deltaX?: number;
-    deltaY?: number;
-    deltaZ?: number;
-}
-
-interface KeyboardInput {
-    event: 'down' | 'up';
-    code: string;
-    key: string;
-    repeat: boolean;
-    modifiers: {
-        ctrl: boolean;
-        alt: boolean;
-        shift: boolean;
-        meta: boolean;
-    };
-}
-
-interface TouchInput {
-    event: 'start' | 'move' | 'end' | 'cancel';
-    touches: Array<{
-        id: number;
-        x: number;
-        y: number;
-        force?: number;
-    }>;
-}
-
-interface GamepadInput {
-    index: number;
-    buttons: number[];
-    axes: number[];
-}
-
-export type StreamingEventType = 
-    | 'connected'
-    | 'disconnected'
-    | 'stream-started'
-    | 'stream-stopped'
-    | 'stats-update'
-    | 'quality-changed'
-    | 'error'
-    | 'latency-warning';
-
-export interface StreamingEvent {
-    type: StreamingEventType;
-    data?: any;
-    timestamp: number;
-}
-
-type EventCallback = (event: StreamingEvent) => void;
-
-// ============================================================================
-// DEFAULT CONFIGURATION
-// ============================================================================
-
-const DEFAULT_CONFIG: PixelStreamingConfig = {
-    serverUrl: 'wss://stream.aethel.engine/signal',
-    width: 1920,
-    height: 1080,
-    targetFps: 60,
-    initialBitrate: 10000,
-    minBitrate: 2000,
-    maxBitrate: 50000,
-    codec: 'h264',
-    adaptiveBitrate: true,
-    dynamicResolution: true,
-    lowLatencyMode: true,
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-    ],
-    audioEnabled: true,
-    cursorMode: 'local'
-};
+import {
+    DEFAULT_PIXEL_STREAMING_CONFIG,
+    type EventCallback,
+    type InputMessage,
+    type PixelStreamingConfig,
+    type StreamingEvent,
+    type StreamingEventType,
+    type StreamingStats,
+} from './pixel-streaming.types';
+import { useEffect, useRef, useState, useCallback } from 'react';
+export {
+    DEFAULT_PIXEL_STREAMING_CONFIG,
+    type EventCallback,
+    type InputMessage,
+    type PixelStreamingConfig,
+    type StreamingEvent,
+    type StreamingEventType,
+    type StreamingStats,
+} from './pixel-streaming.types';
 
 // ============================================================================
 // PIXEL STREAMING CLIENT
@@ -216,7 +63,7 @@ export class PixelStreamingClient {
     private isStreaming = false;
     
     constructor(config: Partial<PixelStreamingConfig> = {}) {
-        this.config = { ...DEFAULT_CONFIG, ...config };
+        this.config = { ...DEFAULT_PIXEL_STREAMING_CONFIG, ...config };
         
         this.stats = {
             bitrate: this.config.initialBitrate,
@@ -1086,8 +933,6 @@ class LatencyEstimator {
 // ============================================================================
 // REACT HOOK
 // ============================================================================
-
-import { useEffect, useRef, useState, useCallback } from 'react';
 
 export interface UsePixelStreamingOptions {
     config?: Partial<PixelStreamingConfig>;

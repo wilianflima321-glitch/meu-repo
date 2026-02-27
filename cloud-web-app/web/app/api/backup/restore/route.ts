@@ -9,12 +9,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { restoreBackup, verifyBackupIntegrity } from '@/lib/backup-service';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'backup-restore-post',
+      key: user.userId,
+      max: 24,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many backup restore requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json();
     const { backupId, projectId, skipPreBackup = false, verifyFirst = true } = body;
     

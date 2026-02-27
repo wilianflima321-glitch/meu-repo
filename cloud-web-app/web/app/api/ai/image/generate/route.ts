@@ -16,11 +16,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import OpenAI from 'openai';
-
-// Rate limit: 20 images per hour
-const IMAGE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 20 };
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Provider configurations
 const PROVIDERS = {
@@ -53,6 +51,12 @@ interface GenerateRequest {
   style?: string;
   quality?: 'standard' | 'hd';
   n?: number;
+}
+
+function getAvailableProviders(): Provider[] {
+  return Object.entries(PROVIDERS)
+    .filter(([, config]) => Boolean(process.env[config.envKey]))
+    .map(([id]) => id as Provider);
 }
 
 // DALL-E Generation
@@ -204,21 +208,16 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-image-generate-post',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many image generation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // Rate limit
-  const rateLimit = checkRateLimit(req, IMAGE_RATE_LIMIT);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { 
-        error: 'Rate limit exceeded',
-        remaining: rateLimit.remaining,
-        resetTime: rateLimit.resetTime,
-      },
-      { status: 429 }
-    );
   }
 
   try {
@@ -249,23 +248,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if provider API key is configured
+    // Keep provider selection explicit: do not auto-fallback to another provider.
     const providerConfig = PROVIDERS[provider as Provider];
     if (!process.env[providerConfig.envKey]) {
-      // Fallback to available provider
-      const availableProvider = Object.entries(PROVIDERS).find(
-        ([_, config]) => process.env[config.envKey]
-      );
-      
-      if (!availableProvider) {
-        return NextResponse.json(
-          { 
-            error: 'No image generation provider configured',
-            message: 'Please configure OPENAI_API_KEY, STABILITY_API_KEY, or FLUX_API_KEY',
-          },
-          { status: 503 }
-        );
-      }
+      const availableProviders = getAvailableProviders();
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message:
+          availableProviders.length === 0
+            ? 'No image generation provider configured.'
+            : `Requested provider "${provider}" is not configured.`,
+        capability: 'AI_IMAGE_GENERATION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1_PROVIDER_CONFIG',
+        metadata: {
+          requestedProvider: provider,
+          requiredEnv: providerConfig.envKey,
+          availableProviders,
+        },
+      });
     }
 
     // Generate based on provider
@@ -329,6 +331,14 @@ export async function POST(req: NextRequest) {
 // GET - List available providers and their status
 export async function GET(req: NextRequest) {
   const auth = requireAuth(req);
+  const rateLimitResponse = await enforceRateLimit({
+    scope: 'ai-image-generate-get',
+    key: auth.userId,
+    max: 180,
+    windowMs: 60 * 60 * 1000,
+    message: 'Too many image provider status requests. Please try again later.',
+  });
+  if (rateLimitResponse) return rateLimitResponse;
   if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

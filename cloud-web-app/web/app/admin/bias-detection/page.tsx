@@ -1,6 +1,16 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type BiasItem = {
   id: string;
@@ -19,6 +29,11 @@ type BiasStats = {
   pending: number;
 };
 
+type BiasResponse = {
+  items?: BiasItem[];
+  stats?: BiasStats;
+};
+
 const emptyStats: BiasStats = {
   total: 0,
   highBias: 0,
@@ -27,342 +42,160 @@ const emptyStats: BiasStats = {
   pending: 0,
 };
 
-function getBiasLabel(score?: number | null) {
-  if (score === null || score === undefined) return 'Sem score';
-  if (score >= 0.7) return 'Viés alto';
-  if (score >= 0.4) return 'Viés médio';
-  return 'Viés baixo';
-}
-
-function getBiasColor(score?: number | null) {
-  if (score === null || score === undefined) return 'bg-gray-200 text-zinc-300';
-  if (score >= 0.7) return 'bg-rose-500/15 text-rose-300';
-  if (score >= 0.4) return 'bg-amber-500/15 text-amber-300';
-  return 'bg-emerald-500/15 text-emerald-300';
-}
-
 export default function BiasDetectionPage() {
   const [items, setItems] = useState<BiasItem[]>([]);
   const [stats, setStats] = useState<BiasStats>(emptyStats);
-  const [newOutput, setNewOutput] = useState('');
-  const [newScore, setNewScore] = useState('');
-  const [newFlags, setNewFlags] = useState('');
-  const [newReason, setNewReason] = useState('');
-  const [newPriority, setNewPriority] = useState<'low' | 'normal' | 'high' | 'urgent'>('normal');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('all');
-  const [biasFilter, setBiasFilter] = useState<'all' | 'high' | 'medium' | 'low' | 'none'>('all');
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [form, setForm] = useState({ text: '', score: '0.5', flags: 'bias, fairness', reason: 'manual audit' });
 
-  const statusLabels: Record<string, string> = {
-    pending: 'pendente',
-    resolved: 'resolvido',
-  };
-
-  const fetchItems = useCallback(async () => {
+  const fetchBias = useCallback(async () => {
     try {
+      setLoading(true);
+      const payload = await adminJsonFetch<BiasResponse>('/api/admin/bias-detection?limit=100');
+      setItems(Array.isArray(payload?.items) ? payload.items : []);
+      setStats(payload?.stats ?? emptyStats);
       setError(null);
-      const res = await fetch('/api/admin/bias-detection');
-      if (!res.ok) {
-        throw new Error('Falha ao carregar auditorias');
-      }
-      const data = await res.json();
-      setItems(Array.isArray(data?.items) ? data.items : []);
-      setStats(data?.stats || emptyStats);
-      setLastUpdated(new Date());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado');
+      setError(err instanceof Error ? err.message : 'Failed to load bias audits');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+    fetchBias();
+  }, [fetchBias]);
 
-  const handleAnalyze = async () => {
-    if (!newOutput.trim() || submitting) return;
-    setSubmitting(true);
+  const createAudit = useCallback(async () => {
+    if (!form.text.trim()) {
+      setError('Text is required.');
+      return;
+    }
 
     try {
-      const res = await fetch('/api/admin/bias-detection', {
+      setSaving(true);
+      await adminJsonFetch('/api/admin/bias-detection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: newOutput,
-          score: newScore ? Number(newScore) : undefined,
-          flags: newFlags,
-          reason: newReason,
-          priority: newPriority,
+          text: form.text,
+          score: Number(form.score),
+          flags: form.flags,
+          reason: form.reason,
         }),
       });
-
-      if (!res.ok) {
-        throw new Error('Falha ao registrar auditoria');
-      }
-
-      setNewOutput('');
-      setNewScore('');
-      setNewFlags('');
-      setNewReason('');
-      setNewPriority('normal');
-      await fetchItems();
+      setMessage('Bias audit item created.');
+      setError(null);
+      setForm({ text: '', score: '0.5', flags: 'bias, fairness', reason: 'manual audit' });
+      await fetchBias();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado');
+      setError(err instanceof Error ? err.message : 'Failed to create bias audit');
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
-  };
-
-  const handleModerationAction = async (id: string, action: 'approve' | 'reject') => {
-    try {
-      const res = await fetch(`/api/admin/moderation/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Falha ao atualizar item');
-      }
-
-      await fetchItems();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado');
-    }
-  };
-
-  const filteredItems = items.filter((item) => {
-    const term = search.trim().toLowerCase();
-    const matchesSearch = !term || item.text.toLowerCase().includes(term);
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'pending'
-        ? item.status === 'pending'
-        : item.status !== 'pending');
-    const matchesBias =
-      biasFilter === 'all' ||
-      (biasFilter === 'none'
-        ? item.autoScore === null || item.autoScore === undefined
-        : biasFilter === 'high'
-        ? (item.autoScore ?? 0) >= 0.7
-        : biasFilter === 'medium'
-        ? (item.autoScore ?? 0) >= 0.4 && (item.autoScore ?? 0) < 0.7
-        : (item.autoScore ?? 0) < 0.4);
-    return matchesSearch && matchesStatus && matchesBias;
-  });
+  }, [fetchBias, form]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Detecção de viés e ética</h1>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Bias Detection'
+      description='Review AI outputs for potential bias with explicit risk distribution and manual audit intake.'
+      actions={<AdminPrimaryButton onClick={fetchBias}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchItems}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-        >
-          Atualizar
-        </button>
+      ) : null}
+      {message ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='success'>{message}</AdminStatusBanner>
+        </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total' value={stats.total} tone='neutral' />
+          <AdminStatCard label='High Bias' value={stats.highBias} tone='rose' />
+          <AdminStatCard label='Medium Bias' value={stats.mediumBias} tone='amber' />
+          <AdminStatCard label='Pending' value={stats.pending} tone='sky' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Auditar Output da IA</h2>
-        <div className="space-y-4">
+      <AdminSection title='Create Manual Bias Audit' className='mb-4'>
+        <div className='grid grid-cols-1 gap-3'>
           <textarea
-            placeholder="Cole a saída da IA aqui para auditoria"
-            value={newOutput}
-            onChange={(e) => setNewOutput(e.target.value)}
-            className="border p-2 w-full"
-            rows={5}
+            rows={3}
+            placeholder='Output text to audit'
+            value={form.text}
+            onChange={(event) => setForm((current) => ({ ...current, text: event.target.value }))}
+            className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className='grid grid-cols-1 gap-3 md:grid-cols-3'>
             <input
-              type="number"
-              step="0.01"
-              min="0"
-              max="1"
-              placeholder="Score de viés (0-1, opcional)"
-              value={newScore}
-              onChange={(e) => setNewScore(e.target.value)}
-              className="border p-2 w-full"
+              type='number'
+              min='0'
+              max='1'
+              step='0.01'
+              value={form.score}
+              onChange={(event) => setForm((current) => ({ ...current, score: event.target.value }))}
+              className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
             />
             <input
-              type="text"
-              placeholder="Flags (separadas por vírgula)"
-              value={newFlags}
-              onChange={(e) => setNewFlags(e.target.value)}
-              className="border p-2 w-full"
+              value={form.flags}
+              onChange={(event) => setForm((current) => ({ ...current, flags: event.target.value }))}
+              placeholder='Comma separated flags'
+              className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
             />
             <input
-              type="text"
-              placeholder="Motivo (opcional)"
-              value={newReason}
-              onChange={(e) => setNewReason(e.target.value)}
-              className="border p-2 w-full"
+              value={form.reason}
+              onChange={(event) => setForm((current) => ({ ...current, reason: event.target.value }))}
+              placeholder='Reason'
+              className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
             />
-            <select
-              value={newPriority}
-              onChange={(e) => setNewPriority(e.target.value as 'low' | 'normal' | 'high' | 'urgent')}
-              className="border p-2 w-full"
-            >
-              <option value="low">Prioridade baixa</option>
-              <option value="normal">Prioridade normal</option>
-              <option value="high">Prioridade alta</option>
-              <option value="urgent">Prioridade urgente</option>
-            </select>
           </div>
-          <button
-            onClick={handleAnalyze}
-            disabled={submitting || !newOutput.trim()}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-60"
-          >
-            {submitting ? 'Registrando...' : 'Registrar Auditoria'}
-          </button>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          <div className='flex justify-end'>
+            <AdminPrimaryButton onClick={createAudit} disabled={saving}>
+              {saving ? 'Submitting...' : 'Submit audit'}
+            </AdminPrimaryButton>
+          </div>
         </div>
-      </div>
+      </AdminSection>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Relatórios Éticos</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="text-center">
-            <h3 className="text-sm font-semibold">Total de auditorias</h3>
-            <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-sm font-semibold">Viés alto</h3>
-            <p className="text-2xl font-bold text-red-600">{stats.highBias}</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-sm font-semibold">Viés médio</h3>
-            <p className="text-2xl font-bold text-yellow-600">{stats.mediumBias}</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-sm font-semibold">Viés baixo</h3>
-            <p className="text-2xl font-bold text-green-600">{stats.lowBias}</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-sm font-semibold">Pendentes</h3>
-            <p className="text-2xl font-bold text-zinc-400">{stats.pending}</p>
-          </div>
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Text</th>
+                <th className='p-3 text-left'>Score</th>
+                <th className='p-3 text-left'>Flags</th>
+                <th className='p-3 text-left'>Status</th>
+                <th className='p-3 text-left'>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Loading bias audits...' />
+              ) : items.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='No bias audits available.' />
+              ) : (
+                items.map((item) => (
+                  <tr key={item.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-zinc-100'>{item.text}</td>
+                    <td className='p-3'>{item.autoScore !== undefined && item.autoScore !== null ? item.autoScore.toFixed(2) : '-'}</td>
+                    <td className='p-3 text-zinc-400'>{item.autoFlags?.join(', ') || '-'}</td>
+                    <td className='p-3'>{item.status}</td>
+                    <td className='p-3 text-zinc-500'>{new Date(item.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Outputs Auditados</h2>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-          <input
-            type="text"
-            placeholder="Buscar por conteúdo"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border p-2 rounded w-full md:max-w-sm"
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            {(['all', 'pending', 'resolved'] as const).map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1 rounded text-xs font-semibold ${
-                  statusFilter === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-zinc-800/70 text-zinc-400'
-                }`}
-              >
-                {status === 'all' ? 'Todos' : status === 'pending' ? 'Pendentes' : 'Resolvidos'}
-              </button>
-            ))}
-            {(['all', 'high', 'medium', 'low', 'none'] as const).map((bias) => (
-              <button
-                key={bias}
-                onClick={() => setBiasFilter(bias)}
-                className={`px-3 py-1 rounded text-xs font-semibold ${
-                  biasFilter === bias
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-zinc-800/70 text-zinc-400'
-                }`}
-              >
-                {bias === 'all'
-                  ? 'Todos scores'
-                  : bias === 'high'
-                  ? 'Alto'
-                  : bias === 'medium'
-                  ? 'Médio'
-                  : bias === 'low'
-                  ? 'Baixo'
-                  : 'Sem score'}
-              </button>
-            ))}
-          </div>
-        </div>
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-20 bg-zinc-800/70 rounded animate-pulse" />
-            ))}
-          </div>
-        ) : filteredItems.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma auditoria registrada.</p>
-        ) : (
-          <ul>
-            {filteredItems.map((item) => (
-              <li key={item.id} className="p-4 border-b">
-                <p className="mb-2 text-sm text-zinc-200">{item.text}</p>
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3 text-sm text-zinc-400">
-                    <span>
-                      Score de viés:{' '}
-                      {item.autoScore === null || item.autoScore === undefined
-                        ? 'N/D'
-                        : `${(item.autoScore * 100).toFixed(1)}%`}
-                    </span>
-                    <span>Status: {statusLabels[item.status] ?? item.status}</span>
-                    <span>{new Date(item.createdAt).toLocaleString()}</span>
-                  </div>
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${getBiasColor(item.autoScore)}`}>
-                    {getBiasLabel(item.autoScore)}
-                  </span>
-                </div>
-                {item.autoFlags && item.autoFlags.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {item.autoFlags.map((flag) => (
-                      <span
-                        key={flag}
-                        className="text-xs bg-zinc-800/70 text-zinc-400 px-2 py-1 rounded"
-                      >
-                        {flag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="mt-3 flex items-center gap-2">
-                  <button
-                    onClick={() => handleModerationAction(item.id, 'approve')}
-                    className="px-3 py-1 rounded text-xs bg-emerald-500/15 text-emerald-300"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    onClick={() => handleModerationAction(item.id, 'reject')}
-                    className="px-3 py-1 rounded text-xs bg-rose-500/15 text-rose-300"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

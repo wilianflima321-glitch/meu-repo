@@ -31,6 +31,3 @@ export {
     type RenderQueueProps
 } from './RenderProgress';
 
-// Job Queue & Security Dashboards
-export { JobQueueDashboard } from './JobQueueDashboard';
-export { SecurityDashboard } from './SecurityDashboard';

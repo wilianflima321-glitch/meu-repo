@@ -1,604 +1,140 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Eye,
-  Users,
-  Activity,
-  Globe,
-  Monitor,
-  Smartphone,
-  MapPin,
-  Clock,
-  Bot,
-  DollarSign,
-  Pause,
-  Play,
-  Search,
-  Filter,
-  RefreshCw,
-  ChevronDown,
-  AlertCircle,
-  Zap,
-  MousePointer,
-  Code,
-  FileCode,
-  Box
-} from 'lucide-react';
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
-// =============================================================================
-// TYPES
-// =============================================================================
-
-interface LiveSession {
+type LiveSession = {
   id: string;
-  userId: string;
-  userEmail: string;
+  userEmail?: string;
   userName?: string;
-  
-  projectId?: string;
   projectName?: string;
-  
-  socketId?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  country?: string;
-  city?: string;
-  
   currentPage?: string;
   currentTool?: string;
-  lastAction?: string;
-  
-  aiCallsCount: number;
-  aiTokensUsed: number;
-  aiCostIncurred: number;
-  
-  startedAt: string;
-  lastPingAt: string;
-  
-  isActive: boolean;
-  
-  // Derived
-  duration: number; // seconds
-  device: 'desktop' | 'mobile' | 'tablet';
-  browser?: string;
-}
+  aiCallsCount?: number;
+  aiTokensUsed?: number;
+  aiCostIncurred?: number;
+  startedAt?: string;
+  lastPingAt?: string;
+};
 
-interface GodViewStats {
-  totalActive: number;
-  totalAICalls: number;
-  totalAICost: number;
-  totalTokens: number;
-  byCountry: { country: string; count: number }[];
-  byDevice: { device: string; count: number }[];
-  byPlan: { plan: string; count: number }[];
-}
-
-// =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
-
-function parseUserAgent(ua?: string): { device: 'desktop' | 'mobile' | 'tablet'; browser?: string } {
-  if (!ua) return { device: 'desktop' };
-  
-  const isMobile = /Mobile|Android|iPhone|iPod/.test(ua);
-  const isTablet = /iPad|Tablet/.test(ua);
-  
-  let browser: string | undefined;
-  if (ua.includes('Chrome')) browser = 'Chrome';
-  else if (ua.includes('Firefox')) browser = 'Firefox';
-  else if (ua.includes('Safari')) browser = 'Safari';
-  else if (ua.includes('Edge')) browser = 'Edge';
-  
-  return {
-    device: isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop',
-    browser,
+type GodViewResponse = {
+  sessions?: LiveSession[];
+  stats?: {
+    totalActive?: number;
+    totalAICalls?: number;
+    totalAICost?: number;
+    totalTokens?: number;
   };
-}
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-  const hours = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  return `${hours}h ${mins}m`;
-}
-
-function getToolIcon(tool?: string) {
-  if (!tool) return Box;
-  const lower = tool.toLowerCase();
-  if (lower.includes('code') || lower.includes('script')) return Code;
-  if (lower.includes('file')) return FileCode;
-  if (lower.includes('ai') || lower.includes('copilot')) return Bot;
-  return Box;
-}
-
-// =============================================================================
-// COMPONENTS
-// =============================================================================
-
-function StatsOverview({ stats }: { stats: GodViewStats }) {
-  return (
-    <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Usuários ao vivo</span>
-          <Users className="w-4 h-4 text-green-400" />
-        </div>
-        <p className="text-3xl font-bold text-white">{stats.totalActive}</p>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs text-green-400">Ao vivo</span>
-        </div>
-      </div>
-      
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Chamadas de IA</span>
-          <Bot className="w-4 h-4 text-blue-400" />
-        </div>
-        <p className="text-3xl font-bold text-white">{stats.totalAICalls.toLocaleString()}</p>
-        <p className="text-xs text-zinc-500 mt-2">{stats.totalTokens.toLocaleString()} tokens</p>
-      </div>
-      
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Custo de IA (ao vivo)</span>
-          <DollarSign className="w-4 h-4 text-yellow-400" />
-        </div>
-        <p className="text-3xl font-bold text-white">${stats.totalAICost.toFixed(2)}</p>
-        <p className="text-xs text-zinc-500 mt-2">Sessões atuais</p>
-      </div>
-      
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Região principal</span>
-          <Globe className="w-4 h-4 text-cyan-400" />
-        </div>
-        <p className="text-3xl font-bold text-white">
-          {stats.byCountry[0]?.country || 'N/D'}
-        </p>
-        <p className="text-xs text-zinc-500 mt-2">
-          {stats.byCountry[0]?.count || 0} usuários
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function SessionCard({ 
-  session, 
-  isExpanded, 
-  onToggle 
-}: { 
-  session: LiveSession; 
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  const DeviceIcon = session.device === 'mobile' ? Smartphone : Monitor;
-  const ToolIcon = getToolIcon(session.currentTool);
-  
-  return (
-    <div 
-      className={`
-        bg-zinc-900/70 border border-zinc-700 rounded-lg overflow-hidden
-        ${session.aiCostIncurred > 1 ? 'border-l-4 border-l-yellow-500' : ''}
-      `}
-    >
-      {/* Header Row */}
-      <div 
-        className="p-4 cursor-pointer hover:bg-zinc-800/80 transition-colors"
-        onClick={onToggle}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Status Indicator */}
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-zinc-800/80 flex items-center justify-center">
-                <span className="text-sm font-medium text-white">
-                  {session.userName?.charAt(0) || session.userEmail.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-[#1a1a1a]" />
-            </div>
-            
-            {/* User Info */}
-            <div>
-              <p className="text-sm font-medium text-white">
-                {session.userName || session.userEmail}
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {session.projectName && (
-                  <span className="text-xs text-zinc-500">
-                    {session.projectName}
-                  </span>
-                )}
-                {session.country && (
-                  <span className="text-xs text-zinc-500 flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {session.city && `${session.city}, `}{session.country}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          {/* Quick Stats */}
-          <div className="flex items-center gap-6">
-            <div className="text-right">
-              <p className="text-xs text-zinc-500">Duração</p>
-              <p className="text-sm text-white flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {formatDuration(session.duration)}
-              </p>
-            </div>
-            
-            <div className="text-right">
-              <p className="text-xs text-zinc-500">Chamadas de IA</p>
-              <p className="text-sm text-white flex items-center gap-1">
-                <Bot className="w-3 h-3" />
-                {session.aiCallsCount}
-              </p>
-            </div>
-            
-            <div className="text-right">
-              <p className="text-xs text-zinc-500">Custo</p>
-              <p className={`text-sm font-medium flex items-center gap-1 ${
-                session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-white'
-              }`}>
-                <DollarSign className="w-3 h-3" />
-                {session.aiCostIncurred.toFixed(3)}
-              </p>
-            </div>
-            
-            <DeviceIcon className="w-4 h-4 text-zinc-500" />
-            
-            <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`} />
-          </div>
-        </div>
-      </div>
-      
-      {/* Expanded Details */}
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-zinc-700 pt-4">
-          <div className="grid grid-cols-3 gap-4">
-            {/* Activity */}
-            <div className="space-y-3">
-              <h4 className="text-xs text-zinc-500 uppercase">Atividade atual</h4>
-              
-              <div className="flex items-center gap-2">
-                <MousePointer className="w-4 h-4 text-zinc-500" />
-                <div>
-                  <p className="text-xs text-zinc-500">Página</p>
-                  <p className="text-sm text-white">{session.currentPage || 'Desconhecida'}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <ToolIcon className="w-4 h-4 text-zinc-500" />
-                <div>
-                  <p className="text-xs text-zinc-500">Ferramenta ativa</p>
-                  <p className="text-sm text-white">{session.currentTool || 'Nenhuma'}</p>
-                </div>
-              </div>
-              
-              {session.lastAction && (
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-zinc-500" />
-                  <div>
-                    <p className="text-xs text-zinc-500">Última ação</p>
-                    <p className="text-sm text-white">{session.lastAction}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Technical */}
-            <div className="space-y-3">
-              <h4 className="text-xs text-zinc-500 uppercase">Técnico</h4>
-              
-              <div>
-                <p className="text-xs text-zinc-500">ID da sessão</p>
-                <p className="text-sm text-white font-mono">{session.id.slice(0, 12)}...</p>
-              </div>
-              
-              <div>
-                <p className="text-xs text-zinc-500">Endereço IP</p>
-                <p className="text-sm text-white font-mono">{session.ipAddress || 'Desconhecido'}</p>
-              </div>
-              
-              <div>
-                <p className="text-xs text-zinc-500">Navegador</p>
-                <p className="text-sm text-white">{session.browser || 'Desconhecido'}</p>
-              </div>
-            </div>
-            
-            {/* AI Usage */}
-            <div className="space-y-3">
-              <h4 className="text-xs text-zinc-500 uppercase">Uso de IA</h4>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-zinc-800/80 rounded p-2">
-                  <p className="text-xs text-zinc-500">Chamadas</p>
-                  <p className="text-lg font-medium text-white">{session.aiCallsCount}</p>
-                </div>
-                
-                <div className="bg-zinc-800/80 rounded p-2">
-                  <p className="text-xs text-zinc-500">Tokens</p>
-                  <p className="text-lg font-medium text-white">
-                    {session.aiTokensUsed.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="bg-zinc-800/80 rounded p-2">
-                <p className="text-xs text-zinc-500">Custo da sessão</p>
-                <p className={`text-xl font-bold ${
-                  session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-green-400'
-                }`}>
-                  ${session.aiCostIncurred.toFixed(4)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function WorldMap({ byCountry }: { byCountry: { country: string; count: number }[] }) {
-  // Simplified text representation - in production use a proper map library
-  const maxCount = Math.max(...byCountry.map(c => c.count), 1);
-  
-  return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
-        <Globe className="w-4 h-4" />
-        Ativos por região
-      </h3>
-      
-      <div className="space-y-2">
-        {byCountry.slice(0, 10).map(({ country, count }) => (
-          <div key={country} className="flex items-center gap-3">
-            <span className="text-sm text-zinc-500 w-20 truncate">{country}</span>
-            <div className="flex-1 h-2 bg-zinc-800/80 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-blue-500 rounded-full"
-                style={{ width: `${(count / maxCount) * 100}%` }}
-              />
-            </div>
-            <span className="text-sm text-zinc-300 w-12 text-right">{count}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// =============================================================================
-// MAIN PAGE
-// =============================================================================
+};
 
 export default function GodViewPage() {
   const [sessions, setSessions] = useState<LiveSession[]>([]);
-  const [stats, setStats] = useState<GodViewStats>({
-    totalActive: 0,
-    totalAICalls: 0,
-    totalAICost: 0,
-    totalTokens: 0,
-    byCountry: [],
-    byDevice: [],
-    byPlan: [],
-  });
+  const [stats, setStats] = useState({ totalActive: 0, totalAICalls: 0, totalAICost: 0, totalTokens: 0 });
   const [loading, setLoading] = useState(true);
-  const [paused, setPaused] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'duration' | 'cost' | 'ai'>('duration');
-  
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
   const fetchSessions = useCallback(async () => {
-    if (paused) return;
-    
     try {
-      const res = await fetch('/api/admin/god-view/sessions');
-      if (!res.ok) throw new Error('Falha ao buscar');
-      const data = await res.json();
-      
-      // Enrich sessions with derived data
-      const enriched = data.sessions.map((s: any) => {
-        const { device, browser } = parseUserAgent(s.userAgent);
-        const duration = Math.floor((Date.now() - new Date(s.startedAt).getTime()) / 1000);
-        return { ...s, device, browser, duration };
+      setLoading(true);
+      const payload = await adminJsonFetch<GodViewResponse>('/api/admin/god-view/sessions');
+      setSessions(Array.isArray(payload?.sessions) ? payload.sessions : []);
+      setStats({
+        totalActive: payload?.stats?.totalActive ?? 0,
+        totalAICalls: payload?.stats?.totalAICalls ?? 0,
+        totalAICost: payload?.stats?.totalAICost ?? 0,
+        totalTokens: payload?.stats?.totalTokens ?? 0,
       });
-      
-      setSessions(enriched);
-      setStats(data.stats);
-    } catch (error) {
-      console.error('Falha ao buscar sessões:', error);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load live sessions');
     } finally {
       setLoading(false);
     }
-  }, [paused]);
-  
+  }, []);
+
   useEffect(() => {
     fetchSessions();
-    const interval = setInterval(fetchSessions, 5000); // 5s refresh for live feel
-    return () => clearInterval(interval);
   }, [fetchSessions]);
-  
-  // Filter and sort sessions
-  const filteredSessions = sessions
-    .filter(s => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        s.userEmail.toLowerCase().includes(q) ||
-        s.userName?.toLowerCase().includes(q) ||
-        s.projectName?.toLowerCase().includes(q) ||
-        s.country?.toLowerCase().includes(q)
-      );
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'cost': return b.aiCostIncurred - a.aiCostIncurred;
-        case 'ai': return b.aiCallsCount - a.aiCallsCount;
-        default: return b.duration - a.duration;
-      }
-    });
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
-      </div>
-    );
-  }
-  
+
+  const avgCostPerSession = useMemo(() => {
+    if (stats.totalActive <= 0) return 0;
+    return stats.totalAICost / stats.totalActive;
+  }, [stats.totalAICost, stats.totalActive]);
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
-            <Eye className="w-6 h-6" />
-            Visão total
-            {!paused && (
-              <span className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                AO VIVO
-              </span>
-            )}
-          </h1>
-          <p className="text-sm text-zinc-500">
-            Visão em tempo real de todas as sessões ativas
-          </p>
+    <AdminPageShell
+      title='God View'
+      description='Observe active user sessions, AI usage load, and project activity in real time.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchSessions}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Buscar usuários, projetos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-sm text-white placeholder-gray-500 w-64"
-            />
-          </div>
-          
-          {/* Sort */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-sm text-white"
-          >
-            <option value="duration">Ordenar por duração</option>
-            <option value="cost">Ordenar por custo de IA</option>
-            <option value="ai">Ordenar por chamadas de IA</option>
-          </select>
-          
-          {/* Pause/Play */}
-          <button
-            onClick={() => setPaused(!paused)}
-            className={`p-2 rounded-lg border ${
-              paused 
-                ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400' 
-                : 'border-zinc-700 text-zinc-500 hover:text-white'
-            }`}
-            title={paused ? 'Retomar atualizações ao vivo' : 'Pausar atualizações ao vivo'}
-          >
-            {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-          </button>
-          
-          {/* Manual Refresh */}
-          <button
-            onClick={fetchSessions}
-            className="p-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-zinc-500 hover:text-white"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Active Sessions' value={stats.totalActive} tone='sky' />
+          <AdminStatCard label='AI Calls' value={stats.totalAICalls} tone='neutral' />
+          <AdminStatCard label='AI Cost' value={`$${stats.totalAICost.toFixed(2)}`} tone='amber' />
+          <AdminStatCard label='Avg Cost / Session' value={`$${avgCostPerSession.toFixed(2)}`} tone='emerald' />
+        </AdminStatGrid>
       </div>
-      
-      {/* Stats Overview */}
-      <StatsOverview stats={stats} />
-      
-      {/* Main Content */}
-      <div className="grid grid-cols-3 gap-6">
-        {/* Sessions List */}
-        <div className="col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-zinc-500">
-              {filteredSessions.length} sessões ativas
-            </h2>
-          </div>
-          
-          {filteredSessions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 bg-zinc-900/70 border border-zinc-700 rounded-lg">
-              <Users className="w-12 h-12 text-zinc-400 mb-4" />
-              <p className="text-zinc-500">Nenhuma sessão ativa</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredSessions.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  session={session}
-                  isExpanded={expandedId === session.id}
-                  onToggle={() => setExpandedId(expandedId === session.id ? null : session.id)}
-                />
-              ))}
-            </div>
-          )}
+
+      <AdminSection title='Live Sessions' className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>User</th>
+                <th className='p-3 text-left'>Project</th>
+                <th className='p-3 text-left'>Page</th>
+                <th className='p-3 text-left'>Tool</th>
+                <th className='p-3 text-left'>AI usage</th>
+                <th className='p-3 text-left'>Last ping</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={6} message='Loading live sessions...' />
+              ) : sessions.length === 0 ? (
+                <AdminTableStateRow colSpan={6} message='No active sessions in the current window.' />
+              ) : (
+                sessions.map((session) => (
+                  <tr key={session.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3'>
+                      <p className='text-zinc-100'>{session.userName || 'Unknown'}</p>
+                      <p className='text-xs text-zinc-500'>{session.userEmail || '-'}</p>
+                    </td>
+                    <td className='p-3'>{session.projectName || '-'}</td>
+                    <td className='p-3'>{session.currentPage || '-'}</td>
+                    <td className='p-3'>{session.currentTool || '-'}</td>
+                    <td className='p-3'>
+                      {(session.aiCallsCount || 0).toLocaleString()} calls / {(session.aiTokensUsed || 0).toLocaleString()} tokens
+                    </td>
+                    <td className='p-3 text-zinc-500'>
+                      {session.lastPingAt ? new Date(session.lastPingAt).toLocaleString() : '-'}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-        
-        {/* Side Panel */}
-        <div className="space-y-4">
-          <WorldMap byCountry={stats.byCountry} />
-          
-          {/* Device Breakdown */}
-          <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
-              <Monitor className="w-4 h-4" />
-              Tipos de dispositivo
-            </h3>
-            
-            <div className="space-y-3">
-              {stats.byDevice.map(({ device, count }) => (
-                <div key={device} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {device === 'mobile' ? (
-                      <Smartphone className="w-4 h-4 text-zinc-500" />
-                    ) : (
-                      <Monitor className="w-4 h-4 text-zinc-500" />
-                    )}
-                    <span className="text-sm text-zinc-300 capitalize">{device}</span>
-                  </div>
-                  <span className="text-sm text-white font-medium">{count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* High Cost Alert */}
-          {filteredSessions.some(s => s.aiCostIncurred > 1) && (
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm font-medium text-yellow-400">Uso elevado de IA</span>
-              </div>
-              <p className="text-xs text-zinc-500">
-                {filteredSessions.filter(s => s.aiCostIncurred > 1).length} sessão(ões) 
-                ultrapassaram $1 em custos de IA nesta sessão.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

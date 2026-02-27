@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db';
 import { getStripe } from '@/lib/stripe';
 import { optionalEnv } from '@/lib/env';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 function resolveAppUrl(req?: NextRequest): string {
   const explicit = optionalEnv('NEXT_PUBLIC_APP_URL') || optionalEnv('NEXTAUTH_URL');
@@ -29,6 +30,14 @@ export async function POST(req: NextRequest) {
   try {
     const stripe = getStripe();
     const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-portal-post',
+      key: auth.userId,
+      max: 24,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many billing portal session requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const user = await prisma.user.findUnique({
       where: { id: auth.userId },
@@ -72,6 +81,14 @@ export async function GET(req: NextRequest) {
   try {
     const stripe = getStripe();
     const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-portal-get',
+      key: auth.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many billing info requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const user = await prisma.user.findUnique({
       where: { id: auth.userId },

@@ -1,7 +1,19 @@
-'use client';
+﻿'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { getToken } from '@/lib/auth';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminBadge,
+  AdminFilterPill,
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSearchInput,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Integration = {
   id: string;
@@ -34,37 +46,27 @@ export default function APIs() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'configured' | 'missing'>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const getAuthHeaders = () => {
-    const token = getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  };
-
   const fetchIntegrations = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/apis', { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error('Falha ao carregar integracoes');
-      const data = await res.json();
+      const data = await adminJsonFetch<{ integrations?: Integration[] }>('/api/admin/apis');
       setIntegrations(Array.isArray(data?.integrations) ? data.integrations : []);
       setLastUpdated(new Date());
       setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar integracoes');
+    }
 
-      const compatRes = await fetch('/api/admin/compatibility-routes', { headers: getAuthHeaders() });
-      if (!compatRes.ok) throw new Error('Falha ao carregar rotas de compatibilidade');
-      const compatData = await compatRes.json();
+    try {
+      const compatData = await adminJsonFetch<{
+        routes?: CompatibilityRouteMetric[];
+        removalCandidates?: string[];
+      }>('/api/admin/compatibility-routes');
       setCompatRoutes(Array.isArray(compatData?.routes) ? compatData.routes : []);
       setRemovalCandidates(Array.isArray(compatData?.removalCandidates) ? compatData.removalCandidates : []);
       setCompatError(null);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao carregar integracoes';
-      if (message.includes('compatibilidade')) {
-        setCompatError(message);
-      } else {
-        setError(message);
-      }
+      setCompatError(err instanceof Error ? err.message : 'Erro ao carregar rotas de compatibilidade');
     } finally {
       setLoading(false);
     }
@@ -74,17 +76,21 @@ export default function APIs() {
     fetchIntegrations();
   }, [fetchIntegrations]);
 
-  const filteredIntegrations = integrations.filter((integration) => {
-    const term = search.trim().toLowerCase();
-    const matchesSearch =
-      !term ||
-      integration.name.toLowerCase().includes(term) ||
-      integration.envKey.toLowerCase().includes(term);
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'configured' ? integration.configured : !integration.configured);
-    return matchesSearch && matchesStatus;
-  });
+  const filteredIntegrations = useMemo(
+    () =>
+      integrations.filter((integration) => {
+        const term = search.trim().toLowerCase();
+        const matchesSearch =
+          !term ||
+          integration.name.toLowerCase().includes(term) ||
+          integration.envKey.toLowerCase().includes(term);
+        const matchesStatus =
+          statusFilter === 'all' ||
+          (statusFilter === 'configured' ? integration.configured : !integration.configured);
+        return matchesSearch && matchesStatus;
+      }),
+    [integrations, search, statusFilter],
+  );
 
   const summary = {
     total: integrations.length,
@@ -93,123 +99,101 @@ export default function APIs() {
   };
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Gerenciamento de APIs</h1>
-          <p className='text-zinc-400'>Status real de integracao com provedores externos e chaves de ambiente.</p>
-          {lastUpdated && (
-            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Gerenciamento de APIs'
+      description='Status real de integracao com provedores externos e chaves de ambiente.'
+      subtitle={lastUpdated ? `Atualizado em ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchIntegrations}>Atualizar</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchIntegrations}
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm hover:bg-zinc-700/80'
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total' value={summary.total} tone='sky' />
+          <AdminStatCard label='Configuradas' value={summary.configured} tone='emerald' />
+          <AdminStatCard label='Ausentes' value={summary.missing} tone='amber' />
+          <AdminStatCard label='Cutoff candidates' value={removalCandidates.length} tone='emerald' />
+        </AdminStatGrid>
       </div>
+      {summary.missing > 0 ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='warning'>
+            Existem integracoes ausentes. Recursos dependentes (IA, render, externos) retornarao erro explicito ate que as
+            chaves de ambiente estejam configuradas.
+          </AdminStatusBanner>
+        </div>
+      ) : null}
 
-      {error && (
-        <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
-          {error}
+      <AdminSection className='mb-4'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+          <AdminSearchInput
+            type='text'
+            placeholder='Buscar por nome ou ambiente'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className='flex items-center gap-2'>
+            {(['all', 'configured', 'missing'] as const).map((status) => (
+              <AdminFilterPill
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                active={statusFilter === status}
+              >
+                {status === 'all' ? 'Todas' : status === 'configured' ? 'Configuradas' : 'Ausentes'}
+              </AdminFilterPill>
+            ))}
+          </div>
         </div>
-      )}
+      </AdminSection>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-blue-300'>{summary.total}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Configuradas</h3>
-          <p className='text-2xl font-bold text-emerald-300'>{summary.configured}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Ausentes</h3>
-          <p className='text-2xl font-bold text-amber-300'>{summary.missing}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Cutoff candidates</h3>
-          <p className='text-2xl font-bold text-emerald-300'>{removalCandidates.length}</p>
-        </div>
-      </div>
-
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
-        <input
-          type='text'
-          placeholder='Buscar por nome ou ambiente'
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full md:max-w-sm text-zinc-100 placeholder:text-zinc-500'
-        />
-        <div className='flex items-center gap-2'>
-          {(['all', 'configured', 'missing'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
-              }`}
-            >
-              {status === 'all' ? 'Todas' : status === 'configured' ? 'Configuradas' : 'Ausentes'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
-        <thead>
-          <tr className='bg-zinc-800/70 text-sm'>
-            <th className='p-2 text-left'>Nome</th>
-            <th className='p-2 text-left'>Chave</th>
-            <th className='p-2 text-left'>Status</th>
-            <th className='p-2 text-left'>Ambiente</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={4}>Carregando integracoes...</td>
-            </tr>
-          ) : filteredIntegrations.length === 0 ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={4}>Nenhuma integracao encontrada com os filtros atuais.</td>
-            </tr>
-          ) : (
-            filteredIntegrations.map((integration) => (
-              <tr key={integration.id} className='border-t border-zinc-800/70'>
-                <td className='p-2'>{integration.name}</td>
-                <td className='p-2 text-xs text-zinc-400'>
-                  {integration.configured ? 'configured (masked)' : 'not configured'}
-                </td>
-                <td className='p-2'>
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
-                      integration.configured ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
-                    }`}
-                  >
-                    {integration.configured ? 'Configurada' : 'Ausente'}
-                  </span>
-                </td>
-                <td className='p-2 text-xs text-zinc-500'>{integration.envKey}</td>
+      <AdminSection className='mb-4 p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Nome</th>
+                <th className='p-3 text-left'>Chave</th>
+                <th className='p-3 text-left'>Status</th>
+                <th className='p-3 text-left'>Ambiente</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={4} message='Carregando integracoes...' />
+              ) : filteredIntegrations.length === 0 ? (
+                <AdminTableStateRow colSpan={4} message='Nenhuma integracao encontrada com os filtros atuais.' />
+              ) : (
+                filteredIntegrations.map((integration) => (
+                  <tr key={integration.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3'>{integration.name}</td>
+                    <td className='p-3 text-xs text-zinc-400'>
+                      {integration.configured ? 'configured (masked)' : 'not configured'}
+                    </td>
+                    <td className='p-3'>
+                      <AdminBadge tone={integration.configured ? 'emerald' : 'amber'}>
+                        {integration.configured ? 'Configurada' : 'Ausente'}
+                      </AdminBadge>
+                    </td>
+                    <td className='p-3 text-xs text-zinc-500'>{integration.envKey}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
 
-      <p className='mt-4 text-xs text-zinc-500'>
+      <p className='mb-6 text-xs text-zinc-500'>
         Operacao esperada: status configurado deve refletir chave valida no ambiente de execucao e disponibilidade do provedor.
       </p>
 
-      <div className='mt-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-        <div className='mb-3 flex items-center justify-between'>
-          <h2 className='text-base font-semibold'>Deprecacao de Rotas (2 ciclos)</h2>
-          <span className='text-xs text-zinc-500'>Telemetria operacional</span>
-        </div>
+      <AdminSection title='Deprecacao de Rotas (2 ciclos)' subtitle='Telemetria operacional'>
         {compatError ? (
-          <div className='rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>{compatError}</div>
+          <AdminStatusBanner tone='danger'>{compatError}</AdminStatusBanner>
         ) : loading ? (
           <p className='text-sm text-zinc-500'>Carregando metricas de deprecacao...</p>
         ) : compatRoutes.length === 0 ? (
@@ -233,21 +217,17 @@ export default function APIs() {
                     <td className='p-2 font-mono text-xs text-zinc-300'>{route.route}</td>
                     <td className='p-2 text-zinc-400'>{route.replacement}</td>
                     <td className='p-2 text-zinc-300'>{route.hits}</td>
-                    <td className='p-2 text-zinc-500'>{route.lastHitAt ? new Date(route.lastHitAt).toLocaleString() : 'never'}</td>
+                    <td className='p-2 text-zinc-500'>
+                      {route.lastHitAt ? new Date(route.lastHitAt).toLocaleString() : 'never'}
+                    </td>
                     <td className='p-2 text-zinc-500'>{route.removalCycleTarget || 'n/a'}</td>
                     <td className='p-2'>
-                      <span
-                        className={`rounded px-2 py-1 text-xs ${
-                          route.candidateForRemoval
-                            ? 'bg-emerald-500/15 text-emerald-300'
-                            : 'bg-amber-500/15 text-amber-300'
-                        }`}
-                      >
+                      <AdminBadge tone={route.candidateForRemoval ? 'emerald' : 'amber'}>
                         {route.candidateForRemoval ? 'candidate' : 'monitor'}
-                      </span>
-                      {typeof route.silenceDays === 'number' && (
+                      </AdminBadge>
+                      {typeof route.silenceDays === 'number' ? (
                         <span className='ml-2 text-[11px] text-zinc-500'>{route.silenceDays}d silence</span>
-                      )}
+                      ) : null}
                     </td>
                   </tr>
                 ))}
@@ -255,15 +235,20 @@ export default function APIs() {
             </table>
           </div>
         )}
-        {removalCandidates.length > 0 && (
-          <div className='mt-3 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200'>
-            Candidates ready for cutoff (subject to PM approval): {removalCandidates.join(', ')}
+
+        {removalCandidates.length > 0 ? (
+          <div className='mt-3'>
+            <AdminStatusBanner tone='success'>
+              Candidates ready for cutoff (subject to PM approval): {removalCandidates.join(', ')}
+            </AdminStatusBanner>
           </div>
-        )}
+        ) : null}
+
         <p className='mt-3 text-xs text-zinc-500'>
           Regra de corte: remover rota legada somente com 0 hits por 14 dias consecutivos e 0 uso frontend confirmado por scanner.
         </p>
-      </div>
-    </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }
+

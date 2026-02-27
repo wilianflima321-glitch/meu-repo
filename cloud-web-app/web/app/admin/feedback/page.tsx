@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type FeedbackItem = {
   id: string;
@@ -12,183 +22,148 @@ type FeedbackItem = {
   createdAt: string;
 };
 
-export default function Feedback() {
-  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+type FeedbackResponse = {
+  feedback?: FeedbackItem[];
+};
+
+export default function FeedbackPage() {
+  const [items, setItems] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'pending' | 'resolved' | 'closed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | string>('all');
   const [categoryFilter, setCategoryFilter] = useState<'all' | string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const statusLabels: Record<string, string> = {
-    open: 'Aberto',
-    pending: 'Pendente',
-    resolved: 'Resolvido',
-    closed: 'Fechado',
-  };
 
-  const fetchFeedbacks = useCallback(async () => {
+  const fetchFeedback = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/feedback');
-      if (!res.ok) throw new Error('Falha ao carregar feedbacks');
-      const data = await res.json();
-      setFeedbacks(Array.isArray(data?.feedback) ? data.feedback : []);
+      const payload = await adminJsonFetch<FeedbackResponse>('/api/admin/feedback');
+      setItems(Array.isArray(payload?.feedback) ? payload.feedback : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar feedbacks');
+      setError(err instanceof Error ? err.message : 'Failed to load feedback');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchFeedbacks();
-  }, [fetchFeedbacks]);
+    fetchFeedback();
+  }, [fetchFeedback]);
 
-  const categories = Array.from(
-    new Set(feedbacks.map((item) => item.category).filter(Boolean))
-  ).sort();
+  const statuses = useMemo(() => Array.from(new Set(items.map((item) => item.status))).sort(), [items]);
+  const categories = useMemo(() => Array.from(new Set(items.map((item) => item.category))).sort(), [items]);
 
-  const filteredFeedbacks = feedbacks.filter((feedback) => {
+  const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    const matchesSearch =
-      !term ||
-      feedback.email.toLowerCase().includes(term) ||
-      feedback.subject.toLowerCase().includes(term) ||
-      feedback.message.toLowerCase().includes(term);
-    const matchesStatus = statusFilter === 'all' || feedback.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || feedback.category === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
-
-  const summary = {
-    total: feedbacks.length,
-    open: feedbacks.filter((item) => item.status === 'open').length,
-    resolved: feedbacks.filter((item) => item.status === 'resolved').length,
-  };
+    return items.filter((item) => {
+      const statusMatches = statusFilter === 'all' || item.status === statusFilter;
+      const categoryMatches = categoryFilter === 'all' || item.category === categoryFilter;
+      const searchMatches =
+        !term ||
+        item.email.toLowerCase().includes(term) ||
+        item.subject.toLowerCase().includes(term) ||
+        item.message.toLowerCase().includes(term);
+      return statusMatches && categoryMatches && searchMatches;
+    });
+  }, [categoryFilter, items, search, statusFilter]);
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className='text-3xl font-bold'>Coleta de feedback</h1>
-          <p className='text-zinc-400'>Analise feedbacks reais enviados via tickets de suporte.</p>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Feedback Inbox'
+      description='Audit user-reported issues and product feedback across support categories.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchFeedback}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchFeedbacks}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Total Feedback' value={items.length} tone='sky' />
+          <AdminStatCard label='Filtered' value={filtered.length} tone='neutral' />
+          <AdminStatCard label='Open States' value={statuses.length} tone='amber' />
+          <AdminStatCard label='Categories' value={categories.length} tone='emerald' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Abertos</h3>
-          <p className="text-2xl font-bold text-yellow-600">{summary.open}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Resolvidos</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.resolved}</p>
-        </div>
-      </div>
-
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <input
-          type="text"
-          placeholder="Buscar por usuário, assunto ou comentário"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full md:max-w-sm"
-        />
-        <div className="flex items-center gap-2 flex-wrap">
-          {(['all', 'open', 'pending', 'resolved', 'closed'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
-              }`}
+      <AdminSection className='mb-4'>
+        <div className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder='Search email, subject or message'
+            className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 lg:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+          />
+          <div className='flex flex-wrap items-center gap-2'>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
             >
-              {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
-            </button>
-          ))}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="border p-1 rounded text-xs"
-          >
-            <option value="all">Todas as categorias</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+              <option value='all'>All statuses</option>
+              {statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              className='rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+            >
+              <option value='all'>All categories</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
+      </AdminSection>
 
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
-        <thead>
-          <tr className='bg-zinc-800/70'>
-            <th className='p-2'>Usuário</th>
-            <th className='p-2'>Assunto</th>
-            <th className='p-2'>Comentário</th>
-            <th className='p-2'>Categoria</th>
-            <th className='p-2'>Status</th>
-            <th className='p-2'>Data</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={6}>Carregando feedbacks...</td>
-            </tr>
-          ) : error ? (
-            <tr>
-              <td className='p-2 text-sm text-red-500' colSpan={6}>{error}</td>
-            </tr>
-          ) : filteredFeedbacks.length === 0 ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={6}>Nenhum feedback encontrado.</td>
-            </tr>
-          ) : (
-            filteredFeedbacks.map((feedback) => (
-              <tr key={feedback.id}>
-                <td className='p-2'>
-                  <div className="flex items-center gap-2">
-                    <span>{feedback.email}</span>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(feedback.email)}
-                      className="text-xs text-zinc-500 hover:text-zinc-200"
-                    >
-                      Copiar
-                    </button>
-                  </div>
-                </td>
-                <td className='p-2'>{feedback.subject}</td>
-                <td className='p-2'>{feedback.message}</td>
-                <td className='p-2'>{feedback.category}</td>
-                <td className='p-2'>
-                  <span className="px-2 py-1 rounded text-xs bg-zinc-800/70 text-zinc-400">
-                    {statusLabels[feedback.status] ?? feedback.status}
-                  </span>
-                </td>
-                <td className='p-2'>{new Date(feedback.createdAt).toLocaleDateString()}</td>
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Subject</th>
+                <th className='p-3 text-left'>User</th>
+                <th className='p-3 text-left'>Category</th>
+                <th className='p-3 text-left'>Status</th>
+                <th className='p-3 text-left'>Created</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Loading feedback...' />
+              ) : filtered.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='No feedback items for current filters.' />
+              ) : (
+                filtered.map((item) => (
+                  <tr key={item.id} className='border-t border-zinc-800/70 align-top'>
+                    <td className='p-3'>
+                      <p className='text-zinc-100'>{item.subject}</p>
+                      <p className='mt-1 text-xs text-zinc-500'>{item.message}</p>
+                    </td>
+                    <td className='p-3'>{item.email}</td>
+                    <td className='p-3'>{item.category}</td>
+                    <td className='p-3'>{item.status}</td>
+                    <td className='p-3 text-zinc-500'>{new Date(item.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { PLANS } from '@/lib/plans';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,15 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(req: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'billing-plans-get',
+      key: getRequestIp(req),
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many plan requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     return NextResponse.json({
       plans: PLANS,
       success: true,

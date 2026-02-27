@@ -5,6 +5,7 @@
 
 import { LSPServerBase, Position, CompletionItem, Hover, Location, Range } from '../lsp/lsp-server-base';
 import { getLSPManager } from '../lsp/lsp-manager';
+import { readFileViaFs } from '../client/files-fs';
 
 export interface AICompletionContext {
   fileContent: string;
@@ -376,14 +377,7 @@ export class AIEnhancedLSP {
     try {
       // uri pode vir como file:///...; aqui usamos o path como chave do projeto.
       const path = uri.startsWith('file://') ? uri.replace(/^file:\/\//, '') : uri;
-      const res = await fetch(`/api/files/read?path=${encodeURIComponent(path)}`, {
-        cache: 'no-store',
-      });
-      if (!res.ok) {
-        return '';
-      }
-      const data = await res.json().catch(() => null);
-      const content = data && typeof data === 'object' ? String((data as any).content ?? '') : '';
+      const content = await readFileViaFs(path).catch(() => '');
       if (!content) return '';
 
       const lines = content.split(/\r?\n/);

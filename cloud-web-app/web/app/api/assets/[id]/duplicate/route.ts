@@ -5,13 +5,22 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { copyObject, headObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 import { copyFile, mkdir, stat } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
 export const dynamic = 'force-dynamic';
+
+async function resolveAssetId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeAssetId(resolvedParams?.id);
+}
 
 async function verifyAssetAccess(assetId: string, userId: string) {
   return prisma.asset.findFirst({
@@ -76,11 +85,27 @@ async function copyLocalUpload(sourceUrl: string, baseName: string) {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
-    const asset = await verifyAssetAccess(params.id, user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-duplicate-post',
+      key: user.userId,
+      max: 40,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset duplication attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const assetId = await resolveAssetId(ctx);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    const asset = await verifyAssetAccess(assetId, user.userId);
 
     if (!asset) {
       return NextResponse.json({ error: 'Asset not found or access denied' }, { status: 404 });

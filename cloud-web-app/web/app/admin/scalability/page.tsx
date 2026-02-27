@@ -1,78 +1,59 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
+
+type InfrastructurePayload = {
+  resources?: {
+    cpu?: { usage?: number };
+    memory?: { percentage?: number };
+    network?: { in?: number; out?: number };
+  };
+  metrics?: {
+    activeConnections?: number;
+    errorRate?: number;
+  };
+};
+
+type BillingPayload = {
+  data?: {
+    plan?: { name?: string };
+    usage?: {
+      aiTokens?: { used?: number; limit?: number };
+      storage?: { used?: number; limit?: number };
+      buildMinutes?: { used?: number; limit?: number };
+    };
+  };
+};
 
 export default function ScalabilityPage() {
-  const [metrics, setMetrics] = useState({
-    cpuUsage: 0,
-    memoryUsage: 0,
-    networkTraffic: 0,
-    activeConnections: 0,
-    errorRate: 0,
-    responseTime: 0,
-  });
-
-  const [usage, setUsage] = useState({
-    planName: '—',
-    aiTokensUsed: 0,
-    storageUsedMb: 0,
-    buildMinutesUsed: 0,
-  });
-
+  const [infra, setInfra] = useState<InfrastructurePayload>({});
+  const [billing, setBilling] = useState<BillingPayload>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [infraRes, billingRes] = await Promise.all([
-        fetch('/api/admin/infrastructure/status'),
-        fetch('/api/billing/usage'),
+      const [infraPayload, billingPayload] = await Promise.all([
+        adminJsonFetch<InfrastructurePayload>('/api/admin/infrastructure/status'),
+        adminJsonFetch<BillingPayload>('/api/billing/usage'),
       ]);
-
-      if (!infraRes.ok) throw new Error('Falha ao carregar infraestrutura');
-      if (!billingRes.ok) throw new Error('Falha ao carregar uso/faturamento');
-
-      const infra = await infraRes.json();
-      const billing = await billingRes.json();
-
-      const resources = infra?.resources;
-      const cpuUsage = Number(resources?.cpu?.usage ?? 0);
-      const memoryUsage = Number(resources?.memory?.percentage ?? 0);
-
-      const networkIn = Number(resources?.network?.in ?? 0);
-      const networkOut = Number(resources?.network?.out ?? 0);
-      const networkMbps = ((networkIn + networkOut) * 8) / 1_000_000;
-
-      const activeConnections = Number(infra?.activeConnections ?? 0);
-      const errorRate = Number(infra?.errorRate ?? 0);
-
-      const latencies = Array.isArray(infra?.services)
-        ? infra.services.map((s: any) => Number(s?.latency ?? 0)).filter((v: number) => Number.isFinite(v) && v > 0)
-        : [];
-      const responseTime = latencies.length
-        ? Math.round(latencies.reduce((a: number, b: number) => a + b, 0) / latencies.length)
-        : 0;
-
-      setMetrics({
-        cpuUsage: Math.round(cpuUsage),
-        memoryUsage: Math.round(memoryUsage),
-        networkTraffic: Math.round(networkMbps),
-        activeConnections,
-        errorRate: Number.isFinite(errorRate) ? errorRate : 0,
-        responseTime,
-      });
-
-      setUsage({
-        planName: billing?.data?.plan?.name || billing?.data?.plan?.id || '—',
-        aiTokensUsed: Number(billing?.data?.usage?.aiTokens?.used ?? 0),
-        storageUsedMb: Number(billing?.data?.usage?.storage?.used ?? 0),
-        buildMinutesUsed: Number(billing?.data?.usage?.buildMinutes?.used ?? 0),
-      });
-
+      setInfra(infraPayload ?? {});
+      setBilling(billingPayload ?? {});
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setError(err instanceof Error ? err.message : 'Failed to load scalability data');
     } finally {
       setLoading(false);
     }
@@ -80,84 +61,71 @@ export default function ScalabilityPage() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 15000);
-    return () => clearInterval(interval);
   }, [fetchData]);
 
+  const usage = billing.data?.usage;
+  const planName = billing.data?.plan?.name || '-';
+
+  const aiPercent = useMemo(() => {
+    const used = usage?.aiTokens?.used ?? 0;
+    const limit = usage?.aiTokens?.limit ?? 1;
+    return limit > 0 ? (used / limit) * 100 : 0;
+  }, [usage?.aiTokens?.limit, usage?.aiTokens?.used]);
+
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Métricas de escalabilidade</h1>
+    <AdminPageShell
+      title='Scalability'
+      description='Cross-check infrastructure pressure and plan usage to keep scaling decisions predictable.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchData}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
+        </div>
+      ) : null}
 
-      {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-rose-300">
-          {error}
-        </div>
-      )}
-
-      {loading && !error && (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-600">
-          Carregando métricas...
-        </div>
-      )}
-      
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Uso de CPU</h3>
-          <p className="text-2xl font-bold text-blue-600">{metrics.cpuUsage}%</p>
-        </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Uso de memória</h3>
-          <p className="text-2xl font-bold text-green-600">{metrics.memoryUsage}%</p>
-        </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Tráfego de rede</h3>
-          <p className="text-2xl font-bold text-blue-600">{metrics.networkTraffic} Mbps</p>
-        </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Conexões ativas</h3>
-          <p className="text-2xl font-bold text-red-600">{metrics.activeConnections}</p>
-        </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Taxa de erro</h3>
-          <p className="text-2xl font-bold text-yellow-600">{metrics.errorRate}%</p>
-        </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-          <h3 className="text-lg font-semibold">Tempo de resposta</h3>
-          <p className="text-2xl font-bold text-sky-600">{metrics.responseTime}ms</p>
-        </div>
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Plan' value={planName} tone='sky' />
+          <AdminStatCard label='CPU Usage' value={`${(infra.resources?.cpu?.usage ?? 0).toFixed(1)}%`} tone='amber' />
+          <AdminStatCard label='Memory Usage' value={`${(infra.resources?.memory?.percentage ?? 0).toFixed(1)}%`} tone='neutral' />
+          <AdminStatCard label='AI Tokens Used' value={`${aiPercent.toFixed(1)}%`} tone='emerald' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Uso mensal</h2>
-        <div className="grid grid-cols-4 gap-4">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">Plano</h3>
-            <p className="text-2xl font-bold text-blue-600">{usage.planName}</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">Tokens de IA</h3>
-            <p className="text-2xl font-bold text-green-600">{usage.aiTokensUsed.toLocaleString()}</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">Armazenamento</h3>
-            <p className="text-2xl font-bold text-blue-600">{usage.storageUsedMb.toLocaleString()} MB</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">Minutos de compilação</h3>
-            <p className="text-2xl font-bold text-red-600">{usage.buildMinutesUsed.toLocaleString()}</p>
-          </div>
-        </div>
-      </div>
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+        <AdminSection title='Runtime Indicators'>
+          {loading ? (
+            <p className='text-sm text-zinc-500'>Loading infrastructure indicators...</p>
+          ) : (
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>Active connections: {infra.metrics?.activeConnections ?? 0}</p>
+              <p>Error rate: {(infra.metrics?.errorRate ?? 0).toFixed(2)}%</p>
+              <p>Network in: {(infra.resources?.network?.in ?? 0).toLocaleString()} Bps</p>
+              <p>Network out: {(infra.resources?.network?.out ?? 0).toLocaleString()} Bps</p>
+            </div>
+          )}
+        </AdminSection>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Recomendações de escalabilidade</h2>
-        <ul className="list-disc list-inside">
-          <li>Considerar autoescalonamento quando CPU &gt; 80%</li>
-          <li>Otimizar consultas para reduzir o tempo de resposta</li>
-          <li>Implementar CDN para reduzir custos de banda</li>
-          <li>Monitorar a taxa de erro para identificar gargalos</li>
-        </ul>
+        <AdminSection title='Quota Consumption'>
+          {loading ? (
+            <p className='text-sm text-zinc-500'>Loading usage indicators...</p>
+          ) : (
+            <div className='space-y-2 text-sm text-zinc-300'>
+              <p>
+                AI Tokens: {(usage?.aiTokens?.used ?? 0).toLocaleString()} / {(usage?.aiTokens?.limit ?? 0).toLocaleString()}
+              </p>
+              <p>
+                Storage: {(usage?.storage?.used ?? 0).toLocaleString()}MB / {(usage?.storage?.limit ?? 0).toLocaleString()}MB
+              </p>
+              <p>
+                Build Minutes: {(usage?.buildMinutes?.used ?? 0).toLocaleString()} / {(usage?.buildMinutes?.limit ?? 0).toLocaleString()}
+              </p>
+            </div>
+          )}
+        </AdminSection>
       </div>
-    </div>
+    </AdminPageShell>
   );
 }

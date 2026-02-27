@@ -3,11 +3,20 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 // GET /api/projects - List all projects for user
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project list requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
     const projects = await prisma.project.findMany({
@@ -39,6 +48,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project creation attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 		const entitlements = await requireEntitlementsForUser(user.userId);
 
     const { name, template } = await req.json();

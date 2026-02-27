@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,9 +21,18 @@ function normalizeCurrency(currency: unknown): string {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'wallet-purchase-intent-post',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many purchase intent attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     await requireEntitlementsForUser(user.userId);
 
-    const body: PurchaseIntentBody = await req.json();
+    const body: PurchaseIntentBody = await req.json().catch(() => ({} as PurchaseIntentBody));
 
     const amount = Number(body?.amount);
     if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
@@ -90,3 +100,5 @@ export async function POST(req: NextRequest) {
     return apiInternalError();
   }
 }
+
+

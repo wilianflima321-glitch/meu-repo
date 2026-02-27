@@ -43,6 +43,9 @@ jobs:
         run: |
           npm --prefix cloud-web-app/web ci
 
+      - name: Repository connectivity gate (pre-compare)
+        run: npm run qa:repo-connectivity
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
@@ -61,13 +64,16 @@ jobs:
       - name: Route contracts gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:route-contracts
 
+      - name: Architecture gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:architecture-gate
+
       - name: Anti fake-success gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:no-fake-success
 
       - name: Encoding sweep gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:mojibake
 
-      - name: Start server (web app with static fallback)
+      - name: Start server (web app required)
         run: |
           check_ready() {
             for i in $(seq 1 45); do
@@ -86,54 +92,37 @@ jobs:
             exit 0
           fi
 
-          echo "Web app did not start in time; switching to static test site."
-          node tools/ide/ui-audit/static_server.js > /tmp/static-server.log 2>&1 &
-          if ! check_ready; then
-            echo "Static fallback did not become ready."
-            echo "--- portal-dev.log (tail) ---"
-            tail -n 80 /tmp/portal-dev.log || true
-            echo "--- static-server.log (tail) ---"
-            tail -n 80 /tmp/static-server.log || true
-            exit 1
-          fi
+          echo "Web app did not start in time."
+          echo "--- portal-dev.log (tail) ---"
+          tail -n 80 /tmp/portal-dev.log || true
+          exit 1
 
       - name: Fetch visual-baseline branch
         run: |
-          # Attempt to fetch the baseline branch if it exists; don't fail if it doesn't.
-          git fetch origin visual-baseline:visual-baseline || echo 'no baseline branch'
+          git fetch origin visual-baseline:visual-baseline
+
+      - name: Restore baseline (required)
+        run: |
+          git checkout visual-baseline -- tools/ide/visual-regression/output/baseline
+          git checkout visual-baseline -- tools/ide/visual-regression/baseline || true
+
+          if [ -d "tools/ide/visual-regression/output/baseline" ]; then
+            mkdir -p tools/ide/visual-regression/baseline
+            cp -r tools/ide/visual-regression/output/baseline/* tools/ide/visual-regression/baseline/ 2>/dev/null || true
+          fi
+
+          if [ ! -d "tools/ide/visual-regression/baseline" ]; then
+            echo "Baseline directory missing after restore."
+            exit 1
+          fi
 
       - name: Capture current screenshots
         run: |
           node tools/ide/visual-regression/capture_baseline.js --baseUrl "$BASE_URL" --out tools/ide/visual-regression/output/current
 
-      - name: Restore baseline (if present)
-        run: |
-          # Try to restore committed baseline from the visual-baseline branch.
-          # If the baseline output doesn't exist after the checkout, skip gracefully.
-          if git rev-parse --verify visual-baseline >/dev/null 2>&1; then
-            git checkout visual-baseline -- tools/ide/visual-regression/output/baseline || true
-            git checkout visual-baseline -- tools/ide/visual-regression/baseline || true
-            if [ -d "tools/ide/visual-regression/output/baseline" ]; then
-              mkdir -p tools/ide/visual-regression/baseline || true
-              cp -r tools/ide/visual-regression/output/baseline/* tools/ide/visual-regression/baseline/ 2>/dev/null || true
-            fi
-            if [ -d "tools/ide/visual-regression/baseline" ]; then
-              echo 'Baseline restored'
-            else
-              echo 'baseline directory not present after checkout; skipping compare'
-            fi
-          else
-            echo 'No baseline branch to compare against; skipping restore'
-          fi
-
       - name: Compare baseline vs current
         run: |
-          # Only run compare if baseline directory exists; otherwise skip with notice.
-          if [ -d "tools/ide/visual-regression/baseline" ]; then
-            node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 50 --total 100
-          else
-            echo 'No baseline present; skipping compare step'
-          fi
+          node tools/ide/visual-regression/compare_baseline.js --baseline tools/ide/visual-regression/baseline --current tools/ide/visual-regression/output/current --out tools/ide/visual-regression/output/diffs --per 50 --total 100
 
       - name: Upload diffs
         if: always()
@@ -145,7 +134,6 @@ jobs:
             tools/ide/visual-regression/output/current
             tools/ide/visual-regression/output/diffs
             /tmp/portal-dev.log
-            /tmp/static-server.log
 
       - name: Check report and create issue if regressions
         if: always()
@@ -155,7 +143,10 @@ jobs:
           script: |
             const fs = require('fs');
             const reportPath = 'tools/ide/visual-regression/output/diffs/compare-report.json';
-            if (!fs.existsSync(reportPath)) { core.notice('No compare report'); return }
+            if (!fs.existsSync(reportPath)) {
+              core.setFailed('Visual compare report missing. Baseline/compare flow must produce compare-report.json.');
+              return;
+            }
             const report = JSON.parse(fs.readFileSync(reportPath,'utf8'));
             const total = report.totalDiff || 0;
             if (total > 100) {

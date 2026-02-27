@@ -1,63 +1,104 @@
 /**
  * Invite Links API - Aethel Engine
- * GET /api/projects/[id]/invite-links - Lista links de convite
- * POST /api/projects/[id]/invite-links - Cria novo link de convite
+ * GET /api/projects/[id]/invite-links - list invite links
+ * POST /api/projects/[id]/invite-links - create invite link
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { nanoid } from 'nanoid';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { notImplementedCapability } from '@/lib/server/capability-response';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/projects/[id]/invite-links
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+interface InviteLinkBody {
+  role?: 'editor' | 'viewer';
+  expiresIn?: number;
+  maxUsage?: number;
+}
+
+async function resolveProjectId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeProjectId(resolved?.id);
+}
+
+function invalidProjectIdResponse() {
+  return NextResponse.json(
+    {
+      error: 'INVALID_PROJECT_ID',
+      message: 'projectId is required and must be under 120 characters.',
+    },
+    { status: 400 }
+  );
+}
+
+function notAuthorizedResponse() {
+  return NextResponse.json(
+    {
+      error: 'PROJECT_ACCESS_DENIED',
+      message: 'Project access denied.',
+    },
+    { status: 403 }
+  );
+}
+
+async function assertProjectAdminAccess(projectId: string, userId: string) {
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      OR: [{ userId }, { members: { some: { userId, role: 'admin' } } }],
+    },
+    select: { id: true },
+  });
+
+  return project;
+}
+
+export async function GET(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
-    const projectId = params.id;
-
-    // Verifica se é owner ou admin do projeto
-    const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        OR: [
-          { userId: user.userId },
-          { members: { some: { userId: user.userId, role: 'admin' } } },
-        ],
-      },
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-invite-links-get',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many invite link list requests. Please try again later.',
     });
+    if (rateLimitResponse) return rateLimitResponse;
 
-    if (!project) {
-      return NextResponse.json(
-        { success: false, error: 'Not authorized' },
-        { status: 403 }
-      );
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return invalidProjectIdResponse();
     }
 
-    // Busca links de convite existentes
+    const project = await assertProjectAdminAccess(projectId, user.userId);
+    if (!project) {
+      return notAuthorizedResponse();
+    }
+
     let inviteLinks: any[] = [];
-    
     try {
-      // Tenta buscar do modelo InviteLink se existir
       inviteLinks = await (prisma as any).inviteLink.findMany({
-        where: { 
+        where: {
           projectId,
-          OR: [
-            { expiresAt: { gt: new Date() } },
-            { expiresAt: null },
-          ],
+          OR: [{ expiresAt: { gt: new Date() } }, { expiresAt: null }],
         },
         orderBy: { createdAt: 'desc' },
       });
     } catch {
-      // InviteLink model não existe - retorna array vazio
-      // Em produção, criar migration para adicionar modelo InviteLink
-      inviteLinks = [];
+      return notImplementedCapability({
+        message: 'Invite links storage is not available. Run migrations to enable this feature.',
+        capability: 'PROJECT_INVITE_LINKS',
+        milestone: 'P1',
+        metadata: { projectId },
+      });
     }
 
     return NextResponse.json({
@@ -74,83 +115,79 @@ export async function GET(
   } catch (error) {
     console.error('[Invite Links API] Error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { error: 'INVITE_LINKS_READ_FAILED', message: 'Failed to read invite links.' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/projects/[id]/invite-links - Cria link de convite
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, ctx: RouteContext) {
   try {
     const user = requireAuth(request);
-    const projectId = params.id;
-    const body = await request.json();
-    const { role = 'viewer', expiresIn, maxUsage } = body;
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-invite-links-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many invite link creation attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
-    // Validar role
-    if (!['editor', 'viewer'].includes(role)) {
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return invalidProjectIdResponse();
+    }
+
+    const body = (await request.json().catch(() => null)) as InviteLinkBody | null;
+    if (!body || typeof body !== 'object') {
       return NextResponse.json(
-        { success: false, error: 'Invalid role' },
+        { error: 'INVALID_BODY', message: 'Body must be a valid JSON object.' },
         { status: 400 }
       );
     }
 
-    // Verifica se é owner ou admin do projeto
-    const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        OR: [
-          { userId: user.userId },
-          { members: { some: { userId: user.userId, role: 'admin' } } },
-        ],
-      },
-    });
+    const role = body.role || 'viewer';
+    const expiresInMs = Number.isFinite(Number(body.expiresIn)) ? Number(body.expiresIn) : undefined;
+    const maxUsageNormalized = Number.isFinite(Number(body.maxUsage)) ? Number(body.maxUsage) : null;
 
-    if (!project) {
+    if (!['editor', 'viewer'].includes(role)) {
       return NextResponse.json(
-        { success: false, error: 'Not authorized' },
-        { status: 403 }
+        { error: 'INVALID_ROLE', message: 'role must be editor or viewer.' },
+        { status: 400 }
       );
     }
 
-    // Gera código único
+    const project = await assertProjectAdminAccess(projectId, user.userId);
+    if (!project) {
+      return notAuthorizedResponse();
+    }
+
     const code = nanoid(16);
-    
-    // Calcula expiração (default: 7 dias)
-    const expiresAt = expiresIn 
-      ? new Date(Date.now() + expiresIn)
+    const expiresAt = expiresInMs
+      ? new Date(Date.now() + expiresInMs)
       : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     let inviteLink: any;
-    
     try {
-      // Tenta criar no modelo InviteLink se existir
       inviteLink = await (prisma as any).inviteLink.create({
         data: {
           projectId,
           code,
           role,
           expiresAt,
-          maxUsage: maxUsage || null,
+          maxUsage: maxUsageNormalized,
           usageCount: 0,
           createdBy: user.userId,
         },
       });
-    } catch (err) {
-      // InviteLink model não existe - retorna erro e instrução
-      console.error('[Invite Links API] InviteLink model not available:', err);
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invite links feature not available. Please run prisma generate to sync the database schema.',
-          details: 'The InviteLink model may not be defined in your Prisma schema.'
-        },
-        { status: 503 }
-      );
+    } catch (error) {
+      console.error('[Invite Links API] InviteLink model not available:', error);
+      return notImplementedCapability({
+        message: 'Invite links storage is not available. Run migrations to enable this feature.',
+        capability: 'PROJECT_INVITE_LINKS',
+        milestone: 'P1',
+        metadata: { projectId },
+      });
     }
 
     return NextResponse.json({
@@ -168,7 +205,7 @@ export async function POST(
   } catch (error) {
     console.error('[Invite Links API] Error:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { error: 'INVITE_LINK_CREATE_FAILED', message: 'Failed to create invite link.' },
       { status: 500 }
     );
   }

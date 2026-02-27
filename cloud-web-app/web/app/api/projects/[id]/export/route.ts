@@ -19,6 +19,15 @@ import { getQueueRedis } from '@/lib/redis-queue';
 import { nanoid } from 'nanoid';
 import { checkProjectAccess } from '@/lib/project-access';
 import { deductBuildMinutes } from '@/lib/build-minutes';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+async function resolveProjectId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeProjectId(resolvedParams?.id);
+}
 
 // ============================================================================
 // SCHEMAS
@@ -112,11 +121,10 @@ const BUILD_COSTS: Record<ExportPlatform, number> = {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
-    const projectId = params.id;
-
+    
     const redis = await getQueueRedis();
 
     // Autenticação
@@ -134,6 +142,23 @@ export async function POST(
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }
+      );
+    }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-export-post',
+      key: decoded.userId || getRequestIp(request),
+      max: 20,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many export creation attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
       );
     }
 
@@ -273,11 +298,10 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
-    const projectId = params.id;
-    
+        
     // Autenticação
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -293,6 +317,23 @@ export async function GET(
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }
+      );
+    }
+
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-export-list-get',
+      key: decoded.userId || getRequestIp(request),
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many export list requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
       );
     }
 

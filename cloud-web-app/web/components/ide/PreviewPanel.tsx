@@ -234,7 +234,14 @@ export default function PreviewPanel({
 }: PreviewPanelProps) {
   const [mediaLoadError, setMediaLoadError] = useState<string | null>(null)
   const ext = getExtension(filePath)
-  const mode = useMemo(() => resolvePreviewMode(filePath), [filePath])
+  const mode = useMemo(() => {
+    if (!filePath) {
+      if (typeof html === 'string' && html.trim()) return 'html'
+      if (typeof content === 'string' && content.trim()) return 'text'
+      return 'text'
+    }
+    return resolvePreviewMode(filePath)
+  }, [filePath, html, content])
   const textContent = typeof content === 'string' ? content : typeof html === 'string' ? html : ''
   const hasText = textContent.length > 0
   const isLargeTextPreview = hasText && textContent.length > MAX_INLINE_PREVIEW_CHARS
@@ -310,6 +317,8 @@ export default function PreviewPanel({
             sandbox="allow-scripts"
             className="w-full h-full bg-white"
             srcDoc={runtimeDoc}
+            loading="lazy"
+            referrerPolicy="no-referrer"
           />
         )}
 
@@ -327,6 +336,7 @@ export default function PreviewPanel({
                   src={rawAssetUrl}
                   alt={filePath || 'preview'}
                   fill
+                  sizes="100vw"
                   unoptimized
                   className="object-contain"
                   onError={() => setMediaLoadError('Unable to render image preview from file runtime endpoint.')}
@@ -338,6 +348,7 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="w-full max-w-xl"
+                preload="metadata"
                 onError={() => setMediaLoadError('Audio preview failed (unsupported codec or missing runtime source).')}
               />
             )}
@@ -346,6 +357,7 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="max-w-full max-h-full bg-black"
+                preload="metadata"
                 onError={() => setMediaLoadError('Video preview failed (unsupported codec or missing runtime source).')}
               />
             )}
@@ -370,6 +382,9 @@ export default function PreviewPanel({
               <div className="mb-2 font-medium text-slate-300">Preview unsupported for this file type</div>
               <div className="text-slate-500 text-xs">
                 Extension &quot;{ext || 'unknown'}&quot; is outside the validated runtime preview scope.
+              </div>
+              <div className="mt-2 text-slate-500 text-xs">
+                Capability status: UNSUPPORTED_RUNTIME. Use export or runtime build for advanced preview.
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { Prisma } from '@prisma/client';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,15 @@ function isSettled(meta: unknown): boolean {
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'wallet-summary-get',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many wallet summary requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     await requireEntitlementsForUser(user.userId);
 
     const [balanceAgg, entries] = await prisma.$transaction([

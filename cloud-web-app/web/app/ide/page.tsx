@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import IDELayout from '@/components/ide/IDELayout'
 import FileExplorerPro from '@/components/ide/FileExplorerPro'
@@ -9,7 +9,47 @@ import PreviewPanel from '@/components/ide/PreviewPanel'
 import AIChatPanelContainer from '@/components/ide/AIChatPanelContainer'
 import TabBar, { TabProvider, useTabBar } from '@/components/editor/TabBar'
 import MonacoEditorPro from '@/components/editor/MonacoEditorPro'
-import CommandPaletteProvider, { type FileItem as PaletteFileItem } from '@/components/ide/CommandPalette'
+import CommandPaletteProvider from '@/components/ide/CommandPalette'
+import { WorkbenchContextBanner } from '@/components/ide/WorkbenchContextBanner'
+import { WorkbenchStatusBar } from '@/components/ide/WorkbenchStatusBar'
+import {
+  ConfirmDialog,
+  PromptDialog,
+  useConfirmDialog,
+  usePromptDialog,
+  useStatusMessage,
+} from '@/components/ide/WorkbenchDialogs'
+import {
+  DebugPanel,
+  GitPanel,
+  OutputPanel,
+  PortsPanel,
+  ProblemsPanel,
+  SearchPanel,
+} from '@/components/ide/WorkbenchPanels'
+import {
+  ENTRY_BOTTOM_MAP,
+  ENTRY_SIDEBAR_MAP,
+  WorkbenchEntry,
+  buildContextBannerMessage,
+} from '@/components/ide/workbench-context'
+import {
+  EmptyEditorState,
+  FileNode,
+  FileState,
+  TerminalSkeleton,
+  WORKBENCH_PROJECT_STORAGE_KEY,
+  dirname,
+  flattenFiles,
+  getExtension,
+  guessLanguage,
+  isPathWithin,
+  joinPath,
+  mapTreeEntry,
+  normalizeWorkspaceRoot,
+  sanitizeProjectId,
+} from '@/components/ide/workbench-utils'
+import { getExecutionTarget } from '@/lib/execution-target'
 
 const MultiTerminalPanel = dynamic(
   () => import('@/components/terminal/XTerminal').then((mod) => ({ default: mod.MultiTerminalPanel })),
@@ -18,380 +58,6 @@ const MultiTerminalPanel = dynamic(
     loading: () => <TerminalSkeleton />,
   }
 )
-
-type FileNode = {
-  id: string
-  name: string
-  type: 'file' | 'folder'
-  path: string
-  children?: FileNode[]
-  modified?: boolean
-  extension?: string
-}
-
-type FileTreeEntry = {
-  name: string
-  path: string
-  type: 'file' | 'directory'
-  children?: FileTreeEntry[]
-}
-
-type FileState = {
-  content: string
-  savedContent: string
-  language?: string
-  lastSavedAt?: Date | null
-}
-
-const LANGUAGE_BY_EXT: Record<string, string> = {
-  ts: 'typescript',
-  tsx: 'typescriptreact',
-  js: 'javascript',
-  jsx: 'javascriptreact',
-  json: 'json',
-  md: 'markdown',
-  css: 'css',
-  scss: 'scss',
-  html: 'html',
-  htm: 'html',
-  py: 'python',
-  rs: 'rust',
-  go: 'go',
-  java: 'java',
-  c: 'c',
-  cpp: 'cpp',
-  txt: 'plaintext',
-}
-
-function getExtension(name: string): string {
-  const idx = name.lastIndexOf('.')
-  return idx === -1 ? '' : name.slice(idx + 1).toLowerCase()
-}
-
-function guessLanguage(path: string): string {
-  const ext = getExtension(path)
-  return LANGUAGE_BY_EXT[ext] || 'plaintext'
-}
-
-function mapTreeEntry(entry: FileTreeEntry): FileNode {
-  const extension = entry.type === 'file' ? getExtension(entry.name) : undefined
-  return {
-    id: entry.path,
-    name: entry.name,
-    type: entry.type === 'directory' ? 'folder' : 'file',
-    path: entry.path,
-    extension,
-    children: entry.children?.map(mapTreeEntry),
-  }
-}
-
-function joinPath(base: string, name: string): string {
-  const trimmedBase = base.replace(/[\\/]+$/, '')
-  const trimmedName = name.replace(/^[\\/]+/, '')
-  if (!trimmedBase || trimmedBase === '/') return `/${trimmedName}`
-  return `${trimmedBase}/${trimmedName}`
-}
-
-function dirname(filePath: string): string {
-  const normalized = filePath.replace(/\\/g, '/')
-  const idx = normalized.lastIndexOf('/')
-  if (idx <= 0) return '/'
-  return normalized.slice(0, idx)
-}
-
-function isPathWithin(basePath: string, candidatePath: string): boolean {
-  const base = basePath.replace(/\\/g, '/')
-  const candidate = candidatePath.replace(/\\/g, '/')
-  if (candidate === base) return true
-  const prefix = base.endsWith('/') ? base : `${base}/`
-  return candidate.startsWith(prefix)
-}
-
-function normalizeWorkspaceRoot(input: string): string {
-  const next = input.trim()
-  if (!next || next === '/workspace') return '/'
-  return next
-}
-
-const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId'
-
-function sanitizeProjectId(value: string | null | undefined): string {
-  const raw = String(value || '').trim()
-  if (!raw) return 'default'
-  const sanitized = raw.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80)
-  return sanitized || 'default'
-}
-
-type WorkbenchEntry =
-  | 'explorer'
-  | 'search'
-  | 'git'
-  | 'ai'
-  | 'terminal'
-  | 'output'
-  | 'problems'
-  | 'debug'
-  | 'ports'
-  | 'chat'
-  | 'debugger'
-  | 'live-preview'
-  | 'vr-preview'
-  | 'testing'
-  | 'niagara-editor'
-  | 'blueprint-editor'
-  | 'animation-blueprint'
-  | 'level-editor'
-  | 'landscape-editor'
-  | 'editor-hub'
-  | 'ai-command'
-  | 'playground'
-
-const ENTRY_SIDEBAR_MAP: Partial<Record<WorkbenchEntry, 'explorer' | 'search' | 'git' | 'ai'>> = {
-  explorer: 'explorer',
-  search: 'search',
-  git: 'git',
-  ai: 'ai',
-  chat: 'ai',
-  'ai-command': 'ai',
-  'live-preview': 'explorer',
-  'vr-preview': 'explorer',
-  testing: 'explorer',
-  'niagara-editor': 'explorer',
-  'blueprint-editor': 'explorer',
-  'animation-blueprint': 'explorer',
-  'level-editor': 'explorer',
-  'landscape-editor': 'explorer',
-  'editor-hub': 'explorer',
-  playground: 'explorer',
-}
-
-const ENTRY_BOTTOM_MAP: Partial<Record<WorkbenchEntry, 'terminal' | 'output' | 'problems' | 'debug' | 'ports'>> = {
-  terminal: 'terminal',
-  debugger: 'debug',
-  testing: 'problems',
-}
-
-function flattenFiles(nodes: FileNode[]): PaletteFileItem[] {
-  const result: PaletteFileItem[] = []
-
-  const visit = (node: FileNode) => {
-    result.push({
-      path: node.path,
-      name: node.name,
-      type: node.type === 'folder' ? 'folder' : 'file',
-      modified: !!node.modified,
-    })
-    node.children?.forEach(visit)
-  }
-
-  nodes.forEach(visit)
-  return result
-}
-
-function TerminalSkeleton() {
-  return (
-    <div className="h-full bg-slate-950 p-4">
-      <div className="flex items-center gap-2 text-slate-600">
-        <div className="w-2 h-4 bg-slate-700 animate-pulse" />
-        <span>Loading terminal...</span>
-      </div>
-    </div>
-  )
-}
-
-function EmptyEditorState() {
-  return (
-    <div className="h-full flex items-center justify-center px-8 text-center">
-      <div>
-        <div className="text-sm font-medium text-slate-300 mb-2">No file selected</div>
-        <div className="text-xs text-slate-500">
-          Open a file from Explorer or use <span className="font-mono text-slate-400">Ctrl+O</span> to load a path.
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function useStatusMessage() {
-  const [message, setMessage] = useState<string | null>(null)
-  const timeoutRef = useRef<number | null>(null)
-
-  const pushMessage = useCallback((next: string) => {
-    setMessage(next)
-    if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
-    timeoutRef.current = window.setTimeout(() => setMessage(null), 3000)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
-    }
-  }, [])
-
-  return { message, pushMessage }
-}
-
-type PromptOptions = {
-  title: string
-  placeholder?: string
-  defaultValue?: string
-}
-
-type PromptState = PromptOptions & {
-  open: boolean
-}
-
-function usePromptDialog() {
-  const resolverRef = useRef<((value: string | null) => void) | null>(null)
-  const [state, setState] = useState<PromptState>({
-    open: false,
-    title: '',
-    placeholder: '',
-    defaultValue: '',
-  })
-  const [value, setValue] = useState('')
-
-  const openPrompt = useCallback((options: PromptOptions) => {
-    return new Promise<string | null>((resolve) => {
-      resolverRef.current = resolve
-      setValue(options.defaultValue || '')
-      setState({
-        open: true,
-        title: options.title,
-        placeholder: options.placeholder,
-        defaultValue: options.defaultValue,
-      })
-    })
-  }, [])
-
-  const closePrompt = useCallback((nextValue: string | null) => {
-    const resolver = resolverRef.current
-    resolverRef.current = null
-    setState((prev) => ({ ...prev, open: false }))
-    resolver?.(nextValue)
-  }, [])
-
-  return { state, value, setValue, openPrompt, closePrompt }
-}
-
-type ConfirmState = {
-  open: boolean
-  message: string
-}
-
-function useConfirmDialog() {
-  const resolverRef = useRef<((value: boolean) => void) | null>(null)
-  const [state, setState] = useState<ConfirmState>({
-    open: false,
-    message: '',
-  })
-
-  const openConfirm = useCallback((message: string) => {
-    return new Promise<boolean>((resolve) => {
-      resolverRef.current = resolve
-      setState({ open: true, message })
-    })
-  }, [])
-
-  const closeConfirm = useCallback((accepted: boolean) => {
-    const resolver = resolverRef.current
-    resolverRef.current = null
-    setState({ open: false, message: '' })
-    resolver?.(accepted)
-  }, [])
-
-  return { state, openConfirm, closeConfirm }
-}
-
-function PromptDialog({
-  title,
-  placeholder,
-  value,
-  open,
-  onChange,
-  onCancel,
-  onConfirm,
-}: {
-  title: string
-  placeholder?: string
-  value: string
-  open: boolean
-  onChange: (next: string) => void
-  onCancel: () => void
-  onConfirm: () => void
-}) {
-  if (!open) return null
-
-  return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/45">
-      <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 p-4 shadow-2xl">
-        <div className="text-sm font-semibold text-slate-100">{title}</div>
-        <input
-          autoFocus
-          value={value}
-          placeholder={placeholder}
-          onChange={(event) => onChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') onConfirm()
-            if (event.key === 'Escape') onCancel()
-          }}
-          className="mt-3 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500"
-        />
-        <div className="mt-3 flex items-center justify-end gap-2">
-          <button
-            onClick={onCancel}
-            className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 focus-visible:bg-slate-800"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="rounded border border-blue-500/50 bg-blue-600/30 px-3 py-1.5 text-xs text-blue-100 hover:bg-blue-600/40 focus-visible:bg-blue-600/40"
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ConfirmDialog({
-  open,
-  message,
-  onCancel,
-  onConfirm,
-}: {
-  open: boolean
-  message: string
-  onCancel: () => void
-  onConfirm: () => void
-}) {
-  if (!open) return null
-
-  return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/45">
-      <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 p-4 shadow-2xl">
-        <div className="text-sm font-semibold text-slate-100">Confirm action</div>
-        <div className="mt-2 text-xs leading-5 text-slate-300">{message}</div>
-        <div className="mt-3 flex items-center justify-end gap-2">
-          <button
-            onClick={onCancel}
-            className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 focus-visible:bg-slate-800"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="rounded border border-red-500/50 bg-red-600/30 px-3 py-1.5 text-xs text-red-100 hover:bg-red-600/40 focus-visible:bg-red-600/40"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 async function fsRequest(payload: Record<string, unknown>, projectId: string) {
   const requestPayload = {
@@ -414,7 +80,9 @@ async function fsRequest(payload: Record<string, unknown>, projectId: string) {
 }
 
 function IDEPageInner() {
+  const router = useRouter()
   const searchParams = useSearchParams()
+  const executionTarget = useMemo(() => getExecutionTarget(), [])
   const queryProjectId = searchParams.get('projectId')
   const { tabs, activeTabId, openTab, closeTab, markTabDirty } = useTabBar()
   const [fileTree, setFileTree] = useState<FileNode[]>([])
@@ -429,12 +97,20 @@ function IDEPageInner() {
   const confirmDialog = useConfirmDialog()
   const startupFilePath = searchParams.get('file')?.trim() || null
   const startupEntry = (searchParams.get('entry')?.trim().toLowerCase() || null) as WorkbenchEntry | null
+  const startupSessionId = searchParams.get('sessionId')?.trim() || null
+  const startupTaskId = searchParams.get('taskId')?.trim() || null
+  const [showContextBanner, setShowContextBanner] = useState(true)
   const startupFileHandledRef = useRef(false)
   const startupEntryHandledRef = useRef(false)
+  const startupSessionHandledRef = useRef(false)
 
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || null
   const activePath = activeTab?.path || null
   const activeState = activePath ? fileStates[activePath] : null
+  const unsavedCount = useMemo(
+    () => Object.values(fileStates).filter((state) => state.content !== state.savedContent).length,
+    [fileStates]
+  )
 
   useEffect(() => {
     if (queryProjectId && queryProjectId.trim()) {
@@ -743,6 +419,22 @@ function IDEPageInner() {
   }, [startupEntry, pushMessage])
 
   useEffect(() => {
+    if (startupSessionHandledRef.current) return
+    if (!startupSessionId) return
+    startupSessionHandledRef.current = true
+    const payload = {
+      sessionId: startupSessionId,
+      ...(startupTaskId ? { taskId: startupTaskId } : {}),
+    }
+    window.dispatchEvent(new CustomEvent('aethel.ide.studioContext', { detail: payload }))
+    pushMessage(
+      startupTaskId
+        ? `Studio handoff loaded (session ${startupSessionId.slice(0, 8)}, task ${startupTaskId.slice(0, 8)}).`
+        : `Studio handoff loaded (session ${startupSessionId.slice(0, 8)}).`
+    )
+  }, [startupSessionId, startupTaskId, pushMessage])
+
+  useEffect(() => {
     const handleOpenRecentWorkspace = async (event: Event) => {
       const detail = (event as CustomEvent<{ workspaceUri?: string }>).detail
       const workspaceUri = detail?.workspaceUri?.trim()
@@ -901,60 +593,33 @@ function IDEPageInner() {
     setPreviewKey((key) => key + 1)
   }, [])
 
+  const contextBannerMessage = useMemo(
+    () =>
+      buildContextBannerMessage({
+        entry: startupEntry,
+        sessionId: startupSessionId,
+        taskId: startupTaskId,
+      }),
+    [startupEntry, startupSessionId, startupTaskId]
+  )
+
+  useEffect(() => {
+    if (!showContextBanner || !contextBannerMessage) return
+    const timeout = window.setTimeout(() => setShowContextBanner(false), 12000)
+    return () => window.clearTimeout(timeout)
+  }, [showContextBanner, contextBannerMessage])
+
   const statusNode = (
-    <span>
-      {statusMessage ||
-        (activePath
-          ? `Project: ${projectId} | Workspace: ${workspaceRoot} | ${activePath}${activeState?.content !== activeState?.savedContent ? ' (unsaved)' : ''}`
-          : `Project: ${projectId} | Workspace: ${workspaceRoot}`)}
-    </span>
-  )
-
-  const outputPanel = (
-    <div className="h-full p-3 text-xs text-slate-300 space-y-2">
-      <div className="font-medium text-slate-200">Output</div>
-      <div className="text-slate-400">Workbench runtime is active. Use Terminal for process logs.</div>
-      <div className="text-slate-500">Project: {projectId}</div>
-      <div className="text-slate-500">Workspace: {workspaceRoot}</div>
-    </div>
-  )
-
-  const problemsPanel = (
-    <div className="h-full p-3 text-xs text-slate-300 space-y-2">
-      <div className="font-medium text-slate-200">Problems</div>
-      <div className="text-slate-400">No diagnostics from backend analyzer in this workspace.</div>
-      <div className="text-slate-500">Enable project analyzer to populate this panel.</div>
-    </div>
-  )
-
-  const debugPanel = (
-    <div className="h-full p-3 text-xs text-slate-300 space-y-2">
-      <div className="font-medium text-slate-200">Debug Console</div>
-      <div className="text-slate-400">Debug adapter is scoped for P1. Current action: explicit capability gate.</div>
-    </div>
-  )
-
-  const searchPanel = (
-    <div className="h-full p-3 text-xs text-slate-300 space-y-2">
-      <div className="font-medium text-slate-200">Search</div>
-      <div className="text-slate-400">Use Command Palette for fast open and symbol navigation.</div>
-      <div className="text-slate-500">Shortcuts: Ctrl+P, Ctrl+Shift+P, Ctrl+G.</div>
-    </div>
-  )
-
-  const gitPanel = (
-    <div className="h-full p-3 text-xs text-slate-300 space-y-2">
-      <div className="font-medium text-slate-200">Source Control</div>
-      <div className="text-slate-400">Git integration is available through project-level workflows.</div>
-      <div className="text-slate-500">This panel will display working tree state after Git bridge activation.</div>
-    </div>
-  )
-
-  const portsPanel = (
-    <div className="h-full p-3 text-xs text-slate-300 space-y-2">
-      <div className="font-medium text-slate-200">Ports</div>
-      <div className="text-slate-400">No forwarded ports are currently active in this workspace.</div>
-    </div>
+    <WorkbenchStatusBar
+      statusMessage={statusMessage}
+      projectId={projectId}
+      workspaceRoot={workspaceRoot}
+      activePath={activePath}
+      isActiveDirty={!!activeState && activeState.content !== activeState.savedContent}
+      unsavedCount={unsavedCount}
+      studioSessionId={startupSessionId}
+      executionTarget={executionTarget}
+    />
   )
 
   return (
@@ -970,7 +635,8 @@ function IDEPageInner() {
       onToggleSidebar={() => window.dispatchEvent(new Event('aethel.layout.toggleSidebar'))}
       onToggleTerminal={() => window.dispatchEvent(new Event('aethel.layout.toggleTerminal'))}
       onAIChat={() => window.dispatchEvent(new Event('aethel.layout.toggleAI'))}
-      onOpenSettings={() => pushMessage('Global IDE settings are managed under Admin > IDE Settings.')}
+      onRollbackLastAIPatch={() => window.dispatchEvent(new Event('aethel.editor.rollbackInlinePatch'))}
+      onOpenSettings={() => router.push('/settings')}
     >
       <IDELayout
         fileExplorer={
@@ -983,22 +649,23 @@ function IDEPageInner() {
             onFileDelete={handleDelete}
             onFileRename={handleRename}
             onRefresh={refreshTree}
+            onOpenStudioHome={() => router.push('/dashboard')}
             workspaceName={workspaceRoot === '/' ? 'workspace' : workspaceRoot.split(/[\\/]/).pop() || workspaceRoot}
             className="text-slate-200"
           />
         }
         aiChatPanel={<AIChatPanelContainer />}
-        searchPanel={searchPanel}
-        gitPanel={gitPanel}
+        searchPanel={<SearchPanel />}
+        gitPanel={<GitPanel />}
         terminal={
           <Suspense fallback={<TerminalSkeleton />}>
             <MultiTerminalPanel />
           </Suspense>
         }
-        outputPanel={outputPanel}
-        problemsPanel={problemsPanel}
-        debugPanel={debugPanel}
-        portsPanel={portsPanel}
+        outputPanel={<OutputPanel projectId={projectId} workspaceRoot={workspaceRoot} />}
+        problemsPanel={<ProblemsPanel />}
+        debugPanel={<DebugPanel />}
+        portsPanel={<PortsPanel />}
         statusBar={statusNode}
         onNewFile={() => handleCreate(workspaceRoot, 'file')}
         onNewFolder={() => handleCreate(workspaceRoot, 'folder')}
@@ -1015,14 +682,21 @@ function IDEPageInner() {
         onCommandPalette={() =>
           window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode: 'commands' } }))
         }
+        onSettings={() => router.push('/settings')}
       >
         <div className="relative h-full flex flex-col">
+          <WorkbenchContextBanner
+            show={showContextBanner}
+            message={contextBannerMessage}
+            onDismiss={() => setShowContextBanner(false)}
+          />
           <TabBar />
           <div className="flex-1 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
             <div className="min-w-0 border-r border-slate-800">
               {activePath ? (
                 <MonacoEditorPro
                   path={activePath}
+                  projectId={projectId}
                   value={activeState?.content ?? ''}
                   language={activeState?.language || activeTab?.language || guessLanguage(activePath)}
                   onChange={handleEditorChange}
@@ -1030,7 +704,13 @@ function IDEPageInner() {
                   enableAISuggestions
                 />
               ) : (
-                <EmptyEditorState />
+                <EmptyEditorState
+                  onOpenFile={handleOpenFile}
+                  onNewFile={() => {
+                    void handleCreate(workspaceRoot, 'file')
+                  }}
+                  onOpenStudioHome={() => router.push('/dashboard')}
+                />
               )}
             </div>
             <PreviewPanel

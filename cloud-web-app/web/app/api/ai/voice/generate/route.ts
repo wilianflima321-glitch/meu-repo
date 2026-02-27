@@ -15,11 +15,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import OpenAI from 'openai';
-
-// Rate limit: 50 voice generations per hour
-const VOICE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 50 };
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Provider configurations
 const PROVIDERS = {
@@ -53,6 +51,12 @@ interface GenerateRequest {
   speed?: number; // 0.5 to 2.0
   pitch?: number; // -50 to +50
   format?: 'mp3' | 'wav' | 'ogg';
+}
+
+function getAvailableProviders(): Provider[] {
+  return Object.entries(PROVIDERS)
+    .filter(([, config]) => Boolean(process.env[config.envKey]))
+    .map(([id]) => id as Provider);
 }
 
 // ElevenLabs Generation
@@ -190,17 +194,16 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-voice-generate-post',
+      key: user.userId,
+      max: 50,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many voice generation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // Rate limit
-  const rateLimit = checkRateLimit(req, VOICE_RATE_LIMIT);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', remaining: rateLimit.remaining },
-      { status: 429 }
-    );
   }
 
   try {
@@ -232,23 +235,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if provider API key is configured
+    // Keep provider selection explicit: do not auto-fallback to another provider.
     const providerConfig = PROVIDERS[provider as Provider];
     if (!process.env[providerConfig.envKey]) {
-      // Fallback to available provider
-      const availableProvider = Object.entries(PROVIDERS).find(
-        ([_, config]) => process.env[config.envKey]
-      );
-      
-      if (!availableProvider) {
-        return NextResponse.json(
-          { 
-            error: 'No voice provider configured',
-            message: 'Please configure ELEVENLABS_API_KEY, OPENAI_API_KEY, or AZURE_SPEECH_KEY',
-          },
-          { status: 503 }
-        );
-      }
+      const availableProviders = getAvailableProviders();
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message:
+          availableProviders.length === 0
+            ? 'No voice generation provider configured.'
+            : `Requested provider "${provider}" is not configured.`,
+        capability: 'AI_VOICE_GENERATION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1_PROVIDER_CONFIG',
+        metadata: {
+          requestedProvider: provider,
+          requiredEnv: providerConfig.envKey,
+          availableProviders,
+        },
+      });
     }
 
     // Get default voice for provider
@@ -307,7 +313,15 @@ export async function POST(req: NextRequest) {
 // GET - List available providers and voices
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req);
+    const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-voice-generate-get',
+      key: auth.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many voice provider status requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

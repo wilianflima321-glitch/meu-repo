@@ -106,7 +106,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
         <h2>Search</h2>
         {onClose && (
           <button className="close-button" onClick={onClose}>
-            ×
+            X
           </button>
         )}
       </div>
@@ -148,7 +148,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
             onClick={() => setShowReplace(!showReplace)}
             title="Toggle Replace"
           >
-            ⇄
+            {'<->'}
           </button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 const execAsync = promisify(exec);
 
@@ -20,6 +21,14 @@ interface GitStatusFile {
 export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
+		const rateLimitResponse = await enforceRateLimit({
+			scope: 'git-status-post',
+			key: user.userId,
+			max: 600,
+			windowMs: 60 * 60 * 1000,
+			message: 'Too many git status requests. Please wait before retrying.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
     const body: GitStatusRequest = await request.json();

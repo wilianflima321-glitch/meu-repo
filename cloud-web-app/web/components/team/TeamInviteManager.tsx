@@ -8,7 +8,6 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import Image from 'next/image';
 import useSWR from 'swr';
 import {
   Users,
@@ -18,7 +17,6 @@ import {
   Copy,
   Check,
   X,
-  Crown,
   Shield,
   Eye,
   Edit3,
@@ -30,174 +28,10 @@ import {
   ChevronDown,
   MoreHorizontal,
 } from 'lucide-react';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  role: 'owner' | 'admin' | 'editor' | 'viewer';
-  status: 'active' | 'pending' | 'inactive';
-  invitedAt?: string;
-  joinedAt?: string;
-  lastActive?: string;
-}
-
-interface InviteLink {
-  id: string;
-  code: string;
-  role: 'editor' | 'viewer';
-  expiresAt: string;
-  usageCount: number;
-  maxUsage: number | null;
-}
-
-interface TeamInviteProps {
-  projectId: string;
-  currentUserRole?: 'owner' | 'admin' | 'editor' | 'viewer';
-  onMemberAdded?: (member: TeamMember) => void;
-  onMemberRemoved?: (memberId: string) => void;
-}
-
-// ============================================================================
-// STYLES
-// ============================================================================
-
-const colors = {
-  bg: '#0a0a0f',
-  surface: '#12121a',
-  surfaceHover: '#1a1a25',
-  border: '#2a2a3a',
-  borderFocus: '#4f46e5',
-  text: '#e4e4eb',
-  textMuted: '#8b8b9e',
-  textDim: '#5a5a6e',
-  primary: '#6366f1',
-  primaryHover: '#5558e3',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  owner: '#f59e0b',
-  admin: '#6366f1',
-  editor: '#22c55e',
-  viewer: '#8b8b9e',
-};
-
-// ============================================================================
-// ROLE BADGE
-// ============================================================================
-
-const RoleBadge: React.FC<{ role: TeamMember['role'] }> = ({ role }) => {
-  const config = {
-    owner: { icon: Crown, color: colors.owner, label: 'Owner' },
-    admin: { icon: Shield, color: colors.admin, label: 'Admin' },
-    editor: { icon: Edit3, color: colors.editor, label: 'Editor' },
-    viewer: { icon: Eye, color: colors.viewer, label: 'Viewer' },
-  };
-  
-  const { icon: Icon, color, label } = config[role];
-  
-  return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '2px 8px',
-        fontSize: '11px',
-        fontWeight: 500,
-        borderRadius: '4px',
-        background: color + '15',
-        color: color,
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-      }}
-    >
-      <Icon size={12} />
-      {label}
-    </span>
-  );
-};
-
-// ============================================================================
-// STATUS INDICATOR
-// ============================================================================
-
-const StatusIndicator: React.FC<{ status: TeamMember['status'] }> = ({ status }) => {
-  const config = {
-    active: { color: colors.success, label: 'Active' },
-    pending: { color: colors.warning, label: 'Pending' },
-    inactive: { color: colors.textDim, label: 'Inactive' },
-  };
-  
-  const { color, label } = config[status];
-  
-  return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-      <span
-        style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          background: color,
-        }}
-      />
-      <span style={{ fontSize: '12px', color: colors.textMuted }}>{label}</span>
-    </span>
-  );
-};
-
-// ============================================================================
-// MEMBER AVATAR
-// ============================================================================
-
-const MemberAvatar: React.FC<{ member: TeamMember; size?: number }> = ({ member, size = 40 }) => {
-  if (member.avatar) {
-    return (
-      <Image
-        src={member.avatar}
-        alt={member.name}
-        width={size}
-        height={size}
-        unoptimized
-        style={{
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          objectFit: 'cover',
-        }}
-      />
-    );
-  }
-  
-  // Generate color from name
-  const hue = member.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360;
-  const bgColor = `hsl(${hue}, 50%, 30%)`;
-  const textColor = `hsl(${hue}, 50%, 80%)`;
-  
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: bgColor,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: textColor,
-        fontWeight: 600,
-        fontSize: size * 0.4,
-      }}
-    >
-      {member.name.charAt(0).toUpperCase()}
-    </div>
-  );
-};
+import { teamInviteColors as colors } from './TeamInviteManager.theme';
+import { MemberAvatar, RoleBadge, StatusIndicator } from './TeamInviteManager.primitives';
+import type { InviteLink, TeamInviteProps, TeamMember } from './TeamInviteManager.types';
+export type { InviteLink, TeamInviteProps, TeamMember } from './TeamInviteManager.types';
 
 // ============================================================================
 // INVITE EMAIL FORM

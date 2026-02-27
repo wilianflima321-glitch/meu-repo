@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getOrCreateLspSession } from '@/lib/server/lsp-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
 
 interface LSPRequest {
@@ -16,7 +17,15 @@ export async function POST(request: NextRequest) {
   let safeId: number | null = null;
   try {
     const user = requireAuth(request);
-		await requireFeatureForUser(user.userId, 'lsp');
+    await requireFeatureForUser(user.userId, 'lsp');
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'lsp-request-post',
+      key: user.userId,
+      max: 900,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many LSP request calls. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body: LSPRequest = await request.json();
     const { language, method, params, id } = body;

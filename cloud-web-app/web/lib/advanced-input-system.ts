@@ -19,164 +19,32 @@
 // TYPES
 // ============================================================================
 
-export type InputDeviceType = 'keyboard' | 'mouse' | 'gamepad' | 'touch';
-
-export type KeyCode = string; // e.g., 'KeyW', 'Space', 'MouseLeft', 'Gamepad0_A'
-
-export interface InputBinding {
-  action: string;
-  keys: KeyCode[];
-  modifiers?: KeyCode[];
-  holdTime?: number; // For hold actions
-  tapCount?: number; // For multi-tap
-}
-
-export interface InputAction {
-  name: string;
-  type: 'button' | 'axis' | 'axis2d';
-  defaultBindings: InputBinding[];
-}
-
-export interface InputContext {
-  name: string;
-  priority: number;
-  actions: InputAction[];
-  consumeInput: boolean;
-  enabled: boolean;
-}
-
-export interface ComboStep {
-  action: string;
-  maxDelay: number;
-}
-
-export interface InputCombo {
-  name: string;
-  steps: ComboStep[];
-  onComplete: () => void;
-}
-
-export interface GestureConfig {
-  type: 'swipe' | 'pinch' | 'rotate' | 'tap' | 'hold';
-  minDistance?: number;
-  maxTime?: number;
-  fingers?: number;
-}
-
-export interface InputState {
-  pressed: Set<string>;
-  justPressed: Set<string>;
-  justReleased: Set<string>;
-  axisValues: Map<string, number>;
-  axis2DValues: Map<string, { x: number; y: number }>;
-  mousePosition: { x: number; y: number };
-  mouseDelta: { x: number; y: number };
-}
-
-export interface RecordedInput {
-  timestamp: number;
-  type: 'press' | 'release' | 'axis' | 'mouse';
-  key?: string;
-  value?: number | { x: number; y: number };
-}
-
-// ============================================================================
-// INPUT DEVICE MANAGER
-// ============================================================================
-
-export class InputDeviceManager {
-  private gamepads: Map<number, Gamepad> = new Map();
-  private deadZone: number = 0.15;
-  
-  private touchPoints: Map<number, { x: number; y: number; startX: number; startY: number; startTime: number }> = new Map();
-  
-  constructor() {
-    this.setupGamepadListeners();
-    this.setupTouchListeners();
-  }
-  
-  private setupGamepadListeners(): void {
-    window.addEventListener('gamepadconnected', (e) => {
-      console.log(`Gamepad connected: ${e.gamepad.id}`);
-      this.gamepads.set(e.gamepad.index, e.gamepad);
-    });
-    
-    window.addEventListener('gamepaddisconnected', (e) => {
-      console.log(`Gamepad disconnected: ${e.gamepad.id}`);
-      this.gamepads.delete(e.gamepad.index);
-    });
-  }
-  
-  private setupTouchListeners(): void {
-    window.addEventListener('touchstart', (e) => {
-      for (const touch of Array.from(e.changedTouches)) {
-        this.touchPoints.set(touch.identifier, {
-          x: touch.clientX,
-          y: touch.clientY,
-          startX: touch.clientX,
-          startY: touch.clientY,
-          startTime: Date.now()
-        });
-      }
-    });
-    
-    window.addEventListener('touchmove', (e) => {
-      for (const touch of Array.from(e.changedTouches)) {
-        const point = this.touchPoints.get(touch.identifier);
-        if (point) {
-          point.x = touch.clientX;
-          point.y = touch.clientY;
-        }
-      }
-    });
-    
-    window.addEventListener('touchend', (e) => {
-      for (const touch of Array.from(e.changedTouches)) {
-        this.touchPoints.delete(touch.identifier);
-      }
-    });
-  }
-  
-  pollGamepads(): Map<number, Gamepad> {
-    const gamepads = navigator.getGamepads();
-    for (const gamepad of gamepads) {
-      if (gamepad) {
-        this.gamepads.set(gamepad.index, gamepad);
-      }
-    }
-    return this.gamepads;
-  }
-  
-  getGamepadButton(index: number, button: number): boolean {
-    const gamepad = this.gamepads.get(index);
-    if (!gamepad) return false;
-    return gamepad.buttons[button]?.pressed ?? false;
-  }
-  
-  getGamepadAxis(index: number, axis: number): number {
-    const gamepad = this.gamepads.get(index);
-    if (!gamepad) return 0;
-    
-    const value = gamepad.axes[axis] ?? 0;
-    return Math.abs(value) < this.deadZone ? 0 : value;
-  }
-  
-  getGamepadStick(index: number, stick: 'left' | 'right'): { x: number; y: number } {
-    const axisOffset = stick === 'left' ? 0 : 2;
-    return {
-      x: this.getGamepadAxis(index, axisOffset),
-      y: this.getGamepadAxis(index, axisOffset + 1)
-    };
-  }
-  
-  getTouchPoints(): Map<number, { x: number; y: number; startX: number; startY: number; startTime: number }> {
-    return new Map(this.touchPoints);
-  }
-  
-  setDeadZone(value: number): void {
-    this.deadZone = Math.max(0, Math.min(1, value));
-  }
-}
+import type {
+  ComboStep,
+  GestureConfig,
+  InputAction,
+  InputBinding,
+  InputCombo,
+  InputContext,
+  InputDeviceType,
+  InputState,
+  KeyCode,
+  RecordedInput,
+} from './advanced-input-system.types';
+import { InputDeviceManager } from './advanced-input-device-manager';
+export { InputDeviceManager } from './advanced-input-device-manager';
+export type {
+  ComboStep,
+  GestureConfig,
+  InputAction,
+  InputBinding,
+  InputCombo,
+  InputContext,
+  InputDeviceType,
+  InputState,
+  KeyCode,
+  RecordedInput,
+} from './advanced-input-system.types';
 
 // ============================================================================
 // INPUT BUFFER

@@ -3,11 +3,20 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 // GET /api/files?projectId=xxx - List files for project
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-legacy-get',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many file list requests. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
     const { searchParams } = new URL(req.url);
@@ -48,6 +57,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-legacy-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 1000,
+      message: 'Too many file write requests. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
     const { projectId, path, content, language } = await req.json();

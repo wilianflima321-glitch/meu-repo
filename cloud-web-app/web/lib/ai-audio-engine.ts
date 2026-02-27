@@ -1,316 +1,48 @@
 /**
- * ==============================================================================
- * AETHEL AI AUDIO ENGINE - Sistema de Áudio AAA com Inteligência Artificial
- * ==============================================================================
- * 
- * Sistema completo de áudio com IA para jogos e filmes AAA:
- * 
- * 1. AI EMOTIONAL AUDIO SYSTEM
- *    - Análise emocional de cenas/roteiros
- *    - Geração automática de música baseada em emoção
- *    - Adaptação dinâmica ao gameplay/narrativa
- * 
- * 2. AI ADAPTIVE MUSIC
- *    - Música procedural com stems/layers
- *    - Transições inteligentes (beat-sync, crossfade)
- *    - Resposta ao contexto (combate, exploração, tensão)
- * 
- * 3. AI VOICE/DIALOGUE
- *    - Text-to-Speech neural (múltiplas vozes)
- *    - Lip-sync automático
- *    - Emoção na voz baseada no script
- * 
- * 4. AI FOLEY/SFX
- *    - Geração procedural de efeitos sonoros
- *    - Footsteps baseados em material/superfície
- *    - Ambientes procedurais (chuva, vento, cidade)
- * 
- * 5. PROFESSIONAL INTERFACE
- *    - Mixer visual (estilo DAW)
- *    - Automação de parâmetros
- *    - Waveform visualization
- *    - Spectrum analyzer
- * 
- * Compatível com: FMOD, Wwise, Web Audio API, Dolby Atmos
+ * Aethel AI Audio Engine runtime.
+ * Core orchestration for adaptive music, SFX, voice and analysis.
  */
 
-// ============================================================================
-// TIPOS CORE
-// ============================================================================
+import type {
+  AmbientLayer,
+  AudioAnalysisData,
+  CharacterContext,
+  EmotionalContext,
+  FoleyEvent,
+  InstrumentConfig,
+  LipSyncData,
+  LipSyncKeyframe,
+  MusicComposition,
+  MusicParameters,
+  MusicStem,
+  SceneContext,
+  SFXParameters,
+  VoiceProfile,
+  VoiceRequest,
+} from './ai-audio-engine.types';
+import { ContextTracker, EmotionAnalyzer } from './ai-audio-engine-analysis';
+import { emotionToMusicParams, emotionToTags, getDefaultEmotion } from './ai-audio-engine.music';
 
-export interface EmotionalContext {
-  /** Emoção primária (0-1 para cada) */
-  joy: number;
-  sadness: number;
-  anger: number;
-  fear: number;
-  surprise: number;
-  disgust: number;
-  trust: number;
-  anticipation: number;
-  
-  /** Intensidade geral (0-1) */
-  intensity: number;
-  
-  /** Valência (-1 negativo, +1 positivo) */
-  valence: number;
-  
-  /** Energia (0 calmo, 1 energético) */
-  arousal: number;
-}
+export type {
+  AmbientLayer,
+  AudioAnalysisData,
+  CharacterContext,
+  EmotionalContext,
+  FoleyEvent,
+  InstrumentConfig,
+  LipSyncData,
+  LipSyncKeyframe,
+  MusicComposition,
+  MusicParameters,
+  MusicStem,
+  SceneContext,
+  SFXParameters,
+  VoiceProfile,
+  VoiceRequest,
+} from './ai-audio-engine.types';
+export { ContextTracker, EmotionAnalyzer } from './ai-audio-engine-analysis';
 
-export interface SceneContext {
-  /** Tipo de cena */
-  type: 'combat' | 'exploration' | 'dialogue' | 'cutscene' | 'puzzle' | 'stealth' | 'chase' | 'boss' | 'victory' | 'defeat' | 'menu' | 'custom';
-  
-  /** Localização/ambiente */
-  environment: 'interior' | 'exterior' | 'underwater' | 'space' | 'cave' | 'forest' | 'city' | 'desert' | 'snow' | 'custom';
-  
-  /** Hora do dia */
-  timeOfDay: 'dawn' | 'day' | 'dusk' | 'night';
-  
-  /** Clima */
-  weather: 'clear' | 'cloudy' | 'rain' | 'storm' | 'snow' | 'fog';
-  
-  /** Contexto emocional */
-  emotion: EmotionalContext;
-  
-  /** Personagens presentes */
-  characters: CharacterContext[];
-  
-  /** Eventos ativos */
-  events: string[];
-  
-  /** Metadata customizada */
-  metadata: Record<string, any>;
-}
-
-export interface CharacterContext {
-  id: string;
-  name: string;
-  role: 'player' | 'ally' | 'enemy' | 'npc' | 'narrator';
-  emotion: EmotionalContext;
-  position?: { x: number; y: number; z: number };
-  voiceProfile?: VoiceProfile;
-}
-
-export interface VoiceProfile {
-  id: string;
-  name: string;
-  gender: 'male' | 'female' | 'neutral';
-  age: 'child' | 'young' | 'adult' | 'elderly';
-  accent?: string;
-  pitch: number;      // -12 to +12 semitones
-  speed: number;      // 0.5 to 2.0
-  breathiness: number; // 0-1
-  roughness: number;  // 0-1
-  
-  /** Emotional modulation settings */
-  emotionMod: {
-    joyPitchMod: number;
-    sadnessPitchMod: number;
-    angerSpeedMod: number;
-    fearBreathMod: number;
-  };
-}
-
-// ============================================================================
-// MUSIC TYPES
-// ============================================================================
-
-export interface MusicParameters {
-  /** Gênero musical */
-  genre: 'orchestral' | 'electronic' | 'ambient' | 'rock' | 'jazz' | 'folk' | 'world' | 'hybrid';
-  
-  /** Tempo em BPM */
-  tempo: number;
-  
-  /** Tom musical */
-  key: string;           // e.g., "C major", "A minor"
-  
-  /** Modo */
-  mode: 'major' | 'minor' | 'dorian' | 'phrygian' | 'lydian' | 'mixolydian' | 'locrian';
-  
-  /** Instrumentação */
-  instruments: InstrumentConfig[];
-  
-  /** Dinâmica (pp - ff) */
-  dynamics: 'pp' | 'p' | 'mp' | 'mf' | 'f' | 'ff';
-  
-  /** Articulação */
-  articulation: 'legato' | 'staccato' | 'marcato' | 'tenuto' | 'accent';
-  
-  /** Textura */
-  texture: 'sparse' | 'medium' | 'dense';
-  
-  /** Repetição */
-  repetition: number;    // 0-1
-  
-  /** Variação */
-  variation: number;     // 0-1
-}
-
-export interface InstrumentConfig {
-  type: string;          // e.g., "strings", "brass", "synth"
-  family: 'strings' | 'brass' | 'woodwind' | 'percussion' | 'keys' | 'synth' | 'vocal' | 'other';
-  volume: number;
-  pan: number;
-  enabled: boolean;
-  
-  /** Layer específico */
-  layer?: string;
-  
-  /** Filtro */
-  filter?: {
-    type: 'lowpass' | 'highpass' | 'bandpass';
-    frequency: number;
-    resonance: number;
-  };
-}
-
-export interface MusicStem {
-  id: string;
-  name: string;
-  category: 'melody' | 'harmony' | 'bass' | 'drums' | 'percussion' | 'ambient' | 'fx';
-  audioUrl?: string;
-  audioBuffer?: AudioBuffer;
-  volume: number;
-  pan: number;
-  enabled: boolean;
-  
-  /** Condições para ativar */
-  conditions?: {
-    minIntensity?: number;
-    maxIntensity?: number;
-    emotions?: string[];
-    events?: string[];
-  };
-}
-
-export interface MusicComposition {
-  id: string;
-  name: string;
-  description: string;
-  
-  /** Parâmetros de geração */
-  parameters: MusicParameters;
-  
-  /** Stems/layers */
-  stems: MusicStem[];
-  
-  /** Duração em segundos */
-  duration: number;
-  
-  /** Loop point */
-  loopStart?: number;
-  loopEnd?: number;
-  
-  /** Stingers (one-shots para transições) */
-  stingers: {
-    start?: string;
-    end?: string;
-    victory?: string;
-    defeat?: string;
-    custom?: Record<string, string>;
-  };
-  
-  /** Metadados de emoção */
-  emotionProfile: EmotionalContext;
-  
-  /** Tags para busca */
-  tags: string[];
-}
-
-// ============================================================================
-// SFX TYPES
-// ============================================================================
-
-export interface SFXParameters {
-  category: 'footstep' | 'impact' | 'weapon' | 'explosion' | 'ambient' | 'ui' | 'foley' | 'creature' | 'vehicle' | 'magic' | 'custom';
-  
-  /** Material/superfície */
-  material?: 'wood' | 'metal' | 'stone' | 'dirt' | 'grass' | 'water' | 'snow' | 'sand' | 'glass' | 'flesh' | 'cloth';
-  
-  /** Tamanho/escala */
-  size: 'tiny' | 'small' | 'medium' | 'large' | 'huge';
-  
-  /** Intensidade */
-  intensity: number;     // 0-1
-  
-  /** Distância */
-  distance: number;      // metros
-  
-  /** Duração */
-  duration: number;      // segundos
-  
-  /** Variação de pitch */
-  pitchVariation: number; // 0-1
-  
-  /** Reverb */
-  reverb: number;        // 0-1
-  
-  /** Spatial */
-  spatial: boolean;
-  position?: { x: number; y: number; z: number };
-}
-
-export interface FoleyEvent {
-  id: string;
-  type: 'footstep' | 'cloth' | 'impact' | 'handle' | 'gesture' | 'breath' | 'custom';
-  
-  /** Character/objeto */
-  source: string;
-  
-  /** Material do chão/superfície */
-  material: string;
-  
-  /** Velocidade (afeta intensidade) */
-  velocity: number;
-  
-  /** Peso (afeta grave/agudo) */
-  weight: number;
-  
-  /** Timestamp */
-  timestamp: number;
-  
-  /** Position */
-  position?: { x: number; y: number; z: number };
-}
-
-export interface AmbientLayer {
-  id: string;
-  name: string;
-  category: 'background' | 'weather' | 'wildlife' | 'urban' | 'indoor' | 'mechanical';
-  
-  /** Loop contínuo ou eventos */
-  mode: 'loop' | 'events';
-  
-  /** Volume base */
-  baseVolume: number;
-  
-  /** Modulação baseada em contexto */
-  contextModulation: {
-    timeOfDay: Record<string, number>;  // volume por período
-    weather: Record<string, number>;    // volume por clima
-    intensity: { min: number; max: number }; // range por intensidade da cena
-  };
-  
-  /** Arquivo/buffer de áudio */
-  audioUrl?: string;
-  audioBuffer?: AudioBuffer;
-  
-  /** Spatial */
-  spatial?: {
-    enabled: boolean;
-    minDistance: number;
-    maxDistance: number;
-    positions?: { x: number; y: number; z: number }[];
-  };
-}
-
-// ============================================================================
 // AI EMOTIONAL AUDIO SYSTEM
-// ============================================================================
 
 export class AIEmotionalAudioSystem {
   private audioContext: AudioContext | null = null;
@@ -339,10 +71,7 @@ export class AIEmotionalAudioSystem {
     this.emotionAnalyzer = new EmotionAnalyzer();
     this.contextTracker = new ContextTracker();
   }
-  
-  // ==========================================================================
   // INITIALIZATION
-  // ==========================================================================
   
   async initialize(): Promise<void> {
     this.audioContext = new AudioContext();
@@ -362,10 +91,7 @@ export class AIEmotionalAudioSystem {
       this.audioContext.close();
     }
   }
-  
-  // ==========================================================================
   // SCENE CONTEXT
-  // ==========================================================================
   
   /**
    * Atualiza o contexto da cena - a IA adapta toda a mixagem
@@ -405,19 +131,16 @@ export class AIEmotionalAudioSystem {
   async analyzeVisual(imageData: ImageData | HTMLCanvasElement): Promise<EmotionalContext> {
     return this.emotionAnalyzer.analyzeVisual(imageData);
   }
-  
-  // ==========================================================================
   // AI MUSIC GENERATION
-  // ==========================================================================
   
   /**
    * Gera música proceduralmente baseada no contexto emocional
    */
   async generateMusic(params: Partial<MusicParameters>, emotion?: EmotionalContext): Promise<MusicComposition> {
-    const context = emotion || this.currentContext?.emotion || this.getDefaultEmotion();
+    const context = emotion || this.currentContext?.emotion || getDefaultEmotion();
     
     // Derivar parâmetros musicais da emoção
-    const musicParams = this.emotionToMusicParams(context, params);
+    const musicParams = emotionToMusicParams(context, params);
     
     // Gerar composição
     const composition: MusicComposition = {
@@ -429,7 +152,7 @@ export class AIEmotionalAudioSystem {
       duration: 120, // 2 minutos
       stingers: {}, // Stingers vazios por padrão
       emotionProfile: context,
-      tags: this.emotionToTags(context),
+      tags: emotionToTags(context),
     };
     
     // Gerar stems baseados nos instrumentos
@@ -444,138 +167,6 @@ export class AIEmotionalAudioSystem {
   /**
    * Converte emoção em parâmetros musicais
    */
-  private emotionToMusicParams(emotion: EmotionalContext, override: Partial<MusicParameters>): MusicParameters {
-    // Mapear valência/arousal para parâmetros musicais
-    const tempo = this.mapRange(emotion.arousal, 0, 1, 60, 140);
-    const mode: MusicParameters['mode'] = emotion.valence > 0 ? 'major' : 'minor';
-    
-    // Determinar gênero baseado na combinação de emoções
-    let genre: MusicParameters['genre'] = 'orchestral';
-    if (emotion.fear > 0.5 || emotion.anger > 0.5) {
-      genre = 'hybrid';
-    } else if (emotion.joy > 0.6) {
-      genre = emotion.arousal > 0.5 ? 'electronic' : 'folk';
-    } else if (emotion.sadness > 0.5) {
-      genre = 'ambient';
-    }
-    
-    // Determinar dinâmica
-    let dynamics: MusicParameters['dynamics'] = 'mf';
-    if (emotion.intensity < 0.3) dynamics = 'p';
-    else if (emotion.intensity < 0.5) dynamics = 'mp';
-    else if (emotion.intensity < 0.7) dynamics = 'mf';
-    else if (emotion.intensity < 0.9) dynamics = 'f';
-    else dynamics = 'ff';
-    
-    // Instrumentação baseada no gênero e emoção
-    const instruments = this.getInstrumentationForEmotion(emotion, genre);
-    
-    return {
-      genre,
-      tempo: Math.round(tempo),
-      key: emotion.valence > 0 ? 'C major' : 'A minor',
-      mode,
-      instruments,
-      dynamics,
-      articulation: emotion.arousal > 0.6 ? 'staccato' : 'legato',
-      texture: emotion.intensity < 0.4 ? 'sparse' : emotion.intensity > 0.7 ? 'dense' : 'medium',
-      repetition: 0.5,
-      variation: emotion.surprise * 0.5 + 0.3,
-      ...override,
-    };
-  }
-  
-  /**
-   * Gera instrumentação baseada na emoção
-   */
-  private getInstrumentationForEmotion(emotion: EmotionalContext, genre: string): InstrumentConfig[] {
-    const instruments: InstrumentConfig[] = [];
-    
-    // Sempre ter uma base
-    if (genre === 'orchestral' || genre === 'hybrid') {
-      instruments.push({
-        type: 'strings',
-        family: 'strings',
-        volume: 0.7,
-        pan: 0,
-        enabled: true,
-      });
-    }
-    
-    // Adicionar instrumentos baseados em emoção
-    if (emotion.sadness > 0.5) {
-      instruments.push({
-        type: 'cello',
-        family: 'strings',
-        volume: 0.6,
-        pan: -0.2,
-        enabled: true,
-      });
-      instruments.push({
-        type: 'piano',
-        family: 'keys',
-        volume: 0.5,
-        pan: 0.1,
-        enabled: true,
-      });
-    }
-    
-    if (emotion.joy > 0.5) {
-      instruments.push({
-        type: 'brass',
-        family: 'brass',
-        volume: 0.5,
-        pan: 0.3,
-        enabled: true,
-      });
-    }
-    
-    if (emotion.anger > 0.5 || emotion.fear > 0.5) {
-      instruments.push({
-        type: 'percussion',
-        family: 'percussion',
-        volume: 0.8,
-        pan: 0,
-        enabled: true,
-      });
-      instruments.push({
-        type: 'synth_bass',
-        family: 'synth',
-        volume: 0.7,
-        pan: 0,
-        enabled: true,
-      });
-    }
-    
-    if (emotion.anticipation > 0.5) {
-      instruments.push({
-        type: 'timpani',
-        family: 'percussion',
-        volume: 0.4,
-        pan: 0,
-        enabled: true,
-      });
-    }
-    
-    // Ambient elements
-    if (genre === 'ambient' || emotion.trust > 0.5) {
-      instruments.push({
-        type: 'pad',
-        family: 'synth',
-        volume: 0.4,
-        pan: 0,
-        enabled: true,
-        filter: {
-          type: 'lowpass',
-          frequency: 2000,
-          resonance: 0.3,
-        },
-      });
-    }
-    
-    return instruments;
-  }
-  
   /**
    * Gera um stem de música
    */
@@ -589,7 +180,7 @@ export class AIEmotionalAudioSystem {
     
     return {
       id: `stem-${instrument.type}-${Date.now()}`,
-      name: instrument.type,
+      name: instrument.type || instrument.name || instrument.family,
       category: this.instrumentToCategory(instrument.family),
       volume: instrument.volume,
       pan: instrument.pan,
@@ -619,10 +210,7 @@ export class AIEmotionalAudioSystem {
         return 'fx';
     }
   }
-  
-  // ==========================================================================
   // ADAPTIVE MUSIC PLAYBACK
-  // ==========================================================================
   
   /**
    * Toca uma composição com transição suave
@@ -742,7 +330,7 @@ export class AIEmotionalAudioSystem {
     
     // Panner para posicionamento
     const panner = this.audioContext.createStereoPanner();
-    panner.pan.value = stem.pan;
+    panner.pan.value = stem.pan ?? 0;
     
     // Conectar
     source.connect(gain);
@@ -787,10 +375,7 @@ export class AIEmotionalAudioSystem {
     await Promise.all(promises);
     this.stemPlayers.clear();
   }
-  
-  // ==========================================================================
   // AI SFX GENERATION
-  // ==========================================================================
   
   /**
    * Gera um efeito sonoro proceduralmente
@@ -909,7 +494,7 @@ export class AIEmotionalAudioSystem {
       const noise = (Math.random() * 2 - 1) * noiseAmount;
       
       // Pitch variation
-      const pitchVar = 1 + (Math.random() - 0.5) * params.pitchVariation;
+      const pitchVar = 1 + (Math.random() - 0.5) * (params.pitchVariation ?? 0);
       
       const sample = (tonal + noise) * envelope * intensityMod * pitchVar;
       
@@ -926,7 +511,7 @@ export class AIEmotionalAudioSystem {
     const length = left.length;
     
     const intensityMod = params.intensity || 0.5;
-    const sizeMultiplier = this.sizeToMultiplier(params.size);
+    const sizeMultiplier = this.sizeToMultiplier(params.size || 'medium');
     
     for (let i = 0; i < length; i++) {
       const t = i / sampleRate;
@@ -957,7 +542,7 @@ export class AIEmotionalAudioSystem {
     const length = left.length;
     
     const intensityMod = params.intensity || 0.8;
-    const sizeMultiplier = this.sizeToMultiplier(params.size);
+    const sizeMultiplier = this.sizeToMultiplier(params.size || 'medium');
     
     for (let i = 0; i < length; i++) {
       const t = i / sampleRate;
@@ -1105,7 +690,7 @@ export class AIEmotionalAudioSystem {
     }
   }
   
-  private sizeToMultiplier(size: string): number {
+  private sizeToMultiplier(size: string = 'medium'): number {
     switch (size) {
       case 'tiny': return 0.3;
       case 'small': return 0.6;
@@ -1115,10 +700,7 @@ export class AIEmotionalAudioSystem {
       default: return 1;
     }
   }
-  
-  // ==========================================================================
   // FOLEY SYSTEM
-  // ==========================================================================
   
   /**
    * Processa evento de foley e toca som apropriado
@@ -1128,7 +710,7 @@ export class AIEmotionalAudioSystem {
       category: 'footstep',
       material: event.material as any,
       size: 'medium',
-      intensity: event.velocity,
+      intensity: event.velocity ?? 0.5,
       distance: 1,
       duration: 0.2,
       pitchVariation: 0.1,
@@ -1140,7 +722,7 @@ export class AIEmotionalAudioSystem {
     switch (event.type) {
       case 'footstep':
         sfxParams.category = 'footstep';
-        sfxParams.duration = 0.15 + event.weight * 0.1;
+        sfxParams.duration = 0.15 + (event.weight ?? 0.5) * 0.1;
         break;
       case 'cloth':
         sfxParams.category = 'foley';
@@ -1149,17 +731,14 @@ export class AIEmotionalAudioSystem {
         break;
       case 'impact':
         sfxParams.category = 'impact';
-        sfxParams.duration = 0.2 + event.weight * 0.2;
+        sfxParams.duration = 0.2 + (event.weight ?? 0.5) * 0.2;
         break;
     }
     
     const buffer = await this.generateSFX(sfxParams);
     this.playSFX(buffer, sfxParams);
   }
-  
-  // ==========================================================================
   // AI VOICE/DIALOGUE
-  // ==========================================================================
   
   /**
    * Gera voz a partir de texto com emoção
@@ -1251,10 +830,7 @@ export class AIEmotionalAudioSystem {
     if (energy < 0.8) return 'RR'; // r
     return 'aa'; // Open vowel
   }
-  
-  // ==========================================================================
   // AMBIENT SYSTEM
-  // ==========================================================================
   
   /**
    * Carrega e configura uma camada de ambient
@@ -1312,10 +888,7 @@ export class AIEmotionalAudioSystem {
       this.ambientLayers.delete(layerId);
     }
   }
-  
-  // ==========================================================================
   // PLAYBACK
-  // ==========================================================================
   
   /**
    * Toca um SFX
@@ -1385,10 +958,7 @@ export class AIEmotionalAudioSystem {
       this.currentVoice = null;
     }
   }
-  
-  // ==========================================================================
   // UTILITIES
-  // ==========================================================================
   
   private async loadAudioBuffer(url: string): Promise<AudioBuffer> {
     if (!this.audioContext) {
@@ -1400,48 +970,7 @@ export class AIEmotionalAudioSystem {
     return this.audioContext.decodeAudioData(arrayBuffer);
   }
   
-  private getDefaultEmotion(): EmotionalContext {
-    return {
-      joy: 0.5,
-      sadness: 0,
-      anger: 0,
-      fear: 0,
-      surprise: 0,
-      disgust: 0,
-      trust: 0.5,
-      anticipation: 0.3,
-      intensity: 0.5,
-      valence: 0.3,
-      arousal: 0.4,
-    };
-  }
-  
-  private emotionToTags(emotion: EmotionalContext): string[] {
-    const tags: string[] = [];
-    
-    if (emotion.joy > 0.5) tags.push('happy', 'uplifting');
-    if (emotion.sadness > 0.5) tags.push('sad', 'melancholic');
-    if (emotion.anger > 0.5) tags.push('intense', 'aggressive');
-    if (emotion.fear > 0.5) tags.push('tense', 'scary');
-    if (emotion.surprise > 0.5) tags.push('dramatic', 'unexpected');
-    if (emotion.anticipation > 0.5) tags.push('building', 'suspenseful');
-    
-    if (emotion.valence > 0.3) tags.push('positive');
-    else if (emotion.valence < -0.3) tags.push('negative');
-    
-    if (emotion.arousal > 0.6) tags.push('energetic');
-    else if (emotion.arousal < 0.4) tags.push('calm');
-    
-    return tags;
-  }
-  
-  private mapRange(value: number, inMin: number, inMax: number, outMin: number, outMax: number): number {
-    return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
-  }
-  
-  // ==========================================================================
   // AUDIO ANALYSIS
-  // ==========================================================================
   
   /**
    * Retorna dados de análise em tempo real
@@ -1461,184 +990,7 @@ export class AIEmotionalAudioSystem {
   }
 }
 
-// ============================================================================
-// EMOTION ANALYZER
-// ============================================================================
-
-export class EmotionAnalyzer {
-  // Dicionários de palavras-chave para análise de texto
-  private emotionKeywords: Record<string, string[]> = {
-    joy: ['happy', 'joy', 'excited', 'wonderful', 'amazing', 'love', 'celebrate', 'triumph'],
-    sadness: ['sad', 'cry', 'tears', 'loss', 'grief', 'mourn', 'lonely', 'heartbreak'],
-    anger: ['angry', 'rage', 'fury', 'hate', 'violent', 'attack', 'destroy', 'revenge'],
-    fear: ['scared', 'afraid', 'terror', 'horror', 'panic', 'dread', 'danger', 'threat'],
-    surprise: ['surprise', 'shock', 'unexpected', 'sudden', 'reveal', 'discover', 'twist'],
-    anticipation: ['wait', 'expect', 'building', 'tension', 'suspense', 'approaching', 'imminent'],
-  };
-  
-  /**
-   * Analisa texto e extrai contexto emocional
-   */
-  analyzeText(text: string): EmotionalContext {
-    const words = text.toLowerCase().split(/\s+/);
-    const wordCount = words.length;
-    
-    const scores: Record<string, number> = {
-      joy: 0,
-      sadness: 0,
-      anger: 0,
-      fear: 0,
-      surprise: 0,
-      anticipation: 0,
-    };
-    
-    // Contar palavras-chave
-    for (const word of words) {
-      for (const [emotion, keywords] of Object.entries(this.emotionKeywords)) {
-        if (keywords.some(kw => word.includes(kw))) {
-          scores[emotion]++;
-        }
-      }
-    }
-    
-    // Normalizar
-    const maxScore = Math.max(...Object.values(scores), 1);
-    for (const emotion of Object.keys(scores)) {
-      scores[emotion] /= maxScore;
-    }
-    
-    // Calcular valência e arousal
-    const valence = (scores.joy - scores.sadness - scores.anger - scores.fear) / 2;
-    const arousal = (scores.anger + scores.fear + scores.surprise + scores.anticipation) / 4;
-    const intensity = Math.max(...Object.values(scores));
-    
-    return {
-      joy: scores.joy,
-      sadness: scores.sadness,
-      anger: scores.anger,
-      fear: scores.fear,
-      surprise: scores.surprise,
-      disgust: 0,
-      trust: 1 - scores.fear,
-      anticipation: scores.anticipation,
-      intensity,
-      valence: Math.max(-1, Math.min(1, valence)),
-      arousal: Math.max(0, Math.min(1, arousal)),
-    };
-  }
-  
-  /**
-   * Analisa imagem/frame para contexto emocional
-   */
-  async analyzeVisual(_imageData: ImageData | HTMLCanvasElement): Promise<EmotionalContext> {
-    // Implementação real usaria computer vision / ML
-    // Por enquanto, retorna valores neutros
-    
-    return {
-      joy: 0.3,
-      sadness: 0.1,
-      anger: 0,
-      fear: 0,
-      surprise: 0.1,
-      disgust: 0,
-      trust: 0.5,
-      anticipation: 0.2,
-      intensity: 0.3,
-      valence: 0.2,
-      arousal: 0.3,
-    };
-  }
-}
-
-// ============================================================================
-// CONTEXT TRACKER
-// ============================================================================
-
-export class ContextTracker {
-  private history: SceneContext[] = [];
-  private listeners: ((context: SceneContext) => void)[] = [];
-  
-  track(context: SceneContext): void {
-    this.history.push(context);
-    
-    // Manter apenas últimos 60 contextos (1 segundo a 60fps)
-    if (this.history.length > 60) {
-      this.history.shift();
-    }
-    
-    // Notificar listeners
-    for (const listener of this.listeners) {
-      listener(context);
-    }
-  }
-  
-  onContextChange(callback: (context: SceneContext) => void): () => void {
-    this.listeners.push(callback);
-    return () => {
-      this.listeners = this.listeners.filter(l => l !== callback);
-    };
-  }
-  
-  getAverageEmotion(): EmotionalContext {
-    if (this.history.length === 0) {
-      return {
-        joy: 0, sadness: 0, anger: 0, fear: 0, surprise: 0,
-        disgust: 0, trust: 0, anticipation: 0,
-        intensity: 0, valence: 0, arousal: 0,
-      };
-    }
-    
-    const sum: EmotionalContext = {
-      joy: 0, sadness: 0, anger: 0, fear: 0, surprise: 0,
-      disgust: 0, trust: 0, anticipation: 0,
-      intensity: 0, valence: 0, arousal: 0,
-    };
-    
-    for (const ctx of this.history) {
-      for (const key of Object.keys(sum) as (keyof EmotionalContext)[]) {
-        sum[key] += ctx.emotion[key];
-      }
-    }
-    
-    for (const key of Object.keys(sum) as (keyof EmotionalContext)[]) {
-      sum[key] /= this.history.length;
-    }
-    
-    return sum;
-  }
-}
-
-// ============================================================================
-// SUPPORTING TYPES
-// ============================================================================
-
-interface VoiceRequest {
-  text: string;
-  profile: VoiceProfile;
-  emotion?: EmotionalContext;
-  priority: number;
-}
-
-interface LipSyncData {
-  duration: number;
-  frameRate: number;
-  keyframes: LipSyncKeyframe[];
-}
-
-interface LipSyncKeyframe {
-  time: number;
-  viseme: string;
-  weight: number;
-}
-
-interface AudioAnalysisData {
-  frequencyData: Uint8Array;
-  timeData: Uint8Array;
-}
-
-// ============================================================================
 // SINGLETON EXPORT
-// ============================================================================
 
 let _instance: AIEmotionalAudioSystem | null = null;
 

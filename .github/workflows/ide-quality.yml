@@ -28,3 +28,6 @@ jobs:
 
       - name: Run TypeScript check for AI IDE
         run: npm run check:ai-ide-ts
+
+      - name: Repository connectivity gate
+        run: npm run qa:repo-connectivity

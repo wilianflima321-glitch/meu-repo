@@ -14,6 +14,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { checkStorageQuota } from '@/lib/storage-quota';
 import { randomUUID } from 'crypto';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 // ============================================================================
 // TEMPLATE DEFINITIONS
@@ -637,6 +638,15 @@ export class PlatformerController extends Component {
 
 export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'templates-get',
+      key: getRequestIp(request),
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many template listing requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { searchParams } = new URL(request.url);
     const genre = searchParams.get('genre');
     const style = searchParams.get('style');
@@ -673,6 +683,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'templates-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many create-from-template requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json();
     const { name, template: templateId, style } = body;
 

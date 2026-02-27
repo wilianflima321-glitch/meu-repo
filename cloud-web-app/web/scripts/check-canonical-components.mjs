@@ -1,7 +1,8 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import path from 'node:path'
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.cwd();
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TARGET_DIRS = ['app', 'components', 'lib'];
 const EXTENSIONS = new Set(['.ts', '.tsx']);
 
@@ -11,6 +12,13 @@ const bannedSuffixes = [
   { suffix: '/CommandPaletteUnified', replacement: '@/components/ide/CommandPalette' },
   { suffix: '/statusbar/StatusBar', replacement: 'IDELayout status bar slot' },
   { suffix: '/statusbar/StatusBarPro', replacement: 'IDELayout status bar slot' },
+  { suffix: '/engine/ContentBrowser', replacement: '@/components/assets/ContentBrowser' },
+  { suffix: '/debug/DebugPanel', replacement: '@/components/ide/DebugPanel' },
+  { suffix: '/dashboard/JobQueueDashboard', replacement: 'admin queue pages or canonical queue widgets' },
+  { suffix: '/admin/JobQueueDashboard', replacement: 'admin queue pages or canonical queue widgets' },
+  { suffix: '/dashboard/SecurityDashboard', replacement: 'admin security pages or canonical security widgets' },
+  { suffix: '/admin/SecurityDashboard', replacement: 'admin security pages or canonical security widgets' },
+  { suffix: '/vcs/TimeMachineSlider', replacement: '@/components/collaboration/TimeMachineSlider' },
 ];
 
 const skipSegments = new Set(['node_modules', '.next', 'dist', 'build']);

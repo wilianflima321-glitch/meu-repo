@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
@@ -20,6 +21,14 @@ const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-upload-post',
+      key: user.userId,
+      max: 90,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset uploads. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const entitlements = await requireEntitlementsForUser(user.userId);
     const formData = await req.formData();
 

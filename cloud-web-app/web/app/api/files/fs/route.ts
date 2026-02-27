@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
@@ -22,6 +23,14 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-fs',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 1000,
+      message: 'Too many file operations. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const body = await request.json();

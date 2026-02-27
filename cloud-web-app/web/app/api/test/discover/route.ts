@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
@@ -15,6 +16,14 @@ export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
 		await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'test-discover-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many test discovery requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
 		const body = (await request.json().catch(() => ({}))) as Partial<DiscoverTestsRequest>;
 		const adapter = String(body.adapter || '').toLowerCase();

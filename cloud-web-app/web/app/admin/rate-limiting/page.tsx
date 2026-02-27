@@ -1,35 +1,56 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
-/**
- * Rate Limiting Admin - Alinhado com planos 2025
- * Sem plano Free - todos os planos são pagos
- */
+type RateLimitConfig = {
+  name: string;
+  algorithm: string;
+  limit: number;
+  window: number;
+  identifier: string;
+};
+
+type RateLimitPayload = {
+  success?: boolean;
+  configs?: RateLimitConfig[];
+  diagnostics?: {
+    provider?: string;
+    enabled?: boolean;
+    strategy?: string;
+  };
+  notes?: string[];
+};
+
 export default function RateLimitingPage() {
-  const [limits, setLimits] = useState<Array<{
-    name: string;
-    algorithm: string;
-    limit: number;
-    window: number;
-    identifier: string;
-  }>>([]);
+  const [limits, setLimits] = useState<RateLimitConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [providerInfo, setProviderInfo] = useState<string>('unknown');
+  const [notes, setNotes] = useState<string[]>([]);
 
   const fetchLimits = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/rate-limits');
-      if (!res.ok) throw new Error('Falha ao carregar limites');
-      const data = await res.json();
+      const data = await adminJsonFetch<RateLimitPayload>('/api/admin/rate-limits');
       setLimits(Array.isArray(data?.configs) ? data.configs : []);
+      setProviderInfo(data?.diagnostics?.provider || data?.diagnostics?.strategy || 'unknown');
+      setNotes(Array.isArray(data?.notes) ? data.notes : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar limites');
+      setError(err instanceof Error ? err.message : 'Failed to load rate-limit configs');
     } finally {
       setLoading(false);
     }
@@ -39,82 +60,91 @@ export default function RateLimitingPage() {
     fetchLimits();
   }, [fetchLimits]);
 
-  const filteredLimits = limits.filter((limit) => {
-    const term = search.trim().toLowerCase();
-    return (
-      !term ||
-      limit.name.toLowerCase().includes(term) ||
-      limit.identifier.toLowerCase().includes(term)
-    );
-  });
+  const filteredLimits = useMemo(() => {
+    return limits.filter((limit) => {
+      const term = search.trim().toLowerCase();
+      return !term || limit.name.toLowerCase().includes(term) || limit.identifier.toLowerCase().includes(term);
+    });
+  }, [limits, search]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Limitação global de taxa da API</h1>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Rate Limiting'
+      description='Inspect active API throttling policy and runtime limiter metadata.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchLimits}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchLimits}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Rules' value={limits.length} tone='sky' />
+          <AdminStatCard label='Filtered rules' value={filteredLimits.length} tone='neutral' />
+          <AdminStatCard label='Provider' value={providerInfo} tone='amber' />
+          <AdminStatCard label='Notes' value={notes.length} tone='emerald' />
+        </AdminStatGrid>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex items-center justify-between gap-3">
+      <AdminSection className='mb-4'>
         <input
-          type="text"
-          placeholder="Buscar por nome ou identificador"
+          type='text'
+          placeholder='Search by rule name or identifier'
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full"
+          onChange={(event) => setSearch(event.target.value)}
+          className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
         />
-        <span className="text-xs text-zinc-500">{filteredLimits.length} regras</span>
-      </div>
-      
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Limites ativos</h2>
-        {loading ? (
-          <p className="text-sm text-zinc-500">Carregando limites...</p>
-        ) : error ? (
-          <div>
-            <p className="text-sm text-red-500">{error}</p>
-            <button className="mt-3 bg-blue-500 text-white px-3 py-1 rounded" onClick={fetchLimits}>
-              Tentar novamente
-            </button>
-          </div>
-        ) : filteredLimits.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma configuração disponível.</p>
-        ) : (
-          <ul>
-            {filteredLimits.map((limit) => (
-              <li key={limit.name} className="p-4 border-b">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                  <div>
-                    <h3 className="font-semibold">{limit.name}</h3>
-                    <p className="text-xs text-zinc-500">Algoritmo: {limit.algorithm} • Identificador: {limit.identifier}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded text-sm bg-zinc-800/70">
-                      {limit.limit} requisições / {limit.window}s
-                    </span>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(limit.identifier)}
-                      className="px-3 py-1 rounded text-xs bg-zinc-800/70 text-zinc-300"
-                    >
-                      Copiar ID
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+      </AdminSection>
+
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Rule</th>
+                <th className='p-3 text-left'>Algorithm</th>
+                <th className='p-3 text-left'>Window</th>
+                <th className='p-3 text-left'>Identifier</th>
+                <th className='p-3 text-left'>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={5} message='Loading rate-limit rules...' />
+              ) : filteredLimits.length === 0 ? (
+                <AdminTableStateRow colSpan={5} message='No rate-limit rules found for current filters.' />
+              ) : (
+                filteredLimits.map((limit) => (
+                  <tr key={limit.name} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-zinc-100'>{limit.name}</td>
+                    <td className='p-3'>{limit.algorithm}</td>
+                    <td className='p-3'>{limit.limit} requests / {limit.window}s</td>
+                    <td className='p-3 text-zinc-400'>{limit.identifier}</td>
+                    <td className='p-3'>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(limit.identifier)}
+                        className='rounded bg-zinc-800/70 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-700/80'
+                        type='button'
+                      >
+                        Copy ID
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+
+      {notes.length > 0 ? (
+        <div className='mt-6'>
+          <AdminStatusBanner tone='info'>{notes.join(' | ')}</AdminStatusBanner>
+        </div>
+      ) : null}
+    </AdminPageShell>
   );
 }

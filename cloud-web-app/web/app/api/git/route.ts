@@ -12,11 +12,20 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
     // SECURITY: Autenticação obrigatória
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'git-post',
+      key: user.userId,
+      max: 360,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many git requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
 
     const body = await request.json();
@@ -298,20 +307,32 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const repoPath = searchParams.get('repoPath');
-  const action = searchParams.get('action');
-  
-  if (!repoPath) {
-    return NextResponse.json(
-      { error: 'Repository path is required' },
-      { status: 400 }
-    );
-  }
-  
-  const git = getGitService(repoPath);
-  
   try {
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'git-get',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many git query requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+    await requireEntitlementsForUser(user.userId);
+
+    const { searchParams } = new URL(request.url);
+    const repoPath = searchParams.get('repoPath');
+    const action = searchParams.get('action');
+    
+    if (!repoPath) {
+      return NextResponse.json(
+        { error: 'Repository path is required' },
+        { status: 400 }
+      );
+    }
+    
+    const safeRepoPath = assertWorkspacePath(repoPath, 'repoPath');
+    const git = getGitService(safeRepoPath);
+
     switch (action) {
       case 'status': {
         const status = await git.getStatus();

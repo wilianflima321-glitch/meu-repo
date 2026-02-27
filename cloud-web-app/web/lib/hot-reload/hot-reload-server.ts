@@ -9,197 +9,55 @@
  */
 
 import { EventEmitter } from 'events';
+import { readFile, stat } from 'fs/promises';
 import { createServer, Server as HttpServer, IncomingMessage } from 'http';
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import { watch, FSWatcher, WatchOptions } from 'chokidar';
-import { createHash } from 'crypto';
-import { readFile, stat } from 'fs/promises';
 import { extname, relative, resolve, normalize } from 'path';
 import { parse as parseUrl } from 'url';
-
-// ============================================================================
-// Types & Interfaces
-// ============================================================================
-
-/** Supported file types for hot reload */
-export type HotReloadFileType = 'css' | 'js' | 'ts' | 'jsx' | 'tsx' | 'json' | 'html' | 'vue' | 'svelte' | 'unknown';
-
-/** Hot reload update strategies */
-export type UpdateStrategy = 'hmr' | 'css-inject' | 'full-reload';
-
-/** Connection state of a WebSocket client */
-export type ConnectionState = 'connecting' | 'connected' | 'disconnecting' | 'disconnected';
-
-/** Bundler types supported for integration */
-export type BundlerType = 'webpack' | 'vite' | 'esbuild' | 'rollup' | 'parcel' | 'custom';
-
-/** Event types emitted by the server */
-export type HotReloadEventType = 'update' | 'reload' | 'error' | 'connected' | 'disconnected' | 'file-changed' | 'build-start' | 'build-end';
-
-/** File change event data */
-export interface FileChangeEvent {
-  path: string;
-  relativePath: string;
-  type: 'add' | 'change' | 'unlink';
-  fileType: HotReloadFileType;
-  timestamp: number;
-  hash?: string;
-  size?: number;
-}
-
-/** Update message sent to clients */
-export interface UpdateMessage {
-  type: 'update';
-  strategy: UpdateStrategy;
-  files: FileUpdateInfo[];
-  timestamp: number;
-  buildId?: string;
-}
-
-/** File update information */
-export interface FileUpdateInfo {
-  path: string;
-  fileType: HotReloadFileType;
-  hash: string;
-  content?: string;
-  acceptsHMR: boolean;
-  dependencies?: string[];
-}
-
-/** Reload message for full page refresh */
-export interface ReloadMessage {
-  type: 'reload';
-  reason: string;
-  timestamp: number;
-}
-
-/** Error message with overlay data */
-export interface ErrorMessage {
-  type: 'error';
-  error: ErrorInfo;
-  timestamp: number;
-}
-
-/** Detailed error information */
-export interface ErrorInfo {
-  message: string;
-  stack?: string;
-  file?: string;
-  line?: number;
-  column?: number;
-  frame?: string;
-  plugin?: string;
-  id?: string;
-}
-
-/** Connected message */
-export interface ConnectedMessage {
-  type: 'connected';
-  clientId: string;
-  serverVersion: string;
-  timestamp: number;
-}
-
-/** Ping/Pong messages for keep-alive */
-export interface PingMessage {
-  type: 'ping';
-  timestamp: number;
-}
-
-export interface PongMessage {
-  type: 'pong';
-  timestamp: number;
-}
-
-/** Union type for all message types */
-export type HotReloadMessage = 
-  | UpdateMessage 
-  | ReloadMessage 
-  | ErrorMessage 
-  | ConnectedMessage 
-  | PingMessage 
-  | PongMessage;
-
-/** Client information */
-export interface ClientInfo {
-  id: string;
-  socket: WebSocket;
-  state: ConnectionState;
-  connectedAt: number;
-  lastPing: number;
-  userAgent?: string;
-  acceptedTypes: HotReloadFileType[];
-}
-
-/** Server configuration options */
-export interface HotReloadServerOptions {
-  /** Port for the WebSocket server */
-  port: number;
-  /** Host to bind to */
-  host: string;
-  /** Root directory to watch */
-  root: string;
-  /** File patterns to watch (glob patterns) */
-  watchPatterns: string[];
-  /** File patterns to ignore */
-  ignorePatterns: string[];
-  /** Debounce delay in milliseconds */
-  debounceDelay: number;
-  /** Enable CSS hot reload without refresh */
-  cssHotReload: boolean;
-  /** Enable JS/TS HMR */
-  jsHMR: boolean;
-  /** Fallback to full reload if HMR fails */
-  fullReloadFallback: boolean;
-  /** Enable error overlay in browser */
-  errorOverlay: boolean;
-  /** Ping interval for keep-alive (ms) */
-  pingInterval: number;
-  /** Client timeout (ms) */
-  clientTimeout: number;
-  /** Bundler integration */
-  bundler?: BundlerType;
-  /** Custom bundler adapter */
-  bundlerAdapter?: BundlerAdapter;
-  /** Public path for assets */
-  publicPath: string;
-  /** Enable logging */
-  logging: boolean;
-  /** Log level */
-  logLevel: 'debug' | 'info' | 'warn' | 'error';
-  /** HTTPS configuration */
-  https?: HttpsConfig;
-  /** Maximum payload size */
-  maxPayloadSize: number;
-  /** Enable file content in updates */
-  sendFileContent: boolean;
-}
-
-/** HTTPS configuration */
-export interface HttpsConfig {
-  key: string;
-  cert: string;
-  ca?: string;
-}
-
-/** Bundler adapter interface for custom integrations */
-export interface BundlerAdapter {
-  name: string;
-  onBuildStart?: () => void | Promise<void>;
-  onBuildEnd?: (result: BuildResult) => void | Promise<void>;
-  transformUpdate?: (files: FileUpdateInfo[]) => FileUpdateInfo[] | Promise<FileUpdateInfo[]>;
-  getModuleDependencies?: (modulePath: string) => string[] | Promise<string[]>;
-  acceptsHMR?: (filePath: string) => boolean;
-}
-
-/** Build result from bundler */
-export interface BuildResult {
-  success: boolean;
-  errors: ErrorInfo[];
-  warnings: string[];
-  duration: number;
-  outputFiles?: string[];
-}
+import { Debouncer, FileHashCache, Logger } from './hot-reload-server-runtime-helpers';
+import { generateHotReloadClientScript } from './hot-reload-client-script';
+import type {
+  BuildResult,
+  BundlerAdapter,
+  ClientInfo,
+  ConnectedMessage,
+  ErrorInfo,
+  ErrorMessage,
+  FileChangeEvent,
+  FileUpdateInfo,
+  HotReloadFileType,
+  HotReloadMessage,
+  HotReloadServerOptions,
+  PingMessage,
+  PongMessage,
+  ReloadMessage,
+  UpdateMessage,
+  UpdateStrategy,
+} from './hot-reload-server-types';
+export type {
+  BuildResult,
+  BundlerAdapter,
+  BundlerType,
+  ClientInfo,
+  ConnectedMessage,
+  ConnectionState,
+  ErrorInfo,
+  ErrorMessage,
+  FileChangeEvent,
+  FileUpdateInfo,
+  HotReloadEventType,
+  HotReloadFileType,
+  HotReloadMessage,
+  HotReloadServerEvents,
+  HotReloadServerOptions,
+  HttpsConfig,
+  PingMessage,
+  PongMessage,
+  ReloadMessage,
+  UpdateMessage,
+  UpdateStrategy,
+} from './hot-reload-server-types';
 
 /** Default configuration */
 const DEFAULT_OPTIONS: HotReloadServerOptions = {
@@ -243,161 +101,6 @@ const DEFAULT_OPTIONS: HotReloadServerOptions = {
   maxPayloadSize: 10 * 1024 * 1024, // 10MB
   sendFileContent: true
 };
-
-// ============================================================================
-// Event Types for TypeScript
-// ============================================================================
-
-export interface HotReloadServerEvents {
-  'update': (message: UpdateMessage) => void;
-  'reload': (message: ReloadMessage) => void;
-  'error': (error: ErrorInfo) => void;
-  'connected': (client: ClientInfo) => void;
-  'disconnected': (clientId: string) => void;
-  'file-changed': (event: FileChangeEvent) => void;
-  'build-start': () => void;
-  'build-end': (result: BuildResult) => void;
-  'server-start': (port: number) => void;
-  'server-stop': () => void;
-}
-
-// ============================================================================
-// Logger
-// ============================================================================
-
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-
-const LOG_LEVELS: Record<LogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3
-};
-
-class Logger {
-  private level: LogLevel;
-  private enabled: boolean;
-  private prefix: string;
-
-  constructor(enabled: boolean, level: LogLevel, prefix = '[HMR]') {
-    this.enabled = enabled;
-    this.level = level;
-    this.prefix = prefix;
-  }
-
-  private shouldLog(level: LogLevel): boolean {
-    return this.enabled && LOG_LEVELS[level] >= LOG_LEVELS[this.level];
-  }
-
-  private formatMessage(level: LogLevel, message: string): string {
-    const timestamp = new Date().toISOString();
-    return `${this.prefix} ${timestamp} [${level.toUpperCase()}] ${message}`;
-  }
-
-  debug(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('debug')) {
-      console.debug(this.formatMessage('debug', message), ...args);
-    }
-  }
-
-  info(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('info')) {
-      console.info(this.formatMessage('info', message), ...args);
-    }
-  }
-
-  warn(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('warn')) {
-      console.warn(this.formatMessage('warn', message), ...args);
-    }
-  }
-
-  error(message: string, ...args: unknown[]): void {
-    if (this.shouldLog('error')) {
-      console.error(this.formatMessage('error', message), ...args);
-    }
-  }
-}
-
-// ============================================================================
-// Debouncer
-// ============================================================================
-
-class Debouncer {
-  private timers: Map<string, NodeJS.Timeout> = new Map();
-  private pendingChanges: Map<string, FileChangeEvent[]> = new Map();
-
-  constructor(private delay: number) {}
-
-  debounce(key: string, event: FileChangeEvent, callback: (events: FileChangeEvent[]) => void): void {
-    // Add to pending changes
-    const pending = this.pendingChanges.get(key) || [];
-    pending.push(event);
-    this.pendingChanges.set(key, pending);
-
-    // Clear existing timer
-    const existingTimer = this.timers.get(key);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
-
-    // Set new timer
-    const timer = setTimeout(() => {
-      const events = this.pendingChanges.get(key) || [];
-      this.pendingChanges.delete(key);
-      this.timers.delete(key);
-      
-      if (events.length > 0) {
-        callback(events);
-      }
-    }, this.delay);
-
-    this.timers.set(key, timer);
-  }
-
-  clear(): void {
-    for (const timer of this.timers.values()) {
-      clearTimeout(timer);
-    }
-    this.timers.clear();
-    this.pendingChanges.clear();
-  }
-}
-
-// ============================================================================
-// File Hash Cache
-// ============================================================================
-
-class FileHashCache {
-  private cache: Map<string, { hash: string; mtime: number }> = new Map();
-
-  async getHash(filePath: string): Promise<string | null> {
-    try {
-      const stats = await stat(filePath);
-      const cached = this.cache.get(filePath);
-
-      if (cached && cached.mtime === stats.mtimeMs) {
-        return cached.hash;
-      }
-
-      const content = await readFile(filePath);
-      const hash = createHash('md5').update(content as unknown as string).digest('hex');
-      
-      this.cache.set(filePath, { hash, mtime: stats.mtimeMs });
-      return hash;
-    } catch {
-      return null;
-    }
-  }
-
-  invalidate(filePath: string): void {
-    this.cache.delete(filePath);
-  }
-
-  clear(): void {
-    this.cache.clear();
-  }
-}
 
 // ============================================================================
 // Hot Reload Server
@@ -1072,235 +775,7 @@ export class HotReloadServer extends EventEmitter {
 
   /** Get the hot reload client script */
   getClientScript(): string {
-    return `
-(function() {
-  'use strict';
-
-  // Hot Reload Client for Aethel Engine
-  const HotReloadClient = {
-    socket: null,
-    clientId: null,
-    reconnectAttempts: 0,
-    maxReconnectAttempts: 10,
-    reconnectDelay: 1000,
-    errorOverlay: null,
-    
-    init: function(wsUrl) {
-      this.wsUrl = wsUrl || 'ws://' + location.hostname + ':${this.options.port}';
-      this.connect();
-    },
-    
-    connect: function() {
-      try {
-        this.socket = new WebSocket(this.wsUrl);
-        
-        this.socket.onopen = () => {
-          console.log('[HMR] Connected to Hot Reload Server');
-          this.reconnectAttempts = 0;
-        };
-        
-        this.socket.onmessage = (event) => {
-          this.handleMessage(JSON.parse(event.data));
-        };
-        
-        this.socket.onclose = () => {
-          console.log('[HMR] Disconnected from Hot Reload Server');
-          this.attemptReconnect();
-        };
-        
-        this.socket.onerror = (error) => {
-          console.error('[HMR] WebSocket error:', error);
-        };
-      } catch (error) {
-        console.error('[HMR] Failed to connect:', error);
-        this.attemptReconnect();
-      }
-    },
-    
-    attemptReconnect: function() {
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        this.reconnectAttempts++;
-        const delay = this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1);
-        console.log('[HMR] Reconnecting in ' + Math.round(delay) + 'ms...');
-        setTimeout(() => this.connect(), delay);
-      }
-    },
-    
-    handleMessage: function(message) {
-      switch (message.type) {
-        case 'connected':
-          this.clientId = message.clientId;
-          console.log('[HMR] Client ID:', message.clientId);
-          break;
-          
-        case 'ping':
-          this.send({ type: 'pong', timestamp: Date.now() });
-          break;
-          
-        case 'update':
-          this.handleUpdate(message);
-          break;
-          
-        case 'reload':
-          console.log('[HMR] Full reload:', message.reason);
-          location.reload();
-          break;
-          
-        case 'error':
-          this.showErrorOverlay(message.error);
-          break;
-          
-        case 'clear-error':
-          this.hideErrorOverlay();
-          break;
-          
-        case 'build-start':
-          console.log('[HMR] Build started...');
-          break;
-          
-        case 'build-end':
-          console.log('[HMR] Build completed in ' + message.duration + 'ms');
-          break;
-      }
-    },
-    
-    handleUpdate: function(message) {
-      console.log('[HMR] Received update:', message.strategy, message.files.map(f => f.path));
-      
-      switch (message.strategy) {
-        case 'css-inject':
-          this.injectCSS(message.files);
-          break;
-          
-        case 'hmr':
-          this.applyHMR(message.files);
-          break;
-          
-        case 'full-reload':
-          location.reload();
-          break;
-      }
-    },
-    
-    injectCSS: function(files) {
-      files.forEach(file => {
-        const links = document.querySelectorAll('link[rel="stylesheet"]');
-        let updated = false;
-        
-        links.forEach(link => {
-          const href = link.getAttribute('href');
-          if (href && href.includes(file.path.replace(/\\\\/g, '/'))) {
-            const newHref = href.split('?')[0] + '?t=' + Date.now();
-            link.setAttribute('href', newHref);
-            updated = true;
-            console.log('[HMR] CSS updated:', file.path);
-          }
-        });
-        
-        if (!updated && file.content) {
-          const style = document.createElement('style');
-          style.setAttribute('data-hmr-path', file.path);
-          style.textContent = file.content;
-          document.head.appendChild(style);
-          console.log('[HMR] CSS injected:', file.path);
-        }
-      });
-    },
-    
-    applyHMR: function(files) {
-      let reloadNeeded = false;
-      
-      files.forEach(file => {
-        if (window.__HMR_MODULES__ && window.__HMR_MODULES__[file.path]) {
-          try {
-            window.__HMR_MODULES__[file.path](file);
-            console.log('[HMR] Module updated:', file.path);
-            this.send({ type: 'hmr-accept', path: file.path });
-          } catch (error) {
-            console.error('[HMR] Module update failed:', file.path, error);
-            this.send({ type: 'hmr-decline', path: file.path });
-            reloadNeeded = true;
-          }
-        } else {
-          reloadNeeded = true;
-        }
-      });
-      
-      if (reloadNeeded) {
-        console.log('[HMR] HMR not available, reloading...');
-        location.reload();
-      }
-    },
-    
-    showErrorOverlay: function(error) {
-      this.hideErrorOverlay();
-      
-      const overlay = document.createElement('div');
-      overlay.id = 'hmr-error-overlay';
-      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);color:#ff6b6b;font-family:monospace;font-size:14px;padding:40px;z-index:999999;overflow:auto;';
-      
-      let html = '<div style="max-width:900px;margin:0 auto;">';
-      html += '<h2 style="color:#ff6b6b;margin:0 0 20px;">Build Error</h2>';
-      html += '<pre style="background:#1a1a1a;padding:20px;border-radius:8px;overflow:auto;white-space:pre-wrap;word-wrap:break-word;">';
-      html += this.escapeHtml(error.message);
-      
-      if (error.file) {
-        html += '\\n\\nFile: ' + this.escapeHtml(error.file);
-        if (error.line) html += ':' + error.line;
-        if (error.column) html += ':' + error.column;
-      }
-      
-      if (error.frame) {
-        html += '\\n\\n' + this.escapeHtml(error.frame);
-      }
-      
-      if (error.stack) {
-        html += '\\n\\nStack:\\n' + this.escapeHtml(error.stack);
-      }
-      
-      html += '</pre>';
-      html += '<button onclick="document.getElementById(\\'hmr-error-overlay\\').remove()" style="position:absolute;top:20px;right:20px;background:#333;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Close</button>';
-      html += '</div>';
-      
-      overlay.innerHTML = html;
-      document.body.appendChild(overlay);
-      this.errorOverlay = overlay;
-    },
-    
-    hideErrorOverlay: function() {
-      if (this.errorOverlay) {
-        this.errorOverlay.remove();
-        this.errorOverlay = null;
-      }
-      const existing = document.getElementById('hmr-error-overlay');
-      if (existing) existing.remove();
-    },
-    
-    escapeHtml: function(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    },
-    
-    send: function(message) {
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(JSON.stringify(message));
-      }
-    }
-  };
-  
-  // Initialize on load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => HotReloadClient.init());
-  } else {
-    HotReloadClient.init();
-  }
-  
-  // Export for global access
-  window.HotReloadClient = HotReloadClient;
-  window.__HMR_MODULES__ = window.__HMR_MODULES__ || {};
-})();
-`;
+    return generateHotReloadClientScript(this.options.port);
   }
 }
 

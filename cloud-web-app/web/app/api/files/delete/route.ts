@@ -3,18 +3,19 @@ import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
   toVirtualWorkspacePath,
 } from '@/lib/server/workspace-scope'
 import { trackCompatibilityRouteHit } from '@/lib/server/compatibility-route-telemetry'
+import { FILES_COMPAT_METADATA } from '@/lib/server/files-compat-policy'
 
 export const dynamic = 'force-dynamic'
 
-async function handleDelete(request: NextRequest) {
-  const user = requireAuth(request)
-  await requireEntitlementsForUser(user.userId)
+async function handleDelete(request: NextRequest, userId: string) {
+  await requireEntitlementsForUser(userId)
 
   const body = await request.json()
   const projectId = getScopedProjectId(request, body)
@@ -35,7 +36,7 @@ async function handleDelete(request: NextRequest) {
   const deleted: string[] = []
   for (const target of targets) {
     const resolved = resolveScopedWorkspacePath({
-      userId: user.userId,
+      userId,
       projectId,
       requestedPath: target,
     })
@@ -54,6 +55,7 @@ async function handleDelete(request: NextRequest) {
       authority: 'canonical',
       compatibilityRoute: '/api/files/delete',
       canonicalEndpoint: '/api/files/fs',
+      ...FILES_COMPAT_METADATA,
     },
     {
       headers: trackCompatibilityRouteHit({
@@ -61,6 +63,7 @@ async function handleDelete(request: NextRequest) {
         route: '/api/files/delete',
         replacement: '/api/files/fs?action=delete',
         status: 'compatibility-wrapper',
+        ...FILES_COMPAT_METADATA,
       }),
     }
   )
@@ -68,7 +71,16 @@ async function handleDelete(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    return await handleDelete(request)
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-delete-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 1000,
+      message: 'Too many file delete requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+    return await handleDelete(request, user.userId)
   } catch (error) {
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped
@@ -78,7 +90,16 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    return await handleDelete(request)
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-delete-delete',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 1000,
+      message: 'Too many file delete requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+    return await handleDelete(request, user.userId)
   } catch (error) {
     const mapped = apiErrorToResponse(error)
     if (mapped) return mapped

@@ -2,6 +2,7 @@
  * Search Manager
  * Orchestrates search and replace operations across workspace
  */
+import { readFileViaFs, requestFileFs, writeFileViaFs } from '@/lib/client/files-fs'
 
 export interface SearchOptions {
   query: string;
@@ -277,47 +278,58 @@ export class SearchManager {
     includePatterns: string[],
     excludePatterns: string[]
   ): Promise<string[]> {
-    // This calls the backend API to get the workspace file list
-    const response = await fetch('/api/files/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ includePatterns, excludePatterns }),
-    });
+    const data = await requestFileFs<{
+      entries?: Array<{ path: string; type: 'file' | 'directory' }>
+    }>({
+      action: 'list',
+      path: '/',
+      options: {
+        recursive: true,
+        includeHidden: false,
+      },
+    })
 
-    if (!response.ok) {
-      throw new Error('Failed to get file list');
-    }
+    const entries = Array.isArray(data.entries) ? data.entries : []
+    return entries
+      .filter((entry) => entry.type === 'file')
+      .map((entry) => entry.path)
+      .filter((entryPath) => this.matchesIncludeExclude(entryPath, includePatterns, excludePatterns))
+  }
 
-    const data = await response.json();
-    return data.files || [];
+  private matchesIncludeExclude(path: string, includePatterns: string[], excludePatterns: string[]): boolean {
+    const normalized = path.replace(/\\/g, '/')
+    const includes = includePatterns.length ? includePatterns : ['**/*']
+    const matchesInclude = includes.some((pattern) => this.matchesGlob(normalized, pattern))
+    if (!matchesInclude) return false
+    return !excludePatterns.some((pattern) => this.matchesGlob(normalized, pattern))
+  }
+
+  private matchesGlob(path: string, glob: string): boolean {
+    const escaped = glob
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*\*/g, '::DOUBLE_STAR::')
+      .replace(/\*/g, '[^/]*')
+      .replace(/\?/g, '.')
+      .replace(/::DOUBLE_STAR::/g, '.*')
+
+    const normalized = escaped.startsWith('/') ? escaped : `/?${escaped}`
+    return new RegExp(`^${normalized}$`).test(path)
   }
 
   /**
    * Read file content
    */
   private async readFile(path: string): Promise<string> {
-    const response = await fetch(`/api/files/read?path=${encodeURIComponent(path)}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to read file: ${path}`);
-    }
-
-    return response.text();
+    return readFileViaFs(path)
   }
 
   /**
    * Write file content
    */
   private async writeFile(path: string, content: string): Promise<void> {
-    const response = await fetch('/api/files/write', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, content }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to write file: ${path}`);
-    }
+    await writeFileViaFs(path, content, {
+      writeOptions: { createDirectories: true, atomic: true },
+    })
   }
 
   /**

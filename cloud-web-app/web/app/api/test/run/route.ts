@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -18,6 +19,14 @@ export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
 		await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'test-run-post',
+      key: user.userId,
+      max: 90,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many test run requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
 		const startTime = new Date();
 		const body = (await request.json().catch(() => ({}))) as Partial<RunTestsRequest>;

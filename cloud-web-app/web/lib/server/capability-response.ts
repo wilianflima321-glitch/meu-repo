@@ -74,3 +74,24 @@ export function notImplementedCapability(options: {
     headers: options.headers,
   })
 }
+
+export function queueBackendUnavailableCapability(options: {
+  message?: string
+  capability: string
+  milestone?: string
+  runtimeMode?: string
+  metadata?: Record<string, unknown>
+  headers?: Record<string, string>
+}) {
+  return capabilityResponse({
+    error: 'QUEUE_BACKEND_UNAVAILABLE',
+    message: options.message || 'Queue backend is unavailable for this capability.',
+    status: 503,
+    capability: options.capability,
+    capabilityStatus: 'PARTIAL',
+    milestone: options.milestone,
+    runtimeMode: options.runtimeMode,
+    metadata: options.metadata,
+    headers: options.headers,
+  })
+}

@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface UninstallRequest {
   extensionId: string;
@@ -21,7 +22,15 @@ const BUILTIN_EXTENSION_IDS = [
 
 export async function POST(request: NextRequest) {
   try {
-		const user = requireAuth(request);
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-uninstall-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many extension uninstall requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireFeatureForUser(user.userId, 'marketplace');
 
     const body: UninstallRequest = await request.json();

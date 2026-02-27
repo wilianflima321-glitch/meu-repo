@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 // =============================================================================
 // SECURITY OVERVIEW ADMIN API
@@ -11,8 +12,17 @@ const truthy = (value?: string) => {
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
 };
 
-async function getHandler(req: NextRequest) {
+async function getHandler(req: NextRequest, context: { user: { id: string } }) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'admin-security-overview-get',
+      key: context.user.id,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many security overview requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { searchParams } = new URL(req.url);
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 200);
 

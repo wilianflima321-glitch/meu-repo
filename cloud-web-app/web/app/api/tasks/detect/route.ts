@@ -5,10 +5,12 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 interface DetectTasksRequest {
   workspaceRoot: string;
 }
+const MAX_WORKSPACE_ROOT_LENGTH = 2048;
 
 type DetectedTask = {
   label: string;
@@ -26,9 +28,23 @@ export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
 		await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'tasks-detect-post',
+      key: user.userId,
+      max: 300,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many task detection requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body: DetectTasksRequest = await request.json();
     const { workspaceRoot } = body;
+    if (!workspaceRoot || workspaceRoot.length > MAX_WORKSPACE_ROOT_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: 'INVALID_WORKSPACE_ROOT', message: 'workspaceRoot is required and must be under 2048 characters.' },
+        { status: 400 }
+      );
+    }
 		const safeRoot = assertWorkspacePath(workspaceRoot, 'workspaceRoot');
 
 		const detectedTasks: DetectedTask[] = [];
@@ -54,7 +70,7 @@ export async function POST(request: NextRequest) {
           });
         }
       }
-    } catch (error) {
+    } catch {
       // No package.json
     }
 
@@ -93,7 +109,7 @@ export async function POST(request: NextRequest) {
           problemMatcher: []
         }
       );
-    } catch (error) {
+    } catch {
       // No pom.xml
     }
 
@@ -125,7 +141,7 @@ export async function POST(request: NextRequest) {
           problemMatcher: []
         }
       );
-    } catch (error) {
+    } catch {
       // No build.gradle
     }
 
@@ -157,7 +173,7 @@ export async function POST(request: NextRequest) {
           problemMatcher: ['$go']
         }
       );
-    } catch (error) {
+    } catch {
       // No go.mod
     }
 
@@ -196,7 +212,7 @@ export async function POST(request: NextRequest) {
           problemMatcher: ['$rustc']
         }
       );
-    } catch (error) {
+    } catch {
       // No Cargo.toml
     }
 
@@ -214,7 +230,7 @@ export async function POST(request: NextRequest) {
           problemMatcher: []
         }
       );
-    } catch (error) {
+    } catch {
       // No requirements.txt
     }
 
@@ -231,7 +247,7 @@ export async function POST(request: NextRequest) {
           problemMatcher: []
         }
       );
-    } catch (error) {
+    } catch {
       // No setup.py
     }
 
@@ -263,7 +279,7 @@ export async function POST(request: NextRequest) {
           problemMatcher: []
         }
       );
-    } catch (error) {
+    } catch {
       // No Makefile
     }
 

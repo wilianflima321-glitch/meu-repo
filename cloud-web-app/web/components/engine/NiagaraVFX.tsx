@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   ReactFlow,
   Node,
@@ -25,366 +25,39 @@ import {
   NodeTypes,
   Handle,
   Position,
-  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport, Grid, Stats } from '@react-three/drei';
 import * as THREE from 'three';
+import {
+  defaultEmitterConfig,
+  initialEdges,
+  initialNodes,
+} from './niagara-vfx-defaults';
+import { ParticleEmitter, ParticleRenderer } from './NiagaraVFX.runtime';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-interface ParticleSystemState {
-  id: string;
-  name: string;
-  emitters: EmitterConfig[];
-  isPlaying: boolean;
-  duration: number;
-  looping: boolean;
-}
+import type {
+  ColorGradient,
+  EmitterConfig,
+  Particle,
+  ParticleSystemState,
+  SizeCurve,
+  VelocityCurve,
+} from './niagara-vfx-types';
 
-interface EmitterConfig {
-  id: string;
-  name: string;
-  enabled: boolean;
-  
-  // Spawn
-  spawnRate: number;
-  spawnBurst: { time: number; count: number }[];
-  maxParticles: number;
-  
-  // Lifetime
-  lifetime: { min: number; max: number };
-  
-  // Position
-  spawnShape: 'point' | 'sphere' | 'box' | 'cone' | 'cylinder' | 'mesh';
-  spawnShapeParams: Record<string, number>;
-  
-  // Velocity
-  initialVelocity: { min: THREE.Vector3; max: THREE.Vector3 };
-  velocityOverLife: VelocityCurve[];
-  
-  // Size
-  initialSize: { min: number; max: number };
-  sizeOverLife: SizeCurve[];
-  
-  // Color
-  initialColor: THREE.Color;
-  colorOverLife: ColorGradient[];
-  
-  // Rotation
-  initialRotation: { min: number; max: number };
-  rotationRate: { min: number; max: number };
-  
-  // Forces
-  gravity: THREE.Vector3;
-  drag: number;
-  turbulence: { strength: number; frequency: number };
-  
-  // Rendering
-  material: 'sprite' | 'mesh' | 'ribbon' | 'beam';
-  texture?: string;
-  blendMode: 'additive' | 'alpha' | 'multiply';
-  sortMode: 'none' | 'byDistance' | 'byAge';
-}
-
-interface VelocityCurve {
-  time: number;
-  multiplier: number;
-}
-
-interface SizeCurve {
-  time: number;
-  size: number;
-}
-
-interface ColorGradient {
-  time: number;
-  color: THREE.Color;
-  alpha: number;
-}
-
-interface Particle {
-  position: THREE.Vector3;
-  velocity: THREE.Vector3;
-  age: number;
-  lifetime: number;
-  size: number;
-  color: THREE.Color;
-  alpha: number;
-  rotation: number;
-  rotationRate: number;
-}
-
-// ============================================================================
-// PARTICLE SYSTEM CORE
-// ============================================================================
-
-class ParticleEmitter {
-  private particles: Particle[] = [];
-  private timeSinceLastSpawn: number = 0;
-  private burstIndex: number = 0;
-  private systemTime: number = 0;
-  
-  constructor(public config: EmitterConfig) {}
-  
-  update(deltaTime: number): Particle[] {
-    if (!this.config.enabled) return this.particles;
-    
-    this.systemTime += deltaTime;
-    
-    // Spawn particles
-    this.timeSinceLastSpawn += deltaTime;
-    const spawnInterval = 1 / this.config.spawnRate;
-    
-    while (this.timeSinceLastSpawn >= spawnInterval && this.particles.length < this.config.maxParticles) {
-      this.spawnParticle();
-      this.timeSinceLastSpawn -= spawnInterval;
-    }
-    
-    // Handle bursts
-    while (this.burstIndex < this.config.spawnBurst.length) {
-      const burst = this.config.spawnBurst[this.burstIndex];
-      if (this.systemTime >= burst.time) {
-        for (let i = 0; i < burst.count && this.particles.length < this.config.maxParticles; i++) {
-          this.spawnParticle();
-        }
-        this.burstIndex++;
-      } else {
-        break;
-      }
-    }
-    
-    // Update particles
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
-      p.age += deltaTime;
-      
-      if (p.age >= p.lifetime) {
-        this.particles.splice(i, 1);
-        continue;
-      }
-      
-      const normalizedAge = p.age / p.lifetime;
-      
-      // Apply forces
-      p.velocity.add(this.config.gravity.clone().multiplyScalar(deltaTime));
-      p.velocity.multiplyScalar(1 - this.config.drag * deltaTime);
-      
-      // Apply turbulence
-      if (this.config.turbulence.strength > 0) {
-        const turb = new THREE.Vector3(
-          Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.x),
-          Math.cos(this.systemTime * this.config.turbulence.frequency + p.position.y),
-          Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.z)
-        ).multiplyScalar(this.config.turbulence.strength * deltaTime);
-        p.velocity.add(turb);
-      }
-      
-      // Apply velocity over life
-      let velocityMult = 1;
-      for (let j = 0; j < this.config.velocityOverLife.length - 1; j++) {
-        const curr = this.config.velocityOverLife[j];
-        const next = this.config.velocityOverLife[j + 1];
-        if (normalizedAge >= curr.time && normalizedAge <= next.time) {
-          const t = (normalizedAge - curr.time) / (next.time - curr.time);
-          velocityMult = curr.multiplier + (next.multiplier - curr.multiplier) * t;
-          break;
-        }
-      }
-      
-      // Update position
-      p.position.add(p.velocity.clone().multiplyScalar(deltaTime * velocityMult));
-      
-      // Update size over life
-      for (let j = 0; j < this.config.sizeOverLife.length - 1; j++) {
-        const curr = this.config.sizeOverLife[j];
-        const next = this.config.sizeOverLife[j + 1];
-        if (normalizedAge >= curr.time && normalizedAge <= next.time) {
-          const t = (normalizedAge - curr.time) / (next.time - curr.time);
-          p.size = curr.size + (next.size - curr.size) * t;
-          break;
-        }
-      }
-      
-      // Update color over life
-      for (let j = 0; j < this.config.colorOverLife.length - 1; j++) {
-        const curr = this.config.colorOverLife[j];
-        const next = this.config.colorOverLife[j + 1];
-        if (normalizedAge >= curr.time && normalizedAge <= next.time) {
-          const t = (normalizedAge - curr.time) / (next.time - curr.time);
-          p.color.lerpColors(curr.color, next.color, t);
-          p.alpha = curr.alpha + (next.alpha - curr.alpha) * t;
-          break;
-        }
-      }
-      
-      // Update rotation
-      p.rotation += p.rotationRate * deltaTime;
-    }
-    
-    return this.particles;
-  }
-  
-  private spawnParticle(): void {
-    const position = this.getSpawnPosition();
-    
-    const velocity = new THREE.Vector3(
-      THREE.MathUtils.randFloat(this.config.initialVelocity.min.x, this.config.initialVelocity.max.x),
-      THREE.MathUtils.randFloat(this.config.initialVelocity.min.y, this.config.initialVelocity.max.y),
-      THREE.MathUtils.randFloat(this.config.initialVelocity.min.z, this.config.initialVelocity.max.z)
-    );
-    
-    const particle: Particle = {
-      position,
-      velocity,
-      age: 0,
-      lifetime: THREE.MathUtils.randFloat(this.config.lifetime.min, this.config.lifetime.max),
-      size: THREE.MathUtils.randFloat(this.config.initialSize.min, this.config.initialSize.max),
-      color: this.config.initialColor.clone(),
-      alpha: 1,
-      rotation: THREE.MathUtils.randFloat(this.config.initialRotation.min, this.config.initialRotation.max),
-      rotationRate: THREE.MathUtils.randFloat(this.config.rotationRate.min, this.config.rotationRate.max),
-    };
-    
-    this.particles.push(particle);
-  }
-  
-  private getSpawnPosition(): THREE.Vector3 {
-    const params = this.config.spawnShapeParams;
-    
-    switch (this.config.spawnShape) {
-      case 'point':
-        return new THREE.Vector3(0, 0, 0);
-        
-      case 'sphere': {
-        const radius = params.radius || 1;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        return new THREE.Vector3(
-          radius * Math.sin(phi) * Math.cos(theta),
-          radius * Math.sin(phi) * Math.sin(theta),
-          radius * Math.cos(phi)
-        );
-      }
-        
-      case 'box': {
-        const width = params.width || 1;
-        const height = params.height || 1;
-        const depth = params.depth || 1;
-        return new THREE.Vector3(
-          THREE.MathUtils.randFloatSpread(width),
-          THREE.MathUtils.randFloatSpread(height),
-          THREE.MathUtils.randFloatSpread(depth)
-        );
-      }
-        
-      case 'cone': {
-        const angle = params.angle || 45;
-        const radius = params.radius || 1;
-        const r = Math.random() * radius;
-        const theta = Math.random() * Math.PI * 2;
-        const y = Math.random() * Math.tan(angle * Math.PI / 180) * r;
-        return new THREE.Vector3(
-          r * Math.cos(theta),
-          y,
-          r * Math.sin(theta)
-        );
-      }
-        
-      case 'cylinder': {
-        const cylinderRadius = params.radius || 1;
-        const cylinderHeight = params.height || 2;
-        const cylinderTheta = Math.random() * Math.PI * 2;
-        return new THREE.Vector3(
-          cylinderRadius * Math.cos(cylinderTheta),
-          THREE.MathUtils.randFloatSpread(cylinderHeight),
-          cylinderRadius * Math.sin(cylinderTheta)
-        );
-      }
-        
-      default:
-        return new THREE.Vector3(0, 0, 0);
-    }
-  }
-  
-  reset(): void {
-    this.particles = [];
-    this.timeSinceLastSpawn = 0;
-    this.burstIndex = 0;
-    this.systemTime = 0;
-  }
-  
-  getParticleCount(): number {
-    return this.particles.length;
-  }
-}
-
-// ============================================================================
-// 3D PARTICLE RENDERER
-// ============================================================================
-
-interface ParticleRendererProps {
-  emitters: ParticleEmitter[];
-  isPlaying: boolean;
-}
-
-function ParticleRenderer({ emitters, isPlaying }: ParticleRendererProps) {
-  const pointsRef = useRef<THREE.Points>(null);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  
-  useFrame((_, delta) => {
-    if (!isPlaying) return;
-    
-    const allParticles: Particle[] = [];
-    for (const emitter of emitters) {
-      allParticles.push(...emitter.update(delta));
-    }
-    setParticles(allParticles);
-  });
-  
-  const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
-    const positions = new Float32Array(particles.length * 3);
-    const colors = new Float32Array(particles.length * 4);
-    const sizes = new Float32Array(particles.length);
-    
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      positions[i * 3] = p.position.x;
-      positions[i * 3 + 1] = p.position.y;
-      positions[i * 3 + 2] = p.position.z;
-      
-      colors[i * 4] = p.color.r;
-      colors[i * 4 + 1] = p.color.g;
-      colors[i * 4 + 2] = p.color.b;
-      colors[i * 4 + 3] = p.alpha;
-      
-      sizes[i] = p.size;
-    }
-    
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 4));
-    geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    
-    return geo;
-  }, [particles]);
-  
-  return (
-    <points ref={pointsRef} geometry={geometry}>
-      <pointsMaterial
-        size={0.2}
-        vertexColors
-        transparent
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-        sizeAttenuation
-      />
-    </points>
-  );
-}
+export type {
+  ColorGradient,
+  EmitterConfig,
+  Particle,
+  ParticleSystemState,
+  SizeCurve,
+  VelocityCurve,
+} from './niagara-vfx-types';
 
 // ============================================================================
 // NODE COMPONENTS FOR REACTFLOW
@@ -470,103 +143,6 @@ const nodeTypes: NodeTypes = {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-
-const defaultEmitterConfig: EmitterConfig = {
-  id: 'default',
-  name: 'Default Emitter',
-  enabled: true,
-  spawnRate: 50,
-  spawnBurst: [],
-  maxParticles: 1000,
-  lifetime: { min: 1, max: 3 },
-  spawnShape: 'point',
-  spawnShapeParams: {},
-  initialVelocity: {
-    min: new THREE.Vector3(-1, 2, -1),
-    max: new THREE.Vector3(1, 5, 1),
-  },
-  velocityOverLife: [
-    { time: 0, multiplier: 1 },
-    { time: 1, multiplier: 0.2 },
-  ],
-  initialSize: { min: 0.1, max: 0.3 },
-  sizeOverLife: [
-    { time: 0, size: 0.1 },
-    { time: 0.5, size: 0.3 },
-    { time: 1, size: 0 },
-  ],
-  initialColor: new THREE.Color(1, 0.5, 0),
-  colorOverLife: [
-    { time: 0, color: new THREE.Color(1, 1, 0), alpha: 1 },
-    { time: 0.3, color: new THREE.Color(1, 0.5, 0), alpha: 1 },
-    { time: 0.7, color: new THREE.Color(1, 0, 0), alpha: 0.8 },
-    { time: 1, color: new THREE.Color(0.2, 0, 0), alpha: 0 },
-  ],
-  initialRotation: { min: 0, max: Math.PI * 2 },
-  rotationRate: { min: -1, max: 1 },
-  gravity: new THREE.Vector3(0, -2, 0),
-  drag: 0.1,
-  turbulence: { strength: 0.5, frequency: 2 },
-  material: 'sprite',
-  blendMode: 'additive',
-  sortMode: 'byDistance',
-};
-
-const initialNodes: Node[] = [
-  {
-    id: 'emitter-1',
-    type: 'niagara',
-    position: { x: 50, y: 100 },
-    data: { label: 'Particle Emitter', type: 'emitter', params: { rate: 50, maxParticles: 1000 } },
-  },
-  {
-    id: 'spawn-1',
-    type: 'niagara',
-    position: { x: 300, y: 50 },
-    data: { label: 'Spawn Location', type: 'spawn', params: { shape: 'sphere', radius: 0.5 } },
-  },
-  {
-    id: 'velocity-1',
-    type: 'niagara',
-    position: { x: 300, y: 180 },
-    data: { label: 'Initial Velocity', type: 'velocity', params: { minY: 2, maxY: 5, spread: 1 } },
-  },
-  {
-    id: 'size-1',
-    type: 'niagara',
-    position: { x: 550, y: 50 },
-    data: { label: 'Size Over Life', type: 'size', params: { start: 0.1, peak: 0.3, end: 0 } },
-  },
-  {
-    id: 'color-1',
-    type: 'niagara',
-    position: { x: 550, y: 180 },
-    data: { label: 'Color Over Life', type: 'color', params: { mode: 'gradient' } },
-  },
-  {
-    id: 'force-1',
-    type: 'niagara',
-    position: { x: 550, y: 310 },
-    data: { label: 'Gravity Force', type: 'force', params: { x: 0, y: -2, z: 0 } },
-  },
-  {
-    id: 'render-1',
-    type: 'niagara',
-    position: { x: 800, y: 150 },
-    data: { label: 'Sprite Renderer', type: 'render', params: { blend: 'additive', sort: true } },
-  },
-];
-
-const initialEdges: Edge[] = [
-  { id: 'e1', source: 'emitter-1', target: 'spawn-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e2', source: 'emitter-1', target: 'velocity-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e3', source: 'spawn-1', target: 'size-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e4', source: 'velocity-1', target: 'color-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e5', source: 'velocity-1', target: 'force-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e6', source: 'size-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e7', source: 'color-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e8', source: 'force-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
-];
 
 // ============================================================================
 // PANELS

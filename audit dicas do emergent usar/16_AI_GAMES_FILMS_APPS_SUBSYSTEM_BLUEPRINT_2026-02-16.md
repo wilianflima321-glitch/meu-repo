@@ -148,3 +148,40 @@ Each subsystem is classified as `IMPLEMENTED`, `PARTIAL`, or `MISSING`.
 - `app/api/ai/chat-advanced/route.ts`
 6. Workbench AI panel is now wired to advanced orchestration route for runtime use:
 - `components/ide/AIChatPanelContainer.tsx`
+7. Deterministic inline edit execution now includes scoped server apply + rollback token issuance:
+- `app/api/ai/change/apply/route.ts`
+- `app/api/ai/change/rollback/route.ts`
+- `lib/server/change-apply-runtime.ts`
+- `components/editor/MonacoEditorPro.tsx`
+8. Rollback snapshots now persist to local runtime temp storage (TTL) for improved continuity across local restarts:
+- `lib/server/change-apply-runtime.ts`
+9. Media/3D generation routes now fail explicitly on missing provider config (`503 PROVIDER_NOT_CONFIGURED`, `capabilityStatus=PARTIAL`, metadata) instead of implicit provider fallback:
+- `app/api/ai/image/generate/route.ts`
+- `app/api/ai/voice/generate/route.ts`
+- `app/api/ai/music/generate/route.ts`
+- `app/api/ai/3d/generate/route.ts`
+
+## 8) Delta 2026-02-18 - Studio Home orchestration bridge
+1. Added Studio Home entry as orchestration bridge between conversational flow and deterministic engineering flow.
+2. Added session/task APIs for mission lifecycle:
+- start
+- plan
+- run
+- validate
+- apply
+- rollback
+- stop
+3. Added scoped, timeboxed full-access grant API with explicit plan gate.
+4. Current persistence strategy reuses `copilotWorkflow.context`:
+- operationally viable in this wave
+- still `PARTIAL` for distributed durability and dedicated ledger-grade storage.
+
+## 9) Delta 2026-02-19 - Domain-quality bridge for games/films/apps in Studio orchestration
+1. Studio session now stores domain classification (`games|films|apps|general`) derived from mission context.
+2. Studio plan/task execution now carries a domain-specific quality checklist to keep outputs aligned with:
+- deterministic gameplay/runtime constraints (games)
+- temporal/render constraints (films)
+- multi-file/API/UX consistency constraints (apps)
+3. New `tasks/run-wave` endpoint executes planner/coder/reviewer in queued wave mode with explicit gates and no fake success.
+4. Cost-pressure-aware execution profile now reduces model/cost intensity when remaining budget drops, preserving quality policy while avoiding runaway consumption.
+5. IDE advanced chat now surfaces trace-summary metadata to expose agent decision path and cost/latency signals to operators.

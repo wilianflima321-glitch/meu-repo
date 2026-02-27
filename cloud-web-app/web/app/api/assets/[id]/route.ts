@@ -9,8 +9,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { prisma } from '@/lib/db';
 import { deleteObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
+const MAX_ASSET_ID_LENGTH = 120;
+const normalizeAssetId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+async function resolveAssetId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeAssetId(resolvedParams?.id);
+}
 
 // ============================================================================
 // HELPER - Verify Asset Access
@@ -41,11 +50,27 @@ async function verifyAssetAccess(assetId: string, userId: string) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
-    const asset = await verifyAssetAccess(params.id, user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-detail-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset detail requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const assetId = await resolveAssetId(ctx);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    const asset = await verifyAssetAccess(assetId, user.userId);
     
     if (!asset) {
       return NextResponse.json(
@@ -83,11 +108,27 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
-    const asset = await verifyAssetAccess(params.id, user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-detail-patch',
+      key: user.userId,
+      max: 90,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset update attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const assetId = await resolveAssetId(ctx);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    const asset = await verifyAssetAccess(assetId, user.userId);
     
     if (!asset) {
       return NextResponse.json(
@@ -115,7 +156,7 @@ export async function PATCH(
 
     // Perform update
     const updatedAsset = await prisma.asset.update({
-      where: { id: params.id },
+      where: { id: assetId },
       data: updateData,
     });
 
@@ -141,11 +182,27 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(request);
-    const asset = await verifyAssetAccess(params.id, user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'assets-detail-delete',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many asset delete attempts. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const assetId = await resolveAssetId(ctx);
+    if (!assetId || assetId.length > MAX_ASSET_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_ASSET_ID', message: 'assetId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
+    const asset = await verifyAssetAccess(assetId, user.userId);
     
     if (!asset) {
       return NextResponse.json(
@@ -172,13 +229,13 @@ export async function DELETE(
 
     // Delete from database
     await prisma.asset.delete({
-      where: { id: params.id },
+      where: { id: assetId },
     });
 
     return NextResponse.json({
       success: true,
       message: 'Asset deleted successfully',
-      assetId: params.id,
+      assetId: assetId,
     });
   } catch (error: any) {
     console.error('Delete asset error:', error);

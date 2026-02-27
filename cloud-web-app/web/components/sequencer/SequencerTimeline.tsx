@@ -8,6 +8,8 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { formatSequencerTime as formatTime, pixelsToTime, sequencerColors as colors, timeToPixels } from './SequencerTimeline.helpers';
+import type { SequenceData, SequencerTimelineProps, TimelineGroup, TimelineKeyframe, TimelineTrack, TrackType } from './SequencerTimeline.types';
 import {
   Play,
   Pause,
@@ -43,94 +45,8 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// TYPES
+// TRACK ICONS
 // ============================================================================
-
-export type TrackType = 'camera' | 'transform' | 'light' | 'audio' | 'event' | 'material' | 'visibility';
-
-export interface TimelineKeyframe {
-  id: string;
-  time: number;
-  value: number | number[] | string | boolean;
-  easing: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut' | 'bezier' | 'hold';
-  bezierHandles?: { in: { x: number; y: number }; out: { x: number; y: number } };
-  selected?: boolean;
-}
-
-export interface TimelineTrack {
-  id: string;
-  name: string;
-  type: TrackType;
-  targetId: string; // ID do objeto na cena
-  property: string; // Ex: 'position.x', 'rotation', 'intensity'
-  keyframes: TimelineKeyframe[];
-  locked?: boolean;
-  visible?: boolean;
-  muted?: boolean;
-  color?: string;
-  collapsed?: boolean;
-}
-
-export interface TimelineGroup {
-  id: string;
-  name: string;
-  tracks: TimelineTrack[];
-  collapsed?: boolean;
-  locked?: boolean;
-}
-
-export interface SequenceData {
-  id: string;
-  name: string;
-  duration: number; // em segundos
-  frameRate: number;
-  groups: TimelineGroup[];
-}
-
-interface SequencerTimelineProps {
-  sequence: SequenceData;
-  currentTime: number;
-  isPlaying: boolean;
-  onTimeChange: (time: number) => void;
-  onPlay: () => void;
-  onPause: () => void;
-  onStop: () => void;
-  onKeyframeAdd: (trackId: string, time: number, value: unknown) => void;
-  onKeyframeUpdate: (trackId: string, keyframeId: string, updates: Partial<TimelineKeyframe>) => void;
-  onKeyframeDelete: (trackId: string, keyframeId: string) => void;
-  onTrackAdd: (groupId: string, track: Omit<TimelineTrack, 'id' | 'keyframes'>) => void;
-  onTrackDelete: (trackId: string) => void;
-  onSequenceUpdate: (updates: Partial<SequenceData>) => void;
-}
-
-// ============================================================================
-// STYLES
-// ============================================================================
-
-const colors = {
-  bg: '#0d0d12',
-  surface: '#14141c',
-  surfaceHover: '#1a1a26',
-  surfaceActive: '#222232',
-  border: '#2a2a3c',
-  borderLight: '#3a3a4c',
-  text: '#e4e4eb',
-  textMuted: '#8b8b9e',
-  textDim: '#5a5a6e',
-  primary: '#6366f1',
-  primaryHover: '#7c7ff2',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  // Track colors
-  camera: '#f59e0b',
-  transform: '#22c55e',
-  light: '#eab308',
-  audio: '#06b6d4',
-  event: '#a855f7',
-  material: '#ec4899',
-  visibility: '#8b8b9e',
-};
 
 const trackTypeIcons: Record<TrackType, typeof Camera> = {
   camera: Camera,
@@ -141,25 +57,6 @@ const trackTypeIcons: Record<TrackType, typeof Camera> = {
   material: Layers,
   visibility: Eye,
 };
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-function formatTime(seconds: number, frameRate: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  const frames = Math.floor((seconds % 1) * frameRate);
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
-}
-
-function timeToPixels(time: number, pixelsPerSecond: number): number {
-  return time * pixelsPerSecond;
-}
-
-function pixelsToTime(pixels: number, pixelsPerSecond: number): number {
-  return pixels / pixelsPerSecond;
-}
 
 // ============================================================================
 // PLAYHEAD COMPONENT

@@ -2,6 +2,7 @@
  * Task Auto-detection
  * Automatically detects tasks from various build systems
  */
+import { readFileViaFs } from '@/lib/client/files-fs'
 
 export interface Task {
   id: string;
@@ -27,15 +28,6 @@ export interface TaskDetector {
   isAvailable(workspaceRoot: string): Promise<boolean>;
 }
 
-function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    return window.localStorage.getItem('aethel-token');
-  } catch {
-    return null;
-  }
-}
-
 function normalizePath(path: string): string {
   if (!path) return '/';
   const p = path.startsWith('/') ? path : `/${path}`;
@@ -43,26 +35,7 @@ function normalizePath(path: string): string {
 }
 
 async function readWorkspaceFile(path: string): Promise<string> {
-  const token = getAuthToken();
-  const url = `/api/files/read?path=${encodeURIComponent(normalizePath(path))}`;
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw Object.assign(new Error(text || `HTTP ${res.status}`), { status: res.status, path });
-  }
-
-  const data = (await res.json().catch(() => null)) as any;
-  if (!data || typeof data.content !== 'string') {
-    throw Object.assign(new Error('Resposta inválida ao ler arquivo.'), { status: 502, path });
-  }
-
-  return data.content;
+  return readFileViaFs(normalizePath(path))
 }
 
 /**

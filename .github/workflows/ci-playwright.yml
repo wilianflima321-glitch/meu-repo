@@ -1,10 +1,7 @@
-name: CI — Jest and Playwright
+name: CI - Jest and Playwright
 
 on:
-  pull_request:
-    branches: [ main, master ]
-  push:
-    branches: [ infra/playwright-ci-ensemble, infra/playwright-ci-ensemble-workflow-fix ]
+  workflow_dispatch: {}
 
 jobs:
   test:
@@ -27,21 +24,21 @@ jobs:
       - name: Install mock server dependencies (if present)
         run: |
           if [ -f tools/llm-mock/package.json ]; then
-            echo "Found tools/llm-mock/package.json — installing dependencies"
+            echo "Found tools/llm-mock/package.json - installing dependencies"
             # Use npm ci when a lockfile is present for reproducible installs, otherwise fall back to npm install
             (cd tools/llm-mock && if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi)
           else
-            echo "No package.json in tools/llm-mock — skipping"
+            echo "No package.json in tools/llm-mock - skipping"
           fi
 
       - name: Run Jest tests for mock package (if present)
         run: |
           # Run Jest only if the mock package has a package.json and tests configured
           if [ -f tools/llm-mock/package.json ]; then
-            echo "Found tools/llm-mock/package.json — running npm test in that directory"
+            echo "Found tools/llm-mock/package.json - running npm test in that directory"
             (cd tools/llm-mock && npm test --silent)
           else
-            echo "No package.json in tools/llm-mock — skipping Jest unit tests"
+            echo "No package.json in tools/llm-mock - skipping Jest unit tests"
           fi
 
       - name: Run AI IDE unit tests
@@ -63,7 +60,7 @@ jobs:
         run: |
           # Kill any existing listener on 8010 to avoid EADDRINUSE flakes
           if ss -ltnp 2>/dev/null | grep -q ':8010\b'; then
-            echo "Found existing listener on 8010 — attempting to kill"
+            echo "Found existing listener on 8010 - attempting to kill"
             PID=$(ss -ltnp 2>/dev/null | grep ':8010\b' | awk '{print $6}' | sed -E 's/.*,([0-9]+)\/.*$/\1/' | head -n1)
             if [ -n "$PID" ]; then
               echo "Killing PID $PID" && kill -9 $PID || true
@@ -288,3 +285,4 @@ jobs:
                 core.info(`Posted CI summary comment to PR #${num}`)
               }
             }
+

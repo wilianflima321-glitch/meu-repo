@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +76,14 @@ function getOrderBy(sort: string) {
 
 export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-assets-get',
+      key: getRequestIp(request),
+      max: 720,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many marketplace asset browse requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseIntSafe(searchParams.get('page'), 1));
     const limit = Math.min(60, Math.max(1, parseIntSafe(searchParams.get('limit'), 24)));
@@ -216,6 +225,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-assets-post',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many marketplace asset publish requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const body = await request.json().catch(() => ({}));
 
     const titleInput = typeof body?.title === 'string' ? body.title : body?.name;

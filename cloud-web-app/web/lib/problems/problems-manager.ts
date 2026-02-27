@@ -2,6 +2,7 @@
  * Problems Manager
  * Aggregates and manages diagnostics from LSP and other sources
  */
+import { readFileViaFs, writeFileViaFs } from '@/lib/client/files-fs'
 
 export interface Diagnostic {
   uri: string;
@@ -236,10 +237,8 @@ export class ProblemsManager {
   private async applyWorkspaceEdit(edit: WorkspaceEdit): Promise<void> {
     for (const [uri, edits] of Object.entries(edit.changes)) {
       // Read file
-      const response = await fetch(`/api/files/read?path=${encodeURIComponent(uri)}`);
-      if (!response.ok) continue;
-
-      let content = await response.text();
+      let content = await readFileViaFs(uri).catch(() => '')
+      if (!content) continue
       const lines = content.split('\n');
 
       // Apply edits in reverse order to maintain positions
@@ -274,11 +273,9 @@ export class ProblemsManager {
 
       // Write file
       content = lines.join('\n');
-      await fetch('/api/files/write', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: uri, content }),
-      });
+      await writeFileViaFs(uri, content, {
+        writeOptions: { createDirectories: true, atomic: true },
+      })
     }
   }
 

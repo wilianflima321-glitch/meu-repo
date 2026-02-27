@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { queueBackendUnavailableCapability } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 
 export const dynamic = 'force-dynamic'
+
+const MAX_JOB_ID_LENGTH = 120
+const normalizeJobId = (value?: string) => String(value ?? '').trim()
+type RouteContext = { params: Promise<{ jobId: string }> }
 
 /**
  * POST /api/render/jobs/{jobId}/cancel
@@ -11,25 +17,38 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: RouteContext
 ) {
   try {
-    requireAuth(request)
-    const { jobId } = params
+    const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'render-job-cancel-post',
+      key: user.userId,
+      max: 60,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many render job cancel requests. Please wait before retrying.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
 
-    if (!jobId) {
-      return NextResponse.json({ error: 'jobId is required' }, { status: 400 })
+    const resolved = await params
+    const jobId = normalizeJobId(resolved?.jobId)
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
+      )
     }
 
-    return notImplementedCapability({
-      error: 'NOT_IMPLEMENTED',
-      message: 'Render job cancellation is not wired to queue/runtime yet.',
+    return queueBackendUnavailableCapability({
+      message: 'Render job cancellation requires queue backend wiring and is currently unavailable.',
       capability: 'RENDER_JOB_CANCEL',
       milestone: 'P1',
-      metadata: { jobId },
+      metadata: { jobId, reason: 'queue-runtime-not-wired' },
     })
   } catch (error) {
     console.error('[render/jobs/cancel] Error:', error)
-    return NextResponse.json({ error: 'Failed to cancel render job' }, { status: 500 })
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return apiInternalError()
   }
 }

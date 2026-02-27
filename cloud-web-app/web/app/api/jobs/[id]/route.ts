@@ -8,6 +8,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { queueManager } from '@/lib/queue-system';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { capabilityResponse } from '@/lib/server/capability-response';
+
+const MAX_JOB_ID_LENGTH = 120;
+const normalizeJobId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
 
 function isUnauthorizedError(error: unknown): boolean {
   return error instanceof Error && error.message === 'Unauthorized';
@@ -24,30 +30,50 @@ function mapStateToStatus(state: string): 'queued' | 'processing' | 'completed' 
   return 'queued';
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    requireAuth(request);
+async function resolveJobId(ctx: RouteContext) {
+  const resolved = await ctx.params;
+  return normalizeJobId(resolved?.id);
+}
 
-    const available = await queueManager.isAvailable();
-    if (!available) {
+function queueUnavailableResponse() {
+  return capabilityResponse({
+    status: 503,
+    error: 'QUEUE_BACKEND_UNAVAILABLE',
+    message: 'Queue backend is not configured.',
+    capability: 'JOB_QUEUE_RUNTIME',
+    capabilityStatus: 'PARTIAL',
+    milestone: 'P1',
+  });
+}
+
+export async function GET(request: NextRequest, ctx: RouteContext) {
+  try {
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'jobs-id-get',
+      key: user.userId,
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many job detail requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const jobId = await resolveJobId(ctx);
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
       return NextResponse.json(
-        {
-          error: 'QUEUE_BACKEND_UNAVAILABLE',
-          message: 'Queue backend is not configured.',
-        },
-        { status: 503 }
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
       );
     }
 
-    const job = await queueManager.getJobById(params.id);
+    const available = await queueManager.isAvailable();
+    if (!available) {
+      return queueUnavailableResponse();
+    }
+
+    const job = await queueManager.getJobById(jobId);
     if (!job) {
-      return NextResponse.json(
-        { error: 'Job nao encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'JOB_NOT_FOUND', message: 'Job not found.' }, { status: 404 });
     }
 
     const payload = (job.data || {}) as Record<string, unknown>;
@@ -66,9 +92,7 @@ export async function GET(
         error: job.failedReason,
         projectId: typeof payload.projectId === 'string' ? payload.projectId : undefined,
         projectName: typeof payload.projectName === 'string' ? payload.projectName : undefined,
-        metadata: typeof payload.metadata === 'object' && payload.metadata !== null
-          ? payload.metadata
-          : undefined,
+        metadata: typeof payload.metadata === 'object' && payload.metadata !== null ? payload.metadata : undefined,
       },
     });
   } catch (error) {
@@ -81,60 +105,64 @@ export async function GET(
         { status: 503 }
       );
     }
-    console.error('Erro ao buscar job:', error);
-    return NextResponse.json(
-      { error: 'Falha ao buscar job' },
-      { status: 500 }
-    );
+    console.error('Failed to read job details:', error);
+    return NextResponse.json({ error: 'JOB_READ_FAILED', message: 'Failed to read job details.' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, ctx: RouteContext) {
   try {
-    requireAuth(request);
+    const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'jobs-id-delete',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many job delete requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
-    const available = await queueManager.isAvailable();
-    if (!available) {
+    const jobId = await resolveJobId(ctx);
+    if (!jobId || jobId.length > MAX_JOB_ID_LENGTH) {
       return NextResponse.json(
-        {
-          error: 'QUEUE_BACKEND_UNAVAILABLE',
-          message: 'Queue backend is not configured.',
-        },
-        { status: 503 }
+        { error: 'INVALID_JOB_ID', message: 'jobId is required and must be under 120 characters.' },
+        { status: 400 }
       );
     }
 
-    const result = await queueManager.cancelJob(params.id);
+    const available = await queueManager.isAvailable();
+    if (!available) {
+      return queueUnavailableResponse();
+    }
+
+    const result = await queueManager.cancelJob(jobId);
     if (!result.found) {
-      return NextResponse.json({ error: 'Job nao encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'JOB_NOT_FOUND', message: 'Job not found.' }, { status: 404 });
     }
     if (!result.cancelled) {
       if (result.reason === 'JOB_ACTIVE_CANNOT_CANCEL') {
         return NextResponse.json(
-          { error: 'Job ativo nao pode ser cancelado imediatamente', state: result.state },
+          { error: 'JOB_ACTIVE_CANNOT_CANCEL', message: 'Active jobs cannot be cancelled immediately.', state: result.state },
           { status: 409 }
         );
       }
       if (result.reason === 'JOB_ALREADY_FINALIZED') {
         return NextResponse.json(
-          { error: 'Job ja finalizado', state: result.state },
+          { error: 'JOB_ALREADY_FINALIZED', message: 'Job is already finalized.', state: result.state },
           { status: 400 }
         );
       }
       return NextResponse.json(
-        { error: result.reason || 'Cancelamento indisponivel', state: result.state },
+        { error: result.reason || 'JOB_CANCEL_NOT_AVAILABLE', message: 'Job cancellation is not available.', state: result.state },
         { status: 400 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Job cancelado com sucesso',
+      message: 'Job cancelled successfully.',
       job: {
-        id: params.id,
+        id: jobId,
         status: 'cancelled',
         cancelledAt: new Date().toISOString(),
       },
@@ -149,10 +177,7 @@ export async function DELETE(
         { status: 503 }
       );
     }
-    console.error('Erro ao cancelar job:', error);
-    return NextResponse.json(
-      { error: 'Falha ao cancelar job' },
-      { status: 500 }
-    );
+    console.error('Failed to cancel job:', error);
+    return NextResponse.json({ error: 'JOB_CANCEL_FAILED', message: 'Failed to cancel job.' }, { status: 500 });
   }
 }

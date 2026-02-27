@@ -14,7 +14,8 @@ const handleGet = withAdminAuth(
       const lastHitAt = item.lastHitAt ? new Date(item.lastHitAt).getTime() : 0
       const silentForMs = lastHitAt > 0 ? Math.max(0, now - lastHitAt) : cutoffWindowMs
       const hasUsageWindow = item.hits > 0
-      const candidateForRemoval = item.status === 'deprecated' && (item.hits === 0 || silentForMs >= cutoffWindowMs)
+      const supportsCutoff = item.status === 'deprecated' || item.status === 'compatibility-wrapper'
+      const candidateForRemoval = supportsCutoff && (item.hits === 0 || silentForMs >= cutoffWindowMs)
       return {
         ...item,
         candidateForRemoval,

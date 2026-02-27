@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Policy = {
   id: string;
@@ -8,6 +18,16 @@ type Policy = {
   status: 'active' | 'review' | 'inactive';
   lastAuditAt: string | null;
   incidents: number;
+};
+
+type CompliancePayload = {
+  policies?: Policy[];
+};
+
+const statusLabel: Record<Policy['status'], string> = {
+  active: 'Active',
+  review: 'In review',
+  inactive: 'Inactive',
 };
 
 export default function Compliance() {
@@ -19,14 +39,12 @@ export default function Compliance() {
   const fetchPolicies = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/compliance');
-      if (!res.ok) throw new Error('Falha ao carregar conformidade');
-      const data = await res.json();
+      const data = await adminJsonFetch<CompliancePayload>('/api/admin/compliance');
       setPolicies(Array.isArray(data?.policies) ? data.policies : []);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar conformidade');
+      setError(err instanceof Error ? err.message : 'Failed to load compliance policies');
     } finally {
       setLoading(false);
     }
@@ -36,97 +54,87 @@ export default function Compliance() {
     fetchPolicies();
   }, [fetchPolicies]);
 
-  const summary = {
-    total: policies.length,
-    incidents: policies.reduce((sum, policy) => sum + policy.incidents, 0),
-  };
+  const summary = useMemo(
+    () => ({
+      total: policies.length,
+      active: policies.filter((policy) => policy.status === 'active').length,
+      incidents: policies.reduce((sum, policy) => sum + policy.incidents, 0),
+    }),
+    [policies],
+  );
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Compliance e Privacidade</h1>
-          <p className='text-zinc-400'>Políticas legais e auditorias de conformidade.</p>
-          {lastUpdated && (
-            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Compliance'
+      description='Track policy status and incident counts for legal and security readiness.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchPolicies}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchPolicies}
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
-        >
-          Atualizar
-        </button>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Policies' value={summary.total} tone='sky' />
+          <AdminStatCard label='Active policies' value={summary.active} tone='emerald' />
+          <AdminStatCard label='Critical incidents' value={summary.incidents} tone='rose' />
+          <AdminStatCard label='Last pull count' value={policies.length} tone='neutral' />
+        </AdminStatGrid>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Políticas monitoradas</h3>
-          <p className='text-2xl font-bold text-blue-600'>{summary.total}</p>
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Policy</th>
+                <th className='p-3 text-left'>Status</th>
+                <th className='p-3 text-left'>Last audit</th>
+                <th className='p-3 text-left'>Incidents</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={4} message='Loading policies...' />
+              ) : policies.length === 0 ? (
+                <AdminTableStateRow colSpan={4} message='No compliance policies configured.' />
+              ) : (
+                policies.map((policy) => (
+                  <tr key={policy.id} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-zinc-100'>{policy.name}</td>
+                    <td className='p-3'>
+                      <span
+                        className={`rounded px-2 py-1 text-xs ${
+                          policy.status === 'active'
+                            ? 'bg-emerald-500/15 text-emerald-300'
+                            : policy.status === 'review'
+                              ? 'bg-amber-500/15 text-amber-300'
+                              : 'bg-zinc-800/70 text-zinc-300'
+                        }`}
+                      >
+                        {statusLabel[policy.status]}
+                      </span>
+                    </td>
+                    <td className='p-3 text-zinc-500'>
+                      {policy.lastAuditAt ? new Date(policy.lastAuditAt).toLocaleString() : '-'}
+                    </td>
+                    <td className='p-3'>{policy.incidents}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Incidentes críticos</h3>
-          <p className='text-2xl font-bold text-red-600'>{summary.incidents}</p>
-        </div>
-      </div>
+      </AdminSection>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
-        <table className='w-full table-auto'>
-          <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
-              <th className='p-2 text-left'>Política</th>
-              <th className='p-2 text-left'>Status</th>
-              <th className='p-2 text-left'>Última auditoria</th>
-              <th className='p-2 text-left'>Incidentes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={4}>Carregando políticas...</td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td className='p-2 text-sm text-red-500' colSpan={4}>{error}</td>
-              </tr>
-            ) : policies.length === 0 ? (
-              <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={4}>Nenhuma política configurada.</td>
-              </tr>
-            ) : (
-              policies.map((policy) => (
-                <tr key={policy.id} className='border-t'>
-                  <td className='p-2'>{policy.name}</td>
-                  <td className='p-2'>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      policy.status === 'active'
-                        ? 'bg-emerald-500/15 text-emerald-300'
-                        : policy.status === 'review'
-                        ? 'bg-amber-500/15 text-amber-300'
-                        : 'bg-zinc-800/70 text-zinc-400'
-                    }`}>
-                      {policy.status === 'active'
-                        ? 'Ativa'
-                        : policy.status === 'review'
-                        ? 'Revisão'
-                        : 'Inativa'}
-                    </span>
-                  </td>
-                  <td className='p-2'>
-                    {policy.lastAuditAt ? new Date(policy.lastAuditAt).toLocaleString() : '—'}
-                  </td>
-                  <td className='p-2'>{policy.incidents}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className='mt-6'>
+        <AdminStatusBanner tone='warning'>
+          Compliance policy data is derived from audit log telemetry. External legal automation remains out of scope in this phase.
+        </AdminStatusBanner>
       </div>
-
-      <div className='mt-6 bg-zinc-900/60 border border-zinc-700 rounded-lg p-4 text-sm text-zinc-400'>
-        Limitação: políticas são calculadas a partir de logs de auditoria. Para automações legais completas,
-        integrar serviços externos de conformidade.
-      </div>
-    </div>
+    </AdminPageShell>
   );
 }

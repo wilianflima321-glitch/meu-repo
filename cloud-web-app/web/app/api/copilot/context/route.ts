@@ -6,6 +6,7 @@ import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import type { CopilotContext } from '@/lib/copilot/context-store';
 import { mergeCopilotContext } from '@/lib/copilot/context-merge';
 import { assertProjectOwnership, resolveProjectIdFromRequest } from '@/lib/copilot/project-resolver';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,6 +97,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
 		const user = requireAuth(req);
 		await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'copilot-context-get',
+      key: user.userId,
+      max: 600,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many copilot context requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
 		const projectId = await resolveProjectIdFromRequest(user.userId, req);
 		if (!projectId) {
@@ -147,6 +156,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 	try {
 		const user = requireAuth(req);
 		await requireEntitlementsForUser(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'copilot-context-post',
+      key: user.userId,
+      max: 300,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many copilot context update requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
 		const body = await req.json().catch(() => ({}));
 		const projectId = await resolveProjectIdFromRequest(user.userId, req, body);

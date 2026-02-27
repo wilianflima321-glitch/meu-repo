@@ -1,7 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const TARGET_DIRS = ['app', 'components', 'lib', 'docs']
 const EXTENSIONS = new Set(['.ts', '.tsx', '.md', '.css'])
 const OUT = path.join(ROOT, 'docs', 'MOJIBAKE_SCAN.md')

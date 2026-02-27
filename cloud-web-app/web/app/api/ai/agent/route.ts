@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AutonomousAgent } from '@/lib/ai/agent-mode';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { consumeMeteredUsage } from '@/lib/metering';
@@ -33,6 +34,14 @@ export async function POST(req: NextRequest) {
   try {
     // AUTENTICAÇÃO OBRIGATÓRIA
     const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-agent-post',
+      key: auth.userId,
+      max: 45,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many agent execution requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     // Verificar entitlements do usuário
     const entitlements = await requireEntitlementsForUser(auth.userId);
@@ -209,6 +218,14 @@ export async function GET(req: NextRequest) {
   try {
     // AUTENTICAÇÃO OBRIGATÓRIA
     const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-agent-get',
+      key: auth.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many agent status requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     
     const sessionId = req.nextUrl.searchParams.get('sessionId');
     

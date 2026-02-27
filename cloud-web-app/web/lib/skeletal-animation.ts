@@ -13,230 +13,30 @@ import * as THREE from 'three';
 // TIPOS
 // ============================================================================
 
-export interface BoneData {
-  name: string;
-  parentIndex: number;
-  localPosition: THREE.Vector3;
-  localRotation: THREE.Quaternion;
-  localScale: THREE.Vector3;
-  length: number;
-}
+import type {
+  AnimationClipData,
+  AnimationEvent,
+  AnimationKeyframe,
+  BlendWeight,
+  BoneAnimation,
+  BoneData,
+  IKTarget,
+  SkeletonData
+} from './skeletal-animation-types';
 
-export interface SkeletonData {
-  bones: BoneData[];
-  rootBoneIndices: number[];
-}
+export type {
+  AnimationClipData,
+  AnimationEvent,
+  AnimationKeyframe,
+  BlendWeight,
+  BoneAnimation,
+  BoneData,
+  IKTarget,
+  SkeletonData
+} from './skeletal-animation-types';
 
-export interface AnimationKeyframe {
-  time: number;
-  position?: THREE.Vector3;
-  rotation?: THREE.Quaternion;
-  scale?: THREE.Vector3;
-}
-
-export interface BoneAnimation {
-  boneName: string;
-  keyframes: AnimationKeyframe[];
-}
-
-export interface AnimationClipData {
-  name: string;
-  duration: number;
-  frameRate: number;
-  tracks: BoneAnimation[];
-  loop: boolean;
-  events?: AnimationEvent[];
-}
-
-export interface AnimationEvent {
-  time: number;
-  name: string;
-  data?: Record<string, unknown>;
-}
-
-export interface IKTarget {
-  boneName: string;
-  targetPosition: THREE.Vector3;
-  weight: number;
-  chainLength: number;
-  poleTarget?: THREE.Vector3;
-}
-
-export interface BlendWeight {
-  animation: string;
-  weight: number;
-  speed: number;
-  time: number;
-}
-
-// ============================================================================
-// BONE
-// ============================================================================
-
-export class Bone extends THREE.Object3D {
-  public boneData: BoneData;
-  public bindMatrix: THREE.Matrix4;
-  public inverseBindMatrix: THREE.Matrix4;
-  public boneIndex: number;
-  public restPosition: THREE.Vector3;
-  public restRotation: THREE.Quaternion;
-  public restScale: THREE.Vector3;
-  
-  constructor(data: BoneData, index: number) {
-    super();
-    
-    this.name = data.name;
-    this.boneData = data;
-    this.boneIndex = index;
-    
-    this.position.copy(data.localPosition);
-    this.quaternion.copy(data.localRotation);
-    this.scale.copy(data.localScale);
-    
-    this.restPosition = data.localPosition.clone();
-    this.restRotation = data.localRotation.clone();
-    this.restScale = data.localScale.clone();
-    
-    this.bindMatrix = new THREE.Matrix4();
-    this.inverseBindMatrix = new THREE.Matrix4();
-  }
-  
-  calculateBindMatrix(): void {
-    this.updateWorldMatrix(true, false);
-    this.bindMatrix.copy(this.matrixWorld);
-    this.inverseBindMatrix.copy(this.bindMatrix).invert();
-  }
-  
-  resetToRest(): void {
-    this.position.copy(this.restPosition);
-    this.quaternion.copy(this.restRotation);
-    this.scale.copy(this.restScale);
-  }
-}
-
-// ============================================================================
-// SKELETON
-// ============================================================================
-
-export class Skeleton {
-  public bones: Bone[] = [];
-  public boneMatrices: Float32Array;
-  public boneTexture: THREE.DataTexture | null = null;
-  private boneByName: Map<string, Bone> = new Map();
-  
-  constructor(data: SkeletonData) {
-    this.buildSkeleton(data);
-    this.boneMatrices = new Float32Array(this.bones.length * 16);
-    this.createBoneTexture();
-  }
-  
-  private buildSkeleton(data: SkeletonData): void {
-    // Create all bones first
-    for (let i = 0; i < data.bones.length; i++) {
-      const boneData = data.bones[i];
-      const bone = new Bone(boneData, i);
-      this.bones.push(bone);
-      this.boneByName.set(boneData.name, bone);
-    }
-    
-    // Set up hierarchy
-    for (let i = 0; i < data.bones.length; i++) {
-      const boneData = data.bones[i];
-      const bone = this.bones[i];
-      
-      if (boneData.parentIndex >= 0) {
-        const parent = this.bones[boneData.parentIndex];
-        parent.add(bone);
-      }
-    }
-    
-    // Calculate bind matrices
-    for (const bone of this.bones) {
-      bone.calculateBindMatrix();
-    }
-  }
-  
-  private createBoneTexture(): void {
-    // Create a texture to store bone matrices for GPU skinning
-    const size = Math.ceil(Math.sqrt(this.bones.length * 4));
-    const textureData = new Float32Array(size * size * 4);
-    
-    this.boneTexture = new THREE.DataTexture(
-      textureData,
-      size,
-      size,
-      THREE.RGBAFormat,
-      THREE.FloatType
-    );
-    this.boneTexture.needsUpdate = true;
-  }
-  
-  getBone(name: string): Bone | undefined {
-    return this.boneByName.get(name);
-  }
-  
-  getBoneIndex(name: string): number {
-    const bone = this.boneByName.get(name);
-    return bone ? bone.boneIndex : -1;
-  }
-  
-  updateMatrices(): void {
-    const offsetMatrix = new THREE.Matrix4();
-    
-    for (let i = 0; i < this.bones.length; i++) {
-      const bone = this.bones[i];
-      bone.updateWorldMatrix(true, false);
-      
-      offsetMatrix.multiplyMatrices(bone.matrixWorld, bone.inverseBindMatrix);
-      offsetMatrix.toArray(this.boneMatrices, i * 16);
-    }
-    
-    if (this.boneTexture) {
-      const size = this.boneTexture.image.width;
-			const data = this.boneTexture.image.data as unknown as Float32Array;
-      
-      for (let i = 0; i < this.bones.length; i++) {
-        const matrixOffset = i * 16;
-        const textureOffset = i * 16;
-        
-        for (let j = 0; j < 16; j++) {
-          data[textureOffset + j] = this.boneMatrices[matrixOffset + j];
-        }
-      }
-      
-      this.boneTexture.needsUpdate = true;
-    }
-  }
-  
-  resetToBindPose(): void {
-    for (const bone of this.bones) {
-      bone.resetToRest();
-    }
-    this.updateMatrices();
-  }
-  
-  clone(): Skeleton {
-    const data: SkeletonData = {
-      bones: this.bones.map(bone => ({
-        ...bone.boneData,
-        localPosition: bone.restPosition.clone(),
-        localRotation: bone.restRotation.clone(),
-        localScale: bone.restScale.clone(),
-      })),
-      rootBoneIndices: this.bones
-        .filter(b => b.boneData.parentIndex < 0)
-        .map(b => b.boneIndex),
-    };
-    
-    return new Skeleton(data);
-  }
-  
-  dispose(): void {
-    if (this.boneTexture) {
-      this.boneTexture.dispose();
-    }
-  }
-}
+import { Bone, Skeleton } from './skeletal-animation-skeleton';
+export { Bone, Skeleton } from './skeletal-animation-skeleton';
 
 // ============================================================================
 // ANIMATION CLIP

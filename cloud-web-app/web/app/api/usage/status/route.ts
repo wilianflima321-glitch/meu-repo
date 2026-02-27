@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { getUsageStatus } from '@/lib/plan-limits';
+import { getCreditBalance } from '@/lib/credit-wallet';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,8 +16,19 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
-    
-    const status = await getUsageStatus(user.userId);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'usage-status-get',
+      key: user.userId,
+      max: 1800,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many usage status checks. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const [status, creditBalance] = await Promise.all([
+      getUsageStatus(user.userId),
+      getCreditBalance(user.userId),
+    ]);
     
     return NextResponse.json({
       success: true,
@@ -42,6 +55,11 @@ export async function GET(req: NextRequest) {
         models: status.limits.models,
         isOverLimit: !status.allowed,
         message: status.reason,
+        usageEntitlement: {
+          creditBalance,
+          variableUsageAllowed: creditBalance > 0,
+          blockedReason: creditBalance > 0 ? null : 'CREDITS_EXHAUSTED',
+        },
       }
     });
 
@@ -58,3 +76,4 @@ export async function GET(req: NextRequest) {
     }, { status: 500 });
   }
 }
+

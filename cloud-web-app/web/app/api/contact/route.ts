@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { getUserFromRequest } from '@/lib/auth-server';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,15 @@ async function getEmailService() {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'contact-post',
+      key: getRequestIp(request),
+      max: 20,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many contact requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json().catch(() => ({}));
     const name = String(body?.name || '').trim();
     const email = String(body?.email || '').trim();

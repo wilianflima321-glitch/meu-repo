@@ -1,0 +1,22 @@
+﻿# Canonical ownership map (single-owner fallback)
+* @wilianflima321-glitch
+
+# Product surfaces
+/cloud-web-app/web/app/dashboard/** @wilianflima321-glitch
+/cloud-web-app/web/components/studio/** @wilianflima321-glitch
+/cloud-web-app/web/app/ide/** @wilianflima321-glitch
+/cloud-web-app/web/components/ide/** @wilianflima321-glitch
+/cloud-web-app/web/app/admin/** @wilianflima321-glitch
+
+# API surfaces
+/cloud-web-app/web/app/api/** @wilianflima321-glitch
+/cloud-web-app/web/lib/server/** @wilianflima321-glitch
+/cloud-web-app/web/lib/ai* @wilianflima321-glitch
+/cloud-web-app/web/lib/plan-limits.ts @wilianflima321-glitch
+
+# Governance and CI
+/.github/workflows/** @wilianflima321-glitch
+/.github/*.md @wilianflima321-glitch
+/package.json @wilianflima321-glitch
+/tools/repo-connectivity-scan.mjs @wilianflima321-glitch
+/audit dicas do emergent usar/** @wilianflima321-glitch

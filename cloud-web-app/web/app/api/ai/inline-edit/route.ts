@@ -3,7 +3,8 @@ import { requireAuth } from '@/lib/auth-server'
 import { aiService, type LLMProvider } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { capabilityResponse, notImplementedCapability } from '@/lib/server/capability-response'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 
 const INLINE_EDIT_SYSTEM_PROMPT = `You are an inline code editing assistant.
 Rules:
@@ -29,16 +30,20 @@ type InlineEditBody = {
   temperature?: number
 }
 
-function asProvider(value: unknown): LLMProvider | undefined {
-  if (value !== 'openai' && value !== 'anthropic' && value !== 'google' && value !== 'groq') {
-    return undefined
-  }
-  return value
-}
+const SUPPORTED_PROVIDERS = ['openai', 'anthropic', 'google', 'groq'] as const
 
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-inline-edit',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 1000,
+      message: 'Too many inline edit requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
+
     const body = (await req.json().catch(() => null)) as InlineEditBody | null
 
     if (!body || typeof body !== 'object') {
@@ -54,7 +59,21 @@ export async function POST(req: NextRequest) {
     const language = typeof body.language === 'string' ? body.language : undefined
     const filePath = typeof body.filePath === 'string' ? body.filePath : undefined
     const context = body.context && typeof body.context === 'object' ? body.context : undefined
-    const provider = asProvider(body.provider)
+    const requestedProviderRaw =
+      typeof body.provider === 'string' ? String(body.provider).trim().toLowerCase() : ''
+    if (requestedProviderRaw && !SUPPORTED_PROVIDERS.includes(requestedProviderRaw as (typeof SUPPORTED_PROVIDERS)[number])) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_PROVIDER',
+          message: 'Requested provider is not supported.',
+          supportedProviders: [...SUPPORTED_PROVIDERS],
+        },
+        { status: 400 }
+      )
+    }
+    const provider = requestedProviderRaw
+      ? (requestedProviderRaw as LLMProvider)
+      : undefined
     const model = typeof body.model === 'string' ? body.model : undefined
     const maxTokens = typeof body.maxTokens === 'number' ? Math.max(1, Math.floor(body.maxTokens)) : 4096
     const temperature = typeof body.temperature === 'number' ? Math.min(1, Math.max(0, body.temperature)) : 0.3
@@ -78,7 +97,8 @@ export async function POST(req: NextRequest) {
 
     const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
     if (!quotaCheck.allowed) {
-      return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status: 429 })
+      const status = quotaCheck.code === 'CREDITS_EXHAUSTED' ? 402 : 429
+      return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status })
     }
 
     if (model) {
@@ -88,13 +108,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (aiService.getAvailableProviders().length === 0) {
+    const availableProviders = aiService.getAvailableProviders()
+    if (availableProviders.length === 0) {
       return notImplementedCapability({
         error: 'NOT_IMPLEMENTED',
         status: 501,
         message: 'AI provider not configured.',
         capability: 'AI_INLINE_EDIT',
         milestone: 'P1',
+      })
+    }
+    if (provider && !availableProviders.includes(provider as (typeof availableProviders)[number])) {
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: 'Requested AI provider is not configured for current runtime.',
+        status: 503,
+        capability: 'AI_INLINE_EDIT',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1',
+        metadata: {
+          requestedProvider: provider,
+          availableProviders,
+        },
       })
     }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import {
 	acquireConcurrencyLease,
 	estimateTokensFromText,
@@ -31,6 +32,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 	try {
 		const auth = requireAuth(req);
+		const rateLimitResponse = await enforceRateLimit({
+			scope: 'chat-orchestrator-post',
+			key: auth.userId,
+			max: 180,
+			windowMs: 60 * 60 * 1000,
+			message: 'Too many chat orchestrator requests. Please wait before retrying.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
 		const entitlements = await requireEntitlementsForUser(auth.userId);
 
 		const body = await req.json().catch(() => null);

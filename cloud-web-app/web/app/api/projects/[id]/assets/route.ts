@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { readdir, stat } from 'fs/promises';
@@ -15,6 +16,15 @@ import { join, extname, basename } from 'path';
 import { existsSync } from 'fs';
 
 export const dynamic = 'force-dynamic';
+
+const MAX_PROJECT_ID_LENGTH = 120;
+const normalizeProjectId = (value?: string) => String(value ?? '').trim();
+type RouteContext = { params: Promise<{ id: string }> };
+
+async function resolveProjectId(ctx: RouteContext) {
+  const resolvedParams = await ctx.params;
+  return normalizeProjectId(resolvedParams?.id);
+}
 
 // Asset type mapping based on file extension
 const EXTENSION_TO_TYPE: Record<string, string> = {
@@ -82,11 +92,27 @@ interface AssetFolder {
 // GET /api/projects/[id]/assets
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: RouteContext
 ) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'projects-assets-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many project asset list requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireEntitlementsForUser(user.userId);
+
+    const projectId = await resolveProjectId(ctx);
+    if (!projectId || projectId.length > MAX_PROJECT_ID_LENGTH) {
+      return NextResponse.json(
+        { error: 'INVALID_PROJECT_ID', message: 'projectId is required and must be under 120 characters.' },
+        { status: 400 }
+      );
+    }
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
@@ -98,7 +124,7 @@ export async function GET(
     // Verify project access
     const project = await prisma.project.findFirst({
       where: {
-        id: params.id,
+        id: projectId,
         OR: [
           { userId: user.userId },
           { members: { some: { userId: user.userId } } },
@@ -113,7 +139,7 @@ export async function GET(
     // Get assets from database (metadata)
     const dbAssets = await prisma.asset.findMany({
       where: {
-        projectId: params.id,
+        projectId: projectId,
         ...(search && {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
@@ -128,11 +154,11 @@ export async function GET(
     });
 
     // Also scan filesystem for any unregistered assets
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', params.id);
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', projectId);
     let fileSystemAssets: AssetFile[] = [];
 
     if (existsSync(uploadsDir)) {
-      fileSystemAssets = await scanDirectory(uploadsDir, params.id);
+      fileSystemAssets = await scanDirectory(uploadsDir, projectId);
     }
 
     // Merge database assets with filesystem (DB takes priority).
@@ -165,7 +191,7 @@ export async function GET(
     // Get total count
     const totalCount = await prisma.asset.count({
       where: {
-        projectId: params.id,
+        projectId: projectId,
         ...(search && {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },

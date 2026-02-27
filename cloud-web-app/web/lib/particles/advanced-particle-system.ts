@@ -15,232 +15,45 @@
 
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
+import { ParticlePool } from './particle-pool';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export type EmitterShape = 'point' | 'box' | 'sphere' | 'cone' | 'circle' | 'edge' | 'mesh';
-export type BlendMode = 'additive' | 'normal' | 'multiply' | 'screen';
-export type SimulationSpace = 'local' | 'world';
+import type {
+  BlendMode,
+  CollisionSettings,
+  ColorStop,
+  EmitterSettings,
+  EmitterShape,
+  FloatCurve,
+  FloatRange,
+  ModifierSettings,
+  Particle,
+  ParticleSettings,
+  ParticleSystemSettings,
+  SimulationSpace,
+  SubEmitterSettings,
+  Vector3Range,
+} from './advanced-particle-types';
 
-export interface Vector3Range {
-  min: { x: number; y: number; z: number };
-  max: { x: number; y: number; z: number };
-}
-
-export interface FloatRange {
-  min: number;
-  max: number;
-}
-
-export interface ColorStop {
-  time: number; // 0-1
-  color: { r: number; g: number; b: number; a: number };
-}
-
-export interface FloatCurve {
-  time: number;
-  value: number;
-  inTangent?: number;
-  outTangent?: number;
-}
-
-export interface EmitterSettings {
-  shape: EmitterShape;
-  position: { x: number; y: number; z: number };
-  rotation: { x: number; y: number; z: number };
-  
-  // Shape-specific
-  boxSize?: { x: number; y: number; z: number };
-  sphereRadius?: number;
-  coneAngle?: number;
-  coneRadius?: number;
-  circleRadius?: number;
-  edgeLength?: number;
-  
-  // Emission
-  rate: number; // Particles per second
-  bursts?: { time: number; count: number; probability: number }[];
-  
-  // Space
-  simulationSpace: SimulationSpace;
-}
-
-export interface ParticleSettings {
-  // Lifetime
-  lifetime: FloatRange;
-  
-  // Initial values
-  startSpeed: FloatRange;
-  startSize: FloatRange;
-  startRotation: FloatRange;
-  startColor: ColorStop[];
-  
-  // Over lifetime
-  sizeOverLifetime?: FloatCurve[];
-  speedOverLifetime?: FloatCurve[];
-  colorOverLifetime?: ColorStop[];
-  rotationOverLifetime?: number; // Degrees per second
-  
-  // Velocity
-  inheritVelocity: number;
-  velocityRandomness: Vector3Range;
-  
-  // Rendering
-  texture?: string;
-  blendMode: BlendMode;
-  renderOrder: number;
-  
-  // Billboard
-  billboard: boolean;
-  stretchedBillboard: boolean;
-  stretchFactor: number;
-  
-  // Sorting
-  sortByDistance: boolean;
-}
-
-export interface ModifierSettings {
-  gravity: { x: number; y: number; z: number };
-  drag: number;
-  
-  // Noise/Turbulence
-  turbulenceStrength: number;
-  turbulenceFrequency: number;
-  turbulenceScrollSpeed: number;
-  
-  // Attractors
-  attractors?: {
-    position: { x: number; y: number; z: number };
-    strength: number;
-    radius: number;
-  }[];
-  
-  // Vortex
-  vortex?: {
-    axis: { x: number; y: number; z: number };
-    strength: number;
-    center: { x: number; y: number; z: number };
-  };
-}
-
-export interface CollisionSettings {
-  enabled: boolean;
-  bounce: number;
-  dampen: number;
-  lifetime: number; // Multiplier on collision
-  planes?: { normal: { x: number; y: number; z: number }; distance: number }[];
-  world: boolean;
-}
-
-export interface SubEmitterSettings {
-  trigger: 'birth' | 'death' | 'collision';
-  emitterId: string;
-  probability: number;
-  inheritVelocity: number;
-}
-
-export interface ParticleSystemSettings {
-  id: string;
-  name: string;
-  duration: number;
-  looping: boolean;
-  prewarm: boolean;
-  maxParticles: number;
-  
-  emitter: EmitterSettings;
-  particle: ParticleSettings;
-  modifiers: ModifierSettings;
-  collision: CollisionSettings;
-  subEmitters: SubEmitterSettings[];
-}
-
-export interface Particle {
-  position: THREE.Vector3;
-  velocity: THREE.Vector3;
-  age: number;
-  lifetime: number;
-  size: number;
-  rotation: number;
-  color: THREE.Color;
-  alpha: number;
-  speed: number;
-  alive: boolean;
-}
-
-// ============================================================================
-// PARTICLE POOL
-// ============================================================================
-
-class ParticlePool {
-  private particles: Particle[] = [];
-  private activeCount = 0;
-  private maxParticles: number;
-  
-  constructor(maxParticles: number) {
-    this.maxParticles = maxParticles;
-    
-    for (let i = 0; i < maxParticles; i++) {
-      this.particles.push(this.createParticle());
-    }
-  }
-  
-  private createParticle(): Particle {
-    return {
-      position: new THREE.Vector3(),
-      velocity: new THREE.Vector3(),
-      age: 0,
-      lifetime: 1,
-      size: 1,
-      rotation: 0,
-      color: new THREE.Color(1, 1, 1),
-      alpha: 1,
-      speed: 1,
-      alive: false,
-    };
-  }
-  
-  acquire(): Particle | null {
-    for (let i = 0; i < this.maxParticles; i++) {
-      if (!this.particles[i].alive) {
-        this.particles[i].alive = true;
-        this.activeCount++;
-        return this.particles[i];
-      }
-    }
-    return null;
-  }
-  
-  release(particle: Particle): void {
-    particle.alive = false;
-    this.activeCount--;
-  }
-  
-  forEach(callback: (particle: Particle, index: number) => void): void {
-    let index = 0;
-    for (let i = 0; i < this.maxParticles; i++) {
-      if (this.particles[i].alive) {
-        callback(this.particles[i], index++);
-      }
-    }
-  }
-  
-  getActiveCount(): number {
-    return this.activeCount;
-  }
-  
-  getAll(): Particle[] {
-    return this.particles;
-  }
-  
-  clear(): void {
-    for (const particle of this.particles) {
-      particle.alive = false;
-    }
-    this.activeCount = 0;
-  }
-}
+export type {
+  BlendMode,
+  CollisionSettings,
+  ColorStop,
+  EmitterSettings,
+  EmitterShape,
+  FloatCurve,
+  FloatRange,
+  ModifierSettings,
+  Particle,
+  ParticleSettings,
+  ParticleSystemSettings,
+  SimulationSpace,
+  SubEmitterSettings,
+  Vector3Range,
+} from './advanced-particle-types';
 
 // ============================================================================
 // PARTICLE EMITTER

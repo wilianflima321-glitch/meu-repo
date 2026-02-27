@@ -258,7 +258,7 @@ export class MentionSuggestionProvider {
       'src/App.tsx',
       'src/index.tsx',
       'src/main.ts',
-      'src/components/Button.tsx',
+      'src/components/ui/Button.tsx',
       'src/services/api.ts',
     ]
     this.functions = [

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Plan Limits Service - Enforcement de Limites por Plano
  * 
  * Define e verifica limites de uso para cada tier de assinatura.
@@ -6,6 +6,7 @@
  */
 
 import { prisma } from './db';
+import { getCreditBalance } from './credit-wallet';
 
 // ============================================================================
 // DEFINIÇÃO DE LIMITES POR PLANO
@@ -22,6 +23,17 @@ export interface PlanLimits {
   models: string[];        // Modelos LLM permitidos
   features: string[];      // Features habilitadas
 }
+
+export type QualityMode = 'standard' | 'delivery' | 'studio';
+
+const PLAN_QUALITY_MODES: Record<string, QualityMode[]> = {
+  starter_trial: ['standard'],
+  starter: ['standard'],
+  basic: ['standard', 'delivery'],
+  pro: ['standard', 'delivery', 'studio'],
+  studio: ['standard', 'delivery', 'studio'],
+  enterprise: ['standard', 'delivery', 'studio'],
+};
 
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
   // Free trial - muito limitado
@@ -123,7 +135,7 @@ export interface UsageStatus {
 export interface QuotaCheckResult {
   allowed: boolean;
   reason?: string;
-  code?: 'QUOTA_EXCEEDED' | 'MODEL_NOT_ALLOWED' | 'FEATURE_NOT_ALLOWED' | 'RATE_LIMITED';
+  code?: 'QUOTA_EXCEEDED' | 'MODEL_NOT_ALLOWED' | 'FEATURE_NOT_ALLOWED' | 'RATE_LIMITED' | 'CREDITS_EXHAUSTED';
 }
 
 // ============================================================================
@@ -137,6 +149,46 @@ export function getPlanLimits(plan: string): PlanLimits {
   // Remover sufixo _trial se existir para fallback
   const basePlan = plan.replace('_trial', '');
   return PLAN_LIMITS[plan] || PLAN_LIMITS[basePlan] || PLAN_LIMITS['starter_trial'];
+}
+
+export function getAllowedQualityModes(plan: string): QualityMode[] {
+  const basePlan = String(plan || 'starter_trial').replace('_trial', '');
+  const direct = PLAN_QUALITY_MODES[plan];
+  if (direct && direct.length > 0) return [...direct];
+  const fallback = PLAN_QUALITY_MODES[basePlan];
+  if (fallback && fallback.length > 0) return [...fallback];
+  return ['standard'];
+}
+
+export function normalizeQualityModeForPlan(
+  plan: string,
+  requested: QualityMode
+): {
+  qualityMode: QualityMode;
+  requestedQualityMode: QualityMode;
+  allowedModes: QualityMode[];
+  downgraded: boolean;
+} {
+  const requestedQualityMode: QualityMode =
+    requested === 'standard' || requested === 'delivery' || requested === 'studio'
+      ? requested
+      : 'studio';
+  const allowedModes = getAllowedQualityModes(plan);
+  if (allowedModes.includes(requestedQualityMode)) {
+    return {
+      qualityMode: requestedQualityMode,
+      requestedQualityMode,
+      allowedModes,
+      downgraded: false,
+    };
+  }
+  const qualityMode = allowedModes[allowedModes.length - 1] || 'standard';
+  return {
+    qualityMode,
+    requestedQualityMode,
+    allowedModes,
+    downgraded: qualityMode !== requestedQualityMode,
+  };
 }
 
 /**
@@ -171,6 +223,18 @@ export async function checkAIQuota(userId: string, estimatedTokens: number = 100
       allowed: false,
       reason: `Limite diário de ${limits.requestsPerDay} requisições atingido. Tente novamente amanhã ou upgrade seu plano.`,
       code: 'RATE_LIMITED',
+    };
+  }
+
+  // Entitlement de consumo (credits): bloqueia custo variavel quando saldo zera.
+  // Mantemos features premium do ciclo pago, mas IA/compute depende de saldo.
+  const estimatedCredits = Math.max(1, Math.ceil(Math.max(0, estimatedTokens) / 1000));
+  const creditBalance = await getCreditBalance(userId);
+  if (creditBalance < estimatedCredits) {
+    return {
+      allowed: false,
+      reason: `Créditos insuficientes para esta operação (necessário: ${estimatedCredits}, saldo: ${creditBalance}).`,
+      code: 'CREDITS_EXHAUSTED',
     };
   }
   
@@ -258,14 +322,19 @@ export async function getCurrentUsage(userId: string): Promise<{ tokensUsed: num
 async function getDailyRequestCount(userId: string): Promise<number> {
   const dayStart = new Date();
   dayStart.setHours(0, 0, 0, 0);
-  
-  // Simplificado: usar o bucket mensal dividido por dia do mês
-  // Em produção, usar uma tabela separada de rate limiting
-  const usage = await getCurrentUsage(userId);
-  const dayOfMonth = new Date().getDate();
-  
-  // Estimativa: requisições totais / dias passados
-  return Math.ceil(usage.requestsUsed / dayOfMonth);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const bucket = await prisma.usageBucket.findFirst({
+    where: {
+      userId,
+      window: 'day',
+      windowStart: { gte: dayStart, lte: dayEnd },
+    },
+    select: { requests: true },
+  });
+
+  return bucket?.requests ?? 0;
 }
 
 /**
@@ -313,26 +382,56 @@ export async function recordTokenUsage(userId: string, tokensUsed: number): Prom
   monthEnd.setMonth(monthEnd.getMonth() + 1);
   monthEnd.setDate(0);
   monthEnd.setHours(23, 59, 59, 999);
-  
-  await prisma.usageBucket.upsert({
-    where: {
-      userId_window_windowStart: {
+
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  await prisma.$transaction([
+    prisma.usageBucket.upsert({
+      where: {
+        userId_window_windowStart: {
+          userId,
+          window: 'month',
+          windowStart: monthStart,
+        }
+      },
+      create: {
         userId,
         window: 'month',
         windowStart: monthStart,
+        windowEnd: monthEnd,
+        tokens: tokensUsed,
+        requests: 1,
+      },
+      update: {
+        tokens: { increment: tokensUsed },
+        requests: { increment: 1 },
       }
-    },
-    create: {
-      userId,
-      window: 'month',
-      windowStart: monthStart,
-      windowEnd: monthEnd,
-      tokens: tokensUsed,
-      requests: 1,
-    },
-    update: {
-      tokens: { increment: tokensUsed },
-      requests: { increment: 1 },
-    }
-  });
+    }),
+    prisma.usageBucket.upsert({
+      where: {
+        userId_window_windowStart: {
+          userId,
+          window: 'day',
+          windowStart: dayStart,
+        }
+      },
+      create: {
+        userId,
+        window: 'day',
+        windowStart: dayStart,
+        windowEnd: dayEnd,
+        tokens: tokensUsed,
+        requests: 1,
+      },
+      update: {
+        tokens: { increment: tokensUsed },
+        requests: { increment: 1 },
+      }
+    }),
+  ]);
 }
+
+

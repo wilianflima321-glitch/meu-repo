@@ -1,6 +1,16 @@
-'use client';
+﻿'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type Metrics = {
   usersOnline: number;
@@ -14,6 +24,24 @@ type AuditLog = {
   action: string | null;
   resource: string | null;
   createdAt: string;
+};
+
+type QuickStatsResponse = {
+  stats?: {
+    activeUsers?: number;
+    requestsPerMinute?: number;
+  };
+};
+
+type InfraResponse = {
+  resources?: {
+    cpu?: { usage?: number };
+    memory?: { usage?: number };
+  };
+};
+
+type AuditResponse = {
+  logs?: AuditLog[];
 };
 
 export default function RealTimePage() {
@@ -33,19 +61,11 @@ export default function RealTimePage() {
   const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true);
-      const [quickStatsRes, infraRes, auditRes] = await Promise.all([
-        fetch('/api/admin/quick-stats'),
-        fetch('/api/admin/infrastructure/status'),
-        fetch('/api/admin/audit?limit=20'),
+      const [quickStats, infra, audit] = await Promise.all([
+        adminJsonFetch<QuickStatsResponse>('/api/admin/quick-stats'),
+        adminJsonFetch<InfraResponse>('/api/admin/infrastructure/status'),
+        adminJsonFetch<AuditResponse>('/api/admin/audit?limit=20'),
       ]);
-
-      if (!quickStatsRes.ok) throw new Error('Falha ao carregar estatísticas rápidas');
-      if (!infraRes.ok) throw new Error('Falha ao carregar infraestrutura');
-      if (!auditRes.ok) throw new Error('Falha ao carregar logs de auditoria');
-
-      const quickStats = await quickStatsRes.json();
-      const infra = await infraRes.json();
-      const audit = await auditRes.json();
 
       setMetrics({
         usersOnline: quickStats?.stats?.activeUsers ?? 0,
@@ -70,104 +90,77 @@ export default function RealTimePage() {
     return () => clearInterval(interval);
   }, [fetchMetrics, autoRefresh]);
 
-  const filteredLogs = logs.filter((log) => {
-    const term = search.trim().toLowerCase();
-    return !term || `${log.action || ''} ${log.resource || ''}`.toLowerCase().includes(term);
-  });
+  const filteredLogs = useMemo(
+    () =>
+      logs.filter((log) => {
+        const term = search.trim().toLowerCase();
+        return !term || `${log.action || ''} ${log.resource || ''}`.toLowerCase().includes(term);
+      }),
+    [logs, search],
+  );
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Monitoramento em tempo real</h1>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <button
+    <AdminPageShell
+      title='Monitoramento em tempo real'
+      description='Telemetria operacional de uso, infraestrutura e auditoria.'
+      subtitle={lastUpdated ? `Atualizado em ${lastUpdated.toLocaleString()}` : undefined}
+      actions={
+        <>
+          <AdminPrimaryButton
             onClick={() => setAutoRefresh((prev) => !prev)}
-            className={`px-3 py-2 rounded text-sm ${
-              autoRefresh ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
-            }`}
+            className={autoRefresh ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20' : ''}
           >
             {autoRefresh ? 'Auto: ativado' : 'Auto: desativado'}
-          </button>
-          <button
-            onClick={fetchMetrics}
-            className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-          >
-            Atualizar
-          </button>
+          </AdminPrimaryButton>
+          <AdminPrimaryButton onClick={fetchMetrics}>Atualizar</AdminPrimaryButton>
+        </>
+      }
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
+      ) : null}
+
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Usuarios online' value={loading ? '...' : metrics.usersOnline} tone='sky' />
+          <AdminStatCard label='Requisicoes API/min' value={loading ? '...' : metrics.apiRequests} tone='emerald' />
+          <AdminStatCard label='Uso de CPU' value={loading ? '...' : `${metrics.cpuUsage.toFixed(0)}%`} tone='rose' />
+          <AdminStatCard label='Uso de memoria' value={loading ? '...' : `${metrics.memoryUsage.toFixed(0)}%`} tone='amber' />
+        </AdminStatGrid>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[0, 1, 2, 3].map((index) => (
-          <div key={index} className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
-            {loading ? (
-              <div className="h-12 bg-zinc-800/70 rounded animate-pulse" />
-            ) : (
-              <>
-                {index === 0 && (
-                  <>
-                    <h3 className="text-lg font-semibold">Usuários online</h3>
-                    <p className="text-2xl font-bold text-blue-600">{metrics.usersOnline}</p>
-                  </>
-                )}
-                {index === 1 && (
-                  <>
-                    <h3 className="text-lg font-semibold">Requisições de API/min</h3>
-                    <p className="text-2xl font-bold text-green-600">{metrics.apiRequests}</p>
-                  </>
-                )}
-                {index === 2 && (
-                  <>
-                    <h3 className="text-lg font-semibold">Uso de CPU</h3>
-                    <p className="text-2xl font-bold text-red-600">{metrics.cpuUsage.toFixed(0)}%</p>
-                  </>
-                )}
-                {index === 3 && (
-                  <>
-                    <h3 className="text-lg font-semibold">Uso de memória</h3>
-                    <p className="text-2xl font-bold text-blue-600">{metrics.memoryUsage.toFixed(0)}%</p>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Logs recentes</h2>
+      <AdminSection title='Logs recentes'>
+        <div className='mb-4'>
           <input
-            type="text"
-            placeholder="Buscar logs"
+            type='text'
+            placeholder='Buscar logs por acao/recurso'
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border p-2 rounded text-sm"
+            onChange={(event) => setSearch(event.target.value)}
+            className='w-full max-w-sm rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
           />
         </div>
-        <div className="bg-zinc-800/70 p-4 rounded h-64 overflow-y-auto">
-          {filteredLogs.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sem logs recentes.</p>
+
+        <div className='h-64 overflow-y-auto rounded bg-zinc-800/70 p-3'>
+          {loading ? (
+            <table className='w-full'>
+              <tbody>
+                <AdminTableStateRow colSpan={1} message='Carregando logs...' />
+              </tbody>
+            </table>
+          ) : filteredLogs.length === 0 ? (
+            <p className='text-sm text-zinc-500'>Sem logs recentes.</p>
           ) : (
             filteredLogs.map((log) => (
-              <p key={log.id} className="text-sm">
-                [{new Date(log.createdAt).toLocaleString()}] {log.action || 'ação'} {log.resource ? `(${log.resource})` : ''}
+              <p key={log.id} className='text-sm text-zinc-200'>
+                [{new Date(log.createdAt).toLocaleString()}] {log.action || 'acao'} {log.resource ? `(${log.resource})` : ''}
               </p>
             ))
           )}
         </div>
-      </div>
-    </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }
+

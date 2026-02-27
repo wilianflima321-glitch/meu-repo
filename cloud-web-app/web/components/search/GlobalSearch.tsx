@@ -310,7 +310,7 @@ function generateMockResults(query: string, options: SearchOptions): FileSearchR
   const mockFiles = [
     { path: 'src/App.tsx', content: 'function App() { return <div>Hello World</div> }' },
     { path: 'src/index.tsx', content: 'ReactDOM.render(<App />, document.getElementById("root"))' },
-    { path: 'src/components/Button.tsx', content: 'export function Button({ onClick }) { return <button onClick={onClick}>Click</button> }' },
+    { path: 'src/components/ui/Button.tsx', content: 'export function Button({ onClick }) { return <button onClick={onClick}>Click</button> }' },
     { path: 'src/hooks/useAuth.ts', content: 'export function useAuth() { const [user, setUser] = useState(null) }' },
     { path: 'src/utils/helpers.ts', content: 'export function formatDate(date: Date) { return date.toISOString() }' },
   ];

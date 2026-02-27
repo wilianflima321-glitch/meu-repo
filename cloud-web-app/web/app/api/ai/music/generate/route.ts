@@ -14,10 +14,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
-import { checkRateLimit } from '@/lib/rate-limit';
-
-// Rate limit: 30 music generations per hour
-const RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 30 };
+import { enforceRateLimit } from '@/lib/server/rate-limit';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 // Provider configurations
 const PROVIDERS = {
@@ -58,6 +56,12 @@ interface GenerateRequest {
   instrumental?: boolean;
   lyrics?: string;
   referenceUrl?: string; // for style reference
+}
+
+function getAvailableProviders(): Provider[] {
+  return Object.entries(PROVIDERS)
+    .filter(([, config]) => Boolean(process.env[config.envKey]))
+    .map(([id]) => id as Provider);
 }
 
 // Suno Generation
@@ -227,16 +231,16 @@ export async function POST(req: NextRequest) {
   let user: AuthUser;
   try {
     user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-music-generate-post',
+      key: user.userId,
+      max: 30,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many music generation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const rateLimit = checkRateLimit(req, RATE_LIMIT);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded', remaining: rateLimit.remaining },
-      { status: 429 }
-    );
   }
 
   try {
@@ -266,21 +270,25 @@ export async function POST(req: NextRequest) {
 
     const providerConfig = PROVIDERS[provider as Provider];
     
-    // Check API key
+    // Keep provider selection explicit: do not auto-fallback to another provider.
     if (!process.env[providerConfig.envKey]) {
-      const availableProvider = Object.entries(PROVIDERS).find(
-        ([_, config]) => process.env[config.envKey]
-      );
-      
-      if (!availableProvider) {
-        return NextResponse.json(
-          { 
-            error: 'No music provider configured',
-            message: 'Please configure SUNO_API_KEY or REPLICATE_API_TOKEN',
-          },
-          { status: 503 }
-        );
-      }
+      const availableProviders = getAvailableProviders();
+      return capabilityResponse({
+        error: 'PROVIDER_NOT_CONFIGURED',
+        status: 503,
+        message:
+          availableProviders.length === 0
+            ? 'No music generation provider configured.'
+            : `Requested provider "${provider}" is not configured.`,
+        capability: 'AI_MUSIC_GENERATION',
+        capabilityStatus: 'PARTIAL',
+        milestone: 'P1_PROVIDER_CONFIG',
+        metadata: {
+          requestedProvider: provider,
+          requiredEnv: providerConfig.envKey,
+          availableProviders,
+        },
+      });
     }
 
     // Validate duration
@@ -341,7 +349,15 @@ export async function POST(req: NextRequest) {
 // GET - Check status or list providers
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req);
+    const auth = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-music-generate-get',
+      key: auth.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many music status requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

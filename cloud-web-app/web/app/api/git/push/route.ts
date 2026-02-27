@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 const execFileAsync = promisify(execFile);
 
@@ -18,6 +19,14 @@ interface GitPushRequest {
 export async function POST(request: NextRequest) {
   try {
 		const user = requireAuth(request);
+		const rateLimitResponse = await enforceRateLimit({
+			scope: 'git-push-post',
+			key: user.userId,
+			max: 120,
+			windowMs: 60 * 60 * 1000,
+			message: 'Too many git push requests. Please wait before retrying.',
+		});
+		if (rateLimitResponse) return rateLimitResponse;
 		await requireEntitlementsForUser(user.userId);
 
     const body: GitPushRequest = await request.json();

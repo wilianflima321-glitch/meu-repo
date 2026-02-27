@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime'
+import { enforceRateLimit } from '@/lib/server/rate-limit'
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
@@ -13,6 +14,14 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request)
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'files-raw',
+      key: user.userId,
+      max: 120,
+      windowMs: 60 * 1000,
+      message: 'Too many raw file requests. Please retry shortly.',
+    })
+    if (rateLimitResponse) return rateLimitResponse
     await requireEntitlementsForUser(user.userId)
 
     const url = new URL(request.url)

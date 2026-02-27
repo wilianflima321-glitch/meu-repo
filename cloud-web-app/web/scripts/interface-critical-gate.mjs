@@ -3,8 +3,9 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const REPORT_FILE = path.join(ROOT, 'docs', 'INTERFACE_CRITICAL_SWEEP.md')
 
 const THRESHOLDS = {
@@ -12,7 +13,8 @@ const THRESHOLDS = {
   'admin-light-theme-tokens': 0,
   'admin-status-light-tokens': 0,
   'blocking-browser-dialogs': 0,
-  'not-implemented-ui': 6,
+  'not-implemented-ui': 4,
+  'not-implemented-noncritical': 0,
   'frontend-workspace-route-usage': 0,
   'legacy-editor-shell-usage': 0,
 }

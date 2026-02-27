@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getMarketplaceRuntime } from '@/lib/server/marketplace-runtime';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 /**
  * GET /api/marketplace - Search/Get Extensions
@@ -19,6 +20,14 @@ import { getMarketplaceRuntime } from '@/lib/server/marketplace-runtime';
 export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-route-get',
+      key: user.userId,
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many marketplace requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireFeatureForUser(user.userId, 'extensions');
 
     const { searchParams } = new URL(request.url);
@@ -118,6 +127,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'marketplace-route-post',
+      key: user.userId,
+      max: 180,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many marketplace mutation requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     await requireFeatureForUser(user.userId, 'extensions');
 
     const body = await request.json();

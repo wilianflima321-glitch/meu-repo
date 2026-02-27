@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { withAdminAuth } from '@/lib/rbac';
+import { enforceRateLimit, getRequestIp } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,15 @@ const defaultFlags = [
 
 export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'feature-flags-get',
+      key: getRequestIp(request),
+      max: 480,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many feature flag requests. Please wait before retrying.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Flags podem ser públicas para o cliente avaliar
     const flags = await prisma.featureFlag.findMany({
       orderBy: { updatedAt: 'desc' },
@@ -64,6 +74,15 @@ export async function GET(request: NextRequest) {
 export const POST = withAdminAuth(
   async (request, { user }) => {
     try {
+      const rateLimitResponse = await enforceRateLimit({
+        scope: 'feature-flags-post',
+        key: user.id,
+        max: 180,
+        windowMs: 60 * 60 * 1000,
+        message: 'Too many feature flag update requests. Please wait before retrying.',
+      });
+      if (rateLimitResponse) return rateLimitResponse;
+
       const body = await request.json();
       const { key, name, enabled, type, percentage, rules, environments, description } = body;
 

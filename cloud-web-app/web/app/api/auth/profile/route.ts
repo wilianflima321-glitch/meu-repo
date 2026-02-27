@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
     const authUser = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-profile-read',
+      key: authUser.userId,
+      max: 180,
+      windowMs: 60 * 1000,
+      message: 'Too many profile read requests. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Get user
     const user = await prisma.user.findUnique({
@@ -78,6 +87,15 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const authUser = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'auth-profile-update',
+      key: authUser.userId,
+      max: 45,
+      windowMs: 60 * 1000,
+      message: 'Too many profile update requests. Please retry shortly.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await req.json().catch(() => ({}));
 
     const name = typeof body?.name === 'string' ? body.name.trim() : undefined;

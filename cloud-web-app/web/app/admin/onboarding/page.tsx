@@ -1,12 +1,26 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminStatCard,
+  AdminStatGrid,
+  AdminStatusBanner,
+  AdminTableStateRow,
+} from '@/components/admin/AdminSurface';
+import { adminJsonFetch } from '@/components/admin/adminAuthFetch';
 
 type OnboardingStats = {
   totalActions: number;
   uniqueUsers: number;
   lastActivity: string | null;
   actionCounts: Record<string, number>;
+};
+
+type OnboardingPayload = {
+  stats?: OnboardingStats;
 };
 
 export default function Onboarding() {
@@ -19,14 +33,12 @@ export default function Onboarding() {
   const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/onboarding/stats');
-      if (!res.ok) throw new Error('Falha ao carregar estatísticas de onboarding');
-      const data = await res.json();
+      const data = await adminJsonFetch<OnboardingPayload>('/api/admin/onboarding/stats');
       setStats(data?.stats ?? null);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar onboarding');
+      setError(err instanceof Error ? err.message : 'Failed to load onboarding statistics');
     } finally {
       setLoading(false);
     }
@@ -36,80 +48,74 @@ export default function Onboarding() {
     fetchStats();
   }, [fetchStats]);
 
-  const filteredActions = Object.entries(stats?.actionCounts || {}).filter(([action]) => {
+  const filteredActions = useMemo(() => {
+    const entries = Object.entries(stats?.actionCounts || {});
     const term = search.trim().toLowerCase();
-    return !term || action.toLowerCase().includes(term);
-  });
+    return entries.filter(([action]) => !term || action.toLowerCase().includes(term));
+  }, [search, stats?.actionCounts]);
 
   return (
-    <div className='p-6 max-w-6xl mx-auto'>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className='text-3xl font-bold'>Onboarding de usuários</h1>
-          <p className='text-zinc-400'>Resumo das ações registradas no onboarding.</p>
-          {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
+    <AdminPageShell
+      title='Onboarding'
+      description='Inspect onboarding action telemetry and unique user activation footprint.'
+      subtitle={lastUpdated ? `Updated at ${lastUpdated.toLocaleString()}` : undefined}
+      actions={<AdminPrimaryButton onClick={fetchStats}>Refresh</AdminPrimaryButton>}
+    >
+      {error ? (
+        <div className='mb-4'>
+          <AdminStatusBanner tone='danger'>{error}</AdminStatusBanner>
         </div>
-        <button
-          onClick={fetchStats}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
-        >
-          Atualizar
-        </button>
-      </div>
+      ) : null}
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
-        {loading ? (
-          <p className='text-sm text-zinc-500'>Carregando estatísticas...</p>
-        ) : error ? (
-          <p className='text-sm text-red-500'>{error}</p>
-        ) : !stats ? (
-          <p className='text-sm text-zinc-500'>Sem dados disponíveis.</p>
-        ) : (
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            <div className='text-center'>
-              <p className='text-sm font-semibold'>Ações registradas</p>
-              <p className='text-2xl font-bold text-blue-600'>{stats.totalActions}</p>
-            </div>
-            <div className='text-center'>
-              <p className='text-sm font-semibold'>Usuários únicos</p>
-              <p className='text-2xl font-bold text-green-600'>{stats.uniqueUsers}</p>
-            </div>
-            <div className='text-center'>
-              <p className='text-sm font-semibold'>Última atividade</p>
-              <p className='text-sm text-zinc-400'>
-                {stats.lastActivity ? new Date(stats.lastActivity).toLocaleString() : '—'}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow'>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className='text-lg font-semibold'>Ações por tipo</h2>
-          <input
-            type="text"
-            placeholder="Buscar ação"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border p-2 rounded text-sm"
+      <div className='mb-6'>
+        <AdminStatGrid>
+          <AdminStatCard label='Actions' value={stats?.totalActions ?? 0} tone='sky' />
+          <AdminStatCard label='Unique users' value={stats?.uniqueUsers ?? 0} tone='emerald' />
+          <AdminStatCard label='Action types' value={Object.keys(stats?.actionCounts || {}).length} tone='neutral' />
+          <AdminStatCard
+            label='Last activity'
+            value={stats?.lastActivity ? new Date(stats.lastActivity).toLocaleDateString() : '-'}
+            tone='amber'
           />
-        </div>
-        {filteredActions.length > 0 ? (
-          <ul>
-            {filteredActions.map(([action, count]) => (
-              <li key={action} className='flex justify-between border-b p-2'>
-                <span>{action}</span>
-                <span className='text-sm text-zinc-400'>{count}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className='text-sm text-zinc-500'>Nenhuma ação registrada.</p>
-        )}
+        </AdminStatGrid>
       </div>
-    </div>
+
+      <AdminSection className='mb-4'>
+        <input
+          type='text'
+          placeholder='Search onboarding action type'
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className='w-full rounded border border-zinc-700 bg-zinc-950/60 p-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:max-w-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400'
+        />
+      </AdminSection>
+
+      <AdminSection className='p-0'>
+        <div className='overflow-x-auto'>
+          <table className='w-full table-auto text-sm'>
+            <thead>
+              <tr className='bg-zinc-800/70'>
+                <th className='p-3 text-left'>Action</th>
+                <th className='p-3 text-left'>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <AdminTableStateRow colSpan={2} message='Loading action counts...' />
+              ) : filteredActions.length === 0 ? (
+                <AdminTableStateRow colSpan={2} message='No onboarding actions found.' />
+              ) : (
+                filteredActions.map(([action, count]) => (
+                  <tr key={action} className='border-t border-zinc-800/70'>
+                    <td className='p-3 text-zinc-100'>{action}</td>
+                    <td className='p-3'>{count}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
+    </AdminPageShell>
   );
 }

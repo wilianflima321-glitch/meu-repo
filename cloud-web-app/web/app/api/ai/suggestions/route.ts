@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
@@ -114,6 +115,14 @@ const suggestionPool: AISuggestion[] = [
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    const rateLimitResponse = await enforceRateLimit({
+      scope: 'ai-suggestions-get',
+      key: user.userId,
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+      message: 'Too many suggestion requests. Please try again later.',
+    });
+    if (rateLimitResponse) return rateLimitResponse;
     const { searchParams } = new URL(req.url);
     
     const limit = parseInt(searchParams.get('limit') || '5');

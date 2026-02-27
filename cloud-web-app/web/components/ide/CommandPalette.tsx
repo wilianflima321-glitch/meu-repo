@@ -108,6 +108,7 @@ function createDefaultCommands(handlers: {
   toggleSidebar?: () => void
   toggleTerminal?: () => void
   aiChat?: () => void
+  rollbackLastAIPatch?: () => void
   openSettings?: () => void
 }): CommandItem[] {
   return [
@@ -184,6 +185,17 @@ function createDefaultCommands(handlers: {
       shortcut: 'Ctrl+I',
       action: handlers.aiChat || (() => {}),
       keywords: ['ai', 'assistant', 'chat'],
+    },
+    {
+      id: 'ai.rollbackLastPatch',
+      label: 'Rollback Last AI Patch',
+      description: 'Revert the most recent server-applied AI inline patch',
+      category: 'ai',
+      icon: 'refresh',
+      shortcut: 'Ctrl+Alt+Z',
+      action: handlers.rollbackLastAIPatch || (() => {}),
+      when: () => typeof handlers.rollbackLastAIPatch === 'function',
+      keywords: ['ai', 'rollback', 'revert', 'patch'],
     },
     {
       id: 'settings.open',
@@ -267,6 +279,7 @@ export function CommandPaletteProvider({
   onToggleSidebar,
   onToggleTerminal,
   onAIChat,
+  onRollbackLastAIPatch,
   onOpenSettings,
   files = [],
 }: {
@@ -281,6 +294,7 @@ export function CommandPaletteProvider({
   onToggleSidebar?: () => void
   onToggleTerminal?: () => void
   onAIChat?: () => void
+  onRollbackLastAIPatch?: () => void
   onOpenSettings?: () => void
   files?: FileItem[]
 }) {
@@ -297,6 +311,7 @@ export function CommandPaletteProvider({
       toggleSidebar: onToggleSidebar,
       toggleTerminal: onToggleTerminal,
       aiChat: onAIChat,
+      rollbackLastAIPatch: onRollbackLastAIPatch,
       openSettings: onOpenSettings,
     })
   )
@@ -313,6 +328,7 @@ export function CommandPaletteProvider({
         toggleSidebar: onToggleSidebar,
         toggleTerminal: onToggleTerminal,
         aiChat: onAIChat,
+        rollbackLastAIPatch: onRollbackLastAIPatch,
         openSettings: onOpenSettings,
       })
     )
@@ -326,6 +342,7 @@ export function CommandPaletteProvider({
     onToggleSidebar,
     onToggleTerminal,
     onAIChat,
+    onRollbackLastAIPatch,
     onOpenSettings,
   ])
 
