@@ -72,3 +72,5 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 5. Moved loose web root Markdown docs to `docs/archive/web-status/` (kept `cloud-web-app/web/README.md` only in web root).
 6. Nexus chat surface canonicalized to `components/nexus/NexusChatMultimodal.tsx` with compatibility wrapper in legacy import path.
 7. Started monolith decomposition in `AethelDashboard` by extracting state/types contract to `components/dashboard/aethel-dashboard-model.ts`.
+8. Continued monolith decomposition in `AethelDashboard` by extracting defaults/constants/format helpers to `components/dashboard/aethel-dashboard-defaults.ts`.
+9. Enforced root connectivity gate in both visual workflows (`ui-audit.yml`, `visual-regression-compare.yml`) to block path regressions before browser steps.

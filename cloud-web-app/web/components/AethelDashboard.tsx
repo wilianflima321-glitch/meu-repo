@@ -27,7 +27,6 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
 } from '@xyflow/react'
-import type { Edge, Node } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
 import { isAuthenticated } from '@/lib/auth'
@@ -55,180 +54,23 @@ import {
   resolveStoredSettings,
   STORAGE_KEYS,
 } from './dashboard/aethel-dashboard-model'
-
-const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
-  {
-    id: '1',
-    name: 'Assistente de pesquisa com IA',
-    description: 'Fluxo multiagente para coletar, resumir e reportar descobertas',
-    category: 'Pesquisa',
-    nodes: [],
-    edges: [],
-  },
-  {
-    id: '2',
-    name: 'Pipeline de dados',
-    description: 'Processamento e visualização de dados ponta a ponta',
-    category: 'Ciência de Dados',
-    nodes: [],
-    edges: [],
-  },
-  {
-    id: '3',
-    name: 'Suíte de criação de conteúdo',
-    description: 'Geração e edição de conteúdo em múltiplas etapas',
-    category: 'Criativo',
-    nodes: [],
-    edges: [],
-  },
-  {
-    id: '4',
-    name: 'Pesquisa e análise',
-    description: 'Fluxo completo de pesquisa e análise',
-    category: 'Pesquisa',
-    nodes: [],
-    edges: [],
-  },
-]
-
-const DEFAULT_USE_CASES: UseCase[] = [
-  {
-    id: '1',
-    title: 'Criar um dashboard em React',
-    description: 'Fluxo completo para criar um dashboard moderno em React com assistência de IA',
-    category: 'Desenvolvimento',
-    sharedBy: 'Comunidade',
-    views: 1250,
-    likes: 89,
-    tags: ['React', 'Painel', 'Front-end'],
-    preview: 'https://example.com/preview1.png',
-  },
-  {
-    id: '2',
-    title: 'Suíte de visualização de dados',
-    description: 'Pipeline de análise e visualização de dados ponta a ponta',
-    category: 'Ciência de Dados',
-    sharedBy: 'EspecialistaDados',
-    views: 890,
-    likes: 67,
-    tags: ['Python', 'Visualização', 'Análises'],
-    preview: 'https://example.com/preview2.png',
-  },
-  {
-    id: '3',
-    title: 'Estratégia de marketing de conteúdo',
-    description: 'Criação de conteúdo com IA e desenvolvimento de estratégia de marketing',
-    category: 'Marketing',
-    sharedBy: 'MarketingPro',
-    views: 2100,
-    likes: 145,
-    tags: ['Marketing', 'Conteúdo', 'Estratégia'],
-    preview: 'https://example.com/preview3.png',
-  },
-]
-
-const DEFAULT_PROJECTS: Project[] = [
-  { id: 1, name: 'Estúdio de Conteúdo IA', type: 'code', status: 'active' },
-  { id: 2, name: 'Hub do Metaverso', type: 'unreal', status: 'active' },
-  { id: 3, name: 'Funil de automação', type: 'web', status: 'planning' },
-]
-
-const INITIAL_NODES: Node[] = [
-  {
-    id: '1',
-    position: { x: 80, y: 40 },
-    data: { label: 'Sinal de entrada' },
-    type: 'input',
-  },
-  {
-    id: '2',
-    position: { x: 320, y: 140 },
-    data: { label: 'Orquestrador IA' },
-  },
-  {
-    id: '3',
-    position: { x: 560, y: 40 },
-    data: { label: 'Saída' },
-    type: 'output',
-  },
-]
-
-const INITIAL_EDGES: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3' },
-]
-
-const HEALTH_KEY = 'health::status'
-const CONNECTIVITY_KEY = 'connectivity::status'
-const BILLING_PLANS_KEY = 'billing::plans'
-const WALLET_KEY = 'wallet::summary'
-const CURRENT_PLAN_KEY = 'billing::current-plan'
-const CREDITS_KEY = 'billing::credits'
-
-const CHAT_THREAD_KEY_BASE = 'chat::activeThreadId'
-const COPILOT_WORKFLOW_KEY_BASE = 'copilot::activeWorkflowId'
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'pendente',
-  processing: 'processando',
-  paid: 'pago',
-  succeeded: 'confirmado',
-  success: 'confirmado',
-  completed: 'concluído',
-  failed: 'falhou',
-  canceled: 'cancelado',
-  cancelled: 'cancelado',
-  awaiting_settlement: 'aguardando liquidação',
-  refunded: 'reembolsado',
-  requires_action: 'requer ação',
-  requires_payment_method: 'requer método de pagamento',
-  requires_confirmation: 'requer confirmação',
-  requires_capture: 'requer captura',
-}
-
-const CONNECTIVITY_STATUS_LABELS: Record<string, string> = {
-  healthy: 'saudável',
-  degraded: 'degradado',
-  down: 'indisponível',
-  unavailable: 'indisponível',
-  unknown: 'desconhecido',
-}
-
-function formatStatusLabel(rawStatus: unknown) {
-  if (typeof rawStatus !== 'string' || !rawStatus.trim()) {
-    return 'confirmado'
-  }
-  const normalized = rawStatus.toLowerCase()
-  return STATUS_LABELS[normalized] ?? rawStatus
-}
-
-function formatConnectivityStatus(rawStatus?: string | null) {
-  if (!rawStatus) {
-    return CONNECTIVITY_STATUS_LABELS.unknown
-  }
-  const normalized = rawStatus.toLowerCase()
-  return CONNECTIVITY_STATUS_LABELS[normalized] ?? rawStatus
-}
-
-function formatCurrencyLabel(currency?: string | null) {
-  if (!currency) {
-    return 'créditos'
-  }
-  if (currency.toLowerCase() === 'credits') {
-    return 'créditos'
-  }
-  return currency
-}
-
-function getScopedKeys(projectId: string | null) {
-  const suffix = projectId ? `::${projectId}` : ''
-  return {
-    chatThreadKey: `${CHAT_THREAD_KEY_BASE}${suffix}`,
-    workflowKey: `${COPILOT_WORKFLOW_KEY_BASE}${suffix}`,
-    legacyChatThreadKey: CHAT_THREAD_KEY_BASE,
-    legacyWorkflowKey: COPILOT_WORKFLOW_KEY_BASE,
-  }
-}
+import {
+  BILLING_PLANS_KEY,
+  CONNECTIVITY_KEY,
+  CREDITS_KEY,
+  CURRENT_PLAN_KEY,
+  DEFAULT_PROJECTS,
+  DEFAULT_USE_CASES,
+  DEFAULT_WORKFLOW_TEMPLATES,
+  HEALTH_KEY,
+  INITIAL_EDGES,
+  INITIAL_NODES,
+  WALLET_KEY,
+  formatConnectivityStatus,
+  formatCurrencyLabel,
+  formatStatusLabel,
+  getScopedKeys,
+} from './dashboard/aethel-dashboard-defaults'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -291,8 +133,8 @@ export default function AethelDashboard() {
   const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null)
   const [isTrialActive, setIsTrialActive] = useState(true)
   const trialDaysLeft = 14
-  const [nodes, setNodes] = useState<Node[]>(INITIAL_NODES)
-  const [edges, setEdges] = useState<Edge[]>(INITIAL_EDGES)
+  const [nodes, setNodes] = useState(INITIAL_NODES)
+  const [edges, setEdges] = useState(INITIAL_EDGES)
   const [hasToken, setHasToken] = useState(false)
   const [authReady, setAuthReady] = useState(false)
   const [authError, setAuthError] = useState<Error | null>(null)

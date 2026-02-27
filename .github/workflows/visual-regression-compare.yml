@@ -31,6 +31,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cloud-web-app/web/package-lock.json
 
+      - name: Repo connectivity gate (pre-compare)
+        run: npm run qa:repo-connectivity
+
       - name: Install root deps
         run: |
           if [ -f package-lock.json ]; then

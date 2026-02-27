@@ -1906,3 +1906,16 @@ Implemented:
 
 Impact:
 1. Reduced `AethelDashboard.tsx` monolith size and improved ownership boundaries for next decomposition batches.
+
+## 0.38 Delta Update 2026-02-27 (Dashboard decomposition batch 2 + CI gate hardening)
+Implemented:
+1. Extracted dashboard defaults/constants/format helpers into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-defaults.ts`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now consumes this canonical defaults module.
+3. Added root connectivity gate to visual CI workflows:
+- `.github/workflows/ui-audit.yml`
+- `.github/workflows/visual-regression-compare.yml`
+
+Impact:
+1. Additional reduction of monolith pressure in `AethelDashboard.tsx`.
+2. Connectivity regressions are now blocked across both UI-audit and visual-regression pipelines.
