@@ -1897,3 +1897,12 @@ Implemented:
 Execution interpretation:
 1. Reduces CI false failures caused by missing optional desktop/theia tree.
 2. Keeps Nexus surface stable while converging to canonical component paths.
+
+## 0.37 Delta Update 2026-02-27 (Dashboard decomposition batch 1)
+Implemented:
+1. Extracted dashboard domain types/storage-state helpers into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-model.ts`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now imports canonical model contract from that module.
+
+Impact:
+1. Reduced `AethelDashboard.tsx` monolith size and improved ownership boundaries for next decomposition batches.
