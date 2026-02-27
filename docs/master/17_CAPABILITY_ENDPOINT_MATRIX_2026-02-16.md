@@ -66,3 +66,10 @@ Validation status:
 ## 5) Notes
 1. This matrix is contract-aligned with `10`, `13`, `14`, `15`, and `16`.
 2. If any endpoint behavior changes, this matrix must be updated in the same wave.
+
+## 6) Delta 2026-02-27 (readiness constraints)
+1. Capability contracts permanecem válidos, mas readiness de produto depende de baseline estrutural:
+- scripts/config sem caminhos quebrados;
+- remoção de artefatos locais versionados;
+- fluxo `/ide` sem fonte mock no caminho principal.
+2. Enquanto essa base não fechar, status operacional permanece `PARTIAL` para claim enterprise/studio.

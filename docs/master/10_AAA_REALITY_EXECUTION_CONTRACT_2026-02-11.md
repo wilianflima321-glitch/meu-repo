@@ -1,4 +1,4 @@
-# 10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11
+﻿# 10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11
 Status: EXECUTABLE CONTRACT  
 Date: 2026-02-11  
 Owner: Multi-agent internal review (Product, UX, Frontend, Backend, AI, Infra, PM, Competitive, AAA tools)
@@ -7,18 +7,18 @@ Owner: Multi-agent internal review (Product, UX, Frontend, Backend, AI, Infra, P
 This contract is the continuation of the canonical audit folder and is written to be directly executable by another AI/engineer.
 
 Primary canonical sources:
-- `meu-repo/audit dicas do emergent usar/00_FONTE_CANONICA.md`
-- `meu-repo/audit dicas do emergent usar/00_REALITY_MATRIX_2026-02-04.md`
-- `meu-repo/audit dicas do emergent usar/FULL_AUDIT.md`
-- `meu-repo/audit dicas do emergent usar/DUPLICATIONS_AND_CONFLICTS.md`
-- `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`
-- `meu-repo/audit dicas do emergent usar/COMPETITIVE_GAP.md`
-- `meu-repo/audit dicas do emergent usar/WORKBENCH_SPEC.md`
-- `meu-repo/audit dicas do emergent usar/AI_SYSTEM_SPEC.md`
-- `meu-repo/audit dicas do emergent usar/EXECUTION_PLAN.md`
-- `meu-repo/audit dicas do emergent usar/8_ADMIN_SYSTEM_SPEC.md`
-- `meu-repo/audit dicas do emergent usar/9_BACKEND_SYSTEM_SPEC.md`
-- `meu-repo/audit dicas do emergent usar/Relatorio_de_Continuacao_Auditoria_Multi-Agente.md`
+- `meu-repo/docs/master/00_FONTE_CANONICA.md`
+- `meu-repo/docs/master/00_REALITY_MATRIX_2026-02-04.md`
+- `meu-repo/docs/master/FULL_AUDIT.md`
+- `meu-repo/docs/master/DUPLICATIONS_AND_CONFLICTS.md`
+- `meu-repo/docs/master/LIMITATIONS.md`
+- `meu-repo/docs/master/COMPETITIVE_GAP.md`
+- `meu-repo/docs/master/WORKBENCH_SPEC.md`
+- `meu-repo/docs/master/AI_SYSTEM_SPEC.md`
+- `meu-repo/docs/master/EXECUTION_PLAN.md`
+- `meu-repo/docs/master/8_ADMIN_SYSTEM_SPEC.md`
+- `meu-repo/docs/master/9_BACKEND_SYSTEM_SPEC.md`
+- `meu-repo/docs/master/Relatorio_de_Continuacao_Auditoria_Multi-Agente.md`
 
 Implementation evidence also verified in codebase to avoid fake status.
 
@@ -185,11 +185,11 @@ Critical interpretation:
 ## 0.6 Delta Update 2026-02-17 (Claude handoff map + runtime runbook)
 Implemented in canonical docs:
 1. New interface handoff map for external AI refactor execution:
-- `audit dicas do emergent usar/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
+- `docs/master/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
 2. New runtime warning/environment runbook:
-- `audit dicas do emergent usar/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+- `docs/master/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
 3. Canonical source index updated to include both docs:
-- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+- `docs/master/00_FONTE_CANONICA.md`
 
 Execution interpretation:
 1. Interface ownership and file-level targets are now explicit for parallel UI hardening.
@@ -198,9 +198,9 @@ Execution interpretation:
 ## 0.7 Delta Update 2026-02-17 (P1/P2 triage finalized)
 Implemented in canonical planning:
 1. Final P1/P2 execution list generated from interface surface map:
-- `audit dicas do emergent usar/20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
+- `docs/master/20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
 2. Canonical source list updated:
-- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
+- `docs/master/00_FONTE_CANONICA.md`
 
 Execution interpretation:
 1. Post-P0 work now has strict ordered priorities and done criteria.
@@ -208,7 +208,7 @@ Execution interpretation:
 
 ## 1. Executive Reality (No Marketing)
 1. Full Unreal parity in browser is not technically feasible with current web limits (WebGL/WebGPU, GPU memory, media pipeline limits).  
-   Source: `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`
+   Source: `meu-repo/docs/master/LIMITATIONS.md`
 2. The platform can still beat competitors in integrated workflow: AI-native + Workbench shell + one-click deploy + cloud collaboration.
 3. Current repo has substantial implementation, but still has explicit `NOT_IMPLEMENTED`, TODO, mock/in-memory paths, and overlapping systems.
 4. "AAA quality everywhere" must be redefined as:
@@ -237,8 +237,8 @@ Where we must not over-promise:
 
 ## 3. Current Product Reality (Measured)
 Measured from repo scan:
-- API routes: `221` (`meu-repo/cloud-web-app/web/app/api`)
-- App pages: `87` (`meu-repo/cloud-web-app/web/app`)
+- API routes: `221` (`cloud-web-app/web/app/api`)
+- App pages: `87` (`cloud-web-app/web/app`)
 - Pages using `WorkbenchRedirect`: `17` (explicitly parked flows)
 - Files with `NOT_IMPLEMENTED` in `web` TS/TSX: `25`
 - `NOT_IMPLEMENTED` lines in `web` TS/TSX: `36`
@@ -263,9 +263,9 @@ Reality:
 - Multiple parallel surfaces remain (`AethelDashboard`, legacy pages, dedicated editor subpages), causing UX fragmentation.
 
 Evidence:
-- `meu-repo/cloud-web-app/web/components/ide/WorkbenchRedirect.tsx`
-- `meu-repo/cloud-web-app/web/app/*/page.tsx` redirect group (17 pages)
-- `meu-repo/cloud-web-app/web/app/ide/page.tsx:398`, `:402`, `:406`, `:410`, `:414`
+- `cloud-web-app/web/components/ide/WorkbenchRedirect.tsx`
+- `cloud-web-app/web/app/*/page.tsx` redirect group (17 pages)
+- `cloud-web-app/web/app/ide/page.tsx:398`, `:402`, `:406`, `:410`, `:414`
 
 Decision:
 - Keep Workbench as single entry shell for all creation/edit/preview/debug terminal tasks.
@@ -279,13 +279,13 @@ Reality:
 - Multiple command palettes and status bars coexist, increasing inconsistency risk.
 
 Evidence:
-- `meu-repo/cloud-web-app/web/components/ide/IDELayout.tsx:562`
-- `meu-repo/cloud-web-app/web/components/ide/FileExplorerPro.tsx:333`
-- `meu-repo/cloud-web-app/web/components/CommandPalette.tsx`
-- `meu-repo/cloud-web-app/web/components/CommandPalettePro.tsx`
-- `meu-repo/cloud-web-app/web/components/CommandPaletteUnified.tsx`
-- `meu-repo/cloud-web-app/web/components/statusbar/StatusBar.tsx`
-- `meu-repo/cloud-web-app/web/components/statusbar/StatusBarPro.tsx`
+- `cloud-web-app/web/components/ide/IDELayout.tsx:562`
+- `cloud-web-app/web/components/ide/FileExplorerPro.tsx:333`
+- `cloud-web-app/web/components/CommandPalette.tsx`
+- `cloud-web-app/web/components/CommandPalettePro.tsx`
+- `cloud-web-app/web/components/CommandPaletteUnified.tsx`
+- `cloud-web-app/web/components/statusbar/StatusBar.tsx`
+- `cloud-web-app/web/components/statusbar/StatusBarPro.tsx`
 
 Decision:
 - Enforce one command palette and one status bar contract in Workbench.
@@ -303,14 +303,14 @@ Reality:
   - DB-backed virtual workspace (`/api/workspace/tree`, `/api/workspace/files`)
 
 Evidence:
-- `meu-repo/cloud-web-app/web/app/api/jobs/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/jobs/[id]/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/jobs/start/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/admin/status/route.ts:63`
-- `meu-repo/cloud-web-app/web/app/api/projects/[id]/folders/route.ts:45`
-- `meu-repo/cloud-web-app/web/app/api/projects/[id]/assets/route.ts:146`
-- `meu-repo/cloud-web-app/web/app/api/files/fs/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/workspace/tree/route.ts`
+- `cloud-web-app/web/app/api/jobs/route.ts`
+- `cloud-web-app/web/app/api/jobs/[id]/route.ts`
+- `cloud-web-app/web/app/api/jobs/start/route.ts`
+- `cloud-web-app/web/app/api/admin/status/route.ts:63`
+- `cloud-web-app/web/app/api/projects/[id]/folders/route.ts:45`
+- `cloud-web-app/web/app/api/projects/[id]/assets/route.ts:146`
+- `cloud-web-app/web/app/api/files/fs/route.ts`
+- `cloud-web-app/web/app/api/workspace/tree/route.ts`
 
 Decision:
 - Unify file authority model immediately (single source for editor operations).
@@ -323,11 +323,11 @@ Reality:
 - L4/L5 agent stack is partially represented but not validated end-to-end.
 
 Evidence:
-- `meu-repo/cloud-web-app/web/app/api/ai/chat/route.ts:92`
-- `meu-repo/cloud-web-app/web/app/api/ai/complete/route.ts:105`
-- `meu-repo/cloud-web-app/web/app/api/ai/action/route.ts:86`
-- `meu-repo/cloud-web-app/web/app/api/ai/inline-edit/route.ts:87`
-- `meu-repo/cloud-web-app/web/lib/ai-service.ts`
+- `cloud-web-app/web/app/api/ai/chat/route.ts:92`
+- `cloud-web-app/web/app/api/ai/complete/route.ts:105`
+- `cloud-web-app/web/app/api/ai/action/route.ts:86`
+- `cloud-web-app/web/app/api/ai/inline-edit/route.ts:87`
+- `cloud-web-app/web/lib/ai-service.ts`
 
 Decision:
 - Keep explicit 501 behavior until provider + validation are live.
@@ -339,10 +339,10 @@ Reality:
 - End-to-end operational proof is still missing in canonical validation logs.
 
 Evidence:
-- `meu-repo/cloud-web-app/web/lib/collaboration/collaboration-service.ts`
-- `meu-repo/cloud-web-app/web/lib/collaboration/collaboration-manager.ts`
-- `meu-repo/cloud-web-app/web/server/websocket-server.ts`
-- `meu-repo/cloud-web-app/web/components/collaboration/CollaborationPanel.tsx`
+- `cloud-web-app/web/lib/collaboration/collaboration-service.ts`
+- `cloud-web-app/web/lib/collaboration/collaboration-manager.ts`
+- `cloud-web-app/web/server/websocket-server.ts`
+- `cloud-web-app/web/components/collaboration/CollaborationPanel.tsx`
 
 Decision:
 - Treat collaboration as P1 verified feature only after load/latency/conflict tests pass.
@@ -353,8 +353,8 @@ Reality:
 - Without strict plan limits, scale is financially unsafe.
 
 Evidence:
-- `meu-repo/audit dicas do emergent usar/LIMITATIONS.md`
-- `meu-repo/audit dicas do emergent usar/8_ADMIN_SYSTEM_SPEC.md`
+- `meu-repo/docs/master/LIMITATIONS.md`
+- `meu-repo/docs/master/8_ADMIN_SYSTEM_SPEC.md`
 
 Decision:
 - Tie product growth to cost controls and entitlement enforcement.
@@ -394,58 +394,58 @@ Each item includes action:
 
 ## 6. Priority File List (Fix Now)
 ## 6.1 P0 blockers
-- `meu-repo/cloud-web-app/web/components/ide/FileExplorerPro.tsx`
+- `cloud-web-app/web/components/ide/FileExplorerPro.tsx`
   - Fix malformed rename branch literal `\n` text and type-safe callback contract.
-- `meu-repo/cloud-web-app/web/components/ide/IDELayout.tsx`
+- `cloud-web-app/web/components/ide/IDELayout.tsx`
   - Align prop interface vs usage, remove dead/fallback tabs from production path.
-- `meu-repo/cloud-web-app/web/app/ide/page.tsx`
+- `cloud-web-app/web/app/ide/page.tsx`
   - Replace placeholder actions with real handlers or explicit disabled state in UI.
-- `meu-repo/cloud-web-app/web/app/api/files/fs/route.ts`
+- `cloud-web-app/web/app/api/files/fs/route.ts`
   - Confirm single source model and path safety for all CRUD actions.
-- `meu-repo/cloud-web-app/web/app/api/files/tree/route.ts`
+- `cloud-web-app/web/app/api/files/tree/route.ts`
   - Align with same source model chosen for file operations.
-- `meu-repo/cloud-web-app/web/app/api/workspace/tree/route.ts`
+- `cloud-web-app/web/app/api/workspace/tree/route.ts`
   - Merge/deprecate according to unified file model decision.
-- `meu-repo/cloud-web-app/web/app/api/workspace/files/route.ts`
+- `cloud-web-app/web/app/api/workspace/files/route.ts`
   - Merge/deprecate according to unified file model decision.
 
 ## 6.2 P1 integrity fixes
-- `meu-repo/cloud-web-app/web/app/api/jobs/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/jobs/[id]/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/jobs/start/route.ts`
+- `cloud-web-app/web/app/api/jobs/route.ts`
+- `cloud-web-app/web/app/api/jobs/[id]/route.ts`
+- `cloud-web-app/web/app/api/jobs/start/route.ts`
   - Replace in-memory/mock workflow with real queue-backed implementation or explicit not-implemented.
 
-- `meu-repo/cloud-web-app/web/app/api/projects/[id]/folders/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/folders/route.ts`
   - Remove placeholder folder data; wire persistent model after Prisma regenerate/migration.
 
-- `meu-repo/cloud-web-app/web/app/api/projects/[id]/assets/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/assets/route.ts`
   - Remove TODO field fallbacks and align schema fields with persisted asset model.
 
-- `meu-repo/cloud-web-app/web/app/api/admin/status/route.ts`
+- `cloud-web-app/web/app/api/admin/status/route.ts`
   - Implement real websocket health probe.
 
 ## 7. Missing Files Needed to Close Contract (Create)
 These files do not need new product scope; they operationalize already-approved specs:
 
-1. `meu-repo/cloud-web-app/web/docs/contracts/workbench-ui-contract.md`
+1. `cloud-web-app/web/docs/contracts/workbench-ui-contract.md`
 - Canonical UI contract extracted from `WORKBENCH_SPEC.md` for implementation checks.
 
-2. `meu-repo/cloud-web-app/web/docs/contracts/ai-l1-l3-contract.md`
+2. `cloud-web-app/web/docs/contracts/ai-l1-l3-contract.md`
 - API + UX behavior contract extracted from `AI_SYSTEM_SPEC.md`.
 
-3. `meu-repo/cloud-web-app/web/docs/contracts/filesystem-authority-decision.md`
+3. `cloud-web-app/web/docs/contracts/filesystem-authority-decision.md`
 - Single-source decision record: filesystem runtime vs DB virtual tree.
 
-4. `meu-repo/cloud-web-app/web/docs/contracts/no-fake-success-policy.md`
+4. `cloud-web-app/web/docs/contracts/no-fake-success-policy.md`
 - Uniform response policy for not-yet-wired flows (`NOT_IMPLEMENTED`, status codes, UX state).
 
-5. `meu-repo/cloud-web-app/web/tests/contracts/workbench-smoke.spec.ts`
+5. `cloud-web-app/web/tests/contracts/workbench-smoke.spec.ts`
 - Contract test for Workbench shell load, panels, file open/save, preview refresh.
 
-6. `meu-repo/cloud-web-app/web/tests/contracts/ai-provider-gate.spec.ts`
+6. `cloud-web-app/web/tests/contracts/ai-provider-gate.spec.ts`
 - Contract test for AI behavior with and without configured providers.
 
-7. `meu-repo/cloud-web-app/web/tests/contracts/no-mock-user-path.spec.ts`
+7. `cloud-web-app/web/tests/contracts/no-mock-user-path.spec.ts`
 - Fails build if mock/in-memory behavior is exposed on production user endpoints.
 
 ## 8. Hard Decisions (Immediate)
@@ -468,42 +468,42 @@ REFACTOR now:
 Implemented in codebase (no mock success in these flows):
 
 1) Workbench core hardening
-- `meu-repo/cloud-web-app/web/components/ide/FileExplorerPro.tsx`
+- `cloud-web-app/web/components/ide/FileExplorerPro.tsx`
   - Fixed rename action parser/runtime break.
   - Unified explorer fallback fetch to `POST /api/files/tree` (removed dependence on workspace mock tree path for fallback mode).
-- `meu-repo/cloud-web-app/web/components/ide/IDELayout.tsx`
+- `cloud-web-app/web/components/ide/IDELayout.tsx`
   - Aligned props contract (`onNewFolder`, `onOpenFolder`, command palette/settings hooks).
   - Added keyboard handling for core workbench shortcuts.
   - Wired sidebar/bottom tab states to explicit panels/fallbacks.
-- `meu-repo/cloud-web-app/web/app/ide/page.tsx`
+- `cloud-web-app/web/app/ide/page.tsx`
   - Added real `workspaceRoot` handling and `Open Folder` flow for workbench context.
   - Removed placeholder-style status wording from primary operations.
 
 2) Queue/job fake-success removal
-- `meu-repo/cloud-web-app/web/lib/queue-system.ts`
+- `cloud-web-app/web/lib/queue-system.ts`
   - Added queue-backed list/get/cancel/retry APIs and safe stats fallback.
   - Added pause/resume all queues operation.
 - Replaced mock endpoints with queue-backed endpoints:
-  - `meu-repo/cloud-web-app/web/app/api/jobs/route.ts`
-  - `meu-repo/cloud-web-app/web/app/api/jobs/[id]/route.ts`
-  - `meu-repo/cloud-web-app/web/app/api/jobs/start/route.ts`
-  - `meu-repo/cloud-web-app/web/app/api/jobs/stop/route.ts`
-  - `meu-repo/cloud-web-app/web/app/api/jobs/stats/route.ts`
-  - `meu-repo/cloud-web-app/web/app/api/jobs/[id]/cancel/route.ts`
-  - `meu-repo/cloud-web-app/web/app/api/jobs/[id]/retry/route.ts`
+  - `cloud-web-app/web/app/api/jobs/route.ts`
+  - `cloud-web-app/web/app/api/jobs/[id]/route.ts`
+  - `cloud-web-app/web/app/api/jobs/start/route.ts`
+  - `cloud-web-app/web/app/api/jobs/stop/route.ts`
+  - `cloud-web-app/web/app/api/jobs/stats/route.ts`
+  - `cloud-web-app/web/app/api/jobs/[id]/cancel/route.ts`
+  - `cloud-web-app/web/app/api/jobs/[id]/retry/route.ts`
 
 Behavior now:
 - If queue backend is unavailable, routes return `QUEUE_BACKEND_UNAVAILABLE` (503), not fake success.
 - If auth is not configured, routes return explicit `AUTH_NOT_CONFIGURED` (503).
 
 3) Project folders API truthfulness
-- `meu-repo/cloud-web-app/web/app/api/projects/[id]/folders/route.ts`
+- `cloud-web-app/web/app/api/projects/[id]/folders/route.ts`
   - Removed placeholder data writes/reads.
   - Returns explicit `NOT_IMPLEMENTED` (501) with required migration actions.
 
 4) Workspace/file authority convergence
-- `meu-repo/cloud-web-app/web/app/api/workspace/tree/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/workspace/files/route.ts`
+- `cloud-web-app/web/app/api/workspace/tree/route.ts`
+- `cloud-web-app/web/app/api/workspace/files/route.ts`
   - Replaced DB-only virtual tree source with filesystem runtime source.
   - Both routes now expose `source: filesystem-runtime` in response for traceability.
 - Error/loading/empty states across Workbench.
@@ -587,36 +587,36 @@ If this contract is followed strictly, the product can be top-tier in execution 
 Implemented in codebase:
 
 1) Global provider and auth/2FA build stability
-- `meu-repo/cloud-web-app/web/components/ClientLayout.tsx`
+- `cloud-web-app/web/components/ClientLayout.tsx`
   - Added `ToastProvider` at global layout level so `useToast` no longer fails in pages/components.
-- `meu-repo/cloud-web-app/web/app/api/auth/2fa/route.ts`
+- `cloud-web-app/web/app/api/auth/2fa/route.ts`
   - Removed `bcrypt` runtime require and standardized password check on `bcryptjs` (already used in auth stack).
 
 2) Workbench visual refactor (professional shell)
-- `meu-repo/cloud-web-app/web/components/ide/IDELayout.tsx`
+- `cloud-web-app/web/components/ide/IDELayout.tsx`
   - Refined palette to neutral studio look (reduced bright accent noise).
   - Hardened status bar, panel headers, and command controls for consistent docking UX.
   - Updated non-implemented panel copy to explicit milestone message (`NOT_IMPLEMENTED`).
 
 3) Billing and Verify Email UX hardening
-- `meu-repo/cloud-web-app/web/app/billing/page.tsx`
+- `cloud-web-app/web/app/billing/page.tsx`
   - Rewritten microcopy and card layout for professional billing UX.
   - Removed inflated marketing tone and fixed checkout error handling.
   - Added deterministic currency/token formatting.
-- `meu-repo/cloud-web-app/web/app/verify-email/page.tsx`
+- `cloud-web-app/web/app/verify-email/page.tsx`
   - Rewritten full state UX (loading/success/missing-token/error/resend) with clean copy and no mojibake artifacts.
 
 4) Design system and preview alignment
-- `meu-repo/cloud-web-app/web/app/globals.css`
+- `cloud-web-app/web/app/globals.css`
   - Rebased primary/accent tokens from violet-heavy to blue/cyan studio palette.
   - Updated focus, button, badge, and progress visual hierarchy.
-- `meu-repo/cloud-web-app/web/app/layout.tsx`
+- `cloud-web-app/web/app/layout.tsx`
   - Added `metadataBase` and aligned theme colors.
-- `meu-repo/workbench-preview.html`
+- `workbench-preview.html`
   - Rebuilt preview shell with professional visual baseline (no emoji/icon noise, no corrupted text).
 
 5) Build pipeline reliability
-- `meu-repo/cloud-web-app/web/next.config.js`
+- `cloud-web-app/web/next.config.js`
   - Made standalone output opt-in via `NEXT_STANDALONE=1` to avoid local packaging trace failure.
 
 Validation:
@@ -629,22 +629,22 @@ Remaining warnings (known, non-blocking for compile):
 
 ## 11) Delta implementado nesta iteracao (marketplace and reliability hardening)
 1. Creator marketplace routes that were missing now exist and are wired with JWT auth (`requireAuth`):
-- `meu-repo/cloud-web-app/web/app/api/marketplace/creator/stats/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/marketplace/creator/assets/route.ts`
-- `meu-repo/cloud-web-app/web/app/api/marketplace/creator/revenue/route.ts`
+- `cloud-web-app/web/app/api/marketplace/creator/stats/route.ts`
+- `cloud-web-app/web/app/api/marketplace/creator/assets/route.ts`
+- `cloud-web-app/web/app/api/marketplace/creator/revenue/route.ts`
 2. Legacy creator routes were refactored from `next-auth` placeholder behavior to explicit production behavior:
-- `meu-repo/cloud-web-app/web/app/api/marketplace/creator/categories/route.ts` now computes category distribution from real `MarketplaceItem` records.
-- `meu-repo/cloud-web-app/web/app/api/marketplace/creator/sales/recent/route.ts` now returns explicit `NOT_IMPLEMENTED` (`501`) instead of fake empty success.
+- `cloud-web-app/web/app/api/marketplace/creator/categories/route.ts` now computes category distribution from real `MarketplaceItem` records.
+- `cloud-web-app/web/app/api/marketplace/creator/sales/recent/route.ts` now returns explicit `NOT_IMPLEMENTED` (`501`) instead of fake empty success.
 3. Marketplace catalog endpoint was upgraded from TODO/empty payload to real database query path:
-- `meu-repo/cloud-web-app/web/app/api/marketplace/assets/route.ts` now serves filtered/sorted data from `MarketplaceItem`, with explicit partial-data contract and `POST` returning `NOT_IMPLEMENTED`.
+- `cloud-web-app/web/app/api/marketplace/assets/route.ts` now serves filtered/sorted data from `MarketplaceItem`, with explicit partial-data contract and `POST` returning `NOT_IMPLEMENTED`.
 4. Admin health route no longer reports fake websocket healthy status:
-- `meu-repo/cloud-web-app/web/app/api/admin/status/route.ts` now marks websocket health as `degraded` or `down` based on available runtime signal, until probe is implemented.
+- `cloud-web-app/web/app/api/admin/status/route.ts` now marks websocket health as `degraded` or `down` based on available runtime signal, until probe is implemented.
 5. Workbench UX and professional polish updates:
-- `meu-repo/cloud-web-app/web/app/ide/page.tsx` now shows preview stale state and clearer editor empty-state guidance.
-- `meu-repo/cloud-web-app/web/components/ide/WorkbenchRedirect.tsx` now uses a cleaner unified-workbench handoff pattern.
-- `meu-repo/cloud-web-app/web/app/(auth)/login/page.tsx` now hides dev-access shortcut unless `NEXT_PUBLIC_ENABLE_DEV_ACCESS=1` (non-production only).
-- `meu-repo/cloud-web-app/web/app/contact-sales/page.tsx` removed emoji-style iconography in enterprise cards.
-- `meu-repo/cloud-web-app/web/app/status/page.tsx` removed celebratory emoji style copy from uptime incidents panel.
+- `cloud-web-app/web/app/ide/page.tsx` now shows preview stale state and clearer editor empty-state guidance.
+- `cloud-web-app/web/components/ide/WorkbenchRedirect.tsx` now uses a cleaner unified-workbench handoff pattern.
+- `cloud-web-app/web/app/(auth)/login/page.tsx` now hides dev-access shortcut unless `NEXT_PUBLIC_ENABLE_DEV_ACCESS=1` (non-production only).
+- `cloud-web-app/web/app/contact-sales/page.tsx` removed emoji-style iconography in enterprise cards.
+- `cloud-web-app/web/app/status/page.tsx` removed celebratory emoji style copy from uptime incidents panel.
 
 Truth contract:
 - Features without real backend support now return explicit capability (`NOT_IMPLEMENTED`) instead of silent success.
@@ -816,24 +816,24 @@ Validation for this delta:
 - `npm run build` -> PASS
 
 ## 19) Delta implementado nesta iteracao (command palette canonical + file API hard unification)
-1. Command Palette canônica migrada para Codicons e removido acoplamento Lucide:
+1. Command Palette canÃ´nica migrada para Codicons e removido acoplamento Lucide:
 - `cloud-web-app/web/components/ide/CommandPalette.tsx`
-  - Ícones agora seguem `Codicon` wrapper.
+  - Ãcones agora seguem `Codicon` wrapper.
   - Mantido contrato de abertura global (`aethel.commandPalette.open`).
   - Corrigido texto de atalhos sem mojibake.
 
-2. `/ide` atualizado para integração limpa de comandos de layout:
+2. `/ide` atualizado para integraÃ§Ã£o limpa de comandos de layout:
 - `cloud-web-app/web/app/ide/page.tsx`
-  - `onToggleSidebar`, `onToggleTerminal`, `onAIChat` agora disparam eventos de layout dedicados (sem injeção de `KeyboardEvent`).
+  - `onToggleSidebar`, `onToggleTerminal`, `onAIChat` agora disparam eventos de layout dedicados (sem injeÃ§Ã£o de `KeyboardEvent`).
 - `cloud-web-app/web/components/ide/IDELayout.tsx`
   - Adicionados listeners para:
     - `aethel.layout.toggleSidebar`
     - `aethel.layout.toggleTerminal`
     - `aethel.layout.toggleAI`
-  - Mantém atalhos VS Code-like e melhora previsibilidade do estado de painel.
+  - MantÃ©m atalhos VS Code-like e melhora previsibilidade do estado de painel.
 
-3. Unificação real de File API com wrappers de compatibilidade:
-- Rotas de compatibilidade migradas para runtime canônico (`filesystem-runtime`) com resposta explícita:
+3. UnificaÃ§Ã£o real de File API com wrappers de compatibilidade:
+- Rotas de compatibilidade migradas para runtime canÃ´nico (`filesystem-runtime`) com resposta explÃ­cita:
   - `cloud-web-app/web/app/api/files/read/route.ts`
   - `cloud-web-app/web/app/api/files/write/route.ts`
   - `cloud-web-app/web/app/api/files/delete/route.ts`
@@ -848,7 +848,7 @@ Validation for this delta:
   - `canonicalEndpoint: "/api/files/fs"`
   - header `x-aethel-route-status: compatibility-wrapper`
 
-4. Deprecação explícita de rotas duplicadas workspace/auth session:
+4. DeprecaÃ§Ã£o explÃ­cita de rotas duplicadas workspace/auth session:
 - `cloud-web-app/web/app/api/workspace/tree/route.ts`
 - `cloud-web-app/web/app/api/workspace/files/route.ts`
 - `cloud-web-app/web/app/api/auth/sessions/route.ts`
@@ -858,7 +858,7 @@ Validation for this delta:
 Validation for this delta:
 - `npm run docs:routes-inventory` -> PASS
 - `npm run qa:canonical-components` -> PASS
-- `npm run qa:mojibake` -> PASS (`165` findings no inventário atual)
+- `npm run qa:mojibake` -> PASS (`165` findings no inventÃ¡rio atual)
 - `npm run typecheck` -> PASS
 - `npm run build` -> PASS
 
@@ -885,7 +885,7 @@ Validation for this delta:
 
 ## 21) Agente Critico oficializado
 1. Documento operacional adicionado:
-- `audit dicas do emergent usar/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
+- `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
 2. Funcao:
 - Estabelecer gate permanente para qualidades e limitacoes reais (P0/P1/P2).
 - Exigir decisao executiva por achado: remover, unificar, refatorar, implementar, adiar, nao fazer.
@@ -900,7 +900,7 @@ Validation for this delta:
   - Ignora `docs/MOJIBAKE_SCAN.md` para evitar auto-referencia no relatorio.
 2. Correcao de texto corrompido em pagina publica:
 - `cloud-web-app/web/app/status/page.tsx`
-  - `Â©` substituido por `&copy;`.
+  - `Ã‚Â©` substituido por `&copy;`.
 3. Estado atual de qualidade:
 - `npm run qa:mojibake` -> PASS com `0` findings.
 - `npm run typecheck` -> PASS
@@ -912,7 +912,7 @@ Validation for this delta:
   - Define raiz efetiva por namespace: `.aethel/workspaces/<userId>/<projectId>`.
   - Resolve caminhos virtuais com protecao de boundary.
   - Converte caminho absoluto para caminho virtual (`/`-based) para resposta da API.
-2. Endpoints canônicos migrados para escopo:
+2. Endpoints canÃ´nicos migrados para escopo:
 - `cloud-web-app/web/app/api/files/fs/route.ts`
 - `cloud-web-app/web/app/api/files/tree/route.ts`
 3. Endpoints de compatibilidade `/api/files/*` alinhados ao mesmo escopo:
@@ -941,7 +941,7 @@ Validation for this delta:
 2. Endpoint admin para leitura de uso:
 - `cloud-web-app/web/app/api/admin/compatibility-routes/route.ts`
 3. Contrato critico atualizado:
-- `audit dicas do emergent usar/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
+- `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
   - Inclui critica executiva atual e backlog de fechamento real.
 
 Critica executiva atual:
@@ -1212,7 +1212,7 @@ Status geral: qualidade visual/UX P0 estabilizada; faltas remanescentes estao co
 - `cloud-web-app/web/app/admin/moderation/page.tsx`
   - `handleAction` convertido para `useCallback` e integrado no ciclo de atalhos com deps corretas.
 - `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
-  - ajuste de deps/estrutura para reduzir ruído de hooks no core do editor.
+  - ajuste de deps/estrutura para reduzir ruÃ­do de hooks no core do editor.
 
 2. Validacao executada:
 - `npm run typecheck` -> PASS
@@ -1664,7 +1664,7 @@ Implemented:
 
 Governance update:
 1. Added canonical execution analysis for AI limitations and required subsystems:
-- `audit dicas do emergent usar/15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
+- `docs/master/15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
 
 Decision:
 1. Keep simulated/heuristic AI surfaces explicit as `PARTIAL` until backed by production-grade orchestration and persistence.
@@ -1689,7 +1689,7 @@ Implemented:
 
 Governance update:
 1. Added subsystem blueprint focused on AI limitations for games/films/apps and required mitigation stack:
-- `audit dicas do emergent usar/16_AI_GAMES_FILMS_APPS_SUBSYSTEM_BLUEPRINT_2026-02-16.md`
+- `docs/master/16_AI_GAMES_FILMS_APPS_SUBSYSTEM_BLUEPRINT_2026-02-16.md`
 
 Decision lock:
 1. Keep explicit capability metadata mandatory for every unavailable runtime branch.
@@ -1712,7 +1712,7 @@ Implemented:
 - `cloud-web-app/web/lib/server/asset-processor.ts`
 - `cloud-web-app/web/app/api/assets/upload/route.ts`
 6. Capability truth map published:
-- `audit dicas do emergent usar/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
+- `docs/master/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
 7. Environment bootstrap checklist published:
 - `cloud-web-app/web/docs/ENVIRONMENT_CHECKLIST.md`
 8. AI runtime SLO baseline published:
@@ -1816,3 +1816,26 @@ Validation snapshot:
 
 Decision lock:
 1. Keep unsupported/failed media runtime states explicit; never imply successful preview render.
+
+## 0.31 Delta Update 2026-02-27 (Canonical sync + connectivity hardening)
+Policy and documentation alignment:
+1. Canonical docs now declare `docs/master` as source-of-truth (`00_FONTE_CANONICA` + new `00_INDEX`).
+2. New structural audit matrix published: `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`.
+3. External benchmark absorption remains gated by evidence (`EXTERNAL_BENCHMARK_ASSUMPTION` when not reproducible in repo).
+
+Factual findings collected in this wave:
+1. Root-level script/config drift exists and must be treated as P0:
+- `package.json` contains missing paths (`examples/browser-ide-app`, `cloud-ide-desktop/desktop-app`).
+- `tsconfig.json` references missing `cloud-ide-desktop/aethel_theia_fork/packages/ai-ide`.
+- `.gitmodules` references missing `cloud-ide-desktop/aethel_theia_fork`.
+2. Environment artifact drift exists:
+- `cloud-web-app/web/.venv` is committed and must be removed from versioned source.
+3. Documentation governance risk remains high outside canonical set:
+- high volume of markdown outside `docs/master`.
+4. Maintainability pressure remains high:
+- many large files (`>=1200` lines), with `components/AethelDashboard.tsx` as top offender.
+
+Execution lock for next commits:
+1. Eliminate broken connectivity references before adding new surfaces.
+2. Keep interface/deprecation/capability contracts explicit.
+3. Decompose high-risk monolith files in owner-scoped batches.

@@ -1,16 +1,16 @@
-# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
+﻿# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
 Status: AUDITORIA EXECUTAVEL  
 Data: 2026-02-14  
 Direcao: Equilibrado + corte legado faseado + sem mudanca de escopo
 
 ## 0) Fontes usadas
-- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
-- `audit dicas do emergent usar/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
-- `audit dicas do emergent usar/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
-- `audit dicas do emergent usar/FULL_AUDIT.md`
-- `audit dicas do emergent usar/DUPLICATIONS_AND_CONFLICTS.md`
-- `audit dicas do emergent usar/LIMITATIONS.md`
-- `audit dicas do emergent usar/COMPETITIVE_GAP.md`
+- `docs/master/00_FONTE_CANONICA.md`
+- `docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
+- `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
+- `docs/master/FULL_AUDIT.md`
+- `docs/master/DUPLICATIONS_AND_CONFLICTS.md`
+- `docs/master/LIMITATIONS.md`
+- `docs/master/COMPETITIVE_GAP.md`
 - `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
 
 ## 1) Resultado por dimensao
@@ -103,7 +103,7 @@ Regra operacional:
 2. Claims externos podem orientar backlog, mas nao alteram status factual de prontidao.
 
 Delta operacional (2026-02-16, sem rodar suite completa):
-1. APIs de notificacao e confirmacao de asset agora expõem estado real de operacao deferida (sem fake success silencioso).
+1. APIs de notificacao e confirmacao de asset agora expÃµem estado real de operacao deferida (sem fake success silencioso).
 2. `TODO` de API critica zerado.
 3. `NOT_IMPLEMENTED` retirado de copy de UI; mantido apenas em contratos de API.
 4. Rotas legadas continuam 410 + telemetria, sem quebra abrupta.
@@ -628,3 +628,13 @@ Delivered:
 
 Triaged impact:
 1. Improves user trust by replacing silent blank previews with explicit capability messaging.
+
+## 7) Delta 2026-02-27 — triagem estrutural obrigatória
+Prioridade atual (sem mudar escopo):
+1. P0 estrutural: conectividade de scripts/config e higiene de artefatos locais.
+2. P0 produto: remover ambiguidade no caminho crítico do `/ide` (eliminar fluxos mock no shell avançado).
+3. P1 manutenção: decompor monólitos e reduzir duplicatas de superfície.
+
+Evidência consolidada:
+- `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
+- `docs/master/00_INDEX.md`

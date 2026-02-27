@@ -1,9 +1,9 @@
-# 13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13
+﻿# 13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13
 
 ## Escopo e evidencias
 Fontes canonicas usadas:
-- `audit dicas do emergent usar/00_FONTE_CANONICA.md`
-- `audit dicas do emergent usar/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
+- `docs/master/00_FONTE_CANONICA.md`
+- `docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
 - `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
 
 Superficies auditadas nesta rodada:
@@ -601,3 +601,18 @@ Implemented:
 
 Critical reading:
 1. Reduces false perception of "empty preview" by showing exact failure class (`PARTIAL` capability runtime).
+
+## Snapshot incremental (2026-02-27) - conectividade e governança
+Fatos novos desta varredura:
+1. A fonte canônica foi consolidada em `docs/master` com `00_INDEX.md`.
+2. Risco estrutural P0 confirmado fora da camada de UX:
+- scripts de raiz com paths inexistentes;
+- `tsconfig` com referência ausente;
+- submódulo órfão em `.gitmodules`;
+- `.venv` versionado em `cloud-web-app/web`.
+3. Pressão de manutenção confirmada por arquivos monolíticos de grande porte.
+
+Leitura crítica:
+1. A plataforma mantém contratos visuais/route gates importantes, mas ainda carrega risco operacional de repositório.
+2. O próximo ganho real de qualidade é reduzir dívida estrutural e não criar novas superfícies.
+3. Claims de maturidade devem permanecer bloqueados enquanto conectividade/base de build não estiver limpa.

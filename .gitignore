@@ -34,6 +34,8 @@ test-results/
 # Env
 .env
 .env.local
+**/.venv/
+**/venv/
 
 # Editor swap files
 *.swp
@@ -47,6 +49,10 @@ test-results/
 # Local data
 data.json
 package-lock.json
+*.zip
+*.patch
+*.bundle
 
 # Copilot/agent chat artifacts
 .zencoder/
+.gh_token

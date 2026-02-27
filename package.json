@@ -3,10 +3,10 @@
   "version": "2.0.0",
   "description": "Aethel AI Engine - Superior autonomous AI platform",
   "scripts": {
-    "start": "cd examples/browser-ide-app && npm install && npm start",
-    "ide": "cd examples/browser-ide-app && npm start",
+    "start": "npm --prefix cloud-web-app/web run start",
+    "ide": "npm --prefix cloud-web-app/web run dev",
     "dev:mock-backend": "node tools/llm-mock/server.js",
-    "dev": "cd examples/browser-ide-app && npm start",
+    "dev": "npm --prefix cloud-web-app/web run dev",
     "playwright:install": "npx playwright install --with-deps",
     "test:e2e": "npx playwright test --config=playwright.config.ts",
     "test:e2e:headed": "npx playwright test --headed --config=playwright.config.ts",
@@ -29,8 +29,8 @@
     "test:web:fast": "npm --prefix cloud-web-app/web run test:fast",
     "test:web:changed": "npm --prefix cloud-web-app/web run test:changed"
     ,
-    "desktop:dev": "npm --prefix cloud-ide-desktop/desktop-app run dev",
-    "desktop:build": "npm --prefix cloud-ide-desktop/desktop-app run build",
+    "desktop:dev": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
+    "desktop:build": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
     "portal:dev": "npm --prefix cloud-web-app/web run dev",
     "portal:start": "npm --prefix cloud-web-app/web run start",
     "portal:build": "npm --prefix cloud-web-app/web run build"

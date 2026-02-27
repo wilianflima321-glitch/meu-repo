@@ -1,14 +1,15 @@
-# 20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17
+﻿# 20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17
 Status: DECISION-COMPLETE EXECUTION LIST
 Date: 2026-02-17
 Source Base: `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
 
 ## 0. Scope
 This backlog is limited to P1/P2 hardening on the current product scope:
-1. single shell `/ide`
-2. explicit capability gates
-3. no new product shell
-4. no fake success
+1. single product shell model with `/ide` as advanced workbench
+2. `dashboard`/home as entry surface with canonical handoff to `/ide`
+3. explicit capability gates
+4. no new product shell
+5. no fake success
 
 ## 1. P1 Priorities (Execute First)
 ### P1-01 Workbench Usability Consistency
@@ -61,7 +62,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. Files:
 - `cloud-web-app/web/next.config.js`
 - `cloud-web-app/web/app/api/**/route.ts` (runtime-sensitive only)
-- `audit dicas do emergent usar/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+- `docs/master/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
 3. Done criteria:
 - warning inventory updated with root-cause status
 - no regression in `qa:enterprise-gate`
@@ -70,7 +71,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 ### P2-01 Collaboration Readiness Gate
 1. Objective: formalize stability claims before promotion.
 2. Files:
-- `audit dicas do emergent usar/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
+- `docs/master/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
 - `cloud-web-app/web/docs/AI_RUNTIME_SLO.md`
 3. Done criteria:
 - explicit SLO for reconnect/conflict/concurrency
@@ -79,8 +80,8 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 ### P2-02 Agentic Promotion Gate (L4/L5)
 1. Objective: block inflated claims without evidence.
 2. Files:
-- `audit dicas do emergent usar/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
-- `audit dicas do emergent usar/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
+- `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
+- `docs/master/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
 3. Done criteria:
 - promotion rubric documented
 - no L4/L5 claim without reproducible operational evidence
@@ -127,3 +128,17 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 7. `npm run qa:no-fake-success`
 8. `npm run qa:mojibake`
 9. `npm run qa:enterprise-gate`
+
+## 5. Delta 2026-02-27 (new blocking order)
+### P0-A Repo Connectivity Hardening
+1. Fix root script/config references to missing paths.
+2. Remove committed local runtime artifacts (`.venv`) and enforce ignore.
+3. Resolve orphan submodule/tsconfig references.
+
+### P0-B IDE Critical Path Integrity
+1. Remove mock data dependency from `/ide` workbench flow.
+2. Enforce real file read/write path (`/api/files/*`) with explicit error state.
+
+### P0-C Surface Consolidation
+1. Define canonical component for duplicate pairs (Nexus, notifications, dashboard blocks).
+2. Decompose top monoliths with owner scope.

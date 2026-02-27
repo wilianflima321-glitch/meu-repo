@@ -7,16 +7,19 @@ Owner: Frontend Platform + Product Design + Critical Agent
 This document maps the real interface surfaces in the current Aethel Workbench/Admin stack so another AI (Claude) can improve UI/UX without changing scope.
 
 Non-negotiable:
-1. Keep `/ide` as single shell.
-2. Keep explicit capability gates (`NOT_IMPLEMENTED`, `DEPRECATED_ROUTE`, `QUEUE_BACKEND_UNAVAILABLE`, `AUTH_NOT_CONFIGURED`).
-3. Do not create a second app shell.
-4. Do not remove deprecation contracts from legacy routes.
+1. Keep `/ide` as advanced workbench shell (no parallel product shell).
+2. `dashboard`/home entry may evolve, but handoff to `/ide` must stay canonical.
+3. Keep explicit capability gates (`NOT_IMPLEMENTED`, `DEPRECATED_ROUTE`, `QUEUE_BACKEND_UNAVAILABLE`, `AUTH_NOT_CONFIGURED`).
+4. Do not create a second app shell.
+5. Do not remove deprecation contracts from legacy routes.
 
 ## 1. Core Entry Surfaces
-1. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
-2. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
-3. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
-4. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
+1. Studio entry page: `cloud-web-app/web/app/dashboard/page.tsx`
+2. Gateway landing page: `cloud-web-app/web/app/page.tsx`
+3. Workbench shell page: `cloud-web-app/web/app/ide/page.tsx`
+4. Workbench layout orchestrator: `cloud-web-app/web/components/ide/IDELayout.tsx`
+5. Global style/tokens/focus/compact density: `cloud-web-app/web/app/globals.css`
+6. Installed app entry and shortcuts: `cloud-web-app/web/app/manifest.ts`
 
 ## 2. IDE UI Surfaces (Primary)
 ### 2.1 Left/center/bottom shell blocks
@@ -106,3 +109,9 @@ CI workflows:
 3. Do not route frontend back to `/api/workspace/*`.
 4. Keep `not-implemented-ui` explicit for gated capabilities.
 5. Run gate suite before claiming completion.
+
+## 8. Delta 2026-02-27 (surface governance)
+1. Canonical entry document for interface work is now `docs/master/00_INDEX.md`.
+2. Surface-map execution must include structural constraints from `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`.
+3. `/ide` critical path must not rely on mock workspace data in production path.
+4. Duplicate surface pairs (e.g., Nexus legacy vs v2) must be explicitly canonicalized before further UX polish.
