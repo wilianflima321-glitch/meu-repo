@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 
-// Carrega o IDELayout dinamicamente para otimizar o carregamento inicial
+// Load workbench shell dynamically to reduce initial bundle cost.
 const FullscreenIDE = dynamic(() => import('@/components/ide/FullscreenIDE'), {
   ssr: false,
   loading: () => (

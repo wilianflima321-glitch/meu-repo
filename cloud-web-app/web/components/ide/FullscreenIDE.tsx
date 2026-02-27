@@ -183,73 +183,86 @@ function IDEContent() {
     [readFile]
   );
 
+  const handlePaletteOpenFile = useCallback((path: string) => {
+    void readFile(path);
+  }, [readFile]);
+
+  const emitLayoutEvent = useCallback((eventName: string) => {
+    window.dispatchEvent(new Event(eventName));
+  }, []);
+
   return (
-    <TabProvider>
-      <IDELayout
-        fileExplorer={<FileExplorerPro onFileSelect={handleFileSelect} />}
-        aiChatPanel={<AIChatPanelContainer />}
-      >
-        <div className="h-full flex flex-col">
-          <TabBar />
-          <div className="flex-1 overflow-hidden">
-            {isReadingFile && (
-              <div className="h-full flex items-center justify-center text-zinc-400">
-                Loading file...
-              </div>
-            )}
-
-            {!isReadingFile && fileError && (
-              <div className="h-full flex items-center justify-center px-6">
-                <div className="max-w-xl rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                  {fileError}
+    <CommandPaletteProvider
+      onOpenFile={handlePaletteOpenFile}
+      onToggleSidebar={() => emitLayoutEvent("aethel.layout.toggleSidebar")}
+      onToggleTerminal={() => emitLayoutEvent("aethel.layout.toggleTerminal")}
+      onAIChat={() => emitLayoutEvent("aethel.layout.openAI")}
+    >
+      <TabProvider>
+        <IDELayout
+          fileExplorer={<FileExplorerPro onFileSelect={handleFileSelect} />}
+          aiChatPanel={<AIChatPanelContainer />}
+        >
+          <div className="h-full flex flex-col">
+            <TabBar />
+            <div className="flex-1 overflow-hidden">
+              {isReadingFile && (
+                <div className="h-full flex items-center justify-center text-zinc-400">
+                  Loading file...
                 </div>
-              </div>
-            )}
+              )}
 
-            {!isReadingFile && !fileError && activeFile && (
-              <MonacoEditorPro
-                path={activeFile.path}
-                value={activeFile.content}
-                language={activeFile.language}
-                onChange={(value) => {
-                  setActiveFile((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          content: value ?? "",
-                        }
-                      : prev
-                  );
-                }}
-                onSave={(value) => {
-                  void writeFile(activeFile.path, value);
-                }}
-              />
-            )}
+              {!isReadingFile && fileError && (
+                <div className="h-full flex items-center justify-center px-6">
+                  <div className="max-w-xl rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {fileError}
+                  </div>
+                </div>
+              )}
 
-            {!isReadingFile && !fileError && !activeFile && (
-              <div className="h-full flex items-center justify-center text-zinc-500">
-                Select a file to start editing.
+              {!isReadingFile && !fileError && activeFile && (
+                <MonacoEditorPro
+                  path={activeFile.path}
+                  value={activeFile.content}
+                  language={activeFile.language}
+                  onChange={(value) => {
+                    setActiveFile((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            content: value ?? "",
+                          }
+                        : prev
+                    );
+                  }}
+                  onSave={(value) => {
+                    void writeFile(activeFile.path, value);
+                  }}
+                />
+              )}
+
+              {!isReadingFile && !fileError && !activeFile && (
+                <div className="h-full flex items-center justify-center text-zinc-500">
+                  Select a file to start editing.
+                </div>
+              )}
+            </div>
+            {isSavingFile && (
+              <div className="h-7 border-t border-zinc-800 bg-zinc-950 px-3 flex items-center text-xs text-zinc-400">
+                Saving...
               </div>
             )}
           </div>
-          {isSavingFile && (
-            <div className="h-7 border-t border-zinc-800 bg-zinc-950 px-3 flex items-center text-xs text-zinc-400">
-              Saving...
-            </div>
-          )}
-        </div>
-      </IDELayout>
-    </TabProvider>
+        </IDELayout>
+      </TabProvider>
+    </CommandPaletteProvider>
   );
 }
 
 export default function FullscreenIDE() {
   return (
     <Suspense fallback={<div>Loading workspace context...</div>}>
-      <CommandPaletteProvider>
-        <IDEContent />
-      </CommandPaletteProvider>
+      <IDEContent />
     </Suspense>
   );
 }

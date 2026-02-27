@@ -1862,3 +1862,10 @@ Implemented in code:
 Execution interpretation:
 1. Reduces drift between legacy and canonical Nexus rendering paths.
 2. Keeps backwards compatibility for existing imports while enforcing one runtime implementation.
+
+## 0.34 Delta Update 2026-02-27 (Workbench command integration)
+Implemented in code:
+1. `components/ide/FullscreenIDE.tsx` now wires command palette actions to real workbench events:
+- open file via canonical file read flow
+- toggle sidebar/terminal/AI via layout events
+2. Workbench shell remains keyboard-first while preserving explicit loading/error/saving states.
