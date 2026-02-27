@@ -1,18 +1,17 @@
 # 41_ACTIVE_LARGE_FILE_PRESSURE_MATRIX_2026-02-25
 Status: GENERATED ACTIVE LARGE FILE PRESSURE SWEEP
-Generated: 2026-02-25T17:59:23.846Z
+Generated: 2026-02-25T18:04:27.877Z
 
 ## Summary
-- Scanned files: 1171
+- Scanned files: 1172
 - Line threshold: 900
-- Files above threshold: 72
+- Files above threshold: 71
 - Hard limit: 136
 
 ## Top Large Files
 | File | Lines |
 | --- | ---: |
 | `cloud-web-app/web/lib/ecs/prefab-component-system.tsx` | 1045 |
-| `cloud-web-app/web/lib/server/extension-host-runtime.ts` | 1042 |
 | `cloud-web-app/web/lib/state/game-state-manager.tsx` | 1042 |
 | `cloud-web-app/web/lib/assets/asset-importer.ts` | 1039 |
 | `cloud-web-app/web/lib/settings/settings-system.tsx` | 1038 |

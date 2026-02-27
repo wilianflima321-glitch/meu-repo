@@ -7602,3 +7602,27 @@ Validation snapshot:
 Decision lock:
 1. Scope/capability/deprecation policy unchanged.
 2. Heavy freeze suite remains deferred to final requested run.
+
+## 312) Delta 2026-02-25 CLI - Extension host API extraction wave (pressure 71)
+
+Implemented:
+1. Decomposed extension-host monolith by extracting sandbox API facade:
+- added `cloud-web-app/web/lib/server/extension-api-runtime.ts` (`ExtensionAPI` class).
+2. Refactored `cloud-web-app/web/lib/server/extension-host-runtime.ts`:
+- reduced main host runtime file from `1042` to `659` lines;
+- kept host lifecycle/orchestration focused and imported extracted API facade;
+- preserved extension-host contracts exported from `extension-host-types`.
+3. No API/capability scope changes; this wave is structural-only and compatibility-preserving.
+
+Validation snapshot:
+1. `cmd /c npm run qa:active-large-file-pressure` -> PASS:
+- `largeFileCount=71` (`136 -> 71`)
+- `growthExceeded=false`.
+2. `cmd /c npm run qa:repo-connectivity` -> PASS (`requiredMissing=0`, `deadScriptReferences=0`).
+3. `cmd /c npm run qa:interface-gate` (in `cloud-web-app/web`) -> PASS:
+- critical interface zeros preserved;
+- `not-implemented-ui=4` explicit.
+
+Decision lock:
+1. Scope/capability/deprecation policy unchanged.
+2. Heavy freeze suite remains deferred to final requested run.
