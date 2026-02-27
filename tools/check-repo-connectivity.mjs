@@ -103,11 +103,74 @@ function checkTrackedVenvArtifacts() {
   }
 }
 
+function checkLooseWebRootMarkdown() {
+  const webRoot = resolvePath('cloud-web-app/web')
+  if (!fs.existsSync(webRoot)) return
+
+  const allowed = new Set(['README.md'])
+  const loose = fs
+    .readdirSync(webRoot, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.md'))
+    .map((entry) => entry.name)
+    .filter((name) => !allowed.has(name))
+
+  if (loose.length > 0) {
+    failures.push(`loose markdown files in cloud-web-app/web root: ${loose.join(', ')}`)
+  }
+}
+
+function checkTrackedSecretLikeFiles() {
+  const trackedSecretPatterns = [
+    '.gh_token',
+    '**/.gh_token',
+    '**/.env.local',
+    '**/.env.production',
+  ]
+
+  for (const pattern of trackedSecretPatterns) {
+    try {
+      const output = execSync(`git ls-files "${pattern}"`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+      const files = output
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+      if (files.length > 0) {
+        failures.push(`tracked secret-like files detected for pattern "${pattern}" (${files.length})`)
+      }
+    } catch {
+      // ignore git wildcard errors for unmatched patterns
+    }
+  }
+}
+
+function checkCanonicalDocsPresence() {
+  const requiredDocs = [
+    'docs/master/00_INDEX.md',
+    'docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md',
+    'docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md',
+    'docs/master/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md',
+    'docs/master/16_AI_GAMES_FILMS_APPS_SUBSYSTEM_BLUEPRINT_2026-02-16.md',
+    'docs/master/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md',
+    'docs/master/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md',
+    'docs/master/20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md',
+    'docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md',
+  ]
+
+  for (const docPath of requiredDocs) {
+    if (!exists(docPath)) {
+      failures.push(`required canonical doc missing: "${docPath}"`)
+    }
+  }
+}
+
 checkPackageScriptPaths()
 checkTsconfigReferences()
 checkGitmodulesPaths()
 checkJunkFiles()
 checkTrackedVenvArtifacts()
+checkLooseWebRootMarkdown()
+checkTrackedSecretLikeFiles()
+checkCanonicalDocsPresence()
 
 if (failures.length > 0) {
   console.error('[repo-connectivity] FAIL')

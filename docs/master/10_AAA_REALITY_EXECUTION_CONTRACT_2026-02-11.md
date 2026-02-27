@@ -1919,3 +1919,15 @@ Implemented:
 Impact:
 1. Additional reduction of monolith pressure in `AethelDashboard.tsx`.
 2. Connectivity regressions are now blocked across both UI-audit and visual-regression pipelines.
+
+## 0.39 Delta Update 2026-02-27 (Repo connectivity gate hardening v2)
+Implemented:
+1. Extended `tools/check-repo-connectivity.mjs` to block:
+- loose markdown drift in `cloud-web-app/web` root (except `README.md`);
+- tracked secret-like files (`.gh_token`, `.env.local`, `.env.production`);
+- missing required canonical docs (`00_INDEX`, `10`, `13`, `14`, `16`, `17`, `18`, `20`, `22`).
+2. Validation snapshot:
+- `node tools/check-repo-connectivity.mjs` -> PASS.
+
+Impact:
+1. Prevents recurrence of documentation drift and accidental secret-like tracking in versioned source.
