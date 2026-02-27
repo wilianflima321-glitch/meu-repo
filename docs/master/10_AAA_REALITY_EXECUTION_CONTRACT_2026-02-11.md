@@ -803,7 +803,7 @@ Validation for this delta:
 - Current scan result captured: `137` findings after heuristic refinement (tracked for staged cleanup without fake success).
 
 4. Documentation references updated to canonical implementation:
-- `cloud-web-app/web/INDICE_DOCUMENTACAO_MASTER.md`
+- `docs/archive/web-status/INDICE_DOCUMENTACAO_MASTER.md`
   - Repointed AethelIDE/CommandPalette references to canonical files.
 - `cloud-web-app/web/docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md`
   - Updated command palette reference to `components/ide/CommandPalette.tsx`.

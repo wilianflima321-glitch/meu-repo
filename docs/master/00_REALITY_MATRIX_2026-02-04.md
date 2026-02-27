@@ -22,7 +22,7 @@ All commands executed under `cloud-web-app/web`.
 
 ## Document Conflicts (From .md Only)
 - `audit dicas do emergent usar/FULL_AUDIT.md` states the Workbench/IDE is NOT IMPLEMENTED.
-- `cloud-web-app/web/FONTE_DA_VERDADE.md` claims Monaco Editor, terminal PTY, AI, collab, etc are functional.
+- `docs/archive/web-status/FONTE_DA_VERDADE.md` claims Monaco Editor, terminal PTY, AI, collab, etc are functional.
 
 **Resolution:** The audit folder is canonical. Claims outside it are marked HISTORICAL/UNVERIFIED until validated.
 
