@@ -199,7 +199,7 @@ export default function AethelDashboard() {
 
       return {
         id: render.jobId,
-        name: render.message || \`Renderização \${index + 1}\`,
+        name: render.message || `Renderização ${index + 1}`,
         type: totalFrames > 1 ? 'sequence' : 'image',
         status: statusMap[render.status] || 'queued',
         progress: render.progress ?? 0,
@@ -267,7 +267,7 @@ export default function AethelDashboard() {
 
   const handleDownload = useCallback((platform: string) => {
     startDownload(platform)
-    showToastMessage(\`Iniciando download para \${platform}...\`, 'info')
+    showToastMessage(`Iniciando download para ${platform}...`, 'info')
   }, [startDownload, showToastMessage])
 
   const handleSubscribe = useCallback(async (planId: string) => {
@@ -277,7 +277,7 @@ export default function AethelDashboard() {
 
     try {
       const response = await AethelAPIClient.subscribe(planId)
-      setSubscribeMessage(\`Assinatura do plano \${planId} iniciada com sucesso!\`)
+      setSubscribeMessage(`Assinatura do plano ${planId} iniciada com sucesso!`)
       showToastMessage('Assinatura processada!', 'success')
       mutate(CURRENT_PLAN_KEY)
     } catch (err) {
@@ -510,10 +510,10 @@ export default function AethelDashboard() {
       </div>
 
       {showToast && (
-        <div className={\`aethel-fixed aethel-bottom-6 aethel-right-6 aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-shadow-lg aethel-z-50 aethel-animate-in aethel-slide-in-from-bottom-4 \${
+        <div className={`aethel-fixed aethel-bottom-6 aethel-right-6 aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-shadow-lg aethel-z-50 aethel-animate-in aethel-slide-in-from-bottom-4 ${
           showToast.type === 'success' ? 'aethel-bg-emerald-600' : 
           showToast.type === 'error' ? 'aethel-bg-red-600' : 'aethel-bg-blue-600'
-        }\`}>
+        }`}>
           {showToast.message}
         </div>
       )}
