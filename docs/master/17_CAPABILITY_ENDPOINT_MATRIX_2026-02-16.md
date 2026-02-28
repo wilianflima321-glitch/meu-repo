@@ -73,3 +73,15 @@ Validation status:
 - remoção de artefatos locais versionados;
 - fluxo `/ide` sem fonte mock no caminho principal.
 2. Enquanto essa base não fechar, status operacional permanece `PARTIAL` para claim enterprise/studio.
+
+## 7) Delta 2026-02-28 (multi-agent reliability hardening)
+1. `app/api/agents/stream/route.ts` now enforces:
+- `requireAuth` + entitlement check;
+- plan-constrained agent count and role filtering;
+- concurrency lease + metered usage before SSE start.
+2. Plan gate failures now return explicit capability envelope:
+- `error=FEATURE_NOT_AVAILABLE`
+- `capability=multi_agent_orchestration`
+- `capabilityStatus=PARTIAL`
+- metadata includes requested roles, plan and allowed limits.
+3. `lib/agent-orchestrator.ts` now streams role output in true interleaved parallel mode with explicit cancellation and non-inflated guidance text.

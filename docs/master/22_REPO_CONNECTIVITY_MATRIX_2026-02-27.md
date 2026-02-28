@@ -291,3 +291,18 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `qa:route-contracts` -> PASS
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
+
+## 29) Incremental closure 2026-02-28 (multi-agent stream hardening)
+1. Hardened `app/api/agents/stream/route.ts` with:
+- auth + entitlement enforcement,
+- plan-aware role filtering and max-agent limits,
+- capability envelope for plan-gated orchestration,
+- metering + concurrency lease before SSE stream.
+2. Reworked `lib/agent-orchestrator.ts` to remove sequential settling behavior:
+- real interleaved parallel streaming,
+- explicit task cancellation state,
+- non-inflated role guidance (no unsupported claims).
+3. Updated `components/nexus/MultiAgentOrchestrator.tsx` UX:
+- stream error banner with gate transparency,
+- stop-stream control,
+- message merge per role to reduce noisy chunk spam.

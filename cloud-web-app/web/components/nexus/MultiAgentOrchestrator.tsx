@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Zap, Loader2, CheckCircle, AlertCircle, Send } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { AlertCircle, CheckCircle, Loader2, Send, Square, Zap } from 'lucide-react'
 
 interface AgentStreamMessage {
   agentId: string
@@ -9,7 +9,53 @@ interface AgentStreamMessage {
   content: string
   thinking?: string
   timestamp: number
-  status: 'pending' | 'streaming' | 'complete'
+  status: 'pending' | 'streaming' | 'complete' | 'error'
+}
+
+type StreamEnvelope =
+  | ({ type: 'ready'; taskId: string; selectedAgents: string[]; timestamp: number } & Record<string, unknown>)
+  | ({ type: 'complete'; taskId: string; timestamp: number } & Record<string, unknown>)
+  | ({ type: 'error'; error: string; taskId?: string; timestamp?: number } & Record<string, unknown>)
+  | AgentStreamMessage
+
+function mergeIncomingMessage(previous: AgentStreamMessage[], incoming: AgentStreamMessage): AgentStreamMessage[] {
+  if (incoming.status === 'streaming') {
+    const lastIndex = [...previous]
+      .map((message, index) => ({ message, index }))
+      .reverse()
+      .find(({ message }) => message.agentId === incoming.agentId && message.status === 'streaming')?.index
+
+    if (typeof lastIndex === 'number') {
+      const next = [...previous]
+      const current = next[lastIndex]
+      next[lastIndex] = {
+        ...current,
+        content: `${current.content}${current.content && incoming.content ? ' ' : ''}${incoming.content}`,
+        timestamp: incoming.timestamp,
+        thinking: incoming.thinking ?? current.thinking,
+      }
+      return next
+    }
+  }
+
+  if (incoming.status === 'complete') {
+    const lastIndex = [...previous]
+      .map((message, index) => ({ message, index }))
+      .reverse()
+      .find(({ message }) => message.agentId === incoming.agentId)?.index
+
+    if (typeof lastIndex === 'number') {
+      const next = [...previous]
+      next[lastIndex] = {
+        ...next[lastIndex],
+        status: 'complete',
+        timestamp: incoming.timestamp,
+      }
+      return next
+    }
+  }
+
+  return [...previous, incoming]
 }
 
 export default function MultiAgentOrchestrator() {
@@ -17,21 +63,39 @@ export default function MultiAgentOrchestrator() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [messages, setMessages] = useState<AgentStreamMessage[]>([])
   const [selectedAgents, setSelectedAgents] = useState(['architect', 'designer', 'engineer'])
+  const [streamError, setStreamError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const agentOptions = [
-    { id: 'architect', label: 'Architect', color: 'text-blue-400' },
-    { id: 'designer', label: 'Designer', color: 'text-pink-400' },
-    { id: 'engineer', label: 'Engineer', color: 'text-emerald-400' },
-    { id: 'qa', label: 'QA', color: 'text-amber-400' },
-    { id: 'researcher', label: 'Researcher', color: 'text-purple-400' }
+    { id: 'architect', label: 'Architect' },
+    { id: 'designer', label: 'Designer' },
+    { id: 'engineer', label: 'Engineer' },
+    { id: 'qa', label: 'QA' },
+    { id: 'researcher', label: 'Researcher' },
   ]
 
-  const handleStream = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!prompt.trim() || selectedAgents.length === 0) return
+  const stopStream = () => {
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = null
+    setIsStreaming(false)
+  }
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [])
+
+  const handleStream = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!prompt.trim() || selectedAgents.length === 0 || isStreaming) return
 
     setIsStreaming(true)
     setMessages([])
+    setStreamError(null)
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
 
     try {
       const response = await fetch('/api/agents/stream', {
@@ -40,14 +104,25 @@ export default function MultiAgentOrchestrator() {
         body: JSON.stringify({
           prompt,
           agents: selectedAgents,
-          priority: 'high'
-        })
+          priority: 'high',
+        }),
+        signal: controller.signal,
       })
 
-      if (!response.ok) throw new Error('Stream failed')
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        const message = payload?.message || payload?.error || `Stream failed with status ${response.status}`
+        setStreamError(String(message))
+        setIsStreaming(false)
+        return
+      }
 
       const reader = response.body?.getReader()
-      if (!reader) throw new Error('No reader')
+      if (!reader) {
+        setStreamError('No streaming reader available.')
+        setIsStreaming(false)
+        return
+      }
 
       const decoder = new TextDecoder()
       let buffer = ''
@@ -61,59 +136,82 @@ export default function MultiAgentOrchestrator() {
         buffer = lines.pop() || ''
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              if (data.type === 'complete') {
-                setIsStreaming(false)
-              } else if (data.type === 'error') {
-                console.error('Stream error:', data.error)
-                setIsStreaming(false)
-              } else {
-                setMessages(prev => [...prev, data])
-              }
-            } catch (e) {
-              console.error('Parse error:', e)
+          if (!line.startsWith('data: ')) continue
+
+          try {
+            const payload = JSON.parse(line.slice(6)) as StreamEnvelope
+            const envelopeType = (payload as { type?: string }).type
+
+            if (envelopeType === 'ready') {
+              continue
             }
+            if (envelopeType === 'complete') {
+              setIsStreaming(false)
+              continue
+            }
+            if (envelopeType === 'error') {
+              setStreamError(String((payload as Extract<StreamEnvelope, { type: 'error' }>).error || 'Stream error'))
+              setIsStreaming(false)
+              continue
+            }
+
+            const message = payload as AgentStreamMessage
+            setMessages((previous) => mergeIncomingMessage(previous, message))
+          } catch {
+            // Ignore malformed SSE payload and keep stream alive.
           }
         }
       }
     } catch (error) {
-      console.error('Stream error:', error)
+      if (!controller.signal.aborted) {
+        setStreamError(error instanceof Error ? error.message : 'Unexpected stream error')
+      }
+    } finally {
+      abortControllerRef.current = null
       setIsStreaming(false)
     }
   }
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950 text-zinc-100 p-6 space-y-6 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-purple-600/20 rounded-lg border border-purple-500/30">
+    <div className="flex h-full flex-col space-y-4 overflow-y-auto bg-zinc-950 p-6 text-zinc-100">
+      <div className="mb-1 flex items-center gap-3">
+        <div className="rounded-lg border border-purple-500/30 bg-purple-600/20 p-2">
           <Zap className="text-purple-400" size={20} />
         </div>
         <div>
           <h2 className="text-lg font-bold uppercase tracking-wider">Multi-Agent Orchestrator</h2>
-          <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">Parallel Execution Engine</p>
+          <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">Parallel execution with explicit gates</p>
         </div>
       </div>
 
-      {/* Agent Selection */}
+      {streamError && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
+          <div className="mb-1 flex items-center gap-2 font-semibold">
+            <AlertCircle size={14} />
+            Capability or runtime gate
+          </div>
+          <p>{streamError}</p>
+        </div>
+      )}
+
       <div className="space-y-2">
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Select Agents</label>
+        <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Select Agents</label>
         <div className="flex flex-wrap gap-2">
-          {agentOptions.map(agent => (
+          {agentOptions.map((agent) => (
             <button
               key={agent.id}
-              onClick={() => setSelectedAgents(prev =>
-                prev.includes(agent.id)
-                  ? prev.filter(a => a !== agent.id)
-                  : [...prev, agent.id]
-              )}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+              type="button"
+              onClick={() =>
+                setSelectedAgents((previous) =>
+                  previous.includes(agent.id) ? previous.filter((value) => value !== agent.id) : [...previous, agent.id]
+                )
+              }
+              className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
                 selectedAgents.includes(agent.id)
-                  ? 'bg-purple-600/30 border border-purple-500/50 text-purple-300'
-                  : 'bg-zinc-800/50 border border-zinc-700/50 text-zinc-500 hover:text-zinc-300'
+                  ? 'border-purple-500/50 bg-purple-600/30 text-purple-300'
+                  : 'border-zinc-700/50 bg-zinc-800/50 text-zinc-500 hover:text-zinc-300'
               }`}
+              aria-pressed={selectedAgents.includes(agent.id)}
             >
               {agent.label}
             </button>
@@ -121,67 +219,80 @@ export default function MultiAgentOrchestrator() {
         </div>
       </div>
 
-      {/* Input Form */}
       <form onSubmit={handleStream} className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl blur opacity-20 group-focus-within:opacity-50 transition duration-500"></div>
-        <div className="relative flex items-center bg-zinc-900 border border-zinc-800 rounded-xl p-2 pl-4">
+        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-20 blur transition duration-500 group-focus-within:opacity-50" />
+        <div className="relative flex items-center rounded-xl border border-zinc-800 bg-zinc-900 p-2 pl-4">
           <input
             type="text"
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe your task for the agent squad..."
-            className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none py-2"
+            onChange={(event) => setPrompt(event.target.value)}
+            placeholder="Describe the task for planner/coder/reviewer..."
+            className="flex-1 bg-transparent py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none"
             disabled={isStreaming}
           />
-          <button
-            type="submit"
-            disabled={isStreaming || selectedAgents.length === 0}
-            className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-all ml-2 disabled:opacity-50"
-          >
-            <Send size={18} />
-          </button>
+
+          {isStreaming ? (
+            <button
+              type="button"
+              onClick={stopStream}
+              className="ml-2 rounded-lg bg-zinc-700 p-2 text-white transition hover:bg-zinc-600"
+              aria-label="Stop stream"
+            >
+              <Square size={18} />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!prompt.trim() || selectedAgents.length === 0}
+              className="ml-2 rounded-lg bg-purple-600 p-2 text-white transition-all hover:bg-purple-500 disabled:opacity-50"
+              aria-label="Start stream"
+            >
+              <Send size={18} />
+            </button>
+          )}
         </div>
       </form>
 
-      {/* Messages Stream */}
       <div className="flex-1 space-y-4 overflow-y-auto">
-        {messages.length === 0 && !isStreaming && (
-          <div className="h-full flex flex-col items-center justify-center text-center px-6">
-            <div className="w-12 h-12 bg-purple-600/20 rounded-2xl flex items-center justify-center mb-4 border border-purple-500/30">
+        {messages.length === 0 && !isStreaming && !streamError && (
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-purple-500/30 bg-purple-600/20">
               <Zap className="text-purple-400" />
             </div>
-            <h3 className="text-zinc-100 font-semibold mb-2">Orchestration Ready</h3>
-            <p className="text-zinc-500 text-sm max-w-xs">
-              Select agents and describe your task to start parallel execution.
+            <h3 className="mb-2 font-semibold text-zinc-100">Orchestration Ready</h3>
+            <p className="max-w-xs text-sm text-zinc-500">
+              Select the agents and start a run. Partial capabilities stay explicitly gated.
             </p>
           </div>
         )}
 
-        {messages.map((msg, idx) => (
-          <div key={`${msg.agentId}-${idx}`} className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="flex items-center justify-between mb-2">
+        {messages.map((message, index) => (
+          <div
+            key={`${message.agentId}-${index}`}
+            className="animate-in slide-in-from-bottom-2 fade-in rounded-xl border border-zinc-800 bg-zinc-900 p-4 duration-300"
+          >
+            <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-400">{msg.agentType}</span>
-                {msg.status === 'complete' && <CheckCircle size={12} className="text-emerald-500" />}
-                {msg.status === 'streaming' && <Loader2 size={12} className="text-blue-500 animate-spin" />}
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-400">{message.agentType}</span>
+                {message.status === 'complete' && <CheckCircle size={12} className="text-emerald-500" />}
+                {message.status === 'streaming' && <Loader2 size={12} className="animate-spin text-blue-500" />}
+                {message.status === 'error' && <AlertCircle size={12} className="text-red-500" />}
               </div>
-              <span className="text-[9px] text-zinc-600 font-mono">
-                {new Date(msg.timestamp).toLocaleTimeString()}
-              </span>
+              <span className="font-mono text-[9px] text-zinc-600">{new Date(message.timestamp).toLocaleTimeString()}</span>
             </div>
-            <p className="text-sm text-zinc-200 leading-relaxed">{msg.content}</p>
-            {msg.thinking && (
-              <div className="mt-2 pt-2 border-t border-zinc-800/50">
-                <p className="text-[11px] text-zinc-500 italic">{msg.thinking}</p>
+            <p className="text-sm leading-relaxed text-zinc-200">{message.content}</p>
+            {message.thinking && (
+              <div className="mt-2 border-t border-zinc-800/50 pt-2">
+                <p className="text-[11px] italic text-zinc-500">{message.thinking}</p>
               </div>
             )}
           </div>
         ))}
 
         {isStreaming && (
-          <div className="flex items-center gap-3 p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse">
-            <Loader2 size={14} className="text-purple-500 animate-spin" />
-            <span className="text-xs text-zinc-400 font-medium">Agents orchestrating...</span>
+          <div className="flex animate-pulse items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+            <Loader2 size={14} className="animate-spin text-purple-500" />
+            <span className="text-xs font-medium text-zinc-400">Agents orchestrating...</span>
           </div>
         )}
       </div>

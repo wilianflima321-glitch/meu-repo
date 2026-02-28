@@ -1,9 +1,11 @@
-/**
+﻿/**
  * Agent Orchestrator for Aethel Engine
- * Manages parallel execution of multiple AI agents with streaming
+ * Streams parallel agent messages with explicit cancellation semantics.
  */
 
-export type AgentType = 'architect' | 'designer' | 'engineer' | 'qa' | 'researcher'
+export const SUPPORTED_AGENT_TYPES = ['architect', 'designer', 'engineer', 'qa', 'researcher'] as const
+export type AgentType = (typeof SUPPORTED_AGENT_TYPES)[number]
+export const DEFAULT_AGENT_SET: AgentType[] = ['architect', 'designer', 'engineer']
 
 export interface Agent {
   id: string
@@ -19,7 +21,7 @@ export interface AgentMessage {
   content: string
   thinking?: string
   timestamp: number
-  status: 'pending' | 'streaming' | 'complete'
+  status: 'pending' | 'streaming' | 'complete' | 'error'
 }
 
 export interface OrchestrationTask {
@@ -31,168 +33,231 @@ export interface OrchestrationTask {
   createdAt: number
 }
 
+type TaskState = {
+  cancelled: boolean
+}
+
+class AsyncQueue<T> {
+  private items: T[] = []
+  private waiters: Array<(result: IteratorResult<T>) => void> = []
+  private closed = false
+
+  push(item: T): void {
+    if (this.closed) return
+    const waiter = this.waiters.shift()
+    if (waiter) {
+      waiter({ value: item, done: false })
+      return
+    }
+    this.items.push(item)
+  }
+
+  close(): void {
+    if (this.closed) return
+    this.closed = true
+    while (this.waiters.length > 0) {
+      const waiter = this.waiters.shift()
+      waiter?.({ value: undefined as T, done: true })
+    }
+  }
+
+  async next(): Promise<IteratorResult<T>> {
+    if (this.items.length > 0) {
+      const value = this.items.shift() as T
+      return { value, done: false }
+    }
+    if (this.closed) {
+      return { value: undefined as T, done: true }
+    }
+    return await new Promise<IteratorResult<T>>((resolve) => {
+      this.waiters.push(resolve)
+    })
+  }
+}
+
 /**
  * Streaming Agent Orchestrator
- * Allows multiple agents to work in parallel with real-time feedback
+ * Multiple roles stream in parallel and interleave naturally.
  */
 export class AgentOrchestrator {
   private agents: Map<string, Agent> = new Map()
   private tasks: Map<string, OrchestrationTask> = new Map()
-  private messageQueue: AgentMessage[] = []
+  private taskStates: Map<string, TaskState> = new Map()
 
   constructor() {
     this.initializeAgents()
   }
 
-  private initializeAgents() {
+  private initializeAgents(): void {
     const agentDefinitions: Agent[] = [
-      {
-        id: 'architect-001',
-        type: 'architect',
-        name: 'Aethel Architect',
-        role: 'System Design & Vision',
-        status: 'idle'
-      },
-      {
-        id: 'designer-001',
-        type: 'designer',
-        name: 'UI/UX Designer',
-        role: 'Aesthetic & Usability',
-        status: 'idle'
-      },
-      {
-        id: 'engineer-001',
-        type: 'engineer',
-        name: 'Lead Engineer',
-        role: 'Performance & Implementation',
-        status: 'idle'
-      },
-      {
-        id: 'qa-001',
-        type: 'qa',
-        name: 'QA Analyst',
-        role: 'Quality & Testing',
-        status: 'idle'
-      },
-      {
-        id: 'researcher-001',
-        type: 'researcher',
-        name: 'Research Agent',
-        role: 'Deep Verification & Analysis',
-        status: 'idle'
-      }
+      { id: 'architect-001', type: 'architect', name: 'Architect', role: 'System decomposition and risk mapping', status: 'idle' },
+      { id: 'designer-001', type: 'designer', name: 'Designer', role: 'UX, interaction, and visual consistency', status: 'idle' },
+      { id: 'engineer-001', type: 'engineer', name: 'Engineer', role: 'Implementation, runtime, and performance', status: 'idle' },
+      { id: 'qa-001', type: 'qa', name: 'QA', role: 'Validation strategy and regression prevention', status: 'idle' },
+      { id: 'researcher-001', type: 'researcher', name: 'Researcher', role: 'Evidence, assumptions, and gap analysis', status: 'idle' },
     ]
 
-    agentDefinitions.forEach(agent => {
+    for (const agent of agentDefinitions) {
       this.agents.set(agent.id, agent)
-    })
+    }
   }
 
-  /**
-   * Execute a task across multiple agents in parallel
-   */
-  async executeParallel(task: OrchestrationTask): Promise<AsyncGenerator<AgentMessage>> {
+  executeParallel(task: OrchestrationTask): AsyncGenerator<AgentMessage> {
     this.tasks.set(task.id, task)
-
+    this.taskStates.set(task.id, { cancelled: false })
     return this.streamAgentExecution(task)
   }
 
-  /**
-   * Stream agent execution results in real-time
-   */
   private async *streamAgentExecution(task: OrchestrationTask): AsyncGenerator<AgentMessage> {
-    const agents = Array.from(this.agents.values()).filter(a => task.agents.includes(a.type))
+    const selectedAgents = Array.from(this.agents.values()).filter((agent) => task.agents.includes(agent.type))
+    const queue = new AsyncQueue<AgentMessage>()
+    const state = this.taskStates.get(task.id)
 
-    // Start all agents in parallel
-    const agentPromises = agents.map(agent => this.executeAgent(agent, task))
+    if (!state || selectedAgents.length === 0) {
+      queue.push({
+        agentId: 'system',
+        agentType: 'qa',
+        content: 'No valid agents selected for this run.',
+        timestamp: Date.now(),
+        status: 'error',
+      })
+      queue.close()
+    } else {
+      Promise.allSettled(
+        selectedAgents.map((agent) =>
+          this.executeAgent(agent, task, state, queue).catch((error) => {
+            this.agents.set(agent.id, { ...agent, status: 'error' })
+            queue.push({
+              agentId: agent.id,
+              agentType: agent.type,
+              content: error instanceof Error ? error.message : 'Agent execution failed.',
+              timestamp: Date.now(),
+              status: 'error',
+            })
+          })
+        )
+      ).finally(() => {
+        this.tasks.delete(task.id)
+        this.taskStates.delete(task.id)
+        queue.close()
+      })
+    }
 
-    // Yield results as they complete (not necessarily in order)
-    const results = await Promise.allSettled(agentPromises)
-
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        yield* result.value
-      }
+    while (true) {
+      const result = await queue.next()
+      if (result.done) break
+      yield result.value
     }
   }
 
-  /**
-   * Execute a single agent with streaming
-   */
-  private async *executeAgent(agent: Agent, task: OrchestrationTask): AsyncGenerator<AgentMessage> {
-    const agentCopy = { ...agent, status: 'thinking' as const }
-    this.agents.set(agent.id, agentCopy)
+  private async executeAgent(
+    agent: Agent,
+    task: OrchestrationTask,
+    state: TaskState,
+    queue: AsyncQueue<AgentMessage>
+  ): Promise<void> {
+    if (state.cancelled) return
 
-    // Simulate thinking phase
-    yield {
+    this.agents.set(agent.id, { ...agent, status: 'thinking' })
+    queue.push({
       agentId: agent.id,
       agentType: agent.type,
-      content: `${agent.name} is analyzing your request...`,
-      thinking: `Processing task: "${task.prompt.substring(0, 50)}..."`,
+      content: `${agent.name} started.`,
+      thinking: `Task snippet: "${truncate(task.prompt, 96)}"`,
       timestamp: Date.now(),
-      status: 'streaming'
-    }
+      status: 'streaming',
+    })
 
-    // Simulate streaming response
-    const response = this.generateAgentResponse(agent.type, task.prompt)
-    const chunks = response.split(' ')
+    this.agents.set(agent.id, { ...agent, status: 'executing' })
+    const response = this.generateAgentResponse(agent.type, task.prompt, task.priority)
+    const chunks = splitForStreaming(response)
 
     for (const chunk of chunks) {
-      await new Promise(resolve => setTimeout(resolve, 50)) // Simulate streaming delay
+      if (state.cancelled) {
+        this.agents.set(agent.id, { ...agent, status: 'idle' })
+        return
+      }
 
-      yield {
+      await delay(randomInt(35, 90))
+      queue.push({
         agentId: agent.id,
         agentType: agent.type,
         content: chunk,
         timestamp: Date.now(),
-        status: 'streaming'
-      }
+        status: 'streaming',
+      })
     }
 
-    // Mark as complete
-    const completedAgent = { ...agent, status: 'complete' as const }
-    this.agents.set(agent.id, completedAgent)
-
-    yield {
+    this.agents.set(agent.id, { ...agent, status: 'complete' })
+    queue.push({
       agentId: agent.id,
       agentType: agent.type,
-      content: '',
+      content: 'Completed.',
       timestamp: Date.now(),
-      status: 'complete'
-    }
+      status: 'complete',
+    })
   }
 
-  /**
-   * Generate contextual response based on agent type
-   */
-  private generateAgentResponse(agentType: AgentType, prompt: string): string {
-    const responses: Record<AgentType, string> = {
-      architect: `Como Arquiteto, sugiro uma abordagem baseada em padrões AAA. Recomendo decompor em módulos: Core Engine, Asset Pipeline e Orchestration Layer.`,
-      designer: `Como Designer, foco em usabilidade e fidelidade visual. Propongo uma interface "Deep Space Dark" com micro-interações fluidas.`,
-      engineer: `Como Engenheiro, vejo oportunidades de otimização. Implementaria WebGPU nativo, WASM runtime e caching inteligente.`,
-      qa: `Como QA, identifico os pontos críticos. Recomendo testes de continuidade, performance benchmarks e validação de assets.`,
-      researcher: `Como Pesquisador, fiz uma análise profunda. Encontrei 12 fontes verificadas que suportam a superação de Unreal e Sora.`
+  private generateAgentResponse(agentType: AgentType, prompt: string, priority: OrchestrationTask['priority']): string {
+    const taskHint = truncate(prompt, 120)
+
+    const baseByRole: Record<AgentType, string> = {
+      architect:
+        `Plan: decompose "${taskHint}" into small steps, define contracts first, then sequence implementation with rollback points.`,
+      designer:
+        'UX: enforce explicit loading/error/empty states, keyboard-first behavior, and remove misleading CTAs from partial capabilities.',
+      engineer:
+        'Execution: implement minimal diff with stable interfaces, add runtime guards, and keep performance impact measurable.',
+      qa:
+        'Validation: check route contracts, no-fake-success behavior, and edge cases (invalid input, cancellation, rate limits).',
+      researcher:
+        'Evidence: mark assumptions explicitly, separate verified facts from hypotheses, and avoid unsupported production claims.',
     }
 
-    return responses[agentType] || 'Processando sua solicitação...'
+    const priorityHint =
+      priority === 'high'
+        ? 'Priority=high: start with P0 reliability and user-facing regressions.'
+        : priority === 'low'
+          ? 'Priority=low: focus on safe incremental closure.'
+          : 'Priority=normal: balance reliability and speed.'
+
+    return `${baseByRole[agentType]} ${priorityHint} Output is advisory and requires repository validation before apply.`
   }
 
-  /**
-   * Get current status of all agents
-   */
   getAgentStatus(): Agent[] {
     return Array.from(this.agents.values())
   }
 
-  /**
-   * Cancel a running task
-   */
   cancelTask(taskId: string): boolean {
-    return this.tasks.delete(taskId)
+    const state = this.taskStates.get(taskId)
+    if (state) {
+      state.cancelled = true
+      this.taskStates.set(taskId, state)
+    }
+    const hadTask = this.tasks.delete(taskId)
+    return Boolean(hadTask || state)
   }
 }
 
-// Singleton instance
+function splitForStreaming(input: string): string[] {
+  const segments = input.split(/(?<=[.?!])\s+/).map((segment) => segment.trim()).filter(Boolean)
+  if (segments.length > 0) return segments
+  return [input]
+}
+
+function truncate(input: string, limit: number): string {
+  if (input.length <= limit) return input
+  return `${input.slice(0, Math.max(0, limit - 3))}...`
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 let orchestrator: AgentOrchestrator | null = null
 
 export function getOrchestrator(): AgentOrchestrator {
