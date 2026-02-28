@@ -2058,3 +2058,17 @@ Implemented:
 Impact:
 1. Further reduces inline AI orchestration logic in dashboard shell.
 2. Improves maintainability and consistency for live-preview AI behavior.
+
+## 0.49 Delta Update 2026-02-28 (Dashboard decomposition batch 6)
+Implemented:
+1. Extracted billing action helpers into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-billing-utils.ts`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- purchase/transfer input validation
+- currency normalization + positive integer parsing
+- purchase/transfer success message builders
+- billing action error mappers (`purchase`, `transfer`, `subscribe`)
+
+Impact:
+1. Reduces inline billing mutation/error logic in dashboard shell.
+2. Improves consistency of wallet action messaging and error handling paths.

@@ -92,6 +92,17 @@ import {
   buildLivePreviewSystemMessage,
   extractPrimaryAssistantContent,
 } from './dashboard/aethel-dashboard-livepreview-ai-utils'
+import {
+  buildPurchaseSuccessMessage,
+  buildTransferSuccessMessage,
+  mapPurchaseIntentError,
+  mapSubscribeError,
+  mapTransferError,
+  normalizeCurrencyCode,
+  parsePositiveInteger,
+  validatePurchaseInput,
+  validateTransferInput,
+} from './dashboard/aethel-dashboard-billing-utils'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -1063,39 +1074,30 @@ export default function AethelDashboard() {
 
   const handlePurchaseIntentSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!hasToken) {
-      setWalletActionError('Faça login para criar intents.')
+    const validationError = validatePurchaseInput(hasToken, purchaseForm.amount)
+    if (validationError) {
+      setWalletActionError(validationError)
       return
     }
-    const amountInt = Number.parseInt(purchaseForm.amount, 10)
-    if (!Number.isFinite(amountInt) || amountInt <= 0) {
-      setWalletActionError('Informe um valor de créditos válido.')
-      return
-    }
+    const amountInt = parsePositiveInteger(purchaseForm.amount)!
     setWalletSubmitting(true)
     setWalletActionMessage(null)
     setWalletActionError(null)
     try {
       const intent = await AethelAPIClient.createPurchaseIntent({
         amount: amountInt,
-        currency: purchaseForm.currency || 'credits',
+        currency: normalizeCurrencyCode(purchaseForm.currency),
         reference: purchaseForm.reference || undefined,
       })
       setLastPurchaseIntent(intent)
-      setWalletActionMessage(
-        `Intenção ${intent.intent_id} confirmada: +${intent.entry.amount.toLocaleString()} ${formatCurrencyLabel(intent.entry.currency)}.`,
-      )
+      setWalletActionMessage(buildPurchaseSuccessMessage(intent, formatCurrencyLabel))
       setPurchaseForm(prev => ({ ...prev, amount: '', reference: '' }))
       await refreshWallet()
       if (creditsKey) {
         await mutate(creditsKey)
       }
     } catch (error) {
-      if (error instanceof APIError) {
-        setWalletActionError(`Falha ao criar intenção (${error.status}): ${error.statusText}`)
-      } else {
-        setWalletActionError('Não foi possível registrar a intenção de compra.')
-      }
+      setWalletActionError(mapPurchaseIntentError(error))
     } finally {
       setWalletSubmitting(false)
     }
@@ -1103,16 +1105,13 @@ export default function AethelDashboard() {
 
   const handleTransferSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!hasToken) {
-      setWalletActionError('Faça login para transferir créditos.')
+    const validationError = validateTransferInput(hasToken, transferForm.amount, transferForm.targetUserId)
+    if (validationError) {
+      setWalletActionError(validationError)
       return
     }
-    const amountInt = Number.parseInt(transferForm.amount, 10)
+    const amountInt = parsePositiveInteger(transferForm.amount)!
     const target = transferForm.targetUserId.trim()
-    if (!Number.isFinite(amountInt) || amountInt <= 0 || !target) {
-      setWalletActionError('Informe destinatário (userId/email) e valor válidos.')
-      return
-    }
     setWalletSubmitting(true)
     setWalletActionMessage(null)
     setWalletActionError(null)
@@ -1120,28 +1119,18 @@ export default function AethelDashboard() {
       const receipt = await AethelAPIClient.transferCredits({
         target_user_id: target,
         amount: amountInt,
-        currency: transferForm.currency || 'credits',
+        currency: normalizeCurrencyCode(transferForm.currency),
         reference: transferForm.reference || undefined,
       })
       setLastTransferReceipt(receipt)
-      setWalletActionMessage(
-        `Transferência ${receipt.transfer_id} concluída: -${receipt.sender_entry.amount.toLocaleString()} ${formatCurrencyLabel(receipt.sender_entry.currency)}.`,
-      )
+      setWalletActionMessage(buildTransferSuccessMessage(receipt, formatCurrencyLabel))
       setTransferForm(prev => ({ ...prev, amount: '', reference: '' }))
       await refreshWallet()
       if (creditsKey) {
         await mutate(creditsKey)
       }
     } catch (error) {
-      if (error instanceof APIError) {
-        setWalletActionError(
-          error.status === 400
-            ? 'Saldo insuficiente ou dados inválidos.'
-            : `Falha ao transferir (${error.status}): ${error.statusText}`,
-        )
-      } else {
-        setWalletActionError('Não foi possível concluir a transferência.')
-      }
+      setWalletActionError(mapTransferError(error))
     } finally {
       setWalletSubmitting(false)
     }
@@ -1172,11 +1161,7 @@ export default function AethelDashboard() {
       }
       await refreshWallet()
     } catch (error) {
-      if (error instanceof APIError) {
-        setSubscribeError(`Não foi possível alterar o plano (${error.status}).`)
-      } else {
-        setSubscribeError('Falha ao comunicar com o serviço de billing.')
-      }
+      setSubscribeError(mapSubscribeError(error))
     } finally {
       setSubscribingPlan(null)
     }

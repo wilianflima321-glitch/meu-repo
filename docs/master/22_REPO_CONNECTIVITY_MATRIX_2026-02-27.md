@@ -119,3 +119,12 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 1. Added:
 - `components/dashboard/aethel-dashboard-livepreview-ai-utils.ts`
 2. Reduced dashboard shell inline live-preview AI glue by delegating payload/prompt/content helper logic to shared module.
+
+## 14) Incremental closure 2026-02-28 (dashboard billing split)
+1. Added:
+- `components/dashboard/aethel-dashboard-billing-utils.ts`
+2. Reduced dashboard shell inline billing handlers by delegating:
+- purchase/transfer validation and parsing
+- currency normalization
+- action success message builders
+- purchase/transfer/subscribe error mappers
