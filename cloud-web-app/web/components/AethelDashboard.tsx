@@ -85,6 +85,13 @@ import {
   getCreditEntries,
   getLastWalletUpdate,
 } from './dashboard/aethel-dashboard-wallet-utils'
+import {
+  buildLivePreviewContextPayload,
+  buildLivePreviewPrompt,
+  buildLivePreviewSuggestionMessage,
+  buildLivePreviewSystemMessage,
+  extractPrimaryAssistantContent,
+} from './dashboard/aethel-dashboard-livepreview-ai-utils'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -965,39 +972,23 @@ export default function AethelDashboard() {
       await fetch('/api/copilot/context', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          workflowId: activeWorkflowId,
-          livePreview: {
-            selectedPoint: { x: position.x, y: position.y, z: position.z },
-          },
-        }),
+        body: JSON.stringify(buildLivePreviewContextPayload(activeWorkflowId, position)),
       })
     } catch (e) {
       // Não bloqueia o fluxo de sugestão; apenas mantém real-or-fail.
       console.warn('Failed to update copilot context', e)
     }
 
-    const prompt =
-      `Contexto da Prévia ao Vivo:\n` +
-      `Ponto selecionado: x=${position.x.toFixed(3)}, y=${position.y.toFixed(3)}, z=${position.z.toFixed(3)}\n\n` +
-      `Tarefa: sugira UMA melhoria concreta para a cena naquele ponto. ` +
-      `Retorne uma única frase curta. Sem markdown. Sem listas.`
+    const prompt = buildLivePreviewPrompt(position)
 
     try {
       const messages: ChatMessage[] = [
-        {
-          role: 'system',
-          content:
-            'Você é o Copilot Aethel para Prévia ao Vivo. Seja preciso, minimalista e evite suposições. Se faltar informação, faça uma pergunta.',
-        },
+        buildLivePreviewSystemMessage(),
         { role: 'user', content: prompt },
       ]
 
       const data = await AethelAPIClient.chat({ model: 'openai:gpt-4', messages })
-      const content =
-        data?.choices?.[0]?.message?.content ||
-        data?.message?.content ||
-        ''
+      const content = extractPrimaryAssistantContent(data)
 
       const suggestion = String(content).trim()
       if (!suggestion) {
@@ -1021,7 +1012,7 @@ export default function AethelDashboard() {
     setAiActivity('Processando sugestão do usuário...')
     setIsGenerating(true)
     // Add to chat history and send to AI
-    const userMessage: ChatMessage = { role: 'user', content: `Sugestão de prévia ao vivo: ${suggestion}` }
+    const userMessage: ChatMessage = buildLivePreviewSuggestionMessage(suggestion)
     setChatHistory(prev => [...prev, userMessage])
 
     try {

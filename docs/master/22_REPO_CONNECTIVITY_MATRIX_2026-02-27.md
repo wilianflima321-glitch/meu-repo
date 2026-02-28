@@ -114,3 +114,8 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `tools/check-canonical-doc-alignment.mjs`
 - `npm run qa:canonical-doc-alignment`
 2. CI now enforces this gate in `web-lint` before build/test stages.
+
+## 13) Incremental closure 2026-02-28 (dashboard live-preview AI split)
+1. Added:
+- `components/dashboard/aethel-dashboard-livepreview-ai-utils.ts`
+2. Reduced dashboard shell inline live-preview AI glue by delegating payload/prompt/content helper logic to shared module.

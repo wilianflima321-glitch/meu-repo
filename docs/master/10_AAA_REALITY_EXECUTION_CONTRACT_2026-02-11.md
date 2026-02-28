@@ -2044,3 +2044,17 @@ Gate scope:
 Impact:
 1. Converts doc coherence from manual review to executable gate.
 2. Reduces future drift across multi-agent documentation updates.
+
+## 0.48 Delta Update 2026-02-28 (Dashboard decomposition batch 5)
+Implemented:
+1. Extracted live-preview AI helper logic into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-livepreview-ai-utils.ts`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- live preview context payload builder
+- live preview prompt/system message builders
+- assistant primary-content extraction
+- live preview suggestion message builder
+
+Impact:
+1. Further reduces inline AI orchestration logic in dashboard shell.
+2. Improves maintainability and consistency for live-preview AI behavior.
