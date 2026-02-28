@@ -2239,3 +2239,22 @@ Implemented:
 Impact:
 1. Removes silent incompatibility risk between presign response and uploader behavior.
 2. Makes asset readiness more explicit with quality scoring and partial-pipeline disclosure.
+
+## 0.60 Delta Update 2026-02-28 (asset quality gate policy by plan)
+Implemented:
+1. Added plan-aware asset intake policy evaluator:
+- `cloud-web-app/web/lib/server/asset-intake-policy.ts`
+2. Upload route now enforces quality admission gate before storage write:
+- `cloud-web-app/web/app/api/assets/upload/route.ts`
+- explicit rejection contract on low quality:
+  - `422 ASSET_QUALITY_GATE_FAILED`
+  - `capability=asset_intake_quality_gate`
+  - `capabilityStatus=PARTIAL`
+3. Confirm route now reports quality + policy decision with entitlement context:
+- `cloud-web-app/web/app/api/assets/[id]/confirm/route.ts`
+4. Policy is strict by plan and remains explicit:
+- `starter>=55`, `basic>=50`, `pro>=40`, `studio>=30`, `enterprise>=20`.
+
+Impact:
+1. Converts asset quality from advisory-only to enforceable intake policy.
+2. Reduces low-quality asset ingestion risk while keeping behavior explicit and auditable.

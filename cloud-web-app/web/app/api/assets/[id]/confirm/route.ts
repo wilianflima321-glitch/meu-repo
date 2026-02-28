@@ -13,6 +13,8 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { headObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
 import { buildAssetQualityReport, inferAssetClassFromNameAndMime } from '@/lib/server/asset-quality';
+import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
 
 // ============================================================================
 // POST - Confirm Upload
@@ -24,6 +26,7 @@ export async function POST(
 ) {
   try {
     const user = requireAuth(request);
+    const entitlements = await requireEntitlementsForUser(user.userId);
 
     // Find asset with access check
     const asset = await prisma.asset.findFirst({
@@ -94,6 +97,11 @@ export async function POST(
       assetClass: inferredAssetClass,
       warnings: ['POST_PROCESSING_PIPELINE_PARTIAL'],
     })
+    const intakePolicy = evaluateAssetIntakePolicy({
+      planId: entitlements.plan.id,
+      source: entitlements.source,
+      quality,
+    })
 
     return NextResponse.json({
       id: asset.id,
@@ -103,6 +111,7 @@ export async function POST(
       mimeType: asset.mimeType,
       createdAt: asset.createdAt.toISOString(),
       quality,
+      intakePolicy,
       postProcessing: {
         queued: false,
         capabilityStatus: 'PARTIAL',

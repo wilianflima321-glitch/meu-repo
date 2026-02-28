@@ -12,6 +12,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { AssetProcessor } from '@/lib/server/asset-processor';
+import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,29 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: validation.error }, { status: 400 });
     }
     
+    const intakeDecision = validation.quality
+      ? evaluateAssetIntakePolicy({
+          planId: entitlements.plan.id,
+          source: entitlements.source,
+          quality: validation.quality,
+        })
+      : null
+
+    if (intakeDecision && !intakeDecision.allowed) {
+      return NextResponse.json(
+        {
+          error: 'ASSET_QUALITY_GATE_FAILED',
+          message: intakeDecision.reason,
+          capability: 'asset_intake_quality_gate',
+          capabilityStatus: 'PARTIAL',
+          metadata: intakeDecision.metadata,
+          quality: validation.quality,
+          intakePolicy: intakeDecision,
+        },
+        { status: 422 }
+      )
+    }
+
     // 2. Storage Enforcements
     if (entitlements.plan.limits.storage !== -1) {
       const agg = await prisma.asset.aggregate({
@@ -146,6 +170,7 @@ export async function POST(req: NextRequest) {
         warnings: validation.warnings || [],
         quality: validation.quality || null,
       },
+      intakePolicy: intakeDecision,
       optimization: {
           enabled: optimizationMeta.enabled,
           processor: optimizationMeta.processor,

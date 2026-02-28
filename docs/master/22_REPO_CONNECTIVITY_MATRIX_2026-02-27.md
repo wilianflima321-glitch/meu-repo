@@ -254,3 +254,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - targeted lint (asset/presign/hooks scope) -> PASS
 - `qa:repo-connectivity` -> PASS
 - `qa:canonical-doc-alignment` -> PASS
+
+## 26) Incremental closure 2026-02-28 (asset admission policy enforcement)
+1. Added plan-aware quality gate for asset intake:
+- `lib/server/asset-intake-policy.ts`
+2. Upload flow now blocks low-quality assets with explicit response contract:
+- `422 ASSET_QUALITY_GATE_FAILED`
+- includes `quality` + `intakePolicy` payload for actionable remediation.
+3. Confirm flow now returns policy context for observability:
+- `intakePolicy` and `quality` included in confirmation payload.
+4. Verification snapshot:
+- targeted lint (asset policy + upload + confirm) -> PASS
