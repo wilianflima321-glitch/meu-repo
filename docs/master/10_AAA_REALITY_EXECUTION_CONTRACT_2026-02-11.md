@@ -2163,3 +2163,21 @@ Implemented:
 Impact:
 1. Removes one more high-density UI region from the monolith.
 2. Reduces `AethelDashboard.tsx` to `2595` lines while keeping behavior and gate policy unchanged.
+
+## 0.56 Delta Update 2026-02-28 (Dashboard decomposition batch 12)
+Implemented:
+1. Extracted projects tab block into:
+- `cloud-web-app/web/components/dashboard/DashboardProjectsTab.tsx`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- projects list grid and removal actions
+- create-project form controls
+- project version slider hook point
+- director note action callback wiring
+3. Lightweight gates executed:
+- `npm run qa:canonical-doc-alignment` -> PASS
+- `npm run qa:repo-connectivity` -> PASS
+- `npm run qa:mojibake` -> PASS
+
+Impact:
+1. Moves another sizeable UI section out of the monolithic shell.
+2. Reduces `AethelDashboard.tsx` to `2535` lines while preserving current project-tab behavior.

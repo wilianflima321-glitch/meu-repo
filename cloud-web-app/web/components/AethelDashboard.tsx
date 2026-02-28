@@ -32,8 +32,6 @@ import { isAuthenticated } from '@/lib/auth'
 import { useAssetDownload, useJobQueue, useRenderProgress } from '@/hooks/useAethelGateway'
 import { RenderQueue, type RenderJob } from './dashboard/RenderProgress'
 import { AIThinkingPanel } from './ai/AIThinkingPanel'
-import { DirectorNotePanel } from './ai/DirectorNotePanel'
-import { TimeMachineSlider } from './collaboration/TimeMachineSlider'
 import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs'
 import {
   type ActiveTab,
@@ -112,6 +110,7 @@ import { TrialBanner } from './dashboard/TrialBanner'
 import { DashboardHeader } from './dashboard/DashboardHeader'
 import { AethelDashboardSidebar } from './dashboard/AethelDashboardSidebar'
 import { DashboardOverviewTab } from './dashboard/DashboardOverviewTab'
+import { DashboardProjectsTab } from './dashboard/DashboardProjectsTab'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -1245,80 +1244,21 @@ export default function AethelDashboard() {
           )}
 
           {activeTab === 'projects' && (
-            <div className="aethel-p-6">
-              <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-6">
-                <h2 className="aethel-text-2xl aethel-font-bold">Projetos</h2>
-                
-                {/* TimeMachine Slider para histórico do projeto */}
-                {projects.length > 0 && (
-                  <div className="aethel-w-96">
-                    <TimeMachineSlider
-                      versions={[]}
-                      onVersionChange={(versionId) => {
-                        showToastMessage(`Navegando para versão: ${versionId}`, 'info');
-                      }}
-                      variant="compact"
-                    />
-                  </div>
-                )}
-              </div>
-              
-              {/* Director Note Panel - Feedback artístico da IA */}
-              {projects.length > 0 && (
-                <div className="aethel-mb-6">
-                  <DirectorNotePanel
-                    projectId={String(projects[0].id)}
-                    position="floating"
-                    onApplyFix={async (note) => {
-                      showToastMessage(`Aplicando sugestão: ${note.title}`, 'success');
-                    }}
-                  />
-                </div>
-              )}
-              
-              <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-6 aethel-mb-6">
-                {projects.map(project => (
-                  <div key={project.id} className="aethel-card aethel-p-4">
-                    <h3 className="aethel-font-semibold aethel-mb-2">{project.name}</h3>
-                    <p className="aethel-text-sm aethel-text-slate-400 aethel-mb-2">Tipo: {project.type}</p>
-                    <p className="aethel-text-sm aethel-mb-4">Status: <span className={`aethel-px-2 aethel-py-1 aethel-rounded aethel-text-xs ${project.status === 'active' ? 'aethel-bg-green-500/20 aethel-text-green-400' : 'aethel-bg-gray-500/20 aethel-text-gray-400'}`}>{project.status}</span></p>
-                    <button
-                      onClick={() => deleteProject(project.id)}
-                      className="aethel-button aethel-button-danger aethel-text-xs"
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="aethel-card aethel-p-6 aethel-max-w-md">
-                <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Criar novo projeto</h3>
-                <div className="aethel-space-y-4">
-                  <input
-                    type="text"
-                    value={newProjectName}
-                    onChange={(e) => setNewProjectName(e.target.value)}
-                    placeholder="Nome do projeto"
-                    className="aethel-input aethel-w-full"
-                  />
-                  <select
-                    value={newProjectType}
-                    onChange={(e) => setNewProjectType(e.target.value)}
-                    className="aethel-input aethel-w-full"
-                  >
-                    <option value="code">Projeto de código</option>
-                    <option value="unreal">Unreal Engine</option>
-                    <option value="web">Aplicação web</option>
-                  </select>
-                  <button
-                    onClick={createProject}
-                    className="aethel-button aethel-button-primary aethel-w-full"
-                  >
-                    Criar projeto
-                  </button>
-                </div>
-              </div>
-            </div>
+            <DashboardProjectsTab
+              projects={projects}
+              newProjectName={newProjectName}
+              newProjectType={newProjectType}
+              onDeleteProject={deleteProject}
+              onCreateProject={createProject}
+              onProjectNameChange={setNewProjectName}
+              onProjectTypeChange={(value) => setNewProjectType(value)}
+              onProjectVersionChange={(versionId) => {
+                showToastMessage(`Navegando para versao: ${versionId}`, 'info')
+              }}
+              onApplyDirectorNote={(title) => {
+                showToastMessage(`Aplicando sugestao: ${title}`, 'success')
+              }}
+            />
           )}
 
           {activeTab === 'ai-chat' && (
