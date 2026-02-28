@@ -2127,3 +2127,20 @@ Implemented:
 Impact:
 1. Further reduces monolith pressure and isolates top-bar behavior into a dedicated component.
 2. Updates current dashboard shell size to `2936` lines with unchanged behavior contract.
+
+## 0.54 Delta Update 2026-02-28 (Dashboard decomposition batch 10)
+Implemented:
+1. Extracted sidebar UI/navigation block into:
+- `cloud-web-app/web/components/dashboard/AethelDashboardSidebar.tsx`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- sidebar open/close rendering
+- session filter controls (`all`, `favorites`, `scheduled`)
+- tab navigation item rendering and selection wiring
+3. Lightweight gates executed:
+- `npm run qa:canonical-doc-alignment` -> PASS
+- `npm run qa:repo-connectivity` -> PASS
+- `npm run qa:mojibake` -> PASS
+
+Impact:
+1. Removes one of the largest inline UI regions from dashboard shell.
+2. Reduces `AethelDashboard.tsx` to `2744` lines while preserving current navigation contract.

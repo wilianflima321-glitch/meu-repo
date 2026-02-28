@@ -163,3 +163,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
 - `qa:mojibake` -> PASS
+
+## 19) Incremental closure 2026-02-28 (dashboard sidebar extraction)
+1. Added:
+- `components/dashboard/AethelDashboardSidebar.tsx`
+2. Removed sidebar nav/filter/session UI block from monolithic shell and delegated to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboard.tsx` -> `2744` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS
