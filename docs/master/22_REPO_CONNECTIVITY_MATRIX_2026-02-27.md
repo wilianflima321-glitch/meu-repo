@@ -94,3 +94,9 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 1. Keep connectivity gate mandatory in all PR pipelines.
 2. Continue dashboard decomposition until no single UI shell file exceeds agreed threshold.
 3. Publish explicit policy for orphan-candidate directories (`ACTIVE` vs `ARCHIVE` vs `REMOVE`).
+
+## 10) Incremental closure 2026-02-28 (dashboard split)
+1. Dashboard decomposition advanced with:
+- `components/dashboard/aethel-dashboard-project-utils.ts`
+- `components/dashboard/aethel-dashboard-wallet-utils.ts`
+2. Project derivation and wallet metric logic were removed from inline dashboard shell and delegated to shared helpers.

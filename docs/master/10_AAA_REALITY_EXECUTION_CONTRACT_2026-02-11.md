@@ -1967,3 +1967,17 @@ Implemented:
 Impact:
 1. Reduces decision ambiguity between historical markdown and active execution contracts.
 2. Keeps market-superiority planning tied to factual constraints and explicit claim gates.
+
+## 0.43 Delta Update 2026-02-28 (Dashboard decomposition batch 4)
+Implemented:
+1. Extracted project operations into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-project-utils.ts`
+2. Extracted wallet metrics/receivable derivations into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-wallet-utils.ts`
+3. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- project create/delete entry derivation
+- wallet usage stats and receivable summary calculations
+
+Impact:
+1. Further reduced monolith responsibility inside dashboard shell.
+2. Improved readability/ownership for business-critical wallet and project logic.

@@ -78,6 +78,13 @@ import {
   toggleSessionFavorite,
   toggleSessionScheduled,
 } from './dashboard/aethel-dashboard-session-utils'
+import { createProjectEntry, removeProjectEntry } from './dashboard/aethel-dashboard-project-utils'
+import {
+  computeReceivableSummary,
+  computeWalletUsageStats,
+  getCreditEntries,
+  getLastWalletUpdate,
+} from './dashboard/aethel-dashboard-wallet-utils'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -938,19 +945,14 @@ export default function AethelDashboard() {
 
   const createProject = () => {
     if (!newProjectName.trim()) return
-    const newProject = {
-      id: projects.length + 1,
-      name: newProjectName,
-      type: newProjectType,
-      status: 'active'
-    }
+    const newProject = createProjectEntry(projects, newProjectName, newProjectType)
     setProjects(prev => [...prev, newProject])
     setNewProjectName('')
     setNewProjectType('code')
   }
 
   const deleteProject = (id: number) => {
-    setProjects(prev => prev.filter(p => p.id !== id))
+    setProjects(prev => removeProjectEntry(prev, id))
   }
 
   const handleMagicWandSelect = async (position: THREE.Vector3) => {
@@ -1046,90 +1048,17 @@ export default function AethelDashboard() {
 
   const walletTransactions = useMemo(() => walletData?.transactions ?? [], [walletData?.transactions])
   const connectivityServices = useMemo(() => connectivityData?.services ?? [], [connectivityData?.services])
-  const lastWalletUpdate = walletTransactions.length > 0 ? walletTransactions[walletTransactions.length - 1].created_at : null
+  const lastWalletUpdate = useMemo(() => getLastWalletUpdate(walletTransactions), [walletTransactions])
 
-  const creditEntries = useMemo(() => walletTransactions.filter(entry => entry.entry_type === 'credit'), [walletTransactions])
+  const creditEntries = useMemo(() => getCreditEntries(walletTransactions), [walletTransactions])
 
   const {
     creditsUsedToday,
     creditsUsedThisMonth,
     creditsReceivedThisMonth,
-  } = useMemo(() => {
-    if (walletTransactions.length === 0) {
-      return {
-        creditsUsedToday: 0,
-        creditsUsedThisMonth: 0,
-        creditsReceivedThisMonth: 0,
-      }
-    }
+  } = useMemo(() => computeWalletUsageStats(walletTransactions), [walletTransactions])
 
-    const now = new Date()
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-
-    let usedToday = 0
-    let usedMonth = 0
-    let receivedMonth = 0
-
-    for (const entry of walletTransactions) {
-      const createdAt = new Date(entry.created_at)
-
-      if (entry.entry_type === 'credit') {
-        if (createdAt >= startOfMonth) {
-          receivedMonth += entry.amount
-        }
-        continue
-      }
-
-      if (createdAt >= startOfToday) {
-        usedToday += entry.amount
-      }
-
-      if (createdAt >= startOfMonth) {
-        usedMonth += entry.amount
-      }
-    }
-
-    return {
-      creditsUsedToday: usedToday,
-      creditsUsedThisMonth: usedMonth,
-      creditsReceivedThisMonth: receivedMonth,
-    }
-  }, [walletTransactions])
-
-  const receivableSummary = useMemo(() => {
-    if (creditEntries.length === 0) {
-      return {
-        total: 0,
-        pending: 0,
-        recent: [] as typeof creditEntries,
-      }
-    }
-
-    let pending = 0
-    for (const entry of creditEntries) {
-      const rawStatus = entry.metadata?.['status'] as unknown
-      const status = typeof rawStatus === 'string' ? rawStatus.toLowerCase() : ''
-      const rawSettled = entry.metadata?.['settled'] as unknown
-      const settledFlag = typeof rawSettled === 'boolean' ? rawSettled : undefined
-      if (status === 'pending' || status === 'awaiting_settlement' || settledFlag === false) {
-        pending += entry.amount
-      }
-    }
-
-    const recent = creditEntries
-      .slice()
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 10)
-
-    const total = creditEntries.reduce((sum, entry) => sum + entry.amount, 0)
-
-    return {
-      total,
-      pending,
-      recent,
-    }
-  }, [creditEntries])
+  const receivableSummary = useMemo(() => computeReceivableSummary(creditEntries), [creditEntries])
 
   const refreshWallet = async () => {
     if (walletKey) {
