@@ -196,3 +196,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
 - `qa:mojibake` -> PASS
+
+## 22) Incremental closure 2026-02-28 (dashboard workflow bar extraction)
+1. Added:
+- `components/dashboard/DashboardCopilotWorkflowBar.tsx`
+2. Removed AI-chat workflow control toolbar from monolithic shell and delegated to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboard.tsx` -> `2469` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS

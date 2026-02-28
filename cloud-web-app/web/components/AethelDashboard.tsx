@@ -111,6 +111,7 @@ import { DashboardHeader } from './dashboard/DashboardHeader'
 import { AethelDashboardSidebar } from './dashboard/AethelDashboardSidebar'
 import { DashboardOverviewTab } from './dashboard/DashboardOverviewTab'
 import { DashboardProjectsTab } from './dashboard/DashboardProjectsTab'
+import { DashboardCopilotWorkflowBar } from './dashboard/DashboardCopilotWorkflowBar'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -1286,88 +1287,21 @@ export default function AethelDashboard() {
                   </button>
                 </div>
               </div>
-
-              <div className="aethel-flex aethel-items-center aethel-gap-2 aethel-mb-4">
-                <span className="aethel-text-sm aethel-text-slate-400">Trabalho</span>
-                <select
-                  value={activeWorkflowId ?? ''}
-                  onChange={(e) => {
-                    const v = e.target.value
-                    if (v === '__new__') {
-                      void createCopilotWorkflow()
-                      return
-                    }
-                    if (v) void switchCopilotWorkflow(v)
-                  }}
-                  className="aethel-input"
-                  disabled={copilotWorkflowsLoading || connectBusy}
-                >
-                  {copilotWorkflows.map((wf) => (
-                    <option key={String(wf.id)} value={String(wf.id)}>
-                      {wf.title || 'Fluxo'}
-                    </option>
-                  ))}
-                  <option value="__new__">+ Novo trabalho</option>
-                </select>
-
-                <button
-                  onClick={() => void renameCopilotWorkflow()}
-                  className="aethel-button aethel-button-secondary"
-                  disabled={!activeWorkflowId}
-                >
-                  Renomear
-                </button>
-                <button
-                  onClick={() => void archiveCopilotWorkflow()}
-                  className="aethel-button aethel-button-secondary"
-                  disabled={!activeWorkflowId}
-                >
-                  Arquivar
-                </button>
-
-                <select
-                  value={connectFromWorkflowId}
-                  onChange={(e) => setConnectFromWorkflowId(e.target.value)}
-                  className="aethel-input"
-                  disabled={copilotWorkflowsLoading || connectBusy}
-                >
-                  <option value="">Conectar…</option>
-                  {copilotWorkflows
-                    .filter((w) => String(w.id) !== String(activeWorkflowId))
-                    .map((wf) => (
-                      <option key={String(wf.id)} value={String(wf.id)}>
-                        {wf.title || 'Fluxo'}
-                      </option>
-                    ))}
-                </select>
-
-                <button
-                  onClick={() => void copyHistoryFromWorkflow()}
-                  className="aethel-button aethel-button-secondary"
-                  disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
-                  title="Copia o histórico do trabalho selecionado para o trabalho atual (clona a thread)"
-                >
-                  {connectBusy ? 'Processando…' : 'Copiar histórico'}
-                </button>
-
-                <button
-                  onClick={() => void importContextFromWorkflow()}
-                  className="aethel-button aethel-button-secondary"
-                  disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
-                  title="Importa contexto (livePreview/editor/openFiles) do trabalho selecionado"
-                >
-                  {connectBusy ? 'Processando…' : 'Importar contexto'}
-                </button>
-
-                <button
-                  onClick={() => void mergeFromWorkflow()}
-                  className="aethel-button aethel-button-secondary"
-                  disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
-                  title="Mescla histórico + contexto do trabalho selecionado e arquiva o trabalho de origem"
-                >
-                  {connectBusy ? 'Processando…' : 'Mesclar'}
-                </button>
-              </div>
+              <DashboardCopilotWorkflowBar
+                activeWorkflowId={activeWorkflowId}
+                copilotWorkflows={copilotWorkflows}
+                copilotWorkflowsLoading={copilotWorkflowsLoading}
+                connectBusy={connectBusy}
+                connectFromWorkflowId={connectFromWorkflowId}
+                onCreateWorkflow={() => void createCopilotWorkflow()}
+                onSelectWorkflow={(workflowId) => void switchCopilotWorkflow(workflowId)}
+                onRenameWorkflow={() => void renameCopilotWorkflow()}
+                onArchiveWorkflow={() => void archiveCopilotWorkflow()}
+                onConnectFromWorkflowChange={setConnectFromWorkflowId}
+                onCopyHistory={() => void copyHistoryFromWorkflow()}
+                onImportContext={() => void importContextFromWorkflow()}
+                onMergeWorkflow={() => void mergeFromWorkflow()}
+              />
 
               {chatMode === 'chat' && (
                 <div className="aethel-card aethel-p-6 aethel-max-w-4xl aethel-mx-auto">

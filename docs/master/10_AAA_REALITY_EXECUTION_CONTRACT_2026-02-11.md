@@ -2181,3 +2181,20 @@ Implemented:
 Impact:
 1. Moves another sizeable UI section out of the monolithic shell.
 2. Reduces `AethelDashboard.tsx` to `2535` lines while preserving current project-tab behavior.
+
+## 0.57 Delta Update 2026-02-28 (Dashboard decomposition batch 13)
+Implemented:
+1. Extracted AI-chat workflow control bar into:
+- `cloud-web-app/web/components/dashboard/DashboardCopilotWorkflowBar.tsx`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- workflow selection/create actions
+- workflow rename/archive actions
+- connect/copy/import/merge controls for workflow context
+3. Lightweight gates executed:
+- `npm run qa:canonical-doc-alignment` -> PASS
+- `npm run qa:repo-connectivity` -> PASS
+- `npm run qa:mojibake` -> PASS
+
+Impact:
+1. Reduces dense control markup in AI-chat tab and centralizes workflow toolbar behavior.
+2. Reduces `AethelDashboard.tsx` to `2469` lines while preserving existing workflow control contract.
