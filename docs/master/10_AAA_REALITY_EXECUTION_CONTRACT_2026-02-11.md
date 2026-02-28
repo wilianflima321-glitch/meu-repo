@@ -2109,3 +2109,21 @@ Implemented:
 Impact:
 1. Reduces top-level UI shell inline markup and improves component boundary clarity.
 2. Moves `AethelDashboard.tsx` below 3000 lines (`2995` current), continuing P0-D split sequence.
+
+## 0.53 Delta Update 2026-02-28 (Dashboard decomposition batch 9)
+Implemented:
+1. Extracted header UI block into:
+- `cloud-web-app/web/components/dashboard/DashboardHeader.tsx`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- sidebar toggle control
+- dashboard reset action
+- theme toggle control
+- backend/auth/billing status badges in header
+3. Lightweight gate checks executed from root command surface:
+- `npm run qa:canonical-doc-alignment` -> PASS
+- `npm run qa:repo-connectivity` -> PASS
+- `npm run qa:mojibake` -> PASS
+
+Impact:
+1. Further reduces monolith pressure and isolates top-bar behavior into a dedicated component.
+2. Updates current dashboard shell size to `2936` lines with unchanged behavior contract.

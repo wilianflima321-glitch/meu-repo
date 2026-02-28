@@ -152,3 +152,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 2. Removed trial-banner markup from monolithic shell and delegated to component.
 3. Current top offender size:
 - `components/AethelDashboard.tsx` -> `2995` lines (decomposition continues).
+
+## 18) Incremental closure 2026-02-28 (dashboard header extraction)
+1. Added:
+- `components/dashboard/DashboardHeader.tsx`
+2. Removed header markup from monolithic shell and delegated status/actions to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboard.tsx` -> `2936` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS
