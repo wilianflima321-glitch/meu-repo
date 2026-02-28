@@ -167,3 +167,6 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - domain readiness scorecards (`games/films/apps`);
 - promotion threshold evidence gates;
 - no-claim enforcement for unsupported capabilities.
+6. `P0-H`: apply market comparator policy from `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`:
+- classify any new external claim as factual or `EXTERNAL_BENCHMARK_ASSUMPTION`;
+- block "equal/superior" narrative if evidence gate is missing.

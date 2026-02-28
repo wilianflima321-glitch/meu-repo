@@ -77,3 +77,8 @@ Scope lock:
 1. no status promotion without command output or reproducible artifact
 2. no claim beyond L3 without operational proof
 3. no UI "success" state for unavailable capabilities
+
+## 8) Comparator linkage
+1. Strategic market comparison and parity language must follow:
+- `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
+2. If comparator and implementation status diverge, implementation evidence wins.

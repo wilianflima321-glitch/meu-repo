@@ -38,6 +38,7 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - `22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
 - `23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
 - `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
+- `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
 
 ## Historical note
 - `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md` is historical and contains legacy path references (`audit dicas do emergent usar/*`); do not use it for current execution decisions.

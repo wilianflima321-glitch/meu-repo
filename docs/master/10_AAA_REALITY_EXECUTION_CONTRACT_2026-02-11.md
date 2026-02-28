@@ -1999,3 +1999,18 @@ Implemented:
 Impact:
 1. Moves critique from narrative-only to owner-ready execution matrix.
 2. Reduces ambiguity on what blocks market-grade claims in games/films/apps.
+
+## 0.45 Delta Update 2026-02-28 (market parity comparator)
+Implemented:
+1. Added strategic comparator playbook:
+- `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
+2. Formalized market comparison policy by tool class:
+- web IDE leaders
+- AI IDE leaders
+- game engine leaders
+- media editor leaders
+3. Linked parity/superiority language to evidence-gated claim policy.
+
+Impact:
+1. Converts competitor comparison into execution constraints (not marketing narrative).
+2. Clarifies where we can be superior now (workflow reliability/integration/cost governance) and where parity is out of scope (desktop AAA parity in browser).
