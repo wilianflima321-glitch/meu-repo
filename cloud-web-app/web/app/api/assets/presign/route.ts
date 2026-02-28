@@ -6,7 +6,7 @@
  * 
  * Flow:
  * 1. Client requests presigned URL with file metadata
- * 2. Server validates and generates presigned POST URL
+ * 2. Server validates and generates presigned URL
  * 3. Client uploads directly to S3/MinIO
  * 4. Client calls /api/assets/[id]/confirm to finalize
  * 
@@ -225,6 +225,22 @@ export async function POST(request: NextRequest) {
       { expiresIn }
     );
 
+    if (!uploadUrl) {
+      return NextResponse.json(
+        {
+          error: 'STORAGE_UPLOAD_URL_UNAVAILABLE',
+          message: 'Nao foi possivel gerar URL de upload com a configuracao atual de storage.',
+          capability: 'asset_upload_presign',
+          capabilityStatus: 'PARTIAL',
+          metadata: {
+            reason: 'PRESIGNER_UNAVAILABLE_OR_STORAGE_CONFIG_INCOMPLETE',
+            bucket: S3_BUCKET,
+          },
+        },
+        { status: 503 }
+      );
+    }
+
     // 11. Return presigned data
     return NextResponse.json({
       assetId,
@@ -232,6 +248,7 @@ export async function POST(request: NextRequest) {
       key: s3Key,
       expiresIn,
       maxSize: MAX_FILE_SIZE,
+      method: 'PUT',
     });
   } catch (error: any) {
     console.error('Presign error:', error);

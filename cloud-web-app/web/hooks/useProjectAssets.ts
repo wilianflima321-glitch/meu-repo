@@ -297,29 +297,53 @@ export async function uploadLargeAsset(
     throw new Error('Failed to get upload URL');
   }
 
-  const { uploadUrl, assetId, fields } = await presignResponse.json();
+  const { uploadUrl, assetId, fields, method } = await presignResponse.json();
 
-  // 2. Upload directly to S3 (bypasses our server)
-  const formData = new FormData();
-  
-  // Add presigned fields first
-  if (fields) {
-    Object.entries(fields).forEach(([key, value]) => {
-      formData.append(key, value as string);
+  if (!uploadUrl || !assetId) {
+    throw new Error('Presign response is missing required upload data');
+  }
+
+  const uploadMethod = typeof method === 'string'
+    ? method.toUpperCase()
+    : fields && Object.keys(fields).length > 0
+      ? 'POST'
+      : 'PUT';
+
+  // 2. Upload directly to storage (bypasses app server)
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.upload.addEventListener('progress', (event) => {
+      if (!onProgress || !event.lengthComputable) return;
+      const pct = Math.min(95, Math.max(1, Math.round((event.loaded / event.total) * 95)));
+      onProgress(pct);
     });
-  }
-  
-  // Add file last
-  formData.append('file', file);
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(98);
+        resolve();
+        return;
+      }
+      reject(new Error(`Direct upload failed (${xhr.status})`));
+    });
+    xhr.addEventListener('error', () => reject(new Error('Direct upload failed')));
 
-  const uploadResponse = await fetch(uploadUrl, {
-    method: 'POST',
-    body: formData,
+    xhr.open(uploadMethod, uploadUrl);
+
+    if (uploadMethod === 'POST') {
+      const formData = new FormData();
+      if (fields && typeof fields === 'object') {
+        Object.entries(fields).forEach(([key, value]) => {
+          formData.append(key, String(value));
+        });
+      }
+      formData.append('file', file);
+      xhr.send(formData);
+      return;
+    }
+
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.send(file);
   });
-
-  if (!uploadResponse.ok) {
-    throw new Error('Direct upload failed');
-  }
 
   // 3. Confirm upload and get asset metadata
   const confirmResponse = await fetch(`/api/assets/${assetId}/confirm`, {
@@ -330,6 +354,7 @@ export async function uploadLargeAsset(
     throw new Error('Failed to confirm upload');
   }
 
+  onProgress?.(100);
   return confirmResponse.json();
 }
 

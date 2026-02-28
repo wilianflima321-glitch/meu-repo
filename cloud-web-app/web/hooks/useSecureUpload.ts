@@ -17,7 +17,7 @@
 
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import useSWR from 'swr';
 
 // ============================================================================
@@ -98,6 +98,7 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
   const abortControllers = useRef<Map<string, AbortController>>(new Map());
   const uploadQueue = useRef<UploadFile[]>([]);
   const activeUploads = useRef(0);
+  const processQueueRef = useRef<() => void>(() => {});
 
   // Fetch quota status
   const { data: quotaData, mutate: refreshQuota } = useSWR<{
@@ -177,7 +178,6 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
       status: 'pending',
     };
     setProgress(prev => new Map(prev).set(fileId, initialProgress));
-    onProgress?.(initialProgress);
 
     try {
       // 1. Verificar quota client-side
@@ -233,16 +233,19 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
       }
 
       const presignData = await presignRes.json();
-      const { assetId, uploadUrl, fields } = presignData;
+      const { assetId, uploadUrl, fields, method } = presignData;
+
+      if (!assetId || !uploadUrl) {
+        throw new Error('Presign response is missing upload metadata');
+      }
 
       updateProgress(fileId, { progress: 10, assetId });
 
-      // 3. Upload direto para S3
-      const formData = new FormData();
-      Object.entries(fields).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
-      formData.append('file', file);
+      const uploadMethod = typeof method === 'string'
+        ? method.toUpperCase()
+        : fields && typeof fields === 'object' && Object.keys(fields).length > 0
+          ? 'POST'
+          : 'PUT';
 
       const xhr = new XMLHttpRequest();
       
@@ -268,8 +271,21 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
         // Lidar com abort
         controller.signal.addEventListener('abort', () => xhr.abort());
 
-        xhr.open('POST', uploadUrl);
-        xhr.send(formData);
+        xhr.open(uploadMethod, uploadUrl);
+        if (uploadMethod === 'POST') {
+          const formData = new FormData();
+          if (fields && typeof fields === 'object') {
+            Object.entries(fields).forEach(([key, value]) => {
+              formData.append(key, String(value));
+            });
+          }
+          formData.append('file', file);
+          xhr.send(formData);
+          return;
+        }
+
+        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+        xhr.send(file);
       });
 
       updateProgress(fileId, { progress: 90, status: 'confirming' });
@@ -304,7 +320,7 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
     } finally {
       abortControllers.current.delete(fileId);
       activeUploads.current--;
-      processQueue();
+      processQueueRef.current();
     }
   }, [checkQuota, updateProgress, onQuotaExceeded, onComplete, refreshQuota]);
 
@@ -324,6 +340,10 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
       setIsUploading(false);
     }
   }, [maxConcurrent, uploadSingle]);
+
+  useEffect(() => {
+    processQueueRef.current = processQueue;
+  }, [processQueue]);
 
   /**
    * Upload de múltiplos arquivos
