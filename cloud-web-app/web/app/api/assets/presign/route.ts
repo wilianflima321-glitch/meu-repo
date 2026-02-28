@@ -23,6 +23,7 @@ import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { buildAssetQualityReport, inferAssetClassFromNameAndMime } from '@/lib/server/asset-quality';
 import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
 import { evaluateAssetSourcePolicy } from '@/lib/server/asset-source-policy';
+import { capabilityResponse } from '@/lib/server/capability-response';
 import { 
   generateUploadUrl, 
   generateDownloadUrl, 
@@ -132,10 +133,16 @@ export async function POST(request: NextRequest) {
     // Check if S3 is available
     const s3Available = await isS3Available();
     if (!s3Available) {
-      return NextResponse.json(
-        { error: 'S3 storage not configured. Install @aws-sdk/client-s3 and set environment variables.' },
-        { status: 503 }
-      );
+      return capabilityResponse({
+        error: 'STORAGE_BACKEND_UNAVAILABLE',
+        message: 'S3 storage not configured. Install SDK and configure storage environment variables.',
+        status: 503,
+        capability: 'asset_upload_presign',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          reason: 'S3_STORAGE_NOT_CONFIGURED',
+        },
+      });
     }
 
     // 1. Authenticate
@@ -192,18 +199,18 @@ export async function POST(request: NextRequest) {
       quality,
     })
     if (!intakePolicy.allowed) {
-      return NextResponse.json(
-        {
-          error: 'ASSET_QUALITY_GATE_FAILED',
-          message: intakePolicy.reason,
-          capability: 'asset_intake_quality_gate',
-          capabilityStatus: 'PARTIAL',
-          metadata: intakePolicy.metadata,
+      return capabilityResponse({
+        error: 'ASSET_QUALITY_GATE_FAILED',
+        message: intakePolicy.reason || 'Asset quality policy blocked this upload.',
+        status: 422,
+        capability: 'asset_intake_quality_gate',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          ...intakePolicy.metadata,
           quality,
           intakePolicy,
         },
-        { status: 422 }
-      )
+      })
     }
 
     const sourcePolicy = evaluateAssetSourcePolicy({
@@ -214,17 +221,17 @@ export async function POST(request: NextRequest) {
       forCommercialUse,
     })
     if (!sourcePolicy.allowed) {
-      return NextResponse.json(
-        {
-          error: 'ASSET_SOURCE_POLICY_BLOCKED',
-          message: sourcePolicy.reason,
-          capability: 'asset_source_policy_gate',
-          capabilityStatus: 'PARTIAL',
-          metadata: sourcePolicy.metadata,
+      return capabilityResponse({
+        error: 'ASSET_SOURCE_POLICY_BLOCKED',
+        message: sourcePolicy.reason || 'Asset source policy blocked this upload.',
+        status: 422,
+        capability: 'asset_source_policy_gate',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          ...sourcePolicy.metadata,
           sourcePolicy,
         },
-        { status: 422 }
-      )
+      })
     }
 
     // 6. Verify project access
@@ -302,19 +309,17 @@ export async function POST(request: NextRequest) {
     );
 
     if (!uploadUrl) {
-      return NextResponse.json(
-        {
-          error: 'STORAGE_UPLOAD_URL_UNAVAILABLE',
-          message: 'Nao foi possivel gerar URL de upload com a configuracao atual de storage.',
-          capability: 'asset_upload_presign',
-          capabilityStatus: 'PARTIAL',
-          metadata: {
-            reason: 'PRESIGNER_UNAVAILABLE_OR_STORAGE_CONFIG_INCOMPLETE',
-            bucket: S3_BUCKET,
-          },
+      return capabilityResponse({
+        error: 'STORAGE_UPLOAD_URL_UNAVAILABLE',
+        message: 'Nao foi possivel gerar URL de upload com a configuracao atual de storage.',
+        status: 503,
+        capability: 'asset_upload_presign',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          reason: 'PRESIGNER_UNAVAILABLE_OR_STORAGE_CONFIG_INCOMPLETE',
+          bucket: S3_BUCKET,
         },
-        { status: 503 }
-      );
+      });
     }
 
     // 11. Return presigned data

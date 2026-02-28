@@ -279,3 +279,15 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `hooks/useSecureUpload.ts`
 5. Verification snapshot:
 - targeted lint (assets governance scope) -> PASS
+
+## 28) Incremental closure 2026-02-28 (asset capability envelope unification)
+1. Asset policy/storage failures now use shared capability response shape in both upload and presign routes.
+2. Gate semantics are explicit and machine-readable for operators and clients:
+- `asset_source_policy_gate`
+- `asset_intake_quality_gate`
+- `asset_upload_presign`
+3. Verification snapshot:
+- `qa:no-fake-success` -> PASS
+- `qa:route-contracts` -> PASS
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS

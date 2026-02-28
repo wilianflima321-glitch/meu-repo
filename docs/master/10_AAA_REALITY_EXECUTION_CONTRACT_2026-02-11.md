@@ -2281,3 +2281,23 @@ Implemented:
 Impact:
 1. Asset intake now has deterministic provenance governance, not only technical-file validation.
 2. Presign/upload/confirm behavior is coherent and auditable end-to-end for this area.
+
+## 0.62 Delta Update 2026-02-28 (capability envelope standardization in asset gates)
+Implemented:
+1. Standardized asset gate failures to shared capability envelope in both ingestion entry points:
+- `cloud-web-app/web/app/api/assets/upload/route.ts`
+- `cloud-web-app/web/app/api/assets/presign/route.ts`
+2. Converted policy denials to explicit capability responses:
+- `ASSET_SOURCE_POLICY_BLOCKED` -> `capability=asset_source_policy_gate` (`422`, `PARTIAL`)
+- `ASSET_QUALITY_GATE_FAILED` -> `capability=asset_intake_quality_gate` (`422`, `PARTIAL`)
+3. Converted storage unavailability in presign path to explicit capability response:
+- `STORAGE_BACKEND_UNAVAILABLE` / `STORAGE_UPLOAD_URL_UNAVAILABLE` -> `capability=asset_upload_presign` (`503`, `PARTIAL`)
+4. Verification executed:
+- `qa:no-fake-success` -> PASS
+- `qa:route-contracts` -> PASS
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+
+Impact:
+1. Eliminates heterogeneous error payload drift in asset ingestion.
+2. Makes policy and storage failures machine-readable and consistent with enterprise contract rules.

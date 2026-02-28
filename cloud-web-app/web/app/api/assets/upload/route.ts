@@ -14,6 +14,7 @@ import { existsSync } from 'fs';
 import { AssetProcessor } from '@/lib/server/asset-processor';
 import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
 import { evaluateAssetSourcePolicy } from '@/lib/server/asset-source-policy';
+import { capabilityResponse } from '@/lib/server/capability-response';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,32 +73,32 @@ export async function POST(req: NextRequest) {
     })
 
     if (!sourcePolicy.allowed) {
-      return NextResponse.json(
-        {
-          error: 'ASSET_SOURCE_POLICY_BLOCKED',
-          message: sourcePolicy.reason,
-          capability: 'asset_source_policy_gate',
-          capabilityStatus: 'PARTIAL',
-          metadata: sourcePolicy.metadata,
+      return capabilityResponse({
+        error: 'ASSET_SOURCE_POLICY_BLOCKED',
+        message: sourcePolicy.reason || 'Asset source policy blocked this upload.',
+        status: 422,
+        capability: 'asset_source_policy_gate',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          ...sourcePolicy.metadata,
           sourcePolicy,
         },
-        { status: 422 }
-      )
+      })
     }
 
     if (intakeDecision && !intakeDecision.allowed) {
-      return NextResponse.json(
-        {
-          error: 'ASSET_QUALITY_GATE_FAILED',
-          message: intakeDecision.reason,
-          capability: 'asset_intake_quality_gate',
-          capabilityStatus: 'PARTIAL',
-          metadata: intakeDecision.metadata,
-          quality: validation.quality,
+      return capabilityResponse({
+        error: 'ASSET_QUALITY_GATE_FAILED',
+        message: intakeDecision.reason || 'Asset quality policy blocked this upload.',
+        status: 422,
+        capability: 'asset_intake_quality_gate',
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          ...intakeDecision.metadata,
+          quality: validation.quality || null,
           intakePolicy: intakeDecision,
         },
-        { status: 422 }
-      )
+      })
     }
 
     // 2. Storage Enforcements
