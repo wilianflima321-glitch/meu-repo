@@ -151,15 +151,16 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 ### Closed
 1. Repo connectivity scanner hardened and passing (`qa:repo-connectivity`).
 2. Visual workflows now include connectivity gate before browser stages.
-3. Dashboard monolith decomposition advanced with extracted modules:
+3. Root command surface now mirrors canonical freeze gates (`lint/typecheck/build` + `qa:*` passthroughs).
+4. Dashboard monolith decomposition advanced with extracted modules:
 - `aethel-dashboard-model.ts`
 - `aethel-dashboard-defaults.ts`
 - `aethel-dashboard-session-utils.ts`
- - `aethel-dashboard-project-utils.ts`
- - `aethel-dashboard-wallet-utils.ts`
- - `aethel-dashboard-livepreview-ai-utils.ts`
- - `aethel-dashboard-billing-utils.ts`
- - `aethel-dashboard-copilot-utils.ts`
+- `aethel-dashboard-project-utils.ts`
+- `aethel-dashboard-wallet-utils.ts`
+- `aethel-dashboard-livepreview-ai-utils.ts`
+- `aethel-dashboard-billing-utils.ts`
+- `aethel-dashboard-copilot-utils.ts`
 
 ### Remaining block sequence
 1. `P0-D`: continue `AethelDashboard` split into UI blocks (`header`, `mission`, `chat`, `preview`, `ops`) with stable props contracts.

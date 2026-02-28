@@ -139,3 +139,9 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - reusable copilot context patch construction
 3. Expanded `qa:repo-connectivity` canonical-doc presence checks to include:
 - `00_FONTE_CANONICA`, `15`, `19`, `23`, `24`, `25`, `26`.
+
+## 16) Incremental closure 2026-02-28 (root command-surface alignment)
+1. Root `package.json` now exposes canonical gate commands as passthroughs to `cloud-web-app/web`:
+- `lint`, `typecheck`, `build`
+- `qa:interface-gate`, `qa:canonical-components`, `qa:route-contracts`, `qa:no-fake-success`, `qa:mojibake`, `qa:enterprise-gate`
+2. This removes root-level command ambiguity during freeze execution.

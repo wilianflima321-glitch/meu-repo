@@ -2088,3 +2088,14 @@ Implemented:
 Impact:
 1. Further reduces duplicated copilot orchestration glue in dashboard shell.
 2. Tightens repo-governance protection against canonical-doc drift.
+
+## 0.51 Delta Update 2026-02-28 (root gate command parity)
+Implemented:
+1. Added root passthrough scripts for freeze gates:
+- `lint`, `typecheck`, `build`
+- `qa:interface-gate`, `qa:canonical-components`, `qa:route-contracts`, `qa:no-fake-success`, `qa:mojibake`, `qa:enterprise-gate`
+2. Root `package.json` now forwards those commands to `cloud-web-app/web`.
+
+Impact:
+1. Aligns top-level execution with canonical gate contract (single command surface from repo root).
+2. Removes command drift between root docs and runnable scripts.

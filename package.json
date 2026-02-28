@@ -35,7 +35,16 @@
     "desktop:build": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
     "portal:dev": "npm --prefix cloud-web-app/web run dev",
     "portal:start": "npm --prefix cloud-web-app/web run start",
-    "portal:build": "npm --prefix cloud-web-app/web run build"
+    "portal:build": "npm --prefix cloud-web-app/web run build",
+    "lint": "npm --prefix cloud-web-app/web run lint",
+    "typecheck": "npm --prefix cloud-web-app/web run typecheck",
+    "build": "npm --prefix cloud-web-app/web run build",
+    "qa:interface-gate": "npm --prefix cloud-web-app/web run qa:interface-gate",
+    "qa:canonical-components": "npm --prefix cloud-web-app/web run qa:canonical-components",
+    "qa:route-contracts": "npm --prefix cloud-web-app/web run qa:route-contracts",
+    "qa:no-fake-success": "npm --prefix cloud-web-app/web run qa:no-fake-success",
+    "qa:mojibake": "npm --prefix cloud-web-app/web run qa:mojibake",
+    "qa:enterprise-gate": "npm --prefix cloud-web-app/web run qa:enterprise-gate"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
