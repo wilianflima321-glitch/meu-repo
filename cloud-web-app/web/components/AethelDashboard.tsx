@@ -93,6 +93,12 @@ import {
   extractPrimaryAssistantContent,
 } from './dashboard/aethel-dashboard-livepreview-ai-utils'
 import {
+  buildCopilotContextPatch,
+  buildWorkflowTitle,
+  extractCopilotWorkflowList,
+  mapApiMessagesToChatHistory,
+} from './dashboard/aethel-dashboard-copilot-utils'
+import {
   buildPurchaseSuccessMessage,
   buildTransferSuccessMessage,
   mapPurchaseIntentError,
@@ -444,10 +450,7 @@ export default function AethelDashboard() {
         }
 
         const data = await AethelAPIClient.getChatMessages(threadId)
-        const raw = Array.isArray((data as any)?.messages) ? (data as any).messages : []
-        const restored: ChatMessage[] = raw
-          .filter((m: any) => m && typeof m.content === 'string')
-          .map((m: any) => ({ role: (m.role as any) || 'user', content: m.content }))
+        const restored = mapApiMessagesToChatHistory(data)
 
         if (cancelled) return
         if (restored.length) {
@@ -465,18 +468,14 @@ export default function AethelDashboard() {
 
   const loadChatHistoryForThread = useCallback(async (threadId: string) => {
     const data = await AethelAPIClient.getChatMessages(threadId)
-    const raw = Array.isArray((data as any)?.messages) ? (data as any).messages : []
-    const restored: ChatMessage[] = raw
-      .filter((m: any) => m && typeof m.content === 'string')
-      .map((m: any) => ({ role: (m.role as any) || 'user', content: m.content }))
-    setChatHistory(restored)
+    setChatHistory(mapApiMessagesToChatHistory(data))
   }, [])
 
   const refreshCopilotWorkflows = useCallback(async () => {
     setCopilotWorkflowsLoading(true)
     try {
       const res = await AethelAPIClient.listCopilotWorkflows().catch(() => ({ workflows: [] as any[] }))
-      const list = Array.isArray((res as any).workflows) ? ((res as any).workflows as CopilotWorkflowSummary[]) : []
+      const list = extractCopilotWorkflowList(res)
       setCopilotWorkflows(list)
       return list
     } finally {
@@ -514,7 +513,7 @@ export default function AethelDashboard() {
   }, [loadChatHistoryForThread, refreshCopilotWorkflows])
 
   const createCopilotWorkflow = useCallback(async () => {
-    const title = `Workflow ${new Date().toLocaleString()}`
+    const title = buildWorkflowTitle('Workflow')
     const createdThread = await AethelAPIClient.createChatThread({ title, ...(copilotProjectId ? { projectId: copilotProjectId } : {}) })
     const threadId = (createdThread as any)?.thread?.id as string | undefined
     const createdWf = await AethelAPIClient.createCopilotWorkflow({
@@ -642,12 +641,8 @@ export default function AethelDashboard() {
 
       await AethelAPIClient.mergeChatThreads({ sourceThreadId, targetThreadId }).catch(() => null)
 
-      const ctx = source?.context
-      if (ctx && typeof ctx === 'object') {
-        const patch: any = { workflowId: activeWorkflowId }
-        if ((ctx as any).livePreview) patch.livePreview = (ctx as any).livePreview
-        if ((ctx as any).editor) patch.editor = (ctx as any).editor
-        if (Array.isArray((ctx as any).openFiles)) patch.openFiles = (ctx as any).openFiles
+      const patch = buildCopilotContextPatch(activeWorkflowId, source?.context)
+      if (patch) {
         await fetch('/api/copilot/context', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -675,16 +670,11 @@ export default function AethelDashboard() {
 
     const sourceRes = await AethelAPIClient.getCopilotWorkflow(connectFromWorkflowId).catch(() => null)
     const source = (sourceRes as any)?.workflow as any
-    const ctx = source?.context
-    if (!ctx || typeof ctx !== 'object') {
+    const patch = buildCopilotContextPatch(activeWorkflowId, source?.context)
+    if (!patch) {
       showToastMessage('Esse trabalho não tem contexto salvo para importar.', 'error')
       return
     }
-
-    const patch: any = { workflowId: activeWorkflowId }
-    if ((ctx as any).livePreview) patch.livePreview = (ctx as any).livePreview
-    if ((ctx as any).editor) patch.editor = (ctx as any).editor
-    if (Array.isArray((ctx as any).openFiles)) patch.openFiles = (ctx as any).openFiles
 
     if (connectBusy) return
     setConnectBusy(true)
@@ -746,7 +736,7 @@ export default function AethelDashboard() {
     if (typeof window !== 'undefined' && isAuthenticated()) {
       void (async () => {
         try {
-          const created = await AethelAPIClient.createChatThread({ title: `Sessão ${new Date().toLocaleString()}` })
+          const created = await AethelAPIClient.createChatThread({ title: buildWorkflowTitle('Sessao') })
           const threadId = (created as any)?.thread?.id
           if (typeof threadId === 'string' && threadId) {
             const keys = getScopedKeys(copilotProjectId)
@@ -754,7 +744,7 @@ export default function AethelDashboard() {
             setActiveChatThreadId(threadId)
 
             const createdWf = await AethelAPIClient.createCopilotWorkflow({
-              title: `Fluxo ${new Date().toLocaleString()}`,
+              title: buildWorkflowTitle('Fluxo'),
               chatThreadId: threadId,
             }).catch(() => null)
             const wfId = (createdWf as any)?.workflow?.id

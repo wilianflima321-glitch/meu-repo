@@ -128,3 +128,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - currency normalization
 - action success message builders
 - purchase/transfer/subscribe error mappers
+
+## 15) Incremental closure 2026-02-28 (dashboard copilot split + gate coverage)
+1. Added:
+- `components/dashboard/aethel-dashboard-copilot-utils.ts`
+2. Reduced dashboard shell inline copilot glue by delegating:
+- chat-message normalization from API payloads
+- workflow list extraction
+- workflow title generation
+- reusable copilot context patch construction
+3. Expanded `qa:repo-connectivity` canonical-doc presence checks to include:
+- `00_FONTE_CANONICA`, `15`, `19`, `23`, `24`, `25`, `26`.

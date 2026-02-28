@@ -2072,3 +2072,19 @@ Implemented:
 Impact:
 1. Reduces inline billing mutation/error logic in dashboard shell.
 2. Improves consistency of wallet action messaging and error handling paths.
+
+## 0.50 Delta Update 2026-02-28 (Dashboard decomposition batch 7 + connectivity gate coverage)
+Implemented:
+1. Extracted copilot/chat helper logic into:
+- `cloud-web-app/web/components/dashboard/aethel-dashboard-copilot-utils.ts`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- API chat-message payload normalization
+- copilot workflow list extraction
+- workflow title generation helpers
+- context patch builder reuse for merge/import flows
+3. Expanded connectivity gate canonical-doc coverage:
+- `tools/check-repo-connectivity.mjs` now requires active docs `00_FONTE_CANONICA`, `15`, `19`, `23`, `24`, `25`, `26` in addition to previous set.
+
+Impact:
+1. Further reduces duplicated copilot orchestration glue in dashboard shell.
+2. Tightens repo-governance protection against canonical-doc drift.
