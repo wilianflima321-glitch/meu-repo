@@ -238,3 +238,19 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 3. Remaining structural risks to close:
 - canonical docs still carry mixed historical narrative blocks that can confuse execution if read without baseline `26`
 - many large runtime modules (`lib/*`, `components/*`) still exceed maintainability threshold and need staged decomposition
+
+## 25) Incremental closure 2026-02-28 (asset upload contract coherence)
+1. Presign/upload contract mismatch was removed:
+- presign route emits `method: PUT` for direct upload path
+- uploader hooks now support both `PUT` and `POST+fields` compatibility
+2. Added explicit capability response when presign URL generation fails:
+- `STORAGE_UPLOAD_URL_UNAVAILABLE` (`503`)
+- `capability=asset_upload_presign`
+- `capabilityStatus=PARTIAL`
+3. Added asset quality-scoring substrate to reduce opaque intake decisions:
+- `lib/server/asset-quality.ts`
+- upload and confirm responses now include quality report metadata
+4. Verification snapshot:
+- targeted lint (asset/presign/hooks scope) -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:canonical-doc-alignment` -> PASS

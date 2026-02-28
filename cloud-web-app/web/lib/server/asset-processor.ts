@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { buildAssetQualityReport, type AssetQualityReport } from '@/lib/server/asset-quality'
 
 export const MAX_ASSET_SIZE_MB = 10
 
@@ -28,6 +29,7 @@ export type AssetValidationResult = {
   assetClass?: 'image' | 'audio' | 'video' | 'model' | 'other'
   capabilityStatus?: 'IMPLEMENTED' | 'PARTIAL'
   warnings?: string[]
+  quality?: AssetQualityReport
 }
 
 function extensionFromName(name: string): string {
@@ -91,7 +93,15 @@ export class AssetProcessor {
       warnings.push('MEDIA_PIPELINE_PARTIAL: transcode and continuity checks are not fully wired in this build.')
     }
 
-    return { valid: true, assetClass, capabilityStatus, warnings }
+    const quality = buildAssetQualityReport({
+      name: file.name,
+      sizeBytes: file.size,
+      mimeType: file.type,
+      assetClass,
+      warnings,
+    })
+
+    return { valid: true, assetClass, capabilityStatus, warnings, quality }
   }
 
   static async processImage(buffer: ArrayBuffer, _type: string): Promise<ProcessedAssetBuffer> {

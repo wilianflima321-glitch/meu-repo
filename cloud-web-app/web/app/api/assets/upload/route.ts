@@ -144,6 +144,7 @@ export async function POST(req: NextRequest) {
       validation: {
         assetClass: validation.assetClass,
         warnings: validation.warnings || [],
+        quality: validation.quality || null,
       },
       optimization: {
           enabled: optimizationMeta.enabled,

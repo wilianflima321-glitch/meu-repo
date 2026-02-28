@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { headObject, isS3Available, S3_BUCKET } from '@/lib/storage/s3-client';
+import { buildAssetQualityReport, inferAssetClassFromNameAndMime } from '@/lib/server/asset-quality';
 
 // ============================================================================
 // POST - Confirm Upload
@@ -85,6 +86,15 @@ export async function POST(
       });
     }
 
+    const inferredAssetClass = inferAssetClassFromNameAndMime(asset.name, asset.mimeType)
+    const quality = buildAssetQualityReport({
+      name: asset.name,
+      sizeBytes: actualSize,
+      mimeType: asset.mimeType,
+      assetClass: inferredAssetClass,
+      warnings: ['POST_PROCESSING_PIPELINE_PARTIAL'],
+    })
+
     return NextResponse.json({
       id: asset.id,
       name: asset.name,
@@ -92,9 +102,16 @@ export async function POST(
       size: actualSize,
       mimeType: asset.mimeType,
       createdAt: asset.createdAt.toISOString(),
+      quality,
       postProcessing: {
         queued: false,
+        capabilityStatus: 'PARTIAL',
         reason: 'JOB_QUEUE_NOT_CONFIGURED',
+        pendingSteps: [
+          'thumbnail_generation',
+          'metadata_enrichment',
+          'search_indexing',
+        ],
       },
     });
   } catch (error: any) {

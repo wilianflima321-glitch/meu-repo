@@ -2214,3 +2214,28 @@ Implemented:
 Impact:
 1. Removes multiple high-density tab blocks from monolithic shell without changing product scope.
 2. Reduces `AethelDashboard.tsx` to `2003` lines and lowers regression risk for future tab-level changes.
+
+## 0.59 Delta Update 2026-02-28 (asset intake/upload reliability alignment)
+Implemented:
+1. Direct-upload contract alignment across presign + uploader hooks:
+- `cloud-web-app/web/app/api/assets/presign/route.ts`
+- `cloud-web-app/web/hooks/useProjectAssets.ts`
+- `cloud-web-app/web/hooks/useSecureUpload.ts`
+2. Presign contract now returns explicit `503` capability payload when upload URL cannot be generated:
+- `error=STORAGE_UPLOAD_URL_UNAVAILABLE`
+- `capability=asset_upload_presign`
+- `capabilityStatus=PARTIAL`
+3. Upload clients now support both transport modes without fake success:
+- presigned `PUT` (raw file body), and
+- compatibility fallback `POST` + `fields` when applicable.
+4. Asset quality report introduced and surfaced in upload/confirm responses:
+- `cloud-web-app/web/lib/server/asset-quality.ts`
+- `cloud-web-app/web/lib/server/asset-processor.ts`
+- `cloud-web-app/web/app/api/assets/upload/route.ts`
+- `cloud-web-app/web/app/api/assets/[id]/confirm/route.ts`
+5. Targeted lint evidence:
+- `npm --prefix cloud-web-app/web run lint -- --file lib/server/asset-quality.ts --file lib/server/asset-processor.ts --file app/api/assets/upload/route.ts --file app/api/assets/[id]/confirm/route.ts --file app/api/assets/presign/route.ts --file hooks/useProjectAssets.ts --file hooks/useSecureUpload.ts` -> PASS.
+
+Impact:
+1. Removes silent incompatibility risk between presign response and uploader behavior.
+2. Makes asset readiness more explicit with quality scoring and partial-pipeline disclosure.
