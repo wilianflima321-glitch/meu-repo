@@ -18,6 +18,7 @@ Status: CANONICAL ENTRYPOINT
 13. `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
 14. `docs/master/27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md`
 15. `docs/master/28_UX_SUPERIORITY_MANUAL_2026-02-28.md`
+16. `docs/master/29_AUDITORIA_360_P0_HUNT_2026-02-28.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -42,6 +43,7 @@ Status: CANONICAL ENTRYPOINT
 | `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` | Canonical active baseline override | ACTIVE |
 | `27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md` | Domain readiness thresholds | ACTIVE |
 | `28_UX_SUPERIORITY_MANUAL_2026-02-28.md` | UX superiority guidelines | ACTIVE |
+| `29_AUDITORIA_360_P0_HUNT_2026-02-28.md` | Critical 360 audit & P0 hunt | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
