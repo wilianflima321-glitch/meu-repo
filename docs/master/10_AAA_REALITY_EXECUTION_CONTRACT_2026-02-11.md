@@ -1981,3 +1981,21 @@ Implemented:
 Impact:
 1. Further reduced monolith responsibility inside dashboard shell.
 2. Improved readability/ownership for business-critical wallet and project logic.
+
+## 0.44 Delta Update 2026-02-28 (games/films/apps gap alignment)
+Implemented:
+1. Added execution matrix:
+- `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
+2. Added explicit cross-domain lacuna mapping for:
+- orchestration
+- memory/context
+- validation
+- runtime
+- economics
+- observability
+- governance
+3. Added new blocking wave in canonical backlog for doc drift and domain readiness scorecards.
+
+Impact:
+1. Moves critique from narrative-only to owner-ready execution matrix.
+2. Reduces ambiguity on what blocks market-grade claims in games/films/apps.

@@ -13,6 +13,7 @@ Status: CANONICAL ENTRYPOINT
 8. `docs/master/20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
 9. `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
 10. `docs/master/23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
+11. `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -32,6 +33,7 @@ Status: CANONICAL ENTRYPOINT
 | `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md` | Prioritized backlog | ACTIVE |
 | `22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md` | Structural connectivity audit | ACTIVE |
 | `23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md` | Consolidated limitations + superiority plan | ACTIVE |
+| `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md` | Cross-domain gap alignment matrix | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

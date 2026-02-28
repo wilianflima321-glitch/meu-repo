@@ -100,3 +100,9 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `components/dashboard/aethel-dashboard-project-utils.ts`
 - `components/dashboard/aethel-dashboard-wallet-utils.ts`
 2. Project derivation and wallet metric logic were removed from inline dashboard shell and delegated to shared helpers.
+
+## 11) Alignment closure 2026-02-28 (cross-domain gaps)
+1. Added canonical cross-domain gap matrix:
+- `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
+2. Connectivity and product readiness remain coupled:
+- no market-grade claim without both structural integrity and domain validation evidence.

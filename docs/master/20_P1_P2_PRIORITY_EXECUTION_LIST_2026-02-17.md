@@ -163,3 +163,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 4. `P0-F`: canonical doc drift cleanup:
 - replace stale legacy path references in active docs;
 - keep historical docs explicitly marked as non-execution sources.
+5. `P0-G`: execute cross-domain gap closure blocks from `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`:
+- domain readiness scorecards (`games/films/apps`);
+- promotion threshold evidence gates;
+- no-claim enforcement for unsupported capabilities.
