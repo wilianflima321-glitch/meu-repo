@@ -21,8 +21,10 @@ Scope lock:
 - `blocking-browser-dialogs=0`
 - `not-implemented-ui=6`
 3. Dashboard hotspot still large:
-- `cloud-web-app/web/components/AethelDashboard.tsx` -> `2469` lines (still monolithic; split in progress).
-4. Canonical drift pressure still exists:
+- `cloud-web-app/web/components/AethelDashboard.tsx` -> `2003` lines (split in progress; still top hotspot).
+4. Large-file maintainability pressure remains high:
+- `>=1200 lines` in tracked `cloud-web-app/web` TS/TSX: `55` files.
+5. Canonical drift pressure still exists:
 - legacy external-path references still present inside `docs/master`.
 
 ## 3) Gap matrix (cross-domain)

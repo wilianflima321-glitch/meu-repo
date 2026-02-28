@@ -31,7 +31,6 @@ import '@xyflow/react/dist/style.css'
 import { isAuthenticated } from '@/lib/auth'
 import { useAssetDownload, useJobQueue, useRenderProgress } from '@/hooks/useAethelGateway'
 import { RenderQueue, type RenderJob } from './dashboard/RenderProgress'
-import { AIThinkingPanel } from './ai/AIThinkingPanel'
 import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs'
 import {
   type ActiveTab,
@@ -40,6 +39,7 @@ import {
   type SessionEntry,
   type SessionFilter,
   type ToastState,
+  type ToastType,
   type UseCase,
   type WorkflowTemplate,
   clearStoredDashboardState,
@@ -111,7 +111,11 @@ import { DashboardHeader } from './dashboard/DashboardHeader'
 import { AethelDashboardSidebar } from './dashboard/AethelDashboardSidebar'
 import { DashboardOverviewTab } from './dashboard/DashboardOverviewTab'
 import { DashboardProjectsTab } from './dashboard/DashboardProjectsTab'
-import { DashboardCopilotWorkflowBar } from './dashboard/DashboardCopilotWorkflowBar'
+import { DashboardAIChatTab } from './dashboard/DashboardAIChatTab'
+import { DashboardWalletTab } from './dashboard/DashboardWalletTab'
+import { DashboardConnectivityTab } from './dashboard/DashboardConnectivityTab'
+import { DashboardContentCreationTab } from './dashboard/DashboardContentCreationTab'
+import { DashboardUnrealTab } from './dashboard/DashboardUnrealTab'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -1263,549 +1267,79 @@ export default function AethelDashboard() {
           )}
 
           {activeTab === 'ai-chat' && (
-            <div className="aethel-p-6">
-              <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-6">
-                <h2 className="aethel-text-2xl aethel-font-bold">Chat IA</h2>
-                <div className="aethel-flex aethel-gap-2">
-                  <button
-                    onClick={() => setChatMode('chat')}
-                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'chat' ? 'aethel-bg-blue-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
-                  >
-                    Chat
-                  </button>
-                  <button
-                    onClick={() => setChatMode('agent')}
-                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'agent' ? 'aethel-bg-blue-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
-                  >
-                    Modo agente
-                  </button>
-                  <button
-                    onClick={() => setChatMode('canvas')}
-                    className={`aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-text-sm aethel-font-medium ${chatMode === 'canvas' ? 'aethel-bg-blue-500 aethel-text-white' : 'aethel-bg-slate-700 aethel-text-slate-300 hover:aethel-bg-slate-600'}`}
-                  >
-                    Canvas
-                  </button>
-                </div>
-              </div>
-              <DashboardCopilotWorkflowBar
-                activeWorkflowId={activeWorkflowId}
-                copilotWorkflows={copilotWorkflows}
-                copilotWorkflowsLoading={copilotWorkflowsLoading}
-                connectBusy={connectBusy}
-                connectFromWorkflowId={connectFromWorkflowId}
-                onCreateWorkflow={() => void createCopilotWorkflow()}
-                onSelectWorkflow={(workflowId) => void switchCopilotWorkflow(workflowId)}
-                onRenameWorkflow={() => void renameCopilotWorkflow()}
-                onArchiveWorkflow={() => void archiveCopilotWorkflow()}
-                onConnectFromWorkflowChange={setConnectFromWorkflowId}
-                onCopyHistory={() => void copyHistoryFromWorkflow()}
-                onImportContext={() => void importContextFromWorkflow()}
-                onMergeWorkflow={() => void mergeFromWorkflow()}
-              />
-
-              {chatMode === 'chat' && (
-                <div className="aethel-card aethel-p-6 aethel-max-w-4xl aethel-mx-auto">
-                  <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
-                    Chat conversacional padrão com os agentes avançados do Aethel.
-                  </div>
-                  <div className="aethel-space-y-4 aethel-mb-4 aethel-max-h-96 aethel-overflow-y-auto">
-                    {chatHistory.map((msg, index) => (
-                      <div key={index} className={`aethel-p-3 aethel-rounded-lg ${msg.role === 'user' ? 'aethel-bg-blue-500/20 aethel-ml-12' : 'aethel-bg-slate-700/50 aethel-mr-12'}`}>
-                        <p className="aethel-text-sm aethel-font-medium aethel-mb-1">{msg.role === 'user' ? 'Você' : 'IA'}</p>
-                        <p className="aethel-text-sm">{msg.content}</p>
-                      </div>
-                    ))}
-                    
-                    {/* AI Thinking Panel - Mostra quando IA está processando */}
-                    {isStreaming && (
-                      <AIThinkingPanel 
-                        isStreaming={isStreaming}
-                        position="floating"
-                      />
-                    )}
-                  </div>
-                  <div className="aethel-flex aethel-gap-2">
-                    <input
-                      type="text"
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                      placeholder="Digite sua mensagem..."
-                      className="aethel-input aethel-flex-1"
-                    />
-                    <button
-                      onClick={sendChatMessage}
-                      className="aethel-button aethel-button-primary"
-                      disabled={isStreaming}
-                    >
-                      {isStreaming ? 'Processando...' : 'Enviar'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {chatMode === 'agent' && (
-                <div className="aethel-card aethel-p-6 aethel-max-w-4xl aethel-mx-auto">
-                  <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
-                    Modo de agente autônomo — inspirado na plataforma Manus. A IA executará tarefas passo a passo e entregará resultados.
-                  </div>
-                  <div className="aethel-space-y-4 aethel-mb-4">
-                    <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-2 lg:aethel-grid-cols-3 aethel-gap-4">
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Pesquisa e análise</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Coletar informações, analisar dados e gerar insights</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Criação de conteúdo</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Gerar artigos, código, documentação e conteúdo criativo</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Automação</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Criar fluxos, scripts e processos automatizados</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Resolução de problemas</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Depurar código, otimizar performance e resolver issues complexas</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Geração de código</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Gerar, depurar e otimizar código em várias linguagens</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Análise de dados</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Analisar datasets, criar visualizações e extrair insights</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Design criativo</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Desenhar UI/UX, gráficos e conceitos criativos</p>
-                      </button>
-                      <button className="aethel-card aethel-p-4 aethel-text-left hover:aethel-bg-slate-700/50 aethel-transition">
-                        <h3 className="aethel-font-semibold aethel-mb-2">Estratégia de negócios</h3>
-                        <p className="aethel-text-sm aethel-text-slate-400">Planejamento estratégico, análise de mercado e desenvolvimento de negócios</p>
-                      </button>
-                    </div>
-                  </div>
-                  <div className="aethel-flex aethel-gap-2">
-                    <input
-                      type="text"
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                      placeholder="Descreva a tarefa para o agente..."
-                      className="aethel-input aethel-flex-1"
-                    />
-                    <button
-                      onClick={sendChatMessage}
-                      className="aethel-button aethel-button-primary"
-                    >
-                      Executar
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {chatMode === 'canvas' && (
-                <div className="aethel-card aethel-p-6 aethel-max-w-6xl aethel-mx-auto">
-                  <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
-                    Canvas visual para trabalho colaborativo com IA. Desenhe, esboce ideias e colabore em tempo real.
-                  </div>
-                  <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-4 aethel-min-h-96 aethel-border aethel-border-slate-700 aethel-relative">
-                    <div className="aethel-absolute aethel-top-4 aethel-left-4 aethel-flex aethel-gap-2">
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Desenhar</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Formas</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Texto</button>
-                      <button className="aethel-button aethel-button-ghost aethel-text-xs">Melhorar com IA</button>
-                    </div>
-                    <div className="aethel-text-center aethel-text-slate-500 aethel-py-32">
-                      <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                      <p className="text-lg font-medium mb-2">Canvas interativo</p>
-                      <p className="text-sm">Em breve com recursos completos de desenho e colaboração</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <DashboardAIChatTab
+              chatMode={chatMode}
+              onChatModeChange={setChatMode}
+              chatHistory={chatHistory}
+              chatMessage={chatMessage}
+              onChatMessageChange={setChatMessage}
+              onSendChatMessage={sendChatMessage}
+              isStreaming={isStreaming}
+              activeWorkflowId={activeWorkflowId}
+              copilotWorkflows={copilotWorkflows}
+              copilotWorkflowsLoading={copilotWorkflowsLoading}
+              connectBusy={connectBusy}
+              connectFromWorkflowId={connectFromWorkflowId}
+              onCreateWorkflow={() => void createCopilotWorkflow()}
+              onSelectWorkflow={(workflowId) => void switchCopilotWorkflow(workflowId)}
+              onRenameWorkflow={() => void renameCopilotWorkflow()}
+              onArchiveWorkflow={() => void archiveCopilotWorkflow()}
+              onConnectFromWorkflowChange={setConnectFromWorkflowId}
+              onCopyHistory={() => void copyHistoryFromWorkflow()}
+              onImportContext={() => void importContextFromWorkflow()}
+              onMergeWorkflow={() => void mergeFromWorkflow()}
+            />
           )}
 
           {activeTab === 'content-creation' && (
-            <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Criação de conteúdo</h2>
-              <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
-                <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Conteúdo com IA</h3>
-                  <p className="aethel-text-slate-400 aethel-mb-4">Gere código, documentação e conteúdo criativo com assistência de IA.</p>
-                  <button className="aethel-button aethel-button-primary">Começar a criar</button>
-                </div>
-                <div className="aethel-card aethel-p-6">
-                  <h3 className="aethel-text-lg aethel-font-semibold aethel-mb-4">Modelos</h3>
-                  <p className="aethel-text-slate-400 aethel-mb-4">Use modelos pré-prontos para tarefas comuns de desenvolvimento.</p>
-                  <button className="aethel-button aethel-button-secondary">Ver modelos</button>
-                </div>
-              </div>
-            </div>
+            <DashboardContentCreationTab />
           )}
 
           {activeTab === 'unreal' && (
-            <div className="aethel-p-6">
-              <h2 className="aethel-text-2xl aethel-font-bold aethel-mb-6">Integração com Unreal Engine</h2>
-              <div className="aethel-card aethel-p-6">
-                <p className="aethel-text-slate-400 aethel-mb-4">Integre-se ao Unreal Engine para VR e desenvolvimento de jogos.</p>
-                <div className="aethel-flex aethel-gap-4">
-                  <button className="aethel-button aethel-button-primary">Conectar à Unreal</button>
-                  <button className="aethel-button aethel-button-secondary">Prévia VR</button>
-                </div>
-              </div>
-            </div>
+            <DashboardUnrealTab />
           )}
 
           {activeTab === 'wallet' && (
-            <div className="aethel-p-6 aethel-space-y-6">
-              <div className="aethel-flex aethel-items-center aethel-justify-between">
-                <h2 className="aethel-text-2xl aethel-font-bold">Carteira</h2>
-                {authReady && hasToken && (
-                  <button onClick={refreshWallet} className="aethel-button aethel-button-secondary aethel-text-xs">
-                    Atualizar
-                  </button>
-                )}
-              </div>
-              {!authReady && <p className="aethel-text-sm aethel-text-slate-400">Verificando autenticação...</p>}
-              {authReady && !hasToken && (
-                <div className="aethel-card aethel-p-6 aethel-max-w-2xl">
-                  <p className="aethel-text-sm aethel-text-slate-300">
-                    Para visualizar o saldo e realizar operações, faça login no portal.
-                  </p>
-                </div>
-              )}
-              {authReady && hasToken && (
-                <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-6">
-                  <div className="aethel-card aethel-p-6 aethel-space-y-4">
-                    <div>
-                      <h3 className="aethel-text-lg aethel-font-semibold">Saldo Atual</h3>
-                      {walletLoading && <p className="aethel-text-sm aethel-text-slate-400">Carregando carteira...</p>}
-                      {walletError && (
-                        <p className="aethel-text-sm aethel-text-red-400">
-                          Falha ao carregar os dados. Tente novamente.
-                        </p>
-                      )}
-                      {!walletLoading && !walletError && walletData && (
-                        <>
-                          <div className="aethel-text-4xl aethel-font-bold aethel-text-slate-100">
-                            {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                          </div>
-                          {creditsInfo && (
-                            <p className="aethel-text-xs aethel-text-slate-400">
-                              Créditos faturáveis: {creditsInfo.credits.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                            </p>
-                          )}
-                          <p className="aethel-text-xs aethel-text-slate-500">
-                            {walletTransactions.length} transações
-                          </p>
-                          {lastWalletUpdate && (
-                            <p className="aethel-text-xs aethel-text-slate-500">
-                              Atualizado em {new Date(lastWalletUpdate).toLocaleString()}
-                            </p>
-                          )}
-                          <div className="aethel-grid aethel-grid-cols-1 sm:aethel-grid-cols-3 aethel-gap-3 aethel-mt-4">
-                            <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                              <p className="aethel-text-xs aethel-text-slate-500">Gasto hoje</p>
-                              <p className="aethel-text-lg aethel-font-semibold aethel-text-rose-300">
-                                {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                              </p>
-                            </div>
-                            <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                              <p className="aethel-text-xs aethel-text-slate-500">Gasto no mês</p>
-                              <p className="aethel-text-lg aethel-font-semibold aethel-text-amber-300">
-                                {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                              </p>
-                            </div>
-                            <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                              <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
-                              <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                                {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                              </p>
-                            </div>
-                          </div>
-                          {lastPurchaseIntent && (
-                            <p className="aethel-text-xs aethel-text-slate-400 aethel-mt-2">
-                              Última intenção #{lastPurchaseIntent.intent_id} • +
-                              {lastPurchaseIntent.entry.amount.toLocaleString()} {formatCurrencyLabel(lastPurchaseIntent.entry.currency)}{' '}
-                              em {new Date(lastPurchaseIntent.entry.created_at).toLocaleString()}
-                            </p>
-                          )}
-                          {lastTransferReceipt && (
-                            <p className="aethel-text-xs aethel-text-slate-400">
-                              Última transferência #{lastTransferReceipt.transfer_id} • -
-                              {lastTransferReceipt.sender_entry.amount.toLocaleString()} {formatCurrencyLabel(lastTransferReceipt.sender_entry.currency)}{' '}
-                              em {new Date(lastTransferReceipt.sender_entry.created_at).toLocaleString()}
-                            </p>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    {(walletActionMessage || walletActionError) && (
-                      <div className={`aethel-text-sm ${walletActionError ? 'aethel-text-red-400' : 'aethel-text-emerald-400'}`}>
-                        {walletActionError || walletActionMessage}
-                      </div>
-                    )}
-                    <form className="aethel-space-y-3" onSubmit={handlePurchaseIntentSubmit}>
-                      <h4 className="aethel-text-sm aethel-font-semibold">Adicionar Créditos</h4>
-                      <div className="aethel-flex aethel-gap-2">
-                        <input
-                          type="number"
-                          min={1}
-                          value={purchaseForm.amount}
-                          onChange={(e) => setPurchaseForm(prev => ({ ...prev, amount: e.target.value }))}
-                          className="aethel-input"
-                          placeholder="Quantidade"
-                          required
-                        />
-                        <select
-                          value={purchaseForm.currency}
-                          onChange={(e) => setPurchaseForm(prev => ({ ...prev, currency: e.target.value }))}
-                          className="aethel-input aethel-w-32"
-                        >
-                          <option value="credits">Créditos</option>
-                        </select>
-                      </div>
-                      <input
-                        type="text"
-                        value={purchaseForm.reference}
-                        onChange={(e) => setPurchaseForm(prev => ({ ...prev, reference: e.target.value }))}
-                        className="aethel-input"
-                        placeholder="Referência (opcional)"
-                      />
-                      <button
-                        type="submit"
-                        className="aethel-button aethel-button-primary"
-                        disabled={walletSubmitting}
-                      >
-                        {walletSubmitting ? 'Processando...' : 'Confirmar Intenção'}
-                      </button>
-                    </form>
-                  </div>
-
-                  <div className="aethel-card aethel-p-6 aethel-space-y-4">
-                    <form className="aethel-space-y-3" onSubmit={handleTransferSubmit}>
-                      <h3 className="aethel-text-lg aethel-font-semibold">Transferir Créditos</h3>
-                      <input
-                        type="text"
-                        value={transferForm.targetUserId}
-                        onChange={(e) => setTransferForm(prev => ({ ...prev, targetUserId: e.target.value }))}
-                        className="aethel-input"
-                        placeholder="ID do usuário ou e-mail do destinatário"
-                        required
-                      />
-                      <div className="aethel-flex aethel-gap-2">
-                        <input
-                          type="number"
-                          min={1}
-                          value={transferForm.amount}
-                          onChange={(e) => setTransferForm(prev => ({ ...prev, amount: e.target.value }))}
-                          className="aethel-input"
-                          placeholder="Quantidade"
-                          required
-                        />
-                        <select
-                          value={transferForm.currency}
-                          onChange={(e) => setTransferForm(prev => ({ ...prev, currency: e.target.value }))}
-                          className="aethel-input aethel-w-32"
-                        >
-                          <option value="credits">Créditos</option>
-                        </select>
-                      </div>
-                      <input
-                        type="text"
-                        value={transferForm.reference}
-                        onChange={(e) => setTransferForm(prev => ({ ...prev, reference: e.target.value }))}
-                        className="aethel-input"
-                        placeholder="Referência (opcional)"
-                      />
-                      <button
-                        type="submit"
-                        className="aethel-button aethel-button-secondary"
-                        disabled={walletSubmitting}
-                      >
-                        {walletSubmitting ? 'Processando...' : 'Transferir'}
-                      </button>
-                    </form>
-
-                    <div>
-                      <h4 className="aethel-text-sm aethel-font-semibold aethel-mb-2">Histórico Recente</h4>
-                      <div className="aethel-space-y-2 aethel-max-h-64 aethel-overflow-y-auto">
-                        {walletTransactions.length === 0 && (
-                          <p className="aethel-text-sm aethel-text-slate-500">Nenhuma transação registrada.</p>
-                        )}
-                        {walletTransactions.slice().reverse().map(entry => (
-                          <div key={entry.id} className="aethel-border aethel-border-slate-800 aethel-rounded-lg aethel-p-3">
-                            <div className="aethel-flex aethel-justify-between aethel-items-center">
-                              <span className="aethel-text-sm aethel-font-medium">
-                                {entry.reference || entry.entry_type.toUpperCase()}
-                              </span>
-                              <span className={`aethel-text-sm aethel-font-semibold ${entry.entry_type === 'credit' ? 'aethel-text-emerald-400' : entry.entry_type === 'transfer' ? 'aethel-text-amber-300' : 'aethel-text-red-400'}`}>
-                                {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
-                              </span>
-                            </div>
-                            <div className="aethel-flex aethel-justify-between aethel-items-center aethel-mt-1">
-                              <span className="aethel-text-xs aethel-text-slate-400">
-                                Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
-                              </span>
-                              <span className="aethel-text-xs aethel-text-slate-500">
-                                {new Date(entry.created_at).toLocaleString()}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="aethel-card aethel-p-6 lg:aethel-col-span-2 aethel-space-y-4">
-                    <div className="aethel-flex aethel-items-center aethel-justify-between">
-                      <h3 className="aethel-text-lg aethel-font-semibold">Recebíveis</h3>
-                      <span className="aethel-text-xs aethel-text-slate-500">
-                        {creditEntries.length} lançamentos de entrada
-                      </span>
-                    </div>
-                    <div className="aethel-grid aethel-grid-cols-1 sm:aethel-grid-cols-3 aethel-gap-4">
-                      <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                        <p className="aethel-text-xs aethel-text-slate-500">Recebido no mês</p>
-                        <p className="aethel-text-lg aethel-font-semibold aethel-text-emerald-300">
-                          {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                        </p>
-                      </div>
-                      <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                        <p className="aethel-text-xs aethel-text-slate-500">Total creditado</p>
-                        <p className="aethel-text-lg aethel-font-semibold aethel-text-blue-300">
-                          {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                        </p>
-                      </div>
-                      <div className="aethel-bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                        <p className="aethel-text-xs aethel-text-slate-500">Pendente de conciliação</p>
-                        <p className="aethel-text-lg aethel-font-semibold aethel-text-amber-300">
-                          {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="aethel-overflow-x-auto">
-                      <table className="aethel-min-w-full aethel-text-xs aethel-text-left">
-                        <thead>
-                          <tr className="aethel-text-slate-400">
-                            <th className="aethel-py-2 aethel-pr-4">Referência</th>
-                            <th className="aethel-py-2 aethel-pr-4">Valor</th>
-                            <th className="aethel-py-2 aethel-pr-4">Status</th>
-                            <th className="aethel-py-2 aethel-pr-4">Saldo</th>
-                            <th className="aethel-py-2">Data</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {receivableSummary.recent.length === 0 && (
-                            <tr>
-                              <td className="aethel-py-3 aethel-text-slate-500" colSpan={5}>
-                                Nenhum recebimento registrado.
-                              </td>
-                            </tr>
-                          )}
-                          {receivableSummary.recent.map(entry => {
-                            const rawStatus = entry.metadata?.['status'] as unknown
-                            const statusLabel = formatStatusLabel(rawStatus)
-                            const invoice = entry.metadata?.['invoice_id'] as unknown
-                            const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
-                            const amountLabel = `+${entry.amount.toLocaleString()} ${formatCurrencyLabel(entry.currency)}`
-                            return (
-                              <tr key={entry.id} className="aethel-border-t aethel-border-slate-800">
-                                <td className="aethel-py-2 aethel-pr-4 aethel-font-medium aethel-text-slate-200">
-                                  {invoiceLabel || 'Recebimento'}
-                                </td>
-                                <td className="aethel-py-2 aethel-pr-4 aethel-text-emerald-300">
-                                  {amountLabel}
-                                </td>
-                                <td className="aethel-py-2 aethel-pr-4 aethel-uppercase">
-                                  {statusLabel}
-                                </td>
-                                <td className="aethel-py-2 aethel-pr-4 aethel-text-slate-400">
-                                  {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
-                                </td>
-                                <td className="aethel-py-2 aethel-text-slate-400">
-                                  {new Date(entry.created_at).toLocaleString()}
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <DashboardWalletTab
+              authReady={authReady}
+              hasToken={hasToken}
+              walletLoading={walletLoading}
+              walletError={walletError}
+              walletData={walletData}
+              walletTransactions={walletTransactions}
+              creditsInfo={creditsInfo}
+              creditsUsedToday={creditsUsedToday}
+              creditsUsedThisMonth={creditsUsedThisMonth}
+              creditsReceivedThisMonth={creditsReceivedThisMonth}
+              lastWalletUpdate={lastWalletUpdate}
+              lastPurchaseIntent={lastPurchaseIntent}
+              lastTransferReceipt={lastTransferReceipt}
+              walletActionMessage={walletActionMessage}
+              walletActionError={walletActionError}
+              purchaseForm={purchaseForm}
+              transferForm={transferForm}
+              walletSubmitting={walletSubmitting}
+              creditEntries={creditEntries}
+              receivableSummary={receivableSummary}
+              onRefreshWallet={refreshWallet}
+              onPurchaseIntentSubmit={handlePurchaseIntentSubmit}
+              onTransferSubmit={handleTransferSubmit}
+              setPurchaseForm={setPurchaseForm}
+              setTransferForm={setTransferForm}
+              formatCurrencyLabel={formatCurrencyLabel}
+              formatStatusLabel={formatStatusLabel}
+            />
           )}
 
           {activeTab === 'connectivity' && (
-            <div className="aethel-p-6 aethel-space-y-6">
-              <div className="aethel-flex aethel-items-center aethel-justify-between">
-                <h2 className="aethel-text-2xl aethel-font-bold">Monitor de conectividade</h2>
-                <button onClick={refreshConnectivity} className="aethel-button aethel-button-secondary aethel-text-xs">
-                  Atualizar
-                </button>
-              </div>
-              {connectivityLoading && (
-                <p className="aethel-text-sm aethel-text-slate-400">Monitorando serviços...</p>
-              )}
-              {connectivityError && (
-                <p className="aethel-text-sm aethel-text-red-400">Não foi possível consultar os endpoints.</p>
-              )}
-              {!connectivityLoading && !connectivityError && connectivityData && (
-                <div className="aethel-space-y-4">
-                  <div className="aethel-card aethel-p-6 aethel-flex aethel-justify-between aethel-items-center">
-                    <div>
-                      <p className="aethel-text-sm aethel-text-slate-400">Status geral</p>
-                      <p className="aethel-text-3xl aethel-font-bold">
-                        {formatConnectivityStatus(connectivityData.overall_status).toUpperCase()}
-                      </p>
-                    </div>
-                    <div className="aethel-text-sm aethel-text-slate-400">
-                      Atualizado em {connectivityData.timestamp ? new Date(connectivityData.timestamp).toLocaleString() : '—'}
-                    </div>
-                  </div>
-
-                  <div className="aethel-grid aethel-grid-cols-1 lg:aethel-grid-cols-2 aethel-gap-4">
-                    {connectivityServices.map(service => (
-                      <div key={service.name} className="aethel-card aethel-p-5 aethel-space-y-3">
-                        <div className="aethel-flex aethel-justify-between aethel-items-center">
-                          <h3 className="aethel-text-lg aethel-font-semibold aethel-capitalize">{service.name.replace(/_/g, ' ')}</h3>
-                          <span className={`aethel-text-xs aethel-rounded-full aethel-px-2 aethel-py-1 ${
-                            service.status === 'healthy'
-                              ? 'aethel-bg-emerald-500/20 aethel-text-emerald-300'
-                              : service.status === 'degraded'
-                              ? 'aethel-bg-amber-500/20 aethel-text-amber-300'
-                              : 'aethel-bg-red-500/20 aethel-text-red-300'
-                          }`}>
-                            {formatConnectivityStatus(service.status).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="aethel-space-y-2">
-                          {service.endpoints.map(endpoint => (
-                            <div key={`${service.name}-${endpoint.url}`} className="aethel-border aethel-border-slate-800 aethel-rounded aethel-p-3">
-                              <div className="aethel-flex aethel-justify-between aethel-items-center">
-                                <span className={`${endpoint.healthy ? 'aethel-text-emerald-300' : 'aethel-text-red-300'} aethel-text-sm`}>{endpoint.url}</span>
-                                <span className="aethel-text-xs aethel-text-slate-400">
-                                  {endpoint.latency_ms !== null ? `${endpoint.latency_ms.toFixed(0)} ms` : '—'} • {endpoint.status_code ?? '—'}
-                                </span>
-                              </div>
-                              {endpoint.error && (
-                                <p className="aethel-text-xs aethel-text-red-300 aethel-mt-1">{endpoint.error}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <DashboardConnectivityTab
+              connectivityLoading={connectivityLoading}
+              connectivityError={connectivityError}
+              connectivityData={connectivityData}
+              connectivityServices={connectivityServices}
+              onRefreshConnectivity={refreshConnectivity}
+              formatConnectivityStatus={formatConnectivityStatus}
+            />
           )}
 
           {activeTab === 'agent-canvas' && (

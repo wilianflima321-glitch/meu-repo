@@ -2198,3 +2198,19 @@ Implemented:
 Impact:
 1. Reduces dense control markup in AI-chat tab and centralizes workflow toolbar behavior.
 2. Reduces `AethelDashboard.tsx` to `2469` lines while preserving existing workflow control contract.
+
+## 0.58 Delta Update 2026-02-28 (Dashboard decomposition batch 14)
+Implemented:
+1. Extracted major tab surfaces into dedicated components:
+- `cloud-web-app/web/components/dashboard/DashboardAIChatTab.tsx`
+- `cloud-web-app/web/components/dashboard/DashboardWalletTab.tsx`
+- `cloud-web-app/web/components/dashboard/DashboardConnectivityTab.tsx`
+- `cloud-web-app/web/components/dashboard/DashboardContentCreationTab.tsx`
+- `cloud-web-app/web/components/dashboard/DashboardUnrealTab.tsx`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates full rendering for those tabs through explicit props contracts.
+3. Targeted lint executed for changed surfaces:
+- `npm --prefix cloud-web-app/web run lint -- --file components/AethelDashboard.tsx --file components/dashboard/DashboardAIChatTab.tsx --file components/dashboard/DashboardWalletTab.tsx --file components/dashboard/DashboardConnectivityTab.tsx --file components/dashboard/DashboardContentCreationTab.tsx --file components/dashboard/DashboardUnrealTab.tsx` -> PASS.
+
+Impact:
+1. Removes multiple high-density tab blocks from monolithic shell without changing product scope.
+2. Reduces `AethelDashboard.tsx` to `2003` lines and lowers regression risk for future tab-level changes.

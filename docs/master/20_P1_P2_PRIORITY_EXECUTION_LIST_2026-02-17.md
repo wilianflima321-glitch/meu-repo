@@ -167,9 +167,15 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `DashboardOverviewTab.tsx`
 - `DashboardProjectsTab.tsx`
 - `DashboardCopilotWorkflowBar.tsx`
+- `DashboardAIChatTab.tsx`
+- `DashboardWalletTab.tsx`
+- `DashboardConnectivityTab.tsx`
+- `DashboardContentCreationTab.tsx`
+- `DashboardUnrealTab.tsx`
 
 ### Remaining block sequence
 1. `P0-D`: continue `AethelDashboard` split into UI blocks (`header`, `mission`, `chat`, `preview`, `ops`) with stable props contracts.
+ - status update: `chat`, `wallet`, `connectivity`, `content-creation`, `unreal` extracted; remaining heavy blocks: `billing`, `download`, `templates`, `use-cases`, `admin`, `agent-canvas`.
 2. `P0-E`: run full freeze gate suite and publish evidence bundle.
 3. `P1-01..P1-05`: execute only after `P0-D/P0-E` close.
 4. `P0-F`: canonical doc drift cleanup:

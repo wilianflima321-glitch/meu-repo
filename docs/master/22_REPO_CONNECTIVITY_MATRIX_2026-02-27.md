@@ -207,3 +207,34 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
 - `qa:mojibake` -> PASS
+
+## 23) Incremental closure 2026-02-28 (dashboard tab extraction wave)
+1. Added:
+- `components/dashboard/DashboardAIChatTab.tsx`
+- `components/dashboard/DashboardWalletTab.tsx`
+- `components/dashboard/DashboardConnectivityTab.tsx`
+- `components/dashboard/DashboardContentCreationTab.tsx`
+- `components/dashboard/DashboardUnrealTab.tsx`
+2. `components/AethelDashboard.tsx` now delegates:
+- full AI chat tab surface (modes + workflow controls + streaming panel)
+- full wallet tab surface (balance/receivables/forms/history)
+- connectivity monitor tab
+- content-creation tab and unreal tab static surfaces
+3. Current top offender size:
+- `components/AethelDashboard.tsx` -> `2003` lines (decomposition continues).
+4. Local quality snapshot:
+- targeted lint for changed dashboard surfaces -> PASS
+- `qa:repo-connectivity` baseline remains PASS
+
+## 24) Recalibration snapshot 2026-02-28 (full repo sweep)
+1. Markdown/document inventory (tracked scope):
+- `md_total=3623`
+- `docs/master/*.md=41`
+- `docs/archive/**/*.md=256`
+- `cloud-web-app/web/*.md=1`
+2. Large-file pressure (tracked TS/TSX in `cloud-web-app/web`):
+- `>=1200 lines = 55 files`
+- current top hotspot remains `components/AethelDashboard.tsx` at `2003` lines
+3. Remaining structural risks to close:
+- canonical docs still carry mixed historical narrative blocks that can confuse execution if read without baseline `26`
+- many large runtime modules (`lib/*`, `components/*`) still exceed maintainability threshold and need staged decomposition

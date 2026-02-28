@@ -116,3 +116,17 @@ This is a workflow/reliability competition, not a raw-model-marketing competitio
 6. Use `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` as the active numeric/status anchor.
 7. Keep canonical coherence gate green:
 - `npm run qa:canonical-doc-alignment`.
+
+## 9) Delta 2026-02-28 (full sweep update)
+1. Dashboard decomposition moved forward with new tab modules:
+- `DashboardAIChatTab`
+- `DashboardWalletTab`
+- `DashboardConnectivityTab`
+- `DashboardContentCreationTab`
+- `DashboardUnrealTab`
+2. Monolith pressure reduced but not closed:
+- `AethelDashboard.tsx`: `2469 -> 2003` lines in this wave.
+3. Remaining high-risk maintainability debt:
+- `>=1200` lines in tracked web TS/TSX: `55` files (requires staged decomposition policy by owner).
+4. Execution focus remains unchanged:
+- finish P0-D decomposition and structural coherence before any "best-in-market" claim expansion.
