@@ -5,12 +5,12 @@ Scope: maximize quality/critique with current product scope (no business expansi
 
 ## 0) Canonical scope and evidence
 Authoritative references used:
-1. `audit dicas do emergent usar/LIMITATIONS.md`
-2. `audit dicas do emergent usar/AI_SYSTEM_SPEC.md`
-3. `audit dicas do emergent usar/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
-4. `audit dicas do emergent usar/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
-5. `audit dicas do emergent usar/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
-6. `audit dicas do emergent usar/15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
+1. `docs/master/LIMITATIONS.md`
+2. `docs/master/AI_SYSTEM_SPEC.md`
+3. `docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
+4. `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
+5. `docs/master/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
+6. `docs/master/15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
 7. `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
 8. current route/component reality in `cloud-web-app/web`
 

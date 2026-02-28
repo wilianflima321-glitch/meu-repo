@@ -79,9 +79,10 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 
 ## 8) Recalibration snapshot (2026-02-28)
 1. Repository markdown inventory:
-- `md_total=3640`
-- `docs/master/*.md=37`
+- `md_total=3641`
+- `docs/master/*.md=38`
 - `docs/archive/**/*.md=256`
+ - legacy path references in canonical folder (`audit dicas do emergent usar/*`): `127` (requires staged cleanup)
 2. Structural gate:
 - `npm run qa:repo-connectivity` -> PASS
 3. Remaining structural pressure:

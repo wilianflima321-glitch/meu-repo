@@ -4,12 +4,12 @@ Date: 2026-02-16
 Scope: games + films + apps, sem mudanca de escopo de negocio
 
 ## 0) Base factual usada
-- `audit dicas do emergent usar/LIMITATIONS.md`
-- `audit dicas do emergent usar/AI_SYSTEM_SPEC.md`
-- `audit dicas do emergent usar/WORKBENCH_SPEC.md`
-- `audit dicas do emergent usar/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
-- `audit dicas do emergent usar/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
-- `audit dicas do emergent usar/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
+- `docs/master/LIMITATIONS.md`
+- `docs/master/AI_SYSTEM_SPEC.md`
+- `docs/master/WORKBENCH_SPEC.md`
+- `docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
+- `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
+- `docs/master/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
 - `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
 - `cloud-web-app/web/docs/ROUTES_INVENTORY.md`
 

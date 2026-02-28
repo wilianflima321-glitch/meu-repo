@@ -1956,3 +1956,14 @@ Factual snapshot:
 1. `qa:repo-connectivity` -> PASS.
 2. Interface critical sweep remains zero on high-severity visual regressions.
 3. `not-implemented-ui` remains explicit and limited to capability gates (current sweep: 6).
+
+## 0.42 Delta Update 2026-02-28 (critical limitations consolidation)
+Implemented:
+1. Added canonical consolidation doc:
+- `docs/master/23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
+2. Updated legacy-path references in active AI subsystem docs (`15`, `16`) to canonical `docs/master/*`.
+3. Extended backlog ordering (`20`) with canonical drift cleanup block (`P0-F`).
+
+Impact:
+1. Reduces decision ambiguity between historical markdown and active execution contracts.
+2. Keeps market-superiority planning tied to factual constraints and explicit claim gates.

@@ -23,7 +23,6 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - `EXECUTION_PLAN.md`
 - `8_ADMIN_SYSTEM_SPEC.md`
 - `9_BACKEND_SYSTEM_SPEC.md`
-- `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md`
 - `00_REALITY_MATRIX_2026-02-04.md`
 - `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
 - `11_WEB_USER_OWNER_TRIAGE_2026-02-11.md`
@@ -37,6 +36,10 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - `19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
 - `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
 - `22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
+- `23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
+
+## Historical note
+- `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md` is historical and contains legacy path references (`audit dicas do emergent usar/*`); do not use it for current execution decisions.
 
 ## Master Contract Policy
 - `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md` is the single execution master.
