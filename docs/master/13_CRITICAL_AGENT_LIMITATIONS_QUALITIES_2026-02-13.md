@@ -285,6 +285,11 @@ Decisoes de qualidade mantidas:
 1. Sem fake-success em qualquer superficie critica.
 2. Capacidade parcial/indisponivel permanece explicita.
 3. `/dashboard` como entrada e `/ide` como shell avancado da mesma plataforma.
+
+## Alignment note (2026-02-28)
+1. Active baseline for this document is governed by:
+- `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
+2. Any older sections with different numeric snapshots are historical unless revalidated in current wave.
 - contratos de interface/rota/canonicidade/mojibake: PASS
 3. Limitacoes mantidas (fora desta rodada):
 - `not-implemented-ui=10` continua explicito por politica anti-fake-success;

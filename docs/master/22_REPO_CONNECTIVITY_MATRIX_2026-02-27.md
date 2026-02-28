@@ -79,10 +79,10 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 
 ## 8) Recalibration snapshot (2026-02-28)
 1. Repository markdown inventory:
-- `md_total=3641`
-- `docs/master/*.md=38`
+- `md_total=3644`
+- `docs/master/*.md=41`
 - `docs/archive/**/*.md=256`
- - legacy path references in canonical folder (`audit dicas do emergent usar/*`): `127` (requires staged cleanup)
+ - legacy external-path references in canonical folder: `116` (requires staged cleanup)
 2. Structural gate:
 - `npm run qa:repo-connectivity` -> PASS
 3. Remaining structural pressure:
@@ -106,3 +106,11 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
 2. Connectivity and product readiness remain coupled:
 - no market-grade claim without both structural integrity and domain validation evidence.
+3. Active baseline for all canonical status metrics is anchored in:
+- `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`.
+
+## 12) Alignment closure 2026-02-28 (doc coherence gate)
+1. Added executable canonical doc coherence gate:
+- `tools/check-canonical-doc-alignment.mjs`
+- `npm run qa:canonical-doc-alignment`
+2. CI now enforces this gate in `web-lint` before build/test stages.

@@ -34,6 +34,9 @@ jobs:
       - name: Repo connectivity gate
         run: npm run qa:repo-connectivity
 
+      - name: Canonical doc alignment gate
+        run: npm run qa:canonical-doc-alignment
+
       - name: Install dependencies
         working-directory: cloud-web-app/web
         run: npm ci

@@ -23,7 +23,7 @@ Scope lock:
 3. Dashboard hotspot still large:
 - `cloud-web-app/web/components/AethelDashboard.tsx` -> `2850` lines.
 4. Canonical drift pressure still exists:
-- legacy path references (`audit dicas do emergent usar/*`) still present inside `docs/master`.
+- legacy external-path references still present inside `docs/master`.
 
 ## 3) Gap matrix (cross-domain)
 | Layer | Games | Films | Apps | Current status | Critical gap |
@@ -82,3 +82,5 @@ Scope lock:
 1. Strategic market comparison and parity language must follow:
 - `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
 2. If comparator and implementation status diverge, implementation evidence wins.
+3. Active numeric/status baseline must follow:
+- `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`.

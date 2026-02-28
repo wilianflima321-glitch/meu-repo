@@ -287,6 +287,10 @@ SLO minimo proposto para declarar "real-time ready":
 2. Executar freeze completo de gates para carimbo final da rodada.
 3. Reconciliar docs historicos x canonicos para reduzir risco de drift decisorio.
 4. Manter politica anti-fake-success e cutoff legado por telemetria em 2 ciclos.
+
+### 9.4 Canonical baseline anchor
+1. Use `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` as the active numeric/status baseline.
+2. Treat older conflicting snapshots in this triage doc as historical context.
 - `admin-status-light-tokens`: **0**
 - `blocking-browser-dialogs`: **0**
 - `not-implemented-ui`: **10**

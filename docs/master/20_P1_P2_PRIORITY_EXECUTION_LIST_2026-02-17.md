@@ -170,3 +170,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 6. `P0-H`: apply market comparator policy from `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`:
 - classify any new external claim as factual or `EXTERNAL_BENCHMARK_ASSUMPTION`;
 - block "equal/superior" narrative if evidence gate is missing.
+7. `P0-I`: enforce active baseline consistency from `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` across all active canonical docs.
+8. `P0-J`: keep canonical-doc-alignment gate green:
+- `npm run qa:canonical-doc-alignment`
+- block merge if canonical baseline/doc references drift.

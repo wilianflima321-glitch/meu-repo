@@ -15,6 +15,7 @@ Status: CANONICAL ENTRYPOINT
 10. `docs/master/23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
 11. `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
 12. `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
+13. `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -36,6 +37,7 @@ Status: CANONICAL ENTRYPOINT
 | `23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md` | Consolidated limitations + superiority plan | ACTIVE |
 | `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md` | Cross-domain gap alignment matrix | ACTIVE |
 | `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md` | Market parity/superiority comparison playbook | ACTIVE |
+| `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` | Canonical active baseline override | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -59,6 +61,7 @@ Status: CANONICAL ENTRYPOINT
   - `not-implemented-ui=6`
 - Structural baseline closed for connectivity P0:
   - `npm run qa:repo-connectivity` passes.
+  - `npm run qa:canonical-doc-alignment` passes.
   - Broken root path references and tracked `.venv` artifacts were removed.
 - Structural debt still open:
   - very large monolithic files (notably `components/AethelDashboard.tsx`),

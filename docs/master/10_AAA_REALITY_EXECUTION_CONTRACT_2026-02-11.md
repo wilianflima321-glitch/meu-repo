@@ -2014,3 +2014,33 @@ Implemented:
 Impact:
 1. Converts competitor comparison into execution constraints (not marketing narrative).
 2. Clarifies where we can be superior now (workflow reliability/integration/cost governance) and where parity is out of scope (desktop AAA parity in browser).
+
+## 0.46 Delta Update 2026-02-28 (canonical baseline unification)
+Implemented:
+1. Added active baseline override document:
+- `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
+2. Canonical conflict rule updated:
+- numerical/current-state conflicts across active docs must defer to `26`.
+
+Impact:
+1. Reduces drift caused by mixed historical deltas in long-running contract docs.
+2. Provides one factual baseline for agent execution and claim gating.
+
+## 0.47 Delta Update 2026-02-28 (canonical doc alignment gate)
+Implemented:
+1. Added canonical alignment checker:
+- `tools/check-canonical-doc-alignment.mjs`
+2. Added root command:
+- `npm run qa:canonical-doc-alignment`
+3. Added CI enforcement in `web-lint` job:
+- `.github/workflows/ci.yml`
+
+Gate scope:
+1. required canonical docs presence
+2. mandatory references to baseline doc `26`
+3. no legacy external-path references in active docs
+4. metric parity between `26` and `INTERFACE_CRITICAL_SWEEP.md`
+
+Impact:
+1. Converts doc coherence from manual review to executable gate.
+2. Reduces future drift across multi-agent documentation updates.

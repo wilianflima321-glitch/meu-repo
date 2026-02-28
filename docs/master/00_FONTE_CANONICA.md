@@ -39,9 +39,10 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - `23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
 - `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
 - `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
+- `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
 
 ## Historical note
-- `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md` is historical and contains legacy path references (`audit dicas do emergent usar/*`); do not use it for current execution decisions.
+- `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md` is historical and contains legacy external-path references; do not use it for current execution decisions.
 
 ## Master Contract Policy
 - `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md` is the single execution master.
@@ -52,6 +53,7 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - No mock, placeholder, or fake success in critical user journeys.
 - Unavailable capability must remain explicit (`NOT_IMPLEMENTED`, `DEPRECATED_ROUTE`, etc.).
 - Conflicts between docs are resolved by `00_INDEX` + `10` + latest dated delta.
+- Active numerical baseline conflicts are resolved by `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` until a newer baseline file exists.
 - External benchmark claims only enter canonical docs as `EXTERNAL_BENCHMARK_ASSUMPTION` until verified in-repo.
 
 ## Execution Baseline

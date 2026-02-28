@@ -61,7 +61,7 @@ We win by workflow reliability and integration quality:
 | Games quality loop not mandatory | P0 | gameplay QA validators + smoke bot loops | AAA Analyst + Frontend Platform | failed gameplay constraints block apply |
 | Films continuity not enforced | P0 | continuity/identity checks + shot control contracts | AAA Analyst + Media Runtime | continuity violations surfaced before publish |
 | App multi-file impact drift | P0 | dependency impact analyzer before apply | Backend + IDE Platform | high-risk edits require impact verdict |
-| Domain scorecards missing | P1 | readiness scorecards for games/films/apps | PM Técnico + Infra | documented thresholds + release evidence |
+| Domain scorecards missing | P1 | readiness scorecards for games/films/apps | PM Tecnico + Infra | documented thresholds + release evidence |
 | Cost predictability incomplete | P1 | budget guardrails + live cost visibility | Billing Lead + Infra | no uncontrolled variable-cost runaway sessions |
 
 ## 7) Claims policy for "equal/superior"
@@ -79,3 +79,4 @@ Blocked claims (until hard evidence):
 1. Link this playbook with `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`.
 2. Keep `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md` as execution order source.
 3. Treat this doc as strategic comparator for parity/superiority claims only.
+4. Use `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` as numeric/status anchor when comparator narratives conflict with current state.

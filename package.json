@@ -20,6 +20,7 @@
     "check:web-ts": "npm --prefix cloud-web-app/web run typecheck",
     "check:js-syntax": "node tools/syntax-scan.mjs",
     "qa:repo-connectivity": "node tools/check-repo-connectivity.mjs",
+    "qa:canonical-doc-alignment": "node tools/check-canonical-doc-alignment.mjs",
     "check:syntax": "npm run check:src-ts && npm run check:ai-ide-ts && npm run check:web-ts && npm run check:js-syntax",
     "test:quick-ai": "npx ts-node -P src/common/tests/tsconfig.cjs.json src/common/tests/quick-ai-test.ts",
     "test:llm": "npx ts-node src/common/llm/tests/llm-integration.test.ts",
