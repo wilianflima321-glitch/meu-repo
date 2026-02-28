@@ -50,11 +50,15 @@ Status: CANONICAL ENTRYPOINT
   - `admin-light-theme-tokens=0`
   - `admin-status-light-tokens=0`
   - `blocking-browser-dialogs=0`
-- Explicit gated capabilities remain (`NOT_IMPLEMENTED`) by contract.
+- Explicit gated capabilities remain (`NOT_IMPLEMENTED`) by contract (`not-implemented-ui=6` in latest sweep).
+- Structural baseline closed for connectivity P0:
+  - repo connectivity scanner passes (`npm run qa:repo-connectivity`),
+  - root script/config broken-path debt was removed,
+  - tracked `.venv` artifacts were removed from versioned source.
 - Structural debt still open:
-  - root scripts referencing missing paths,
-  - committed `.venv` artifacts,
-  - duplicated/legacy assets and very large monolithic files.
+  - very large monolithic files (notably `components/AethelDashboard.tsx`),
+  - high markdown volume outside `docs/master` (historical/archival maintenance load),
+  - orphan-candidate top-level folders that are not runtime-critical.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

@@ -1945,3 +1945,14 @@ Implemented:
 Impact:
 1. Reduced inline mutation logic in dashboard shell.
 2. Increased maintainability for upcoming split of dashboard blocks by concern.
+
+## 0.41 Delta Update 2026-02-28 (governance and CI coherence)
+Implemented:
+1. Root `test:ai-ide` script now gracefully skips when optional Theia/ai-ide tree is absent.
+2. `.github/workflows/ci.yml` now runs `qa:repo-connectivity` after explicit Node setup (deterministic execution order).
+3. Canonical docs refreshed with current structural status (`00_INDEX`, `13`, `14`, `20`, `22`).
+
+Factual snapshot:
+1. `qa:repo-connectivity` -> PASS.
+2. Interface critical sweep remains zero on high-severity visual regressions.
+3. `not-implemented-ui` remains explicit and limited to capability gates (current sweep: 6).

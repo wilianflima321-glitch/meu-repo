@@ -258,6 +258,33 @@ Evidencias executadas nesta rodada (workspace `cloud-web-app/web`):
 - lint: **0 warnings**
 - typecheck: PASS
 - build: PASS
+
+---
+
+## Delta critico de coerencia (2026-02-28)
+Evidencias desta rodada:
+1. `npm run qa:repo-connectivity` -> PASS (scanner estrutural de caminhos/scripts/docs/segredos).
+2. `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md` (ultimo sweep):
+- `legacy-accent-tokens=0`
+- `admin-light-theme-tokens=0`
+- `admin-status-light-tokens=0`
+- `blocking-browser-dialogs=0`
+- `not-implemented-ui=6`
+3. `NOT_IMPLEMENTED` real permanece concentrado em gates de capacidade:
+- `/api/ai/chat|complete|action|inline-edit`
+- `/api/render/jobs/[jobId]/cancel`
+- billing gateway nao suportado (`PAYMENT_GATEWAY_NOT_IMPLEMENTED`)
+
+Critica objetiva atual:
+1. O maior risco residual nao e visual; e manutencao estrutural e governanca de escopo.
+2. O monolito `components/AethelDashboard.tsx` ainda e grande e continua como principal hotspot tecnico.
+3. O volume de markdown fora de `docs/master` segue alto e aumenta risco de decisao por fonte historica.
+4. Claims de L4/L5 e colaboracao avancada continuam proibidos sem evidencia operacional reproduzivel.
+
+Decisoes de qualidade mantidas:
+1. Sem fake-success em qualquer superficie critica.
+2. Capacidade parcial/indisponivel permanece explicita.
+3. `/dashboard` como entrada e `/ide` como shell avancado da mesma plataforma.
 - contratos de interface/rota/canonicidade/mojibake: PASS
 3. Limitacoes mantidas (fora desta rodada):
 - `not-implemented-ui=10` continua explicito por politica anti-fake-success;

@@ -26,13 +26,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Repo connectivity gate
-        run: npm run qa:repo-connectivity
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Repo connectivity gate
+        run: npm run qa:repo-connectivity
 
       - name: Install dependencies
         working-directory: cloud-web-app/web

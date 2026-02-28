@@ -258,6 +258,35 @@ SLO minimo proposto para declarar "real-time ready":
 2. Baseline atualizado:
 - `legacy-accent-tokens`: **0**
 - `admin-light-theme-tokens`: **0**
+
+---
+
+## 9) Delta de triagem consolidada (2026-02-28)
+### 9.1 Estado factual
+1. Estrutural: `qa:repo-connectivity` PASS.
+2. Interface critica: zeros preservados e `not-implemented-ui=6`.
+3. Contratos legados: `410 DEPRECATED_ROUTE` com metadados continuam ativos.
+4. IA indisponivel: `501 NOT_IMPLEMENTED` permanece explicito.
+
+### 9.2 Critica por dominio (residual)
+1. Produto/UX:
+- jornada principal esta coerente, mas ainda depende de gates em capacidades de IA/render/billing.
+2. Frontend/IDE:
+- shell esta estavel; hotspot de manutencao segue em `AethelDashboard.tsx` (monolito).
+3. Backend/Infra:
+- contratos estao alinhados; readiness real ainda depende de freeze completo de gates.
+4. IA/Automacao:
+- L1-L3 ok por contrato; sem evidencia suficiente para promover L4/L5.
+5. Colaboracao/DX:
+- permanece `PARTIAL` para claim enterprise de concorrencia/reconexao.
+6. Negocio/Mercado:
+- posicionamento correto e workflow studio-grade web-native; sem base para claim de desktop parity.
+
+### 9.3 Prioridade objetiva de fechamento
+1. Decompor o dashboard monolitico em blocos menores com ownership explicito.
+2. Executar freeze completo de gates para carimbo final da rodada.
+3. Reconciliar docs historicos x canonicos para reduzir risco de drift decisorio.
+4. Manter politica anti-fake-success e cutoff legado por telemetria em 2 ciclos.
 - `admin-status-light-tokens`: **0**
 - `blocking-browser-dialogs`: **0**
 - `not-implemented-ui`: **10**

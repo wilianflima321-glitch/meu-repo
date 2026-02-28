@@ -146,3 +146,17 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 ### P0 completion note (2026-02-27)
 1. `/ide` main bridge (`components/ide/FullscreenIDE.tsx`) now uses canonical file API instead of local mock tree in critical flow.
 2. URL handoff contract (`projectId`, `file`, `entry`) is consumed in runtime bridge.
+
+## 6. Delta 2026-02-28 (next blocking order)
+### Closed
+1. Repo connectivity scanner hardened and passing (`qa:repo-connectivity`).
+2. Visual workflows now include connectivity gate before browser stages.
+3. Dashboard monolith decomposition advanced with extracted modules:
+- `aethel-dashboard-model.ts`
+- `aethel-dashboard-defaults.ts`
+- `aethel-dashboard-session-utils.ts`
+
+### Remaining block sequence
+1. `P0-D`: continue `AethelDashboard` split into UI blocks (`header`, `mission`, `chat`, `preview`, `ops`) with stable props contracts.
+2. `P0-E`: run full freeze gate suite and publish evidence bundle.
+3. `P1-01..P1-05`: execute only after `P0-D/P0-E` close.

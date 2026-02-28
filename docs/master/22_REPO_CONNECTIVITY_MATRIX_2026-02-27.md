@@ -76,3 +76,20 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 9. Enforced root connectivity gate in both visual workflows (`ui-audit.yml`, `visual-regression-compare.yml`) to block path regressions before browser steps.
 10. Expanded connectivity scanner coverage for loose web-root markdown, tracked secret-like files, and required canonical-doc presence checks.
 11. Continued dashboard split by extracting session-history creation/filter/toggle helpers to `components/dashboard/aethel-dashboard-session-utils.ts`.
+
+## 8) Recalibration snapshot (2026-02-28)
+1. Repository markdown inventory:
+- `md_total=3640`
+- `docs/master/*.md=37`
+- `docs/archive/**/*.md=256`
+2. Structural gate:
+- `npm run qa:repo-connectivity` -> PASS
+3. Remaining structural pressure:
+- high historical markdown volume outside canonical docs,
+- monolithic hotspots still present (`cloud-web-app/web/components/AethelDashboard.tsx` > 3000 lines),
+- orphan-candidate top-level folders still requiring explicit keep/remove policy.
+
+## 9) Immediate closure actions (no scope change)
+1. Keep connectivity gate mandatory in all PR pipelines.
+2. Continue dashboard decomposition until no single UI shell file exceeds agreed threshold.
+3. Publish explicit policy for orphan-candidate directories (`ACTIVE` vs `ARCHIVE` vs `REMOVE`).

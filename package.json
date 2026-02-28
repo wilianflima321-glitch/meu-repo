@@ -13,7 +13,7 @@
     "check:src-ts": "npx -y tsc --noEmit -p src/tsconfig.json",
     "check:ai-ide-ts": "node -e \"const fs=require('fs'); const p='cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json'; if(!fs.existsSync(p)){console.warn('ai-ide tsconfig not present; skipping'); process.exit(0);} const {execSync}=require('child_process'); execSync('npx -y tsc --noEmit -p '+p, {stdio:'inherit'});\"",
     "build:ai-ide": "node -e \"const fs=require('fs'); const p='cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/tsconfig.json'; if(!fs.existsSync(p)){console.warn('ai-ide tsconfig not present; skipping'); process.exit(0);} const {execSync}=require('child_process'); execSync('npx -y tsc -p '+p, {stdio:'inherit'});\"",
-    "test:ai-ide": "npm run build:ai-ide && node cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js",
+    "test:ai-ide": "node -e \"const fs=require('fs'); const p='cloud-ide-desktop/aethel_theia_fork/packages/ai-ide/test/run-mocha.js'; if(!fs.existsSync(p)){console.warn('ai-ide tests not present in this repo snapshot; skipping'); process.exit(0);} const {execSync}=require('child_process'); execSync('npm run build:ai-ide', {stdio:'inherit'}); execSync('node '+p, {stdio:'inherit'});\"",
     "test:all": "npm run check:ai-ide-ts && npm run test:ai-ide && npm run test:e2e",
     "ci:local": "npm run test:all",
     "diagnostics:playwright": "node tools/ci/write-playwright-summary.mjs --json test-results/playwright.json --out diagnostics/PLAYWRIGHT_SUMMARY.txt",
