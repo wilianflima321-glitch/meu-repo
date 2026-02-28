@@ -174,3 +174,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
 - `qa:mojibake` -> PASS
+
+## 20) Incremental closure 2026-02-28 (dashboard overview extraction)
+1. Added:
+- `components/dashboard/DashboardOverviewTab.tsx`
+2. Removed overview block (status cards + wallet/connectivity summary + preview wrapper) from monolithic shell and delegated to dedicated component.
+3. Current top offender size:
+- `components/AethelDashboard.tsx` -> `2595` lines (decomposition continues).
+4. Verification snapshot:
+- `qa:canonical-doc-alignment` -> PASS
+- `qa:repo-connectivity` -> PASS
+- `qa:mojibake` -> PASS

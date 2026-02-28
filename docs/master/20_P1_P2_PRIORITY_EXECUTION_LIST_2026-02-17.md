@@ -164,6 +164,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `TrialBanner.tsx`
 - `DashboardHeader.tsx`
 - `AethelDashboardSidebar.tsx`
+- `DashboardOverviewTab.tsx`
 
 ### Remaining block sequence
 1. `P0-D`: continue `AethelDashboard` split into UI blocks (`header`, `mission`, `chat`, `preview`, `ops`) with stable props contracts.

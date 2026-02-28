@@ -2144,3 +2144,22 @@ Implemented:
 Impact:
 1. Removes one of the largest inline UI regions from dashboard shell.
 2. Reduces `AethelDashboard.tsx` to `2744` lines while preserving current navigation contract.
+
+## 0.55 Delta Update 2026-02-28 (Dashboard decomposition batch 11)
+Implemented:
+1. Extracted overview tab block into:
+- `cloud-web-app/web/components/dashboard/DashboardOverviewTab.tsx`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+- overview status cards
+- wallet summary panel
+- connectivity summary panel
+- live preview block wrapper
+3. Removed now-redundant inline imports from shell (`LivePreview`, `APIError`).
+4. Lightweight gates executed:
+- `npm run qa:canonical-doc-alignment` -> PASS
+- `npm run qa:repo-connectivity` -> PASS
+- `npm run qa:mojibake` -> PASS
+
+Impact:
+1. Removes one more high-density UI region from the monolith.
+2. Reduces `AethelDashboard.tsx` to `2595` lines while keeping behavior and gate policy unchanged.
