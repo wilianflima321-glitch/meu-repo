@@ -19,6 +19,10 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { randomUUID } from 'crypto';
 import { checkStorageQuota, createQuotaExceededResponse } from '@/lib/storage-quota';
+import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { buildAssetQualityReport, inferAssetClassFromNameAndMime } from '@/lib/server/asset-quality';
+import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
+import { evaluateAssetSourcePolicy } from '@/lib/server/asset-source-policy';
 import { 
   generateUploadUrl, 
   generateDownloadUrl, 
@@ -137,9 +141,20 @@ export async function POST(request: NextRequest) {
     // 1. Authenticate
     const user = requireAuth(request);
 
+    const entitlements = await requireEntitlementsForUser(user.userId);
+
     // 2. Parse request
     const body = await request.json();
-    const { projectId, fileName, fileType, fileSize, path = '/Content' } = body;
+    const {
+      projectId,
+      fileName,
+      fileType,
+      fileSize,
+      path = '/Content',
+      source = 'user_upload',
+      license = 'unknown',
+      forCommercialUse = true,
+    } = body;
 
     // 3. Validate required fields
     if (!projectId || !fileName || !fileSize) {
@@ -161,6 +176,55 @@ export async function POST(request: NextRequest) {
     if (fileType && !ALLOWED_MIME_TYPES.has(fileType)) {
       // Allow unknown types but log
       console.warn(`Unknown MIME type: ${fileType} for file: ${fileName}`);
+    }
+
+    const inferredAssetClass = inferAssetClassFromNameAndMime(fileName, fileType)
+    const quality = buildAssetQualityReport({
+      name: fileName,
+      sizeBytes: fileSize,
+      mimeType: fileType,
+      assetClass: inferredAssetClass,
+      warnings: ['PRESIGN_STAGE_PRECHECK'],
+    })
+    const intakePolicy = evaluateAssetIntakePolicy({
+      planId: entitlements.plan.id,
+      source: entitlements.source,
+      quality,
+    })
+    if (!intakePolicy.allowed) {
+      return NextResponse.json(
+        {
+          error: 'ASSET_QUALITY_GATE_FAILED',
+          message: intakePolicy.reason,
+          capability: 'asset_intake_quality_gate',
+          capabilityStatus: 'PARTIAL',
+          metadata: intakePolicy.metadata,
+          quality,
+          intakePolicy,
+        },
+        { status: 422 }
+      )
+    }
+
+    const sourcePolicy = evaluateAssetSourcePolicy({
+      planId: entitlements.plan.id,
+      entitlementSource: entitlements.source,
+      source,
+      license,
+      forCommercialUse,
+    })
+    if (!sourcePolicy.allowed) {
+      return NextResponse.json(
+        {
+          error: 'ASSET_SOURCE_POLICY_BLOCKED',
+          message: sourcePolicy.reason,
+          capability: 'asset_source_policy_gate',
+          capabilityStatus: 'PARTIAL',
+          metadata: sourcePolicy.metadata,
+          sourcePolicy,
+        },
+        { status: 422 }
+      )
     }
 
     // 6. Verify project access
@@ -209,11 +273,23 @@ export async function POST(request: NextRequest) {
         projectId,
         name: fileName,
         type: assetType,
+        extension: fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : '',
         path: assetPath,
         storagePath: s3Key,
         url: `s3://${S3_BUCKET}/${s3Key}`, // Store full S3 URI
         size: fileSize,
         mimeType: fileType || 'application/octet-stream',
+        status: 'pending',
+        uploaderId: user.userId,
+        metadata: {
+          source: sourcePolicy.source,
+          license: sourcePolicy.license,
+          forCommercialUse,
+          sourcePolicy,
+          quality,
+          intakePolicy,
+          uploadStage: 'presigned_pending_upload',
+        },
       },
     });
 
@@ -249,6 +325,9 @@ export async function POST(request: NextRequest) {
       expiresIn,
       maxSize: MAX_FILE_SIZE,
       method: 'PUT',
+      quality,
+      intakePolicy,
+      sourcePolicy,
     });
   } catch (error: any) {
     console.error('Presign error:', error);

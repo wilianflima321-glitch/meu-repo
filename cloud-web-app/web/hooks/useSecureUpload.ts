@@ -28,6 +28,9 @@ export interface UploadFile {
   file: File;
   projectId: string;
   path?: string;
+  source?: string;
+  license?: string;
+  forCommercialUse?: boolean;
 }
 
 export interface UploadProgress {
@@ -163,7 +166,14 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
    * Upload de um único arquivo
    */
   const uploadSingle = useCallback(async (uploadFile: UploadFile): Promise<UploadResult> => {
-    const { file, projectId, path = '/Content' } = uploadFile;
+    const {
+      file,
+      projectId,
+      path = '/Content',
+      source = 'user_upload',
+      license = 'unknown',
+      forCommercialUse = true,
+    } = uploadFile;
     const fileId = `${file.name}_${Date.now()}`;
 
     // Criar AbortController para este upload
@@ -203,6 +213,9 @@ export function useSecureUpload(options: UseSecureUploadOptions = {}): UseSecure
           fileType: file.type,
           fileSize: file.size,
           path,
+          source,
+          license,
+          forCommercialUse,
         }),
         signal: controller.signal,
       });

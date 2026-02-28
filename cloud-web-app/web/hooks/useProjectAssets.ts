@@ -279,7 +279,12 @@ export function useProjectAssets(projectId: string | null, options: UseProjectAs
 export async function uploadLargeAsset(
   projectId: string,
   file: File,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
+  options?: {
+    source?: string;
+    license?: string;
+    forCommercialUse?: boolean;
+  }
 ): Promise<Asset> {
   // 1. Get presigned URL from server
   const presignResponse = await fetch('/api/assets/presign', {
@@ -290,6 +295,9 @@ export async function uploadLargeAsset(
       fileName: file.name,
       fileType: file.type,
       fileSize: file.size,
+      source: options?.source || 'user_upload',
+      license: options?.license || 'unknown',
+      forCommercialUse: options?.forCommercialUse ?? true,
     }),
   });
 

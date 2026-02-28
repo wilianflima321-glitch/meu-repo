@@ -13,6 +13,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { AssetProcessor } from '@/lib/server/asset-processor';
 import { evaluateAssetIntakePolicy } from '@/lib/server/asset-intake-policy';
+import { evaluateAssetSourcePolicy } from '@/lib/server/asset-source-policy';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File;
     const projectId = formData.get('projectId') as string;
     const assetType = formData.get('type') as string;
+    const declaredSource = formData.get('source') as string | null;
+    const declaredLicense = formData.get('license') as string | null;
+    const forCommercialUse = String(formData.get('forCommercialUse') ?? 'true').toLowerCase() !== 'false';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -58,6 +62,28 @@ export async function POST(req: NextRequest) {
           quality: validation.quality,
         })
       : null
+
+    const sourcePolicy = evaluateAssetSourcePolicy({
+      planId: entitlements.plan.id,
+      entitlementSource: entitlements.source,
+      source: declaredSource,
+      license: declaredLicense,
+      forCommercialUse,
+    })
+
+    if (!sourcePolicy.allowed) {
+      return NextResponse.json(
+        {
+          error: 'ASSET_SOURCE_POLICY_BLOCKED',
+          message: sourcePolicy.reason,
+          capability: 'asset_source_policy_gate',
+          capabilityStatus: 'PARTIAL',
+          metadata: sourcePolicy.metadata,
+          sourcePolicy,
+        },
+        { status: 422 }
+      )
+    }
 
     if (intakeDecision && !intakeDecision.allowed) {
       return NextResponse.json(
@@ -151,10 +177,22 @@ export async function POST(req: NextRequest) {
         projectId,
         name: file.name,
         type: assetType || detectAssetType(file.type),
+        extension: extensionFromName(file.name),
         path: assetPath,
         url: `/uploads/${filename}`,
         size: finalBuffer.byteLength, // Use optimized size
         mimeType: file.type,
+        status: 'ready',
+        uploaderId: user.userId,
+        metadata: {
+          source: sourcePolicy.source,
+          license: sourcePolicy.license,
+          forCommercialUse,
+          sourcePolicy,
+          intakePolicy: intakeDecision,
+          quality: validation.quality || null,
+          optimization: optimizationMeta,
+        },
       },
     });
 
@@ -171,6 +209,7 @@ export async function POST(req: NextRequest) {
         quality: validation.quality || null,
       },
       intakePolicy: intakeDecision,
+      sourcePolicy,
       optimization: {
           enabled: optimizationMeta.enabled,
           processor: optimizationMeta.processor,
@@ -187,6 +226,11 @@ export async function POST(req: NextRequest) {
     if (mapped) return mapped;
     return apiInternalError('Failed to upload file');
   }
+}
+
+function extensionFromName(fileName: string): string {
+  const idx = fileName.lastIndexOf('.')
+  return idx >= 0 ? fileName.slice(idx + 1).toLowerCase() : ''
 }
 
 function detectAssetType(mimeType: string): string {

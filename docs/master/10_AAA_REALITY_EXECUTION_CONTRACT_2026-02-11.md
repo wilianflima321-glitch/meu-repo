@@ -2258,3 +2258,26 @@ Implemented:
 Impact:
 1. Converts asset quality from advisory-only to enforceable intake policy.
 2. Reduces low-quality asset ingestion risk while keeping behavior explicit and auditable.
+
+## 0.61 Delta Update 2026-02-28 (asset source/license governance + presign precheck)
+Implemented:
+1. Added source/license policy engine for asset ingestion:
+- `cloud-web-app/web/lib/server/asset-source-policy.ts`
+2. Upload and presign flows now enforce source/license gates before accepting ingestion:
+- `cloud-web-app/web/app/api/assets/upload/route.ts`
+- `cloud-web-app/web/app/api/assets/presign/route.ts`
+3. New explicit gate for blocked provenance/license:
+- `422 ASSET_SOURCE_POLICY_BLOCKED`
+- `capability=asset_source_policy_gate`
+- `capabilityStatus=PARTIAL`
+4. Presign now performs full precheck (quality + source) before generating upload URL and persists pending metadata context.
+5. Confirm flow now finalizes asset status + metadata snapshot:
+- sets `status=ready`
+- stores `quality`, `intakePolicy`, `postProcessing` and stage transition in `metadata`.
+6. Upload client hooks now forward provenance intent:
+- `hooks/useProjectAssets.ts` (`uploadLargeAsset` options)
+- `hooks/useSecureUpload.ts` (`UploadFile` optional `source/license/forCommercialUse`)
+
+Impact:
+1. Asset intake now has deterministic provenance governance, not only technical-file validation.
+2. Presign/upload/confirm behavior is coherent and auditable end-to-end for this area.

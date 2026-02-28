@@ -265,3 +265,17 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `intakePolicy` and `quality` included in confirmation payload.
 4. Verification snapshot:
 - targeted lint (asset policy + upload + confirm) -> PASS
+
+## 27) Incremental closure 2026-02-28 (asset provenance governance closure)
+1. Added source/license policy gate:
+- `lib/server/asset-source-policy.ts`
+2. Enforced provenance checks in both ingestion entry points:
+- `app/api/assets/upload/route.ts`
+- `app/api/assets/presign/route.ts`
+3. Confirm stage now writes final readiness metadata and status transition:
+- `app/api/assets/[id]/confirm/route.ts` persists `status=ready` + policy/quality snapshot.
+4. Client hooks aligned with provenance contract:
+- `hooks/useProjectAssets.ts`
+- `hooks/useSecureUpload.ts`
+5. Verification snapshot:
+- targeted lint (assets governance scope) -> PASS

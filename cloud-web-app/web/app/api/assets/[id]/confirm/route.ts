@@ -46,6 +46,8 @@ export async function POST(
         url: true,
         size: true,
         mimeType: true,
+        status: true,
+        metadata: true,
         createdAt: true,
       },
     });
@@ -81,14 +83,6 @@ export async function POST(
       }
     }
 
-    // Update size if different
-    if (actualSize !== asset.size) {
-      await prisma.asset.update({
-        where: { id: params.id },
-        data: { size: actualSize },
-      });
-    }
-
     const inferredAssetClass = inferAssetClassFromNameAndMime(asset.name, asset.mimeType)
     const quality = buildAssetQualityReport({
       name: asset.name,
@@ -103,13 +97,48 @@ export async function POST(
       quality,
     })
 
+    const existingMeta = (asset.metadata && typeof asset.metadata === 'object') ? asset.metadata as Record<string, unknown> : {}
+    const updatedAsset = await prisma.asset.update({
+      where: { id: params.id },
+      data: {
+        size: actualSize,
+        status: 'ready',
+        metadata: {
+          ...existingMeta,
+          quality,
+          intakePolicy,
+          uploadStage: 'confirmed',
+          postProcessing: {
+            queued: false,
+            capabilityStatus: 'PARTIAL',
+            reason: 'JOB_QUEUE_NOT_CONFIGURED',
+            pendingSteps: [
+              'thumbnail_generation',
+              'metadata_enrichment',
+              'search_indexing',
+            ],
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        size: true,
+        mimeType: true,
+        status: true,
+        createdAt: true,
+      },
+    })
+
     return NextResponse.json({
-      id: asset.id,
-      name: asset.name,
-      type: asset.type,
-      size: actualSize,
-      mimeType: asset.mimeType,
-      createdAt: asset.createdAt.toISOString(),
+      id: updatedAsset.id,
+      name: updatedAsset.name,
+      type: updatedAsset.type,
+      size: updatedAsset.size,
+      mimeType: updatedAsset.mimeType,
+      status: updatedAsset.status,
+      createdAt: updatedAsset.createdAt.toISOString(),
       quality,
       intakePolicy,
       postProcessing: {
