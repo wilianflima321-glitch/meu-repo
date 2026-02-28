@@ -1,4 +1,4 @@
-﻿# 00_INDEX
+# 00_INDEX
 Date: 2026-02-28
 Status: CANONICAL ENTRYPOINT
 
@@ -16,6 +16,7 @@ Status: CANONICAL ENTRYPOINT
 11. `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
 12. `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
 13. `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
+14. `docs/master/27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -38,6 +39,7 @@ Status: CANONICAL ENTRYPOINT
 | `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md` | Cross-domain gap alignment matrix | ACTIVE |
 | `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md` | Market parity/superiority comparison playbook | ACTIVE |
 | `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` | Canonical active baseline override | ACTIVE |
+| `27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md` | Domain readiness thresholds | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
