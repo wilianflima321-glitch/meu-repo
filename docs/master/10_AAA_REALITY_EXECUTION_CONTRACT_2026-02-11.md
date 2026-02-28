@@ -2099,3 +2099,13 @@ Implemented:
 Impact:
 1. Aligns top-level execution with canonical gate contract (single command surface from repo root).
 2. Removes command drift between root docs and runnable scripts.
+
+## 0.52 Delta Update 2026-02-28 (Dashboard decomposition batch 8)
+Implemented:
+1. Extracted trial banner UI block into:
+- `cloud-web-app/web/components/dashboard/TrialBanner.tsx`
+2. `cloud-web-app/web/components/AethelDashboard.tsx` now consumes `TrialBanner` with explicit dismiss callback.
+
+Impact:
+1. Reduces top-level UI shell inline markup and improves component boundary clarity.
+2. Moves `AethelDashboard.tsx` below 3000 lines (`2995` current), continuing P0-D split sequence.

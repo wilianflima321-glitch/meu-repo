@@ -145,3 +145,10 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `lint`, `typecheck`, `build`
 - `qa:interface-gate`, `qa:canonical-components`, `qa:route-contracts`, `qa:no-fake-success`, `qa:mojibake`, `qa:enterprise-gate`
 2. This removes root-level command ambiguity during freeze execution.
+
+## 17) Incremental closure 2026-02-28 (dashboard UI block extraction)
+1. Added:
+- `components/dashboard/TrialBanner.tsx`
+2. Removed trial-banner markup from monolithic shell and delegated to component.
+3. Current top offender size:
+- `components/AethelDashboard.tsx` -> `2995` lines (decomposition continues).
