@@ -3,15 +3,18 @@
 import { useState } from 'react'
 import NexusCanvas from '@/components/NexusCanvas'
 import NexusChatMultimodal from '@/components/nexus/NexusChatMultimodal'
+import AethelResearch from '@/components/nexus/AethelResearch'
+import DirectorMode from '@/components/nexus/DirectorMode'
 import { 
   Search, Bell, Settings, User, Grid, Layout, 
   Activity, Zap, Shield, Database, Cloud, Share2, Plus, Home,
-  Cpu, Terminal, Layers, Wand2
+  Cpu, Terminal, Layers, Wand2, BookOpen, Clapperboard
 } from 'lucide-react'
 
 export default function NexusPage() {
   const [isAIPainting, setIsAIPainting] = useState(false)
   const [canvasMode, setCanvasMode] = useState<'3d' | 'ui' | 'code'>('3d')
+  const [rightPanelMode, setRightPanelMode] = useState<'chat' | 'research' | 'director'>('chat')
 
   return (
     <div className="flex h-screen bg-black text-zinc-100 overflow-hidden font-sans selection:bg-blue-500/30">
@@ -53,18 +56,26 @@ export default function NexusPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-              <input 
-                type="text" 
-                placeholder="Search Nexus..." 
-                className="bg-zinc-900/50 border border-zinc-800 rounded-full py-1.5 pl-10 pr-4 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/50 w-64"
-              />
+            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1 mr-4">
+              <button 
+                onClick={() => setRightPanelMode('chat')}
+                className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${rightPanelMode === 'chat' ? 'bg-blue-600 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                Nexus Chat
+              </button>
+              <button 
+                onClick={() => setRightPanelMode('research')}
+                className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${rightPanelMode === 'research' ? 'bg-blue-600 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                Research
+              </button>
+              <button 
+                onClick={() => setRightPanelMode('director')}
+                className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${rightPanelMode === 'director' ? 'bg-blue-600 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                Director
+              </button>
             </div>
-            <button className="p-2 text-zinc-400 hover:text-zinc-100 relative">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-zinc-950"></span>
-            </button>
             <button className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-blue-900/20">
               Deploy
             </button>
@@ -94,10 +105,10 @@ export default function NexusPage() {
               {/* Asset List Simulation */}
               <div className="space-y-3">
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className="flex items-center gap-3 p-2 bg-zinc-900/50 border border-zinc-800/50 rounded-lg">
-                    <div className="w-8 h-8 bg-zinc-800 rounded flex items-center justify-center text-zinc-500 font-mono text-[10px]">3D</div>
+                  <div key={i} className="flex items-center gap-3 p-2 bg-zinc-900/50 border border-zinc-800/50 rounded-lg group hover:border-blue-500/30 transition-all cursor-pointer">
+                    <div className="w-8 h-8 bg-zinc-800 rounded flex items-center justify-center text-zinc-500 font-mono text-[10px] group-hover:bg-blue-600/20 group-hover:text-blue-400 transition-colors">3D</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-bold truncate">Asset_Prototype_0{i}.obj</p>
+                      <p className="text-[10px] font-bold truncate group-hover:text-blue-400 transition-colors">Asset_Prototype_0{i}.obj</p>
                       <p className="text-[9px] text-zinc-600 uppercase">Optimized</p>
                     </div>
                   </div>
@@ -116,9 +127,11 @@ export default function NexusPage() {
             />
           </div>
 
-          {/* Right: The Nexus Chat (Multimodal) */}
-          <div className="w-96 flex flex-col shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-10">
-            <NexusChatMultimodal />
+          {/* Right: The Nexus Chat (Multimodal) / Research / Director */}
+          <div className="w-96 flex flex-col shadow-[-20px_0_40px_rgba(0,0,0,0.5)] z-10 bg-zinc-950 border-l border-zinc-800">
+            {rightPanelMode === 'chat' && <NexusChatMultimodal />}
+            {rightPanelMode === 'research' && <AethelResearch />}
+            {rightPanelMode === 'director' && <DirectorMode />}
           </div>
         </div>
       </main>

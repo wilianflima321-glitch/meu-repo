@@ -17,6 +17,7 @@ Status: CANONICAL ENTRYPOINT
 12. `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
 13. `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
 14. `docs/master/27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md`
+15. `docs/master/28_UX_SUPERIORITY_MANUAL_2026-02-28.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -40,6 +41,7 @@ Status: CANONICAL ENTRYPOINT
 | `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md` | Market parity/superiority comparison playbook | ACTIVE |
 | `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` | Canonical active baseline override | ACTIVE |
 | `27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md` | Domain readiness thresholds | ACTIVE |
+| `28_UX_SUPERIORITY_MANUAL_2026-02-28.md` | UX superiority guidelines | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
