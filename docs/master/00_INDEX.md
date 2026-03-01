@@ -87,6 +87,7 @@ Status: CANONICAL ENTRYPOINT
 - External claims are directional only.
 - If not reproducible in this repo, tag as `EXTERNAL_BENCHMARK_ASSUMPTION`.
 - Product/roadmap decisions must be based on canonical evidence in `docs/master/`.
+- Executive UX-market gap baseline is tracked in `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`.
 
 ## Execution Rule for Future AI Agents
 - Always start from this file.

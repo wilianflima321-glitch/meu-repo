@@ -2,72 +2,92 @@
 Status: REALITY ALIGNMENT
 Date: 2026-02-28
 Owner: PM Tecnico + Critical Agent
+Input: Executive UX gap report (user-provided, 2026-02-28)
 
 ## 1) Purpose
-Absorb the latest executive assessment as canonical alignment input, separating:
-1. verified in-repo facts,
-2. critical UX/product gaps,
-3. external benchmark assumptions.
+Convert the executive review into canonical execution direction without scope drift.
 
-This file is the bridge between current engineering quality and market-grade user experience execution.
+This file is now the active UX-market readiness bridge between:
+1. engineering quality already achieved;
+2. user-perceived product quality still missing.
 
-## 2) Verified strengths (in-repo evidence)
-1. Enterprise gate discipline is active (`lint`, `typecheck`, `build`, interface/contracts/fake-success/mojibake gates).
-2. Interface critical metrics are at zero for legacy/accent/admin-light/dialog regressions.
-3. Capability/error contracts are explicit (`NOT_IMPLEMENTED`, `DEPRECATED_ROUTE`, `QUEUE_BACKEND_UNAVAILABLE`, etc.).
-4. Canonical governance in `docs/master` is active and enforced by alignment/connectivity checks.
-5. `/dashboard` and `/ide` shell contract remains stable.
+## 2) What is already elite (FACTUAL_IN_REPO)
+1. Quality governance and gates are strong (`lint`, `typecheck`, `build`, interface/contracts/no-fake-success/mojibake).
+2. Interface critical regressions are controlled (`legacy-accent`, `admin-light`, `blocking-dialogs` at zero in latest sweep baseline).
+3. Error/deprecation capability policy is explicit and machine-readable.
+4. Canonical doc governance is active and enforceable (`00_INDEX`, canonical alignment gate, connectivity gate).
+5. Multi-agent and deterministic validation architecture is structurally differentiated.
 
-## 3) Critical gaps to close (P0/P1)
-1. Preview runtime experience:
-- current default is still static/limited in user-perceived real-time flow;
-- HMR-grade preview is required for top-tier UX parity.
-2. Zero-to-value onboarding:
-- first-user journey still lacks deterministic "first wow in <90s" evidence.
-3. Mobile responsiveness for entry surfaces:
-- dashboard/landing/product entry requires explicit responsive acceptance.
-4. Product telemetry:
-- no canonical evidence of complete product analytics loop for funnel and abandonment analysis.
-5. AI provider setup UX:
-- capability gates are honest, but setup recovery path must be direct and guided.
-6. Dashboard monolith residual:
-- decomposition improved, but remaining heavy blocks still create maintenance/regression pressure.
-7. Collaboration readiness:
-- still `PARTIAL` without published SLO/load evidence.
-8. Theme/accessibility completeness:
-- dark-first quality is high; light theme + full accessibility evidence remains open.
+## 3) Critical gaps (execution blockers)
+### G1 Preview runtime fluency (P0)
+Current: preview in primary user flow is still perceived as static for modern app UX expectations.
+Required: real runtime update loop (HMR-grade where supported), explicit gate when unsupported.
 
-## 4) Claim policy update
-1. "Best in market" is blocked until UX flow evidence exists for:
-- onboarding,
-- preview responsiveness,
-- mobile-ready entry experience,
-- telemetry-backed adoption metrics.
-2. Any statement about competitor superiority must be tagged:
-- `FACTUAL_IN_REPO`, or
-- `EXTERNAL_BENCHMARK_ASSUMPTION`.
-3. `28/29/30` remain valid strategic docs, but operational claims are bounded by this file + `26`.
+### G2 Onboarding zero-to-value (P0)
+Current: no proved deterministic first-value flow in under 90 seconds.
+Required: guided first project flow with measurable completion and immediate value.
 
-## 5) Execution ordering (binding)
-1. P0-A to P0-J from `20` remain active.
-2. Immediate next closures:
-- P0-K: product telemetry baseline and funnel instrumentation;
-- P0-L: AI provider setup recovery wizard on capability gates;
-- P0-M: preview runtime HMR path (real, not simulated);
-- P0-N: first-value onboarding flow with measurable completion;
-- P0-O: responsive hardening for `/dashboard` + landing;
-- P0-P: finish `AethelDashboard` decomposition.
-3. Only after these closures:
-- promote UX-market claims,
-- advance L3+ readiness narratives.
+### G3 Mobile readiness on entry surfaces (P0)
+Current: no canonical acceptance evidence for `/dashboard` and landing on mobile/tablet.
+Required: responsive contracts for entry and billing/profile surfaces.
 
-## 6) Acceptance evidence required
-1. Technical:
-- gate suite green in freeze wave.
-2. Product UX:
+### G4 Performance observability (P0)
+Current: no canonical Core Web Vitals baseline for critical routes.
+Required: collect and publish TTI/FCP/LCP + stream latency baselines.
+
+### G5 AI setup recovery UX (P0)
+Current: honest `501 NOT_IMPLEMENTED` exists, but recovery path is not guaranteed.
+Required: direct setup CTA + inline wizard + verification result in UX flow.
+
+### G6 Dashboard monolith residual (P0)
+Current: decomposition improved but heavy blocks remain.
+Required: complete extraction of remaining tab blocks with stable contracts.
+
+### G7 Collaboration readiness evidence (P1)
+Current: PARTIAL without published SLO/load proof.
+Required: publish minimum SLO + conflict/reconnect/load evidence.
+
+### G8 Theme and accessibility completeness (P1)
+Current: dark-first is strong; light mode and complete accessibility evidence are still open.
+Required: light theme strategy and WCAG evidence for critical surfaces.
+
+### G9 Product telemetry loop (P0)
+Current: no canonical product funnel instrumentation evidence.
+Required: telemetry for funnel, drop-off, first-action and first-value events.
+
+### G10 Empty states and micro-interaction consistency (P1)
+Current: partial improvements only.
+Required: unified empty/loading/error/success language and behavior across dashboard/ide/admin.
+
+## 4) Comparator policy
+1. Competitor comparisons are directional by default.
+2. Every external statement must be tagged:
+- `FACTUAL_IN_REPO` when proven locally, or
+- `EXTERNAL_BENCHMARK_ASSUMPTION` when not reproducible in-repo.
+3. "Best in market" claim stays blocked until P0 UX blockers are closed with evidence.
+
+## 5) Binding execution order
+1. Keep `P0-A..P0-J` from `20` active.
+2. Execute next:
+- `P0-K` telemetry baseline and funnel instrumentation;
+- `P0-L` AI setup recovery UX for `NOT_IMPLEMENTED` capability gates;
+- `P0-M` real-time preview runtime path;
+- `P0-N` onboarding first-value flow;
+- `P0-O` responsive entry surfaces;
+- `P0-P` complete dashboard decomposition.
+3. Then execute:
+- collaboration SLO publication and stress tests;
+- light theme and accessibility completion;
+- empty-state and micro-interaction consistency pass.
+
+## 6) Evidence gate for closure
+1. Technical gates remain mandatory.
+2. UX evidence required:
 - measured first-action and first-value times;
-- user-visible recovery path for provider-not-configured.
-3. Performance:
-- baseline for TTI/FCP/LCP and preview update latency.
-4. Governance:
-- all active docs aligned with this file and `26`.
+- verified AI setup recovery path;
+- responsive behavior pass for entry surfaces.
+3. Performance evidence required:
+- TTI/FCP/LCP baseline;
+- AI stream latency baseline.
+4. Governance evidence required:
+- active canonical docs aligned with `26` and this file in the same wave.

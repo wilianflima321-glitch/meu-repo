@@ -210,6 +210,14 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `/dashboard` and landing must meet defined mobile/tablet acceptance.
 6. `P0-P` Complete dashboard monolith decomposition:
 - extract remaining heavy tab blocks and finalize stable prop contracts.
+7. `P1-Q` Collaboration readiness evidence:
+- publish SLO (`p95 latency`, reconnect, conflict handling) and stress-test baseline.
+8. `P1-R` Light theme + accessibility completion:
+- add light-theme token strategy and WCAG evidence for critical surfaces.
+9. `P1-S` Empty-state and micro-interaction consistency:
+- unify loading/error/empty/success patterns across dashboard/ide/admin.
+10. `P1-T` Performance metrics baseline:
+- publish TTI/FCP/LCP + AI stream latency and track against targets.
 
 ### Gate for market-level UX claim
 1. No "best in market" claim before:
