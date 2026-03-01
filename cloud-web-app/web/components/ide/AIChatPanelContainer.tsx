@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import AIChatPanelPro from '@/components/ide/AIChatPanelPro'
+import { analytics } from '@/lib/analytics'
 
 type ChatMessage = {
   id: string
@@ -18,6 +19,12 @@ type AdvancedProfile = {
   qualityMode: QualityMode
   agentCount: 1 | 2 | 3
   enableWebResearch: boolean
+}
+
+type ProviderGateState = {
+  code: string
+  message: string
+  capability?: string
 }
 
 const MODELS = [
@@ -112,7 +119,10 @@ function inferAdvancedProfile(message: string): AdvancedProfile {
   }
 }
 
-function extractApiError(raw: string, fallbackStatus: number): { code: string; message: string } {
+function extractApiError(
+  raw: string,
+  fallbackStatus: number
+): { code: string; message: string; capability?: string; capabilityStatus?: string } {
   try {
     const data = JSON.parse(raw)
     const code =
@@ -127,7 +137,9 @@ function extractApiError(raw: string, fallbackStatus: number): { code: string; m
         : typeof data?.detail === 'string'
           ? data.detail
           : `Request failed with HTTP ${fallbackStatus}.`
-    return { code, message }
+    const capability = typeof data?.capability === 'string' ? data.capability : undefined
+    const capabilityStatus = typeof data?.capabilityStatus === 'string' ? data.capabilityStatus : undefined
+    return { code, message, capability, capabilityStatus }
   } catch {
     return {
       code: fallbackStatus === 501 ? 'AI_PROVIDER_UNAVAILABLE' : 'AI_REQUEST_FAILED',
@@ -149,6 +161,14 @@ function isAgentGateError(code: string): boolean {
   return code === 'FEATURE_NOT_ALLOWED' || code === 'AGENTS_LIMIT_EXCEEDED'
 }
 
+function isProviderSetupError(error: { code: string; capabilityStatus?: string }): boolean {
+  return (
+    error.code === 'AI_PROVIDER_UNAVAILABLE' ||
+    error.code === 'NOT_IMPLEMENTED' ||
+    error.capabilityStatus === 'NOT_IMPLEMENTED'
+  )
+}
+
 function getProjectIdFromLocation(): string | undefined {
   if (typeof window === 'undefined') return undefined
   const value = new URLSearchParams(window.location.search).get('projectId')
@@ -161,6 +181,7 @@ export default function AIChatPanelContainer() {
   const [currentModel, setCurrentModel] = useState(MODELS[0].id)
   const [isLoading, setIsLoading] = useState(false)
   const [projectId, setProjectId] = useState<string | undefined>(undefined)
+  const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)
 
   const modelOptions = useMemo(() => MODELS, [])
 
@@ -197,8 +218,16 @@ export default function AIChatPanelContainer() {
       }
 
       setIsLoading(true)
+      analytics?.track?.('ai', 'ai_chat', {
+        metadata: {
+          source: 'ide-panel',
+          model: currentModel,
+          projectId,
+        },
+      })
 
       try {
+        setProviderGate(null)
         const profile = inferAdvancedProfile(message)
         const payload = {
           model: currentModel,
@@ -235,6 +264,13 @@ export default function AIChatPanelContainer() {
 
         if (!res.ok) {
           const parsed = extractApiError(raw, res.status)
+          if (isProviderSetupError(parsed)) {
+            setProviderGate({
+              code: parsed.code,
+              message: parsed.message,
+              capability: parsed.capability,
+            })
+          }
           throw new Error(`${parsed.code}: ${parsed.message}`.trim())
         }
 
@@ -254,6 +290,15 @@ export default function AIChatPanelContainer() {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'AI_REQUEST_FAILED: AI request failed.'
+
+        analytics?.track?.('ai', 'ai_error', {
+          metadata: {
+            source: 'ide-panel',
+            model: currentModel,
+            projectId,
+            error: errorMessage,
+          },
+        })
 
         setMessages((prev) => [
           ...prev,
@@ -277,15 +322,38 @@ export default function AIChatPanelContainer() {
   }, [])
 
   return (
-    <AIChatPanelPro
-      messages={messages}
-      onSendMessage={handleSendMessage}
-      onClearChat={handleClearChat}
-      isLoading={isLoading}
-      currentModel={currentModel}
-      models={modelOptions}
-      onModelChange={setCurrentModel}
-      allowAttachments={false}
-    />
+    <div className="flex h-full flex-col">
+      {providerGate && (
+        <div className="mx-3 mt-3 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-100">
+          <div className="font-semibold">AI Provider Not Configured</div>
+          <div className="mt-1 text-amber-200">
+            {providerGate.message}
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <a
+              href="/admin/apis"
+              className="rounded border border-amber-400/40 bg-amber-500/20 px-2 py-1 text-[11px] font-medium text-amber-100 hover:bg-amber-500/30"
+            >
+              Configure Provider
+            </a>
+            <span className="text-[11px] text-amber-300/80">
+              capability: {providerGate.capability ?? 'AI_CHAT_ADVANCED'}
+            </span>
+          </div>
+        </div>
+      )}
+      <div className="min-h-0 flex-1">
+        <AIChatPanelPro
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          onClearChat={handleClearChat}
+          isLoading={isLoading}
+          currentModel={currentModel}
+          models={modelOptions}
+          onModelChange={setCurrentModel}
+          allowAttachments={false}
+        />
+      </div>
+    </div>
   )
 }

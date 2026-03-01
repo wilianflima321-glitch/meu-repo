@@ -198,9 +198,11 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 1. `P0-K` Product telemetry baseline:
 - instrument funnel (`landing -> signup -> dashboard -> first project -> first AI action`);
 - publish canonical metrics source and dashboards.
+ - status 2026-02-28: `PARTIAL` (batch ingest endpoint `app/api/analytics/batch/route.ts` + dashboard/chat baseline events wired).
 2. `P0-L` AI provider setup recovery UX:
 - every AI `NOT_IMPLEMENTED` gate must provide direct setup CTA and verification path;
 - no dead-end error state in critical journey.
+ - status 2026-02-28: `PARTIAL` (`components/ide/AIChatPanelContainer.tsx` now shows setup CTA `/admin/apis` on provider gate).
 3. `P0-M` Preview runtime real-time closure:
 - move from static-perceived preview to true runtime update loop (HMR-grade where supported);
 - keep unsupported/runtime-limited types explicitly gated.

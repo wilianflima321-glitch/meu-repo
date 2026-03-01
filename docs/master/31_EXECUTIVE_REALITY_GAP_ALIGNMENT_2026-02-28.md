@@ -91,3 +91,19 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - AI stream latency baseline.
 4. Governance evidence required:
 - active canonical docs aligned with `26` and this file in the same wave.
+
+## 7) Delta 2026-02-28 (implemented in this wave)
+### 7.1 G5 AI setup recovery UX
+1. `components/ide/AIChatPanelContainer.tsx` now exposes explicit recovery state when advanced chat returns provider/capability `NOT_IMPLEMENTED`.
+2. UX now includes direct operational CTA to `/admin/apis` and capability label, instead of only raw error text.
+3. Non-fake-success policy remains intact (`501` still returned; UI only adds guided recovery).
+
+### 7.2 G9 Product telemetry baseline
+1. New endpoint `app/api/analytics/batch/route.ts` was added to accept batched analytics payloads from `lib/analytics.ts`.
+2. Dashboard and IDE chat container now emit baseline events for chat usage/error and dashboard surface open.
+3. Telemetry persistence is routed into `AuditLog` with explicit `category=analytics`.
+
+### 7.3 Dashboard contract coherence (P0 stability)
+1. `components/AethelDashboard.tsx` was realigned with current tab component contracts (header/sidebar/chat/wallet/connectivity).
+2. Removed dead/no-op tab callbacks in critical paths (`chat`, `connectivity`, `templates`, `use-cases`).
+3. Capability and state handoff now remain explicit in dashboard flows (no hidden success path).

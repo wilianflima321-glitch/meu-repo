@@ -5,6 +5,8 @@ export interface WorkflowTemplate {
   name: string
   description: string
   category: string
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  steps: string[]
   nodes: any[]
   edges: any[]
   thumbnail?: string
@@ -12,14 +14,17 @@ export interface WorkflowTemplate {
 
 export interface UseCase {
   id: string
-  title: string
+  name: string
   description: string
   category: string
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  features: string[]
   sharedBy: string
   views: number
   likes: number
   tags: string[]
   preview?: string
+  title?: string
 }
 
 export interface DashboardSettings {
