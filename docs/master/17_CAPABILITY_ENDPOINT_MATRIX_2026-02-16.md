@@ -33,6 +33,9 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | AI inline edit | `app/api/ai/inline-edit/route.ts` | `NOT_IMPLEMENTED` when provider missing; otherwise active | `501 NOT_IMPLEMENTED` + capability metadata |
 
 | AI inline completion (compat) | `app/api/ai/inline-completion/route.ts` | active compat surface | canonical `suggestion` + alias `text` |
+| AI agents overview | `app/api/ai/agents/route.ts` | `PARTIAL` | returns deterministic empty baseline + capability metadata |
+| AI agents executions | `app/api/ai/agents/executions/route.ts` | `PARTIAL` | returns deterministic empty baseline + capability metadata |
+| AI agents metrics | `app/api/ai/agents/metrics/route.ts` | `PARTIAL` | returns deterministic baseline metrics + capability metadata |
 
 | AI deterministic validation | `app/api/ai/change/validate/route.ts` | `IMPLEMENTED` | returns `canApply`, `verdict`, `checks`, dependency impact |
 | AI change apply | `app/api/ai/change/apply/route.ts` | `NOT_IMPLEMENTED` | explicit gate until persistent apply/rollback token store is available |
@@ -41,6 +44,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Render cancel | `app/api/render/jobs/[jobId]/cancel/route.ts` | `NOT_IMPLEMENTED` | explicit capability gate with metadata |
 
 | Billing checkout (non-stripe) | `app/api/billing/checkout/route.ts` | `NOT_IMPLEMENTED` branch | `PAYMENT_GATEWAY_NOT_IMPLEMENTED` with capability metadata |
+| Wallet purchase intent (package bridge) | `app/api/wallet/purchase/route.ts` | `PARTIAL` | registers pending ledger intent with explicit settlement gate |
 
 | File tree | `app/api/files/tree/route.ts` | `IMPLEMENTED` | canonical file authority |
 
@@ -53,6 +57,9 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | Asset upload validation | `app/api/assets/upload/route.ts` + `lib/server/asset-processor.ts` | `IMPLEMENTED/PARTIAL` by class | explicit validation + warnings + capabilityStatus |
 | Analytics batch ingest | `app/api/analytics/batch/route.ts` | `IMPLEMENTED` | batched telemetry ingest (`events[]`, `metrics[]`) persisted in `AuditLog` with bounded batch size |
 | Studio orchestration APIs | `app/api/studio/*` | `NOT_IMPLEMENTED` (explicit) | all new endpoints return capability envelope via shared `studio-gate` helper (no fake success) |
+| Admin job queue APIs | `app/api/admin/jobs*` | `PARTIAL/NOT_IMPLEMENTED` | list/stats return baseline; control actions remain explicit `NOT_IMPLEMENTED` |
+| Admin security event APIs | `app/api/admin/security/events|rate-limits` | `PARTIAL` | baseline response with explicit capability status for ops surfaces |
+| Catch-all compatibility APIs | `app/api/{git,engine,files,health,lsp,marketplace,search,terminal,test,logs,commands,launch,telemetry}/[...path]` | `NOT_IMPLEMENTED` (explicit) | unmatched legacy paths now return capability envelope instead of opaque `404` |
 
 
 

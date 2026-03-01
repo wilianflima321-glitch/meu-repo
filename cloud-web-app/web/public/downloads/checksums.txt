@@ -1,0 +1,2 @@
+# Checksums are published only for release artifacts that pass freeze gates.
+# This placeholder keeps route stability while delivery channels are finalized.
