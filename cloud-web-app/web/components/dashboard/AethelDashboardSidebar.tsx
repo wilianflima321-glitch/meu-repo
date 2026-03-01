@@ -14,6 +14,7 @@ type AethelDashboardSidebarProps = {
   onCreateNewSession: () => void
   onSelectSessionFilter: (filter: SessionFilter) => void
   onSelectTab: (tab: ActiveTab) => void
+  onCloseMobile?: () => void
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -105,12 +106,21 @@ export function AethelDashboardSidebar({
   onCreateNewSession,
   onSelectSessionFilter,
   onSelectTab,
+  onCloseMobile,
 }: AethelDashboardSidebarProps) {
+  const selectTab = (tab: ActiveTab) => {
+    onSelectTab(tab)
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      onCloseMobile?.()
+    }
+  }
+
   return (
     <nav
       className={`aethel-sidebar fixed md:relative z-50 h-full md:h-auto transform transition-transform duration-300 ease-in-out ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
+      aria-label="Navegacao principal do studio"
     >
       <div className="aethel-sidebar-header">
         <div className="aethel-flex aethel-items-center aethel-gap-3">
@@ -163,8 +173,9 @@ export function AethelDashboardSidebar({
           <button
             key={item.tab}
             type="button"
-            onClick={() => onSelectTab(item.tab)}
+            onClick={() => selectTab(item.tab)}
             className={`aethel-sidebar-item aethel-w-full ${activeTab === item.tab ? 'active' : ''}`}
+            aria-current={activeTab === item.tab ? 'page' : undefined}
           >
             <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPrimary} />

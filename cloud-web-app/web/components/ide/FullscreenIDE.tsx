@@ -5,11 +5,14 @@ import { useSearchParams } from "next/navigation";
 import IDELayout from "@/components/ide/IDELayout";
 import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
+import PreviewPanel from "@/components/ide/PreviewPanel";
 import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import CommandPaletteProvider from "@/components/ide/CommandPalette";
+import { analytics } from "@/lib/analytics";
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
+const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
 
 type ActiveFileState = {
   path: string;
@@ -53,6 +56,14 @@ function IDEContent() {
   const [isReadingFile, setIsReadingFile] = useState(false);
   const [isSavingFile, setIsSavingFile] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [previewEnabled, setPreviewEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = window.localStorage.getItem(PREVIEW_ENABLED_STORAGE_KEY);
+    if (stored === "1") return true;
+    if (stored === "0") return false;
+    return window.innerWidth >= 1440;
+  });
+  const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -60,6 +71,11 @@ function IDEContent() {
       localStorage.setItem(LAST_PROJECT_ID_STORAGE_KEY, projectId);
     }
   }, [projectId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(PREVIEW_ENABLED_STORAGE_KEY, previewEnabled ? "1" : "0");
+  }, [previewEnabled]);
 
   const readFile = useCallback(
     async (path: string) => {
@@ -172,8 +188,24 @@ function IDEContent() {
           detail: { tab: "terminal" },
         })
       );
+      return;
+    }
+    if (entry === "live-preview" || entry === "preview") {
+      setPreviewEnabled(true);
     }
   }, [entryParam]);
+
+  useEffect(() => {
+    analytics?.track("engine", "editor_open", {
+      metadata: {
+        surface: "ide",
+        projectId,
+        file: fileParam ?? null,
+        entry: entryParam ?? null,
+      },
+    });
+    analytics?.trackPageLoad?.("ide");
+  }, [entryParam, fileParam, projectId]);
 
   const handleFileSelect = useCallback(
     (file: { path: string; type: "file" | "folder" }) => {
@@ -202,6 +234,7 @@ function IDEContent() {
         <IDELayout
           fileExplorer={<FileExplorerPro onFileSelect={handleFileSelect} />}
           aiChatPanel={<AIChatPanelContainer />}
+          onTogglePreview={() => setPreviewEnabled((prev) => !prev)}
         >
           <div className="h-full flex flex-col">
             <TabBar />
@@ -221,24 +254,41 @@ function IDEContent() {
               )}
 
               {!isReadingFile && !fileError && activeFile && (
-                <MonacoEditorPro
-                  path={activeFile.path}
-                  value={activeFile.content}
-                  language={activeFile.language}
-                  onChange={(value) => {
-                    setActiveFile((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            content: value ?? "",
-                          }
-                        : prev
-                    );
-                  }}
-                  onSave={(value) => {
-                    void writeFile(activeFile.path, value);
-                  }}
-                />
+                <div className={`h-full min-h-0 ${previewEnabled ? "grid grid-cols-1 xl:grid-cols-2" : ""}`}>
+                  <div className={`h-full min-h-0 ${previewEnabled ? "border-r border-zinc-800" : ""}`}>
+                    <MonacoEditorPro
+                      path={activeFile.path}
+                      value={activeFile.content}
+                      language={activeFile.language}
+                      onChange={(value) => {
+                        setActiveFile((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                content: value ?? "",
+                              }
+                            : prev
+                        );
+                      }}
+                      onSave={(value) => {
+                        void writeFile(activeFile.path, value);
+                      }}
+                    />
+                  </div>
+                  {previewEnabled && (
+                    <div className="h-full min-h-0 bg-zinc-950">
+                      <PreviewPanel
+                        key={`${activeFile.path}:${previewRefreshTick}`}
+                        title="Live Preview"
+                        filePath={activeFile.path}
+                        content={activeFile.content}
+                        projectId={projectId}
+                        isStale={isSavingFile}
+                        onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
+                      />
+                    </div>
+                  )}
+                </div>
               )}
 
               {!isReadingFile && !fileError && !activeFile && (

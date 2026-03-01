@@ -26,6 +26,11 @@ type DashboardAIChatTabProps = {
   onCopyHistory: () => void
   onImportContext: () => void
   onMergeWorkflow: () => void
+  providerSetupGate?: {
+    message: string
+    capabilityStatus?: string
+  } | null
+  onOpenProviderSettings?: () => void
 }
 
 export function DashboardAIChatTab({
@@ -49,6 +54,8 @@ export function DashboardAIChatTab({
   onCopyHistory,
   onImportContext,
   onMergeWorkflow,
+  providerSetupGate,
+  onOpenProviderSettings,
 }: DashboardAIChatTabProps) {
   return (
     <div className="aethel-p-6">
@@ -94,6 +101,29 @@ export function DashboardAIChatTab({
         onImportContext={onImportContext}
         onMergeWorkflow={onMergeWorkflow}
       />
+
+      {providerSetupGate && (
+        <div className="aethel-card aethel-p-4 aethel-mb-6 aethel-border aethel-border-amber-500/30 aethel-bg-amber-500/10">
+          <div className="aethel-flex aethel-items-center aethel-justify-between aethel-gap-3">
+            <div>
+              <p className="aethel-text-sm aethel-font-semibold aethel-text-amber-200">AI provider nao configurado</p>
+              <p className="aethel-text-xs aethel-text-slate-300 aethel-mt-1">{providerSetupGate.message}</p>
+              {providerSetupGate.capabilityStatus && (
+                <p className="aethel-text-[11px] aethel-text-slate-400 aethel-mt-1">
+                  capabilityStatus: {providerSetupGate.capabilityStatus}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={onOpenProviderSettings}
+              className="aethel-button aethel-button-primary aethel-text-xs"
+            >
+              Configurar em /admin/apis
+            </button>
+          </div>
+        </div>
+      )}
 
       {chatMode === 'chat' && (
         <div className="aethel-card aethel-p-6 aethel-max-w-4xl aethel-mx-auto">

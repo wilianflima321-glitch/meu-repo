@@ -110,6 +110,7 @@ const DEFAULT_SETTINGS: DashboardSettings = {
 }
 
 const DEFAULT_MODEL = 'gpt-4o-mini'
+const FIRST_VALUE_GUIDE_DISMISSED_KEY = 'aethel.dashboard.first-value.dismissed'
 
 type AdvancedProfile = {
   qualityMode: 'standard' | 'delivery' | 'studio'
@@ -235,6 +236,11 @@ export default function AethelDashboard() {
   const [lastTransferReceipt, setLastTransferReceipt] = useState<TransferResponse | null>(null)
   const [subscribeError, setSubscribeError] = useState<string | null>(null)
   const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null)
+  const [aiProviderGate, setAiProviderGate] = useState<{ message: string; capabilityStatus?: string } | null>(null)
+  const [showFirstValueGuide, setShowFirstValueGuide] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return window.localStorage.getItem(FIRST_VALUE_GUIDE_DISMISSED_KEY) !== '1'
+  })
   const [isTrialActive] = useState(true)
   const trialDaysLeft = 14
   const [nodes, setNodes] = useState(INITIAL_NODES)
@@ -320,6 +326,13 @@ export default function AethelDashboard() {
     }
   }, [])
 
+  const dismissFirstValueGuide = useCallback(() => {
+    setShowFirstValueGuide(false)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(FIRST_VALUE_GUIDE_DISMISSED_KEY, '1')
+    }
+  }, [])
+
   const persistCopilotScope = useCallback((workflowId: string | null, threadId: string | null) => {
     if (typeof window === 'undefined') return
     const keys = getScopedKeys(copilotProjectId)
@@ -336,6 +349,23 @@ export default function AethelDashboard() {
     }
     trackEvent('user', 'settings_change', { section: 'dashboard-tab', tab })
   }, [trackEvent])
+
+  const handleOpenProviderSettings = useCallback(() => {
+    setSidebarOpen(false)
+    setActiveTab('admin')
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEYS.activeTab, 'admin')
+    }
+    trackEvent('ai', 'ai_error', { source: 'provider-gate', action: 'open-admin-apis' })
+  }, [trackEvent])
+
+  const handleOpenIdeLivePreview = useCallback(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams()
+    params.set('entry', 'live-preview')
+    if (copilotProjectId) params.set('projectId', copilotProjectId)
+    window.location.assign(`/ide?${params.toString()}`)
+  }, [copilotProjectId])
 
   const handleResetDashboard = useCallback(() => {
     clearStoredDashboardState()
@@ -384,9 +414,10 @@ export default function AethelDashboard() {
     const project = createProjectEntry(projects, value, newProjectType)
     setProjects(prev => [project, ...prev])
     setNewProjectName('')
+    dismissFirstValueGuide()
     showToastMessage('Projeto criado com sucesso.', 'success')
     trackEvent('project', 'project_create', { type: newProjectType })
-  }, [newProjectName, newProjectType, projects, showToastMessage, trackEvent])
+  }, [newProjectName, newProjectType, projects, dismissFirstValueGuide, showToastMessage, trackEvent])
 
   const handleDeleteProject = useCallback((id: number) => {
     setProjects(prev => removeProjectEntry(prev, id))
@@ -666,6 +697,7 @@ export default function AethelDashboard() {
     void (async () => {
       const message = chatMessage.trim()
       if (!message || isStreaming) return
+      setAiProviderGate(null)
       const nextMessages = [...chatHistory, { role: 'user', content: message } as ChatMessage].slice(-200)
       setChatMessage('')
       setChatHistory(nextMessages)
@@ -714,10 +746,17 @@ export default function AethelDashboard() {
         }
         if (!response.ok) {
           const parsed = extractApiError(raw, response.status)
-          const userMessage =
+          const isProviderGate =
             parsed.code === 'NOT_IMPLEMENTED' || parsed.capabilityStatus === 'NOT_IMPLEMENTED'
-              ? `${parsed.message} Configure um provider em /admin/apis para liberar o chat.`
-              : `${parsed.code}: ${parsed.message}`
+          const userMessage = isProviderGate
+            ? `${parsed.message} Configure um provider em /admin/apis para liberar o chat.`
+            : `${parsed.code}: ${parsed.message}`
+          if (isProviderGate) {
+            setAiProviderGate({
+              message: parsed.message,
+              capabilityStatus: parsed.capabilityStatus,
+            })
+          }
           throw new Error(userMessage)
         }
         const assistantMessage: ChatMessage = {
@@ -725,6 +764,7 @@ export default function AethelDashboard() {
           content: extractApiContent(raw) || 'Resposta vazia do modelo.',
         }
         setChatHistory((prev) => [...prev, assistantMessage].slice(-200))
+        dismissFirstValueGuide()
         setAiActivity('Ativo')
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Falha na chamada de IA.'
@@ -734,7 +774,7 @@ export default function AethelDashboard() {
         setIsStreaming(false)
       }
     })()
-  }, [chatMessage, isStreaming, chatHistory, copilotProjectId])
+  }, [chatMessage, isStreaming, chatHistory, copilotProjectId, dismissFirstValueGuide])
 
   const handleMagicWandSelect = useCallback((position: THREE.Vector3) => {
     setSelectedPreviewPoint(position.clone())
@@ -799,6 +839,7 @@ export default function AethelDashboard() {
     setHasToken(isAuthenticated())
     setCopilotProjectId(getProjectIdFromLocation())
     trackEvent('engine', 'editor_open', { surface: 'dashboard' })
+    analytics?.trackPageLoad?.('dashboard')
   }, [trackEvent])
 
   useEffect(() => {
@@ -906,6 +947,15 @@ export default function AethelDashboard() {
       />
 
       <div className="aethel-flex aethel-flex-1 aethel-overflow-hidden">
+        {sidebarOpen && (
+          <button
+            type="button"
+            aria-label="Fechar menu lateral"
+            className="fixed inset-0 z-40 bg-slate-950/70 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         <AethelDashboardSidebar
           sidebarOpen={sidebarOpen}
           activeTab={activeTab}
@@ -913,9 +963,37 @@ export default function AethelDashboard() {
           onCreateNewSession={handleCreateNewSession}
           onSelectSessionFilter={setSessionFilter}
           onSelectTab={handleTabChange}
+          onCloseMobile={() => setSidebarOpen(false)}
         />
 
         <main className="aethel-flex-1 aethel-overflow-y-auto aethel-relative">
+          {showFirstValueGuide && (
+            <section className="aethel-m-4 aethel-p-4 aethel-rounded-lg border border-blue-500/30 bg-blue-500/10 md:aethel-m-6">
+              <div className="aethel-flex aethel-flex-col md:aethel-flex md:aethel-flex-row md:aethel-items-center md:aethel-justify-between aethel-gap-3">
+                <div>
+                  <h3 className="aethel-text-sm aethel-font-semibold aethel-text-blue-200">Primeiro valor em menos de 2 minutos</h3>
+                  <p className="aethel-text-xs aethel-text-slate-300 aethel-mt-1">
+                    Crie um projeto, configure o provider de IA e abra o live preview da IDE com contexto completo.
+                  </p>
+                </div>
+                <div className="aethel-flex aethel-flex-col sm:aethel-flex sm:aethel-flex-row aethel-gap-2">
+                  <button type="button" onClick={() => handleTabChange('projects')} className="aethel-button aethel-button-primary aethel-text-xs">
+                    Criar projeto
+                  </button>
+                  <button type="button" onClick={handleOpenProviderSettings} className="aethel-button aethel-button-secondary aethel-text-xs">
+                    Configurar IA
+                  </button>
+                  <button type="button" onClick={handleOpenIdeLivePreview} className="aethel-button aethel-button-secondary aethel-text-xs">
+                    Abrir IDE + Preview
+                  </button>
+                  <button type="button" onClick={dismissFirstValueGuide} className="aethel-button aethel-button-ghost aethel-text-xs">
+                    Dispensar
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
           {activeTab === 'overview' && (
             <DashboardOverviewTab
               aiActivity={aiActivity}
@@ -979,6 +1057,8 @@ export default function AethelDashboard() {
               onCopyHistory={handleCopyHistory}
               onImportContext={handleImportContext}
               onMergeWorkflow={handleMergeWorkflow}
+              providerSetupGate={aiProviderGate}
+              onOpenProviderSettings={handleOpenProviderSettings}
             />
           )}
 

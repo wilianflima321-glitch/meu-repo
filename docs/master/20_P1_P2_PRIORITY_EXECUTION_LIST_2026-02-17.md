@@ -202,14 +202,17 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. `P0-L` AI provider setup recovery UX:
 - every AI `NOT_IMPLEMENTED` gate must provide direct setup CTA and verification path;
 - no dead-end error state in critical journey.
- - status 2026-02-28: `PARTIAL` (`components/ide/AIChatPanelContainer.tsx` now shows setup CTA `/admin/apis` on provider gate).
+ - status 2026-02-28: `PARTIAL` (`components/ide/AIChatPanelContainer.tsx` + `components/dashboard/DashboardAIChatTab.tsx` now expose setup CTA `/admin/apis` on provider gate).
 3. `P0-M` Preview runtime real-time closure:
 - move from static-perceived preview to true runtime update loop (HMR-grade where supported);
 - keep unsupported/runtime-limited types explicitly gated.
+ - status 2026-02-28: `PARTIAL` (`components/ide/FullscreenIDE.tsx` now renders split Editor + `PreviewPanel` with live in-memory updates and manual refresh for runtime-backed assets).
 4. `P0-N` Onboarding first-value flow:
 - deterministic first project path with clear progress and first successful outcome.
+ - status 2026-02-28: `PARTIAL` (`components/AethelDashboard.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff).
 5. `P0-O` Responsive entry surface hardening:
 - `/dashboard` and landing must meet defined mobile/tablet acceptance.
+ - status 2026-02-28: `PARTIAL` (`components/dashboard/AethelDashboardSidebar.tsx` + `components/AethelDashboard.tsx` now include mobile close behavior and backdrop handling).
 6. `P0-P` Complete dashboard monolith decomposition:
 - extract remaining heavy tab blocks and finalize stable prop contracts.
 7. `P1-Q` Collaboration readiness evidence:

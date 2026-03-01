@@ -162,3 +162,8 @@ Validation status:
 1. `AIChatPanelContainer` now surfaces an explicit recovery gate for provider-missing scenarios while preserving `501 NOT_IMPLEMENTED` backend contract.
 2. `analytics/batch` endpoint now exists and matches the client flush path from `lib/analytics.ts`.
 3. No capability contract was relaxed; this wave only closed operational UX/telemetry gaps.
+
+## 9) Delta 2026-02-28 (dashboard + ide UX closure slice)
+1. `DashboardAIChatTab` now mirrors provider setup recovery CTA to `/admin/apis` when advanced chat hits `NOT_IMPLEMENTED` provider gates.
+2. `/ide` now renders split editor + preview path in `FullscreenIDE` with explicit toggle and runtime-gated fallback behavior from `PreviewPanel`.
+3. Capability policy remains unchanged: unsupported preview/runtime classes keep explicit gated messaging (no fake-ready state).

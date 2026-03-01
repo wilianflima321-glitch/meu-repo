@@ -107,3 +107,23 @@ Required: unified empty/loading/error/success language and behavior across dashb
 1. `components/AethelDashboard.tsx` was realigned with current tab component contracts (header/sidebar/chat/wallet/connectivity).
 2. Removed dead/no-op tab callbacks in critical paths (`chat`, `connectivity`, `templates`, `use-cases`).
 3. Capability and state handoff now remain explicit in dashboard flows (no hidden success path).
+
+### 7.4 G1 preview fluency (P0-M partial)
+1. `components/ide/FullscreenIDE.tsx` now supports split Editor + Live Preview inside `/ide` with explicit toggle (`onTogglePreview`).
+2. Preview updates now reflect in-memory editor changes in real time for supported text runtimes.
+3. Runtime-limited types remain explicitly gated in `components/ide/PreviewPanel.tsx` (no fake runtime claim).
+
+### 7.5 G2 onboarding first-value (P0-N partial)
+1. `components/AethelDashboard.tsx` now renders a first-value action rail on entry surfaces:
+- create first project;
+- configure provider setup;
+- open `/ide` directly in `entry=live-preview`.
+2. Flow is intentionally operational (actions are executable), not only instructional copy.
+
+### 7.6 G3 responsive entry hardening (P0-O partial)
+1. `components/dashboard/AethelDashboardSidebar.tsx` now closes on mobile tab selection.
+2. `components/AethelDashboard.tsx` now adds mobile backdrop dismissal to avoid navigation trap states.
+
+### 7.7 G5 dashboard AI recovery extension (P0-L partial)
+1. `components/dashboard/DashboardAIChatTab.tsx` now exposes provider gate message with direct CTA to `/admin/apis`.
+2. `components/AethelDashboard.tsx` tracks provider-gate state from chat API failures and surfaces guided recovery instead of dead-end error-only flow.
