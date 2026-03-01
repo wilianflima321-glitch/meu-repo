@@ -40,6 +40,11 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
 - `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
 - `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
+- `27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md`
+- `28_UX_SUPERIORITY_MANUAL_2026-02-28.md`
+- `29_AUDITORIA_360_P0_HUNT_2026-02-28.md`
+- `30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md`
+- `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
 
 ## Historical note
 - `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md` is historical and contains legacy external-path references; do not use it for current execution decisions.
@@ -55,6 +60,7 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - Conflicts between docs are resolved by `00_INDEX` + `10` + latest dated delta.
 - Active numerical baseline conflicts are resolved by `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` until a newer baseline file exists.
 - External benchmark claims only enter canonical docs as `EXTERNAL_BENCHMARK_ASSUMPTION` until verified in-repo.
+- Operational UX/market claims must align with `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`.
 
 ## Execution Baseline
 - Entry UX: `dashboard`/home journey; `/ide` remains advanced workbench.

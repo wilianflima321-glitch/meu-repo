@@ -192,3 +192,25 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 8. `P0-J`: keep canonical-doc-alignment gate green:
 - `npm run qa:canonical-doc-alignment`
 - block merge if canonical baseline/doc references drift.
+
+## 7. Delta 2026-02-28 (executive closure order from canonical gap review)
+### New immediate blockers (before broad P1 rollout)
+1. `P0-K` Product telemetry baseline:
+- instrument funnel (`landing -> signup -> dashboard -> first project -> first AI action`);
+- publish canonical metrics source and dashboards.
+2. `P0-L` AI provider setup recovery UX:
+- every AI `NOT_IMPLEMENTED` gate must provide direct setup CTA and verification path;
+- no dead-end error state in critical journey.
+3. `P0-M` Preview runtime real-time closure:
+- move from static-perceived preview to true runtime update loop (HMR-grade where supported);
+- keep unsupported/runtime-limited types explicitly gated.
+4. `P0-N` Onboarding first-value flow:
+- deterministic first project path with clear progress and first successful outcome.
+5. `P0-O` Responsive entry surface hardening:
+- `/dashboard` and landing must meet defined mobile/tablet acceptance.
+6. `P0-P` Complete dashboard monolith decomposition:
+- extract remaining heavy tab blocks and finalize stable prop contracts.
+
+### Gate for market-level UX claim
+1. No "best in market" claim before:
+- P0-K/P0-L/P0-M/P0-N/P0-O/P0-P evidence is published.

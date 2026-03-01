@@ -35,3 +35,12 @@ Current values:
 1. `/dashboard` remains entry surface.
 2. `/ide` remains advanced shell of the same platform.
 3. No fake-success and no hidden fallback claims.
+
+## 6) UX market-readiness lock (added 2026-02-28)
+1. Strong engineering quality does not equal UX market leadership by default.
+2. Market-level UX claim is blocked until `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md` closures are evidenced:
+- telemetry baseline,
+- AI setup recovery UX,
+- real-time preview flow,
+- first-value onboarding,
+- responsive entry surfaces.

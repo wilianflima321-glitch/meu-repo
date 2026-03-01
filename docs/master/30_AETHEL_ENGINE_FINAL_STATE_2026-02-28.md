@@ -84,3 +84,14 @@ Documentar o estado final do Aethel Engine após a varredura 360º, hardening de
 O Aethel Engine é agora um **motor de criação assistida de elite**, pronto para superar Manus, Unreal e Perplexity em seus respectivos domínios. A arquitetura é sólida, a segurança está hardened e a experiência do usuário é intuitiva e poderosa.
 
 **Status Final:** ✅ PRONTO PARA PRODUÇÃO (Com Roadmap Claro)
+
+---
+
+## 7) Reality correction (2026-02-28)
+1. This document remains strategic and directional.
+2. Operational claim status is bounded by:
+- `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
+- `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
+3. Current factual correction:
+- engineering governance quality is high;
+- UX market-leadership claim is still pending closure of onboarding/preview/mobile/telemetry gaps.

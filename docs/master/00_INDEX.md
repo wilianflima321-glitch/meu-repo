@@ -20,6 +20,7 @@ Status: CANONICAL ENTRYPOINT
 15. `docs/master/28_UX_SUPERIORITY_MANUAL_2026-02-28.md`
 16. `docs/master/29_AUDITORIA_360_P0_HUNT_2026-02-28.md`
 17. `docs/master/30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md`
+18. `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -46,6 +47,7 @@ Status: CANONICAL ENTRYPOINT
 | `28_UX_SUPERIORITY_MANUAL_2026-02-28.md` | UX superiority guidelines | ACTIVE |
 | `29_AUDITORIA_360_P0_HUNT_2026-02-28.md` | Critical 360 audit & P0 hunt | ACTIVE |
 | `30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md` | Final state & roadmap | ACTIVE |
+| `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md` | Executive gap reality + closure order | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -75,6 +77,11 @@ Status: CANONICAL ENTRYPOINT
   - very large monolithic files (notably `components/AethelDashboard.tsx`),
   - high markdown volume outside `docs/master`,
   - orphan-candidate top-level folders not in runtime-critical flow.
+- UX-market gap debt still open (tracked in `31`):
+  - preview real-time fluency,
+  - onboarding first-value flow,
+  - mobile readiness for entry surfaces,
+  - product telemetry coverage.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

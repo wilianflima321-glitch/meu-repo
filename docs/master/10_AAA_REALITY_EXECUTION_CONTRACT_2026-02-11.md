@@ -2301,3 +2301,22 @@ Implemented:
 Impact:
 1. Eliminates heterogeneous error payload drift in asset ingestion.
 2. Makes policy and storage failures machine-readable and consistent with enterprise contract rules.
+
+## 0.63 Delta Update 2026-02-28 (executive UX gap alignment)
+Implemented (contract/governance):
+1. Added canonical executive alignment doc:
+- `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
+2. Locked critical next closures as contract priority:
+- telemetry baseline,
+- AI provider setup recovery UX,
+- preview runtime real-time path (HMR-grade),
+- onboarding first-value flow,
+- responsive hardening for entry surfaces,
+- dashboard monolith final decomposition.
+3. Clarified claim boundary:
+- engineering quality is strong,
+- market UX superiority claim is blocked until UX evidence gates close.
+
+Impact:
+1. Prevents narrative drift between "internal quality excellence" and "user-perceived product excellence".
+2. Aligns all next waves to measurable UX and adoption outcomes without scope expansion.
