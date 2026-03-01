@@ -209,7 +209,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
  - status 2026-02-28: `PARTIAL` (`components/ide/FullscreenIDE.tsx` now renders split Editor + `PreviewPanel` with live in-memory updates and manual refresh for runtime-backed assets).
 4. `P0-N` Onboarding first-value flow:
 - deterministic first project path with clear progress and first successful outcome.
- - status 2026-02-28: `PARTIAL` (`components/AethelDashboard.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff).
+ - status 2026-02-28: `PARTIAL` (`components/AethelDashboard.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff; `app/landing-v2.tsx` now seeds mission via `/dashboard?mission=`).
 5. `P0-O` Responsive entry surface hardening:
 - `/dashboard` and landing must meet defined mobile/tablet acceptance.
  - status 2026-02-28: `PARTIAL` (`components/dashboard/AethelDashboardSidebar.tsx` + `components/AethelDashboard.tsx` now include mobile close behavior and backdrop handling).

@@ -124,6 +124,14 @@ function getProjectIdFromLocation(): string | null {
   return value && value.trim() ? value.trim() : null
 }
 
+function getMissionFromLocation(): string | null {
+  if (typeof window === 'undefined') return null
+  const value = new URLSearchParams(window.location.search).get('mission')
+  if (!value) return null
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
 function getAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {}
   const token = window.localStorage.getItem('aethel-token')
@@ -237,6 +245,9 @@ export default function AethelDashboard() {
   const [subscribeError, setSubscribeError] = useState<string | null>(null)
   const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null)
   const [aiProviderGate, setAiProviderGate] = useState<{ message: string; capabilityStatus?: string } | null>(null)
+  const [missionSeedLoaded, setMissionSeedLoaded] = useState(false)
+  const [firstValueAiSuccess, setFirstValueAiSuccess] = useState(false)
+  const [firstValueOpenedIde, setFirstValueOpenedIde] = useState(false)
   const [showFirstValueGuide, setShowFirstValueGuide] = useState(() => {
     if (typeof window === 'undefined') return true
     return window.localStorage.getItem(FIRST_VALUE_GUIDE_DISMISSED_KEY) !== '1'
@@ -361,6 +372,7 @@ export default function AethelDashboard() {
 
   const handleOpenIdeLivePreview = useCallback(() => {
     if (typeof window === 'undefined') return
+    setFirstValueOpenedIde(true)
     const params = new URLSearchParams()
     params.set('entry', 'live-preview')
     if (copilotProjectId) params.set('projectId', copilotProjectId)
@@ -414,10 +426,9 @@ export default function AethelDashboard() {
     const project = createProjectEntry(projects, value, newProjectType)
     setProjects(prev => [project, ...prev])
     setNewProjectName('')
-    dismissFirstValueGuide()
     showToastMessage('Projeto criado com sucesso.', 'success')
     trackEvent('project', 'project_create', { type: newProjectType })
-  }, [newProjectName, newProjectType, projects, dismissFirstValueGuide, showToastMessage, trackEvent])
+  }, [newProjectName, newProjectType, projects, showToastMessage, trackEvent])
 
   const handleDeleteProject = useCallback((id: number) => {
     setProjects(prev => removeProjectEntry(prev, id))
@@ -764,7 +775,7 @@ export default function AethelDashboard() {
           content: extractApiContent(raw) || 'Resposta vazia do modelo.',
         }
         setChatHistory((prev) => [...prev, assistantMessage].slice(-200))
-        dismissFirstValueGuide()
+        setFirstValueAiSuccess(true)
         setAiActivity('Ativo')
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Falha na chamada de IA.'
@@ -774,7 +785,7 @@ export default function AethelDashboard() {
         setIsStreaming(false)
       }
     })()
-  }, [chatMessage, isStreaming, chatHistory, copilotProjectId, dismissFirstValueGuide])
+  }, [chatMessage, isStreaming, chatHistory, copilotProjectId])
 
   const handleMagicWandSelect = useCallback((position: THREE.Vector3) => {
     setSelectedPreviewPoint(position.clone())
@@ -841,6 +852,19 @@ export default function AethelDashboard() {
     trackEvent('engine', 'editor_open', { surface: 'dashboard' })
     analytics?.trackPageLoad?.('dashboard')
   }, [trackEvent])
+
+  useEffect(() => {
+    if (missionSeedLoaded || typeof window === 'undefined') return
+    const mission = getMissionFromLocation()
+    setMissionSeedLoaded(true)
+    if (!mission) return
+    setActiveTab('ai-chat')
+    window.localStorage.setItem(STORAGE_KEYS.activeTab, 'ai-chat')
+    setChatMessage((prev) => (prev.trim() ? prev : mission))
+    setShowFirstValueGuide(true)
+    trackEvent('ai', 'ai_chat', { source: 'dashboard-mission-seed' })
+    showToastMessage('Missao carregada no Studio Home. Revise e envie para iniciar.', 'info')
+  }, [missionSeedLoaded, showToastMessage, trackEvent])
 
   useEffect(() => {
     if (typeof document === 'undefined') return
@@ -975,6 +999,11 @@ export default function AethelDashboard() {
                   <p className="aethel-text-xs aethel-text-slate-300 aethel-mt-1">
                     Crie um projeto, configure o provider de IA e abra o live preview da IDE com contexto completo.
                   </p>
+                  <ul className="aethel-mt-2 aethel-space-y-1 text-[11px] text-slate-300">
+                    <li>{projects.length > DEFAULT_PROJECTS.length ? '✓' : '○'} Primeiro projeto criado</li>
+                    <li>{firstValueAiSuccess ? '✓' : '○'} Primeira resposta de IA recebida</li>
+                    <li>{firstValueOpenedIde ? '✓' : '○'} IDE live preview aberta</li>
+                  </ul>
                 </div>
                 <div className="aethel-flex aethel-flex-col sm:aethel-flex sm:aethel-flex-row aethel-gap-2">
                   <button type="button" onClick={() => handleTabChange('projects')} className="aethel-button aethel-button-primary aethel-text-xs">

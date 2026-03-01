@@ -127,3 +127,8 @@ Required: unified empty/loading/error/success language and behavior across dashb
 ### 7.7 G5 dashboard AI recovery extension (P0-L partial)
 1. `components/dashboard/DashboardAIChatTab.tsx` now exposes provider gate message with direct CTA to `/admin/apis`.
 2. `components/AethelDashboard.tsx` tracks provider-gate state from chat API failures and surfaces guided recovery instead of dead-end error-only flow.
+
+### 7.8 Landing -> Studio first-value handoff (P0-N partial)
+1. `app/landing-v2.tsx` now routes Magic Box submissions to `/dashboard?mission=...` instead of dropping users directly into `/ide`.
+2. `components/AethelDashboard.tsx` now consumes `mission` query context and seeds Studio Home chat flow (`ai-chat`) deterministically.
+3. First-value rail now exposes progress checkpoints (first project, first AI response, IDE preview opened) to reduce onboarding ambiguity.
