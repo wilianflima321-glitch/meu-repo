@@ -81,6 +81,8 @@ export function DashboardWalletTab({
   formatCurrencyLabel,
   formatStatusLabel,
 }: DashboardWalletTabProps) {
+  const hasWalletError = Boolean(walletError)
+
   return (
     <div className="aethel-p-6 aethel-space-y-6">
       <div className="aethel-flex aethel-items-center aethel-justify-between">
@@ -108,12 +110,12 @@ export function DashboardWalletTab({
             <div>
               <h3 className="aethel-text-lg aethel-font-semibold">Saldo Atual</h3>
               {walletLoading && <p className="aethel-text-sm aethel-text-slate-400">Carregando carteira...</p>}
-              {walletError && (
+              {hasWalletError && (
                 <p className="aethel-text-sm aethel-text-red-400">
                   Falha ao carregar os dados. Tente novamente.
                 </p>
               )}
-              {!walletLoading && !walletError && walletData && (
+              {!walletLoading && !hasWalletError && walletData && (
                 <>
                   <div className="aethel-text-4xl aethel-font-bold aethel-text-slate-100">
                     {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
@@ -327,9 +329,10 @@ export function DashboardWalletTab({
                   )}
                   {receivableSummary.recent.map((entry) => {
                     const rawStatus = entry.metadata?.['status'] as unknown
-                    const statusLabel = formatStatusLabel(rawStatus)
+                    const statusLabel = String(formatStatusLabel(rawStatus))
                     const invoice = entry.metadata?.['invoice_id'] as unknown
-                    const invoiceLabel = typeof invoice === 'string' ? invoice : entry.reference
+                    const referenceLabel = typeof entry.reference === 'string' ? entry.reference : ''
+                    const invoiceLabel = typeof invoice === 'string' ? invoice : referenceLabel
                     const amountLabel = `+${entry.amount.toLocaleString()} ${formatCurrencyLabel(entry.currency)}`
                     return (
                       <tr key={entry.id} className="aethel-border-t aethel-border-slate-800">

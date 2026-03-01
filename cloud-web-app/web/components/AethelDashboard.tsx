@@ -253,6 +253,7 @@ export default function AethelDashboard() {
     return window.localStorage.getItem(FIRST_VALUE_GUIDE_DISMISSED_KEY) !== '1'
   })
   const [isTrialActive] = useState(true)
+  const [showTrialBanner, setShowTrialBanner] = useState(true)
   const trialDaysLeft = 14
   const [nodes, setNodes] = useState(INITIAL_NODES)
   const [edges, setEdges] = useState(INITIAL_EDGES)
@@ -314,7 +315,10 @@ export default function AethelDashboard() {
       description: plan.description ?? '',
       price: plan.priceBRL ?? plan.price ?? 0,
       currency: plan.currency ?? 'BRL',
-      interval: String(plan.interval).toLowerCase().includes('year') || String(plan.interval).toLowerCase().includes('ano') ? 'year' : 'month',
+      interval:
+        String(plan.interval).toLowerCase().includes('year') || String(plan.interval).toLowerCase().includes('ano')
+          ? ('year' as const)
+          : ('month' as const),
       features: plan.features ?? [],
       popular: plan.popular ?? false,
       limits: {
@@ -955,8 +959,12 @@ export default function AethelDashboard() {
 
   return (
     <div className={`aethel-min-h-screen aethel-flex aethel-flex-column ${settings.theme === 'dark' ? 'aethel-bg-slate-950 aethel-text-slate-50' : 'aethel-bg-slate-100 aethel-text-slate-900'}`}>
-      {isTrialActive && (
-        <TrialBanner daysLeft={trialDaysLeft} onUpgrade={() => handleTabChange('billing')} />
+      {isTrialActive && showTrialBanner && (
+        <TrialBanner
+          trialDaysLeft={trialDaysLeft}
+          onDismiss={() => setShowTrialBanner(false)}
+          onUpgrade={() => handleTabChange('billing')}
+        />
       )}
 
       <DashboardHeader

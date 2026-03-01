@@ -22,7 +22,7 @@ type DashboardOverviewTabProps = {
   connectivityData: ConnectivityResponse | undefined
   connectivityLoading: boolean
   connectivityError: Error | null | undefined
-  connectivityServices: ConnectivityResponse['services']
+  connectivityServices: ConnectivityResponse['services'] | undefined
   formatConnectivityStatus: (status?: string | null) => string
   miniPreviewExpanded: boolean
   onToggleMiniPreviewExpanded: () => void
@@ -47,7 +47,7 @@ export function DashboardOverviewTab({
   connectivityData,
   connectivityLoading,
   connectivityError,
-  connectivityServices,
+  connectivityServices = [],
   formatConnectivityStatus,
   miniPreviewExpanded,
   onToggleMiniPreviewExpanded,

@@ -34,6 +34,8 @@ export function DashboardConnectivityTab({
   onRefreshConnectivity,
   formatConnectivityStatus,
 }: DashboardConnectivityTabProps) {
+  const hasConnectivityError = Boolean(connectivityError)
+
   return (
     <div className="aethel-p-6 aethel-space-y-6">
       <div className="aethel-flex aethel-items-center aethel-justify-between">
@@ -47,17 +49,17 @@ export function DashboardConnectivityTab({
         <p className="aethel-text-sm aethel-text-slate-400">Monitorando servicos...</p>
       )}
 
-      {connectivityError && (
+      {hasConnectivityError && (
         <p className="aethel-text-sm aethel-text-red-400">Nao foi possivel consultar os endpoints.</p>
       )}
 
-      {!connectivityLoading && !connectivityError && connectivityData && (
+      {!connectivityLoading && !hasConnectivityError && connectivityData && (
         <div className="aethel-space-y-4">
           <div className="aethel-card aethel-p-6 aethel-flex aethel-justify-between aethel-items-center">
             <div>
               <p className="aethel-text-sm aethel-text-slate-400">Status geral</p>
               <p className="aethel-text-3xl aethel-font-bold">
-                {formatConnectivityStatus(connectivityData.overall_status).toUpperCase()}
+                {String(formatConnectivityStatus(connectivityData.overall_status)).toUpperCase()}
               </p>
             </div>
             <div className="aethel-text-sm aethel-text-slate-400">
@@ -77,7 +79,7 @@ export function DashboardConnectivityTab({
                       ? 'aethel-bg-amber-500/20 aethel-text-amber-300'
                       : 'aethel-bg-red-500/20 aethel-text-red-300'
                   }`}>
-                    {formatConnectivityStatus(service.status).toUpperCase()}
+                    {String(formatConnectivityStatus(service.status)).toUpperCase()}
                   </span>
                 </div>
 

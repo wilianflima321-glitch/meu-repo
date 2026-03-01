@@ -132,3 +132,8 @@ Required: unified empty/loading/error/success language and behavior across dashb
 1. `app/landing-v2.tsx` now routes Magic Box submissions to `/dashboard?mission=...` instead of dropping users directly into `/ide`.
 2. `components/AethelDashboard.tsx` now consumes `mission` query context and seeds Studio Home chat flow (`ai-chat`) deterministically.
 3. First-value rail now exposes progress checkpoints (first project, first AI response, IDE preview opened) to reduce onboarding ambiguity.
+
+### 7.9 Runtime contract hardening (P0 quality)
+1. `app/api/analytics/batch/route.ts` now normalizes payload into Prisma-safe JSON input before persistence.
+2. Dashboard billing/trial contract mismatch was corrected (`TrialBanner` props + billing interval strict union).
+3. Unknown-based render guards were tightened in connectivity/wallet tabs to remove hidden runtime typing ambiguity.
