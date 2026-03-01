@@ -56,6 +56,7 @@ Priority admin pages:
 2. `cloud-web-app/web/app/admin/payments/page.tsx`
 3. `cloud-web-app/web/app/admin/apis/page.tsx`
 4. `cloud-web-app/web/app/admin/security/page.tsx`
+5. `cloud-web-app/web/app/admin/emergency/page.tsx`
 
 Admin layout and shared frame:
 1. `cloud-web-app/web/app/admin/layout.tsx`
@@ -80,9 +81,26 @@ All other admin surface directories:
 2. `cloud-web-app/web/app/api/ai/complete/route.ts`
 3. `cloud-web-app/web/app/api/ai/action/route.ts`
 4. `cloud-web-app/web/app/api/ai/inline-edit/route.ts`
-5. `cloud-web-app/web/lib/server/capability-response.ts`
+5. `cloud-web-app/web/app/api/ai/change/validate/route.ts`
+6. `cloud-web-app/web/app/api/ai/change/apply/route.ts`
+7. `cloud-web-app/web/app/api/ai/change/rollback/route.ts`
+8. `cloud-web-app/web/lib/server/capability-response.ts`
 
-### 4.4 Payment capability gate
+### 4.4 Studio orchestration capability gates
+1. `cloud-web-app/web/app/api/studio/_lib/studio-gate.ts`
+2. `cloud-web-app/web/app/api/studio/session/start/route.ts`
+3. `cloud-web-app/web/app/api/studio/session/[id]/route.ts`
+4. `cloud-web-app/web/app/api/studio/session/[id]/stop/route.ts`
+5. `cloud-web-app/web/app/api/studio/tasks/plan/route.ts`
+6. `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
+7. `cloud-web-app/web/app/api/studio/tasks/[id]/validate/route.ts`
+8. `cloud-web-app/web/app/api/studio/tasks/[id]/apply/route.ts`
+9. `cloud-web-app/web/app/api/studio/tasks/[id]/rollback/route.ts`
+10. `cloud-web-app/web/app/api/studio/cost/live/route.ts`
+11. `cloud-web-app/web/app/api/studio/access/full/route.ts`
+12. `cloud-web-app/web/app/api/studio/access/full/[id]/route.ts`
+
+### 4.5 Payment capability gate
 1. `cloud-web-app/web/app/api/billing/checkout/route.ts`
 2. `cloud-web-app/web/app/api/admin/payments/gateway/route.ts`
 
@@ -122,3 +140,7 @@ CI workflows:
 2. Surface-map execution must include structural constraints from `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`.
 3. `/ide` critical path must not rely on mock workspace data in production path.
 4. Duplicate surface pairs (e.g., Nexus legacy vs v2) must be explicitly canonicalized before further UX polish.
+
+## 9. Delta 2026-02-28 (coverage closure)
+1. Admin emergency surface is now explicit in canonical map and no longer a dangling navigation target.
+2. Typed-route gaps for AI change apply/rollback and Studio orchestration APIs are now represented as explicit capability-gated surfaces.
