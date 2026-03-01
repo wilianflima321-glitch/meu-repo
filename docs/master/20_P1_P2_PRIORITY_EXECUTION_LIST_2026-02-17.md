@@ -202,7 +202,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. `P0-L` AI provider setup recovery UX:
 - every AI `NOT_IMPLEMENTED` gate must provide direct setup CTA and verification path;
 - no dead-end error state in critical journey.
- - status 2026-02-28: `PARTIAL` (`components/ide/AIChatPanelContainer.tsx` + `components/dashboard/DashboardAIChatTab.tsx` now expose setup CTA `/admin/apis` on provider gate).
+ - status 2026-02-28: `PARTIAL` (`components/ide/AIChatPanelContainer.tsx` + `components/dashboard/DashboardAIChatTab.tsx` now expose setup CTA `/admin/apis`; `app/admin/apis/page.tsx` now shows explicit provider setup rail with pending-provider inventory and restart/refresh steps).
 3. `P0-M` Preview runtime real-time closure:
 - move from static-perceived preview to true runtime update loop (HMR-grade where supported);
 - keep unsupported/runtime-limited types explicitly gated.

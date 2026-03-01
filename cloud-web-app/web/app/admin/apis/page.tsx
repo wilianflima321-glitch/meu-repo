@@ -92,6 +92,24 @@ export default function APIs() {
     missing: integrations.filter((integration) => !integration.configured).length,
   };
 
+  const aiProvidersMissing = integrations.filter((integration) => {
+    if (integration.configured) return false;
+    const name = integration.name.toLowerCase();
+    const key = integration.envKey.toLowerCase();
+    return (
+      name.includes('openai') ||
+      name.includes('anthropic') ||
+      name.includes('gemini') ||
+      name.includes('google') ||
+      name.includes('groq') ||
+      key.includes('openai') ||
+      key.includes('anthropic') ||
+      key.includes('gemini') ||
+      key.includes('google') ||
+      key.includes('groq')
+    );
+  });
+
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
@@ -113,6 +131,34 @@ export default function APIs() {
       {error && (
         <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
           {error}
+        </div>
+      )}
+
+      {aiProvidersMissing.length > 0 && (
+        <div className='mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4'>
+          <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
+            <div>
+              <p className='text-sm font-semibold text-amber-200'>AI provider setup pendente</p>
+              <p className='text-xs text-amber-100/90'>
+                Configure pelo menos um provider para liberar chat, complete e inline edit sem gate `NOT_IMPLEMENTED`.
+              </p>
+            </div>
+            <span className='inline-flex rounded bg-amber-500/20 px-2 py-1 text-xs text-amber-100'>
+              {aiProvidersMissing.length} pendente(s)
+            </span>
+          </div>
+          <ol className='mt-3 list-decimal space-y-1 pl-4 text-xs text-amber-100/90'>
+            <li>Defina a chave do provider no ambiente seguro (nunca no client).</li>
+            <li>Reinicie o runtime da aplicação para aplicar variáveis.</li>
+            <li>Clique em Atualizar e valide status configurado nesta página.</li>
+          </ol>
+          <div className='mt-3 flex flex-wrap gap-2'>
+            {aiProvidersMissing.map((provider) => (
+              <span key={provider.id} className='rounded border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-xs text-amber-100'>
+                {provider.name} ({provider.envKey})
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
