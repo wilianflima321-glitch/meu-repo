@@ -167,3 +167,4 @@ Validation status:
 1. `DashboardAIChatTab` now mirrors provider setup recovery CTA to `/admin/apis` when advanced chat hits `NOT_IMPLEMENTED` provider gates.
 2. `/ide` now renders split editor + preview path in `FullscreenIDE` with explicit toggle and runtime-gated fallback behavior from `PreviewPanel`.
 3. Capability policy remains unchanged: unsupported preview/runtime classes keep explicit gated messaging (no fake-ready state).
+4. Landing entry now seeds Studio mission handoff (`/dashboard?mission=...`) so first AI action starts in canonical Studio Home flow before optional `/ide` deep dive.
