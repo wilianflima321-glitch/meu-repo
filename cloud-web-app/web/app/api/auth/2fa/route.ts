@@ -12,7 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-import { verifyToken } from '@/lib/auth-server';
+import { getUserFromRequest } from '@/lib/auth-server';
 import { twoFactorService } from '@/lib/security/two-factor-auth';
 import { prisma } from '@/lib/db';
 
@@ -368,11 +368,5 @@ async function handleBackupCodes(request: NextRequest) {
 // ============================================================================
 
 async function authenticateRequest(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.slice(7);
-  return verifyToken(token);
+  return getUserFromRequest(request)
 }

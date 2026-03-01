@@ -37,7 +37,9 @@ export type CodiconName =
   | 'symbol-color'
   | 'gear'
   | 'edit'
-  | 'trash';
+  | 'trash'
+  | 'github-inverted'
+  | 'google';
 
 type CodiconProps = HTMLAttributes<HTMLSpanElement> & {
   name: CodiconName;

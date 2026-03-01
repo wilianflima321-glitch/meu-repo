@@ -36,7 +36,21 @@ const PROTECTED_ROUTES: Record<string, UserRole[]> = {
 export async function verifyToken(token: string): Promise<DecodedToken | null> {
   try {
     const verified = await jwtVerify(token, secret)
-    return verified.payload as DecodedToken
+    const payload = verified.payload as Record<string, unknown>
+    const sub = typeof payload.sub === 'string' ? payload.sub : null
+    const email = typeof payload.email === 'string' ? payload.email : null
+    const roleRaw = typeof payload.role === 'string' ? payload.role : 'guest'
+    const role: UserRole = ['admin', 'moderator', 'user', 'guest'].includes(roleRaw)
+      ? (roleRaw as UserRole)
+      : 'guest'
+    if (!sub || !email) return null
+    return {
+      sub,
+      email,
+      role,
+      iat: typeof payload.iat === 'number' ? payload.iat : 0,
+      exp: typeof payload.exp === 'number' ? payload.exp : 0,
+    }
   } catch (error) {
     console.error('Token verification failed:', error)
     return null

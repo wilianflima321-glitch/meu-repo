@@ -37,7 +37,7 @@ function extensionFromName(name: string): string {
   return idx >= 0 ? name.slice(idx + 1).toLowerCase() : ''
 }
 
-function detectAssetClass(file: File): AssetValidationResult['assetClass'] {
+function detectAssetClass(file: File): 'image' | 'audio' | 'video' | 'model' | 'other' {
   const mime = (file.type || '').toLowerCase()
   const ext = extensionFromName(file.name)
 

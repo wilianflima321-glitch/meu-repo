@@ -35,6 +35,8 @@ Provide a single factual map of capability status for high-impact APIs and runti
 | AI inline completion (compat) | `app/api/ai/inline-completion/route.ts` | active compat surface | canonical `suggestion` + alias `text` |
 
 | AI deterministic validation | `app/api/ai/change/validate/route.ts` | `IMPLEMENTED` | returns `canApply`, `verdict`, `checks`, dependency impact |
+| AI change apply | `app/api/ai/change/apply/route.ts` | `NOT_IMPLEMENTED` | explicit gate until persistent apply/rollback token store is available |
+| AI change rollback | `app/api/ai/change/rollback/route.ts` | `NOT_IMPLEMENTED` | explicit gate until rollback snapshots are persisted |
 
 | Render cancel | `app/api/render/jobs/[jobId]/cancel/route.ts` | `NOT_IMPLEMENTED` | explicit capability gate with metadata |
 
@@ -50,6 +52,7 @@ Provide a single factual map of capability status for high-impact APIs and runti
 
 | Asset upload validation | `app/api/assets/upload/route.ts` + `lib/server/asset-processor.ts` | `IMPLEMENTED/PARTIAL` by class | explicit validation + warnings + capabilityStatus |
 | Analytics batch ingest | `app/api/analytics/batch/route.ts` | `IMPLEMENTED` | batched telemetry ingest (`events[]`, `metrics[]`) persisted in `AuditLog` with bounded batch size |
+| Studio orchestration APIs | `app/api/studio/*` | `NOT_IMPLEMENTED` (explicit) | all new endpoints return capability envelope via shared `studio-gate` helper (no fake success) |
 
 
 
@@ -168,3 +171,13 @@ Validation status:
 2. `/ide` now renders split editor + preview path in `FullscreenIDE` with explicit toggle and runtime-gated fallback behavior from `PreviewPanel`.
 3. Capability policy remains unchanged: unsupported preview/runtime classes keep explicit gated messaging (no fake-ready state).
 4. Landing entry now seeds Studio mission handoff (`/dashboard?mission=...`) so first AI action starts in canonical Studio Home flow before optional `/ide` deep dive.
+
+## 10) Delta 2026-02-28 (route coverage closure)
+1. Added explicit route files for typed route coverage and contract clarity:
+- `/api/auth/2fa/disable`
+- `/api/auth/2fa/validate`
+- `/api/auth/2fa/backup-codes`
+- `/admin/emergency`
+- `/dashboard/legacy`
+2. Added explicit capability-gated stubs for `/api/studio/*` and `/api/ai/change/apply|rollback`.
+3. Net effect: missing-route ambiguity was removed without relaxing anti-fake-success policy.
