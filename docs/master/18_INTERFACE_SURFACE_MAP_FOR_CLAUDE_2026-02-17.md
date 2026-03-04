@@ -331,3 +331,8 @@ CI workflows:
 ## 41. Delta 2026-03-04 (admin AI monitor production probe control)
 1. Added production evidence trigger button in `app/admin/ai-monitor/page.tsx` (`Run Production Probe`).
 2. Action calls `/api/admin/ai/core-loop-production-probe` and refreshes readiness/metrics/runs surfaces after completion.
+
+## 42. Delta 2026-03-04 (admin AI monitor operator feedback clarity)
+1. `app/admin/ai-monitor/page.tsx` now shows deterministic success/error notice banner after `Run Drill` and `Run Production Probe`.
+2. Notices include operational totals (`runs`, `success`, `blocked`, `failed`) and selected probe file when available.
+3. Goal: eliminate silent-only console failure mode and keep operator loop transactional in-surface.

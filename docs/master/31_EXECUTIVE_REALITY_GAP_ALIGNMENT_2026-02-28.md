@@ -847,3 +847,10 @@ Required: unified empty/loading/error/success language and behavior across dashb
 1. Added admin endpoint `POST /api/admin/ai/core-loop-production-probe` (`ADMIN_AI_CORE_LOOP_PRODUCTION_PROBE`, `PARTIAL`).
 2. Endpoint executes delegated authenticated sandbox apply probes (`/api/ai/change/apply`) with `runSource=production`.
 3. `/admin/ai-monitor` now exposes `Run Production Probe` to reduce production-evidence zero states in readiness windows.
+
+### 7.95 Operator feedback closure in AI monitor (2026-03-04-y)
+1. `app/admin/ai-monitor/page.tsx` now surfaces in-page success/error notice after:
+- `Run Drill`
+- `Run Production Probe`
+2. Notices now include deterministic totals from API payloads (`runs`, `success`, `blocked`, `failed`) and probe file when available.
+3. Result: operator workflows no longer depend on console-only diagnostics for critical probe actions.

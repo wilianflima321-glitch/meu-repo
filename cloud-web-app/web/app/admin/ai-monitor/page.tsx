@@ -246,6 +246,27 @@ type EmergencyResponse = {
   };
 };
 
+type CoreLoopDrillResponse = {
+  totals?: {
+    runs?: number;
+    applySuccess?: number;
+    applyBlocked?: number;
+    rollbackSuccess?: number;
+  };
+};
+
+type ProductionProbeResponse = {
+  metadata?: {
+    totals?: {
+      applySuccess?: number;
+      applyBlocked?: number;
+      applyFailed?: number;
+    };
+    runs?: number;
+    selectedFile?: string;
+  };
+};
+
 async function fetchWithAuth<T>(url: string): Promise<T> {
   const token = getToken();
   const response = await fetch(url, {
@@ -430,6 +451,7 @@ export default function AgentMonitorPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRunningDrill, setIsRunningDrill] = useState(false);
   const [isRunningProductionProbe, setIsRunningProductionProbe] = useState(false);
+  const [operatorNotice, setOperatorNotice] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const [runSampleClass, setRunSampleClass] = useState<'all' | 'production' | 'rehearsal'>('production');
 
   const { data: metricsData } = useSWR<AIMetricsResponse>('/api/admin/ai/metrics', fetchWithAuth, {
@@ -508,6 +530,7 @@ export default function AgentMonitorPage() {
   const runCoreLoopDrill = React.useCallback(async () => {
     try {
       setIsRunningDrill(true);
+      setOperatorNotice(null);
       const token = getToken();
       const response = await fetch('/api/admin/ai/core-loop-drill', {
         method: 'POST',
@@ -521,6 +544,7 @@ export default function AgentMonitorPage() {
         const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
         throw new Error(payload.error || payload.message || `Request failed: ${response.status}`);
       }
+      const payload = (await response.json().catch(() => ({}))) as CoreLoopDrillResponse;
       await Promise.all([
         refreshCalls(),
         refreshPromotion(),
@@ -530,8 +554,19 @@ export default function AgentMonitorPage() {
         refreshFullAccessAudit(),
         refreshRuns(),
       ]);
+      const runs = payload?.totals?.runs ?? 0;
+      const applySuccess = payload?.totals?.applySuccess ?? 0;
+      const applyBlocked = payload?.totals?.applyBlocked ?? 0;
+      setOperatorNotice({
+        tone: 'success',
+        text: `Drill concluido: runs=${runs}, success=${applySuccess}, blocked=${applyBlocked}.`,
+      });
     } catch (error) {
       console.error('[ai-monitor] core loop drill failed', error);
+      setOperatorNotice({
+        tone: 'error',
+        text: error instanceof Error ? error.message : 'Falha ao executar core-loop drill.',
+      });
     } finally {
       setIsRunningDrill(false);
     }
@@ -540,6 +575,7 @@ export default function AgentMonitorPage() {
   const runProductionProbe = React.useCallback(async () => {
     try {
       setIsRunningProductionProbe(true);
+      setOperatorNotice(null);
       const token = getToken();
       const response = await fetch('/api/admin/ai/core-loop-production-probe', {
         method: 'POST',
@@ -553,6 +589,7 @@ export default function AgentMonitorPage() {
         const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
         throw new Error(payload.error || payload.message || `Request failed: ${response.status}`);
       }
+      const payload = (await response.json().catch(() => ({}))) as ProductionProbeResponse;
       await Promise.all([
         refreshCalls(),
         refreshPromotion(),
@@ -562,8 +599,21 @@ export default function AgentMonitorPage() {
         refreshFullAccessAudit(),
         refreshRuns(),
       ]);
+      const runs = payload?.metadata?.runs ?? 0;
+      const applySuccess = payload?.metadata?.totals?.applySuccess ?? 0;
+      const applyBlocked = payload?.metadata?.totals?.applyBlocked ?? 0;
+      const applyFailed = payload?.metadata?.totals?.applyFailed ?? 0;
+      const selectedFile = payload?.metadata?.selectedFile || 'n/a';
+      setOperatorNotice({
+        tone: 'success',
+        text: `Production probe concluido: runs=${runs}, success=${applySuccess}, blocked=${applyBlocked}, failed=${applyFailed}, file=${selectedFile}.`,
+      });
     } catch (error) {
       console.error('[ai-monitor] production probe failed', error);
+      setOperatorNotice({
+        tone: 'error',
+        text: error instanceof Error ? error.message : 'Falha ao executar production probe.',
+      });
     } finally {
       setIsRunningProductionProbe(false);
     }
@@ -616,6 +666,18 @@ export default function AgentMonitorPage() {
           </button>
         </div>
       </div>
+
+      {operatorNotice && (
+        <div
+          className={`rounded-xl border p-3 text-sm ${
+            operatorNotice.tone === 'success'
+              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
+              : 'border-rose-500/40 bg-rose-500/10 text-rose-100'
+          }`}
+        >
+          {operatorNotice.text}
+        </div>
+      )}
 
       {emergencyState && emergencyState.level !== 'normal' && (
         <div
