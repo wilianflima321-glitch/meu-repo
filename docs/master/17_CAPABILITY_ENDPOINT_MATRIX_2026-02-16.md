@@ -20,22 +20,22 @@ Provide a single factual map of capability status for high-impact APIs and runti
 
 |---|---|---|---|
 
-| AI chat | `app/api/ai/chat/route.ts` | `PARTIAL` (provider-missing gate) with optional explicit demo fallback | default `503 AI_PROVIDER_NOT_CONFIGURED` + capability metadata; when `AETHEL_AI_DEMO_MODE=1`, returns `demoMode=true` payload with warning + setup metadata |
+| AI chat | `app/api/ai/chat/route.ts` | `PARTIAL` (provider-missing gate) with optional explicit demo fallback | default `503 AI_PROVIDER_NOT_CONFIGURED` + capability metadata; when `AETHEL_AI_DEMO_MODE=1`, returns `demoMode=true` payload with warning + setup metadata + per-user daily demo budget enforcement (`429 AI_DEMO_LIMIT_REACHED`) |
 
-| AI chat advanced | `app/api/ai/chat-advanced/route.ts` | `IMPLEMENTED` with explicit provider gates + quality controls | default `503 AI_PROVIDER_NOT_CONFIGURED` on missing provider/model-provider mismatch; supports `qualityMode` + optional benchmark context; when `AETHEL_AI_DEMO_MODE=1`, returns `demoMode=true` response with explicit warning |
+| AI chat advanced | `app/api/ai/chat-advanced/route.ts` | `IMPLEMENTED` with explicit provider gates + quality controls | default `503 AI_PROVIDER_NOT_CONFIGURED` on missing provider/model-provider mismatch; supports `qualityMode` + optional benchmark context; when `AETHEL_AI_DEMO_MODE=1`, returns `demoMode=true` response with explicit warning + per-user budget limit (`429 AI_DEMO_LIMIT_REACHED`) |
 
 | AI chat panel orchestration | `components/ide/AIChatPanelContainer.tsx` | `IMPLEMENTED/PARTIAL` | routes through `/api/ai/chat-advanced`; auto-selects `qualityMode`/`agentCount`; falls back to single-agent when plan gate blocks multi-agent; provider gate is suppressed when demo mode is active to preserve first-value path |
 | Editor inline edit apply chain | `components/editor/MonacoEditorPro.tsx` | `PARTIAL` | inline edit executes `validate -> apply` server chain; blocked states surface deterministic feedback including `FULL_ACCESS_GRANT_REQUIRED` and in-editor CTA to activate temporary Full Access; successful/rejected apply now posts LEARN feedback (`accepted`/`needs_work`) with `runId` |
 
-| AI complete | `app/api/ai/complete/route.ts` | `PARTIAL` when provider missing; otherwise active | default `503 AI_PROVIDER_NOT_CONFIGURED`; when demo mode is active returns explicit `demoMode=true` completion payload; response canonical `suggestion` + alias `text` |
+| AI complete | `app/api/ai/complete/route.ts` | `PARTIAL` when provider missing; otherwise active | default `503 AI_PROVIDER_NOT_CONFIGURED`; when demo mode is active returns explicit `demoMode=true` completion payload with per-user budget enforcement (`429 AI_DEMO_LIMIT_REACHED`); response canonical `suggestion` + alias `text` |
 
-| AI action | `app/api/ai/action/route.ts` | `PARTIAL` when provider missing; otherwise active | default `503 AI_PROVIDER_NOT_CONFIGURED`; demo mode can return explicit `demoMode=true` action payload with setup warning |
+| AI action | `app/api/ai/action/route.ts` | `PARTIAL` when provider missing; otherwise active | default `503 AI_PROVIDER_NOT_CONFIGURED`; demo mode can return explicit `demoMode=true` action payload with setup warning and per-user budget enforcement (`429 AI_DEMO_LIMIT_REACHED`) |
 
-| AI inline edit | `app/api/ai/inline-edit/route.ts` | `PARTIAL` when provider missing; otherwise active | default `503 AI_PROVIDER_NOT_CONFIGURED`; demo mode can return explicit `demoMode=true` inline-edit payload |
-| AI provider status | `app/api/ai/provider-status/route.ts` | `IMPLEMENTED` | returns non-secret provider readiness (`configuredProviders`, `missingProviders`) plus `demoModeEnabled` signal for onboarding recovery/UI gating |
+| AI inline edit | `app/api/ai/inline-edit/route.ts` | `PARTIAL` when provider missing; otherwise active | default `503 AI_PROVIDER_NOT_CONFIGURED`; demo mode can return explicit `demoMode=true` inline-edit payload with per-user budget enforcement (`429 AI_DEMO_LIMIT_REACHED`) |
+| AI provider status | `app/api/ai/provider-status/route.ts` | `IMPLEMENTED` | returns non-secret provider readiness (`configuredProviders`, `missingProviders`) plus `demoModeEnabled` signal and `demoDailyLimit` for onboarding recovery/UI gating |
 | Preview runtime health | `app/api/preview/runtime-health/route.ts` | `PARTIAL` | probes local dev-runtime reachability with explicit host allowlist and capability headers |
 
-| AI inline completion (compat) | `app/api/ai/inline-completion/route.ts` | `PARTIAL` when provider missing; otherwise active compat surface | default `503 AI_PROVIDER_NOT_CONFIGURED`; demo mode can return explicit `demoMode=true`; canonical `suggestion` + alias `text` |
+| AI inline completion (compat) | `app/api/ai/inline-completion/route.ts` | `PARTIAL` when provider missing; otherwise active compat surface | default `503 AI_PROVIDER_NOT_CONFIGURED`; demo mode can return explicit `demoMode=true` with per-user budget enforcement (`429 AI_DEMO_LIMIT_REACHED`); canonical `suggestion` + alias `text` |
 | Multi-agent stream runtime | `app/api/agents/stream/route.ts` | `PARTIAL` | SSE stream with auth + entitlement + metering; supports `heuristic` plus experimental `provider-backed` mode when at least one provider is configured; emits explicit capability metadata/disclaimer/coordination policy in `ready` envelope |
 | AI agents overview | `app/api/ai/agents/route.ts` | `PARTIAL` | returns deterministic empty baseline + capability metadata |
 | AI agents executions | `app/api/ai/agents/executions/route.ts` | `PARTIAL` | returns deterministic empty baseline + capability metadata |

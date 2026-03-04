@@ -18,6 +18,7 @@ import {
   demoRouteMetadata,
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode';
+import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 
 function resolveBackendBaseUrl(): string | null {
   const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -98,6 +99,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (aiService.getAvailableProviders().length === 0) {
       if (isAiDemoModeEnabled()) {
+        const demoUsage = await consumeAiDemoUsage({
+          userId: auth.userId,
+          route: '/api/ai/chat',
+        })
+        if (!demoUsage.allowed) {
+          return capabilityResponse({
+            error: 'AI_DEMO_LIMIT_REACHED',
+            status: 429,
+            message: 'AI demo daily limit reached for this user.',
+            capability: 'AI_CHAT',
+            capabilityStatus: 'PARTIAL',
+            milestone: 'P0',
+            metadata: {
+              ...buildAiProviderSetupMetadata({ route: '/api/ai/chat' }),
+              demoMode: true,
+              demoLimit: demoUsage.limit,
+              demoUsed: demoUsage.used,
+              demoRemaining: demoUsage.remaining,
+              demoResetAt: demoUsage.resetAt,
+            },
+          })
+        }
         const demo = demoRouteMetadata({ route: '/api/ai/chat', capability: 'AI_CHAT' });
         return NextResponse.json(
           {
@@ -106,6 +129,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             model: AI_DEMO_MODEL,
             tokensUsed: 0,
             latencyMs: 0,
+            demoRemaining: demoUsage.remaining,
+            demoLimit: demoUsage.limit,
+            demoResetAt: demoUsage.resetAt,
             ...demo,
           },
           {
@@ -120,6 +146,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
                 : {}),
               'X-Aethel-AI-Demo-Mode': '1',
+              'X-Aethel-AI-Demo-Remaining': String(demoUsage.remaining),
             },
           }
         );

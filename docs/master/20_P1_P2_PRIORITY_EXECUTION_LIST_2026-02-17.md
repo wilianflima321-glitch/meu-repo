@@ -371,3 +371,4 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. Apply/rollback batch envelope widened (`20 -> 50`) for controlled large waves without contract break.
 3. Optional onboarding demo fallback added for provider-missing flows (guarded by `AETHEL_AI_DEMO_MODE`) across core AI endpoints, preserving explicit `PARTIAL` contract and setup guidance.
 4. Provider preflight now exposes `demoModeEnabled` via `/api/ai/provider-status`; IDE/dashboard suppress hard provider gate when demo is enabled to keep first-value path unblocked.
+5. Demo fallback now includes per-user daily budget enforcement with explicit overflow contract (`429 AI_DEMO_LIMIT_REACHED`) to keep cost/risk bounded while preserving first-value access.

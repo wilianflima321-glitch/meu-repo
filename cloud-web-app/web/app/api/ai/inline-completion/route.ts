@@ -12,6 +12,7 @@ import {
   demoRouteMetadata,
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode'
+import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 
 /**
  * Inline Completion API (compat surface for ghost-text clients)
@@ -82,6 +83,28 @@ export async function POST(req: NextRequest) {
 
     if (aiService.getAvailableProviders().length === 0) {
       if (isAiDemoModeEnabled()) {
+        const demoUsage = await consumeAiDemoUsage({
+          userId: user.userId,
+          route: '/api/ai/inline-completion',
+        })
+        if (!demoUsage.allowed) {
+          return capabilityResponse({
+            error: 'AI_DEMO_LIMIT_REACHED',
+            status: 429,
+            message: 'AI demo daily limit reached for this user.',
+            capability: 'AI_INLINE_COMPLETION',
+            capabilityStatus: 'PARTIAL',
+            milestone: 'P0',
+            metadata: {
+              ...buildAiProviderSetupMetadata({ route: '/api/ai/inline-completion' }),
+              demoMode: true,
+              demoLimit: demoUsage.limit,
+              demoUsed: demoUsage.used,
+              demoRemaining: demoUsage.remaining,
+              demoResetAt: demoUsage.resetAt,
+            },
+          })
+        }
         const demo = demoRouteMetadata({ route: '/api/ai/inline-completion', capability: 'AI_INLINE_COMPLETION' })
         const suggestion = buildDemoCompletion({ prompt })
         return NextResponse.json({
@@ -91,6 +114,9 @@ export async function POST(req: NextRequest) {
           model: AI_DEMO_MODEL,
           tokensUsed: 0,
           latencyMs: 0,
+          demoRemaining: demoUsage.remaining,
+          demoLimit: demoUsage.limit,
+          demoResetAt: demoUsage.resetAt,
           ...demo,
         })
       }

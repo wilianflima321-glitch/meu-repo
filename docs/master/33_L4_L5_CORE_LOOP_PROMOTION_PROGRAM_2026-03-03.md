@@ -248,3 +248,11 @@ Mandatory implementation:
 4. IDE core-loop learn signal now connected to user flow:
 - `MonacoEditorPro` posts `accepted` or `needs_work` feedback after inline apply outcome;
 - `/ide` rollback action posts `rejected` feedback for the same `runId`.
+
+## 19) Delta 2026-03-04 (demo-budget guardrail)
+1. Demo mode now enforces explicit per-user daily budget for provider-missing fallback responses.
+2. New helper: `lib/server/ai-demo-usage.ts` (`.aethel/ai-demo-usage/*.json` store).
+3. Covered routes now return:
+- regular demo payload while budget remains;
+- `429 AI_DEMO_LIMIT_REACHED` with setup metadata when exhausted.
+4. Provider status now exposes `demoDailyLimit` alongside `demoModeEnabled` for UI transparency.

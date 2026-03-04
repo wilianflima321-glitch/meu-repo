@@ -26,6 +26,7 @@ import {
   demoRouteMetadata,
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode';
+import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -268,6 +269,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (availableProviders.length === 0) {
       if (isAiDemoModeEnabled()) {
+        const demoUsage = await consumeAiDemoUsage({
+          userId,
+          route: '/api/ai/chat-advanced',
+        });
+        if (!demoUsage.allowed) {
+          return capabilityResponse({
+            error: 'AI_DEMO_LIMIT_REACHED',
+            status: 429,
+            message: 'AI demo daily limit reached for this user.',
+            capability: 'AI_CHAT_ADVANCED',
+            capabilityStatus: 'PARTIAL',
+            milestone: 'P0',
+            metadata: {
+              ...buildAiProviderSetupMetadata({ route: '/api/ai/chat-advanced' }),
+              demoMode: true,
+              demoLimit: demoUsage.limit,
+              demoUsed: demoUsage.used,
+              demoRemaining: demoUsage.remaining,
+              demoResetAt: demoUsage.resetAt,
+            },
+          });
+        }
         const demo = demoRouteMetadata({ route: '/api/ai/chat-advanced', capability: 'AI_CHAT_ADVANCED' });
         const demoMessage = buildDemoChatContent({ messages });
         return NextResponse.json({
@@ -287,6 +310,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           },
           provider: AI_DEMO_PROVIDER,
           model: AI_DEMO_MODEL,
+          demoRemaining: demoUsage.remaining,
+          demoLimit: demoUsage.limit,
+          demoResetAt: demoUsage.resetAt,
           ...demo,
         });
       }

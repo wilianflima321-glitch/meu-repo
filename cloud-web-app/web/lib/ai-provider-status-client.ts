@@ -13,6 +13,7 @@ export type AiProviderStatusResponse = {
   setupAction?: string
   demoModeEnabled?: boolean
   demoModeLabel?: string
+  demoDailyLimit?: number
 }
 
 export async function fetchAiProviderStatus(signal?: AbortSignal): Promise<AiProviderStatusResponse> {

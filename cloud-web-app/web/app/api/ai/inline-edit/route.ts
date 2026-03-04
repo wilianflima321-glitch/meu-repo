@@ -12,6 +12,7 @@ import {
   demoRouteMetadata,
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode'
+import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 
 const INLINE_EDIT_SYSTEM_PROMPT = `You are an inline code editing assistant.
 Rules:
@@ -98,6 +99,28 @@ export async function POST(req: NextRequest) {
 
     if (aiService.getAvailableProviders().length === 0) {
       if (isAiDemoModeEnabled()) {
+        const demoUsage = await consumeAiDemoUsage({
+          userId: user.userId,
+          route: '/api/ai/inline-edit',
+        })
+        if (!demoUsage.allowed) {
+          return capabilityResponse({
+            error: 'AI_DEMO_LIMIT_REACHED',
+            status: 429,
+            message: 'AI demo daily limit reached for this user.',
+            capability: 'AI_INLINE_EDIT',
+            capabilityStatus: 'PARTIAL',
+            milestone: 'P0',
+            metadata: {
+              ...buildAiProviderSetupMetadata({ route: '/api/ai/inline-edit' }),
+              demoMode: true,
+              demoLimit: demoUsage.limit,
+              demoUsed: demoUsage.used,
+              demoRemaining: demoUsage.remaining,
+              demoResetAt: demoUsage.resetAt,
+            },
+          })
+        }
         const demo = demoRouteMetadata({ route: '/api/ai/inline-edit', capability: 'AI_INLINE_EDIT' })
         return NextResponse.json({
           ...buildDemoInlineEdit({ code, instruction }),
@@ -105,6 +128,9 @@ export async function POST(req: NextRequest) {
           model: AI_DEMO_MODEL,
           tokensUsed: 0,
           latencyMs: 0,
+          demoRemaining: demoUsage.remaining,
+          demoLimit: demoUsage.limit,
+          demoResetAt: demoUsage.resetAt,
           ...demo,
         })
       }

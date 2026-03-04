@@ -12,6 +12,7 @@ import {
   demoRouteMetadata,
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode'
+import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 
 /**
  * POST /api/ai/complete
@@ -111,6 +112,28 @@ export async function POST(req: NextRequest) {
 
     if (aiService.getAvailableProviders().length === 0) {
       if (isAiDemoModeEnabled()) {
+        const demoUsage = await consumeAiDemoUsage({
+          userId: user.userId,
+          route: '/api/ai/complete',
+        })
+        if (!demoUsage.allowed) {
+          return capabilityResponse({
+            error: 'AI_DEMO_LIMIT_REACHED',
+            status: 429,
+            message: 'AI demo daily limit reached for this user.',
+            capability: 'AI_COMPLETE',
+            capabilityStatus: 'PARTIAL',
+            milestone: 'P0',
+            metadata: {
+              ...buildAiProviderSetupMetadata({ route: '/api/ai/complete' }),
+              demoMode: true,
+              demoLimit: demoUsage.limit,
+              demoUsed: demoUsage.used,
+              demoRemaining: demoUsage.remaining,
+              demoResetAt: demoUsage.resetAt,
+            },
+          })
+        }
         const demo = demoRouteMetadata({ route: '/api/ai/complete', capability: 'AI_COMPLETE' })
         const suggestion = buildDemoCompletion({
           prompt: typeof (body as any).prompt === 'string' ? (body as any).prompt : undefined,
@@ -124,6 +147,9 @@ export async function POST(req: NextRequest) {
           model: AI_DEMO_MODEL,
           tokensUsed: 0,
           latencyMs: 0,
+          demoRemaining: demoUsage.remaining,
+          demoLimit: demoUsage.limit,
+          demoResetAt: demoUsage.resetAt,
           ...demo,
         })
       }

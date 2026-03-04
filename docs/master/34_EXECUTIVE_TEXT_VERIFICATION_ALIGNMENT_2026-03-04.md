@@ -77,6 +77,10 @@ Current wave delta:
 - inline apply success -> `accepted`
 - inline apply rejection -> `needs_work`
 - manual rollback -> `rejected`
+6. Demo fallback now has explicit per-user daily budget guard:
+- helper `lib/server/ai-demo-usage.ts`
+- overflow contract `429 AI_DEMO_LIMIT_REACHED`
+- provider status exposes `demoDailyLimit` for first-value UX transparency.
 
 ### P0-B First-value onboarding closure
 1. Reduce provider-setup friction path.
