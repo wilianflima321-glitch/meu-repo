@@ -4,7 +4,7 @@ Date: 2026-02-17
 Source Base: `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
 
 ## 0.1 Current Freeze Snapshot (2026-03-01)
-1. `>=1200` code hotspots in `cloud-web-app/web`: `0` (resolved in global gap scan).
+1. `>=1200` code hotspots in `cloud-web-app/web`: `1` (`AethelDashboard.tsx` at hard limit `1200`).
 2. Blocking dialogs in active scope: `0`.
 3. Blocking dialogs in deprecated scope: `0`.
 4. Canonical read-order drift: `0`.

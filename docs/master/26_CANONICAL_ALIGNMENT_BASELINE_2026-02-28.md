@@ -20,7 +20,7 @@ Current values:
 4. `blocking-browser-dialogs=0`
 5. `not-implemented-ui=0`
 6. `qa:repo-connectivity=PASS`
-7. `api-not-implemented-gates=2` (source: `32_GLOBAL_GAP_REGISTER_2026-03-01.md`)
+7. `api-not-implemented-gates=0` (source: `32_GLOBAL_GAP_REGISTER_2026-03-01.md`)
 
 ## 3) Interpretation rules
 1. Older references like `not-implemented-ui=10` are historical and must not be used as current status.
@@ -50,7 +50,7 @@ Current values:
 
 ## 7) End-of-day sync (2026-03-01)
 1. Interface-gate mismatch is now closed in current wave:
-- `not-implemented-ui` aligned to `5` and gate threshold remains `6`.
+- `not-implemented-ui` aligned to `0` and gate threshold remains `6`.
 2. Resolution path used:
 - removed inline `NOT_IMPLEMENTED` literals in one API branch while preserving capability contract semantics via shared constants.
 3. No threshold relaxation was applied.
@@ -87,3 +87,12 @@ Current values:
 - `/api/billing/checkout`
 - `/api/billing/checkout-link`
 2. Capability transparency remains explicit; no fake-ready success was introduced.
+
+## 13) Delta 2026-03-04 (baseline reconciliation)
+1. Current factual state from canonical scanners:
+- `not-implemented-ui=0`
+- `api-not-implemented-gates=0`
+- `AethelDashboard.tsx=1200` (bounded by `qa:dashboard-shell`)
+2. Transition inventories in sections `8..12` are historical deltas and must not be interpreted as current status.
+3. Executive-text reconciliation is tracked in:
+- `34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`.

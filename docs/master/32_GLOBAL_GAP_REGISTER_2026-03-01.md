@@ -7,8 +7,8 @@ Owner: Platform + PM Tecnico
 Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no estado atual do repositorio.
 
 ## 2) Snapshot factual
-1. Markdown total no repo: `3654`
-2. Markdown canonico (`docs/master`): `48`
+1. Markdown total no repo: `3655`
+2. Markdown canonico (`docs/master`): `49`
 3. Markdown fora do canonico: `3606`
 4. Arquivos grandes (`>=1200` linhas) em `cloud-web-app/web`: `1`
 5. Uso de dialogs bloqueantes (ativo): `0`
@@ -40,7 +40,7 @@ Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no est
 3. Fechar varredura runtime de acessibilidade (axe/lighthouse) para claim de cobertura completa.
 
 ## 4) Top hotspots >=1200 linhas
-1. `cloud-web-app/web/components/AethelDashboard.tsx` (`1322` linhas)
+1. `cloud-web-app/web/components/AethelDashboard.tsx` (`1200` linhas)
 
 ## 5) Dialogs bloqueantes ativos (amostra)
 1. Nenhum encontrado no escopo ativo.

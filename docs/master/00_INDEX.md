@@ -1,5 +1,5 @@
 # 00_INDEX
-Date: 2026-03-03
+Date: 2026-03-04
 Status: CANONICAL ENTRYPOINT
 
 ## Read Order (Required)
@@ -31,6 +31,7 @@ Status: CANONICAL ENTRYPOINT
 26. `docs/master/LIMITATIONS.md`
 27. `docs/master/WORKBENCH_SPEC.md`
 28. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
+29. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -60,6 +61,7 @@ Status: CANONICAL ENTRYPOINT
 | `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md` | Executive gap reality + closure order | ACTIVE |
 | `32_GLOBAL_GAP_REGISTER_2026-03-01.md` | Repo-wide factual gap register | ACTIVE |
 | `33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md` | L4/L5 core-loop promotion program | ACTIVE |
+| `34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md` | Executive text verification and canonical reconciliation | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -74,13 +76,15 @@ Status: CANONICAL ENTRYPOINT
 | `8_ADMIN_SYSTEM_SPEC.md` | Admin scope | ACTIVE |
 | `9_BACKEND_SYSTEM_SPEC.md` | Backend scope | ACTIVE |
 
-## Current Factual Snapshot (2026-03-03)
+## Current Factual Snapshot (2026-03-04)
 - Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
   - `legacy-accent-tokens=0`
   - `admin-light-theme-tokens=0`
   - `admin-status-light-tokens=0`
   - `blocking-browser-dialogs=0`
-  - `not-implemented-ui=6`
+  - `not-implemented-ui=0`
+- Explicit API NOT_IMPLEMENTED gates (`tools/find-not-implemented.mjs`): `0`
+- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1200`
 - Structural baseline closed for connectivity P0:
   - `npm run qa:repo-connectivity` passes.
   - `npm run qa:canonical-doc-alignment` passes.
@@ -106,6 +110,9 @@ Status: CANONICAL ENTRYPOINT
   - plan quota precision improved (daily requests now read from canonical day bucket; usage APIs expose `requestsToday`),
   - global gap scanner added (`npm run qa:global-gap-scan`) with canonical output in `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`,
   - L4/L5 promotion roadmap locked in `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`.
+- Delta 2026-03-04:
+  - executive text alignment absorbed into canonical docs at `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`,
+  - mismatch corrections applied for current-state counts (dashboard shell line bound and explicit NOT_IMPLEMENTED inventory).
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

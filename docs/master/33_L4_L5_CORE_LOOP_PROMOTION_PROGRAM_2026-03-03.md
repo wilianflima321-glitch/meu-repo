@@ -204,3 +204,15 @@ Mandatory implementation:
 7. `MonacoEditorPro` inline edit now executes `validate -> apply` server chain (not only local in-memory patch), tightening PLAN/PATCH/APPLY evidence continuity.
 8. Added admin audit endpoint `/api/admin/ai/full-access` and monitor card to track active/revoked/expired temporary privilege windows.
 9. Inline-edit error path now exposes direct in-editor `Enable Full Access` CTA for faster high-risk recovery without hidden admin navigation.
+
+## 16) Delta 2026-03-04 (executive text reconciliation)
+1. User-provided executive review was reconciled against repository evidence and absorbed in:
+- `34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`.
+2. Mismatch corrections now canonicalized:
+- dashboard shell bound is `1200` (not historical `1322`);
+- explicit API `NOT_IMPLEMENTED` inventory is `0`;
+- mixed gate-count narratives are now normalized into atomic checks + aggregate chain.
+3. Priority order remains unchanged:
+- P0-A core loop reliability;
+- P0-B first-value onboarding closure;
+- P0-C managed preview runtime closure.
