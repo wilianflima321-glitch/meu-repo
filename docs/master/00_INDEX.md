@@ -114,8 +114,10 @@ Status: CANONICAL ENTRYPOINT
   - executive text alignment absorbed into canonical docs at `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`,
   - mismatch corrections applied for current-state counts (dashboard shell line bound and explicit NOT_IMPLEMENTED inventory),
   - `/ide` preview now has runtime auto-discovery baseline (`/api/preview/runtime-discover` + runtime toolbar "Auto detectar"),
+  - `/dashboard -> /ide` handoff now performs best-effort runtime discovery when no stored runtime URL exists (continuity for preview runtime mode),
   - `qa:impact-matrix` now runs with deterministic core-loop defaults and updates `docs/master/impact_matrix_core_loop.json`,
-  - core-loop rolling metrics refreshed (`metrics/latest_run*.json`) with rehearsal-only evidence still excluded from promotion policy.
+  - core-loop rolling metrics refreshed (`metrics/latest_run*.json`) with rehearsal-only evidence still excluded from promotion policy,
+  - production evidence probe tooling added (`npm run qa:core-loop-production-probe`) to generate authenticated production-sample apply probes in sandbox mode.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

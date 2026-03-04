@@ -226,6 +226,18 @@ Mandatory implementation:
 2. Expanded apply/rollback batch envelopes:
 - `ai/change/apply`: from `20` -> `50` changes per request.
 - `ai/change/rollback`: from `20` -> `50` rollback tokens per request.
+
+## 18) Delta 2026-03-04 (production evidence probe CLI)
+1. Added deterministic production-sample probe tool:
+- `tools/run-core-loop-production-probe.mjs`
+- script: `npm run qa:core-loop-production-probe`
+2. Probe behavior:
+- requires explicit auth token (`AETHEL_TOKEN`/`AETHEL_AUTH_TOKEN`);
+- resolves a low-risk workspace file via `/api/files/tree` + `/api/files/fs`;
+- executes `POST /api/ai/change/apply` in `executionMode=sandbox` with `runSource=production`;
+- emits a compact summary (`success/blocked/failed/successRate`) for evidence pipeline operators.
+3. Goal:
+- reduce `production sample size = 0` deadlock without bypassing capability contracts.
 3. Readiness/metrics now expose feedback diagnostics in LEARN payload:
 - user readiness: `feedbackCounts` + `allFeedbackCounts`;
 - admin readiness: `feedbackCounts`;

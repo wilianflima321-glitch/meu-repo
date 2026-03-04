@@ -318,3 +318,8 @@ CI workflows:
 - one-shot automatic scan when preview is enabled and no runtime is configured;
 - explicit manual "Auto detectar" action in runtime toolbar.
 3. `components/ide/PreviewRuntimeToolbar.tsx` now surfaces runtime discovery state/result messages to avoid silent fallback ambiguity.
+
+## 39. Delta 2026-03-04 (dashboard -> ide runtime continuity hardening)
+1. `components/AethelDashboard.tsx` now attempts runtime discovery during IDE handoff when no persisted runtime URL exists.
+2. On successful discovery, handoff now forwards `previewUrl` to `/ide` and persists it in local storage for subsequent sessions.
+3. Failure/not-found path remains explicit and non-blocking (handoff continues with inline preview fallback).

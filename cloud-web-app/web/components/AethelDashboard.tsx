@@ -334,14 +334,47 @@ export default function AethelDashboard() {
       entry,
       projectId: copilotProjectId,
     })
-    const params = new URLSearchParams()
-    params.set('entry', entry)
-    if (copilotProjectId) params.set('projectId', copilotProjectId)
-    const storedRuntimeUrl = window.localStorage.getItem(PREVIEW_RUNTIME_URL_STORAGE_KEY)
-    if (storedRuntimeUrl && /^https?:\/\//i.test(storedRuntimeUrl.trim())) {
-      params.set('previewUrl', storedRuntimeUrl.trim())
-    }
-    window.location.assign(`/ide?${params.toString()}`)
+
+    void (async () => {
+      const params = new URLSearchParams()
+      params.set('entry', entry)
+      if (copilotProjectId) params.set('projectId', copilotProjectId)
+
+      const storedRuntimeUrl = window.localStorage.getItem(PREVIEW_RUNTIME_URL_STORAGE_KEY)
+      if (storedRuntimeUrl && /^https?:\/\//i.test(storedRuntimeUrl.trim())) {
+        params.set('previewUrl', storedRuntimeUrl.trim())
+      } else {
+        try {
+          const response = await fetch('/api/preview/runtime-discover', {
+            cache: 'no-store',
+          })
+          const payload = (await response.json().catch(() => null)) as { preferredRuntimeUrl?: string | null } | null
+          const preferredRuntimeUrl =
+            typeof payload?.preferredRuntimeUrl === 'string' ? payload.preferredRuntimeUrl.trim() : ''
+          if (response.ok && preferredRuntimeUrl && /^https?:\/\//i.test(preferredRuntimeUrl)) {
+            params.set('previewUrl', preferredRuntimeUrl)
+            window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, preferredRuntimeUrl)
+            trackEvent('engine', 'render_time', {
+              source: 'dashboard-handoff-runtime-discovery',
+              status: 'found',
+              runtimeUrl: preferredRuntimeUrl,
+            })
+          } else {
+            trackEvent('engine', 'render_time', {
+              source: 'dashboard-handoff-runtime-discovery',
+              status: 'not-found',
+            })
+          }
+        } catch {
+          trackEvent('engine', 'render_time', {
+            source: 'dashboard-handoff-runtime-discovery',
+            status: 'error',
+          })
+        }
+      }
+
+      window.location.assign(`/ide?${params.toString()}`)
+    })()
   }, [copilotProjectId, trackEvent])
   const handleOpenIdeLivePreview = useCallback(() => {
     setFirstValueOpenedIde(true)

@@ -28,6 +28,7 @@
     "qa:core-loop-metrics:production": "node tools/export-core-loop-metrics.mjs --output metrics/latest_run-production.json --hours 168 --source production",
     "qa:core-loop-metrics:rehearsal": "node tools/export-core-loop-metrics.mjs --output metrics/latest_run-rehearsal.json --hours 168 --source rehearsal",
     "qa:core-loop-drill": "node tools/run-core-loop-drill.mjs --runs 12",
+    "qa:core-loop-production-probe": "node tools/run-core-loop-production-probe.mjs --runs 6",
     "check:syntax": "npm run check:src-ts && npm run check:ai-ide-ts && npm run check:web-ts && npm run check:js-syntax",
     "test:quick-ai": "npx ts-node -P src/common/tests/tsconfig.cjs.json src/common/tests/quick-ai-test.ts",
     "test:llm": "npx ts-node src/common/llm/tests/llm-integration.test.ts",

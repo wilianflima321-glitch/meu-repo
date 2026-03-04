@@ -827,3 +827,13 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - `sampleClass=rehearsal`: `applyRuns=12` (diagnostic only)
 3. Promotion policy remains unchanged:
 - `production_only_for_promotion`.
+
+### 7.91 Dashboard handoff runtime continuity (2026-03-04-u)
+1. `components/AethelDashboard.tsx` now performs best-effort runtime discovery before redirecting to `/ide` when no persisted runtime URL exists.
+2. Discovered runtime URL is forwarded as `previewUrl` in handoff query and persisted for continuity.
+3. Discovery failure/not-found path remains explicit via telemetry and preserves non-blocking fallback handoff.
+
+### 7.92 Production evidence probe tooling (2026-03-04-v)
+1. Added CLI probe `tools/run-core-loop-production-probe.mjs` and script `npm run qa:core-loop-production-probe`.
+2. Tool executes authenticated sandbox apply probes (`/api/ai/change/apply`) with production run-source semantics.
+3. Purpose: operationally unblock `production sample size=0` evidence gaps without changing promotion policy.
