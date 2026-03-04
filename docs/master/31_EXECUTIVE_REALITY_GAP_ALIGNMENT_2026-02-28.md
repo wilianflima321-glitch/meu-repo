@@ -835,7 +835,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 
 ### 7.92 Production evidence probe tooling (2026-03-04-v)
 1. Added CLI probe `tools/run-core-loop-production-probe.mjs` and script `npm run qa:core-loop-production-probe`.
-2. Tool executes authenticated sandbox apply probes (`/api/ai/change/apply`) with production run-source semantics.
+2. Tool executes authenticated production probes through admin endpoint `POST /api/admin/ai/core-loop-production-probe`.
 3. Purpose: operationally unblock `production sample size=0` evidence gaps without changing promotion policy.
 
 ### 7.93 Dashboard shell regression guard restore (2026-03-04-w)

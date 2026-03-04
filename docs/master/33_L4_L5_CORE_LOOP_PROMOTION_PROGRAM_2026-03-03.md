@@ -227,19 +227,7 @@ Mandatory implementation:
 - `ai/change/apply`: from `20` -> `50` changes per request.
 - `ai/change/rollback`: from `20` -> `50` rollback tokens per request.
 
-## 18) Delta 2026-03-04 (production evidence probe CLI)
-1. Added deterministic production-sample probe tool:
-- `tools/run-core-loop-production-probe.mjs`
-- script: `npm run qa:core-loop-production-probe`
-2. Probe behavior:
-- requires explicit auth token (`AETHEL_TOKEN`/`AETHEL_AUTH_TOKEN`);
-- resolves a low-risk workspace file via `/api/files/tree` + `/api/files/fs`;
-- executes `POST /api/ai/change/apply` in `executionMode=sandbox` with `runSource=production`;
-- emits a compact summary (`success/blocked/failed/successRate`) for evidence pipeline operators.
-3. Goal:
-- reduce `production sample size = 0` deadlock without bypassing capability contracts.
-
-## 19) Delta 2026-03-04 (production probe API for operator loop)
+## 18) Delta 2026-03-04 (production evidence probe API + operator loop)
 1. Added admin probe endpoint:
 - `POST /api/admin/ai/core-loop-production-probe`
 - capability: `ADMIN_AI_CORE_LOOP_PRODUCTION_PROBE` (`PARTIAL`).
@@ -248,14 +236,25 @@ Mandatory implementation:
 - delegates authenticated `executionMode=sandbox` apply calls;
 - emits production-source evidence for readiness metrics.
 3. Added operator trigger in `/admin/ai-monitor`:
-- `Run Production Probe` button to execute probe + refresh readiness surfaces.
-3. Readiness/metrics now expose feedback diagnostics in LEARN payload:
+- `Run Production Probe` button to execute probe + refresh readiness/metrics/runs surfaces.
+4. Readiness/metrics now expose feedback diagnostics in LEARN payload:
 - user readiness: `feedbackCounts` + `allFeedbackCounts`;
 - admin readiness: `feedbackCounts`;
 - admin metrics: `feedbackCounts` + `allFeedbackCounts`;
 - admin promotion: production vs rehearsal feedback counts.
 
-## 18) Delta 2026-03-04 (first-value demo fallback + IDE learn wiring)
+## 19) Delta 2026-03-04 (production evidence probe CLI alignment)
+1. Added deterministic production-sample probe tool:
+- `tools/run-core-loop-production-probe.mjs`
+- script: `npm run qa:core-loop-production-probe`
+2. Probe behavior:
+- requires explicit auth token (`AETHEL_TOKEN`/`AETHEL_AUTH_TOKEN`);
+- delegates to `POST /api/admin/ai/core-loop-production-probe`;
+- emits compact summary (`success/blocked/failed/successRate`) for evidence operators.
+3. Goal:
+- reduce `production sample size = 0` deadlock without bypassing capability contracts or duplicating server-side probe logic.
+
+## 20) Delta 2026-03-04 (first-value demo fallback + IDE learn wiring)
 1. Added explicit optional demo fallback for provider-missing AI endpoints (guarded by `AETHEL_AI_DEMO_MODE`):
 - `/api/ai/chat`
 - `/api/ai/chat-advanced`
@@ -272,7 +271,7 @@ Mandatory implementation:
 - `MonacoEditorPro` posts `accepted` or `needs_work` feedback after inline apply outcome;
 - `/ide` rollback action posts `rejected` feedback for the same `runId`.
 
-## 19) Delta 2026-03-04 (demo-budget guardrail)
+## 21) Delta 2026-03-04 (demo-budget guardrail)
 1. Demo mode now enforces explicit per-user daily budget for provider-missing fallback responses.
 2. New helper: `lib/server/ai-demo-usage.ts` (`.aethel/ai-demo-usage/*.json` store).
 3. Covered routes now return:
