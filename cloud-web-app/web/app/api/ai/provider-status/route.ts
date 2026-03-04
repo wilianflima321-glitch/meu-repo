@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { AI_PROVIDER_SETUP_URL } from '@/lib/capability-constants'
+import { isAiDemoModeEnabled } from '@/lib/server/ai-demo-mode'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,7 @@ const PROVIDERS: Array<{ id: string; envKey: string }> = [
 ]
 
 export async function GET() {
+  const demoModeEnabled = isAiDemoModeEnabled()
   const providers: ProviderStatus[] = PROVIDERS.map((provider) => ({
     id: provider.id,
     configured: Boolean(process.env[provider.envKey]),
@@ -36,5 +38,7 @@ export async function GET() {
     milestone: 'P0',
     setupUrl: AI_PROVIDER_SETUP_URL,
     setupAction: 'OPEN_AI_PROVIDER_SETTINGS',
+    demoModeEnabled,
+    demoModeLabel: demoModeEnabled ? 'DEMO_MODE_ACTIVE' : 'DEMO_MODE_OFF',
   })
 }

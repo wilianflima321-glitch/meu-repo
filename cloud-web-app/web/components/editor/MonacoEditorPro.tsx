@@ -4,6 +4,7 @@ import React, { useRef, useCallback, useEffect, useState } from 'react';
 import Editor, { OnMount, loader, Monaco } from '@monaco-editor/react';
 import type * as monacoEditor from 'monaco-editor';
 import { useInlineEdit, InlineEditModal } from './InlineEditModal';
+import { getAuthHeaders, submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 
 /**
  * Professional Monaco Editor Component
@@ -96,12 +97,6 @@ type ChangeApplyResponse = {
   message?: string;
   metadata?: Record<string, unknown>;
 };
-
-function getAuthHeaders(): Record<string, string> {
-  if (typeof window === 'undefined') return {};
-  const token = window.localStorage.getItem('aethel-token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 // ============================================================================
 // MONACO CONFIGURATION
@@ -711,6 +706,15 @@ export function MonacoEditorPro({
       });
 
       const applyPayload = (await applyResponse.json().catch(() => ({}))) as ChangeApplyResponse;
+      const applyMetadata =
+        applyPayload && typeof applyPayload === 'object' && applyPayload.metadata && typeof applyPayload.metadata === 'object'
+          ? (applyPayload.metadata as Record<string, unknown>)
+          : null;
+      const runId =
+        applyMetadata && typeof applyMetadata.runId === 'string'
+          ? applyMetadata.runId
+          : undefined;
+
       if (!applyResponse.ok) {
         const baseMessage =
           applyPayload.message || applyPayload.error || `Apply failed with status ${applyResponse.status}.`;
@@ -729,20 +733,22 @@ export function MonacoEditorPro({
           setInlineEditNeedsFullAccess(true);
         }
         console.warn('[MonacoEditorPro] Inline edit apply rejected:', message);
+        if (runId) {
+          void submitChangeFeedback({
+            runId,
+            feedback: 'needs_work',
+            reason: applyPayload.error || 'APPLY_REJECTED',
+            notes: message,
+            filePath: normalizedPath,
+            runSource: 'production',
+          });
+        }
         return false;
       }
 
-      const applyMetadata =
-        applyPayload && typeof applyPayload === 'object' && applyPayload.metadata && typeof applyPayload.metadata === 'object'
-          ? (applyPayload.metadata as Record<string, unknown>)
-          : null;
       const rollbackToken =
         applyMetadata && typeof applyMetadata.rollbackToken === 'string'
           ? applyMetadata.rollbackToken
-          : undefined;
-      const runId =
-        applyMetadata && typeof applyMetadata.runId === 'string'
-          ? applyMetadata.runId
           : undefined;
 
       onAiApplyResult?.({
@@ -751,6 +757,16 @@ export function MonacoEditorPro({
         message: applyPayload.message || 'Apply succeeded.',
         filePath: normalizedPath,
       });
+      if (runId) {
+        void submitChangeFeedback({
+          runId,
+          feedback: 'accepted',
+          reason: 'APPLY_CONFIRMED',
+          notes: 'Inline edit applied successfully in MonacoEditorPro.',
+          filePath: normalizedPath,
+          runSource: 'production',
+        });
+      }
     } catch (error) {
       console.error('[MonacoEditorPro] Inline edit validation error:', error);
       setInlineEditFeedback({

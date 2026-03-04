@@ -5,6 +5,13 @@ import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
+import {
+  AI_DEMO_MODEL,
+  AI_DEMO_PROVIDER,
+  buildDemoInlineEdit,
+  demoRouteMetadata,
+  isAiDemoModeEnabled,
+} from '@/lib/server/ai-demo-mode'
 
 const INLINE_EDIT_SYSTEM_PROMPT = `You are an inline code editing assistant.
 Rules:
@@ -90,6 +97,18 @@ export async function POST(req: NextRequest) {
     }
 
     if (aiService.getAvailableProviders().length === 0) {
+      if (isAiDemoModeEnabled()) {
+        const demo = demoRouteMetadata({ route: '/api/ai/inline-edit', capability: 'AI_INLINE_EDIT' })
+        return NextResponse.json({
+          ...buildDemoInlineEdit({ code, instruction }),
+          provider: AI_DEMO_PROVIDER,
+          model: AI_DEMO_MODEL,
+          tokensUsed: 0,
+          latencyMs: 0,
+          ...demo,
+        })
+      }
+
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
         status: 503,

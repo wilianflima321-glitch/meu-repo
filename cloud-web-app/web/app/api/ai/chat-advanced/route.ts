@@ -19,6 +19,13 @@ import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
 import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants';
+import {
+  AI_DEMO_MODEL,
+  AI_DEMO_PROVIDER,
+  buildDemoChatContent,
+  demoRouteMetadata,
+  isAiDemoModeEnabled,
+} from '@/lib/server/ai-demo-mode';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -260,6 +267,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const availableProviders = aiService.getAvailableProviders();
 
     if (availableProviders.length === 0) {
+      if (isAiDemoModeEnabled()) {
+        const demo = demoRouteMetadata({ route: '/api/ai/chat-advanced', capability: 'AI_CHAT_ADVANCED' });
+        const demoMessage = buildDemoChatContent({ messages });
+        return NextResponse.json({
+          message: { role: 'assistant', content: demoMessage },
+          tokensUsed: 0,
+          toolsExecuted: [],
+          traceId,
+          traceSummary: {
+            traceId,
+            summary: 'Demo mode response generated because no real AI provider is configured.',
+            telemetry: {
+              provider: AI_DEMO_PROVIDER,
+              model: AI_DEMO_MODEL,
+              tokensUsed: 0,
+              latencyMs: 0,
+            },
+          },
+          provider: AI_DEMO_PROVIDER,
+          model: AI_DEMO_MODEL,
+          ...demo,
+        });
+      }
+
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
         status: 503,

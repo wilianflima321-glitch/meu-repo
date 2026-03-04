@@ -229,30 +229,34 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 2. Dashboard header now exposes Full Access toggle with active/expiry visibility; no hidden privilege window in primary Studio entry surface.
 3. `/ide` status bar now mirrors Full Access control for advanced-workbench parity.
 4. Monaco inline edit flow now persists through server `validate -> apply` chain, reducing local-only patch drift.
-4. `P0-N` Onboarding first-value flow:
+5. `P0-A` reliability wave advanced:
+- added LEARN ingress endpoint (`/api/ai/change/feedback`) with run-bound feedback evidence;
+- expanded apply/rollback request envelope (`20 -> 50`) for controlled multi-file waves;
+- readiness payloads now expose feedback diagnostics to support promotion decisions.
+6. `P0-N` Onboarding first-value flow:
 - deterministic first project path with clear progress and first successful outcome.
  - status 2026-02-28: `PARTIAL` (`components/AethelDashboard.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff; `app/landing-v2.tsx` now seeds mission via `/dashboard?mission=`).
  - status 2026-03-01: `ADVANCED` (`app/(auth)/register/register-v2.tsx` now routes new users to `/dashboard?onboarding=1&source=register&mission=...`; `app/(auth)/login/login-v2.tsx` now routes to deterministic dashboard/next target with transactional states; `components/AethelDashboard.tsx` now consumes onboarding/source query context and starts first-value guide without dead-end entry).
-5. `P0-O` Responsive entry surface hardening:
+7. `P0-O` Responsive entry surface hardening:
 - `/dashboard` and landing must meet defined mobile/tablet acceptance.
  - status 2026-02-28: `PARTIAL` (`components/dashboard/AethelDashboardSidebar.tsx` + `components/AethelDashboard.tsx` now include mobile close behavior and backdrop handling).
  - status 2026-03-01: `PARTIAL` (`components/dashboard/DashboardHeader.tsx` now has mobile-safe density (`text`, action visibility, compact `IDE` CTA), and `AethelDashboard` routes header IDE open through canonical context handoff without fake desktop CTA).
  - status 2026-03-01-b: `ADVANCED` (`app/landing-v2.tsx` now includes mobile-first mission shortcuts + skip-link landmark flow; `app/dashboard/page.tsx` now has deterministic loading state; `components/AethelDashboard.tsx` replaces blank auth bootstrap with explicit loading state and responsive toast placement; `AethelDashboardSidebar` now includes mobile close control and bounded drawer width for tablet/phone).
-6. `P0-P` Complete dashboard monolith decomposition:
+8. `P0-P` Complete dashboard monolith decomposition:
 - extract remaining heavy tab blocks and finalize stable prop contracts.
  - status 2026-03-01: `ADVANCED` (`AethelDashboard.tsx` reduced to ~1189 lines; first-value rail extracted to `components/dashboard/FirstValueGuide.tsx`; chat request/fallback logic unified via `lib/ai-chat-advanced-client.ts`; dashboard shell remains below >=1200 hotspot cutoff).
-7. `P1-Q` Collaboration readiness evidence:
+9. `P1-Q` Collaboration readiness evidence:
 - publish SLO (`p95 latency`, reconnect, conflict handling) and stress-test baseline.
  - status 2026-03-01: `PARTIAL` (SLO baseline published in `cloud-web-app/web/docs/COLLAB_RUNTIME_SLO.md`; readiness now aggregates audit-backed evidence history; new ledger endpoint `app/api/admin/collaboration/evidence/route.ts` plus admin controls in `app/admin/collaboration/page.tsx`; external stress proof bundle still pending).
  - status 2026-03-01-b: `ADVANCED` (stress-proof attachment endpoint added at `app/api/admin/collaboration/evidence/stress-proof/route.ts`; readiness gate now requires stress-proof presence for promotion eligibility; admin collaboration surface now supports proof registration and visible attached/pending state).
-8. `P1-R` Light theme + accessibility completion:
+10. `P1-R` Light theme + accessibility completion:
 - add light-theme token strategy and WCAG evidence for critical surfaces.
  - status 2026-03-01: `PARTIAL` (light-theme token overrides available in `styles/globals.css`; critical-surface evidence baseline published at `cloud-web-app/web/docs/WCAG_CRITICAL_SURFACE_AUDIT.md`; automated WCAG gate and full sweep still pending).
  - status 2026-03-01-b: `ADVANCED` (static accessibility gate operational via `npm run qa:wcag-critical` backed by `cloud-web-app/web/scripts/check-wcag-critical-surfaces.mjs`; `qa:enterprise-gate` now includes this check; runtime axe/lighthouse sweep still pending for full completion).
-9. `P1-S` Empty-state and micro-interaction consistency:
+11. `P1-S` Empty-state and micro-interaction consistency:
 - unify loading/error/empty/success patterns across dashboard/ide/admin.
  - status 2026-03-01: `ADVANCED` (shared state classes now include success feedback in `styles/globals.css`; parity pass applied to `components/ide/FileExplorerPro.tsx`, `app/admin/apis/page.tsx`, `app/admin/collaboration/page.tsx`, `components/dashboard/DashboardAIChatTab.tsx`, and `app/settings/page.tsx` with explicit loading/error/empty/success contracts and no ambiguous partial CTA in canvas mode).
-10. `P1-T` Performance metrics baseline:
+12. `P1-T` Performance metrics baseline:
 - publish TTI/FCP/LCP + AI stream latency and track against targets.
  - status 2026-03-01: `ADVANCED` (route-level web vitals and AI latency telemetry integrated; `admin/analytics` now consumes `/api/admin/analytics/baseline` with P50/P95 + target comparisons + funnel checkpoints; `/dashboard` non-critical tabs are now lazy-loaded to reduce initial bundle pressure).
  - status 2026-03-01-b: `ADVANCED` (dashboard heavy runtime dependencies moved behind tab-local boundaries: `AgentCanvasTab` now owns React Flow state and `DashboardOverviewTab` lazy-loads `LivePreview`; local production build reduced `/dashboard` first-load JS from ~495kB to ~174kB in current profile output).
@@ -358,3 +362,12 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - `ai/change/rollback` now supports `runId` to restore full apply runs without manual token fanout.
 5. Promotion telemetry visibility advanced:
 - `/api/admin/ai/readiness` now publishes L4 gate metrics (`applySuccessRate`, `regressionRate`, `sandboxCoverage`, `sampleSize`) and `promotionEligible`.
+
+### P0-A/P0-B status update (2026-03-04)
+1. LEARN loop ingestion is now connected to IDE user behavior:
+- inline apply success emits `accepted` feedback;
+- inline apply rejection emits `needs_work` feedback when `runId` is available;
+- manual rollback emits `rejected` feedback.
+2. Apply/rollback batch envelope widened (`20 -> 50`) for controlled large waves without contract break.
+3. Optional onboarding demo fallback added for provider-missing flows (guarded by `AETHEL_AI_DEMO_MODE`) across core AI endpoints, preserving explicit `PARTIAL` contract and setup guidance.
+4. Provider preflight now exposes `demoModeEnabled` via `/api/ai/provider-status`; IDE/dashboard suppress hard provider gate when demo is enabled to keep first-value path unblocked.

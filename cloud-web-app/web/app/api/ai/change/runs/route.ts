@@ -19,6 +19,7 @@ const ALLOWED_EVENT_TYPES: ChangeRunLedgerEvent['eventType'][] = [
   'rollback',
   'apply_blocked',
   'rollback_blocked',
+  'learn_feedback',
 ]
 const ALLOWED_OUTCOMES: ChangeRunLedgerEvent['outcome'][] = ['success', 'blocked', 'failed']
 const ALLOWED_SAMPLE_CLASSES: Array<ChangeRunSampleClass | 'all'> = ['all', 'production', 'rehearsal']

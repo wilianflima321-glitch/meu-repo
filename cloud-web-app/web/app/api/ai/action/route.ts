@@ -5,6 +5,13 @@ import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
+import {
+  AI_DEMO_MODEL,
+  AI_DEMO_PROVIDER,
+  buildDemoActionContent,
+  demoRouteMetadata,
+  isAiDemoModeEnabled,
+} from '@/lib/server/ai-demo-mode'
 
 /**
  * POST /api/ai/action
@@ -84,6 +91,24 @@ export async function POST(req: NextRequest) {
     const prompt = instruction || (promptBuilder ? promptBuilder(code, language) : code)
 
     if (aiService.getAvailableProviders().length === 0) {
+      if (isAiDemoModeEnabled()) {
+        const demo = demoRouteMetadata({ route: '/api/ai/action', capability: 'AI_ACTION' })
+        return NextResponse.json({
+          action,
+          content: buildDemoActionContent({
+            action,
+            instruction,
+            code,
+            language,
+          }),
+          provider: AI_DEMO_PROVIDER,
+          model: AI_DEMO_MODEL,
+          tokensUsed: 0,
+          latencyMs: 0,
+          ...demo,
+        })
+      }
+
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
         status: 503,

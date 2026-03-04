@@ -86,6 +86,12 @@ function collectReasons(row) {
   return typeof reason === 'string' && reason.trim() ? reason.trim() : null
 }
 
+function collectFeedback(row) {
+  if (!row?.metadata || typeof row.metadata !== 'object') return null
+  const feedback = row.metadata.feedback
+  return typeof feedback === 'string' && feedback.trim() ? feedback.trim() : null
+}
+
 function readRunSource(row) {
   if (!row?.metadata || typeof row.metadata !== 'object') return 'production'
   const runSource = row.metadata.runSource
@@ -134,6 +140,7 @@ async function main() {
   const rollbackSuccess = rows.filter((row) => row.eventType === 'rollback' && row.outcome === 'success').length
   const rollbackBlocked = rows.filter((row) => row.eventType === 'rollback_blocked' && row.outcome === 'blocked').length
   const rollbackFailed = rows.filter((row) => row.eventType === 'rollback_blocked' && row.outcome === 'failed').length
+  const learnFeedback = rows.filter((row) => row.eventType === 'learn_feedback' && row.outcome === 'success').length
 
   const applyRuns = applySuccess + applyBlocked + applyFailed
   const failedRows = rows.filter((row) => row.outcome === 'failed')
@@ -149,6 +156,14 @@ async function main() {
     (row) => row.eventType === 'apply' && row.outcome === 'success' && readExecutionMode(row) === 'workspace'
   ).length
 
+  const feedbackCounts = rows
+    .filter((row) => row.eventType === 'learn_feedback')
+    .reduce((acc, row) => {
+      const feedback = collectFeedback(row) || 'unknown'
+      acc[feedback] = (acc[feedback] || 0) + 1
+      return acc
+    }, {})
+
   const output = {
     generatedAt: new Date().toISOString(),
     windowHours: args.hours,
@@ -163,6 +178,7 @@ async function main() {
       rollbackSuccess,
       rollbackBlocked,
       rollbackFailed,
+      learnFeedback,
       sandboxApplyRuns,
       workspaceApplyRuns,
     },
@@ -172,9 +188,11 @@ async function main() {
       regression_rate: normalizeRate(toNumber(regressionRows.length), applyRuns),
       sandbox_coverage: normalizeRate(sandboxApplyRuns, applySuccess),
       workspace_coverage: normalizeRate(workspaceApplyRuns, applySuccess),
+      feedback_coverage: normalizeRate(learnFeedback, applySuccess),
     },
     diagnostics: {
       regressionSignals: [...new Set(regressionRows.map((row) => collectReasons(row)).filter(Boolean))],
+      feedbackCounts: Object.entries(feedbackCounts).sort((a, b) => b[1] - a[1]),
       runSourceCounts: Object.entries(
         rows.reduce((acc, row) => {
           const source = readRunSource(row)

@@ -216,3 +216,35 @@ Mandatory implementation:
 - P0-A core loop reliability;
 - P0-B first-value onboarding closure;
 - P0-C managed preview runtime closure.
+
+## 17) Delta 2026-03-04 (LEARN ingress + batch envelope expansion)
+1. Added explicit LEARN ingestion endpoint:
+- `POST /api/ai/change/feedback`
+- capability: `AI_CHANGE_LEARN`
+- accepted feedback: `accepted|rejected|needs_work`
+- bound to `runId` and appended as `learn_feedback` event in run ledger.
+2. Expanded apply/rollback batch envelopes:
+- `ai/change/apply`: from `20` -> `50` changes per request.
+- `ai/change/rollback`: from `20` -> `50` rollback tokens per request.
+3. Readiness/metrics now expose feedback diagnostics in LEARN payload:
+- user readiness: `feedbackCounts` + `allFeedbackCounts`;
+- admin readiness: `feedbackCounts`;
+- admin metrics: `feedbackCounts` + `allFeedbackCounts`;
+- admin promotion: production vs rehearsal feedback counts.
+
+## 18) Delta 2026-03-04 (first-value demo fallback + IDE learn wiring)
+1. Added explicit optional demo fallback for provider-missing AI endpoints (guarded by `AETHEL_AI_DEMO_MODE`):
+- `/api/ai/chat`
+- `/api/ai/chat-advanced`
+- `/api/ai/complete`
+- `/api/ai/action`
+- `/api/ai/inline-edit`
+- `/api/ai/inline-completion`
+2. Demo fallback keeps anti-fake-success contract explicit:
+- responses include `demoMode=true`, `capabilityStatus=PARTIAL`, warning text, provider setup metadata;
+- default behavior without demo flag remains `503 AI_PROVIDER_NOT_CONFIGURED`.
+3. Provider readiness endpoint now exposes demo state:
+- `/api/ai/provider-status` returns `demoModeEnabled` signal.
+4. IDE core-loop learn signal now connected to user flow:
+- `MonacoEditorPro` posts `accepted` or `needs_work` feedback after inline apply outcome;
+- `/ide` rollback action posts `rejected` feedback for the same `runId`.

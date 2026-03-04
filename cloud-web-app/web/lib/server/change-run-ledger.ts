@@ -14,8 +14,8 @@ const REHEARSAL_RUN_SOURCES = new Set([
 ])
 
 export interface ChangeRunLedgerEvent {
-  eventType: 'apply' | 'rollback' | 'apply_blocked' | 'rollback_blocked'
-  capability: 'AI_CHANGE_APPLY' | 'AI_CHANGE_ROLLBACK'
+  eventType: 'apply' | 'rollback' | 'apply_blocked' | 'rollback_blocked' | 'learn_feedback'
+  capability: 'AI_CHANGE_APPLY' | 'AI_CHANGE_ROLLBACK' | 'AI_CHANGE_LEARN'
   userId: string
   projectId: string
   filePath: string
@@ -40,6 +40,7 @@ export interface ChangeRunLedgerSummary {
   rollbackSuccess: number
   rollbackBlocked: number
   rollbackFailed: number
+  learnFeedback: number
   successRate: number
 }
 
@@ -205,6 +206,7 @@ export function summarizeChangeRunLedger(rows: ChangeRunLedgerRow[]): ChangeRunL
   let rollbackSuccess = 0
   let rollbackBlocked = 0
   let rollbackFailed = 0
+  let learnFeedback = 0
 
   for (const row of rows) {
     if (row.eventType === 'apply') applySuccess += 1
@@ -213,6 +215,7 @@ export function summarizeChangeRunLedger(rows: ChangeRunLedgerRow[]): ChangeRunL
     if (row.eventType === 'rollback') rollbackSuccess += 1
     if (row.eventType === 'rollback_blocked' && row.outcome === 'blocked') rollbackBlocked += 1
     if (row.eventType === 'rollback_blocked' && row.outcome === 'failed') rollbackFailed += 1
+    if (row.eventType === 'learn_feedback') learnFeedback += 1
   }
 
   const successDenominator = applySuccess + applyBlocked + applyFailed
@@ -226,6 +229,7 @@ export function summarizeChangeRunLedger(rows: ChangeRunLedgerRow[]): ChangeRunL
     rollbackSuccess,
     rollbackBlocked,
     rollbackFailed,
+    learnFeedback,
     successRate,
   }
 }

@@ -8,6 +8,7 @@ import { computeCoreLoopReadiness, type CoreLoopThresholds } from '@/lib/server/
 import {
   buildCoreLoopRecommendations,
   buildCoreLoopTrend,
+  buildFeedbackCounts,
   buildReasonCounts,
   buildReasonPlaybook,
   topEntries,
@@ -81,6 +82,7 @@ export const GET = withAdminAuth(async () => {
   const primaryWindow = windows[1] ?? windows[0]
   const productionEvents = filterChangeRunLedgerBySample(primaryWindow.events, 'production')
   const reasonCounts = buildReasonCounts(productionEvents)
+  const feedbackCounts = buildFeedbackCounts(productionEvents)
   const trend =
     primaryWindow && windows[2]
       ? buildCoreLoopTrend({
@@ -94,6 +96,7 @@ export const GET = withAdminAuth(async () => {
         thresholds: THRESHOLDS,
         providerConfigured: primaryWindow.reportProduction.providerConfigured,
         reasonCounts,
+        feedbackCounts,
       })
     : []
 
@@ -125,6 +128,7 @@ export const GET = withAdminAuth(async () => {
       blockers: primaryWindow.reportProduction.metrics.blockers,
       trend,
       reasonCounts: topEntries(reasonCounts, 8),
+      feedbackCounts: topEntries(feedbackCounts, 6),
       reasonPlaybook: buildReasonPlaybook(reasonCounts, 6),
       recommendations,
       rollup: primaryWindow.reportProduction.rollup,

@@ -11,6 +11,7 @@ export type CoreLoopRecommendation = {
     | 'increase_sandbox_coverage'
     | 'provider_setup'
     | 'approve_high_risk'
+    | 'reduce_rejections'
   severity: 'critical' | 'warning' | 'info'
   message: string
 }
@@ -123,6 +124,18 @@ export function buildImpactedEndpointCounts(events: ChangeRunLedgerRow[]): Count
   return sortCountMap(counts)
 }
 
+export function buildFeedbackCounts(events: ChangeRunLedgerRow[]): CountMap {
+  const counts: CountMap = {}
+  for (const event of events) {
+    if (event.eventType !== 'learn_feedback') continue
+    const metadata = toMetadataObject(event.metadata)
+    const feedback =
+      typeof metadata.feedback === 'string' && metadata.feedback.trim() ? metadata.feedback.trim() : 'unknown'
+    increment(counts, feedback)
+  }
+  return sortCountMap(counts)
+}
+
 export function topEntries(input: CountMap, limit = 6): CountMap {
   return Object.fromEntries(Object.entries(input).slice(0, Math.max(1, limit)))
 }
@@ -132,6 +145,7 @@ export function buildCoreLoopRecommendations(params: {
   thresholds: CoreLoopThresholds
   providerConfigured: boolean
   reasonCounts: CountMap
+  feedbackCounts?: CountMap
 }): CoreLoopRecommendation[] {
   const { metrics, thresholds, providerConfigured, reasonCounts } = params
   const out: CoreLoopRecommendation[] = []
@@ -185,6 +199,21 @@ export function buildCoreLoopRecommendations(params: {
     })
   }
 
+  const feedbackCounts = params.feedbackCounts || {}
+  const accepted = feedbackCounts.accepted || 0
+  const rejected = feedbackCounts.rejected || 0
+  const needsWork = feedbackCounts.needs_work || 0
+  const totalFeedback = accepted + rejected + needsWork
+  const rejectionRate = totalFeedback > 0 ? rejected / totalFeedback : 0
+  if (totalFeedback >= 10 && rejectionRate >= 0.25) {
+    out.push({
+      id: 'reduce_rejections',
+      severity: 'warning',
+      message:
+        'User feedback rejection rate is high in recent learn samples; tighten validation and dependency-risk plans before apply.',
+    })
+  }
+
   return out
 }
 
@@ -225,6 +254,7 @@ function reasonAction(reason: string): string {
   if (reason === 'DEPENDENCY_IMPACT_APPROVAL_REQUIRED') return 'Reduce local-import fanout or require explicit approval.'
   if (reason === 'APPLY_WRITE_FAILED') return 'Harden workspace I/O path and fallback recovery.'
   if (reason === 'ROLLBACK_WRITE_FAILED') return 'Validate rollback token/write restore path with smoke runs.'
+  if (reason === 'USER_REJECTED_APPLY') return 'Route similar changes to sandbox preview and explicit approval before workspace apply.'
   return 'Review ledger evidence and add targeted remediation for this reason.'
 }
 

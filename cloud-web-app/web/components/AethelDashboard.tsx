@@ -919,7 +919,7 @@ export default function AethelDashboard() {
     ;(async () => {
       try {
         const status = await fetchAiProviderStatus(controller.signal)
-        if (status.configured) {
+        if (status.configured || status.demoModeEnabled) {
           setAiProviderGate(null)
           return
         }

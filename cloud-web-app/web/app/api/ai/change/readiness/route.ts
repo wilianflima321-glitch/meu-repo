@@ -8,6 +8,7 @@ import {
   buildCoreLoopTrend,
   buildCoreLoopRecommendations,
   buildExecutionModeCounts,
+  buildFeedbackCounts,
   buildReasonPlaybook,
   buildReasonCounts,
   buildRiskCounts,
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
   })
   const productionEvents = filterChangeRunLedgerBySample(events, 'production')
   const reasonCounts = buildReasonCounts(productionEvents)
+  const feedbackCounts = buildFeedbackCounts(productionEvents)
   const executionModeCounts = buildExecutionModeCounts(productionEvents)
   const riskCounts = buildRiskCounts(productionEvents)
   const baselineSinceIso = new Date(Date.now() - 24 * 30 * 60 * 60 * 1000).toISOString()
@@ -97,6 +99,7 @@ export async function GET(request: NextRequest) {
     thresholds: THRESHOLDS,
     providerConfigured: report.providerConfigured,
     reasonCounts,
+    feedbackCounts,
   })
 
   return capabilityResponse({
@@ -116,7 +119,9 @@ export async function GET(request: NextRequest) {
       rollup: report.rollup,
       rollupAll: reportAll.rollup,
       reasonCounts: topEntries(reasonCounts, 8),
+      feedbackCounts: topEntries(feedbackCounts, 6),
       allReasonCounts: topEntries(buildReasonCounts(events), 8),
+      allFeedbackCounts: topEntries(buildFeedbackCounts(events), 6),
       executionModeCounts: topEntries(executionModeCounts, 6),
       riskCounts: topEntries(riskCounts, 6),
       trend,

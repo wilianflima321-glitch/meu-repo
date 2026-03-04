@@ -11,6 +11,13 @@ import {
 } from '@/lib/metering';
 import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants';
+import {
+  AI_DEMO_MODEL,
+  AI_DEMO_PROVIDER,
+  buildDemoChatContent,
+  demoRouteMetadata,
+  isAiDemoModeEnabled,
+} from '@/lib/server/ai-demo-mode';
 
 function resolveBackendBaseUrl(): string | null {
   const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -90,6 +97,33 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     if (aiService.getAvailableProviders().length === 0) {
+      if (isAiDemoModeEnabled()) {
+        const demo = demoRouteMetadata({ route: '/api/ai/chat', capability: 'AI_CHAT' });
+        return NextResponse.json(
+          {
+            content: buildDemoChatContent({ messages }),
+            provider: AI_DEMO_PROVIDER,
+            model: AI_DEMO_MODEL,
+            tokensUsed: 0,
+            latencyMs: 0,
+            ...demo,
+          },
+          {
+            headers: {
+              ...(decision.remaining?.requestsPerHour !== undefined
+                ? { 'X-Usage-Remaining-RequestsPerHour': String(decision.remaining.requestsPerHour) }
+                : {}),
+              ...(decision.remaining?.tokensPerDay !== undefined
+                ? { 'X-Usage-Remaining-TokensPerDay': String(decision.remaining.tokensPerDay) }
+                : {}),
+              ...(decision.remaining?.tokensPerMonth !== undefined
+                ? { 'X-Usage-Remaining-TokensPerMonth': String(decision.remaining.tokensPerMonth) }
+                : {}),
+              'X-Aethel-AI-Demo-Mode': '1',
+            },
+          }
+        );
+      }
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
         status: 503,

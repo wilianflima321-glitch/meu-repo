@@ -12,6 +12,7 @@ import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import CommandPaletteProvider from "@/components/ide/CommandPalette";
 import { analytics } from "@/lib/analytics";
+import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
 const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
@@ -646,6 +647,8 @@ function IDEContent() {
       setRollbackBusy(true)
       setFileError(null)
       try {
+        const rollbackRunId = lastAiApply.runId
+        const rollbackFilePath = lastAiApply.filePath || activeFile.path
         const response = await fetch('/api/ai/change/rollback', {
           method: 'POST',
           headers: {
@@ -661,11 +664,21 @@ function IDEContent() {
           throw new Error(payload.error || payload.message || `Rollback failed: HTTP ${response.status}`)
         }
 
-        const rollbackPath = lastAiApply.filePath || activeFile.path
+        const rollbackPath = rollbackFilePath
         await readFile(rollbackPath)
         setPreviewRefreshTick((prev) => prev + 1)
         setLastSavedAt(new Date())
         setLastAiApply(null)
+        if (rollbackRunId) {
+          void submitChangeFeedback({
+            runId: rollbackRunId,
+            feedback: 'rejected',
+            reason: 'USER_TRIGGERED_ROLLBACK',
+            notes: 'User triggered rollback from IDE status bar.',
+            filePath: rollbackPath,
+            runSource: 'production',
+          })
+        }
         analytics?.track?.('project', 'project_save', {
           metadata: {
             source: 'ide-inline-rollback',

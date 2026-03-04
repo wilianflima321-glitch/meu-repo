@@ -6,6 +6,7 @@ import {
   buildCoreLoopTrend,
   buildCoreLoopRecommendations,
   buildExecutionModeCounts,
+  buildFeedbackCounts,
   buildImpactedEndpointCounts,
   buildReasonPlaybook,
   buildReasonCounts,
@@ -61,6 +62,7 @@ export const GET = withAdminAuth(async () => {
 
       const productionEvents = filterChangeRunLedgerBySample(events, 'production')
       const reasonCounts = buildReasonCounts(productionEvents)
+      const feedbackCounts = buildFeedbackCounts(productionEvents)
       const executionModeCounts = buildExecutionModeCounts(productionEvents)
       const riskCounts = buildRiskCounts(productionEvents)
       const impactedEndpointCounts = buildImpactedEndpointCounts(productionEvents)
@@ -69,6 +71,7 @@ export const GET = withAdminAuth(async () => {
         thresholds: THRESHOLDS,
         providerConfigured,
         reasonCounts,
+        feedbackCounts,
       })
       const lastEventAt = events.length > 0 ? events[0].timestamp : null
 
@@ -81,7 +84,9 @@ export const GET = withAdminAuth(async () => {
         rollup: report.rollup,
         rollupAll: reportAll.rollup,
         reasonCounts,
+        feedbackCounts,
         allReasonCounts: buildReasonCounts(events),
+        allFeedbackCounts: buildFeedbackCounts(events),
         executionModeCounts,
         riskCounts,
         impactedEndpointCounts: topEntries(impactedEndpointCounts, 8),

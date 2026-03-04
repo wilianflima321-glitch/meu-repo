@@ -111,7 +111,7 @@ export default function AIChatPanelContainer() {
     ;(async () => {
       try {
         const status = await fetchAiProviderStatus(controller.signal)
-        if (status.configured) {
+        if (status.configured || status.demoModeEnabled) {
           setProviderGate(null)
           return
         }

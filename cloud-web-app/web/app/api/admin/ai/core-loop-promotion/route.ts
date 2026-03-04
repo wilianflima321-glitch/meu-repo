@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { withAdminAuth } from '@/lib/rbac'
-import { readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
+import { filterChangeRunLedgerBySample, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
 import { computeCoreLoopReadiness, type CoreLoopThresholds } from '@/lib/server/core-loop-readiness'
+import { buildFeedbackCounts, topEntries } from '@/lib/server/core-loop-learning'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +39,14 @@ export const GET = withAdminAuth(async () => {
     runGroupLimit: 200,
     sampleClass: 'rehearsal',
   })
+  const productionFeedbackCounts = topEntries(
+    buildFeedbackCounts(filterChangeRunLedgerBySample(events, 'production')),
+    6
+  )
+  const rehearsalFeedbackCounts = topEntries(
+    buildFeedbackCounts(filterChangeRunLedgerBySample(events, 'rehearsal')),
+    6
+  )
 
   return NextResponse.json(
     {
@@ -50,6 +59,8 @@ export const GET = withAdminAuth(async () => {
       thresholds: THRESHOLDS,
       production: production.metrics,
       rehearsal: rehearsal.metrics,
+      productionFeedbackCounts,
+      rehearsalFeedbackCounts,
       updatedAt: now.toISOString(),
       sinceIso,
     },

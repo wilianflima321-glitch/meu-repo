@@ -104,6 +104,11 @@ export default function AIProviderSetupGuide({
       )}
 
       {errorText && <p className="mt-2 text-[11px] text-rose-200">{errorText}</p>}
+      {status?.demoModeEnabled && (
+        <p className="mt-2 rounded border border-emerald-400/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-100">
+          Demo mode ativo: fluxo de IA liberado com respostas simuladas. Configure provider real para qualidade de producao.
+        </p>
+      )}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button

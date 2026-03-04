@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic'
 
 const CAPABILITY = 'AI_CHANGE_ROLLBACK'
 const RUN_SOURCE = 'production'
-const MAX_BATCH_ROLLBACKS = 20
+const MAX_BATCH_ROLLBACKS = 50
 
 type RollbackBody = {
   rollbackToken?: string

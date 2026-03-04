@@ -68,6 +68,16 @@ All direct competitor feature/perf claims (Cursor, Replit, Linear, Bolt, Lovable
 2. Expand apply/rollback operational envelope with run-level evidence quality.
 3. Close LEARN stage from instrumentation to decision feedback loop.
 
+Current wave delta:
+1. LEARN feedback ingress is now operational at `POST /api/ai/change/feedback`.
+2. Apply/rollback batch envelope expanded from `20` to `50` for controlled multi-file/multi-token waves.
+3. Readiness payloads now include feedback diagnostics (`feedbackCounts`) in user/admin evidence surfaces.
+4. Optional provider-missing demo fallback (`AETHEL_AI_DEMO_MODE`) now covers core AI endpoints with explicit `demoMode=true` contract (anti-fake-success preserved).
+5. IDE flow now emits LEARN evidence from user actions:
+- inline apply success -> `accepted`
+- inline apply rejection -> `needs_work`
+- manual rollback -> `rejected`
+
 ### P0-B First-value onboarding closure
 1. Reduce provider-setup friction path.
 2. Publish first-value SLO with measured windows.

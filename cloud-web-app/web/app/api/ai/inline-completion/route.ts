@@ -5,6 +5,13 @@ import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
+import {
+  AI_DEMO_MODEL,
+  AI_DEMO_PROVIDER,
+  buildDemoCompletion,
+  demoRouteMetadata,
+  isAiDemoModeEnabled,
+} from '@/lib/server/ai-demo-mode'
 
 /**
  * Inline Completion API (compat surface for ghost-text clients)
@@ -74,6 +81,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (aiService.getAvailableProviders().length === 0) {
+      if (isAiDemoModeEnabled()) {
+        const demo = demoRouteMetadata({ route: '/api/ai/inline-completion', capability: 'AI_INLINE_COMPLETION' })
+        const suggestion = buildDemoCompletion({ prompt })
+        return NextResponse.json({
+          suggestion,
+          text: suggestion,
+          provider: AI_DEMO_PROVIDER,
+          model: AI_DEMO_MODEL,
+          tokensUsed: 0,
+          latencyMs: 0,
+          ...demo,
+        })
+      }
+
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
         status: 503,
