@@ -842,3 +842,8 @@ Required: unified empty/loading/error/success language and behavior across dashb
 1. Moved IDE handoff runtime-discovery logic into `components/dashboard/aethel-dashboard-ide-handoff.ts`.
 2. `components/AethelDashboard.tsx` returned to shell gate boundary (`<=1200` lines) after runtime continuity enhancements.
 3. `qa:dashboard-shell` remains green with runtime-discovery behavior preserved.
+
+### 7.94 Production evidence generation API + operator action (2026-03-04-x)
+1. Added admin endpoint `POST /api/admin/ai/core-loop-production-probe` (`ADMIN_AI_CORE_LOOP_PRODUCTION_PROBE`, `PARTIAL`).
+2. Endpoint executes delegated authenticated sandbox apply probes (`/api/ai/change/apply`) with `runSource=production`.
+3. `/admin/ai-monitor` now exposes `Run Production Probe` to reduce production-evidence zero states in readiness windows.

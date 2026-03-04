@@ -327,3 +327,7 @@ CI workflows:
 ## 40. Delta 2026-03-04 (dashboard shell decomposition guard)
 1. Added runtime handoff helper `components/dashboard/aethel-dashboard-ide-handoff.ts` to keep shell composition compact.
 2. `AethelDashboard.tsx` keeps orchestration-only role while preserving runtime continuity behavior.
+
+## 41. Delta 2026-03-04 (admin AI monitor production probe control)
+1. Added production evidence trigger button in `app/admin/ai-monitor/page.tsx` (`Run Production Probe`).
+2. Action calls `/api/admin/ai/core-loop-production-probe` and refreshes readiness/metrics/runs surfaces after completion.

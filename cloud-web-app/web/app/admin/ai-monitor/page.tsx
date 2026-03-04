@@ -429,6 +429,7 @@ export default function AgentMonitorPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRunningDrill, setIsRunningDrill] = useState(false);
+  const [isRunningProductionProbe, setIsRunningProductionProbe] = useState(false);
   const [runSampleClass, setRunSampleClass] = useState<'all' | 'production' | 'rehearsal'>('production');
 
   const { data: metricsData } = useSWR<AIMetricsResponse>('/api/admin/ai/metrics', fetchWithAuth, {
@@ -536,6 +537,38 @@ export default function AgentMonitorPage() {
     }
   }, [refreshCalls, refreshPromotion, refreshReadiness, refreshCoreLoopMetrics, refreshLedgerIntegrity, refreshFullAccessAudit, refreshRuns]);
 
+  const runProductionProbe = React.useCallback(async () => {
+    try {
+      setIsRunningProductionProbe(true);
+      const token = getToken();
+      const response = await fetch('/api/admin/ai/core-loop-production-probe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ runs: 6 }),
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
+        throw new Error(payload.error || payload.message || `Request failed: ${response.status}`);
+      }
+      await Promise.all([
+        refreshCalls(),
+        refreshPromotion(),
+        refreshReadiness(),
+        refreshCoreLoopMetrics(),
+        refreshLedgerIntegrity(),
+        refreshFullAccessAudit(),
+        refreshRuns(),
+      ]);
+    } catch (error) {
+      console.error('[ai-monitor] production probe failed', error);
+    } finally {
+      setIsRunningProductionProbe(false);
+    }
+  }, [refreshCalls, refreshPromotion, refreshReadiness, refreshCoreLoopMetrics, refreshLedgerIntegrity, refreshFullAccessAudit, refreshRuns]);
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -571,6 +604,15 @@ export default function AgentMonitorPage() {
           >
             <Zap className="w-4 h-4" />
             {isRunningDrill ? 'Rodando drill...' : 'Run Drill'}
+          </button>
+          <button
+            onClick={() => void runProductionProbe()}
+            disabled={isRunningProductionProbe}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/40 text-emerald-300 disabled:opacity-60"
+            type="button"
+          >
+            <Zap className="w-4 h-4" />
+            {isRunningProductionProbe ? 'Rodando probe...' : 'Run Production Probe'}
           </button>
         </div>
       </div>

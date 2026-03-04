@@ -238,6 +238,17 @@ Mandatory implementation:
 - emits a compact summary (`success/blocked/failed/successRate`) for evidence pipeline operators.
 3. Goal:
 - reduce `production sample size = 0` deadlock without bypassing capability contracts.
+
+## 19) Delta 2026-03-04 (production probe API for operator loop)
+1. Added admin probe endpoint:
+- `POST /api/admin/ai/core-loop-production-probe`
+- capability: `ADMIN_AI_CORE_LOOP_PRODUCTION_PROBE` (`PARTIAL`).
+2. Flow:
+- resolves scoped project/workspace file candidate;
+- delegates authenticated `executionMode=sandbox` apply calls;
+- emits production-source evidence for readiness metrics.
+3. Added operator trigger in `/admin/ai-monitor`:
+- `Run Production Probe` button to execute probe + refresh readiness surfaces.
 3. Readiness/metrics now expose feedback diagnostics in LEARN payload:
 - user readiness: `feedbackCounts` + `allFeedbackCounts`;
 - admin readiness: `feedbackCounts`;

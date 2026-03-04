@@ -268,6 +268,19 @@ const checks = [
     name: 'admin/ai/core-loop-drill rehearsal contract',
   },
   {
+    file: 'app/api/admin/ai/core-loop-production-probe/route.ts',
+    patterns: [
+      "const CAPABILITY = 'ADMIN_AI_CORE_LOOP_PRODUCTION_PROBE'",
+      "error: 'PRODUCTION_PROBE_FILE_NOT_FOUND'",
+      "error: 'PRODUCTION_PROBE_AUTH_MISSING'",
+      "samplePolicy: 'production_only_for_promotion'",
+      "runSource: 'production'",
+      "capabilityStatus: 'PARTIAL'",
+      "message: 'Production evidence probe executed.'",
+    ],
+    name: 'admin/ai/core-loop-production-probe contract',
+  },
+  {
     file: 'app/api/admin/ai/ledger-integrity/route.ts',
     patterns: [
       "const CAPABILITY = 'ADMIN_AI_LEDGER_INTEGRITY'",

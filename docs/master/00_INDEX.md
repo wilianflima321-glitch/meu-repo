@@ -118,7 +118,8 @@ Status: CANONICAL ENTRYPOINT
   - dashboard shell decomposition guard preserved via `components/dashboard/aethel-dashboard-ide-handoff.ts` (keeps `AethelDashboard.tsx` under shell gate boundary),
   - `qa:impact-matrix` now runs with deterministic core-loop defaults and updates `docs/master/impact_matrix_core_loop.json`,
   - core-loop rolling metrics refreshed (`metrics/latest_run*.json`) with rehearsal-only evidence still excluded from promotion policy,
-  - production evidence probe tooling added (`npm run qa:core-loop-production-probe`) to generate authenticated production-sample apply probes in sandbox mode.
+  - production evidence probe tooling added (`npm run qa:core-loop-production-probe`) to generate authenticated production-sample apply probes in sandbox mode,
+  - admin production probe API + control added (`/api/admin/ai/core-loop-production-probe`, `/admin/ai-monitor` action `Run Production Probe`).
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
