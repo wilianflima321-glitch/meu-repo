@@ -11,7 +11,7 @@ function parseArgs(argv) {
   const out = {
     plan: '',
     files: '',
-    output: path.join(ROOT, 'impact_matrix.json'),
+    output: path.join(ROOT, 'docs', 'master', 'impact_matrix_core_loop.json'),
     sourceRoot: DEFAULT_SOURCE_ROOT,
   }
 
@@ -39,6 +39,11 @@ function parseArgs(argv) {
   }
   return out
 }
+
+const DEFAULT_CORE_LOOP_TARGETS = [
+  'cloud-web-app/web/app/api/ai/change/apply/route.ts',
+  'cloud-web-app/web/app/api/ai/change/rollback/route.ts',
+]
 
 function toPosix(filePath) {
   return filePath.replace(/\\/g, '/')
@@ -235,7 +240,11 @@ async function main() {
 
   const planTargets = await loadTargetsFromPlan(args.plan, sourceRoot)
   const argTargets = loadTargetsFromFilesArg(args.files, sourceRoot)
-  const targets = [...new Set([...planTargets, ...argTargets])]
+  let targets = [...new Set([...planTargets, ...argTargets])]
+
+  if (targets.length === 0) {
+    targets = loadTargetsFromFilesArg(DEFAULT_CORE_LOOP_TARGETS.join(','), sourceRoot)
+  }
 
   if (targets.length === 0) {
     console.error('[impact] no targets resolved. Use --plan <plan.json> or --files <comma-separated paths>.')

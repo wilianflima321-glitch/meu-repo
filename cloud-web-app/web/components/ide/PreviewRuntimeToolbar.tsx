@@ -22,6 +22,10 @@ type Props = {
   onUseFallback: () => void
   onRevalidate: () => void
   onOpenRuntime: () => void
+  onDiscoverRuntime: () => void
+  isDiscoveringRuntime: boolean
+  runtimeDiscoveryMessage?: string | null
+  runtimeDiscoveryTone?: 'info' | 'success' | 'warning'
 }
 
 export default function PreviewRuntimeToolbar({
@@ -38,7 +42,18 @@ export default function PreviewRuntimeToolbar({
   onUseFallback,
   onRevalidate,
   onOpenRuntime,
+  onDiscoverRuntime,
+  isDiscoveringRuntime,
+  runtimeDiscoveryMessage,
+  runtimeDiscoveryTone = 'info',
 }: Props) {
+  const discoveryToneClass =
+    runtimeDiscoveryTone === 'success'
+      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+      : runtimeDiscoveryTone === 'warning'
+        ? 'border-amber-500/30 bg-amber-500/10 text-amber-100'
+        : 'border-zinc-700 bg-zinc-900/80 text-zinc-300'
+
   return (
     <div className="border-b border-zinc-800 bg-zinc-950/80 px-3 py-2 text-xs">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -79,6 +94,14 @@ export default function PreviewRuntimeToolbar({
             className="rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-200 hover:bg-zinc-800"
           >
             {showRuntimeSettings ? 'Ocultar runtime' : 'Configurar runtime'}
+          </button>
+          <button
+            type="button"
+            onClick={onDiscoverRuntime}
+            disabled={isDiscoveringRuntime}
+            className="rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isDiscoveringRuntime ? 'Detectando...' : 'Auto detectar'}
           </button>
           {previewRuntimeUrl && (
             <button
@@ -126,6 +149,9 @@ export default function PreviewRuntimeToolbar({
             </button>
           )}
         </div>
+      )}
+      {runtimeDiscoveryMessage && (
+        <div className={`mt-2 rounded px-2 py-1 text-[11px] ${discoveryToneClass}`}>{runtimeDiscoveryMessage}</div>
       )}
       {previewRuntimeUrl && runtimeHealthStatus !== 'reachable' && (
         <div className="mt-2 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[11px] text-amber-100">

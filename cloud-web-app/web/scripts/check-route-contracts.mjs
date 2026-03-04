@@ -325,6 +325,18 @@ const checks = [
     name: 'admin/onboarding stats contract',
   },
   {
+    file: 'app/api/preview/runtime-discover/route.ts',
+    patterns: [
+      "const CAPABILITY = 'IDE_PREVIEW_RUNTIME_DISCOVERY'",
+      "error: 'RUNTIME_DISCOVERY_TOO_MANY_CANDIDATES'",
+      "status: 400",
+      "capabilityStatus: 'PARTIAL'",
+      'preferredRuntimeUrl',
+      "source: usingDefaultCandidates ? 'default' : 'request'",
+    ],
+    name: 'preview/runtime-discover contract',
+  },
+  {
     file: 'app/api/render/jobs/[jobId]/cancel/route.ts',
     patterns: [
       "const CAPABILITY = 'RENDER_JOB_CANCEL'",

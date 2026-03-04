@@ -28,6 +28,7 @@ Rules used:
 1. Preview runtime:
    - Supported external runtime URL path exists and is operational.
    - Inline fallback exists and is explicit.
+   - Runtime auto-discovery baseline now exists (`/api/preview/runtime-discover` + `/ide` auto-detect/manual detect actions).
    - Managed HMR runtime (zero-config per project) is still missing.
 2. Onboarding first-value:
    - First-value rails and telemetry checkpoints exist.
@@ -35,6 +36,7 @@ Rules used:
 3. Core loop:
    - `validate`, `apply`, `rollback`, `readiness`, `promotion` endpoints exist.
    - Promotion evidence policy is active (`production_only_for_promotion`).
+   - Rehearsal run evidence now exists in exported metrics (`metrics/latest_run-rehearsal.json`).
    - L4 promotion evidence is still blocked by sample/quality thresholds.
 4. Collaboration:
    - Readiness/evidence endpoints exist.

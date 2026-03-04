@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import IDELayout from "@/components/ide/IDELayout";
@@ -36,6 +36,17 @@ type RuntimeHealthState = {
   latencyMs?: number
   httpStatus?: number
   reason?: string
+}
+
+type RuntimeDiscoveryResponse = {
+  preferredRuntimeUrl?: string | null
+  candidates?: Array<{
+    url?: string
+    status?: PreviewRuntimeHealthStatus
+    latencyMs?: number
+    httpStatus?: number
+    reason?: string
+  }>
 }
 
 type FullAccessGrant = {
@@ -165,10 +176,14 @@ function IDEContent() {
   const [isCompactViewport, setIsCompactViewport] = useState(false)
   const [runtimeHealth, setRuntimeHealth] = useState<RuntimeHealthState>({ status: 'idle' })
   const [runtimeHealthCheckedAt, setRuntimeHealthCheckedAt] = useState<Date | null>(null)
+  const [isDiscoveringRuntime, setIsDiscoveringRuntime] = useState(false)
+  const [runtimeDiscoveryMessage, setRuntimeDiscoveryMessage] = useState<string | null>(null)
+  const [runtimeDiscoveryTone, setRuntimeDiscoveryTone] = useState<'info' | 'success' | 'warning'>('info')
   const [fullAccessBusy, setFullAccessBusy] = useState(false)
   const [rollbackBusy, setRollbackBusy] = useState(false)
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
+  const runtimeAutoDiscoveryTriggeredRef = useRef(false)
 
   const { data: fullAccessData, mutate: mutateFullAccess } = useSWR<FullAccessResponse>(
     hasToken ? '/api/studio/access/full' : null,
@@ -448,6 +463,7 @@ function IDEContent() {
     const normalized = normalizeRuntimeUrl(previewRuntimeInput)
     setPreviewRuntimeUrl(normalized)
     setRuntimeHealth({ status: normalized ? 'checking' : 'idle' })
+    setRuntimeDiscoveryMessage(null)
     if (typeof window !== 'undefined') {
       if (normalized) {
         window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, normalized)
@@ -463,6 +479,81 @@ function IDEContent() {
       },
     })
   }, [previewRuntimeInput])
+
+  const discoverRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual') => {
+    if (isDiscoveringRuntime) return
+    setIsDiscoveringRuntime(true)
+    if (mode === 'manual') {
+      setRuntimeDiscoveryTone('info')
+      setRuntimeDiscoveryMessage('Buscando runtime local nas portas padrao...')
+    }
+
+    try {
+      const response = await fetch('/api/preview/runtime-discover', {
+        cache: 'no-store',
+      })
+      const payload = (await response.json().catch(() => null)) as RuntimeDiscoveryResponse | null
+      if (!response.ok) {
+        const errorText = (payload as { error?: string } | null)?.error || `HTTP ${response.status}`
+        throw new Error(errorText)
+      }
+
+      const preferredRuntimeUrl = normalizeRuntimeUrl(payload?.preferredRuntimeUrl ?? null)
+      if (!preferredRuntimeUrl) {
+        if (mode === 'manual') {
+          setRuntimeDiscoveryTone('warning')
+          setRuntimeDiscoveryMessage('Nenhum runtime local encontrado. Inicie npm run dev e tente novamente.')
+        } else {
+          setRuntimeDiscoveryMessage(null)
+        }
+        analytics?.track?.('engine', 'render_time', {
+          metadata: {
+            surface: 'ide-preview-runtime-discovery',
+            mode,
+            status: 'not-found',
+          },
+        })
+        return
+      }
+
+      setPreviewRuntimeUrl(preferredRuntimeUrl)
+      setPreviewRuntimeInput(preferredRuntimeUrl)
+      setRuntimeHealth({ status: 'checking' })
+      setRuntimeHealthCheckedAt(new Date())
+      setRuntimeDiscoveryTone('success')
+      setRuntimeDiscoveryMessage(`Runtime detectado: ${preferredRuntimeUrl}`)
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, preferredRuntimeUrl)
+      }
+
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-discovery',
+          mode,
+          status: 'found',
+          runtimeUrl: preferredRuntimeUrl,
+        },
+      })
+    } catch (error) {
+      if (mode === 'manual') {
+        setRuntimeDiscoveryTone('warning')
+        setRuntimeDiscoveryMessage(
+          error instanceof Error ? `Falha ao detectar runtime: ${error.message}` : 'Falha ao detectar runtime.'
+        )
+      }
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-discovery',
+          mode,
+          status: 'error',
+          reason: error instanceof Error ? error.message : 'unknown',
+        },
+      })
+    } finally {
+      setIsDiscoveringRuntime(false)
+    }
+  }, [isDiscoveringRuntime])
 
   const forceInlinePreviewFallback =
     Boolean(previewRuntimeUrl) &&
@@ -525,6 +616,14 @@ function IDEContent() {
   }, [previewRuntimeUrl, checkRuntimeHealth])
 
   useEffect(() => {
+    if (runtimeAutoDiscoveryTriggeredRef.current) return
+    if (!previewEnabled) return
+    if (previewRuntimeUrl) return
+    runtimeAutoDiscoveryTriggeredRef.current = true
+    void discoverRuntime('auto')
+  }, [discoverRuntime, previewEnabled, previewRuntimeUrl])
+
+  useEffect(() => {
     if (!previewEnabled || !previewRuntimeUrl) return
     const interval = window.setInterval(() => {
       if (document.visibilityState !== 'visible') return
@@ -566,6 +665,8 @@ function IDEContent() {
     setPreviewRuntimeUrl(null)
     setRuntimeHealth({ status: 'idle' })
     setRuntimeHealthCheckedAt(null)
+    setRuntimeDiscoveryTone('info')
+    setRuntimeDiscoveryMessage('Modo inline fallback ativo.')
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(PREVIEW_RUNTIME_URL_STORAGE_KEY)
     }
@@ -728,6 +829,12 @@ function IDEContent() {
                 onRuntimeInputChange={setPreviewRuntimeInput}
                 onApplyRuntime={applyRuntimeUrl}
                 onUseFallback={handleUseInlineFallback}
+                isDiscoveringRuntime={isDiscoveringRuntime}
+                runtimeDiscoveryMessage={runtimeDiscoveryMessage}
+                runtimeDiscoveryTone={runtimeDiscoveryTone}
+                onDiscoverRuntime={() => {
+                  void discoverRuntime('manual')
+                }}
                 onRevalidate={() => {
                   if (!previewRuntimeUrl) return
                   void checkRuntimeHealth(previewRuntimeUrl)

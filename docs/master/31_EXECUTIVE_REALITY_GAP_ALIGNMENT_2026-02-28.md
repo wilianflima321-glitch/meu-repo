@@ -801,3 +801,29 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - `production` metrics (policy scope);
 - `rehearsal` metrics (diagnostic scope).
 3. Goal: eliminate manual interpretation drift between readiness and metrics endpoints during release freeze decisions.
+
+### 7.88 Preview runtime auto-discovery baseline (2026-03-04-r)
+1. Added `/api/preview/runtime-discover` (`IDE_PREVIEW_RUNTIME_DISCOVERY`, `PARTIAL`) to scan local runtime candidates and emit `preferredRuntimeUrl` with explicit candidate statuses.
+2. `components/ide/FullscreenIDE.tsx` now supports one-shot automatic runtime discovery when no runtime URL is configured and preview is enabled.
+3. `components/ide/PreviewRuntimeToolbar.tsx` now includes explicit manual discovery action (`Auto detectar`) and discovery feedback messages.
+4. `runtime-health` route now reuses canonical helper logic in `lib/server/preview-runtime.ts` for consistent allowlist/probe behavior across runtime observability surfaces.
+
+### 7.89 Impact matrix CLI default profile hardening (2026-03-04-s)
+1. `tools/impact.mjs` now uses deterministic core-loop defaults when no `--plan`/`--files` are provided:
+- `app/api/ai/change/apply/route.ts`
+- `app/api/ai/change/rollback/route.ts`
+2. Default output is now canonicalized to:
+- `docs/master/impact_matrix_core_loop.json`
+3. `npm run qa:impact-matrix` no longer fails with empty-target error in baseline execution.
+
+### 7.90 Core-loop metrics refresh (2026-03-04-t)
+1. Re-exported rolling metrics artifacts:
+- `metrics/latest_run.json`
+- `metrics/latest_run-production.json`
+- `metrics/latest_run-rehearsal.json`
+2. Current evidence profile after refresh:
+- `sampleClass=all`: `applyRuns=12`, `apply_success_rate=0.75`, `blocked_rate=0.25`
+- `sampleClass=production`: `applyRuns=0` (still blocks L4 promotion claim)
+- `sampleClass=rehearsal`: `applyRuns=12` (diagnostic only)
+3. Promotion policy remains unchanged:
+- `production_only_for_promotion`.

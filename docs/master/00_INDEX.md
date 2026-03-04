@@ -112,7 +112,10 @@ Status: CANONICAL ENTRYPOINT
   - L4/L5 promotion roadmap locked in `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`.
 - Delta 2026-03-04:
   - executive text alignment absorbed into canonical docs at `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`,
-  - mismatch corrections applied for current-state counts (dashboard shell line bound and explicit NOT_IMPLEMENTED inventory).
+  - mismatch corrections applied for current-state counts (dashboard shell line bound and explicit NOT_IMPLEMENTED inventory),
+  - `/ide` preview now has runtime auto-discovery baseline (`/api/preview/runtime-discover` + runtime toolbar "Auto detectar"),
+  - `qa:impact-matrix` now runs with deterministic core-loop defaults and updates `docs/master/impact_matrix_core_loop.json`,
+  - core-loop rolling metrics refreshed (`metrics/latest_run*.json`) with rehearsal-only evidence still excluded from promotion policy.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

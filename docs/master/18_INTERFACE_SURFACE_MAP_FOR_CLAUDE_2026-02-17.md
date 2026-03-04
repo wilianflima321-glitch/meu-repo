@@ -91,7 +91,8 @@ All other admin surface directories:
 
 ### 4.3.1 Preview runtime observability
 1. `cloud-web-app/web/app/api/preview/runtime-health/route.ts`
-2. `cloud-web-app/web/components/ide/FullscreenIDE.tsx` runtime status chip + revalidate control
+2. `cloud-web-app/web/app/api/preview/runtime-discover/route.ts`
+3. `cloud-web-app/web/components/ide/FullscreenIDE.tsx` runtime status chip + revalidate/auto-discovery controls
 
 ### 4.4 Studio orchestration capability gates
 1. `cloud-web-app/web/app/api/studio/_lib/studio-gate.ts`
@@ -310,3 +311,10 @@ CI workflows:
 1. `app/api/admin/collaboration/readiness/route.ts` now returns freshness status for evidence bundle (`stale.*`, `maxAgeDays`, `lastPassedAt`).
 2. `app/admin/collaboration/page.tsx` now displays stale evidence flags in readiness cards and stress-proof status.
 3. Promotion visibility is now time-aware (presence + freshness), reducing false-positive readiness interpretation.
+
+## 38. Delta 2026-03-04 (preview runtime auto-discovery baseline)
+1. Added canonical discovery route `app/api/preview/runtime-discover/route.ts` (`IDE_PREVIEW_RUNTIME_DISCOVERY`, `PARTIAL`) with default local candidate scan and explicit candidate-cap semantics.
+2. `components/ide/FullscreenIDE.tsx` now supports runtime auto-discovery:
+- one-shot automatic scan when preview is enabled and no runtime is configured;
+- explicit manual "Auto detectar" action in runtime toolbar.
+3. `components/ide/PreviewRuntimeToolbar.tsx` now surfaces runtime discovery state/result messages to avoid silent fallback ambiguity.
