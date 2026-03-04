@@ -74,6 +74,7 @@ import {
   getAuthHeaders,
   getProjectIdFromLocation,
 } from './dashboard/aethel-dashboard-location-utils'
+import { resolveIdeHandoffParams } from './dashboard/aethel-dashboard-ide-handoff'
 import {
   buildCopilotContextPatch,
   buildWorkflowTitle,
@@ -329,52 +330,18 @@ export default function AethelDashboard() {
   }, [showToastMessage, trackEvent])
   const navigateToIdeWithContext = useCallback((source: string, entry: string) => {
     if (typeof window === 'undefined') return
-    trackEvent('engine', 'editor_open', {
-      source,
+    trackEvent('engine', 'editor_open', { source, entry, projectId: copilotProjectId })
+
+    void resolveIdeHandoffParams({
       entry,
       projectId: copilotProjectId,
-    })
-
-    void (async () => {
-      const params = new URLSearchParams()
-      params.set('entry', entry)
-      if (copilotProjectId) params.set('projectId', copilotProjectId)
-
-      const storedRuntimeUrl = window.localStorage.getItem(PREVIEW_RUNTIME_URL_STORAGE_KEY)
-      if (storedRuntimeUrl && /^https?:\/\//i.test(storedRuntimeUrl.trim())) {
-        params.set('previewUrl', storedRuntimeUrl.trim())
-      } else {
-        try {
-          const response = await fetch('/api/preview/runtime-discover', {
-            cache: 'no-store',
-          })
-          const payload = (await response.json().catch(() => null)) as { preferredRuntimeUrl?: string | null } | null
-          const preferredRuntimeUrl =
-            typeof payload?.preferredRuntimeUrl === 'string' ? payload.preferredRuntimeUrl.trim() : ''
-          if (response.ok && preferredRuntimeUrl && /^https?:\/\//i.test(preferredRuntimeUrl)) {
-            params.set('previewUrl', preferredRuntimeUrl)
-            window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, preferredRuntimeUrl)
-            trackEvent('engine', 'render_time', {
-              source: 'dashboard-handoff-runtime-discovery',
-              status: 'found',
-              runtimeUrl: preferredRuntimeUrl,
-            })
-          } else {
-            trackEvent('engine', 'render_time', {
-              source: 'dashboard-handoff-runtime-discovery',
-              status: 'not-found',
-            })
-          }
-        } catch {
-          trackEvent('engine', 'render_time', {
-            source: 'dashboard-handoff-runtime-discovery',
-            status: 'error',
-          })
-        }
+      previewRuntimeStorageKey: PREVIEW_RUNTIME_URL_STORAGE_KEY,
+    }).then(({ params, runtimeUrl, discoveryStatus }) => {
+      if (discoveryStatus !== 'stored') {
+        trackEvent('engine', 'render_time', { source: 'dashboard-handoff-runtime-discovery', status: discoveryStatus, runtimeUrl })
       }
-
       window.location.assign(`/ide?${params.toString()}`)
-    })()
+    })
   }, [copilotProjectId, trackEvent])
   const handleOpenIdeLivePreview = useCallback(() => {
     setFirstValueOpenedIde(true)

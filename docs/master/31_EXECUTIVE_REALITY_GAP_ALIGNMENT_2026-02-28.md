@@ -837,3 +837,8 @@ Required: unified empty/loading/error/success language and behavior across dashb
 1. Added CLI probe `tools/run-core-loop-production-probe.mjs` and script `npm run qa:core-loop-production-probe`.
 2. Tool executes authenticated sandbox apply probes (`/api/ai/change/apply`) with production run-source semantics.
 3. Purpose: operationally unblock `production sample size=0` evidence gaps without changing promotion policy.
+
+### 7.93 Dashboard shell regression guard restore (2026-03-04-w)
+1. Moved IDE handoff runtime-discovery logic into `components/dashboard/aethel-dashboard-ide-handoff.ts`.
+2. `components/AethelDashboard.tsx` returned to shell gate boundary (`<=1200` lines) after runtime continuity enhancements.
+3. `qa:dashboard-shell` remains green with runtime-discovery behavior preserved.

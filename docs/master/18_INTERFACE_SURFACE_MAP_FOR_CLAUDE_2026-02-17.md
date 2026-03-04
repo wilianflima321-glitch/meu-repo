@@ -323,3 +323,7 @@ CI workflows:
 1. `components/AethelDashboard.tsx` now attempts runtime discovery during IDE handoff when no persisted runtime URL exists.
 2. On successful discovery, handoff now forwards `previewUrl` to `/ide` and persists it in local storage for subsequent sessions.
 3. Failure/not-found path remains explicit and non-blocking (handoff continues with inline preview fallback).
+
+## 40. Delta 2026-03-04 (dashboard shell decomposition guard)
+1. Added runtime handoff helper `components/dashboard/aethel-dashboard-ide-handoff.ts` to keep shell composition compact.
+2. `AethelDashboard.tsx` keeps orchestration-only role while preserving runtime continuity behavior.

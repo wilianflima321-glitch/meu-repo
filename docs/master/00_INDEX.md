@@ -115,6 +115,7 @@ Status: CANONICAL ENTRYPOINT
   - mismatch corrections applied for current-state counts (dashboard shell line bound and explicit NOT_IMPLEMENTED inventory),
   - `/ide` preview now has runtime auto-discovery baseline (`/api/preview/runtime-discover` + runtime toolbar "Auto detectar"),
   - `/dashboard -> /ide` handoff now performs best-effort runtime discovery when no stored runtime URL exists (continuity for preview runtime mode),
+  - dashboard shell decomposition guard preserved via `components/dashboard/aethel-dashboard-ide-handoff.ts` (keeps `AethelDashboard.tsx` under shell gate boundary),
   - `qa:impact-matrix` now runs with deterministic core-loop defaults and updates `docs/master/impact_matrix_core_loop.json`,
   - core-loop rolling metrics refreshed (`metrics/latest_run*.json`) with rehearsal-only evidence still excluded from promotion policy,
   - production evidence probe tooling added (`npm run qa:core-loop-production-probe`) to generate authenticated production-sample apply probes in sandbox mode.
