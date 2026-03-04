@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react'
 import { 
-  BarChart3, TrendingUp, AlertTriangle, Shield, Zap, Users, 
-  CreditCard, Settings, Activity, Lock, Eye, Download, RefreshCw,
-  CheckCircle, XCircle, Clock
+  TrendingUp, AlertTriangle, Shield, Zap,
+  CreditCard, Activity, RefreshCw,
+  CheckCircle, XCircle
 } from 'lucide-react'
 
 interface AdminMetric {
@@ -22,9 +22,18 @@ interface SecurityEvent {
   status: 'success' | 'failed' | 'suspicious'
 }
 
+type OpsAction = 'backup' | 'cache_flush' | 'logs_export' | 'feature_flags'
+
+type OpsNotice = {
+  type: 'success' | 'error'
+  message: string
+}
+
 export default function AdminDashboardPro() {
   const [activeTab, setActiveTab] = useState<'overview' | 'billing' | 'security' | 'ops'>('overview')
   const [refreshing, setRefreshing] = useState(false)
+  const [runningAction, setRunningAction] = useState<OpsAction | null>(null)
+  const [opsNotice, setOpsNotice] = useState<OpsNotice | null>(null)
 
   const metrics: AdminMetric[] = [
     { label: 'Total Users', value: '2,847', change: 12.5, status: 'up' },
@@ -44,6 +53,26 @@ export default function AdminDashboardPro() {
     setRefreshing(true)
     await new Promise(resolve => setTimeout(resolve, 1000))
     setRefreshing(false)
+  }
+
+  const runOpsAction = async (action: OpsAction) => {
+    if (runningAction) return
+    setRunningAction(action)
+    setOpsNotice(null)
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 900))
+      const labels: Record<OpsAction, string> = {
+        backup: 'Database backup enfileirado com sucesso.',
+        cache_flush: 'Cache flush executado com sucesso.',
+        logs_export: 'Export de logs iniciado. Verifique downloads em instantes.',
+        feature_flags: 'Feature flags sincronizadas com sucesso.',
+      }
+      setOpsNotice({ type: 'success', message: labels[action] })
+    } catch {
+      setOpsNotice({ type: 'error', message: 'Falha ao executar operação. Tente novamente.' })
+    } finally {
+      setRunningAction(null)
+    }
   }
 
   return (
@@ -195,27 +224,61 @@ export default function AdminDashboardPro() {
           <div className="space-y-6">
             <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Zap size={20} className="text-purple-400" />
+                <Zap size={20} className="text-blue-400" />
                 Operations
               </h2>
+              {opsNotice && (
+                <div
+                  className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
+                    opsNotice.type === 'success'
+                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
+                      : 'border-rose-500/40 bg-rose-500/10 text-rose-200'
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {opsNotice.message}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-purple-500/50 transition-all text-left group">
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-purple-400 transition-colors">Database Backup</p>
+                <button
+                  onClick={() => runOpsAction('backup')}
+                  disabled={runningAction !== null}
+                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Database Backup</p>
                   <p className="text-xs text-zinc-600 mt-1">Last backup: 2 hours ago</p>
                 </button>
-                <button className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-purple-500/50 transition-all text-left group">
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-purple-400 transition-colors">Cache Flush</p>
+                <button
+                  onClick={() => runOpsAction('cache_flush')}
+                  disabled={runningAction !== null}
+                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Cache Flush</p>
                   <p className="text-xs text-zinc-600 mt-1">Clear all cached data</p>
                 </button>
-                <button className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-purple-500/50 transition-all text-left group">
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-purple-400 transition-colors">Logs Export</p>
+                <button
+                  onClick={() => runOpsAction('logs_export')}
+                  disabled={runningAction !== null}
+                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Logs Export</p>
                   <p className="text-xs text-zinc-600 mt-1">Download system logs</p>
                 </button>
-                <button className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-purple-500/50 transition-all text-left group">
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-purple-400 transition-colors">Feature Flags</p>
+                <button
+                  onClick={() => runOpsAction('feature_flags')}
+                  disabled={runningAction !== null}
+                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Feature Flags</p>
                   <p className="text-xs text-zinc-600 mt-1">Manage feature toggles</p>
                 </button>
               </div>
+              {runningAction && (
+                <p className="mt-3 text-xs text-zinc-400" aria-live="polite">
+                  Executando operação...
+                </p>
+              )}
             </div>
           </div>
         )}

@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
-  Sparkles,
   Send,
   Mail,
   MessageSquare,
@@ -101,9 +101,7 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <nav className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
+              <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={40} height={40} className="rounded-xl" />
               <span className="text-xl font-bold text-white">Aethel</span>
             </Link>
             <Link

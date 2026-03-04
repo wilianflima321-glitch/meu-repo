@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 import type { ActiveTab, SessionFilter } from './aethel-dashboard-model'
 
 type NavItem = {
@@ -117,17 +119,34 @@ export function AethelDashboardSidebar({
 
   return (
     <nav
+      id="dashboard-sidebar"
       className={`aethel-sidebar fixed md:relative z-50 h-full md:h-auto transform transition-transform duration-300 ease-in-out ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
       aria-label="Navegacao principal do studio"
     >
       <div className="aethel-sidebar-header">
-        <div className="aethel-flex aethel-items-center aethel-gap-3">
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded aethel-flex aethel-items-center aethel-justify-center">
-            <span className="text-white font-bold text-xs">A</span>
+        <div className="aethel-flex aethel-items-center aethel-justify-between aethel-gap-3">
+          <div className="aethel-flex aethel-items-center aethel-gap-3">
+            <Image
+              src="/branding/aethel-icon-source.png"
+              alt="Aethel"
+              width={24}
+              height={24}
+              className="rounded"
+            />
+            <span className="font-semibold text-sm">Navegacao</span>
           </div>
-          <span className="font-semibold text-sm">Navegacao</span>
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            className="md:hidden aethel-button aethel-button-ghost aethel-p-2"
+            aria-label="Fechar navegacao"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
       </div>
 

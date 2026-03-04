@@ -115,6 +115,9 @@ export interface UsageStatus {
     tokensLimit: number;
     tokensRemaining: number;
     percentUsed: number;
+    requestsUsedToday: number;
+    requestsDailyLimit: number;
+    requestsDailyRemaining: number;
   };
   plan: string;
   limits: PlanLimits;
@@ -124,6 +127,23 @@ export interface QuotaCheckResult {
   allowed: boolean;
   reason?: string;
   code?: 'QUOTA_EXCEEDED' | 'MODEL_NOT_ALLOWED' | 'FEATURE_NOT_ALLOWED' | 'RATE_LIMITED';
+}
+
+function getUtcDayWindow(now: Date = new Date()): { start: Date; end: Date } {
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const day = now.getUTCDate();
+  const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+  const end = new Date(Date.UTC(year, month, day + 1, 0, 0, 0, 0));
+  return { start, end };
+}
+
+function getUtcMonthWindow(now: Date = new Date()): { start: Date; end: Date } {
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const start = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+  const end = new Date(Date.UTC(year, month + 1, 1, 0, 0, 0, 0));
+  return { start, end };
 }
 
 // ============================================================================
@@ -233,9 +253,7 @@ export async function checkFeatureAccess(userId: string, feature: string): Promi
  * Obtém o uso atual do mês
  */
 export async function getCurrentUsage(userId: string): Promise<{ tokensUsed: number; requestsUsed: number; storageUsedMB: number }> {
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
+  const { start: monthStart } = getUtcMonthWindow();
   
   const bucket = await prisma.usageBucket.findFirst({
     where: {
@@ -256,16 +274,18 @@ export async function getCurrentUsage(userId: string): Promise<{ tokensUsed: num
  * Obtém contagem de requisições do dia
  */
 async function getDailyRequestCount(userId: string): Promise<number> {
-  const dayStart = new Date();
-  dayStart.setHours(0, 0, 0, 0);
-  
-  // Simplificado: usar o bucket mensal dividido por dia do mês
-  // Em produção, usar uma tabela separada de rate limiting
-  const usage = await getCurrentUsage(userId);
-  const dayOfMonth = new Date().getDate();
-  
-  // Estimativa: requisições totais / dias passados
-  return Math.ceil(usage.requestsUsed / dayOfMonth);
+  const { start: dayStart } = getUtcDayWindow();
+
+  const bucket = await prisma.usageBucket.findFirst({
+    where: {
+      userId,
+      window: 'day',
+      windowStart: dayStart,
+    },
+    select: { requests: true },
+  });
+
+  return bucket?.requests || 0;
 }
 
 /**
@@ -283,18 +303,28 @@ export async function getUsageStatus(userId: string): Promise<UsageStatus> {
   
   const limits = getPlanLimits(user.plan);
   const usage = await getCurrentUsage(userId);
+  const requestsUsedToday = await getDailyRequestCount(userId);
   
   const tokensRemaining = Math.max(0, limits.tokensPerMonth - usage.tokensUsed);
   const percentUsed = (usage.tokensUsed / limits.tokensPerMonth) * 100;
+  const requestsDailyRemaining = Math.max(0, limits.requestsPerDay - requestsUsedToday);
   
   return {
-    allowed: percentUsed < 100,
-    reason: percentUsed >= 100 ? 'Limite mensal atingido' : undefined,
+    allowed: percentUsed < 100 && requestsUsedToday < limits.requestsPerDay,
+    reason:
+      percentUsed >= 100
+        ? 'Limite mensal atingido'
+        : requestsUsedToday >= limits.requestsPerDay
+          ? 'Limite diário de requisições atingido'
+          : undefined,
     usage: {
       tokensUsed: usage.tokensUsed,
       tokensLimit: limits.tokensPerMonth,
       tokensRemaining,
       percentUsed: Math.round(percentUsed * 10) / 10,
+      requestsUsedToday,
+      requestsDailyLimit: limits.requestsPerDay,
+      requestsDailyRemaining,
     },
     plan: user.plan,
     limits,
@@ -305,34 +335,51 @@ export async function getUsageStatus(userId: string): Promise<UsageStatus> {
  * Registra uso de tokens
  */
 export async function recordTokenUsage(userId: string, tokensUsed: number): Promise<void> {
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
-  
-  const monthEnd = new Date(monthStart);
-  monthEnd.setMonth(monthEnd.getMonth() + 1);
-  monthEnd.setDate(0);
-  monthEnd.setHours(23, 59, 59, 999);
-  
-  await prisma.usageBucket.upsert({
-    where: {
-      userId_window_windowStart: {
+  const { start: monthStart, end: monthEnd } = getUtcMonthWindow();
+  const { start: dayStart, end: dayEnd } = getUtcDayWindow();
+
+  await prisma.$transaction([
+    prisma.usageBucket.upsert({
+      where: {
+        userId_window_windowStart: {
+          userId,
+          window: 'month',
+          windowStart: monthStart,
+        }
+      },
+      create: {
         userId,
         window: 'month',
         windowStart: monthStart,
+        windowEnd: monthEnd,
+        tokens: tokensUsed,
+        requests: 1,
+      },
+      update: {
+        tokens: { increment: tokensUsed },
+        requests: { increment: 1 },
       }
-    },
-    create: {
-      userId,
-      window: 'month',
-      windowStart: monthStart,
-      windowEnd: monthEnd,
-      tokens: tokensUsed,
-      requests: 1,
-    },
-    update: {
-      tokens: { increment: tokensUsed },
-      requests: { increment: 1 },
-    }
-  });
+    }),
+    prisma.usageBucket.upsert({
+      where: {
+        userId_window_windowStart: {
+          userId,
+          window: 'day',
+          windowStart: dayStart,
+        }
+      },
+      create: {
+        userId,
+        window: 'day',
+        windowStart: dayStart,
+        windowEnd: dayEnd,
+        tokens: tokensUsed,
+        requests: 1,
+      },
+      update: {
+        tokens: { increment: tokensUsed },
+        requests: { increment: 1 },
+      }
+    }),
+  ]);
 }

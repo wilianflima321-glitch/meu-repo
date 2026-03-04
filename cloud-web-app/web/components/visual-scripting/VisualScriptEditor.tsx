@@ -1,12 +1,4 @@
-/**
- * Visual Scripting - Sistema de Programação Visual
- * 
- * Sistema tipo Blueprint do Unreal Engine para criar lógica sem código.
- * Baseado em @xyflow/react para o editor de nós.
- */
-
 'use client';
-
 import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import {
   ReactFlow,
@@ -27,628 +19,17 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
+import {
+  NODE_CATALOG,
+  type NodeCategory,
+  type NodeDefinition,
+  type VisualNodeData,
+} from './visual-node-catalog';
 
-// ============================================================================
-// TIPOS DE NÓS
-// ============================================================================
-
-export type NodeCategory = 
-  | 'event'     // Eventos (OnStart, OnUpdate, etc.)
-  | 'action'    // Ações (Move, Jump, Spawn, etc.)
-  | 'condition' // Condições (If, Compare, etc.)
-  | 'variable'  // Variáveis (Get, Set)
-  | 'math'      // Matemática (Add, Multiply, etc.)
-  | 'flow'      // Controle de fluxo (Branch, Loop, etc.)
-  | 'input'     // Input do jogador
-  | 'physics'   // Física (Raycast, Force, etc.)
-  | 'audio'     // Áudio (Play Sound, etc.)
-  | 'ui';       // Interface do usuário
-
-export interface NodeDefinition {
-  type: string;
-  category: NodeCategory;
-  label: string;
-  description: string;
-  inputs: PortDefinition[];
-  outputs: PortDefinition[];
-  color: string;
-  icon?: string;
-}
-
-export interface PortDefinition {
-  id: string;
-  label: string;
-  type: 'exec' | 'boolean' | 'number' | 'string' | 'vector3' | 'object' | 'any';
-  default?: unknown;
-}
-
-export interface VisualNodeData extends Record<string, unknown> {
-	definition: NodeDefinition;
-	values?: Record<string, unknown>;
-	onValueChange?: (portId: string, value: unknown) => void;
-}
+export type { PortDefinition } from './visual-node-catalog';
 
 export type VisualNodeType = Node<VisualNodeData>;
-
-// ============================================================================
-// CATÁLOGO DE NÓS
-// ============================================================================
-
-export const NODE_CATALOG: NodeDefinition[] = [
-  // === EVENTOS ===
-  {
-    type: 'event_start',
-    category: 'event',
-    label: 'On Start',
-    description: 'Executa quando o jogo inicia',
-    inputs: [],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#e74c3c',
-  },
-  {
-    type: 'event_update',
-    category: 'event',
-    label: 'On Update',
-    description: 'Executa a cada frame',
-    inputs: [],
-    outputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'deltaTime', label: 'Delta Time', type: 'number' },
-    ],
-    color: '#e74c3c',
-  },
-  {
-    type: 'event_collision',
-    category: 'event',
-    label: 'On Collision',
-    description: 'Executa quando há colisão',
-    inputs: [],
-    outputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'other', label: 'Other Object', type: 'object' },
-      { id: 'point', label: 'Point', type: 'vector3' },
-    ],
-    color: '#e74c3c',
-  },
-  {
-    type: 'event_trigger',
-    category: 'event',
-    label: 'On Trigger',
-    description: 'Executa quando entra em trigger',
-    inputs: [],
-    outputs: [
-      { id: 'enter', label: 'Enter', type: 'exec' },
-      { id: 'exit', label: 'Exit', type: 'exec' },
-      { id: 'other', label: 'Other', type: 'object' },
-    ],
-    color: '#e74c3c',
-  },
-
-  // === AÇÕES ===
-  {
-    type: 'action_move',
-    category: 'action',
-    label: 'Move',
-    description: 'Move o objeto',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'direction', label: 'Direction', type: 'vector3' },
-      { id: 'speed', label: 'Speed', type: 'number', default: 5 },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#3498db',
-  },
-  {
-    type: 'action_rotate',
-    category: 'action',
-    label: 'Rotate',
-    description: 'Rotaciona o objeto',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'euler', label: 'Euler Angles', type: 'vector3' },
-      { id: 'speed', label: 'Speed', type: 'number', default: 1 },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#3498db',
-  },
-  {
-    type: 'action_spawn',
-    category: 'action',
-    label: 'Spawn Object',
-    description: 'Cria um novo objeto',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'prefab', label: 'Prefab', type: 'string' },
-      { id: 'position', label: 'Position', type: 'vector3' },
-    ],
-    outputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'spawned', label: 'Spawned', type: 'object' },
-    ],
-    color: '#3498db',
-  },
-  {
-    type: 'action_destroy',
-    category: 'action',
-    label: 'Destroy',
-    description: 'Destrói um objeto',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'target', label: 'Target', type: 'object' },
-      { id: 'delay', label: 'Delay', type: 'number', default: 0 },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#3498db',
-  },
-  {
-    type: 'action_log',
-    category: 'action',
-    label: 'Print',
-    description: 'Imprime mensagem no console',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'message', label: 'Message', type: 'string' },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#3498db',
-  },
-
-  // === FLOW CONTROL (Unreal-Style) ===
-  {
-    type: 'flow_branch',
-    category: 'flow',
-    label: 'Branch',
-    description: 'If/Else condicional',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'condition', label: 'Condition', type: 'boolean' },
-    ],
-    outputs: [
-      { id: 'true', label: 'True', type: 'exec' },
-      { id: 'false', label: 'False', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_sequence',
-    category: 'flow',
-    label: 'Sequence',
-    description: 'Executa múltiplas saídas em sequência',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-    ],
-    outputs: [
-      { id: 'then_0', label: 'Then 0', type: 'exec' },
-      { id: 'then_1', label: 'Then 1', type: 'exec' },
-      { id: 'then_2', label: 'Then 2', type: 'exec' },
-      { id: 'then_3', label: 'Then 3', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_for_loop',
-    category: 'flow',
-    label: 'For Loop',
-    description: 'Loop com índice de iteração',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'first', label: 'First Index', type: 'number', default: 0 },
-      { id: 'last', label: 'Last Index', type: 'number', default: 10 },
-    ],
-    outputs: [
-      { id: 'loop', label: 'Loop Body', type: 'exec' },
-      { id: 'index', label: 'Index', type: 'number' },
-      { id: 'completed', label: 'Completed', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_for_each',
-    category: 'flow',
-    label: 'For Each',
-    description: 'Loop sobre elementos de array',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'array', label: 'Array', type: 'any' },
-    ],
-    outputs: [
-      { id: 'loop', label: 'Loop Body', type: 'exec' },
-      { id: 'element', label: 'Element', type: 'any' },
-      { id: 'index', label: 'Index', type: 'number' },
-      { id: 'completed', label: 'Completed', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_while',
-    category: 'flow',
-    label: 'While Loop',
-    description: 'Executa enquanto condição for verdadeira',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'condition', label: 'Condition', type: 'boolean' },
-    ],
-    outputs: [
-      { id: 'loop', label: 'Loop Body', type: 'exec' },
-      { id: 'completed', label: 'Completed', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_do_once',
-    category: 'flow',
-    label: 'Do Once',
-    description: 'Executa apenas uma vez até ser resetado',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'reset', label: 'Reset', type: 'exec' },
-    ],
-    outputs: [
-      { id: 'completed', label: 'Completed', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_do_n',
-    category: 'flow',
-    label: 'Do N',
-    description: 'Executa N vezes, depois para',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'n', label: 'N', type: 'number', default: 3 },
-      { id: 'reset', label: 'Reset', type: 'exec' },
-    ],
-    outputs: [
-      { id: 'exit', label: 'Exit', type: 'exec' },
-      { id: 'counter', label: 'Counter', type: 'number' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_gate',
-    category: 'flow',
-    label: 'Gate',
-    description: 'Portão que pode ser aberto/fechado',
-    inputs: [
-      { id: 'exec', label: 'Enter', type: 'exec' },
-      { id: 'open', label: 'Open', type: 'exec' },
-      { id: 'close', label: 'Close', type: 'exec' },
-      { id: 'toggle', label: 'Toggle', type: 'exec' },
-    ],
-    outputs: [
-      { id: 'exit', label: 'Exit', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_flip_flop',
-    category: 'flow',
-    label: 'Flip Flop',
-    description: 'Alterna entre duas saídas',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-    ],
-    outputs: [
-      { id: 'a', label: 'A', type: 'exec' },
-      { id: 'b', label: 'B', type: 'exec' },
-      { id: 'is_a', label: 'Is A', type: 'boolean' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_delay',
-    category: 'flow',
-    label: 'Delay',
-    description: 'Aguarda tempo antes de continuar',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'duration', label: 'Duration (s)', type: 'number', default: 1 },
-    ],
-    outputs: [
-      { id: 'completed', label: 'Completed', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_retriggerable_delay',
-    category: 'flow',
-    label: 'Retriggerable Delay',
-    description: 'Delay que reseta ao receber nova entrada',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'duration', label: 'Duration (s)', type: 'number', default: 1 },
-    ],
-    outputs: [
-      { id: 'completed', label: 'Completed', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_multi_gate',
-    category: 'flow',
-    label: 'Multi Gate',
-    description: 'Distribui execução entre múltiplas saídas',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'reset', label: 'Reset', type: 'exec' },
-      { id: 'loop', label: 'Loop', type: 'boolean', default: false },
-      { id: 'random', label: 'Random', type: 'boolean', default: false },
-    ],
-    outputs: [
-      { id: 'out_0', label: 'Out 0', type: 'exec' },
-      { id: 'out_1', label: 'Out 1', type: 'exec' },
-      { id: 'out_2', label: 'Out 2', type: 'exec' },
-      { id: 'out_3', label: 'Out 3', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-
-  // === CONDIÇÕES ===
-  {
-    type: 'condition_compare',
-    category: 'condition',
-    label: 'Compare',
-    description: 'Compara dois valores',
-    inputs: [
-      { id: 'a', label: 'A', type: 'number' },
-      { id: 'b', label: 'B', type: 'number' },
-    ],
-    outputs: [
-      { id: 'equal', label: 'A == B', type: 'boolean' },
-      { id: 'greater', label: 'A > B', type: 'boolean' },
-      { id: 'less', label: 'A < B', type: 'boolean' },
-    ],
-    color: '#f39c12',
-  },
-
-  // === MATEMÁTICA ===
-  {
-    type: 'math_add',
-    category: 'math',
-    label: 'Add',
-    description: 'Soma dois números',
-    inputs: [
-      { id: 'a', label: 'A', type: 'number', default: 0 },
-      { id: 'b', label: 'B', type: 'number', default: 0 },
-    ],
-    outputs: [{ id: 'result', label: 'Result', type: 'number' }],
-    color: '#27ae60',
-  },
-  {
-    type: 'math_subtract',
-    category: 'math',
-    label: 'Subtract',
-    description: 'Subtrai dois números',
-    inputs: [
-      { id: 'a', label: 'A', type: 'number', default: 0 },
-      { id: 'b', label: 'B', type: 'number', default: 0 },
-    ],
-    outputs: [{ id: 'result', label: 'Result', type: 'number' }],
-    color: '#27ae60',
-  },
-  {
-    type: 'math_multiply',
-    category: 'math',
-    label: 'Multiply',
-    description: 'Multiplica dois números',
-    inputs: [
-      { id: 'a', label: 'A', type: 'number', default: 1 },
-      { id: 'b', label: 'B', type: 'number', default: 1 },
-    ],
-    outputs: [{ id: 'result', label: 'Result', type: 'number' }],
-    color: '#27ae60',
-  },
-  {
-    type: 'math_divide',
-    category: 'math',
-    label: 'Divide',
-    description: 'Divide dois números',
-    inputs: [
-      { id: 'a', label: 'A', type: 'number', default: 1 },
-      { id: 'b', label: 'B', type: 'number', default: 1 },
-    ],
-    outputs: [{ id: 'result', label: 'Result', type: 'number' }],
-    color: '#27ae60',
-  },
-  {
-    type: 'math_vector3',
-    category: 'math',
-    label: 'Make Vector3',
-    description: 'Cria um Vector3',
-    inputs: [
-      { id: 'x', label: 'X', type: 'number', default: 0 },
-      { id: 'y', label: 'Y', type: 'number', default: 0 },
-      { id: 'z', label: 'Z', type: 'number', default: 0 },
-    ],
-    outputs: [{ id: 'vector', label: 'Vector', type: 'vector3' }],
-    color: '#27ae60',
-  },
-  {
-    type: 'math_break_vector3',
-    category: 'math',
-    label: 'Break Vector3',
-    description: 'Separa componentes de um Vector3',
-    inputs: [{ id: 'vector', label: 'Vector', type: 'vector3' }],
-    outputs: [
-      { id: 'x', label: 'X', type: 'number' },
-      { id: 'y', label: 'Y', type: 'number' },
-      { id: 'z', label: 'Z', type: 'number' },
-    ],
-    color: '#27ae60',
-  },
-  {
-    type: 'math_random',
-    category: 'math',
-    label: 'Random',
-    description: 'Gera número aleatório',
-    inputs: [
-      { id: 'min', label: 'Min', type: 'number', default: 0 },
-      { id: 'max', label: 'Max', type: 'number', default: 1 },
-    ],
-    outputs: [{ id: 'value', label: 'Value', type: 'number' }],
-    color: '#27ae60',
-  },
-
-  // === INPUT ===
-  {
-    type: 'input_key',
-    category: 'input',
-    label: 'Get Key',
-    description: 'Verifica se tecla está pressionada',
-    inputs: [{ id: 'key', label: 'Key', type: 'string', default: 'Space' }],
-    outputs: [
-      { id: 'pressed', label: 'Pressed', type: 'boolean' },
-      { id: 'just_pressed', label: 'Just Pressed', type: 'boolean' },
-      { id: 'just_released', label: 'Just Released', type: 'boolean' },
-    ],
-    color: '#e67e22',
-  },
-  {
-    type: 'input_axis',
-    category: 'input',
-    label: 'Get Axis',
-    description: 'Obtém valor de eixo de input',
-    inputs: [{ id: 'axis', label: 'Axis', type: 'string', default: 'Horizontal' }],
-    outputs: [{ id: 'value', label: 'Value', type: 'number' }],
-    color: '#e67e22',
-  },
-  {
-    type: 'input_mouse',
-    category: 'input',
-    label: 'Get Mouse',
-    description: 'Obtém posição do mouse',
-    inputs: [],
-    outputs: [
-      { id: 'position', label: 'Screen Pos', type: 'vector3' },
-      { id: 'delta', label: 'Delta', type: 'vector3' },
-      { id: 'left', label: 'Left Button', type: 'boolean' },
-      { id: 'right', label: 'Right Button', type: 'boolean' },
-    ],
-    color: '#e67e22',
-  },
-
-  // === PHYSICS ===
-  {
-    type: 'physics_raycast',
-    category: 'physics',
-    label: 'Raycast',
-    description: 'Lança raio e detecta colisão',
-    inputs: [
-      { id: 'origin', label: 'Origin', type: 'vector3' },
-      { id: 'direction', label: 'Direction', type: 'vector3' },
-      { id: 'distance', label: 'Distance', type: 'number', default: 100 },
-    ],
-    outputs: [
-      { id: 'hit', label: 'Hit', type: 'boolean' },
-      { id: 'point', label: 'Point', type: 'vector3' },
-      { id: 'normal', label: 'Normal', type: 'vector3' },
-      { id: 'object', label: 'Object', type: 'object' },
-    ],
-    color: '#1abc9c',
-  },
-  {
-    type: 'physics_add_force',
-    category: 'physics',
-    label: 'Add Force',
-    description: 'Adiciona força a um objeto',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'target', label: 'Target', type: 'object' },
-      { id: 'force', label: 'Force', type: 'vector3' },
-      { id: 'impulse', label: 'Impulse', type: 'boolean', default: false },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#1abc9c',
-  },
-
-  // === AUDIO ===
-  {
-    type: 'audio_play',
-    category: 'audio',
-    label: 'Play Sound',
-    description: 'Toca um som',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'sound', label: 'Sound', type: 'string' },
-      { id: 'volume', label: 'Volume', type: 'number', default: 1 },
-      { id: 'loop', label: 'Loop', type: 'boolean', default: false },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#9b59b6',
-  },
-
-  // === FLOW ===
-  {
-    type: 'flow_sequence',
-    category: 'flow',
-    label: 'Sequence',
-    description: 'Executa em sequência',
-    inputs: [{ id: 'exec', label: '', type: 'exec' }],
-    outputs: [
-      { id: 'then_0', label: 'Then 0', type: 'exec' },
-      { id: 'then_1', label: 'Then 1', type: 'exec' },
-      { id: 'then_2', label: 'Then 2', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_delay',
-    category: 'flow',
-    label: 'Delay',
-    description: 'Aguarda tempo antes de continuar',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'duration', label: 'Duration', type: 'number', default: 1 },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#9b59b6',
-  },
-  {
-    type: 'flow_loop',
-    category: 'flow',
-    label: 'For Loop',
-    description: 'Loop com contador',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'start', label: 'Start', type: 'number', default: 0 },
-      { id: 'end', label: 'End', type: 'number', default: 10 },
-    ],
-    outputs: [
-      { id: 'body', label: 'Loop Body', type: 'exec' },
-      { id: 'index', label: 'Index', type: 'number' },
-      { id: 'completed', label: 'Completed', type: 'exec' },
-    ],
-    color: '#9b59b6',
-  },
-
-  // === VARIÁVEIS ===
-  {
-    type: 'variable_get',
-    category: 'variable',
-    label: 'Get Variable',
-    description: 'Obtém valor de variável',
-    inputs: [{ id: 'name', label: 'Name', type: 'string' }],
-    outputs: [{ id: 'value', label: 'Value', type: 'any' }],
-    color: '#2ecc71',
-  },
-  {
-    type: 'variable_set',
-    category: 'variable',
-    label: 'Set Variable',
-    description: 'Define valor de variável',
-    inputs: [
-      { id: 'exec', label: '', type: 'exec' },
-      { id: 'name', label: 'Name', type: 'string' },
-      { id: 'value', label: 'Value', type: 'any' },
-    ],
-    outputs: [{ id: 'exec', label: '', type: 'exec' }],
-    color: '#2ecc71',
-  },
-];
-
-// ============================================================================
-// COMPONENTES DE NÓS CUSTOMIZADOS
-// ============================================================================
 
 const portColors: Record<string, string> = {
   exec: '#ffffff',
@@ -670,7 +51,6 @@ interface VisualNodeProps {
 
 function VisualNode({ data }: VisualNodeProps) {
   const { definition, values = {}, onValueChange } = data;
-
   return (
     <div
       className="visual-node"
@@ -693,7 +73,6 @@ function VisualNode({ data }: VisualNodeProps) {
       >
         {definition.label}
       </div>
-
       {/* Inputs */}
       <div style={{ padding: '8px 0' }}>
         {definition.inputs.map((port) => (
@@ -742,7 +121,6 @@ function VisualNode({ data }: VisualNodeProps) {
           </div>
         ))}
       </div>
-
       {/* Outputs */}
       <div style={{ padding: '8px 0' }}>
         {definition.outputs.map((port) => (
@@ -778,19 +156,12 @@ function VisualNode({ data }: VisualNodeProps) {
     </div>
   );
 }
-
-// ============================================================================
-// NODE PALETTE
-// ============================================================================
-
 interface NodePaletteProps {
   onAddNode: (definition: NodeDefinition) => void;
 }
-
 function NodePalette({ onAddNode }: NodePaletteProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategory, setExpandedCategory] = useState<string | null>('event');
-
   const categories = useMemo(() => {
     const cats = new Map<NodeCategory, NodeDefinition[]>();
     NODE_CATALOG.forEach((node) => {
@@ -800,7 +171,6 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     });
     return cats;
   }, []);
-
   const categoryLabels: Record<NodeCategory, string> = {
     event: '🎯 Eventos',
     action: '⚡ Ações',
@@ -813,10 +183,8 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     audio: '🔊 Áudio',
     ui: '🖼️ UI',
   };
-
   const filteredCategories = useMemo(() => {
     if (!searchTerm) return categories;
-
     const filtered = new Map<NodeCategory, NodeDefinition[]>();
     categories.forEach((nodes, category) => {
       const matchingNodes = nodes.filter(
@@ -830,7 +198,6 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     });
     return filtered;
   }, [categories, searchTerm]);
-
   return (
     <div
       style={{
@@ -858,7 +225,6 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
           }}
         />
       </div>
-
       {Array.from(filteredCategories).map(([category, nodes]) => (
         <div key={category}>
           <button
@@ -879,7 +245,6 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
           >
             {categoryLabels[category]} ({nodes.length})
           </button>
-
           {expandedCategory === category && (
             <div style={{ padding: '4px 8px' }}>
               {nodes.map((node) => (
@@ -910,11 +275,6 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     </div>
   );
 }
-
-// ============================================================================
-// CONTEXT MENU - Clique direito para criar nodes
-// ============================================================================
-
 interface ContextMenuProps {
   x: number;
   y: number;
@@ -922,19 +282,14 @@ interface ContextMenuProps {
   onClose: () => void;
   onAddNode: (definition: NodeDefinition, position: { x: number; y: number }) => void;
 }
-
 function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategory, setExpandedCategory] = useState<NodeCategory | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  // Close on click outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && e.target && !menuRef.current.contains(e.target as globalThis.Node)) {
@@ -951,7 +306,6 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
       document.removeEventListener('keydown', handleEscape);
     };
   }, [onClose]);
-
   const categories = useMemo(() => {
     const cats = new Map<NodeCategory, NodeDefinition[]>();
     NODE_CATALOG.forEach((node) => {
@@ -961,7 +315,6 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
     });
     return cats;
   }, []);
-
   const categoryLabels: Record<NodeCategory, string> = {
     event: '🎯 Eventos',
     action: '⚡ Ações',
@@ -974,7 +327,6 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
     audio: '🔊 Áudio',
     ui: '🖼️ UI',
   };
-
   const filteredNodes = useMemo(() => {
     if (!searchTerm) return null;
     return NODE_CATALOG.filter(
@@ -983,12 +335,10 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
         n.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm]);
-
   const handleAddNode = (node: NodeDefinition) => {
     onAddNode(node, flowPosition);
     onClose();
   };
-
   return (
     <div
       ref={menuRef}
@@ -1029,11 +379,9 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
           Clique direito no canvas para abrir este menu
         </div>
       </div>
-
       {/* Results */}
       <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
         {filteredNodes ? (
-          // Search results
           <div style={{ padding: '8px' }}>
             {filteredNodes.length === 0 ? (
               <div style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
@@ -1067,7 +415,6 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
             )}
           </div>
         ) : (
-          // Category view
           Array.from(categories).map(([category, nodes]) => (
             <div key={category}>
               <button
@@ -1093,7 +440,6 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                 <span>{categoryLabels[category]}</span>
                 <span style={{ color: '#666' }}>{nodes.length}</span>
               </button>
-
               {expandedCategory === category && (
                 <div style={{ padding: '6px 10px', background: '#181818' }}>
                   {nodes.map((node) => (
@@ -1126,11 +472,6 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
     </div>
   );
 }
-
-// ============================================================================
-// VISUAL SCRIPT EDITOR
-// ============================================================================
-
 export interface VisualScript {
   id: string;
   name: string;
@@ -1138,31 +479,24 @@ export interface VisualScript {
 	edges: Edge[];
   variables: { name: string; type: string; defaultValue: unknown }[];
 }
-
 interface VisualScriptEditorProps {
   script?: VisualScript;
   onChange?: (script: VisualScript) => void;
 }
-
 const nodeTypes: NodeTypes = {
   visual: VisualNode,
 };
-
 export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps) {
   const initialNodes = script?.nodes ?? [];
   const initialEdges = script?.edges ?? [];
-
 	const [nodes, setNodes, onNodesChange] = useNodesState<VisualNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  
-  // Context menu state
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
     flowPosition: { x: number; y: number };
   } | null>(null);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-
   const onConnect = useCallback(
     (connection: Connection) => {
       const newEdge: Edge = {
@@ -1176,7 +510,6 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     },
     [setEdges]
   );
-
   const handleAddNode = useCallback(
     (definition: NodeDefinition) => {
 			const newNode: VisualNodeType = {
@@ -1189,8 +522,6 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     },
     [setNodes]
   );
-
-  // Handler para adicionar node via context menu na posição correta
   const handleAddNodeAtPosition = useCallback(
     (definition: NodeDefinition, position: { x: number; y: number }) => {
       const newNode: VisualNodeType = {
@@ -1203,22 +534,15 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     },
     [setNodes]
   );
-
-  // Handler para context menu (clique direito)
   const handleContextMenu = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
-      
       if (!reactFlowWrapper.current) return;
-      
       const bounds = reactFlowWrapper.current.getBoundingClientRect();
       const x = event.clientX;
       const y = event.clientY;
-      
-      // Calcular posição no flow (aproximada, sem acesso ao viewport transform)
       const flowX = event.clientX - bounds.left;
       const flowY = event.clientY - bounds.top;
-      
       setContextMenu({
         x,
         y,
@@ -1227,8 +551,6 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     },
     []
   );
-
-  // Compilar script para JSON
   const compileScript = useCallback((): VisualScript => {
     return {
       id: script?.id || `script-${Date.now()}`,
@@ -1238,17 +560,24 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
       variables: script?.variables || [],
     };
   }, [nodes, edges, script]);
-
-  // Notificar mudanças
+  const handleClearGraph = useCallback(async () => {
+    const shouldClear = await openConfirmDialog({
+      title: 'Limpar grafo',
+      message: 'Limpar todos os nos?',
+      confirmText: 'Limpar',
+      cancelText: 'Cancelar',
+    });
+    if (!shouldClear) return;
+    setNodes([]);
+    setEdges([]);
+  }, [setEdges, setNodes]);
   React.useEffect(() => {
     onChange?.(compileScript());
   }, [nodes, edges, onChange, compileScript]);
-
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%' }}>
       <NodePalette onAddNode={handleAddNode} />
-
-      <div 
+      <div
         ref={reactFlowWrapper}
         style={{ flex: 1 }}
         onContextMenu={handleContextMenu}
@@ -1272,7 +601,6 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
             nodeColor={(node: VisualNodeType) => node.data?.definition?.color || '#666'}
             style={{ background: '#1e1e1e' }}
           />
-
           <Panel position="top-right">
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
@@ -1294,12 +622,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
                 💾 Salvar
               </button>
               <button
-                onClick={() => {
-                  if (confirm('Limpar todos os nós?')) {
-                    setNodes([]);
-                    setEdges([]);
-                  }
-                }}
+                onClick={handleClearGraph}
                 style={{
                   padding: '8px 16px',
                   background: '#e74c3c',
@@ -1316,7 +639,6 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
           </Panel>
         </ReactFlow>
       </div>
-
       {/* Context Menu */}
       {contextMenu && (
         <ContextMenu
@@ -1330,5 +652,4 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
     </div>
   );
 }
-
 export default VisualScriptEditor;

@@ -4,6 +4,7 @@ import { Users, CreditCard, DollarSign, Activity, Settings, TrendingUp, AlertTri
 import { authHeaders } from '@/lib/auth'
 import { API_BASE } from '@/lib/api'
 import { useToast } from '@/components/ui/Toast'
+import { openPromptDialog } from '@/lib/ui/non-blocking-dialogs'
 
 interface User {
   id: number
@@ -326,9 +327,21 @@ export default function AdminPanel() {
                       <td className="aethel-py-3 aethel-px-4">
                         <div className="aethel-flex aethel-space-x-2">
                           <button
-                            onClick={() => {
-                              const amount = prompt('Digite os créditos a adicionar:');
-                              if (amount) handleAddCredits(user.id, parseFloat(amount));
+                            onClick={async () => {
+                              const amount = await openPromptDialog({
+                                title: 'Adicionar creditos',
+                                message: 'Digite os creditos a adicionar:',
+                                placeholder: '100',
+                                confirmText: 'Adicionar',
+                                cancelText: 'Cancelar',
+                              });
+                              if (!amount) return;
+                              const parsed = Number.parseFloat(amount);
+                              if (Number.isNaN(parsed)) {
+                                toast.error('Valor invalido para creditos');
+                                return;
+                              }
+                              handleAddCredits(user.id, parsed);
                             }}
                             className="aethel-text-xs aethel-bg-blue-500/20 aethel-text-blue-400 aethel-px-2 aethel-py-1 aethel-rounded hover:aethel-bg-blue-500/30"
                           >

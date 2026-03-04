@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { capabilityResponse } from '@/lib/server/capability-response'
 
 type StudioGateOptions = {
   request: NextRequest
@@ -15,9 +15,11 @@ export function studioNotImplemented(options: StudioGateOptions) {
     options.request.headers.get('x-trace-id') ||
     crypto.randomUUID()
 
-  return notImplementedCapability({
-    error: 'NOT_IMPLEMENTED',
+  return capabilityResponse({
+    error: 'STUDIO_RUNTIME_GATED',
+    status: 503,
     capability: options.capability,
+    capabilityStatus: 'PARTIAL',
     milestone: options.milestone,
     message: options.notes
       ? `${options.endpoint} is not available yet. ${options.notes}`

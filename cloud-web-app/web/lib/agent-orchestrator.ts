@@ -6,6 +6,39 @@
 export const SUPPORTED_AGENT_TYPES = ['architect', 'designer', 'engineer', 'qa', 'researcher'] as const
 export type AgentType = (typeof SUPPORTED_AGENT_TYPES)[number]
 export const DEFAULT_AGENT_SET: AgentType[] = ['architect', 'designer', 'engineer']
+export const ORCHESTRATOR_EXECUTION_MODE = 'heuristic'
+export const ORCHESTRATOR_CAPABILITY_STATUS = 'PARTIAL'
+export const ORCHESTRATOR_DISCLAIMER =
+  'Heuristic advisory mode: role outputs are policy-driven guidance and still require deterministic validation before apply.'
+
+export type CoordinationPolicy = {
+  nonOverlappingScopes: boolean
+  applyGate: 'reviewer_required'
+  executionOrder: AgentType[]
+}
+
+export const ORCHESTRATOR_COORDINATION_POLICY: CoordinationPolicy = {
+  nonOverlappingScopes: true,
+  applyGate: 'reviewer_required',
+  executionOrder: ['architect', 'designer', 'engineer', 'qa', 'researcher'],
+}
+
+export function buildRoleScope(agent: AgentType): string {
+  switch (agent) {
+    case 'architect':
+      return 'Defines decomposition, contracts, and sequencing only.'
+    case 'designer':
+      return 'Owns UX states, accessibility, and interaction consistency only.'
+    case 'engineer':
+      return 'Implements scoped code changes only (no autonomous apply).'
+    case 'qa':
+      return 'Validates deterministic checks and regression risk only.'
+    case 'researcher':
+      return 'Verifies evidence/assumptions and flags unsupported claims only.'
+    default:
+      return 'Scoped execution role.'
+  }
+}
 
 export interface Agent {
   id: string
@@ -221,7 +254,7 @@ export class AgentOrchestrator {
           ? 'Priority=low: focus on safe incremental closure.'
           : 'Priority=normal: balance reliability and speed.'
 
-    return `${baseByRole[agentType]} ${priorityHint} Output is advisory and requires repository validation before apply.`
+    return `${baseByRole[agentType]} ${priorityHint} ${ORCHESTRATOR_DISCLAIMER}`
   }
 
   getAgentStatus(): Agent[] {

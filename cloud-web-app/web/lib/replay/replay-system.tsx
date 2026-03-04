@@ -1,26 +1,7 @@
-/**
- * Replay System - Sistema de Replay Avançado
- * 
- * Sistema completo com:
- * - Frame recording
- * - State snapshots
- * - Input recording
- * - Playback controls
- * - Seeking
- * - Speed control
- * - Export/Import
- * - Compression
- * - Keyframe interpolation
- * 
- * @module lib/replay/replay-system
- */
+// replay system module.
 
 import { EventEmitter } from 'events';
-
-// ============================================================================
 // TYPES
-// ============================================================================
-
 export interface ReplayFrame {
   frameNumber: number;
   timestamp: number;
@@ -102,15 +83,11 @@ export interface ReplayConfig {
   recordInputs: boolean;
   recordEvents: boolean;
 }
-
-// ============================================================================
 // INPUT SERIALIZER
-// ============================================================================
-
 export class InputSerializer {
   serializeInputs(inputs: Map<string, InputState>): InputState[] {
     const result: InputState[] = [];
-    
+
     for (const [, input] of inputs) {
       result.push({
         playerId: input.playerId,
@@ -120,13 +97,13 @@ export class InputSerializer {
         axes: new Map(input.axes),
       });
     }
-    
+
     return result;
   }
-  
+
   deserializeInputs(data: InputState[]): Map<string, InputState> {
     const map = new Map<string, InputState>();
-    
+
     for (const input of data) {
       map.set(input.playerId, {
         playerId: input.playerId,
@@ -136,10 +113,10 @@ export class InputSerializer {
         axes: new Map(input.axes),
       });
     }
-    
+
     return map;
   }
-  
+
   toJSON(inputs: InputState[]): string {
     return JSON.stringify(inputs.map(input => ({
       playerId: input.playerId,
@@ -149,10 +126,10 @@ export class InputSerializer {
       axes: Array.from(input.axes.entries()),
     })));
   }
-  
+
   fromJSON(json: string): InputState[] {
     const data = JSON.parse(json);
-    return data.map((input: { 
+    return data.map((input: {
       playerId: string;
       keys: string[];
       mousePosition: { x: number; y: number };
@@ -167,36 +144,32 @@ export class InputSerializer {
     }));
   }
 }
-
-// ============================================================================
 // STATE SERIALIZER
-// ============================================================================
-
 export class StateSerializer {
   private entitySerializers: Map<string, (entity: unknown) => unknown> = new Map();
-  
+
   registerSerializer(type: string, serializer: (entity: unknown) => unknown): void {
     this.entitySerializers.set(type, serializer);
   }
-  
+
   serializeState(world: { entities: Map<string, unknown>; globals?: Map<string, unknown> }): StateSnapshot {
     const entities: EntitySnapshot[] = [];
-    
+
     for (const [id, entity] of world.entities) {
       entities.push(this.serializeEntity(id, entity));
     }
-    
+
     return {
       entities,
       globals: new Map(world.globals || []),
       random: Math.random(),
     };
   }
-  
+
   private serializeEntity(id: string, entity: unknown): EntitySnapshot {
     const type = (entity as { type?: string }).type || 'unknown';
     const components = new Map<string, unknown>();
-    
+
     // Use custom serializer if available
     const serializer = this.entitySerializers.get(type);
     if (serializer) {
@@ -216,17 +189,17 @@ export class StateSerializer {
         }
       }
     }
-    
+
     return {
       id,
       type,
       components,
     };
   }
-  
+
   deserializeState(snapshot: StateSnapshot): Map<string, unknown> {
     const entities = new Map<string, unknown>();
-    
+
     for (const entitySnapshot of snapshot.entities) {
       entities.set(entitySnapshot.id, {
         id: entitySnapshot.id,
@@ -234,33 +207,33 @@ export class StateSerializer {
         ...Object.fromEntries(entitySnapshot.components),
       });
     }
-    
+
     return entities;
   }
-  
+
   private isSerializable(value: unknown): boolean {
     if (value === null || value === undefined) return true;
     if (typeof value === 'function') return false;
     if (typeof value === 'symbol') return false;
     return true;
   }
-  
+
   private deepClone<T>(value: T): T {
     if (value === null || value === undefined) return value;
     if (typeof value !== 'object') return value;
-    
+
     if (Array.isArray(value)) {
       return value.map(v => this.deepClone(v)) as unknown as T;
     }
-    
+
     if (value instanceof Map) {
       return new Map(Array.from(value.entries()).map(([k, v]) => [k, this.deepClone(v)])) as unknown as T;
     }
-    
+
     if (value instanceof Set) {
       return new Set(Array.from(value).map(v => this.deepClone(v))) as unknown as T;
     }
-    
+
     const result: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       result[key] = this.deepClone(val);
@@ -268,26 +241,22 @@ export class StateSerializer {
     return result as T;
   }
 }
-
-// ============================================================================
 // REPLAY RECORDER
-// ============================================================================
-
 export class ReplayRecorder extends EventEmitter {
   private config: ReplayConfig;
   private recording: Recording | null = null;
   private isRecording = false;
   private frameNumber = 0;
   private startTime = 0;
-  
+
   private inputSerializer = new InputSerializer();
   private stateSerializer = new StateSerializer();
   private currentInputs: Map<string, InputState> = new Map();
   private pendingEvents: ReplayEvent[] = [];
-  
+
   constructor(config: Partial<ReplayConfig> = {}) {
     super();
-    
+
     this.config = {
       snapshotInterval: 60, // Snapshot every 60 frames (1 second at 60fps)
       maxFrames: 36000, // 10 minutes at 60fps
@@ -298,11 +267,7 @@ export class ReplayRecorder extends EventEmitter {
       ...config,
     };
   }
-  
-  // ============================================================================
-  // RECORDING CONTROL
-  // ============================================================================
-  
+// RECORDING CONTROL
   startRecording(metadata?: Partial<RecordingMetadata>): void {
     this.recording = {
       id: this.generateId(),
@@ -322,79 +287,71 @@ export class ReplayRecorder extends EventEmitter {
         ...metadata,
       },
     };
-    
+
     this.isRecording = true;
     this.frameNumber = 0;
     this.startTime = performance.now();
-    
+
     this.emit('recordingStarted', this.recording);
   }
-  
+
   stopRecording(): Recording | null {
     if (!this.recording) return null;
-    
+
     this.isRecording = false;
     this.recording.endTime = Date.now();
     this.recording.duration = this.recording.endTime - this.recording.startTime;
     this.recording.frameCount = this.frameNumber;
-    
+
     const result = this.recording;
     this.emit('recordingStopped', result);
-    
+
     return result;
   }
-  
+
   isActive(): boolean {
     return this.isRecording;
   }
-  
-  // ============================================================================
-  // FRAME RECORDING
-  // ============================================================================
-  
+// FRAME RECORDING
   recordFrame(world: { entities: Map<string, unknown>; globals?: Map<string, unknown> }, deltaTime: number): void {
     if (!this.isRecording || !this.recording) return;
-    
+
     if (this.frameNumber >= this.config.maxFrames) {
       this.stopRecording();
       return;
     }
-    
+
     const timestamp = performance.now() - this.startTime;
     const isKeyframe = this.frameNumber % this.config.snapshotInterval === 0;
-    
+
     const frame: ReplayFrame = {
       frameNumber: this.frameNumber,
       timestamp,
       deltaTime,
-      inputs: this.config.recordInputs 
+      inputs: this.config.recordInputs
         ? this.inputSerializer.serializeInputs(this.currentInputs)
         : [],
-      events: this.config.recordEvents 
+      events: this.config.recordEvents
         ? [...this.pendingEvents]
         : [],
     };
-    
+
     // Add snapshot for keyframes
     if (isKeyframe) {
       frame.snapshot = this.stateSerializer.serializeState(world);
       this.recording.keyframes.push(this.frameNumber);
     }
-    
+
     this.recording.frames.push(frame);
     this.frameNumber++;
     this.pendingEvents = [];
-    
+
     this.emit('frameRecorded', frame);
   }
-  
-  // ============================================================================
-  // INPUT RECORDING
-  // ============================================================================
-  
+// INPUT RECORDING
   recordInput(playerId: string, input: Partial<InputState>): void {
     if (!this.isRecording) return;
-    
+
     const existing = this.currentInputs.get(playerId) || {
       playerId,
       keys: new Set<string>(),
@@ -402,61 +359,49 @@ export class ReplayRecorder extends EventEmitter {
       mouseButtons: new Set<number>(),
       axes: new Map<string, number>(),
     };
-    
+
     this.currentInputs.set(playerId, {
       ...existing,
       ...input,
       playerId,
     });
   }
-  
-  // ============================================================================
-  // EVENT RECORDING
-  // ============================================================================
-  
+// EVENT RECORDING
   recordEvent(type: string, data: unknown): void {
     if (!this.isRecording) return;
-    
+
     this.pendingEvents.push({
       type,
       timestamp: performance.now() - this.startTime,
       data,
     });
   }
-  
-  // ============================================================================
-  // UTILITIES
-  // ============================================================================
-  
+// UTILITIES
   private generateId(): string {
     return `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-  
+
   getRecording(): Recording | null {
     return this.recording;
   }
-  
+
   getCurrentFrame(): number {
     return this.frameNumber;
   }
 }
-
-// ============================================================================
 // REPLAY PLAYER
-// ============================================================================
-
 export class ReplayPlayer extends EventEmitter {
   private config: ReplayConfig;
   private recording: Recording | null = null;
   private state: PlaybackState;
   private animationFrame: number | null = null;
   private lastFrameTime = 0;
-  
+
   private stateSerializer = new StateSerializer();
-  
+
   constructor(config: Partial<ReplayConfig> = {}) {
     super();
-    
+
     this.config = {
       snapshotInterval: 60,
       maxFrames: 36000,
@@ -466,7 +411,7 @@ export class ReplayPlayer extends EventEmitter {
       recordEvents: true,
       ...config,
     };
-    
+
     this.state = {
       isPlaying: false,
       isPaused: false,
@@ -476,78 +421,70 @@ export class ReplayPlayer extends EventEmitter {
       loop: false,
     };
   }
-  
-  // ============================================================================
-  // PLAYBACK CONTROL
-  // ============================================================================
-  
+// PLAYBACK CONTROL
   load(recording: Recording): void {
     this.recording = recording;
     this.state.currentFrame = 0;
     this.state.currentTime = 0;
     this.emit('recordingLoaded', recording);
   }
-  
+
   play(): void {
     if (!this.recording) return;
-    
+
     this.state.isPlaying = true;
     this.state.isPaused = false;
     this.lastFrameTime = performance.now();
-    
+
     this.tick();
     this.emit('playbackStarted');
   }
-  
+
   pause(): void {
     this.state.isPaused = true;
     this.emit('playbackPaused');
   }
-  
+
   resume(): void {
     if (!this.state.isPlaying) return;
-    
+
     this.state.isPaused = false;
     this.lastFrameTime = performance.now();
     this.tick();
     this.emit('playbackResumed');
   }
-  
+
   stop(): void {
     this.state.isPlaying = false;
     this.state.isPaused = false;
     this.state.currentFrame = 0;
     this.state.currentTime = 0;
-    
+
     if (this.animationFrame !== null) {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
-    
+
     this.emit('playbackStopped');
   }
-  
-  // ============================================================================
-  // SEEKING
-  // ============================================================================
-  
+// SEEKING
   seek(frame: number): void {
     if (!this.recording) return;
-    
+
     frame = Math.max(0, Math.min(frame, this.recording.frameCount - 1));
     this.state.currentFrame = frame;
-    
+
     const frameData = this.recording.frames[frame];
     if (frameData) {
       this.state.currentTime = frameData.timestamp;
     }
-    
+
     this.emit('seeked', frame);
   }
-  
+
   seekToTime(time: number): void {
     if (!this.recording) return;
-    
+
     // Find frame at time
     let targetFrame = 0;
     for (let i = 0; i < this.recording.frames.length; i++) {
@@ -557,75 +494,67 @@ export class ReplayPlayer extends EventEmitter {
       }
       targetFrame = i;
     }
-    
+
     this.seek(targetFrame);
   }
-  
+
   seekToKeyframe(index: number): void {
     if (!this.recording) return;
-    
+
     index = Math.max(0, Math.min(index, this.recording.keyframes.length - 1));
     const frame = this.recording.keyframes[index];
     this.seek(frame);
   }
-  
+
   nextFrame(): void {
     this.seek(this.state.currentFrame + 1);
   }
-  
+
   previousFrame(): void {
     this.seek(this.state.currentFrame - 1);
   }
-  
+
   nextKeyframe(): void {
     if (!this.recording) return;
-    
+
     const nextKeyframe = this.recording.keyframes.find(k => k > this.state.currentFrame);
     if (nextKeyframe !== undefined) {
       this.seek(nextKeyframe);
     }
   }
-  
+
   previousKeyframe(): void {
     if (!this.recording) return;
-    
+
     const prevKeyframe = [...this.recording.keyframes]
       .reverse()
       .find(k => k < this.state.currentFrame);
-    
+
     if (prevKeyframe !== undefined) {
       this.seek(prevKeyframe);
     }
   }
-  
-  // ============================================================================
-  // SPEED CONTROL
-  // ============================================================================
-  
+// SPEED CONTROL
   setSpeed(speed: number): void {
     this.state.speed = Math.max(0.1, Math.min(speed, 10));
     this.emit('speedChanged', this.state.speed);
   }
-  
+
   setLoop(loop: boolean): void {
     this.state.loop = loop;
   }
-  
-  // ============================================================================
-  // FRAME PLAYBACK
-  // ============================================================================
-  
+// FRAME PLAYBACK
   private tick = (): void => {
     if (!this.state.isPlaying || this.state.isPaused || !this.recording) {
       return;
     }
-    
+
     const now = performance.now();
     const deltaTime = (now - this.lastFrameTime) * this.state.speed;
     this.lastFrameTime = now;
-    
+
     this.state.currentTime += deltaTime;
-    
+
     // Find current frame
     while (
       this.state.currentFrame < this.recording.frameCount - 1 &&
@@ -634,7 +563,7 @@ export class ReplayPlayer extends EventEmitter {
       this.state.currentFrame++;
       this.processFrame(this.recording.frames[this.state.currentFrame]);
     }
-    
+
     // Check if at end
     if (this.state.currentFrame >= this.recording.frameCount - 1) {
       if (this.state.loop) {
@@ -646,36 +575,32 @@ export class ReplayPlayer extends EventEmitter {
         return;
       }
     }
-    
+
     this.emit('frameUpdated', this.state.currentFrame);
-    
+
     this.animationFrame = requestAnimationFrame(this.tick);
   };
-  
+
   private processFrame(frame: ReplayFrame): void {
     // Emit inputs
     for (const input of frame.inputs) {
       this.emit('input', input);
     }
-    
+
     // Emit events
     for (const event of frame.events) {
       this.emit('event', event);
     }
-    
+
     // Emit snapshot if present
     if (frame.snapshot) {
       this.emit('snapshot', frame.snapshot);
     }
   }
-  
-  // ============================================================================
-  // STATE RESTORATION
-  // ============================================================================
-  
+// STATE RESTORATION
   getStateAtFrame(frame: number): StateSnapshot | null {
     if (!this.recording) return null;
-    
+
     // Find nearest keyframe before target frame
     let keyframeIndex = 0;
     for (let i = this.recording.keyframes.length - 1; i >= 0; i--) {
@@ -684,10 +609,10 @@ export class ReplayPlayer extends EventEmitter {
         break;
       }
     }
-    
+
     const keyframeData = this.recording.frames[keyframeIndex];
     if (!keyframeData?.snapshot) return null;
-    
+
     // For exact keyframes, return directly
     if (keyframeIndex === frame) {
       return this.cloneSnapshot(keyframeData.snapshot);
@@ -697,53 +622,49 @@ export class ReplayPlayer extends EventEmitter {
     this.applyFrameDelta(state, keyframeIndex + 1, frame);
     return state;
   }
-  
+
   getInputsAtFrame(frame: number): InputState[] {
     if (!this.recording) return [];
-    
+
     const frameData = this.recording.frames[frame];
     return frameData?.inputs || [];
   }
-  
+
   getEventsAtFrame(frame: number): ReplayEvent[] {
     if (!this.recording) return [];
-    
+
     const frameData = this.recording.frames[frame];
     return frameData?.events || [];
   }
-  
-  // ============================================================================
-  // INTERPOLATION
-  // ============================================================================
-  
+// INTERPOLATION
   getInterpolatedState(t: number): StateSnapshot | null {
     if (!this.recording || !this.config.interpolate) return null;
-    
+
     // Find surrounding keyframes
     const timeInMs = t * this.recording.duration;
-    
+
     let prevKeyframe = 0;
     let nextKeyframe = this.recording.keyframes[0] || 0;
-    
+
     for (let i = 0; i < this.recording.keyframes.length - 1; i++) {
       if (this.recording.frames[this.recording.keyframes[i]].timestamp <= timeInMs) {
         prevKeyframe = this.recording.keyframes[i];
         nextKeyframe = this.recording.keyframes[i + 1];
       }
     }
-    
+
     const prevFrame = this.recording.frames[prevKeyframe];
     const nextFrame = this.recording.frames[nextKeyframe];
-    
+
     if (!prevFrame?.snapshot || !nextFrame?.snapshot) {
       return prevFrame?.snapshot || null;
     }
-    
+
     // Calculate interpolation factor
-    const alpha = 
-      (timeInMs - prevFrame.timestamp) / 
+    const alpha =
+      (timeInMs - prevFrame.timestamp) /
       (nextFrame.timestamp - prevFrame.timestamp);
-    
+
     return this.interpolateSnapshots(prevFrame.snapshot, nextFrame.snapshot, alpha);
   }
 
@@ -818,20 +739,20 @@ export class ReplayPlayer extends EventEmitter {
     replayLog.push(event.type);
     state.globals.set('__replay.unhandledEvents', replayLog.slice(-25));
   }
-  
+
   private interpolateSnapshots(a: StateSnapshot, b: StateSnapshot, alpha: number): StateSnapshot {
     const entities: EntitySnapshot[] = [];
-    
+
     // Create entity map for quick lookup
     const bEntities = new Map<string, EntitySnapshot>();
     for (const entity of b.entities) {
       bEntities.set(entity.id, entity);
     }
-    
+
     // Interpolate matching entities
     for (const entityA of a.entities) {
       const entityB = bEntities.get(entityA.id);
-      
+
       if (entityB) {
         entities.push(this.interpolateEntities(entityA, entityB, alpha));
       } else {
@@ -839,54 +760,54 @@ export class ReplayPlayer extends EventEmitter {
         entities.push(entityA);
       }
     }
-    
+
     // Add entities only in B
     for (const entityB of b.entities) {
       if (!a.entities.find(e => e.id === entityB.id)) {
         entities.push(entityB);
       }
     }
-    
+
     return {
       entities,
       globals: new Map(b.globals),
       random: a.random + (b.random - a.random) * alpha,
     };
   }
-  
+
   private interpolateEntities(a: EntitySnapshot, b: EntitySnapshot, alpha: number): EntitySnapshot {
     const components = new Map<string, unknown>();
-    
+
     for (const [key, valueA] of a.components) {
       const valueB = b.components.get(key);
-      
+
       if (valueB !== undefined) {
         components.set(key, this.interpolateValue(valueA, valueB, alpha));
       } else {
         components.set(key, valueA);
       }
     }
-    
+
     return {
       id: a.id,
       type: a.type,
       components,
     };
   }
-  
+
   private interpolateValue(a: unknown, b: unknown, alpha: number): unknown {
     if (typeof a === 'number' && typeof b === 'number') {
       return a + (b - a) * alpha;
     }
-    
+
     if (this.isVector(a) && this.isVector(b)) {
       return this.interpolateVector(a, b, alpha);
     }
-    
+
     // Return b for non-numeric values
     return alpha < 0.5 ? a : b;
   }
-  
+
   private isVector(value: unknown): value is { x: number; y: number; z?: number } {
     return (
       typeof value === 'object' &&
@@ -895,7 +816,7 @@ export class ReplayPlayer extends EventEmitter {
       'y' in value
     );
   }
-  
+
   private interpolateVector(
     a: { x: number; y: number; z?: number },
     b: { x: number; y: number; z?: number },
@@ -905,49 +826,41 @@ export class ReplayPlayer extends EventEmitter {
       x: a.x + (b.x - a.x) * alpha,
       y: a.y + (b.y - a.y) * alpha,
     };
-    
+
     if (a.z !== undefined && b.z !== undefined) {
       result.z = a.z + (b.z - a.z) * alpha;
     }
-    
+
     return result;
   }
-  
-  // ============================================================================
-  // GETTERS
-  // ============================================================================
-  
+// GETTERS
   getState(): PlaybackState {
     return { ...this.state };
   }
-  
+
   getRecording(): Recording | null {
     return this.recording;
   }
-  
+
   getDuration(): number {
     return this.recording?.duration || 0;
   }
-  
+
   getProgress(): number {
     if (!this.recording || this.recording.frameCount === 0) return 0;
     return this.state.currentFrame / (this.recording.frameCount - 1);
   }
 }
-
-// ============================================================================
 // REPLAY MANAGER
-// ============================================================================
-
 export class ReplayManager extends EventEmitter {
   private recordings: Map<string, Recording> = new Map();
   private recorder: ReplayRecorder;
   private player: ReplayPlayer;
   private config: ReplayConfig;
-  
+
   constructor(config: Partial<ReplayConfig> = {}) {
     super();
-    
+
     this.config = {
       snapshotInterval: 60,
       maxFrames: 36000,
@@ -957,50 +870,46 @@ export class ReplayManager extends EventEmitter {
       recordEvents: true,
       ...config,
     };
-    
+
     this.recorder = new ReplayRecorder(this.config);
     this.player = new ReplayPlayer(this.config);
-    
+
     // Forward events
     this.recorder.on('recordingStarted', (r) => this.emit('recordingStarted', r));
     this.recorder.on('recordingStopped', (r) => {
       this.recordings.set(r.id, r);
       this.emit('recordingStopped', r);
     });
-    
+
     this.player.on('playbackStarted', () => this.emit('playbackStarted'));
     this.player.on('playbackStopped', () => this.emit('playbackStopped'));
     this.player.on('playbackEnded', () => this.emit('playbackEnded'));
   }
-  
+
   getRecorder(): ReplayRecorder {
     return this.recorder;
   }
-  
+
   getPlayer(): ReplayPlayer {
     return this.player;
   }
-  
+
   getRecordings(): Recording[] {
     return Array.from(this.recordings.values());
   }
-  
+
   getRecording(id: string): Recording | undefined {
     return this.recordings.get(id);
   }
-  
+
   deleteRecording(id: string): void {
     this.recordings.delete(id);
   }
-  
-  // ============================================================================
-  // EXPORT/IMPORT
-  // ============================================================================
-  
+// EXPORT/IMPORT
   async exportRecording(id: string): Promise<ArrayBuffer> {
     const recording = this.recordings.get(id);
     if (!recording) throw new Error('Recording not found');
-    
+
     const json = JSON.stringify(recording, (key, value) => {
       if (value instanceof Map) {
         return { __type: 'Map', data: Array.from(value.entries()) };
@@ -1010,17 +919,17 @@ export class ReplayManager extends EventEmitter {
       }
       return value;
     });
-    
+
     if (this.config.compressOnSave) {
       return this.compress(json);
     }
-    
+
     return new TextEncoder().encode(json).buffer;
   }
-  
+
   async importRecording(data: ArrayBuffer): Promise<Recording> {
     let json: string;
-    
+
     try {
       // Try to decompress
       json = await this.decompress(data);
@@ -1028,7 +937,7 @@ export class ReplayManager extends EventEmitter {
       // Assume uncompressed
       json = new TextDecoder().decode(data);
     }
-    
+
     const recording = JSON.parse(json, (key, value) => {
       if (value && typeof value === 'object') {
         if (value.__type === 'Map') {
@@ -1040,29 +949,29 @@ export class ReplayManager extends EventEmitter {
       }
       return value;
     }) as Recording;
-    
+
     this.recordings.set(recording.id, recording);
     return recording;
   }
-  
+
   private async compress(data: string): Promise<ArrayBuffer> {
     const encoder = new TextEncoder();
     const inputData = encoder.encode(data);
-    
+
     const cs = new CompressionStream('gzip');
     const writer = cs.writable.getWriter();
     writer.write(inputData);
     writer.close();
-    
+
     const chunks: Uint8Array[] = [];
     const reader = cs.readable.getReader();
-    
+
     let result = await reader.read();
     while (!result.done) {
       chunks.push(result.value);
       result = await reader.read();
     }
-    
+
     // Combine chunks
     const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
     const output = new Uint8Array(totalLength);
@@ -1071,25 +980,25 @@ export class ReplayManager extends EventEmitter {
       output.set(chunk, offset);
       offset += chunk.length;
     }
-    
+
     return output.buffer;
   }
-  
+
   private async decompress(data: ArrayBuffer): Promise<string> {
     const ds = new DecompressionStream('gzip');
     const writer = ds.writable.getWriter();
     writer.write(new Uint8Array(data));
     writer.close();
-    
+
     const chunks: Uint8Array[] = [];
     const reader = ds.readable.getReader();
-    
+
     let result = await reader.read();
     while (!result.done) {
       chunks.push(result.value);
       result = await reader.read();
     }
-    
+
     // Combine chunks
     const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
     const output = new Uint8Array(totalLength);
@@ -1098,30 +1007,22 @@ export class ReplayManager extends EventEmitter {
       output.set(chunk, offset);
       offset += chunk.length;
     }
-    
+
     return new TextDecoder().decode(output);
   }
-  
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
-  
+// CLEANUP
   clear(): void {
     this.recordings.clear();
     this.recorder.stopRecording();
     this.player.stop();
   }
-  
+
   dispose(): void {
     this.clear();
     this.removeAllListeners();
   }
 }
-
-// ============================================================================
 // REACT HOOKS
-// ============================================================================
-
 import { useState, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
 
 interface ReplayContextValue {
@@ -1132,10 +1033,10 @@ interface ReplayContextValue {
 
 const ReplayContext = createContext<ReplayContextValue | null>(null);
 
-export function ReplayProvider({ 
+export function ReplayProvider({
   children,
   config,
-}: { 
+}: {
   children: React.ReactNode;
   config?: Partial<ReplayConfig>;
 }) {
@@ -1147,13 +1048,13 @@ export function ReplayProvider({
       player: manager.getPlayer(),
     };
   }, [config]);
-  
+
   useEffect(() => {
     return () => {
       value.manager.dispose();
     };
   }, [value]);
-  
+
   return (
     <ReplayContext.Provider value={value}>
       {children}
@@ -1174,35 +1075,35 @@ export function useReplayRecorder() {
   if (!context) {
     throw new Error('useReplayRecorder must be used within ReplayProvider');
   }
-  
+
   const recorder = context.recorder;
   const [isRecording, setIsRecording] = useState(false);
   const [frameCount, setFrameCount] = useState(0);
-  
+
   useEffect(() => {
     const onStart = () => setIsRecording(true);
     const onStop = () => setIsRecording(false);
     const onFrame = () => setFrameCount(recorder.getCurrentFrame());
-    
+
     recorder.on('recordingStarted', onStart);
     recorder.on('recordingStopped', onStop);
     recorder.on('frameRecorded', onFrame);
-    
+
     return () => {
       recorder.off('recordingStarted', onStart);
       recorder.off('recordingStopped', onStop);
       recorder.off('frameRecorded', onFrame);
     };
   }, [recorder]);
-  
+
   const start = useCallback((metadata?: Partial<RecordingMetadata>) => {
     recorder.startRecording(metadata);
   }, [recorder]);
-  
+
   const stop = useCallback(() => {
     return recorder.stopRecording();
   }, [recorder]);
-  
+
   return { recorder, isRecording, frameCount, start, stop };
 }
 
@@ -1211,13 +1112,13 @@ export function useReplayPlayer() {
   if (!context) {
     throw new Error('useReplayPlayer must be used within ReplayProvider');
   }
-  
+
   const player = context.player;
   const [state, setState] = useState<PlaybackState>(player.getState());
-  
+
   useEffect(() => {
     const update = () => setState(player.getState());
-    
+
     player.on('playbackStarted', update);
     player.on('playbackPaused', update);
     player.on('playbackResumed', update);
@@ -1225,30 +1126,30 @@ export function useReplayPlayer() {
     player.on('seeked', update);
     player.on('speedChanged', update);
     player.on('frameUpdated', update);
-    
+
     return () => {
       player.removeAllListeners();
     };
   }, [player]);
-  
+
   return { player, state };
 }
 
 export function useReplayRecordings() {
   const manager = useReplayManager();
   const [recordings, setRecordings] = useState<Recording[]>([]);
-  
+
   useEffect(() => {
     const update = () => setRecordings(manager.getRecordings());
-    
+
     update();
     manager.on('recordingStopped', update);
-    
+
     return () => {
       manager.off('recordingStopped', update);
     };
   }, [manager]);
-  
+
   return recordings;
 }
 

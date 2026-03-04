@@ -9,7 +9,8 @@ import {
   consumeMeteredUsage,
   releaseConcurrencyLease,
 } from '@/lib/metering';
-import { notImplementedCapability } from '@/lib/server/capability-response';
+import { capabilityResponse } from '@/lib/server/capability-response';
+import { buildAiProviderSetupMetadata } from '@/lib/capability-constants';
 
 function resolveBackendBaseUrl(): string | null {
   const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -89,12 +90,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     if (aiService.getAvailableProviders().length === 0) {
-      return notImplementedCapability({
-        error: 'NOT_IMPLEMENTED',
-        status: 501,
+      return capabilityResponse({
+        error: 'AI_PROVIDER_NOT_CONFIGURED',
+        status: 503,
         message: 'AI provider not configured.',
         capability: 'AI_CHAT',
+        capabilityStatus: 'PARTIAL',
         milestone: 'P0',
+        metadata: buildAiProviderSetupMetadata({ route: '/api/ai/chat' }),
       });
     }
 

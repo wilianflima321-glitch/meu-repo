@@ -1,24 +1,6 @@
-/**
- * World/Game Settings System - Sistema de Configurações Avançado
- * 
- * Sistema completo com:
- * - Audio, video, controls, gameplay settings
- * - Settings validation and defaults
- * - Settings persistence (localStorage)
- * - Settings profiles/presets
- * - Platform-specific defaults
- * - Accessibility options
- * - Performance presets
- * - Settings migration between versions
- * 
- * @module lib/settings/settings-system
- */
 
 import { EventEmitter } from 'events';
 
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export type GraphicsQuality = 'very_low' | 'low' | 'medium' | 'high' | 'ultra' | 'custom';
 export type Difficulty = 'story' | 'easy' | 'normal' | 'hard' | 'nightmare' | 'custom';
@@ -48,7 +30,6 @@ export interface VideoSettings {
   fpsLimit: number;
   graphicsQuality: GraphicsQuality;
   
-  // Quality settings
   textureQuality: 'low' | 'medium' | 'high' | 'ultra';
   shadowQuality: 'off' | 'low' | 'medium' | 'high' | 'ultra';
   shadowDistance: number;
@@ -58,7 +39,6 @@ export interface VideoSettings {
   foliageDistance: number;
   foliageDensity: number;
   
-  // Effects
   ambientOcclusion: 'off' | 'ssao' | 'hbao' | 'gtao';
   bloom: boolean;
   bloomIntensity: number;
@@ -71,13 +51,11 @@ export interface VideoSettings {
   vignette: boolean;
   vignetteIntensity: number;
   
-  // Performance
   dynamicResolution: boolean;
   dynamicResolutionTarget: number;
   renderScale: number;
   lodBias: number;
   
-  // Display
   gamma: number;
   brightness: number;
   contrast: number;
@@ -88,7 +66,6 @@ export interface VideoSettings {
 }
 
 export interface ControlSettings {
-  // Mouse
   mouseSensitivity: number;
   mouseAimSensitivity: number;
   mouseSmoothing: boolean;
@@ -96,7 +73,6 @@ export interface ControlSettings {
   invertMouseY: boolean;
   rawMouseInput: boolean;
   
-  // Gamepad
   gamepadEnabled: boolean;
   gamepadVibration: boolean;
   gamepadVibrationIntensity: number;
@@ -107,11 +83,9 @@ export interface ControlSettings {
   invertGamepadY: boolean;
   triggerDeadzone: number;
   
-  // Keybindings
   keybindings: Record<string, KeyBinding>;
   gamepadBindings: Record<string, GamepadBinding>;
   
-  // Advanced
   toggleSprint: boolean;
   toggleCrouch: boolean;
   toggleAim: boolean;
@@ -134,14 +108,12 @@ export interface GamepadBinding {
 export interface GameplaySettings {
   difficulty: Difficulty;
   
-  // Difficulty modifiers (for custom)
   damageReceived: number;
   damageDealt: number;
   resourceScarcity: number;
   enemyAggression: number;
   enemyHealth: number;
   
-  // HUD
   showHUD: boolean;
   showMinimap: boolean;
   showCompass: boolean;
@@ -151,27 +123,23 @@ export interface GameplaySettings {
   showInteractionPrompts: boolean;
   showTutorialHints: boolean;
   
-  // Camera
   cameraShake: boolean;
   cameraShakeIntensity: number;
   headBob: boolean;
   headBobIntensity: number;
   
-  // Assists
   autoAim: boolean;
   autoAimStrength: number;
   aimAssist: boolean;
   aimAssistStrength: number;
   lockOnTarget: boolean;
   
-  // Misc
   pauseOnFocusLoss: boolean;
   skipCutscenes: boolean;
   autoSaveFrequency: number; // minutes
 }
 
 export interface AccessibilitySettings {
-  // Visual
   textSize: TextSize;
   uiScale: number;
   colorBlindMode: ColorBlindMode;
@@ -180,7 +148,6 @@ export interface AccessibilitySettings {
   screenReader: boolean;
   flashingEffects: boolean;
   
-  // Audio
   subtitles: boolean;
   subtitleSize: TextSize;
   subtitleBackground: boolean;
@@ -188,14 +155,12 @@ export interface AccessibilitySettings {
   closedCaptions: boolean;
   monoAudio: boolean;
   
-  // Controls
   reducedMotion: boolean;
   stickyKeys: boolean;
   holdButtonDuration: number;
   quickTimeEventAssist: boolean;
   oneHandedMode: boolean;
   
-  // Gameplay
   invincibility: boolean;
   infiniteResources: boolean;
   skipPuzzles: boolean;
@@ -203,7 +168,6 @@ export interface AccessibilitySettings {
   narratorEnabled: boolean;
   narratorSpeed: number;
   
-  // Language
   language: string;
   voiceLanguage: string;
   textLanguage: string;
@@ -254,9 +218,6 @@ export interface SettingsConfig {
   validateOnLoad: boolean;
 }
 
-// ============================================================================
-// DEFAULT SETTINGS
-// ============================================================================
 
 export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
   masterVolume: 1.0,
@@ -468,9 +429,6 @@ export const DEFAULT_PRIVACY_SETTINGS: PrivacySettings = {
   hidePersonalInfo: false,
 };
 
-// ============================================================================
-// GRAPHICS PRESETS
-// ============================================================================
 
 export const GRAPHICS_PRESETS: Record<GraphicsQuality, Partial<VideoSettings>> = {
   very_low: {
@@ -560,9 +518,6 @@ export const GRAPHICS_PRESETS: Record<GraphicsQuality, Partial<VideoSettings>> =
   custom: {},
 };
 
-// ============================================================================
-// DIFFICULTY PRESETS
-// ============================================================================
 
 export const DIFFICULTY_PRESETS: Record<Difficulty, Partial<GameplaySettings>> = {
   story: {
@@ -619,9 +574,6 @@ export const DIFFICULTY_PRESETS: Record<Difficulty, Partial<GameplaySettings>> =
   custom: {},
 };
 
-// ============================================================================
-// SETTINGS MANAGER
-// ============================================================================
 
 export class SettingsManager extends EventEmitter {
   private static instance: SettingsManager | null = null;
@@ -642,10 +594,8 @@ export class SettingsManager extends EventEmitter {
       ...config,
     };
     
-    // Initialize with defaults
     this.settings = this.getDefaultSettings();
     
-    // Load from storage
     this.loadFromStorage();
   }
   
@@ -656,9 +606,6 @@ export class SettingsManager extends EventEmitter {
     return SettingsManager.instance;
   }
   
-  // ============================================================================
-  // DEFAULT SETTINGS
-  // ============================================================================
   
   getDefaultSettings(): AllSettings {
     return {
@@ -687,9 +634,6 @@ export class SettingsManager extends EventEmitter {
     this.emit('changed', this.settings);
   }
   
-  // ============================================================================
-  // GETTERS
-  // ============================================================================
   
   getAll(): AllSettings {
     return { ...this.settings };
@@ -730,9 +674,6 @@ export class SettingsManager extends EventEmitter {
     return this.settings[category][property];
   }
   
-  // ============================================================================
-  // SETTERS
-  // ============================================================================
   
   setAudio(settings: Partial<AudioSettings>): void {
     this.settings.audio = { ...this.settings.audio, ...settings };
@@ -787,9 +728,6 @@ export class SettingsManager extends EventEmitter {
     }
   }
   
-  // ============================================================================
-  // PRESETS
-  // ============================================================================
   
   applyGraphicsPreset(quality: GraphicsQuality): void {
     const preset = GRAPHICS_PRESETS[quality];
@@ -829,9 +767,6 @@ export class SettingsManager extends EventEmitter {
     return Array.from(this.presets.values());
   }
   
-  // ============================================================================
-  // KEYBINDINGS
-  // ============================================================================
   
   setKeybinding(action: string, binding: KeyBinding): void {
     this.settings.controls.keybindings[action] = binding;
@@ -866,9 +801,6 @@ export class SettingsManager extends EventEmitter {
     return undefined;
   }
   
-  // ============================================================================
-  // PERSISTENCE
-  // ============================================================================
   
   saveToStorage(): void {
     if (typeof localStorage === 'undefined') return;
@@ -896,14 +828,12 @@ export class SettingsManager extends EventEmitter {
       
       const data = JSON.parse(raw);
       
-      // Migration if version mismatch
       if (data.version !== this.config.version) {
         this.migrateSettings(data.settings, data.version);
       } else {
         this.settings = this.mergeWithDefaults(data.settings);
       }
       
-      // Validate
       if (this.config.validateOnLoad) {
         this.validate();
       }
@@ -941,21 +871,15 @@ export class SettingsManager extends EventEmitter {
   }
   
   private migrateSettings(settings: unknown, fromVersion: number): void {
-    // Implement version migrations here
     console.log(`Migrating settings from v${fromVersion} to v${this.config.version}`);
     
-    // For now, just merge with defaults
     this.settings = this.mergeWithDefaults(settings as Partial<AllSettings>);
   }
   
-  // ============================================================================
-  // VALIDATION
-  // ============================================================================
   
   validate(): boolean {
     let valid = true;
     
-    // Clamp numeric values
     this.settings.audio.masterVolume = this.clamp(this.settings.audio.masterVolume, 0, 1);
     this.settings.audio.musicVolume = this.clamp(this.settings.audio.musicVolume, 0, 1);
     this.settings.audio.sfxVolume = this.clamp(this.settings.audio.sfxVolume, 0, 1);
@@ -975,9 +899,6 @@ export class SettingsManager extends EventEmitter {
     return Math.max(min, Math.min(max, value));
   }
   
-  // ============================================================================
-  // EXPORT/IMPORT
-  // ============================================================================
   
   export(): string {
     return JSON.stringify({
@@ -1000,9 +921,6 @@ export class SettingsManager extends EventEmitter {
     }
   }
   
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
   
   dispose(): void {
     this.saveToStorage();
@@ -1011,9 +929,6 @@ export class SettingsManager extends EventEmitter {
   }
 }
 
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
 
 import { useState, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
 

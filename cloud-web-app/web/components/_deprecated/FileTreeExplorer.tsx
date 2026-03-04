@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
 
 interface FileNode {
   name: string;
@@ -166,7 +167,12 @@ export default function FileTreeExplorer() {
 
   const handleNewFile = async () => {
     if (!contextMenu) return;
-    const fileName = prompt('Enter file name:');
+    const fileName = await openPromptDialog({
+      title: 'New file',
+      message: 'Enter file name:',
+      confirmText: 'Create',
+      cancelText: 'Cancel',
+    });
     if (fileName) {
       // Create new file
       console.log('Create file:', fileName, 'in', contextMenu.node.path);
@@ -176,7 +182,12 @@ export default function FileTreeExplorer() {
 
   const handleNewFolder = async () => {
     if (!contextMenu) return;
-    const folderName = prompt('Enter folder name:');
+    const folderName = await openPromptDialog({
+      title: 'New folder',
+      message: 'Enter folder name:',
+      confirmText: 'Create',
+      cancelText: 'Cancel',
+    });
     if (folderName) {
       // Create new folder
       console.log('Create folder:', folderName, 'in', contextMenu.node.path);
@@ -186,7 +197,13 @@ export default function FileTreeExplorer() {
 
   const handleRename = async () => {
     if (!contextMenu) return;
-    const newName = prompt('Enter new name:', contextMenu.node.name);
+    const newName = await openPromptDialog({
+      title: 'Rename',
+      message: 'Enter new name:',
+      defaultValue: contextMenu.node.name,
+      confirmText: 'Rename',
+      cancelText: 'Cancel',
+    });
     if (newName) {
       // Rename file/folder
       console.log('Rename:', contextMenu.node.path, 'to', newName);
@@ -196,7 +213,12 @@ export default function FileTreeExplorer() {
 
   const handleDelete = async () => {
     if (!contextMenu) return;
-    if (confirm(`Delete ${contextMenu.node.name}?`)) {
+    if (await openConfirmDialog({
+      title: 'Delete item',
+      message: `Delete ${contextMenu.node.name}?`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    })) {
       // Delete file/folder
       console.log('Delete:', contextMenu.node.path);
     }

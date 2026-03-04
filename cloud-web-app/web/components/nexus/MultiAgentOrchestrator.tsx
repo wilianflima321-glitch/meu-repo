@@ -12,8 +12,25 @@ interface AgentStreamMessage {
   status: 'pending' | 'streaming' | 'complete' | 'error'
 }
 
+type ReadyEnvelope = {
+  type: 'ready'
+  taskId: string
+  selectedAgents: string[]
+  timestamp: number
+  mode?: string
+  capability?: string
+  capabilityStatus?: string
+  disclaimer?: string
+  coordination?: {
+    nonOverlappingScopes?: boolean
+    applyGate?: string
+    executionOrder?: string[]
+    selectedScopes?: Array<{ role: string; scope: string }>
+  }
+}
+
 type StreamEnvelope =
-  | ({ type: 'ready'; taskId: string; selectedAgents: string[]; timestamp: number } & Record<string, unknown>)
+  | ReadyEnvelope
   | ({ type: 'complete'; taskId: string; timestamp: number } & Record<string, unknown>)
   | ({ type: 'error'; error: string; taskId?: string; timestamp?: number } & Record<string, unknown>)
   | AgentStreamMessage
@@ -64,6 +81,9 @@ export default function MultiAgentOrchestrator() {
   const [messages, setMessages] = useState<AgentStreamMessage[]>([])
   const [selectedAgents, setSelectedAgents] = useState(['architect', 'designer', 'engineer'])
   const [streamError, setStreamError] = useState<string | null>(null)
+  const [runtimeMode, setRuntimeMode] = useState<'heuristic' | 'provider-backed' | 'unknown'>('unknown')
+  const [runtimeDisclaimer, setRuntimeDisclaimer] = useState<string | null>(null)
+  const [coordinationHint, setCoordinationHint] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const agentOptions = [
@@ -93,6 +113,9 @@ export default function MultiAgentOrchestrator() {
     setIsStreaming(true)
     setMessages([])
     setStreamError(null)
+    setRuntimeMode('unknown')
+    setRuntimeDisclaimer(null)
+    setCoordinationHint(null)
 
     const controller = new AbortController()
     abortControllerRef.current = controller
@@ -105,6 +128,7 @@ export default function MultiAgentOrchestrator() {
           prompt,
           agents: selectedAgents,
           priority: 'high',
+          executionMode: 'heuristic',
         }),
         signal: controller.signal,
       })
@@ -143,6 +167,27 @@ export default function MultiAgentOrchestrator() {
             const envelopeType = (payload as { type?: string }).type
 
             if (envelopeType === 'ready') {
+              const readyPayload = payload as ReadyEnvelope
+              setRuntimeMode(
+                readyPayload.mode === 'provider-backed'
+                  ? 'provider-backed'
+                  : readyPayload.mode === 'heuristic'
+                    ? 'heuristic'
+                    : 'unknown'
+              )
+              setRuntimeDisclaimer(readyPayload.disclaimer || null)
+              if (readyPayload.coordination?.nonOverlappingScopes) {
+                const ordered = (readyPayload.coordination.executionOrder || [])
+                  .map((value) => value.toUpperCase())
+                  .join(' -> ')
+                setCoordinationHint(
+                  ordered
+                    ? `No-overlap enabled. Execution order: ${ordered}. Apply gate: reviewer required.`
+                    : 'No-overlap enabled with reviewer-required apply gate.'
+                )
+              } else {
+                setCoordinationHint(null)
+              }
               continue
             }
             if (envelopeType === 'complete') {
@@ -175,8 +220,8 @@ export default function MultiAgentOrchestrator() {
   return (
     <div className="flex h-full flex-col space-y-4 overflow-y-auto bg-zinc-950 p-6 text-zinc-100">
       <div className="mb-1 flex items-center gap-3">
-        <div className="rounded-lg border border-purple-500/30 bg-purple-600/20 p-2">
-          <Zap className="text-purple-400" size={20} />
+        <div className="rounded-lg border border-blue-500/30 bg-blue-600/20 p-2">
+          <Zap className="text-blue-400" size={20} />
         </div>
         <div>
           <h2 className="text-lg font-bold uppercase tracking-wider">Multi-Agent Orchestrator</h2>
@@ -194,6 +239,17 @@ export default function MultiAgentOrchestrator() {
         </div>
       )}
 
+      {runtimeMode === 'heuristic' && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-100">
+          <div className="mb-1 flex items-center gap-2 font-semibold">
+            <AlertCircle size={14} />
+            Heuristic mode (PARTIAL capability)
+          </div>
+          <p>{runtimeDisclaimer || 'Outputs are advisory and still require deterministic validation before apply.'}</p>
+          {coordinationHint && <p className="mt-1 text-amber-200/90">{coordinationHint}</p>}
+        </div>
+      )}
+
       <div className="space-y-2">
         <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Select Agents</label>
         <div className="flex flex-wrap gap-2">
@@ -208,7 +264,7 @@ export default function MultiAgentOrchestrator() {
               }
               className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
                 selectedAgents.includes(agent.id)
-                  ? 'border-purple-500/50 bg-purple-600/30 text-purple-300'
+                  ? 'border-blue-500/50 bg-blue-600/30 text-blue-200'
                   : 'border-zinc-700/50 bg-zinc-800/50 text-zinc-500 hover:text-zinc-300'
               }`}
               aria-pressed={selectedAgents.includes(agent.id)}
@@ -220,7 +276,7 @@ export default function MultiAgentOrchestrator() {
       </div>
 
       <form onSubmit={handleStream} className="relative group">
-        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-20 blur transition duration-500 group-focus-within:opacity-50" />
+        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 opacity-20 blur transition duration-500 group-focus-within:opacity-50" />
         <div className="relative flex items-center rounded-xl border border-zinc-800 bg-zinc-900 p-2 pl-4">
           <input
             type="text"
@@ -244,7 +300,7 @@ export default function MultiAgentOrchestrator() {
             <button
               type="submit"
               disabled={!prompt.trim() || selectedAgents.length === 0}
-              className="ml-2 rounded-lg bg-purple-600 p-2 text-white transition-all hover:bg-purple-500 disabled:opacity-50"
+              className="ml-2 rounded-lg bg-blue-600 p-2 text-white transition-all hover:bg-blue-500 disabled:opacity-50"
               aria-label="Start stream"
             >
               <Send size={18} />
@@ -256,8 +312,8 @@ export default function MultiAgentOrchestrator() {
       <div className="flex-1 space-y-4 overflow-y-auto">
         {messages.length === 0 && !isStreaming && !streamError && (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-purple-500/30 bg-purple-600/20">
-              <Zap className="text-purple-400" />
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-500/30 bg-blue-600/20">
+              <Zap className="text-blue-400" />
             </div>
             <h3 className="mb-2 font-semibold text-zinc-100">Orchestration Ready</h3>
             <p className="max-w-xs text-sm text-zinc-500">
@@ -273,7 +329,7 @@ export default function MultiAgentOrchestrator() {
           >
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-400">{message.agentType}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">{message.agentType}</span>
                 {message.status === 'complete' && <CheckCircle size={12} className="text-emerald-500" />}
                 {message.status === 'streaming' && <Loader2 size={12} className="animate-spin text-blue-500" />}
                 {message.status === 'error' && <AlertCircle size={12} className="text-red-500" />}
@@ -291,7 +347,7 @@ export default function MultiAgentOrchestrator() {
 
         {isStreaming && (
           <div className="flex animate-pulse items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-            <Loader2 size={14} className="animate-spin text-purple-500" />
+            <Loader2 size={14} className="animate-spin text-blue-500" />
             <span className="text-xs font-medium text-zinc-400">Agents orchestrating...</span>
           </div>
         )}

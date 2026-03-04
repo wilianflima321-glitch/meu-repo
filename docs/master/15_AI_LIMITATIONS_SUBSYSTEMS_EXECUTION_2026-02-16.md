@@ -161,7 +161,7 @@ Scope: games + films + apps, sem mudanca de escopo de negocio
 
 ## 7) Backlog imediato para manter viabilidade
 P0:
-1. Fechar causa raiz de warning `revalidateTag` (`localhost:undefined`).
+1. Manter warning inventory sob controle operacional (baseline atual: apenas fallback de Docker sandbox em ambiente local sem daemon).
 2. Publicar checklist de ambiente minimo (Upstash, Docker/runtime, providers).
 3. Congelar matriz factual L1-L5 e colaboracao em `13/14` com status atual.
 

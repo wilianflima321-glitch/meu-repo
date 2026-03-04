@@ -332,9 +332,15 @@ export class ConsentManager {
   private async emitConsentEvent(eventType: string, data: any): Promise<void> {
     // Emit to observability system (OTel)
     try {
-      await fetch('/api/telemetry/event', {
+      const endpoint =
+        typeof window === 'undefined'
+          ? `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/telemetry/event`
+          : '/api/telemetry/event'
+
+      await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
         body: JSON.stringify({
           type: eventType,
           timestamp: new Date().toISOString(),

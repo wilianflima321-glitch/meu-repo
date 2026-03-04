@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
 import {
@@ -19,7 +20,6 @@ import {
   TrendingUp,
   Users,
   X,
-  Zap,
   Brain,
 } from 'lucide-react'
 
@@ -89,9 +89,13 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
       >
         <div className="flex h-12 items-center justify-between border-b border-zinc-800 px-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded bg-gradient-to-br from-blue-600 to-cyan-600">
-              <Zap className="h-3.5 w-3.5 text-white" />
-            </div>
+            <Image
+              src="/branding/aethel-icon-source.png"
+              alt="Aethel"
+              width={28}
+              height={28}
+              className="rounded"
+            />
             <div>
               <p className="text-xs font-semibold text-zinc-100">Aethel Ops</p>
               <p className="text-[10px] text-zinc-500">Operations</p>

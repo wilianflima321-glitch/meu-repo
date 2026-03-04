@@ -24,8 +24,8 @@ const CONFIG = {
     '/',
     '/offline',
     '/manifest.json',
-    '/favicon.svg',
-    '/aethel-logo.svg',
+    '/icons/favicon.ico',
+    '/branding/aethel-icon-source.png',
   ],
   
   // Padrões de URL para diferentes estratégias de cache
@@ -380,8 +380,8 @@ self.addEventListener('push', (event) => {
   
   const options = {
     body: data.body || 'Aethel Engine notification',
-    icon: '/aethel-logo.svg',
-    badge: '/favicon.svg',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-72x72.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/',

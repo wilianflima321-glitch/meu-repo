@@ -18,9 +18,7 @@
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export type TrackType = 
   | 'camera'
@@ -165,9 +163,7 @@ export interface FadeClipData {
   color?: string;
 }
 
-// ============================================================================
 // EASING FUNCTIONS
-// ============================================================================
 
 const easingFunctions: Record<EasingType, (t: number) => number> = {
   linear: (t) => t,
@@ -187,9 +183,7 @@ const easingFunctions: Record<EasingType, (t: number) => number> = {
   },
 };
 
-// ============================================================================
 // CUTSCENE PLAYER
-// ============================================================================
 
 export interface CutsceneState {
   isPlaying: boolean;
@@ -666,9 +660,7 @@ export class CutscenePlayer extends EventEmitter {
   }
 }
 
-// ============================================================================
 // CUTSCENE AUDIO MANAGER
-// ============================================================================
 
 class CutsceneAudioManager {
   private audioContext: AudioContext | null = null;
@@ -768,9 +760,7 @@ class CutsceneAudioManager {
   }
 }
 
-// ============================================================================
 // CUTSCENE BUILDER
-// ============================================================================
 
 export class CutsceneBuilder {
   private definition: Partial<CutsceneDefinition> = {
@@ -1014,9 +1004,7 @@ export class CutsceneBuilder {
   }
 }
 
-// ============================================================================
 // CUTSCENE MANAGER
-// ============================================================================
 
 export class CutsceneManager extends EventEmitter {
   private definitions: Map<string, CutsceneDefinition> = new Map();
@@ -1090,9 +1078,7 @@ export class CutsceneManager extends EventEmitter {
   }
 }
 
-// ============================================================================
 // REACT HOOKS
-// ============================================================================
 
 import { useState, useRef, useEffect, useContext, createContext, useCallback } from 'react';
 

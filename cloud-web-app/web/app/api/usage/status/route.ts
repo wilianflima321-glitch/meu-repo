@@ -27,7 +27,12 @@ export async function GET(req: NextRequest) {
             limit: status.usage.tokensLimit,
             remaining: status.usage.tokensRemaining,
             percentUsed: status.usage.percentUsed,
-          }
+          },
+          requestsToday: {
+            used: status.usage.requestsUsedToday,
+            limit: status.usage.requestsDailyLimit,
+            remaining: status.usage.requestsDailyRemaining,
+          },
         },
         limits: {
           tokensPerMonth: status.limits.tokensPerMonth,

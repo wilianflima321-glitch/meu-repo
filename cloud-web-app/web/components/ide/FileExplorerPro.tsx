@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import Codicon, { type CodiconName } from './Codicon'
 
 // ============= Types =============
@@ -123,6 +123,21 @@ function FileTreeNode({
       <button
         onClick={() => isFolder ? onToggle(node.id) : onSelect(node)}
         onContextMenu={(e) => onContextMenu(e, node)}
+        onKeyDown={(event) => {
+          if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+            event.preventDefault()
+            const target = event.currentTarget
+            const rect = target.getBoundingClientRect()
+            onContextMenu(
+              {
+                preventDefault: () => {},
+                clientX: Math.round(rect.left + 8),
+                clientY: Math.round(rect.top + rect.height + 4),
+              } as React.MouseEvent,
+              node
+            )
+          }
+        }}
         className={`
           w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
           hover:bg-white/5 active:bg-white/10 transition-colors
@@ -186,6 +201,9 @@ interface ContextMenuProps {
 }
 
 function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [menuPosition, setMenuPosition] = useState({ left: x, top: y })
   const isFolder = file.type === 'folder'
   
   const menuItems = [
@@ -197,6 +215,60 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
     { id: 'rename', label: 'Rename', icon: 'edit' as CodiconName },
     { id: 'delete', label: 'Delete', icon: 'trash' as CodiconName, danger: true },
   ]
+  const actionableItems = menuItems.filter((item) => !item.divider)
+
+  useEffect(() => {
+    const activeButton = menuRef.current?.querySelector<HTMLButtonElement>(`button[data-action-index="${activeIndex}"]`)
+    activeButton?.focus()
+  }, [activeIndex])
+
+  useEffect(() => {
+    const menu = menuRef.current
+    if (!menu || typeof window === 'undefined') return
+    const width = menu.offsetWidth || 192
+    const height = menu.offsetHeight || 120
+    const margin = 8
+
+    const maxLeft = Math.max(margin, window.innerWidth - width - margin)
+    const maxTop = Math.max(margin, window.innerHeight - height - margin)
+
+    setMenuPosition({
+      left: Math.max(margin, Math.min(x, maxLeft)),
+      top: Math.max(margin, Math.min(y, maxTop)),
+    })
+  }, [x, y, menuItems.length])
+
+  const activateActionAtIndex = useCallback((index: number) => {
+    const item = actionableItems[index]
+    if (!item?.id) return
+    onAction(item.id)
+    onClose()
+  }, [actionableItems, onAction, onClose])
+
+  const handleMenuKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      onClose()
+      return
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveIndex((prev) => (prev + 1) % actionableItems.length)
+      return
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveIndex((prev) => (prev - 1 + actionableItems.length) % actionableItems.length)
+      return
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      activateActionAtIndex(activeIndex)
+    }
+  }, [activateActionAtIndex, actionableItems.length, activeIndex, onClose])
 
   return (
     <>
@@ -208,29 +280,43 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
       
       {/* Menu */}
       <div
+        ref={menuRef}
+        role="menu"
+        aria-label={`Context actions for ${file.name}`}
+        onKeyDown={handleMenuKeyDown}
         className="fixed z-50 min-w-48 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl"
-        style={{ left: x, top: y }}
+        style={{ left: menuPosition.left, top: menuPosition.top }}
       >
-        {menuItems.map((item, i) => (
-          item.divider ? (
-            <div key={`divider-${i}`} className="my-1 border-t border-slate-700" />
-          ) : (
-            <button
-              key={item.id}
-              onClick={() => {
-                onAction(item.id!)
-                onClose()
-              }}
-              className={`
-                w-full flex items-center gap-2 px-3 py-1.5 text-xs
-                ${item.danger ? 'text-red-400 hover:bg-red-500/20' : 'text-slate-300 hover:bg-slate-700'}
-              `}
-            >
-              {item.icon && <Codicon name={item.icon} />}
-              <span className="flex-1 text-left">{item.label}</span>
-            </button>
-          )
-        ))}
+        {(() => {
+          let actionPointer = -1
+          return menuItems.map((item, i) => {
+            if (item.divider) {
+              return <div key={`divider-${i}`} className="my-1 border-t border-slate-700" />
+            }
+            actionPointer += 1
+            const actionIndex = actionPointer
+            return (
+              <button
+                key={item.id}
+                role="menuitem"
+                data-action-index={actionIndex}
+                tabIndex={actionIndex === activeIndex ? 0 : -1}
+                onMouseEnter={() => setActiveIndex(actionIndex)}
+                onClick={() => {
+                  onAction(item.id!)
+                  onClose()
+                }}
+                className={`
+                  w-full flex items-center gap-2 px-3 py-1.5 text-xs
+                  ${item.danger ? 'text-red-400 hover:bg-red-500/20' : 'text-slate-300 hover:bg-slate-700'}
+                `}
+              >
+                {item.icon && <Codicon name={item.icon} />}
+                <span className="flex-1 text-left">{item.label}</span>
+              </button>
+            )
+          })
+        })()}
       </div>
     </>
   )
@@ -257,6 +343,7 @@ export default function FileExplorerPro({
   const [internalFiles, setInternalFiles] = useState<FileNode[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<{
     x: number
     y: number
@@ -290,6 +377,7 @@ export default function FileExplorerPro({
           : []
       const mapped = tree.map(mapWorkspaceNode)
       setInternalFiles(mapped)
+      setLastSyncAt(new Date().toISOString())
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : 'Erro ao carregar arquivos')
       setInternalFiles([])
@@ -328,6 +416,17 @@ export default function FileExplorerPro({
     e.preventDefault()
     setContextMenu({ x: e.clientX, y: e.clientY, file })
   }, [])
+
+  useEffect(() => {
+    if (!contextMenu) return
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setContextMenu(null)
+      }
+    }
+    window.addEventListener('keydown', onEscape)
+    return () => window.removeEventListener('keydown', onEscape)
+  }, [contextMenu])
 
   // Handle context menu action
   const handleAction = useCallback((action: string) => {
@@ -391,6 +490,7 @@ export default function FileExplorerPro({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowSearch(!showSearch)}
+            aria-label="Toggle file search"
             className={`p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${showSearch ? 'text-blue-300' : 'text-slate-400'}`}
             title="Search Files"
           >
@@ -398,6 +498,7 @@ export default function FileExplorerPro({
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'file')}
+            aria-label="Create new file"
             className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="New File"
           >
@@ -405,6 +506,7 @@ export default function FileExplorerPro({
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'folder')}
+            aria-label="Create new folder"
             className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="New Folder"
           >
@@ -412,6 +514,7 @@ export default function FileExplorerPro({
           </button>
           <button
             onClick={handleRefresh}
+            aria-label="Refresh workspace files"
             className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
             title="Refresh"
           >
@@ -419,6 +522,11 @@ export default function FileExplorerPro({
           </button>
         </div>
       </div>
+      {lastSyncAt && (
+        <div className="px-2 py-1 border-b border-slate-800 text-[10px] text-slate-500" aria-live="polite">
+          Last sync: {new Date(lastSyncAt).toLocaleTimeString()}
+        </div>
+      )}
 
       {/* Search */}
       {showSearch && (
@@ -440,15 +548,22 @@ export default function FileExplorerPro({
       {/* File Tree */}
       <div className="flex-1 overflow-y-auto py-1">
         {effectiveError && (
-          <div className="px-3 py-2 text-xs text-red-400">
-            {effectiveError}
+          <div className="px-3 py-2">
+            <div className="aethel-state aethel-state-error text-xs" role="alert" aria-live="polite">
+              {effectiveError}
+            </div>
           </div>
         )}
         {effectiveLoading && !effectiveError && (
-          <div className="px-3 py-2 text-xs text-slate-500 space-y-1.5">
-            <div className="h-3 rounded bg-slate-800/80 aethel-shimmer" />
-            <div className="h-3 rounded bg-slate-800/70 aethel-shimmer" />
-            <div className="h-3 rounded bg-slate-800/60 aethel-shimmer" />
+          <div className="px-3 py-2" aria-live="polite">
+            <div className="aethel-state aethel-state-loading text-xs">
+              <p className="aethel-state-title mb-2">Loading workspace tree...</p>
+              <div className="space-y-1.5">
+                <div className="aethel-skeleton-line w-full" />
+                <div className="aethel-skeleton-line w-5/6" />
+                <div className="aethel-skeleton-line w-2/3" />
+              </div>
+            </div>
           </div>
         )}
         {filteredFiles.map(node => (
@@ -465,8 +580,11 @@ export default function FileExplorerPro({
         ))}
         
         {filteredFiles.length === 0 && searchQuery && (
-          <div className="text-center py-8 text-slate-500 text-sm">
-            No files matching {`"${searchQuery}"`}
+          <div className="px-3 py-3">
+            <div className="aethel-state aethel-state-empty text-center text-xs">
+              <p className="aethel-state-title mb-1">No files matching this search</p>
+              <p>{`"${searchQuery}"`}</p>
+            </div>
           </div>
         )}
         {filteredFiles.length === 0 && !searchQuery && !effectiveLoading && !effectiveError && (

@@ -1,5 +1,5 @@
 # 00_INDEX
-Date: 2026-02-28
+Date: 2026-03-03
 Status: CANONICAL ENTRYPOINT
 
 ## Read Order (Required)
@@ -21,6 +21,16 @@ Status: CANONICAL ENTRYPOINT
 16. `docs/master/29_AUDITORIA_360_P0_HUNT_2026-02-28.md`
 17. `docs/master/30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md`
 18. `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
+19. `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
+20. `docs/master/15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
+21. `docs/master/16_AI_GAMES_FILMS_APPS_SUBSYSTEM_BLUEPRINT_2026-02-16.md`
+22. `docs/master/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
+23. `docs/master/8_ADMIN_SYSTEM_SPEC.md`
+24. `docs/master/9_BACKEND_SYSTEM_SPEC.md`
+25. `docs/master/AI_SYSTEM_SPEC.md`
+26. `docs/master/LIMITATIONS.md`
+27. `docs/master/WORKBENCH_SPEC.md`
+28. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -48,6 +58,8 @@ Status: CANONICAL ENTRYPOINT
 | `29_AUDITORIA_360_P0_HUNT_2026-02-28.md` | Critical 360 audit & P0 hunt | ACTIVE |
 | `30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md` | Final state & roadmap | ACTIVE |
 | `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md` | Executive gap reality + closure order | ACTIVE |
+| `32_GLOBAL_GAP_REGISTER_2026-03-01.md` | Repo-wide factual gap register | ACTIVE |
+| `33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md` | L4/L5 core-loop promotion program | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -62,7 +74,7 @@ Status: CANONICAL ENTRYPOINT
 | `8_ADMIN_SYSTEM_SPEC.md` | Admin scope | ACTIVE |
 | `9_BACKEND_SYSTEM_SPEC.md` | Backend scope | ACTIVE |
 
-## Current Factual Snapshot (2026-02-28)
+## Current Factual Snapshot (2026-03-03)
 - Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
   - `legacy-accent-tokens=0`
   - `admin-light-theme-tokens=0`
@@ -74,7 +86,7 @@ Status: CANONICAL ENTRYPOINT
   - `npm run qa:canonical-doc-alignment` passes.
   - Broken root path references and tracked `.venv` artifacts were removed.
 - Structural debt still open:
-  - very large monolithic files (notably `components/AethelDashboard.tsx`),
+  - very large monolithic files in engine/media modules (dashboard shell now bounded by gate),
   - high markdown volume outside `docs/master`,
   - orphan-candidate top-level folders not in runtime-critical flow.
 - UX-market gap debt still open (tracked in `31`):
@@ -82,6 +94,18 @@ Status: CANONICAL ENTRYPOINT
   - onboarding first-value flow,
   - mobile readiness for entry surfaces,
   - product telemetry coverage.
+- Delta 2026-03-03:
+  - `qa:interface-gate` is green again after closing the mismatch (`not-implemented-ui=6`, gate limit `6`),
+  - static accessibility baseline gate now operational (`npm run qa:wcag-critical`),
+  - dashboard shell integrity gate now operational (`npm run qa:dashboard-shell`) with `AethelDashboard.tsx <= 1200` + no direct `@xyflow/react` coupling,
+  - global gap register now confirms active blocking dialogs at `0` (`docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`),
+  - collaboration readiness now includes stress-proof attachment workflow (`/api/admin/collaboration/evidence/stress-proof`) before promotion eligibility,
+  - dashboard first-load bundle pressure reduced in current build profile (`/dashboard` ~495kB -> ~174kB) after runtime-split hardening,
+  - route-level web-vitals instrumentation added (`FCP/LCP/CLS/TTI`) via `components/analytics/WebVitalsReporter.tsx`,
+  - first-value onboarding rail extracted from `AethelDashboard` into `components/dashboard/FirstValueGuide.tsx`,
+  - plan quota precision improved (daily requests now read from canonical day bucket; usage APIs expose `requestsToday`),
+  - global gap scanner added (`npm run qa:global-gap-scan`) with canonical output in `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`,
+  - L4/L5 promotion roadmap locked in `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

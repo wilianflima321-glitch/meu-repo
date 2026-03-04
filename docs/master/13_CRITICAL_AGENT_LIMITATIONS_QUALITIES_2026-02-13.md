@@ -648,3 +648,8 @@ Leitura crítica:
 1. A plataforma mantém contratos visuais/route gates importantes, mas ainda carrega risco operacional de repositório.
 2. O próximo ganho real de qualidade é reduzir dívida estrutural e não criar novas superfícies.
 3. Claims de maturidade devem permanecer bloqueados enquanto conectividade/base de build não estiver limpa.
+
+## Delta 2026-03-03 IX - hard gate inventory and warning profile
+1. Explicit API `NOT_IMPLEMENTED` inventory moved to `0` in active scope after billing runtime-gate normalization (`PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE`, `503`, `PARTIAL`).
+2. Remaining local build warning profile is currently bounded to Docker sandbox fallback only.
+3. Limitation that remains: capability state is still `PARTIAL` in multiple core-loop/runtime areas and cannot be promoted to L4/L5 without evidence thresholds.

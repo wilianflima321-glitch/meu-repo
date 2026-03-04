@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
 // ============================================================================
 // PROJECT PERSISTENCE SYSTEM (Premiere Pro / DaVinci style)
@@ -365,11 +366,11 @@ interface ProjectContextValue {
   error: string | null
   
   // Actions
-  newProject: (name: string, settings?: Partial<ProjectSettings>) => void
+  newProject: (name: string, settings?: Partial<ProjectSettings>) => Promise<void>
   openProject: () => Promise<void>
   saveProject: () => Promise<void>
   saveProjectAs: () => Promise<void>
-  closeProject: () => void
+  closeProject: () => Promise<void>
   
   // Updates
   updateMetadata: (updates: Partial<ProjectMetadata>) => void
@@ -426,13 +427,19 @@ export function ProjectProvider({
     
     // Check for autosave recovery
     const autosave = loadAutosave()
-    if (autosave) {
-      const shouldRecover = confirm('An autosaved project was found. Would you like to recover it?')
-      if (shouldRecover) {
-        setProject(autosave)
-        clearAutosave()
-      }
-    }
+    if (!autosave) return
+
+    void (async () => {
+      const shouldRecover = await openConfirmDialog({
+        title: 'Recover autosave',
+        message: 'An autosaved project was found. Would you like to recover it?',
+        confirmText: 'Recover',
+        cancelText: 'Ignore',
+      })
+      if (!shouldRecover) return
+      setProject(autosave)
+      clearAutosave()
+    })()
   }, [])
   
   // Autosave
@@ -491,9 +498,14 @@ export function ProjectProvider({
     }
   }), [])
   
-  const newProject = useCallback((name: string, settings?: Partial<ProjectSettings>) => {
+  const newProject = useCallback(async (name: string, settings?: Partial<ProjectSettings>) => {
     if (isDirty) {
-      const confirmed = confirm('You have unsaved changes. Create new project anyway?')
+      const confirmed = await openConfirmDialog({
+        title: 'Unsaved changes',
+        message: 'You have unsaved changes. Create new project anyway?',
+        confirmText: 'Create new',
+        cancelText: 'Keep editing',
+      })
       if (!confirmed) return
     }
     
@@ -506,7 +518,12 @@ export function ProjectProvider({
   
   const openProject = useCallback(async () => {
     if (isDirty) {
-      const confirmed = confirm('You have unsaved changes. Open another project anyway?')
+      const confirmed = await openConfirmDialog({
+        title: 'Unsaved changes',
+        message: 'You have unsaved changes. Open another project anyway?',
+        confirmText: 'Open project',
+        cancelText: 'Keep editing',
+      })
       if (!confirmed) return
     }
     
@@ -565,9 +582,14 @@ export function ProjectProvider({
     await saveProject()
   }, [project, saveProject])
   
-  const closeProject = useCallback(() => {
+  const closeProject = useCallback(async () => {
     if (isDirty) {
-      const confirmed = confirm('You have unsaved changes. Close anyway?')
+      const confirmed = await openConfirmDialog({
+        title: 'Unsaved changes',
+        message: 'You have unsaved changes. Close anyway?',
+        confirmText: 'Close',
+        cancelText: 'Keep editing',
+      })
       if (!confirmed) return
     }
     
@@ -693,7 +715,12 @@ export function ProjectProvider({
   
   const openRecentProject = useCallback(async (projectId: string) => {
     if (isDirty) {
-      const confirmed = confirm('You have unsaved changes. Open another project anyway?')
+      const confirmed = await openConfirmDialog({
+        title: 'Unsaved changes',
+        message: 'You have unsaved changes. Open another project anyway?',
+        confirmText: 'Open project',
+        cancelText: 'Keep editing',
+      })
       if (!confirmed) return
     }
     

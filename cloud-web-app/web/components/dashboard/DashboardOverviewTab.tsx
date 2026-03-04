@@ -1,10 +1,24 @@
-import * as THREE from 'three'
+import dynamic from 'next/dynamic'
 
 import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
 
 import type { Project } from './aethel-dashboard-model'
-import LivePreview from '../LivePreview'
+
+const LivePreview = dynamic(() => import('../LivePreview'), {
+  ssr: false,
+  loading: () => (
+    <div className="aethel-state aethel-state-loading">
+      <p className="aethel-state-title">Carregando previa 3D...</p>
+    </div>
+  ),
+})
+
+type Point3 = {
+  x: number
+  y: number
+  z: number
+}
 
 type DashboardOverviewTabProps = {
   aiActivity: string
@@ -26,7 +40,7 @@ type DashboardOverviewTabProps = {
   formatConnectivityStatus: (status?: string | null) => string
   miniPreviewExpanded: boolean
   onToggleMiniPreviewExpanded: () => void
-  onMagicWandSelect: (position: THREE.Vector3) => void
+  onMagicWandSelect: (position: Point3) => void
   onSendSuggestion: (suggestion: string) => Promise<void>
   isGenerating: boolean
 }

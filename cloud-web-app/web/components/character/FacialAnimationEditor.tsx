@@ -5,9 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
-// ============================================================================
 // TYPES & INTERFACES
-// ============================================================================
 
 interface FacialAnimationEditorProps {
   characterId: string
@@ -50,9 +48,7 @@ interface BlendShapeCategory {
   shapes: string[]
 }
 
-// ============================================================================
 // ARKIT 52 BLEND SHAPES - ORGANIZED BY CATEGORY
-// ============================================================================
 
 const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   {
@@ -145,9 +141,7 @@ const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   },
 ]
 
-// ============================================================================
 // EMOTION PRESETS
-// ============================================================================
 
 const EMOTION_PRESETS: EmotionPreset[] = [
   {
@@ -239,9 +233,7 @@ const EMOTION_PRESETS: EmotionPreset[] = [
   },
 ]
 
-// ============================================================================
 // VISEMES FOR LIP SYNC
-// ============================================================================
 
 const VISEMES: Viseme[] = [
   {
@@ -321,9 +313,7 @@ const VISEMES: Viseme[] = [
   },
 ]
 
-// ============================================================================
 // FACS ACTION UNITS REFERENCE
-// ============================================================================
 
 const FACS_ACTION_UNITS: FACSActionUnit[] = [
   { au: 'AU1', name: 'Inner Brow Raiser', description: 'Raises inner portion of eyebrows', relatedBlendShapes: ['browInnerUp'] },
@@ -352,9 +342,7 @@ const FACS_ACTION_UNITS: FACSActionUnit[] = [
   { au: 'AU45', name: 'Blink', description: 'Closes eyelids', relatedBlendShapes: ['eyeBlinkLeft', 'eyeBlinkRight'] },
 ]
 
-// ============================================================================
 // SUBCOMPONENT: BlendShapeSlider
-// ============================================================================
 
 interface BlendShapeSliderProps {
   name: string
@@ -395,9 +383,7 @@ const BlendShapeSlider: React.FC<BlendShapeSliderProps> = React.memo(({ name, va
 
 BlendShapeSlider.displayName = 'BlendShapeSlider'
 
-// ============================================================================
 // SUBCOMPONENT: EmotionPresetButton
-// ============================================================================
 
 interface EmotionPresetButtonProps {
   preset: EmotionPreset
@@ -422,9 +408,7 @@ const EmotionPresetButton: React.FC<EmotionPresetButtonProps> = React.memo(({ pr
 
 EmotionPresetButton.displayName = 'EmotionPresetButton'
 
-// ============================================================================
 // SUBCOMPONENT: AudioWaveform
-// ============================================================================
 
 interface AudioWaveformProps {
   audioData: number[]
@@ -495,9 +479,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = React.memo(({ audioData, dur
 
 AudioWaveform.displayName = 'AudioWaveform'
 
-// ============================================================================
 // SUBCOMPONENT: LipSyncTimeline
-// ============================================================================
 
 interface LipSyncTimelineProps {
   keyframes: LipSyncKeyframe[]
@@ -651,9 +633,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
 
 LipSyncTimeline.displayName = 'LipSyncTimeline'
 
-// ============================================================================
 // SUBCOMPONENT: FACSReference
-// ============================================================================
 
 interface FACSReferenceProps {
   onSelectAU: (blendShapes: string[]) => void
@@ -737,9 +717,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
 
 FACSReference.displayName = 'FACSReference'
 
-// ============================================================================
 // SUBCOMPONENT: FacePreview3D
-// ============================================================================
 
 interface FacePreview3DProps {
   blendShapes: BlendShapeValues
@@ -915,9 +893,7 @@ const FacePreview3D: React.FC<FacePreview3DProps> = React.memo(({ blendShapes })
 
 FacePreview3D.displayName = 'FacePreview3D'
 
-// ============================================================================
 // MAIN COMPONENT: FacialAnimationEditor
-// ============================================================================
 
 const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
   characterId,

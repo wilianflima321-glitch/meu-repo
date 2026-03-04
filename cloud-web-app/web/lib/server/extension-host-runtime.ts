@@ -1,17 +1,4 @@
-/**
- * Aethel Engine - Extension Host Runtime
- * 
- * Runtime para execução de extensões em processo isolado.
- * Baseado na arquitetura do VS Code Extension Host.
- * 
- * Features:
- * - Worker thread isolation
- * - Extension API sandboxing
- * - IPC messaging
- * - Extension lifecycle management
- * - Activation events
- * - Contribution points
- */
+// Extension host runtime with worker isolation and sandboxed extension execution.
 
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { EventEmitter } from 'events';

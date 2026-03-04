@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Codicon from './Codicon'
+import { analytics } from '@/lib/analytics'
 
 interface PreviewPanelProps {
   title?: string
@@ -10,6 +11,9 @@ interface PreviewPanelProps {
   content?: string
   html?: string
   projectId?: string
+  runtimeUrl?: string
+  forceInlineFallback?: boolean
+  runtimeUnavailableReason?: string
   isStale?: boolean
   onRefresh?: () => void
 }
@@ -229,10 +233,15 @@ export default function PreviewPanel({
   content,
   html,
   projectId,
+  runtimeUrl,
+  forceInlineFallback = false,
+  runtimeUnavailableReason,
   isStale = false,
   onRefresh,
 }: PreviewPanelProps) {
   const [mediaLoadError, setMediaLoadError] = useState<string | null>(null)
+  const [runtimeReloadTick, setRuntimeReloadTick] = useState(0)
+  const runtimeTelemetryRef = useRef<string>('')
   const ext = getExtension(filePath)
   const mode = useMemo(() => resolvePreviewMode(filePath), [filePath])
   const textContent = typeof content === 'string' ? content : typeof html === 'string' ? html : ''
@@ -253,6 +262,7 @@ export default function PreviewPanel({
     if (!filePath || (mode !== 'image' && mode !== 'audio' && mode !== 'video')) return ''
     const params = new URLSearchParams()
     params.set('path', filePath)
+    params.set('intent', 'preview')
     if (projectId) params.set('projectId', projectId)
     return `/api/files/raw?${params.toString()}`
   }, [filePath, mode, projectId])
@@ -260,12 +270,43 @@ export default function PreviewPanel({
   const showIframeRuntime =
     !isLargeTextPreview &&
     (mode === 'html' || mode === 'markdown' || mode === 'css' || mode === 'javascript' || mode === 'typescript')
+  const canUseDevRuntime =
+    !!runtimeUrl &&
+    !forceInlineFallback &&
+    !isLargeTextPreview &&
+    (mode === 'html' || mode === 'css' || mode === 'javascript' || mode === 'typescript')
+  const runtimeSrc = useMemo(() => {
+    if (!runtimeUrl) return ''
+    const separator = runtimeUrl.includes('?') ? '&' : '?'
+    return `${runtimeUrl}${separator}aethel_preview_tick=${runtimeReloadTick}`
+  }, [runtimeReloadTick, runtimeUrl])
   const showText = !isLargeTextPreview && (mode === 'json' || mode === 'text')
   const showMedia = mode === 'image' || mode === 'audio' || mode === 'video'
 
   useEffect(() => {
     setMediaLoadError(null)
   }, [rawAssetUrl, mode, filePath])
+
+  useEffect(() => {
+    const runtimeMode =
+      canUseDevRuntime
+        ? 'dev-server'
+        : showIframeRuntime
+          ? 'inline-fallback'
+          : 'not-applicable'
+    const key = `${filePath || 'none'}:${mode}:${runtimeMode}`
+    if (runtimeTelemetryRef.current === key) return
+    runtimeTelemetryRef.current = key
+
+    analytics?.track?.('engine', 'render_time', {
+      metadata: {
+        surface: 'preview-panel',
+        filePath: filePath || null,
+        mode,
+        runtimeMode,
+      },
+    })
+  }, [canUseDevRuntime, filePath, mode, showIframeRuntime])
 
   return (
     <div className="h-full flex flex-col bg-slate-950">
@@ -285,6 +326,24 @@ export default function PreviewPanel({
           <span className="text-[10px] text-slate-500 normal-case">
             mode:{mode}
           </span>
+          {canUseDevRuntime && (
+            <span className="text-[10px] text-emerald-300 normal-case px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+              runtime:dev-server
+            </span>
+          )}
+          {!canUseDevRuntime && showIframeRuntime && (
+            <span className="text-[10px] text-amber-300 normal-case px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+              runtime:inline-fallback
+            </span>
+          )}
+          {forceInlineFallback && runtimeUrl && (
+            <span
+              className="text-[10px] text-rose-300 normal-case px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/20"
+              title={runtimeUnavailableReason || 'Runtime unavailable'}
+            >
+              runtime:unavailable
+            </span>
+          )}
           {isStale && (
             <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] normal-case">
               Preview out of date
@@ -292,8 +351,11 @@ export default function PreviewPanel({
           )}
         </div>
         <button
-          onClick={onRefresh}
-          disabled={!onRefresh}
+          onClick={() => {
+            if (canUseDevRuntime) setRuntimeReloadTick((prev) => prev + 1)
+            onRefresh?.()
+          }}
+          disabled={!onRefresh && !canUseDevRuntime}
           aria-label="Refresh preview panel"
           className="flex items-center gap-1 px-2 py-1 rounded text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/5 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
           title="Refresh preview"
@@ -304,11 +366,26 @@ export default function PreviewPanel({
       </div>
 
       <div className="flex-1 bg-slate-900">
-        {showIframeRuntime && hasText && (
+        {forceInlineFallback && runtimeUrl && (
+          <div className="aethel-state aethel-state-loading rounded-none border-x-0 border-t-0 text-[11px]">
+            External runtime unavailable. Inline fallback active.
+            {runtimeUnavailableReason ? ` reason: ${runtimeUnavailableReason}.` : ''}
+          </div>
+        )}
+        {canUseDevRuntime && (
+          <iframe
+            title="Aethel Preview Runtime Server"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            className="w-full h-full bg-slate-950"
+            src={runtimeSrc}
+          />
+        )}
+
+        {!canUseDevRuntime && showIframeRuntime && hasText && (
           <iframe
             title="Aethel Preview Runtime"
             sandbox="allow-scripts"
-            className="w-full h-full bg-white"
+            className="w-full h-full bg-slate-950"
             srcDoc={runtimeDoc}
           />
         )}
@@ -354,10 +431,10 @@ export default function PreviewPanel({
 
         {showMedia && mediaLoadError && (
           <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
-            <div className="max-w-lg rounded border border-amber-500/30 bg-amber-500/10 px-4 py-3">
-              <div className="mb-2 font-medium text-amber-200">Media preview unavailable</div>
-              <div className="text-slate-300 text-xs">{mediaLoadError}</div>
-              <div className="mt-2 text-slate-500 text-xs">
+            <div className="aethel-state aethel-state-error max-w-lg">
+              <div className="aethel-state-title mb-2">Media preview unavailable</div>
+              <div className="text-xs">{mediaLoadError}</div>
+              <div className="mt-2 text-xs">
                 Capability status: PARTIAL. Validate media codec/runtime support in final target environment.
               </div>
             </div>
@@ -366,9 +443,9 @@ export default function PreviewPanel({
 
         {mode === 'unsupported' && (
           <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
-            <div className="max-w-md rounded border border-slate-700 bg-slate-950/40 px-4 py-3">
-              <div className="mb-2 font-medium text-slate-300">Preview unsupported for this file type</div>
-              <div className="text-slate-500 text-xs">
+            <div className="aethel-state aethel-state-empty max-w-md">
+              <div className="aethel-state-title mb-2">Preview unsupported for this file type</div>
+              <div className="text-xs">
                 Extension &quot;{ext || 'unknown'}&quot; is outside the validated runtime preview scope.
               </div>
             </div>
@@ -377,12 +454,12 @@ export default function PreviewPanel({
 
         {isLargeTextPreview && (
           <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
-            <div className="max-w-lg rounded border border-amber-500/30 bg-amber-500/10 px-4 py-3">
-              <div className="mb-2 font-medium text-amber-200">Preview gated for large payload</div>
-              <div className="text-slate-300 text-xs">
+            <div className="aethel-state aethel-state-loading max-w-lg">
+              <div className="aethel-state-title mb-2">Preview gated for large payload</div>
+              <div className="text-xs">
                 This file exceeds the validated inline preview limit ({MAX_INLINE_PREVIEW_CHARS.toLocaleString()} chars).
               </div>
-              <div className="mt-2 text-slate-500 text-xs">
+              <div className="mt-2 text-xs">
                 Capability status: PARTIAL. Use runtime execution or open a smaller scoped file.
               </div>
             </div>
@@ -391,9 +468,9 @@ export default function PreviewPanel({
 
         {!hasText && !showMedia && mode !== 'unsupported' && (
           <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
-            <div>
-              <div className="mb-2 font-medium text-slate-300">Preview not available</div>
-              <div className="text-slate-500">
+            <div className="aethel-state aethel-state-empty">
+              <div className="aethel-state-title mb-2">Preview not available</div>
+              <div className="text-xs">
                 Open a file in Explorer to render preview.
               </div>
             </div>
@@ -402,9 +479,9 @@ export default function PreviewPanel({
 
         {showMedia && !rawAssetUrl && (
           <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
-            <div>
-              <div className="mb-2 font-medium text-slate-300">Media preview unavailable</div>
-              <div className="text-slate-500">Missing media source path for this preview context.</div>
+            <div className="aethel-state aethel-state-empty">
+              <div className="aethel-state-title mb-2">Media preview unavailable</div>
+              <div className="text-xs">Missing media source path for this preview context.</div>
             </div>
           </div>
         )}

@@ -160,6 +160,46 @@
   --aethel-z-toast: 1080;
 }
 
+[data-aethel-theme='light'],
+[data-theme='light'],
+[data-theme='hc-light'],
+html.light {
+  --aethel-primary: #2563eb;
+  --aethel-primary-dark: #1d4ed8;
+  --aethel-primary-light: #3b82f6;
+  --aethel-primary-50: #eff6ff;
+  --aethel-primary-900: #1e3a8a;
+
+  --aethel-secondary: #e11d48;
+  --aethel-secondary-dark: #be123c;
+  --aethel-secondary-light: #f43f5e;
+
+  --aethel-accent: #0f766e;
+  --aethel-accent-dark: #115e59;
+  --aethel-accent-light: #14b8a6;
+
+  --aethel-surface-primary: #f5f7fb;
+  --aethel-surface-secondary: #ffffff;
+  --aethel-surface-tertiary: #eef2f7;
+  --aethel-surface-quaternary: #e2e8f0;
+  --aethel-surface-elevated: #ffffff;
+
+  --aethel-text-primary: #0f172a;
+  --aethel-text-secondary: #334155;
+  --aethel-text-tertiary: #475569;
+  --aethel-text-quaternary: #64748b;
+  --aethel-text-muted: #94a3b8;
+
+  --aethel-border-subtle: rgba(15, 23, 42, 0.08);
+  --aethel-border-primary: rgba(15, 23, 42, 0.14);
+  --aethel-border-secondary: rgba(15, 23, 42, 0.2);
+  --aethel-border-focus: #2563eb;
+
+  --aethel-gradient-primary: linear-gradient(135deg, #2563eb 0%, #0891b2 50%, #0f766e 100%);
+  --aethel-gradient-subtle: linear-gradient(180deg, rgba(37, 99, 235, 0.08) 0%, transparent 100%);
+  --aethel-gradient-glow: radial-gradient(ellipse at center, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+}
+
 /* ===== Global Styles ===== */
 * {
   box-sizing: border-box;
@@ -183,6 +223,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--aethel-surface-primary);
   min-height: 100vh;
+}
+
+[data-aethel-theme='light'] body,
+[data-theme='light'] body,
+[data-theme='hc-light'] body,
+html.light body {
+  color: var(--aethel-text-primary);
+  background: var(--aethel-surface-primary);
 }
 
 /* Selection styles */
@@ -415,6 +463,71 @@ code, pre {
   box-shadow: var(--aethel-shadow-sm);
 }
 
+.aethel-state {
+  border: 1px solid var(--aethel-border-primary);
+  border-radius: var(--aethel-radius-lg);
+  background: var(--aethel-surface-secondary);
+  color: var(--aethel-text-secondary);
+  padding: var(--aethel-space-3) var(--aethel-space-4);
+  font-size: var(--aethel-font-size-sm);
+}
+
+.aethel-state-title {
+  color: var(--aethel-text-primary);
+  font-weight: var(--aethel-font-weight-semibold);
+}
+
+.aethel-state-loading {
+  border-color: rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.aethel-state-error {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+}
+
+.aethel-state-success {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+  color: #a7f3d0;
+}
+
+[data-aethel-theme='light'] .aethel-state-error,
+[data-theme='light'] .aethel-state-error,
+[data-theme='hc-light'] .aethel-state-error,
+html.light .aethel-state-error {
+  color: #991b1b;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+[data-aethel-theme='light'] .aethel-state-success,
+[data-theme='light'] .aethel-state-success,
+[data-theme='hc-light'] .aethel-state-success,
+html.light .aethel-state-success {
+  color: #065f46;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.aethel-state-empty {
+  border-style: dashed;
+  color: var(--aethel-text-tertiary);
+}
+
+.aethel-skeleton-line {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0.16));
+  background-size: 200% 100%;
+  animation: aethel-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes aethel-skeleton-pulse {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
+
 .aethel-sidebar {
   background-color: var(--aethel-surface-secondary);
   border-right: 1px solid var(--aethel-border-primary);
@@ -537,13 +650,15 @@ code, pre {
 /* ===== Responsive Design ===== */
 @media (max-width: 768px) {
   .aethel-sidebar {
-    width: 100%;
-    height: auto;
+    width: min(88vw, 360px);
+    height: 100dvh;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
     transform: translateX(-100%);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    overscroll-behavior: contain;
   }
 
   .aethel-sidebar.open {

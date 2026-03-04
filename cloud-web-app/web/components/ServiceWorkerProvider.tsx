@@ -193,7 +193,7 @@ export function InstallPrompt() {
     <div className="fixed bottom-4 left-4 z-[9999] max-w-sm">
       <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4">
         <div className="flex items-center gap-3">
-          <Image src="/aethel-logo.svg" alt="" width={40} height={40} className="w-10 h-10" />
+          <Image src="/branding/aethel-icon-source.png" alt="" width={40} height={40} className="w-10 h-10 rounded-lg" />
           <div className="flex-1">
             <p className="text-sm font-medium text-white">
               Instalar Aethel Engine

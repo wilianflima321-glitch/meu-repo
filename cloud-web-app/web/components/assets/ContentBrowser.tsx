@@ -43,6 +43,7 @@ import {
   Zap,
 } from 'lucide-react';
 import AssetPreviewPanel from './AssetPreviewPanel';
+import { openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
 
 // ============================================================================
 // TYPES
@@ -604,7 +605,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
     setContextMenu({ x: e.clientX, y: e.clientY, asset });
   }, []);
 
-  const handleContextAction = useCallback((action: string) => {
+  const handleContextAction = useCallback(async (action: string) => {
     if (!contextMenu?.asset) return;
     const { asset } = contextMenu;
 
@@ -613,7 +614,13 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
         onAssetDelete?.(asset);
         break;
       case 'rename':
-        const newName = prompt('Novo nome:', asset.name);
+        const newName = await openPromptDialog({
+          title: 'Renomear asset',
+          message: 'Novo nome:',
+          defaultValue: asset.name,
+          confirmText: 'Renomear',
+          cancelText: 'Cancelar',
+        });
         if (newName) onAssetRename?.(asset, newName);
         break;
       case 'duplicate':

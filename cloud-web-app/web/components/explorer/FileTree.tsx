@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFileExplorerManager, FileNode } from '../../lib/explorer/file-explorer-manager';
 import { getThemeManager } from '../../lib/themes/theme-manager';
+import { openConfirmDialog, openPromptDialog } from '../../lib/ui/non-blocking-dialogs';
 
 interface FileTreeProps {
   onFileSelect?: (path: string) => void;
@@ -253,18 +254,29 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
   };
 
   const handleDelete = async () => {
-    if (confirm(`Delete ${path}?`)) {
-      try {
-        await explorerManager.deleteFiles([path]);
-        onAction();
-      } catch (error) {
-        console.error('Delete failed:', error);
-      }
+    const shouldDelete = await openConfirmDialog({
+      title: 'Delete item',
+      message: `Delete ${path}?`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
+    try {
+      await explorerManager.deleteFiles([path]);
+      onAction();
+    } catch (error) {
+      console.error('Delete failed:', error);
     }
   };
 
-  const handleRename = () => {
-    const newName = prompt('New name:', path.split('/').pop());
+  const handleRename = async () => {
+    const newName = await openPromptDialog({
+      title: 'Rename item',
+      message: 'New name:',
+      defaultValue: path.split('/').pop() ?? '',
+      confirmText: 'Rename',
+      cancelText: 'Cancel',
+    });
     if (newName) {
       explorerManager.renameFile(path, newName);
       onAction();

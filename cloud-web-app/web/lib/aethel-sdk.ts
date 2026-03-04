@@ -11,6 +11,8 @@
  *   aethel.render.start({ scene: 'main.blend' });
  */
 
+import { openSdkModalDialog, openSdkModalPrompt } from '@/lib/ui/sdk-modal-dialogs';
+
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
@@ -452,16 +454,24 @@ const webAdapter = {
     window: {
         showInformationMessage: async (message: string, options?: MessageOptions): Promise<string | undefined> => {
             if (options?.modal) {
-                return new Promise(resolve => {
-                    if (options.items?.length) {
-                        // Show buttons
-                        const result = window.confirm(message + '\n\n' + options.detail);
-                        resolve(result ? options.items[0] : undefined);
-                    } else {
-                        window.alert(message);
-                        resolve(undefined);
-                    }
+                if (options.items?.length) {
+                    const result = await openSdkModalDialog({
+                        title: 'Information',
+                        message,
+                        detail: options.detail,
+                        confirmText: options.items[0] || 'Confirm',
+                        cancelText: options.items[1] || 'Cancel',
+                    });
+                    return result ? options.items[0] : undefined;
+                }
+                await openSdkModalDialog({
+                    title: 'Information',
+                    message,
+                    detail: options.detail,
+                    confirmText: 'OK',
+                    showCancel: false,
                 });
+                return undefined;
             }
             
             showToast(message, 'info');
@@ -470,7 +480,13 @@ const webAdapter = {
         
         showWarningMessage: async (message: string, options?: MessageOptions): Promise<string | undefined> => {
             if (options?.modal) {
-                const result = window.confirm(message);
+                const result = await openSdkModalDialog({
+                    title: 'Warning',
+                    message,
+                    detail: options.detail,
+                    confirmText: options.items?.[0] || 'Confirm',
+                    cancelText: options.items?.[1] || 'Cancel',
+                });
                 return result ? options?.items?.[0] : undefined;
             }
             
@@ -480,7 +496,13 @@ const webAdapter = {
         
         showErrorMessage: async (message: string, options?: MessageOptions): Promise<string | undefined> => {
             if (options?.modal) {
-                window.alert(message);
+                await openSdkModalDialog({
+                    title: 'Error',
+                    message,
+                    detail: options.detail,
+                    confirmText: 'OK',
+                    showCancel: false,
+                });
             } else {
                 showToast(message, 'error', 8000);
             }
@@ -559,10 +581,7 @@ const webAdapter = {
         },
         
         showInputBox: async (options: InputBoxOptions): Promise<string | undefined> => {
-            return new Promise(resolve => {
-                const result = window.prompt(options.prompt || options.title || 'Input', options.value || '');
-                resolve(result || undefined);
-            });
+            return openSdkModalPrompt(options.prompt || options.title || 'Input', options.value || '', options.title || 'Input');
         },
         
         showOpenDialog: async (options: OpenDialogOptions): Promise<string[] | undefined> => {
@@ -591,8 +610,7 @@ const webAdapter = {
         },
         
         showSaveDialog: async (options: SaveDialogOptions): Promise<string | undefined> => {
-            const name = window.prompt(options.title || 'Save as', options.defaultUri || '');
-            return name || undefined;
+            return openSdkModalPrompt(options.title || 'Save as', options.defaultUri || '', options.title || 'Save');
         },
         
         withProgress: async <T>(

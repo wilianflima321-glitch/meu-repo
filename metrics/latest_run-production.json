@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-03-04T16:39:09.878Z",
+  "windowHours": 168,
+  "sampleClass": "production",
+  "sampleSize": 0,
+  "totals": {
+    "rows": 0,
+    "applyRuns": 0,
+    "applySuccess": 0,
+    "applyBlocked": 0,
+    "applyFailed": 0,
+    "rollbackSuccess": 0,
+    "rollbackBlocked": 0,
+    "rollbackFailed": 0,
+    "sandboxApplyRuns": 0,
+    "workspaceApplyRuns": 0
+  },
+  "metrics": {
+    "apply_success_rate": 0,
+    "blocked_rate": 0,
+    "regression_rate": 0,
+    "sandbox_coverage": 0,
+    "workspace_coverage": 0
+  },
+  "diagnostics": {
+    "regressionSignals": [],
+    "runSourceCounts": [],
+    "lastEventAt": null
+  }
+}

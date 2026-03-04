@@ -62,8 +62,14 @@ const resolveFirstValidEnvValue = (keys) => {
 
 const clearIpcEnv = () => {
   for (const key of [...IPC_PORT_ENV_KEYS, ...IPC_KEY_ENV_KEYS]) {
+    process.env[key] = ''
     delete process.env[key]
   }
+  // Defensive: Next internals sometimes read these keys after config normalization.
+  process.env.__NEXT_INCREMENTAL_CACHE_IPC_PORT = ''
+  process.env.__NEXT_INCREMENTAL_CACHE_IPC_KEY = ''
+  process.env.__NEXT_PRIVATE_INCREMENTAL_CACHE_IPC_PORT = ''
+  process.env.__NEXT_PRIVATE_INCREMENTAL_CACHE_IPC_KEY = ''
 }
 
 const ipcPortRaw = resolveFirstValidEnvValue(IPC_PORT_ENV_KEYS)

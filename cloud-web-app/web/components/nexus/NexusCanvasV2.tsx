@@ -54,9 +54,53 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [stats, setStats] = useState({ fps: 0, objects: 0 });
 
+  // Carregar objetos da cena
+  const loadSceneObjects = useCallback((scene: THREE.Scene, objects: SceneObject[]) => {
+    objects.forEach((obj) => {
+      let threeObj: THREE.Object3D | null = null;
+
+      switch (obj.type) {
+        case 'mesh':
+          const geometry = new THREE.BoxGeometry(1, 1, 1);
+          const material = new THREE.MeshStandardMaterial({
+            color: obj.material?.color || '#ffffff',
+            metalness: obj.material?.metalness || 0.5,
+            roughness: obj.material?.roughness || 0.5,
+          });
+          threeObj = new THREE.Mesh(geometry, material);
+          break;
+
+        case 'light':
+          threeObj = new THREE.PointLight(0xffffff, 1, 100);
+          break;
+
+        case 'particle':
+          const particleGeometry = new THREE.BufferGeometry();
+          const particleCount = 1000;
+          const positions = new Float32Array(particleCount * 3);
+          for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 100;
+          }
+          particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+          const particleMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
+          threeObj = new THREE.Points(particleGeometry, particleMaterial);
+          break;
+      }
+
+      if (threeObj) {
+        threeObj.position.set(...obj.position);
+        threeObj.rotation.set(...obj.rotation);
+        threeObj.scale.set(...obj.scale);
+        scene.add(threeObj);
+        objectsRef.current.set(obj.id, threeObj);
+      }
+    });
+  }, []);
+
   // Inicializar a cena 3D
   useEffect(() => {
     if (!containerRef.current || isInitialized) return;
+    const containerElement = containerRef.current;
 
     // Criar cena
     const scene = new THREE.Scene();
@@ -66,7 +110,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     // Criar câmera
     const camera = new THREE.PerspectiveCamera(
       75,
-      containerRef.current.clientWidth / containerRef.current.clientHeight,
+      containerElement.clientWidth / containerElement.clientHeight,
       0.1,
       10000
     );
@@ -80,11 +124,11 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
       alpha: true,
       powerPreference: renderMode === 'cinematic' ? 'high-performance' : 'default',
     });
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setSize(containerElement.clientWidth, containerElement.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
-    containerRef.current.appendChild(renderer.domElement);
+    containerElement.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
     // Adicionar iluminação
@@ -150,54 +194,11 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (containerRef.current && rendererRef.current) {
-        containerRef.current.removeChild(rendererRef.current.domElement);
+      if (rendererRef.current && rendererRef.current.domElement.parentElement === containerElement) {
+        containerElement.removeChild(rendererRef.current.domElement);
       }
     };
-  }, [isInitialized, renderMode]);
-
-  // Carregar objetos da cena
-  const loadSceneObjects = (scene: THREE.Scene, objects: SceneObject[]) => {
-    objects.forEach((obj) => {
-      let threeObj: THREE.Object3D | null = null;
-
-      switch (obj.type) {
-        case 'mesh':
-          const geometry = new THREE.BoxGeometry(1, 1, 1);
-          const material = new THREE.MeshStandardMaterial({
-            color: obj.material?.color || '#ffffff',
-            metalness: obj.material?.metalness || 0.5,
-            roughness: obj.material?.roughness || 0.5,
-          });
-          threeObj = new THREE.Mesh(geometry, material);
-          break;
-
-        case 'light':
-          threeObj = new THREE.PointLight(0xffffff, 1, 100);
-          break;
-
-        case 'particle':
-          const particleGeometry = new THREE.BufferGeometry();
-          const particleCount = 1000;
-          const positions = new Float32Array(particleCount * 3);
-          for (let i = 0; i < particleCount * 3; i++) {
-            positions[i] = (Math.random() - 0.5) * 100;
-          }
-          particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-          const particleMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
-          threeObj = new THREE.Points(particleGeometry, particleMaterial);
-          break;
-      }
-
-      if (threeObj) {
-        threeObj.position.set(...obj.position);
-        threeObj.rotation.set(...obj.rotation);
-        threeObj.scale.set(...obj.scale);
-        scene.add(threeObj);
-        objectsRef.current.set(obj.id, threeObj);
-      }
-    });
-  };
+  }, [initialScene, isInitialized, loadSceneObjects, renderMode]);
 
   // Adicionar novo objeto à cena
   const addObject = useCallback((obj: SceneObject) => {

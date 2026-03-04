@@ -30,6 +30,7 @@ export default function APIs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [compatError, setCompatError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'configured' | 'missing'>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -58,6 +59,7 @@ export default function APIs() {
       setCompatRoutes(Array.isArray(compatData?.routes) ? compatData.routes : []);
       setRemovalCandidates(Array.isArray(compatData?.removalCandidates) ? compatData.removalCandidates : []);
       setCompatError(null);
+      setStatusMessage('Integracoes atualizadas com sucesso.');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao carregar integracoes';
       if (message.includes('compatibilidade')) {
@@ -65,6 +67,7 @@ export default function APIs() {
       } else {
         setError(message);
       }
+      setStatusMessage(null);
     } finally {
       setLoading(false);
     }
@@ -92,8 +95,7 @@ export default function APIs() {
     missing: integrations.filter((integration) => !integration.configured).length,
   };
 
-  const aiProvidersMissing = integrations.filter((integration) => {
-    if (integration.configured) return false;
+  const isAIProviderIntegration = (integration: Integration) => {
     const name = integration.name.toLowerCase();
     const key = integration.envKey.toLowerCase();
     return (
@@ -108,7 +110,10 @@ export default function APIs() {
       key.includes('google') ||
       key.includes('groq')
     );
-  });
+  };
+  const aiProviderIntegrations = integrations.filter(isAIProviderIntegration);
+  const aiProvidersMissing = aiProviderIntegrations.filter((integration) => !integration.configured);
+  const hasConfiguredAIProvider = aiProviderIntegrations.some((integration) => integration.configured);
 
   return (
     <div className='p-6 max-w-6xl mx-auto'>
@@ -122,6 +127,7 @@ export default function APIs() {
         </div>
         <button
           onClick={fetchIntegrations}
+          aria-label='Atualizar status de integracoes'
           className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm hover:bg-zinc-700/80'
         >
           Atualizar
@@ -129,8 +135,13 @@ export default function APIs() {
       </div>
 
       {error && (
-        <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
+        <div className='aethel-state aethel-state-error mb-4' role='alert' aria-live='polite'>
           {error}
+        </div>
+      )}
+      {statusMessage && !error && (
+        <div className='aethel-state aethel-state-success mb-4' role='status' aria-live='polite'>
+          {statusMessage}
         </div>
       )}
 
@@ -140,7 +151,7 @@ export default function APIs() {
             <div>
               <p className='text-sm font-semibold text-amber-200'>AI provider setup pendente</p>
               <p className='text-xs text-amber-100/90'>
-                Configure pelo menos um provider para liberar chat, complete e inline edit sem gate `NOT_IMPLEMENTED`.
+                Configure pelo menos um provider para liberar chat, complete e inline edit sem bloqueio de capability.
               </p>
             </div>
             <span className='inline-flex rounded bg-amber-500/20 px-2 py-1 text-xs text-amber-100'>
@@ -161,6 +172,26 @@ export default function APIs() {
           </div>
         </div>
       )}
+
+      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
+        <h2 className='text-sm font-semibold text-zinc-200'>AI Provider Setup Quick Check</h2>
+        <div className='mt-3 space-y-2 text-xs'>
+          <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+            <span className='text-zinc-400'>1. Pelo menos um provider configurado</span>
+            <span className={hasConfiguredAIProvider ? 'text-emerald-300' : 'text-amber-300'}>
+              {hasConfiguredAIProvider ? 'OK' : 'PENDENTE'}
+            </span>
+          </div>
+          <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+            <span className='text-zinc-400'>2. Runtime reiniciado após mudança de variáveis</span>
+            <span className='text-zinc-500'>manual</span>
+          </div>
+          <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+            <span className='text-zinc-400'>3. Validação de endpoint (`/api/ai/chat-advanced`)</span>
+            <span className='text-zinc-500'>use /ide chat</span>
+          </div>
+        </div>
+      </div>
 
       <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
         <div className='text-center'>
@@ -187,6 +218,7 @@ export default function APIs() {
           placeholder='Buscar por nome ou ambiente'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          aria-label='Buscar integrações por nome ou chave de ambiente'
           className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full md:max-w-sm text-zinc-100 placeholder:text-zinc-500'
         />
         <div className='flex items-center gap-2'>
@@ -194,6 +226,7 @@ export default function APIs() {
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
+              aria-pressed={statusFilter === status}
               className={`px-3 py-1 rounded text-xs font-semibold ${
                 statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
               }`}
@@ -204,7 +237,7 @@ export default function APIs() {
         </div>
       </div>
 
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
+      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow overflow-hidden' aria-busy={loading}>
         <thead>
           <tr className='bg-zinc-800/70 text-sm'>
             <th className='p-2 text-left'>Nome</th>
@@ -216,13 +249,17 @@ export default function APIs() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={4}>Carregando integracoes...</td>
+              <td className='p-2' colSpan={4}>
+                <div className='aethel-state aethel-state-loading text-xs'>
+                  <p className='aethel-state-title mb-2'>Carregando integracoes...</p>
+                  <div className='space-y-1.5'>
+                    <div className='aethel-skeleton-line w-full' />
+                    <div className='aethel-skeleton-line w-5/6' />
+                  </div>
+                </div>
+              </td>
             </tr>
-          ) : filteredIntegrations.length === 0 ? (
-            <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={4}>Nenhuma integracao encontrada com os filtros atuais.</td>
-            </tr>
-          ) : (
+          ) : filteredIntegrations.length === 0 ? null : (
             filteredIntegrations.map((integration) => (
               <tr key={integration.id} className='border-t border-zinc-800/70'>
                 <td className='p-2'>{integration.name}</td>
@@ -244,6 +281,11 @@ export default function APIs() {
           )}
         </tbody>
       </table>
+      {!loading && filteredIntegrations.length === 0 && !error && (
+        <div className='aethel-state aethel-state-empty mt-3'>
+          Nenhuma integração corresponde ao filtro atual.
+        </div>
+      )}
 
       <p className='mt-4 text-xs text-zinc-500'>
         Operacao esperada: status configurado deve refletir chave valida no ambiente de execucao e disponibilidade do provedor.
@@ -255,11 +297,17 @@ export default function APIs() {
           <span className='text-xs text-zinc-500'>Telemetria operacional</span>
         </div>
         {compatError ? (
-          <div className='rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>{compatError}</div>
+          <div className='aethel-state aethel-state-error text-sm' role='alert' aria-live='polite'>{compatError}</div>
         ) : loading ? (
-          <p className='text-sm text-zinc-500'>Carregando metricas de deprecacao...</p>
+          <div className='aethel-state aethel-state-loading text-xs'>
+            <p className='aethel-state-title mb-2'>Carregando metricas de deprecacao...</p>
+            <div className='space-y-1.5'>
+              <div className='aethel-skeleton-line w-full' />
+              <div className='aethel-skeleton-line w-4/5' />
+            </div>
+          </div>
         ) : compatRoutes.length === 0 ? (
-          <p className='text-sm text-zinc-500'>Sem eventos de rota legada registrados no periodo atual.</p>
+          <div className='aethel-state aethel-state-empty text-xs'>Sem eventos de rota legada registrados no periodo atual.</div>
         ) : (
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>

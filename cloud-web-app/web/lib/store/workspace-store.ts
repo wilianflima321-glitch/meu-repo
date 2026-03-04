@@ -1,17 +1,8 @@
-/**
- * Aethel IDE - Global Workspace Store (Zustand)
- * 
- * Gerenciamento centralizado de estado para a IDE completa.
- * Similar ao modelo usado pelo VS Code internamente.
- */
 
 import { create } from 'zustand';
 import { persist, devtools, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export type EditorTabType = 
   | 'code' 
@@ -202,57 +193,40 @@ export interface QuickFix {
   };
 }
 
-// ============================================================================
-// WORKSPACE STORE
-// ============================================================================
 
 interface WorkspaceStore {
-  // Workspace
   workspacePath: string | null;
   workspaceName: string;
   recentWorkspaces: string[];
   
-  // Editor Groups (split editor support)
   editorGroups: EditorGroup[];
   activeGroupId: string;
   
-  // Layout
   layout: LayoutState;
   
-  // File Explorer
   fileTree: FileSystemEntry | null;
   selectedPaths: string[];
   
-  // Search
   search: SearchState;
   
-  // Debug
   debug: DebugState;
   
-  // Git
   git: GitState;
   
-  // Problems
   problems: Problem[];
   
-  // Notifications
   notifications: NotificationItem[];
   
-  // Terminal sessions
   terminalSessions: string[];
   activeTerminalId: string | null;
   
-  // Settings
   settings: Record<string, any>;
   
-  // Extensions
   enabledExtensions: string[];
   
-  // Actions - Workspace
   setWorkspace: (path: string, name: string) => void;
   addRecentWorkspace: (path: string) => void;
   
-  // Actions - Editor
   openFile: (path: string, options?: { preview?: boolean; type?: EditorTabType }) => void;
   closeFile: (tabId: string, groupId?: string) => void;
   closeAllFiles: (groupId?: string) => void;
@@ -264,7 +238,6 @@ interface WorkspaceStore {
   moveTab: (tabId: string, fromGroupId: string, toGroupId: string, index: number) => void;
   saveTabViewState: (tabId: string, viewState: any) => void;
   
-  // Actions - Editor Groups (Split Editor)
   splitEditorRight: () => void;
   splitEditorDown: () => void;
   closeEditorGroup: (groupId: string) => void;
@@ -272,7 +245,6 @@ interface WorkspaceStore {
   focusNextGroup: () => void;
   focusPreviousGroup: () => void;
   
-  // Actions - Layout
   toggleSidebar: () => void;
   togglePanel: () => void;
   setSidebarTab: (tab: string) => void;
@@ -283,19 +255,16 @@ interface WorkspaceStore {
   toggleFocusMode: () => void;
   maximizePanel: () => void;
   
-  // Actions - File Explorer
   setFileTree: (tree: FileSystemEntry) => void;
   toggleDirectory: (path: string) => void;
   selectFile: (path: string, multi?: boolean) => void;
   refreshFileTree: () => Promise<void>;
   
-  // Actions - Search
   setSearchQuery: (query: string) => void;
   setSearchOptions: (options: Partial<SearchState>) => void;
   executeSearch: () => Promise<void>;
   clearSearch: () => void;
   
-  // Actions - Debug
   startDebugging: (configuration: any) => Promise<void>;
   stopDebugging: () => void;
   pauseDebugging: () => void;
@@ -308,7 +277,6 @@ interface WorkspaceStore {
   removeWatch: (id: string) => void;
   clearDebugConsole: () => void;
   
-  // Actions - Git
   refreshGitStatus: () => Promise<void>;
   stageFile: (path: string) => void;
   unstageFile: (path: string) => void;
@@ -318,31 +286,24 @@ interface WorkspaceStore {
   checkout: (branch: string) => Promise<void>;
   createBranch: (name: string) => Promise<void>;
   
-  // Actions - Problems
   setProblems: (problems: Problem[]) => void;
   addProblem: (problem: Problem) => void;
   removeProblem: (id: string) => void;
   clearProblems: (source?: string) => void;
   
-  // Actions - Notifications
   showNotification: (notification: Omit<NotificationItem, 'id' | 'timestamp'>) => string;
   dismissNotification: (id: string) => void;
   clearNotifications: () => void;
   updateNotificationProgress: (id: string, progress: number) => void;
   
-  // Actions - Terminal
   createTerminal: () => string;
   closeTerminal: (id: string) => void;
   setActiveTerminal: (id: string) => void;
   
-  // Actions - Settings
   updateSetting: (key: string, value: any) => void;
   resetSettings: () => void;
 }
 
-// ============================================================================
-// DEFAULT VALUES
-// ============================================================================
 
 const defaultLayout: LayoutState = {
   sidebarPosition: 'left',
@@ -395,9 +356,6 @@ const defaultGitState: GitState = {
   hasConflicts: false,
 };
 
-// ============================================================================
-// STORE IMPLEMENTATION
-// ============================================================================
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -426,7 +384,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
     subscribeWithSelector(
       persist(
         immer((set, get) => ({
-          // Initial State
           workspacePath: null,
           workspaceName: 'Aethel Workspace',
           recentWorkspaces: [],
@@ -452,7 +409,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           settings: {},
           enabledExtensions: [],
           
-          // Workspace Actions
           setWorkspace: (path, name) => set(state => {
             state.workspacePath = path;
             state.workspaceName = name;
@@ -463,24 +419,20 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             state.recentWorkspaces = [path, ...filtered].slice(0, 10);
           }),
           
-          // Editor Actions
           openFile: (path, options = {}) => set(state => {
             const { preview = true, type = 'code' } = options;
             const group = state.editorGroups.find(g => g.id === state.activeGroupId);
             if (!group) return;
             
-            // Check if file already open
             const existingTab = group.tabs.find(t => t.path === path);
             if (existingTab) {
               group.activeTabId = existingTab.id;
-              // If clicking on preview, make it permanent
               if (existingTab.preview) {
                 existingTab.preview = false;
               }
               return;
             }
             
-            // Replace preview tab if exists
             const previewIndex = group.tabs.findIndex(t => t.preview && !t.pinned);
             
             const newTab: EditorTab = {
@@ -514,7 +466,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             
             group.tabs.splice(index, 1);
             
-            // Update active tab
             if (group.activeTabId === tabId) {
               const newIndex = Math.min(index, group.tabs.length - 1);
               group.activeTabId = group.tabs[newIndex]?.id || null;
@@ -525,7 +476,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             const group = state.editorGroups.find(g => g.id === (groupId || state.activeGroupId));
             if (!group) return;
             
-            // Keep pinned tabs
             group.tabs = group.tabs.filter(t => t.pinned);
             group.activeTabId = group.tabs[0]?.id || null;
           }),
@@ -545,7 +495,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             const tab = group.tabs.find(t => t.id === tabId);
             if (tab) {
               group.activeTabId = tabId;
-              // Make preview permanent on double-click
               if (tab.preview) {
                 tab.preview = false;
               }
@@ -568,7 +517,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
               if (tab) {
                 tab.pinned = true;
                 tab.preview = false;
-                // Move pinned tabs to front
                 const index = group.tabs.indexOf(tab);
                 const pinnedCount = group.tabs.filter(t => t.pinned && t !== tab).length;
                 group.tabs.splice(index, 1);
@@ -615,7 +563,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             }
           }),
           
-          // Split Editor Actions
           splitEditorRight: () => set(state => {
             const activeGroup = state.editorGroups.find(g => g.id === state.activeGroupId);
             if (!activeGroup || !activeGroup.activeTabId) return;
@@ -693,7 +640,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             state.activeGroupId = state.editorGroups[prevIndex].id;
           }),
           
-          // Layout Actions
           toggleSidebar: () => set(state => {
             state.layout.sidebarVisible = !state.layout.sidebarVisible;
           }),
@@ -747,7 +693,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             state.layout.panelMaximized = !state.layout.panelMaximized;
           }),
           
-          // File Explorer Actions
           setFileTree: (tree) => set(state => {
             state.fileTree = tree;
           }),
@@ -807,7 +752,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             }
           },
           
-          // Search Actions
           setSearchQuery: (query) => set(state => {
             state.search.query = query;
           }),
@@ -869,7 +813,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             state.search = { ...defaultSearchState };
           }),
           
-          // Debug Actions
           startDebugging: async (_configuration) => {
             set(state => {
               state.debug.status = 'running';
@@ -969,7 +912,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             state.debug.console = [];
           }),
           
-          // Git Actions
           refreshGitStatus: async () => {
             const state = get();
             if (!state.workspacePath) return;
@@ -1056,7 +998,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
                 throw new Error(error.message || error.error);
               }
               
-              // Refresh status after commit
               await get().refreshGitStatus();
             } catch (error) {
               console.error('[Git] Commit error:', error);
@@ -1083,7 +1024,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
                 throw new Error(error.message || error.error);
               }
               
-              // Refresh status after checkout
               await get().refreshGitStatus();
               await get().refreshFileTree();
             } catch (error) {
@@ -1111,7 +1051,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
                 throw new Error(error.message || error.error);
               }
               
-              // Refresh status after creating branch
               await get().refreshGitStatus();
             } catch (error) {
               console.error('[Git] Create branch error:', error);
@@ -1119,7 +1058,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             }
           },
           
-          // Problems Actions
           setProblems: (problems) => set(state => {
             state.problems = problems;
           }),
@@ -1143,7 +1081,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             }
           }),
           
-          // Notifications Actions
           showNotification: (notification) => {
             const id = generateId();
             set(state => {
@@ -1174,7 +1111,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             }
           }),
           
-          // Terminal Actions
           createTerminal: () => {
             const id = generateId();
             set(state => {
@@ -1200,7 +1136,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
             }
           }),
           
-          // Settings Actions
           updateSetting: (key, value) => set(state => {
             state.settings[key] = value;
           }),
@@ -1224,9 +1159,6 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
   )
 );
 
-// ============================================================================
-// SELECTORS (for performance optimization)
-// ============================================================================
 
 export const useActiveGroup = () => useWorkspaceStore(state => 
   state.editorGroups.find(g => g.id === state.activeGroupId)

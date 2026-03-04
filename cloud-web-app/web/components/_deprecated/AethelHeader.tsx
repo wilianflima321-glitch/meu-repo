@@ -6,7 +6,7 @@ export default function AethelHeader() {
   return (
     <header className="aethel-container aethel-flex aethel-justify-between aethel-items-center aethel-p-4" role="banner">
       <div className="aethel-flex aethel-items-center aethel-gap-3">
-        <Image src="/aethel-logo.svg" alt="Aethel" width={28} height={28} />
+        <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={28} height={28} className="rounded-md" />
         <Link href="/" className="aethel-button aethel-button-ghost" aria-label="Home">
           Aethel IDE
         </Link>

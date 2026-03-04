@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import ClientLayout from '../components/ClientLayout'
 import { ServiceWorkerProvider } from '../components/ServiceWorkerProvider'
+import WebVitalsReporter from '../components/analytics/WebVitalsReporter'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -55,11 +56,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/favicon.ico', type: 'image/x-icon' },
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
       { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
     ],
     apple: [
-      { url: '/icons/icon-152x152.png', sizes: '152x152' },
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180' },
       { url: '/icons/icon-192x192.png', sizes: '192x192' },
     ],
   },
@@ -77,6 +79,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="antialiased">
         <ServiceWorkerProvider>
+          <WebVitalsReporter />
           <div id="root" className="min-h-screen bg-slate-900 text-slate-100">
             <ClientLayout>
               {children}

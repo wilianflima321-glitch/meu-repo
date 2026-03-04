@@ -17,7 +17,8 @@ import { checkAIQuota, recordTokenUsage, checkModelAccess, checkFeatureAccess, g
 import { prisma } from '@/lib/prisma';
 import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
-import { notImplementedCapability } from '@/lib/server/capability-response';
+import { capabilityResponse } from '@/lib/server/capability-response';
+import { buildAiProviderSetupMetadata } from '@/lib/capability-constants';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -60,6 +61,11 @@ interface AdvancedChatRequest {
 interface ChatResponse {
   message: ChatMessage;
   tokensUsed: number;
+  roleUsage?: {
+    architect?: { model: string; tokensUsed: number; latencyMs?: number };
+    engineer?: { model: string; tokensUsed: number; latencyMs?: number };
+    critic?: { model: string; tokensUsed: number; latencyMs?: number };
+  };
   toolsExecuted?: { name: string; result: ToolResult }[];
   agentExecution?: {
     steps: number;
@@ -110,6 +116,9 @@ const QUALITY_POLICY = {
 - Para UI/UX, prefira padroes de mercado com consistencia de acessibilidade e feedback.
 - Se faltar dado critico, explicite a lacuna antes de concluir.`,
 } as const;
+
+const MAX_HISTORY_CONTEXT_CHARS = 12_000;
+const MAX_ROLE_CONTEXT_CHARS = 16_000;
 
 function buildSelfQuestioningChecklist(): string {
   return [
@@ -251,15 +260,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const availableProviders = aiService.getAvailableProviders();
 
     if (availableProviders.length === 0) {
-      return notImplementedCapability({
-        status: 501,
+      return capabilityResponse({
+        error: 'AI_PROVIDER_NOT_CONFIGURED',
+        status: 503,
         message: 'AI provider not configured.',
         capability: 'AI_CHAT_ADVANCED',
+        capabilityStatus: 'PARTIAL',
         milestone: 'P0',
-        metadata: {
+        metadata: buildAiProviderSetupMetadata({
           mode: 'advanced-chat',
           requestedModel: model,
-        },
+          route: '/api/ai/chat-advanced',
+        }),
       });
     }
 
@@ -337,16 +349,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       const missingProvider = getMissingProviderForModel(model, availableProviders);
       if (missingProvider) {
-        return notImplementedCapability({
-          status: 501,
+        return capabilityResponse({
+          error: 'AI_PROVIDER_NOT_CONFIGURED',
+          status: 503,
           message: `Provider ${missingProvider} not configured for model ${model}.`,
           capability: 'AI_PROVIDER_CONFIG',
+          capabilityStatus: 'PARTIAL',
           milestone: 'P0',
-          metadata: {
+          metadata: buildAiProviderSetupMetadata({
             requestedModel: model,
             expectedProvider: missingProvider,
             availableProviders,
-          },
+            route: '/api/ai/chat-advanced',
+          }),
         });
       }
     } else {
@@ -371,17 +386,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         const missingProvider = getMissingProviderForModel(item.model, availableProviders);
         if (missingProvider) {
-          return notImplementedCapability({
-            status: 501,
+          return capabilityResponse({
+            error: 'AI_PROVIDER_NOT_CONFIGURED',
+            status: 503,
             message: `Provider ${missingProvider} not configured for role ${item.role}.`,
             capability: 'AI_PROVIDER_CONFIG',
+            capabilityStatus: 'PARTIAL',
             milestone: 'P0',
-            metadata: {
+            metadata: buildAiProviderSetupMetadata({
               role: item.role,
               requestedModel: item.model,
               expectedProvider: missingProvider,
               availableProviders,
-            },
+              route: '/api/ai/chat-advanced',
+            }),
           });
         }
       }
@@ -440,46 +458,59 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
 
     // O AIService atual suporta `query(userQuery, context?, options)`.
     // Esta rota mantém a interface "advanced", mas consolida o histórico como contexto.
-    const historyContext = messages
+    const historyContextRaw = messages
       .slice(0, -1)
       .filter((m) => m.role !== 'tool')
       .map((m) => `${m.role}: ${m.content}`)
       .join('\n');
+    const historyContext = clampText(historyContextRaw, MAX_HISTORY_CONTEXT_CHARS);
 
     if (agentCount > 1) {
       const architectModel = normalizeModelName((roleModels?.architect || model).trim());
       const engineerModel = normalizeModelName((roleModels?.engineer || model).trim());
       const criticModel = normalizeModelName((roleModels?.critic || model).trim());
+      const architectContext = historyContext || undefined;
 
-      const architectResult = await aiService.query(lastUserMessage, historyContext || undefined, {
+      const architectResult = await aiService.query(lastUserMessage, architectContext, {
         model: architectModel,
         provider: inferProviderFromModel(architectModel),
-        systemPrompt: `${systemMessage}\n\nROLE: ARQUITETO\nVocê é o Arquiteto. Produza um plano curto, perguntas (máx 3) se necessário, e uma decisão final com 1–3 motivos. Não escreva código.\n\n${qualityInstruction}${benchmarkInstruction}`,
+        systemPrompt: `${systemMessage}\n\nROLE: ARQUITETO\nVoce e o Arquiteto. Entregue SOMENTE:\n- plano objetivo (max 6 bullets)\n- riscos (max 3)\n- criterio de aceite (max 3)\n- perguntas abertas (max 2, apenas se obrigatorias)\nNao escreva codigo e nao responda como usuario final.\n\n${qualityInstruction}${benchmarkInstruction}`,
       });
 
       const architectSnippet = clampText(architectResult.content, 2000);
-
-      const engineerResult = await aiService.query(lastUserMessage, `${historyContext || ''}\n\n=== Arquiteto (interno) ===\n${architectSnippet}`, {
+      const engineerContext = clampText(
+        `${historyContext || ''}\n\n=== Arquiteto (interno) ===\n${architectSnippet}`,
+        MAX_ROLE_CONTEXT_CHARS
+      );
+      const engineerResult = await aiService.query(lastUserMessage, engineerContext, {
         model: engineerModel,
         provider: inferProviderFromModel(engineerModel),
-        systemPrompt: `${systemMessage}\n\nROLE: ENGENHEIRO\nVocê é o Engenheiro. Execute a resposta final para o usuário. Use o plano do Arquiteto apenas como guia interno. Seja direto e entregue.\n\n${qualityInstruction}${benchmarkInstruction}`,
+        systemPrompt: `${systemMessage}\n\nROLE: ENGENHEIRO\nVoce e o Engenheiro executor. Entregue resposta final aplicada ao pedido do usuario.\nRegras:\n- use o plano do Arquiteto como guia interno, sem repetir todo o plano;\n- produza resultado final com passos acionaveis e validacao minima;\n- se houver limitacao real, explicite e proponha contorno pratico.\n\n${qualityInstruction}${benchmarkInstruction}`,
       });
 
       totalTokens = (architectResult.tokensUsed || 0) + (engineerResult.tokensUsed || 0);
       let finalContent = engineerResult.content;
+      let criticTokensUsed = 0;
+      let criticLatencyMs: number | undefined;
 
       let criticSummary: { verdict?: string; bullets?: string[]; raw?: string } | null = null;
       if (agentCount === 3) {
+        const criticContext = clampText(
+          `${historyContext || ''}\n\n=== Arquiteto (interno) ===\n${architectSnippet}\n\n=== Resposta do Engenheiro (interno) ===\n${clampText(engineerResult.content, 2000)}`,
+          MAX_ROLE_CONTEXT_CHARS
+        );
         const criticResult = await aiService.query(
           lastUserMessage,
-          `${historyContext || ''}\n\n=== Arquiteto (interno) ===\n${architectSnippet}\n\n=== Resposta do Engenheiro (interno) ===\n${clampText(engineerResult.content, 2000)}`,
+          criticContext,
           {
             model: criticModel,
             provider: inferProviderFromModel(criticModel),
-            systemPrompt: `${systemMessage}\n\nROLE: CRÍTICO\nVocê é o Crítico (QA). Responda com:\nVEREDITO: ✅/⚠️/❌\n- 1 a 3 bullets de riscos/correções mínimas\nSem debate infinito.\n\n${qualityInstruction}${benchmarkInstruction}`,
+            systemPrompt: `${systemMessage}\n\nROLE: CRITICO\nVoce e o Critico (QA). Nao reescreva a resposta completa.\nResponda somente:\nVEREDITO: PASS|WARN|FAIL\n- 1 a 3 riscos ou ajustes minimos\nSem debate infinito.\n\n${qualityInstruction}${benchmarkInstruction}`,
           }
         );
-        totalTokens += criticResult.tokensUsed || 0;
+        criticTokensUsed = criticResult.tokensUsed || 0;
+        criticLatencyMs = criticResult.latencyMs || undefined;
+        totalTokens += criticTokensUsed;
         criticSummary = summarizeCritic(criticResult.content);
         if (criticSummary?.verdict && (criticSummary.bullets?.length || 0) > 0) {
           finalContent = `${finalContent}\n\nCrítico: ${criticSummary.verdict} ${criticSummary.bullets?.slice(0, 3).join(' ')}`;
@@ -497,6 +528,27 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
       const chatResponse: ChatResponse = {
         message: response,
         tokensUsed: totalTokens,
+        roleUsage: {
+          architect: {
+            model: architectModel,
+            tokensUsed: architectResult.tokensUsed || 0,
+            latencyMs: architectResult.latencyMs || undefined,
+          },
+          engineer: {
+            model: engineerModel,
+            tokensUsed: engineerResult.tokensUsed || 0,
+            latencyMs: engineerResult.latencyMs || undefined,
+          },
+          ...(agentCount === 3
+            ? {
+              critic: {
+                model: criticModel,
+                tokensUsed: criticTokensUsed,
+                latencyMs: criticLatencyMs,
+              },
+            }
+            : {}),
+        },
         toolsExecuted: toolsExecuted.length > 0 ? toolsExecuted : undefined,
         traceId: includeTrace ? traceId : undefined,
         traceSummary: includeTrace
@@ -567,6 +619,13 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
     const chatResponse: ChatResponse = {
       message: response,
       tokensUsed: totalTokens,
+      roleUsage: {
+        engineer: {
+          model,
+          tokensUsed: totalTokens,
+          latencyMs: result.latencyMs || undefined,
+        },
+      },
       toolsExecuted: toolsExecuted.length > 0 ? toolsExecuted : undefined,
       traceId: includeTrace ? traceId : undefined,
       traceSummary: includeTrace
@@ -642,7 +701,7 @@ function clampAgentCount(value: unknown): 1 | 2 | 3 {
 function clampText(text: string, maxChars: number): string {
   const s = String(text || '');
   if (s.length <= maxChars) return s;
-  return s.slice(0, Math.max(0, maxChars - 1)) + '…';
+  return s.slice(0, Math.max(0, maxChars - 3)) + '...';
 }
 
 function inferProviderFromModel(model: string): 'openai' | 'anthropic' | 'google' | undefined {
@@ -669,7 +728,7 @@ function normalizeModelName(model: string): string {
 
 function summarizeCritic(raw: string): { verdict?: string; bullets?: string[]; raw: string } {
   const text = String(raw || '').trim();
-  const verdictMatch = text.match(/VEREDITO\s*:\s*(✅|⚠️|❌)/i);
+  const verdictMatch = text.match(/VEREDITO\s*:\s*(PASS|WARN|FAIL)/i);
   const verdict = verdictMatch?.[1];
   const bullets = text
     .split(/\r?\n/)

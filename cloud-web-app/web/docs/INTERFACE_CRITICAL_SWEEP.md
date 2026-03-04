@@ -1,8 +1,8 @@
 # Interface Critical Sweep
 
-- Generated at: `2026-02-17T14:09:50.672Z`
+- Generated at: `2026-03-04T20:53:01.808Z`
 - Scope: `app/`, `components/`
-- Files scanned: `545`
+- Files scanned: `679`
 
 ## Summary
 
@@ -10,7 +10,7 @@
 - `admin-light-theme-tokens` (high): 0
 - `admin-status-light-tokens` (high): 0
 - `blocking-browser-dialogs` (medium): 0
-- `not-implemented-ui` (info): 6
+- `not-implemented-ui` (info): 0
 - `deprecated-surface-usage` (medium): 0
 - `frontend-workspace-route-usage` (high): 0
 - `legacy-editor-shell-usage` (high): 0
@@ -51,16 +51,9 @@
 
 - Metric ID: `not-implemented-ui`
 - Severity: `info`
-- Total matches: `6`
+- Total matches: `0`
 
-| File | Matches |
-| --- | ---: |
-| `app/api/ai/action/route.ts` | 1 |
-| `app/api/ai/chat/route.ts` | 1 |
-| `app/api/ai/complete/route.ts` | 1 |
-| `app/api/ai/inline-completion/route.ts` | 1 |
-| `app/api/ai/inline-edit/route.ts` | 1 |
-| `app/api/render/jobs/[jobId]/cancel/route.ts` | 1 |
+- No matches
 
 ## Deprecated surface references (_deprecated)
 

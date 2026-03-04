@@ -59,6 +59,17 @@ export async function GET(request: NextRequest) {
         period: 'month' as const,
       },
       {
+        resource: 'ai_requests_daily',
+        used: usageStatus.usage.requestsUsedToday,
+        limit: limits.requestsPerDay,
+        unlimited: limits.requestsPerDay === -1,
+        remaining: limits.requestsPerDay === -1 ? -1 : usageStatus.usage.requestsDailyRemaining,
+        percentage: limits.requestsPerDay > 0
+          ? Math.min(100, Math.round((usageStatus.usage.requestsUsedToday / limits.requestsPerDay) * 100))
+          : 0,
+        period: 'day' as const,
+      },
+      {
         resource: 'storage_mb',
         used: storageUsedMb,
         limit: storageLimitMb,
@@ -129,6 +140,9 @@ export async function POST(request: NextRequest) {
     } else if (resource === 'projects') {
       currentUsage = projectsCount;
       limit = limits.projectsMax;
+    } else if (resource === 'ai_requests_daily') {
+      currentUsage = usageStatus.usage.requestsUsedToday;
+      limit = limits.requestsPerDay;
     } else {
       return NextResponse.json(
         { success: false, error: 'Unknown resource' },

@@ -1,24 +1,8 @@
-/**
- * Screenshot & Capture System - Sistema de Captura de Tela e Vídeo
- * 
- * Sistema completo com:
- * - Captura de screenshots (PNG/JPEG/WebP)
- * - Gravação de vídeo (WebM/MP4)
- * - GIF recording
- * - Photo mode (pause + effects)
- * - Replay buffer (last N seconds)
- * - Watermark support
- * - Social sharing
- * - Gallery management
- * 
- * @module lib/capture/capture-system
- */
+// Capture system for screenshots/video/gif with replay and gallery support.
 
 import { EventEmitter } from 'events';
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 export type ImageFormat = 'png' | 'jpeg' | 'webp';
 export type VideoFormat = 'webm' | 'mp4';
@@ -132,9 +116,7 @@ export interface CaptureConfig {
   replayBufferDuration: number;
 }
 
-// ============================================================================
 // FILTER PRESETS
-// ============================================================================
 
 export const PHOTO_FILTER_PRESETS: Record<string, ScreenshotEffect[]> = {
   'none': [],
@@ -181,9 +163,7 @@ export const PHOTO_FILTER_PRESETS: Record<string, ScreenshotEffect[]> = {
   ],
 };
 
-// ============================================================================
 // CAPTURE SYSTEM
-// ============================================================================
 
 export class CaptureSystem extends EventEmitter {
   private static instance: CaptureSystem | null = null;
@@ -1022,9 +1002,7 @@ export class CaptureSystem extends EventEmitter {
   }
 }
 
-// ============================================================================
 // REACT HOOKS
-// ============================================================================
 
 import { useState, useEffect, useContext, createContext, useCallback, useMemo, useRef } from 'react';
 

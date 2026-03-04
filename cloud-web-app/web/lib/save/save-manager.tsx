@@ -1,25 +1,6 @@
-/**
- * Save/Autosave Manager - Sistema de Salvamento Avançado
- * 
- * Sistema completo com:
- * - Multiple save slots
- * - Autosave with configurable intervals
- * - Save versioning and migration
- * - Compression support
- * - Cloud save integration
- * - Save validation and corruption detection
- * - Quick save/load
- * - Save metadata and previews
- * - Export/import functionality
- * 
- * @module lib/save/save-manager
- */
 
 import { EventEmitter } from 'events';
 
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export type SaveType = 'manual' | 'autosave' | 'quicksave' | 'checkpoint';
 export type SaveLocation = 'local' | 'cloud' | 'both';
@@ -238,9 +219,6 @@ export interface CloudProvider {
   sync(): Promise<void>;
 }
 
-// ============================================================================
-// SAVE SERIALIZERS
-// ============================================================================
 
 export interface SaveSerializer {
   serialize(state: GameState): string;
@@ -275,8 +253,6 @@ export class CompressedSerializer implements SaveSerializer {
   }
   
   private compress(data: string): string {
-    // Simple compression using btoa and removing repeated patterns
-    // In production, use pako or similar
     return btoa(unescape(encodeURIComponent(data)));
   }
   
@@ -285,9 +261,6 @@ export class CompressedSerializer implements SaveSerializer {
   }
 }
 
-// ============================================================================
-// SAVE MIGRATION
-// ============================================================================
 
 export type MigrationFn = (state: GameState) => GameState;
 
@@ -321,9 +294,6 @@ export class SaveMigrator {
   }
 }
 
-// ============================================================================
-// SAVE VALIDATION
-// ============================================================================
 
 export class SaveValidator {
   private static calculateChecksum(data: string): string {
@@ -352,7 +322,6 @@ export class SaveValidator {
     
     const s = state as Record<string, unknown>;
     
-    // Check required properties
     if (!s.player || typeof s.player !== 'object') return false;
     if (!s.world || typeof s.world !== 'object') return false;
     if (!Array.isArray(s.quests)) return false;
@@ -362,9 +331,6 @@ export class SaveValidator {
   }
 }
 
-// ============================================================================
-// SAVE MANAGER
-// ============================================================================
 
 export class SaveManager extends EventEmitter {
   private static instance: SaveManager | null = null;
@@ -408,10 +374,8 @@ export class SaveManager extends EventEmitter {
     this.migrator = new SaveMigrator();
     this.sessionStartTime = Date.now();
     
-    // Initialize slots
     this.initializeSlots();
     
-    // Load existing saves
     this.loadSavesFromStorage();
   }
   
@@ -422,9 +386,6 @@ export class SaveManager extends EventEmitter {
     return SaveManager.instance;
   }
   
-  // ============================================================================
-  // INITIALIZATION
-  // ============================================================================
   
   private initializeSlots(): void {
     for (let i = 0; i < this.config.maxSlots; i++) {
@@ -475,9 +436,6 @@ export class SaveManager extends EventEmitter {
     );
   }
   
-  // ============================================================================
-  // STATE PROVIDERS
-  // ============================================================================
   
   registerStateProvider(key: string, provider: () => unknown): void {
     this.stateProviders.set(key, provider);
@@ -498,7 +456,6 @@ export class SaveManager extends EventEmitter {
       }
     }
     
-    // Return current state with custom additions
     if (this.currentState) {
       return {
         ...this.currentState,
@@ -506,7 +463,6 @@ export class SaveManager extends EventEmitter {
       };
     }
     
-    // Default empty state
     return {
       player: this.createDefaultPlayerState(),
       world: this.createDefaultWorldState(),
@@ -600,9 +556,6 @@ export class SaveManager extends EventEmitter {
     };
   }
   
-  // ============================================================================
-  // SAVE OPERATIONS
-  // ============================================================================
   
   async save(
     slotIndex: number,
@@ -649,10 +602,8 @@ export class SaveManager extends EventEmitter {
       
       const saveData: SaveData = { metadata, state };
       
-      // Save to local storage
       this.saveToStorage(slotIndex, serialized, metadata);
       
-      // Update slot
       this.slots[slotIndex] = {
         index: slotIndex,
         occupied: true,
@@ -660,10 +611,8 @@ export class SaveManager extends EventEmitter {
         locked: false,
       };
       
-      // Save index
       this.saveSaveIndex();
       
-      // Cloud sync
       if (this.config.cloudSyncEnabled && this.cloudProvider) {
         try {
           await this.cloudProvider.upload(saveData);
@@ -695,7 +644,6 @@ export class SaveManager extends EventEmitter {
   async autoSave(): Promise<SaveData | null> {
     if (!this.config.autosaveEnabled) return null;
     
-    // Find or create autosave slot
     let autosaveSlot = this.findNextAutosaveSlot();
     
     try {
@@ -714,24 +662,20 @@ export class SaveManager extends EventEmitter {
   }
   
   private findNextAutosaveSlot(): number {
-    // Find existing autosaves
     const autosaves = this.slots
       .filter(s => s.occupied && s.metadata?.type === 'autosave')
       .sort((a, b) => (a.metadata?.modifiedAt || 0) - (b.metadata?.modifiedAt || 0));
     
-    // If we have max autosaves, use oldest
     if (autosaves.length >= this.config.maxAutosaves) {
       return autosaves[0].index;
     }
     
-    // Find first empty slot (starting from end)
     for (let i = this.config.maxSlots - 1; i >= 0; i--) {
       if (!this.slots[i].occupied) {
         return i;
       }
     }
     
-    // Use oldest autosave if no empty slots
     return autosaves[0]?.index || this.config.maxSlots - 1;
   }
   
@@ -750,9 +694,6 @@ export class SaveManager extends EventEmitter {
     return `save_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
   
-  // ============================================================================
-  // LOAD OPERATIONS
-  // ============================================================================
   
   async load(slotIndex: number): Promise<GameState> {
     if (this.status !== 'idle') {
@@ -775,12 +716,10 @@ export class SaveManager extends EventEmitter {
       
       let state = this.serializer.deserialize(data);
       
-      // Validate structure
       if (!SaveValidator.validateStructure(state)) {
         throw new Error('Save data is corrupted');
       }
       
-      // Migrate if needed
       if (slot.metadata.version < this.config.saveVersion) {
         if (this.migrator.hasPath(slot.metadata.version, this.config.saveVersion)) {
           state = this.migrator.migrate(
@@ -793,7 +732,6 @@ export class SaveManager extends EventEmitter {
         }
       }
       
-      // Validate checksum
       const checksum = SaveValidator.generateChecksum(state);
       if (checksum !== slot.metadata.checksum) {
         console.warn('Checksum mismatch, save may be corrupted');
@@ -826,9 +764,6 @@ export class SaveManager extends EventEmitter {
     return localStorage.getItem(key);
   }
   
-  // ============================================================================
-  // DELETE OPERATIONS
-  // ============================================================================
   
   async deleteSave(slotIndex: number): Promise<void> {
     const slot = this.slots[slotIndex];
@@ -838,13 +773,11 @@ export class SaveManager extends EventEmitter {
       throw new Error('Slot is locked');
     }
     
-    // Remove from storage
     if (typeof localStorage !== 'undefined') {
       const key = `${this.config.storageKey}_${slotIndex}`;
       localStorage.removeItem(key);
     }
     
-    // Cloud delete
     if (this.cloudProvider && slot.metadata) {
       try {
         await this.cloudProvider.delete(slot.metadata.id);
@@ -853,7 +786,6 @@ export class SaveManager extends EventEmitter {
       }
     }
     
-    // Update slot
     this.slots[slotIndex] = {
       index: slotIndex,
       occupied: false,
@@ -872,9 +804,6 @@ export class SaveManager extends EventEmitter {
     }
   }
   
-  // ============================================================================
-  // EXPORT/IMPORT
-  // ============================================================================
   
   async exportSave(slotIndex: number): Promise<Blob> {
     const slot = this.slots[slotIndex];
@@ -905,15 +834,12 @@ export class SaveManager extends EventEmitter {
       throw new Error('Invalid save file structure');
     }
     
-    // Update metadata
     data.metadata.slotIndex = slotIndex;
     data.metadata.modifiedAt = Date.now();
     
-    // Serialize and save
     const serialized = this.serializer.serialize(data.state);
     this.saveToStorage(slotIndex, serialized, data.metadata);
     
-    // Update slot
     this.slots[slotIndex] = {
       index: slotIndex,
       occupied: true,
@@ -925,9 +851,6 @@ export class SaveManager extends EventEmitter {
     this.emit('saveImported', { slotIndex, metadata: data.metadata });
   }
   
-  // ============================================================================
-  // AUTOSAVE MANAGEMENT
-  // ============================================================================
   
   startAutosave(): void {
     if (this.autosaveTimer) return;
@@ -956,9 +879,6 @@ export class SaveManager extends EventEmitter {
     }
   }
   
-  // ============================================================================
-  // SLOT MANAGEMENT
-  // ============================================================================
   
   getSlots(): SaveSlot[] {
     return [...this.slots];
@@ -990,9 +910,6 @@ export class SaveManager extends EventEmitter {
     }
   }
   
-  // ============================================================================
-  // CLOUD SYNC
-  // ============================================================================
   
   setCloudProvider(provider: CloudProvider): void {
     this.cloudProvider = provider;
@@ -1010,13 +927,11 @@ export class SaveManager extends EventEmitter {
       
       const cloudSaves = await this.cloudProvider.list();
       
-      // Merge cloud saves with local
       for (const cloudMeta of cloudSaves) {
         const localSlot = this.slots[cloudMeta.slotIndex];
         
         if (!localSlot.occupied || 
             (localSlot.metadata && cloudMeta.modifiedAt > localSlot.metadata.modifiedAt)) {
-          // Cloud is newer, download
           const cloudData = await this.cloudProvider.download(cloudMeta.id);
           const serialized = this.serializer.serialize(cloudData.state);
           this.saveToStorage(cloudMeta.slotIndex, serialized, cloudMeta);
@@ -1040,9 +955,6 @@ export class SaveManager extends EventEmitter {
     }
   }
   
-  // ============================================================================
-  // STATE & UTILITIES
-  // ============================================================================
   
   getStatus(): SaveStatus {
     return this.status;
@@ -1068,9 +980,6 @@ export class SaveManager extends EventEmitter {
     return { ...this.config };
   }
   
-  // ============================================================================
-  // CLEANUP
-  // ============================================================================
   
   dispose(): void {
     this.stopAutosave();
@@ -1080,9 +989,6 @@ export class SaveManager extends EventEmitter {
   }
 }
 
-// ============================================================================
-// REACT HOOKS
-// ============================================================================
 
 import { useState, useEffect, useContext, createContext, useCallback, useMemo } from 'react';
 

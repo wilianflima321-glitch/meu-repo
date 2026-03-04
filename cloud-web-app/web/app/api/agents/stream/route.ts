@@ -1,11 +1,17 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import {
+  buildRoleScope,
   DEFAULT_AGENT_SET,
   getOrchestrator,
+  ORCHESTRATOR_COORDINATION_POLICY,
+  ORCHESTRATOR_CAPABILITY_STATUS,
+  ORCHESTRATOR_DISCLAIMER,
+  ORCHESTRATOR_EXECUTION_MODE,
   OrchestrationTask,
   SUPPORTED_AGENT_TYPES,
   type AgentType,
 } from '@/lib/agent-orchestrator'
+import { aiService } from '@/lib/ai-service'
 import { requireAuth } from '@/lib/auth-server'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
@@ -23,6 +29,7 @@ type StreamRequestBody = {
   prompt?: unknown
   agents?: unknown
   priority?: unknown
+  executionMode?: unknown
 }
 
 const MAX_PROMPT_LENGTH = 12_000
@@ -59,6 +66,39 @@ function normalizeAgents(input: unknown): AgentType[] {
   return Array.from(new Set(normalized))
 }
 
+function normalizeExecutionMode(input: unknown): 'heuristic' | 'provider-backed' {
+  return input === 'provider-backed' ? 'provider-backed' : 'heuristic'
+}
+
+function getAvailableModes(): Array<'heuristic' | 'provider-backed'> {
+  const providers = aiService.getAvailableProviders()
+  if (providers.length > 0) return ['heuristic', 'provider-backed']
+  return ['heuristic']
+}
+
+function buildProviderBackedMessages(agent: AgentType, prompt: string, priority: OrchestrationTask['priority']) {
+  const priorityHint =
+    priority === 'high'
+      ? 'Priority: high. Focus on reliability and critical path completion first.'
+      : priority === 'low'
+        ? 'Priority: low. Prefer incremental and low-risk closure.'
+        : 'Priority: normal. Balance speed and reliability.'
+
+  const system = [
+    'You are part of a multi-agent engineering squad.',
+    `Role=${agent}.`,
+    `Scope=${buildRoleScope(agent)}`,
+    'Do not overlap other roles; provide output strictly for your role scope.',
+    'Return concise, actionable output with deterministic checks when possible.',
+    priorityHint,
+  ].join(' ')
+
+  return [
+    { role: 'system' as const, content: system },
+    { role: 'user' as const, content: prompt },
+  ]
+}
+
 /**
  * POST /api/agents/stream
  * Streams responses from multiple AI roles in parallel with auth, plan limits and metering.
@@ -92,6 +132,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const requestedAgents = normalizeAgents(body.agents)
     const priority = normalizePriority(body.priority)
+    const executionMode = normalizeExecutionMode(body.executionMode)
+
     const maxAgentsForPlan = getMaxAgentsForPlan(entitlements.plan.limits.concurrent)
 
     const planAllowedAgents = Array.isArray(entitlements.plan.allowedAgents)
@@ -161,6 +203,169 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       cost: { requests: 1, tokens: estimatedTokens },
     })
 
+    if (executionMode === 'provider-backed') {
+      const availableProviders = aiService.getAvailableProviders()
+      if (availableProviders.length === 0) {
+        return capabilityResponse({
+          error: 'AI_PROVIDER_NOT_CONFIGURED',
+          message: 'Provider-backed mode requires at least one configured AI provider.',
+          status: 503,
+          capability: 'multi_agent_orchestration_provider',
+          capabilityStatus: 'PARTIAL',
+          milestone: 'P2',
+          metadata: {
+            requestedMode: executionMode,
+            availableModes: getAvailableModes(),
+            setupUrl: '/settings?tab=api',
+            setupAction: 'OPEN_AI_PROVIDER_SETTINGS',
+          },
+        })
+      }
+
+      const encoder = new TextEncoder()
+      let streamClosed = false
+      let leaseReleased = false
+      const releaseLease = async (): Promise<void> => {
+        if (leaseReleased || !leaseId) return
+        leaseReleased = true
+        await releaseConcurrencyLease(leaseId)
+      }
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'ready',
+                  taskId: task.id,
+                  selectedAgents,
+                  mode: 'provider-backed',
+                  capability: 'multi_agent_orchestration_provider',
+                  capabilityStatus: 'PARTIAL',
+                  disclaimer:
+                    'Provider-backed mode is experimental. Outputs still require deterministic validation before apply.',
+                  coordination: {
+                    ...ORCHESTRATOR_COORDINATION_POLICY,
+                    selectedScopes: selectedAgents.map((agent) => ({
+                      role: agent,
+                      scope: buildRoleScope(agent),
+                    })),
+                  },
+                  providers: availableProviders,
+                  timestamp: Date.now(),
+                })}\n\n`
+              )
+            )
+
+            const executions = selectedAgents.map(async (agent) => {
+              if (streamClosed) return
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({
+                    type: 'agent_start',
+                    taskId: task.id,
+                    agentType: agent,
+                    timestamp: Date.now(),
+                    status: 'streaming',
+                  })}\n\n`
+                )
+              )
+
+              try {
+                const response = await aiService.chat({
+                  messages: buildProviderBackedMessages(agent, prompt, priority),
+                  maxTokens: 700,
+                  temperature: 0.2,
+                })
+
+                if (streamClosed) return
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({
+                      type: 'agent_message',
+                      taskId: task.id,
+                      agentType: agent,
+                      content: response.content,
+                      model: response.model,
+                      provider: response.provider,
+                      tokensUsed: response.tokensUsed,
+                      latencyMs: response.latencyMs,
+                      timestamp: Date.now(),
+                      status: 'complete',
+                    })}\n\n`
+                  )
+                )
+              } catch (error) {
+                if (streamClosed) return
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({
+                      type: 'agent_error',
+                      taskId: task.id,
+                      agentType: agent,
+                      error: error instanceof Error ? error.message : 'Agent execution failed',
+                      timestamp: Date.now(),
+                      status: 'error',
+                    })}\n\n`
+                  )
+                )
+              }
+            })
+
+            await Promise.all(executions)
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'complete',
+                  taskId: task.id,
+                  timestamp: Date.now(),
+                  mode: 'provider-backed',
+                })}\n\n`
+              )
+            )
+            controller.close()
+          } catch (error) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'error',
+                  taskId: task.id,
+                  error: error instanceof Error ? error.message : 'Unknown stream error',
+                  timestamp: Date.now(),
+                })}\n\n`
+              )
+            )
+            controller.close()
+          } finally {
+            await releaseLease()
+          }
+        },
+        async cancel() {
+          streamClosed = true
+          await releaseLease()
+        },
+      })
+
+      return new NextResponse(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no',
+          ...(meteringDecision.remaining?.requestsPerHour !== undefined
+            ? { 'X-Usage-Remaining-RequestsPerHour': String(meteringDecision.remaining.requestsPerHour) }
+            : {}),
+          ...(meteringDecision.remaining?.tokensPerDay !== undefined
+            ? { 'X-Usage-Remaining-TokensPerDay': String(meteringDecision.remaining.tokensPerDay) }
+            : {}),
+          ...(meteringDecision.remaining?.tokensPerMonth !== undefined
+            ? { 'X-Usage-Remaining-TokensPerMonth': String(meteringDecision.remaining.tokensPerMonth) }
+            : {}),
+        },
+      })
+    }
+
     const orchestrator = getOrchestrator()
     const encoder = new TextEncoder()
     let streamClosed = false
@@ -181,6 +386,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 type: 'ready',
                 taskId: task.id,
                 selectedAgents,
+                mode: ORCHESTRATOR_EXECUTION_MODE,
+                capability: 'multi_agent_orchestration',
+                capabilityStatus: ORCHESTRATOR_CAPABILITY_STATUS,
+                disclaimer: ORCHESTRATOR_DISCLAIMER,
+                coordination: {
+                  ...ORCHESTRATOR_COORDINATION_POLICY,
+                  selectedScopes: selectedAgents.map((agent) => ({
+                    role: agent,
+                    scope: buildRoleScope(agent),
+                  })),
+                },
                 timestamp: Date.now(),
               })}\n\n`
             )
@@ -268,11 +484,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({
       agents,
+      mode: ORCHESTRATOR_EXECUTION_MODE,
+      capability: 'multi_agent_orchestration',
+      capabilityStatus: ORCHESTRATOR_CAPABILITY_STATUS,
+      disclaimer: ORCHESTRATOR_DISCLAIMER,
+      coordination: {
+        ...ORCHESTRATOR_COORDINATION_POLICY,
+      },
       limits: {
         planId: entitlements.plan.id,
         maxAgentsForPlan,
         concurrentLimit: entitlements.plan.limits.concurrent,
       },
+      availableModes: getAvailableModes(),
       timestamp: Date.now(),
     })
   } catch (error) {

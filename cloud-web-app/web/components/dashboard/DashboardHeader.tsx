@@ -1,10 +1,19 @@
+import Image from 'next/image'
+
 type DashboardHeaderProps = {
   sidebarOpen: boolean
   onToggleSidebar: () => void
   onResetDashboard: () => void
   onToggleTheme: () => void
+  onOpenIde: () => void
+  onToggleFullAccess: () => void
   theme: 'dark' | 'light'
   backendOnline: boolean
+  aiProviderConfigured: boolean
+  onOpenProviderSettings: () => void
+  fullAccessActive: boolean
+  fullAccessExpiresAt?: string | null
+  fullAccessBusy?: boolean
   authErrorText?: string | null
   billingErrorText?: string | null
 }
@@ -14,11 +23,22 @@ export function DashboardHeader({
   onToggleSidebar,
   onResetDashboard,
   onToggleTheme,
+  onOpenIde,
+  onToggleFullAccess,
   theme,
   backendOnline,
+  aiProviderConfigured,
+  onOpenProviderSettings,
+  fullAccessActive,
+  fullAccessExpiresAt,
+  fullAccessBusy = false,
   authErrorText,
   billingErrorText,
 }: DashboardHeaderProps) {
+  const fullAccessExpiryLabel = fullAccessExpiresAt
+    ? new Date(fullAccessExpiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : null
+
   return (
     <header className="aethel-card aethel-m-4 aethel-rounded-xl aethel-shadow-lg">
       <div className="aethel-flex aethel-items-center aethel-justify-between aethel-p-4">
@@ -28,23 +48,29 @@ export function DashboardHeader({
             onClick={onToggleSidebar}
             className="md:hidden aethel-button aethel-button-ghost aethel-p-2"
             aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+            aria-expanded={sidebarOpen}
+            aria-controls="dashboard-sidebar"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
           <div className="aethel-flex aethel-items-center aethel-gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg aethel-flex aethel-items-center aethel-justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <Image
+              src="/branding/aethel-icon-source.png"
+              alt="Aethel"
+              width={32}
+              height={32}
+              className="rounded-lg ring-1 ring-zinc-700/70"
+            />
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               Aethel IDE
             </h1>
           </div>
         </div>
 
-        <div className="aethel-flex aethel-items-center aethel-gap-4">
-          <button type="button" onClick={onResetDashboard} className="aethel-button aethel-button-ghost aethel-text-xs">
+        <div className="aethel-flex aethel-items-center aethel-gap-2 md:aethel-gap-4">
+          <button type="button" onClick={onResetDashboard} className="hidden md:inline-flex aethel-button aethel-button-ghost aethel-text-xs">
             Redefinir painel
           </button>
           <button
@@ -69,28 +95,64 @@ export function DashboardHeader({
               backendOnline
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                 : 'bg-red-500/20 text-red-400 border border-red-500/30'
-            }`}
+            } hidden sm:flex`}
           >
             <div className={`w-2 h-2 aethel-rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
             Backend: {backendOnline ? 'Online' : 'Offline'}
           </div>
 
           {authErrorText && (
-            <span className="text-xs aethel-text-red-400" title={authErrorText}>
+            <span className="hidden lg:inline text-xs aethel-text-red-400" title={authErrorText}>
               Auth providers indisponiveis
             </span>
           )}
           {billingErrorText && (
-            <span className="text-xs aethel-text-yellow-400" title={billingErrorText}>
+            <span className="hidden lg:inline text-xs aethel-text-yellow-400" title={billingErrorText}>
               Planos indisponiveis
             </span>
           )}
+          {!aiProviderConfigured && (
+            <button
+              type="button"
+              onClick={onOpenProviderSettings}
+              className="hidden lg:inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
+              title="Configure ao menos um provider para liberar o chat de IA"
+            >
+              Configurar IA
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onToggleFullAccess}
+            disabled={fullAccessBusy}
+            className={`hidden lg:inline-flex rounded border px-2 py-1 text-xs disabled:opacity-60 ${
+              fullAccessActive
+                ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20'
+                : 'border-zinc-600/70 bg-zinc-800/70 text-zinc-200 hover:bg-zinc-700/70'
+            }`}
+            title={
+              fullAccessActive
+                ? `Acesso total ativo${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}. Clique para revogar.`
+                : 'Habilitar acesso total temporario auditado.'
+            }
+          >
+            {fullAccessBusy
+              ? 'Aguarde...'
+              : fullAccessActive
+                ? `Full Access ON${fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}`
+                : 'Full Access'}
+          </button>
 
-          <button type="button" className="aethel-button aethel-button-primary aethel-shadow-md hover:aethel-shadow-lg aethel-transition">
+          <button
+            type="button"
+            onClick={onOpenIde}
+            className="aethel-button aethel-button-primary aethel-shadow-md hover:aethel-shadow-lg aethel-transition"
+          >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Abrir IDE Desktop
+            <span className="hidden sm:inline">Abrir IDE</span>
+            <span className="sm:hidden">IDE</span>
           </button>
         </div>
       </div>

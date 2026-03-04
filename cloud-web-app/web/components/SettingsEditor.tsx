@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 
 interface SettingDefinition {
   key: string;
@@ -379,11 +380,16 @@ export default function SettingsEditor() {
   };
 
   // Reset all settings
-  const resetAllSettings = () => {
-    if (confirm('Tem certeza de que deseja redefinir todas as configurações?')) {
-      saveSettings({});
-      setModifiedSettings(new Set());
-    }
+  const resetAllSettings = async () => {
+    const shouldReset = await openConfirmDialog({
+      title: 'Redefinir configuracoes',
+      message: 'Tem certeza de que deseja redefinir todas as configuracoes?',
+      confirmText: 'Redefinir',
+      cancelText: 'Cancelar',
+    });
+    if (!shouldReset) return;
+    saveSettings({});
+    setModifiedSettings(new Set());
   };
 
   // Render setting input based on type

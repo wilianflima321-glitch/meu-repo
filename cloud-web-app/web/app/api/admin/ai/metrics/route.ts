@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminAuth } from '@/lib/rbac';
 import { prisma } from '@/lib/db';
+import { readChangeRunLedgerEvents, summarizeChangeRunGroups, summarizeChangeRunLedger } from '@/lib/server/change-run-ledger';
 
 export const GET = withAdminAuth(
   async (request, { user }) => {
@@ -60,6 +61,12 @@ export const GET = withAdminAuth(
       
       const avgLatency = totalCalls > 0 ? Math.round(totalLatency / totalCalls) : 0;
       const errorRate = totalCalls > 0 ? errorCount / totalCalls : 0;
+      const changeRuns = await readChangeRunLedgerEvents({
+        sinceIso: last24h.toISOString(),
+        limit: 500,
+      });
+      const changeRunSummary = summarizeChangeRunLedger(changeRuns);
+      const changeRunGroups = summarizeChangeRunGroups(changeRuns, 50);
       
       return NextResponse.json({
         success: true,
@@ -70,6 +77,11 @@ export const GET = withAdminAuth(
           avgLatency,
           errorRate,
           modelBreakdown,
+          changeRuns: {
+            summary: changeRunSummary,
+            runGroups: changeRunGroups,
+            samples: changeRuns.slice(0, 50),
+          },
         },
       });
       

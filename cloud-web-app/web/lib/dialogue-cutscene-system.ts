@@ -1,28 +1,6 @@
-/**
- * DIALOGUE & CUTSCENE SYSTEM - Aethel Engine
- * 
- * Sistema profissional de diálogos e cutscenes para jogos AAA.
- * 
- * FEATURES:
- * - Dialogue tree system
- * - Branching narratives
- * - Condition-based choices
- * - Character portraits
- * - Voice line integration
- * - Lip sync triggering
- * - Camera control for cutscenes
- * - Timeline-based sequencing
- * - Cinematic bars
- * - Subtitle system
- * - Localization support
- * - Save/load dialogue state
- */
 
 import * as THREE from 'three';
 
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export interface DialogueNode {
   id: string;
@@ -97,7 +75,6 @@ export interface DialogueState {
   relationships: Map<string, number>;
 }
 
-// Cutscene types
 export interface CutsceneTrack {
   type: 'camera' | 'animation' | 'audio' | 'dialogue' | 'event' | 'subtitle';
   startTime: number;
@@ -131,23 +108,18 @@ export interface SubtitleEntry {
   position?: 'bottom' | 'top' | 'middle';
 }
 
-// ============================================================================
-// DIALOGUE SYSTEM
-// ============================================================================
 
 export class DialogueSystem {
   private trees: Map<string, DialogueTree> = new Map();
   private state: DialogueState;
   private currentLanguage: string = 'en';
   
-  // Callbacks
   private onDialogueStart?: (tree: DialogueTree, node: DialogueNode) => void;
   private onDialogueEnd?: (tree: DialogueTree) => void;
   private onNodeChange?: (node: DialogueNode) => void;
   private onChoicesAvailable?: (choices: DialogueChoice[]) => void;
   private onAction?: (action: DialogueAction) => void;
   
-  // External systems
   private variableProvider?: (key: string) => any;
   private conditionEvaluator?: (condition: DialogueCondition) => boolean;
   private actionHandler?: (action: DialogueAction) => void;
@@ -163,12 +135,10 @@ export class DialogueSystem {
     };
   }
   
-  // Load dialogue tree
   loadTree(tree: DialogueTree): void {
     this.trees.set(tree.id, tree);
   }
   
-  // Load from JSON
   loadFromJSON(json: any): DialogueTree {
     const tree: DialogueTree = {
       id: json.id,
@@ -179,12 +149,10 @@ export class DialogueSystem {
       variables: new Map(Object.entries(json.variables || {})),
     };
     
-    // Parse nodes
     for (const nodeData of json.nodes) {
       tree.nodes.set(nodeData.id, nodeData);
     }
     
-    // Parse characters
     for (const charData of json.characters || []) {
       tree.characters.set(charData.id, {
         ...charData,
@@ -196,7 +164,6 @@ export class DialogueSystem {
     return tree;
   }
   
-  // Start dialogue
   startDialogue(treeId: string): boolean {
     const tree = this.trees.get(treeId);
     if (!tree) return false;
@@ -214,18 +181,15 @@ export class DialogueSystem {
     return true;
   }
   
-  // Process current node
   private processNode(node: DialogueNode): void {
     this.state.history.push(node.id);
     this.onNodeChange?.(node);
     
     switch (node.type) {
       case 'dialogue':
-        // Display dialogue and wait for advance
         break;
         
       case 'choice':
-        // Filter choices by conditions
         const availableChoices = (node.choices || []).filter(
           choice => this.evaluateConditions(choice.conditions)
         );
@@ -233,7 +197,6 @@ export class DialogueSystem {
         break;
         
       case 'action':
-        // Execute actions and advance
         this.executeActions(node.actions || []);
         if (node.nextNode) {
           this.advanceToNode(node.nextNode);
@@ -241,21 +204,18 @@ export class DialogueSystem {
         break;
         
       case 'condition':
-        // Evaluate branches
         for (const branch of node.branches || []) {
           if (this.evaluateCondition(branch.condition)) {
             this.advanceToNode(branch.nodeId);
             return;
           }
         }
-        // Default branch
         if (node.nextNode) {
           this.advanceToNode(node.nextNode);
         }
         break;
         
       case 'random':
-        // Select random branch
         const totalWeight = (node.randomBranches || []).reduce((sum, b) => sum + b.weight, 0);
         let random = Math.random() * totalWeight;
         
@@ -270,7 +230,6 @@ export class DialogueSystem {
     }
   }
   
-  // Advance to next node
   advance(): void {
     const tree = this.getCurrentTree();
     const node = this.getCurrentNode();
@@ -284,7 +243,6 @@ export class DialogueSystem {
     }
   }
   
-  // Select choice
   selectChoice(choiceId: string): void {
     const node = this.getCurrentNode();
     if (!node || node.type !== 'choice') return;
@@ -292,10 +250,8 @@ export class DialogueSystem {
     const choice = node.choices?.find(c => c.id === choiceId);
     if (!choice) return;
     
-    // Execute consequences
     this.executeActions(choice.consequences || []);
     
-    // Advance to next node
     this.advanceToNode(choice.nextNode);
   }
   
@@ -312,7 +268,6 @@ export class DialogueSystem {
     }
   }
   
-  // End dialogue
   endDialogue(): void {
     const tree = this.getCurrentTree();
     
@@ -324,14 +279,12 @@ export class DialogueSystem {
     }
   }
   
-  // Evaluate conditions
   private evaluateConditions(conditions?: DialogueCondition[]): boolean {
     if (!conditions || conditions.length === 0) return true;
     return conditions.every(c => this.evaluateCondition(c));
   }
   
   private evaluateCondition(condition: DialogueCondition): boolean {
-    // Use custom evaluator if provided
     if (this.conditionEvaluator) {
       return this.conditionEvaluator(condition);
     }
@@ -366,18 +319,15 @@ export class DialogueSystem {
     }
   }
   
-  // Execute actions
   private executeActions(actions: DialogueAction[]): void {
     for (const action of actions) {
       this.onAction?.(action);
       
-      // Use custom handler if provided
       if (this.actionHandler) {
         this.actionHandler(action);
         continue;
       }
       
-      // Default handling
       switch (action.type) {
         case 'set_variable':
           this.state.variables.set(action.key!, action.value);
@@ -397,7 +347,6 @@ export class DialogueSystem {
     }
   }
   
-  // Getters
   getCurrentTree(): DialogueTree | undefined {
     return this.state.currentTreeId ? this.trees.get(this.state.currentTreeId) : undefined;
   }
@@ -435,7 +384,6 @@ export class DialogueSystem {
     return this.state.currentTreeId !== null;
   }
   
-  // State management
   getState(): DialogueState {
     return {
       ...this.state,
@@ -451,7 +399,6 @@ export class DialogueSystem {
     if (state.relationships) this.state.relationships = new Map(state.relationships);
   }
   
-  // Configuration
   setLanguage(language: string): void {
     this.currentLanguage = language;
   }
@@ -468,7 +415,6 @@ export class DialogueSystem {
     this.actionHandler = handler;
   }
   
-  // Callbacks
   setOnDialogueStart(callback: (tree: DialogueTree, node: DialogueNode) => void): void {
     this.onDialogueStart = callback;
   }
@@ -490,9 +436,6 @@ export class DialogueSystem {
   }
 }
 
-// ============================================================================
-// CUTSCENE SYSTEM
-// ============================================================================
 
 export class CutsceneSystem {
   private cutscenes: Map<string, Cutscene> = new Map();
@@ -504,17 +447,14 @@ export class CutsceneSystem {
   private camera: THREE.PerspectiveCamera | null = null;
   private scene: THREE.Scene | null = null;
   
-  // Track states
   private activeSubtitles: SubtitleEntry[] = [];
   private activeTracks: Map<CutsceneTrack, any> = new Map();
   
-  // Callbacks
   private onCutsceneStart?: (cutscene: Cutscene) => void;
   private onCutsceneEnd?: (cutscene: Cutscene) => void;
   private onSubtitleChange?: (subtitles: SubtitleEntry[]) => void;
   private onEvent?: (eventName: string, data: any) => void;
   
-  // Cinema bars
   private cinematicBarsEnabled: boolean = false;
   private cinematicBarsProgress: number = 0;
   
@@ -528,12 +468,10 @@ export class CutsceneSystem {
     this.scene = scene;
   }
   
-  // Load cutscene
   loadCutscene(cutscene: Cutscene): void {
     this.cutscenes.set(cutscene.id, cutscene);
   }
   
-  // Load from JSON
   loadFromJSON(json: any): Cutscene {
     const cutscene: Cutscene = {
       id: json.id,
@@ -561,7 +499,6 @@ export class CutsceneSystem {
     return data;
   }
   
-  // Play cutscene
   play(cutsceneId: string): boolean {
     const cutscene = this.cutscenes.get(cutsceneId);
     if (!cutscene) return false;
@@ -572,7 +509,6 @@ export class CutsceneSystem {
     this.isPaused = false;
     this.activeTracks.clear();
     
-    // Enable cinematic bars
     this.enableCinematicBars();
     
     this.onCutsceneStart?.(cutscene);
@@ -580,18 +516,15 @@ export class CutsceneSystem {
     return true;
   }
   
-  // Update
   update(deltaTime: number): void {
     if (!this.isPlaying || this.isPaused || !this.currentCutscene) return;
     
     this.currentTime += deltaTime;
     
-    // Update cinematic bars
     if (this.cinematicBarsEnabled && this.cinematicBarsProgress < 1) {
       this.cinematicBarsProgress = Math.min(1, this.cinematicBarsProgress + deltaTime * 2);
     }
     
-    // Process tracks
     for (const track of this.currentCutscene.tracks) {
       const trackStarted = this.currentTime >= track.startTime;
       const trackEnded = this.currentTime >= track.startTime + track.duration;
@@ -603,7 +536,6 @@ export class CutsceneSystem {
       }
     }
     
-    // Check if cutscene ended
     if (this.currentTime >= this.currentCutscene.duration) {
       this.stop();
     }
@@ -618,7 +550,6 @@ export class CutsceneSystem {
         break;
         
       case 'animation':
-        // Trigger animation on target
         if (!this.activeTracks.has(track)) {
           this.activeTracks.set(track, true);
           this.onEvent?.('play_animation', track.data);
@@ -655,7 +586,6 @@ export class CutsceneSystem {
   private processCameraTrack(keyframes: CameraKeyframe[], time: number): void {
     if (!this.camera || keyframes.length === 0) return;
     
-    // Find surrounding keyframes
     let prevKf = keyframes[0];
     let nextKf = keyframes[0];
     
@@ -670,13 +600,11 @@ export class CutsceneSystem {
       nextKf = keyframes[i];
     }
     
-    // Last keyframe
     if (time >= keyframes[keyframes.length - 1].time) {
       prevKf = keyframes[keyframes.length - 1];
       nextKf = prevKf;
     }
     
-    // Interpolate
     if (prevKf === nextKf) {
       this.camera.position.copy(prevKf.position);
       this.camera.lookAt(prevKf.lookAt);
@@ -735,13 +663,11 @@ export class CutsceneSystem {
     }
   }
   
-  // Stop cutscene
   stop(): void {
     if (!this.currentCutscene) return;
     
     const cutscene = this.currentCutscene;
     
-    // End all active tracks
     for (const track of this.activeTracks.keys()) {
       this.endTrack(track);
     }
@@ -750,20 +676,17 @@ export class CutsceneSystem {
     this.currentCutscene = null;
     this.activeSubtitles = [];
     
-    // Disable cinematic bars
     this.disableCinematicBars();
     
     this.onCutsceneEnd?.(cutscene);
     cutscene.onComplete?.();
   }
   
-  // Skip cutscene
   skip(): void {
     if (!this.currentCutscene?.skippable) return;
     this.stop();
   }
   
-  // Pause/Resume
   pause(): void {
     this.isPaused = true;
   }
@@ -772,7 +695,6 @@ export class CutsceneSystem {
     this.isPaused = false;
   }
   
-  // Cinematic bars
   private enableCinematicBars(): void {
     this.cinematicBarsEnabled = true;
     this.cinematicBarsProgress = 0;
@@ -791,7 +713,6 @@ export class CutsceneSystem {
     return this.cinematicBarsEnabled;
   }
   
-  // Getters
   isPlaying_(): boolean {
     return this.isPlaying;
   }
@@ -817,7 +738,6 @@ export class CutsceneSystem {
     return this.activeSubtitles;
   }
   
-  // Callbacks
   setOnCutsceneStart(callback: (cutscene: Cutscene) => void): void {
     this.onCutsceneStart = callback;
   }
@@ -835,9 +755,6 @@ export class CutsceneSystem {
   }
 }
 
-// ============================================================================
-// DIALOGUE UI RENDERER
-// ============================================================================
 
 export class DialogueUIRenderer {
   private container: HTMLDivElement;
@@ -992,7 +909,6 @@ export class DialogueUIRenderer {
     this.currentText = text;
     this.startTypewriter();
     
-    // Hide choices
     this.choicesContainer.innerHTML = '';
   }
   
@@ -1070,9 +986,6 @@ export class DialogueUIRenderer {
   }
 }
 
-// ============================================================================
-// SUBTITLE RENDERER
-// ============================================================================
 
 export class SubtitleRenderer {
   private container: HTMLDivElement;
@@ -1103,7 +1016,6 @@ export class SubtitleRenderer {
   }
   
   updateSubtitles(subtitles: SubtitleEntry[]): void {
-    // Remove old subtitles
     const currentIds = new Set(subtitles.map(s => `${s.startTime}-${s.text}`));
     
     for (const [id, element] of this.currentSubtitles) {
@@ -1113,7 +1025,6 @@ export class SubtitleRenderer {
       }
     }
     
-    // Add/update subtitles
     for (const sub of subtitles) {
       const id = `${sub.startTime}-${sub.text}`;
       
@@ -1147,7 +1058,6 @@ export class SubtitleRenderer {
     text.textContent = subtitle.text;
     element.appendChild(text);
     
-    // Position
     if (subtitle.position === 'top') {
       this.container.style.bottom = 'auto';
       this.container.style.top = '80px';
@@ -1165,9 +1075,6 @@ export class SubtitleRenderer {
   }
 }
 
-// ============================================================================
-// CINEMATIC BARS RENDERER
-// ============================================================================
 
 export class CinematicBarsRenderer {
   private topBar: HTMLDivElement;
@@ -1213,9 +1120,6 @@ export class CinematicBarsRenderer {
   }
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export const createDialogueSystem = (): DialogueSystem => {
   return new DialogueSystem();

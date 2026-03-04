@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-03-04T13:56:12.555Z",
+  "sourceRoot": "cloud-web-app/web",
+  "targetCount": 2,
+  "graphStats": {
+    "scannedFiles": 1072,
+    "totalEdges": 1388
+  },
+  "entries": [
+    {
+      "file": "cloud-web-app/web/app/api/ai/change/apply/route.ts",
+      "dependsOn": [
+        "cloud-web-app/web/lib/api-errors.ts",
+        "cloud-web-app/web/lib/auth-server.ts",
+        "cloud-web-app/web/lib/entitlements.ts",
+        "cloud-web-app/web/lib/server/capability-response.ts",
+        "cloud-web-app/web/lib/server/change-rollback-store.ts",
+        "cloud-web-app/web/lib/server/change-run-ledger.ts",
+        "cloud-web-app/web/lib/server/change-validation.ts",
+        "cloud-web-app/web/lib/server/filesystem-runtime.ts",
+        "cloud-web-app/web/lib/server/workspace-scope.ts"
+      ],
+      "dependedBy": [],
+      "tests": [],
+      "endpoints": [],
+      "uiSurfaces": [],
+      "riskTag": "medium"
+    },
+    {
+      "file": "cloud-web-app/web/app/api/ai/change/rollback/route.ts",
+      "dependsOn": [
+        "cloud-web-app/web/lib/api-errors.ts",
+        "cloud-web-app/web/lib/auth-server.ts",
+        "cloud-web-app/web/lib/entitlements.ts",
+        "cloud-web-app/web/lib/server/capability-response.ts",
+        "cloud-web-app/web/lib/server/change-rollback-store.ts",
+        "cloud-web-app/web/lib/server/change-run-ledger.ts",
+        "cloud-web-app/web/lib/server/filesystem-runtime.ts",
+        "cloud-web-app/web/lib/server/workspace-scope.ts"
+      ],
+      "dependedBy": [],
+      "tests": [],
+      "endpoints": [],
+      "uiSurfaces": [],
+      "riskTag": "medium"
+    }
+  ]
+}

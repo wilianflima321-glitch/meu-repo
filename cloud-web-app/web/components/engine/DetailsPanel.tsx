@@ -1,83 +1,11 @@
-/**
- * Details Panel - Inspetor de Propriedades
- * 
- * Painel profissional estilo Unreal/Unity para editar
- * propriedades de objetos selecionados na cena.
- * 
- * NÃO É MOCK - Sistema real e funcional!
- */
-
 'use client';
-
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
+import type { ComponentDefinition, InspectedObject, PropertyDefinition } from './DetailsPanel.types';
 
-// ============================================================================
-// TIPOS
-// ============================================================================
+export type { PropertyType, ComponentDefinition, InspectedObject } from './DetailsPanel.types';
 
-export type PropertyType = 
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'vector2'
-  | 'vector3'
-  | 'vector4'
-  | 'color'
-  | 'euler'
-  | 'quaternion'
-  | 'enum'
-  | 'asset'
-  | 'object'
-  | 'array'
-  | 'curve'
-  | 'gradient';
-
-export interface PropertyDefinition {
-  name: string;
-  displayName: string;
-  type: PropertyType;
-  value: unknown;
-  category?: string;
-  tooltip?: string;
-  min?: number;
-  max?: number;
-  step?: number;
-  options?: { label: string; value: unknown }[];
-  assetType?: string;
-  readOnly?: boolean;
-  advanced?: boolean;
-  onChange?: (value: unknown) => void;
-}
-
-export interface ComponentDefinition {
-  id: string;
-  name: string;
-  icon: string;
-  enabled: boolean;
-  properties: PropertyDefinition[];
-  removable?: boolean;
-}
-
-export interface InspectedObject {
-  id: string;
-  name: string;
-  type: string;
-  icon: string;
-  transform?: {
-    position: THREE.Vector3;
-    rotation: THREE.Euler;
-    scale: THREE.Vector3;
-  };
-  components: ComponentDefinition[];
-  staticProperties?: PropertyDefinition[];
-}
-
-// ============================================================================
-// PROPERTY EDITORS
-// ============================================================================
-
-// Number Input
 function NumberInput({
   value,
   onChange,
@@ -97,19 +25,16 @@ function NumberInput({
   const [isDragging, setIsDragging] = useState(false);
   const startX = useRef(0);
   const startValue = useRef(0);
-  
   useEffect(() => {
     if (!isDragging) {
       setLocalValue(value.toFixed(3).replace(/\.?0+$/, ''));
     }
   }, [value, isDragging]);
-  
   const handleDragStart = (e: React.MouseEvent) => {
     if (readOnly) return;
     setIsDragging(true);
     startX.current = e.clientX;
     startValue.current = value;
-    
     const handleMove = (moveEvent: MouseEvent) => {
       const delta = (moveEvent.clientX - startX.current) * step;
       let newValue = startValue.current + delta;
@@ -117,17 +42,14 @@ function NumberInput({
       if (max !== undefined) newValue = Math.min(max, newValue);
       onChange(newValue);
     };
-    
     const handleUp = () => {
       setIsDragging(false);
       document.removeEventListener('mousemove', handleMove);
       document.removeEventListener('mouseup', handleUp);
     };
-    
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleUp);
   };
-  
   return (
     <input
       type="text"
@@ -158,8 +80,6 @@ function NumberInput({
     />
   );
 }
-
-// Vector3 Editor
 function Vector3Editor({
   value,
   onChange,
@@ -195,8 +115,6 @@ function Vector3Editor({
     </div>
   );
 }
-
-// Color Editor
 function ColorEditor({
   value,
   onChange,
@@ -207,7 +125,6 @@ function ColorEditor({
   readOnly?: boolean;
 }) {
   const [showPicker, setShowPicker] = useState(false);
-  
   return (
     <div style={{ position: 'relative' }}>
       <div
@@ -232,7 +149,6 @@ function ColorEditor({
         }} />
         <span style={{ color: '#aaa', fontSize: '12px' }}>{value}</span>
       </div>
-      
       {showPicker && (
         <div style={{
           position: 'absolute',
@@ -277,8 +193,6 @@ function ColorEditor({
     </div>
   );
 }
-
-// Boolean Editor
 function BooleanEditor({
   value,
   onChange,
@@ -319,8 +233,6 @@ function BooleanEditor({
     </label>
   );
 }
-
-// Enum Editor
 function EnumEditor({
   value,
   options,
@@ -359,8 +271,6 @@ function EnumEditor({
     </select>
   );
 }
-
-// String Editor
 function StringEditor({
   value,
   onChange,
@@ -393,7 +303,6 @@ function StringEditor({
       />
     );
   }
-  
   return (
     <input
       type="text"
@@ -412,8 +321,6 @@ function StringEditor({
     />
   );
 }
-
-// Asset Selector
 function AssetSelector({
   value,
   assetType,
@@ -479,11 +386,6 @@ function AssetSelector({
     </div>
   );
 }
-
-// ============================================================================
-// PROPERTY ROW
-// ============================================================================
-
 function PropertyRow({
   property,
   onChange,
@@ -495,7 +397,6 @@ function PropertyRow({
     onChange(value);
     property.onChange?.(value);
   }, [onChange, property]);
-  
   const renderEditor = () => {
     switch (property.type) {
       case 'number':
@@ -509,7 +410,6 @@ function PropertyRow({
             readOnly={property.readOnly}
           />
         );
-        
       case 'string':
         return (
           <StringEditor
@@ -518,7 +418,6 @@ function PropertyRow({
             readOnly={property.readOnly}
           />
         );
-        
       case 'boolean':
         return (
           <BooleanEditor
@@ -527,7 +426,6 @@ function PropertyRow({
             readOnly={property.readOnly}
           />
         );
-        
       case 'vector3':
       case 'euler':
         return (
@@ -537,7 +435,6 @@ function PropertyRow({
             readOnly={property.readOnly}
           />
         );
-        
       case 'color':
         return (
           <ColorEditor
@@ -546,7 +443,6 @@ function PropertyRow({
             readOnly={property.readOnly}
           />
         );
-        
       case 'enum':
         return (
           <EnumEditor
@@ -556,7 +452,6 @@ function PropertyRow({
             readOnly={property.readOnly}
           />
         );
-        
       case 'asset':
         return (
           <AssetSelector
@@ -566,7 +461,6 @@ function PropertyRow({
             readOnly={property.readOnly}
           />
         );
-        
       default:
         return (
           <span style={{ color: '#666', fontSize: '12px' }}>
@@ -575,7 +469,6 @@ function PropertyRow({
         );
     }
   };
-  
   return (
     <div style={{
       display: 'grid',
@@ -601,11 +494,6 @@ function PropertyRow({
     </div>
   );
 }
-
-// ============================================================================
-// COMPONENT SECTION
-// ============================================================================
-
 function ComponentSection({
   component,
   onPropertyChange,
@@ -619,24 +507,18 @@ function ComponentSection({
 }) {
   const [expanded, setExpanded] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
   const basicProps = component.properties.filter(p => !p.advanced);
   const advancedProps = component.properties.filter(p => p.advanced);
-  
-  // Group by category
   const groupedProps = useMemo(() => {
     const props = showAdvanced ? component.properties : basicProps;
     const groups: Record<string, PropertyDefinition[]> = {};
-    
     for (const prop of props) {
       const cat = prop.category || 'General';
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(prop);
     }
-    
     return groups;
   }, [component.properties, basicProps, showAdvanced]);
-  
   return (
     <div style={{
       marginBottom: '8px',
@@ -660,15 +542,14 @@ function ComponentSection({
           {expanded ? '▼' : '▶'}
         </span>
         <span style={{ fontSize: '16px' }}>{component.icon}</span>
-        <span style={{ 
-          flex: 1, 
-          fontWeight: 'bold', 
+        <span style={{
+          flex: 1,
+          fontWeight: 'bold',
           fontSize: '13px',
           color: '#fff',
         }}>
           {component.name}
         </span>
-        
         {/* Enable toggle */}
         <div onClick={(e) => e.stopPropagation()}>
           <BooleanEditor
@@ -676,15 +557,19 @@ function ComponentSection({
             onChange={onToggleEnabled}
           />
         </div>
-        
         {/* Remove button */}
         {component.removable && (
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              if (confirm(`Remove ${component.name}?`)) {
-                onRemove();
-              }
+              const shouldRemove = await openConfirmDialog({
+                title: 'Remove component',
+                message: `Remove ${component.name}?`,
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+              });
+              if (!shouldRemove) return;
+              onRemove();
             }}
             style={{
               background: 'none',
@@ -699,7 +584,6 @@ function ComponentSection({
           </button>
         )}
       </div>
-      
       {/* Properties */}
       {expanded && (
         <div style={{ padding: '12px' }}>
@@ -717,7 +601,6 @@ function ComponentSection({
                   {category}
                 </div>
               )}
-              
               {props.map((prop) => (
                 <PropertyRow
                   key={prop.name}
@@ -727,7 +610,6 @@ function ComponentSection({
               ))}
             </div>
           ))}
-          
           {/* Advanced toggle */}
           {advancedProps.length > 0 && (
             <button
@@ -752,11 +634,6 @@ function ComponentSection({
     </div>
   );
 }
-
-// ============================================================================
-// TRANSFORM SECTION
-// ============================================================================
-
 function TransformSection({
   transform,
   onChange,
@@ -769,7 +646,6 @@ function TransformSection({
   onChange: (transform: { position: THREE.Vector3; rotation: THREE.Euler; scale: THREE.Vector3 }) => void;
 }) {
   const [expanded, setExpanded] = useState(true);
-  
   return (
     <div style={{
       marginBottom: '8px',
@@ -793,15 +669,14 @@ function TransformSection({
           {expanded ? '▼' : '▶'}
         </span>
         <span style={{ fontSize: '16px' }}>🔄</span>
-        <span style={{ 
-          flex: 1, 
-          fontWeight: 'bold', 
+        <span style={{
+          flex: 1,
+          fontWeight: 'bold',
           fontSize: '13px',
           color: '#fff',
         }}>
           Transform
         </span>
-        
         {/* Reset button */}
         <button
           onClick={(e) => {
@@ -825,7 +700,6 @@ function TransformSection({
           ↺
         </button>
       </div>
-      
       {expanded && (
         <div style={{ padding: '12px' }}>
           {/* Position */}
@@ -855,7 +729,6 @@ function TransformSection({
               onChange={(v) => onChange({ ...transform, position: new THREE.Vector3(v.x, v.y, v.z) })}
             />
           </div>
-          
           {/* Rotation */}
           <div style={{ marginBottom: '12px' }}>
             <div style={{
@@ -879,13 +752,13 @@ function TransformSection({
               </button>
             </div>
             <Vector3Editor
-              value={{ 
-                x: THREE.MathUtils.radToDeg(transform.rotation.x), 
-                y: THREE.MathUtils.radToDeg(transform.rotation.y), 
+              value={{
+                x: THREE.MathUtils.radToDeg(transform.rotation.x),
+                y: THREE.MathUtils.radToDeg(transform.rotation.y),
                 z: THREE.MathUtils.radToDeg(transform.rotation.z),
               }}
-              onChange={(v) => onChange({ 
-                ...transform, 
+              onChange={(v) => onChange({
+                ...transform,
                 rotation: new THREE.Euler(
                   THREE.MathUtils.degToRad(v.x),
                   THREE.MathUtils.degToRad(v.y),
@@ -894,7 +767,6 @@ function TransformSection({
               })}
             />
           </div>
-          
           {/* Scale */}
           <div>
             <div style={{
@@ -927,25 +799,18 @@ function TransformSection({
     </div>
   );
 }
-
-// ============================================================================
-// MAIN DETAILS PANEL COMPONENT
-// ============================================================================
-
 export interface DetailsPanelProps {
   selectedObject?: InspectedObject | null;
   onObjectChange?: (object: InspectedObject) => void;
   onAddComponent?: (componentType: string) => void;
   onRemoveComponent?: (componentId: string) => void;
 }
-
 export default function DetailsPanel({
   selectedObject: initialObject,
   onObjectChange,
   onAddComponent,
   onRemoveComponent,
 }: DetailsPanelProps) {
-  // Sample data if none provided
   const [selectedObject, setSelectedObject] = useState<InspectedObject | null>(initialObject || {
     id: '1',
     name: 'Player',
@@ -1041,9 +906,7 @@ export default function DetailsPanel({
       { name: 'static', displayName: 'Static', type: 'boolean', value: false },
     ],
   });
-  
   const [showAddComponent, setShowAddComponent] = useState(false);
-  
   const availableComponents = [
     { type: 'mesh', name: 'Static Mesh', icon: '🔷' },
     { type: 'skeletal_mesh', name: 'Skeletal Mesh', icon: '🦴' },
@@ -1059,24 +922,21 @@ export default function DetailsPanel({
     { type: 'animator', name: 'Animator', icon: '🎬' },
     { type: 'nav_agent', name: 'Nav Mesh Agent', icon: '🧭' },
   ];
-  
   const handleTransformChange = useCallback((transform: NonNullable<InspectedObject['transform']>) => {
     if (!selectedObject) return;
     const updated = { ...selectedObject, transform };
     setSelectedObject(updated);
     onObjectChange?.(updated);
   }, [selectedObject, onObjectChange]);
-  
   const handlePropertyChange = useCallback((componentId: string, propertyName: string, value: unknown) => {
     if (!selectedObject) return;
-    
     const updated = {
       ...selectedObject,
       components: selectedObject.components.map(comp => {
         if (comp.id === componentId) {
           return {
             ...comp,
-            properties: comp.properties.map(prop => 
+            properties: comp.properties.map(prop =>
               prop.name === propertyName ? { ...prop, value } : prop
             ),
           };
@@ -1084,52 +944,41 @@ export default function DetailsPanel({
         return comp;
       }),
     };
-    
     setSelectedObject(updated);
     onObjectChange?.(updated);
   }, [selectedObject, onObjectChange]);
-  
   const handleComponentToggle = useCallback((componentId: string) => {
     if (!selectedObject) return;
-    
     const updated = {
       ...selectedObject,
-      components: selectedObject.components.map(comp => 
+      components: selectedObject.components.map(comp =>
         comp.id === componentId ? { ...comp, enabled: !comp.enabled } : comp
       ),
     };
-    
     setSelectedObject(updated);
     onObjectChange?.(updated);
   }, [selectedObject, onObjectChange]);
-  
   const handleComponentRemove = useCallback((componentId: string) => {
     if (!selectedObject) return;
-    
     const updated = {
       ...selectedObject,
       components: selectedObject.components.filter(comp => comp.id !== componentId),
     };
-    
     setSelectedObject(updated);
     onObjectChange?.(updated);
     onRemoveComponent?.(componentId);
   }, [selectedObject, onObjectChange, onRemoveComponent]);
-  
   const handleStaticPropertyChange = useCallback((propertyName: string, value: unknown) => {
     if (!selectedObject || !selectedObject.staticProperties) return;
-    
     const updated = {
       ...selectedObject,
-      staticProperties: selectedObject.staticProperties.map(prop => 
+      staticProperties: selectedObject.staticProperties.map(prop =>
         prop.name === propertyName ? { ...prop, value } : prop
       ),
     };
-    
     setSelectedObject(updated);
     onObjectChange?.(updated);
   }, [selectedObject, onObjectChange]);
-  
   if (!selectedObject) {
     return (
       <div style={{
@@ -1163,7 +1012,6 @@ export default function DetailsPanel({
       </div>
     );
   }
-  
   return (
     <div style={{
       display: 'flex',
@@ -1182,7 +1030,6 @@ export default function DetailsPanel({
       }}>
         📋 Details
       </div>
-      
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
         {/* Object Header */}
@@ -1220,7 +1067,6 @@ export default function DetailsPanel({
             </div>
           </div>
         </div>
-        
         {/* Static Properties */}
         {selectedObject.staticProperties && selectedObject.staticProperties.length > 0 && (
           <div style={{
@@ -1238,7 +1084,6 @@ export default function DetailsPanel({
             ))}
           </div>
         )}
-        
         {/* Transform */}
         {selectedObject.transform && (
           <TransformSection
@@ -1246,7 +1091,6 @@ export default function DetailsPanel({
             onChange={handleTransformChange}
           />
         )}
-        
         {/* Components */}
         {selectedObject.components.map((component) => (
           <ComponentSection
@@ -1257,7 +1101,6 @@ export default function DetailsPanel({
             onRemove={() => handleComponentRemove(component.id)}
           />
         ))}
-        
         {/* Add Component Button */}
         <div style={{ position: 'relative' }}>
           <button
@@ -1280,7 +1123,6 @@ export default function DetailsPanel({
           >
             ➕ Add Component
           </button>
-          
           {showAddComponent && (
             <div style={{
               position: 'absolute',

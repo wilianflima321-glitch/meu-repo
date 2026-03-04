@@ -23,6 +23,12 @@ Output:
 - `tools/ide/ui-audit/output/*-axe.json` - axe results per page
 - `tools/ide/ui-audit/output/ui-audit-report.json` - small summary report
 
+Assert thresholds:
+
+```powershell
+PS> node tools/ide/ui-audit/assert_a11y_report.js --report tools/ide/ui-audit/output/ui-audit-report.json --required home,dashboard,ide,settings,login,register --maxViolations 20
+```
+
 Notes and limitations:
 
 - The script injects `axe-core` from a CDN at runtime (best-effort). CI environments with restricted egress may block this and axe checks will fail. If needed, add `axe-core` to repo dependencies and change the script to load local bundle.

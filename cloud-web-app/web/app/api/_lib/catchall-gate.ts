@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { capabilityResponse } from '@/lib/server/capability-response'
 
 type CatchallParams = {
   path?: string[]
@@ -17,7 +17,10 @@ export function catchallNotImplemented(options: CatchallGateOptions) {
   const normalizedNamespace = options.namespace.toUpperCase().replace(/[^A-Z0-9]+/g, '_')
   const capability = `${normalizedNamespace}_CATCHALL`
 
-  return notImplementedCapability({
+  return capabilityResponse({
+    error: 'ROUTE_NOT_MAPPED',
+    status: 404,
+    capabilityStatus: 'PARTIAL',
     message: `Endpoint /api/${options.namespace}/${path || '[root]'} is not available in this release channel.`,
     capability,
     milestone: options.milestone || 'P1',

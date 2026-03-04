@@ -3,7 +3,8 @@ import { requireAuth } from '@/lib/auth-server'
 import { aiService } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
-import { notImplementedCapability } from '@/lib/server/capability-response'
+import { capabilityResponse } from '@/lib/server/capability-response'
+import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
 
 /**
  * POST /api/ai/complete
@@ -102,12 +103,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (aiService.getAvailableProviders().length === 0) {
-      return notImplementedCapability({
-        error: 'NOT_IMPLEMENTED',
-        status: 501,
+      return capabilityResponse({
+        error: 'AI_PROVIDER_NOT_CONFIGURED',
+        status: 503,
         message: 'AI provider not configured.',
         capability: 'AI_COMPLETE',
+        capabilityStatus: 'PARTIAL',
         milestone: 'P0',
+        metadata: buildAiProviderSetupMetadata({ route: '/api/ai/complete' }),
       })
     }
 

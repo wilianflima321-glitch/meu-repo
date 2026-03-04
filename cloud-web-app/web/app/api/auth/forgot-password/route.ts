@@ -7,13 +7,95 @@ import { Redis } from '@upstash/redis';
 
 export const dynamic = 'force-dynamic';
 
-// Rate limit: 3 requests per hour per IP (prevent bruteforce enumeration)
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(3, '1 h'),
-  analytics: true,
-  prefix: 'aethel:forgot-password',
-});
+type RateLimitResult = {
+  success: boolean
+  limit: number
+  remaining: number
+  reset: number
+}
+
+const FORGOT_PASSWORD_RATE_LIMIT = 3
+const FORGOT_PASSWORD_WINDOW_MS = 60 * 60 * 1000
+
+let upstashLimiter: Ratelimit | null | undefined
+
+const globalLimiterStore = globalThis as typeof globalThis & {
+  __aethelForgotPasswordLimiterStore?: Map<string, { count: number; resetAt: number }>
+}
+
+const localLimiterStore =
+  globalLimiterStore.__aethelForgotPasswordLimiterStore ??
+  (globalLimiterStore.__aethelForgotPasswordLimiterStore = new Map())
+
+function getUpstashLimiter(): Ratelimit | null {
+  if (upstashLimiter !== undefined) return upstashLimiter
+
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if (!url || !token) {
+    upstashLimiter = null
+    return upstashLimiter
+  }
+
+  upstashLimiter = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(FORGOT_PASSWORD_RATE_LIMIT, '1 h'),
+    analytics: true,
+    prefix: 'aethel:forgot-password',
+  })
+  return upstashLimiter
+}
+
+function runLocalRateLimit(ip: string): RateLimitResult {
+  const key = `forgot:${ip}`
+  const now = Date.now()
+  const current = localLimiterStore.get(key)
+
+  if (!current || current.resetAt <= now) {
+    const resetAt = now + FORGOT_PASSWORD_WINDOW_MS
+    localLimiterStore.set(key, { count: 1, resetAt })
+    return {
+      success: true,
+      limit: FORGOT_PASSWORD_RATE_LIMIT,
+      remaining: FORGOT_PASSWORD_RATE_LIMIT - 1,
+      reset: Math.floor(resetAt / 1000),
+    }
+  }
+
+  if (current.count >= FORGOT_PASSWORD_RATE_LIMIT) {
+    return {
+      success: false,
+      limit: FORGOT_PASSWORD_RATE_LIMIT,
+      remaining: 0,
+      reset: Math.floor(current.resetAt / 1000),
+    }
+  }
+
+  current.count += 1
+  localLimiterStore.set(key, current)
+  return {
+    success: true,
+    limit: FORGOT_PASSWORD_RATE_LIMIT,
+    remaining: Math.max(0, FORGOT_PASSWORD_RATE_LIMIT - current.count),
+    reset: Math.floor(current.resetAt / 1000),
+  }
+}
+
+async function limitForgotPasswordRequests(ip: string): Promise<RateLimitResult> {
+  const limiter = getUpstashLimiter()
+  if (!limiter) {
+    return runLocalRateLimit(ip)
+  }
+
+  const result = await limiter.limit(`forgot:${ip}`)
+  return {
+    success: result.success,
+    limit: result.limit,
+    remaining: result.remaining,
+    reset: result.reset,
+  }
+}
 
 /**
  * POST /api/auth/forgot-password
@@ -28,7 +110,7 @@ export async function POST(req: NextRequest) {
                req.headers.get('x-real-ip') ?? 
                'anonymous';
     
-    const { success, limit, reset, remaining } = await ratelimit.limit(`forgot:${ip}`);
+    const { success, limit, reset, remaining } = await limitForgotPasswordRequests(ip);
     
     if (!success) {
       return NextResponse.json(

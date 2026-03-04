@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getWorkspaceManager, WorkspaceFolder } from '../../lib/workspace/workspace-manager';
+import { openConfirmDialog } from '../../lib/ui/non-blocking-dialogs';
 
 interface WorkspaceSwitcherProps {
   onClose: () => void;
@@ -42,9 +43,14 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
   };
 
   const handleRemoveFolder = async (index: number) => {
-    if (confirm('Remove this folder from workspace?')) {
-      await workspaceManager.removeWorkspaceFolder(index);
-    }
+    const shouldRemove = await openConfirmDialog({
+      title: 'Remover pasta',
+      message: 'Remove this folder from workspace?',
+      confirmText: 'Remover',
+      cancelText: 'Cancelar',
+    });
+    if (!shouldRemove) return;
+    await workspaceManager.removeWorkspaceFolder(index);
   };
 
   const handleOpenRecent = (workspaceUri: string) => {

@@ -1,6 +1,4 @@
-﻿import type { Edge, Node } from '@xyflow/react'
-
-import type { Project, UseCase, WorkflowTemplate } from './aethel-dashboard-model'
+﻿import type { Project, UseCase, WorkflowTemplate } from './aethel-dashboard-model'
 
 export const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
   {
@@ -116,31 +114,6 @@ export const DEFAULT_PROJECTS: Project[] = [
   { id: 3, name: 'Funil de automacao', type: 'web', status: 'planning' },
 ]
 
-export const INITIAL_NODES: Node[] = [
-  {
-    id: '1',
-    position: { x: 80, y: 40 },
-    data: { label: 'Sinal de entrada' },
-    type: 'input',
-  },
-  {
-    id: '2',
-    position: { x: 320, y: 140 },
-    data: { label: 'Orquestrador IA' },
-  },
-  {
-    id: '3',
-    position: { x: 560, y: 40 },
-    data: { label: 'Saida' },
-    type: 'output',
-  },
-]
-
-export const INITIAL_EDGES: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3' },
-]
-
 export const HEALTH_KEY = 'health::status'
 export const CONNECTIVITY_KEY = 'connectivity::status'
 export const BILLING_PLANS_KEY = 'billing::plans'
@@ -212,3 +185,6 @@ export function getScopedKeys(projectId: string | null) {
     legacyWorkflowKey: COPILOT_WORKFLOW_KEY_BASE,
   }
 }
+
+
+

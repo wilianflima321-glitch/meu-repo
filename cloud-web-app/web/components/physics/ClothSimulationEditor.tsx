@@ -1,19 +1,3 @@
-/**
- * CLOTH SIMULATION EDITOR - Aethel Engine
- * 
- * Editor visual profissional para simulação de tecidos.
- * Integra diretamente com cloth-simulation.ts para resultados em tempo real.
- * 
- * FEATURES:
- * - Configuração completa de parâmetros físicos
- * - Pin vertices com seleção visual interativa
- * - Preview em tempo real com controles de câmera
- * - Múltiplos tipos de constraint (distance, bending, shear)
- * - Self-collision configurável
- * - Wind simulation com direção visual
- * - Export para runtime otimizado
- * - Presets profissionais (silk, cotton, leather, etc)
- */
 
 'use client';
 
@@ -58,9 +42,6 @@ import {
   ClothCollider,
 } from '@/lib/cloth-simulation';
 
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export type ClothToolType = 
   | 'select'
@@ -88,9 +69,6 @@ export interface ClothEditorState {
   currentPreset: string | null;
 }
 
-// ============================================================================
-// PRESETS PROFISSIONAIS
-// ============================================================================
 
 const CLOTH_PRESETS: ClothPreset[] = [
   {
@@ -192,9 +170,6 @@ const CLOTH_PRESETS: ClothPreset[] = [
   },
 ];
 
-// ============================================================================
-// SLIDER COMPONENT
-// ============================================================================
 
 interface SliderProps {
   label: string;
@@ -237,9 +212,6 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, tool
   );
 }
 
-// ============================================================================
-// VECTOR3 INPUT COMPONENT
-// ============================================================================
 
 interface Vector3InputProps {
   label: string;
@@ -277,9 +249,6 @@ function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.
   );
 }
 
-// ============================================================================
-// COLLAPSIBLE SECTION
-// ============================================================================
 
 interface CollapsibleSectionProps {
   title: string;
@@ -307,9 +276,6 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
   );
 }
 
-// ============================================================================
-// CLOTH MESH 3D COMPONENT
-// ============================================================================
 
 interface ClothMesh3DProps {
   simulation: ClothSimulation | null;
@@ -332,7 +298,6 @@ function ClothMesh3D({
   
   const [hoverVertex, setHoverVertex] = useState<number | null>(null);
   
-  // Create geometry from simulation
   const { geometry, pointsGeometry, constraintGeometry } = useMemo(() => {
     if (!simulation) return { geometry: null, pointsGeometry: null, constraintGeometry: null };
     
@@ -340,7 +305,6 @@ function ClothMesh3D({
     const segmentsY = config.segmentsY;
     const particles = simulation.particles;
     
-    // Cloth mesh geometry
     const geo = new THREE.BufferGeometry();
     const positions: number[] = [];
     const normals: number[] = [];
@@ -355,7 +319,6 @@ function ClothMesh3D({
       );
     }
     
-    // Create indices for quad mesh
     for (let j = 0; j < segmentsY; j++) {
       for (let i = 0; i < segmentsX; i++) {
         const a = j * (segmentsX + 1) + i;
@@ -373,7 +336,6 @@ function ClothMesh3D({
     geo.setIndex(indices);
     geo.computeVertexNormals();
     
-    // Points geometry for vertex selection
     const pointsGeo = new THREE.BufferGeometry();
     const pointPositions: number[] = [];
     const pointColors: number[] = [];
@@ -394,7 +356,6 @@ function ClothMesh3D({
     pointsGeo.setAttribute('position', new THREE.Float32BufferAttribute(pointPositions, 3));
     pointsGeo.setAttribute('color', new THREE.Float32BufferAttribute(pointColors, 3));
     
-    // Constraint lines geometry
     const constraintGeo = new THREE.BufferGeometry();
     const linePositions: number[] = [];
     const lineColors: number[] = [];
@@ -409,7 +370,6 @@ function ClothMesh3D({
         linePositions.push(p1.position.x, p1.position.y, p1.position.z);
         linePositions.push(p2.position.x, p2.position.y, p2.position.z);
         
-        // Color by constraint type
         let color: [number, number, number];
         switch (constraint.type) {
           case 'structural': color = [0.2, 0.8, 0.2]; break;
@@ -428,13 +388,11 @@ function ClothMesh3D({
     return { geometry: geo, pointsGeometry: pointsGeo, constraintGeometry: constraintGeo };
   }, [simulation, config, editorState.selectedVertices, editorState.pinnedVertices, editorState.showConstraints]);
   
-  // Update simulation each frame
   useFrame((_, delta) => {
     if (!simulation || !editorState.isSimulating) return;
     
     simulation.update(Math.min(delta, 0.033)); // Cap at ~30fps physics
     
-    // Update mesh geometry
     if (meshRef.current && geometry) {
       const positions = geometry.attributes.position.array as Float32Array;
       for (let i = 0; i < simulation.particles.length; i++) {
@@ -447,7 +405,6 @@ function ClothMesh3D({
       geometry.computeVertexNormals();
     }
     
-    // Update points
     if (pointsRef.current && pointsGeometry) {
       const positions = pointsGeometry.attributes.position.array as Float32Array;
       for (let i = 0; i < simulation.particles.length; i++) {
@@ -460,7 +417,6 @@ function ClothMesh3D({
     }
   });
   
-  // Handle vertex click
   const handlePointClick = useCallback((event: THREE.Event) => {
     if (!simulation) return;
     
@@ -508,9 +464,6 @@ function ClothMesh3D({
   );
 }
 
-// ============================================================================
-// COLLIDER VISUALIZER
-// ============================================================================
 
 interface ColliderVisualizerProps {
   colliders: ClothCollider[];
@@ -585,9 +538,6 @@ function ColliderVisualizer({
   );
 }
 
-// ============================================================================
-// WIND ARROW VISUALIZER
-// ============================================================================
 
 interface WindArrowProps {
   direction: { x: number; y: number; z: number };
@@ -622,9 +572,6 @@ function WindArrow({ direction, strength, visible }: WindArrowProps) {
   );
 }
 
-// ============================================================================
-// TOOLBAR COMPONENT
-// ============================================================================
 
 interface ToolbarProps {
   selectedTool: ClothToolType;
@@ -693,9 +640,6 @@ function Toolbar({
   );
 }
 
-// ============================================================================
-// MAIN CLOTH SIMULATION EDITOR
-// ============================================================================
 
 export interface ClothSimulationEditorProps {
   meshId?: string;
@@ -710,7 +654,6 @@ export default function ClothSimulationEditor({
   onSimulationUpdate,
   onExport,
 }: ClothSimulationEditorProps) {
-  // Configuration state
   const [config, setConfig] = useState<ClothConfig>({
     width: 4,
     height: 4,
@@ -730,7 +673,6 @@ export default function ClothSimulationEditor({
     ...initialConfig,
   });
   
-  // Editor state
   const [editorState, setEditorState] = useState<ClothEditorState>({
     selectedVertices: new Set(),
     pinnedVertices: new Set([0, 1, 2, 3, 4]), // Default: pin top row
@@ -741,11 +683,9 @@ export default function ClothSimulationEditor({
     currentPreset: null,
   });
   
-  // Tool state
   const [selectedTool, setSelectedTool] = useState<ClothToolType>('select');
   const [showWindArrow, setShowWindArrow] = useState(true);
   
-  // Colliders
   const [colliders, setColliders] = useState<ClothCollider[]>([
     {
       type: 'sphere',
@@ -755,27 +695,22 @@ export default function ClothSimulationEditor({
   ]);
   const [selectedCollider, setSelectedCollider] = useState<number | null>(null);
   
-  // Simulation instance
   const [simulation, setSimulation] = useState<ClothSimulation | null>(null);
   
-  // Initialize simulation
   useEffect(() => {
     const sim = new ClothSimulation(config);
     
-    // Apply pinned vertices
     for (const idx of editorState.pinnedVertices) {
       if (sim.particles[idx]) {
         sim.particles[idx].pinned = true;
       }
     }
     
-    // Add colliders
     sim.setColliders(colliders);
     
     setSimulation(sim);
   }, [config, colliders, editorState.pinnedVertices]);
   
-  // Update simulation config when changed
   useEffect(() => {
     if (simulation) {
       simulation.updateConfig(config);
@@ -784,7 +719,6 @@ export default function ClothSimulationEditor({
     }
   }, [simulation, config, colliders, onSimulationUpdate]);
   
-  // Handle vertex click
   const handleVertexClick = useCallback((index: number, shiftKey: boolean) => {
     if (!simulation) return;
     
@@ -825,7 +759,6 @@ export default function ClothSimulationEditor({
           break;
           
         case 'tear':
-          // Mark constraints connected to this vertex as broken
           for (const constraint of simulation.constraints) {
             if (constraint.p1 === index || constraint.p2 === index) {
               constraint.broken = true;
@@ -838,7 +771,6 @@ export default function ClothSimulationEditor({
     });
   }, [simulation, selectedTool]);
   
-  // Apply preset
   const applyPreset = useCallback((preset: ClothPreset) => {
     setConfig((prev) => ({
       ...prev,
@@ -852,7 +784,6 @@ export default function ClothSimulationEditor({
     }));
   }, []);
   
-  // Reset simulation
   const resetSimulation = useCallback(() => {
     const sim = new ClothSimulation(config);
     for (const idx of editorState.pinnedVertices) {
@@ -865,7 +796,6 @@ export default function ClothSimulationEditor({
     setEditorState((prev) => ({ ...prev, isSimulating: false }));
   }, [config, editorState.pinnedVertices, colliders]);
   
-  // Export configuration
   const handleExport = useCallback(() => {
     onExport?.({
       config,
@@ -873,7 +803,6 @@ export default function ClothSimulationEditor({
     });
   }, [config, editorState.pinnedVertices, onExport]);
   
-  // Add collider
   const addCollider = useCallback((type: ClothCollider['type']) => {
     const newCollider: ClothCollider = {
       type,
@@ -885,7 +814,6 @@ export default function ClothSimulationEditor({
     setColliders((prev) => [...prev, newCollider]);
   }, []);
   
-  // Remove selected collider
   const removeSelectedCollider = useCallback(() => {
     if (selectedCollider !== null) {
       setColliders((prev) => prev.filter((_, i) => i !== selectedCollider));

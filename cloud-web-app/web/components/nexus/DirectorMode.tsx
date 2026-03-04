@@ -23,8 +23,8 @@ export default function DirectorMode() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-pink-600/20 rounded-lg border border-pink-500/30">
-            <Clapperboard className="text-pink-400" size={20} />
+          <div className="p-2 bg-blue-600/20 rounded-lg border border-blue-500/30">
+            <Clapperboard className="text-blue-400" size={20} />
           </div>
           <div>
             <h2 className="text-lg font-bold uppercase tracking-wider">Director Mode</h2>
@@ -117,7 +117,7 @@ export default function DirectorMode() {
             <span className="text-[9px] font-bold text-zinc-500 uppercase">Qualidade</span>
           </button>
           <button className="flex flex-col items-center gap-1 p-3 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-all">
-            <Box size={16} className="text-purple-400" />
+            <Box size={16} className="text-cyan-400" />
             <span className="text-[9px] font-bold text-zinc-500 uppercase">Assets</span>
           </button>
         </div>

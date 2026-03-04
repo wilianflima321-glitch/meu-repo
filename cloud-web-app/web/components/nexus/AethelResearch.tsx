@@ -143,7 +143,7 @@ export default function AethelResearch() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-zinc-900/30 border border-zinc-800 rounded-xl">
                   <div className="flex items-center gap-2 mb-2">
-                    <Database size={14} className="text-purple-400" />
+                    <Database size={14} className="text-blue-400" />
                     <span className="text-[10px] font-bold text-zinc-500 uppercase">Dados Brutos</span>
                   </div>
                   <div className="text-lg font-bold text-zinc-200">1.2 TB</div>

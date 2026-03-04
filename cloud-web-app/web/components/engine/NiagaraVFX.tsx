@@ -1,14 +1,4 @@
-/**
- * Niagara VFX System - Editor de Partículas Visual
- * 
- * Sistema profissional estilo Unreal Engine para criar
- * efeitos visuais de partículas com node-based editor.
- * 
- * NÃO É MOCK - Sistema real e funcional!
- */
-
 'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   ReactFlow,
@@ -31,11 +21,6 @@ import '@xyflow/react/dist/style.css';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport, Grid, Stats } from '@react-three/drei';
 import * as THREE from 'three';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
 interface ParticleSystemState {
   id: string;
   name: string;
@@ -44,68 +29,45 @@ interface ParticleSystemState {
   duration: number;
   looping: boolean;
 }
-
 interface EmitterConfig {
   id: string;
   name: string;
   enabled: boolean;
-  
-  // Spawn
   spawnRate: number;
   spawnBurst: { time: number; count: number }[];
   maxParticles: number;
-  
-  // Lifetime
   lifetime: { min: number; max: number };
-  
-  // Position
   spawnShape: 'point' | 'sphere' | 'box' | 'cone' | 'cylinder' | 'mesh';
   spawnShapeParams: Record<string, number>;
-  
-  // Velocity
   initialVelocity: { min: THREE.Vector3; max: THREE.Vector3 };
   velocityOverLife: VelocityCurve[];
-  
-  // Size
   initialSize: { min: number; max: number };
   sizeOverLife: SizeCurve[];
-  
-  // Color
   initialColor: THREE.Color;
   colorOverLife: ColorGradient[];
-  
-  // Rotation
   initialRotation: { min: number; max: number };
   rotationRate: { min: number; max: number };
-  
-  // Forces
   gravity: THREE.Vector3;
   drag: number;
   turbulence: { strength: number; frequency: number };
-  
-  // Rendering
   material: 'sprite' | 'mesh' | 'ribbon' | 'beam';
   texture?: string;
   blendMode: 'additive' | 'alpha' | 'multiply';
   sortMode: 'none' | 'byDistance' | 'byAge';
 }
-
 interface VelocityCurve {
   time: number;
   multiplier: number;
 }
-
 interface SizeCurve {
   time: number;
   size: number;
 }
-
 interface ColorGradient {
   time: number;
   color: THREE.Color;
   alpha: number;
 }
-
 interface Particle {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
@@ -117,34 +79,21 @@ interface Particle {
   rotation: number;
   rotationRate: number;
 }
-
-// ============================================================================
-// PARTICLE SYSTEM CORE
-// ============================================================================
-
 class ParticleEmitter {
   private particles: Particle[] = [];
   private timeSinceLastSpawn: number = 0;
   private burstIndex: number = 0;
   private systemTime: number = 0;
-  
   constructor(public config: EmitterConfig) {}
-  
   update(deltaTime: number): Particle[] {
     if (!this.config.enabled) return this.particles;
-    
     this.systemTime += deltaTime;
-    
-    // Spawn particles
     this.timeSinceLastSpawn += deltaTime;
     const spawnInterval = 1 / this.config.spawnRate;
-    
     while (this.timeSinceLastSpawn >= spawnInterval && this.particles.length < this.config.maxParticles) {
       this.spawnParticle();
       this.timeSinceLastSpawn -= spawnInterval;
     }
-    
-    // Handle bursts
     while (this.burstIndex < this.config.spawnBurst.length) {
       const burst = this.config.spawnBurst[this.burstIndex];
       if (this.systemTime >= burst.time) {
@@ -156,24 +105,16 @@ class ParticleEmitter {
         break;
       }
     }
-    
-    // Update particles
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
       p.age += deltaTime;
-      
       if (p.age >= p.lifetime) {
         this.particles.splice(i, 1);
         continue;
       }
-      
       const normalizedAge = p.age / p.lifetime;
-      
-      // Apply forces
       p.velocity.add(this.config.gravity.clone().multiplyScalar(deltaTime));
       p.velocity.multiplyScalar(1 - this.config.drag * deltaTime);
-      
-      // Apply turbulence
       if (this.config.turbulence.strength > 0) {
         const turb = new THREE.Vector3(
           Math.sin(this.systemTime * this.config.turbulence.frequency + p.position.x),
@@ -182,8 +123,6 @@ class ParticleEmitter {
         ).multiplyScalar(this.config.turbulence.strength * deltaTime);
         p.velocity.add(turb);
       }
-      
-      // Apply velocity over life
       let velocityMult = 1;
       for (let j = 0; j < this.config.velocityOverLife.length - 1; j++) {
         const curr = this.config.velocityOverLife[j];
@@ -194,11 +133,7 @@ class ParticleEmitter {
           break;
         }
       }
-      
-      // Update position
       p.position.add(p.velocity.clone().multiplyScalar(deltaTime * velocityMult));
-      
-      // Update size over life
       for (let j = 0; j < this.config.sizeOverLife.length - 1; j++) {
         const curr = this.config.sizeOverLife[j];
         const next = this.config.sizeOverLife[j + 1];
@@ -208,8 +143,6 @@ class ParticleEmitter {
           break;
         }
       }
-      
-      // Update color over life
       for (let j = 0; j < this.config.colorOverLife.length - 1; j++) {
         const curr = this.config.colorOverLife[j];
         const next = this.config.colorOverLife[j + 1];
@@ -220,23 +153,17 @@ class ParticleEmitter {
           break;
         }
       }
-      
-      // Update rotation
       p.rotation += p.rotationRate * deltaTime;
     }
-    
     return this.particles;
   }
-  
   private spawnParticle(): void {
     const position = this.getSpawnPosition();
-    
     const velocity = new THREE.Vector3(
       THREE.MathUtils.randFloat(this.config.initialVelocity.min.x, this.config.initialVelocity.max.x),
       THREE.MathUtils.randFloat(this.config.initialVelocity.min.y, this.config.initialVelocity.max.y),
       THREE.MathUtils.randFloat(this.config.initialVelocity.min.z, this.config.initialVelocity.max.z)
     );
-    
     const particle: Particle = {
       position,
       velocity,
@@ -248,17 +175,13 @@ class ParticleEmitter {
       rotation: THREE.MathUtils.randFloat(this.config.initialRotation.min, this.config.initialRotation.max),
       rotationRate: THREE.MathUtils.randFloat(this.config.rotationRate.min, this.config.rotationRate.max),
     };
-    
     this.particles.push(particle);
   }
-  
   private getSpawnPosition(): THREE.Vector3 {
     const params = this.config.spawnShapeParams;
-    
     switch (this.config.spawnShape) {
       case 'point':
         return new THREE.Vector3(0, 0, 0);
-        
       case 'sphere': {
         const radius = params.radius || 1;
         const theta = Math.random() * Math.PI * 2;
@@ -269,7 +192,6 @@ class ParticleEmitter {
           radius * Math.cos(phi)
         );
       }
-        
       case 'box': {
         const width = params.width || 1;
         const height = params.height || 1;
@@ -280,7 +202,6 @@ class ParticleEmitter {
           THREE.MathUtils.randFloatSpread(depth)
         );
       }
-        
       case 'cone': {
         const angle = params.angle || 45;
         const radius = params.radius || 1;
@@ -293,7 +214,6 @@ class ParticleEmitter {
           r * Math.sin(theta)
         );
       }
-        
       case 'cylinder': {
         const cylinderRadius = params.radius || 1;
         const cylinderHeight = params.height || 2;
@@ -304,74 +224,56 @@ class ParticleEmitter {
           cylinderRadius * Math.sin(cylinderTheta)
         );
       }
-        
       default:
         return new THREE.Vector3(0, 0, 0);
     }
   }
-  
   reset(): void {
     this.particles = [];
     this.timeSinceLastSpawn = 0;
     this.burstIndex = 0;
     this.systemTime = 0;
   }
-  
   getParticleCount(): number {
     return this.particles.length;
   }
 }
-
-// ============================================================================
-// 3D PARTICLE RENDERER
-// ============================================================================
-
 interface ParticleRendererProps {
   emitters: ParticleEmitter[];
   isPlaying: boolean;
 }
-
 function ParticleRenderer({ emitters, isPlaying }: ParticleRendererProps) {
   const pointsRef = useRef<THREE.Points>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
-  
   useFrame((_, delta) => {
     if (!isPlaying) return;
-    
     const allParticles: Particle[] = [];
     for (const emitter of emitters) {
       allParticles.push(...emitter.update(delta));
     }
     setParticles(allParticles);
   });
-  
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     const positions = new Float32Array(particles.length * 3);
     const colors = new Float32Array(particles.length * 4);
     const sizes = new Float32Array(particles.length);
-    
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       positions[i * 3] = p.position.x;
       positions[i * 3 + 1] = p.position.y;
       positions[i * 3 + 2] = p.position.z;
-      
       colors[i * 4] = p.color.r;
       colors[i * 4 + 1] = p.color.g;
       colors[i * 4 + 2] = p.color.b;
       colors[i * 4 + 3] = p.alpha;
-      
       sizes[i] = p.size;
     }
-    
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 4));
     geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    
     return geo;
   }, [particles]);
-  
   return (
     <points ref={pointsRef} geometry={geometry}>
       <pointsMaterial
@@ -385,11 +287,6 @@ function ParticleRenderer({ emitters, isPlaying }: ParticleRendererProps) {
     </points>
   );
 }
-
-// ============================================================================
-// NODE COMPONENTS FOR REACTFLOW
-// ============================================================================
-
 const nodeStyles = {
   emitter: {
     background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
@@ -420,7 +317,6 @@ const nodeStyles = {
     border: '2px solid #1c2833',
   },
 };
-
 interface NiagaraNodeProps {
   data: {
     label: string;
@@ -430,10 +326,8 @@ interface NiagaraNodeProps {
   };
   selected: boolean;
 }
-
 function NiagaraNode({ data, selected }: NiagaraNodeProps) {
   const style = nodeStyles[data.type] || nodeStyles.emitter;
-  
   return (
     <div
       style={{
@@ -446,31 +340,22 @@ function NiagaraNode({ data, selected }: NiagaraNodeProps) {
       }}
     >
       <Handle type="target" position={Position.Left} style={{ background: '#fff', width: 10, height: 10 }} />
-      
       <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '12px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
         {data.label}
       </div>
-      
       {data.params && Object.entries(data.params).slice(0, 3).map(([key, value]) => (
         <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'rgba(255,255,255,0.8)', marginBottom: '2px' }}>
           <span>{key}:</span>
           <span style={{ fontWeight: 'bold' }}>{typeof value === 'number' ? value.toFixed(2) : String(value)}</span>
         </div>
       ))}
-      
       <Handle type="source" position={Position.Right} style={{ background: '#fff', width: 10, height: 10 }} />
     </div>
   );
 }
-
 const nodeTypes: NodeTypes = {
   niagara: NiagaraNode,
 };
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 const defaultEmitterConfig: EmitterConfig = {
   id: 'default',
   name: 'Default Emitter',
@@ -511,7 +396,6 @@ const defaultEmitterConfig: EmitterConfig = {
   blendMode: 'additive',
   sortMode: 'byDistance',
 };
-
 const initialNodes: Node[] = [
   {
     id: 'emitter-1',
@@ -556,7 +440,6 @@ const initialNodes: Node[] = [
     data: { label: 'Sprite Renderer', type: 'render', params: { blend: 'additive', sort: true } },
   },
 ];
-
 const initialEdges: Edge[] = [
   { id: 'e1', source: 'emitter-1', target: 'spawn-1', animated: true, style: { stroke: '#fff' } },
   { id: 'e2', source: 'emitter-1', target: 'velocity-1', animated: true, style: { stroke: '#fff' } },
@@ -567,31 +450,22 @@ const initialEdges: Edge[] = [
   { id: 'e7', source: 'color-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
   { id: 'e8', source: 'force-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
 ];
-
-// ============================================================================
-// PANELS
-// ============================================================================
-
 interface EmitterPanelProps {
   config: EmitterConfig;
   onChange: (config: EmitterConfig) => void;
 }
-
 function EmitterPanel({ config, onChange }: EmitterPanelProps) {
   const handleChange = (key: keyof EmitterConfig, value: unknown) => {
     onChange({ ...config, [key]: value });
   };
-  
   return (
     <div style={{ padding: '12px', fontSize: '12px' }}>
       <div style={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '14px' }}>
         {config.name}
       </div>
-      
       {/* Spawn Settings */}
       <div style={{ marginBottom: '16px' }}>
         <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#3498db' }}>Spawn</div>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Spawn Rate:</span>
           <input
@@ -601,7 +475,6 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
           />
         </label>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Max Particles:</span>
           <input
@@ -611,7 +484,6 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
           />
         </label>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Shape:</span>
           <select
@@ -627,11 +499,9 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
           </select>
         </label>
       </div>
-      
       {/* Lifetime */}
       <div style={{ marginBottom: '16px' }}>
         <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#9b59b6' }}>Lifetime</div>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Min:</span>
           <input
@@ -642,7 +512,6 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
           />
         </label>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Max:</span>
           <input
@@ -654,11 +523,9 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
           />
         </label>
       </div>
-      
       {/* Size */}
       <div style={{ marginBottom: '16px' }}>
         <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#2ecc71' }}>Size</div>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Min Size:</span>
           <input
@@ -669,7 +536,6 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
           />
         </label>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Max Size:</span>
           <input
@@ -681,11 +547,9 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
           />
         </label>
       </div>
-      
       {/* Forces */}
       <div style={{ marginBottom: '16px' }}>
         <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1abc9c' }}>Forces</div>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Gravity Y:</span>
           <input
@@ -696,7 +560,6 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
           />
         </label>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Drag:</span>
           <input
@@ -709,7 +572,6 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
           />
         </label>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Turbulence:</span>
           <input
@@ -722,11 +584,9 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
           />
         </label>
       </div>
-      
       {/* Rendering */}
       <div>
         <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#e74c3c' }}>Rendering</div>
-        
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Blend Mode:</span>
           <select
@@ -743,11 +603,9 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
     </div>
   );
 }
-
 interface EffectPresetsPanelProps {
   onSelect: (preset: string) => void;
 }
-
 function EffectPresetsPanel({ onSelect }: EffectPresetsPanelProps) {
   const presets = [
     { id: 'fire', name: 'Fire', icon: '🔥' },
@@ -763,13 +621,11 @@ function EffectPresetsPanel({ onSelect }: EffectPresetsPanelProps) {
     { id: 'electricity', name: 'Electricity', icon: '⚡' },
     { id: 'leaves', name: 'Leaves', icon: '🍃' },
   ];
-  
   return (
     <div style={{ padding: '12px' }}>
       <div style={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '14px' }}>
         Effect Presets
       </div>
-      
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
         {presets.map((preset) => (
           <button
@@ -806,11 +662,6 @@ function EffectPresetsPanel({ onSelect }: EffectPresetsPanelProps) {
     </div>
   );
 }
-
-// ============================================================================
-// MAIN EXPORT
-// ============================================================================
-
 export default function NiagaraVFX() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -819,26 +670,20 @@ export default function NiagaraVFX() {
   const [activeTab, setActiveTab] = useState<'parameters' | 'presets' | 'timeline'>('parameters');
   const [emitterConfig, setEmitterConfig] = useState<EmitterConfig>(defaultEmitterConfig);
   const [showStats, setShowStats] = useState(true);
-  
   const emittersRef = useRef<ParticleEmitter[]>([new ParticleEmitter(defaultEmitterConfig)]);
-  
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#fff' } }, eds)),
     [setEdges]
   );
-  
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNode(node.id);
   }, []);
-  
   const handleEmitterConfigChange = useCallback((config: EmitterConfig) => {
     setEmitterConfig(config);
     emittersRef.current[0] = new ParticleEmitter(config);
   }, []);
-  
   const handlePresetSelect = useCallback((presetId: string) => {
     let newConfig = { ...defaultEmitterConfig };
-    
     switch (presetId) {
       case 'fire':
         newConfig = {
@@ -860,7 +705,6 @@ export default function NiagaraVFX() {
           ],
         };
         break;
-        
       case 'smoke':
         newConfig = {
           ...newConfig,
@@ -885,7 +729,6 @@ export default function NiagaraVFX() {
           turbulence: { strength: 1, frequency: 0.5 },
         };
         break;
-        
       case 'sparks':
         newConfig = {
           ...newConfig,
@@ -907,7 +750,6 @@ export default function NiagaraVFX() {
           ],
         };
         break;
-        
       case 'explosion':
         newConfig = {
           ...newConfig,
@@ -932,7 +774,6 @@ export default function NiagaraVFX() {
           ],
         };
         break;
-        
       case 'snow':
         newConfig = {
           ...newConfig,
@@ -954,7 +795,6 @@ export default function NiagaraVFX() {
           ],
         };
         break;
-        
       case 'magic':
         newConfig = {
           ...newConfig,
@@ -985,19 +825,15 @@ export default function NiagaraVFX() {
         };
         break;
     }
-    
     handleEmitterConfigChange(newConfig);
   }, [handleEmitterConfigChange]);
-  
   const handlePlayPause = useCallback(() => {
     setIsPlaying((p) => !p);
   }, []);
-  
   const handleRestart = useCallback(() => {
     emittersRef.current.forEach((e) => e.reset());
     setIsPlaying(true);
   }, []);
-  
   return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#1a1a1a', color: '#fff' }}>
       {/* Toolbar */}
@@ -1011,7 +847,6 @@ export default function NiagaraVFX() {
         gap: '8px',
       }}>
         <span style={{ fontWeight: 'bold', marginRight: '16px' }}>🎆 Niagara VFX Editor</span>
-        
         <button
           onClick={handlePlayPause}
           style={{
@@ -1028,7 +863,6 @@ export default function NiagaraVFX() {
         >
           {isPlaying ? '⏸️ Pause' : '▶️ Play'}
         </button>
-        
         <button
           onClick={handleRestart}
           style={{
@@ -1042,9 +876,7 @@ export default function NiagaraVFX() {
         >
           🔄 Restart
         </button>
-        
         <div style={{ flex: 1 }} />
-        
         <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
           <input
             type="checkbox"
@@ -1053,7 +885,6 @@ export default function NiagaraVFX() {
           />
           Show Stats
         </label>
-        
         <button
           style={{
             padding: '6px 12px',
@@ -1066,7 +897,6 @@ export default function NiagaraVFX() {
         >
           💾 Save
         </button>
-        
         <button
           style={{
             padding: '6px 12px',
@@ -1080,7 +910,6 @@ export default function NiagaraVFX() {
           📤 Export
         </button>
       </div>
-      
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex' }}>
         {/* Left Panel - 3D Preview */}
@@ -1091,12 +920,9 @@ export default function NiagaraVFX() {
           <div style={{ flex: 1, position: 'relative' }}>
             <Canvas camera={{ position: [5, 5, 5], fov: 60 }}>
               <color attach="background" args={['#1a1a1a']} />
-              
               <ambientLight intensity={0.3} />
               <directionalLight position={[10, 10, 5]} intensity={0.5} />
-              
               <ParticleRenderer emitters={emittersRef.current} isPlaying={isPlaying} />
-              
               <Grid
                 position={[0, -0.01, 0]}
                 args={[20, 20]}
@@ -1109,16 +935,12 @@ export default function NiagaraVFX() {
                 fadeDistance={50}
                 infiniteGrid
               />
-              
               <OrbitControls makeDefault />
-              
               <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
                 <GizmoViewport />
               </GizmoHelper>
-              
               {showStats && <Stats />}
             </Canvas>
-            
             {/* Particle Count Overlay */}
             <div style={{
               position: 'absolute',
@@ -1134,7 +956,6 @@ export default function NiagaraVFX() {
             </div>
           </div>
         </div>
-        
         {/* Center Panel - Node Graph */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '8px 12px', background: '#252525', borderBottom: '1px solid #333', fontWeight: 'bold', fontSize: '12px' }}>
@@ -1154,7 +975,6 @@ export default function NiagaraVFX() {
             >
               <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#333" />
               <Controls style={{ background: '#252525', borderRadius: '8px' }} />
-              
               <Panel position="top-left">
                 <div style={{ background: '#252525', padding: '8px 12px', borderRadius: '4px', fontSize: '11px' }}>
                   <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Node Types:</div>
@@ -1179,7 +999,6 @@ export default function NiagaraVFX() {
             </ReactFlow>
           </div>
         </div>
-        
         {/* Right Panel - Properties */}
         <div style={{ width: '280px', borderLeft: '1px solid #333', display: 'flex', flexDirection: 'column' }}>
           {/* Tabs */}
@@ -1204,21 +1023,17 @@ export default function NiagaraVFX() {
               </button>
             ))}
           </div>
-          
           {/* Tab Content */}
           <div style={{ flex: 1, overflow: 'auto' }}>
             {activeTab === 'parameters' && (
               <EmitterPanel config={emitterConfig} onChange={handleEmitterConfigChange} />
             )}
-            
             {activeTab === 'presets' && (
               <EffectPresetsPanel onSelect={handlePresetSelect} />
             )}
-            
             {activeTab === 'timeline' && (
               <div style={{ padding: '12px', fontSize: '12px', color: '#888' }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '12px', color: '#fff' }}>Timeline</div>
-                
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Size Over Life</div>
                   <div style={{ height: '60px', background: '#252525', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
@@ -1232,12 +1047,10 @@ export default function NiagaraVFX() {
                     </svg>
                   </div>
                 </div>
-                
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Color Over Life</div>
                   <div style={{ height: '24px', borderRadius: '4px', background: 'linear-gradient(to right, #ffff00, #ff8000, #ff0000, #330000)' }} />
                 </div>
-                
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Alpha Over Life</div>
                   <div style={{ height: '60px', background: '#252525', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
@@ -1251,7 +1064,6 @@ export default function NiagaraVFX() {
                     </svg>
                   </div>
                 </div>
-                
                 <div>
                   <div style={{ marginBottom: '8px' }}>Velocity Over Life</div>
                   <div style={{ height: '60px', background: '#252525', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>

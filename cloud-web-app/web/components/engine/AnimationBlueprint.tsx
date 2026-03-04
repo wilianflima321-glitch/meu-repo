@@ -1,11 +1,3 @@
-/**
- * Animation Blueprint System - Sistema de Animação Avançado
- * 
- * Sistema profissional estilo Unreal Engine para criar
- * e editar state machines de animação com blending.
- * 
- * NÃO É MOCK - Sistema real e funcional!
- */
 
 'use client';
 
@@ -28,9 +20,6 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-// ============================================================================
-// TIPOS
-// ============================================================================
 
 export type AnimationStateType = 
   | 'state'
@@ -85,11 +74,7 @@ export interface BlendSpacePoint {
   y?: number;
 }
 
-// ============================================================================
-// NODE COMPONENTS
-// ============================================================================
 
-// State Node
 function StateNode({ data, selected }: { data: { label: string; type: AnimationStateType; animation?: string; isEntry?: boolean }; selected: boolean }) {
   const getNodeColor = () => {
     switch (data.type) {
@@ -187,7 +172,6 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
   );
 }
 
-// Transition Edge Label
 function TransitionLabel({ data }: { data: { conditions?: TransitionCondition[]; blendTime: number } }) {
   if (!data.conditions?.length) {
     return (
@@ -230,11 +214,7 @@ const nodeTypes: NodeTypes = {
   animState: StateNode,
 };
 
-// ============================================================================
-// SIDE PANEL COMPONENTS
-// ============================================================================
 
-// Variables Panel
 function VariablesPanel({
   variables,
   values,
@@ -421,7 +401,6 @@ function VariablesPanel({
   );
 }
 
-// State Inspector
 function StateInspector({
   state,
   onUpdate,
@@ -589,7 +568,6 @@ function StateInspector({
   );
 }
 
-// Transition Inspector
 function TransitionInspector({
   transition,
   variables,
@@ -810,16 +788,12 @@ function TransitionInspector({
   );
 }
 
-// ============================================================================
-// MAIN ANIMATION BLUEPRINT COMPONENT
-// ============================================================================
 
 export interface AnimationBlueprintProps {
   onSave?: (data: { states: AnimationState[]; transitions: TransitionRule[]; variables: AnimationVariable[] }) => void;
 }
 
 export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) {
-  // Sample animations
   const animations = [
     'Idle',
     'Walk',
@@ -836,7 +810,6 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     'Death',
   ];
   
-  // States
   const [states, setStates] = useState<AnimationState[]>([
     { id: 'entry', name: 'Entry', type: 'entry', looping: false, playRate: 1, blendIn: 0, blendOut: 0, position: { x: 100, y: 200 } },
     { id: 'idle', name: 'Idle', type: 'state', animation: 'Idle', looping: true, playRate: 1, blendIn: 0.2, blendOut: 0.2, position: { x: 300, y: 200 } },
@@ -845,7 +818,6 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     { id: 'jump', name: 'Jump', type: 'state', animation: 'Jump_Start', looping: false, playRate: 1, blendIn: 0.1, blendOut: 0.1, position: { x: 700, y: 200 } },
   ]);
   
-  // Transitions
   const [transitions, setTransitions] = useState<TransitionRule[]>([
     { id: 't1', from: 'entry', to: 'idle', conditions: [], blendTime: 0, blendMode: 'linear', priority: 0, automatic: true },
     { id: 't2', from: 'idle', to: 'walk', conditions: [{ variable: 'Speed', operator: '>', value: 0.1 }], blendTime: 0.2, blendMode: 'linear', priority: 1, automatic: false },
@@ -858,7 +830,6 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     { id: 't9', from: 'jump', to: 'idle', conditions: [{ variable: 'IsJumping', operator: '==', value: false }], blendTime: 0.2, blendMode: 'linear', priority: 0, automatic: false },
   ]);
   
-  // Variables
   const [variables, setVariables] = useState<AnimationVariable[]>([
     { name: 'Speed', type: 'float', defaultValue: 0, min: 0, max: 1 },
     { name: 'Direction', type: 'float', defaultValue: 0, min: -180, max: 180 },
@@ -867,7 +838,6 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     { name: 'IsAttacking', type: 'bool', defaultValue: false },
   ]);
   
-  // Runtime values for preview
   const [variableValues, setVariableValues] = useState<Record<string, number | boolean>>({
     Speed: 0,
     Direction: 0,
@@ -876,11 +846,9 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     IsAttacking: false,
   });
   
-  // Selection
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [selectedTransition, setSelectedTransition] = useState<string | null>(null);
   
-  // Convert to ReactFlow nodes
   const nodes: Node[] = useMemo(() => 
     states.map(state => ({
       id: state.id,
@@ -895,7 +863,6 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     })),
   [states, selectedState]);
   
-  // Convert to ReactFlow edges
   const edges: Edge[] = useMemo(() =>
     transitions.map(t => ({
       id: t.id,
@@ -919,7 +886,6 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(nodes);
   const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(edges);
   
-  // Sync nodes
   useEffect(() => {
     setFlowNodes(nodes);
   }, [nodes, setFlowNodes]);
@@ -928,7 +894,6 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     setFlowEdges(edges);
   }, [edges, setFlowEdges]);
   
-  // Handlers
   const onConnect = useCallback((connection: Connection) => {
     if (connection.source && connection.target) {
       const newTransition: TransitionRule = {

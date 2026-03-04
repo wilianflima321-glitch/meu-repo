@@ -1,19 +1,3 @@
-/**
- * SOUND CUE NODE EDITOR - Aethel Engine
- * 
- * Editor visual de Sound Cues no estilo Unreal Engine.
- * Permite criar grafos de áudio complexos com routing, efeitos e modulação.
- * 
- * FEATURES:
- * - Node-based audio graph
- * - Mixer/routing nodes
- * - Modulation (LFO, envelope, random)
- * - Effects (reverb, delay, filter, distortion)
- * - 3D spatialization
- * - Real-time preview
- * - Attenuation visualization
- * - Parameter binding
- */
 
 'use client';
 
@@ -37,9 +21,6 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export type SoundNodeType =
   | 'output'
@@ -121,9 +102,6 @@ export interface SoundCueParameter {
   max?: number;
 }
 
-// ============================================================================
-// NODE DEFINITIONS
-// ============================================================================
 
 const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
   output: {
@@ -466,9 +444,6 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
   },
 };
 
-// ============================================================================
-// SOUND NODE COMPONENT
-// ============================================================================
 
 interface SoundNodeData extends Record<string, unknown> {
   definition: SoundNodeDefinition;
@@ -626,9 +601,6 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
   );
 }
 
-// ============================================================================
-// NODE CATALOG
-// ============================================================================
 
 interface NodeCatalogProps {
   onAddNode: (type: SoundNodeType) => void;
@@ -645,7 +617,6 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
       cats[def.category].push(def);
     });
     
-    // Filter by search
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       Object.keys(cats).forEach((cat) => {
@@ -731,9 +702,6 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
   );
 }
 
-// ============================================================================
-// PREVIEW PANEL
-// ============================================================================
 
 interface PreviewPanelProps {
   isPlaying: boolean;
@@ -824,9 +792,6 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
   );
 }
 
-// ============================================================================
-// PARAMETERS PANEL
-// ============================================================================
 
 interface ParametersPanelProps {
   parameters: SoundCueParameter[];
@@ -948,9 +913,6 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
   );
 }
 
-// ============================================================================
-// MAIN SOUND CUE EDITOR
-// ============================================================================
 
 export interface SoundCueEditorProps {
   cue?: SoundCue;
@@ -962,7 +924,6 @@ const nodeTypes = {
 };
 
 export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProps) {
-  // Cue state
   const [cue, setCue] = useState<SoundCue>(initialCue || {
     id: crypto.randomUUID(),
     name: 'New Sound Cue',
@@ -978,13 +939,11 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     parameters: [],
   });
   
-  // UI state
   const [searchQuery, setSearchQuery] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewVolume, setPreviewVolume] = useState(0.7);
   const [runtimeValues, setRuntimeValues] = useState<Record<string, number | boolean>>({});
   
-  // Handle parameter changes on nodes
   const handleParameterChange = useCallback((nodeId: string, paramId: string, value: unknown) => {
     setCue((prev) => ({
       ...prev,
@@ -996,7 +955,6 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     }));
   }, []);
   
-  // Convert to React Flow format
   const initialNodes: Node<SoundNodeData>[] = useMemo(() => {
     return cue.nodes.map((node) => ({
       id: node.id,
@@ -1025,7 +983,6 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   
-  // Add new node
   const addNode = useCallback((type: SoundNodeType) => {
     const newNode: SoundCueNode = {
       id: crypto.randomUUID(),
@@ -1054,7 +1011,6 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     ]);
   }, [setNodes, handleParameterChange]);
   
-  // Handle connections
   const onConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target) return;
     
@@ -1084,10 +1040,8 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     );
   }, [setEdges, isPlaying]);
   
-  // Preview controls
   const handlePlay = useCallback(() => {
     setIsPlaying(true);
-    // Would trigger actual audio playback
     console.log('Playing sound cue:', cue);
   }, [cue]);
   
@@ -1095,7 +1049,6 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     setIsPlaying(false);
   }, []);
   
-  // Notify parent
   useEffect(() => {
     onChange?.(cue);
   }, [cue, onChange]);

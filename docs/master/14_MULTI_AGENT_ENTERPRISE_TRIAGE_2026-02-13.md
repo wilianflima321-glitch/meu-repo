@@ -671,3 +671,19 @@ Prioridade atual (sem mudar escopo):
 Evidência consolidada:
 - `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
 - `docs/master/00_INDEX.md`
+
+## 8) Delta 2026-03-01 — Collaboration SLO baseline
+Concluido:
+1. Publicado baseline formal de readiness colaborativo em:
+- `cloud-web-app/web/docs/COLLAB_RUNTIME_SLO.md`
+2. Gate de promocao continua estrito:
+- status colaboracao permanece `PARTIAL` sem evidencia de carga/reconexao/conflito.
+3. Regra de claim preservada:
+- sem "real-time ready" sem bundle de evidencia reproduzivel.
+
+## 9) Delta 2026-03-03 — Runtime gate inventory sync
+Concluido:
+1. Inventario explicito `NOT_IMPLEMENTED` em APIs ativas foi reduzido para `0` (fonte: `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`).
+2. Billing mismatch path agora segue contrato runtime parcial:
+- `PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE` (`503`, `PARTIAL`).
+3. Gate enterprise segue verde sem relaxamento de regra.

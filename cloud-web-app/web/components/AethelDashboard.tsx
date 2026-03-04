@@ -1,12 +1,7 @@
 'use client'
-
 import type { FormEvent } from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import * as THREE from 'three'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { applyEdgeChanges, applyNodeChanges } from '@xyflow/react'
-import '@xyflow/react/dist/style.css'
-
 import {
   AethelAPIClient,
   type BillingPlan,
@@ -18,6 +13,15 @@ import {
   type WalletSummary,
 } from '@/lib/api'
 import { analytics } from '@/lib/analytics'
+import {
+  AdvancedChatRequestError,
+  isProviderSetupError,
+  requestAdvancedChat,
+} from '@/lib/ai-chat-advanced-client'
+import {
+  buildAiProviderGateMessage,
+  fetchAiProviderStatus,
+} from '@/lib/ai-provider-status-client'
 import { isAuthenticated } from '@/lib/auth'
 import { useAssetDownload } from '@/hooks/useAethelGateway'
 import {
@@ -31,7 +35,6 @@ import {
   type WorkflowTemplate,
   STORAGE_KEYS,
   clearStoredDashboardState,
-  resolveStoredActiveTab,
   resolveStoredChatHistory,
   resolveStoredSessions,
   resolveStoredSettings,
@@ -45,8 +48,6 @@ import {
   DEFAULT_USE_CASES,
   DEFAULT_WORKFLOW_TEMPLATES,
   HEALTH_KEY,
-  INITIAL_EDGES,
-  INITIAL_NODES,
   WALLET_KEY,
   formatConnectivityStatus as formatConnectivityStatusLabel,
   formatCurrencyLabel,
@@ -69,6 +70,11 @@ import {
   extractPrimaryAssistantContent,
 } from './dashboard/aethel-dashboard-livepreview-ai-utils'
 import {
+  extractApiContent,
+  getAuthHeaders,
+  getProjectIdFromLocation,
+} from './dashboard/aethel-dashboard-location-utils'
+import {
   buildCopilotContextPatch,
   buildWorkflowTitle,
   extractCopilotWorkflowList,
@@ -85,113 +91,24 @@ import {
   validatePurchaseInput,
   validateTransferInput,
 } from './dashboard/aethel-dashboard-billing-utils'
-
 import { TrialBanner } from './dashboard/TrialBanner'
 import { DashboardHeader } from './dashboard/DashboardHeader'
 import { AethelDashboardSidebar } from './dashboard/AethelDashboardSidebar'
-import { DashboardOverviewTab } from './dashboard/DashboardOverviewTab'
-import { DashboardProjectsTab } from './dashboard/DashboardProjectsTab'
-import { DashboardAIChatTab } from './dashboard/DashboardAIChatTab'
-import { DashboardWalletTab } from './dashboard/DashboardWalletTab'
-import { DashboardConnectivityTab } from './dashboard/DashboardConnectivityTab'
-import { DashboardContentCreationTab } from './dashboard/DashboardContentCreationTab'
-import { DashboardUnrealTab } from './dashboard/DashboardUnrealTab'
-import BillingTab from './dashboard/tabs/BillingTab'
-import DownloadTab from './dashboard/tabs/DownloadTab'
-import TemplatesTab from './dashboard/tabs/TemplatesTab'
-import UseCasesTab from './dashboard/tabs/UseCasesTab'
-import AdminTab from './dashboard/tabs/AdminTab'
-import AgentCanvasTab from './dashboard/tabs/AgentCanvasTab'
-
-const DEFAULT_SETTINGS: DashboardSettings = {
-  theme: 'dark',
-  autoSave: true,
-  notifications: true,
-}
-
+import { DashboardMainContent } from './dashboard/DashboardMainContent'
+import {
+  DASHBOARD_DEFAULT_SETTINGS,
+  PREVIEW_RUNTIME_URL_STORAGE_KEY,
+  coerceActiveTab,
+  type FullAccessResponse,
+  type Point3,
+} from './dashboard/aethel-dashboard-core-types'
+import { DashboardLoadingScreen } from './dashboard/DashboardLoadingScreen'
+import { DashboardToast } from './dashboard/DashboardToast'
+import { useFirstValueTracking } from './dashboard/useFirstValueTracking'
+import { useDashboardMissionSeed } from './dashboard/useDashboardMissionSeed'
+import { useDashboardStoragePersistence } from './dashboard/useDashboardStoragePersistence'
 const DEFAULT_MODEL = 'gpt-4o-mini'
 const FIRST_VALUE_GUIDE_DISMISSED_KEY = 'aethel.dashboard.first-value.dismissed'
-
-type AdvancedProfile = {
-  qualityMode: 'standard' | 'delivery' | 'studio'
-  agentCount: 1 | 2 | 3
-  enableWebResearch: boolean
-}
-
-function getProjectIdFromLocation(): string | null {
-  if (typeof window === 'undefined') return null
-  const value = new URLSearchParams(window.location.search).get('projectId')
-  return value && value.trim() ? value.trim() : null
-}
-
-function getMissionFromLocation(): string | null {
-  if (typeof window === 'undefined') return null
-  const value = new URLSearchParams(window.location.search).get('mission')
-  if (!value) return null
-  const trimmed = value.trim()
-  return trimmed.length > 0 ? trimmed : null
-}
-
-function getAuthHeaders(): Record<string, string> {
-  if (typeof window === 'undefined') return {}
-  const token = window.localStorage.getItem('aethel-token')
-  return token ? { Authorization: `Bearer ${token}` } : {}
-}
-
-function coerceActiveTab(raw: string | null): ActiveTab {
-  if (raw === 'chat') return 'ai-chat'
-  return resolveStoredActiveTab(raw)
-}
-
-function extractApiContent(raw: string): string {
-  try {
-    const parsed = JSON.parse(raw)
-    return (
-      parsed?.message?.content ||
-      parsed?.choices?.[0]?.message?.content ||
-      parsed?.message ||
-      parsed?.output?.text ||
-      raw
-    )
-  } catch {
-    return raw
-  }
-}
-
-function extractApiError(raw: string, status: number): { code: string; message: string; capabilityStatus?: string } {
-  try {
-    const parsed = JSON.parse(raw)
-    return {
-      code: typeof parsed?.error === 'string' ? parsed.error : status === 501 ? 'NOT_IMPLEMENTED' : 'AI_REQUEST_FAILED',
-      message: typeof parsed?.message === 'string' ? parsed.message : raw || `HTTP ${status}`,
-      capabilityStatus: typeof parsed?.capabilityStatus === 'string' ? parsed.capabilityStatus : undefined,
-    }
-  } catch {
-    return {
-      code: status === 501 ? 'NOT_IMPLEMENTED' : 'AI_REQUEST_FAILED',
-      message: raw || `HTTP ${status}`,
-    }
-  }
-}
-
-function isAgentGateError(code: string): boolean {
-  return code === 'FEATURE_NOT_ALLOWED' || code === 'AGENTS_LIMIT_EXCEEDED'
-}
-
-function inferAdvancedProfile(message: string): AdvancedProfile {
-  const lower = message.toLowerCase()
-  const deepAudit = ['auditoria', 'triagem', 'benchmark', 'research', 'arquitetura', 'studio'].some((token) => lower.includes(token))
-  if (deepAudit) {
-    return { qualityMode: 'studio', agentCount: 3, enableWebResearch: true }
-  }
-  const implementation = ['implemente', 'implement', 'corrija', 'refactor', 'fix', 'build', 'deploy'].some((token) =>
-    lower.includes(token)
-  )
-  if (implementation) {
-    return { qualityMode: 'delivery', agentCount: 2, enableWebResearch: false }
-  }
-  return { qualityMode: 'standard', agentCount: 1, enableWebResearch: false }
-}
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -209,7 +126,6 @@ export default function AethelDashboard() {
     if (typeof window === 'undefined') return 'overview'
     return coerceActiveTab(window.localStorage.getItem(STORAGE_KEYS.activeTab))
   })
-  const [aiActivity, setAiActivity] = useState('Ocioso')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => {
     if (typeof window === 'undefined') return []
     return resolveStoredChatHistory(window.localStorage.getItem(STORAGE_KEYS.chatHistory))
@@ -223,9 +139,9 @@ export default function AethelDashboard() {
   const [connectBusy, setConnectBusy] = useState(false)
   const [chatMessage, setChatMessage] = useState('')
   const [livePreviewSuggestions, setLivePreviewSuggestions] = useState<string[]>([])
-  const [selectedPreviewPoint, setSelectedPreviewPoint] = useState<THREE.Vector3 | null>(null)
+  const [selectedPreviewPoint, setSelectedPreviewPoint] = useState<Point3 | null>(null)
   const [settings, setSettings] = useState<DashboardSettings>(() => {
-    if (typeof window === 'undefined') return { ...DEFAULT_SETTINGS }
+    if (typeof window === 'undefined') return { ...DASHBOARD_DEFAULT_SETTINGS }
     return resolveStoredSettings(window.localStorage.getItem(STORAGE_KEYS.settings))
   })
   const [projects, setProjects] = useState<Project[]>(DEFAULT_PROJECTS)
@@ -244,19 +160,18 @@ export default function AethelDashboard() {
   const [lastTransferReceipt, setLastTransferReceipt] = useState<TransferResponse | null>(null)
   const [subscribeError, setSubscribeError] = useState<string | null>(null)
   const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null)
-  const [aiProviderGate, setAiProviderGate] = useState<{ message: string; capabilityStatus?: string } | null>(null)
-  const [missionSeedLoaded, setMissionSeedLoaded] = useState(false)
+  const [aiProviderGate, setAiProviderGate] = useState<{ message: string; capabilityStatus?: string; setupUrl?: string } | null>(null)
   const [firstValueAiSuccess, setFirstValueAiSuccess] = useState(false)
   const [firstValueOpenedIde, setFirstValueOpenedIde] = useState(false)
+  const [fullAccessBusy, setFullAccessBusy] = useState(false)
   const [showFirstValueGuide, setShowFirstValueGuide] = useState(() => {
     if (typeof window === 'undefined') return true
     return window.localStorage.getItem(FIRST_VALUE_GUIDE_DISMISSED_KEY) !== '1'
   })
+  const chatAbortRef = useRef<AbortController | null>(null)
   const [isTrialActive] = useState(true)
   const [showTrialBanner, setShowTrialBanner] = useState(true)
   const trialDaysLeft = 14
-  const [nodes, setNodes] = useState(INITIAL_NODES)
-  const [edges, setEdges] = useState(INITIAL_EDGES)
   const [hasToken, setHasToken] = useState(false)
   const [authReady, setAuthReady] = useState(false)
 
@@ -289,6 +204,26 @@ export default function AethelDashboard() {
     { refreshInterval: 30000 }
   )
 
+  const { data: fullAccessData, mutate: mutateFullAccess } = useSWR<FullAccessResponse>(
+    hasToken ? '/api/studio/access/full' : null,
+    async (url: string) => {
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+      })
+      const payload = (await response.json().catch(() => ({}))) as FullAccessResponse
+      if (!response.ok) {
+        throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
+      }
+      return payload
+    },
+    {
+      refreshInterval: 30000,
+    }
+  )
+
   const walletTransactions = useMemo(() => walletData?.transactions ?? [], [walletData])
   const creditEntries = useMemo(() => getCreditEntries(walletTransactions), [walletTransactions])
   const walletStats = useMemo(() => computeWalletUsageStats(walletTransactions), [walletTransactions])
@@ -298,6 +233,11 @@ export default function AethelDashboard() {
   const walletLoading = hasToken && !walletData && !walletError
   const connectivityLoading = hasToken && !connectivityData && !connectivityError
   const filteredSessions = useMemo(() => filterSessionHistory(sessionHistory, sessionFilter), [sessionHistory, sessionFilter])
+  const aiActivity = useMemo(() => (isStreaming ? 'Processando' : filteredSessions.length > 0 ? 'Ativo' : 'Ocioso'), [isStreaming, filteredSessions.length])
+  const fullAccessActiveGrant = useMemo(() => {
+    const grants = fullAccessData?.metadata?.grants || []
+    return grants.find((grant) => grant.status === 'active') ?? null
+  }, [fullAccessData?.metadata?.grants])
   const backendOnline = useMemo(() => {
     if (healthError) return false
     if (!healthData) return true
@@ -334,6 +274,12 @@ export default function AethelDashboard() {
     analytics?.track?.(category, action, { metadata })
   }, [])
 
+  useDashboardStoragePersistence({
+    sessionHistory,
+    chatHistory,
+    settings,
+  })
+
   const showToastMessage = useCallback((message: string, type: ToastType = 'info') => {
     setShowToast({ message, type })
     if (typeof window !== 'undefined') {
@@ -346,7 +292,8 @@ export default function AethelDashboard() {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(FIRST_VALUE_GUIDE_DISMISSED_KEY, '1')
     }
-  }, [])
+    trackEvent('user', 'settings_change', { section: 'first-value-guide', action: 'dismiss' })
+  }, [trackEvent])
 
   const persistCopilotScope = useCallback((workflowId: string | null, threadId: string | null) => {
     if (typeof window === 'undefined') return
@@ -366,22 +313,120 @@ export default function AethelDashboard() {
   }, [trackEvent])
 
   const handleOpenProviderSettings = useCallback(() => {
-    setSidebarOpen(false)
-    setActiveTab('admin')
+    const setupTarget = aiProviderGate?.setupUrl || '/settings?tab=api'
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.activeTab, 'admin')
+      window.location.assign(setupTarget)
     }
-    trackEvent('ai', 'ai_error', { source: 'provider-gate', action: 'open-admin-apis' })
-  }, [trackEvent])
+    trackEvent('ai', 'ai_error', { source: 'provider-gate', action: 'open-settings-api-tab', setupTarget })
+  }, [aiProviderGate?.setupUrl, trackEvent])
 
-  const handleOpenIdeLivePreview = useCallback(() => {
+  const handleStopDashboardChat = useCallback(() => {
+    chatAbortRef.current?.abort()
+    chatAbortRef.current = null
+    setIsStreaming(false)
+    showToastMessage('Execucao interrompida pelo usuario.', 'info')
+    trackEvent('ai', 'ai_error', { source: 'dashboard-chat', action: 'abort' })
+  }, [showToastMessage, trackEvent])
+  const navigateToIdeWithContext = useCallback((source: string, entry: string) => {
     if (typeof window === 'undefined') return
-    setFirstValueOpenedIde(true)
+    trackEvent('engine', 'editor_open', {
+      source,
+      entry,
+      projectId: copilotProjectId,
+    })
     const params = new URLSearchParams()
-    params.set('entry', 'live-preview')
+    params.set('entry', entry)
     if (copilotProjectId) params.set('projectId', copilotProjectId)
+    const storedRuntimeUrl = window.localStorage.getItem(PREVIEW_RUNTIME_URL_STORAGE_KEY)
+    if (storedRuntimeUrl && /^https?:\/\//i.test(storedRuntimeUrl.trim())) {
+      params.set('previewUrl', storedRuntimeUrl.trim())
+    }
     window.location.assign(`/ide?${params.toString()}`)
-  }, [copilotProjectId])
+  }, [copilotProjectId, trackEvent])
+  const handleOpenIdeLivePreview = useCallback(() => {
+    setFirstValueOpenedIde(true)
+    navigateToIdeWithContext('dashboard-first-value', 'live-preview')
+  }, [navigateToIdeWithContext])
+  const handleOpenAIChatFromGuide = useCallback(() => {
+    setActiveTab('ai-chat')
+    setChatMode('chat')
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEYS.activeTab, 'ai-chat')
+    }
+    trackEvent('ai', 'ai_chat', { source: 'first-value-guide', action: 'open-ai-chat' })
+  }, [trackEvent])
+  const handleOpenIdeFromHeader = useCallback(() => {
+    navigateToIdeWithContext('dashboard-header', 'quick-open')
+  }, [navigateToIdeWithContext])
+  const handleToggleFullAccess = useCallback(() => {
+    if (!hasToken || fullAccessBusy) {
+      if (!hasToken) showToastMessage('Autentique-se para alterar Full Access.', 'error')
+      return
+    }
+
+    void (async () => {
+      setFullAccessBusy(true)
+      try {
+        if (fullAccessActiveGrant?.id) {
+          const response = await fetch(`/api/studio/access/full/${encodeURIComponent(fullAccessActiveGrant.id)}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeaders(),
+            },
+          })
+          const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
+          if (!response.ok) {
+            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
+          }
+          showToastMessage('Full Access revogado.', 'success')
+          trackEvent('security', 'full_access_revoke', {
+            source: 'dashboard-header',
+            projectId: copilotProjectId,
+          })
+        } else {
+          const response = await fetch('/api/studio/access/full', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeaders(),
+            },
+            body: JSON.stringify({
+              projectId: copilotProjectId || undefined,
+              durationMinutes: 15,
+              reason: `dashboard_header_full_access:${copilotProjectId || 'workspace'}`,
+              scope: copilotProjectId ? [`project:${copilotProjectId}`, 'workspace:apply'] : ['workspace:apply'],
+            }),
+          })
+          const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
+          if (!response.ok) {
+            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
+          }
+          showToastMessage('Full Access temporario ativado (15 min).', 'success')
+          trackEvent('security', 'full_access_grant', {
+            source: 'dashboard-header',
+            projectId: copilotProjectId,
+            durationMinutes: 15,
+          })
+        }
+
+        await mutateFullAccess()
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Falha ao atualizar Full Access.'
+        showToastMessage(message, 'error')
+      } finally {
+        setFullAccessBusy(false)
+      }
+    })()
+  }, [
+    hasToken,
+    fullAccessBusy,
+    fullAccessActiveGrant?.id,
+    showToastMessage,
+    trackEvent,
+    copilotProjectId,
+    mutateFullAccess,
+  ])
 
   const handleResetDashboard = useCallback(() => {
     clearStoredDashboardState()
@@ -391,7 +436,7 @@ export default function AethelDashboard() {
     setChatHistory([])
     setChatMessage('')
     setLivePreviewSuggestions([])
-    setSettings({ ...DEFAULT_SETTINGS })
+    setSettings({ ...DASHBOARD_DEFAULT_SETTINGS })
     setProjects(DEFAULT_PROJECTS)
     setActiveWorkflowId(null)
     setActiveChatThreadId(null)
@@ -712,87 +757,86 @@ export default function AethelDashboard() {
     void (async () => {
       const message = chatMessage.trim()
       if (!message || isStreaming) return
+      const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now()
       setAiProviderGate(null)
       const nextMessages = [...chatHistory, { role: 'user', content: message } as ChatMessage].slice(-200)
       setChatMessage('')
       setChatHistory(nextMessages)
       setIsStreaming(true)
-      setAiActivity('Processando')
       try {
-        const profile = inferAdvancedProfile(message)
-        let response = await fetch('/api/ai/chat-advanced', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({
-            model: DEFAULT_MODEL,
-            messages: nextMessages.map((item) => ({ role: item.role, content: item.content })),
-            projectId: copilotProjectId ?? undefined,
-            qualityMode: profile.qualityMode,
-            agentCount: profile.agentCount,
-            enableWebResearch: profile.enableWebResearch,
-            includeTrace: true,
-          }),
+        const controller = new AbortController()
+        chatAbortRef.current = controller
+        const result = await requestAdvancedChat({
+          message,
+          model: DEFAULT_MODEL,
+          messages: nextMessages.map((item) => ({ role: item.role, content: item.content })),
+          projectId: copilotProjectId ?? undefined,
+          headers: getAuthHeaders(),
+          signal: controller.signal,
         })
-        let raw = await response.text()
-        if (!response.ok) {
-          const parsed = extractApiError(raw, response.status)
-          if (isAgentGateError(parsed.code) && profile.agentCount > 1) {
-            response = await fetch('/api/ai/chat-advanced', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeaders(),
-              },
-              body: JSON.stringify({
-                model: DEFAULT_MODEL,
-                messages: nextMessages.map((item) => ({ role: item.role, content: item.content })),
-                projectId: copilotProjectId ?? undefined,
-                qualityMode: profile.qualityMode,
-                agentCount: 1,
-                enableWebResearch: false,
-                includeTrace: true,
-              }),
-            })
-            raw = await response.text()
-          }
-        }
-        if (!response.ok) {
-          const parsed = extractApiError(raw, response.status)
-          const isProviderGate =
-            parsed.code === 'NOT_IMPLEMENTED' || parsed.capabilityStatus === 'NOT_IMPLEMENTED'
-          const userMessage = isProviderGate
-            ? `${parsed.message} Configure um provider em /admin/apis para liberar o chat.`
-            : `${parsed.code}: ${parsed.message}`
-          if (isProviderGate) {
-            setAiProviderGate({
-              message: parsed.message,
-              capabilityStatus: parsed.capabilityStatus,
-            })
-          }
-          throw new Error(userMessage)
-        }
         const assistantMessage: ChatMessage = {
           role: 'assistant',
-          content: extractApiContent(raw) || 'Resposta vazia do modelo.',
+          content: extractApiContent(result.raw) || 'Resposta vazia do modelo.',
         }
+        const latencyMs = Math.max(
+          0,
+          Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
+        )
         setChatHistory((prev) => [...prev, assistantMessage].slice(-200))
         setFirstValueAiSuccess(true)
-        setAiActivity('Ativo')
+        setAiProviderGate(null)
+        trackEvent('ai', 'ai_chat', { source: 'dashboard-chat', status: 'success', latencyMs })
+        analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
+          surface: 'dashboard',
+          status: 'success',
+        })
+        analytics?.track?.('ai', 'ai_stream', {
+          metadata: {
+            source: 'dashboard-chat',
+            latencyMs,
+            status: 'success',
+            usedFallback: result.usedFallback,
+          },
+        })
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Falha na chamada de IA.'
+        if (error instanceof Error && error.name === 'AbortError') {
+          setChatHistory((prev) => [...prev, { role: 'assistant', content: 'Request interrupted by user.' } as ChatMessage].slice(-200))
+          return
+        }
+        let errorMessage = error instanceof Error ? error.message : 'Falha na chamada de IA.'
+        if (error instanceof AdvancedChatRequestError) {
+          const providerGate = isProviderSetupError(error)
+          if (providerGate) {
+            setAiProviderGate({
+              message: error.message,
+              capabilityStatus: error.capabilityStatus,
+              setupUrl: error.setupUrl,
+            })
+            const setupTarget = error.setupUrl || '/settings?tab=api'
+            errorMessage = `${error.message} Configure um provider em ${setupTarget} para liberar o chat.`
+          } else {
+            errorMessage = `${error.code}: ${error.message}`
+          }
+        }
+        const latencyMs = Math.max(
+          0,
+          Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
+        )
         setChatHistory((prev) => [...prev, { role: 'assistant', content: errorMessage } as ChatMessage].slice(-200))
-        setAiActivity('Erro')
+        trackEvent('ai', 'ai_error', { source: 'dashboard-chat', latencyMs, error: errorMessage })
+        analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
+          surface: 'dashboard',
+          status: 'error',
+        })
       } finally {
+        chatAbortRef.current = null
         setIsStreaming(false)
       }
     })()
-  }, [chatMessage, isStreaming, chatHistory, copilotProjectId])
+  }, [chatMessage, isStreaming, chatHistory, copilotProjectId, trackEvent])
 
-  const handleMagicWandSelect = useCallback((position: THREE.Vector3) => {
-    setSelectedPreviewPoint(position.clone())
+  const handleMagicWandSelect = useCallback((position: Point3) => {
+    setSelectedPreviewPoint(position)
     if (!activeWorkflowId) return
     const payload = buildLivePreviewContextPayload(activeWorkflowId, position)
     void fetch('/api/copilot/context', {
@@ -815,39 +859,50 @@ export default function AethelDashboard() {
     setLivePreviewSuggestions((prev) => [normalized, ...prev].slice(0, 10))
     try {
       const prompt = selectedPreviewPoint ? `${buildLivePreviewPrompt(selectedPreviewPoint)}\n\nPedido do usuario: ${normalized}` : normalized
-      const response = await fetch('/api/ai/chat-advanced', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({
-          model: DEFAULT_MODEL,
-          messages: [buildLivePreviewSystemMessage(), { role: 'user', content: prompt }],
-          projectId: copilotProjectId ?? undefined,
+      const result = await requestAdvancedChat({
+        message: prompt,
+        model: DEFAULT_MODEL,
+        messages: [buildLivePreviewSystemMessage(), { role: 'user', content: prompt }],
+        projectId: copilotProjectId ?? undefined,
+        headers: getAuthHeaders(),
+        profileOverride: {
           qualityMode: 'delivery',
           agentCount: 1,
           enableWebResearch: false,
-        }),
+        },
       })
-      const raw = await response.text()
-      if (!response.ok) {
-        throw new Error(extractApiError(raw, response.status).message)
-      }
-      const parsed = extractPrimaryAssistantContent(JSON.parse(raw)) || extractApiContent(raw)
+      const parsed = extractPrimaryAssistantContent(JSON.parse(result.raw)) || extractApiContent(result.raw)
       const finalSuggestion = parsed.trim() || normalized
       setLivePreviewSuggestions((prev) => [finalSuggestion, ...prev].slice(0, 10))
       setChatHistory((prev) => [...prev, buildLivePreviewSuggestionMessage(finalSuggestion)].slice(-200))
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Falha ao gerar sugestao.'
+      const message =
+        error instanceof AdvancedChatRequestError
+          ? `${error.code}: ${error.message}`
+          : error instanceof Error
+            ? error.message
+            : 'Falha ao gerar sugestao.'
       setLivePreviewSuggestions((prev) => [`Erro: ${message}`, ...prev].slice(0, 10))
     } finally {
       setIsGenerating(false)
     }
   }, [isGenerating, selectedPreviewPoint, copilotProjectId])
 
-  const onNodesChange = useCallback((changes: any) => setNodes((nds) => applyNodeChanges(changes, nds)), [])
-  const onEdgesChange = useCallback((changes: any) => setEdges((eds) => applyEdgeChanges(changes, eds)), [])
+  useFirstValueTracking({
+    projectsCount: projects.length,
+    defaultProjectsCount: DEFAULT_PROJECTS.length,
+    firstValueAiSuccess,
+    firstValueOpenedIde,
+    trackEvent,
+  })
+
+  useDashboardMissionSeed({
+    trackEvent,
+    showToastMessage,
+    setShowFirstValueGuide,
+    setActiveTab,
+    setChatMessage,
+  })
 
   useEffect(() => {
     setAuthReady(true)
@@ -858,17 +913,32 @@ export default function AethelDashboard() {
   }, [trackEvent])
 
   useEffect(() => {
-    if (missionSeedLoaded || typeof window === 'undefined') return
-    const mission = getMissionFromLocation()
-    setMissionSeedLoaded(true)
-    if (!mission) return
-    setActiveTab('ai-chat')
-    window.localStorage.setItem(STORAGE_KEYS.activeTab, 'ai-chat')
-    setChatMessage((prev) => (prev.trim() ? prev : mission))
-    setShowFirstValueGuide(true)
-    trackEvent('ai', 'ai_chat', { source: 'dashboard-mission-seed' })
-    showToastMessage('Missao carregada no Studio Home. Revise e envie para iniciar.', 'info')
-  }, [missionSeedLoaded, showToastMessage, trackEvent])
+    if (!authReady || !hasToken) return
+    const controller = new AbortController()
+
+    ;(async () => {
+      try {
+        const status = await fetchAiProviderStatus(controller.signal)
+        if (status.configured) {
+          setAiProviderGate(null)
+          return
+        }
+        setAiProviderGate({
+          message: buildAiProviderGateMessage(status),
+          capabilityStatus: status.capabilityStatus,
+          setupUrl: status.setupUrl,
+        })
+        trackEvent('ai', 'ai_error', {
+          source: 'dashboard-provider-preflight',
+          error: 'AI_PROVIDER_NOT_CONFIGURED',
+        })
+      } catch {
+        // best-effort preflight only
+      }
+    })()
+
+    return () => controller.abort()
+  }, [authReady, hasToken, trackEvent])
 
   useEffect(() => {
     if (typeof document === 'undefined') return
@@ -933,32 +1003,19 @@ export default function AethelDashboard() {
     })()
   }, [activeChatThreadId])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.sessionHistory, JSON.stringify(sessionHistory))
-    }
-  }, [sessionHistory])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.chatHistory, JSON.stringify(chatHistory))
-    }
-  }, [chatHistory])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings))
-    }
-  }, [settings])
-
-  useEffect(() => {
-    setAiActivity(isStreaming ? 'Processando' : filteredSessions.length > 0 ? 'Ativo' : 'Ocioso')
-  }, [isStreaming, filteredSessions.length])
-
-  if (!authReady) return null
+  if (!authReady) {
+    return <DashboardLoadingScreen theme={settings.theme} />
+  }
 
   return (
     <div className={`aethel-min-h-screen aethel-flex aethel-flex-column ${settings.theme === 'dark' ? 'aethel-bg-slate-950 aethel-text-slate-50' : 'aethel-bg-slate-100 aethel-text-slate-900'}`}>
+      <a
+        href="#dashboard-main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-3 focus:py-2 focus:text-white focus:ring-2 focus:ring-blue-500"
+      >
+        Pular para o conteudo principal
+      </a>
+      <div className="sr-only" role="status" aria-live="polite" />
       {isTrialActive && showTrialBanner && (
         <TrialBanner
           trialDaysLeft={trialDaysLeft}
@@ -972,12 +1029,18 @@ export default function AethelDashboard() {
         onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         onResetDashboard={handleResetDashboard}
         onToggleTheme={handleToggleTheme}
+        onOpenIde={handleOpenIdeFromHeader}
+        onToggleFullAccess={handleToggleFullAccess}
         theme={settings.theme}
         backendOnline={backendOnline}
+        aiProviderConfigured={!aiProviderGate}
+        onOpenProviderSettings={handleOpenProviderSettings}
+        fullAccessActive={Boolean(fullAccessActiveGrant)}
+        fullAccessExpiresAt={fullAccessActiveGrant?.expiresAt || null}
+        fullAccessBusy={fullAccessBusy}
         authErrorText={authErrorText}
         billingErrorText={billingErrorText}
       />
-
       <div className="aethel-flex aethel-flex-1 aethel-overflow-hidden">
         {sidebarOpen && (
           <button
@@ -997,203 +1060,140 @@ export default function AethelDashboard() {
           onSelectTab={handleTabChange}
           onCloseMobile={() => setSidebarOpen(false)}
         />
-
-        <main className="aethel-flex-1 aethel-overflow-y-auto aethel-relative">
-          {showFirstValueGuide && (
-            <section className="aethel-m-4 aethel-p-4 aethel-rounded-lg border border-blue-500/30 bg-blue-500/10 md:aethel-m-6">
-              <div className="aethel-flex aethel-flex-col md:aethel-flex md:aethel-flex-row md:aethel-items-center md:aethel-justify-between aethel-gap-3">
-                <div>
-                  <h3 className="aethel-text-sm aethel-font-semibold aethel-text-blue-200">Primeiro valor em menos de 2 minutos</h3>
-                  <p className="aethel-text-xs aethel-text-slate-300 aethel-mt-1">
-                    Crie um projeto, configure o provider de IA e abra o live preview da IDE com contexto completo.
-                  </p>
-                  <ul className="aethel-mt-2 aethel-space-y-1 text-[11px] text-slate-300">
-                    <li>{projects.length > DEFAULT_PROJECTS.length ? '✓' : '○'} Primeiro projeto criado</li>
-                    <li>{firstValueAiSuccess ? '✓' : '○'} Primeira resposta de IA recebida</li>
-                    <li>{firstValueOpenedIde ? '✓' : '○'} IDE live preview aberta</li>
-                  </ul>
-                </div>
-                <div className="aethel-flex aethel-flex-col sm:aethel-flex sm:aethel-flex-row aethel-gap-2">
-                  <button type="button" onClick={() => handleTabChange('projects')} className="aethel-button aethel-button-primary aethel-text-xs">
-                    Criar projeto
-                  </button>
-                  <button type="button" onClick={handleOpenProviderSettings} className="aethel-button aethel-button-secondary aethel-text-xs">
-                    Configurar IA
-                  </button>
-                  <button type="button" onClick={handleOpenIdeLivePreview} className="aethel-button aethel-button-secondary aethel-text-xs">
-                    Abrir IDE + Preview
-                  </button>
-                  <button type="button" onClick={dismissFirstValueGuide} className="aethel-button aethel-button-ghost aethel-text-xs">
-                    Dispensar
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {activeTab === 'overview' && (
-            <DashboardOverviewTab
-              aiActivity={aiActivity}
-              projects={projects}
-              livePreviewSuggestions={livePreviewSuggestions}
-              authReady={authReady}
-              hasToken={hasToken}
-              onRefreshWallet={handleRefreshWallet}
-              lastWalletUpdate={lastWalletUpdate}
-              walletLoading={walletLoading}
-              walletError={walletError as Error | null | undefined}
-              walletData={walletData}
-              walletTransactions={walletTransactions}
-              formatCurrencyLabel={formatCurrencyLabel}
-              connectivityData={connectivityData}
-              connectivityLoading={connectivityLoading}
-              connectivityError={connectivityError as Error | null | undefined}
-              connectivityServices={connectivityServices}
-              formatConnectivityStatus={formatConnectivityStatusLabel}
-              miniPreviewExpanded={miniPreviewExpanded}
-              onToggleMiniPreviewExpanded={() => setMiniPreviewExpanded((prev) => !prev)}
-              onMagicWandSelect={handleMagicWandSelect}
-              onSendSuggestion={handleSendLivePreviewSuggestion}
-              isGenerating={isGenerating}
-            />
-          )}
-
-          {activeTab === 'projects' && (
-            <DashboardProjectsTab
-              projects={projects}
-              newProjectName={newProjectName}
-              newProjectType={newProjectType}
-              onDeleteProject={handleDeleteProject}
-              onCreateProject={handleCreateProject}
-              onProjectNameChange={setNewProjectName}
-              onProjectTypeChange={setNewProjectType}
-              onProjectVersionChange={handleProjectVersionChange}
-              onApplyDirectorNote={handleApplyDirectorNote}
-            />
-          )}
-
-          {activeTab === 'ai-chat' && (
-            <DashboardAIChatTab
-              chatMode={chatMode}
-              onChatModeChange={setChatMode}
-              chatHistory={chatHistory}
-              chatMessage={chatMessage}
-              onChatMessageChange={setChatMessage}
-              onSendChatMessage={handleSendChatMessage}
-              isStreaming={isStreaming}
-              activeWorkflowId={activeWorkflowId}
-              copilotWorkflows={copilotWorkflows}
-              copilotWorkflowsLoading={copilotWorkflowsLoading}
-              connectBusy={connectBusy}
-              connectFromWorkflowId={connectFromWorkflowId}
-              onCreateWorkflow={handleCreateWorkflow}
-              onSelectWorkflow={handleSelectWorkflow}
-              onRenameWorkflow={handleRenameWorkflow}
-              onArchiveWorkflow={handleArchiveWorkflow}
-              onConnectFromWorkflowChange={setConnectFromWorkflowId}
-              onCopyHistory={handleCopyHistory}
-              onImportContext={handleImportContext}
-              onMergeWorkflow={handleMergeWorkflow}
-              providerSetupGate={aiProviderGate}
-              onOpenProviderSettings={handleOpenProviderSettings}
-            />
-          )}
-
-          {activeTab === 'wallet' && (
-            <DashboardWalletTab
-              authReady={authReady}
-              hasToken={hasToken}
-              walletLoading={walletLoading}
-              walletError={walletError}
-              walletData={walletData}
-              walletTransactions={walletTransactions}
-              creditsInfo={creditsData}
-              creditsUsedToday={walletStats.creditsUsedToday}
-              creditsUsedThisMonth={walletStats.creditsUsedThisMonth}
-              creditsReceivedThisMonth={walletStats.creditsReceivedThisMonth}
-              lastWalletUpdate={lastWalletUpdate}
-              lastPurchaseIntent={lastPurchaseIntent}
-              lastTransferReceipt={lastTransferReceipt}
-              walletActionMessage={walletActionMessage}
-              walletActionError={walletActionError}
-              purchaseForm={purchaseForm}
-              transferForm={transferForm}
-              walletSubmitting={walletSubmitting}
-              creditEntries={creditEntries}
-              receivableSummary={receivableSummary}
-              onRefreshWallet={handleRefreshWallet}
-              onPurchaseIntentSubmit={handlePurchase}
-              onTransferSubmit={handleTransfer}
-              setPurchaseForm={setPurchaseForm}
-              setTransferForm={setTransferForm}
-              formatCurrencyLabel={formatCurrencyLabel}
-              formatStatusLabel={formatStatusLabel}
-            />
-          )}
-
-          {activeTab === 'billing' && (
-            <div className="aethel-p-6">
-              <BillingTab
-                plans={billingPlansForUI}
-                currentPlan={currentPlan?.id}
-                loading={!billingData && !billingError}
-                onSelectPlan={handleSubscribe}
-                onManageSubscription={handleManageSubscription}
-              />
-              {subscribeError && <p className="aethel-mt-4 aethel-text-sm aethel-text-red-400">{subscribeError}</p>}
-              {subscribingPlan && <p className="aethel-mt-2 aethel-text-xs aethel-text-slate-400">Processando plano {subscribingPlan}...</p>}
-            </div>
-          )}
-
-          {activeTab === 'connectivity' && (
-            <DashboardConnectivityTab
-              connectivityLoading={connectivityLoading}
-              connectivityError={connectivityError}
-              connectivityData={connectivityData}
-              connectivityServices={connectivityServices}
-              onRefreshConnectivity={handleRefreshConnectivity}
-              formatConnectivityStatus={formatConnectivityStatusLabel}
-            />
-          )}
-
-          {activeTab === 'content-creation' && <DashboardContentCreationTab />}
-
-          {activeTab === 'unreal' && <DashboardUnrealTab />}
-
-          {activeTab === 'download' && <DownloadTab onDownload={handleDownload} />}
-
-          {activeTab === 'templates' && (
-            <TemplatesTab templates={workflowTemplates} onSelect={handleTemplateSelect} />
-          )}
-
-          {activeTab === 'use-cases' && (
-            <UseCasesTab useCases={useCases} onSelect={handleUseCaseSelect} />
-          )}
-
-          {activeTab === 'admin' && <AdminTab />}
-
-          {activeTab === 'agent-canvas' && (
-            <AgentCanvasTab
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-            />
-          )}
+        <main id="dashboard-main-content" className="aethel-flex-1 aethel-overflow-y-auto aethel-relative">
+          <DashboardMainContent
+            activeTab={activeTab}
+            showFirstValueGuide={showFirstValueGuide}
+            firstProjectCreated={projects.length > DEFAULT_PROJECTS.length}
+            firstValueAiSuccess={firstValueAiSuccess}
+            firstValueOpenedIde={firstValueOpenedIde}
+            onFirstValueCreateProject={() => {
+              trackEvent('project', 'project_open', { source: 'first-value-guide', action: 'open-project-tab' })
+              handleTabChange('projects')
+            }}
+            onFirstValueConfigureAI={() => {
+              trackEvent('ai', 'ai_error', { source: 'first-value-guide', action: 'open-provider-setup' })
+              handleOpenProviderSettings()
+            }}
+            onFirstValueOpenAIChat={handleOpenAIChatFromGuide}
+            onFirstValueOpenIdePreview={handleOpenIdeLivePreview}
+            onFirstValueDismiss={dismissFirstValueGuide}
+            overviewProps={{
+              aiActivity,
+              projects,
+              livePreviewSuggestions,
+              authReady,
+              hasToken,
+              onRefreshWallet: handleRefreshWallet,
+              lastWalletUpdate,
+              walletLoading,
+              walletError: walletError as Error | null | undefined,
+              walletData,
+              walletTransactions,
+              formatCurrencyLabel,
+              connectivityData,
+              connectivityLoading,
+              connectivityError: connectivityError as Error | null | undefined,
+              connectivityServices,
+              formatConnectivityStatus: formatConnectivityStatusLabel,
+              miniPreviewExpanded,
+              onToggleMiniPreviewExpanded: () => setMiniPreviewExpanded((prev) => !prev),
+              onMagicWandSelect: handleMagicWandSelect,
+              onSendSuggestion: handleSendLivePreviewSuggestion,
+              isGenerating,
+            }}
+            projectsProps={{
+              projects,
+              newProjectName,
+              newProjectType,
+              onDeleteProject: handleDeleteProject,
+              onCreateProject: handleCreateProject,
+              onProjectNameChange: setNewProjectName,
+              onProjectTypeChange: setNewProjectType,
+              onProjectVersionChange: handleProjectVersionChange,
+              onApplyDirectorNote: handleApplyDirectorNote,
+            }}
+            aiChatProps={{
+              chatMode,
+              onChatModeChange: setChatMode,
+              chatHistory,
+              chatMessage,
+              onChatMessageChange: setChatMessage,
+              onSendChatMessage: handleSendChatMessage,
+              onStopStreaming: handleStopDashboardChat,
+              isStreaming,
+              activeWorkflowId,
+              copilotWorkflows,
+              copilotWorkflowsLoading,
+              connectBusy,
+              connectFromWorkflowId,
+              onCreateWorkflow: handleCreateWorkflow,
+              onSelectWorkflow: handleSelectWorkflow,
+              onRenameWorkflow: handleRenameWorkflow,
+              onArchiveWorkflow: handleArchiveWorkflow,
+              onConnectFromWorkflowChange: setConnectFromWorkflowId,
+              onCopyHistory: handleCopyHistory,
+              onImportContext: handleImportContext,
+              onMergeWorkflow: handleMergeWorkflow,
+              providerSetupGate: aiProviderGate,
+              onOpenProviderSettings: handleOpenProviderSettings,
+            }}
+            walletProps={{
+              authReady,
+              hasToken,
+              walletLoading,
+              walletError,
+              walletData,
+              walletTransactions,
+              creditsInfo: creditsData,
+              creditsUsedToday: walletStats.creditsUsedToday,
+              creditsUsedThisMonth: walletStats.creditsUsedThisMonth,
+              creditsReceivedThisMonth: walletStats.creditsReceivedThisMonth,
+              lastWalletUpdate,
+              lastPurchaseIntent,
+              lastTransferReceipt,
+              walletActionMessage,
+              walletActionError,
+              purchaseForm,
+              transferForm,
+              walletSubmitting,
+              creditEntries,
+              receivableSummary,
+              onRefreshWallet: handleRefreshWallet,
+              onPurchaseIntentSubmit: handlePurchase,
+              onTransferSubmit: handleTransfer,
+              setPurchaseForm,
+              setTransferForm,
+              formatCurrencyLabel,
+              formatStatusLabel,
+            }}
+            billingProps={{
+              plans: billingPlansForUI,
+              currentPlan: currentPlan?.id,
+              loading: !billingData && !billingError,
+              onSelectPlan: handleSubscribe,
+              onManageSubscription: handleManageSubscription,
+            }}
+            billingError={subscribeError}
+            subscribingPlan={subscribingPlan}
+            connectivityProps={{
+              connectivityLoading,
+              connectivityError,
+              connectivityData,
+              connectivityServices,
+              onRefreshConnectivity: handleRefreshConnectivity,
+              formatConnectivityStatus: formatConnectivityStatusLabel,
+            }}
+            workflowTemplates={workflowTemplates}
+            useCases={useCases}
+            onDownload={handleDownload}
+            onTemplateSelect={handleTemplateSelect}
+            onUseCaseSelect={handleUseCaseSelect}
+          />
         </main>
       </div>
 
-      {showToast && (
-        <div className={`aethel-fixed aethel-bottom-6 aethel-right-6 aethel-px-4 aethel-py-2 aethel-rounded-lg aethel-shadow-lg aethel-z-50 aethel-animate-in aethel-slide-in-from-bottom-4 ${
-          showToast.type === 'success'
-            ? 'aethel-bg-emerald-600'
-            : showToast.type === 'error'
-              ? 'aethel-bg-red-600'
-              : 'aethel-bg-blue-600'
-        }`}>
-          {showToast.message}
-        </div>
-      )}
+      {showToast ? <DashboardToast message={showToast.message} type={showToast.type} /> : null}
     </div>
   )
 }

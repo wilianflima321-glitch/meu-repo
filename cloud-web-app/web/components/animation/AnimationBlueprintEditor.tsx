@@ -1,22 +1,4 @@
-/**
- * ANIMATION BLUEPRINT EDITOR - Aethel Engine
- * 
- * Editor visual de Animation Blueprints no estilo Unreal Engine.
- * Permite criar state machines, blend trees e lógica de animação visualmente.
- * 
- * FEATURES:
- * - Animation State Machine visual
- * - Blend Tree editor
- * - Transition rules visuais
- * - Parameter management
- * - Preview em tempo real
- * - Notifies e eventos
- * - IK/FK layers
- * - Montages
- */
-
 'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   ReactFlow,
@@ -38,125 +20,34 @@ import {
   getBezierPath,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type AnimationNodeType = 
-  | 'state'
-  | 'entry'
-  | 'exit'
-  | 'conduit'
-  | 'blend_space_1d'
-  | 'blend_space_2d'
-  | 'blend_node'
-  | 'sequence'
-  | 'pose_snapshot'
-  | 'state_alias';
-
-export interface AnimationParameter {
-  id: string;
-  name: string;
-  type: 'float' | 'int' | 'bool' | 'trigger';
-  value: number | boolean;
-  min?: number;
-  max?: number;
-}
-
-export interface TransitionCondition {
-  parameter: string;
-  comparison: '==' | '!=' | '>' | '<' | '>=' | '<=';
-  value: number | boolean;
-}
-
-export interface AnimationTransition {
-  id: string;
-  sourceState: string;
-  targetState: string;
-  conditions: TransitionCondition[];
-  blendTime: number;
-  blendMode: 'linear' | 'cubic' | 'custom';
-  interruptible: boolean;
-  priority: number;
-}
-
-export interface AnimationState {
-  id: string;
-  name: string;
-  type: AnimationNodeType;
-  animation?: string;
-  blendTree?: BlendTree;
-  speed: number;
-  loop: boolean;
-  notifies: AnimationNotify[];
-}
-
-export interface BlendTree {
-  type: '1d' | '2d' | 'additive';
-  parameterX: string;
-  parameterY?: string;
-  children: BlendTreeNode[];
-}
-
-export interface BlendTreeNode {
-  animation: string;
-  position: { x: number; y?: number };
-  weight?: number;
-}
-
-export interface AnimationNotify {
-  id: string;
-  name: string;
-  time: number;
-  duration?: number;
-  payload?: Record<string, unknown>;
-}
-
-export interface AnimationLayer {
-  id: string;
-  name: string;
-  blendMode: 'override' | 'additive';
-  weight: number;
-  mask?: string[]; // Bone mask
-  stateMachine: string;
-}
-
-export interface AnimationBlueprint {
-  id: string;
-  name: string;
-  skeleton: string;
-  parameters: AnimationParameter[];
-  states: AnimationState[];
-  transitions: AnimationTransition[];
-  layers: AnimationLayer[];
-  defaultState: string;
-}
-
-// ============================================================================
-// NODE DATA TYPES
-// ============================================================================
-
-interface StateNodeData extends Record<string, unknown> {
-  state: AnimationState;
-  isDefault: boolean;
-  isSelected: boolean;
-  onEdit: (state: AnimationState) => void;
-  onSetDefault: (stateId: string) => void;
-}
-
-interface TransitionEdgeData extends Record<string, unknown> {
-  transition: AnimationTransition;
-  onEdit?: (transition: AnimationTransition) => void;
-}
-
-// ============================================================================
-// STATE NODE COMPONENT
-// ============================================================================
-
+import {
+  type AnimationBlueprint,
+  type AnimationLayer,
+  type AnimationNodeType,
+  type AnimationNotify,
+  type AnimationParameter,
+  type AnimationState,
+  type AnimationTransition,
+  type BlendTree,
+  type BlendTreeNode,
+  type StateNodeData,
+  type TransitionCondition,
+  type TransitionEdgeData,
+} from './animation-blueprint-editor.types'
+export type {
+  AnimationBlueprint,
+  AnimationLayer,
+  AnimationNodeType,
+  AnimationNotify,
+  AnimationParameter,
+  AnimationState,
+  AnimationTransition,
+  BlendTree,
+  BlendTreeNode,
+  TransitionCondition,
+} from './animation-blueprint-editor.types'
 function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
   const { state, isDefault, onEdit, onSetDefault } = data;
-  
   const getNodeColor = () => {
     switch (state.type) {
       case 'entry': return '#22c55e';
@@ -167,7 +58,6 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
       default: return '#3b82f6';
     }
   };
-  
   return (
     <div
       style={{
@@ -186,7 +76,6 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
         position={Position.Left}
         style={{ background: '#64748b', width: 10, height: 10 }}
       />
-      
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
         <div
@@ -204,33 +93,28 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           </span>
         )}
       </div>
-      
       {/* Animation info */}
       {state.animation && (
         <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
           🎬 {state.animation}
         </div>
       )}
-      
       {/* Blend tree indicator */}
       {state.blendTree && (
         <div style={{ fontSize: '12px', color: '#8b5cf6' }}>
           ⚡ Blend Tree ({state.blendTree.type})
         </div>
       )}
-      
       {/* Speed */}
       <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
         Speed: {state.speed}x {state.loop ? '🔄' : ''}
       </div>
-      
       {/* Notifies count */}
       {state.notifies.length > 0 && (
         <div style={{ fontSize: '11px', color: '#f59e0b', marginTop: '2px' }}>
           📌 {state.notifies.length} notifies
         </div>
       )}
-      
       {/* Context menu buttons (visible on hover) */}
       <div
         style={{
@@ -274,7 +158,6 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           </button>
         )}
       </div>
-      
       {/* Output handle */}
       <Handle
         type="source"
@@ -284,11 +167,6 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
     </div>
   );
 }
-
-// ============================================================================
-// TRANSITION EDGE COMPONENT
-// ============================================================================
-
 function TransitionEdge({ 
   id,
   sourceX,
@@ -308,9 +186,7 @@ function TransitionEdge({
     targetY,
     targetPosition,
   });
-  
   const transition = data?.transition;
-  
   return (
     <>
       <path
@@ -322,7 +198,6 @@ function TransitionEdge({
         fill="none"
         markerEnd="url(#arrow)"
       />
-      
       {/* Transition label */}
       {transition && (
         <foreignObject
@@ -356,24 +231,16 @@ function TransitionEdge({
     </>
   );
 }
-
-// ============================================================================
-// PARAMETER PANEL
-// ============================================================================
-
 interface ParameterPanelProps {
   parameters: AnimationParameter[];
   onChange: (params: AnimationParameter[]) => void;
   onValueChange: (id: string, value: number | boolean) => void;
 }
-
 function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelProps) {
   const [newParamName, setNewParamName] = useState('');
   const [newParamType, setNewParamType] = useState<AnimationParameter['type']>('float');
-  
   const addParameter = () => {
     if (!newParamName.trim()) return;
-    
     const newParam: AnimationParameter = {
       id: crypto.randomUUID(),
       name: newParamName,
@@ -382,21 +249,17 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
       min: newParamType === 'float' || newParamType === 'int' ? 0 : undefined,
       max: newParamType === 'float' ? 1 : newParamType === 'int' ? 100 : undefined,
     };
-    
     onChange([...parameters, newParam]);
     setNewParamName('');
   };
-  
   const removeParameter = (id: string) => {
     onChange(parameters.filter(p => p.id !== id));
   };
-  
   return (
     <div style={{ padding: '12px', background: '#0f172a', borderRadius: '8px' }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>
         Parameters
       </h3>
-      
       {/* Parameter list */}
       <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
         {parameters.map(param => (
@@ -423,12 +286,10 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
             }}>
               {param.type}
             </span>
-            
             {/* Name */}
             <span style={{ flex: 1, color: 'white', fontSize: '12px' }}>
               {param.name}
             </span>
-            
             {/* Value control */}
             {(param.type === 'float' || param.type === 'int') && (
               <input
@@ -441,7 +302,6 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
                 style={{ width: '80px' }}
               />
             )}
-            
             {param.type === 'bool' && (
               <input
                 type="checkbox"
@@ -449,7 +309,6 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
                 onChange={(e) => onValueChange(param.id, e.target.checked)}
               />
             )}
-            
             {param.type === 'trigger' && (
               <button
                 onClick={() => {
@@ -469,12 +328,10 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
                 Fire
               </button>
             )}
-            
             {/* Value display */}
             <span style={{ color: '#64748b', fontSize: '11px', width: '40px', textAlign: 'right' }}>
               {typeof param.value === 'boolean' ? (param.value ? 'true' : 'false') : param.value.toFixed(2)}
             </span>
-            
             {/* Delete */}
             <button
               onClick={() => removeParameter(param.id)}
@@ -491,7 +348,6 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
           </div>
         ))}
       </div>
-      
       {/* Add new parameter */}
       <div style={{ display: 'flex', gap: '8px' }}>
         <input
@@ -544,11 +400,6 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
     </div>
   );
 }
-
-// ============================================================================
-// STATE EDITOR MODAL
-// ============================================================================
-
 interface StateEditorModalProps {
   state: AnimationState;
   onSave: (state: AnimationState) => void;
@@ -556,14 +407,11 @@ interface StateEditorModalProps {
   availableAnimations: string[];
   parameters: AnimationParameter[];
 }
-
 function StateEditorModal({ state, onSave, onClose, availableAnimations, parameters }: StateEditorModalProps) {
   const [editedState, setEditedState] = useState<AnimationState>({ ...state });
-  
   const updateField = <K extends keyof AnimationState>(field: K, value: AnimationState[K]) => {
     setEditedState(prev => ({ ...prev, [field]: value }));
   };
-  
   return (
     <div
       style={{
@@ -592,7 +440,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
         onClick={(e) => e.stopPropagation()}
       >
         <h2 style={{ color: 'white', marginBottom: '20px' }}>Edit State: {state.name}</h2>
-        
         {/* Name */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -612,7 +459,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             }}
           />
         </div>
-        
         {/* Animation */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -636,7 +482,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             ))}
           </select>
         </div>
-        
         {/* Speed */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -652,7 +497,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             style={{ width: '100%' }}
           />
         </div>
-        
         {/* Loop */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -664,7 +508,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             Loop Animation
           </label>
         </div>
-        
         {/* Blend Tree option */}
         <div style={{ marginBottom: '16px', padding: '12px', background: '#0f172a', borderRadius: '8px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -679,7 +522,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             />
             Use Blend Tree
           </label>
-          
           {editedState.blendTree && (
             <div style={{ marginTop: '8px' }}>
               <select
@@ -702,7 +544,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
                 <option value="2d">2D Blend Space</option>
                 <option value="additive">Additive</option>
               </select>
-              
               <select
                 value={editedState.blendTree.parameterX}
                 onChange={(e) => updateField('blendTree', {
@@ -726,7 +567,6 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             </div>
           )}
         </div>
-        
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
           <button
@@ -760,21 +600,14 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
     </div>
   );
 }
-
-// ============================================================================
-// TRANSITION EDITOR MODAL
-// ============================================================================
-
 interface TransitionEditorModalProps {
   transition: AnimationTransition;
   onSave: (transition: AnimationTransition) => void;
   onClose: () => void;
   parameters: AnimationParameter[];
 }
-
 function TransitionEditorModal({ transition, onSave, onClose, parameters }: TransitionEditorModalProps) {
   const [editedTransition, setEditedTransition] = useState<AnimationTransition>({ ...transition });
-  
   const addCondition = () => {
     const newCondition: TransitionCondition = {
       parameter: parameters[0]?.id || '',
@@ -786,21 +619,18 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
       conditions: [...prev.conditions, newCondition],
     }));
   };
-  
   const updateCondition = (index: number, updates: Partial<TransitionCondition>) => {
     setEditedTransition(prev => ({
       ...prev,
       conditions: prev.conditions.map((c, i) => i === index ? { ...c, ...updates } : c),
     }));
   };
-  
   const removeCondition = (index: number) => {
     setEditedTransition(prev => ({
       ...prev,
       conditions: prev.conditions.filter((_, i) => i !== index),
     }));
   };
-  
   return (
     <div
       style={{
@@ -829,7 +659,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         onClick={(e) => e.stopPropagation()}
       >
         <h2 style={{ color: 'white', marginBottom: '20px' }}>Edit Transition</h2>
-        
         {/* Blend Time */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -845,7 +674,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
             style={{ width: '100%' }}
           />
         </div>
-        
         {/* Blend Mode */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -871,7 +699,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
             <option value="custom">Custom Curve</option>
           </select>
         </div>
-        
         {/* Interruptible */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -883,7 +710,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
             Can Be Interrupted
           </label>
         </div>
-        
         {/* Priority */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -899,7 +725,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
             style={{ width: '100%' }}
           />
         </div>
-        
         {/* Conditions */}
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -919,7 +744,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
               + Add
             </button>
           </div>
-          
           {editedTransition.conditions.map((condition, index) => (
             <div
               key={index}
@@ -950,7 +774,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
-              
               <select
                 value={condition.comparison}
                 onChange={(e) => updateCondition(index, { comparison: e.target.value as TransitionCondition['comparison'] })}
@@ -970,7 +793,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                 <option value=">=">&gt;=</option>
                 <option value="<=">&lt;=</option>
               </select>
-              
               <input
                 type="number"
                 value={condition.value as number}
@@ -985,7 +807,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                   fontSize: '11px',
                 }}
               />
-              
               <button
                 onClick={() => removeCondition(index)}
                 style={{
@@ -1000,7 +821,6 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
             </div>
           ))}
         </div>
-        
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
           <button
@@ -1034,31 +854,22 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
     </div>
   );
 }
-
-// ============================================================================
-// MAIN ANIMATION BLUEPRINT EDITOR
-// ============================================================================
-
 export interface AnimationBlueprintEditorProps {
   blueprint?: AnimationBlueprint;
   onChange?: (blueprint: AnimationBlueprint) => void;
   availableAnimations?: string[];
 }
-
 const nodeTypes = {
   state: StateNode,
 };
-
 const edgeTypes = {
   transition: TransitionEdge,
 };
-
 export function AnimationBlueprintEditor({
   blueprint: initialBlueprint,
   onChange,
   availableAnimations = ['Idle', 'Walk', 'Run', 'Jump', 'Fall', 'Land', 'Attack', 'Hit', 'Die'],
 }: AnimationBlueprintEditorProps) {
-  // Blueprint state
   const [blueprint, setBlueprint] = useState<AnimationBlueprint>(initialBlueprint || {
     id: crypto.randomUUID(),
     name: 'New Animation Blueprint',
@@ -1118,12 +929,8 @@ export function AnimationBlueprintEditor({
     layers: [],
     defaultState: 'idle',
   });
-  
-  // Modals
   const [editingState, setEditingState] = useState<AnimationState | null>(null);
   const [editingTransition, setEditingTransition] = useState<AnimationTransition | null>(null);
-  
-  // Convert to React Flow nodes/edges
   const initialNodes: Node<StateNodeData>[] = useMemo(() => {
     return blueprint.states.map((state, index) => ({
       id: state.id,
@@ -1140,7 +947,6 @@ export function AnimationBlueprintEditor({
       },
     }));
   }, [blueprint.states, blueprint.defaultState]);
-  
   const initialEdges: Edge<TransitionEdgeData>[] = useMemo(() => {
     return blueprint.transitions.map(transition => ({
       id: transition.id,
@@ -1154,14 +960,10 @@ export function AnimationBlueprintEditor({
       },
     }));
   }, [blueprint.transitions]);
-  
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  
-  // Handle new connections
   const onConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target) return;
-    
     const newTransition: AnimationTransition = {
       id: crypto.randomUUID(),
       sourceState: connection.source,
@@ -1172,12 +974,10 @@ export function AnimationBlueprintEditor({
       interruptible: true,
       priority: 0,
     };
-    
     setBlueprint(prev => ({
       ...prev,
       transitions: [...prev.transitions, newTransition],
     }));
-    
     setEdges(eds => addEdge({
       ...connection,
       id: newTransition.id,
@@ -1189,8 +989,6 @@ export function AnimationBlueprintEditor({
       },
     }, eds));
   }, [setEdges]);
-  
-  // Add new state
   const addState = () => {
     const newState: AnimationState = {
       id: crypto.randomUUID(),
@@ -1200,12 +998,10 @@ export function AnimationBlueprintEditor({
       loop: true,
       notifies: [],
     };
-    
     setBlueprint(prev => ({
       ...prev,
       states: [...prev.states, newState],
     }));
-    
     setNodes(nds => [...nds, {
       id: newState.id,
       type: 'state',
@@ -1221,50 +1017,37 @@ export function AnimationBlueprintEditor({
       },
     }]);
   };
-  
-  // Save state edit
   const saveStateEdit = (state: AnimationState) => {
     setBlueprint(prev => ({
       ...prev,
       states: prev.states.map(s => s.id === state.id ? state : s),
     }));
-    
     setNodes(nds => nds.map(n => n.id === state.id ? {
       ...n,
       data: { ...n.data, state },
     } : n));
-    
     setEditingState(null);
   };
-  
-  // Save transition edit
   const saveTransitionEdit = (transition: AnimationTransition) => {
     setBlueprint(prev => ({
       ...prev,
       transitions: prev.transitions.map(t => t.id === transition.id ? transition : t),
     }));
-    
     setEdges(eds => eds.map(e => e.id === transition.id ? {
       ...e,
       data: { ...e.data, transition },
     } : e));
-    
     setEditingTransition(null);
   };
-  
-  // Parameter value change (for preview)
   const handleParameterValueChange = (id: string, value: number | boolean) => {
     setBlueprint(prev => ({
       ...prev,
       parameters: prev.parameters.map(p => p.id === id ? { ...p, value } : p),
     }));
   };
-  
-  // Notify parent of changes
   useEffect(() => {
     onChange?.(blueprint);
   }, [blueprint, onChange]);
-  
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex' }}>
       {/* Left sidebar - Parameters */}
@@ -1272,13 +1055,11 @@ export function AnimationBlueprintEditor({
         <h2 style={{ color: 'white', fontSize: '16px', marginBottom: '16px' }}>
           🎬 {blueprint.name}
         </h2>
-        
         <ParameterPanel
           parameters={blueprint.parameters}
           onChange={(params) => setBlueprint(prev => ({ ...prev, parameters: params }))}
           onValueChange={handleParameterValueChange}
         />
-        
         <div style={{ marginTop: '16px' }}>
           <button
             onClick={addState}
@@ -1296,7 +1077,6 @@ export function AnimationBlueprintEditor({
             + Add State
           </button>
         </div>
-        
         {/* Layers panel would go here */}
         <div style={{ marginTop: '20px', padding: '12px', background: '#1e293b', borderRadius: '8px' }}>
           <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '8px' }}>Layers</h3>
@@ -1305,7 +1085,6 @@ export function AnimationBlueprintEditor({
           </p>
         </div>
       </div>
-      
       {/* Main graph area */}
       <div style={{ flex: 1 }}>
         <ReactFlow
@@ -1326,7 +1105,6 @@ export function AnimationBlueprintEditor({
             nodeColor="#3b82f6"
           />
           <Background color="#1e293b" gap={20} />
-          
           <Panel position="top-right">
             <div style={{ 
               background: '#1e293b', 
@@ -1340,7 +1118,6 @@ export function AnimationBlueprintEditor({
           </Panel>
         </ReactFlow>
       </div>
-      
       {/* Modals */}
       {editingState && (
         <StateEditorModal
@@ -1351,7 +1128,6 @@ export function AnimationBlueprintEditor({
           parameters={blueprint.parameters}
         />
       )}
-      
       {editingTransition && (
         <TransitionEditorModal
           transition={editingTransition}
@@ -1360,7 +1136,6 @@ export function AnimationBlueprintEditor({
           parameters={blueprint.parameters}
         />
       )}
-      
       {/* Arrow marker definition */}
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
@@ -1380,5 +1155,4 @@ export function AnimationBlueprintEditor({
     </div>
   );
 }
-
 export default AnimationBlueprintEditor;

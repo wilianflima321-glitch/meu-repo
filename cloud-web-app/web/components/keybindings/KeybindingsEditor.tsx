@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { getKeybindingManager, Keybinding as ManagerKeybinding } from '@/lib/keybindings/keybinding-manager'
 import { useToast } from '@/components/ui/Toast'
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
 // ============= Types =============
 
@@ -367,11 +368,16 @@ export default function KeybindingsEditor({
   }, [])
   
   // Reset all
-  const resetAll = useCallback(() => {
-    if (confirm('Reset all keybindings to defaults?')) {
-      setKeybindings(DEFAULT_KEYBINDINGS)
-      setHasChanges(true)
-    }
+  const resetAll = useCallback(async () => {
+    const shouldReset = await openConfirmDialog({
+      title: 'Reset keybindings',
+      message: 'Reset all keybindings to defaults?',
+      confirmText: 'Reset',
+      cancelText: 'Cancel',
+    })
+    if (!shouldReset) return
+    setKeybindings(DEFAULT_KEYBINDINGS)
+    setHasChanges(true)
   }, [])
   
   // Save and register with manager

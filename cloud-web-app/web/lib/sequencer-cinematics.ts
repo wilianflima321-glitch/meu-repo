@@ -1,19 +1,4 @@
-/**
- * SEQUENCER/CINEMATICS SYSTEM - Aethel Engine
- * 
- * Sistema de cinematics tipo Unreal Sequencer.
- * Permite criar cutscenes, trailers e animações em tempo real.
- * 
- * FEATURES:
- * - Timeline com múltiplas tracks
- * - Keyframe animation
- * - Camera cuts e blends
- * - Audio sync
- * - Events/triggers
- * - Curves de animação (Bezier, Linear, Step)
- * - Playback controls
- * - Export para vídeo
- */
+// Sequencer/cinematics system for real-time cutscene timelines.
 
 import * as THREE from 'three';
 

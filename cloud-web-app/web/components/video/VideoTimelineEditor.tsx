@@ -1,293 +1,30 @@
-/**
- * VIDEO TIMELINE EDITOR - Aethel Engine
- * 
- * Editor de timeline de vídeo profissional no estilo Adobe Premiere Pro.
- * Permite edição não-linear de vídeo, áudio, efeitos e transições.
- * 
- * FEATURES:
- * - Multi-track timeline
- * - Video/Audio/Effect tracks
- * - Clip trimming and splitting
- * - Transitions library
- * - Keyframe animation
- * - Color grading (Lumetri style)
- * - Audio mixing
- * - Markers and regions
- * - Real-time preview
- * - Export settings
- */
-
 'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type TrackType = 'video' | 'audio' | 'effect' | 'title' | 'adjustment';
-export type ClipType = 'video' | 'audio' | 'image' | 'title' | 'effect' | 'adjustment';
-
-export interface TimelineClip {
-  id: string;
-  name: string;
-  type: ClipType;
-  trackId: string;
-  startTime: number;       // Start on timeline (seconds)
-  duration: number;        // Duration on timeline
-  sourceIn: number;        // Source in point
-  sourceOut: number;       // Source out point
-  sourceDuration: number;  // Original source duration
-  sourceUrl: string;
-  thumbnail?: string;
-  audioLevel: number;      // 0-1
-  opacity: number;         // 0-1
-  speed: number;           // 1 = normal
-  keyframes: ClipKeyframe[];
-  effects: ClipEffect[];
-  transitions: {
-    in?: Transition;
-    out?: Transition;
-  };
-  color: string;           // UI color
-  locked: boolean;
-  muted: boolean;
-}
-
-export interface Track {
-  id: string;
-  name: string;
-  type: TrackType;
-  height: number;
-  visible: boolean;
-  locked: boolean;
-  muted: boolean;
-  solo: boolean;
-  color: string;
-  volume: number;         // For audio tracks
-  pan: number;            // For audio tracks (-1 to 1)
-  clips: string[];        // Clip IDs
-}
-
-export interface ClipKeyframe {
-  id: string;
-  property: string;       // opacity, position.x, scale, etc.
-  time: number;           // Relative to clip start
-  value: number | number[];
-  easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'bezier';
-  bezierHandles?: { x1: number; y1: number; x2: number; y2: number };
-}
-
-export interface ClipEffect {
-  id: string;
-  type: string;           // blur, color_correction, etc.
-  name: string;
-  enabled: boolean;
-  parameters: Record<string, unknown>;
-  keyframes: ClipKeyframe[];
-}
-
-export interface Transition {
-  id: string;
-  type: string;           // cross_dissolve, dip_to_black, wipe, etc.
-  duration: number;
-  parameters: Record<string, unknown>;
-}
-
-export interface TimelineMarker {
-  id: string;
-  time: number;
-  name: string;
-  color: string;
-  type: 'marker' | 'chapter' | 'comment';
-}
-
-export interface TimelineRegion {
-  id: string;
-  startTime: number;
-  endTime: number;
-  name: string;
-  color: string;
-}
-
-export interface TimelineProject {
-  id: string;
-  name: string;
-  duration: number;
-  frameRate: number;
-  resolution: { width: number; height: number };
-  tracks: Track[];
-  clips: Map<string, TimelineClip>;
-  markers: TimelineMarker[];
-  regions: TimelineRegion[];
-  workAreaIn: number;
-  workAreaOut: number;
-}
-
-// ============================================================================
-// TIMELINE RULER
-// ============================================================================
-
-interface TimelineRulerProps {
-  duration: number;
-  zoom: number;
-  scrollX: number;
-  playhead: number;
-  frameRate: number;
-  workArea: { in: number; out: number };
-  markers: TimelineMarker[];
-  onSeek: (time: number) => void;
-  onMarkerClick: (marker: TimelineMarker) => void;
-}
-
-function TimelineRuler({
-  duration,
-  zoom,
-  scrollX,
-  playhead,
-  frameRate,
-  workArea,
-  markers,
-  onSeek,
-  onMarkerClick,
-}: TimelineRulerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    const frames = Math.floor((seconds % 1) * frameRate);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
-  };
-  
-  const pixelsPerSecond = 100 * zoom;
-  const tickInterval = zoom < 0.5 ? 5 : zoom < 1 ? 2 : zoom < 2 ? 1 : 0.5;
-  
-  const handleClick = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left + scrollX;
-    const time = x / pixelsPerSecond;
-    onSeek(Math.max(0, Math.min(duration, time)));
-  };
-  
-  const visibleStart = scrollX / pixelsPerSecond;
-  const visibleEnd = visibleStart + (containerRef.current?.clientWidth ?? 1000) / pixelsPerSecond;
-  
-  const ticks = useMemo(() => {
-    const result: number[] = [];
-    const start = Math.floor(visibleStart / tickInterval) * tickInterval;
-    
-    for (let time = start; time <= Math.min(visibleEnd + tickInterval, duration); time += tickInterval) {
-      result.push(time);
-    }
-    
-    return result;
-  }, [visibleStart, visibleEnd, tickInterval, duration]);
-  
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        height: '32px',
-        background: '#0f172a',
-        borderBottom: '1px solid #1e293b',
-        position: 'relative',
-        cursor: 'pointer',
-        overflow: 'hidden',
-      }}
-      onClick={handleClick}
-    >
-      {/* Work area */}
-      <div
-        style={{
-          position: 'absolute',
-          left: `${(workArea.in * pixelsPerSecond) - scrollX}px`,
-          width: `${(workArea.out - workArea.in) * pixelsPerSecond}px`,
-          height: '100%',
-          background: 'rgba(59, 130, 246, 0.1)',
-          borderLeft: '2px solid #3b82f6',
-          borderRight: '2px solid #3b82f6',
-        }}
-      />
-      
-      {/* Ticks */}
-      {ticks.map((time) => (
-        <div
-          key={time}
-          style={{
-            position: 'absolute',
-            left: `${(time * pixelsPerSecond) - scrollX}px`,
-            height: time % 1 === 0 ? '100%' : '50%',
-            width: '1px',
-            background: time % 5 === 0 ? '#475569' : '#374151',
-            bottom: 0,
-          }}
-        >
-          {time % (tickInterval * 2) === 0 && (
-            <span style={{
-              position: 'absolute',
-              top: '4px',
-              left: '4px',
-              fontSize: '10px',
-              color: '#94a3b8',
-              whiteSpace: 'nowrap',
-            }}>
-              {formatTime(time)}
-            </span>
-          )}
-        </div>
-      ))}
-      
-      {/* Markers */}
-      {markers.map((marker) => (
-        <div
-          key={marker.id}
-          onClick={(e) => { e.stopPropagation(); onMarkerClick(marker); }}
-          style={{
-            position: 'absolute',
-            left: `${(marker.time * pixelsPerSecond) - scrollX - 6}px`,
-            bottom: '4px',
-            width: '12px',
-            height: '12px',
-            background: marker.color,
-            borderRadius: '2px',
-            cursor: 'pointer',
-          }}
-          title={marker.name}
-        />
-      ))}
-      
-      {/* Playhead */}
-      <div
-        style={{
-          position: 'absolute',
-          left: `${(playhead * pixelsPerSecond) - scrollX}px`,
-          top: 0,
-          bottom: 0,
-          width: '2px',
-          background: '#ef4444',
-          zIndex: 10,
-        }}
-      >
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: '-6px',
-          width: '14px',
-          height: '14px',
-          background: '#ef4444',
-          clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-        }} />
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// TRACK HEADER
-// ============================================================================
-
+import { TimelineRuler } from './video-timeline-editor-ruler';
+import {
+  type ClipEffect,
+  type ClipKeyframe,
+  type ClipType,
+  type TimelineClip,
+  type TimelineMarker,
+  type TimelineProject,
+  type TimelineRegion,
+  type Track,
+  type TrackType,
+  type Transition,
+} from './video-timeline-editor.types';
+export type {
+  ClipEffect,
+  ClipKeyframe,
+  ClipType,
+  TimelineClip,
+  TimelineMarker,
+  TimelineProject,
+  TimelineRegion,
+  Track,
+  TrackType,
+  Transition,
+} from './video-timeline-editor.types';
 interface TrackHeaderProps {
   track: Track;
   onToggleVisible: () => void;
@@ -296,7 +33,6 @@ interface TrackHeaderProps {
   onToggleSolo: () => void;
   onVolumeChange: (volume: number) => void;
 }
-
 function TrackHeader({
   track,
   onToggleVisible,
@@ -325,7 +61,6 @@ function TrackHeader({
         background: track.color,
         borderRadius: '2px',
       }} />
-      
       {/* Track name */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ 
@@ -342,7 +77,6 @@ function TrackHeader({
           {track.type.toUpperCase()}
         </div>
       </div>
-      
       {/* Track controls */}
       <div style={{ display: 'flex', gap: '4px' }}>
         <button
@@ -361,7 +95,6 @@ function TrackHeader({
         >
           👁
         </button>
-        
         <button
           onClick={onToggleMute}
           style={{
@@ -378,7 +111,6 @@ function TrackHeader({
         >
           M
         </button>
-        
         {track.type === 'audio' && (
           <button
             onClick={onToggleSolo}
@@ -397,7 +129,6 @@ function TrackHeader({
             S
           </button>
         )}
-        
         <button
           onClick={onToggleLock}
           style={{
@@ -418,11 +149,6 @@ function TrackHeader({
     </div>
   );
 }
-
-// ============================================================================
-// TIMELINE CLIP COMPONENT
-// ============================================================================
-
 interface TimelineClipComponentProps {
   clip: TimelineClip;
   track: Track;
@@ -434,7 +160,6 @@ interface TimelineClipComponentProps {
   onTrimStart: (newIn: number) => void;
   onTrimEnd: (newOut: number) => void;
 }
-
 function TimelineClipComponent({
   clip,
   track,
@@ -451,15 +176,12 @@ function TimelineClipComponent({
   const [dragStartX, setDragStartX] = useState(0);
   const [originalStart, setOriginalStart] = useState(0);
   const [originalDuration, setOriginalDuration] = useState(0);
-  
   const pixelsPerSecond = 100 * zoom;
   const clipLeft = (clip.startTime * pixelsPerSecond) - scrollX;
   const clipWidth = clip.duration * pixelsPerSecond;
-  
   const handleMouseDown = (e: React.MouseEvent, type: 'move' | 'trim-start' | 'trim-end') => {
     e.stopPropagation();
     if (track.locked || clip.locked) return;
-    
     setIsDragging(true);
     setDragType(type);
     setDragStartX(e.clientX);
@@ -467,14 +189,11 @@ function TimelineClipComponent({
     setOriginalDuration(clip.duration);
     onSelect();
   };
-  
   useEffect(() => {
     if (!isDragging) return;
-    
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartX;
       const deltaTime = deltaX / pixelsPerSecond;
-      
       if (dragType === 'move') {
         onMove(Math.max(0, originalStart + deltaTime));
       } else if (dragType === 'trim-start') {
@@ -487,21 +206,17 @@ function TimelineClipComponent({
         onTrimEnd(newDuration);
       }
     };
-    
     const handleMouseUp = () => {
       setIsDragging(false);
       setDragType(null);
     };
-    
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragType, dragStartX, originalStart, originalDuration, pixelsPerSecond, clip, onMove, onTrimStart, onTrimEnd]);
-  
   return (
     <div
       style={{
@@ -532,7 +247,6 @@ function TimelineClipComponent({
         }}
         onMouseDown={(e) => handleMouseDown(e, 'trim-start')}
       />
-      
       <div
         style={{
           position: 'absolute',
@@ -545,7 +259,6 @@ function TimelineClipComponent({
         }}
         onMouseDown={(e) => handleMouseDown(e, 'trim-end')}
       />
-      
       {/* Clip content */}
       <div
         style={{
@@ -570,7 +283,6 @@ function TimelineClipComponent({
             borderRadius: '2px',
           }} />
         )}
-        
         {/* Clip name */}
         <div style={{
           color: 'white',
@@ -583,7 +295,6 @@ function TimelineClipComponent({
         }}>
           {clip.name}
         </div>
-        
         {/* Duration */}
         {clipWidth > 100 && (
           <div style={{
@@ -594,7 +305,6 @@ function TimelineClipComponent({
             {clip.duration.toFixed(2)}s
           </div>
         )}
-        
         {/* Waveform for audio */}
         {clip.type === 'audio' && (
           <div style={{
@@ -621,7 +331,6 @@ function TimelineClipComponent({
             ))}
           </div>
         )}
-        
         {/* Keyframe indicators */}
         {clip.keyframes.length > 0 && (
           <div style={{
@@ -648,7 +357,6 @@ function TimelineClipComponent({
             ))}
           </div>
         )}
-        
         {/* Lock indicator */}
         {clip.locked && (
           <div style={{
@@ -664,11 +372,6 @@ function TimelineClipComponent({
     </div>
   );
 }
-
-// ============================================================================
-// TRACK CONTENT
-// ============================================================================
-
 interface TrackContentProps {
   track: Track;
   clips: TimelineClip[];
@@ -678,7 +381,6 @@ interface TrackContentProps {
   onSelectClip: (clipId: string) => void;
   onClipChange: (clip: TimelineClip) => void;
 }
-
 function TrackContent({
   track,
   clips,
@@ -689,7 +391,6 @@ function TrackContent({
   onClipChange,
 }: TrackContentProps) {
   const trackClips = clips.filter((c) => c.trackId === track.id);
-  
   return (
     <div
       style={{
@@ -725,11 +426,6 @@ function TrackContent({
     </div>
   );
 }
-
-// ============================================================================
-// PLAYBACK CONTROLS
-// ============================================================================
-
 interface PlaybackControlsProps {
   isPlaying: boolean;
   currentTime: number;
@@ -743,7 +439,6 @@ interface PlaybackControlsProps {
   onGoToStart: () => void;
   onGoToEnd: () => void;
 }
-
 function PlaybackControls({
   isPlaying,
   currentTime,
@@ -763,7 +458,6 @@ function PlaybackControls({
     const frames = Math.floor((seconds % 1) * frameRate);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
   };
-  
   return (
     <div style={{
       display: 'flex',
@@ -786,7 +480,6 @@ function PlaybackControls({
       }}>
         {formatTime(currentTime)}
       </div>
-      
       {/* Transport controls */}
       <div style={{ display: 'flex', gap: '4px' }}>
         <button
@@ -805,7 +498,6 @@ function PlaybackControls({
         >
           ⏮
         </button>
-        
         <button
           onClick={onStepBackward}
           style={{
@@ -822,7 +514,6 @@ function PlaybackControls({
         >
           ⏪
         </button>
-        
         <button
           onClick={isPlaying ? onPause : onPlay}
           style={{
@@ -839,7 +530,6 @@ function PlaybackControls({
         >
           {isPlaying ? '⏸' : '▶'}
         </button>
-        
         <button
           onClick={onStepForward}
           style={{
@@ -856,7 +546,6 @@ function PlaybackControls({
         >
           ⏩
         </button>
-        
         <button
           onClick={onGoToEnd}
           style={{
@@ -874,7 +563,6 @@ function PlaybackControls({
           ⏭
         </button>
       </div>
-      
       {/* Duration display */}
       <div style={{ color: '#64748b', fontSize: '12px' }}>
         / {formatTime(duration)}
@@ -882,16 +570,10 @@ function PlaybackControls({
     </div>
   );
 }
-
-// ============================================================================
-// CLIP INSPECTOR
-// ============================================================================
-
 interface ClipInspectorProps {
   clip: TimelineClip | null;
   onUpdate: (clip: TimelineClip) => void;
 }
-
 function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
   if (!clip) {
     return (
@@ -904,13 +586,11 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
       </div>
     );
   }
-  
   return (
     <div style={{ padding: '12px' }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '16px' }}>
         Clip Properties
       </h3>
-      
       {/* Name */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
@@ -931,7 +611,6 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           }}
         />
       </div>
-      
       {/* Timing */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
@@ -953,7 +632,6 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           }}
         />
       </div>
-      
       <div style={{ marginBottom: '12px' }}>
         <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
           Duration
@@ -974,7 +652,6 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           }}
         />
       </div>
-      
       {/* Opacity */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -991,7 +668,6 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           style={{ width: '100%' }}
         />
       </div>
-      
       {/* Speed */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -1008,7 +684,6 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           style={{ width: '100%' }}
         />
       </div>
-      
       {/* Audio level for audio/video clips */}
       {(clip.type === 'audio' || clip.type === 'video') && (
         <div style={{ marginBottom: '12px' }}>
@@ -1027,7 +702,6 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           />
         </div>
       )}
-      
       {/* Lock/Mute */}
       <div style={{ display: 'flex', gap: '8px' }}>
         <label style={{ color: '#94a3b8', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -1038,7 +712,6 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           />
           Locked
         </label>
-        
         <label style={{ color: '#94a3b8', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
           <input
             type="checkbox"
@@ -1051,18 +724,12 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
     </div>
   );
 }
-
-// ============================================================================
-// EFFECTS PANEL
-// ============================================================================
-
 interface EffectsPanelProps {
   clip: TimelineClip | null;
   onAddEffect: (effectType: string) => void;
   onRemoveEffect: (effectId: string) => void;
   onUpdateEffect: (effect: ClipEffect) => void;
 }
-
 const availableEffects = [
   { type: 'blur', name: 'Gaussian Blur', category: 'Blur' },
   { type: 'sharpen', name: 'Sharpen', category: 'Blur' },
@@ -1075,19 +742,15 @@ const availableEffects = [
   { type: 'film_grain', name: 'Film Grain', category: 'Stylize' },
   { type: 'glow', name: 'Glow', category: 'Stylize' },
 ];
-
 function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: EffectsPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  
   const filteredEffects = availableEffects.filter(e => 
     e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     e.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
   return (
     <div style={{ padding: '12px' }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Effects</h3>
-      
       {/* Search */}
       <input
         type="text"
@@ -1105,7 +768,6 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
           marginBottom: '12px',
         }}
       />
-      
       {/* Applied effects */}
       {clip && clip.effects.length > 0 && (
         <div style={{ marginBottom: '12px' }}>
@@ -1149,7 +811,6 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
           ))}
         </div>
       )}
-      
       {/* Available effects */}
       <h4 style={{ color: '#94a3b8', fontSize: '11px', marginBottom: '8px' }}>
         Available Effects
@@ -1183,18 +844,11 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
     </div>
   );
 }
-
-// ============================================================================
-// MAIN VIDEO TIMELINE EDITOR
-// ============================================================================
-
 export interface VideoTimelineEditorProps {
   project?: TimelineProject;
   onChange?: (project: TimelineProject) => void;
 }
-
 export function VideoTimelineEditor({ project: initialProject, onChange }: VideoTimelineEditorProps) {
-  // Project state
   const [project, setProject] = useState<TimelineProject>(initialProject || {
     id: crypto.randomUUID(),
     name: 'New Project',
@@ -1277,32 +931,21 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
     workAreaIn: 0,
     workAreaOut: 120,
   });
-  
-  // Playback state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  
-  // View state
   const [zoom, setZoom] = useState(1);
   const [scrollX, setScrollX] = useState(0);
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
   const [activePanel, setActivePanel] = useState<'inspector' | 'effects'>('inspector');
-  
-  // Clips array
   const clips = useMemo(() => Array.from(project.clips.values()), [project.clips]);
   const selectedClip = selectedClipId ? project.clips.get(selectedClipId) || null : null;
-  
-  // Playback loop
   useEffect(() => {
     if (!isPlaying) return;
-    
     const startTime = performance.now();
     const startPlayhead = currentTime;
-    
     const animate = () => {
       const elapsed = (performance.now() - startTime) / 1000;
       const newTime = startPlayhead + elapsed;
-      
       if (newTime >= project.duration) {
         setIsPlaying(false);
         setCurrentTime(project.duration);
@@ -1311,16 +954,12 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         requestAnimationFrame(animate);
       }
     };
-    
     requestAnimationFrame(animate);
   }, [isPlaying, project.duration, currentTime]);
-  
-  // Handlers
   const handleSeek = useCallback((time: number) => {
     setCurrentTime(time);
     if (isPlaying) setIsPlaying(false);
   }, [isPlaying]);
-  
   const handleClipChange = useCallback((updatedClip: TimelineClip) => {
     setProject((prev) => {
       const newClips = new Map(prev.clips);
@@ -1328,17 +967,14 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
       return { ...prev, clips: newClips };
     });
   }, []);
-  
   const handleTrackUpdate = useCallback((trackId: string, updates: Partial<Track>) => {
     setProject((prev) => ({
       ...prev,
       tracks: prev.tracks.map((t) => t.id === trackId ? { ...t, ...updates } : t),
     }));
   }, []);
-  
   const handleAddEffect = useCallback((effectType: string) => {
     if (!selectedClipId) return;
-    
     const effect: ClipEffect = {
       id: crypto.randomUUID(),
       type: effectType,
@@ -1347,18 +983,14 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
       parameters: {},
       keyframes: [],
     };
-    
     const clip = project.clips.get(selectedClipId);
     if (clip) {
       handleClipChange({ ...clip, effects: [...clip.effects, effect] });
     }
   }, [selectedClipId, project.clips, handleClipChange]);
-  
-  // Notify parent
   useEffect(() => {
     onChange?.(project);
   }, [project, onChange]);
-  
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#0f172a' }}>
       {/* Top bar */}
@@ -1371,12 +1003,10 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         borderBottom: '1px solid #1e293b',
       }}>
         <h2 style={{ color: 'white', fontSize: '16px' }}>🎬 {project.name}</h2>
-        
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <span style={{ color: '#64748b', fontSize: '12px' }}>
             {project.resolution.width}x{project.resolution.height} @ {project.frameRate}fps
           </span>
-          
           {/* Zoom controls */}
           <button
             onClick={() => setZoom(z => Math.max(0.1, z / 1.5))}
@@ -1411,7 +1041,6 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
           </button>
         </div>
       </div>
-      
       {/* Playback controls */}
       <PlaybackControls
         isPlaying={isPlaying}
@@ -1426,7 +1055,6 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         onGoToStart={() => handleSeek(0)}
         onGoToEnd={() => handleSeek(project.duration)}
       />
-      
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Timeline area */}
@@ -1448,7 +1076,6 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
               />
             </div>
           </div>
-          
           {/* Tracks */}
           <div style={{ flex: 1, overflow: 'auto' }}>
             {project.tracks.map((track) => (
@@ -1473,7 +1100,6 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
               </div>
             ))}
           </div>
-          
           {/* Horizontal scrollbar */}
           <div style={{
             height: '12px',
@@ -1491,7 +1117,6 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
             />
           </div>
         </div>
-        
         {/* Right panel */}
         <div style={{
           width: '280px',
@@ -1531,7 +1156,6 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
               Effects
             </button>
           </div>
-          
           {/* Panel content */}
           <div style={{ flex: 1, overflow: 'auto' }}>
             {activePanel === 'inspector' ? (
@@ -1567,5 +1191,4 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
     </div>
   );
 }
-
 export default VideoTimelineEditor;

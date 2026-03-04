@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
 import NextImage from 'next/image'
 import {
@@ -53,148 +52,18 @@ import {
   File,
   ImageIcon,
 } from 'lucide-react'
-
-// ============= Web Speech API Type Declarations =============
-
-// TypeScript declarations for Web Speech API (not fully standardized yet)
-interface SpeechRecognitionResult {
-  isFinal: boolean
-  [index: number]: SpeechRecognitionAlternative
-}
-
-interface SpeechRecognitionAlternative {
-  transcript: string
-  confidence: number
-}
-
-interface SpeechRecognitionResultList {
-  length: number
-  item(index: number): SpeechRecognitionResult
-  [index: number]: SpeechRecognitionResult
-}
-
-interface SpeechRecognitionEventExtended extends Event {
-  results: SpeechRecognitionResultList
-  resultIndex: number
-}
-
-interface SpeechRecognitionInstance extends EventTarget {
-  continuous: boolean
-  interimResults: boolean
-  lang: string
-  start(): void
-  stop(): void
-  abort(): void
-  onresult: ((event: SpeechRecognitionEventExtended) => void) | null
-  onerror: ((event: Event) => void) | null
-  onend: (() => void) | null
-}
-
-// ============= Types =============
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: Date
-  model?: string
-  tokens?: number
-  codeBlocks?: CodeBlock[]
-  isVoice?: boolean
-  audioUrl?: string
-  thinking?: string
-  toolCalls?: ToolCall[]
-  attachments?: Attachment[]
-}
-
-interface Attachment {
-  id: string
-  type: 'file' | 'image' | 'code'
-  name: string
-  size?: number
-  url?: string
-  preview?: string
-}
-
-interface ToolCall {
-  id: string
-  name: string
-  status: 'pending' | 'running' | 'completed' | 'failed'
-  args?: Record<string, unknown>
-  result?: string
-  duration?: number
-}
-
-interface CodeBlock {
-  language: string
-  code: string
-  filename?: string
-}
-
-interface ChatThread {
-  id: string
-  title: string
-  lastMessage: string
-  updatedAt: Date
-  messageCount: number
-  isArchived?: boolean
-}
-
-interface AIChatPanelProps {
-  messages?: Message[]
-  onSendMessage?: (message: string, context?: MessageContext) => void
-  onRegenerateResponse?: (messageId: string) => void
-  onRateResponse?: (messageId: string, rating: 'up' | 'down') => void
-  onClearChat?: () => void
-  currentModel?: string
-  models?: ModelOption[]
-  onModelChange?: (model: string) => void
-  isLoading?: boolean
-  streamingContent?: string
-  className?: string
-  // New props for advanced features
-  threads?: ChatThread[]
-  activeThreadId?: string
-  onSelectThread?: (threadId: string) => void
-  onCreateThread?: () => void
-  onArchiveThread?: (threadId: string) => void
-  onDeleteThread?: (threadId: string) => void
-  showHistory?: boolean
-  onToggleHistory?: () => void
-  // Live mode props
-  isLiveMode?: boolean
-  onToggleLiveMode?: () => void
-  liveStatus?: 'idle' | 'listening' | 'thinking' | 'speaking'
-  allowAttachments?: boolean
-}
-
-interface MessageContext {
-  files?: string[]
-  selection?: string
-  image?: string
-  attachments?: Attachment[]
-}
-
-interface ModelOption {
-  id: string
-  name: string
-  provider: string
-  description?: string
-  maxTokens?: number
-  supportsVision?: boolean
-  supportsVoice?: boolean
-}
-
-// ============= Constants =============
-
-const DEFAULT_MODELS: ModelOption[] = [
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', description: 'Most capable model', maxTokens: 128000, supportsVision: true, supportsVoice: true },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', description: 'Fast and efficient', maxTokens: 128000, supportsVision: true },
-  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'Anthropic', description: 'Balanced performance', maxTokens: 200000, supportsVision: true },
-  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'Google', description: 'Live multimodal', maxTokens: 1000000, supportsVision: true, supportsVoice: true },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'Google', description: 'Multimodal', maxTokens: 1000000, supportsVision: true },
-  { id: 'deepseek-chat', name: 'DeepSeek R1', provider: 'DeepSeek', description: 'Reasoning model', maxTokens: 64000 },
-]
+import {
+  DEFAULT_MODELS,
+  type AIChatPanelProps,
+  type Attachment,
+  type ChatThread,
+  type Message,
+  type MessageContext,
+  type ModelOption,
+  type SpeechRecognitionEventExtended,
+  type SpeechRecognitionInstance,
+  type ToolCall,
+} from './AIChatPanelPro.types'
 
 const QUICK_PROMPTS = [
   { icon: Code, label: 'Explain Code', prompt: 'Explain this code:' },
@@ -206,26 +75,20 @@ const QUICK_PROMPTS = [
   { icon: Brain, label: 'Explain Error', prompt: 'Explain this error and how to fix it:' },
   { icon: Layers, label: 'Add Tests', prompt: 'Generate unit tests for:' },
 ]
-
-// ============= Tool Call Component =============
-
 function ToolCallDisplay({ toolCall }: { toolCall: ToolCall }) {
   const [expanded, setExpanded] = useState(false)
-  
   const statusIcon = {
     pending: <Clock className="w-3.5 h-3.5 text-slate-400" />,
     running: <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />,
     completed: <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />,
     failed: <XCircle className="w-3.5 h-3.5 text-red-400" />,
   }
-
   const statusColor = {
     pending: 'border-slate-600',
     running: 'border-blue-500 bg-blue-500/5',
     completed: 'border-emerald-500/50 bg-emerald-500/5',
     failed: 'border-red-500/50 bg-red-500/5',
   }
-
   return (
     <div className={`rounded-lg border ${statusColor[toolCall.status]} overflow-hidden my-2`}>
       <button
@@ -239,7 +102,6 @@ function ToolCallDisplay({ toolCall }: { toolCall: ToolCall }) {
         )}
         <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${expanded ? 'rotate-90' : ''}`} />
       </button>
-      
       {expanded && (
         <div className="px-3 py-2 border-t border-slate-700/50 bg-slate-900/50">
           {toolCall.args && (
@@ -263,9 +125,6 @@ function ToolCallDisplay({ toolCall }: { toolCall: ToolCall }) {
     </div>
   )
 }
-
-// ============= Thinking Display Component =============
-
 function ThinkingDisplay({ thinking, isExpanded, onToggle }: { thinking: string; isExpanded: boolean; onToggle: () => void }) {
   return (
     <div className="my-2 rounded-lg border border-cyan-500/30 bg-cyan-500/5 overflow-hidden">
@@ -277,7 +136,6 @@ function ThinkingDisplay({ thinking, isExpanded, onToggle }: { thinking: string;
         <span className="flex-1 text-sm text-cyan-300">Thinking...</span>
         <ChevronRight className={`w-4 h-4 text-cyan-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
       </button>
-      
       {isExpanded && (
         <div className="px-3 py-2 border-t border-cyan-500/20 bg-cyan-900/20">
           <p className="text-sm text-cyan-200/80 whitespace-pre-wrap">{thinking}</p>
@@ -286,9 +144,6 @@ function ThinkingDisplay({ thinking, isExpanded, onToggle }: { thinking: string;
     </div>
   )
 }
-
-// ============= Live Mode Indicator =============
-
 function LiveModeIndicator({ status, onEnd }: { status: 'idle' | 'listening' | 'thinking' | 'speaking'; onEnd: () => void }) {
   const statusConfig = {
     idle: { color: 'bg-slate-500', pulse: false, text: 'Ready' },
@@ -296,9 +151,7 @@ function LiveModeIndicator({ status, onEnd }: { status: 'idle' | 'listening' | '
     thinking: { color: 'bg-amber-500', pulse: true, text: 'Thinking...' },
     speaking: { color: 'bg-emerald-500', pulse: true, text: 'Speaking...' },
   }
-  
   const config = statusConfig[status]
-  
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-900/50 to-cyan-900/50 border-b border-blue-500/30">
       <div className="relative">
@@ -324,9 +177,6 @@ function LiveModeIndicator({ status, onEnd }: { status: 'idle' | 'listening' | '
     </div>
   )
 }
-
-// ============= Chat History Sidebar =============
-
 function ChatHistorySidebar({
   threads,
   activeThreadId,
@@ -345,15 +195,12 @@ function ChatHistorySidebar({
   onClose: () => void
 }) {
   const [searchQuery, setSearchQuery] = useState('')
-  
-  const filteredThreads = threads.filter(t => 
+  const filteredThreads = threads.filter(t =>
     t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   )
-  
   const activeThreads = filteredThreads.filter(t => !t.isArchived)
   const archivedThreads = filteredThreads.filter(t => t.isArchived)
-
   return (
     <div className="w-72 h-full flex flex-col border-r border-slate-700 bg-slate-900">
       {/* Header */}
@@ -366,7 +213,6 @@ function ChatHistorySidebar({
           <X className="w-4 h-4 text-slate-400" />
         </button>
       </div>
-      
       {/* Search & New Chat */}
       <div className="p-2 space-y-2 border-b border-slate-800">
         <div className="relative">
@@ -387,7 +233,6 @@ function ChatHistorySidebar({
           New Chat
         </button>
       </div>
-      
       {/* Thread List */}
       <div className="flex-1 overflow-y-auto">
         {activeThreads.length > 0 && (
@@ -404,7 +249,6 @@ function ChatHistorySidebar({
             ))}
           </div>
         )}
-        
         {archivedThreads.length > 0 && (
           <div className="p-2 border-t border-slate-800">
             <div className="flex items-center gap-2 px-2 py-1 text-xs text-slate-500">
@@ -423,7 +267,6 @@ function ChatHistorySidebar({
             ))}
           </div>
         )}
-        
         {filteredThreads.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center p-4">
             <MessageCircle className="w-8 h-8 text-slate-600 mb-2" />
@@ -434,7 +277,6 @@ function ChatHistorySidebar({
     </div>
   )
 }
-
 function ThreadItem({
   thread,
   isActive,
@@ -449,7 +291,6 @@ function ThreadItem({
   onDelete: () => void
 }) {
   const [showMenu, setShowMenu] = useState(false)
-  
   return (
     <div
       className={`group relative rounded-lg cursor-pointer mb-1 ${
@@ -466,7 +307,6 @@ function ThreadItem({
           <span>{thread.messageCount} msgs</span>
         </div>
       </button>
-      
       <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu) }}
@@ -474,7 +314,6 @@ function ThreadItem({
         >
           <MoreHorizontal className="w-4 h-4 text-slate-400" />
         </button>
-        
         {showMenu && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
@@ -500,9 +339,6 @@ function ThreadItem({
     </div>
   )
 }
-
-// ============= Attachment Preview =============
-
 function AttachmentPreview({ attachment, onRemove }: { attachment: Attachment; onRemove: () => void }) {
   return (
     <div className="relative group">
@@ -541,9 +377,6 @@ function AttachmentPreview({ attachment, onRemove }: { attachment: Attachment; o
     </div>
   )
 }
-
-// ============= Voice Recording Hook =============
-
 function useVoiceRecording() {
   const [isRecording, setIsRecording] = useState(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
@@ -552,21 +385,17 @@ function useVoiceRecording() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
-
   const startRecording = useCallback(async () => {
     try {
-      // Try Web Speech API first for real-time transcription
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
         recognitionRef.current = new SpeechRecognitionAPI() as SpeechRecognitionInstance
         recognitionRef.current.continuous = true
         recognitionRef.current.interimResults = true
         recognitionRef.current.lang = 'pt-BR'
-        
         recognitionRef.current.onresult = (event: SpeechRecognitionEventExtended) => {
           let interimTranscript = ''
           let finalTranscript = ''
-          
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const result = event.results[i]
             if (result.isFinal) {
@@ -575,37 +404,29 @@ function useVoiceRecording() {
               interimTranscript += result[0].transcript
             }
           }
-          
           setTranscript(finalTranscript || interimTranscript)
         }
-        
         recognitionRef.current.start()
       }
-
-      // Also record audio for potential server-side transcription
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       mediaRecorderRef.current = new MediaRecorder(stream)
       chunksRef.current = []
-
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) {
           chunksRef.current.push(e.data)
         }
       }
-
       mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
         setAudioBlob(blob)
         stream.getTracks().forEach(track => track.stop())
       }
-
       mediaRecorderRef.current.start()
       setIsRecording(true)
     } catch (error) {
       console.error('Error starting recording:', error)
     }
   }, [])
-
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
@@ -615,12 +436,10 @@ function useVoiceRecording() {
       recognitionRef.current.stop()
     }
   }, [isRecording])
-
   const clearRecording = useCallback(() => {
     setAudioBlob(null)
     setTranscript('')
   }, [])
-
   return {
     isRecording,
     audioBlob,
@@ -631,9 +450,6 @@ function useVoiceRecording() {
     clearRecording,
   }
 }
-
-// ============= Demo Data =============
-
 const DEMO_MESSAGES: Message[] = [
   {
     id: '1',
@@ -643,31 +459,23 @@ const DEMO_MESSAGES: Message[] = [
     model: 'gpt-4o',
   },
 ]
-
-// ============= Message Component =============
-
 interface MessageBubbleProps {
   message: Message
   onCopy: (content: string) => void
   onRegenerate: () => void
   onRate: (rating: 'up' | 'down') => void
 }
-
 function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [showThinking, setShowThinking] = useState(false)
   const isUser = message.role === 'user'
-
   const handleCopy = () => {
     onCopy(message.content)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-
-  // Parse code blocks from content
   const renderContent = (content: string) => {
     const parts = content.split(/(```[\s\S]*?```)/g)
-    
     return parts.map((part, i) => {
       if (part.startsWith('```')) {
         const match = part.match(/```(\w+)?\n?([\s\S]*?)```/)
@@ -691,8 +499,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
           )
         }
       }
-      
-      // Render markdown-like formatting
       return (
         <span key={i} className="whitespace-pre-wrap">
           {part.split('\n').map((line, j) => (
@@ -713,7 +519,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
       )
     })
   }
-
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       {/* Avatar */}
@@ -723,7 +528,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
       `}>
         {isUser ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
       </div>
-
       {/* Content */}
       <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
         {/* Voice indicator */}
@@ -733,7 +537,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             Voice message
           </div>
         )}
-        
         {/* Attachments */}
         {message.attachments && message.attachments.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
@@ -745,7 +548,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             ))}
           </div>
         )}
-        
         {/* Thinking display */}
         {message.thinking && (
           <ThinkingDisplay
@@ -754,7 +556,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             onToggle={() => setShowThinking(!showThinking)}
           />
         )}
-        
         {/* Tool calls */}
         {message.toolCalls && message.toolCalls.length > 0 && (
           <div className="mb-2">
@@ -763,17 +564,15 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             ))}
           </div>
         )}
-
         <div className={`
           inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
-          ${isUser 
-            ? 'bg-blue-600 text-white rounded-tr-sm' 
+          ${isUser
+            ? 'bg-blue-600 text-white rounded-tr-sm'
             : 'bg-slate-800 text-slate-200 rounded-tl-sm'
           }
         `}>
           <div className="text-sm">{renderContent(message.content)}</div>
         </div>
-
         {/* Meta & Actions */}
         <div className={`flex items-center gap-2 mt-1 text-xs text-slate-500 ${isUser ? 'justify-end' : ''}`}>
           {message.model && (
@@ -789,7 +588,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             </span>
           )}
           <span>{formatTime(message.timestamp)}</span>
-          
           {!isUser && (
             <div className="flex items-center gap-1 ml-2">
               <button
@@ -827,9 +625,6 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
     </div>
   )
 }
-
-// ============= Main Component =============
-
 export default function AIChatPanelPro({
   messages = DEMO_MESSAGES,
   onSendMessage,
@@ -842,7 +637,6 @@ export default function AIChatPanelPro({
   isLoading = false,
   streamingContent = '',
   className = '',
-  // New props
   threads = [],
   activeThreadId,
   onSelectThread,
@@ -864,35 +658,23 @@ export default function AIChatPanelPro({
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  
-  // Voice recording
   const { isRecording, transcript, startRecording, stopRecording, clearRecording } = useVoiceRecording()
-  
-  // Text-to-speech
   const [isSpeaking, setIsSpeaking] = useState(false)
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null)
-
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
-
-  // Auto-resize textarea
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.style.height = 'auto'
       inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + 'px'
     }
   }, [input])
-  
-  // Update input with transcript
   useEffect(() => {
     if (transcript) {
       setInput(prev => prev + ' ' + transcript)
     }
   }, [transcript])
-  
-  // Speak last assistant message
   const speakMessage = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel()
@@ -904,19 +686,15 @@ export default function AIChatPanelPro({
       setIsSpeaking(true)
     }
   }, [])
-  
   const stopSpeaking = useCallback(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel()
       setIsSpeaking(false)
     }
   }, [])
-
-  // Handle send
   const handleSend = useCallback((e?: FormEvent) => {
     e?.preventDefault()
     if (!input.trim() || isLoading) return
-    
     onSendMessage?.(input, {
       attachments: allowAttachments && attachments.length > 0 ? attachments : undefined,
     })
@@ -924,26 +702,18 @@ export default function AIChatPanelPro({
     setAttachments([])
     clearRecording()
   }, [input, isLoading, attachments, onSendMessage, clearRecording, allowAttachments])
-
-  // Handle keyboard shortcuts
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSend()
     }
   }
-
-  // Handle file attach
   const handleFileAttach = () => {
     fileInputRef.current?.click()
   }
-  
-  // Handle image attach
   const handleImageAttach = () => {
     imageInputRef.current?.click()
   }
-  
-  // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image') => {
     const file = e.target.files?.[0]
     if (file) {
@@ -953,7 +723,6 @@ export default function AIChatPanelPro({
         name: file.name,
         size: file.size,
       }
-      
       if (type === 'image') {
         const reader = new FileReader()
         reader.onload = (ev) => {
@@ -967,24 +736,16 @@ export default function AIChatPanelPro({
     }
     e.target.value = ''
   }
-  
-  // Remove attachment
   const removeAttachment = (id: string) => {
     setAttachments(prev => prev.filter(a => a.id !== id))
   }
-
-  // Handle quick prompt
   const handleQuickPrompt = (prompt: string) => {
     setInput(prev => prev ? `${prev}\n\n${prompt}` : prompt)
     inputRef.current?.focus()
   }
-
-  // Copy to clipboard
   const handleCopy = async (content: string) => {
     await navigator.clipboard.writeText(content)
   }
-  
-  // Toggle voice recording
   const handleVoiceToggle = () => {
     if (isRecording) {
       stopRecording()
@@ -992,9 +753,7 @@ export default function AIChatPanelPro({
       startRecording()
     }
   }
-
   const selectedModel = models.find(m => m.id === currentModel) || models[0]
-
   return (
     <div className={`h-full flex ${className}`}>
       {/* History Sidebar */}
@@ -1009,14 +768,12 @@ export default function AIChatPanelPro({
           onClose={() => setShowHistorySidebar(false)}
         />
       )}
-      
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Live Mode Indicator */}
         {isLiveMode && onToggleLiveMode && (
           <LiveModeIndicator status={liveStatus} onEnd={onToggleLiveMode} />
         )}
-        
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
           {/* Left: History + Model */}
@@ -1030,7 +787,6 @@ export default function AIChatPanelPro({
                 <History className="w-4 h-4" />
               </button>
             )}
-            
             {/* Model Selector */}
             <div className="relative">
               <button
@@ -1041,7 +797,6 @@ export default function AIChatPanelPro({
                 <span>{selectedModel.name}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
-
               {showModelSelector && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
@@ -1082,7 +837,6 @@ export default function AIChatPanelPro({
               )}
             </div>
           </div>
-
           {/* Actions */}
           <div className="flex items-center gap-1">
             {/* Live Mode Toggle */}
@@ -1095,7 +849,6 @@ export default function AIChatPanelPro({
                 <Radio className="w-4 h-4" />
               </button>
             )}
-            
             {/* TTS Toggle */}
             <button
               onClick={isSpeaking ? stopSpeaking : () => {
@@ -1107,7 +860,6 @@ export default function AIChatPanelPro({
             >
               {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
-            
             <button
               onClick={onClearChat}
               className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
@@ -1123,7 +875,6 @@ export default function AIChatPanelPro({
             </button>
           </div>
         </div>
-
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
@@ -1155,7 +906,6 @@ export default function AIChatPanelPro({
               </div>
             </div>
         )}
-
         {messages.map(message => (
           <MessageBubble
             key={message.id}
@@ -1165,7 +915,6 @@ export default function AIChatPanelPro({
             onRate={(rating) => onRateResponse?.(message.id, rating)}
           />
         ))}
-
         {/* Streaming response */}
         {streamingContent && (
           <div className="flex gap-3">
@@ -1180,7 +929,6 @@ export default function AIChatPanelPro({
             </div>
           </div>
         )}
-
         {/* Loading indicator */}
         {isLoading && !streamingContent && (
           <div className="flex gap-3">
@@ -1194,10 +942,8 @@ export default function AIChatPanelPro({
             </div>
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
-
       {/* Quick prompts bar */}
       <div className="px-3 py-2 border-t border-slate-800">
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
@@ -1213,7 +959,6 @@ export default function AIChatPanelPro({
           ))}
         </div>
       </div>
-
       {/* Input area */}
       <form onSubmit={handleSend} className="p-3 border-t border-slate-800">
         {/* Attachments preview */}
@@ -1228,7 +973,6 @@ export default function AIChatPanelPro({
             ))}
           </div>
         )}
-        
         {/* Voice recording indicator */}
         {isRecording && (
           <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
@@ -1243,7 +987,6 @@ export default function AIChatPanelPro({
             </button>
           </div>
         )}
-
         <div className="flex items-end gap-2">
           {/* Attach buttons */}
           <div className="flex items-center gap-1 pb-1">
@@ -1276,7 +1019,6 @@ export default function AIChatPanelPro({
               {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
           </div>
-
           {/* Input */}
           <div className="flex-1 relative">
             <textarea
@@ -1308,7 +1050,6 @@ export default function AIChatPanelPro({
             </button>
           </div>
         </div>
-
         {/* Hidden file inputs */}
         {allowAttachments && (
           <>
@@ -1333,9 +1074,6 @@ export default function AIChatPanelPro({
     </div>
   )
 }
-
-// ============= Helpers =============
-
 function formatTime(date: Date): string {
   return date.toLocaleTimeString('en-US', {
     hour: 'numeric',
@@ -1343,21 +1081,18 @@ function formatTime(date: Date): string {
     hour12: true,
   })
 }
-
 function formatRelativeTime(date: Date): string {
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffMins = Math.floor(diffMs / 60000)
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
-  
   if (diffMins < 1) return 'Just now'
   if (diffMins < 60) return `${diffMins}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
   return date.toLocaleDateString()
 }
-
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'

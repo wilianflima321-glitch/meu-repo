@@ -1,445 +1,5 @@
-/**
- * AETHEL ENGINE - i18n Translations
- * 
- * Complete translation files for all supported languages.
- * Covers entire IDE interface, marketplace, and engine features.
- */
-
-export interface TranslationStrings {
-    // Common
-    common: {
-        save: string;
-        cancel: string;
-        delete: string;
-        edit: string;
-        create: string;
-        open: string;
-        close: string;
-        search: string;
-        filter: string;
-        sort: string;
-        loading: string;
-        error: string;
-        success: string;
-        warning: string;
-        info: string;
-        confirm: string;
-        yes: string;
-        no: string;
-        ok: string;
-        apply: string;
-        reset: string;
-        undo: string;
-        redo: string;
-        copy: string;
-        paste: string;
-        cut: string;
-        duplicate: string;
-        rename: string;
-        refresh: string;
-        settings: string;
-        help: string;
-        about: string;
-        version: string;
-        language: string;
-        theme: string;
-        dark: string;
-        light: string;
-        system: string;
-    };
-    
-    // Menu
-    menu: {
-        file: string;
-        newProject: string;
-        openProject: string;
-        saveProject: string;
-        saveAs: string;
-        export: string;
-        import: string;
-        recentProjects: string;
-        exit: string;
-        
-        edit: string;
-        selectAll: string;
-        deselectAll: string;
-        preferences: string;
-        
-        view: string;
-        viewport: string;
-        panels: string;
-        fullscreen: string;
-        resetLayout: string;
-        
-        project: string;
-        projectSettings: string;
-        buildSettings: string;
-        build: string;
-        buildAndRun: string;
-        cleanBuild: string;
-        
-        tools: string;
-        packageManager: string;
-        pluginManager: string;
-        console: string;
-        profiler: string;
-        
-        help: string;
-        documentation: string;
-        tutorials: string;
-        reportBug: string;
-        checkUpdates: string;
-    };
-    
-    // Panels
-    panels: {
-        hierarchy: string;
-        inspector: string;
-        project: string;
-        console: string;
-        animation: string;
-        timeline: string;
-        assets: string;
-        materials: string;
-        layers: string;
-        properties: string;
-        nodeEditor: string;
-        scriptEditor: string;
-    };
-    
-    // Viewport
-    viewport: {
-        perspective: string;
-        orthographic: string;
-        top: string;
-        bottom: string;
-        front: string;
-        back: string;
-        left: string;
-        right: string;
-        wireframe: string;
-        solid: string;
-        textured: string;
-        rendered: string;
-        grid: string;
-        snap: string;
-        gizmo: string;
-        translate: string;
-        rotate: string;
-        scale: string;
-        local: string;
-        global: string;
-        pivot: string;
-        center: string;
-    };
-    
-    // Scene
-    scene: {
-        newScene: string;
-        loadScene: string;
-        saveScene: string;
-        sceneSettings: string;
-        addObject: string;
-        empty: string;
-        cube: string;
-        sphere: string;
-        cylinder: string;
-        plane: string;
-        camera: string;
-        light: string;
-        directionalLight: string;
-        pointLight: string;
-        spotLight: string;
-        areaLight: string;
-        ambientLight: string;
-        group: string;
-        prefab: string;
-    };
-    
-    // Inspector
-    inspector: {
-        transform: string;
-        position: string;
-        rotation: string;
-        scale: string;
-        mesh: string;
-        material: string;
-        physics: string;
-        rigidbody: string;
-        collider: string;
-        script: string;
-        addComponent: string;
-        removeComponent: string;
-        enabled: string;
-        disabled: string;
-        static: string;
-        dynamic: string;
-        kinematic: string;
-        mass: string;
-        friction: string;
-        bounciness: string;
-        drag: string;
-        angularDrag: string;
-        useGravity: string;
-        isTrigger: string;
-    };
-    
-    // Assets
-    assets: {
-        import: string;
-        refresh: string;
-        createFolder: string;
-        createMaterial: string;
-        createScript: string;
-        createPrefab: string;
-        createAnimation: string;
-        createShader: string;
-        showInExplorer: string;
-        reimport: string;
-        delete: string;
-        rename: string;
-        copy: string;
-        paste: string;
-        duplicate: string;
-        findReferences: string;
-        models: string;
-        textures: string;
-        audio: string;
-        scripts: string;
-        materials: string;
-        prefabs: string;
-        scenes: string;
-        animations: string;
-        shaders: string;
-        fonts: string;
-    };
-    
-    // Materials
-    materials: {
-        newMaterial: string;
-        albedo: string;
-        normal: string;
-        roughness: string;
-        metallic: string;
-        emission: string;
-        occlusion: string;
-        height: string;
-        opacity: string;
-        tiling: string;
-        offset: string;
-        shader: string;
-        renderQueue: string;
-        doubleSided: string;
-        transparent: string;
-        alphaClip: string;
-    };
-    
-    // Animation
-    animation: {
-        play: string;
-        pause: string;
-        stop: string;
-        loop: string;
-        speed: string;
-        keyframe: string;
-        addKeyframe: string;
-        deleteKeyframe: string;
-        curve: string;
-        linear: string;
-        bezier: string;
-        constant: string;
-        record: string;
-        preview: string;
-        blend: string;
-        transition: string;
-    };
-    
-    // Physics
-    physics: {
-        gravity: string;
-        simulate: string;
-        pause: string;
-        step: string;
-        collisionLayers: string;
-        raycast: string;
-        overlap: string;
-    };
-    
-    // Lighting
-    lighting: {
-        intensity: string;
-        color: string;
-        range: string;
-        spotAngle: string;
-        shadows: string;
-        shadowType: string;
-        hard: string;
-        soft: string;
-        none: string;
-        shadowResolution: string;
-        bias: string;
-        normalBias: string;
-        bakeLighting: string;
-        realtime: string;
-        baked: string;
-        mixed: string;
-    };
-    
-    // Rendering
-    rendering: {
-        quality: string;
-        resolution: string;
-        antiAliasing: string;
-        shadows: string;
-        bloom: string;
-        ambientOcclusion: string;
-        motionBlur: string;
-        depthOfField: string;
-        colorGrading: string;
-        toneMappimg: string;
-        exposure: string;
-        vignette: string;
-        chromaticAberration: string;
-        fog: string;
-        skybox: string;
-        reflections: string;
-    };
-    
-    // Build
-    build: {
-        platform: string;
-        windows: string;
-        mac: string;
-        linux: string;
-        webgl: string;
-        android: string;
-        ios: string;
-        targetDirectory: string;
-        compression: string;
-        development: string;
-        release: string;
-        debug: string;
-        includeSymbols: string;
-        buildNumber: string;
-        bundleId: string;
-        icon: string;
-        splash: string;
-        startBuilding: string;
-        buildComplete: string;
-        buildFailed: string;
-    };
-    
-    // Marketplace
-    marketplace: {
-        title: string;
-        browse: string;
-        search: string;
-        categories: string;
-        free: string;
-        paid: string;
-        featured: string;
-        popular: string;
-        newest: string;
-        myLibrary: string;
-        myAssets: string;
-        favorites: string;
-        purchases: string;
-        downloads: string;
-        upload: string;
-        publish: string;
-        price: string;
-        rating: string;
-        reviews: string;
-        download: string;
-        addToLibrary: string;
-        purchased: string;
-        owned: string;
-        creator: string;
-        license: string;
-        compatibility: string;
-        fileSize: string;
-        version: string;
-        lastUpdate: string;
-        description: string;
-        tags: string;
-        preview: string;
-        writeReview: string;
-        report: string;
-    };
-    
-    // AI
-    ai: {
-        assistant: string;
-        generate: string;
-        generating: string;
-        prompt: string;
-        model: string;
-        creativity: string;
-        askAnything: string;
-        generateCode: string;
-        generateTexture: string;
-        generateModel: string;
-        generateAnimation: string;
-        explain: string;
-        optimize: string;
-        fix: string;
-        suggestions: string;
-        history: string;
-    };
-    
-    // Collaboration
-    collaboration: {
-        share: string;
-        invite: string;
-        collaborators: string;
-        online: string;
-        offline: string;
-        editing: string;
-        viewing: string;
-        permissions: string;
-        owner: string;
-        editor: string;
-        viewer: string;
-        chat: string;
-        voice: string;
-        cursor: string;
-        follow: string;
-    };
-    
-    // Errors
-    errors: {
-        generic: string;
-        networkError: string;
-        fileNotFound: string;
-        accessDenied: string;
-        invalidFormat: string;
-        loadFailed: string;
-        saveFailed: string;
-        importFailed: string;
-        exportFailed: string;
-        buildFailed: string;
-        connectionLost: string;
-        authRequired: string;
-        quotaExceeded: string;
-    };
-    
-    // Success
-    success: {
-        saved: string;
-        deleted: string;
-        imported: string;
-        exported: string;
-        published: string;
-        downloaded: string;
-        connected: string;
-        updated: string;
-    };
-}
-
-// ============================================================================
-// ENGLISH (en-US)
-// ============================================================================
-
+import type { TranslationStrings } from './translations.types'
+export type { TranslationStrings } from './translations.types'
 export const en_US: TranslationStrings = {
     common: {
         save: 'Save',
@@ -481,7 +41,6 @@ export const en_US: TranslationStrings = {
         light: 'Light',
         system: 'System'
     },
-    
     menu: {
         file: 'File',
         newProject: 'New Project',
@@ -518,7 +77,6 @@ export const en_US: TranslationStrings = {
         reportBug: 'Report Bug',
         checkUpdates: 'Check for Updates'
     },
-    
     panels: {
         hierarchy: 'Hierarchy',
         inspector: 'Inspector',
@@ -533,7 +91,6 @@ export const en_US: TranslationStrings = {
         nodeEditor: 'Node Editor',
         scriptEditor: 'Script Editor'
     },
-    
     viewport: {
         perspective: 'Perspective',
         orthographic: 'Orthographic',
@@ -558,7 +115,6 @@ export const en_US: TranslationStrings = {
         pivot: 'Pivot',
         center: 'Center'
     },
-    
     scene: {
         newScene: 'New Scene',
         loadScene: 'Load Scene',
@@ -580,7 +136,6 @@ export const en_US: TranslationStrings = {
         group: 'Group',
         prefab: 'Prefab'
     },
-    
     inspector: {
         transform: 'Transform',
         position: 'Position',
@@ -607,7 +162,6 @@ export const en_US: TranslationStrings = {
         useGravity: 'Use Gravity',
         isTrigger: 'Is Trigger'
     },
-    
     assets: {
         import: 'Import',
         refresh: 'Refresh',
@@ -636,7 +190,6 @@ export const en_US: TranslationStrings = {
         shaders: 'Shaders',
         fonts: 'Fonts'
     },
-    
     materials: {
         newMaterial: 'New Material',
         albedo: 'Albedo',
@@ -655,7 +208,6 @@ export const en_US: TranslationStrings = {
         transparent: 'Transparent',
         alphaClip: 'Alpha Clip'
     },
-    
     animation: {
         play: 'Play',
         pause: 'Pause',
@@ -674,7 +226,6 @@ export const en_US: TranslationStrings = {
         blend: 'Blend',
         transition: 'Transition'
     },
-    
     physics: {
         gravity: 'Gravity',
         simulate: 'Simulate',
@@ -684,7 +235,6 @@ export const en_US: TranslationStrings = {
         raycast: 'Raycast',
         overlap: 'Overlap'
     },
-    
     lighting: {
         intensity: 'Intensity',
         color: 'Color',
@@ -703,7 +253,6 @@ export const en_US: TranslationStrings = {
         baked: 'Baked',
         mixed: 'Mixed'
     },
-    
     rendering: {
         quality: 'Quality',
         resolution: 'Resolution',
@@ -722,7 +271,6 @@ export const en_US: TranslationStrings = {
         skybox: 'Skybox',
         reflections: 'Reflections'
     },
-    
     build: {
         platform: 'Platform',
         windows: 'Windows',
@@ -745,7 +293,6 @@ export const en_US: TranslationStrings = {
         buildComplete: 'Build Complete',
         buildFailed: 'Build Failed'
     },
-    
     marketplace: {
         title: 'Marketplace',
         browse: 'Browse',
@@ -782,7 +329,6 @@ export const en_US: TranslationStrings = {
         writeReview: 'Write a Review',
         report: 'Report'
     },
-    
     ai: {
         assistant: 'AI Assistant',
         generate: 'Generate',
@@ -801,7 +347,6 @@ export const en_US: TranslationStrings = {
         suggestions: 'Suggestions',
         history: 'History'
     },
-    
     collaboration: {
         share: 'Share',
         invite: 'Invite',
@@ -819,7 +364,6 @@ export const en_US: TranslationStrings = {
         cursor: 'Show Cursors',
         follow: 'Follow'
     },
-    
     errors: {
         generic: 'Something went wrong',
         networkError: 'Network error. Please check your connection.',
@@ -835,7 +379,6 @@ export const en_US: TranslationStrings = {
         authRequired: 'Authentication required',
         quotaExceeded: 'Storage quota exceeded'
     },
-    
     success: {
         saved: 'Saved successfully',
         deleted: 'Deleted successfully',
@@ -847,11 +390,6 @@ export const en_US: TranslationStrings = {
         updated: 'Updated successfully'
     }
 };
-
-// ============================================================================
-// PORTUGUESE (pt-BR)
-// ============================================================================
-
 export const pt_BR: TranslationStrings = {
     common: {
         save: 'Salvar',
@@ -893,7 +431,6 @@ export const pt_BR: TranslationStrings = {
         light: 'Claro',
         system: 'Sistema'
     },
-    
     menu: {
         file: 'Arquivo',
         newProject: 'Novo Projeto',
@@ -930,7 +467,6 @@ export const pt_BR: TranslationStrings = {
         reportBug: 'Reportar Bug',
         checkUpdates: 'Verificar Atualizações'
     },
-    
     panels: {
         hierarchy: 'Hierarquia',
         inspector: 'Inspetor',
@@ -945,7 +481,6 @@ export const pt_BR: TranslationStrings = {
         nodeEditor: 'Editor de Nós',
         scriptEditor: 'Editor de Scripts'
     },
-    
     viewport: {
         perspective: 'Perspectiva',
         orthographic: 'Ortográfica',
@@ -970,7 +505,6 @@ export const pt_BR: TranslationStrings = {
         pivot: 'Pivô',
         center: 'Centro'
     },
-    
     scene: {
         newScene: 'Nova Cena',
         loadScene: 'Carregar Cena',
@@ -992,7 +526,6 @@ export const pt_BR: TranslationStrings = {
         group: 'Grupo',
         prefab: 'Prefab'
     },
-    
     inspector: {
         transform: 'Transformação',
         position: 'Posição',
@@ -1019,7 +552,6 @@ export const pt_BR: TranslationStrings = {
         useGravity: 'Usar Gravidade',
         isTrigger: 'É Gatilho'
     },
-    
     assets: {
         import: 'Importar',
         refresh: 'Atualizar',
@@ -1048,7 +580,6 @@ export const pt_BR: TranslationStrings = {
         shaders: 'Shaders',
         fonts: 'Fontes'
     },
-    
     materials: {
         newMaterial: 'Novo Material',
         albedo: 'Albedo',
@@ -1067,7 +598,6 @@ export const pt_BR: TranslationStrings = {
         transparent: 'Transparente',
         alphaClip: 'Recorte Alfa'
     },
-    
     animation: {
         play: 'Reproduzir',
         pause: 'Pausar',
@@ -1086,7 +616,6 @@ export const pt_BR: TranslationStrings = {
         blend: 'Mesclagem',
         transition: 'Transição'
     },
-    
     physics: {
         gravity: 'Gravidade',
         simulate: 'Simular',
@@ -1096,7 +625,6 @@ export const pt_BR: TranslationStrings = {
         raycast: 'Raycast',
         overlap: 'Sobreposição'
     },
-    
     lighting: {
         intensity: 'Intensidade',
         color: 'Cor',
@@ -1115,7 +643,6 @@ export const pt_BR: TranslationStrings = {
         baked: 'Assada',
         mixed: 'Mista'
     },
-    
     rendering: {
         quality: 'Qualidade',
         resolution: 'Resolução',
@@ -1134,7 +661,6 @@ export const pt_BR: TranslationStrings = {
         skybox: 'Skybox',
         reflections: 'Reflexos'
     },
-    
     build: {
         platform: 'Plataforma',
         windows: 'Windows',
@@ -1157,7 +683,6 @@ export const pt_BR: TranslationStrings = {
         buildComplete: 'Build Concluído',
         buildFailed: 'Build Falhou'
     },
-    
     marketplace: {
         title: 'Marketplace',
         browse: 'Navegar',
@@ -1194,7 +719,6 @@ export const pt_BR: TranslationStrings = {
         writeReview: 'Escrever Avaliação',
         report: 'Denunciar'
     },
-    
     ai: {
         assistant: 'Assistente IA',
         generate: 'Gerar',
@@ -1213,7 +737,6 @@ export const pt_BR: TranslationStrings = {
         suggestions: 'Sugestões',
         history: 'Histórico'
     },
-    
     collaboration: {
         share: 'Compartilhar',
         invite: 'Convidar',
@@ -1231,7 +754,6 @@ export const pt_BR: TranslationStrings = {
         cursor: 'Mostrar Cursores',
         follow: 'Seguir'
     },
-    
     errors: {
         generic: 'Algo deu errado',
         networkError: 'Erro de rede. Verifique sua conexão.',
@@ -1247,7 +769,6 @@ export const pt_BR: TranslationStrings = {
         authRequired: 'Autenticação necessária',
         quotaExceeded: 'Cota de armazenamento excedida'
     },
-    
     success: {
         saved: 'Salvo com sucesso',
         deleted: 'Excluído com sucesso',
@@ -1259,11 +780,6 @@ export const pt_BR: TranslationStrings = {
         updated: 'Atualizado com sucesso'
     }
 };
-
-// ============================================================================
-// SPANISH (es-ES)
-// ============================================================================
-
 export const es_ES: TranslationStrings = {
     common: {
         save: 'Guardar',
@@ -1305,7 +821,6 @@ export const es_ES: TranslationStrings = {
         light: 'Claro',
         system: 'Sistema'
     },
-    
     menu: {
         file: 'Archivo',
         newProject: 'Nuevo Proyecto',
@@ -1342,7 +857,6 @@ export const es_ES: TranslationStrings = {
         reportBug: 'Reportar Error',
         checkUpdates: 'Buscar Actualizaciones'
     },
-    
     panels: {
         hierarchy: 'Jerarquía',
         inspector: 'Inspector',
@@ -1357,7 +871,6 @@ export const es_ES: TranslationStrings = {
         nodeEditor: 'Editor de Nodos',
         scriptEditor: 'Editor de Scripts'
     },
-    
     viewport: {
         perspective: 'Perspectiva',
         orthographic: 'Ortográfica',
@@ -1382,7 +895,6 @@ export const es_ES: TranslationStrings = {
         pivot: 'Pivote',
         center: 'Centro'
     },
-    
     scene: {
         newScene: 'Nueva Escena',
         loadScene: 'Cargar Escena',
@@ -1404,7 +916,6 @@ export const es_ES: TranslationStrings = {
         group: 'Grupo',
         prefab: 'Prefab'
     },
-    
     inspector: {
         transform: 'Transformación',
         position: 'Posición',
@@ -1431,7 +942,6 @@ export const es_ES: TranslationStrings = {
         useGravity: 'Usar Gravedad',
         isTrigger: 'Es Disparador'
     },
-    
     assets: {
         import: 'Importar',
         refresh: 'Actualizar',
@@ -1460,7 +970,6 @@ export const es_ES: TranslationStrings = {
         shaders: 'Shaders',
         fonts: 'Fuentes'
     },
-    
     materials: {
         newMaterial: 'Nuevo Material',
         albedo: 'Albedo',
@@ -1479,7 +988,6 @@ export const es_ES: TranslationStrings = {
         transparent: 'Transparente',
         alphaClip: 'Recorte Alfa'
     },
-    
     animation: {
         play: 'Reproducir',
         pause: 'Pausar',
@@ -1498,7 +1006,6 @@ export const es_ES: TranslationStrings = {
         blend: 'Mezcla',
         transition: 'Transición'
     },
-    
     physics: {
         gravity: 'Gravedad',
         simulate: 'Simular',
@@ -1508,7 +1015,6 @@ export const es_ES: TranslationStrings = {
         raycast: 'Raycast',
         overlap: 'Solapamiento'
     },
-    
     lighting: {
         intensity: 'Intensidad',
         color: 'Color',
@@ -1527,7 +1033,6 @@ export const es_ES: TranslationStrings = {
         baked: 'Horneada',
         mixed: 'Mixta'
     },
-    
     rendering: {
         quality: 'Calidad',
         resolution: 'Resolución',
@@ -1546,7 +1051,6 @@ export const es_ES: TranslationStrings = {
         skybox: 'Skybox',
         reflections: 'Reflejos'
     },
-    
     build: {
         platform: 'Plataforma',
         windows: 'Windows',
@@ -1569,7 +1073,6 @@ export const es_ES: TranslationStrings = {
         buildComplete: 'Compilación Completa',
         buildFailed: 'Compilación Fallida'
     },
-    
     marketplace: {
         title: 'Marketplace',
         browse: 'Explorar',
@@ -1606,7 +1109,6 @@ export const es_ES: TranslationStrings = {
         writeReview: 'Escribir Reseña',
         report: 'Reportar'
     },
-    
     ai: {
         assistant: 'Asistente IA',
         generate: 'Generar',
@@ -1625,7 +1127,6 @@ export const es_ES: TranslationStrings = {
         suggestions: 'Sugerencias',
         history: 'Historial'
     },
-    
     collaboration: {
         share: 'Compartir',
         invite: 'Invitar',
@@ -1643,7 +1144,6 @@ export const es_ES: TranslationStrings = {
         cursor: 'Mostrar Cursores',
         follow: 'Seguir'
     },
-    
     errors: {
         generic: 'Algo salió mal',
         networkError: 'Error de red. Comprueba tu conexión.',
@@ -1659,7 +1159,6 @@ export const es_ES: TranslationStrings = {
         authRequired: 'Autenticación requerida',
         quotaExceeded: 'Cuota de almacenamiento excedida'
     },
-    
     success: {
         saved: 'Guardado exitosamente',
         deleted: 'Eliminado exitosamente',
@@ -1671,11 +1170,6 @@ export const es_ES: TranslationStrings = {
         updated: 'Actualizado exitosamente'
     }
 };
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
 export const translations: Record<string, TranslationStrings> = {
     'en-US': en_US,
     'en': en_US,
@@ -1684,15 +1178,12 @@ export const translations: Record<string, TranslationStrings> = {
     'es-ES': es_ES,
     'es': es_ES
 };
-
 export const supportedLanguages = [
     { code: 'en-US', name: 'English (US)', nativeName: 'English' },
     { code: 'pt-BR', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
     { code: 'es-ES', name: 'Spanish (Spain)', nativeName: 'Español (España)' }
 ];
-
 export function getTranslation(locale: string): TranslationStrings {
     return translations[locale] || translations['en-US'];
 }
-
 export default translations;

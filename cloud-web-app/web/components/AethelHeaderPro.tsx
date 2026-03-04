@@ -134,9 +134,14 @@ export default function AethelHeader() {
           <div className="flex items-center gap-8">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-purple-600 flex items-center justify-center shadow-lg shadow-sky-500/20 group-hover:shadow-sky-500/40 transition-shadow">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
+              <Image
+                src="/branding/aethel-icon-source.png"
+                alt="Aethel"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-lg shadow-lg shadow-sky-500/20 transition-shadow group-hover:shadow-sky-500/40"
+                priority
+              />
               <span className="font-bold text-xl text-white">
                 Aethel
               </span>
@@ -178,20 +183,26 @@ export default function AethelHeader() {
           <div className="flex items-center gap-3">
             {/* Global Search */}
             <button
+              type="button"
+              aria-label="Abrir busca global"
               onClick={() => setSearchOpen(true)}
               className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-800 hover:text-slate-300 transition-colors"
             >
               <Search className="w-4 h-4" />
               <span>Buscar...</span>
               <kbd className="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-slate-500 bg-slate-900 rounded">
-                ⌘K
+                Ctrl+K
               </kbd>
             </button>
 
             {isAuth ? (
               <>
                 {/* Notifications */}
-                <button className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                <button
+                  type="button"
+                  aria-label={`Abrir notificacoes${notifications > 0 ? `, ${notifications} pendentes` : ''}`}
+                  className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                >
                   <Bell className="w-5 h-5" />
                   {notifications > 0 && (
                     <span className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
@@ -244,6 +255,8 @@ export default function AethelHeader() {
 
             {/* Mobile Menu Button */}
             <button
+              type="button"
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
             >

@@ -1,5 +1,5 @@
 # 00_FONTE_CANONICA
-Data: 2026-02-27
+Data: 2026-03-03
 Status: CANONICAL
 
 ## Purpose
@@ -45,6 +45,8 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - `29_AUDITORIA_360_P0_HUNT_2026-02-28.md`
 - `30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md`
 - `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
+- `32_GLOBAL_GAP_REGISTER_2026-03-01.md`
+- `33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
 
 ## Historical note
 - `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md` is historical and contains legacy external-path references; do not use it for current execution decisions.
@@ -61,6 +63,8 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - Active numerical baseline conflicts are resolved by `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` until a newer baseline file exists.
 - External benchmark claims only enter canonical docs as `EXTERNAL_BENCHMARK_ASSUMPTION` until verified in-repo.
 - Operational UX/market claims must align with `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`.
+- Repo-wide factual gap counts must align with `32_GLOBAL_GAP_REGISTER_2026-03-01.md`.
+- L4/L5 promotion execution must align with `33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`.
 
 ## Execution Baseline
 - Entry UX: `dashboard`/home journey; `/ide` remains advanced workbench.

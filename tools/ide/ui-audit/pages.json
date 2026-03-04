@@ -1,7 +1,8 @@
 [
   { "name": "home", "path": "/" },
+  { "name": "dashboard", "path": "/dashboard" },
   { "name": "ide", "path": "/ide" },
-  { "name": "marketplace", "path": "/marketplace" },
-  { "name": "pricing", "path": "/pricing" },
-  { "name": "settings", "path": "/settings" }
+  { "name": "settings", "path": "/settings" },
+  { "name": "login", "path": "/login" },
+  { "name": "register", "path": "/register" }
 ]

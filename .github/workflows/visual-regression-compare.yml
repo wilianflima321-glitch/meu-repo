@@ -67,6 +67,12 @@ jobs:
       - name: Anti fake-success gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:no-fake-success
 
+      - name: WCAG critical gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:wcag-critical
+
+      - name: Dashboard shell gate (pre-compare)
+        run: npm --prefix cloud-web-app/web run qa:dashboard-shell
+
       - name: Encoding sweep gate (pre-compare)
         run: npm --prefix cloud-web-app/web run qa:mojibake
 

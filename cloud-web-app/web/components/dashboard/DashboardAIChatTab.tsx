@@ -1,6 +1,7 @@
 import type { ChatMessage, CopilotWorkflowSummary } from '@/lib/api'
 
 import { AIThinkingPanel } from '../ai/AIThinkingPanel'
+import AIProviderSetupGuide from '../ai/AIProviderSetupGuide'
 import { DashboardCopilotWorkflowBar } from './DashboardCopilotWorkflowBar'
 
 type ChatMode = 'chat' | 'agent' | 'canvas'
@@ -12,6 +13,7 @@ type DashboardAIChatTabProps = {
   chatMessage: string
   onChatMessageChange: (value: string) => void
   onSendChatMessage: () => void
+  onStopStreaming?: () => void
   isStreaming: boolean
   activeWorkflowId: string | null
   copilotWorkflows: CopilotWorkflowSummary[]
@@ -29,6 +31,7 @@ type DashboardAIChatTabProps = {
   providerSetupGate?: {
     message: string
     capabilityStatus?: string
+    setupUrl?: string
   } | null
   onOpenProviderSettings?: () => void
 }
@@ -40,6 +43,7 @@ export function DashboardAIChatTab({
   chatMessage,
   onChatMessageChange,
   onSendChatMessage,
+  onStopStreaming,
   isStreaming,
   activeWorkflowId,
   copilotWorkflows,
@@ -103,25 +107,14 @@ export function DashboardAIChatTab({
       />
 
       {providerSetupGate && (
-        <div className="aethel-card aethel-p-4 aethel-mb-6 aethel-border aethel-border-amber-500/30 aethel-bg-amber-500/10">
-          <div className="aethel-flex aethel-items-center aethel-justify-between aethel-gap-3">
-            <div>
-              <p className="aethel-text-sm aethel-font-semibold aethel-text-amber-200">AI provider nao configurado</p>
-              <p className="aethel-text-xs aethel-text-slate-300 aethel-mt-1">{providerSetupGate.message}</p>
-              {providerSetupGate.capabilityStatus && (
-                <p className="aethel-text-[11px] aethel-text-slate-400 aethel-mt-1">
-                  capabilityStatus: {providerSetupGate.capabilityStatus}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={onOpenProviderSettings}
-              className="aethel-button aethel-button-primary aethel-text-xs"
-            >
-              Configurar em /admin/apis
-            </button>
-          </div>
+        <div className="aethel-mb-6">
+          <AIProviderSetupGuide
+            source="dashboard"
+            message={providerSetupGate.message}
+            capabilityStatus={providerSetupGate.capabilityStatus}
+            settingsHref={providerSetupGate.setupUrl}
+            onOpenSettings={onOpenProviderSettings}
+          />
         </div>
       )}
 
@@ -130,6 +123,12 @@ export function DashboardAIChatTab({
           <div className="aethel-mb-4 aethel-text-sm aethel-text-slate-400">
             Chat conversacional padrao com os agentes avancados do Aethel.
           </div>
+          {chatHistory.length === 0 && !isStreaming && (
+            <div className="aethel-state aethel-state-empty aethel-mb-4">
+              <p className="aethel-state-title">Nenhuma conversa iniciada</p>
+              <p className="aethel-text-xs aethel-mt-1">Envie uma mensagem para iniciar o fluxo Planner/Coder/Reviewer.</p>
+            </div>
+          )}
           <div className="aethel-space-y-4 aethel-mb-4 aethel-max-h-96 aethel-overflow-y-auto">
             {chatHistory.map((msg, index) => (
               <div key={index} className={`aethel-p-3 aethel-rounded-lg ${msg.role === 'user' ? 'aethel-bg-blue-500/20 aethel-ml-12' : 'aethel-bg-slate-700/50 aethel-mr-12'}`}>
@@ -144,6 +143,8 @@ export function DashboardAIChatTab({
               type="text"
               value={chatMessage}
               onChange={(event) => onChatMessageChange(event.target.value)}
+              disabled={isStreaming}
+              aria-label="Mensagem para o chat de IA"
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   onSendChatMessage()
@@ -156,10 +157,19 @@ export function DashboardAIChatTab({
               type="button"
               onClick={onSendChatMessage}
               className="aethel-button aethel-button-primary"
-              disabled={isStreaming}
+              disabled={isStreaming || chatMessage.trim().length === 0}
             >
               {isStreaming ? 'Processando...' : 'Enviar'}
             </button>
+            {isStreaming && onStopStreaming && (
+              <button
+                type="button"
+                onClick={onStopStreaming}
+                className="aethel-button aethel-button-ghost aethel-text-xs"
+              >
+                Interromper
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -232,17 +242,20 @@ export function DashboardAIChatTab({
           </div>
           <div className="aethel-bg-slate-800 aethel-rounded-lg aethel-p-4 aethel-min-h-96 aethel-border aethel-border-slate-700 aethel-relative">
             <div className="aethel-absolute aethel-top-4 aethel-left-4 aethel-flex aethel-gap-2">
-              <button type="button" className="aethel-button aethel-button-ghost aethel-text-xs">Desenhar</button>
-              <button type="button" className="aethel-button aethel-button-ghost aethel-text-xs">Formas</button>
-              <button type="button" className="aethel-button aethel-button-ghost aethel-text-xs">Texto</button>
-              <button type="button" className="aethel-button aethel-button-ghost aethel-text-xs">Melhorar com IA</button>
+              <button type="button" disabled className="aethel-button aethel-button-ghost aethel-text-xs opacity-60">Desenhar</button>
+              <button type="button" disabled className="aethel-button aethel-button-ghost aethel-text-xs opacity-60">Formas</button>
+              <button type="button" disabled className="aethel-button aethel-button-ghost aethel-text-xs opacity-60">Texto</button>
+              <button type="button" disabled className="aethel-button aethel-button-ghost aethel-text-xs opacity-60">Melhorar com IA</button>
             </div>
             <div className="aethel-text-center aethel-text-slate-500 aethel-py-32">
               <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
               <p className="text-lg font-medium mb-2">Canvas interativo</p>
-              <p className="text-sm">Em breve com recursos completos de desenho e colaboracao</p>
+              <div className="aethel-state aethel-state-empty mx-auto max-w-xl text-xs">
+                <p className="aethel-state-title mb-1">Capability status: PARTIAL</p>
+                <p>Ferramentas de desenho no Studio Home ainda estao limitadas. Use o modo avancado em /ide para edicao completa.</p>
+              </div>
             </div>
           </div>
         </div>

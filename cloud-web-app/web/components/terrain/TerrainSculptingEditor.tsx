@@ -1,39 +1,16 @@
-/**
- * TERRAIN SCULPTING EDITOR - Aethel Engine
- * 
- * Editor visual completo para esculpir terrenos no estilo Unreal/Unity.
- * Suporta sculpting, painting, erosion, foliage placement e muito mais.
- * 
- * FEATURES:
- * - Height sculpting com múltiplos brushes
- * - Texture/material painting com layers
- * - Erosion tools (hidráulica, térmica, eólica)
- * - Foliage painting
- * - Hole tool para caves
- * - Import/export heightmaps
- * - LOD management
- * - Streaming terrain
- */
-
 'use client';
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree, ThreeEvent } from '@react-three/fiber';
-import { 
-  OrbitControls, 
-  Grid, 
-  Environment, 
+import {
+  OrbitControls,
+  Grid,
+  Environment,
   Stats,
   GizmoHelper,
   GizmoViewport,
 } from '@react-three/drei';
 import * as THREE from 'three';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type TerrainToolType = 
+export type TerrainToolType =
   | 'sculpt_raise'
   | 'sculpt_lower'
   | 'sculpt_smooth'
@@ -46,10 +23,8 @@ export type TerrainToolType =
   | 'foliage_erase'
   | 'select'
   | 'region';
-
 export type BrushShape = 'circle' | 'square' | 'custom';
 export type BrushFalloff = 'linear' | 'smooth' | 'spherical' | 'tip' | 'constant';
-
 export interface BrushSettings {
   size: number;           // Radius in world units
   strength: number;       // 0-1
@@ -60,7 +35,6 @@ export interface BrushSettings {
   jitter: number;         // Position randomization
   customMask?: ImageData; // For custom shapes
 }
-
 export interface TerrainLayer {
   id: string;
   name: string;
@@ -72,22 +46,17 @@ export interface TerrainLayer {
   metallic: number;
   roughness: number;
 }
-
 export interface ErosionSettings {
   type: 'hydraulic' | 'thermal' | 'wind';
   iterations: number;
   strength: number;
-  // Hydraulic
   rainAmount?: number;
   evaporation?: number;
   sedimentCapacity?: number;
-  // Thermal
   talusAngle?: number;
-  // Wind
   windDirection?: { x: number; y: number };
   windStrength?: number;
 }
-
 export interface FoliageType {
   id: string;
   name: string;
@@ -103,7 +72,6 @@ export interface FoliageType {
   maxHeight: number;
   collisionEnabled: boolean;
 }
-
 export interface TerrainSettings {
   resolution: number;        // Heightmap resolution
   size: { x: number; y: number; z: number }; // World size
@@ -114,7 +82,6 @@ export interface TerrainSettings {
   castShadows: boolean;
   receiveShadows: boolean;
 }
-
 export interface TerrainData {
   heightmap: Float32Array;
   splatmaps: Float32Array[]; // One per 4 layers
@@ -122,36 +89,26 @@ export interface TerrainData {
   foliageInstances: FoliageInstance[];
   resolution: number;
 }
-
 export interface FoliageInstance {
   typeId: string;
   position: { x: number; y: number; z: number };
   rotation: { x: number; y: number; z: number };
   scale: number;
 }
-
-// ============================================================================
-// BRUSH PREVIEW COMPONENT
-// ============================================================================
-
 interface BrushPreviewProps {
   position: THREE.Vector3 | null;
   settings: BrushSettings;
   color: string;
 }
-
 function BrushPreview({ position, settings, color }: BrushPreviewProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  
   useFrame(() => {
     if (meshRef.current && position) {
       meshRef.current.position.copy(position);
       meshRef.current.position.y += 0.1; // Slight offset
     }
   });
-  
   if (!position) return null;
-  
   return (
     <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, THREE.MathUtils.degToRad(settings.rotation)]}>
       {settings.shape === 'circle' ? (
@@ -163,11 +120,6 @@ function BrushPreview({ position, settings, color }: BrushPreviewProps) {
     </mesh>
   );
 }
-
-// ============================================================================
-// TERRAIN MESH COMPONENT
-// ============================================================================
-
 interface TerrainMeshProps {
   data: TerrainData;
   settings: TerrainSettings;
@@ -178,7 +130,6 @@ interface TerrainMeshProps {
   brushPosition: THREE.Vector3 | null;
   setBrushPosition: (pos: THREE.Vector3 | null) => void;
 }
-
 function TerrainMesh({
   data,
   settings,
@@ -192,8 +143,6 @@ function TerrainMesh({
   const meshRef = useRef<THREE.Mesh>(null);
   const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
   const [isPainting, setIsPainting] = useState(false);
-  
-  // Create terrain geometry from heightmap
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(
       settings.size.x,
@@ -202,23 +151,17 @@ function TerrainMesh({
       data.resolution - 1
     );
     geo.rotateX(-Math.PI / 2);
-    
     const positions = geo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < positions.count; i++) {
       const height = data.heightmap[i] * settings.maxHeight;
       positions.setY(i, height);
     }
-    
     positions.needsUpdate = true;
     geo.computeVertexNormals();
-    
     geometryRef.current = geo;
     return geo;
   }, [data.heightmap, data.resolution, settings]);
-  
-  // Create terrain material with splatmapping
   const material = useMemo(() => {
-    // Simple material for now - in production would use custom shader
     return new THREE.MeshStandardMaterial({
       color: '#4a7c59',
       roughness: 0.8,
@@ -226,7 +169,6 @@ function TerrainMesh({
       wireframe: false,
     });
   }, []);
-  
   const handlePointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (e.point && e.uv) {
@@ -234,7 +176,6 @@ function TerrainMesh({
       onBrushStart(e.point, e.uv);
     }
   }, [onBrushStart]);
-  
   const handlePointerMove = useCallback((e: ThreeEvent<PointerEvent>) => {
     if (e.point) {
       setBrushPosition(e.point.clone());
@@ -243,12 +184,10 @@ function TerrainMesh({
       }
     }
   }, [isPainting, onBrushMove, setBrushPosition]);
-  
   const handlePointerUp = useCallback(() => {
     setIsPainting(false);
     onBrushEnd();
   }, [onBrushEnd]);
-  
   const handlePointerLeave = useCallback(() => {
     setBrushPosition(null);
     if (isPainting) {
@@ -256,7 +195,6 @@ function TerrainMesh({
       onBrushEnd();
     }
   }, [isPainting, onBrushEnd, setBrushPosition]);
-  
   return (
     <mesh
       ref={meshRef}
@@ -271,16 +209,10 @@ function TerrainMesh({
     />
   );
 }
-
-// ============================================================================
-// TOOLBAR COMPONENT
-// ============================================================================
-
 interface ToolbarProps {
   selectedTool: TerrainToolType;
   onToolChange: (tool: TerrainToolType) => void;
 }
-
 const toolCategories = [
   {
     name: 'Sculpt',
@@ -315,7 +247,6 @@ const toolCategories = [
     ],
   },
 ];
-
 function Toolbar({ selectedTool, onToolChange }: ToolbarProps) {
   return (
     <div style={{
@@ -359,21 +290,14 @@ function Toolbar({ selectedTool, onToolChange }: ToolbarProps) {
     </div>
   );
 }
-
-// ============================================================================
-// BRUSH SETTINGS PANEL
-// ============================================================================
-
 interface BrushSettingsPanelProps {
   settings: BrushSettings;
   onChange: (settings: BrushSettings) => void;
 }
-
 function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
   const update = <K extends keyof BrushSettings>(key: K, value: BrushSettings[K]) => {
     onChange({ ...settings, [key]: value });
   };
-  
   return (
     <div style={{
       padding: '12px',
@@ -381,7 +305,6 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Brush Settings</h3>
-      
       {/* Size */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -398,7 +321,6 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
           style={{ width: '100%' }}
         />
       </div>
-      
       {/* Strength */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -415,7 +337,6 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
           style={{ width: '100%' }}
         />
       </div>
-      
       {/* Falloff */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -441,7 +362,6 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
           <option value="constant">Constant</option>
         </select>
       </div>
-      
       {/* Shape */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -469,7 +389,6 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
           ))}
         </div>
       </div>
-      
       {/* Rotation */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -486,7 +405,6 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
           style={{ width: '100%' }}
         />
       </div>
-      
       {/* Jitter */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -506,11 +424,6 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
     </div>
   );
 }
-
-// ============================================================================
-// LAYERS PANEL
-// ============================================================================
-
 interface LayersPanelProps {
   layers: TerrainLayer[];
   selectedLayer: string | null;
@@ -519,7 +432,6 @@ interface LayersPanelProps {
   onRemove: (id: string) => void;
   onUpdate: (layer: TerrainLayer) => void;
 }
-
 function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdate }: LayersPanelProps) {
   return (
     <div style={{
@@ -544,7 +456,6 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
           + Add
         </button>
       </div>
-      
       <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
         {layers.map((layer, index) => (
           <div
@@ -570,7 +481,6 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
               borderRadius: '4px',
               flexShrink: 0,
             }} />
-            
             {/* Layer info */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ color: 'white', fontSize: '12px', fontWeight: 500 }}>
@@ -580,7 +490,6 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
                 Tiling: {layer.tiling.x}x{layer.tiling.y}
               </div>
             </div>
-            
             {/* Index */}
             <div style={{
               width: '20px',
@@ -595,7 +504,6 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
             }}>
               {index + 1}
             </div>
-            
             {/* Delete */}
             <button
               onClick={(e) => { e.stopPropagation(); onRemove(layer.id); }}
@@ -612,12 +520,10 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
           </div>
         ))}
       </div>
-      
       {/* Layer settings for selected */}
       {selectedLayer && (() => {
         const layer = layers.find(l => l.id === selectedLayer);
         if (!layer) return null;
-        
         return (
           <div style={{ marginTop: '12px', padding: '12px', background: '#1e293b', borderRadius: '4px' }}>
             <div style={{ marginBottom: '8px' }}>
@@ -634,7 +540,6 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
                 style={{ width: '100%' }}
               />
             </div>
-            
             <div style={{ display: 'flex', gap: '8px' }}>
               <div style={{ flex: 1 }}>
                 <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
@@ -681,22 +586,15 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
     </div>
   );
 }
-
-// ============================================================================
-// EROSION PANEL
-// ============================================================================
-
 interface ErosionPanelProps {
   settings: ErosionSettings;
   onChange: (settings: ErosionSettings) => void;
   onApply: () => void;
 }
-
 function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
   const update = <K extends keyof ErosionSettings>(key: K, value: ErosionSettings[K]) => {
     onChange({ ...settings, [key]: value });
   };
-  
   return (
     <div style={{
       padding: '12px',
@@ -704,7 +602,6 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Erosion Settings</h3>
-      
       {/* Type */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
@@ -728,7 +625,6 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
           <option value="wind">Wind</option>
         </select>
       </div>
-      
       {/* Iterations */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -745,7 +641,6 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
           style={{ width: '100%' }}
         />
       </div>
-      
       {/* Strength */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -762,7 +657,6 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
           style={{ width: '100%' }}
         />
       </div>
-      
       {/* Type-specific settings */}
       {settings.type === 'hydraulic' && (
         <>
@@ -796,7 +690,6 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
           </div>
         </>
       )}
-      
       {settings.type === 'thermal' && (
         <div style={{ marginBottom: '8px' }}>
           <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
@@ -813,7 +706,6 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
           />
         </div>
       )}
-      
       <button
         onClick={onApply}
         style={{
@@ -833,11 +725,6 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
     </div>
   );
 }
-
-// ============================================================================
-// 3D VIEWPORT SCENE
-// ============================================================================
-
 interface ViewportSceneProps {
   terrainData: TerrainData;
   terrainSettings: TerrainSettings;
@@ -846,7 +733,6 @@ interface ViewportSceneProps {
   brushSettings: BrushSettings;
   onApplyBrush: (x: number, z: number) => void;
 }
-
 function ViewportScene({
   terrainData,
   terrainSettings,
@@ -856,7 +742,6 @@ function ViewportScene({
   onApplyBrush,
 }: ViewportSceneProps) {
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
-  
   const getBrushColor = () => {
     if (selectedTool.startsWith('sculpt_raise')) return '#22c55e';
     if (selectedTool.startsWith('sculpt_lower')) return '#ef4444';
@@ -865,36 +750,29 @@ function ViewportScene({
     if (selectedTool.startsWith('foliage')) return '#10b981';
     return '#64748b';
   };
-  
   const handleBrushStart = useCallback((position: THREE.Vector3, _uv: THREE.Vector2) => {
     onApplyBrush(position.x, position.z);
   }, [onApplyBrush]);
-  
   const handleBrushMove = useCallback((position: THREE.Vector3, _uv: THREE.Vector2) => {
     onApplyBrush(position.x, position.z);
   }, [onApplyBrush]);
-  
   const handleBrushEnd = useCallback(() => {
-    // Finalize stroke - could save undo state here
   }, []);
-  
   return (
     <>
       {/* Lighting */}
       <ambientLight intensity={0.4} />
-      <directionalLight 
-        position={[50, 100, 50]} 
-        intensity={1} 
-        castShadow 
+      <directionalLight
+        position={[50, 100, 50]}
+        intensity={1}
+        castShadow
         shadow-mapSize={[2048, 2048]}
       />
-      
       {/* Environment */}
       <Environment preset="sunset" />
-      
       {/* Grid */}
-      <Grid 
-        args={[100, 100]} 
+      <Grid
+        args={[100, 100]}
         position={[0, 0.01, 0]}
         cellSize={1}
         cellThickness={0.5}
@@ -905,7 +783,6 @@ function ViewportScene({
         fadeDistance={100}
         fadeStrength={1}
       />
-      
       {/* Terrain */}
       <TerrainMesh
         data={terrainData}
@@ -917,23 +794,20 @@ function ViewportScene({
         brushPosition={brushPosition}
         setBrushPosition={setBrushPosition}
       />
-      
       {/* Brush preview */}
       <BrushPreview
         position={brushPosition}
         settings={brushSettings}
         color={getBrushColor()}
       />
-      
       {/* Camera controls */}
-      <OrbitControls 
+      <OrbitControls
         makeDefault
         enablePan
         enableZoom
         enableRotate
         maxPolarAngle={Math.PI / 2.1}
       />
-      
       {/* Gizmo */}
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
         <GizmoViewport labelColor="white" />
@@ -941,23 +815,16 @@ function ViewportScene({
     </>
   );
 }
-
-// ============================================================================
-// MAIN TERRAIN SCULPTING EDITOR
-// ============================================================================
-
 export interface TerrainSculptingEditorProps {
   initialData?: TerrainData;
   initialSettings?: TerrainSettings;
   onChange?: (data: TerrainData) => void;
 }
-
 export function TerrainSculptingEditor({
   initialData,
   initialSettings,
   onChange,
 }: TerrainSculptingEditorProps) {
-  // Default terrain settings
   const [terrainSettings] = useState<TerrainSettings>(initialSettings || {
     resolution: 257,
     size: { x: 100, y: 100, z: 50 },
@@ -968,30 +835,21 @@ export function TerrainSculptingEditor({
     castShadows: true,
     receiveShadows: true,
   });
-  
-  // Initialize terrain data
   const [terrainData, setTerrainData] = useState<TerrainData>(() => {
     if (initialData) return initialData;
-    
     const resolution = terrainSettings.resolution;
     const heightmap = new Float32Array(resolution * resolution);
-    
-    // Generate initial terrain with some hills
     for (let z = 0; z < resolution; z++) {
       for (let x = 0; x < resolution; x++) {
         const nx = x / resolution - 0.5;
         const nz = z / resolution - 0.5;
-        
-        // Simple noise-like pattern
-        const height = 
+        const height =
           Math.sin(nx * 10) * Math.cos(nz * 10) * 0.1 +
           Math.sin(nx * 5 + nz * 3) * 0.15 +
           0.2;
-        
         heightmap[z * resolution + x] = Math.max(0, Math.min(1, height));
       }
     }
-    
     return {
       heightmap,
       splatmaps: [new Float32Array(resolution * resolution * 4)],
@@ -1000,8 +858,6 @@ export function TerrainSculptingEditor({
       resolution,
     };
   });
-  
-  // Tool state
   const [selectedTool, setSelectedTool] = useState<TerrainToolType>('sculpt_raise');
   const [brushSettings, setBrushSettings] = useState<BrushSettings>({
     size: 5,
@@ -1012,8 +868,6 @@ export function TerrainSculptingEditor({
     spacing: 0.25,
     jitter: 0,
   });
-  
-  // Layers state
   const [layers, setLayers] = useState<TerrainLayer[]>([
     {
       id: 'grass',
@@ -1047,8 +901,6 @@ export function TerrainSculptingEditor({
     },
   ]);
   const [selectedLayer, setSelectedLayer] = useState<string | null>('grass');
-  
-  // Erosion settings
   const [erosionSettings, setErosionSettings] = useState<ErosionSettings>({
     type: 'hydraulic',
     iterations: 50,
@@ -1058,26 +910,15 @@ export function TerrainSculptingEditor({
     sedimentCapacity: 0.5,
     talusAngle: 45,
   });
-  
-  // UI state
   const [showErosion, setShowErosion] = useState(false);
   const [showStats, setShowStats] = useState(true);
-  
-  // Apply brush to terrain
   const applyBrush = useCallback((worldX: number, worldZ: number) => {
     const resolution = terrainData.resolution;
     const { size } = terrainSettings;
-    
-    // Convert world to heightmap coordinates
     const hx = ((worldX / size.x) + 0.5) * (resolution - 1);
     const hz = ((worldZ / size.y) + 0.5) * (resolution - 1);
-    
-    // Calculate brush radius in heightmap units
     const brushRadius = (brushSettings.size / size.x) * resolution;
-    
-    // Get brush effect based on tool
     let effect: (height: number, distance: number) => number;
-    
     switch (selectedTool) {
       case 'sculpt_raise':
         effect = (h, d) => h + brushSettings.strength * getFalloff(d, brushRadius, brushSettings.falloff) * 0.01;
@@ -1098,22 +939,17 @@ export function TerrainSculptingEditor({
       default:
         effect = (h) => h;
     }
-    
-    // Apply to heightmap
     setTerrainData(prev => {
       const newHeightmap = new Float32Array(prev.heightmap);
-      
       const minX = Math.max(0, Math.floor(hx - brushRadius));
       const maxX = Math.min(resolution - 1, Math.ceil(hx + brushRadius));
       const minZ = Math.max(0, Math.floor(hz - brushRadius));
       const maxZ = Math.min(resolution - 1, Math.ceil(hz + brushRadius));
-      
       for (let z = minZ; z <= maxZ; z++) {
         for (let x = minX; x <= maxX; x++) {
           const dx = x - hx;
           const dz = z - hz;
           const distance = Math.sqrt(dx * dx + dz * dz);
-          
           if (distance <= brushRadius) {
             const idx = z * resolution + x;
             const currentHeight = newHeightmap[idx];
@@ -1121,15 +957,11 @@ export function TerrainSculptingEditor({
           }
         }
       }
-      
       return { ...prev, heightmap: newHeightmap };
     });
   }, [terrainData, terrainSettings, brushSettings, selectedTool]);
-  
-  // Falloff function
   const getFalloff = (distance: number, radius: number, type: BrushFalloff): number => {
     const t = Math.max(0, 1 - distance / radius);
-    
     switch (type) {
       case 'linear': return t;
       case 'smooth': return t * t * (3 - 2 * t); // Smoothstep
@@ -1139,15 +971,9 @@ export function TerrainSculptingEditor({
       default: return t;
     }
   };
-  
-  // Apply erosion
   const applyErosion = useCallback(() => {
-    // This would run the erosion simulation
     console.log('Applying erosion:', erosionSettings);
-    // Implementation would modify heightmap based on erosion type
   }, [erosionSettings]);
-  
-  // Add layer
   const addLayer = () => {
     const newLayer: TerrainLayer = {
       id: crypto.randomUUID(),
@@ -1160,18 +986,15 @@ export function TerrainSculptingEditor({
     };
     setLayers(prev => [...prev, newLayer]);
   };
-  
-  // Notify parent of changes
   useEffect(() => {
     onChange?.(terrainData);
   }, [terrainData, onChange]);
-  
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', background: '#0f172a' }}>
       {/* Left sidebar - Tools */}
-      <div style={{ 
-        width: '200px', 
-        borderRight: '1px solid #1e293b', 
+      <div style={{
+        width: '200px',
+        borderRight: '1px solid #1e293b',
         padding: '12px',
         display: 'flex',
         flexDirection: 'column',
@@ -1182,12 +1005,10 @@ export function TerrainSculptingEditor({
           selectedTool={selectedTool}
           onToolChange={setSelectedTool}
         />
-        
         <BrushSettingsPanel
           settings={brushSettings}
           onChange={setBrushSettings}
         />
-        
         {selectedTool === 'sculpt_erosion' && (
           <ErosionPanel
             settings={erosionSettings}
@@ -1196,7 +1017,6 @@ export function TerrainSculptingEditor({
           />
         )}
       </div>
-      
       {/* Main viewport */}
       <div style={{ flex: 1, position: 'relative' }}>
         <Canvas
@@ -1214,7 +1034,6 @@ export function TerrainSculptingEditor({
           />
           {showStats && <Stats />}
         </Canvas>
-        
         {/* Top toolbar */}
         <div style={{
           position: 'absolute',
@@ -1237,7 +1056,6 @@ export function TerrainSculptingEditor({
           >
             📊 Stats
           </button>
-          
           <button
             onClick={() => setShowErosion(s => !s)}
             style={{
@@ -1253,7 +1071,6 @@ export function TerrainSculptingEditor({
             💧 Erosion Panel
           </button>
         </div>
-        
         {/* Status bar */}
         <div style={{
           position: 'absolute',
@@ -1273,11 +1090,10 @@ export function TerrainSculptingEditor({
           <span>Layers: {layers.length}</span>
         </div>
       </div>
-      
       {/* Right sidebar - Layers */}
-      <div style={{ 
-        width: '260px', 
-        borderLeft: '1px solid #1e293b', 
+      <div style={{
+        width: '260px',
+        borderLeft: '1px solid #1e293b',
         padding: '12px',
         overflowY: 'auto',
       }}>
@@ -1289,7 +1105,6 @@ export function TerrainSculptingEditor({
           onRemove={(id) => setLayers(prev => prev.filter(l => l.id !== id))}
           onUpdate={(layer) => setLayers(prev => prev.map(l => l.id === layer.id ? layer : l))}
         />
-        
         {/* Terrain info */}
         <div style={{
           marginTop: '16px',
@@ -1298,7 +1113,6 @@ export function TerrainSculptingEditor({
           borderRadius: '8px',
         }}>
           <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Terrain Settings</h3>
-          
           <div style={{ fontSize: '12px', color: '#94a3b8' }}>
             <div style={{ marginBottom: '8px' }}>
               <span style={{ color: '#64748b' }}>Resolution:</span> {terrainData.resolution}²
@@ -1317,7 +1131,6 @@ export function TerrainSculptingEditor({
             </div>
           </div>
         </div>
-        
         {/* Import/Export */}
         <div style={{
           marginTop: '16px',
@@ -1357,5 +1170,4 @@ export function TerrainSculptingEditor({
     </div>
   );
 }
-
 export default TerrainSculptingEditor;

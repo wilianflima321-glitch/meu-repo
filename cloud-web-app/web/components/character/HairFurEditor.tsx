@@ -1,19 +1,12 @@
 'use client';
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
-
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
-
 export interface HairFurEditorProps {
   characterId: string;
   onHairUpdate?: (hairData: HairData) => void;
 }
-
 interface HairData {
   strandCount: number;
   regions: HairRegion[];
@@ -24,7 +17,6 @@ interface HairData {
   lod: LODSettings;
   preset: HairPreset;
 }
-
 interface HairRegion {
   id: string;
   name: string;
@@ -32,26 +24,22 @@ interface HairRegion {
   density: number;
   enabled: boolean;
 }
-
 interface ClumpingSettings {
   factor: number;
   iterations: number;
   noise: number;
   tightness: number;
 }
-
 interface CurlSettings {
   intensity: number;
   frequency: number;
   randomness: number;
   type: 'wave' | 'curl' | 'coil';
 }
-
 interface GradientStop {
   position: number;
   color: string;
 }
-
 interface PhysicsSettings {
   gravity: number;
   stiffness: number;
@@ -59,27 +47,19 @@ interface PhysicsSettings {
   windStrength: number;
   windTurbulence: number;
 }
-
 interface LODSettings {
   strandDistance: number;
   cardDistance: number;
   cardCount: number;
   enableLOD: boolean;
 }
-
 type HairPreset = 'straight' | 'wavy' | 'curly' | 'afro' | 'fur' | 'custom';
 type BrushTool = 'comb' | 'cut' | 'add' | 'length';
-
 interface BrushSettings {
   tool: BrushTool;
   size: number;
   strength: number;
 }
-
-// ============================================================================
-// PRESET CONFIGURATIONS
-// ============================================================================
-
 const HAIR_PRESETS: Record<HairPreset, Partial<HairData>> = {
   straight: {
     curl: { intensity: 0, frequency: 0, randomness: 0.1, type: 'wave' },
@@ -103,7 +83,6 @@ const HAIR_PRESETS: Record<HairPreset, Partial<HairData>> = {
   },
   custom: {},
 };
-
 const DEFAULT_REGIONS: HairRegion[] = [
   { id: 'top', name: 'Topo', length: 0.8, density: 1.0, enabled: true },
   { id: 'sides', name: 'Laterais', length: 0.6, density: 0.9, enabled: true },
@@ -111,17 +90,11 @@ const DEFAULT_REGIONS: HairRegion[] = [
   { id: 'front', name: 'Frontal', length: 0.5, density: 0.85, enabled: true },
   { id: 'nape', name: 'Nuca', length: 0.4, density: 0.8, enabled: true },
 ];
-
 const DEFAULT_GRADIENT: GradientStop[] = [
   { position: 0, color: '#2d1810' },
   { position: 0.5, color: '#4a2c1a' },
   { position: 1, color: '#6b3d22' },
 ];
-
-// ============================================================================
-// HAIR GENERATION UTILITIES
-// ============================================================================
-
 function generateHairStrands(
   strandCount: number,
   regions: HairRegion[],
@@ -135,50 +108,34 @@ function generateHairStrands(
   const totalPoints = strandCount * segmentsPerStrand * 2;
   const positions = new Float32Array(totalPoints * 3);
   const colors = new Float32Array(totalPoints * 3);
-
   const enabledRegions = regions.filter((r) => r.enabled);
   const strandsPerRegion = Math.floor(strandCount / Math.max(enabledRegions.length, 1));
-
   let pointIndex = 0;
-
   enabledRegions.forEach((region, regionIdx) => {
     const regionAngleStart = (regionIdx / enabledRegions.length) * Math.PI * 2;
     const regionAngleEnd = ((regionIdx + 1) / enabledRegions.length) * Math.PI * 2;
-
     for (let i = 0; i < strandsPerRegion; i++) {
-      // Generate root position on scalp sphere
       const theta = regionAngleStart + Math.random() * (regionAngleEnd - regionAngleStart);
       const phi = Math.acos(1 - 2 * (0.2 + Math.random() * 0.3));
       const scalRadius = 0.5;
-
       const rootX = scalRadius * Math.sin(phi) * Math.cos(theta);
       const rootY = scalRadius * Math.cos(phi) + 0.3;
       const rootZ = scalRadius * Math.sin(phi) * Math.sin(theta);
-
-      // Calculate strand direction (outward from scalp)
       const dirX = rootX;
       const dirY = rootY - 0.3;
       const dirZ = rootZ;
       const dirLen = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ) || 1;
-
-      // Clumping offset
       const clumpSeed = Math.floor(i / (strandsPerRegion * clumping.factor + 1));
       const clumpOffsetX = (Math.sin(clumpSeed * 12.9898) * 0.5) * clumping.tightness;
       const clumpOffsetZ = (Math.cos(clumpSeed * 78.233) * 0.5) * clumping.tightness;
-
       for (let seg = 0; seg < segmentsPerStrand; seg++) {
         const t = seg / (segmentsPerStrand - 1);
         const tNext = (seg + 1) / (segmentsPerStrand - 1);
-
-        // Base length with region multiplier
         const length = region.length * 0.8;
-
-        // Curl calculation
         let curlX = 0, curlZ = 0;
         if (curl.intensity > 0) {
           const curlPhase = i * 0.1 + curl.randomness * Math.random();
           const curlAmp = curl.intensity * 0.1 * t;
-          
           if (curl.type === 'wave') {
             curlX = Math.sin(t * curl.frequency * Math.PI + curlPhase) * curlAmp;
           } else if (curl.type === 'curl') {
@@ -189,13 +146,9 @@ function generateHairStrands(
             curlZ = Math.cos(t * curl.frequency * Math.PI * 3 + curlPhase) * curlAmp * 1.5;
           }
         }
-
-        // Physics simulation (gravity + wind)
         const gravityEffect = t * t * physics.gravity * 0.3;
         const windEffect = Math.sin(time * 2 + rootX * 5) * physics.windStrength * t * 0.1;
         const windTurbEffect = Math.sin(time * 5 + rootZ * 10) * physics.windTurbulence * t * 0.05;
-
-        // Calculate positions
         const calcPos = (tVal: number) => {
           const stiffMult = 1 - physics.stiffness * 0.5;
           return {
@@ -204,50 +157,37 @@ function generateHairStrands(
             z: rootZ + (dirZ / dirLen) * tVal * length + curlZ + clumpOffsetZ * tVal,
           };
         };
-
         const p1 = calcPos(t);
         const p2 = calcPos(Math.min(tNext, 1));
-
-        // Store line segment
         positions[pointIndex * 3] = p1.x;
         positions[pointIndex * 3 + 1] = p1.y;
         positions[pointIndex * 3 + 2] = p1.z;
         pointIndex++;
-
         positions[pointIndex * 3] = p2.x;
         positions[pointIndex * 3 + 1] = p2.y;
         positions[pointIndex * 3 + 2] = p2.z;
         pointIndex++;
-
-        // Interpolate gradient colors
         const color1 = interpolateGradient(gradient, t);
         const color2 = interpolateGradient(gradient, tNext);
-
         colors[(pointIndex - 2) * 3] = color1.r;
         colors[(pointIndex - 2) * 3 + 1] = color1.g;
         colors[(pointIndex - 2) * 3 + 2] = color1.b;
-
         colors[(pointIndex - 1) * 3] = color2.r;
         colors[(pointIndex - 1) * 3 + 1] = color2.g;
         colors[(pointIndex - 1) * 3 + 2] = color2.b;
       }
     }
   });
-
   return { positions, colors };
 }
-
 function interpolateGradient(gradient: GradientStop[], t: number): { r: number; g: number; b: number } {
   if (gradient.length === 0) return { r: 0.5, g: 0.3, b: 0.2 };
   if (gradient.length === 1) {
     const c = hexToRgb(gradient[0].color);
     return c || { r: 0.5, g: 0.3, b: 0.2 };
   }
-
-  // Find surrounding stops
   let lower = gradient[0];
   let upper = gradient[gradient.length - 1];
-
   for (let i = 0; i < gradient.length - 1; i++) {
     if (t >= gradient[i].position && t <= gradient[i + 1].position) {
       lower = gradient[i];
@@ -255,20 +195,16 @@ function interpolateGradient(gradient: GradientStop[], t: number): { r: number; 
       break;
     }
   }
-
   const range = upper.position - lower.position;
   const localT = range > 0 ? (t - lower.position) / range : 0;
-
   const c1 = hexToRgb(lower.color) || { r: 0, g: 0, b: 0 };
   const c2 = hexToRgb(upper.color) || { r: 1, g: 1, b: 1 };
-
   return {
     r: c1.r + (c2.r - c1.r) * localT,
     g: c1.g + (c2.g - c1.g) * localT,
     b: c1.b + (c2.b - c1.b) * localT,
   };
 }
-
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
@@ -279,7 +215,6 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
       }
     : null;
 }
-
 function rgbToHex(r: number, g: number, b: number): string {
   const toHex = (n: number) => {
     const hex = Math.round(n * 255).toString(16);
@@ -287,11 +222,6 @@ function rgbToHex(r: number, g: number, b: number): string {
   };
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
-
-// ============================================================================
-// SUBCOMPONENT: HairStrands3D
-// ============================================================================
-
 interface HairStrands3DProps {
   strandCount: number;
   regions: HairRegion[];
@@ -301,7 +231,6 @@ interface HairStrands3DProps {
   physics: PhysicsSettings;
   animatePhysics: boolean;
 }
-
 function HairStrands3D({
   strandCount,
   regions,
@@ -314,13 +243,10 @@ function HairStrands3D({
   const linesRef = useRef<THREE.LineSegments>(null);
   const geometryRef = useRef<THREE.BufferGeometry>(null);
   const timeRef = useRef(0);
-
-  // Update hair geometry
   useFrame((_, delta) => {
     if (animatePhysics) {
       timeRef.current += delta;
     }
-
     if (geometryRef.current) {
       const { positions, colors } = generateHairStrands(
         Math.min(strandCount, 10000), // Cap for performance in preview
@@ -331,14 +257,12 @@ function HairStrands3D({
         physics,
         timeRef.current
       );
-
       geometryRef.current.setAttribute('position', new THREE.BufferAttribute(positions, 3));
       geometryRef.current.setAttribute('color', new THREE.BufferAttribute(colors, 3));
       geometryRef.current.attributes.position.needsUpdate = true;
       geometryRef.current.attributes.color.needsUpdate = true;
     }
   });
-
   return (
     <lineSegments ref={linesRef}>
       <bufferGeometry ref={geometryRef} />
@@ -346,11 +270,6 @@ function HairStrands3D({
     </lineSegments>
   );
 }
-
-// ============================================================================
-// SUBCOMPONENT: HeadMesh
-// ============================================================================
-
 function HeadMesh() {
   return (
     <mesh position={[0, 0.3, 0]}>
@@ -359,44 +278,32 @@ function HeadMesh() {
     </mesh>
   );
 }
-
-// ============================================================================
-// SUBCOMPONENT: BrushPreview
-// ============================================================================
-
 interface BrushPreviewProps {
   brush: BrushSettings;
   active: boolean;
 }
-
 function BrushPreview({ brush, active }: BrushPreviewProps) {
   const { raycaster, camera, mouse } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
   const [position, setPosition] = useState<THREE.Vector3>(new THREE.Vector3());
-
   useFrame(() => {
     if (!active || !meshRef.current) return;
-
     raycaster.setFromCamera(mouse, camera);
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     const intersection = new THREE.Vector3();
     raycaster.ray.intersectPlane(plane, intersection);
-
     if (intersection) {
       setPosition(intersection);
       meshRef.current.position.copy(intersection);
     }
   });
-
   if (!active) return null;
-
   const brushColors: Record<BrushTool, string> = {
     comb: '#3b82f6',
     cut: '#ef4444',
     add: '#22c55e',
     length: '#f59e0b',
   };
-
   return (
     <mesh ref={meshRef} position={position}>
       <ringGeometry args={[brush.size * 0.08, brush.size * 0.1, 32]} />
@@ -409,19 +316,12 @@ function BrushPreview({ brush, active }: BrushPreviewProps) {
     </mesh>
   );
 }
-
-// ============================================================================
-// SUBCOMPONENT: GradientPicker
-// ============================================================================
-
 interface GradientPickerProps {
   gradient: GradientStop[];
   onChange: (gradient: GradientStop[]) => void;
 }
-
 function GradientPicker({ gradient, onChange }: GradientPickerProps) {
   const [selectedStop, setSelectedStop] = useState<number>(0);
-
   const handleStopColorChange = useCallback(
     (index: number, color: string) => {
       const newGradient = [...gradient];
@@ -430,7 +330,6 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
     },
     [gradient, onChange]
   );
-
   const handleStopPositionChange = useCallback(
     (index: number, position: number) => {
       const newGradient = [...gradient];
@@ -441,14 +340,12 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
     },
     [gradient, onChange]
   );
-
   const addStop = useCallback(() => {
     const newPosition = gradient.length > 0 ? (gradient[gradient.length - 1].position + 1) / 2 : 0.5;
     const newGradient = [...gradient, { position: newPosition, color: '#8b5a2b' }];
     newGradient.sort((a, b) => a.position - b.position);
     onChange(newGradient);
   }, [gradient, onChange]);
-
   const removeStop = useCallback(
     (index: number) => {
       if (gradient.length <= 2) return;
@@ -458,12 +355,10 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
     },
     [gradient, onChange, selectedStop]
   );
-
   const gradientStyle = useMemo(() => {
     const stops = gradient.map((s) => `${s.color} ${s.position * 100}%`).join(', ');
     return { background: `linear-gradient(to right, ${stops})` };
   }, [gradient]);
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -475,7 +370,6 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
           + Parada
         </button>
       </div>
-
       {/* Gradient Preview Bar */}
       <div className="relative h-8 rounded-lg border border-slate-600 overflow-hidden" style={gradientStyle}>
         {gradient.map((stop, index) => (
@@ -491,7 +385,6 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
           </div>
         ))}
       </div>
-
       {/* Stop Editor */}
       {gradient[selectedStop] && (
         <div className="grid grid-cols-3 gap-2 p-3 bg-slate-800/50 rounded-lg">
@@ -530,16 +423,10 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
     </div>
   );
 }
-
-// ============================================================================
-// SUBCOMPONENT: LODPreview
-// ============================================================================
-
 interface LODPreviewProps {
   lod: LODSettings;
   currentDistance: number;
 }
-
 function LODPreview({ lod, currentDistance }: LODPreviewProps) {
   const currentMode = useMemo(() => {
     if (!lod.enableLOD) return 'strands';
@@ -547,7 +434,6 @@ function LODPreview({ lod, currentDistance }: LODPreviewProps) {
     if (currentDistance < lod.cardDistance) return 'cards';
     return 'billboard';
   }, [lod, currentDistance]);
-
   return (
     <div className="p-3 bg-slate-800/50 rounded-lg space-y-2">
       <div className="flex items-center justify-between">
@@ -576,11 +462,6 @@ function LODPreview({ lod, currentDistance }: LODPreviewProps) {
     </div>
   );
 }
-
-// ============================================================================
-// SUBCOMPONENT: Slider
-// ============================================================================
-
 interface SliderProps {
   label: string;
   value: number;
@@ -590,7 +471,6 @@ interface SliderProps {
   unit?: string;
   onChange: (value: number) => void;
 }
-
 function Slider({ label, value, min, max, step = 1, unit = '', onChange }: SliderProps) {
   return (
     <div className="space-y-1">
@@ -613,13 +493,7 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange }: Slide
     </div>
   );
 }
-
-// ============================================================================
-// MAIN COMPONENT: HairFurEditor
-// ============================================================================
-
 export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEditorProps) {
-  // State
   const [strandCount, setStrandCount] = useState(10000);
   const [regions, setRegions] = useState<HairRegion[]>(DEFAULT_REGIONS);
   const [clumping, setClumping] = useState<ClumpingSettings>({
@@ -658,8 +532,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
   const [animatePhysics, setAnimatePhysics] = useState(true);
   const [activeTab, setActiveTab] = useState<'general' | 'style' | 'physics' | 'lod' | 'brush'>('general');
   const [cameraDistance, setCameraDistance] = useState(3);
-
-  // Apply preset
   const applyPreset = useCallback((presetName: HairPreset) => {
     setPreset(presetName);
     if (presetName !== 'custom') {
@@ -668,8 +540,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
       if (presetData.clumping) setClumping((prev) => ({ ...prev, ...presetData.clumping }));
     }
   }, []);
-
-  // Compile hair data
   const hairData = useMemo<HairData>(
     () => ({
       strandCount,
@@ -683,19 +553,13 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
     }),
     [strandCount, regions, clumping, curl, gradient, physics, lod, preset]
   );
-
-  // Notify parent on changes
   useEffect(() => {
     onHairUpdate?.(hairData);
   }, [hairData, onHairUpdate]);
-
-  // Update region
   const updateRegion = useCallback((id: string, updates: Partial<HairRegion>) => {
     setRegions((prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)));
     setPreset('custom');
   }, []);
-
-  // Export functions
   const exportAsCards = useCallback(() => {
     const exportData = {
       type: 'hair_cards',
@@ -712,7 +576,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
     a.click();
     URL.revokeObjectURL(url);
   }, [characterId, hairData, lod.cardCount]);
-
   const exportAsStrands = useCallback(() => {
     const exportData = {
       type: 'hair_strands',
@@ -728,15 +591,12 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
     a.click();
     URL.revokeObjectURL(url);
   }, [characterId, hairData]);
-
-  // Brush icons
   const brushIcons: Record<BrushTool, string> = {
     comb: '🪥',
     cut: '✂️',
     add: '➕',
     length: '📏',
   };
-
   return (
     <div className="w-full h-full min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex">
       {/* 3D Viewport */}
@@ -750,7 +610,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
           <directionalLight position={[-3, 3, -3]} intensity={0.3} />
           <pointLight position={[0, 2, 0]} intensity={0.5} color="#fff5e6" />
-
           <HeadMesh />
           <HairStrands3D
             strandCount={strandCount}
@@ -761,9 +620,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             physics={physics}
             animatePhysics={animatePhysics}
           />
-
           <BrushPreview brush={brush} active={brushActive} />
-
           <OrbitControls
             enablePan={true}
             enableZoom={true}
@@ -776,10 +633,8 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               }
             }}
           />
-
           <gridHelper args={[10, 10, '#334155', '#1e293b']} position={[0, -0.5, 0]} />
         </Canvas>
-
         {/* Viewport Overlay - Stats */}
         <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-sm rounded-lg p-3 text-sm space-y-1">
           <div className="text-slate-400">
@@ -792,7 +647,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             Física: <span className={animatePhysics ? 'text-green-400' : 'text-red-400'}>{animatePhysics ? 'Ativa' : 'Pausada'}</span>
           </div>
         </div>
-
         {/* Viewport Overlay - Controls */}
         <div className="absolute bottom-4 left-4 flex gap-2">
           <button
@@ -806,13 +660,11 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             {animatePhysics ? '⏸️ Pausar Física' : '▶️ Animar Física'}
           </button>
         </div>
-
         {/* Viewport Overlay - LOD */}
         <div className="absolute bottom-4 right-4 w-64">
           <LODPreview lod={lod} currentDistance={cameraDistance} />
         </div>
       </div>
-
       {/* Control Panel */}
       <div className="w-96 bg-slate-800/95 backdrop-blur-sm border-l border-slate-700 flex flex-col overflow-hidden">
         {/* Header */}
@@ -822,7 +674,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           </h2>
           <p className="text-sm text-slate-400 mt-1">Character: {characterId}</p>
         </div>
-
         {/* Preset Bar */}
         <div className="p-4 border-b border-slate-700">
           <label className="text-sm font-medium text-slate-300 block mb-2">Presets</label>
@@ -847,7 +698,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             ))}
           </div>
         </div>
-
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-700">
           {[
@@ -870,7 +720,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             </button>
           ))}
         </div>
-
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* General Tab */}
@@ -887,7 +736,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   setPreset('custom');
                 }}
               />
-
               <div className="space-y-3">
                 <label className="text-sm font-medium text-slate-300 block">Regiões</label>
                 {regions.map((region) => (
@@ -935,7 +783,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               </div>
             </>
           )}
-
           {/* Style Tab */}
           {activeTab === 'style' && (
             <>
@@ -987,7 +834,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   }}
                 />
               </div>
-
               {/* Curl */}
               <div className="space-y-3 pt-4 border-t border-slate-700">
                 <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Ondulação/Cacho</h3>
@@ -1048,7 +894,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   }}
                 />
               </div>
-
               {/* Gradient */}
               <div className="space-y-3 pt-4 border-t border-slate-700">
                 <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Cor do Cabelo</h3>
@@ -1056,7 +901,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               </div>
             </>
           )}
-
           {/* Physics Tab */}
           {activeTab === 'physics' && (
             <>
@@ -1087,7 +931,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   onChange={(v) => setPhysics((prev) => ({ ...prev, damping: v }))}
                 />
               </div>
-
               <div className="space-y-3 pt-4 border-t border-slate-700">
                 <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Vento</h3>
                 <Slider
@@ -1109,7 +952,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               </div>
             </>
           )}
-
           {/* LOD Tab */}
           {activeTab === 'lod' && (
             <>
@@ -1126,7 +968,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                     />
                   </label>
                 </div>
-
                 {lod.enableLOD && (
                   <>
                     <Slider
@@ -1158,7 +999,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   </>
                 )}
               </div>
-
               <div className="p-4 bg-slate-700/30 rounded-lg space-y-2 mt-4">
                 <h4 className="text-sm font-medium text-slate-200">Níveis de LOD</h4>
                 <div className="flex items-center gap-2 text-xs">
@@ -1176,7 +1016,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               </div>
             </>
           )}
-
           {/* Brush Tab */}
           {activeTab === 'brush' && (
             <>
@@ -1204,7 +1043,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   ))}
                 </div>
               </div>
-
               <div className="space-y-3 pt-4 border-t border-slate-700">
                 <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Configuração do Brush</h3>
                 <Slider
@@ -1224,7 +1062,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   onChange={(v) => setBrush((prev) => ({ ...prev, strength: v }))}
                 />
               </div>
-
               <div className="pt-4">
                 <button
                   onClick={() => setBrushActive(!brushActive)}
@@ -1237,7 +1074,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   {brushActive ? '✓ Brush Ativo - Clique no Viewport' : 'Ativar Brush'}
                 </button>
               </div>
-
               <div className="p-4 bg-amber-900/30 border border-amber-700/50 rounded-lg mt-4">
                 <p className="text-sm text-amber-200">
                   <strong>💡 Dica:</strong> Com o brush ativo, clique e arraste no viewport 3D para aplicar a ferramenta selecionada nos fios de cabelo.
@@ -1246,7 +1082,6 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             </>
           )}
         </div>
-
         {/* Export Footer */}
         <div className="p-4 border-t border-slate-700 space-y-3">
           <h3 className="text-sm font-semibold text-slate-300">Exportar para Runtime</h3>
@@ -1274,10 +1109,5 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
     </div>
   );
 }
-
-// ============================================================================
-// NAMED EXPORTS FOR SUBCOMPONENTS
-// ============================================================================
-
 export { HairStrands3D, BrushPreview, GradientPicker, LODPreview };
 export type { HairData, HairRegion, ClumpingSettings, CurlSettings, PhysicsSettings, LODSettings, BrushSettings };

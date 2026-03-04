@@ -36,6 +36,8 @@ export interface MonacoEditorProps {
   // Callbacks
   onChange?: (value: string | undefined, event: monacoEditor.editor.IModelContentChangedEvent) => void;
   onSave?: (value: string) => void;
+  onAiApplyResult?: (result: { runId?: string; rollbackToken?: string; message?: string; filePath?: string }) => void;
+  onRequestFullAccess?: () => void;
   onCursorChange?: (position: { line: number; column: number }) => void;
   onSelectionChange?: (selection: { text: string; range: monacoEditor.IRange }) => void;
   onMount?: (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
@@ -59,6 +61,7 @@ export interface MonacoEditorProps {
   // Data
   diagnostics?: Diagnostic[];
   gitChanges?: GitChange[];
+  fullAccessActive?: boolean;
 }
 
 export interface Diagnostic {
@@ -76,6 +79,28 @@ export interface GitChange {
   startLine: number;
   endLine: number;
   type: 'added' | 'modified' | 'deleted';
+}
+
+type ChangeValidationCheck = {
+  status?: 'pass' | 'fail';
+  message?: string;
+};
+
+type ChangeValidationResponse = {
+  canApply?: boolean;
+  checks?: ChangeValidationCheck[];
+};
+
+type ChangeApplyResponse = {
+  error?: string;
+  message?: string;
+  metadata?: Record<string, unknown>;
+};
+
+function getAuthHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  const token = window.localStorage.getItem('aethel-token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 // ============================================================================
@@ -145,6 +170,8 @@ export function MonacoEditorPro({
   path,
   onChange,
   onSave,
+  onAiApplyResult,
+  onRequestFullAccess,
   onCursorChange,
   onSelectionChange,
   onMount: onMountProp,
@@ -162,6 +189,7 @@ export function MonacoEditorPro({
   enableErrorDecorations = true,
   diagnostics = [],
   gitChanges = [],
+  fullAccessActive = false,
 }: MonacoEditorProps) {
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
@@ -175,6 +203,11 @@ export function MonacoEditorPro({
     code: '',
     range: null as monacoEditor.IRange | null,
   });
+  const [inlineEditFeedback, setInlineEditFeedback] = useState<{
+    type: 'error' | 'success';
+    message: string;
+  } | null>(null);
+  const [inlineEditNeedsFullAccess, setInlineEditNeedsFullAccess] = useState(false);
 
   // Handle editor mount
   const handleMount: OnMount = useCallback((editor, monaco) => {
@@ -591,6 +624,8 @@ export function MonacoEditorPro({
   // Handle inline edit apply
   const handleInlineEditApply = useCallback(async (newCode: string) => {
     if (!editorRef.current || !editorSelection.range) return false;
+    setInlineEditFeedback(null);
+    setInlineEditNeedsFullAccess(false);
 
     const editor = editorRef.current;
     const model = editor.getModel();
@@ -613,7 +648,10 @@ export function MonacoEditorPro({
     try {
       const validationResponse = await fetch('/api/ai/change/validate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify({
           original: originalSnippet,
           modified: newCode,
@@ -625,20 +663,100 @@ export function MonacoEditorPro({
 
       if (!validationResponse.ok) {
         console.warn('[MonacoEditorPro] Inline edit validation request failed', await validationResponse.text());
+        setInlineEditFeedback({
+          type: 'error',
+          message: 'Validation request failed before apply.',
+        });
         return false;
       }
 
-      const validation = await validationResponse.json();
+      const validation = (await validationResponse.json()) as ChangeValidationResponse;
       if (!validation?.canApply) {
         const firstFailure = Array.isArray(validation?.checks)
-          ? validation.checks.find((check: any) => check?.status === 'fail')
+          ? validation.checks.find((check) => check?.status === 'fail')
           : null;
         const reason = firstFailure?.message || 'Validation blocked this patch.';
         console.warn('[MonacoEditorPro] Inline edit blocked:', reason);
+        setInlineEditFeedback({
+          type: 'error',
+          message: `Patch blocked: ${reason}`,
+        });
         return false;
       }
+
+      const normalizedPath = path || '';
+      if (!normalizedPath.trim()) {
+        setInlineEditFeedback({
+          type: 'error',
+          message: 'Inline apply requires a file path bound to this editor model.',
+        });
+        return false;
+      }
+
+      const applyResponse = await fetch('/api/ai/change/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          filePath: normalizedPath,
+          original: currentDocument,
+          modified: nextDocument,
+          fullDocument: nextDocument,
+          language,
+          enforceOriginalMatch: true,
+          approvedHighRisk: Boolean(fullAccessActive),
+        }),
+      });
+
+      const applyPayload = (await applyResponse.json().catch(() => ({}))) as ChangeApplyResponse;
+      if (!applyResponse.ok) {
+        const baseMessage =
+          applyPayload.message || applyPayload.error || `Apply failed with status ${applyResponse.status}.`;
+        const message =
+          applyPayload.error === 'FULL_ACCESS_GRANT_REQUIRED'
+            ? `${baseMessage} Ative Full Access temporario antes de override high-risk.`
+            : baseMessage;
+        setInlineEditFeedback({
+          type: 'error',
+          message,
+        });
+        if (
+          applyPayload.error === 'FULL_ACCESS_GRANT_REQUIRED' ||
+          applyPayload.error === 'HIGH_RISK_APPROVAL_REQUIRED'
+        ) {
+          setInlineEditNeedsFullAccess(true);
+        }
+        console.warn('[MonacoEditorPro] Inline edit apply rejected:', message);
+        return false;
+      }
+
+      const applyMetadata =
+        applyPayload && typeof applyPayload === 'object' && applyPayload.metadata && typeof applyPayload.metadata === 'object'
+          ? (applyPayload.metadata as Record<string, unknown>)
+          : null;
+      const rollbackToken =
+        applyMetadata && typeof applyMetadata.rollbackToken === 'string'
+          ? applyMetadata.rollbackToken
+          : undefined;
+      const runId =
+        applyMetadata && typeof applyMetadata.runId === 'string'
+          ? applyMetadata.runId
+          : undefined;
+
+      onAiApplyResult?.({
+        runId,
+        rollbackToken,
+        message: applyPayload.message || 'Apply succeeded.',
+        filePath: normalizedPath,
+      });
     } catch (error) {
       console.error('[MonacoEditorPro] Inline edit validation error:', error);
+      setInlineEditFeedback({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Inline edit request failed.',
+      });
       return false;
     }
 
@@ -650,11 +768,39 @@ export function MonacoEditorPro({
     ]);
 
     onChange?.(editor.getValue(), {} as any);
+    onSave?.(nextDocument);
+    setInlineEditFeedback({
+      type: 'success',
+      message: 'Patch applied and persisted.',
+    });
+    setInlineEditNeedsFullAccess(false);
     return true;
-  }, [editorSelection.range, onChange, language, path]);
+  }, [editorSelection.range, fullAccessActive, onAiApplyResult, onChange, onSave, language, path]);
 
   return (
     <div className="relative w-full h-full">
+      {inlineEditFeedback && (
+        <div
+          className={`absolute right-2 top-2 z-30 max-w-[420px] rounded border px-2 py-1 text-xs ${
+            inlineEditFeedback.type === 'error'
+              ? 'border-red-500/40 bg-red-500/10 text-red-200'
+              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <div>{inlineEditFeedback.message}</div>
+          {inlineEditNeedsFullAccess && onRequestFullAccess && (
+            <button
+              type="button"
+              onClick={onRequestFullAccess}
+              className="mt-1 rounded border border-cyan-500/40 bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-100 hover:bg-cyan-500/20"
+            >
+              Enable Full Access
+            </button>
+          )}
+        </div>
+      )}
       <Editor
         height={height}
         language={language}

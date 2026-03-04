@@ -1,7 +1,13 @@
-'use client'
+﻿'use client'
 
-import React from 'react'
+import { useCallback, useState } from 'react'
 import {
+  applyEdgeChanges,
+  applyNodeChanges,
+  type Edge,
+  type EdgeChange,
+  type Node,
+  type NodeChange,
   ReactFlow,
   Background,
   Controls,
@@ -9,19 +15,44 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
-interface AgentCanvasTabProps {
-  nodes: any[]
-  edges: any[]
-  onNodesChange: (changes: any) => void
-  onEdgesChange: (changes: any) => void
-}
+const INITIAL_NODES: Node[] = [
+  {
+    id: '1',
+    position: { x: 80, y: 40 },
+    data: { label: 'Sinal de entrada' },
+    type: 'input',
+  },
+  {
+    id: '2',
+    position: { x: 320, y: 140 },
+    data: { label: 'Orquestrador IA' },
+  },
+  {
+    id: '3',
+    position: { x: 560, y: 40 },
+    data: { label: 'Saida' },
+    type: 'output',
+  },
+]
 
-export default function AgentCanvasTab({
-  nodes,
-  edges,
-  onNodesChange,
-  onEdgesChange,
-}: AgentCanvasTabProps) {
+const INITIAL_EDGES: Edge[] = [
+  { id: 'e1-2', source: '1', target: '2', animated: true },
+  { id: 'e2-3', source: '2', target: '3' },
+]
+
+export default function AgentCanvasTab() {
+  const [nodes, setNodes] = useState<Node[]>(INITIAL_NODES)
+  const [edges, setEdges] = useState<Edge[]>(INITIAL_EDGES)
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => setNodes((current) => applyNodeChanges(changes, current)),
+    []
+  )
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => setEdges((current) => applyEdgeChanges(changes, current)),
+    []
+  )
+
   return (
     <div className="aethel-p-6 aethel-space-y-8 aethel-h-full aethel-flex aethel-flex-column">
       <div className="aethel-text-center">
@@ -52,8 +83,8 @@ export default function AgentCanvasTab({
             </svg>
           </div>
           <div>
-            <p className="aethel-text-xs aethel-text-slate-500">Agentes Ativos</p>
-            <p className="aethel-text-sm aethel-font-bold">4 Agentes</p>
+            <p className="aethel-text-xs aethel-text-slate-500">Agentes ativos</p>
+            <p className="aethel-text-sm aethel-font-bold">4 agentes</p>
           </div>
         </div>
         <div className="aethel-card aethel-p-4 aethel-flex aethel-items-center aethel-gap-3">
@@ -63,22 +94,23 @@ export default function AgentCanvasTab({
             </svg>
           </div>
           <div>
-            <p className="aethel-text-xs aethel-text-slate-500">Tarefas Concluídas</p>
-            <p className="aethel-text-sm aethel-font-bold">128 Tarefas</p>
+            <p className="aethel-text-xs aethel-text-slate-500">Tarefas concluidas</p>
+            <p className="aethel-text-sm aethel-font-bold">128 tarefas</p>
           </div>
         </div>
         <div className="aethel-card aethel-p-4 aethel-flex aethel-items-center aethel-gap-3">
-          <div className="aethel-p-2 aethel-bg-purple-500/10 aethel-rounded-lg">
-            <svg className="aethel-w-5 aethel-h-5 aethel-text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="aethel-p-2 aethel-bg-blue-500/10 aethel-rounded-lg">
+            <svg className="aethel-w-5 aethel-h-5 aethel-text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div>
-            <p className="aethel-text-xs aethel-text-slate-500">Tempo Médio</p>
-            <p className="aethel-text-sm aethel-font-bold">1.2s / tarefa</p>
+            <p className="aethel-text-xs aethel-text-slate-500">Tempo medio</p>
+            <p className="aethel-text-sm aethel-font-bold">1.2s por tarefa</p>
           </div>
         </div>
       </div>
     </div>
   )
 }
+

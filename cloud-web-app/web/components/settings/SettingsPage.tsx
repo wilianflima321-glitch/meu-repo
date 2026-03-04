@@ -3,7 +3,7 @@
 /**
  * Settings Page - Professional IDE Settings Interface
  * Like VS Code Settings with all categories
- * 
+ *
  * Categories:
  * - Editor
  * - AI/Copilot
@@ -55,8 +55,6 @@ import {
   CreditCard,
 } from 'lucide-react'
 
-// ============= Types =============
-
 interface SettingItem {
   id: string
   label: string
@@ -82,10 +80,7 @@ interface SettingsCategory {
   subcategories?: { id: string; label: string }[]
 }
 
-// ============= Default Settings =============
-
 const DEFAULT_SETTINGS: Record<string, any> = {
-  // Editor
   'editor.fontSize': 14,
   'editor.fontFamily': 'JetBrains Mono, Fira Code, monospace',
   'editor.tabSize': 2,
@@ -104,8 +99,7 @@ const DEFAULT_SETTINGS: Record<string, any> = {
   'editor.guides.indentation': true,
   'editor.stickyScroll.enabled': true,
   'editor.inlineSuggest.enabled': true,
-  
-  // AI/Copilot
+
   'ai.enabled': true,
   'ai.provider': 'openai',
   'ai.model': 'gpt-4o',
@@ -119,8 +113,7 @@ const DEFAULT_SETTINGS: Record<string, any> = {
   'ai.codeContext.enabled': true,
   'ai.codeContext.maxFiles': 10,
   'ai.codeContext.maxLines': 500,
-  
-  // Terminal
+
   'terminal.fontSize': 13,
   'terminal.fontFamily': 'JetBrains Mono, monospace',
   'terminal.cursorStyle': 'block',
@@ -131,8 +124,7 @@ const DEFAULT_SETTINGS: Record<string, any> = {
   'terminal.shell.osx': 'zsh',
   'terminal.copyOnSelect': true,
   'terminal.rightClickBehavior': 'paste',
-  
-  // Git
+
   'git.enabled': true,
   'git.autoFetch': true,
   'git.autoFetchPeriod': 180,
@@ -142,8 +134,7 @@ const DEFAULT_SETTINGS: Record<string, any> = {
   'git.pruneOnFetch': true,
   'git.defaultBranchName': 'main',
   'git.showInlineBlame': false,
-  
-  // Engine
+
   'engine.physics.enabled': true,
   'engine.physics.gravity': -9.81,
   'engine.physics.timeStep': 0.016,
@@ -159,8 +150,7 @@ const DEFAULT_SETTINGS: Record<string, any> = {
   'engine.targetFPS': 60,
   'engine.lod.enabled': true,
   'engine.lod.bias': 1.0,
-  
-  // Appearance
+
   'appearance.theme': 'dark',
   'appearance.colorScheme': 'default',
   'appearance.iconTheme': 'default',
@@ -171,28 +161,23 @@ const DEFAULT_SETTINGS: Record<string, any> = {
   'appearance.breadcrumbs': true,
   'appearance.tabsMultipleRows': false,
   'appearance.compactFolders': true,
-  
-  // Notifications
+
   'notifications.enabled': true,
   'notifications.sound': false,
   'notifications.showInStatusBar': true,
   'notifications.doNotDisturb': false,
-  
-  // Privacy & Security
+
   'privacy.telemetry': 'all',
   'privacy.crashReports': true,
   'security.workspace.trust.enabled': true,
   'security.workspace.trust.untrustedFiles': 'prompt',
-  
-  // Sync
+
   'sync.enabled': false,
   'sync.settings': true,
   'sync.keybindings': true,
   'sync.extensions': true,
   'sync.snippets': true,
 }
-
-// ============= Categories Configuration =============
 
 const CATEGORIES: SettingsCategory[] = [
   {
@@ -297,10 +282,7 @@ const CATEGORIES: SettingsCategory[] = [
   },
 ]
 
-// ============= Setting Items Configuration =============
-
 const SETTING_ITEMS: SettingItem[] = [
-  // Editor - Font
   {
     id: 'editor.fontSize',
     label: 'Font Size',
@@ -432,8 +414,7 @@ const SETTING_ITEMS: SettingItem[] = [
     defaultValue: true,
     category: 'editor',
   },
-  
-  // AI Settings
+
   {
     id: 'ai.enabled',
     label: 'Enable AI Features',
@@ -541,8 +522,7 @@ const SETTING_ITEMS: SettingItem[] = [
     category: 'ai',
     subcategory: 'chat',
   },
-  
-  // Terminal Settings
+
   {
     id: 'terminal.fontSize',
     label: 'Font Size',
@@ -579,8 +559,7 @@ const SETTING_ITEMS: SettingItem[] = [
     max: 100000,
     category: 'terminal',
   },
-  
-  // Git Settings
+
   {
     id: 'git.enabled',
     label: 'Enable Git',
@@ -617,8 +596,7 @@ const SETTING_ITEMS: SettingItem[] = [
     defaultValue: false,
     category: 'git',
   },
-  
-  // Engine Settings
+
   {
     id: 'engine.physics.enabled',
     label: 'Enable Physics',
@@ -712,8 +690,7 @@ const SETTING_ITEMS: SettingItem[] = [
     category: 'engine',
     subcategory: 'performance',
   },
-  
-  // Appearance Settings
+
   {
     id: 'appearance.theme',
     label: 'Theme',
@@ -781,8 +758,7 @@ const SETTING_ITEMS: SettingItem[] = [
     category: 'appearance',
     subcategory: 'layout',
   },
-  
-  // Notification Settings
+
   {
     id: 'notifications.enabled',
     label: 'Enable Notifications',
@@ -810,8 +786,7 @@ const SETTING_ITEMS: SettingItem[] = [
     defaultValue: false,
     category: 'notifications',
   },
-  
-  // Privacy Settings
+
   {
     id: 'privacy.telemetry',
     label: 'Telemetry',
@@ -835,8 +810,7 @@ const SETTING_ITEMS: SettingItem[] = [
     defaultValue: true,
     category: 'privacy',
   },
-  
-  // Sync Settings
+
   {
     id: 'sync.enabled',
     label: 'Settings Sync',
@@ -874,8 +848,6 @@ const SETTING_ITEMS: SettingItem[] = [
     category: 'sync',
   },
 ]
-
-// ============= Setting Input Components =============
 
 interface SettingInputProps {
   setting: SettingItem
@@ -958,8 +930,6 @@ function SettingSlider({ setting, value, onChange }: SettingInputProps) {
   )
 }
 
-// ============= Setting Row Component =============
-
 interface SettingRowProps {
   setting: SettingItem
   value: any
@@ -976,7 +946,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
     text: SettingText,
     slider: SettingSlider,
   }[setting.type] || SettingText
-  
+
   return (
     <div className="flex items-start justify-between py-4 border-b border-slate-800 group">
       <div className="flex-1 pr-8">
@@ -996,7 +966,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
         <p className="text-xs text-slate-500 mt-0.5">{setting.description}</p>
         <p className="text-[10px] text-slate-600 font-mono mt-1">{setting.id}</p>
       </div>
-      
+
       <div className="flex items-center gap-2">
         <InputComponent
           setting={setting}
@@ -1017,15 +987,12 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
   )
 }
 
-// ============= Main Settings Page Component =============
-
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, any>>(DEFAULT_SETTINGS)
   const [selectedCategory, setSelectedCategory] = useState('editor')
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  
-  // Load settings from localStorage
+
   useEffect(() => {
     const saved = localStorage.getItem('aethel-settings')
     if (saved) {
@@ -1036,13 +1003,11 @@ export default function SettingsPage() {
       }
     }
   }, [])
-  
-  // Save settings
+
   const saveSettings = useCallback(() => {
     localStorage.setItem('aethel-settings', JSON.stringify(settings))
   }, [settings])
-  
-  // Update setting
+
   const updateSetting = useCallback((id: string, value: any) => {
     setSettings((prev) => {
       const next = { ...prev, [id]: value }
@@ -1050,8 +1015,7 @@ export default function SettingsPage() {
       return next
     })
   }, [])
-  
-  // Reset setting to default
+
   const resetSetting = useCallback((id: string) => {
     setSettings((prev) => {
       const next = { ...prev, [id]: DEFAULT_SETTINGS[id] }
@@ -1059,21 +1023,19 @@ export default function SettingsPage() {
       return next
     })
   }, [])
-  
-  // Reset all settings
+
   const resetAllSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS)
     localStorage.setItem('aethel-settings', JSON.stringify(DEFAULT_SETTINGS))
   }, [])
-  
-  // Filter settings by category and search
+
   const filteredSettings = useMemo(() => {
     let items = SETTING_ITEMS.filter((s) => s.category === selectedCategory)
-    
+
     if (selectedSubcategory) {
       items = items.filter((s) => s.subcategory === selectedSubcategory)
     }
-    
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       items = SETTING_ITEMS.filter(
@@ -1083,20 +1045,18 @@ export default function SettingsPage() {
           s.id.toLowerCase().includes(query)
       )
     }
-    
+
     return items
   }, [selectedCategory, selectedSubcategory, searchQuery])
-  
-  // Get current category
+
   const currentCategory = CATEGORIES.find((c) => c.id === selectedCategory)
-  
-  // Count modified settings
+
   const modifiedCount = useMemo(() => {
     return Object.entries(settings).filter(
       ([key, value]) => DEFAULT_SETTINGS[key] !== value
     ).length
   }, [settings])
-  
+
   return (
     <div className="flex h-full bg-slate-900">
       {/* Sidebar */}
@@ -1114,7 +1074,7 @@ export default function SettingsPage() {
             />
           </div>
         </div>
-        
+
         {/* Categories */}
         <div className="flex-1 overflow-y-auto py-2">
           {CATEGORIES.map((category) => (
@@ -1134,7 +1094,7 @@ export default function SettingsPage() {
                 {category.icon}
                 <span className="text-sm">{category.label}</span>
               </button>
-              
+
               {/* Subcategories */}
               {selectedCategory === category.id && category.subcategories && (
                 <div className="ml-6 border-l border-slate-700">
@@ -1156,7 +1116,7 @@ export default function SettingsPage() {
             </div>
           ))}
         </div>
-        
+
         {/* Footer */}
         <div className="p-3 border-t border-slate-700">
           <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
@@ -1188,7 +1148,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
@@ -1208,7 +1168,7 @@ export default function SettingsPage() {
             </p>
           )}
         </div>
-        
+
         {/* Settings List */}
         <div className="flex-1 overflow-y-auto px-6">
           {filteredSettings.length === 0 ? (

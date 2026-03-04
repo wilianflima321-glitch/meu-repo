@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 
 interface KeyBinding {
   id: string;
@@ -207,10 +208,15 @@ export default function KeyboardShortcutsEditor() {
   };
 
   // Reset all
-  const resetAll = () => {
-    if (confirm('Reset all keyboard shortcuts to defaults?')) {
-      saveKeybindings(DEFAULT_KEYBINDINGS);
-    }
+  const resetAll = async () => {
+    const shouldReset = await openConfirmDialog({
+      title: 'Reset keyboard shortcuts',
+      message: 'Reset all keyboard shortcuts to defaults?',
+      confirmText: 'Reset',
+      cancelText: 'Cancel',
+    });
+    if (!shouldReset) return;
+    saveKeybindings(DEFAULT_KEYBINDINGS);
   };
 
   // Check if has conflict

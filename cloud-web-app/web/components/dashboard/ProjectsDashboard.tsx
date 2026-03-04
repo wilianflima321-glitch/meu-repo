@@ -16,6 +16,7 @@ import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 import {
   Plus,
   FolderOpen,
@@ -750,7 +751,13 @@ export const ProjectsDashboard: React.FC = () => {
   }, [mutate]);
 
   const handleDeleteProject = useCallback(async (projectId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este projeto?')) return;
+    const shouldDelete = await openConfirmDialog({
+      title: 'Excluir projeto',
+      message: 'Tem certeza que deseja excluir este projeto?',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
+    });
+    if (!shouldDelete) return;
     await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
     mutate();
   }, [mutate]);

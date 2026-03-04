@@ -41,4 +41,4 @@ export type {
   PropertyType,
   ComponentDefinition,
   InspectedObject,
-} from './DetailsPanel';
+} from './DetailsPanel.types';

@@ -1,16 +1,5 @@
-/**
- * Aethel Engine - Particle System
- * 
- * High-performance GPU-accelerated particle system for visual effects.
- * Supports emitters, forces, collisions, and custom shaders.
- */
 
 import { EventEmitter } from 'events';
-
-// ============================================================================
-// Types & Interfaces
-// ============================================================================
-
 export interface Vector3 {
   x: number;
   y: number;
@@ -25,23 +14,19 @@ export interface Color {
 }
 
 export interface Particle {
-  // Position and velocity
   position: Vector3;
   velocity: Vector3;
   acceleration: Vector3;
-  
-  // Visual
+
   color: Color;
   size: number;
   rotation: number;
   rotationSpeed: number;
-  
-  // Lifecycle
+
   life: number;
   maxLife: number;
   age: number;
-  
-  // Custom data
+
   userData: Record<string, number>;
 }
 
@@ -50,15 +35,11 @@ export type BlendMode = 'normal' | 'additive' | 'multiply' | 'screen';
 
 export interface EmitterShapeConfig {
   type: EmitterShape;
-  // Sphere/Circle
   radius?: number;
   innerRadius?: number;
-  // Box
   size?: Vector3;
-  // Cone
   angle?: number;
   height?: number;
-  // Line
   start?: Vector3;
   end?: Vector3;
 }
@@ -108,58 +89,43 @@ export interface SubEmitterConfig {
 }
 
 export interface ParticleEmitterConfig {
-  // Identity
   name: string;
   enabled?: boolean;
-  
-  // Emission
+
   maxParticles: number;
   emissionRate: number; // particles per second
   bursts?: { time: number; count: number; cycles: number; interval: number }[];
-  
-  // Shape
+
   shape: EmitterShapeConfig;
-  
-  // Initial properties
+
   lifetime: ValueRange;
   speed: ValueRange;
   size: ValueRange;
   rotation: ValueRange;
   color: Color;
-  
-  // Over lifetime
+
   colorOverLife?: ColorGradient[];
   sizeOverLife?: SizeOverLife[];
   speedOverLife?: { time: number; multiplier: number }[];
-  
-  // Forces
+
   gravity?: Vector3;
-  
-  // Modules
+
   velocityModule?: VelocityModule;
   noiseModule?: NoiseModule;
   collisionModule?: CollisionModule;
-  
-  // Rendering
+
   blendMode?: BlendMode;
   texture?: string;
   spriteSheet?: { rows: number; cols: number; fps: number };
-  
-  // Sub-emitters
+
   subEmitters?: SubEmitterConfig[];
-  
-  // Simulation
+
   simulationSpace?: 'local' | 'world';
   startDelay?: number;
   duration?: number;
   loop?: boolean;
   prewarm?: boolean;
 }
-
-// ============================================================================
-// Math Utilities
-// ============================================================================
-
 const Vec3 = {
   create(x = 0, y = 0, z = 0): Vector3 {
     return { x, y, z };
@@ -241,97 +207,83 @@ function randomRange(range: ValueRange): number {
 function sampleGradient(gradient: ColorGradient[], t: number): Color {
   if (gradient.length === 0) return { r: 1, g: 1, b: 1, a: 1 };
   if (gradient.length === 1) return gradient[0].color;
-  
-  // Find the two surrounding keys
+
   for (let i = 0; i < gradient.length - 1; i++) {
     if (t >= gradient[i].time && t <= gradient[i + 1].time) {
       const localT = (t - gradient[i].time) / (gradient[i + 1].time - gradient[i].time);
       return ColorUtil.lerp(gradient[i].color, gradient[i + 1].color, localT);
     }
   }
-  
+
   return gradient[gradient.length - 1].color;
 }
 
 function sampleCurve(curve: { time: number; [key: string]: number }[], t: number, key: string): number {
   if (curve.length === 0) return 1;
   if (curve.length === 1) return curve[0][key];
-  
+
   for (let i = 0; i < curve.length - 1; i++) {
     if (t >= curve[i].time && t <= curve[i + 1].time) {
       const localT = (t - curve[i].time) / (curve[i + 1].time - curve[i].time);
       return curve[i][key] + (curve[i + 1][key] - curve[i][key]) * localT;
     }
   }
-  
+
   return curve[curve.length - 1][key];
 }
-
-// ============================================================================
-// Simplex Noise (for noise module)
-// ============================================================================
-
 class SimplexNoise {
   private perm: number[] = [];
-  
+
   constructor(seed = Math.random()) {
     const p: number[] = [];
     for (let i = 0; i < 256; i++) p[i] = i;
-    
-    // Shuffle based on seed
+
     let s = seed * 1000;
     for (let i = 255; i > 0; i--) {
       s = (s * 16807) % 2147483647;
       const j = Math.floor((s / 2147483647) * (i + 1));
       [p[i], p[j]] = [p[j], p[i]];
     }
-    
+
     for (let i = 0; i < 512; i++) {
       this.perm[i] = p[i & 255];
     }
   }
 
   noise3D(x: number, y: number, z: number): number {
-    // Simplified 3D noise implementation
     const grad3 = [
       [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
       [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
       [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
     ];
-    
+
     const F3 = 1.0 / 3.0;
     const G3 = 1.0 / 6.0;
-    
+
     const s = (x + y + z) * F3;
     const i = Math.floor(x + s);
     const j = Math.floor(y + s);
     const k = Math.floor(z + s);
-    
+
     const t = (i + j + k) * G3;
     const x0 = x - (i - t);
     const y0 = y - (j - t);
     const z0 = z - (k - t);
-    
+
     let n0 = 0, n1 = 0, n2 = 0, n3 = 0;
-    
+
     const dot = (g: number[], x: number, y: number, z: number) => g[0]*x + g[1]*y + g[2]*z;
-    
+
     let t0 = 0.6 - x0*x0 - y0*y0 - z0*z0;
     if (t0 > 0) {
       t0 *= t0;
       const gi0 = this.perm[(i + this.perm[(j + this.perm[k & 255]) & 255]) & 255] % 12;
       n0 = t0 * t0 * dot(grad3[gi0], x0, y0, z0);
     }
-    
-    // Simplified - just return first contribution scaled
+
     return n0 * 32;
   }
 }
-
-// ============================================================================
-// Particle Pool
-// ============================================================================
-
 class ParticlePool {
   private pool: Particle[] = [];
   private active: Particle[] = [];
@@ -339,8 +291,7 @@ class ParticlePool {
 
   constructor(maxSize: number) {
     this.maxSize = maxSize;
-    
-    // Pre-allocate particles
+
     for (let i = 0; i < maxSize; i++) {
       this.pool.push(this.createParticle());
     }
@@ -364,7 +315,7 @@ class ParticlePool {
 
   spawn(): Particle | null {
     if (this.pool.length === 0) return null;
-    
+
     const particle = this.pool.pop()!;
     this.active.push(particle);
     return particle;
@@ -374,15 +325,14 @@ class ParticlePool {
     const index = this.active.indexOf(particle);
     if (index !== -1) {
       this.active.splice(index, 1);
-      
-      // Reset particle
+
       particle.position = { x: 0, y: 0, z: 0 };
       particle.velocity = { x: 0, y: 0, z: 0 };
       particle.acceleration = { x: 0, y: 0, z: 0 };
       particle.life = 0;
       particle.age = 0;
       particle.userData = {};
-      
+
       this.pool.push(particle);
     }
   }
@@ -406,22 +356,15 @@ class ParticlePool {
     }
   }
 }
-
-// ============================================================================
-// Particle Emitter
-// ============================================================================
-
 export class ParticleEmitter extends EventEmitter {
   public id: string;
   public name: string;
   public config: ParticleEmitterConfig;
-  
-  // Transform
+
   public position: Vector3 = { x: 0, y: 0, z: 0 };
   public rotation: Vector3 = { x: 0, y: 0, z: 0 };
   public scale: Vector3 = { x: 1, y: 1, z: 1 };
-  
-  // State
+
   private pool: ParticlePool;
   private emissionAccumulator = 0;
   private burstTimers: number[] = [];
@@ -429,15 +372,14 @@ export class ParticleEmitter extends EventEmitter {
   private isPlaying = false;
   private isPaused = false;
   private noise: SimplexNoise;
-  
-  // Callbacks
+
   public onParticleBirth?: (particle: Particle) => void;
   public onParticleDeath?: (particle: Particle) => void;
   public onParticleUpdate?: (particle: Particle, dt: number) => void;
 
   constructor(config: ParticleEmitterConfig) {
     super();
-    
+
     this.id = crypto.randomUUID();
     this.name = config.name;
     this.config = {
@@ -450,11 +392,10 @@ export class ParticleEmitter extends EventEmitter {
       prewarm: false,
       ...config,
     };
-    
+
     this.pool = new ParticlePool(config.maxParticles);
     this.noise = new SimplexNoise();
-    
-    // Initialize burst timers
+
     if (config.bursts) {
       this.burstTimers = config.bursts.map(() => 0);
     }
@@ -462,32 +403,31 @@ export class ParticleEmitter extends EventEmitter {
 
   play(): void {
     if (this.isPlaying) return;
-    
+
     this.isPlaying = true;
     this.isPaused = false;
     this.elapsed = 0;
     this.emissionAccumulator = 0;
-    
+
     if (this.config.prewarm) {
-      // Simulate a few seconds to pre-warm
       const prewarmTime = this.config.duration ?? 5;
       const dt = 1 / 60;
       for (let t = 0; t < prewarmTime; t += dt) {
         this.update(dt);
       }
     }
-    
+
     this.emit('play');
   }
 
   stop(clear = true): void {
     this.isPlaying = false;
     this.isPaused = false;
-    
+
     if (clear) {
       this.pool.clear();
     }
-    
+
     this.emit('stop');
   }
 
@@ -503,10 +443,9 @@ export class ParticleEmitter extends EventEmitter {
 
   update(dt: number): void {
     if (!this.isPlaying || this.isPaused || !this.config.enabled) return;
-    
+
     this.elapsed += dt;
-    
-    // Check duration
+
     const duration = this.config.duration ?? Infinity;
     if (this.elapsed > duration) {
       if (this.config.loop) {
@@ -516,23 +455,19 @@ export class ParticleEmitter extends EventEmitter {
         this.isPlaying = false;
       }
     }
-    
-    // Check start delay
+
     if (this.elapsed < (this.config.startDelay ?? 0)) return;
-    
-    // Emit particles
+
     this.emitParticles(dt);
-    
-    // Process bursts
+
     this.processBursts(dt);
-    
-    // Update particles
+
     this.updateParticles(dt);
   }
 
   private emitParticles(dt: number): void {
     this.emissionAccumulator += this.config.emissionRate * dt;
-    
+
     while (this.emissionAccumulator >= 1) {
       this.spawnParticle();
       this.emissionAccumulator -= 1;
@@ -541,11 +476,11 @@ export class ParticleEmitter extends EventEmitter {
 
   private processBursts(dt: number): void {
     if (!this.config.bursts) return;
-    
+
     for (let i = 0; i < this.config.bursts.length; i++) {
       const burst = this.config.bursts[i];
       this.burstTimers[i] += dt;
-      
+
       if (this.burstTimers[i] >= burst.time) {
         for (let c = 0; c < burst.cycles; c++) {
           if (this.burstTimers[i] >= burst.time + c * burst.interval) {
@@ -561,16 +496,13 @@ export class ParticleEmitter extends EventEmitter {
   private spawnParticle(): Particle | null {
     const particle = this.pool.spawn();
     if (!particle) return null;
-    
-    // Set initial position based on shape
+
     particle.position = this.getSpawnPosition();
-    
-    // Set initial velocity
+
     const speed = randomRange(this.config.speed);
     const direction = this.getSpawnDirection(particle.position);
     particle.velocity = Vec3.scale(direction, speed);
-    
-    // Set initial properties
+
     particle.size = randomRange(this.config.size);
     particle.rotation = randomRange(this.config.rotation);
     particle.rotationSpeed = (Math.random() - 0.5) * 2;
@@ -578,27 +510,26 @@ export class ParticleEmitter extends EventEmitter {
     particle.maxLife = randomRange(this.config.lifetime);
     particle.life = particle.maxLife;
     particle.age = 0;
-    
-    // Apply gravity as initial acceleration
+
     if (this.config.gravity) {
       particle.acceleration = { ...this.config.gravity };
     }
-    
+
     this.onParticleBirth?.(particle);
     this.emit('birth', particle);
-    
+
     return particle;
   }
 
   private getSpawnPosition(): Vector3 {
     const shape = this.config.shape;
     let localPos: Vector3;
-    
+
     switch (shape.type) {
       case 'point':
         localPos = { x: 0, y: 0, z: 0 };
         break;
-        
+
       case 'sphere': {
         const r = shape.innerRadius ?? 0;
         const R = shape.radius ?? 1;
@@ -612,7 +543,7 @@ export class ParticleEmitter extends EventEmitter {
         };
         break;
       }
-        
+
       case 'box': {
         const size = shape.size ?? { x: 1, y: 1, z: 1 };
         localPos = {
@@ -622,7 +553,7 @@ export class ParticleEmitter extends EventEmitter {
         };
         break;
       }
-        
+
       case 'cone': {
         const angle = (shape.angle ?? 45) * Math.PI / 180;
         const height = shape.height ?? 1;
@@ -636,7 +567,7 @@ export class ParticleEmitter extends EventEmitter {
         };
         break;
       }
-        
+
       case 'circle': {
         const r = shape.innerRadius ?? 0;
         const R = shape.radius ?? 1;
@@ -649,7 +580,7 @@ export class ParticleEmitter extends EventEmitter {
         };
         break;
       }
-        
+
       case 'line': {
         const start = shape.start ?? { x: 0, y: 0, z: 0 };
         const end = shape.end ?? { x: 1, y: 0, z: 0 };
@@ -657,32 +588,28 @@ export class ParticleEmitter extends EventEmitter {
         localPos = Vec3.lerp(start, end, t);
         break;
       }
-        
+
       default:
         localPos = { x: 0, y: 0, z: 0 };
     }
-    
-    // Transform to world space
+
     return Vec3.add(this.position, Vec3.scale(localPos, this.scale.x));
   }
 
   private getSpawnDirection(position: Vector3): Vector3 {
     const shape = this.config.shape;
-    
+
     switch (shape.type) {
       case 'sphere':
       case 'circle':
-        // Radial outward
         const dir = Vec3.sub(position, this.position);
         return Vec3.length(dir) > 0 ? Vec3.normalize(dir) : { x: 0, y: 1, z: 0 };
-        
+
       case 'cone':
-        // Along cone surface
         const diff = Vec3.sub(position, this.position);
         return Vec3.normalize({ x: diff.x, y: 1, z: diff.z });
-        
+
       default:
-        // Random direction
         return Vec3.random();
     }
   }
@@ -690,44 +617,37 @@ export class ParticleEmitter extends EventEmitter {
   private updateParticles(dt: number): void {
     const particles = this.pool.getActive();
     const toRecycle: Particle[] = [];
-    
+
     for (const particle of particles) {
-      // Update age and life
       particle.age += dt;
       particle.life -= dt;
-      
-      // Check if dead
+
       if (particle.life <= 0) {
         toRecycle.push(particle);
         this.onParticleDeath?.(particle);
         this.emit('death', particle);
         continue;
       }
-      
+
       const normalizedAge = particle.age / particle.maxLife;
-      
-      // Apply velocity module
+
       if (this.config.velocityModule?.enabled) {
         this.applyVelocityModule(particle, dt);
       }
-      
-      // Apply noise module
+
       if (this.config.noiseModule?.enabled) {
         this.applyNoiseModule(particle, dt);
       }
-      
-      // Apply collision module
+
       if (this.config.collisionModule?.enabled) {
         this.applyCollisionModule(particle, dt);
       }
-      
-      // Update velocity with acceleration
+
       particle.velocity = Vec3.add(
         particle.velocity,
         Vec3.scale(particle.acceleration, dt)
       );
-      
-      // Apply speed over life
+
       if (this.config.speedOverLife) {
         const multiplier = sampleCurve(
           this.config.speedOverLife,
@@ -736,22 +656,18 @@ export class ParticleEmitter extends EventEmitter {
         );
         particle.velocity = Vec3.scale(particle.velocity, multiplier);
       }
-      
-      // Update position
+
       particle.position = Vec3.add(
         particle.position,
         Vec3.scale(particle.velocity, dt)
       );
-      
-      // Update rotation
+
       particle.rotation += particle.rotationSpeed * dt;
-      
-      // Update color over life
+
       if (this.config.colorOverLife) {
         particle.color = sampleGradient(this.config.colorOverLife, normalizedAge);
       }
-      
-      // Update size over life
+
       if (this.config.sizeOverLife) {
         const baseSizeData = this.config.sizeOverLife.find((s) => s.time <= normalizedAge);
         const baseSize = baseSizeData?.size ?? 1;
@@ -762,11 +678,10 @@ export class ParticleEmitter extends EventEmitter {
         );
         particle.size = baseSize * sizeFactor;
       }
-      
+
       this.onParticleUpdate?.(particle, dt);
     }
-    
-    // Recycle dead particles
+
     for (const particle of toRecycle) {
       this.pool.recycle(particle);
     }
@@ -774,13 +689,11 @@ export class ParticleEmitter extends EventEmitter {
 
   private applyVelocityModule(particle: Particle, _dt: number): void {
     const velocityMod = this.config.velocityModule!;
-    
-    // Linear velocity
+
     if (velocityMod.linear) {
       particle.velocity = Vec3.add(particle.velocity, velocityMod.linear);
     }
-    
-    // Orbital velocity
+
     if (velocityMod.orbital) {
       const toCenter = Vec3.sub(this.position, particle.position);
       const tangent = Vec3.normalize({
@@ -794,8 +707,7 @@ export class ParticleEmitter extends EventEmitter {
         Vec3.scale(tangent, orbitalSpeed)
       );
     }
-    
-    // Radial velocity
+
     if (velocityMod.radial) {
       const fromCenter = Vec3.sub(particle.position, this.position);
       const dir = Vec3.normalize(fromCenter);
@@ -809,7 +721,7 @@ export class ParticleEmitter extends EventEmitter {
   private applyNoiseModule(particle: Particle, dt: number): void {
     const noiseMod = this.config.noiseModule!;
     const time = this.elapsed * noiseMod.scrollSpeed;
-    
+
     const noiseX = this.noise.noise3D(
       particle.position.x * noiseMod.frequency,
       particle.position.y * noiseMod.frequency,
@@ -825,7 +737,7 @@ export class ParticleEmitter extends EventEmitter {
       particle.position.x * noiseMod.frequency,
       time + 200
     );
-    
+
     particle.velocity = Vec3.add(particle.velocity, {
       x: noiseX * noiseMod.strength * dt,
       y: noiseY * noiseMod.strength * dt,
@@ -835,36 +747,31 @@ export class ParticleEmitter extends EventEmitter {
 
   private applyCollisionModule(particle: Particle, _dt: number): void {
     const collisionMod = this.config.collisionModule!;
-    
+
     if (!collisionMod.planes) return;
-    
+
     for (const plane of collisionMod.planes) {
       const dist = Vec3.dot(particle.position, plane.normal) - plane.distance;
-      
+
       if (dist < 0) {
-        // Collision!
-        // Move particle to surface
         particle.position = Vec3.add(
           particle.position,
           Vec3.scale(plane.normal, -dist)
         );
-        
-        // Reflect velocity
+
         const dot = Vec3.dot(particle.velocity, plane.normal);
         particle.velocity = Vec3.add(
           particle.velocity,
           Vec3.scale(plane.normal, -2 * dot)
         );
-        
-        // Apply bounce and dampen
+
         particle.velocity = Vec3.scale(
           particle.velocity,
           collisionMod.bounce * (1 - collisionMod.dampen)
         );
-        
-        // Reduce lifetime
+
         particle.life -= particle.maxLife * collisionMod.lifetimeLoss;
-        
+
         this.emit('collision', particle, plane);
       }
     }
@@ -891,20 +798,14 @@ export class ParticleEmitter extends EventEmitter {
     this.removeAllListeners();
   }
 }
-
-// ============================================================================
-// Particle System Manager
-// ============================================================================
-
 export class ParticleSystem extends EventEmitter {
   private static instance: ParticleSystem | null = null;
-  
+
   private emitters = new Map<string, ParticleEmitter>();
   private isRunning = false;
   private lastTime = 0;
   private animationFrameId: number | null = null;
-  
-  // Rendering context (optional)
+
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
 
@@ -967,7 +868,7 @@ export class ParticleSystem extends EventEmitter {
 
   start(): void {
     if (this.isRunning) return;
-    
+
     this.isRunning = true;
     this.lastTime = performance.now();
     this.tick();
@@ -983,14 +884,14 @@ export class ParticleSystem extends EventEmitter {
 
   private tick = (): void => {
     if (!this.isRunning) return;
-    
+
     const now = performance.now();
     const dt = Math.min((now - this.lastTime) / 1000, 0.1);
     this.lastTime = now;
-    
+
     this.update(dt);
     this.render();
-    
+
     this.animationFrameId = requestAnimationFrame(this.tick);
   };
 
@@ -1002,10 +903,9 @@ export class ParticleSystem extends EventEmitter {
 
   render(): void {
     if (!this.ctx || !this.canvas) return;
-    
-    // Clear canvas (or use blend mode)
+
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
+
     for (const emitter of this.emitters.values()) {
       this.renderEmitter(emitter);
     }
@@ -1013,11 +913,10 @@ export class ParticleSystem extends EventEmitter {
 
   private renderEmitter(emitter: ParticleEmitter): void {
     if (!this.ctx) return;
-    
+
     const particles = emitter.getParticles();
     const blendMode = emitter.config.blendMode ?? 'additive';
-    
-    // Set blend mode
+
     switch (blendMode) {
       case 'additive':
         this.ctx.globalCompositeOperation = 'lighter';
@@ -1031,30 +930,28 @@ export class ParticleSystem extends EventEmitter {
       default:
         this.ctx.globalCompositeOperation = 'source-over';
     }
-    
+
     for (const particle of particles) {
       this.renderParticle(particle);
     }
-    
-    // Reset blend mode
+
     this.ctx.globalCompositeOperation = 'source-over';
   }
 
   private renderParticle(particle: Particle): void {
     if (!this.ctx) return;
-    
+
     const { position, color, size, rotation } = particle;
-    
+
     this.ctx.save();
     this.ctx.translate(position.x, position.y);
     this.ctx.rotate(rotation);
     this.ctx.fillStyle = ColorUtil.toRGBA(color);
-    
-    // Simple circle rendering
+
     this.ctx.beginPath();
     this.ctx.arc(0, 0, size, 0, Math.PI * 2);
     this.ctx.fill();
-    
+
     this.ctx.restore();
   }
 
@@ -1091,11 +988,6 @@ export class ParticleSystem extends EventEmitter {
     this.removeAllListeners();
   }
 }
-
-// ============================================================================
-// Preset Effects
-// ============================================================================
-
 export const ParticlePresets = {
   fire(): ParticleEmitterConfig {
     return {

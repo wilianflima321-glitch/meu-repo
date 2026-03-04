@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db';
 import { optionalEnv } from '@/lib/env';
 import { getStripe, getStripePriceIdForPlan } from '@/lib/stripe';
 import { readPaymentGatewayConfig } from '@/lib/server/payment-gateway-config';
-import { notImplementedCapability } from '@/lib/server/capability-response';
+import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAppUrl } from '@/lib/server/app-origin';
 
 export const dynamic = 'force-dynamic';
@@ -51,12 +51,18 @@ export async function POST(req: NextRequest) {
       );
     }
     if (gatewayConfig.activeGateway !== 'stripe') {
-      return notImplementedCapability({
-        error: 'PAYMENT_GATEWAY_NOT_IMPLEMENTED',
+      return capabilityResponse({
+        error: 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE',
         message: `Active gateway "${gatewayConfig.activeGateway}" is not available in this build.`,
+        status: 503,
         capability: 'PAYMENT_GATEWAY_RUNTIME',
+        capabilityStatus: 'PARTIAL',
         milestone: 'P1',
-        metadata: { activeGateway: gatewayConfig.activeGateway },
+        metadata: {
+          activeGateway: gatewayConfig.activeGateway,
+          supportedGateway: 'stripe',
+          checkoutEnabled: gatewayConfig.checkoutEnabled,
+        },
       });
     }
 

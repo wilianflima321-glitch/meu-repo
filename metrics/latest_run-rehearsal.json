@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-03-04T16:23:18.730Z",
+  "windowHours": 168,
+  "sampleClass": "rehearsal",
+  "sampleSize": 12,
+  "totals": {
+    "rows": 15,
+    "applyRuns": 12,
+    "applySuccess": 9,
+    "applyBlocked": 3,
+    "applyFailed": 0,
+    "rollbackSuccess": 3,
+    "rollbackBlocked": 0,
+    "rollbackFailed": 0,
+    "sandboxApplyRuns": 4,
+    "workspaceApplyRuns": 5
+  },
+  "metrics": {
+    "apply_success_rate": 0.75,
+    "blocked_rate": 0.25,
+    "regression_rate": 0,
+    "sandbox_coverage": 0.4444,
+    "workspace_coverage": 0.5556
+  },
+  "diagnostics": {
+    "regressionSignals": [],
+    "runSourceCounts": [
+      [
+        "core_loop_drill",
+        15
+      ]
+    ],
+    "lastEventAt": "2026-03-04T16:01:27.567Z"
+  }
+}

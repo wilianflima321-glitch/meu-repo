@@ -1,15 +1,8 @@
 'use client'
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-// ============================================================================
-// PROFESSIONAL EXPORT SYSTEM (Premiere Pro / Media Encoder style)
-// ============================================================================
-
 export type VideoCodec = 'h264' | 'h265' | 'vp8' | 'vp9' | 'av1' | 'prores' | 'dnxhd'
 export type AudioCodec = 'aac' | 'mp3' | 'opus' | 'pcm' | 'flac'
 export type Container = 'mp4' | 'webm' | 'mov' | 'mkv' | 'avi' | 'gif'
-
 export interface ExportPreset {
   id: string
   name: string
@@ -18,14 +11,10 @@ export interface ExportPreset {
   settings: ExportSettings
   icon?: string
 }
-
 export interface ExportSettings {
-  // Format
   container: Container
   videoCodec: VideoCodec | null    // null = no video
   audioCodec: AudioCodec | null    // null = no audio
-  
-  // Video
   resolution: { width: number; height: number }
   frameRate: number
   bitrate: number                   // kbps
@@ -35,34 +24,20 @@ export interface ExportSettings {
   keyframeInterval?: number         // Frames between keyframes
   pixelFormat?: 'yuv420p' | 'yuv422p' | 'yuv444p' | 'rgb24'
   profile?: 'baseline' | 'main' | 'high' | 'high10' | 'high422' | 'high444'
-  
-  // Audio
   sampleRate: number
   channels: 1 | 2 | 6               // Mono, Stereo, 5.1
   audioBitrate: number              // kbps
-  
-  // Range
   useInOutPoints: boolean
   inPoint?: number
   outPoint?: number
-  
-  // Advanced
   twoPass: boolean
   fastStart: boolean                // moov atom at start for streaming
   hardwareAcceleration: boolean
   deinterlace: boolean
-  
-  // Metadata
   includeMetadata: boolean
   customMetadata?: Record<string, string>
 }
-
-// ============================================================================
-// PRESET LIBRARY
-// ============================================================================
-
 export const EXPORT_PRESETS: ExportPreset[] = [
-  // YouTube
   {
     id: 'youtube-4k',
     name: 'YouTube 4K',
@@ -143,8 +118,6 @@ export const EXPORT_PRESETS: ExportPreset[] = [
       includeMetadata: true
     }
   },
-  
-  // Social Media
   {
     id: 'instagram-feed',
     name: 'Instagram Feed',
@@ -249,8 +222,6 @@ export const EXPORT_PRESETS: ExportPreset[] = [
       includeMetadata: false
     }
   },
-  
-  // Web
   {
     id: 'web-vp9',
     name: 'Web VP9',
@@ -303,8 +274,6 @@ export const EXPORT_PRESETS: ExportPreset[] = [
       includeMetadata: true
     }
   },
-  
-  // Professional
   {
     id: 'prores-422',
     name: 'Apple ProRes 422',
@@ -356,8 +325,6 @@ export const EXPORT_PRESETS: ExportPreset[] = [
       includeMetadata: true
     }
   },
-  
-  // Archive
   {
     id: 'archive-high',
     name: 'Archive (High Quality)',
@@ -385,8 +352,6 @@ export const EXPORT_PRESETS: ExportPreset[] = [
       includeMetadata: true
     }
   },
-  
-  // GIF
   {
     id: 'gif-high',
     name: 'Animated GIF',
@@ -412,8 +377,6 @@ export const EXPORT_PRESETS: ExportPreset[] = [
       includeMetadata: false
     }
   },
-  
-  // Audio Only
   {
     id: 'audio-mp3',
     name: 'MP3 Audio',
@@ -465,13 +428,7 @@ export const EXPORT_PRESETS: ExportPreset[] = [
     }
   }
 ]
-
-// ============================================================================
-// EXPORT QUEUE
-// ============================================================================
-
 export type ExportJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled'
-
 export interface ExportJob {
   id: string
   name: string
@@ -483,26 +440,18 @@ export interface ExportJob {
   error?: string
   outputPath?: string
   estimatedTimeRemaining?: number
-  // Source info
   sourceProjectId?: string
   sourceRange: { start: number; end: number }
 }
-
-// ============================================================================
-// EXPORT MANAGER CLASS
-// ============================================================================
-
 export class ExportManager {
   private queue: ExportJob[] = []
   private currentJob: ExportJob | null = null
   private isProcessing = false
   private abortController: AbortController | null = null
-  
   private onQueueUpdate?: (queue: ExportJob[]) => void
   private onJobProgress?: (jobId: string, progress: number) => void
   private onJobComplete?: (jobId: string, outputUrl: string) => void
   private onJobError?: (jobId: string, error: string) => void
-  
   constructor(callbacks?: {
     onQueueUpdate?: (queue: ExportJob[]) => void
     onJobProgress?: (jobId: string, progress: number) => void
@@ -516,7 +465,6 @@ export class ExportManager {
       this.onJobError = callbacks.onJobError
     }
   }
-  
   addJob(name: string, settings: ExportSettings, sourceRange: { start: number; end: number }): string {
     const job: ExportJob = {
       id: `export-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -526,20 +474,15 @@ export class ExportManager {
       progress: 0,
       sourceRange
     }
-    
     this.queue.push(job)
     this.onQueueUpdate?.(this.queue)
-    
     if (!this.isProcessing) {
       this.processNext()
     }
-    
     return job.id
   }
-  
   cancelJob(jobId: string): boolean {
     const jobIndex = this.queue.findIndex(j => j.id === jobId)
-    
     if (jobIndex >= 0) {
       if (this.currentJob?.id === jobId) {
         this.abortController?.abort()
@@ -547,14 +490,11 @@ export class ExportManager {
       } else {
         this.queue[jobIndex].status = 'cancelled'
       }
-      
       this.onQueueUpdate?.(this.queue)
       return true
     }
-    
     return false
   }
-  
   removeJob(jobId: string): boolean {
     const index = this.queue.findIndex(j => j.id === jobId)
     if (index >= 0 && this.queue[index].status !== 'processing') {
@@ -564,35 +504,27 @@ export class ExportManager {
     }
     return false
   }
-  
   getQueue(): ExportJob[] {
     return [...this.queue]
   }
-  
   private async processNext(): Promise<void> {
     const nextJob = this.queue.find(j => j.status === 'queued')
-    
     if (!nextJob) {
       this.isProcessing = false
       return
     }
-    
     this.isProcessing = true
     this.currentJob = nextJob
     this.abortController = new AbortController()
-    
     nextJob.status = 'processing'
     nextJob.startedAt = Date.now()
     this.onQueueUpdate?.(this.queue)
-    
     try {
       const outputUrl = await this.processJob(nextJob, this.abortController.signal)
-      
       nextJob.status = 'completed'
       nextJob.completedAt = Date.now()
       nextJob.progress = 100
       nextJob.outputPath = outputUrl
-      
       this.onJobComplete?.(nextJob.id, outputUrl)
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
@@ -603,49 +535,30 @@ export class ExportManager {
         this.onJobError?.(nextJob.id, (error as Error).message)
       }
     }
-    
     this.onQueueUpdate?.(this.queue)
     this.currentJob = null
     this.abortController = null
-    
-    // Process next in queue
     this.processNext()
   }
-  
   private async processJob(job: ExportJob, signal: AbortSignal): Promise<string> {
-    // This is where actual encoding would happen
-    // For now, simulate progress
-    
     const { settings } = job
     const duration = job.sourceRange.end - job.sourceRange.start
-    
-    // Simulate encoding progress
     const totalFrames = duration * settings.frameRate
     const framesPerSecond = settings.hardwareAcceleration ? 120 : 30
     const estimatedDuration = totalFrames / framesPerSecond
-    
     for (let progress = 0; progress <= 100; progress += 1) {
       if (signal.aborted) {
         throw new DOMException('Aborted', 'AbortError')
       }
-      
       await new Promise(resolve => setTimeout(resolve, estimatedDuration * 10))
-      
       job.progress = progress
       job.estimatedTimeRemaining = (estimatedDuration * (100 - progress)) / 100
       this.onJobProgress?.(job.id, progress)
     }
-    
-    // Return a blob URL (in real implementation, this would be the actual encoded file)
     const blob = new Blob(['dummy video data'], { type: 'video/mp4' })
     return URL.createObjectURL(blob)
   }
 }
-
-// ============================================================================
-// EXPORT DIALOG COMPONENT
-// ============================================================================
-
 interface ExportDialogProps {
   open: boolean
   onClose: () => void
@@ -653,7 +566,6 @@ interface ExportDialogProps {
   projectDuration: number
   projectResolution: { width: number; height: number }
 }
-
 export function ExportDialog({
   open,
   onClose,
@@ -665,8 +577,6 @@ export function ExportDialog({
   const [customSettings, setCustomSettings] = useState<ExportSettings>(EXPORT_PRESETS[1].settings)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [outputName, setOutputName] = useState('export')
-  
-  // Group presets by category
   const presetsByCategory = useMemo(() => {
     const grouped: Record<string, ExportPreset[]> = {}
     EXPORT_PRESETS.forEach(preset => {
@@ -677,32 +587,24 @@ export function ExportDialog({
     })
     return grouped
   }, [])
-  
-  // Estimate file size
   const estimatedSize = useMemo(() => {
     const videoBitrate = customSettings.bitrate || 0
     const audioBitrate = customSettings.audioBitrate || 0
     const totalBitrate = videoBitrate + audioBitrate // kbps
     const sizeKB = (totalBitrate * projectDuration) / 8
-    
     if (sizeKB < 1024) return `~${Math.round(sizeKB)} KB`
     if (sizeKB < 1024 * 1024) return `~${(sizeKB / 1024).toFixed(1)} MB`
     return `~${(sizeKB / 1024 / 1024).toFixed(1)} GB`
   }, [customSettings, projectDuration])
-  
-  // Estimate encoding time
   const estimatedTime = useMemo(() => {
     const frames = projectDuration * customSettings.frameRate
     const fps = customSettings.hardwareAcceleration ? 120 : (customSettings.twoPass ? 15 : 30)
     const seconds = frames / fps
-    
     if (seconds < 60) return `~${Math.round(seconds)}s`
     if (seconds < 3600) return `~${Math.round(seconds / 60)}min`
     return `~${(seconds / 3600).toFixed(1)}h`
   }, [customSettings, projectDuration])
-  
   if (!open) return null
-  
   return (
     <div style={{
       position: 'fixed',
@@ -746,7 +648,6 @@ export function ExportDialog({
             ✕
           </button>
         </div>
-        
         {/* Content */}
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
           {/* Presets sidebar */}
@@ -759,7 +660,6 @@ export function ExportDialog({
             <div style={{ color: '#909296', fontSize: 10, fontWeight: 600, marginBottom: 8, textTransform: 'uppercase' }}>
               Presets
             </div>
-            
             {Object.entries(presetsByCategory).map(([category, presets]) => (
               <div key={category} style={{ marginBottom: 12 }}>
                 <div style={{ color: '#5c5f66', fontSize: 10, marginBottom: 4 }}>
@@ -795,7 +695,6 @@ export function ExportDialog({
               </div>
             ))}
           </div>
-          
           {/* Settings panel */}
           <div style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
             {/* Output name */}
@@ -818,7 +717,6 @@ export function ExportDialog({
                 }}
               />
             </div>
-            
             {/* Format summary */}
             <div style={{
               background: '#25262b',
@@ -865,7 +763,6 @@ export function ExportDialog({
                 </div>
               </div>
             </div>
-            
             {/* Quick settings */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
               {/* Resolution */}
@@ -896,7 +793,6 @@ export function ExportDialog({
                   <option value="1080x1080">Square (1080×1080)</option>
                 </select>
               </div>
-              
               {/* Frame rate */}
               <div>
                 <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
@@ -922,7 +818,6 @@ export function ExportDialog({
                   <option value={60}>60 fps</option>
                 </select>
               </div>
-              
               {/* Bitrate */}
               <div>
                 <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
@@ -943,7 +838,6 @@ export function ExportDialog({
                   }}
                 />
               </div>
-              
               {/* Audio bitrate */}
               <div>
                 <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
@@ -965,7 +859,6 @@ export function ExportDialog({
                 />
               </div>
             </div>
-            
             {/* Advanced toggle */}
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
@@ -983,7 +876,6 @@ export function ExportDialog({
             >
               {showAdvanced ? '▼' : '▶'} Advanced Settings
             </button>
-            
             {showAdvanced && (
               <div style={{
                 background: '#25262b',
@@ -1001,7 +893,6 @@ export function ExportDialog({
                     />
                     <span style={{ color: '#c1c2c5', fontSize: 12 }}>Two-pass encoding</span>
                   </label>
-                  
                   {/* Hardware acceleration */}
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input
@@ -1011,7 +902,6 @@ export function ExportDialog({
                     />
                     <span style={{ color: '#c1c2c5', fontSize: 12 }}>Hardware acceleration</span>
                   </label>
-                  
                   {/* Fast start */}
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input
@@ -1021,7 +911,6 @@ export function ExportDialog({
                     />
                     <span style={{ color: '#c1c2c5', fontSize: 12 }}>Fast start (streaming)</span>
                   </label>
-                  
                   {/* Include metadata */}
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input
@@ -1034,7 +923,6 @@ export function ExportDialog({
                 </div>
               </div>
             )}
-            
             {/* Estimates */}
             <div style={{
               background: '#2c2e33',
@@ -1060,7 +948,6 @@ export function ExportDialog({
             </div>
           </div>
         </div>
-        
         {/* Footer */}
         <div style={{
           padding: '12px 20px',
@@ -1106,17 +993,11 @@ export function ExportDialog({
     </div>
   )
 }
-
-// ============================================================================
-// EXPORT QUEUE PANEL COMPONENT
-// ============================================================================
-
 interface ExportQueuePanelProps {
   jobs: ExportJob[]
   onCancel: (jobId: string) => void
   onRemove: (jobId: string) => void
 }
-
 export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelProps) {
   if (jobs.length === 0) {
     return (
@@ -1130,7 +1011,6 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
       </div>
     )
   }
-  
   return (
     <div style={{ padding: 12 }}>
       {jobs.map(job => (
@@ -1159,7 +1039,6 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
               {job.status.toUpperCase()}
             </span>
           </div>
-          
           {job.status === 'processing' && (
             <>
               <div style={{
@@ -1184,7 +1063,6 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
               </div>
             </>
           )}
-          
           {job.status === 'completed' && job.outputPath && (
             <a
               href={job.outputPath}
@@ -1203,13 +1081,11 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
               Download
             </a>
           )}
-          
           {job.status === 'failed' && job.error && (
             <div style={{ color: '#fa5252', fontSize: 11, marginTop: 4 }}>
               Error: {job.error}
             </div>
           )}
-          
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             {job.status === 'processing' && (
               <button
@@ -1249,5 +1125,4 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
     </div>
   )
 }
-
 export default ExportDialog

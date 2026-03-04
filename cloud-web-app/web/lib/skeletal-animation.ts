@@ -1,17 +1,8 @@
-/**
- * Skeletal Animation System REAL
- * 
- * Sistema REAL de animação skeletal com bones, skinning, IK, blending.
- * Suporta GPU skinning, retargeting, animação procedural.
- * 
- * NÃO É MOCK - Sistema completo de animação!
- */
+// skeletal animation module.
 
 import * as THREE from 'three';
 
-// ============================================================================
 // TIPOS
-// ============================================================================
 
 export interface BoneData {
   name: string;
@@ -69,9 +60,7 @@ export interface BlendWeight {
   time: number;
 }
 
-// ============================================================================
 // BONE
-// ============================================================================
 
 export class Bone extends THREE.Object3D {
   public boneData: BoneData;
@@ -114,9 +103,7 @@ export class Bone extends THREE.Object3D {
   }
 }
 
-// ============================================================================
 // SKELETON
-// ============================================================================
 
 export class Skeleton {
   public bones: Bone[] = [];
@@ -238,9 +225,7 @@ export class Skeleton {
   }
 }
 
-// ============================================================================
 // ANIMATION CLIP
-// ============================================================================
 
 export class AnimationClip {
   public name: string;
@@ -313,9 +298,7 @@ export class AnimationClip {
   }
 }
 
-// ============================================================================
 // ANIMATION STATE
-// ============================================================================
 
 export class AnimationState {
   public clip: AnimationClip;
@@ -388,9 +371,7 @@ export class AnimationState {
   }
 }
 
-// ============================================================================
 // ANIMATION MIXER
-// ============================================================================
 
 export class AnimationMixer {
   private skeleton: Skeleton;
@@ -648,9 +629,7 @@ export class AnimationMixer {
   }
 }
 
-// ============================================================================
 // INVERSE KINEMATICS
-// ============================================================================
 
 export class IKSolver {
   private skeleton: Skeleton;
@@ -878,9 +857,7 @@ export class IKSolver {
   }
 }
 
-// ============================================================================
 // ANIMATION RETARGETING
-// ============================================================================
 
 export class AnimationRetargeter {
   private sourceRig: Map<string, string> = new Map(); // source bone -> target bone
@@ -960,9 +937,7 @@ export class AnimationRetargeter {
   }
 }
 
-// ============================================================================
 // PROCEDURAL ANIMATION
-// ============================================================================
 
 export class ProceduralAnimator {
   private skeleton: Skeleton;
@@ -1079,9 +1054,7 @@ export class ProceduralAnimator {
   }
 }
 
-// ============================================================================
 // SKINNED MESH
-// ============================================================================
 
 export class SkinnedMesh extends THREE.SkinnedMesh {
   public animationMixer: AnimationMixer;
@@ -1129,9 +1102,7 @@ export class SkinnedMesh extends THREE.SkinnedMesh {
   }
 }
 
-// ============================================================================
 // EXPORTS
-// ============================================================================
 
 export function createSkeleton(data: SkeletonData): Skeleton {
   return new Skeleton(data);
@@ -1161,9 +1132,7 @@ export function createSkinnedMesh(
   return new SkinnedMesh(geometry, material, skeleton);
 }
 
-// ============================================================================
 // PRESET SKELETONS
-// ============================================================================
 
 export const SkeletonPresets = {
   humanoid: (): SkeletonData => ({

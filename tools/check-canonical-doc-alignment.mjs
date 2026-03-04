@@ -26,6 +26,8 @@ const requiredDocs = [
   'docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md',
   'docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md',
   'docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md',
+  'docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md',
+  'docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md',
 ]
 
 for (const doc of requiredDocs) {
@@ -38,6 +40,9 @@ if (exists('docs/master/00_INDEX.md')) {
   const index = read('docs/master/00_INDEX.md')
   if (!index.includes('26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md')) {
     failures.push('00_INDEX is missing reference to canonical baseline doc 26')
+  }
+  if (!index.includes('32_GLOBAL_GAP_REGISTER_2026-03-01.md')) {
+    failures.push('00_INDEX is missing reference to global gap register doc 32')
   }
 }
 

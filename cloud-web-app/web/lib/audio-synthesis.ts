@@ -1,15 +1,4 @@
-/**
- * Audio Synthesis Engine REAL
- * 
- * Sistema REAL de síntese de áudio com Web Audio API.
- * Suporta oscillators, filtros, efeitos, modulação, samplers.
- * 
- * NÃO É MOCK - Gera áudio de verdade!
- */
 
-// ============================================================================
-// TIPOS
-// ============================================================================
 
 export type OscillatorShape = 'sine' | 'square' | 'sawtooth' | 'triangle' | 'custom';
 export type FilterType = 'lowpass' | 'highpass' | 'bandpass' | 'notch' | 'allpass' | 'lowshelf' | 'highshelf' | 'peaking';
@@ -58,9 +47,6 @@ export interface SynthVoiceConfig {
   lfos?: LFOConfig[];
 }
 
-// ============================================================================
-// AUDIO CONTEXT MANAGER
-// ============================================================================
 
 export class AudioContextManager {
   private static instance: AudioContextManager | null = null;
@@ -83,7 +69,6 @@ export class AudioContextManager {
     
     this.context = new AudioContext();
     
-    // Create master chain
     this.analyser = this.context.createAnalyser();
     this.analyser.fftSize = 2048;
     
@@ -97,7 +82,6 @@ export class AudioContextManager {
     this.masterGain = this.context.createGain();
     this.masterGain.gain.value = 0.8;
     
-    // Connect: analyser -> compressor -> masterGain -> destination
     this.analyser.connect(this.compressor);
     this.compressor.connect(this.masterGain);
     this.masterGain.connect(this.context.destination);
@@ -162,9 +146,6 @@ export class AudioContextManager {
   }
 }
 
-// ============================================================================
-// ENVELOPE GENERATOR
-// ============================================================================
 
 export class EnvelopeGenerator {
   private context: AudioContext;
@@ -200,9 +181,6 @@ export class EnvelopeGenerator {
   }
 }
 
-// ============================================================================
-// OSCILLATOR MODULE
-// ============================================================================
 
 export class OscillatorModule {
   private context: AudioContext;
@@ -285,9 +263,6 @@ export class OscillatorModule {
   }
 }
 
-// ============================================================================
-// FILTER MODULE
-// ============================================================================
 
 export class FilterModule {
   private context: AudioContext;
@@ -339,9 +314,6 @@ export class FilterModule {
   }
 }
 
-// ============================================================================
-// LFO MODULE
-// ============================================================================
 
 export class LFOModule {
   private context: AudioContext;
@@ -387,9 +359,6 @@ export class LFOModule {
   }
 }
 
-// ============================================================================
-// EFFECTS
-// ============================================================================
 
 export class ReverbEffect {
   private context: AudioContext;
@@ -411,7 +380,6 @@ export class ReverbEffect {
     this.wetGain.gain.value = 0.5;
     this.dryGain.gain.value = 0.5;
     
-    // Routing
     this.inputNode.connect(this.convolver);
     this.inputNode.connect(this.dryGain);
     this.convolver.connect(this.wetGain);
@@ -490,7 +458,6 @@ export class DelayEffect {
     this.filter.type = 'lowpass';
     this.filter.frequency.value = 5000;
     
-    // Routing
     this.inputNode.connect(this.dryGain);
     this.inputNode.connect(this.delay);
     this.delay.connect(this.filter);
@@ -621,7 +588,6 @@ export class ChorusEffect {
     this.inputNode = context.createGain();
     this.outputNode = context.createGain();
     
-    // Create delay lines with LFO modulation
     for (let i = 0; i < voices; i++) {
       const delay = context.createDelay(0.1);
       delay.delayTime.value = 0.02 + (i * 0.01);
@@ -645,7 +611,6 @@ export class ChorusEffect {
       this.lfoGains.push(lfoGain);
     }
     
-    // Mix dry signal
     this.inputNode.connect(this.outputNode);
   }
   
@@ -678,9 +643,6 @@ export class ChorusEffect {
   }
 }
 
-// ============================================================================
-// SYNTH VOICE
-// ============================================================================
 
 export class SynthVoice {
   private context: AudioContext;
@@ -707,17 +669,14 @@ export class SynthVoice {
       this.filterEnvelope = new EnvelopeGenerator(context, config.filterEnvelope);
     }
     
-    // Create filter
     if (config.filter) {
       this.filter = new FilterModule(context, config.filter);
     }
     
-    // Create oscillators
     for (const oscConfig of config.oscillators) {
       this.oscillators.push(new OscillatorModule(context, oscConfig));
     }
     
-    // Create LFOs
     if (config.lfos) {
       for (const lfoConfig of config.lfos) {
         this.lfos.push(new LFOModule(context, lfoConfig));
@@ -747,20 +706,16 @@ export class SynthVoice {
     const frequency = this.midiToFrequency(note);
     const startTime = this.context.currentTime;
     
-    // Start oscillators
     for (const osc of this.oscillators) {
       osc.start(frequency, startTime);
     }
     
-    // Start LFOs
     for (const lfo of this.lfos) {
       lfo.start(startTime);
     }
     
-    // Apply amplitude envelope
     this.ampEnvelope.apply(this.outputGain.gain, startTime, velocity);
     
-    // Apply filter envelope
     if (this.filter && this.filterEnvelope) {
       const baseFreq = this.config.filter!.frequency;
       const envAmount = baseFreq * 4;
@@ -776,15 +731,12 @@ export class SynthVoice {
     
     const releaseTime = this.context.currentTime;
     
-    // Release amplitude envelope
     this.ampEnvelope.release(this.outputGain.gain, releaseTime);
     
-    // Release filter envelope
     if (this.filter && this.filterEnvelope) {
       this.filterEnvelope.release(this.filter.getFrequencyParam(), releaseTime);
     }
     
-    // Schedule stop
     const stopTime = releaseTime + this.config.envelope.release + 0.1;
     
     for (const osc of this.oscillators) {
@@ -841,9 +793,6 @@ export class SynthVoice {
   }
 }
 
-// ============================================================================
-// POLYPHONIC SYNTHESIZER
-// ============================================================================
 
 export class PolySynth {
   private context: AudioContext;
@@ -860,7 +809,6 @@ export class PolySynth {
     
     this.outputGain = context.createGain();
     
-    // Pre-create voices
     for (let i = 0; i < maxVoices; i++) {
       const voice = new SynthVoice(context, config);
       voice.getOutput().connect(this.outputGain);
@@ -869,11 +817,9 @@ export class PolySynth {
   }
   
   noteOn(note: number, velocity: number = 1): void {
-    // Find free voice or steal oldest
     let voice = this.voices.find(v => !v.getIsPlaying());
     
     if (!voice) {
-      // Steal voice (simple: take first)
       voice = this.voices[0];
       voice.noteOff();
     }
@@ -895,10 +841,8 @@ export class PolySynth {
   }
   
   addEffect(effect: ReverbEffect | DelayEffect | DistortionEffect | ChorusEffect): void {
-    // Disconnect output from previous target
     this.outputGain.disconnect();
     
-    // Connect through effects chain
     let lastOutput: AudioNode = this.outputGain;
     
     for (const fx of this.effects) {
@@ -906,7 +850,6 @@ export class PolySynth {
       lastOutput = fx.getOutput();
     }
     
-    // Add new effect
     lastOutput.connect(effect.getInput());
     this.effects.push(effect);
   }
@@ -933,9 +876,6 @@ export class PolySynth {
   }
 }
 
-// ============================================================================
-// SAMPLER
-// ============================================================================
 
 export class Sampler {
   private context: AudioContext;
@@ -966,7 +906,6 @@ export class Sampler {
   }
   
   noteOn(note: number, velocity: number = 1): void {
-    // Find closest sample
     let closestNote = this.baseNote;
     let minDist = Infinity;
     
@@ -981,18 +920,14 @@ export class Sampler {
     const buffer = this.samples.get(closestNote);
     if (!buffer) return;
     
-    // Stop existing note
     this.noteOff(note);
     
-    // Create source
     const source = this.context.createBufferSource();
     source.buffer = buffer;
     
-    // Calculate playback rate for pitch shift
     const semitones = note - closestNote;
     source.playbackRate.value = Math.pow(2, semitones / 12);
     
-    // Apply velocity
     const velocityGain = this.context.createGain();
     velocityGain.gain.value = velocity;
     
@@ -1035,9 +970,6 @@ export class Sampler {
   }
 }
 
-// ============================================================================
-// DRUM MACHINE
-// ============================================================================
 
 export interface DrumPattern {
   bpm: number;
@@ -1137,9 +1069,6 @@ export class DrumMachine {
   }
 }
 
-// ============================================================================
-// PRESET SYNTHS
-// ============================================================================
 
 export const SynthPresets = {
   lead: (): SynthVoiceConfig => ({
@@ -1205,9 +1134,6 @@ export const SynthPresets = {
   }),
 };
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export function createAudioContext(): Promise<AudioContext> {
   return AudioContextManager.getInstance().initialize();

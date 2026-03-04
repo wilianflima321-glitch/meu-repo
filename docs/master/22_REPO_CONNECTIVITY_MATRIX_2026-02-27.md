@@ -218,6 +218,17 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 2. `components/AethelDashboard.tsx` now delegates:
 - full AI chat tab surface (modes + workflow controls + streaming panel)
 - full wallet tab surface (balance/receivables/forms/history)
+
+## 24) Incremental closure 2026-03-01 (dashboard monolith threshold)
+1. Added:
+- `components/dashboard/FirstValueGuide.tsx`
+2. `components/AethelDashboard.tsx` line count reduced to `1098` (below 1200-pressure threshold used in this matrix).
+3. Updated pressure snapshot (`cloud-web-app/web`, >=1200 lines):
+- total files still high (`55`), but top offender moved from dashboard shell to domain-heavy modules.
+- current top offender: `lib/translations.ts` (`1698` lines).
+4. Conclusion:
+- dashboard shell is no longer the largest structural hotspot;
+- next decomposition wave should prioritize large domain modules (`lib/*`, editor/media subsystems).
 - connectivity monitor tab
 - content-creation tab and unreal tab static surfaces
 3. Current top offender size:
@@ -247,6 +258,31 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `STORAGE_UPLOAD_URL_UNAVAILABLE` (`503`)
 - `capability=asset_upload_presign`
 - `capabilityStatus=PARTIAL`
+
+## 26) Incremental closure 2026-03-01 (dashboard shell integrity gate)
+1. Added dedicated guard:
+- `cloud-web-app/web/scripts/check-dashboard-shell-integrity.mjs`
+- command: `npm run qa:dashboard-shell`
+2. Guard rules:
+- `components/AethelDashboard.tsx` must stay `<=1200` lines;
+- no direct `@xyflow/react` import in dashboard shell path.
+3. Gate wiring:
+- included in `cloud-web-app/web` `qa:enterprise-gate`;
+- mirrored in root scripts;
+- enforced pre-audit/pre-compare in CI workflows.
+4. Current state:
+- `AethelDashboard.tsx` at `1198` lines.
+
+## 27) Incremental closure 2026-03-01 (quota precision alignment)
+1. `cloud-web-app/web/lib/plan-limits.ts` daily request checks now use canonical day buckets (`window='day'`, UTC) instead of monthly-average approximation.
+2. `recordTokenUsage` now updates both `month` and `day` usage buckets in a single transaction.
+3. Usage APIs now expose daily request visibility:
+- `GET /api/usage/status` includes `requestsToday.used|limit|remaining`;
+- `GET /api/quotas` includes `resource='ai_requests_daily'`.
+
+## 28) Incremental closure 2026-03-01 (build env robustness)
+1. Hardened `next.config.js` IPC env sanitation to prevent invalid incremental-cache IPC config (`port/key='undefined'`) during build.
+2. Freeze chain was revalidated with full `qa:enterprise-gate` PASS after this fix.
 3. Added asset quality-scoring substrate to reduce opaque intake decisions:
 - `lib/server/asset-quality.ts`
 - upload and confirm responses now include quality report metadata
@@ -306,3 +342,17 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - stream error banner with gate transparency,
 - stop-stream control,
 - message merge per role to reduce noisy chunk spam.
+
+## 30) Incremental closure 2026-03-01 (global gap scanner)
+1. Added repository-wide factual scanner:
+- `tools/run-global-gap-scan.mjs`
+- command: `npm run qa:global-gap-scan`
+- output: `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
+2. Snapshot from current wave:
+- markdown inventory: `md_total=3653`, `docs/master=47`, `outside_canonical=3606`
+- code pressure: `large_files_ge_1200=26`
+- blocking dialogs in active surfaces: `0` (deprecated residual: `4`)
+- explicit API gates with `NOT_IMPLEMENTED`: `18`
+- active canonical docs missing in read-order: `0` (closed in current wave)
+3. Decision:
+- treat this scanner output as freeze input for P0 sequencing (`P0-U..P0-X`) until counts trend down.

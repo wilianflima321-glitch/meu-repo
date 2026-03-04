@@ -9,32 +9,21 @@ This runbook tracks known non-blocking runtime warnings and the minimum environm
 This document does not change product scope.
 
 ## 1. Current Warning Inventory (Observed)
-1. Missing Upstash variables:
-- `UPSTASH_REDIS_REST_URL`
-- `UPSTASH_REDIS_REST_TOKEN`
-2. Docker unavailable fallback:
+1. Docker unavailable fallback:
 - sandbox/local runtime falls back to direct execution.
-3. Next runtime noise during build finalization:
-- `TypeError: Failed to parse URL from http://localhost:undefined?...revalidateTag...`
+2. No blocking Upstash or `revalidateTag` warning observed in latest local build profile.
 
 ## 2. Risk Classification
-1. Upstash missing vars:
-- Risk: medium
-- Impact: queue/cache-backed features may degrade to fallback paths
-- Gate impact: none (currently non-blocking)
-2. Docker missing:
+1. Docker missing:
 - Risk: medium
 - Impact: reduced execution isolation in local dev/sandbox modes
 - Gate impact: none (fallback explicit)
-3. `revalidateTag` invalid URL warning:
-- Risk: medium
-- Impact: build log noise and runtime uncertainty around internal incremental cache IPC
-- Gate impact: none (build exits successfully)
+2. Historical warning items (`UPSTASH_*`, `revalidateTag localhost:undefined`) are currently mitigated in this wave and moved to monitoring-only.
 
 ## 3. Minimum Local Environment Checklist
 1. Node and npm installed and aligned with project lockfile.
 2. `JWT_SECRET` set for protected route validation.
-3. Optional but recommended:
+3. Optional:
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 4. Optional:
@@ -58,13 +47,12 @@ This document does not change product scope.
 ## 5. Mitigation Actions (No Scope Change)
 1. Continue forcing runtime-sensitive ops routes to dynamic execution where needed.
 2. Keep explicit capability/degradation responses (no fake success).
-3. Track the `revalidateTag` warning as unresolved framework/runtime item until root cause is isolated without weakening gates.
-4. Keep this runbook aligned with deltas in:
+3. Keep this runbook aligned with deltas in:
 - `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
 - `13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
 - `14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
 
 ## 6. Exit Criteria for Closing This Runbook
-1. No unresolved runtime warning in build logs for `revalidateTag` invalid URL path.
+1. Runtime warning inventory remains explicit and bounded to known non-blocking items.
 2. Environment prerequisites documented and reproducible for local + CI.
 3. No regression in explicit capability/error contracts.

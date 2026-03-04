@@ -1,8 +1,7 @@
 'use client';
-
 /**
  * Aethel Engine - Visual Settings UI
- * 
+ *
  * VS Code-style settings with:
  * - Search settings
  * - Categories navigation
@@ -11,7 +10,6 @@
  * - Modified indicator
  * - Reset to default
  */
-
 import {
   useState,
   useEffect,
@@ -43,20 +41,14 @@ import {
   AlertCircle,
   type LucideIcon,
 } from 'lucide-react';
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export type SettingType = 
-  | 'string' 
-  | 'number' 
-  | 'boolean' 
-  | 'array' 
-  | 'object' 
+export type SettingType =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'array'
+  | 'object'
   | 'enum'
   | 'color';
-
 export interface SettingDefinition {
   key: string;
   type: SettingType;
@@ -73,26 +65,18 @@ export interface SettingDefinition {
   scope?: 'application' | 'machine' | 'window' | 'resource' | 'language';
   tags?: string[];
 }
-
 export interface SettingValue {
   userValue?: unknown;
   workspaceValue?: unknown;
   defaultValue: unknown;
 }
-
 export type SettingsScope = 'user' | 'workspace';
-
 export interface SettingsCategory {
   id: string;
   label: string;
   icon?: LucideIcon;
   children?: SettingsCategory[];
 }
-
-// ============================================================================
-// Settings Context
-// ============================================================================
-
 interface SettingsContextValue {
   settings: Map<string, SettingDefinition>;
   values: Map<string, SettingValue>;
@@ -103,9 +87,7 @@ interface SettingsContextValue {
   resetValue: (key: string) => void;
   isModified: (key: string) => boolean;
 }
-
 const SettingsContext = createContext<SettingsContextValue | null>(null);
-
 export function useSettings() {
   const context = useContext(SettingsContext);
   if (!context) {
@@ -113,13 +95,7 @@ export function useSettings() {
   }
   return context;
 }
-
-// ============================================================================
-// Sample Settings Definition (VS Code-like)
-// ============================================================================
-
 const DEFAULT_SETTINGS: SettingDefinition[] = [
-  // Editor
   {
     key: 'editor.fontSize',
     type: 'number',
@@ -253,8 +229,6 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
     category: ['Text Editor'],
     enum: ['none', 'keep', 'brackets', 'advanced', 'full'],
   },
-
-  // Workbench
   {
     key: 'workbench.colorTheme',
     type: 'enum',
@@ -316,8 +290,6 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
     category: ['Workbench'],
     enum: ['none', 'welcomePage', 'readme', 'newUntitledFile', 'welcomePageInEmptyWorkbench'],
   },
-
-  // Terminal
   {
     key: 'terminal.integrated.fontSize',
     type: 'number',
@@ -351,8 +323,6 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
     minimum: 0,
     maximum: 100000,
   },
-
-  // Files
   {
     key: 'files.autoSave',
     type: 'enum',
@@ -400,8 +370,6 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
     description: 'Insert a final newline at the end of the file when saving.',
     category: ['Text Editor', 'Files'],
   },
-
-  // AI Features
   {
     key: 'aethel.ai.enabled',
     type: 'boolean',
@@ -440,8 +408,6 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
     minimum: 0,
     maximum: 1,
   },
-
-  // Blueprint Editor
   {
     key: 'aethel.blueprint.gridSize',
     type: 'number',
@@ -473,8 +439,6 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
     category: ['Aethel Engine', 'Blueprint'],
     enum: ['bezier', 'linear', 'step'],
   },
-
-  // Material Editor
   {
     key: 'aethel.material.previewSize',
     type: 'number',
@@ -492,11 +456,6 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
     category: ['Aethel Engine', 'Material Editor'],
   },
 ];
-
-// ============================================================================
-// Settings Provider
-// ============================================================================
-
 export function SettingsProvider({
   children,
   initialSettings,
@@ -512,17 +471,14 @@ export function SettingsProvider({
   const [values, setValues] = useState<Map<string, SettingValue>>(
     initialValues || new Map()
   );
-
   const settings = useMemo(() => {
     const map = new Map<string, SettingDefinition>();
     (initialSettings || DEFAULT_SETTINGS).forEach(s => map.set(s.key, s));
     return map;
   }, [initialSettings]);
-
   const getValue = useCallback((key: string): unknown => {
     const settingValue = values.get(key);
     const definition = settings.get(key);
-    
     if (scope === 'workspace' && settingValue?.workspaceValue !== undefined) {
       return settingValue.workspaceValue;
     }
@@ -531,29 +487,23 @@ export function SettingsProvider({
     }
     return definition?.default;
   }, [values, settings, scope]);
-
   const setValue = useCallback((key: string, value: unknown) => {
     setValues(prev => {
       const next = new Map(prev);
       const existing = next.get(key) || { defaultValue: settings.get(key)?.default };
-      
       if (scope === 'workspace') {
         next.set(key, { ...existing, workspaceValue: value });
       } else {
         next.set(key, { ...existing, userValue: value });
       }
-      
       return next;
     });
-    
     onSave?.(key, value, scope);
   }, [scope, settings, onSave]);
-
   const resetValue = useCallback((key: string) => {
     setValues(prev => {
       const next = new Map(prev);
       const existing = next.get(key);
-      
       if (existing) {
         if (scope === 'workspace') {
           const { workspaceValue, ...rest } = existing;
@@ -563,23 +513,18 @@ export function SettingsProvider({
           next.set(key, rest);
         }
       }
-      
       return next;
     });
-    
     onSave?.(key, settings.get(key)?.default, scope);
   }, [scope, settings, onSave]);
-
   const isModified = useCallback((key: string): boolean => {
     const settingValue = values.get(key);
     if (!settingValue) return false;
-    
     if (scope === 'workspace') {
       return settingValue.workspaceValue !== undefined;
     }
     return settingValue.userValue !== undefined;
   }, [values, scope]);
-
   return (
     <SettingsContext.Provider
       value={{
@@ -597,11 +542,6 @@ export function SettingsProvider({
     </SettingsContext.Provider>
   );
 }
-
-// ============================================================================
-// Setting Input Components
-// ============================================================================
-
 function BooleanSetting({
   definition,
   value,
@@ -629,7 +569,6 @@ function BooleanSetting({
     </div>
   );
 }
-
 function StringSetting({
   definition,
   value,
@@ -655,7 +594,6 @@ function StringSetting({
     </div>
   );
 }
-
 function NumberSetting({
   definition,
   value,
@@ -697,7 +635,6 @@ function NumberSetting({
     </div>
   );
 }
-
 function EnumSetting({
   definition,
   value,
@@ -729,7 +666,6 @@ function EnumSetting({
     </div>
   );
 }
-
 function ArraySetting({
   definition,
   value,
@@ -744,18 +680,15 @@ function ArraySetting({
   onReset: () => void;
 }) {
   const [newItem, setNewItem] = useState('');
-
   const addItem = () => {
     if (newItem.trim()) {
       onChange([...value, newItem.trim()]);
       setNewItem('');
     }
   };
-
   const removeItem = (index: number) => {
     onChange(value.filter((_, i) => i !== index));
   };
-
   return (
     <div>
       <SettingLabel definition={definition} modified={modified} onReset={onReset} />
@@ -801,7 +734,6 @@ function ArraySetting({
     </div>
   );
 }
-
 function ColorSetting({
   definition,
   value,
@@ -836,7 +768,6 @@ function ColorSetting({
     </div>
   );
 }
-
 function SettingLabel({
   definition,
   modified,
@@ -850,7 +781,6 @@ function SettingLabel({
   const displayName = keyParts[keyParts.length - 1]
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, str => str.toUpperCase());
-
   return (
     <div className="flex items-start gap-2">
       <div className="flex-1 min-w-0">
@@ -886,11 +816,6 @@ function SettingLabel({
     </div>
   );
 }
-
-// ============================================================================
-// Settings UI
-// ============================================================================
-
 export function SettingsUI({
   className,
 }: {
@@ -905,18 +830,14 @@ export function SettingsUI({
     resetValue,
     isModified,
   } = useSettings();
-
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(['Text Editor', 'Workbench', 'Aethel Engine'])
   );
   const [showJSON, setShowJSON] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  // Focus search on mount and Ctrl+F
   useEffect(() => {
     searchInputRef.current?.focus();
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
@@ -924,15 +845,11 @@ export function SettingsUI({
         searchInputRef.current?.select();
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  // Build category tree
   const categories = useMemo(() => {
     const tree = new Map<string, Set<string>>();
-    
     Array.from(settings.values()).forEach(setting => {
       const root = setting.category[0];
       if (!tree.has(root)) {
@@ -942,40 +859,31 @@ export function SettingsUI({
         tree.get(root)?.add(setting.category[1]);
       }
     });
-
     return Array.from(tree.entries()).map(([label, children]) => ({
       id: label,
       label,
       children: Array.from(children).map(c => ({ id: c, label: c })),
     }));
   }, [settings]);
-
-  // Filter settings by search
   const filteredSettings = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return Array.from(settings.values());
-
     return Array.from(settings.values()).filter(setting =>
       setting.key.toLowerCase().includes(query) ||
       setting.description.toLowerCase().includes(query) ||
       setting.category.some(c => c.toLowerCase().includes(query))
     );
   }, [settings, searchQuery]);
-
-  // Group settings by category
   const groupedSettings = useMemo(() => {
     const groups = new Map<string, SettingDefinition[]>();
-
     filteredSettings.forEach(setting => {
       const category = setting.category.join(' > ');
       const existing = groups.get(category) || [];
       existing.push(setting);
       groups.set(category, existing);
     });
-
     return groups;
   }, [filteredSettings]);
-
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
       const next = new Set(prev);
@@ -987,17 +895,14 @@ export function SettingsUI({
       return next;
     });
   };
-
   const renderSetting = (definition: SettingDefinition) => {
     const value = getValue(definition.key);
     const modified = isModified(definition.key);
-
     const props = {
       definition,
       modified,
       onReset: () => resetValue(definition.key),
     };
-
     switch (definition.type) {
       case 'boolean':
         return (
@@ -1049,7 +954,6 @@ export function SettingsUI({
         );
     }
   };
-
   return (
     <div className={`h-full flex flex-col bg-slate-900 ${className || ''}`}>
       {/* Header */}
@@ -1058,7 +962,6 @@ export function SettingsUI({
           <Settings className="w-5 h-5 text-slate-400" />
           <span className="text-lg font-medium text-white">Settings</span>
         </div>
-
         {/* Scope toggle */}
         <div className="flex items-center gap-2">
           <button
@@ -1097,7 +1000,6 @@ export function SettingsUI({
           </button>
         </div>
       </div>
-
       {/* Search */}
       <div className="px-4 py-2 border-b border-slate-800">
         <div className="relative">
@@ -1125,7 +1027,6 @@ export function SettingsUI({
           </div>
         )}
       </div>
-
       {/* Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Categories sidebar */}
@@ -1143,14 +1044,12 @@ export function SettingsUI({
                 )}
                 {category.label}
               </button>
-
               {expandedCategories.has(category.id) && category.children && (
                 <div className="pl-6 pb-1">
                   {category.children.map(child => (
                     <button
                       key={child.id}
                       onClick={() => {
-                        // Scroll to category
                         const el = document.getElementById(`setting-category-${category.id}-${child.id}`);
                         el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
@@ -1164,7 +1063,6 @@ export function SettingsUI({
             </div>
           ))}
         </div>
-
         {/* Settings list */}
         <div className="flex-1 overflow-y-auto p-6">
           {showJSON ? (
@@ -1206,7 +1104,6 @@ export function SettingsUI({
                   </div>
                 );
               })}
-
               {filteredSettings.length === 0 && (
                 <div className="text-center py-12 text-slate-500">
                   <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -1220,11 +1117,6 @@ export function SettingsUI({
     </div>
   );
 }
-
-// ============================================================================
-// Quick Settings Popup (for status bar)
-// ============================================================================
-
 export function QuickSettingsPopup({
   settings: settingsToShow,
   onClose,
@@ -1233,7 +1125,6 @@ export function QuickSettingsPopup({
   onClose: () => void;
 }) {
   const { settings, getValue, setValue } = useSettings();
-
   return (
     <div className="absolute bottom-full right-0 mb-2 w-64 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
@@ -1246,10 +1137,8 @@ export function QuickSettingsPopup({
         {settingsToShow.map(key => {
           const setting = settings.get(key);
           if (!setting) return null;
-
           const value = getValue(key);
           const displayName = key.split('.').pop()?.replace(/([A-Z])/g, ' $1');
-
           if (setting.type === 'boolean') {
             return (
               <label
@@ -1266,7 +1155,6 @@ export function QuickSettingsPopup({
               </label>
             );
           }
-
           if (setting.type === 'enum' && setting.enum) {
             return (
               <div key={key} className="px-2 py-1.5">
@@ -1283,12 +1171,10 @@ export function QuickSettingsPopup({
               </div>
             );
           }
-
           return null;
         })}
       </div>
     </div>
   );
 }
-
 export default SettingsUI;
