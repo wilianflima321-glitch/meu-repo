@@ -1,7 +1,7 @@
 export type IdeHandoffResolution = {
   params: URLSearchParams
   runtimeUrl: string | null
-  discoveryStatus: 'stored' | 'found' | 'not-found' | 'error'
+  discoveryStatus: 'stored' | 'provisioned' | 'found' | 'not-found' | 'provision-error' | 'error'
 }
 
 type ResolveIdeHandoffParamsInput = {
@@ -14,10 +14,30 @@ function isValidRuntimeUrl(value: string): boolean {
   return /^https?:\/\//i.test(value.trim())
 }
 
+async function tryProvisionRuntime(projectId: string | null): Promise<string | null> {
+  if (typeof window === 'undefined') return null
+  const token = window.localStorage.getItem('aethel-token')
+  if (!token) return null
+
+  const response = await fetch('/api/preview/runtime-provision', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ projectId }),
+  })
+  const payload = (await response.json().catch(() => null)) as { runtimeUrl?: string | null } | null
+  if (!response.ok) return null
+  if (typeof payload?.runtimeUrl !== 'string') return null
+  return isValidRuntimeUrl(payload.runtimeUrl) ? payload.runtimeUrl.trim() : null
+}
+
 export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInput): Promise<IdeHandoffResolution> {
   const params = new URLSearchParams()
   params.set('entry', input.entry)
   if (input.projectId) params.set('projectId', input.projectId)
+  let provisionFailed = false
 
   if (typeof window === 'undefined') {
     return {
@@ -39,6 +59,21 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
   }
 
   try {
+    const provisionedRuntime = await tryProvisionRuntime(input.projectId)
+    if (provisionedRuntime) {
+      params.set('previewUrl', provisionedRuntime)
+      window.localStorage.setItem(input.previewRuntimeStorageKey, provisionedRuntime)
+      return {
+        params,
+        runtimeUrl: provisionedRuntime,
+        discoveryStatus: 'provisioned',
+      }
+    }
+  } catch {
+    provisionFailed = true
+  }
+
+  try {
     const response = await fetch('/api/preview/runtime-discover', {
       cache: 'no-store',
     })
@@ -52,7 +87,7 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
       return {
         params,
         runtimeUrl: null,
-        discoveryStatus: 'not-found',
+        discoveryStatus: provisionFailed ? 'provision-error' : 'not-found',
       }
     }
 
@@ -67,7 +102,7 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
     return {
       params,
       runtimeUrl: null,
-      discoveryStatus: 'error',
+      discoveryStatus: provisionFailed ? 'provision-error' : 'error',
     }
   }
 }
