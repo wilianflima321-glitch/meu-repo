@@ -329,3 +329,14 @@ Mandatory implementation:
 - explicit `Provisionar runtime` action keeps deterministic status and telemetry.
 4. Goal:
 - reduce first-preview friction for non-technical users and move runtime setup closer to zero-config behavior.
+
+## 26) Delta 2026-03-05 (preview runtime abuse guardrails)
+1. Added explicit rate-limit capability envelope for preview runtime surfaces:
+- `PREVIEW_RUNTIME_RATE_LIMIT_EXCEEDED` (`429`, `PARTIAL`).
+2. Applied route-level throttling to:
+- `GET /api/preview/runtime-discover`
+- `GET /api/preview/runtime-health`
+- `POST /api/preview/runtime-provision`
+3. Added shared server helper:
+- `lib/server/preview-runtime-rate-limit.ts`
+4. No-fake-success contract updated to enforce `PREVIEW_RUNTIME_RATE_LIMIT_EXCEEDED -> 429`.

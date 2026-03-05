@@ -6,12 +6,24 @@ import {
   discoverPreviewRuntime,
   parseRuntimeDiscoveryCandidates,
 } from '@/lib/server/preview-runtime'
+import {
+  PREVIEW_DISCOVERY_RATE_LIMIT,
+  enforcePreviewRuntimeRateLimit,
+} from '@/lib/server/preview-runtime-rate-limit'
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_DISCOVERY'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
+  const rateLimited = enforcePreviewRuntimeRateLimit({
+    req: request,
+    capability: CAPABILITY,
+    route: '/api/preview/runtime-discover',
+    config: PREVIEW_DISCOVERY_RATE_LIMIT,
+  })
+  if (rateLimited) return rateLimited
+
   const requestedCandidates = parseRuntimeDiscoveryCandidates(request.nextUrl.searchParams)
   const usingDefaultCandidates = requestedCandidates.length === 0
   const candidates = usingDefaultCandidates ? DEFAULT_RUNTIME_CANDIDATES : requestedCandidates

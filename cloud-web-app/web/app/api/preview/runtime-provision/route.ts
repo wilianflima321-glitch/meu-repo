@@ -8,6 +8,10 @@ import {
   normalizeRuntimeCandidate,
   probeRuntimeUrl,
 } from '@/lib/server/preview-runtime'
+import {
+  PREVIEW_PROVISION_RATE_LIMIT,
+  enforcePreviewRuntimeRateLimit,
+} from '@/lib/server/preview-runtime-rate-limit'
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'
 const DEFAULT_TIMEOUT_MS = 12_000
@@ -36,6 +40,14 @@ async function localFallbackDiscover() {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimited = enforcePreviewRuntimeRateLimit({
+    req: request,
+    capability: CAPABILITY,
+    route: '/api/preview/runtime-provision',
+    config: PREVIEW_PROVISION_RATE_LIMIT,
+  })
+  if (rateLimited) return rateLimited
+
   try {
     const auth = requireAuth(request)
     const body = (await request.json().catch(() => null)) as ProvisionBody | null

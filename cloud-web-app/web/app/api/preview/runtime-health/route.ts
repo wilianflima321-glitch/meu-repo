@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { isAllowedRuntimeUrl, probeRuntimeUrl } from '@/lib/server/preview-runtime'
+import {
+  PREVIEW_HEALTH_RATE_LIMIT,
+  enforcePreviewRuntimeRateLimit,
+} from '@/lib/server/preview-runtime-rate-limit'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
+  const rateLimited = enforcePreviewRuntimeRateLimit({
+    req: request,
+    capability: 'IDE_PREVIEW_RUNTIME_HEALTH',
+    route: '/api/preview/runtime-health',
+    config: PREVIEW_HEALTH_RATE_LIMIT,
+  })
+  if (rateLimited) return rateLimited
+
   const target = request.nextUrl.searchParams.get('url')?.trim()
   if (!target) {
     return capabilityResponse({

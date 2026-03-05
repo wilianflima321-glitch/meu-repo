@@ -350,6 +350,8 @@ const checks = [
     file: 'app/api/preview/runtime-discover/route.ts',
     patterns: [
       "const CAPABILITY = 'IDE_PREVIEW_RUNTIME_DISCOVERY'",
+      'enforcePreviewRuntimeRateLimit',
+      'PREVIEW_DISCOVERY_RATE_LIMIT',
       "error: 'RUNTIME_DISCOVERY_TOO_MANY_CANDIDATES'",
       "status: 400",
       "capabilityStatus: 'PARTIAL'",
@@ -362,6 +364,8 @@ const checks = [
     file: 'app/api/preview/runtime-provision/route.ts',
     patterns: [
       "const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'",
+      'enforcePreviewRuntimeRateLimit',
+      'PREVIEW_PROVISION_RATE_LIMIT',
       "error: 'RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED'",
       "error: 'RUNTIME_PROVISION_FAILED'",
       "error: 'RUNTIME_PROVISION_INVALID_URL'",
@@ -371,6 +375,19 @@ const checks = [
       'runtimeUrl',
     ],
     name: 'preview/runtime-provision contract',
+  },
+  {
+    file: 'app/api/preview/runtime-health/route.ts',
+    patterns: [
+      "'IDE_PREVIEW_RUNTIME_HEALTH'",
+      'enforcePreviewRuntimeRateLimit',
+      'PREVIEW_HEALTH_RATE_LIMIT',
+      "error: 'RUNTIME_URL_REQUIRED'",
+      "error: 'RUNTIME_URL_INVALID'",
+      "error: 'RUNTIME_URL_NOT_ALLOWED'",
+      "capabilityStatus: 'PARTIAL'",
+    ],
+    name: 'preview/runtime-health contract',
   },
   {
     file: 'app/api/render/jobs/[jobId]/cancel/route.ts',
