@@ -340,3 +340,11 @@ Mandatory implementation:
 3. Added shared server helper:
 - `lib/server/preview-runtime-rate-limit.ts`
 4. No-fake-success contract updated to enforce `PREVIEW_RUNTIME_RATE_LIMIT_EXCEEDED -> 429`.
+
+## 27) Delta 2026-03-05 (LEARN feedback evidence integrity)
+1. `POST /api/ai/change/feedback` now validates `runId` against scoped change-run ledger evidence before accepting feedback.
+2. New deterministic contracts:
+- `RUN_NOT_FOUND` (`404`) when the `runId` does not exist in evidence window.
+- `LEARN_FEEDBACK_ALREADY_EXISTS` (`409`) when feedback for the same `runId` was already submitted.
+3. Goal:
+- prevent synthetic or duplicated LEARN signals from corrupting L4 readiness metrics.

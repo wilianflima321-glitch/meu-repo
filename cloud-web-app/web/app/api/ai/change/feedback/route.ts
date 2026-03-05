@@ -2,13 +2,15 @@ import { NextRequest } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
 import { capabilityResponse } from '@/lib/server/capability-response'
-import { appendChangeRunLedgerEvent } from '@/lib/server/change-run-ledger'
+import { appendChangeRunLedgerEvent, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
 import { getScopedProjectId } from '@/lib/server/workspace-scope'
 
 export const dynamic = 'force-dynamic'
 
 const CAPABILITY = 'AI_CHANGE_LEARN'
 const MAX_NOTES_CHARS = 2000
+const FEEDBACK_LOOKBACK_DAYS = 30
+const FEEDBACK_LOOKBACK_LIMIT = 5000
 
 type FeedbackKind = 'accepted' | 'rejected' | 'needs_work'
 
@@ -48,6 +50,20 @@ function normalizeRating(value: unknown, feedback: FeedbackKind): number {
   if (feedback === 'accepted') return 1
   if (feedback === 'rejected') return -1
   return 0
+}
+
+function extractRunId(metadata: unknown): string {
+  if (!metadata || typeof metadata !== 'object') return ''
+  const runId = (metadata as Record<string, unknown>).runId
+  if (typeof runId !== 'string') return ''
+  return runId.trim()
+}
+
+function extractSubmittedAt(metadata: unknown): string | null {
+  if (!metadata || typeof metadata !== 'object') return null
+  const submittedAt = (metadata as Record<string, unknown>).submittedAt
+  if (typeof submittedAt !== 'string' || !submittedAt.trim()) return null
+  return submittedAt.trim()
 }
 
 export async function POST(request: NextRequest) {
@@ -112,6 +128,50 @@ export async function POST(request: NextRequest) {
   const runSource = normalizeRunSource(body.runSource)
   const submittedAt = new Date().toISOString()
 
+  const existingEvents = await readChangeRunLedgerEvents({
+    userId: user.userId,
+    sinceIso: new Date(Date.now() - FEEDBACK_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+    limit: FEEDBACK_LOOKBACK_LIMIT,
+  }).catch(() => [])
+
+  const hasRunEvidence = existingEvents.some((event) => {
+    if (event.eventType !== 'apply' && event.eventType !== 'rollback' && event.eventType !== 'apply_blocked' && event.eventType !== 'rollback_blocked') {
+      return false
+    }
+    return extractRunId(event.metadata) === runId
+  })
+  if (!hasRunEvidence) {
+    return capabilityResponse({
+      error: 'RUN_NOT_FOUND',
+      message: 'runId was not found in scoped change-run ledger evidence.',
+      status: 404,
+      capability: CAPABILITY,
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        runId,
+        lookbackDays: FEEDBACK_LOOKBACK_DAYS,
+      },
+    })
+  }
+
+  const previousFeedback = existingEvents.find((event) => {
+    if (event.eventType !== 'learn_feedback') return false
+    return extractRunId(event.metadata) === runId
+  })
+  if (previousFeedback) {
+    return capabilityResponse({
+      error: 'LEARN_FEEDBACK_ALREADY_EXISTS',
+      message: 'Learn feedback already exists for this runId.',
+      status: 409,
+      capability: CAPABILITY,
+      capabilityStatus: 'PARTIAL',
+      metadata: {
+        runId,
+        previousSubmittedAt: extractSubmittedAt(previousFeedback.metadata),
+      },
+    })
+  }
+
   await appendChangeRunLedgerEvent({
     eventType: 'learn_feedback',
     capability: CAPABILITY,
@@ -145,4 +205,3 @@ export async function POST(request: NextRequest) {
     },
   })
 }
-

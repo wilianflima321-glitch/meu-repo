@@ -209,6 +209,8 @@ const checks = [
       "const CAPABILITY = 'AI_CHANGE_LEARN'",
       "error: 'FEEDBACK_REQUIRED'",
       "error: 'RUN_ID_REQUIRED'",
+      "error: 'RUN_NOT_FOUND'",
+      "error: 'LEARN_FEEDBACK_ALREADY_EXISTS'",
       "error: 'FEEDBACK_NOTES_TOO_LONG'",
       "message: 'Learn feedback saved.'",
       "eventType: 'learn_feedback'",
