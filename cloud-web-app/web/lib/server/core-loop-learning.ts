@@ -9,6 +9,7 @@ export type CoreLoopRecommendation = {
     | 'improve_success_rate'
     | 'reduce_regressions'
     | 'increase_sandbox_coverage'
+    | 'increase_feedback_coverage'
     | 'provider_setup'
     | 'approve_high_risk'
     | 'reduce_rejections'
@@ -187,6 +188,14 @@ export function buildCoreLoopRecommendations(params: {
       id: 'increase_sandbox_coverage',
       severity: 'warning',
       message: `Sandbox coverage is below target (${(thresholds.sandboxCoverage * 100).toFixed(0)}%).`,
+    })
+  }
+
+  if (metrics.sampleSize >= Math.min(10, thresholds.minSample) && metrics.learnFeedbackCoverage < thresholds.feedbackCoverageMin) {
+    out.push({
+      id: 'increase_feedback_coverage',
+      severity: 'warning',
+      message: `Learn feedback coverage is below target (${(thresholds.feedbackCoverageMin * 100).toFixed(0)}%).`,
     })
   }
 

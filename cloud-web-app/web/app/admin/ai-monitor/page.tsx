@@ -56,6 +56,9 @@ type AIReadinessMetrics = {
   regressionRate: number;
   blockedRate: number;
   sandboxCoverage: number;
+  learnFeedbackCoverage?: number;
+  reviewedApplyRuns?: number;
+  unreviewedApplyRuns?: number;
   workspaceCoverage?: number;
   workspaceApplyRuns?: number;
 };
@@ -70,6 +73,7 @@ type AIReadiness = {
     successRate: number;
     regressionRateMax: number;
     sandboxCoverage: number;
+    feedbackCoverageMin?: number;
   };
   metrics: AIReadinessMetrics;
   metricsAll?: AIReadinessMetrics;
@@ -92,6 +96,9 @@ type CoreLoopWindowMetrics = {
   regressionRate: number;
   blockedRate: number;
   sandboxCoverage: number;
+  learnFeedbackCoverage?: number;
+  reviewedApplyRuns?: number;
+  unreviewedApplyRuns?: number;
   workspaceCoverage: number;
   workspaceApplyRuns: number;
   sandboxApplyRuns: number;
@@ -730,7 +737,7 @@ export default function AgentMonitorPage() {
           {readiness.samplePolicy && (
             <p className="mb-3 text-xs text-zinc-500">Policy: {readiness.samplePolicy}</p>
           )}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
             <div className="bg-zinc-800/60 rounded p-3">
               <p className="text-zinc-500">Success Rate</p>
               <p className="text-white font-semibold">{(readiness.metrics.applySuccessRate * 100).toFixed(1)}%</p>
@@ -744,10 +751,24 @@ export default function AgentMonitorPage() {
               <p className="text-white font-semibold">{(readiness.metrics.sandboxCoverage * 100).toFixed(1)}%</p>
             </div>
             <div className="bg-zinc-800/60 rounded p-3">
+              <p className="text-zinc-500">Learn Coverage</p>
+              <p className="text-white font-semibold">
+                {((readiness.metrics.learnFeedbackCoverage || 0) * 100).toFixed(1)}%
+              </p>
+            </div>
+            <div className="bg-zinc-800/60 rounded p-3">
               <p className="text-zinc-500">Sample Size</p>
               <p className="text-white font-semibold">{readiness.metrics.sampleSize}</p>
             </div>
           </div>
+          {(typeof readiness.metrics.reviewedApplyRuns === 'number' ||
+            typeof readiness.metrics.unreviewedApplyRuns === 'number') && (
+            <p className="mt-2 text-[11px] text-zinc-500">
+              reviewed={readiness.metrics.reviewedApplyRuns ?? 0} | unreviewed=
+              {readiness.metrics.unreviewedApplyRuns ?? 0} | target learn coverage=
+              {((readiness.thresholds.feedbackCoverageMin ?? 0.6) * 100).toFixed(0)}%
+            </p>
+          )}
           {(readiness.metricsAll || readiness.rehearsalMetrics) && (
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               {readiness.metricsAll && (
@@ -786,6 +807,7 @@ export default function AgentMonitorPage() {
                   <p className="text-zinc-200 mt-1">Success: {(window.metrics.applySuccessRate * 100).toFixed(1)}%</p>
                   <p className="text-zinc-200">Regression: {(window.metrics.regressionRate * 100).toFixed(1)}%</p>
                   <p className="text-zinc-200">Sandbox: {(window.metrics.sandboxCoverage * 100).toFixed(1)}%</p>
+                  <p className="text-zinc-200">Learn: {((window.metrics.learnFeedbackCoverage || 0) * 100).toFixed(1)}%</p>
                 </div>
               ))}
             </div>

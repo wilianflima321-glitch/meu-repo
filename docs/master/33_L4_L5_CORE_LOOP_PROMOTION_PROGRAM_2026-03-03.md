@@ -303,3 +303,19 @@ Mandatory implementation:
 - `sloTargetMs`
 - `sloStatus`
 5. `/admin/onboarding` now exposes first-value SLO target/status in-surface for operator decision loops.
+
+## 24) Delta 2026-03-05 (LEARN coverage threshold hardening)
+1. Core-loop readiness now tracks explicit LEARN coverage per apply-run:
+- `learnFeedbackCoverage`
+- `reviewedApplyRuns`
+- `unreviewedApplyRuns`
+2. Promotion threshold set for LEARN coverage:
+- `feedbackCoverageMin = 0.6` (production sample policy).
+3. New blocker is emitted when coverage is below threshold after minimum evidence floor:
+- `Learn feedback coverage below threshold`.
+4. Run-group evidence now includes learn counters:
+- `learnFeedbackCount`
+- `acceptedFeedbackCount`
+- `rejectedFeedbackCount`
+- `needsWorkFeedbackCount`
+5. `/admin/ai-monitor` readiness card now surfaces LEARN coverage and reviewed/unreviewed counts to close blind spots in `ROLLBACK -> LEARN`.

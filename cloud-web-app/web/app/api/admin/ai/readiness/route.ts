@@ -21,12 +21,14 @@ const L4_MIN_SAMPLE = 20
 const L4_SUCCESS_RATE_TARGET = 0.9
 const L4_REGRESSION_RATE_MAX = 0.05
 const L4_SANDBOX_COVERAGE_TARGET = 0.5
+const L4_FEEDBACK_COVERAGE_TARGET = 0.6
 
 const THRESHOLDS: CoreLoopThresholds = {
   minSample: L4_MIN_SAMPLE,
   successRate: L4_SUCCESS_RATE_TARGET,
   regressionRateMax: L4_REGRESSION_RATE_MAX,
   sandboxCoverage: L4_SANDBOX_COVERAGE_TARGET,
+  feedbackCoverageMin: L4_FEEDBACK_COVERAGE_TARGET,
 }
 
 const WINDOW_HOURS = [24, 24 * 7, 24 * 30]
@@ -116,7 +118,10 @@ export const GET = withAdminAuth(async () => {
         regressionRate: primaryWindow.reportProduction.metrics.regressionRate,
         blockedRate: primaryWindow.reportProduction.metrics.blockedRate,
         sandboxCoverage: primaryWindow.reportProduction.metrics.sandboxCoverage,
+        learnFeedbackCoverage: primaryWindow.reportProduction.metrics.learnFeedbackCoverage,
         workspaceCoverage: primaryWindow.reportProduction.metrics.workspaceCoverage,
+        reviewedApplyRuns: primaryWindow.reportProduction.metrics.reviewedApplyRuns,
+        unreviewedApplyRuns: primaryWindow.reportProduction.metrics.unreviewedApplyRuns,
         workspaceApplyRuns: primaryWindow.reportProduction.metrics.workspaceApplyRuns,
         sandboxApplyRuns: primaryWindow.reportProduction.metrics.sandboxApplyRuns,
         successfulApplyRuns: primaryWindow.reportProduction.metrics.successfulApplyRuns,

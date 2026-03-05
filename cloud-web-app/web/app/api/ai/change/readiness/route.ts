@@ -25,6 +25,7 @@ const THRESHOLDS: CoreLoopThresholds = {
   successRate: 0.9,
   regressionRateMax: 0.05,
   sandboxCoverage: 0.5,
+  feedbackCoverageMin: 0.6,
 }
 
 function parseHours(value: string | null): number {
@@ -113,7 +114,12 @@ export async function GET(request: NextRequest) {
       sinceIso,
       samplePolicy: 'production_only_for_promotion',
       thresholds: report.thresholds,
-      metrics: report.metrics,
+      metrics: {
+        ...report.metrics,
+        learnFeedbackCoverage: report.metrics.learnFeedbackCoverage,
+        reviewedApplyRuns: report.metrics.reviewedApplyRuns,
+        unreviewedApplyRuns: report.metrics.unreviewedApplyRuns,
+      },
       metricsAll: reportAll.metrics,
       rehearsalMetrics: rehearsalReport.metrics,
       rollup: report.rollup,

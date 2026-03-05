@@ -59,6 +59,10 @@ export interface ChangeRunLedgerGroup {
   executionModes: string[]
   runSources: string[]
   sampleClass: ChangeRunSampleClass
+  learnFeedbackCount: number
+  acceptedFeedbackCount: number
+  rejectedFeedbackCount: number
+  needsWorkFeedbackCount: number
 }
 
 function buildLedgerFilePath(now = new Date()): string {
@@ -289,6 +293,10 @@ export function summarizeChangeRunGroups(rows: ChangeRunLedgerRow[], limit = 50)
       files: Set<string>
       executionModes: Set<string>
       runSources: Set<string>
+      learnFeedbackCount: number
+      acceptedFeedbackCount: number
+      rejectedFeedbackCount: number
+      needsWorkFeedbackCount: number
     }
   >()
 
@@ -310,11 +318,25 @@ export function summarizeChangeRunGroups(rows: ChangeRunLedgerRow[], limit = 50)
         files: new Set<string>(),
         executionModes: new Set<string>(),
         runSources: new Set<string>(),
+        learnFeedbackCount: 0,
+        acceptedFeedbackCount: 0,
+        rejectedFeedbackCount: 0,
+        needsWorkFeedbackCount: 0,
       }
 
     base.eventCount += 1
     if (row.eventType === 'apply') base.applyCount += 1
     if (row.eventType === 'rollback') base.rollbackCount += 1
+    if (row.eventType === 'learn_feedback') {
+      base.learnFeedbackCount += 1
+      const feedback =
+        row.metadata && typeof row.metadata === 'object' && typeof (row.metadata as Record<string, unknown>).feedback === 'string'
+          ? String((row.metadata as Record<string, unknown>).feedback).trim().toLowerCase()
+          : ''
+      if (feedback === 'accepted') base.acceptedFeedbackCount += 1
+      if (feedback === 'rejected') base.rejectedFeedbackCount += 1
+      if (feedback === 'needs_work') base.needsWorkFeedbackCount += 1
+    }
     if (row.outcome === 'blocked') base.blockedCount += 1
     if (row.outcome === 'failed') base.failedCount += 1
     if (row.outcome === 'success') base.successCount += 1
@@ -352,6 +374,10 @@ export function summarizeChangeRunGroups(rows: ChangeRunLedgerRow[], limit = 50)
         executionModes: [...group.executionModes],
         runSources,
         sampleClass,
+        learnFeedbackCount: group.learnFeedbackCount,
+        acceptedFeedbackCount: group.acceptedFeedbackCount,
+        rejectedFeedbackCount: group.rejectedFeedbackCount,
+        needsWorkFeedbackCount: group.needsWorkFeedbackCount,
       }
     })
     .sort((a, b) => new Date(b.lastTimestamp).getTime() - new Date(a.lastTimestamp).getTime())

@@ -11,6 +11,7 @@ export type CoreLoopThresholds = {
   successRate: number
   regressionRateMax: number
   sandboxCoverage: number
+  feedbackCoverageMin: number
 }
 
 export type CoreLoopWindowReport = {
@@ -20,7 +21,10 @@ export type CoreLoopWindowReport = {
   regressionRate: number
   blockedRate: number
   sandboxCoverage: number
+  learnFeedbackCoverage: number
   workspaceCoverage: number
+  reviewedApplyRuns: number
+  unreviewedApplyRuns: number
   workspaceApplyRuns: number
   sandboxApplyRuns: number
   successfulApplyRuns: number
@@ -55,11 +59,14 @@ export function computeCoreLoopReadiness(params: {
   const blockedApplyRuns = applyRuns.filter((group) => group.finalOutcome === 'blocked').length
   const sandboxApplyRuns = applyRuns.filter((group) => group.executionModes.includes('sandbox')).length
   const workspaceApplyRuns = applyRuns.filter((group) => group.executionModes.includes('workspace')).length
+  const reviewedApplyRuns = applyRuns.filter((group) => group.learnFeedbackCount > 0).length
+  const unreviewedApplyRuns = Math.max(0, totalApplyRuns - reviewedApplyRuns)
 
   const applySuccessRate = totalApplyRuns > 0 ? successfulApplyRuns / totalApplyRuns : 0
   const regressionRate = totalApplyRuns > 0 ? failedApplyRuns / totalApplyRuns : 0
   const blockedRate = totalApplyRuns > 0 ? blockedApplyRuns / totalApplyRuns : 0
   const sandboxCoverage = totalApplyRuns > 0 ? sandboxApplyRuns / totalApplyRuns : 0
+  const learnFeedbackCoverage = totalApplyRuns > 0 ? reviewedApplyRuns / totalApplyRuns : 0
   const workspaceCoverage = totalApplyRuns > 0 ? workspaceApplyRuns / totalApplyRuns : 0
 
   const blockers: string[] = []
@@ -68,6 +75,9 @@ export function computeCoreLoopReadiness(params: {
   if (applySuccessRate < params.thresholds.successRate) blockers.push('Apply success rate below threshold')
   if (regressionRate > params.thresholds.regressionRateMax) blockers.push('Regression rate above threshold')
   if (sandboxCoverage < params.thresholds.sandboxCoverage) blockers.push('Sandbox coverage below threshold')
+  if (totalApplyRuns >= Math.min(10, params.thresholds.minSample) && learnFeedbackCoverage < params.thresholds.feedbackCoverageMin) {
+    blockers.push('Learn feedback coverage below threshold')
+  }
 
   return {
     thresholds: params.thresholds,
@@ -81,7 +91,10 @@ export function computeCoreLoopReadiness(params: {
       regressionRate,
       blockedRate,
       sandboxCoverage,
+      learnFeedbackCoverage,
       workspaceCoverage,
+      reviewedApplyRuns,
+      unreviewedApplyRuns,
       workspaceApplyRuns,
       sandboxApplyRuns,
       successfulApplyRuns,

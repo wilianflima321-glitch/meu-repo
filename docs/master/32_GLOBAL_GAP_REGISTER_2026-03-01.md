@@ -33,6 +33,7 @@ Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no est
 2. Manter `0` dialogs bloqueantes ativos (`window.confirm/alert/prompt`) e bloquear regressao.
 3. Manter gates `NOT_IMPLEMENTED` explicitos apenas onde a capacidade realmente nao existe.
 4. Manter `00_INDEX` com read-order canonico completo (sem drift).
+5. Elevar cobertura de `LEARN` em runs de apply de producao para cumprir `feedbackCoverageMin=0.6` (promocao L4 bloqueada abaixo disso).
 
 ### P1
 1. Consolidar markdown nao-canonico e reduzir volume consultivo fora de `docs/master`.
