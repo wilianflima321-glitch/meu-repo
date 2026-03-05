@@ -366,3 +366,13 @@ Mandatory implementation:
 - `readyPollMs`
 3. Goal:
 - reduce false-negative provisioning failures during runtime boot and improve first-preview reliability for authenticated users.
+
+## 30) Delta 2026-03-05 (managed preview endpoint failover)
+1. `POST /api/preview/runtime-provision` now supports multi-endpoint failover:
+- `AETHEL_PREVIEW_PROVISION_ENDPOINT` (primary)
+- `AETHEL_PREVIEW_PROVISION_ENDPOINTS` (CSV fallback chain)
+2. Provision attempts are executed sequentially with deterministic diagnostics:
+- per-attempt metadata (`endpoint`, `status`, `mode`, `error`)
+- success metadata includes selected `endpoint`, `attempt`, `totalEndpoints`
+3. Goal:
+- increase runtime provisioning resilience and reduce onboarding failures caused by single-endpoint outages.

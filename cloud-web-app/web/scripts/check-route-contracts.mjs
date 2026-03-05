@@ -374,6 +374,8 @@ const checks = [
       "error: 'RUNTIME_PROVISION_UNHEALTHY'",
       "error: 'RUNTIME_PROVISION_EXCEPTION'",
       'waitForRuntimeReady',
+      'parseProvisionEndpoints',
+      'AETHEL_PREVIEW_PROVISION_ENDPOINTS',
       'AETHEL_PREVIEW_PROVISION_READY_WAIT_MS',
       'AETHEL_PREVIEW_PROVISION_READY_POLL_MS',
       "capabilityStatus: 'PARTIAL'",

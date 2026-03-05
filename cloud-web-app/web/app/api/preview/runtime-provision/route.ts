@@ -24,6 +24,20 @@ type ProvisionBody = {
   projectId?: unknown
 }
 
+type ManagedProvisionAttempt = {
+  endpoint: string
+  status?: number
+  error?: string
+  mode: 'upstream_error' | 'invalid_runtime_url' | 'request_exception'
+}
+
+type ManagedProvisionSuccess = {
+  runtimeUrl: string
+  endpoint: string
+  attempt: number
+  totalEndpoints: number
+}
+
 function parseTimeoutMs(raw: string | undefined): number {
   const parsed = Number.parseInt(String(raw ?? ''), 10)
   if (!Number.isFinite(parsed)) return DEFAULT_TIMEOUT_MS
@@ -34,6 +48,26 @@ function parseProjectId(raw: unknown): string {
   if (typeof raw !== 'string') return 'default'
   const normalized = raw.trim().replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80)
   return normalized || 'default'
+}
+
+function parseProvisionEndpoints(rawSingle: string, rawList: string): string[] {
+  const values = [rawSingle, ...rawList.split(',')]
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+  const unique: string[] = []
+  const seen = new Set<string>()
+  for (const entry of values) {
+    let normalized = entry
+    try {
+      normalized = new URL(entry).toString()
+    } catch {
+      // Keep original value to surface explicit invalid endpoint failures.
+    }
+    if (seen.has(normalized)) continue
+    seen.add(normalized)
+    unique.push(normalized)
+  }
+  return unique
 }
 
 function parseReadyWaitMs(raw: string | undefined): number {
@@ -86,6 +120,87 @@ async function localFallbackDiscover() {
   return payload.preferredRuntimeUrl
 }
 
+async function callManagedProvisionEndpoint(params: {
+  endpoint: string
+  projectId: string
+  userId: string
+  timeoutMs: number
+  provisionToken: string
+}): Promise<{
+  success?: ManagedProvisionSuccess
+  failure?: ManagedProvisionAttempt
+}> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), params.timeoutMs)
+  try {
+    const response = await fetch(params.endpoint, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.provisionToken ? { Authorization: `Bearer ${params.provisionToken}` } : {}),
+      },
+      body: JSON.stringify({
+        projectId: params.projectId,
+        userId: params.userId,
+      }),
+    })
+    const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null
+    if (!response.ok) {
+      return {
+        failure: {
+          endpoint: params.endpoint,
+          status: response.status,
+          mode: 'upstream_error',
+          error:
+            typeof payload?.error === 'string'
+              ? payload.error
+              : typeof payload?.message === 'string'
+                ? payload.message
+                : 'unknown',
+        },
+      }
+    }
+
+    const candidate =
+      typeof payload?.runtimeUrl === 'string'
+        ? payload.runtimeUrl
+        : typeof payload?.previewUrl === 'string'
+          ? payload.previewUrl
+          : ''
+    const runtimeUrl = normalizeRuntimeCandidate(candidate)
+    if (!runtimeUrl) {
+      return {
+        failure: {
+          endpoint: params.endpoint,
+          status: response.status,
+          mode: 'invalid_runtime_url',
+          error: 'invalid_or_blocked_runtime_url',
+        },
+      }
+    }
+
+    return {
+      success: {
+        runtimeUrl,
+        endpoint: params.endpoint,
+        attempt: 0,
+        totalEndpoints: 0,
+      },
+    }
+  } catch (error) {
+    return {
+      failure: {
+        endpoint: params.endpoint,
+        mode: 'request_exception',
+        error: error instanceof Error ? error.message : 'request_exception',
+      },
+    }
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 export async function POST(request: NextRequest) {
   const rateLimited = enforcePreviewRuntimeRateLimit({
     req: request,
@@ -101,12 +216,14 @@ export async function POST(request: NextRequest) {
     const projectId = parseProjectId(body?.projectId)
 
     const provisionEndpoint = String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINT || '').trim()
+    const provisionEndpointsCsv = String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINTS || '').trim()
     const provisionToken = String(process.env.AETHEL_PREVIEW_PROVISION_TOKEN || '').trim()
     const timeoutMs = parseTimeoutMs(process.env.AETHEL_PREVIEW_PROVISION_TIMEOUT_MS)
     const readyWaitMs = parseReadyWaitMs(process.env.AETHEL_PREVIEW_PROVISION_READY_WAIT_MS)
     const readyPollMs = parseReadyPollMs(process.env.AETHEL_PREVIEW_PROVISION_READY_POLL_MS)
+    const provisionEndpoints = parseProvisionEndpoints(provisionEndpoint, provisionEndpointsCsv)
 
-    if (!provisionEndpoint) {
+    if (provisionEndpoints.length === 0) {
       const localRuntime = await localFallbackDiscover()
       if (!localRuntime) {
         return capabilityResponse({
@@ -118,7 +235,7 @@ export async function POST(request: NextRequest) {
           metadata: {
             mode: 'local_fallback',
             preferredRuntimeUrl: null,
-            setupEnv: 'AETHEL_PREVIEW_PROVISION_ENDPOINT',
+            setupEnv: ['AETHEL_PREVIEW_PROVISION_ENDPOINT', 'AETHEL_PREVIEW_PROVISION_ENDPOINTS'],
           },
         })
       }
@@ -143,66 +260,73 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    const failures: ManagedProvisionAttempt[] = []
+    let managedSuccess: ManagedProvisionSuccess | null = null
+
+    for (let index = 0; index < provisionEndpoints.length; index += 1) {
+      const endpoint = provisionEndpoints[index]
+      const attemptResult = await callManagedProvisionEndpoint({
+        endpoint,
+        projectId,
+        userId: auth.userId,
+        timeoutMs,
+        provisionToken,
+      })
+      if (attemptResult.success) {
+        managedSuccess = {
+          ...attemptResult.success,
+          attempt: index + 1,
+          totalEndpoints: provisionEndpoints.length,
+        }
+        break
+      }
+      if (attemptResult.failure) {
+        failures.push(attemptResult.failure)
+        if (
+          attemptResult.failure.mode === 'invalid_runtime_url' &&
+          index === provisionEndpoints.length - 1
+        ) {
+          return capabilityResponse({
+            error: 'RUNTIME_PROVISION_INVALID_URL',
+            status: 502,
+            message: 'Provision backend returned an invalid or blocked runtime URL.',
+            capability: CAPABILITY,
+            capabilityStatus: 'PARTIAL',
+            metadata: {
+              mode: 'managed',
+              projectId,
+              endpoint,
+              attempt: index + 1,
+              totalEndpoints: provisionEndpoints.length,
+            },
+          })
+        }
+      }
+    }
+
+    if (!managedSuccess) {
+      return capabilityResponse({
+        error: 'RUNTIME_PROVISION_FAILED',
+        status: 503,
+        message: 'Managed preview provision request failed.',
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          mode: 'managed',
+          projectId,
+          attempts: failures,
+          attemptCount: failures.length,
+          totalEndpoints: provisionEndpoints.length,
+        },
+      })
+    }
 
     try {
-      const response = await fetch(provisionEndpoint, {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(provisionToken ? { Authorization: `Bearer ${provisionToken}` } : {}),
-        },
-        body: JSON.stringify({
-          projectId,
-          userId: auth.userId,
-        }),
-      })
-      const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null
-      if (!response.ok) {
-        return capabilityResponse({
-          error: 'RUNTIME_PROVISION_FAILED',
-          status: 503,
-          message: 'Managed preview provision request failed.',
-          capability: CAPABILITY,
-          capabilityStatus: 'PARTIAL',
-          metadata: {
-            mode: 'managed',
-            projectId,
-            upstreamStatus: response.status,
-            upstreamError:
-              typeof payload?.error === 'string'
-                ? payload.error
-                : typeof payload?.message === 'string'
-                  ? payload.message
-                  : 'unknown',
-          },
-        })
-      }
-
-      const candidate =
-        typeof payload?.runtimeUrl === 'string'
-          ? payload.runtimeUrl
-          : typeof payload?.previewUrl === 'string'
-            ? payload.previewUrl
-            : ''
-      const runtimeUrl = normalizeRuntimeCandidate(candidate)
-      if (!runtimeUrl) {
-        return capabilityResponse({
-          error: 'RUNTIME_PROVISION_INVALID_URL',
-          status: 502,
-          message: 'Provision backend returned an invalid or blocked runtime URL.',
-          capability: CAPABILITY,
-          capabilityStatus: 'PARTIAL',
-          metadata: {
-            mode: 'managed',
-            projectId,
-          },
-        })
-      }
-
-      const readiness = await waitForRuntimeReady(runtimeUrl, readyWaitMs, readyPollMs)
+      const readiness = await waitForRuntimeReady(
+        managedSuccess.runtimeUrl,
+        readyWaitMs,
+        readyPollMs
+      )
       if (!readiness.probe.reachable) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_UNHEALTHY',
@@ -213,7 +337,10 @@ export async function POST(request: NextRequest) {
           metadata: {
             mode: 'managed',
             projectId,
-            runtimeUrl,
+            runtimeUrl: managedSuccess.runtimeUrl,
+            endpoint: managedSuccess.endpoint,
+            attempt: managedSuccess.attempt,
+            totalEndpoints: managedSuccess.totalEndpoints,
             probeStatus: readiness.probe.status,
             latencyMs: readiness.probe.latencyMs,
             httpStatus: readiness.probe.httpStatus,
@@ -231,11 +358,14 @@ export async function POST(request: NextRequest) {
           success: true,
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
-          runtimeUrl,
+          runtimeUrl: managedSuccess.runtimeUrl,
           metadata: {
             mode: 'managed',
             managed: true,
             projectId,
+            endpoint: managedSuccess.endpoint,
+            attempt: managedSuccess.attempt,
+            totalEndpoints: managedSuccess.totalEndpoints,
             latencyMs: readiness.probe.latencyMs,
             httpStatus: readiness.probe.httpStatus,
             readyAttempts: readiness.attempts,
@@ -261,10 +391,11 @@ export async function POST(request: NextRequest) {
         metadata: {
           mode: 'managed',
           projectId,
+          endpoint: managedSuccess.endpoint,
+          attempt: managedSuccess.attempt,
+          totalEndpoints: managedSuccess.totalEndpoints,
         },
       })
-    } finally {
-      clearTimeout(timeout)
     }
   } catch (error) {
     const mapped = apiErrorToResponse(error)
