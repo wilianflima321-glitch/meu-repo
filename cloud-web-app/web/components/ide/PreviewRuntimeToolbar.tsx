@@ -23,7 +23,9 @@ type Props = {
   onRevalidate: () => void
   onOpenRuntime: () => void
   onDiscoverRuntime: () => void
+  onProvisionRuntime: () => void
   isDiscoveringRuntime: boolean
+  isProvisioningRuntime: boolean
   runtimeDiscoveryMessage?: string | null
   runtimeDiscoveryTone?: 'info' | 'success' | 'warning'
 }
@@ -43,7 +45,9 @@ export default function PreviewRuntimeToolbar({
   onRevalidate,
   onOpenRuntime,
   onDiscoverRuntime,
+  onProvisionRuntime,
   isDiscoveringRuntime,
+  isProvisioningRuntime,
   runtimeDiscoveryMessage,
   runtimeDiscoveryTone = 'info',
 }: Props) {
@@ -102,6 +106,14 @@ export default function PreviewRuntimeToolbar({
             className="rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isDiscoveringRuntime ? 'Detectando...' : 'Auto detectar'}
+          </button>
+          <button
+            type="button"
+            onClick={onProvisionRuntime}
+            disabled={isProvisioningRuntime}
+            className="rounded border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isProvisioningRuntime ? 'Provisionando...' : 'Provisionar runtime'}
           </button>
           {previewRuntimeUrl && (
             <button

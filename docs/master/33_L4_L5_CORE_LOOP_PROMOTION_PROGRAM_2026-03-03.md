@@ -278,3 +278,28 @@ Mandatory implementation:
 - regular demo payload while budget remains;
 - `429 AI_DEMO_LIMIT_REACHED` with setup metadata when exhausted.
 4. Provider status now exposes `demoDailyLimit` alongside `demoModeEnabled` for UI transparency.
+
+## 22) Delta 2026-03-05 (core AI route-rate-limit hardening)
+1. Added shared throttling helper:
+- `lib/server/ai-core-rate-limit.ts`.
+2. Applied explicit route-level 429 envelopes (`AI_RATE_LIMIT_EXCEEDED`) to:
+- `/api/ai/chat`
+- `/api/ai/chat-advanced`
+- `/api/ai/complete`
+- `/api/ai/action`
+- `/api/ai/inline-edit`
+- `/api/ai/inline-completion`
+3. `qa:no-fake-success` mapping extended to enforce `AI_RATE_LIMIT_EXCEEDED -> 429`.
+
+## 23) Delta 2026-03-05 (managed preview provision + first-value SLO visibility)
+1. Added authenticated runtime provision endpoint:
+- `POST /api/preview/runtime-provision` (`IDE_PREVIEW_RUNTIME_PROVISION`, `PARTIAL`).
+2. IDE preview toolbar now includes `Provisionar runtime` action (managed or local-fallback path) with deterministic feedback.
+3. Runtime allowlist now supports configured non-local hosts/ports:
+- `AETHEL_PREVIEW_ALLOWED_HOSTS`
+- `AETHEL_PREVIEW_ALLOWED_PORTS`
+4. Admin onboarding stats now emit SLO contract fields:
+- `sampleSize`
+- `sloTargetMs`
+- `sloStatus`
+5. `/admin/onboarding` now exposes first-value SLO target/status in-surface for operator decision loops.

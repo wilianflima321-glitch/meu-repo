@@ -49,6 +49,15 @@ type RuntimeDiscoveryResponse = {
   }>
 }
 
+type RuntimeProvisionResponse = {
+  runtimeUrl?: string | null
+  error?: string
+  message?: string
+  metadata?: {
+    mode?: string
+  }
+}
+
 type FullAccessGrant = {
   id: string
   userId: string
@@ -177,6 +186,7 @@ function IDEContent() {
   const [runtimeHealth, setRuntimeHealth] = useState<RuntimeHealthState>({ status: 'idle' })
   const [runtimeHealthCheckedAt, setRuntimeHealthCheckedAt] = useState<Date | null>(null)
   const [isDiscoveringRuntime, setIsDiscoveringRuntime] = useState(false)
+  const [isProvisioningRuntime, setIsProvisioningRuntime] = useState(false)
   const [runtimeDiscoveryMessage, setRuntimeDiscoveryMessage] = useState<string | null>(null)
   const [runtimeDiscoveryTone, setRuntimeDiscoveryTone] = useState<'info' | 'success' | 'warning'>('info')
   const [fullAccessBusy, setFullAccessBusy] = useState(false)
@@ -555,6 +565,67 @@ function IDEContent() {
     }
   }, [isDiscoveringRuntime])
 
+  const provisionRuntime = useCallback(async () => {
+    if (isProvisioningRuntime) return
+    setIsProvisioningRuntime(true)
+    setRuntimeDiscoveryTone('info')
+    setRuntimeDiscoveryMessage('Provisionando runtime gerenciado...')
+
+    try {
+      const response = await fetch('/api/preview/runtime-provision', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ projectId }),
+      })
+      const payload = (await response.json().catch(() => null)) as RuntimeProvisionResponse | null
+      if (!response.ok) {
+        const reason = payload?.error || payload?.message || `HTTP ${response.status}`
+        throw new Error(reason)
+      }
+
+      const runtimeUrl = normalizeRuntimeUrl(payload?.runtimeUrl ?? null)
+      if (!runtimeUrl) {
+        throw new Error('Runtime provision endpoint returned empty runtime URL.')
+      }
+
+      setPreviewRuntimeUrl(runtimeUrl)
+      setPreviewRuntimeInput(runtimeUrl)
+      setRuntimeHealth({ status: 'checking' })
+      setRuntimeHealthCheckedAt(new Date())
+      setRuntimeDiscoveryTone('success')
+      setRuntimeDiscoveryMessage(`Runtime provisionado: ${runtimeUrl}`)
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, runtimeUrl)
+      }
+
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-provision',
+          status: 'provisioned',
+          runtimeUrl,
+          mode: payload?.metadata?.mode || 'unknown',
+        },
+      })
+    } catch (error) {
+      setRuntimeDiscoveryTone('warning')
+      setRuntimeDiscoveryMessage(
+        error instanceof Error ? `Falha ao provisionar runtime: ${error.message}` : 'Falha ao provisionar runtime.'
+      )
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-provision',
+          status: 'error',
+          reason: error instanceof Error ? error.message : 'unknown',
+        },
+      })
+    } finally {
+      setIsProvisioningRuntime(false)
+    }
+  }, [isProvisioningRuntime, projectId])
+
   const forceInlinePreviewFallback =
     Boolean(previewRuntimeUrl) &&
     (runtimeHealth.status === 'unreachable' ||
@@ -830,10 +901,14 @@ function IDEContent() {
                 onApplyRuntime={applyRuntimeUrl}
                 onUseFallback={handleUseInlineFallback}
                 isDiscoveringRuntime={isDiscoveringRuntime}
+                isProvisioningRuntime={isProvisioningRuntime}
                 runtimeDiscoveryMessage={runtimeDiscoveryMessage}
                 runtimeDiscoveryTone={runtimeDiscoveryTone}
                 onDiscoverRuntime={() => {
                   void discoverRuntime('manual')
+                }}
+                onProvisionRuntime={() => {
+                  void provisionRuntime()
                 }}
                 onRevalidate={() => {
                   if (!previewRuntimeUrl) return

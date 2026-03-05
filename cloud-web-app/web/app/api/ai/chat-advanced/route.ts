@@ -27,6 +27,7 @@ import {
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode';
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
+import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -241,6 +242,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Autenticação
     const auth = requireAuth(request);
+    const rateLimited = enforceAiCoreRateLimit({
+      req: request,
+      capability: 'AI_CHAT_ADVANCED',
+      route: '/api/ai/chat-advanced',
+      config: AI_CORE_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
     const userId = auth.userId;
 
     const body: AdvancedChatRequest = await request.json();

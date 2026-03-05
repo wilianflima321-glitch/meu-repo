@@ -13,6 +13,7 @@ import {
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode'
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
+import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 
 /**
  * POST /api/ai/action
@@ -43,6 +44,13 @@ const ACTION_PROMPTS: Record<string, (code: string, language: string) => string>
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req)
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'AI_ACTION',
+      route: '/api/ai/action',
+      config: AI_CORE_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
     const body = await req.json().catch(() => null)
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'INVALID_BODY', message: 'Invalid JSON body.' }, { status: 400 })

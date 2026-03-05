@@ -19,6 +19,7 @@ import {
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode';
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
+import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 
 function resolveBackendBaseUrl(): string | null {
   const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -32,6 +33,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     const auth = requireAuth(req);
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'AI_CHAT',
+      route: '/api/ai/chat',
+      config: AI_CORE_RATE_LIMIT,
+    });
+    if (rateLimited) return rateLimited;
     const entitlements = await requireEntitlementsForUser(auth.userId);
 
     const body = await req.json().catch(() => null);

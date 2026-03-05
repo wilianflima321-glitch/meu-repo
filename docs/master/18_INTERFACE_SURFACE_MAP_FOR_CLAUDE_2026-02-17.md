@@ -336,3 +336,15 @@ CI workflows:
 1. `app/admin/ai-monitor/page.tsx` now shows deterministic success/error notice banner after `Run Drill` and `Run Production Probe`.
 2. Notices include operational totals (`runs`, `success`, `blocked`, `failed`) and selected probe file when available.
 3. Goal: eliminate silent-only console failure mode and keep operator loop transactional in-surface.
+
+## 43. Delta 2026-03-05 (preview runtime managed provision control)
+1. Added `app/api/preview/runtime-provision/route.ts` (`IDE_PREVIEW_RUNTIME_PROVISION`, `PARTIAL`) for authenticated runtime provision flow.
+2. `components/ide/PreviewRuntimeToolbar.tsx` now exposes `Provisionar runtime` action in runtime strip.
+3. `components/ide/FullscreenIDE.tsx` now applies provisioned runtime URL directly and persists it for session continuity.
+
+## 44. Delta 2026-03-05 (onboarding SLO visibility contract)
+1. `app/api/admin/onboarding/stats/route.ts` now emits first-value SLO metadata:
+- `sampleSize`
+- `sloTargetMs`
+- `sloStatus` (`pass|fail|insufficient_sample`)
+2. `app/admin/onboarding/page.tsx` now renders explicit SLO card with target + verdict.

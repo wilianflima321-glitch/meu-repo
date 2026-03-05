@@ -13,6 +13,7 @@ import {
   isAiDemoModeEnabled,
 } from '@/lib/server/ai-demo-mode'
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
+import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 
 const INLINE_EDIT_SYSTEM_PROMPT = `You are an inline code editing assistant.
 Rules:
@@ -48,6 +49,13 @@ function asProvider(value: unknown): LLMProvider | undefined {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req)
+    const rateLimited = enforceAiCoreRateLimit({
+      req,
+      capability: 'AI_INLINE_EDIT',
+      route: '/api/ai/inline-edit',
+      config: AI_INLINE_RATE_LIMIT,
+    })
+    if (rateLimited) return rateLimited
     const body = (await req.json().catch(() => null)) as InlineEditBody | null
 
     if (!body || typeof body !== 'object') {

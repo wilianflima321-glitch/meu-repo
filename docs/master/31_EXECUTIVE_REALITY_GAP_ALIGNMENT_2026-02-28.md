@@ -854,3 +854,27 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - `Run Production Probe`
 2. Notices now include deterministic totals from API payloads (`runs`, `success`, `blocked`, `failed`) and probe file when available.
 3. Result: operator workflows no longer depend on console-only diagnostics for critical probe actions.
+
+### 7.96 Core AI route-rate-limiting baseline (2026-03-05-a)
+1. Added shared server helper `lib/server/ai-core-rate-limit.ts` with explicit capability envelope on throttling (`429 AI_RATE_LIMIT_EXCEEDED`).
+2. Applied route-level throttling to critical AI surfaces:
+- `/api/ai/chat`
+- `/api/ai/chat-advanced`
+- `/api/ai/complete`
+- `/api/ai/action`
+- `/api/ai/inline-edit`
+- `/api/ai/inline-completion`
+3. `check-no-fake-success` mapping now includes `AI_RATE_LIMIT_EXCEEDED -> 429`.
+
+### 7.97 Managed preview provisioning + onboarding SLO contract (2026-03-05-b)
+1. Added authenticated preview provisioning endpoint:
+- `POST /api/preview/runtime-provision` (`IDE_PREVIEW_RUNTIME_PROVISION`, `PARTIAL`).
+2. IDE runtime toolbar now supports explicit `Provisionar runtime` action with deterministic feedback.
+3. Runtime allowlist now supports operator-configured hosts/ports:
+- `AETHEL_PREVIEW_ALLOWED_HOSTS`
+- `AETHEL_PREVIEW_ALLOWED_PORTS`
+4. `/api/admin/onboarding/stats` now exposes first-value SLO contract:
+- `sampleSize`
+- `sloTargetMs` (default `90000`)
+- `sloStatus` (`pass|fail|insufficient_sample`)
+5. `/admin/onboarding` now displays SLO target + verdict in the metrics strip.

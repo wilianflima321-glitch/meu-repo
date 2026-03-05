@@ -30,6 +30,9 @@ type OnboardingStatsResponse = {
     completionRateFromSignup: number | null
     completionRateFromEntry: number | null
     medianFirstValueTimeMs: number | null
+    sampleSize: number
+    sloTargetMs: number
+    sloStatus: 'pass' | 'fail' | 'insufficient_sample'
   }
   funnel: Funnel
   actionCounts: Record<string, number>
@@ -57,7 +60,15 @@ function computeMedian(values: number[]): number | null {
   return sorted[middle]
 }
 
+function parseMsWithDefault(raw: string | undefined, fallback: number): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback
+  return parsed
+}
+
 const handler = async (req: NextRequest) => {
+  const firstValueSloTargetMs = parseMsWithDefault(process.env.AETHEL_FIRST_VALUE_SLO_MS, 90_000)
+  const minSloSample = parseMsWithDefault(process.env.AETHEL_FIRST_VALUE_MIN_SAMPLE, 10)
   const days = clampDays(new URL(req.url).searchParams.get('days'))
   const endAt = new Date()
   const startAt = new Date(endAt.getTime() - days * 24 * 60 * 60 * 1000)
@@ -159,6 +170,13 @@ const handler = async (req: NextRequest) => {
     funnel.onboardingEntries > 0
       ? Number(((funnel.firstValueCompleted / funnel.onboardingEntries) * 100).toFixed(2))
       : null
+  const medianFirstValueTimeMs = computeMedian(firstValueDurations)
+  const sloStatus: 'pass' | 'fail' | 'insufficient_sample' =
+    firstValueDurations.length < minSloSample
+      ? 'insufficient_sample'
+      : medianFirstValueTimeMs !== null && medianFirstValueTimeMs <= firstValueSloTargetMs
+        ? 'pass'
+        : 'fail'
 
   const response: OnboardingStatsResponse = {
     success: true,
@@ -178,7 +196,10 @@ const handler = async (req: NextRequest) => {
     firstValue: {
       completionRateFromSignup,
       completionRateFromEntry,
-      medianFirstValueTimeMs: computeMedian(firstValueDurations),
+      medianFirstValueTimeMs,
+      sampleSize: firstValueDurations.length,
+      sloTargetMs: firstValueSloTargetMs,
+      sloStatus,
     },
     funnel,
     actionCounts,

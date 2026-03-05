@@ -35,11 +35,40 @@ export const DEFAULT_RUNTIME_CANDIDATES = [
   'http://localhost:3001',
 ]
 
+function parseCsvSet(raw: string | undefined): Set<string> {
+  return new Set(
+    String(raw || '')
+      .split(',')
+      .map((entry) => entry.trim().toLowerCase())
+      .filter(Boolean)
+  )
+}
+
+function hostMatchesAllowlist(host: string, allowlist: Set<string>): boolean {
+  const normalizedHost = host.toLowerCase()
+  for (const allowed of allowlist) {
+    if (!allowed) continue
+    if (allowed.startsWith('.')) {
+      if (normalizedHost.endsWith(allowed)) return true
+      continue
+    }
+    if (normalizedHost === allowed) return true
+  }
+  return false
+}
+
 export function isAllowedRuntimeUrl(url: URL): boolean {
   if (!['http:', 'https:'].includes(url.protocol)) return false
-  const hostAllowed = LOCAL_ALLOWED_HOSTS.has(url.hostname) || url.hostname.endsWith('.localhost')
+  const extraAllowedHosts = parseCsvSet(process.env.AETHEL_PREVIEW_ALLOWED_HOSTS)
+  const extraAllowedPorts = parseCsvSet(process.env.AETHEL_PREVIEW_ALLOWED_PORTS)
+  const hostAllowed =
+    LOCAL_ALLOWED_HOSTS.has(url.hostname) ||
+    url.hostname.endsWith('.localhost') ||
+    hostMatchesAllowlist(url.hostname, extraAllowedHosts)
   if (!hostAllowed) return false
-  return LOCAL_ALLOWED_PORTS.has(url.port)
+  if (LOCAL_ALLOWED_PORTS.has(url.port)) return true
+  if (extraAllowedPorts.size > 0 && extraAllowedPorts.has(url.port)) return true
+  return false
 }
 
 export function normalizeRuntimeCandidate(raw: string): string | null {
