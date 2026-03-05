@@ -319,3 +319,13 @@ Mandatory implementation:
 - `rejectedFeedbackCount`
 - `needsWorkFeedbackCount`
 5. `/admin/ai-monitor` readiness card now surfaces LEARN coverage and reviewed/unreviewed counts to close blind spots in `ROLLBACK -> LEARN`.
+
+## 25) Delta 2026-03-05 (IDE managed preview auto-bootstrap)
+1. `/ide` runtime startup now prioritizes managed provisioning when authenticated and no runtime is configured.
+2. Auto path order:
+- `provisionRuntime(auto)` first;
+- fallback to `discoverRuntime(auto)` only when provision is unavailable or fails.
+3. Manual UX remains unchanged:
+- explicit `Provisionar runtime` action keeps deterministic status and telemetry.
+4. Goal:
+- reduce first-preview friction for non-technical users and move runtime setup closer to zero-config behavior.

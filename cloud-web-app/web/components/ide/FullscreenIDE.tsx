@@ -194,6 +194,7 @@ function IDEContent() {
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
   const runtimeAutoDiscoveryTriggeredRef = useRef(false)
+  const runtimeAutoProvisionTriggeredRef = useRef(false)
 
   const { data: fullAccessData, mutate: mutateFullAccess } = useSWR<FullAccessResponse>(
     hasToken ? '/api/studio/access/full' : null,
@@ -490,8 +491,8 @@ function IDEContent() {
     })
   }, [previewRuntimeInput])
 
-  const discoverRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual') => {
-    if (isDiscoveringRuntime) return
+  const discoverRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
+    if (isDiscoveringRuntime) return false
     setIsDiscoveringRuntime(true)
     if (mode === 'manual') {
       setRuntimeDiscoveryTone('info')
@@ -523,7 +524,7 @@ function IDEContent() {
             status: 'not-found',
           },
         })
-        return
+        return false
       }
 
       setPreviewRuntimeUrl(preferredRuntimeUrl)
@@ -545,6 +546,7 @@ function IDEContent() {
           runtimeUrl: preferredRuntimeUrl,
         },
       })
+      return true
     } catch (error) {
       if (mode === 'manual') {
         setRuntimeDiscoveryTone('warning')
@@ -560,16 +562,19 @@ function IDEContent() {
           reason: error instanceof Error ? error.message : 'unknown',
         },
       })
+      return false
     } finally {
       setIsDiscoveringRuntime(false)
     }
   }, [isDiscoveringRuntime])
 
-  const provisionRuntime = useCallback(async () => {
-    if (isProvisioningRuntime) return
+  const provisionRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
+    if (isProvisioningRuntime) return false
     setIsProvisioningRuntime(true)
-    setRuntimeDiscoveryTone('info')
-    setRuntimeDiscoveryMessage('Provisionando runtime gerenciado...')
+    if (mode === 'manual') {
+      setRuntimeDiscoveryTone('info')
+      setRuntimeDiscoveryMessage('Provisionando runtime gerenciado...')
+    }
 
     try {
       const response = await fetch('/api/preview/runtime-provision', {
@@ -606,21 +611,26 @@ function IDEContent() {
           surface: 'ide-preview-runtime-provision',
           status: 'provisioned',
           runtimeUrl,
-          mode: payload?.metadata?.mode || 'unknown',
+          mode: payload?.metadata?.mode || mode || 'unknown',
         },
       })
+      return true
     } catch (error) {
-      setRuntimeDiscoveryTone('warning')
-      setRuntimeDiscoveryMessage(
-        error instanceof Error ? `Falha ao provisionar runtime: ${error.message}` : 'Falha ao provisionar runtime.'
-      )
+      if (mode === 'manual') {
+        setRuntimeDiscoveryTone('warning')
+        setRuntimeDiscoveryMessage(
+          error instanceof Error ? `Falha ao provisionar runtime: ${error.message}` : 'Falha ao provisionar runtime.'
+        )
+      }
       analytics?.track?.('engine', 'render_time', {
         metadata: {
           surface: 'ide-preview-runtime-provision',
           status: 'error',
+          mode,
           reason: error instanceof Error ? error.message : 'unknown',
         },
       })
+      return false
     } finally {
       setIsProvisioningRuntime(false)
     }
@@ -687,12 +697,21 @@ function IDEContent() {
   }, [previewRuntimeUrl, checkRuntimeHealth])
 
   useEffect(() => {
-    if (runtimeAutoDiscoveryTriggeredRef.current) return
     if (!previewEnabled) return
     if (previewRuntimeUrl) return
+    if (hasToken && !runtimeAutoProvisionTriggeredRef.current) {
+      runtimeAutoProvisionTriggeredRef.current = true
+      void provisionRuntime('auto').then((provisioned) => {
+        if (provisioned || runtimeAutoDiscoveryTriggeredRef.current) return
+        runtimeAutoDiscoveryTriggeredRef.current = true
+        void discoverRuntime('auto')
+      })
+      return
+    }
+    if (runtimeAutoDiscoveryTriggeredRef.current) return
     runtimeAutoDiscoveryTriggeredRef.current = true
     void discoverRuntime('auto')
-  }, [discoverRuntime, previewEnabled, previewRuntimeUrl])
+  }, [discoverRuntime, hasToken, previewEnabled, previewRuntimeUrl, provisionRuntime])
 
   useEffect(() => {
     if (!previewEnabled || !previewRuntimeUrl) return
