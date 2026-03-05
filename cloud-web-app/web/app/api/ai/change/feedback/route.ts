@@ -66,6 +66,13 @@ function extractSubmittedAt(metadata: unknown): string | null {
   return submittedAt.trim()
 }
 
+function extractRunSource(metadata: unknown): string {
+  if (!metadata || typeof metadata !== 'object') return ''
+  const runSource = (metadata as Record<string, unknown>).runSource
+  if (typeof runSource !== 'string') return ''
+  return runSource.trim()
+}
+
 export async function POST(request: NextRequest) {
   const user = requireAuth(request)
   await requireEntitlementsForUser(user.userId)
@@ -125,7 +132,7 @@ export async function POST(request: NextRequest) {
   const filePath = toString(body.filePath) || '/unknown'
   const reason = toString(body.reason)
   const rating = normalizeRating(body.rating, feedback)
-  const runSource = normalizeRunSource(body.runSource)
+  const requestedRunSource = normalizeRunSource(body.runSource)
   const submittedAt = new Date().toISOString()
 
   const existingEvents = await readChangeRunLedgerEvents({
@@ -134,13 +141,13 @@ export async function POST(request: NextRequest) {
     limit: FEEDBACK_LOOKBACK_LIMIT,
   }).catch(() => [])
 
-  const hasRunEvidence = existingEvents.some((event) => {
+  const runEvidence = existingEvents.find((event) => {
     if (event.eventType !== 'apply' && event.eventType !== 'rollback' && event.eventType !== 'apply_blocked' && event.eventType !== 'rollback_blocked') {
       return false
     }
     return extractRunId(event.metadata) === runId
   })
-  if (!hasRunEvidence) {
+  if (!runEvidence) {
     return capabilityResponse({
       error: 'RUN_NOT_FOUND',
       message: 'runId was not found in scoped change-run ledger evidence.',
@@ -153,6 +160,8 @@ export async function POST(request: NextRequest) {
       },
     })
   }
+  const runSourceFromEvidence = normalizeRunSource(extractRunSource(runEvidence.metadata))
+  const runSource = runSourceFromEvidence || requestedRunSource
 
   const previousFeedback = existingEvents.find((event) => {
     if (event.eventType !== 'learn_feedback') return false
@@ -186,6 +195,7 @@ export async function POST(request: NextRequest) {
       reason: reason || undefined,
       notes: notes || undefined,
       runSource,
+      requestedRunSource,
       submittedAt,
     },
   }).catch(() => {})
@@ -201,6 +211,7 @@ export async function POST(request: NextRequest) {
       feedback,
       rating,
       runSource,
+      requestedRunSource,
       submittedAt,
     },
   })

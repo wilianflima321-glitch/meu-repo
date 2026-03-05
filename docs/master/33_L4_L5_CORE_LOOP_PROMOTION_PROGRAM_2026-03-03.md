@@ -348,3 +348,9 @@ Mandatory implementation:
 - `LEARN_FEEDBACK_ALREADY_EXISTS` (`409`) when feedback for the same `runId` was already submitted.
 3. Goal:
 - prevent synthetic or duplicated LEARN signals from corrupting L4 readiness metrics.
+
+## 28) Delta 2026-03-05 (LEARN runSource canonical integrity)
+1. `POST /api/ai/change/feedback` now canonicalizes `runSource` from existing run evidence metadata when available.
+2. User-submitted `runSource` is persisted as `requestedRunSource` for audit/debug, while readiness calculations consume evidence-backed `runSource`.
+3. Goal:
+- prevent client-side `runSource` spoofing from skewing production vs rehearsal readiness metrics.
