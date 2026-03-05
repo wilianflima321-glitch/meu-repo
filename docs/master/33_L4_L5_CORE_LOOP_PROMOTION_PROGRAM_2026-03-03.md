@@ -354,3 +354,15 @@ Mandatory implementation:
 2. User-submitted `runSource` is persisted as `requestedRunSource` for audit/debug, while readiness calculations consume evidence-backed `runSource`.
 3. Goal:
 - prevent client-side `runSource` spoofing from skewing production vs rehearsal readiness metrics.
+
+## 29) Delta 2026-03-05 (managed preview warm-up stabilization)
+1. `POST /api/preview/runtime-provision` now performs readiness warm-up polling before returning unhealthy:
+- helper: `waitForRuntimeReady(runtimeUrl, waitBudgetMs, pollMs)`
+- env controls: `AETHEL_PREVIEW_PROVISION_READY_WAIT_MS`, `AETHEL_PREVIEW_PROVISION_READY_POLL_MS`
+2. `RUNTIME_PROVISION_UNHEALTHY` metadata now includes:
+- `readyAttempts`
+- `readyElapsedMs`
+- `readyWaitMs`
+- `readyPollMs`
+3. Goal:
+- reduce false-negative provisioning failures during runtime boot and improve first-preview reliability for authenticated users.

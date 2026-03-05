@@ -15,6 +15,8 @@ import {
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'
 const DEFAULT_TIMEOUT_MS = 12_000
+const DEFAULT_READY_WAIT_MS = 10_000
+const DEFAULT_READY_POLL_MS = 1_200
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +34,51 @@ function parseProjectId(raw: unknown): string {
   if (typeof raw !== 'string') return 'default'
   const normalized = raw.trim().replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80)
   return normalized || 'default'
+}
+
+function parseReadyWaitMs(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_READY_WAIT_MS
+  return Math.max(0, Math.min(parsed, 60_000))
+}
+
+function parseReadyPollMs(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_READY_POLL_MS
+  return Math.max(200, Math.min(parsed, 5_000))
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function waitForRuntimeReady(runtimeUrl: string, waitBudgetMs: number, pollMs: number) {
+  const startedAt = Date.now()
+  let attempts = 0
+  let latest = await probeRuntimeUrl(runtimeUrl, 3000)
+  attempts += 1
+  if (latest.reachable || waitBudgetMs <= 0) {
+    return {
+      probe: latest,
+      attempts,
+      elapsedMs: Date.now() - startedAt,
+    }
+  }
+
+  while (Date.now() - startedAt < waitBudgetMs) {
+    const remainingMs = waitBudgetMs - (Date.now() - startedAt)
+    if (remainingMs <= 0) break
+    await sleep(Math.min(pollMs, remainingMs))
+    latest = await probeRuntimeUrl(runtimeUrl, 3000)
+    attempts += 1
+    if (latest.reachable) break
+  }
+
+  return {
+    probe: latest,
+    attempts,
+    elapsedMs: Date.now() - startedAt,
+  }
 }
 
 async function localFallbackDiscover() {
@@ -56,6 +103,8 @@ export async function POST(request: NextRequest) {
     const provisionEndpoint = String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINT || '').trim()
     const provisionToken = String(process.env.AETHEL_PREVIEW_PROVISION_TOKEN || '').trim()
     const timeoutMs = parseTimeoutMs(process.env.AETHEL_PREVIEW_PROVISION_TIMEOUT_MS)
+    const readyWaitMs = parseReadyWaitMs(process.env.AETHEL_PREVIEW_PROVISION_READY_WAIT_MS)
+    const readyPollMs = parseReadyPollMs(process.env.AETHEL_PREVIEW_PROVISION_READY_POLL_MS)
 
     if (!provisionEndpoint) {
       const localRuntime = await localFallbackDiscover()
@@ -153,8 +202,8 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      const probe = await probeRuntimeUrl(runtimeUrl, 3000)
-      if (!probe.reachable) {
+      const readiness = await waitForRuntimeReady(runtimeUrl, readyWaitMs, readyPollMs)
+      if (!readiness.probe.reachable) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_UNHEALTHY',
           status: 503,
@@ -165,10 +214,14 @@ export async function POST(request: NextRequest) {
             mode: 'managed',
             projectId,
             runtimeUrl,
-            probeStatus: probe.status,
-            latencyMs: probe.latencyMs,
-            httpStatus: probe.httpStatus,
-            reason: probe.reason,
+            probeStatus: readiness.probe.status,
+            latencyMs: readiness.probe.latencyMs,
+            httpStatus: readiness.probe.httpStatus,
+            reason: readiness.probe.reason,
+            readyAttempts: readiness.attempts,
+            readyElapsedMs: readiness.elapsedMs,
+            readyWaitMs,
+            readyPollMs,
           },
         })
       }
@@ -183,8 +236,12 @@ export async function POST(request: NextRequest) {
             mode: 'managed',
             managed: true,
             projectId,
-            latencyMs: probe.latencyMs,
-            httpStatus: probe.httpStatus,
+            latencyMs: readiness.probe.latencyMs,
+            httpStatus: readiness.probe.httpStatus,
+            readyAttempts: readiness.attempts,
+            readyElapsedMs: readiness.elapsedMs,
+            readyWaitMs,
+            readyPollMs,
           },
         },
         {
