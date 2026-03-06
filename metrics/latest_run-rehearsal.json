@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-03-04T22:52:41.865Z",
+  "generatedAt": "2026-03-06T23:21:05.200Z",
   "windowHours": 168,
   "sampleClass": "rehearsal",
-  "sampleSize": 12,
+  "sampleSize": 24,
   "totals": {
-    "rows": 15,
-    "applyRuns": 12,
-    "applySuccess": 9,
-    "applyBlocked": 3,
+    "rows": 39,
+    "applyRuns": 24,
+    "applySuccess": 18,
+    "applyBlocked": 6,
     "applyFailed": 0,
-    "rollbackSuccess": 3,
+    "rollbackSuccess": 6,
     "rollbackBlocked": 0,
     "rollbackFailed": 0,
-    "learnFeedback": 0,
-    "sandboxApplyRuns": 4,
-    "workspaceApplyRuns": 5
+    "learnFeedback": 9,
+    "sandboxApplyRuns": 8,
+    "workspaceApplyRuns": 10
   },
   "metrics": {
     "apply_success_rate": 0.75,
@@ -22,17 +22,26 @@
     "regression_rate": 0,
     "sandbox_coverage": 0.4444,
     "workspace_coverage": 0.5556,
-    "feedback_coverage": 0
+    "feedback_coverage": 0.5
   },
   "diagnostics": {
     "regressionSignals": [],
-    "feedbackCounts": [],
+    "feedbackCounts": [
+      [
+        "accepted",
+        7
+      ],
+      [
+        "needs_work",
+        2
+      ]
+    ],
     "runSourceCounts": [
       [
         "core_loop_drill",
-        15
+        39
       ]
     ],
-    "lastEventAt": "2026-03-04T16:01:27.567Z"
+    "lastEventAt": "2026-03-06T23:21:05.177Z"
   }
 }

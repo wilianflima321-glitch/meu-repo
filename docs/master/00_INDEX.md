@@ -1,5 +1,5 @@
 # 00_INDEX
-Date: 2026-03-04
+Date: 2026-03-05
 Status: CANONICAL ENTRYPOINT
 
 ## Read Order (Required)
@@ -32,6 +32,7 @@ Status: CANONICAL ENTRYPOINT
 27. `docs/master/WORKBENCH_SPEC.md`
 28. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
 29. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
+30. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -62,6 +63,7 @@ Status: CANONICAL ENTRYPOINT
 | `32_GLOBAL_GAP_REGISTER_2026-03-01.md` | Repo-wide factual gap register | ACTIVE |
 | `33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md` | L4/L5 core-loop promotion program | ACTIVE |
 | `34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md` | Executive text verification and canonical reconciliation | ACTIVE |
+| `35_L4_L5_COMPLETION_MAP_2026-03-05.md` | Canonical completion order for L4/L5 closure | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -84,7 +86,7 @@ Status: CANONICAL ENTRYPOINT
   - `blocking-browser-dialogs=0`
   - `not-implemented-ui=0`
 - Explicit API NOT_IMPLEMENTED gates (`tools/find-not-implemented.mjs`): `0`
-- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1200`
+- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1199`
 - Structural baseline closed for connectivity P0:
   - `npm run qa:repo-connectivity` passes.
   - `npm run qa:canonical-doc-alignment` passes.

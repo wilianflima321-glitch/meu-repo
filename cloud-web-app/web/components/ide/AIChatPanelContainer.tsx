@@ -10,9 +10,12 @@ import {
 } from '@/lib/ai-provider-status-client'
 import {
   AdvancedChatRequestError,
+  type AdvancedProfile,
+  inferAdvancedProfile,
   isProviderSetupError,
   requestAdvancedChat,
 } from '@/lib/ai-chat-advanced-client'
+import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
 
 type ChatMessage = {
   id: string
@@ -91,6 +94,49 @@ function getProjectIdFromLocation(): string | undefined {
   return value.trim()
 }
 
+function resolveProfileFromMentions(
+  message: string,
+  fallback: AdvancedProfile
+): { message: string; profile: AdvancedProfile; tags: string[] } {
+  const tags = (message.match(/@[a-z0-9:_-]+/gi) || []).map((tag) => tag.toLowerCase())
+  const profile: AdvancedProfile = { ...fallback }
+
+  if (tags.includes('@studio')) {
+    profile.qualityMode = 'studio'
+    profile.agentCount = 3
+  }
+  if (tags.includes('@delivery')) {
+    profile.qualityMode = 'delivery'
+    if (profile.agentCount < 2) profile.agentCount = 2
+  }
+  if (tags.includes('@fast')) {
+    profile.qualityMode = 'standard'
+    profile.agentCount = 1
+    profile.enableWebResearch = false
+  }
+  if (tags.includes('@web')) {
+    profile.enableWebResearch = true
+    if (profile.agentCount < 2) profile.agentCount = 2
+  }
+
+  const agentTag = tags.find((tag) => /^@agents:[123]$/.test(tag))
+  if (agentTag) {
+    const count = Number(agentTag.split(':')[1])
+    if (count === 1 || count === 2 || count === 3) profile.agentCount = count
+  }
+
+  const cleaned = message
+    .replace(/@[a-z0-9:_-]+/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  return {
+    message: cleaned || message.trim(),
+    profile,
+    tags,
+  }
+}
+
 export default function AIChatPanelContainer() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [currentModel, setCurrentModel] = useState(MODELS[0].id)
@@ -104,6 +150,40 @@ export default function AIChatPanelContainer() {
   useEffect(() => {
     setProjectId(getProjectIdFromLocation())
   }, [])
+
+  useEffect(() => {
+    const handoff = consumeResearchHandoff()
+    if (!handoff) return
+
+    const contextPrompt = buildResearchPrompt(handoff)
+    setMessages((prev) => {
+      if (prev.length > 0) return prev
+      return [
+        {
+          id: `system-research-${Date.now()}`,
+          role: 'system',
+          content: `Research context imported from Nexus.\n\n${contextPrompt}`,
+          timestamp: new Date(),
+        },
+        {
+          id: `assistant-research-${Date.now() + 1}`,
+          role: 'assistant',
+          content:
+            'Research handoff loaded. Send your next message to transform this into implementation steps. Tip: use @studio @web for deep multi-agent analysis.',
+          timestamp: new Date(),
+          model: currentModel,
+        },
+      ]
+    })
+
+    analytics?.track?.('ai', 'ai_chat', {
+      metadata: {
+        source: 'ide-research-handoff',
+        query: handoff.query,
+        sources: handoff.sources.length,
+      },
+    })
+  }, [currentModel])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -142,10 +222,13 @@ export default function AIChatPanelContainer() {
     async (message: string, context?: { attachments?: unknown[] }) => {
       if (!message.trim() || isLoading) return
 
+      const fallbackProfile = inferAdvancedProfile(message)
+      const profileResolution = resolveProfileFromMentions(message, fallbackProfile)
+      const normalizedMessage = profileResolution.message
       const userMessage: ChatMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
-        content: message.trim(),
+        content: normalizedMessage,
         timestamp: new Date(),
       }
 
@@ -182,10 +265,11 @@ export default function AIChatPanelContainer() {
         setProviderGate(null)
 
         const result = await requestAdvancedChat({
-          message,
+          message: normalizedMessage,
           model: currentModel,
           messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
           projectId,
+          profileOverride: profileResolution.profile,
           signal: controller.signal,
         })
 
@@ -218,6 +302,10 @@ export default function AIChatPanelContainer() {
             latencyMs,
             status: 'success',
             usedFallback: result.usedFallback,
+            qualityMode: profileResolution.profile.qualityMode,
+            agentCount: profileResolution.profile.agentCount,
+            enableWebResearch: profileResolution.profile.enableWebResearch,
+            mentionTags: profileResolution.tags,
           },
         })
 

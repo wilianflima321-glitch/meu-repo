@@ -1,6 +1,6 @@
 # 34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04
 Status: ACTIVE ALIGNMENT NOTE
-Date: 2026-03-04
+Date: 2026-03-05
 Owner: PM Tecnico + Chief Architect
 Input: user-provided executive text (2026-03-04)
 
@@ -13,7 +13,7 @@ Rules used:
 3. Planning priorities are preserved only when they do not violate scope lock from `10` and `33`.
 
 ## 2) Verified claims (FACTUAL_IN_REPO)
-1. Canonical docs in `docs/master`: `49` (was `48` before this alignment note was added).
+1. Canonical docs in `docs/master`: `50` (including `35_L4_L5_COMPLETION_MAP_2026-03-05.md`).
 2. `qa:enterprise-gate` current state: PASS.
 3. Interface gate current state includes:
    - `legacy-accent-tokens=0`
@@ -21,7 +21,7 @@ Rules used:
    - `not-implemented-ui=0`
 4. Explicit API `NOT_IMPLEMENTED` inventory (scanner): `0`.
 5. Dashboard shell gate is active and passing with:
-   - `AethelDashboard.tsx=1200 lines`
+   - `AethelDashboard.tsx=1199 lines`
 6. Capability/error governance is active (`PARTIAL`, `DEPRECATED_ROUTE`, explicit capability metadata).
 
 ## 3) Partially verified claims (PARTIAL_IN_REPO)
@@ -103,3 +103,4 @@ Current wave delta:
 1. `00_INDEX` (read-order and snapshot).
 2. `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` (current factual baseline reconciliation).
 3. `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md` (freeze snapshot consistency).
+4. `35_L4_L5_COMPLETION_MAP_2026-03-05.md` (canonical completion order for execution waves).

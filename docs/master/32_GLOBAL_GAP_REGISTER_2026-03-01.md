@@ -7,10 +7,10 @@ Owner: Platform + PM Tecnico
 Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no estado atual do repositorio.
 
 ## 2) Snapshot factual
-1. Markdown total no repo: `3655`
-2. Markdown canonico (`docs/master`): `49`
+1. Markdown total no repo: `3656`
+2. Markdown canonico (`docs/master`): `50`
 3. Markdown fora do canonico: `3606`
-4. Arquivos grandes (`>=1200` linhas) em `cloud-web-app/web`: `1`
+4. Arquivos grandes (`>=1200` linhas) em `cloud-web-app/web`: `0`
 5. Uso de dialogs bloqueantes (ativo): `0`
 6. Uso de dialogs bloqueantes (deprecated): `0`
 7. APIs com gate `NOT_IMPLEMENTED` explicito: `0`
@@ -29,11 +29,10 @@ Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no est
 
 ## 3) Lacunas abertas (prioridade)
 ### P0
-1. Continuar decomposicao dos hotspots acima de 1200 linhas fora do shell principal.
+1. Manter `0` hotspots (`>=1200` linhas) no escopo ativo.
 2. Manter `0` dialogs bloqueantes ativos (`window.confirm/alert/prompt`) e bloquear regressao.
 3. Manter gates `NOT_IMPLEMENTED` explicitos apenas onde a capacidade realmente nao existe.
 4. Manter `00_INDEX` com read-order canonico completo (sem drift).
-5. Elevar cobertura de `LEARN` em runs de apply de producao para cumprir `feedbackCoverageMin=0.6` (promocao L4 bloqueada abaixo disso).
 
 ### P1
 1. Consolidar markdown nao-canonico e reduzir volume consultivo fora de `docs/master`.
@@ -41,7 +40,7 @@ Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no est
 3. Fechar varredura runtime de acessibilidade (axe/lighthouse) para claim de cobertura completa.
 
 ## 4) Top hotspots >=1200 linhas
-1. `cloud-web-app/web/components/AethelDashboard.tsx` (`1200` linhas)
+1. Nenhum hotspot acima de 1200 linhas no escopo ativo.
 
 ## 5) Dialogs bloqueantes ativos (amostra)
 1. Nenhum encontrado no escopo ativo.

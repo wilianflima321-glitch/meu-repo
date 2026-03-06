@@ -84,6 +84,7 @@ export default function MultiAgentOrchestrator() {
   const [runtimeMode, setRuntimeMode] = useState<'heuristic' | 'provider-backed' | 'unknown'>('unknown')
   const [runtimeDisclaimer, setRuntimeDisclaimer] = useState<string | null>(null)
   const [coordinationHint, setCoordinationHint] = useState<string | null>(null)
+  const [executionMode, setExecutionMode] = useState<'heuristic' | 'provider-backed'>('heuristic')
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const agentOptions = [
@@ -128,7 +129,7 @@ export default function MultiAgentOrchestrator() {
           prompt,
           agents: selectedAgents,
           priority: 'high',
-          executionMode: 'heuristic',
+          executionMode,
         }),
         signal: controller.signal,
       })
@@ -249,6 +250,41 @@ export default function MultiAgentOrchestrator() {
           {coordinationHint && <p className="mt-1 text-amber-200/90">{coordinationHint}</p>}
         </div>
       )}
+
+      <div className="space-y-2">
+        <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Execution mode</label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setExecutionMode('heuristic')}
+            className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+              executionMode === 'heuristic'
+                ? 'border-blue-500/50 bg-blue-600/30 text-blue-200'
+                : 'border-zinc-700/50 bg-zinc-800/50 text-zinc-500 hover:text-zinc-300'
+            }`}
+            disabled={isStreaming}
+            aria-pressed={executionMode === 'heuristic'}
+          >
+            Heuristic
+          </button>
+          <button
+            type="button"
+            onClick={() => setExecutionMode('provider-backed')}
+            className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+              executionMode === 'provider-backed'
+                ? 'border-blue-500/50 bg-blue-600/30 text-blue-200'
+                : 'border-zinc-700/50 bg-zinc-800/50 text-zinc-500 hover:text-zinc-300'
+            }`}
+            disabled={isStreaming}
+            aria-pressed={executionMode === 'provider-backed'}
+          >
+            Provider-backed
+          </button>
+        </div>
+        <p className="text-[11px] text-zinc-500">
+          Heuristic is always available. Provider-backed requires at least one configured provider.
+        </p>
+      </div>
 
       <div className="space-y-2">
         <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Select Agents</label>

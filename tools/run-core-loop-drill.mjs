@@ -169,6 +169,30 @@ async function main() {
     prevHash = applyRow.eventHash
     summary.applySuccess += 1
 
+    const learnFeedbackEvent = {
+      eventType: 'learn_feedback',
+      capability: 'AI_CHANGE_LEARN',
+      userId: args.userId,
+      projectId: args.projectId,
+      filePath,
+      outcome: 'success',
+      metadata: {
+        runId,
+        runSource: 'core_loop_drill',
+        executionMode,
+        feedback: i % 4 === 0 ? 'needs_work' : 'accepted',
+        reason: i % 4 === 0 ? 'DRILL_QUALITY_REVIEW' : 'DRILL_APPLY_ACCEPTED',
+        drillScenario: 'learn_feedback_capture',
+      },
+    }
+    const feedbackRow = buildRow({
+      timestamp: new Date(Date.now() + i * 3 + 1).toISOString(),
+      prevHash,
+      event: learnFeedbackEvent,
+    })
+    lines.push(JSON.stringify(feedbackRow))
+    prevHash = feedbackRow.eventHash
+
     if (i % 3 === 0) {
       const rollbackEvent = {
         eventType: 'rollback',
@@ -185,7 +209,7 @@ async function main() {
         },
       }
       const rollbackRow = buildRow({
-        timestamp: new Date(Date.now() + i * 3 + 1).toISOString(),
+        timestamp: new Date(Date.now() + i * 3 + 2).toISOString(),
         prevHash,
         event: rollbackEvent,
       })

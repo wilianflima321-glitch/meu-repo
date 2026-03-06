@@ -174,11 +174,11 @@ Validation status:
 
 
 ## 6) Delta 2026-02-27 (readiness constraints)
-1. Capability contracts permanecem válidos, mas readiness de produto depende de baseline estrutural:
+1. Capability contracts permanecem validos, mas readiness de produto depende de baseline estrutural:
 - scripts/config sem caminhos quebrados;
-- remoção de artefatos locais versionados;
+- remocao de artefatos locais versionados;
 - fluxo `/ide` sem fonte mock no caminho principal.
-2. Enquanto essa base não fechar, status operacional permanece `PARTIAL` para claim enterprise/studio.
+2. Enquanto essa base nao fechar, status operacional permanece `PARTIAL` para claim enterprise/studio.
 
 
 ## 7) Delta 2026-02-28 (multi-agent reliability hardening)
@@ -382,3 +382,27 @@ Validation status:
 - `reasonCounts` for blocked/failure reasons;
 - `executionModeCounts` for sandbox/workspace apply mix;
 - `lastEventAt` to make stale/no-evidence state explicit.
+
+## 30) Delta 2026-03-05 (preview provision failover + warm-up transparency)
+1. `/api/preview/runtime-provision` now operates as authenticated `PARTIAL` managed bootstrap with explicit local fallback and operational metadata.
+2. Provisioning supports endpoint failover and warm-up polling:
+- endpoint candidates can be provided by `AETHEL_PREVIEW_PROVISION_ENDPOINTS` (ordered list);
+- warm-up retries are controlled by `AETHEL_PREVIEW_PROVISION_WARMUP_ATTEMPTS` and `AETHEL_PREVIEW_PROVISION_WARMUP_DELAY_MS`.
+3. Provision response keeps capability transparency:
+- `capabilityStatus=PARTIAL`;
+- `mode` (`managed` or `local-discovery-fallback`);
+- `usedEndpoint`, `attempts`, and health result metadata for operator diagnostics.
+4. No claim upgrade to real managed HMR is allowed from this slice; status remains runtime-bootstrap only.
+
+## 31) Delta 2026-03-06 (research handoff + agent mode controls)
+1. `components/nexus/AethelResearch.tsx` now supports explicit `Research -> IDE` handoff:
+- stores normalized handoff payload in local storage (`aethel.research.handoff.v1`);
+- opens `/ide?entry=ai&source=research` with no hidden side effects.
+2. `components/ide/AIChatPanelContainer.tsx` now consumes handoff payload and injects deterministic context messages instead of silent context loss.
+3. IDE chat now supports explicit profile mentions in user prompt:
+- `@studio`, `@delivery`, `@fast`, `@web`, `@agents:1|2|3`;
+- mentions map to `qualityMode`, `agentCount`, `enableWebResearch` via `profileOverride`.
+4. `components/nexus/MultiAgentOrchestrator.tsx` now exposes explicit execution mode selector:
+- `heuristic` (default);
+- `provider-backed` (gated by configured provider availability).
+5. Capability claim remains `PARTIAL` for research integration and multi-agent provider-backed reliability; no status promotion implied by this slice.

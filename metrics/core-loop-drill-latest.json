@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-04T16:01:27.537Z",
-  "ledgerFile": ".aethel/change-ledger/2026-03-04.ndjson",
+  "generatedAt": "2026-03-06T23:21:05.147Z",
+  "ledgerFile": ".aethel/change-ledger/2026-03-06.ndjson",
   "runsRequested": 12,
   "applySuccess": 9,
   "applyBlocked": 3,

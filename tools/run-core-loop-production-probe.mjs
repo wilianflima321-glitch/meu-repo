@@ -5,13 +5,13 @@ import process from 'node:process'
 const DEFAULT_BASE_URL = process.env.AETHEL_BASE_URL || 'http://localhost:3000'
 const DEFAULT_RUNS = Number.parseInt(process.env.AETHEL_PROBE_RUNS || '6', 10)
 const DEFAULT_PROJECT_ID = process.env.AETHEL_PROJECT_ID || 'default'
-const AUTH_TOKEN = process.env.AETHEL_TOKEN || process.env.AETHEL_AUTH_TOKEN || ''
 
 function parseArgs(argv) {
   const out = {
     baseUrl: DEFAULT_BASE_URL,
     runs: Number.isFinite(DEFAULT_RUNS) ? DEFAULT_RUNS : 6,
     projectId: DEFAULT_PROJECT_ID,
+    token: process.env.AETHEL_TOKEN || process.env.AETHEL_AUTH_TOKEN || '',
   }
 
   for (let i = 2; i < argv.length; i += 1) {
@@ -30,18 +30,26 @@ function parseArgs(argv) {
     if (arg === '--project-id' && argv[i + 1]) {
       out.projectId = argv[i + 1]
       i += 1
+      continue
+    }
+    if (arg === '--token' && argv[i + 1]) {
+      out.token = argv[i + 1]
+      i += 1
     }
   }
 
   out.baseUrl = String(out.baseUrl || '').replace(/\/+$/, '')
   out.runs = Math.max(1, Math.min(out.runs, 30))
   out.projectId = String(out.projectId || 'default').trim() || 'default'
+  out.token = String(out.token || '').trim()
   return out
 }
 
-function ensureToken() {
-  if (!AUTH_TOKEN.trim()) {
-    console.error('[core-loop-production-probe] missing token: set AETHEL_TOKEN (or AETHEL_AUTH_TOKEN)')
+function ensureToken(token) {
+  if (!String(token || '').trim()) {
+    console.error(
+      '[core-loop-production-probe] missing token: set AETHEL_TOKEN/AETHEL_AUTH_TOKEN or pass --token <jwt>'
+    )
     process.exit(1)
   }
 }
@@ -57,12 +65,12 @@ async function fetchJson(url, options = {}) {
 }
 
 async function main() {
-  ensureToken()
   const args = parseArgs(process.argv)
+  ensureToken(args.token)
 
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${AUTH_TOKEN.trim()}`,
+    Authorization: `Bearer ${args.token}`,
     'x-project-id': args.projectId,
   }
 
