@@ -406,3 +406,12 @@ Validation status:
 - `heuristic` (default);
 - `provider-backed` (gated by configured provider availability).
 5. Capability claim remains `PARTIAL` for research integration and multi-agent provider-backed reliability; no status promotion implied by this slice.
+
+## 32) Delta 2026-03-06-b (local demo fallback for first-value onboarding)
+1. `components/ide/AIChatPanelContainer.tsx` now serves explicit `DEMO LOCAL` responses when provider is not configured and server-side demo mode is off.
+2. Local demo keeps anti-fake-success policy:
+- banner is visible while provider gate is active;
+- every response is explicitly labeled as demo and points to `/settings?tab=api` for real providers.
+3. Daily limit is enforced in browser storage (`aethel.ai.local-demo.v1`) with deterministic reset at UTC day boundary.
+4. Telemetry now records `status=demo-local`, reason (`preflight_provider_gate` or `provider_setup_error`) and usage counters for onboarding funnel evidence.
+5. Capability contract remains unchanged (`AI_PROVIDER_NOT_CONFIGURED` gate is still explicit on provider-backed paths); this slice only removes first-value dead-end UX.

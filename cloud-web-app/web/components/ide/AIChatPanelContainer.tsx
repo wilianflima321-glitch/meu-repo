@@ -6,8 +6,10 @@ import AIProviderSetupGuide from '@/components/ai/AIProviderSetupGuide'
 import { analytics } from '@/lib/analytics'
 import {
   buildAiProviderGateMessage,
+  type AiProviderStatusResponse,
   fetchAiProviderStatus,
 } from '@/lib/ai-provider-status-client'
+import { buildLocalDemoChatContent, consumeLocalDemoUsage } from '@/lib/ai-chat-local-demo'
 import {
   AdvancedChatRequestError,
   type AdvancedProfile,
@@ -144,6 +146,7 @@ export default function AIChatPanelContainer() {
   const requestAbortRef = useRef<AbortController | null>(null)
   const [projectId, setProjectId] = useState<string | undefined>(undefined)
   const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)
+  const [providerStatus, setProviderStatus] = useState<AiProviderStatusResponse | null>(null)
 
   const modelOptions = useMemo(() => MODELS, [])
 
@@ -191,6 +194,7 @@ export default function AIChatPanelContainer() {
     ;(async () => {
       try {
         const status = await fetchAiProviderStatus(controller.signal)
+        setProviderStatus(status)
         if (status.configured || status.demoModeEnabled) {
           setProviderGate(null)
           return
@@ -211,12 +215,85 @@ export default function AIChatPanelContainer() {
           },
         })
       } catch {
+        setProviderStatus(null)
         // best-effort preflight; keep panel usable for retries
       }
     })()
 
     return () => controller.abort()
   }, [])
+
+  const tryServeLocalDemo = useCallback(
+    (input: { message: string; profile: AdvancedProfile; tags?: string[]; reason: string }): boolean => {
+      if (providerStatus?.configured || providerStatus?.demoModeEnabled) return false
+
+      const usage = consumeLocalDemoUsage(providerStatus?.demoDailyLimit)
+      if (!usage.allowed) {
+        const limitMessage = `DEMO_LIMIT_REACHED: local demo daily limit reached (${usage.used}/${usage.limit}). Configure a provider in /settings?tab=api or retry after ${usage.resetAt}.`
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: limitMessage,
+            timestamp: new Date(),
+            model: currentModel,
+          },
+        ])
+        analytics?.track?.('ai', 'ai_error', {
+          metadata: {
+            source: 'ide-panel-local-demo',
+            model: currentModel,
+            projectId,
+            error: 'DEMO_LIMIT_REACHED',
+            demoLimit: usage.limit,
+            demoUsed: usage.used,
+            reason: input.reason,
+          },
+        })
+        return true
+      }
+
+      const demoContent = buildLocalDemoChatContent({
+        message: input.message,
+        qualityMode: input.profile.qualityMode,
+        agentCount: input.profile.agentCount,
+        enableWebResearch: input.profile.enableWebResearch,
+        remaining: usage.remaining,
+        limit: usage.limit,
+      })
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: demoContent,
+          timestamp: new Date(),
+          model: currentModel,
+        },
+      ])
+
+      analytics?.track?.('ai', 'ai_stream', {
+        metadata: {
+          source: 'ide-panel-local-demo',
+          model: currentModel,
+          projectId,
+          status: 'demo-local',
+          reason: input.reason,
+          qualityMode: input.profile.qualityMode,
+          agentCount: input.profile.agentCount,
+          enableWebResearch: input.profile.enableWebResearch,
+          mentionTags: input.tags ?? [],
+          demoRemaining: usage.remaining,
+          demoLimit: usage.limit,
+          demoUsed: usage.used,
+        },
+      })
+      return true
+    },
+    [currentModel, projectId, providerStatus]
+  )
 
   const handleSendMessage = useCallback(
     async (message: string, context?: { attachments?: unknown[] }) => {
@@ -246,6 +323,10 @@ export default function AIChatPanelContainer() {
             model: currentModel,
           },
         ])
+        return
+      }
+
+      if (providerGate && tryServeLocalDemo({ message: normalizedMessage, profile: profileResolution.profile, tags: profileResolution.tags, reason: 'preflight_provider_gate' })) {
         return
       }
 
@@ -332,6 +413,15 @@ export default function AIChatPanelContainer() {
             capability: err.capability,
             setupUrl: err.setupUrl,
           })
+          const servedDemo = tryServeLocalDemo({
+            message: normalizedMessage,
+            profile: profileResolution.profile,
+            tags: profileResolution.tags,
+            reason: 'provider_setup_error',
+          })
+          if (servedDemo) {
+            return
+          }
         }
 
         const errorMessage =
@@ -375,7 +465,7 @@ export default function AIChatPanelContainer() {
         setIsLoading(false)
       }
     },
-    [messages, currentModel, isLoading, projectId]
+    [messages, currentModel, isLoading, projectId, providerGate, tryServeLocalDemo]
   )
 
   const handleClearChat = useCallback(() => {
@@ -389,7 +479,7 @@ export default function AIChatPanelContainer() {
   return (
     <div className="flex h-full flex-col">
       {providerGate && (
-        <div className="mx-3 mt-3">
+        <div className="mx-3 mt-3 space-y-2">
           <AIProviderSetupGuide
             source="ide"
             compact
@@ -397,6 +487,13 @@ export default function AIChatPanelContainer() {
             capability={providerGate.capability}
             settingsHref={providerGate.setupUrl}
           />
+          {!providerStatus?.configured && !providerStatus?.demoModeEnabled && (
+            <div className="rounded border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-[11px] text-sky-100">
+              Demo local disponivel: voce pode enviar ate{' '}
+              {typeof providerStatus?.demoDailyLimit === 'number' ? providerStatus.demoDailyLimit : 5} mensagens por dia
+              com resposta guiada sem provider real.
+            </div>
+          )}
         </div>
       )}
       {isLoading && (
