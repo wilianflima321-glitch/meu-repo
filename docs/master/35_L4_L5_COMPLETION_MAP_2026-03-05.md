@@ -177,3 +177,12 @@ If work competes with this order:
 2. First-value friction wins next.
 3. Collaboration/accessibility/mobile proof comes before new domain ambition.
 4. Games/Films remain frozen beyond factual L2 hardening until Apps L4 is closed.
+
+## 10) Delta 2026-03-07
+1. First-value path improved with explicit local demo bridge on IDE chat when provider is missing and server demo mode is off.
+2. Dashboard shell margin improved (`AethelDashboard.tsx` moved from `1199` to `1190` lines) by extracting initial-state logic to a dedicated helper module.
+3. `DUPLICATIONS_AND_CONFLICTS.md` is refreshed and active again; conflict map now tracks open blockers with explicit IDs (`C-01..C-05`).
+4. L4 block conditions remain unchanged:
+   - production evidence still required;
+   - readiness thresholds still mandatory;
+   - no claim upgrade allowed by rehearsal-only metrics.

@@ -35,9 +35,6 @@ import {
   type WorkflowTemplate,
   STORAGE_KEYS,
   clearStoredDashboardState,
-  resolveStoredChatHistory,
-  resolveStoredSessions,
-  resolveStoredSettings,
 } from './dashboard/aethel-dashboard-model'
 import {
   BILLING_PLANS_KEY,
@@ -99,7 +96,6 @@ import { DashboardMainContent } from './dashboard/DashboardMainContent'
 import {
   DASHBOARD_DEFAULT_SETTINGS,
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
-  coerceActiveTab,
   type FullAccessResponse,
   type Point3,
 } from './dashboard/aethel-dashboard-core-types'
@@ -108,6 +104,13 @@ import { DashboardToast } from './dashboard/DashboardToast'
 import { useFirstValueTracking } from './dashboard/useFirstValueTracking'
 import { useDashboardMissionSeed } from './dashboard/useDashboardMissionSeed'
 import { useDashboardStoragePersistence } from './dashboard/useDashboardStoragePersistence'
+import {
+  getInitialActiveTab,
+  getInitialChatHistory,
+  getInitialFirstValueGuideState,
+  getInitialSessionHistory,
+  getInitialSettings,
+} from './dashboard/aethel-dashboard-initial-state'
 const DEFAULT_MODEL = 'gpt-4o-mini'
 const FIRST_VALUE_GUIDE_DISMISSED_KEY = 'aethel.dashboard.first-value.dismissed'
 
@@ -117,20 +120,11 @@ export default function AethelDashboard() {
   const [workflowTemplates] = useState<WorkflowTemplate[]>(DEFAULT_WORKFLOW_TEMPLATES)
   const [useCases] = useState<UseCase[]>(DEFAULT_USE_CASES)
   const [showToast, setShowToast] = useState<ToastState | null>(null)
-  const [sessionHistory, setSessionHistory] = useState(() => {
-    if (typeof window === 'undefined') return []
-    return resolveStoredSessions(window.localStorage.getItem(STORAGE_KEYS.sessionHistory))
-  })
+  const [sessionHistory, setSessionHistory] = useState(getInitialSessionHistory)
   const [sessionFilter, setSessionFilter] = useState<SessionFilter>('all')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
-    if (typeof window === 'undefined') return 'overview'
-    return coerceActiveTab(window.localStorage.getItem(STORAGE_KEYS.activeTab))
-  })
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => {
-    if (typeof window === 'undefined') return []
-    return resolveStoredChatHistory(window.localStorage.getItem(STORAGE_KEYS.chatHistory))
-  })
+  const [activeTab, setActiveTab] = useState<ActiveTab>(getInitialActiveTab)
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(getInitialChatHistory)
   const [activeChatThreadId, setActiveChatThreadId] = useState<string | null>(null)
   const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null)
   const [copilotProjectId, setCopilotProjectId] = useState<string | null>(null)
@@ -141,10 +135,7 @@ export default function AethelDashboard() {
   const [chatMessage, setChatMessage] = useState('')
   const [livePreviewSuggestions, setLivePreviewSuggestions] = useState<string[]>([])
   const [selectedPreviewPoint, setSelectedPreviewPoint] = useState<Point3 | null>(null)
-  const [settings, setSettings] = useState<DashboardSettings>(() => {
-    if (typeof window === 'undefined') return { ...DASHBOARD_DEFAULT_SETTINGS }
-    return resolveStoredSettings(window.localStorage.getItem(STORAGE_KEYS.settings))
-  })
+  const [settings, setSettings] = useState<DashboardSettings>(getInitialSettings)
   const [projects, setProjects] = useState<Project[]>(DEFAULT_PROJECTS)
   const [newProjectName, setNewProjectName] = useState('')
   const [newProjectType, setNewProjectType] = useState<Project['type']>('code')
@@ -165,10 +156,9 @@ export default function AethelDashboard() {
   const [firstValueAiSuccess, setFirstValueAiSuccess] = useState(false)
   const [firstValueOpenedIde, setFirstValueOpenedIde] = useState(false)
   const [fullAccessBusy, setFullAccessBusy] = useState(false)
-  const [showFirstValueGuide, setShowFirstValueGuide] = useState(() => {
-    if (typeof window === 'undefined') return true
-    return window.localStorage.getItem(FIRST_VALUE_GUIDE_DISMISSED_KEY) !== '1'
-  })
+  const [showFirstValueGuide, setShowFirstValueGuide] = useState(() =>
+    getInitialFirstValueGuideState(FIRST_VALUE_GUIDE_DISMISSED_KEY)
+  )
   const chatAbortRef = useRef<AbortController | null>(null)
   const [isTrialActive] = useState(true)
   const [showTrialBanner, setShowTrialBanner] = useState(true)

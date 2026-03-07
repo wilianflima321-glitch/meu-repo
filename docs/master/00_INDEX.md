@@ -1,5 +1,5 @@
 # 00_INDEX
-Date: 2026-03-05
+Date: 2026-03-07
 Status: CANONICAL ENTRYPOINT
 
 ## Read Order (Required)
@@ -69,7 +69,7 @@ Status: CANONICAL ENTRYPOINT
 | Doc | Scope | Status |
 |---|---|---|
 | `FULL_AUDIT.md` | Base audit | HISTORICAL BASELINE |
-| `DUPLICATIONS_AND_CONFLICTS.md` | Duplication map | NEEDS REFRESH |
+| `DUPLICATIONS_AND_CONFLICTS.md` | Duplication/conflict execution map | ACTIVE (REFRESHED 2026-03-07) |
 | `LIMITATIONS.md` | Non-negotiable technical limits | ACTIVE |
 | `COMPETITIVE_GAP.md` | Competitive decomposition | MIXED FACTS+ASSUMPTIONS |
 | `WORKBENCH_SPEC.md` | Workbench contract | ACTIVE |
@@ -78,7 +78,7 @@ Status: CANONICAL ENTRYPOINT
 | `8_ADMIN_SYSTEM_SPEC.md` | Admin scope | ACTIVE |
 | `9_BACKEND_SYSTEM_SPEC.md` | Backend scope | ACTIVE |
 
-## Current Factual Snapshot (2026-03-04)
+## Current Factual Snapshot (2026-03-07)
 - Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
   - `legacy-accent-tokens=0`
   - `admin-light-theme-tokens=0`
@@ -86,7 +86,7 @@ Status: CANONICAL ENTRYPOINT
   - `blocking-browser-dialogs=0`
   - `not-implemented-ui=0`
 - Explicit API NOT_IMPLEMENTED gates (`tools/find-not-implemented.mjs`): `0`
-- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1199`
+- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1190`
 - Structural baseline closed for connectivity P0:
   - `npm run qa:repo-connectivity` passes.
   - `npm run qa:canonical-doc-alignment` passes.
@@ -122,6 +122,10 @@ Status: CANONICAL ENTRYPOINT
   - core-loop rolling metrics refreshed (`metrics/latest_run*.json`) with rehearsal-only evidence still excluded from promotion policy,
   - production evidence probe tooling added (`npm run qa:core-loop-production-probe`) to generate authenticated production-sample apply probes in sandbox mode,
   - admin production probe API + control added (`/api/admin/ai/core-loop-production-probe`, `/admin/ai-monitor` action `Run Production Probe`).
+- Delta 2026-03-07:
+  - `DUPLICATIONS_AND_CONFLICTS.md` was fully refreshed and moved back to active state with canonical conflict IDs and closure checklist,
+  - IDE chat now has explicit local demo fallback for provider-missing first-value flow (`DEMO LOCAL` + daily usage cap + telemetry),
+  - dashboard shell initialization logic extracted to dedicated helper module (`components/dashboard/aethel-dashboard-initial-state.ts`) to reduce shell churn risk and preserve gate margin.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
