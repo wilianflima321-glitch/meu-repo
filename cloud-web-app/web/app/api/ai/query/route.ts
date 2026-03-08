@@ -10,7 +10,7 @@ import { persistAITrace } from '@/lib/ai-trace-store';
  * AI Query API - Conexão REAL com LLMs
  * POST /api/ai/query
  * 
- * Conecta diretamente com OpenAI, Anthropic ou Google Gemini.
+ * Conecta diretamente com OpenAI, OpenRouter, Anthropic ou Google Gemini.
  * Com ENFORCEMENT de limites por plano!
  */
 export async function POST(req: NextRequest) {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     if (availableProviders.length === 0) {
       return NextResponse.json({
         error: 'NO_AI_PROVIDERS',
-        message: 'Nenhum provider de IA configurado. Configure OPENAI_API_KEY, ANTHROPIC_API_KEY ou GOOGLE_API_KEY no .env',
+        message: 'Nenhum provider de IA configurado. Configure OPENROUTER_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY ou GOOGLE_API_KEY no .env',
         availableProviders: []
       }, { status: 503 });
     }

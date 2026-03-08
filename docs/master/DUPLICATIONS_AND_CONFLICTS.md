@@ -23,6 +23,12 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 | C-03 | Billing narrative vs runtime reality | Billing routes are `PARTIAL`, gateway runtime may be unavailable | High (monetization block) | Wire checkout runtime and webhook path for paid plans |
 | C-04 | Canonical docs vs historical volume | `docs/master` is clean, but non-canonical markdown volume remains very high | Medium (agent drift) | Continue archive consolidation and keep `00_INDEX` authoritative |
 | C-05 | Dashboard shell margin risk | `AethelDashboard.tsx` is bounded but still near threshold | Medium (fast regressions) | Keep decomposition; avoid adding new feature blocks in shell |
+| C-06 | Shell authority drift | `AethelDashboardSidebar` is canonical, but `DashboardSidebar`/`DashboardLayout` still exist as parallel legacy primitives | Medium (new drift) | Keep legacy exports explicit, route new work to canonical shell only |
+| C-07 | Preview surface fragmentation | `LivePreview`, `PreviewPanel`, `NexusCanvasV2`, and detached `TheForgeUnified` still represent different runtime stories | High UX inconsistency | Collapse preview/runtime authority behind one canonical manager and keep detached shells non-authoritative |
+| C-08 | Provider-ready code vs local production runtime | Live provider calls pass, but local authenticated production probe is still blocked by missing `DATABASE_URL`, `JWT_SECRET`, `.env.local`, and inactive Docker daemon | High (false sense of readiness) | Stand up real local/staging runtime and run authenticated production probes before promoting claims |
+| C-09 | Security hardening drift vs L5 claim | Some auth/CSRF paths historically accepted fallback secrets even when runtime was not configured | High (unsafe enterprise posture) | Keep fail-closed secret policy across admin/auth/CSRF surfaces and expose readiness blockers explicitly |
+| C-10 | Streaming path parity vs chat path | `/api/ai/stream` historically depended on external backend proxy while `/api/ai/chat` already had internal-provider fallback | Medium (UX inconsistency, local-runtime dead end) | Keep direct-provider streaming path as canonical fallback when backend proxy is absent |
+| C-11 | Production preflight hidden in operator knowledge | Teams had to discover missing `.env.local`/DB/JWT/Docker state ad hoc | Medium (slow unblock) | Keep explicit runtime preflight script in CI/local workflows |
 
 ## 4) Canonical UX Decisions (locked)
 1. `/dashboard` stays primary entry.
@@ -30,6 +36,12 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 3. Provider-missing paths must remain explicit; no fake-success.
 4. Demo experience must be clearly labeled as demo.
 5. Capability contracts remain source of truth for product claims.
+6. Product-facing preview routing should prefer `CanonicalPreviewSurface` over direct primitive imports.
+7. Shared preview runtime helpers should live in `lib/preview/runtime-manager.ts`; do not duplicate discover/provision/health logic in new surfaces.
+8. Preview runtime stateful orchestration should prefer `hooks/usePreviewRuntimeManager.ts` over in-component copies.
+9. AI provider configuration truth should prefer `lib/ai-provider-config.ts` over ad-hoc environment checks in routes.
+10. AI provider labels/setup wording should prefer `lib/ai-provider-config.ts` over hard-coded product copy.
+11. Admin/auth/CSRF routes must fail closed when secrets are missing; no baked-in fallback secrets in production paths.
 
 ## 5) Canonical Domain Scope (locked until Apps L4)
 1. Apps: primary L4 candidate.

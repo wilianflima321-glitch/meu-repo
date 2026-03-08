@@ -24,6 +24,7 @@
     "qa:global-gap-scan": "node tools/run-global-gap-scan.mjs",
     "qa:find-not-implemented": "node tools/find-not-implemented.mjs --output docs/master/not-implemented-scan.csv",
     "qa:impact-matrix": "node tools/impact.mjs",
+    "qa:production-runtime-readiness": "node tools/check-production-runtime-readiness.mjs",
     "qa:core-loop-metrics": "node tools/export-core-loop-metrics.mjs --output metrics/latest_run.json --hours 168",
     "qa:core-loop-metrics:production": "node tools/export-core-loop-metrics.mjs --output metrics/latest_run-production.json --hours 168 --source production",
     "qa:core-loop-metrics:rehearsal": "node tools/export-core-loop-metrics.mjs --output metrics/latest_run-rehearsal.json --hours 168 --source rehearsal",

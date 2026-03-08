@@ -1,4 +1,5 @@
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
+import { getAiProviderSetupSummary } from '@/lib/ai-provider-config'
 
 const DEMO_PROVIDER = 'demo'
 const DEMO_MODEL = 'aethel-demo-v1'
@@ -74,6 +75,7 @@ export function buildDemoChatContent(args: {
   messages?: Array<{ content?: string }>
 }): string {
   const seed = sanitizeText(args.message || lastContentMessage(args.messages) || 'Sem contexto recebido.')
+  const providerSummary = getAiProviderSetupSummary()
   return [
     'DEMO MODE (provider real nao configurado).',
     '',
@@ -85,7 +87,7 @@ export function buildDemoChatContent(args: {
     '3. Executar validacao local (lint/typecheck/build) antes de promover.',
     '4. Registrar feedback no core loop (accepted/rejected/needs_work).',
     '',
-    'Acao recomendada agora: configure OpenAI, Anthropic, Google ou Groq em /settings?tab=api para trocar do modo demo para execucao real.',
+    `Acao recomendada agora: configure ${providerSummary} em /settings?tab=api para trocar do modo demo para execucao real.`,
   ].join('\n')
 }
 

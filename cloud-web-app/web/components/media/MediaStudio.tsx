@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react'
 import { VideoPreview, VideoTimeline, type VideoClip } from '../video/VideoTimeline'
 import { ImageEditor } from '../image/ImageEditor'
 import WaveformRenderer, { MixerChannel } from '../audio/AudioEngine'
@@ -28,9 +28,23 @@ import {
 
 type Props = {
   path?: string
+  project?: MediaProject
+  onProjectChange?: (project: MediaProject) => void
+  selectedAssetId?: string | null
+  onSelectedAssetIdChange?: (assetId: string | null) => void
+  selectedClipId?: string | null
+  onSelectedClipIdChange?: (clipId: string | null) => void
 }
 
-export default function MediaStudio({ path }: Props) {
+export default function MediaStudio({
+  path,
+  project: controlledProject,
+  onProjectChange,
+  selectedAssetId: controlledSelectedAssetId,
+  onSelectedAssetIdChange,
+  selectedClipId: controlledSelectedClipId,
+  onSelectedClipIdChange,
+}: Props) {
   const initialProject = useMemo<MediaProject>(() => {
     const now = Date.now()
     return {
@@ -46,9 +60,37 @@ export default function MediaStudio({ path }: Props) {
     }
   }, [])
 
-  const [project, setProject] = useState<MediaProject>(initialProject)
-  const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null)
-  const [selectedClipId, setSelectedClipId] = useState<string | null>(null)
+  const [internalProject, setInternalProject] = useState<MediaProject>(initialProject)
+  const [internalSelectedAssetId, setInternalSelectedAssetId] = useState<string | null>(null)
+  const [internalSelectedClipId, setInternalSelectedClipId] = useState<string | null>(null)
+  const project = controlledProject ?? internalProject
+  const selectedAssetId = controlledSelectedAssetId ?? internalSelectedAssetId
+  const selectedClipId = controlledSelectedClipId ?? internalSelectedClipId
+
+  const setProject = useCallback((update: SetStateAction<MediaProject>) => {
+    if (controlledProject && onProjectChange) {
+      const nextProject = typeof update === 'function' ? update(controlledProject) : update
+      onProjectChange(nextProject)
+      return
+    }
+    setInternalProject(update)
+  }, [controlledProject, onProjectChange])
+
+  const setSelectedAssetId = useCallback((nextId: string | null) => {
+    if (controlledSelectedAssetId !== undefined) {
+      onSelectedAssetIdChange?.(nextId)
+      return
+    }
+    setInternalSelectedAssetId(nextId)
+  }, [controlledSelectedAssetId, onSelectedAssetIdChange])
+
+  const setSelectedClipId = useCallback((nextId: string | null) => {
+    if (controlledSelectedClipId !== undefined) {
+      onSelectedClipIdChange?.(nextId)
+      return
+    }
+    setInternalSelectedClipId(nextId)
+  }, [controlledSelectedClipId, onSelectedClipIdChange])
 
   const [currentTime, setCurrentTime] = useState(0)
   const [zoom, setZoom] = useState(80)

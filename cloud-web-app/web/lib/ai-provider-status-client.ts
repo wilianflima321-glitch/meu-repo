@@ -1,3 +1,5 @@
+import { AI_PROVIDER_LABELS } from '@/lib/ai-provider-config'
+
 export type AiProviderStatusResponse = {
   configured?: boolean
   status?: 'configured' | 'not_configured'
@@ -41,5 +43,6 @@ export function buildAiProviderGateMessage(status?: AiProviderStatusResponse | n
   if (missingProviders.length === 0) {
     return 'Configure ao menos um provider para liberar chat, complete e inline edit.'
   }
-  return `Configure ao menos um provider para liberar chat, complete e inline edit. Missing: ${missingProviders.join(', ')}.`
+  const missingLabels = missingProviders.map((provider) => AI_PROVIDER_LABELS[provider] || provider)
+  return `Configure ao menos um provider para liberar chat, complete e inline edit. Missing: ${missingLabels.join(', ')}.`
 }

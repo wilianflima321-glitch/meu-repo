@@ -20,7 +20,7 @@ import { EventEmitter } from 'events';
 // TYPES
 // ============================================================================
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'groq' | 'ollama';
+export type Provider = 'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq' | 'ollama';
 
 export interface ToolDefinition {
   name: string;
@@ -116,6 +116,11 @@ const MODEL_INFO: Record<string, {
   'gpt-4-turbo': { provider: 'openai', contextWindow: 128000, maxOutput: 4096, inputCost: 10.00, outputCost: 30.00, supportsVision: true, supportsTools: true, supportsJson: true },
   'o1-preview': { provider: 'openai', contextWindow: 128000, maxOutput: 32768, inputCost: 15.00, outputCost: 60.00, supportsTools: false },
   'o1-mini': { provider: 'openai', contextWindow: 128000, maxOutput: 65536, inputCost: 3.00, outputCost: 12.00, supportsTools: false },
+
+  // OpenRouter
+  'google/gemini-3.1-flash-lite-preview': { provider: 'openrouter', contextWindow: 1000000, maxOutput: 8192, inputCost: 0.10, outputCost: 0.40, supportsVision: true, supportsTools: true, supportsJson: true },
+  'openai/gpt-4o-mini': { provider: 'openrouter', contextWindow: 128000, maxOutput: 16384, inputCost: 0.15, outputCost: 0.60, supportsVision: true, supportsTools: true, supportsJson: true },
+  'anthropic/claude-3.5-haiku': { provider: 'openrouter', contextWindow: 200000, maxOutput: 8192, inputCost: 0.80, outputCost: 4.00, supportsVision: true, supportsTools: true },
   
   // Anthropic
   'claude-3-5-sonnet-20241022': { provider: 'anthropic', contextWindow: 200000, maxOutput: 8192, inputCost: 3.00, outputCost: 15.00, supportsVision: true, supportsTools: true },
@@ -134,6 +139,7 @@ const MODEL_INFO: Record<string, {
 
 export class AdvancedAIProvider extends EventEmitter {
   private openai: OpenAI | null = null;
+  private openrouter: OpenAI | null = null;
   private anthropic: Anthropic | null = null;
   private google: GoogleGenerativeAI | null = null;
   
@@ -154,6 +160,17 @@ export class AdvancedAIProvider extends EventEmitter {
     if (process.env.OPENAI_API_KEY) {
       this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     }
+
+    if (process.env.OPENROUTER_API_KEY) {
+      this.openrouter = new OpenAI({
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseURL: 'https://openrouter.ai/api/v1',
+        defaultHeaders: {
+          'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://aethel.local',
+          'X-Title': 'Aethel Engine',
+        },
+      });
+    }
     
     if (process.env.ANTHROPIC_API_KEY) {
       this.anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -172,6 +189,10 @@ export class AdvancedAIProvider extends EventEmitter {
     
     if (this.openai) {
       models.push('gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o1-mini');
+    }
+
+    if (this.openrouter) {
+      models.push('google/gemini-3.1-flash-lite-preview', 'openai/gpt-4o-mini', 'anthropic/claude-3.5-haiku');
     }
     
     if (this.anthropic) {
@@ -257,6 +278,9 @@ export class AdvancedAIProvider extends EventEmitter {
       case 'openai':
         response = await this.completeOpenAI(messages, { ...options, model });
         break;
+      case 'openrouter':
+        response = await this.completeOpenRouter(messages, { ...options, model });
+        break;
       case 'anthropic':
         response = await this.completeAnthropic(messages, { ...options, model });
         break;
@@ -292,6 +316,9 @@ export class AdvancedAIProvider extends EventEmitter {
     switch (info.provider) {
       case 'openai':
         yield* this.streamOpenAI(messages, { ...options, model });
+        break;
+      case 'openrouter':
+        yield* this.streamOpenRouter(messages, { ...options, model });
         break;
       case 'anthropic':
         yield* this.streamAnthropic(messages, { ...options, model });
@@ -376,6 +403,88 @@ export class AdvancedAIProvider extends EventEmitter {
       stream: true,
     });
     
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        yield { content };
+      }
+    }
+  }
+
+  /**
+   * OpenRouter completion via OpenAI-compatible API
+   */
+  private async completeOpenRouter(
+    messages: Message[],
+    options: CompletionOptions
+  ): Promise<CompletionResponse> {
+    if (!this.openrouter) throw new Error('OpenRouter not configured');
+
+    const openaiMessages = this.convertToOpenAI(messages);
+    const tools = options.tools?.map(t => ({
+      type: 'function' as const,
+      function: {
+        name: t.name,
+        description: t.description,
+        parameters: t.parameters,
+      },
+    }));
+
+    const response = await this.openrouter.chat.completions.create({
+      model: options.model!,
+      messages: openaiMessages,
+      temperature: options.temperature,
+      max_tokens: options.maxTokens,
+      top_p: options.topP,
+      frequency_penalty: options.frequencyPenalty,
+      presence_penalty: options.presencePenalty,
+      stop: options.stop,
+      tools: tools?.length ? tools : undefined,
+      tool_choice: options.toolChoice as any,
+      response_format: options.responseFormat,
+    });
+
+    const choice = response.choices[0];
+    const toolCalls = choice.message.tool_calls?.map(tc => ({
+      id: tc.id,
+      name: tc.function.name,
+      arguments: JSON.parse(tc.function.arguments),
+    }));
+
+    return {
+      content: choice.message.content || '',
+      toolCalls,
+      finishReason: choice.finish_reason as any,
+      usage: {
+        promptTokens: response.usage?.prompt_tokens || 0,
+        completionTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+      },
+      model: response.model,
+      provider: 'openrouter',
+      latencyMs: 0,
+    };
+  }
+
+  /**
+   * OpenRouter streaming via OpenAI-compatible API
+   */
+  private async *streamOpenRouter(
+    messages: Message[],
+    options: CompletionOptions
+  ): AsyncGenerator<{ content?: string; toolCall?: ToolCall }, void, unknown> {
+    if (!this.openrouter) throw new Error('OpenRouter not configured');
+
+    const openaiMessages = this.convertToOpenAI(messages);
+
+    const stream = await this.openrouter.chat.completions.create({
+      model: options.model!,
+      messages: openaiMessages,
+      temperature: options.temperature,
+      max_tokens: options.maxTokens,
+      stream: true,
+    });
+
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content;
       if (content) {
@@ -688,6 +797,7 @@ export class AdvancedAIProvider extends EventEmitter {
    * Select default model based on available providers
    */
   private selectDefaultModel(): string {
+    if (this.openrouter) return 'google/gemini-3.1-flash-lite-preview';
     if (this.google) return 'gemini-1.5-flash';
     if (this.openai) return 'gpt-4o-mini';
     if (this.anthropic) return 'claude-3-5-haiku-20241022';

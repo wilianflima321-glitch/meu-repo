@@ -4,6 +4,9 @@ import { useState, type ReactNode } from 'react'
 import DashboardSidebar, { type DashboardTab } from './DashboardSidebar'
 import AethelHeaderPro from '../AethelHeaderPro'
 
+// Legacy shell wrapper kept for compatibility with earlier refactor work.
+// New dashboard work should anchor on AethelDashboard + AethelDashboardSidebar.
+
 interface DashboardLayoutProps {
   children: ReactNode
   activeTab: DashboardTab

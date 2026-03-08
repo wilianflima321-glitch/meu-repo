@@ -230,8 +230,8 @@ async function maybeCollectWebBenchmarkContext(
 
 function getMissingProviderForModel(
   model: string,
-  availableProviders: ReadonlyArray<'openai' | 'anthropic' | 'google' | 'groq'>
-): 'openai' | 'anthropic' | 'google' | 'groq' | null {
+  availableProviders: ReadonlyArray<'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq'>
+): 'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq' | null {
   const expectedProvider = inferProviderFromModel(model);
   if (!expectedProvider) return null;
   if (availableProviders.includes(expectedProvider)) return null;
@@ -769,8 +769,11 @@ function clampText(text: string, maxChars: number): string {
   return s.slice(0, Math.max(0, maxChars - 3)) + '...';
 }
 
-function inferProviderFromModel(model: string): 'openai' | 'anthropic' | 'google' | undefined {
+function inferProviderFromModel(model: string): 'openai' | 'openrouter' | 'anthropic' | 'google' | undefined {
   const m = (model || '').trim().toLowerCase();
+  if (m.startsWith('openai/')) return 'openrouter';
+  if (m.startsWith('google/')) return 'openrouter';
+  if (m.startsWith('anthropic/')) return 'openrouter';
   if (m.startsWith('gpt-')) return 'openai';
   if (m.startsWith('claude-')) return 'anthropic';
   if (m.startsWith('gemini-')) return 'google';
@@ -784,7 +787,7 @@ function normalizeModelName(model: string): string {
   const idx = raw.indexOf(':');
   if (idx > 0 && idx < raw.length - 1) {
     const prefix = raw.slice(0, idx).toLowerCase();
-    if (prefix === 'openai' || prefix === 'anthropic' || prefix === 'google' || prefix === 'groq') {
+    if (prefix === 'openai' || prefix === 'openrouter' || prefix === 'anthropic' || prefix === 'google' || prefix === 'groq') {
       return raw.slice(idx + 1);
     }
   }

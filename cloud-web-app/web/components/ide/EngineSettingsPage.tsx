@@ -232,14 +232,20 @@ const ENGINE_SETTINGS: Record<string, Setting[]> = {
 
 const AI_SETTINGS: Record<string, Setting[]> = {
   models: [
-    { id: 'ai.defaultModel', label: 'Default Model', type: 'select', value: 'gpt-4o', options: [
+    { id: 'ai.defaultModel', label: 'Default Model', type: 'select', value: 'google/gemini-3.1-flash-lite-preview', options: [
+      { value: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite (OpenRouter)' },
+      { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (OpenRouter)' },
+      { value: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku (OpenRouter)' },
       { value: 'gpt-4o', label: 'GPT-4o (OpenAI)' },
       { value: 'gpt-4o-mini', label: 'GPT-4o Mini (OpenAI)' },
       { value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4 (Anthropic)' },
       { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro (Google)' },
       { value: 'deepseek-chat', label: 'DeepSeek Chat' },
     ]},
-    { id: 'ai.codeModel', label: 'Code Generation Model', type: 'select', value: 'gpt-4o', options: [
+    { id: 'ai.codeModel', label: 'Code Generation Model', type: 'select', value: 'google/gemini-3.1-flash-lite-preview', options: [
+      { value: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite (OpenRouter)' },
+      { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (OpenRouter)' },
+      { value: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku (OpenRouter)' },
       { value: 'gpt-4o', label: 'GPT-4o' },
       { value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4' },
       { value: 'deepseek-coder', label: 'DeepSeek Coder' },

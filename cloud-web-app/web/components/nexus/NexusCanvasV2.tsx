@@ -5,18 +5,18 @@ import * as THREE from 'three';
 
 /**
  * ============================================
- * NEXUS CANVAS V2: Motor de Renderização AAA
+ * NEXUS CANVAS V2: Motor de Renderizacao (Baseline)
  * ============================================
  * 
- * Renderizador 3D de alta performance baseado em Three.js
- * com suporte a WebGPU para qualidade visual Unreal-like.
+ * Renderizador 3D baseado em Three.js/WebGL para iteracao local.
+ * Recursos WebGPU avancados permanecem como trilha de evolucao.
  * 
  * Características:
  * - Renderização em tempo real (60 FPS)
- * - Suporte a Scene Graphs complexos
+ * - Suporte a Scene Graphs
  * - Integração com WASM Logic Engine
  * - Hot-reload de assets e lógica
- * - Pixel-perfect visual quality
+ * - Qualidade visual de prototipagem
  */
 
 interface SceneObject {
@@ -39,6 +39,9 @@ interface NexusCanvasProps {
   enablePhysics?: boolean;
   renderMode?: 'draft' | 'cinematic';
 }
+
+// Canonical scene/canvas preview primitive for dashboard-facing 3D surfaces.
+// Higher-level product routing should use `components/preview/CanonicalPreviewSurface.tsx`.
 
 export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
   initialScene = [],
@@ -118,7 +121,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // Criar renderer com WebGPU se disponível
+    // Renderer baseline (Three.js WebGL)
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -270,6 +273,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
         >
           <div>FPS: {stats.fps}</div>
           <div>Objects: {stats.objects}</div>
+          <div>Renderer: WebGL</div>
           <div>Mode: {renderMode}</div>
         </div>
       </div>

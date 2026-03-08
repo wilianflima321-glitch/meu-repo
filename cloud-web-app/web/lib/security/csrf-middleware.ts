@@ -18,7 +18,16 @@ import { randomBytes, createHmac } from 'crypto';
 const CSRF_TOKEN_LENGTH = 32;
 const CSRF_COOKIE_NAME = '__Host-csrf-token';
 const CSRF_HEADER_NAME = 'x-csrf-token';
-const CSRF_SECRET = process.env.CSRF_SECRET || process.env.JWT_SECRET || 'fallback-secret-change-me';
+
+function getCsrfSecret(): string {
+  const secret = process.env.CSRF_SECRET || process.env.JWT_SECRET;
+  if (!secret || secret === 'fallback-secret-change-me') {
+    throw Object.assign(new Error('CSRF_NOT_CONFIGURED: defina CSRF_SECRET ou JWT_SECRET real.'), {
+      code: 'CSRF_NOT_CONFIGURED',
+    });
+  }
+  return secret;
+}
 
 // Rotas que requerem proteção CSRF
 const PROTECTED_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
@@ -66,7 +75,7 @@ export function generateCSRFToken(): CSRFToken {
  */
 function signToken(token: string, expiresAt: number): string {
   const payload = `${token}:${expiresAt}`;
-  return createHmac('sha256', CSRF_SECRET).update(payload).digest('hex');
+  return createHmac('sha256', getCsrfSecret()).update(payload).digest('hex');
 }
 
 /**
@@ -172,7 +181,15 @@ export async function csrfMiddleware(
   const headerToken = request.headers.get(CSRF_HEADER_NAME);
 
   // Valida
-  const validation = validateCSRFToken(cookieToken ?? undefined, headerToken ?? undefined);
+  let validation: CSRFValidationResult;
+  try {
+    validation = validateCSRFToken(cookieToken ?? undefined, headerToken ?? undefined);
+  } catch (error) {
+    if ((error as { code?: string })?.code === 'CSRF_NOT_CONFIGURED') {
+      return NextResponse.json({ error: 'CSRF_NOT_CONFIGURED' }, { status: 503 });
+    }
+    throw error;
+  }
 
   if (!validation.valid) {
     return NextResponse.json(
@@ -193,7 +210,15 @@ export async function csrfMiddleware(
 export async function handleCSRFTokenRequest(
   request: NextRequest
 ): Promise<NextResponse> {
-  const csrf = generateCSRFToken();
+  let csrf: CSRFToken;
+  try {
+    csrf = generateCSRFToken();
+  } catch (error) {
+    if ((error as { code?: string })?.code === 'CSRF_NOT_CONFIGURED') {
+      return NextResponse.json({ error: 'CSRF_NOT_CONFIGURED' }, { status: 503 });
+    }
+    throw error;
+  }
 
   const response = NextResponse.json({ 
     token: csrf.token,

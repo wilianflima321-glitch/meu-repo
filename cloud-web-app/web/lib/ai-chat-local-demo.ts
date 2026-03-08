@@ -1,3 +1,5 @@
+import { getAiProviderSetupSummary } from '@/lib/ai-provider-config'
+
 export const AI_LOCAL_DEMO_USAGE_KEY = 'aethel.ai.local-demo.v1'
 
 type LocalDemoUsageSnapshot = {
@@ -102,6 +104,7 @@ export function consumeLocalDemoUsage(limit?: number): LocalDemoUsageDecision {
 
 export function buildLocalDemoChatContent(params: BuildLocalDemoChatContentParams): string {
   const normalizedMessage = sanitizeText(params.message || 'sem mensagem')
+  const providerSummary = getAiProviderSetupSummary()
   return [
     'DEMO LOCAL (provider de IA nao configurado).',
     '',
@@ -114,6 +117,6 @@ export function buildLocalDemoChatContent(params: BuildLocalDemoChatContentParam
     '4. Configurar provider real para sair do demo local e receber respostas com contexto completo.',
     '',
     `Demo local restante hoje: ${params.remaining}/${params.limit}.`,
-    'Setup recomendado: abra /settings?tab=api e configure OpenAI, Anthropic, Google ou Groq.',
+    `Setup recomendado: abra /settings?tab=api e configure ${providerSummary}.`,
   ].join('\n')
 }

@@ -394,10 +394,19 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
   {
     key: 'aethel.ai.model',
     type: 'enum',
-    default: 'gpt-4o',
+    default: 'google/gemini-3.1-flash-lite-preview',
     description: 'The AI model to use for code completion.',
     category: ['Aethel Engine', 'AI'],
-    enum: ['gpt-4o', 'gpt-4-turbo', 'claude-3-opus', 'claude-3-sonnet', 'local-llm'],
+    enum: [
+      'google/gemini-3.1-flash-lite-preview',
+      'openai/gpt-4o-mini',
+      'anthropic/claude-3.5-haiku',
+      'gpt-4o',
+      'gpt-4-turbo',
+      'claude-3-opus',
+      'claude-3-sonnet',
+      'local-llm',
+    ],
   },
   {
     key: 'aethel.ai.temperature',

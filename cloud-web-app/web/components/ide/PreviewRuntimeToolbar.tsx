@@ -1,12 +1,6 @@
 'use client'
 
-export type PreviewRuntimeHealthStatus =
-  | 'idle'
-  | 'checking'
-  | 'reachable'
-  | 'unreachable'
-  | 'unhealthy'
-  | 'invalid'
+import type { PreviewRuntimeHealthStatus } from '@/lib/preview/runtime-manager'
 
 type Props = {
   previewRuntimeUrl: string | null

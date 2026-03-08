@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { withAdminAuth } from '@/lib/rbac'
+import { isAnyAiProviderConfigured } from '@/lib/ai-provider-config'
 import {
   filterChangeRunLedgerBySample,
   readChangeRunLedgerEvents,
@@ -13,6 +14,7 @@ import {
   buildReasonPlaybook,
   topEntries,
 } from '@/lib/server/core-loop-learning'
+import { getProductionRuntimeReadiness } from '@/lib/server/production-runtime-readiness'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,12 +38,8 @@ const WINDOW_HOURS = [24, 24 * 7, 24 * 30]
 export const GET = withAdminAuth(async () => {
   const now = new Date()
 
-  const providerConfigured = Boolean(
-    process.env.OPENAI_API_KEY ||
-      process.env.ANTHROPIC_API_KEY ||
-      process.env.GOOGLE_API_KEY ||
-      process.env.GROQ_API_KEY
-  )
+  const providerConfigured = isAnyAiProviderConfigured()
+  const runtimeReadiness = getProductionRuntimeReadiness()
   const windows = await Promise.all(
     WINDOW_HOURS.map(async (hours) => {
       const sinceIso = new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString()
@@ -113,6 +111,8 @@ export const GET = withAdminAuth(async () => {
       thresholds: THRESHOLDS,
       metrics: {
         providerConfigured: primaryWindow.reportProduction.providerConfigured,
+        authReady: runtimeReadiness.authReady,
+        probeReady: runtimeReadiness.probeReady,
         sampleSize: primaryWindow.reportProduction.metrics.sampleSize,
         applySuccessRate: primaryWindow.reportProduction.metrics.applySuccessRate,
         regressionRate: primaryWindow.reportProduction.metrics.regressionRate,
@@ -136,6 +136,7 @@ export const GET = withAdminAuth(async () => {
       feedbackCounts: topEntries(feedbackCounts, 6),
       reasonPlaybook: buildReasonPlaybook(reasonCounts, 6),
       recommendations,
+      runtimeReadiness,
       rollup: primaryWindow.reportProduction.rollup,
       rollupAll: primaryWindow.reportAll.rollup,
       runGroups: primaryWindow.reportProduction.runGroups.filter((group) => group.applyCount > 0).slice(0, 50),

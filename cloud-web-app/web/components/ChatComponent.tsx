@@ -38,7 +38,7 @@ const ChatComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
-  const [selectedModel, setSelectedModel] = useState('openai:gpt-4o-mini');
+  const [selectedModel, setSelectedModel] = useState('openrouter:google/gemini-3.1-flash-lite-preview');
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -688,10 +688,11 @@ const ChatComponent: React.FC = () => {
             disabled={isLoading || isStreaming}
             title="Modelo"
           >
-            <option value="openai:gpt-4o-mini">GPT-4o Mini</option>
-            <option value="openai:gpt-4">GPT-4</option>
-            <option value="anthropic:claude-3-sonnet">Claude 3 Sonnet</option>
-            <option value="google:gemini-pro">Gemini Pro</option>
+            <option value="openrouter:google/gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (OpenRouter)</option>
+            <option value="openrouter:openai/gpt-4o-mini">GPT-4o Mini (OpenRouter)</option>
+            <option value="openrouter:anthropic/claude-3.5-haiku">Claude 3.5 Haiku (OpenRouter)</option>
+            <option value="openai:gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+            <option value="openai:gpt-4o">GPT-4o (OpenAI)</option>
             <option value="ollama:llama3">Llama 3 (Local)</option>
           </select>
         </div>

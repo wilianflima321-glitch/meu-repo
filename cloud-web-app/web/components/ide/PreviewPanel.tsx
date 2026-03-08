@@ -18,6 +18,10 @@ interface PreviewPanelProps {
   onRefresh?: () => void
 }
 
+// Canonical runtime/html preview primitive.
+// Product-level routing should flow through `components/preview/CanonicalPreviewSurface.tsx`
+// to avoid fragmenting preview semantics across dashboard surfaces.
+
 type PreviewMode =
   | 'html'
   | 'markdown'

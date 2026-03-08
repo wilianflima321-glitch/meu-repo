@@ -111,7 +111,7 @@ import {
   getInitialSessionHistory,
   getInitialSettings,
 } from './dashboard/aethel-dashboard-initial-state'
-const DEFAULT_MODEL = 'gpt-4o-mini'
+const DEFAULT_MODEL = 'google/gemini-3.1-flash-lite-preview'
 const FIRST_VALUE_GUIDE_DISMISSED_KEY = 'aethel.dashboard.first-value.dismissed'
 
 export default function AethelDashboard() {

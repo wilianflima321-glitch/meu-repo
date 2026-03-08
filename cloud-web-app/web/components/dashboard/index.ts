@@ -1,8 +1,13 @@
-// Dashboard Components - Refactored from monolithic AethelDashboard.tsx
-// Professional modular architecture
+// Dashboard components
+// Canonical shell exports are explicit to reduce accidental reuse of legacy shell primitives.
 
+export { AethelDashboardSidebar as DashboardSidebarCanonical } from './AethelDashboardSidebar'
+
+// Legacy shell exports kept only for compatibility with older refactors.
 export { DashboardSidebar, type DashboardTab } from './DashboardSidebar'
+export { DashboardSidebar as LegacyDashboardSidebar } from './DashboardSidebar'
 export { DashboardLayout } from './DashboardLayout'
+export { DashboardLayout as LegacyDashboardLayout } from './DashboardLayout'
 export { NewProjectWizard } from './NewProjectWizard'
 export { ProjectsDashboard } from './ProjectsDashboard'
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Plan Limits Service - Enforcement de Limites por Plano
  * 
  * Define e verifica limites de uso para cada tier de assinatura.
@@ -129,6 +129,50 @@ export interface QuotaCheckResult {
   code?: 'QUOTA_EXCEEDED' | 'MODEL_NOT_ALLOWED' | 'FEATURE_NOT_ALLOWED' | 'RATE_LIMITED';
 }
 
+const MODEL_ALIASES: Record<string, string[]> = {
+  'google/gemini-3.1-flash-lite-preview': ['gemini-1.5-flash', 'google:gemini-3.1-flash-lite-preview', 'openrouter:google/gemini-3.1-flash-lite-preview'],
+  'openai/gpt-4o-mini': ['gpt-4o-mini', 'openai:gpt-4o-mini'],
+  'anthropic/claude-3.5-haiku': ['claude-3-5-haiku-20241022', 'claude-3-haiku', 'anthropic:claude-3.5-haiku'],
+};
+
+function normalizeModelIdentifier(model: string): string {
+  const raw = String(model || '').trim();
+  if (!raw) return raw;
+  const colonIndex = raw.indexOf(':');
+  if (colonIndex > 0 && colonIndex < raw.length - 1) {
+    const prefix = raw.slice(0, colonIndex).toLowerCase();
+    if (prefix === 'openai' || prefix === 'openrouter' || prefix === 'anthropic' || prefix === 'google' || prefix === 'groq') {
+      return raw.slice(colonIndex + 1);
+    }
+  }
+  return raw;
+}
+
+function expandAllowedModels(models: readonly string[]): Set<string> {
+  const expanded = new Set<string>();
+  for (const model of models) {
+    const normalized = normalizeModelIdentifier(model);
+    expanded.add(normalized);
+    const aliases = MODEL_ALIASES[normalized];
+    if (aliases) {
+      for (const alias of aliases) {
+        expanded.add(normalizeModelIdentifier(alias));
+      }
+    }
+
+    for (const [canonical, aliasList] of Object.entries(MODEL_ALIASES)) {
+      const normalizedAliases = aliasList.map(normalizeModelIdentifier);
+      if (normalizedAliases.includes(normalized)) {
+        expanded.add(canonical);
+        for (const alias of normalizedAliases) {
+          expanded.add(alias);
+        }
+      }
+    }
+  }
+  return expanded;
+}
+
 function getUtcDayWindow(now: Date = new Date()): { start: Date; end: Date } {
   const year = now.getUTCFullYear();
   const month = now.getUTCMonth();
@@ -211,14 +255,16 @@ export async function checkModelAccess(userId: string, model: string): Promise<Q
   }
   
   const limits = getPlanLimits(user.plan);
-  
-  if (limits.models.includes('*') || limits.models.includes(model)) {
+  const normalizedModel = normalizeModelIdentifier(model);
+  const allowedModels = expandAllowedModels(limits.models);
+
+  if (limits.models.includes('*') || allowedModels.has(normalizedModel)) {
     return { allowed: true };
   }
   
   return {
     allowed: false,
-    reason: `O modelo ${model} não está disponível no seu plano. Modelos disponíveis: ${limits.models.join(', ')}`,
+    reason: `O modelo ${normalizedModel} não está disponível no seu plano. Modelos disponíveis: ${limits.models.join(', ')}`,
     code: 'MODEL_NOT_ALLOWED',
   };
 }
@@ -383,3 +429,4 @@ export async function recordTokenUsage(userId: string, tokensUsed: number): Prom
     }),
   ]);
 }
+

@@ -6,7 +6,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'aethel-secret-key')
+function getRbacSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET
+  if (!secret || secret === 'aethel-secret-key') {
+    throw Object.assign(new Error('AUTH_NOT_CONFIGURED: JWT_SECRET ausente para RBAC middleware.'), {
+      code: 'AUTH_NOT_CONFIGURED',
+    })
+  }
+  return new TextEncoder().encode(secret)
+}
 
 export type UserRole = 'admin' | 'moderator' | 'user' | 'guest'
 
@@ -35,7 +43,7 @@ const PROTECTED_ROUTES: Record<string, UserRole[]> = {
 
 export async function verifyToken(token: string): Promise<DecodedToken | null> {
   try {
-    const verified = await jwtVerify(token, secret)
+    const verified = await jwtVerify(token, getRbacSecret())
     const payload = verified.payload as Record<string, unknown>
     const sub = typeof payload.sub === 'string' ? payload.sub : null
     const email = typeof payload.email === 'string' ? payload.email : null
@@ -80,6 +88,10 @@ export async function rbacMiddleware(request: NextRequest): Promise<NextResponse
 
   const token = authHeader.slice(7)
   const decoded = await verifyToken(token)
+
+  if (!decoded && !process.env.JWT_SECRET) {
+    return NextResponse.json({ error: 'AUTH_NOT_CONFIGURED' }, { status: 503 })
+  }
 
   if (!decoded) {
     return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 })

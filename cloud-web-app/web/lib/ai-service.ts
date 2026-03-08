@@ -19,7 +19,7 @@ import { emergencyController, MODEL_CONFIGS } from './emergency-mode';
 // TIPOS
 // ============================================================================
 
-export type LLMProvider = 'openai' | 'anthropic' | 'google' | 'groq';
+export type LLMProvider = 'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq';
 
 export interface Message {
   role: 'system' | 'user' | 'assistant';
@@ -47,6 +47,35 @@ export interface AIResponse {
   originalModel?: string; // Modelo original se foi downgraded
 }
 
+function parseModelSelection(
+  model?: string,
+  provider?: LLMProvider
+): { model?: string; provider?: LLMProvider } {
+  const rawModel = String(model || '').trim();
+  if (!rawModel) {
+    return { model: undefined, provider };
+  }
+
+  const colonIndex = rawModel.indexOf(':');
+  if (colonIndex > 0 && colonIndex < rawModel.length - 1) {
+    const prefix = rawModel.slice(0, colonIndex).toLowerCase();
+    const nextModel = rawModel.slice(colonIndex + 1);
+    if (prefix === 'openrouter') return { model: nextModel, provider: 'openrouter' };
+    if (prefix === 'openai') return { model: nextModel, provider: provider === 'openrouter' ? provider : 'openai' };
+    if (prefix === 'anthropic') return { model: nextModel, provider: provider === 'openrouter' ? provider : 'anthropic' };
+    if (prefix === 'google') return { model: nextModel, provider: provider === 'openrouter' ? provider : 'google' };
+    if (prefix === 'groq') return { model: nextModel, provider: 'groq' };
+  }
+
+  if (!provider) {
+    if (rawModel.startsWith('openai/')) return { model: rawModel, provider: 'openrouter' };
+    if (rawModel.startsWith('anthropic/')) return { model: rawModel, provider: 'openrouter' };
+    if (rawModel.startsWith('google/')) return { model: rawModel, provider: 'openrouter' };
+  }
+
+  return { model: rawModel, provider };
+}
+
 // ============================================================================
 // PRICING POR MILHÃO DE TOKENS (Dezembro 2024)
 // ============================================================================
@@ -55,10 +84,13 @@ const PRICING: Record<string, { input: number; output: number }> = {
   'gpt-4o': { input: 2.50, output: 10.00 },
   'gpt-4o-mini': { input: 0.15, output: 0.60 },
   'gpt-3.5-turbo': { input: 0.50, output: 1.50 },
+  'openai/gpt-4o-mini': { input: 0.15, output: 0.60 },
   'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
   'claude-3-5-haiku-20241022': { input: 0.80, output: 4.00 },
+  'anthropic/claude-3.5-haiku': { input: 0.80, output: 4.00 },
   'gemini-1.5-pro': { input: 1.25, output: 5.00 },
   'gemini-1.5-flash': { input: 0.075, output: 0.30 },
+  'google/gemini-3.1-flash-lite-preview': { input: 0.10, output: 0.40 },
 };
 
 // ============================================================================
@@ -67,6 +99,7 @@ const PRICING: Record<string, { input: number; output: number }> = {
 
 class AIService {
   private openai: OpenAI | null = null;
+  private openrouter: OpenAI | null = null;
   private anthropic: Anthropic | null = null;
   private google: GoogleGenerativeAI | null = null;
   
@@ -79,6 +112,17 @@ class AIService {
     if (process.env.OPENAI_API_KEY) {
       this.openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
+      });
+    }
+
+    if (process.env.OPENROUTER_API_KEY) {
+      this.openrouter = new OpenAI({
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseURL: 'https://openrouter.ai/api/v1',
+        defaultHeaders: {
+          'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+          'X-Title': 'Aethel Engine',
+        },
       });
     }
     
@@ -101,6 +145,7 @@ class AIService {
   getAvailableProviders(): LLMProvider[] {
     const providers: LLMProvider[] = [];
     if (this.openai) providers.push('openai');
+    if (this.openrouter) providers.push('openrouter');
     if (this.anthropic) providers.push('anthropic');
     if (this.google) providers.push('google');
     return providers;
@@ -110,13 +155,14 @@ class AIService {
    * Seleciona o melhor provider disponível
    */
   private selectProvider(): LLMProvider {
-    // Prioridade: Groq (rápido) > Google (barato) > OpenAI > Anthropic
+    // Prioridade factual: OpenRouter (multi-provider padr?o) > Google > OpenAI > Anthropic
+    if (this.openrouter) return 'openrouter';
     if (this.google) return 'google';
     if (this.openai) return 'openai';
     if (this.anthropic) return 'anthropic';
     throw new Error('Nenhum provider de IA configurado. Configure ao menos uma API key no .env');
   }
-  
+
   /**
    * Calcula custo estimado baseado no modelo e tokens
    */
@@ -137,8 +183,9 @@ class AIService {
     options: AIQueryOptions = {}
   ): Promise<AIResponse> {
     const startTime = Date.now();
-    let provider = options.provider || this.selectProvider();
-    let model = options.model || this.getDefaultModel(provider);
+    const parsedSelection = parseModelSelection(options.model, options.provider);
+    let provider = parsedSelection.provider || this.selectProvider();
+    let model = parsedSelection.model || this.getDefaultModel(provider);
     let wasDowngraded = false;
     let originalModel: string | undefined;
     
@@ -150,7 +197,7 @@ class AIService {
       
       if (!emergencyCheck.allowed) {
         // Tentar com modelo mais barato
-        const cheapModel = 'gpt-4o-mini';
+        const cheapModel = this.openrouter ? 'google/gemini-3.1-flash-lite-preview' : 'gpt-4o-mini';
         const fallbackCheck = emergencyController.canMakeRequest(cheapModel, options.maxTokens || 2048);
         
         if (!fallbackCheck.allowed) {
@@ -160,7 +207,7 @@ class AIService {
         // Forçar downgrade
         originalModel = model;
         model = cheapModel;
-        provider = 'openai';
+        provider = parseModelSelection(cheapModel).provider || (this.openrouter ? 'openrouter' : 'openai');
         wasDowngraded = true;
         console.warn(`[AIService] Emergency downgrade: ${originalModel} -> ${model}`);
       } else if (emergencyCheck.model && emergencyCheck.model !== model) {
@@ -186,6 +233,9 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       switch (provider) {
         case 'openai':
           response = await this.queryOpenAI(messages, { ...options, model }, startTime);
+          break;
+        case 'openrouter':
+          response = await this.queryOpenRouter(messages, { ...options, model }, startTime);
           break;
         case 'anthropic':
           response = await this.queryAnthropic(messages, { ...options, model }, startTime);
@@ -235,6 +285,7 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
   private getDefaultModel(provider: LLMProvider): string {
     switch (provider) {
       case 'openai': return 'gpt-4o-mini';
+      case 'openrouter': return 'google/gemini-3.1-flash-lite-preview';
       case 'anthropic': return 'claude-3-5-haiku-20241022';
       case 'google': return 'gemini-1.5-flash';
       default: return 'gpt-4o-mini';
@@ -252,7 +303,8 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
    * Verifica se pode fazer request (para UI)
    */
   canMakeRequest(model?: string, tokens?: number) {
-    return emergencyController.canMakeRequest(model || 'gpt-4o-mini', tokens ?? 0);
+    const parsedSelection = parseModelSelection(model);
+    return emergencyController.canMakeRequest(parsedSelection.model || 'gpt-4o-mini', tokens ?? 0);
   }
   
   /**
@@ -290,6 +342,41 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     };
   }
   
+  /**
+   * OpenRouter Query (OpenAI-compatible API)
+   */
+  private async queryOpenRouter(
+    messages: Message[],
+    options: AIQueryOptions,
+    startTime: number
+  ): Promise<AIResponse> {
+    if (!this.openrouter) {
+      throw new Error('OpenRouter n??o configurado');
+    }
+
+    const model = options.model || 'google/gemini-3.1-flash-lite-preview';
+
+    const response = await this.openrouter.chat.completions.create({
+      model,
+      messages: messages.map(m => ({
+        role: m.role,
+        content: m.content,
+      })),
+      temperature: options.temperature ?? 0.7,
+      max_tokens: options.maxTokens ?? 2048,
+    });
+
+    const usage = response.usage || { total_tokens: 0 };
+
+    return {
+      content: response.choices[0]?.message?.content || '',
+      model: response.model,
+      provider: 'openrouter',
+      tokensUsed: usage.total_tokens,
+      latencyMs: Date.now() - startTime,
+    };
+  }
+
   /**
    * Anthropic Query
    */
@@ -375,7 +462,8 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     temperature?: number;
     maxTokens?: number;
   }): Promise<AIResponse> {
-    const { messages, model, provider, temperature, maxTokens } = params;
+    const { messages, temperature, maxTokens } = params;
+    const parsedSelection = parseModelSelection(params.model, params.provider);
     
     // Extrai system prompt e user query das mensagens
     const systemMessage = messages.find(m => m.role === 'system');
@@ -392,8 +480,8 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       .join('\n');
     
     return this.query(lastUserMessage.content, contextMessages || undefined, {
-      provider,
-      model,
+      provider: parsedSelection.provider,
+      model: parsedSelection.model,
       temperature,
       maxTokens,
       systemPrompt: systemMessage?.content,
@@ -410,12 +498,13 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
     temperature?: number;
     maxTokens?: number;
   }): AsyncGenerator<string, void, unknown> {
-    const provider = params.provider || this.selectProvider();
+    const parsedSelection = parseModelSelection(params.model, params.provider);
+    const provider = parsedSelection.provider || this.selectProvider();
     const systemMessage = params.messages.find(m => m.role === 'system');
     const userMessages = params.messages.filter(m => m.role !== 'system');
     
     if (provider === 'openai' && this.openai) {
-      const model = params.model || 'gpt-4o-mini';
+      const model = parsedSelection.model || 'gpt-4o-mini';
       
       const stream = await this.openai.chat.completions.create({
         model,
@@ -434,8 +523,28 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
           yield content;
         }
       }
+    } else if (provider === 'openrouter' && this.openrouter) {
+      const model = parsedSelection.model || 'google/gemini-3.1-flash-lite-preview';
+
+      const stream = await this.openrouter.chat.completions.create({
+        model,
+        messages: params.messages.map(m => ({
+          role: m.role,
+          content: m.content,
+        })),
+        temperature: params.temperature ?? 0.7,
+        max_tokens: params.maxTokens ?? 2048,
+        stream: true,
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          yield content;
+        }
+      }
     } else if (provider === 'anthropic' && this.anthropic) {
-      const model = params.model || 'claude-3-5-haiku-20241022';
+      const model = parsedSelection.model || 'claude-3-5-haiku-20241022';
       
       const stream = await this.anthropic.messages.stream({
         model,

@@ -19,6 +19,11 @@ import { getWasmRuntime } from '@/lib/wasm-runtime';
  * 
  * Objetivo: Superar VS Code + Unreal Engine
  * em um único ambiente web.
+ *
+ * Status factual:
+ * - exploratory shell only
+ * - not connected to canonical /dashboard or /ide runtime
+ * - should not be treated as the source of truth for product claims
  */
 
 interface ForgeTab {

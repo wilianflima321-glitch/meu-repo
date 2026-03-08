@@ -59,7 +59,7 @@ class GhostTextProvider {
     position: { line: number; column: number },
     language: string,
     filePath: string,
-    model: string = 'gpt-4o-mini'
+    model: string = 'google/gemini-3.1-flash-lite-preview'
   ): Promise<CompletionSuggestion | null> {
     // Cancel previous request
     if (this.abortController) {
@@ -283,7 +283,7 @@ export default function InlineCompletion({
   debounceMs = 500,
   maxSuggestions = 1,
   showGhostText = true,
-  model = 'gpt-4o-mini',
+  model = 'google/gemini-3.1-flash-lite-preview',
 }: InlineCompletionProps) {
   const [ghostText, setGhostText] = useState<GhostTextState>({
     visible: false,
@@ -516,10 +516,11 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
           onChange={(e) => onSettingsChange({ ...settings, model: e.target.value })}
           className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white"
         >
-          <option value="gpt-4o-mini">GPT-4o Mini (Fast)</option>
-          <option value="gpt-4o">GPT-4o (Best)</option>
-          <option value="claude-3-5-haiku-latest">Claude 3.5 Haiku (Fast)</option>
-          <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (Best)</option>
+          <option value="google/gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (OpenRouter)</option>
+          <option value="openai/gpt-4o-mini">GPT-4o Mini (OpenRouter)</option>
+          <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku (OpenRouter)</option>
+          <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+          <option value="gpt-4o">GPT-4o (OpenAI)</option>
           <option value="deepseek-coder">DeepSeek Coder (Budget)</option>
         </select>
       </div>

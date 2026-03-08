@@ -19,6 +19,7 @@ declare global {
       
       // AI Providers
       OPENAI_API_KEY?: string;
+      OPENROUTER_API_KEY?: string;
       ANTHROPIC_API_KEY?: string;
       GOOGLE_API_KEY?: string;
       GROQ_API_KEY?: string;

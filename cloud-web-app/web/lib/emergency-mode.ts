@@ -62,7 +62,7 @@ export interface CostMetrics {
 
 export interface ModelConfig {
   name: string;
-  provider: 'openai' | 'anthropic' | 'google';
+  provider: 'openai' | 'openrouter' | 'anthropic' | 'google';
   inputCostPer1M: number;
   outputCostPer1M: number;
   isEmergencyAllowed: boolean;
@@ -102,6 +102,29 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     provider: 'openai',
     inputCostPer1M: 0.50,
     outputCostPer1M: 1.50,
+    isEmergencyAllowed: true,
+  },
+
+  // OpenRouter - baratos/roteados
+  'google/gemini-3.1-flash-lite-preview': {
+    name: 'Gemini 3.1 Flash Lite (OpenRouter)',
+    provider: 'openrouter',
+    inputCostPer1M: 0.10,
+    outputCostPer1M: 0.40,
+    isEmergencyAllowed: true,
+  },
+  'openai/gpt-4o-mini': {
+    name: 'GPT-4o Mini (OpenRouter)',
+    provider: 'openrouter',
+    inputCostPer1M: 0.15,
+    outputCostPer1M: 0.60,
+    isEmergencyAllowed: true,
+  },
+  'anthropic/claude-3.5-haiku': {
+    name: 'Claude 3.5 Haiku (OpenRouter)',
+    provider: 'openrouter',
+    inputCostPer1M: 0.80,
+    outputCostPer1M: 4.0,
     isEmergencyAllowed: true,
   },
   

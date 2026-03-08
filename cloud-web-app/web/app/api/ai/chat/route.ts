@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { aiService } from '@/lib/ai-service';
+import { checkModelAccess } from '@/lib/plan-limits';
 import {
   acquireConcurrencyLease,
   estimateTokensFromText,
@@ -20,6 +21,21 @@ import {
 } from '@/lib/server/ai-demo-mode';
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
+
+function inferProviderFromModel(model?: string): 'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq' | undefined {
+  const raw = String(model || '').trim().toLowerCase()
+  if (!raw) return undefined
+  if (raw.startsWith('openrouter:')) return 'openrouter'
+  if (raw.startsWith('openai:')) return 'openai'
+  if (raw.startsWith('anthropic:')) return 'anthropic'
+  if (raw.startsWith('google:')) return 'google'
+  if (raw.startsWith('groq:')) return 'groq'
+  if (raw.startsWith('openai/') || raw.startsWith('anthropic/') || raw.startsWith('google/')) return 'openrouter'
+  if (raw.startsWith('gpt-')) return 'openai'
+  if (raw.startsWith('claude-')) return 'anthropic'
+  if (raw.startsWith('gemini-')) return 'google'
+  return undefined
+}
 
 function resolveBackendBaseUrl(): string | null {
   const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -48,6 +64,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const messages = Array.isArray((body as any).messages) ? (body as any).messages : [];
+    const requestedModel = typeof (body as any).model === 'string' ? (body as any).model : undefined
+    const requestedProvider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
     const promptText = messages
       .map((m: any) => (typeof m?.content === 'string' ? m.content : ''))
       .join('\n');
@@ -74,6 +92,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       limits: entitlements.plan.limits,
       cost: { requests: 1, tokens: estimatedTotalTokens },
     });
+
+    if (requestedModel) {
+      const modelCheck = await checkModelAccess(auth.userId, requestedModel)
+      if (!modelCheck.allowed) {
+        return NextResponse.json(
+          { error: modelCheck.code || 'MODEL_NOT_ALLOWED', message: modelCheck.reason || 'Model not allowed' },
+          { status: 403 }
+        )
+      }
+    }
 
     const backendBase = resolveBackendBaseUrl();
     if (backendBase) {
@@ -168,6 +196,26 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         milestone: 'P0',
         metadata: buildAiProviderSetupMetadata({ route: '/api/ai/chat' }),
       });
+    }
+
+    if (requestedModel) {
+      const inferredProvider = requestedProvider || inferProviderFromModel(requestedModel)
+      if (inferredProvider && !aiService.getAvailableProviders().includes(inferredProvider)) {
+        return capabilityResponse({
+          error: 'AI_PROVIDER_NOT_CONFIGURED',
+          status: 503,
+          message: `Provider ${inferredProvider} not configured for model ${requestedModel}.`,
+          capability: 'AI_CHAT',
+          capabilityStatus: 'PARTIAL',
+          milestone: 'P0',
+          metadata: buildAiProviderSetupMetadata({
+            route: '/api/ai/chat',
+            requestedModel,
+            expectedProvider: inferredProvider,
+            availableProviders: aiService.getAvailableProviders(),
+          }),
+        })
+      }
     }
 
     const aiMessages = messages

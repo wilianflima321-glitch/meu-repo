@@ -13,6 +13,10 @@ interface LivePreviewProps {
   isGenerating: boolean
 }
 
+// Legacy interactive preview primitive.
+// Dashboard-facing product work should prefer `components/preview/CanonicalPreviewSurface.tsx`
+// so preview authority stays centralized.
+
 function Scene({ onMagicWandSelect, suggestions, onOpenMiniChat }: { onMagicWandSelect: (pos: THREE.Vector3) => void, suggestions: string[], onOpenMiniChat: () => void }) {
   const { camera, scene } = useThree()
   const [selectedPoint, setSelectedPoint] = useState<THREE.Vector3 | null>(null)
@@ -119,12 +123,12 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
   const [miniChatOpen, setMiniChatOpen] = useState(false)
   const [suggestionText, setSuggestionText] = useState('')
   const joystickRef = useRef<any>(null)
+  const joystickZoneRef = useRef<HTMLDivElement | null>(null)
 
   const openMiniChat = () => setMiniChatOpen(true)
 
   useEffect(() => {
-    // Initialize virtual joystick for mobile
-    const joystickZone = document.getElementById('joystick-zone')
+    const joystickZone = joystickZoneRef.current
     if (joystickZone) {
       const options: any = {
         zone: joystickZone,
@@ -135,9 +139,8 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
       joystickRef.current = nipplejs.create(options)
 
       joystickRef.current.on('move', (evt: any, data: any) => {
-        // Handle joystick movement for navigation
-        console.log('Joystick moved:', data)
-        // Could integrate with camera controls here
+        void evt
+        void data
       })
     }
 
@@ -158,9 +161,8 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
           const xAxis = gamepad.axes[0]
           const yAxis = gamepad.axes[1]
           if (Math.abs(xAxis) > 0.1 || Math.abs(yAxis) > 0.1) {
-            // Move camera based on gamepad input
-            console.log('Gamepad movement:', xAxis, yAxis)
-            // Integrate with camera controls
+            void xAxis
+            void yAxis
           }
         }
       }
@@ -189,9 +191,6 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
       <Canvas className="w-full h-full">
         <Scene onMagicWandSelect={onMagicWandSelect} suggestions={suggestions} onOpenMiniChat={openMiniChat} />
       </Canvas>
-
-      {/* Joystick Zone for Mobile */}
-      <div id="joystick-zone" className="absolute bottom-4 left-4 w-32 h-32"></div>
 
       {/* Magic Wand Button */}
       <button
@@ -231,8 +230,10 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
         </div>
       )}
 
-      {/* Joystick Zone for Mobile */}
-      <div id="joystick-zone" className="absolute bottom-4 left-4 w-24 h-24 bg-gray-700 rounded-full opacity-50 md:hidden"></div>
+      <div
+        ref={joystickZoneRef}
+        className="absolute bottom-4 left-4 w-24 h-24 bg-gray-700 rounded-full opacity-50 md:hidden"
+      />
 
       {/* Loading Indicator */}
       {isGenerating && (

@@ -301,7 +301,7 @@ export function createSpan(name: string, op: string): Sentry.Span | undefined {
  * Track AI API call
  */
 export function trackAICall(params: {
-  provider: 'openai' | 'anthropic' | 'google';
+  provider: 'openai' | 'openrouter' | 'anthropic' | 'google';
   model: string;
   tokens?: number;
   latency?: number;

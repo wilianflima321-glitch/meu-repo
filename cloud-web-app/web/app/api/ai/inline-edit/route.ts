@@ -40,7 +40,7 @@ type InlineEditBody = {
 }
 
 function asProvider(value: unknown): LLMProvider | undefined {
-  if (value !== 'openai' && value !== 'anthropic' && value !== 'google' && value !== 'groq') {
+  if (value !== 'openai' && value !== 'openrouter' && value !== 'anthropic' && value !== 'google' && value !== 'groq') {
     return undefined
   }
   return value

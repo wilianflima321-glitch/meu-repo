@@ -186,3 +186,66 @@ If work competes with this order:
    - production evidence still required;
    - readiness thresholds still mandatory;
    - no claim upgrade allowed by rehearsal-only metrics.
+5. IDE chat mention handling now avoids silent degradation:
+   - unsupported mention tags are surfaced explicitly as `MENTION_NOT_SUPPORTED`;
+   - empty prompts after mention sanitization are blocked before provider call;
+   - only documented profile-routing tags remain active (`@studio`, `@delivery`, `@fast`, `@web`, `@agents:1|2|3`).
+6. Async polling compatibility aliases were added for generator APIs that already expose `checkStatusUrl`:
+   - `GET /api/ai/music/status` now maps to canonical `GET /api/ai/music/generate`;
+   - `GET /api/ai/3d/status` now maps to canonical `GET /api/ai/3d/generate`.
+7. Audio/music stack remains marked as integration-incomplete at product level:
+   - generation endpoints exist;
+   - editor-grade audio components exist;
+   - end-to-end orchestration in the canonical workbench is still `PARTIAL`.
+8. Dashboard `content-creation` surface now moved from placeholder cards to a unified workbench shell:
+   - canonical local `Project Graph` store (`assets/scenes/timeline/shots/jobs/audio-policy`);
+   - single three-panel workspace (`graph`, `scene/timeline/preview`, `jobs/policy/inspector`);
+   - async AI generation queue orchestration for `music`, `voice`, `3d` with status polling and graph import hooks.
+9. Product-shell drift remains an active quality risk and must stay explicit:
+   - `AethelDashboardSidebar` and `DashboardSidebar` still coexist;
+   - `TheForgeUnified.tsx` remains detached from the canonical dashboard path;
+   - `LivePreview`, `PreviewPanel`, and `NexusCanvasV2` still represent different preview paradigms.
+10. Media orchestration is improved but not yet fully canonical:
+   - `MediaStudio.tsx` now supports controlled operation from the `Project Graph` shell;
+   - timeline/assets selection can flow through the canonical workbench path;
+   - however, full domain unification is still pending because non-media surfaces are not yet bound to the same contract depth;
+   - therefore timeline/editor parity should remain `PARTIAL`, not claimed as complete.
+11. Preview authority is now partially centralized for dashboard-facing surfaces:
+   - `CanonicalPreviewSurface.tsx` now fronts `live`, `scene`, and `runtime` preview variants;
+   - dashboard overview, creation workbench, and `/ide` now route through this preview authority instead of importing primitives directly;
+   - shared runtime helpers now exist in `lib/preview/runtime-manager.ts` for normalize/discover/provision/health/persist flows;
+   - `/ide` runtime state/orchestration is now routed through `hooks/usePreviewRuntimeManager.ts` instead of remaining fully inline in `FullscreenIDE.tsx`;
+   - preview consolidation remains `PARTIAL` because dashboard handoff/bootstrap and detached legacy shells are still not fully collapsed into one runtime authority.
+12. Provider integration coverage improved:
+   - `OPENROUTER_API_KEY` is now recognized as a first-class configured provider in runtime/admin status surfaces;
+   - `aiService` now supports OpenRouter through the OpenAI-compatible API path with explicit `provider: openrouter`;
+   - `aiService.selectProvider()` now prefers OpenRouter when it is the only configured provider instead of falsely failing with "Nenhum provider";
+   - `lib/ai/advanced-ai-provider.ts` and `lib/ai/inline-completion.ts` now also recognize OpenRouter instead of keeping older OpenAI-only assumptions in deeper AI infrastructure layers;
+   - live direct validation succeeded for routed models `google/gemini-3.1-flash-lite-preview`, `openai/gpt-4o-mini`, and `anthropic/claude-3.5-haiku`;
+   - low-cost real completion was validated against a live OpenRouter model (`google/gemini-3.1-flash-lite-preview`);
+   - setup and settings UX now surface OpenRouter as a first-class operator-facing option instead of backend-only support;
+   - `inline-edit` provider validation now accepts `openrouter`;
+   - IDE chat model presets and provider gate messaging now include OpenRouter-oriented defaults so the product shell is less biased toward direct OpenAI-only wording;
+   - provider cost metadata now includes routed OpenRouter variants in `aiService` and emergency-mode controls so cost/allowance logic is less inconsistent;
+   - `plan-limits.ts` now normalizes provider-prefixed/routed model identifiers so `checkModelAccess` no longer rejects OpenRouter-backed models that the UX exposes;
+   - readiness and promotion routes now count `OPENROUTER_API_KEY` as factual provider configuration instead of under-reporting configured state in core-loop/admin surfaces;
+   - default AI settings now bias toward routed OpenRouter models in operator-facing settings surfaces instead of hard-defaulting to direct OpenAI choices;
+   - provider configuration truth is now centralized in `lib/ai-provider-config.ts` and consumed by health/provider-status/readiness routes to reduce future env-check drift;
+   - provider labels/setup wording now also draw from centralized provider config so demo/setup copy is less likely to drift from runtime truth;
+   - this improves factual provider readiness but does not change L4 promotion criteria, which still require production evidence.
+13. Local production-style validation remains blocked by environment prerequisites:
+   - direct provider validation is real and passing, but full protected-route validation still requires a real app runtime with `DATABASE_URL`, `JWT_SECRET`, and a valid authenticated token for `/api/admin/ai/core-loop-production-probe`;
+   - current local environment still lacks `cloud-web-app/web/.env.local`, does not expose `DATABASE_URL`/`JWT_SECRET`, and does not have a running Docker daemon for the heavier sandbox path;
+   - therefore provider readiness improved materially, but production readiness remains `PARTIAL` until authenticated end-to-end probes run against a live runtime.
+14. Security/readiness hardening improved:
+   - `lib/rbac.ts` no longer accepts an implicit fallback admin JWT secret and now fails closed with `AUTH_NOT_CONFIGURED` instead of silently trusting a baked-in development secret;
+   - `lib/rbac-middleware.ts` now also fails closed when `JWT_SECRET` is absent instead of accepting `aethel-secret-key`;
+   - `lib/security/csrf-middleware.ts` no longer signs tokens with a fallback secret and now reports `CSRF_NOT_CONFIGURED` when server secrets are absent;
+   - `app/api/admin/ai/readiness/route.ts` now exposes runtime prerequisites through `runtimeReadiness` so admin operators can distinguish provider readiness from real production-probe readiness.
+15. AI chat/stream runtime consistency improved:
+   - `/api/ai/chat` now enforces model access checks for requested models and returns explicit provider-setup capability metadata when a model implies an unavailable provider;
+   - `/api/ai/stream` no longer hard-depends on `NEXT_PUBLIC_API_URL`; it can now stream directly through internal providers when no external AI backend proxy is configured;
+   - `/api/ai/stream` also mirrors demo-mode/provider-missing behavior instead of failing as a backend-only dead-end, which reduces one production readiness gap for the local runtime path.
+16. Production preflight is now executable instead of implicit:
+   - `tools/check-production-runtime-readiness.mjs` provides a deterministic local preflight for `.env.local`, `DATABASE_URL`, `JWT_SECRET`, `CSRF_SECRET`, Docker CLI, and Docker daemon state;
+   - `npm run qa:production-runtime-readiness` now fails with explicit blockers instead of leaving operators to infer why production probes cannot start.

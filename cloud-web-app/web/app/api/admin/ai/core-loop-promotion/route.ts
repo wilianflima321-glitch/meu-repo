@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { withAdminAuth } from '@/lib/rbac'
+import { isAnyAiProviderConfigured } from '@/lib/ai-provider-config'
 import { filterChangeRunLedgerBySample, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
 import { computeCoreLoopReadiness, type CoreLoopThresholds } from '@/lib/server/core-loop-readiness'
 import { buildFeedbackCounts, topEntries } from '@/lib/server/core-loop-learning'
@@ -19,12 +20,7 @@ export const GET = withAdminAuth(async () => {
   const now = new Date()
   const sinceIso = new Date(now.getTime() - 24 * 7 * 60 * 60 * 1000).toISOString()
   const events = await readChangeRunLedgerEvents({ sinceIso, limit: 5000 })
-  const providerConfigured = Boolean(
-    process.env.OPENAI_API_KEY ||
-      process.env.ANTHROPIC_API_KEY ||
-      process.env.GOOGLE_API_KEY ||
-      process.env.GROQ_API_KEY
-  )
+  const providerConfigured = isAnyAiProviderConfigured()
 
   const production = computeCoreLoopReadiness({
     events,

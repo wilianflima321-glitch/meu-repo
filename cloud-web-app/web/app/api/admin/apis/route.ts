@@ -4,6 +4,7 @@ import { withAdminAuth } from '@/lib/rbac';
 const handler = async (_req: NextRequest) => {
   const integrations = [
     { id: 'openai', name: 'OpenAI', envKey: 'OPENAI_API_KEY' },
+    { id: 'openrouter', name: 'OpenRouter', envKey: 'OPENROUTER_API_KEY' },
     { id: 'anthropic', name: 'Anthropic', envKey: 'ANTHROPIC_API_KEY' },
     { id: 'google', name: 'Google Gemini', envKey: 'GOOGLE_API_KEY' },
     { id: 'azure', name: 'Azure OpenAI', envKey: 'AZURE_OPENAI_API_KEY' },

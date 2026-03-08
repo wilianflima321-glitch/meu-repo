@@ -204,9 +204,15 @@ export function isOwnerEmail(email: string): boolean {
 // MIDDLEWARE DE PROTEÇÃO
 // ============================================================================
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'aethel-super-secret-key-change-in-production'
-);
+function getAdminJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret === 'aethel-super-secret-key-change-in-production') {
+    throw Object.assign(new Error('AUTH_NOT_CONFIGURED: defina JWT_SECRET real para RBAC admin.'), {
+      code: 'AUTH_NOT_CONFIGURED',
+    });
+  }
+  return new TextEncoder().encode(secret);
+}
 
 function extractAuthToken(request: NextRequest): string | null {
   const header = request.headers.get('Authorization') || request.headers.get('authorization');
@@ -243,7 +249,7 @@ export async function protectAdminRoute(
   
   try {
     // Verifica JWT
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getAdminJwtSecret());
     
     const userId = payload.sub as string;
     const userRole = payload.role as string;
@@ -266,6 +272,9 @@ export async function protectAdminRoute(
     return null;
     
   } catch (error) {
+    if ((error as { code?: string })?.code === 'AUTH_NOT_CONFIGURED') {
+      return NextResponse.json({ error: 'AUTH_NOT_CONFIGURED' }, { status: 503 });
+    }
     // Token inválido - 404 para esconder
     return NextResponse.json({ error: 'Not Found' }, { status: 404 });
   }
@@ -286,7 +295,7 @@ export function withAdminAuth(
     }
     
     try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
+      const { payload } = await jwtVerify(token, getAdminJwtSecret());
       
       const userId = payload.sub as string;
       const userRole = payload.role as AdminRole;
@@ -336,6 +345,9 @@ export function withAdminAuth(
       return handler(request, { user: adminUser });
       
     } catch (error) {
+      if ((error as { code?: string })?.code === 'AUTH_NOT_CONFIGURED') {
+        return NextResponse.json({ error: 'AUTH_NOT_CONFIGURED' }, { status: 503 });
+      }
       return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
   };

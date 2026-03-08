@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  getAvailableModelsForProvider,
+  getPreferredConfiguredAiProvider,
+  isAnyAiProviderConfigured,
+} from '@/lib/ai-provider-config'
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +16,9 @@ export async function GET(_request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const aiApiUrl = process.env.AI_API_URL || process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
-    
-    if (!aiApiUrl) {
+    const provider = getPreferredConfiguredAiProvider()
+
+    if (!isAnyAiProviderConfigured()) {
       return NextResponse.json({
         status: 'unknown',
         latency: 0,
@@ -25,12 +30,6 @@ export async function GET(_request: NextRequest) {
       });
     }
 
-    // Determinar provider
-    let provider = 'unknown';
-    if (process.env.OPENAI_API_KEY) provider = 'openai';
-    if (process.env.ANTHROPIC_API_KEY) provider = 'anthropic';
-    if (process.env.AI_API_URL) provider = 'custom';
-
     const latency = Date.now() - startTime;
 
     return NextResponse.json({
@@ -39,7 +38,7 @@ export async function GET(_request: NextRequest) {
       ai: {
         configured: true,
         provider,
-        models: getAvailableModels(provider),
+        models: getAvailableModelsForProvider(provider),
       },
       timestamp: new Date().toISOString(),
     });
@@ -59,16 +58,5 @@ export async function GET(_request: NextRequest) {
       },
       { status: 503 }
     );
-  }
-}
-
-function getAvailableModels(provider: string): string[] {
-  switch (provider) {
-    case 'openai':
-      return ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'];
-    case 'anthropic':
-      return ['claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'];
-    default:
-      return [];
   }
 }

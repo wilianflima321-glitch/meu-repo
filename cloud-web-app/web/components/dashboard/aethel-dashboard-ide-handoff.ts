@@ -1,3 +1,10 @@
+import {
+  discoverPreviewRuntime,
+  getStoredPreviewRuntimeUrl,
+  persistPreviewRuntimeUrl,
+  provisionPreviewRuntime,
+} from '@/lib/preview/runtime-manager'
+
 export type IdeHandoffResolution = {
   params: URLSearchParams
   runtimeUrl: string | null
@@ -8,29 +15,6 @@ type ResolveIdeHandoffParamsInput = {
   entry: string
   projectId: string | null
   previewRuntimeStorageKey: string
-}
-
-function isValidRuntimeUrl(value: string): boolean {
-  return /^https?:\/\//i.test(value.trim())
-}
-
-async function tryProvisionRuntime(projectId: string | null): Promise<string | null> {
-  if (typeof window === 'undefined') return null
-  const token = window.localStorage.getItem('aethel-token')
-  if (!token) return null
-
-  const response = await fetch('/api/preview/runtime-provision', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ projectId }),
-  })
-  const payload = (await response.json().catch(() => null)) as { runtimeUrl?: string | null } | null
-  if (!response.ok) return null
-  if (typeof payload?.runtimeUrl !== 'string') return null
-  return isValidRuntimeUrl(payload.runtimeUrl) ? payload.runtimeUrl.trim() : null
 }
 
 export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInput): Promise<IdeHandoffResolution> {
@@ -47,8 +31,8 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
     }
   }
 
-  const storedRuntimeUrl = window.localStorage.getItem(input.previewRuntimeStorageKey)
-  if (storedRuntimeUrl && isValidRuntimeUrl(storedRuntimeUrl)) {
+  const storedRuntimeUrl = getStoredPreviewRuntimeUrl(input.previewRuntimeStorageKey)
+  if (storedRuntimeUrl) {
     const runtimeUrl = storedRuntimeUrl.trim()
     params.set('previewUrl', runtimeUrl)
     return {
@@ -59,10 +43,10 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
   }
 
   try {
-    const provisionedRuntime = await tryProvisionRuntime(input.projectId)
+    const provisionedRuntime = (await provisionPreviewRuntime(input.projectId)).runtimeUrl
     if (provisionedRuntime) {
       params.set('previewUrl', provisionedRuntime)
-      window.localStorage.setItem(input.previewRuntimeStorageKey, provisionedRuntime)
+      persistPreviewRuntimeUrl(provisionedRuntime, input.previewRuntimeStorageKey)
       return {
         params,
         runtimeUrl: provisionedRuntime,
@@ -74,16 +58,8 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
   }
 
   try {
-    const response = await fetch('/api/preview/runtime-discover', {
-      cache: 'no-store',
-    })
-    const payload = (await response.json().catch(() => null)) as { preferredRuntimeUrl?: string | null } | null
-    const runtimeUrl =
-      typeof payload?.preferredRuntimeUrl === 'string' && isValidRuntimeUrl(payload.preferredRuntimeUrl)
-        ? payload.preferredRuntimeUrl.trim()
-        : ''
-
-    if (!response.ok || !runtimeUrl) {
+    const runtimeUrl = await discoverPreviewRuntime()
+    if (!runtimeUrl) {
       return {
         params,
         runtimeUrl: null,
@@ -92,7 +68,7 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
     }
 
     params.set('previewUrl', runtimeUrl)
-    window.localStorage.setItem(input.previewRuntimeStorageKey, runtimeUrl)
+    persistPreviewRuntimeUrl(runtimeUrl, input.previewRuntimeStorageKey)
     return {
       params,
       runtimeUrl,

@@ -1,18 +1,8 @@
-import dynamic from 'next/dynamic'
-
 import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
+import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurface'
 
 import type { Project } from './aethel-dashboard-model'
-
-const LivePreview = dynamic(() => import('../LivePreview'), {
-  ssr: false,
-  loading: () => (
-    <div className="aethel-state aethel-state-loading">
-      <p className="aethel-state-title">Carregando previa 3D...</p>
-    </div>
-  ),
-})
 
 type Point3 = {
   x: number
@@ -245,7 +235,8 @@ export function DashboardOverviewTab({
             {miniPreviewExpanded ? 'Recolher' : 'Expandir'}
           </button>
         </div>
-        <LivePreview
+        <CanonicalPreviewSurface
+          variant="live"
           onMagicWandSelect={onMagicWandSelect}
           suggestions={livePreviewSuggestions}
           onSendSuggestion={onSendSuggestion}

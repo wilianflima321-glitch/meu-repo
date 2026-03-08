@@ -174,7 +174,7 @@ export const DEFAULT_SETTINGS: Record<string, any> = {
   'ai.chat.enabled': true,
   'ai.agentMode.enabled': true,
   'ai.agentMode.requireApproval': true,
-  'ai.model': 'gpt-4',
+  'ai.model': 'google/gemini-3.1-flash-lite-preview',
   'ai.temperature': 0.7,
   
   // Debug
@@ -275,10 +275,19 @@ export const SETTING_DEFINITIONS: Record<string, SettingDefinition> = {
   'ai.model': {
     key: 'ai.model',
     type: 'enum',
-    default: 'gpt-4',
+    default: 'google/gemini-3.1-flash-lite-preview',
     description: 'AI model to use for completions and chat.',
     scope: 'user',
-    enum: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'claude-3-opus', 'claude-3-sonnet'],
+    enum: [
+      'google/gemini-3.1-flash-lite-preview',
+      'openai/gpt-4o-mini',
+      'anthropic/claude-3.5-haiku',
+      'gpt-4',
+      'gpt-4-turbo',
+      'gpt-3.5-turbo',
+      'claude-3-opus',
+      'claude-3-sonnet',
+    ],
     tags: ['ai'],
   },
 };

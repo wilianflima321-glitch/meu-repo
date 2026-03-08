@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { requireEntitlementsForUser } from '@/lib/entitlements'
+import { isAnyAiProviderConfigured } from '@/lib/ai-provider-config'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { filterChangeRunLedgerBySample, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
 import { computeCoreLoopReadiness, type CoreLoopThresholds } from '@/lib/server/core-loop-readiness'
@@ -46,12 +47,7 @@ export async function GET(request: NextRequest) {
     limit: 2000,
   })
 
-  const providerConfigured = Boolean(
-    process.env.OPENAI_API_KEY ||
-      process.env.ANTHROPIC_API_KEY ||
-      process.env.GOOGLE_API_KEY ||
-      process.env.GROQ_API_KEY
-  )
+  const providerConfigured = isAnyAiProviderConfigured()
   const reportAll = computeCoreLoopReadiness({
     events,
     thresholds: THRESHOLDS,

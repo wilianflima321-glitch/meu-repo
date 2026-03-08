@@ -1,23 +1,22 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import IDELayout from "@/components/ide/IDELayout";
 import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
-import PreviewPanel from "@/components/ide/PreviewPanel";
-import PreviewRuntimeToolbar, { type PreviewRuntimeHealthStatus } from "@/components/ide/PreviewRuntimeToolbar";
+import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurface";
+import PreviewRuntimeToolbar from "@/components/ide/PreviewRuntimeToolbar";
 import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import CommandPaletteProvider from "@/components/ide/CommandPalette";
 import { analytics } from "@/lib/analytics";
+import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
 const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
-const PREVIEW_RUNTIME_URL_STORAGE_KEY = "aethel.workbench.preview.runtimeUrl";
-const DEFAULT_PREVIEW_RUNTIME_URL = process.env.NEXT_PUBLIC_PREVIEW_RUNTIME_URL?.trim() || null;
 
 type ActiveFileState = {
   path: string;
@@ -30,33 +29,6 @@ type WorkspaceTreeNode = {
   type?: "file" | "directory";
   children?: WorkspaceTreeNode[];
 };
-
-type RuntimeHealthState = {
-  status: PreviewRuntimeHealthStatus
-  latencyMs?: number
-  httpStatus?: number
-  reason?: string
-}
-
-type RuntimeDiscoveryResponse = {
-  preferredRuntimeUrl?: string | null
-  candidates?: Array<{
-    url?: string
-    status?: PreviewRuntimeHealthStatus
-    latencyMs?: number
-    httpStatus?: number
-    reason?: string
-  }>
-}
-
-type RuntimeProvisionResponse = {
-  runtimeUrl?: string | null
-  error?: string
-  message?: string
-  metadata?: {
-    mode?: string
-  }
-}
 
 type FullAccessGrant = {
   id: string
@@ -103,14 +75,6 @@ function resolveLanguage(path: string): string {
 function normalizePath(input: string): string {
   if (!input) return "/";
   return input.startsWith("/") ? input : `/${input}`;
-}
-
-function normalizeRuntimeUrl(input: string | null): string | null {
-  if (!input) return null
-  const value = input.trim()
-  if (!value) return null
-  if (/^https?:\/\//i.test(value)) return value
-  return null
 }
 
 function pickFirstFilePath(nodes: WorkspaceTreeNode[]): string | null {
@@ -174,27 +138,37 @@ function IDEContent() {
   });
   const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
   const [initialFileResolved, setInitialFileResolved] = useState(false);
-  const [previewRuntimeUrl, setPreviewRuntimeUrl] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null
-    const fromStorage = normalizeRuntimeUrl(window.localStorage.getItem(PREVIEW_RUNTIME_URL_STORAGE_KEY))
-    if (fromStorage) return fromStorage
-    return normalizeRuntimeUrl(DEFAULT_PREVIEW_RUNTIME_URL)
-  })
-  const [previewRuntimeInput, setPreviewRuntimeInput] = useState('')
-  const [showRuntimeSettings, setShowRuntimeSettings] = useState(false)
   const [isCompactViewport, setIsCompactViewport] = useState(false)
-  const [runtimeHealth, setRuntimeHealth] = useState<RuntimeHealthState>({ status: 'idle' })
-  const [runtimeHealthCheckedAt, setRuntimeHealthCheckedAt] = useState<Date | null>(null)
-  const [isDiscoveringRuntime, setIsDiscoveringRuntime] = useState(false)
-  const [isProvisioningRuntime, setIsProvisioningRuntime] = useState(false)
-  const [runtimeDiscoveryMessage, setRuntimeDiscoveryMessage] = useState<string | null>(null)
-  const [runtimeDiscoveryTone, setRuntimeDiscoveryTone] = useState<'info' | 'success' | 'warning'>('info')
   const [fullAccessBusy, setFullAccessBusy] = useState(false)
   const [rollbackBusy, setRollbackBusy] = useState(false)
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
-  const runtimeAutoDiscoveryTriggeredRef = useRef(false)
-  const runtimeAutoProvisionTriggeredRef = useRef(false)
+
+  const {
+    previewRuntimeUrl,
+    previewRuntimeInput,
+    setPreviewRuntimeInput,
+    showRuntimeSettings,
+    setShowRuntimeSettings,
+    runtimeHealth,
+    runtimeHealthCheckedAt,
+    isDiscoveringRuntime,
+    isProvisioningRuntime,
+    runtimeDiscoveryMessage,
+    runtimeDiscoveryTone,
+    runtimeHealthHint,
+    forceInlinePreviewFallback,
+    applyRuntimeUrl,
+    discoverRuntime,
+    provisionRuntime,
+    checkRuntimeHealth,
+    handleUseInlineFallback,
+  } = usePreviewRuntimeManager({
+    projectId,
+    previewEnabled,
+    hasToken,
+    previewUrlParam,
+  })
 
   const { data: fullAccessData, mutate: mutateFullAccess } = useSWR<FullAccessResponse>(
     hasToken ? '/api/studio/access/full' : null,
@@ -232,19 +206,6 @@ function IDEContent() {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(PREVIEW_ENABLED_STORAGE_KEY, previewEnabled ? "1" : "0");
   }, [previewEnabled]);
-
-  useEffect(() => {
-    const normalized = normalizeRuntimeUrl(previewUrlParam)
-    if (!normalized) return
-    setPreviewRuntimeUrl(normalized)
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, normalized)
-    }
-  }, [previewUrlParam])
-
-  useEffect(() => {
-    setPreviewRuntimeInput(previewRuntimeUrl ?? '')
-  }, [previewRuntimeUrl])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -469,298 +430,6 @@ function IDEContent() {
   const emitLayoutEvent = useCallback((eventName: string) => {
     window.dispatchEvent(new Event(eventName));
   }, []);
-
-  const applyRuntimeUrl = useCallback(() => {
-    const normalized = normalizeRuntimeUrl(previewRuntimeInput)
-    setPreviewRuntimeUrl(normalized)
-    setRuntimeHealth({ status: normalized ? 'checking' : 'idle' })
-    setRuntimeDiscoveryMessage(null)
-    if (typeof window !== 'undefined') {
-      if (normalized) {
-        window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, normalized)
-      } else {
-        window.localStorage.removeItem(PREVIEW_RUNTIME_URL_STORAGE_KEY)
-      }
-    }
-    analytics?.track?.('user', 'settings_change', {
-      metadata: {
-        source: 'ide-preview-runtime',
-        configured: Boolean(normalized),
-        runtimeUrl: normalized ?? null,
-      },
-    })
-  }, [previewRuntimeInput])
-
-  const discoverRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
-    if (isDiscoveringRuntime) return false
-    setIsDiscoveringRuntime(true)
-    if (mode === 'manual') {
-      setRuntimeDiscoveryTone('info')
-      setRuntimeDiscoveryMessage('Buscando runtime local nas portas padrao...')
-    }
-
-    try {
-      const response = await fetch('/api/preview/runtime-discover', {
-        cache: 'no-store',
-      })
-      const payload = (await response.json().catch(() => null)) as RuntimeDiscoveryResponse | null
-      if (!response.ok) {
-        const errorText = (payload as { error?: string } | null)?.error || `HTTP ${response.status}`
-        throw new Error(errorText)
-      }
-
-      const preferredRuntimeUrl = normalizeRuntimeUrl(payload?.preferredRuntimeUrl ?? null)
-      if (!preferredRuntimeUrl) {
-        if (mode === 'manual') {
-          setRuntimeDiscoveryTone('warning')
-          setRuntimeDiscoveryMessage('Nenhum runtime local encontrado. Inicie npm run dev e tente novamente.')
-        } else {
-          setRuntimeDiscoveryMessage(null)
-        }
-        analytics?.track?.('engine', 'render_time', {
-          metadata: {
-            surface: 'ide-preview-runtime-discovery',
-            mode,
-            status: 'not-found',
-          },
-        })
-        return false
-      }
-
-      setPreviewRuntimeUrl(preferredRuntimeUrl)
-      setPreviewRuntimeInput(preferredRuntimeUrl)
-      setRuntimeHealth({ status: 'checking' })
-      setRuntimeHealthCheckedAt(new Date())
-      setRuntimeDiscoveryTone('success')
-      setRuntimeDiscoveryMessage(`Runtime detectado: ${preferredRuntimeUrl}`)
-
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, preferredRuntimeUrl)
-      }
-
-      analytics?.track?.('engine', 'render_time', {
-        metadata: {
-          surface: 'ide-preview-runtime-discovery',
-          mode,
-          status: 'found',
-          runtimeUrl: preferredRuntimeUrl,
-        },
-      })
-      return true
-    } catch (error) {
-      if (mode === 'manual') {
-        setRuntimeDiscoveryTone('warning')
-        setRuntimeDiscoveryMessage(
-          error instanceof Error ? `Falha ao detectar runtime: ${error.message}` : 'Falha ao detectar runtime.'
-        )
-      }
-      analytics?.track?.('engine', 'render_time', {
-        metadata: {
-          surface: 'ide-preview-runtime-discovery',
-          mode,
-          status: 'error',
-          reason: error instanceof Error ? error.message : 'unknown',
-        },
-      })
-      return false
-    } finally {
-      setIsDiscoveringRuntime(false)
-    }
-  }, [isDiscoveringRuntime])
-
-  const provisionRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
-    if (isProvisioningRuntime) return false
-    setIsProvisioningRuntime(true)
-    if (mode === 'manual') {
-      setRuntimeDiscoveryTone('info')
-      setRuntimeDiscoveryMessage('Provisionando runtime gerenciado...')
-    }
-
-    try {
-      const response = await fetch('/api/preview/runtime-provision', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({ projectId }),
-      })
-      const payload = (await response.json().catch(() => null)) as RuntimeProvisionResponse | null
-      if (!response.ok) {
-        const reason = payload?.error || payload?.message || `HTTP ${response.status}`
-        throw new Error(reason)
-      }
-
-      const runtimeUrl = normalizeRuntimeUrl(payload?.runtimeUrl ?? null)
-      if (!runtimeUrl) {
-        throw new Error('Runtime provision endpoint returned empty runtime URL.')
-      }
-
-      setPreviewRuntimeUrl(runtimeUrl)
-      setPreviewRuntimeInput(runtimeUrl)
-      setRuntimeHealth({ status: 'checking' })
-      setRuntimeHealthCheckedAt(new Date())
-      setRuntimeDiscoveryTone('success')
-      setRuntimeDiscoveryMessage(`Runtime provisionado: ${runtimeUrl}`)
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(PREVIEW_RUNTIME_URL_STORAGE_KEY, runtimeUrl)
-      }
-
-      analytics?.track?.('engine', 'render_time', {
-        metadata: {
-          surface: 'ide-preview-runtime-provision',
-          status: 'provisioned',
-          runtimeUrl,
-          mode: payload?.metadata?.mode || mode || 'unknown',
-        },
-      })
-      return true
-    } catch (error) {
-      if (mode === 'manual') {
-        setRuntimeDiscoveryTone('warning')
-        setRuntimeDiscoveryMessage(
-          error instanceof Error ? `Falha ao provisionar runtime: ${error.message}` : 'Falha ao provisionar runtime.'
-        )
-      }
-      analytics?.track?.('engine', 'render_time', {
-        metadata: {
-          surface: 'ide-preview-runtime-provision',
-          status: 'error',
-          mode,
-          reason: error instanceof Error ? error.message : 'unknown',
-        },
-      })
-      return false
-    } finally {
-      setIsProvisioningRuntime(false)
-    }
-  }, [isProvisioningRuntime, projectId])
-
-  const forceInlinePreviewFallback =
-    Boolean(previewRuntimeUrl) &&
-    (runtimeHealth.status === 'unreachable' ||
-      runtimeHealth.status === 'unhealthy' ||
-      runtimeHealth.status === 'invalid')
-
-  const checkRuntimeHealth = useCallback(async (runtimeUrl: string | null) => {
-    if (!runtimeUrl) {
-      setRuntimeHealth({ status: 'idle' })
-      setRuntimeHealthCheckedAt(null)
-      return
-    }
-
-    setRuntimeHealth({ status: 'checking' })
-    setRuntimeHealthCheckedAt(new Date())
-    try {
-      const response = await fetch(`/api/preview/runtime-health?url=${encodeURIComponent(runtimeUrl)}`, {
-        cache: 'no-store',
-      })
-      const payload = await response.json().catch(() => null)
-      if (!response.ok) {
-        setRuntimeHealth({
-          status: 'invalid',
-          reason: typeof payload?.error === 'string' ? payload.error : 'health_check_failed',
-        })
-        return
-      }
-
-      const status = typeof payload?.status === 'string' ? payload.status : 'unreachable'
-      if (status === 'reachable') {
-        setRuntimeHealth({
-          status: 'reachable',
-          latencyMs: typeof payload?.latencyMs === 'number' ? payload.latencyMs : undefined,
-          httpStatus: typeof payload?.httpStatus === 'number' ? payload.httpStatus : undefined,
-        })
-      } else if (status === 'unhealthy') {
-        setRuntimeHealth({
-          status: 'unhealthy',
-          latencyMs: typeof payload?.latencyMs === 'number' ? payload.latencyMs : undefined,
-          httpStatus: typeof payload?.httpStatus === 'number' ? payload.httpStatus : undefined,
-        })
-      } else {
-        setRuntimeHealth({
-          status: 'unreachable',
-          latencyMs: typeof payload?.latencyMs === 'number' ? payload.latencyMs : undefined,
-          reason: typeof payload?.reason === 'string' ? payload.reason : 'network',
-        })
-      }
-    } catch {
-      setRuntimeHealth({
-        status: 'unreachable',
-        reason: 'network',
-      })
-    }
-  }, [])
-
-  useEffect(() => {
-    void checkRuntimeHealth(previewRuntimeUrl)
-  }, [previewRuntimeUrl, checkRuntimeHealth])
-
-  useEffect(() => {
-    if (!previewEnabled) return
-    if (previewRuntimeUrl) return
-    if (hasToken && !runtimeAutoProvisionTriggeredRef.current) {
-      runtimeAutoProvisionTriggeredRef.current = true
-      void provisionRuntime('auto').then((provisioned) => {
-        if (provisioned || runtimeAutoDiscoveryTriggeredRef.current) return
-        runtimeAutoDiscoveryTriggeredRef.current = true
-        void discoverRuntime('auto')
-      })
-      return
-    }
-    if (runtimeAutoDiscoveryTriggeredRef.current) return
-    runtimeAutoDiscoveryTriggeredRef.current = true
-    void discoverRuntime('auto')
-  }, [discoverRuntime, hasToken, previewEnabled, previewRuntimeUrl, provisionRuntime])
-
-  useEffect(() => {
-    if (!previewEnabled || !previewRuntimeUrl) return
-    const interval = window.setInterval(() => {
-      if (document.visibilityState !== 'visible') return
-      void checkRuntimeHealth(previewRuntimeUrl)
-    }, 30000)
-    return () => window.clearInterval(interval)
-  }, [previewEnabled, previewRuntimeUrl, checkRuntimeHealth])
-
-  useEffect(() => {
-    if (!previewRuntimeUrl) return
-    if (runtimeHealth.status === 'checking' || runtimeHealth.status === 'idle') return
-    analytics?.track?.('engine', 'render_time', {
-      metadata: {
-        surface: 'ide-preview-runtime-health',
-        runtimeUrl: previewRuntimeUrl,
-        status: runtimeHealth.status,
-        latencyMs: runtimeHealth.latencyMs ?? null,
-        httpStatus: runtimeHealth.httpStatus ?? null,
-        reason: runtimeHealth.reason ?? null,
-      },
-    })
-  }, [previewRuntimeUrl, runtimeHealth.httpStatus, runtimeHealth.latencyMs, runtimeHealth.reason, runtimeHealth.status])
-
-  const runtimeHealthHint =
-    runtimeHealth.status === 'reachable'
-      ? `Runtime ativo${typeof runtimeHealth.latencyMs === 'number' ? ` (${runtimeHealth.latencyMs}ms)` : ''}.`
-      : runtimeHealth.status === 'checking'
-        ? 'Validando runtime externo...'
-        : runtimeHealth.status === 'unhealthy'
-          ? 'Runtime respondeu com erro. Preview usara fallback inline.'
-          : runtimeHealth.status === 'unreachable'
-            ? 'Runtime inacessivel. Preview usara fallback inline.'
-            : runtimeHealth.status === 'invalid'
-              ? 'Runtime URL invalida/bloqueada. Corrija para usar dev-server.'
-              : 'Sem runtime externo configurado (modo inline).'
-
-  const handleUseInlineFallback = useCallback(() => {
-    setPreviewRuntimeInput('')
-    setPreviewRuntimeUrl(null)
-    setRuntimeHealth({ status: 'idle' })
-    setRuntimeHealthCheckedAt(null)
-    setRuntimeDiscoveryTone('info')
-    setRuntimeDiscoveryMessage('Modo inline fallback ativo.')
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(PREVIEW_RUNTIME_URL_STORAGE_KEY)
-    }
-  }, [])
 
   const fullAccessActiveGrant = useMemo(() => {
     const grants = fullAccessData?.metadata?.grants || []
@@ -988,8 +657,9 @@ function IDEContent() {
                   </div>
                   {previewEnabled && (
                     <div className="h-full min-h-0 bg-zinc-950">
-                      <PreviewPanel
+                      <CanonicalPreviewSurface
                         key={`${activeFile.path}:${previewRefreshTick}`}
+                        variant="runtime"
                         title="Live Preview"
                         filePath={activeFile.path}
                         content={activeFile.content}

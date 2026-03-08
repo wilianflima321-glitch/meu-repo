@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { withAdminAuth } from '@/lib/rbac'
+import { isAnyAiProviderConfigured } from '@/lib/ai-provider-config'
 import { filterChangeRunLedgerBySample, readChangeRunLedgerEvents } from '@/lib/server/change-run-ledger'
 import { computeCoreLoopReadiness, type CoreLoopThresholds } from '@/lib/server/core-loop-readiness'
 import {
@@ -28,12 +29,7 @@ const THRESHOLDS: CoreLoopThresholds = {
 
 export const GET = withAdminAuth(async () => {
   const now = new Date()
-  const providerConfigured = Boolean(
-    process.env.OPENAI_API_KEY ||
-      process.env.ANTHROPIC_API_KEY ||
-      process.env.GOOGLE_API_KEY ||
-      process.env.GROQ_API_KEY
-  )
+  const providerConfigured = isAnyAiProviderConfigured()
 
   const windows = await Promise.all(
     WINDOW_HOURS.map(async (hours) => {

@@ -26,35 +26,37 @@ interface AICompletionResponse {
   text: string;
 }
 
-const remoteAIService = {
-  async complete(request: AICompletionRequest, signal: AbortSignal): Promise<AICompletionResponse> {
-    const res = await fetch('/api/ai/complete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      signal,
-      body: JSON.stringify({
-        prompt: request.prompt,
-        maxTokens: request.maxTokens,
-        temperature: request.temperature,
-        provider: undefined,
-        model: undefined,
-      }),
-    });
+function getRemoteAIService(provider?: string) {
+  return {
+    async complete(request: AICompletionRequest, signal: AbortSignal): Promise<AICompletionResponse> {
+      const res = await fetch('/api/ai/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        signal,
+        body: JSON.stringify({
+          prompt: request.prompt,
+          maxTokens: request.maxTokens,
+          temperature: request.temperature,
+          provider,
+          model: undefined,
+        }),
+      });
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(`Inline completion request failed: ${res.status} ${text}`);
-    }
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`Inline completion request failed: ${res.status} ${text}`);
+      }
 
-    const data = (await res.json().catch(() => null)) as { text?: string; suggestion?: string } | null;
-    const completion = data?.suggestion ?? data?.text ?? '';
-    return { text: String(completion) };
-  },
-};
+      const data = (await res.json().catch(() => null)) as { text?: string; suggestion?: string } | null;
+      const completion = data?.suggestion ?? data?.text ?? '';
+      return { text: String(completion) };
+    },
+  };
+}
 
-function getAIService(_provider: string) {
-  return remoteAIService;
+function getAIService(provider: string) {
+  return getRemoteAIService(provider);
 }
 
 // Completion cache entry
@@ -73,7 +75,7 @@ export interface InlineCompletionConfig {
   temperature: number;
   cacheTimeout: number;
   minPrefixLength: number;
-  provider: 'openai' | 'anthropic' | 'ollama';
+  provider: 'openai' | 'openrouter' | 'anthropic' | 'ollama';
 }
 
 const DEFAULT_CONFIG: InlineCompletionConfig = {

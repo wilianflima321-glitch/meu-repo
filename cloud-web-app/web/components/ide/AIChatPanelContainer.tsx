@@ -37,6 +37,33 @@ type ProviderGateState = {
 
 const MODELS = [
   {
+    id: 'google/gemini-3.1-flash-lite-preview',
+    name: 'Gemini 3.1 Flash Lite',
+    provider: 'OpenRouter',
+    description: 'Low-cost routed model for first-value and broad usage',
+    maxTokens: 1000000,
+    supportsVision: false,
+    supportsVoice: false,
+  },
+  {
+    id: 'openai/gpt-4o-mini',
+    name: 'GPT-4o Mini (Routed)',
+    provider: 'OpenRouter',
+    description: 'OpenAI-compatible routed option with centralized provider control',
+    maxTokens: 128000,
+    supportsVision: false,
+    supportsVoice: false,
+  },
+  {
+    id: 'anthropic/claude-3.5-haiku',
+    name: 'Claude 3.5 Haiku (Routed)',
+    provider: 'OpenRouter',
+    description: 'Anthropic-quality low-cost routed option',
+    maxTokens: 200000,
+    supportsVision: false,
+    supportsVoice: false,
+  },
+  {
     id: 'gpt-4o-mini',
     name: 'GPT-4o Mini',
     provider: 'OpenAI',
@@ -99,9 +126,18 @@ function getProjectIdFromLocation(): string | undefined {
 function resolveProfileFromMentions(
   message: string,
   fallback: AdvancedProfile
-): { message: string; profile: AdvancedProfile; tags: string[] } {
+): {
+  message: string
+  profile: AdvancedProfile
+  tags: string[]
+  unsupportedTags: string[]
+  supportedTags: string[]
+} {
   const tags = (message.match(/@[a-z0-9:_-]+/gi) || []).map((tag) => tag.toLowerCase())
   const profile: AdvancedProfile = { ...fallback }
+  const supportedTagSet = new Set(['@studio', '@delivery', '@fast', '@web'])
+  const supportedTags = tags.filter((tag) => supportedTagSet.has(tag) || /^@agents:[123]$/.test(tag))
+  const unsupportedTags = tags.filter((tag) => !supportedTags.includes(tag))
 
   if (tags.includes('@studio')) {
     profile.qualityMode = 'studio'
@@ -136,6 +172,8 @@ function resolveProfileFromMentions(
     message: cleaned || message.trim(),
     profile,
     tags,
+    unsupportedTags,
+    supportedTags,
   }
 }
 
@@ -311,6 +349,37 @@ export default function AIChatPanelContainer() {
 
       const nextMessages = [...messages, userMessage]
       setMessages(nextMessages)
+
+      if (profileResolution.unsupportedTags.length > 0) {
+        const uniqueUnsupported = [...new Set(profileResolution.unsupportedTags)]
+        const unsupportedList = uniqueUnsupported.join(', ')
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content:
+              `MENTION_NOT_SUPPORTED: ${unsupportedList} ainda nao esta suportado nesta superficie.\n` +
+              'Suportado no momento: @studio, @delivery, @fast, @web e @agents:1|2|3.',
+            timestamp: new Date(),
+            model: currentModel,
+          },
+        ])
+
+        analytics?.track?.('ai', 'ai_error', {
+          metadata: {
+            source: 'ide-panel',
+            model: currentModel,
+            projectId,
+            error: 'MENTION_NOT_SUPPORTED',
+            unsupportedTags: uniqueUnsupported,
+          },
+        })
+
+        if (!normalizedMessage.trim()) {
+          return
+        }
+      }
 
       if (context?.attachments && context.attachments.length > 0) {
         setMessages((prev) => [

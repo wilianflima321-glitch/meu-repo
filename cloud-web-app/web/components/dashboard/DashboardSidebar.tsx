@@ -20,6 +20,9 @@ import {
 } from 'lucide-react'
 import { CreditDisplay } from './CreditDisplay'
 
+// Legacy sidebar kept for compatibility with the older modular shell.
+// Canonical navigation for the active dashboard runtime is AethelDashboardSidebar.
+
 export type DashboardTab =
   | 'overview'
   | 'projects'

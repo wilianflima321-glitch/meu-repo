@@ -124,6 +124,30 @@ export interface AIChatPanelProps {
 
 export const DEFAULT_MODELS: ModelOption[] = [
   {
+    id: 'google/gemini-3.1-flash-lite-preview',
+    name: 'Gemini 3.1 Flash Lite',
+    provider: 'OpenRouter',
+    description: 'Low-cost routed default for broad interactive work',
+    maxTokens: 1000000,
+    supportsVision: false,
+  },
+  {
+    id: 'openai/gpt-4o-mini',
+    name: 'GPT-4o Mini (Routed)',
+    provider: 'OpenRouter',
+    description: 'OpenAI-compatible routed model',
+    maxTokens: 128000,
+    supportsVision: false,
+  },
+  {
+    id: 'anthropic/claude-3.5-haiku',
+    name: 'Claude 3.5 Haiku (Routed)',
+    provider: 'OpenRouter',
+    description: 'Anthropic-quality routed model',
+    maxTokens: 200000,
+    supportsVision: false,
+  },
+  {
     id: 'gpt-4o',
     name: 'GPT-4o',
     provider: 'OpenAI',

@@ -117,8 +117,8 @@ export class SettingsManager {
       },
       ai: {
         enabled: true,
-        provider: 'openai',
-        model: 'gpt-4',
+        provider: 'openrouter',
+        model: 'google/gemini-3.1-flash-lite-preview',
         temperature: 0.7,
         maxTokens: 2000
       },

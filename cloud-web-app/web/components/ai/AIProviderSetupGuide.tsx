@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AI_PROVIDER_ENV_LABELS } from '@/lib/ai-provider-config'
 import { fetchAiProviderStatus, type AiProviderStatusResponse } from '@/lib/ai-provider-status-client'
 
 type Props = {
@@ -82,6 +83,20 @@ export default function AIProviderSetupGuide({
         <li>Reinicie o runtime para aplicar as variaveis.</li>
         <li>Valide o status e reteste o chat.</li>
       </ol>
+
+      <div className="mt-3 rounded border border-zinc-700/70 bg-zinc-950/70 px-3 py-2 text-[11px] text-zinc-300">
+        <p className="font-medium text-zinc-100">Providers suportados</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {(status?.missingProviders || ['openrouter', 'openai', 'anthropic', 'google', 'groq']).map((provider) => (
+            <span
+              key={provider}
+              className="rounded border border-zinc-700 bg-zinc-900/80 px-2 py-1 text-[11px] text-zinc-200"
+            >
+              {AI_PROVIDER_ENV_LABELS[provider] || provider}
+            </span>
+          ))}
+        </div>
+      </div>
 
       {status?.configuredProviders && status.configuredProviders.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
