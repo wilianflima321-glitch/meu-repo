@@ -16,6 +16,7 @@
       --bg: #f8fafc;
       --card: #ffffff;
       --line: #e2e8f0;
+      --soft: #f1f5f9;
     }
     * { box-sizing: border-box; }
     body {
@@ -23,10 +24,10 @@
       background: var(--bg);
       color: var(--ink);
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.45;
+      line-height: 1.5;
     }
     .page {
-      max-width: 1080px;
+      max-width: 1100px;
       margin: 32px auto 80px;
       padding: 0 24px;
     }
@@ -35,7 +36,7 @@
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 32px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
     }
     h1, h2, h3 { margin: 0 0 8px; }
     h1 { font-size: 28px; }
@@ -77,13 +78,13 @@
       text-align: left;
       vertical-align: top;
     }
-    th { background: #f1f5f9; }
+    th { background: var(--soft); }
     .badge {
       display: inline-block;
       padding: 2px 8px;
       border-radius: 999px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       color: white;
     }
     .b-ok { background: var(--success); }
@@ -121,8 +122,9 @@
       padding: 12px;
       background: #fafafa;
     }
-    .kicker { color: var(--secondary); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    .kicker { color: var(--secondary); font-weight: 700; font-size: 12px; text-transform: uppercase; }
     .small { font-size: 12px; color: var(--muted); }
+    .muted { color: var(--muted); }
   </style>
 </head>
 <body>
@@ -235,6 +237,8 @@
       <h3>2.3 Gates de QA</h3>
       <p><span class="badge b-ok">PASS</span> lint, typecheck, build, interface gates, route contracts, no fake success, mojibake, enterprise gate.</p>
       <p><span class="badge b-warn">PARTIAL</span> WCAG (sem evidência completa), Core Loop Probe (production sample 0), Global Gap Scan (G1-G10).</p>
+      <h3>2.4 Stack Principal</h3>
+      <p>Next.js 14.2.5, React 18.3.1, Prisma 5.7.0, Three.js, @react-three/fiber, TailwindCSS, Zustand, Zod, OpenAI SDK, Anthropic SDK, Google Generative AI, AWS SDK, Headless UI, Heroicons.</p>
       <div class="note">Oportunidades imediatas: reduzir ruído de docs não canônicos, decompor AethelDashboard.tsx, publicar baseline público de performance.</div>
     </section>
 
@@ -242,62 +246,20 @@
       <h2>3. Auditoria da Interface (UI/UX) – Bit a Bit</h2>
       <table>
         <thead>
-          <tr><th>Superfície</th><th>Estado Atual</th><th>Comparação</th><th>Score</th><th>Gaps</th></tr>
+          <tr><th>Superfície</th><th>Estado atual</th><th>Concorrente próximo</th><th>Score</th><th>Gaps específicos</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Landing Page</td>
-            <td>Base existente, sem hero demo, social proof ou pricing visível.</td>
-            <td>Linear, Bolt, Cursor</td>
-            <td>5.5/10</td>
-            <td>Hero video, screenshots reais, prova social, pricing, SEO.</td>
-          </tr>
-          <tr>
-            <td>Dashboard</td>
-            <td>Funcional, bundle leve; monólito 1.199 linhas.</td>
-            <td>Linear, Notion</td>
-            <td>7.0/10</td>
-            <td>Decompor, empty states completos, telemetria de first value.</td>
-          </tr>
-          <tr>
-            <td>IDE/Workbench</td>
-            <td>Monaco + multi-agent; preview parcial.</td>
-            <td>Cursor, Bolt</td>
-            <td>6.5/10</td>
-            <td>@-mentions completas, RAG semântico, HMR sandbox.</td>
-          </tr>
-          <tr>
-            <td>Nexus Chat</td>
-            <td>Multi-agent real, anti-fake-success.</td>
-            <td>Cursor, Perplexity</td>
-            <td>7.5/10</td>
-            <td>Citações inline, memórias, feedback granular.</td>
-          </tr>
-          <tr>
-            <td>Aethel Research</td>
-            <td>Verified synthesis AAA.</td>
-            <td>Perplexity</td>
-            <td>6.0/10</td>
-            <td>Citações, web real-time, métricas públicas.</td>
-          </tr>
-          <tr>
-            <td>Director Mode</td>
-            <td>Workflow/shot timeline, sem geração real.</td>
-            <td>LTX Studio</td>
-            <td>4.0/10</td>
-            <td>Video gen, retake, continuity, export.</td>
-          </tr>
-          <tr>
-            <td>Admin Panel</td>
-            <td>Métricas e readiness, sem billing real.</td>
-            <td>Stripe/Vercel</td>
-            <td>7.0/10</td>
-            <td>Alertas, cohorts, billing metrics.</td>
-          </tr>
+          <tr><td>Landing Page</td><td>Base existente, sem hero demo, social proof ou pricing visível.</td><td>Linear, Bolt, Cursor</td><td>5.5/10</td><td>Hero video, screenshots reais, prova social, pricing, SEO.</td></tr>
+          <tr><td>Dashboard</td><td>Funcional, bundle leve; monólito 1.199 linhas.</td><td>Linear, Notion</td><td>7.0/10</td><td>Decompor, empty states completos, telemetria de first value.</td></tr>
+          <tr><td>IDE/Workbench</td><td>Monaco + multi-agent; preview parcial.</td><td>Cursor, Bolt</td><td>6.5/10</td><td>@-mentions completas, RAG semântico, HMR sandbox.</td></tr>
+          <tr><td>Nexus Chat</td><td>Multi-agent real, anti-fake-success.</td><td>Cursor, Perplexity</td><td>7.5/10</td><td>Citações inline, memórias, feedback granular.</td></tr>
+          <tr><td>Aethel Research</td><td>Verified synthesis AAA.</td><td>Perplexity</td><td>6.0/10</td><td>Citações, web real-time, métricas públicas.</td></tr>
+          <tr><td>Director Mode</td><td>Workflow/shot timeline, sem geração real.</td><td>LTX Studio</td><td>4.0/10</td><td>Video gen, retake, continuity, export.</td></tr>
+          <tr><td>Admin Panel</td><td>Métricas e readiness, sem billing real.</td><td>Stripe/Vercel</td><td>7.0/10</td><td>Alertas, cohorts, billing metrics.</td></tr>
         </tbody>
       </table>
       <h3>Melhorias concretas</h3>
-      <p>Exemplo de @-mentions no chat: <code>@Codebase</code>, <code>@Docs</code>, <code>@Git</code>. Exemplo de preview sandbox: integrar <code>E2B</code> com provisionamento seguro.</p>
+      <p>Exemplos: <code>@Codebase</code> e <code>@Docs</code> no chat, preview sandbox via <code>E2B</code>, e onboarding com template demo.</p>
     </section>
 
     <section class="section" id="ia">
@@ -402,7 +364,7 @@
 
     <section class="section" id="repoorg">
       <h2>17. Organização do Repositório</h2>
-      <p>Problemas: 3.606 MDs não canônicos, DUPLICATIONS_AND_CONFLICTS desatualizado, orphan folders.</p>
+      <p>Problemas: 3.606 MDs não canônicos, DUPLICATIONS_AND_CONFLICTS.md desatualizado, orphan folders.</p>
       <pre class="small">git mv cloud-admin-ia/... docs/archive/
 git mv shared/tools/... docs/archive/</pre>
       <div class="note">Política proposta: TTL 7 dias para métricas, arquivar docs &gt; 90 dias sem update.</div>
@@ -504,7 +466,7 @@ git mv shared/tools/... docs/archive/</pre>
     <section class="section" id="conclusao">
       <h2>20. Conclusão e Recomendação Estratégica</h2>
       <p>Recomendação: lançar em 60 dias como “o IDE mais honesto do mercado”, com foco em Apps, multi-agent e anti-fake-success. Billing e preview sandbox real são os desbloqueadores obrigatórios.</p>
-      <p><strong>Critérios de sucesso:</strong> evidence L4 em produção, checkout funcional, SLO de first value comprovado, preview HMR-like.</p>
+      <p><strong>Critérios de sucesso:</strong> evidência L4 em produção, checkout funcional, SLO de first value comprovado, preview HMR-like.</p>
     </section>
   </div>
 </body>
