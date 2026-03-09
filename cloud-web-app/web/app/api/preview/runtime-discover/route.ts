@@ -6,6 +6,7 @@ import {
   discoverPreviewRuntime,
   parseRuntimeDiscoveryCandidates,
 } from '@/lib/server/preview-runtime'
+import { getPreviewRuntimeReadiness } from '@/lib/server/preview-runtime-readiness'
 import {
   PREVIEW_DISCOVERY_RATE_LIMIT,
   enforcePreviewRuntimeRateLimit,
@@ -43,6 +44,7 @@ export async function GET(request: NextRequest) {
   }
 
   const payload = await discoverPreviewRuntime(candidates, 1800)
+  const readiness = await getPreviewRuntimeReadiness()
 
   return NextResponse.json(
     {
@@ -50,6 +52,14 @@ export async function GET(request: NextRequest) {
       preferredRuntimeUrl: payload.preferredRuntimeUrl,
       candidates: payload.candidates,
       summary: payload.summary,
+      guidance: {
+        strategy: readiness.strategy,
+        managedProvider: readiness.managedProvider,
+        managedProviderLabel: readiness.managedProviderLabel,
+        managedProviderMode: readiness.managedProviderMode,
+        instructions: readiness.instructions,
+        recommendedCommands: readiness.recommendedCommands,
+      },
       capability: CAPABILITY,
       capabilityStatus: 'PARTIAL',
       metadata: {

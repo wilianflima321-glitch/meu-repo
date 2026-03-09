@@ -8,6 +8,7 @@ import { DashboardProjectsTab } from './DashboardProjectsTab'
 import { DashboardAIChatTab } from './DashboardAIChatTab'
 import { DashboardWalletTab } from './DashboardWalletTab'
 import { DashboardConnectivityTab } from './DashboardConnectivityTab'
+import type { FirstValueSessionSummary } from './useFirstValueTracking'
 import {
   DashboardContentCreationTab,
   DashboardUnrealTab,
@@ -28,6 +29,8 @@ type DashboardMainContentProps = {
   firstProjectCreated: boolean
   firstValueAiSuccess: boolean
   firstValueOpenedIde: boolean
+  firstValueSessionSummary: FirstValueSessionSummary
+  onFirstValueStartTemplate: (templateId: string) => void
   onFirstValueCreateProject: () => void
   onFirstValueConfigureAI: () => void
   onFirstValueOpenAIChat: () => void
@@ -54,6 +57,8 @@ export function DashboardMainContent({
   firstProjectCreated,
   firstValueAiSuccess,
   firstValueOpenedIde,
+  firstValueSessionSummary,
+  onFirstValueStartTemplate,
   onFirstValueCreateProject,
   onFirstValueConfigureAI,
   onFirstValueOpenAIChat,
@@ -80,6 +85,8 @@ export function DashboardMainContent({
           firstProjectCreated={firstProjectCreated}
           firstAiSuccess={firstValueAiSuccess}
           firstIdeOpened={firstValueOpenedIde}
+          sessionSummary={firstValueSessionSummary}
+          onStartTemplate={onFirstValueStartTemplate}
           onCreateProject={onFirstValueCreateProject}
           onConfigureAI={onFirstValueConfigureAI}
           onOpenAIChat={onFirstValueOpenAIChat}

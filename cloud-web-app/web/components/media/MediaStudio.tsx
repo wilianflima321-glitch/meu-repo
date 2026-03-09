@@ -1,9 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react'
-import { VideoPreview, VideoTimeline, type VideoClip } from '../video/VideoTimeline'
-import { ImageEditor } from '../image/ImageEditor'
-import WaveformRenderer, { MixerChannel } from '../audio/AudioEngine'
+import { VideoTimeline, type VideoClip } from '../video/VideoTimeline'
 import type { ClipEffect } from '../../lib/video-encoder-real'
 
 import {
@@ -14,17 +12,21 @@ import {
   computeVisualAlphaAtTime,
   decodeAudioBuffer,
   drawFitContain,
-  formatTime,
-  getEffectValue,
   inferMediaKindFromPath,
   resolveSrcFromWorkspacePath,
   timelineToRendererClips,
-  upsertEffect,
   type MediaAsset,
   type MediaKind,
   type MediaProject,
   type TransitionType,
 } from './media-studio-core'
+import {
+  MediaStudioAssetBin,
+  MediaStudioInspectorPanel,
+  MediaStudioMixerPanel,
+  MediaStudioPreviewPanel,
+  MediaStudioToolbar,
+} from './MediaStudioPanels'
 
 type Props = {
   path?: string
@@ -289,7 +291,7 @@ export default function MediaStudio({
 
       return next
     })
-  }, [path])
+  }, [path, setProject])
 
   useEffect(() => {
     if (!selectedAssetId && project.assets.length > 0) {
@@ -298,7 +300,7 @@ export default function MediaStudio({
     if (!selectedClipId && project.clips.length > 0) {
       setSelectedClipId(project.clips[project.clips.length - 1].id)
     }
-  }, [project.assets, project.clips, selectedAssetId, selectedClipId])
+  }, [project.assets, project.clips, selectedAssetId, selectedClipId, setSelectedAssetId, setSelectedClipId])
 
   useEffect(() => {
     const audioClipsWithoutPeaks = project.clips.filter(c => c.type === 'audio' && !c.peaks)
@@ -322,7 +324,7 @@ export default function MediaStudio({
     return () => {
       cancelled = true
     }
-  }, [project.clips])
+  }, [project.clips, setProject])
 
   const handleImportLocal = useCallback((file: File) => {
     const kind = inferMediaKindFromPath(file.name)
@@ -359,7 +361,7 @@ export default function MediaStudio({
         duration: Math.max(prev.duration, clip.startTime + clip.duration + 1),
       }
     })
-  }, [])
+  }, [setProject])
 
   const handleClipMove = useCallback((clipId: string, startTime: number, trackIndex: number) => {
     setProject(prev => {
@@ -367,7 +369,7 @@ export default function MediaStudio({
       const newDuration = clips.reduce((max, c) => Math.max(max, c.startTime + c.duration), 0)
       return { ...prev, clips, duration: Math.max(prev.duration, newDuration + 1) }
     })
-  }, [])
+  }, [setProject])
 
   const handleClipTrim = useCallback((clipId: string, inPoint: number, outPoint: number) => {
     setProject(prev => {
@@ -379,7 +381,7 @@ export default function MediaStudio({
       const newDuration = clips.reduce((max, c) => Math.max(max, c.startTime + c.duration), 0)
       return { ...prev, clips, duration: Math.max(prev.duration, newDuration + 1) }
     })
-  }, [])
+  }, [setProject])
 
   const handleClipSelect = useCallback((clipId: string | null) => {
     setSelectedClipId(clipId)
@@ -390,7 +392,7 @@ export default function MediaStudio({
 
     const asset = project.assets.find(a => a.src === clip.src)
     if (asset) setSelectedAssetId(asset.id)
-  }, [project.assets, project.clips])
+  }, [project.assets, project.clips, setSelectedAssetId, setSelectedClipId])
 
   useEffect(() => {
     if (!isPlaying) return
@@ -706,499 +708,49 @@ export default function MediaStudio({
 
   const selectedClip = activeClip
 
-  const inspector = useMemo(() => {
-    if (!selectedClip) return null
-
-    const isAudio = selectedClip.type === 'audio'
-    const isVisual = selectedClip.type === 'video' || selectedClip.type === 'image'
-
-    return (
-      <div className="p-3 space-y-3">
-        <div className="text-sm font-semibold text-slate-200">Inspector</div>
-
-        <div className="space-y-1">
-          <div className="text-xs text-slate-400">Clip</div>
-          <div className="text-sm text-slate-200 truncate">{selectedClip.name}</div>
-          <div className="text-xs text-slate-500">{selectedClip.type.toUpperCase()}</div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <label className="text-xs text-slate-400">
-            Start
-            <input
-              className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
-              type="number"
-              step="0.1"
-              value={selectedClip.startTime}
-              onChange={(e) => {
-                const v = parseFloat(e.target.value)
-                setProject(prev => ({
-                  ...prev,
-                  clips: prev.clips.map(c => (c.id === selectedClip.id ? { ...c, startTime: Number.isFinite(v) ? v : c.startTime } : c)),
-                }))
-              }}
-            />
-          </label>
-
-          <label className="text-xs text-slate-400">
-            Duration
-            <input
-              className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
-              type="number"
-              step="0.1"
-              value={selectedClip.duration}
-              onChange={(e) => {
-                const v = parseFloat(e.target.value)
-                setProject(prev => ({
-                  ...prev,
-                  clips: prev.clips.map(c => (c.id === selectedClip.id ? { ...c, duration: Number.isFinite(v) ? v : c.duration, outPoint: Number.isFinite(v) ? c.inPoint + v : c.outPoint } : c)),
-                }))
-              }}
-            />
-          </label>
-
-          <label className="text-xs text-slate-400">
-            In
-            <input
-              className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
-              type="number"
-              step="0.1"
-              value={selectedClip.inPoint}
-              onChange={(e) => {
-                const v = parseFloat(e.target.value)
-                setProject(prev => ({
-                  ...prev,
-                  clips: prev.clips.map(c => (c.id === selectedClip.id ? { ...c, inPoint: Number.isFinite(v) ? v : c.inPoint } : c)),
-                }))
-              }}
-            />
-          </label>
-
-          <label className="text-xs text-slate-400">
-            Out
-            <input
-              className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
-              type="number"
-              step="0.1"
-              value={selectedClip.outPoint}
-              onChange={(e) => {
-                const v = parseFloat(e.target.value)
-                setProject(prev => ({
-                  ...prev,
-                  clips: prev.clips.map(c => (c.id === selectedClip.id ? { ...c, outPoint: Number.isFinite(v) ? v : c.outPoint } : c)),
-                }))
-              }}
-            />
-          </label>
-
-          {isAudio && (
-            <label className="col-span-2 text-xs text-slate-400">
-              Gain
-              <input
-                className="mt-1 w-full"
-                type="range"
-                min="0"
-                max="2"
-                step="0.01"
-                value={selectedClip.gain ?? 1}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value)
-                  setProject(prev => ({
-                    ...prev,
-                    clips: prev.clips.map(c => (c.id === selectedClip.id ? { ...c, gain: Number.isFinite(v) ? v : (c.gain ?? 1) } : c)),
-                  }))
-                }}
-              />
-            </label>
-          )}
-
-          <label className="col-span-2 text-xs text-slate-400">
-            Transition (overlap)
-            <select
-              className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
-              value={selectedClip.transition ?? 'crossfade'}
-              onChange={(e) => {
-                const v = e.target.value as TransitionType
-                setProject(prev => ({
-                  ...prev,
-                  clips: prev.clips.map(c => (c.id === selectedClip.id ? { ...c, transition: v } : c)),
-                }))
-              }}
-            >
-              <option value="crossfade">Crossfade</option>
-              <option value="dipToBlack">Dip to Black</option>
-            </select>
-          </label>
-
-          <label className="col-span-2 text-xs text-slate-400">
-            Crossfade (overlap)
-            <input
-              className="mt-1 w-full"
-              type="range"
-              min="0"
-              max="5"
-              step="0.05"
-              value={selectedClip.crossfade ?? 0.5}
-              onChange={(e) => {
-                const v = parseFloat(e.target.value)
-                setProject(prev => ({
-                  ...prev,
-                  clips: prev.clips.map(c => (c.id === selectedClip.id ? { ...c, crossfade: Number.isFinite(v) ? v : (c.crossfade ?? 0.5) } : c)),
-                }))
-              }}
-            />
-          </label>
-
-          {isVisual && (
-            <label className="col-span-2 text-xs text-slate-400">
-              Opacity
-              <input
-                className="mt-1 w-full"
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={getEffectValue(selectedClip.effects, 'opacity', 1)}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value)
-                  setProject(prev => ({
-                    ...prev,
-                    clips: prev.clips.map(c => (c.id === selectedClip.id
-                      ? { ...c, effects: upsertEffect(c.effects, { type: 'opacity', value: Number.isFinite(v) ? v : 1 }) }
-                      : c
-                    )),
-                  }))
-                }}
-              />
-            </label>
-          )}
-
-          {isVisual && (
-            <label className="col-span-2 text-xs text-slate-400">
-              Color (Brightness / Contrast / Saturation)
-              <div className="mt-1 space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-16 text-[11px] text-slate-500">Bright</span>
-                  <input
-                    className="flex-1"
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.01"
-                    value={getEffectValue(selectedClip.effects, 'brightness', 1)}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value)
-                      setProject(prev => ({
-                        ...prev,
-                        clips: prev.clips.map(c => (c.id === selectedClip.id
-                          ? { ...c, effects: upsertEffect(c.effects, { type: 'brightness', value: Number.isFinite(v) ? v : 1 }) }
-                          : c
-                        )),
-                      }))
-                    }}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="w-16 text-[11px] text-slate-500">Contrast</span>
-                  <input
-                    className="flex-1"
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.01"
-                    value={getEffectValue(selectedClip.effects, 'contrast', 1)}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value)
-                      setProject(prev => ({
-                        ...prev,
-                        clips: prev.clips.map(c => (c.id === selectedClip.id
-                          ? { ...c, effects: upsertEffect(c.effects, { type: 'contrast', value: Number.isFinite(v) ? v : 1 }) }
-                          : c
-                        )),
-                      }))
-                    }}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="w-16 text-[11px] text-slate-500">Saturate</span>
-                  <input
-                    className="flex-1"
-                    type="range"
-                    min="0"
-                    max="3"
-                    step="0.01"
-                    value={getEffectValue(selectedClip.effects, 'saturation', 1)}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value)
-                      setProject(prev => ({
-                        ...prev,
-                        clips: prev.clips.map(c => (c.id === selectedClip.id
-                          ? { ...c, effects: upsertEffect(c.effects, { type: 'saturation', value: Number.isFinite(v) ? v : 1 }) }
-                          : c
-                        )),
-                      }))
-                    }}
-                  />
-                </div>
-              </div>
-            </label>
-          )}
-
-          {isVisual && (
-            <label className="col-span-2 text-xs text-slate-400">
-              Blur / Grayscale
-              <div className="mt-1 space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-16 text-[11px] text-slate-500">Blur</span>
-                  <input
-                    className="flex-1"
-                    type="range"
-                    min="0"
-                    max="16"
-                    step="0.1"
-                    value={getEffectValue(selectedClip.effects, 'blur', 0)}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value)
-                      setProject(prev => ({
-                        ...prev,
-                        clips: prev.clips.map(c => (c.id === selectedClip.id
-                          ? { ...c, effects: upsertEffect(c.effects, { type: 'blur', value: Number.isFinite(v) ? v : 0 }) }
-                          : c
-                        )),
-                      }))
-                    }}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="w-16 text-[11px] text-slate-500">Gray</span>
-                  <input
-                    className="flex-1"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={getEffectValue(selectedClip.effects, 'grayscale', 0)}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value)
-                      setProject(prev => ({
-                        ...prev,
-                        clips: prev.clips.map(c => (c.id === selectedClip.id
-                          ? { ...c, effects: upsertEffect(c.effects, { type: 'grayscale', value: Number.isFinite(v) ? v : 0 }) }
-                          : c
-                        )),
-                      }))
-                    }}
-                  />
-                </div>
-              </div>
-            </label>
-          )}
-        </div>
-
-        <div className="text-xs text-slate-500 font-mono">Playhead: {formatTime(currentTime)}</div>
-      </div>
-    )
-  }, [selectedClip, currentTime])
-
-  const mixer = useMemo(() => {
-    const audioClips = project.clips.filter(c => c.type === 'audio')
-    if (audioClips.length === 0) return null
-
-    return (
-      <div className="p-3">
-        <div className="text-sm font-semibold text-slate-200 mb-2">Mixer</div>
-        <div className="flex gap-2 overflow-x-auto">
-          {audioClips.map((c) => (
-            <MixerChannel
-              key={c.id}
-              name={c.name}
-              volume={Math.min(1, Math.max(0, (c.gain ?? 1) / 2))}
-              pan={0}
-              muted={false}
-              solo={false}
-              peakLevel={0}
-              onVolumeChange={(vol) => {
-                const gain = vol * 2
-                setProject(prev => ({
-                  ...prev,
-                  clips: prev.clips.map(cc => (cc.id === c.id ? { ...cc, gain } : cc)),
-                }))
-              }}
-              onPanChange={() => {}}
-              onMuteToggle={() => {}}
-              onSoloToggle={() => {}}
-            />
-          ))}
-        </div>
-      </div>
-    )
-  }, [project.clips])
 
   return (
     <div className="h-full w-full flex flex-col bg-slate-900">
-      {/* Top bar */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-800 bg-slate-900">
-        <div className="text-sm font-semibold text-slate-200">Media Studio</div>
+      <MediaStudioToolbar
+        currentTime={currentTime}
+        duration={project.duration}
+        exporting={exporting}
+        exportStatus={exportStatus}
+        isPlaying={isPlaying}
+        zoom={zoom}
+        onExport={exportWebM}
+        onImport={handleImportLocal}
+        onSetZoom={setZoom}
+        onStop={stop}
+        onTogglePlay={togglePlay}
+      />
 
-        <button
-          className="ml-3 px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
-          onClick={togglePlay}
-        >
-          {isPlaying ? 'Pause' : 'Play'}
-        </button>
-        <button
-          className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
-          onClick={stop}
-        >
-          Stop
-        </button>
-
-        <button
-          className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 disabled:opacity-50"
-          onClick={exportWebM}
-          disabled={exporting}
-        >
-          {exporting ? 'Exportando...' : 'Exportar WebM'}
-        </button>
-
-        {exportStatus && (
-          <div className="text-xs text-slate-400">{exportStatus}</div>
-        )}
-
-        <div className="ml-3 text-xs text-slate-400 font-mono">
-          {formatTime(currentTime)} / {formatTime(project.duration)}
-        </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <label className="text-xs text-slate-400 flex items-center gap-2">
-            Zoom
-            <input
-              type="range"
-              min={20}
-              max={200}
-              value={zoom}
-              onChange={(e) => setZoom(parseInt(e.target.value, 10))}
-            />
-          </label>
-
-          <label className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 cursor-pointer">
-            Importar
-            <input
-              className="hidden"
-              type="file"
-              accept="audio/*,video/*,image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                handleImportLocal(file)
-                e.currentTarget.value = ''
-              }}
-            />
-          </label>
-        </div>
-      </div>
-
-      {/* Main layout */}
       <div className="flex-1 flex min-h-0">
-        {/* Asset bin */}
-        <div className="w-64 border-r border-slate-800 bg-slate-950/30">
-          <div className="px-3 py-2 text-xs text-slate-400 border-b border-slate-800">Assets</div>
-          <div className="p-2 space-y-1 overflow-auto h-full">
-            {project.assets.length === 0 ? (
-              <div className="text-sm text-slate-500 p-2">
-                Importe um arquivo de mídia (imagem/áudio/vídeo) para começar.
-              </div>
-            ) : (
-              project.assets.map(a => (
-                <button
-                  key={a.id}
-                  onClick={() => setSelectedAssetId(a.id)}
-                  className={
-                    'w-full text-left px-2 py-1.5 rounded border ' +
-                    (selectedAssetId === a.id
-                      ? 'bg-slate-800 border-slate-700 text-slate-100'
-                      : 'bg-transparent border-transparent hover:bg-slate-800/50 text-slate-300')
-                  }
-                >
-                  <div className="text-sm truncate">{a.name}</div>
-                  <div className="text-xs text-slate-500">{a.kind.toUpperCase()}</div>
-                </button>
-              ))
-            )}
-          </div>
-        </div>
+        <MediaStudioAssetBin
+          assets={project.assets}
+          selectedAssetId={selectedAssetId}
+          onSelectAsset={setSelectedAssetId}
+        />
 
-        {/* Center */}
         <div className="flex-1 flex flex-col min-h-0">
-          {/* Preview */}
-          <div className="flex-1 min-h-0 p-3">
-            <div className="h-full bg-slate-950/30 border border-slate-800 rounded">
-              {preview.kind === 'video' ? (
-                <div className="p-3">
-                  <VideoPreview
-                    src={preview.src}
-                    currentTime={previewVideoTime}
-                    isPlaying={isPlaying}
-                    onTimeUpdate={(videoTime) => {
-                      if (!activeTimelineVideoClip) return
-                      const timelineT = activeTimelineVideoClip.startTime + (videoTime - activeTimelineVideoClip.inPoint)
-                      setCurrentTime(Math.max(0, Math.min(project.duration, timelineT)))
-                    }}
-                  />
-                </div>
-              ) : preview.kind === 'image' ? (
-                <div className="h-full">
-                  {/* O ImageEditor já é um editor real em canvas. Aqui ele fica dentro do Media Studio (unificado). */}
-                  <ImageEditor width={980} height={640} initialImage={preview.src} />
-                </div>
-              ) : preview.kind === 'audio' ? (
-                <div className="p-3">
-                  <WaveformRenderer
-                    audioUrl={preview.src}
-                    width={900}
-                    height={180}
-                    progress={audioProgress}
-                    onSeek={(pos) => {
-                      const el = audioElRef.current
-                      if (!el || !el.duration) return
-                      el.currentTime = el.duration * pos
-                    }}
-                  />
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
-                      onClick={() => {
-                        const el = audioElRef.current
-                        if (!el) return
-                        el.play()
-                      }}
-                    >
-                      Play Audio
-                    </button>
-                    <button
-                      className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
-                      onClick={() => {
-                        const el = audioElRef.current
-                        if (!el) return
-                        el.pause()
-                      }}
-                    >
-                      Pause Audio
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-slate-500">
-                  Selecione um asset ou clip para visualizar.
-                </div>
-              )}
-            </div>
-          </div>
+          <MediaStudioPreviewPanel
+            activeTimelineVideoClip={activeTimelineVideoClip}
+            audioProgress={audioProgress}
+            currentTime={currentTime}
+            duration={project.duration}
+            isPlaying={isPlaying}
+            onAudioPause={() => audioElRef.current?.pause()}
+            onAudioPlay={() => { void audioElRef.current?.play() }}
+            onAudioSeek={(position) => {
+              const el = audioElRef.current
+              if (!el || !el.duration) return
+              el.currentTime = el.duration * position
+            }}
+            onSetCurrentTime={setCurrentTime}
+            preview={preview}
+            previewVideoTime={previewVideoTime}
+          />
 
-          {/* Timeline */}
           <div className="border-t border-slate-800 p-3 bg-slate-950/20">
             <VideoTimeline
               tracks={project.tracks}
@@ -1215,10 +767,13 @@ export default function MediaStudio({
           </div>
         </div>
 
-        {/* Inspector + Mixer */}
         <div className="w-80 border-l border-slate-800 bg-slate-950/30 overflow-auto">
-          {inspector}
-          {mixer}
+          <MediaStudioInspectorPanel
+            currentTime={currentTime}
+            selectedClip={selectedClip}
+            setProject={setProject}
+          />
+          <MediaStudioMixerPanel clips={project.clips} setProject={setProject} />
         </div>
       </div>
     </div>

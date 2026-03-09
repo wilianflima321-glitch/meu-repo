@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
+import type * as monacoEditor from 'monaco-editor'
 import IDELayout from "@/components/ide/IDELayout";
 import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
@@ -143,6 +144,7 @@ function IDEContent() {
   const [rollbackBusy, setRollbackBusy] = useState(false)
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
+  const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
 
   const {
     previewRuntimeUrl,
@@ -157,6 +159,12 @@ function IDEContent() {
     runtimeDiscoveryMessage,
     runtimeDiscoveryTone,
     runtimeHealthHint,
+    runtimeReadiness,
+    refreshRuntimeReadiness,
+    runtimeStrategyLabel,
+    runtimeStrategyHint,
+    runtimePrimaryAction,
+    runtimePrimaryActionLabel,
     forceInlinePreviewFallback,
     applyRuntimeUrl,
     discoverRuntime,
@@ -292,6 +300,14 @@ function IDEContent() {
             file: normalizedPath,
           },
         });
+        window.dispatchEvent(new CustomEvent('aethel.ide.fileMutation', {
+          detail: {
+            projectId,
+            path: normalizedPath,
+            operation: 'write',
+            timestamp: new Date().toISOString(),
+          },
+        }))
       } catch (error) {
         setFileError(error instanceof Error ? error.message : "Unable to save file.");
       } finally {
@@ -403,6 +419,47 @@ function IDEContent() {
   }, [entryParam]);
 
   useEffect(() => {
+    const onOpenFileFromContext = (event: Event) => {
+      const detail = (event as CustomEvent<{ path?: string; startLine?: number; endLine?: number; source?: string }>).detail
+      const targetPath = typeof detail?.path === 'string' ? normalizePath(detail.path) : null
+      if (!targetPath) return
+      const startLine = typeof detail?.startLine === 'number' ? detail.startLine : null
+      const endLine = typeof detail?.endLine === 'number' ? detail.endLine : startLine
+
+      analytics?.track?.('project', 'project_open', {
+        metadata: {
+          source: detail?.source || 'ai-context',
+          projectId,
+          file: targetPath,
+          startLine,
+          endLine,
+        },
+      })
+
+      void readFile(targetPath).then(() => {
+        if (!editorRef.current || !startLine) return
+        editorRef.current.revealLineInCenter(startLine)
+        editorRef.current.setPosition({ lineNumber: startLine, column: 1 })
+        if (endLine && endLine >= startLine) {
+          editorRef.current.setSelection({
+            startLineNumber: startLine,
+            startColumn: 1,
+            endLineNumber: endLine,
+            endColumn: 1,
+          })
+        }
+        editorRef.current.focus()
+      })
+      window.dispatchEvent(new Event('aethel.layout.openAI'))
+    }
+
+    window.addEventListener('aethel.ide.openFileFromContext', onOpenFileFromContext as EventListener)
+    return () => {
+      window.removeEventListener('aethel.ide.openFileFromContext', onOpenFileFromContext as EventListener)
+    }
+  }, [projectId, readFile]);
+
+  useEffect(() => {
     analytics?.track("engine", "editor_open", {
       metadata: {
         surface: "ide",
@@ -430,6 +487,28 @@ function IDEContent() {
   const emitLayoutEvent = useCallback((eventName: string) => {
     window.dispatchEvent(new Event(eventName));
   }, []);
+
+  const handleRunRecommendedPreviewAction = useCallback(() => {
+    if (runtimePrimaryAction === 'provision') {
+      void provisionRuntime('manual').then(() => {
+        void refreshRuntimeReadiness()
+      })
+      return
+    }
+    if (runtimePrimaryAction === 'discover') {
+      void discoverRuntime('manual').then(() => {
+        void refreshRuntimeReadiness()
+      })
+      return
+    }
+    handleUseInlineFallback()
+  }, [
+    discoverRuntime,
+    handleUseInlineFallback,
+    provisionRuntime,
+    refreshRuntimeReadiness,
+    runtimePrimaryAction,
+  ])
 
   const fullAccessActiveGrant = useMemo(() => {
     const grants = fullAccessData?.metadata?.grants || []
@@ -582,6 +661,11 @@ function IDEContent() {
                 runtimeHealthLatencyMs={runtimeHealth.latencyMs}
                 runtimeHealthCheckedAt={runtimeHealthCheckedAt}
                 runtimeHealthHint={runtimeHealthHint}
+                runtimeReadiness={runtimeReadiness}
+                runtimePrimaryAction={runtimePrimaryAction}
+                runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+                runtimeStrategyLabel={runtimeStrategyLabel}
+                runtimeStrategyHint={runtimeStrategyHint}
                 showRuntimeSettings={showRuntimeSettings}
                 previewRuntimeInput={previewRuntimeInput}
                 onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
@@ -592,11 +676,16 @@ function IDEContent() {
                 isProvisioningRuntime={isProvisioningRuntime}
                 runtimeDiscoveryMessage={runtimeDiscoveryMessage}
                 runtimeDiscoveryTone={runtimeDiscoveryTone}
+                onRunRecommendedAction={handleRunRecommendedPreviewAction}
                 onDiscoverRuntime={() => {
-                  void discoverRuntime('manual')
+                  void discoverRuntime('manual').then(() => {
+                    void refreshRuntimeReadiness()
+                  })
                 }}
                 onProvisionRuntime={() => {
-                  void provisionRuntime()
+                  void provisionRuntime('manual').then(() => {
+                    void refreshRuntimeReadiness()
+                  })
                 }}
                 onRevalidate={() => {
                   if (!previewRuntimeUrl) return
@@ -638,6 +727,9 @@ function IDEContent() {
                       value={activeFile.content}
                       language={activeFile.language}
                       fullAccessActive={Boolean(fullAccessActiveGrant)}
+                      onMount={(editor) => {
+                        editorRef.current = editor
+                      }}
                       onAiApplyResult={handleInlineApplyResult}
                       onRequestFullAccess={handleToggleFullAccess}
                       onChange={(value) => {

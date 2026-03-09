@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db';
 import { getStripe } from '@/lib/stripe';
 import { optionalEnv } from '@/lib/env';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { billingRuntimeCapabilityResponse, getBillingRuntimeState } from '@/lib/server/billing-runtime';
 
 function resolveAppUrl(req?: NextRequest): string {
   const explicit = optionalEnv('NEXT_PUBLIC_APP_URL') || optionalEnv('NEXTAUTH_URL');
@@ -27,6 +28,11 @@ function handleStripeConfigError(error: unknown): NextResponse | null {
 
 export async function POST(req: NextRequest) {
   try {
+    const billingRuntime = await getBillingRuntimeState();
+    if (!billingRuntime.portalReady) {
+      return billingRuntimeCapabilityResponse('portal', billingRuntime);
+    }
+
     const stripe = getStripe();
     const auth = requireAuth(req);
 
@@ -70,6 +76,11 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    const billingRuntime = await getBillingRuntimeState();
+    if (!billingRuntime.portalReady) {
+      return billingRuntimeCapabilityResponse('portal', billingRuntime);
+    }
+
     const stripe = getStripe();
     const auth = requireAuth(req);
 

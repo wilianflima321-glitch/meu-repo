@@ -63,6 +63,53 @@ export type BillingPlan = {
 	limits?: Record<string, unknown>;
 };
 
+export type BillingReadiness = {
+	status: 'ready' | 'partial' | 'unavailable' | string;
+	checkoutReady: boolean;
+	portalReady?: boolean;
+	webhookReady?: boolean;
+	blockers?: string[];
+	instructions?: string[];
+	recommendedCommands?: string[];
+	gateway?: {
+		activeGateway: string;
+		checkoutEnabled: boolean;
+		allowLocalIdeRedirect?: boolean;
+		checkoutOrigin?: string | null;
+	};
+	provider?: {
+		id: string;
+		label: string;
+		setupEnv: string[];
+		surfaces: string[];
+		webhookPath?: string | null;
+	};
+	stripe?: {
+		configured: boolean;
+		secretKeyConfigured: boolean;
+		publishableKeyConfigured: boolean;
+		webhookSecretConfigured: boolean;
+		pricesReady: boolean;
+		configuredPriceCount: number;
+		requiredPriceCount: number;
+		missingEnv: string[];
+		configuredPrices: string[];
+	};
+	error?: string;
+};
+
+export type BillingSubscriptionStatus = {
+	plan: string;
+	stripeCustomerId?: string | null;
+	subscription: {
+		id: string;
+		status: string;
+		currentPeriodEnd: string;
+		stripeSubscriptionId?: string | null;
+		stripePriceId?: string | null;
+	} | null;
+};
+
 export type WalletTransaction = {
 	id: string;
 	amount: number;
@@ -202,6 +249,16 @@ export const AethelAPIClient = {
 		return Array.isArray(data?.plans) ? data.plans : (data as any);
 	},
 
+	getBillingReadiness: async (): Promise<BillingReadiness> => {
+		return requestJSON<BillingReadiness>('/billing/readiness');
+	},
+
+	getBillingSubscription: async (): Promise<BillingSubscriptionStatus> => {
+		const payload = await requestJSON<{ success?: boolean; data?: BillingSubscriptionStatus }>('/billing/subscription');
+		if (payload?.data) return payload.data;
+		throw new APIError(500, 'Invalid billing subscription payload', 'BILLING_SUBSCRIPTION_INVALID_PAYLOAD', payload);
+	},
+
 	getWalletSummary: async (): Promise<WalletSummary> => {
 		return requestJSON<WalletSummary>('/wallet/summary');
 	},
@@ -305,6 +362,12 @@ export const AethelAPIClient = {
 			body: { planId },
 		});
 		return { status: data?.success ? 'checkout_created' : 'checkout_unknown', checkoutUrl: data?.checkoutUrl };
+	},
+
+	openBillingPortal: async (): Promise<{ url?: string }> => {
+		return requestJSON<{ url?: string }>('/billing/portal', {
+			method: 'POST',
+		});
 	},
 
 	// ========== Profile ==========

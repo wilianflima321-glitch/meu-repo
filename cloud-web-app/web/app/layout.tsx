@@ -16,10 +16,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Aethel Engine - AI-Powered Game Development IDE',
-  description: 'Next-generation game development IDE with AI assistance, real-time collaboration, and professional tools for web and desktop.',
+  title: 'Aethel Engine - Multi-agent software studio',
+  description: 'Multi-agent software studio for apps, research and operationally explicit AI-assisted building.',
   metadataBase: new URL('https://aethel.dev'),
-  keywords: ['game engine', 'game development', 'IDE', 'AI', 'three.js', 'WebGL', 'game editor'],
+  keywords: ['multi-agent IDE', 'AI software studio', 'research to code', 'apps IDE', 'Aethel Engine', 'anti-fake-success'],
   authors: [{ name: 'Aethel Engine Team' }],
   creator: 'Aethel Engine',
   publisher: 'Aethel Engine',
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     url: 'https://aethel.dev',
     siteName: 'Aethel Engine',
-    title: 'Aethel Engine - AI-Powered Game Development IDE',
-    description: 'Next-generation game development IDE with AI assistance and real-time collaboration.',
+    title: 'Aethel Engine - Multi-agent software studio',
+    description: 'Research, planning, code, preview and readiness in one AI-assisted studio.',
     images: [
       {
         url: '/og-image.png',
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Aethel Engine',
-    description: 'AI-Powered Game Development IDE',
+    description: 'Multi-agent software studio for apps and research',
     images: ['/twitter-image.png'],
   },
   icons: {

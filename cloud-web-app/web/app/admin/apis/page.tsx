@@ -10,6 +10,69 @@ type Integration = {
   configured: boolean;
 };
 
+type BillingRuntimeSnapshot = {
+  status: 'ready' | 'partial' | 'unavailable' | string;
+  checkoutReady: boolean;
+  portalReady?: boolean;
+  webhookReady?: boolean;
+  provider?: {
+    id: string;
+    label: string;
+    setupEnv: string[];
+    webhookPath?: string | null;
+  };
+  stripe?: {
+    publishableKeyConfigured: boolean;
+    configuredPriceCount: number;
+    requiredPriceCount: number;
+    missingEnv: string[];
+  };
+};
+
+type ProductionRuntimeSnapshot = {
+  runtimeReadiness?: {
+    envLocalPresent: boolean;
+    databaseConfigured: boolean;
+    databaseReachable: boolean;
+    databaseTarget?: string | null;
+    appRuntimeReachable?: boolean;
+    appBaseUrl?: string | null;
+    jwtConfigured: boolean;
+    csrfConfigured: boolean;
+    dockerCliPresent: boolean;
+    dockerDaemonReady: boolean;
+    authReady: boolean;
+    probeReady: boolean;
+    blockers: string[];
+    instructions: string[];
+    recommendedCommands: string[];
+  };
+};
+
+type PreviewRuntimeSnapshot = {
+  status?: 'ready' | 'partial' | string;
+  strategy?: 'managed' | 'local' | 'inline' | string;
+  managedProviderLabel?: string | null;
+  managedProviderMode?: 'route-managed' | 'browser-side' | 'unknown' | string;
+  routeProvisionSupported?: boolean;
+  preferredRuntimeUrl?: string | null;
+  blockers?: string[];
+  instructions?: string[];
+  recommendedCommands?: string[];
+};
+
+type OperatorReadinessSnapshot = {
+  status: 'ready' | 'partial' | string;
+  blockers: string[];
+  instructions: string[];
+  recommendedCommands: string[];
+  checks: {
+    billingRuntime: BillingRuntimeSnapshot;
+    previewRuntime: PreviewRuntimeSnapshot;
+    productionRuntime: NonNullable<ProductionRuntimeSnapshot['runtimeReadiness']>;
+  };
+};
+
 type CompatibilityRouteMetric = {
   route: string;
   replacement: string;
@@ -34,6 +97,10 @@ export default function APIs() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'configured' | 'missing'>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [billingRuntime, setBillingRuntime] = useState<BillingRuntimeSnapshot | null>(null);
+  const [previewRuntime, setPreviewRuntime] = useState<PreviewRuntimeSnapshot | null>(null);
+  const [productionRuntime, setProductionRuntime] = useState<ProductionRuntimeSnapshot | null>(null);
+  const [operatorReadiness, setOperatorReadiness] = useState<OperatorReadinessSnapshot | null>(null);
 
   const getAuthHeaders = () => {
     const token = getToken();
@@ -58,6 +125,26 @@ export default function APIs() {
       const compatData = await compatRes.json();
       setCompatRoutes(Array.isArray(compatData?.routes) ? compatData.routes : []);
       setRemovalCandidates(Array.isArray(compatData?.removalCandidates) ? compatData.removalCandidates : []);
+
+      const operatorRes = await fetch('/api/admin/operator-readiness', {
+        headers: getAuthHeaders(),
+        cache: 'no-store',
+      });
+      if (!operatorRes.ok) throw new Error('Falha ao carregar readiness operacional');
+      const operatorData = await operatorRes.json().catch(() => null);
+      const operatorSnapshot =
+        operatorData && typeof operatorData === 'object'
+          ? (operatorData as OperatorReadinessSnapshot)
+          : null;
+      setOperatorReadiness(operatorSnapshot);
+      setBillingRuntime(operatorSnapshot?.checks.billingRuntime ?? null);
+      setPreviewRuntime(operatorSnapshot?.checks.previewRuntime ?? null);
+      setProductionRuntime(
+        operatorSnapshot?.checks.productionRuntime
+          ? { runtimeReadiness: operatorSnapshot.checks.productionRuntime }
+          : null
+      );
+
       setCompatError(null);
       setStatusMessage('Integracoes atualizadas com sucesso.');
     } catch (err) {
@@ -192,6 +279,213 @@ export default function APIs() {
           </div>
         </div>
       </div>
+
+      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
+        <h2 className='text-sm font-semibold text-zinc-200'>Production Runtime Quick Check</h2>
+        {productionRuntime?.runtimeReadiness ? (
+          <div className='mt-3 space-y-2 text-xs'>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Probe readiness</span>
+              <span className={productionRuntime.runtimeReadiness.probeReady ? 'text-emerald-300' : 'text-amber-300'}>
+                {productionRuntime.runtimeReadiness.probeReady ? 'READY' : 'BLOCKED'}
+              </span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>DB / app runtime</span>
+              <span className='text-zinc-300'>
+                {productionRuntime.runtimeReadiness.databaseReachable ? 'db-ok' : 'db-blocked'} / {productionRuntime.runtimeReadiness.appRuntimeReachable ? 'app-ok' : 'app-blocked'}
+              </span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Docker / auth</span>
+              <span className='text-zinc-300'>
+                {productionRuntime.runtimeReadiness.dockerDaemonReady ? 'docker-ok' : 'docker-blocked'} / {productionRuntime.runtimeReadiness.authReady ? 'auth-ok' : 'auth-blocked'}
+              </span>
+            </div>
+            {productionRuntime.runtimeReadiness.databaseTarget ? (
+              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+                database target: <span className='text-zinc-300'>{productionRuntime.runtimeReadiness.databaseTarget}</span>
+              </div>
+            ) : null}
+            {productionRuntime.runtimeReadiness.appBaseUrl ? (
+              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+                app base url: <span className='text-zinc-300'>{productionRuntime.runtimeReadiness.appBaseUrl}</span>
+              </div>
+            ) : null}
+            {productionRuntime.runtimeReadiness.blockers?.length ? (
+              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+                Blockers: {productionRuntime.runtimeReadiness.blockers.join(', ')}
+              </div>
+            ) : null}
+            {productionRuntime.runtimeReadiness.instructions?.length ? (
+              <ul className='space-y-1 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+                {productionRuntime.runtimeReadiness.instructions.map((instruction) => (
+                  <li key={instruction}>- {instruction}</li>
+                ))}
+              </ul>
+            ) : null}
+            {productionRuntime.runtimeReadiness.recommendedCommands?.length ? (
+              <div className='flex flex-wrap gap-2 pt-1'>
+                {productionRuntime.runtimeReadiness.recommendedCommands.map((command) => (
+                  <span key={command} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                    {command}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className='mt-3 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+            Production runtime readiness unavailable.
+          </div>
+        )}
+      </div>
+
+      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
+        <h2 className='text-sm font-semibold text-zinc-200'>Billing Runtime Quick Check</h2>
+        {billingRuntime ? (
+          <div className='mt-3 space-y-2 text-xs'>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Runtime status</span>
+              <span className={billingRuntime.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
+                {String(billingRuntime.status).toUpperCase()}
+              </span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Provider</span>
+              <span className='text-zinc-300'>{billingRuntime.provider?.label || 'unknown'}</span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Checkout / Portal / Webhook</span>
+              <span className='text-zinc-300'>
+                {String(Boolean(billingRuntime.checkoutReady))} / {String(Boolean(billingRuntime.portalReady))} / {String(Boolean(billingRuntime.webhookReady))}
+              </span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Publishable key / price coverage</span>
+              <span className='text-zinc-300'>
+                {String(Boolean(billingRuntime.stripe?.publishableKeyConfigured))} / {billingRuntime.stripe?.configuredPriceCount ?? 0}/{billingRuntime.stripe?.requiredPriceCount ?? 0}
+              </span>
+            </div>
+            {billingRuntime.provider?.webhookPath ? (
+              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+                webhook path: <span className='text-zinc-300'>{billingRuntime.provider.webhookPath}</span>
+              </div>
+            ) : null}
+            {billingRuntime.provider?.setupEnv?.length ? (
+              <div className='flex flex-wrap gap-2 pt-1'>
+                {billingRuntime.provider.setupEnv.map((envKey) => (
+                  <span key={envKey} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                    {envKey}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+            {billingRuntime.stripe?.missingEnv?.length ? (
+              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+                Missing env: {billingRuntime.stripe.missingEnv.join(', ')}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className='mt-3 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+            Billing runtime readiness unavailable.
+          </div>
+        )}
+      </div>
+
+      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
+        <h2 className='text-sm font-semibold text-zinc-200'>Preview Runtime Quick Check</h2>
+        {previewRuntime ? (
+          <div className='mt-3 space-y-2 text-xs'>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Runtime status</span>
+              <span className={previewRuntime.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
+                {String(previewRuntime.status || 'unknown').toUpperCase()}
+              </span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Strategy</span>
+              <span className='text-zinc-300'>{previewRuntime.strategy || 'unknown'}</span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Provider / mode</span>
+              <span className='text-zinc-300'>
+                {previewRuntime.managedProviderLabel || 'none'} / {previewRuntime.managedProviderMode || 'unknown'}
+              </span>
+            </div>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Route provisioning</span>
+              <span className='text-zinc-300'>{String(Boolean(previewRuntime.routeProvisionSupported))}</span>
+            </div>
+            {previewRuntime.preferredRuntimeUrl ? (
+              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+                preferred runtime: <span className='text-zinc-300'>{previewRuntime.preferredRuntimeUrl}</span>
+              </div>
+            ) : null}
+            {previewRuntime.blockers?.length ? (
+              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+                Blockers: {previewRuntime.blockers.join(', ')}
+              </div>
+            ) : null}
+            {previewRuntime.instructions?.length ? (
+              <ul className='space-y-1 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+                {previewRuntime.instructions.map((instruction) => (
+                  <li key={instruction}>- {instruction}</li>
+                ))}
+              </ul>
+            ) : null}
+            {previewRuntime.recommendedCommands?.length ? (
+              <div className='flex flex-wrap gap-2 pt-1'>
+                {previewRuntime.recommendedCommands.map((command) => (
+                  <span key={command} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                    {command}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className='mt-3 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+            Preview runtime readiness unavailable.
+          </div>
+        )}
+      </div>
+
+      {operatorReadiness ? (
+        <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
+          <h2 className='text-sm font-semibold text-zinc-200'>Operator Readiness Aggregate</h2>
+          <div className='mt-3 space-y-2 text-xs'>
+            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
+              <span className='text-zinc-400'>Aggregate status</span>
+              <span className={operatorReadiness.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
+                {String(operatorReadiness.status).toUpperCase()}
+              </span>
+            </div>
+            {operatorReadiness.blockers?.length ? (
+              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+                Blockers: {operatorReadiness.blockers.join(', ')}
+              </div>
+            ) : null}
+            {operatorReadiness.instructions?.length ? (
+              <ul className='space-y-1 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+                {operatorReadiness.instructions.map((instruction) => (
+                  <li key={instruction}>- {instruction}</li>
+                ))}
+              </ul>
+            ) : null}
+            {operatorReadiness.recommendedCommands?.length ? (
+              <div className='flex flex-wrap gap-2 pt-1'>
+                {operatorReadiness.recommendedCommands.map((command) => (
+                  <span key={command} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                    {command}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
         <div className='text-center'>

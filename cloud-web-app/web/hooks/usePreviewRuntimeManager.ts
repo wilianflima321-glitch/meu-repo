@@ -5,13 +5,15 @@ import { analytics } from '@/lib/analytics'
 import {
   checkPreviewRuntimeHealth,
   DEFAULT_PREVIEW_RUNTIME_URL,
-  discoverPreviewRuntime,
+  discoverPreviewRuntimeDetails,
+  getPreviewRuntimeReadiness,
   getStoredPreviewRuntimeUrl,
   normalizeRuntimeUrl,
   persistPreviewRuntimeUrl,
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
   provisionPreviewRuntime,
   type PreviewRuntimeHealthState,
+  type PreviewRuntimeReadinessResponse,
 } from '@/lib/preview/runtime-manager'
 
 type RuntimeMessageTone = 'info' | 'success' | 'warning'
@@ -38,6 +40,7 @@ export function usePreviewRuntimeManager({
   const [previewRuntimeInput, setPreviewRuntimeInput] = useState('')
   const [showRuntimeSettings, setShowRuntimeSettings] = useState(false)
   const [runtimeHealth, setRuntimeHealth] = useState<PreviewRuntimeHealthState>({ status: 'idle' })
+  const [runtimeReadiness, setRuntimeReadiness] = useState<PreviewRuntimeReadinessResponse | null>(null)
   const [runtimeHealthCheckedAt, setRuntimeHealthCheckedAt] = useState<Date | null>(null)
   const [isDiscoveringRuntime, setIsDiscoveringRuntime] = useState(false)
   const [isProvisioningRuntime, setIsProvisioningRuntime] = useState(false)
@@ -45,6 +48,32 @@ export function usePreviewRuntimeManager({
   const [runtimeDiscoveryTone, setRuntimeDiscoveryTone] = useState<RuntimeMessageTone>('info')
   const runtimeAutoDiscoveryTriggeredRef = useRef(false)
   const runtimeAutoProvisionTriggeredRef = useRef(false)
+
+  const refreshRuntimeReadiness = useCallback(async () => {
+    try {
+      const readiness = await getPreviewRuntimeReadiness()
+      setRuntimeReadiness(readiness)
+      return readiness
+    } catch {
+      setRuntimeReadiness(null)
+      return null
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadReadiness = async () => {
+      const readiness = await refreshRuntimeReadiness()
+      if (cancelled) return
+      if (!readiness) setRuntimeReadiness(null)
+    }
+
+    void loadReadiness()
+    return () => {
+      cancelled = true
+    }
+  }, [refreshRuntimeReadiness])
 
   useEffect(() => {
     const normalized = normalizeRuntimeUrl(previewUrlParam ?? null)
@@ -81,11 +110,18 @@ export function usePreviewRuntimeManager({
     }
 
     try {
-      const preferredRuntimeUrl = await discoverPreviewRuntime()
+      const discovery = await discoverPreviewRuntimeDetails()
+      const preferredRuntimeUrl = normalizeRuntimeUrl(discovery.preferredRuntimeUrl ?? null)
       if (!preferredRuntimeUrl) {
+        const suggestedCommand = discovery.guidance?.recommendedCommands?.[0] || null
+        const suggestedInstruction = discovery.guidance?.instructions?.[0] || null
         if (mode === 'manual') {
           setRuntimeDiscoveryTone('warning')
-          setRuntimeDiscoveryMessage('Nenhum runtime local encontrado. Inicie npm run dev e tente novamente.')
+          setRuntimeDiscoveryMessage(
+            suggestedCommand
+              ? `Nenhum runtime local encontrado. Proximo passo: ${suggestedCommand}`
+              : suggestedInstruction || 'Nenhum runtime local encontrado. Inicie npm run dev e tente novamente.'
+          )
         } else {
           setRuntimeDiscoveryMessage(null)
         }
@@ -115,6 +151,7 @@ export function usePreviewRuntimeManager({
           runtimeUrl: preferredRuntimeUrl,
         },
       })
+      void refreshRuntimeReadiness()
       return true
     } catch (error) {
       if (mode === 'manual') {
@@ -135,7 +172,7 @@ export function usePreviewRuntimeManager({
     } finally {
       setIsDiscoveringRuntime(false)
     }
-  }, [isDiscoveringRuntime])
+  }, [isDiscoveringRuntime, refreshRuntimeReadiness])
 
   const provisionRuntime = useCallback(async (mode: 'auto' | 'manual' = 'manual'): Promise<boolean> => {
     if (isProvisioningRuntime) return false
@@ -168,6 +205,7 @@ export function usePreviewRuntimeManager({
           mode: provisionResult.metadataMode || mode || 'unknown',
         },
       })
+      void refreshRuntimeReadiness()
       return true
     } catch (error) {
       if (mode === 'manual') {
@@ -188,7 +226,7 @@ export function usePreviewRuntimeManager({
     } finally {
       setIsProvisioningRuntime(false)
     }
-  }, [isProvisioningRuntime, projectId])
+  }, [isProvisioningRuntime, projectId, refreshRuntimeReadiness])
 
   const checkRuntime = useCallback(async (runtimeUrl: string | null) => {
     if (!runtimeUrl) {
@@ -214,19 +252,32 @@ export function usePreviewRuntimeManager({
   useEffect(() => {
     if (!previewEnabled) return
     if (previewRuntimeUrl) return
-    if (hasToken && !runtimeAutoProvisionTriggeredRef.current) {
+    const recommendedAction = runtimeReadiness?.recommendedAction
+
+    if (
+      hasToken &&
+      recommendedAction === 'provision' &&
+      !runtimeAutoProvisionTriggeredRef.current
+    ) {
       runtimeAutoProvisionTriggeredRef.current = true
       void provisionRuntime('auto').then((provisioned) => {
         if (provisioned || runtimeAutoDiscoveryTriggeredRef.current) return
-        runtimeAutoDiscoveryTriggeredRef.current = true
-        void discoverRuntime('auto')
+        if (recommendedAction === 'discover') {
+          runtimeAutoDiscoveryTriggeredRef.current = true
+          void discoverRuntime('auto')
+        }
       })
       return
     }
-    if (runtimeAutoDiscoveryTriggeredRef.current) return
-    runtimeAutoDiscoveryTriggeredRef.current = true
-    void discoverRuntime('auto')
-  }, [discoverRuntime, hasToken, previewEnabled, previewRuntimeUrl, provisionRuntime])
+
+    if (
+      (recommendedAction === 'discover' || (!recommendedAction && !hasToken)) &&
+      !runtimeAutoDiscoveryTriggeredRef.current
+    ) {
+      runtimeAutoDiscoveryTriggeredRef.current = true
+      void discoverRuntime('auto')
+    }
+  }, [discoverRuntime, hasToken, previewEnabled, previewRuntimeUrl, provisionRuntime, runtimeReadiness?.recommendedAction])
 
   useEffect(() => {
     if (!previewEnabled || !previewRuntimeUrl) return
@@ -265,6 +316,36 @@ export function usePreviewRuntimeManager({
               ? 'Runtime URL invalida/bloqueada. Corrija para usar dev-server.'
               : 'Sem runtime externo configurado (modo inline).'
 
+  const runtimeStrategyLabel =
+    runtimeReadiness?.strategy === 'managed'
+      ? 'managed'
+      : runtimeReadiness?.strategy === 'local'
+        ? 'local'
+        : 'inline'
+
+  const runtimeStrategyHint =
+    runtimeReadiness?.strategy === 'managed'
+      ? runtimeReadiness.readyForManagedProvision
+        ? 'Managed preview configurado; provisionamento pode ser usado como caminho principal.'
+        : 'Managed preview foi detectado, mas ainda ha bloqueios de runtime.'
+      : runtimeReadiness?.strategy === 'local'
+        ? 'Nenhum sandbox gerenciado padrao foi detectado; fallback atual depende de dev-server local.'
+        : 'Sem sandbox gerenciado ou runtime local detectado; preview fica em modo inline.'
+
+  const runtimePrimaryAction =
+    runtimeReadiness?.recommendedAction === 'provision'
+      ? 'provision'
+      : runtimeReadiness?.recommendedAction === 'discover'
+        ? 'discover'
+        : 'inline'
+
+  const runtimePrimaryActionLabel =
+    runtimePrimaryAction === 'provision'
+      ? 'Provisionar recomendado'
+      : runtimePrimaryAction === 'discover'
+        ? 'Detectar recomendado'
+        : 'Usar inline'
+
   const handleUseInlineFallback = useCallback(() => {
     setPreviewRuntimeInput('')
     setPreviewRuntimeUrl(null)
@@ -294,6 +375,12 @@ export function usePreviewRuntimeManager({
     runtimeDiscoveryMessage,
     runtimeDiscoveryTone,
     runtimeHealthHint,
+    runtimeReadiness,
+    refreshRuntimeReadiness,
+    runtimeStrategyLabel,
+    runtimeStrategyHint,
+    runtimePrimaryAction,
+    runtimePrimaryActionLabel,
     forceInlinePreviewFallback,
     applyRuntimeUrl,
     discoverRuntime,

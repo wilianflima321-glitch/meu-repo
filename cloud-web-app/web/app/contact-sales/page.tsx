@@ -1,17 +1,38 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useMemo, useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 
-const features = [
-  { icon: 'SSO', title: 'SSO/SAML', desc: 'Single Sign-On para toda a organizacao' },
-  { icon: 'SEC', title: 'SOC2 Compliance', desc: 'Seguranca de nivel enterprise' },
-  { icon: 'ANL', title: 'Analytics Avancados', desc: 'Metricas detalhadas de uso e performance' },
-  { icon: 'SLA', title: 'SLA 99.99%', desc: 'Uptime garantido em contrato' },
-  { icon: 'CSM', title: 'Gerente Dedicado', desc: 'Suporte personalizado para seu time' },
-  { icon: 'ONB', title: 'Onboarding Custom', desc: 'Treinamento e setup personalizado' },
-];
+const enterpriseFeatures = [
+  { icon: 'RBAC', title: 'Governanca e RBAC', desc: 'Controles operacionais, audit trail e readiness por superficie.' },
+  { icon: 'AGT', title: 'Multi-agent orchestration', desc: 'Architect, Engineer e Critic com contratos explicitos.' },
+  { icon: 'RCH', title: 'Research -> Plan -> Code', desc: 'Fluxo unico para times que precisam ir de analise a execucao.' },
+  { icon: 'OPS', title: 'Acompanhamento de rollout', desc: 'Readiness, apply/rollback e trilha de mudancas auditavel.' },
+]
+
+function buildMailtoUrl(formData: {
+  name: string
+  email: string
+  company: string
+  role: string
+  teamSize: string
+  message: string
+}) {
+  const subject = `[Aethel Enterprise] ${formData.company || 'Novo interesse enterprise'}`
+  const body = [
+    `Nome: ${formData.name || '-'}`,
+    `Email: ${formData.email || '-'}`,
+    `Empresa: ${formData.company || '-'}`,
+    `Cargo: ${formData.role || '-'}`,
+    `Tamanho do time: ${formData.teamSize || '-'}`,
+    '',
+    'Contexto:',
+    formData.message || '-',
+  ].join('\n')
+
+  return `mailto:sales@aethel.dev?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+}
 
 export default function ContactSalesPage() {
   const [formData, setFormData] = useState({
@@ -21,196 +42,131 @@ export default function ContactSalesPage() {
     role: '',
     teamSize: '',
     message: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-  };
-
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-[150px]" />
-        </div>
-
-        <div className="relative text-center max-w-lg">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-
-          <h1 className="text-3xl font-bold mb-4">Mensagem enviada!</h1>
-          <p className="text-slate-400 text-lg mb-8">
-            Obrigado pelo seu interesse. Nossa equipe de vendas entrara em contato em ate 24 horas uteis.
-          </p>
-
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center gap-2 h-12 px-8 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
-          >
-            Voltar ao inicio
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const mailtoUrl = useMemo(() => buildMailtoUrl(formData), [formData])
+  const requiredReady = formData.name.trim() && formData.email.trim() && formData.company.trim()
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-sky-600/10 rounded-full blur-[150px]" />
+        <div className="absolute top-0 left-1/4 h-[600px] w-[600px] rounded-full bg-blue-600/10 blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/10 blur-[150px]" />
       </div>
 
-      {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3">
             <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={36} height={36} className="rounded-xl" />
             <span className="text-xl font-bold">Aethel</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/pricing" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/pricing" className="text-slate-400 transition-colors hover:text-white">
               Precos
             </Link>
             <Link
-              href="/register"
-              className="h-9 px-4 flex items-center bg-white text-black font-medium rounded-lg hover:bg-slate-200 transition-colors"
+              href="/dashboard?onboarding=1&source=contact-sales"
+              className="flex h-9 items-center rounded-lg bg-white px-4 font-medium text-black transition-colors hover:bg-slate-200"
             >
-              Comecar gratis
+              Abrir produto
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Content */}
-      <div className="relative pt-24 pb-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* Left - Info */}
-            <div className="lg:pt-8">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm font-medium mb-6">
+      <main className="relative px-6 pb-16 pt-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            <section className="lg:pt-8">
+              <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-300">
                 Enterprise
               </span>
 
-              <h1 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
-                Solucoes para{' '}
-                <span className="bg-gradient-to-r from-blue-400 to-sky-400 bg-clip-text text-transparent">
-                  grandes times
-                </span>
+              <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
+                Conversa comercial sem promessas infladas.
               </h1>
 
-              <p className="text-xl text-slate-400 mb-10 leading-relaxed">
-                Agende uma demonstracao personalizada e descubra como o Aethel pode transformar a produtividade do seu time de desenvolvimento.
+              <p className="mt-6 text-xl leading-relaxed text-slate-400">
+                Esta pagina nao simula envio nem mostra logos inventados. Use o formulario para abrir um email pre-preenchido para o time comercial, com o contexto do seu time.
               </p>
 
-              {/* Features */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                {features.map((feature, i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-xl bg-white/5 border border-white/10"
-                  >
-                    <span className="text-xs font-bold tracking-[0.2em] text-slate-300 mb-2 block">{feature.icon}</span>
-                    <h3 className="font-semibold text-white mb-1">{feature.title}</h3>
-                    <p className="text-sm text-slate-400">{feature.desc}</p>
-                  </div>
+              <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                {enterpriseFeatures.map((feature) => (
+                  <article key={feature.icon} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <span className="mb-2 block text-xs font-bold tracking-[0.2em] text-slate-300">{feature.icon}</span>
+                    <h2 className="font-semibold text-white">{feature.title}</h2>
+                    <p className="mt-1 text-sm text-slate-400">{feature.desc}</p>
+                  </article>
                 ))}
               </div>
 
-              {/* Trusted By */}
-              <div className="mt-10 pt-10 border-t border-white/10">
-                <p className="text-sm text-slate-500 mb-4">Confiado por empresas inovadoras</p>
-                <div className="flex items-center gap-8 text-slate-600">
-                  <span className="text-lg font-bold">TechCorp</span>
-                  <span className="text-lg font-bold">StartupX</span>
-                  <span className="text-lg font-bold">DevHouse</span>
-                </div>
+              <div className="mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
+                <p className="text-sm font-semibold text-amber-200">Estado atual para compras enterprise</p>
+                <p className="mt-2 text-sm leading-6 text-amber-100/85">
+                  A base tecnica e forte, mas ainda existem lacunas objetivas em billing runtime, preview sandbox default e evidencia operacional de L4. Esta conversa comercial deve tratar o estado do produto como ele realmente esta.
+                </p>
               </div>
-            </div>
+            </section>
 
-            {/* Right - Form */}
-            <div className="lg:pt-8">
-              <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <h2 className="text-2xl font-bold mb-6">Agende uma demo</h2>
+            <section className="lg:pt-8">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+                <h2 className="text-2xl font-bold">Abrir email para vendas</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  Preencha os campos essenciais. O CTA abre seu cliente de email com o resumo pronto para enviar para <span className="font-medium text-white">sales@aethel.dev</span>.
+                </p>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid sm:grid-cols-2 gap-4">
+                <div className="mt-8 space-y-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Nome *
-                      </label>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">Nome *</label>
                       <input
                         type="text"
-                        required
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="Seu nome"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                        E-mail corporativo *
-                      </label>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">Email corporativo *</label>
                       <input
                         type="email"
-                        required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="voce@empresa.com"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Empresa *
-                    </label>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">Empresa *</label>
                     <input
                       type="text"
-                      required
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       placeholder="Nome da empresa"
                     />
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Cargo
-                      </label>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">Cargo</label>
                       <input
                         type="text"
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="Seu cargo"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Tamanho do time
-                      </label>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">Tamanho do time</label>
                       <select
                         value={formData.teamSize}
                         onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
-                        className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       >
                         <option value="" className="bg-zinc-900">Selecione</option>
                         <option value="1-10" className="bg-zinc-900">1-10</option>
@@ -223,40 +179,54 @@ export default function ContactSalesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Como podemos ajudar?
-                    </label>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">Contexto e requisitos</label>
                     <textarea
-                      rows={4}
+                      rows={5}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all resize-none"
-                      placeholder="Conte-nos sobre suas necessidades..."
+                      className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      placeholder="Ex: tamanho do time, necessidades de compliance, preview sandbox, billing enterprise, SSO."
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-sky-600 text-white font-semibold rounded-xl hover:from-blue-500 hover:to-sky-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? 'Enviando...' : 'Agendar demonstracao'}
-                  </button>
+                  <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                    <p className="text-sm font-medium text-white">Fluxo atual</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-400">
+                      O CTA abaixo abre um email local com o contexto preenchido. Ainda nao existe envio automatizado desta pagina para CRM.
+                    </p>
+                  </div>
 
-                  <p className="text-xs text-slate-500 text-center">
-                    Ao enviar, voce concorda com nossa{' '}
-                    <Link href="/privacy" className="text-blue-400 hover:underline">
-                      Politica de Privacidade
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <a
+                      href={requiredReady ? mailtoUrl : undefined}
+                      aria-disabled={!requiredReady}
+                      className={`flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold transition-colors ${
+                        requiredReady
+                          ? 'bg-white text-black hover:bg-slate-200'
+                          : 'cursor-not-allowed bg-white/10 text-slate-500'
+                      }`}
+                    >
+                      Abrir email para vendas
+                    </a>
+                    <Link
+                      href="/pricing"
+                      className="flex h-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                    >
+                      Revisar pricing
                     </Link>
-                  </p>
-                </form>
+                  </div>
+
+                  {!requiredReady && (
+                    <p className="text-xs text-slate-500">
+                      Preencha nome, email e empresa para liberar o CTA de email.
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+            </section>
           </div>
         </div>
-      </div>
+      </main>
     </div>
-  );
+  )
 }
-
-

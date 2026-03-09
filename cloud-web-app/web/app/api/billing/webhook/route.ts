@@ -8,11 +8,17 @@ import { prisma } from '@/lib/db';
 import Stripe from 'stripe';
 import { requireEnv } from '@/lib/env';
 import { getStripe } from '@/lib/stripe';
+import { billingRuntimeCapabilityResponse, getBillingRuntimeState } from '@/lib/server/billing-runtime';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const billingRuntime = await getBillingRuntimeState();
+    if (!billingRuntime.webhookReady) {
+      return billingRuntimeCapabilityResponse('webhook', billingRuntime);
+    }
+
     const webhookSecret = requireEnv('STRIPE_WEBHOOK_SECRET');
     const signature = req.headers.get('stripe-signature');
     if (!signature) {

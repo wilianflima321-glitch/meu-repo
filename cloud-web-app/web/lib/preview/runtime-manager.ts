@@ -25,6 +25,14 @@ export type PreviewRuntimeDiscoveryResponse = {
     httpStatus?: number;
     reason?: string;
   }>;
+  guidance?: {
+    strategy?: 'managed' | 'local' | 'inline' | string;
+    managedProvider?: string | null;
+    managedProviderLabel?: string | null;
+    managedProviderMode?: 'route-managed' | 'browser-side' | 'unknown' | string;
+    instructions?: string[];
+    recommendedCommands?: string[];
+  };
 };
 
 export type PreviewRuntimeProvisionResponse = {
@@ -35,6 +43,31 @@ export type PreviewRuntimeProvisionResponse = {
     mode?: string;
   };
 };
+
+export type PreviewRuntimeReadinessResponse = {
+  status?: 'ready' | 'partial' | string;
+  strategy?: 'managed' | 'local' | 'inline' | string;
+  recommendedAction?: 'provision' | 'discover' | 'inline' | string;
+  managedConfigured?: boolean;
+  managedProvider?: string | null;
+  managedProviderLabel?: string | null;
+  managedProviderMode?: 'route-managed' | 'browser-side' | 'unknown' | string;
+  managedSetupEnv?: string[];
+  routeProvisionSupported?: boolean;
+  preferredRuntimeUrl?: string | null;
+  readyForManagedProvision?: boolean;
+  blockers?: string[];
+  instructions?: string[];
+  recommendedCommands?: string[];
+  metadata?: {
+    configuredEndpoints?: string[];
+    localDiscovery?: {
+      preferredRuntimeUrl?: string | null;
+      reachableCandidates?: number;
+      totalCandidates?: number;
+    };
+  };
+}
 
 export function normalizeRuntimeUrl(input: string | null): string | null {
   if (!input) return null;
@@ -64,13 +97,18 @@ function getRuntimeAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function discoverPreviewRuntime(): Promise<string | null> {
+export async function discoverPreviewRuntimeDetails(): Promise<PreviewRuntimeDiscoveryResponse> {
   const response = await fetch('/api/preview/runtime-discover', { cache: 'no-store' });
   const payload = (await response.json().catch(() => null)) as PreviewRuntimeDiscoveryResponse | null;
   if (!response.ok) {
     const reason = (payload as { error?: string } | null)?.error || `HTTP ${response.status}`;
     throw new Error(reason);
   }
+  return payload || {};
+}
+
+export async function discoverPreviewRuntime(): Promise<string | null> {
+  const payload = await discoverPreviewRuntimeDetails();
   return normalizeRuntimeUrl(payload?.preferredRuntimeUrl ?? null);
 }
 
@@ -135,4 +173,14 @@ export async function checkPreviewRuntimeHealth(runtimeUrl: string | null): Prom
     latencyMs: typeof payload?.latencyMs === 'number' ? payload.latencyMs : undefined,
     reason: typeof payload?.reason === 'string' ? payload.reason : 'network',
   };
+}
+
+export async function getPreviewRuntimeReadiness(): Promise<PreviewRuntimeReadinessResponse> {
+  const response = await fetch('/api/preview/runtime-readiness', { cache: 'no-store' })
+  const payload = (await response.json().catch(() => null)) as PreviewRuntimeReadinessResponse | null
+  if (!response.ok) {
+    const reason = (payload as { error?: string } | null)?.error || `HTTP ${response.status}`
+    throw new Error(reason)
+  }
+  return payload || {}
 }

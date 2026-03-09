@@ -55,6 +55,23 @@ export type AIReadiness = {
   metricsAll?: AIReadinessMetrics;
   rehearsalMetrics?: AIReadinessMetrics;
   blockers?: string[];
+  runtimeReadiness?: {
+    envLocalPresent: boolean;
+    databaseConfigured: boolean;
+    databaseReachable: boolean;
+    databaseTarget: string | null;
+    appRuntimeReachable?: boolean;
+    appBaseUrl?: string | null;
+    jwtConfigured: boolean;
+    csrfConfigured: boolean;
+    dockerCliPresent: boolean;
+    dockerDaemonReady: boolean;
+    authReady: boolean;
+    probeReady: boolean;
+    blockers: string[];
+    instructions: string[];
+    recommendedCommands: string[];
+  };
   windows?: Array<{
     hours: number;
     sinceIso: string;

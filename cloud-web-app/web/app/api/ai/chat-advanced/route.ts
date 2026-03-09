@@ -28,6 +28,7 @@ import {
 } from '@/lib/server/ai-demo-mode';
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
+import { buildMentionContextBlock } from '@/lib/server/mention-context'
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -504,12 +505,19 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
     // Construir mensagens para a API
     const systemMessage = SYSTEM_PROMPT + (projectContext ? `\n\n${projectContext}` : '');
     const lastUserMessage = messages[messages.length - 1].content;
+    const mentionContext = await buildMentionContextBlock(lastUserMessage, {
+      userId,
+      projectId,
+    })
     const webBenchmark = await maybeCollectWebBenchmarkContext(lastUserMessage, enableWebResearch);
     const qualityInstruction = `${QUALITY_POLICY[qualityMode]}\n\n${buildSelfQuestioningChecklist()}`;
+    const mentionInstruction = mentionContext.context
+      ? `\n\n${mentionContext.context}\nUse esse contexto apenas quando ele ajudar a responder com mais precisao.`
+      : ''
     const benchmarkInstruction = webBenchmark.summary
       ? `\n\nReferencias externas (pesquisa automatica, best-effort):\n${webBenchmark.summary}\nUse como benchmark, sem copiar cegamente.`
       : '';
-    const enhancedSystemMessage = `${systemMessage}\n\n${qualityInstruction}${benchmarkInstruction}`;
+    const enhancedSystemMessage = `${systemMessage}\n\n${qualityInstruction}${mentionInstruction}${benchmarkInstruction}`;
     
     // Se streaming, usar streaming response
     if (stream) {
@@ -539,7 +547,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
       const architectResult = await aiService.query(lastUserMessage, architectContext, {
         model: architectModel,
         provider: inferProviderFromModel(architectModel),
-        systemPrompt: `${systemMessage}\n\nROLE: ARQUITETO\nVoce e o Arquiteto. Entregue SOMENTE:\n- plano objetivo (max 6 bullets)\n- riscos (max 3)\n- criterio de aceite (max 3)\n- perguntas abertas (max 2, apenas se obrigatorias)\nNao escreva codigo e nao responda como usuario final.\n\n${qualityInstruction}${benchmarkInstruction}`,
+        systemPrompt: `${enhancedSystemMessage}\n\nROLE: ARQUITETO\nVoce e o Arquiteto. Entregue SOMENTE:\n- plano objetivo (max 6 bullets)\n- riscos (max 3)\n- criterio de aceite (max 3)\n- perguntas abertas (max 2, apenas se obrigatorias)\nNao escreva codigo e nao responda como usuario final.`,
       });
 
       const architectSnippet = clampText(architectResult.content, 2000);
@@ -550,7 +558,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
       const engineerResult = await aiService.query(lastUserMessage, engineerContext, {
         model: engineerModel,
         provider: inferProviderFromModel(engineerModel),
-        systemPrompt: `${systemMessage}\n\nROLE: ENGENHEIRO\nVoce e o Engenheiro executor. Entregue resposta final aplicada ao pedido do usuario.\nRegras:\n- use o plano do Arquiteto como guia interno, sem repetir todo o plano;\n- produza resultado final com passos acionaveis e validacao minima;\n- se houver limitacao real, explicite e proponha contorno pratico.\n\n${qualityInstruction}${benchmarkInstruction}`,
+        systemPrompt: `${enhancedSystemMessage}\n\nROLE: ENGENHEIRO\nVoce e o Engenheiro executor. Entregue resposta final aplicada ao pedido do usuario.\nRegras:\n- use o plano do Arquiteto como guia interno, sem repetir todo o plano;\n- produza resultado final com passos acionaveis e validacao minima;\n- se houver limitacao real, explicite e proponha contorno pratico.`,
       });
 
       totalTokens = (architectResult.tokensUsed || 0) + (engineerResult.tokensUsed || 0);
@@ -570,7 +578,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
           {
             model: criticModel,
             provider: inferProviderFromModel(criticModel),
-            systemPrompt: `${systemMessage}\n\nROLE: CRITICO\nVoce e o Critico (QA). Nao reescreva a resposta completa.\nResponda somente:\nVEREDITO: PASS|WARN|FAIL\n- 1 a 3 riscos ou ajustes minimos\nSem debate infinito.\n\n${qualityInstruction}${benchmarkInstruction}`,
+            systemPrompt: `${enhancedSystemMessage}\n\nROLE: CRITICO\nVoce e o Critico (QA). Nao reescreva a resposta completa.\nResponda somente:\nVEREDITO: PASS|WARN|FAIL\n- 1 a 3 riscos ou ajustes minimos\nSem debate infinito.`,
           }
         );
         criticTokensUsed = criticResult.tokensUsed || 0;
@@ -628,6 +636,9 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
               { kind: 'context', label: `historyContextMessages=${messages.length - 1}` },
               { kind: 'other', label: `agentCount=${agentCount}` },
               { kind: 'other', label: `qualityMode=${qualityMode}` },
+              ...(mentionContext.tags.length > 0
+                ? ([{ kind: 'other', label: 'mentionTags', detail: mentionContext.tags.join(', ') }] as const)
+                : []),
               { kind: 'other', label: `models`, detail: `architect=${architectModel}; engineer=${engineerModel}${agentCount === 3 ? `; critic=${criticModel}` : ''}` },
               { kind: 'other', label: 'architectOutput', detail: clampText(architectResult.content, 800) },
               ...(webBenchmark.evidence.map((ref) => ({
@@ -668,7 +679,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
       {
         model,
         provider: inferProviderFromModel(model),
-        systemPrompt: `${systemMessage}\n\n${qualityInstruction}${benchmarkInstruction}`,
+        systemPrompt: enhancedSystemMessage,
       }
     );
 
@@ -715,6 +726,9 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
                   ] as const)
                 : []),
               { kind: 'other', label: `qualityMode=${qualityMode}` },
+              ...(mentionContext.tags.length > 0
+                ? ([{ kind: 'other', label: 'mentionTags', detail: mentionContext.tags.join(', ') }] as const)
+                : []),
               ...(webBenchmark.evidence.map((ref) => ({
                 kind: 'search' as const,
                 label: ref.title,

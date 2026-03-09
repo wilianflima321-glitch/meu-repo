@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAdminAuth } from '@/lib/rbac'
 import { prisma } from '@/lib/db'
+import { getFirstValueMinSample, getFirstValueSloTargetMs } from '@/lib/server/first-value-slo'
 
 type Funnel = {
   signups: number
@@ -30,9 +31,11 @@ type OnboardingStatsResponse = {
     completionRateFromSignup: number | null
     completionRateFromEntry: number | null
     medianFirstValueTimeMs: number | null
+    p95FirstValueTimeMs: number | null
     sampleSize: number
     sloTargetMs: number
     sloStatus: 'pass' | 'fail' | 'insufficient_sample'
+    latestCompletedAt: string | null
   }
   funnel: Funnel
   actionCounts: Record<string, number>
@@ -60,15 +63,16 @@ function computeMedian(values: number[]): number | null {
   return sorted[middle]
 }
 
-function parseMsWithDefault(raw: string | undefined, fallback: number): number {
-  const parsed = Number.parseInt(String(raw ?? ''), 10)
-  if (!Number.isFinite(parsed) || parsed <= 0) return fallback
-  return parsed
+function computePercentile(values: number[], percentile: number): number | null {
+  if (values.length === 0) return null
+  const sorted = [...values].sort((a, b) => a - b)
+  const index = Math.max(0, Math.min(sorted.length - 1, Math.ceil((percentile / 100) * sorted.length) - 1))
+  return sorted[index]
 }
 
 const handler = async (req: NextRequest) => {
-  const firstValueSloTargetMs = parseMsWithDefault(process.env.AETHEL_FIRST_VALUE_SLO_MS, 90_000)
-  const minSloSample = parseMsWithDefault(process.env.AETHEL_FIRST_VALUE_MIN_SAMPLE, 10)
+  const firstValueSloTargetMs = getFirstValueSloTargetMs()
+  const minSloSample = getFirstValueMinSample()
   const days = clampDays(new URL(req.url).searchParams.get('days'))
   const endAt = new Date()
   const startAt = new Date(endAt.getTime() - days * 24 * 60 * 60 * 1000)
@@ -109,6 +113,7 @@ const handler = async (req: NextRequest) => {
   }
 
   const firstValueDurations: number[] = []
+  let latestCompletedAt: string | null = null
   let onboardingActions = 0
   let analyticsActions = 0
 
@@ -131,6 +136,7 @@ const handler = async (req: NextRequest) => {
       if (payload.section === 'onboarding' && payload.action === 'entry') funnel.onboardingEntries += 1
       if (payload.section === 'first-value-guide' && payload.action === 'completed') {
         funnel.firstValueCompleted += 1
+        latestCompletedAt = entry.createdAt.toISOString()
       }
       continue
     }
@@ -171,10 +177,11 @@ const handler = async (req: NextRequest) => {
       ? Number(((funnel.firstValueCompleted / funnel.onboardingEntries) * 100).toFixed(2))
       : null
   const medianFirstValueTimeMs = computeMedian(firstValueDurations)
+  const p95FirstValueTimeMs = computePercentile(firstValueDurations, 95)
   const sloStatus: 'pass' | 'fail' | 'insufficient_sample' =
     firstValueDurations.length < minSloSample
       ? 'insufficient_sample'
-      : medianFirstValueTimeMs !== null && medianFirstValueTimeMs <= firstValueSloTargetMs
+      : p95FirstValueTimeMs !== null && p95FirstValueTimeMs <= firstValueSloTargetMs
         ? 'pass'
         : 'fail'
 
@@ -197,9 +204,11 @@ const handler = async (req: NextRequest) => {
       completionRateFromSignup,
       completionRateFromEntry,
       medianFirstValueTimeMs,
+      p95FirstValueTimeMs,
       sampleSize: firstValueDurations.length,
       sloTargetMs: firstValueSloTargetMs,
       sloStatus,
+      latestCompletedAt,
     },
     funnel,
     actionCounts,

@@ -28,6 +28,25 @@ type GatewayConfig = {
   updatedAt: string | null;
 };
 
+type BillingRuntimeSnapshot = {
+  status: 'ready' | 'partial' | 'unavailable' | string;
+  checkoutReady: boolean;
+  portalReady?: boolean;
+  webhookReady?: boolean;
+  provider?: {
+    id: string;
+    label: string;
+    setupEnv: string[];
+    webhookPath?: string | null;
+  };
+  stripe?: {
+    publishableKeyConfigured: boolean;
+    configuredPriceCount: number;
+    requiredPriceCount: number;
+    missingEnv: string[];
+  };
+};
+
 const DEFAULT_GATEWAY: GatewayConfig = {
   activeGateway: 'stripe',
   checkoutEnabled: true,
@@ -47,6 +66,7 @@ export default function Payments() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'succeeded' | 'pending' | 'failed'>('all');
   const [search, setSearch] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [billingRuntime, setBillingRuntime] = useState<BillingRuntimeSnapshot | null>(null);
 
   const statusLabels: Record<string, string> = {
     succeeded: 'Aprovado',
@@ -69,6 +89,12 @@ export default function Payments() {
     if (!res.ok) throw new Error('Falha ao carregar configuração de gateway');
     const data = await res.json();
     setGateway(data?.config || DEFAULT_GATEWAY);
+  }, []);
+
+  const fetchBillingRuntime = useCallback(async () => {
+    const res = await fetch('/api/billing/readiness', { cache: 'no-store' });
+    const data = await res.json().catch(() => null);
+    setBillingRuntime(data && typeof data === 'object' ? data as BillingRuntimeSnapshot : null);
   }, []);
 
   const fetchPayments = useCallback(async () => {
@@ -97,7 +123,10 @@ export default function Payments() {
     fetchGateway().catch((err) => {
       setError(err instanceof Error ? err.message : 'Falha ao carregar gateway');
     });
-  }, [fetchGateway, fetchPayments]);
+    fetchBillingRuntime().catch((err) => {
+      setError(err instanceof Error ? err.message : 'Falha ao carregar billing runtime');
+    });
+  }, [fetchBillingRuntime, fetchGateway, fetchPayments]);
 
   const saveGateway = useCallback(async () => {
     try {
@@ -204,6 +233,26 @@ export default function Payments() {
           <span className='text-zinc-200'>{gateway.checkoutEnabled ? 'habilitado' : 'desabilitado'}</span>, redirecionamento da IDE local{' '}
           <span className='text-zinc-200'>{gateway.allowLocalIdeRedirect ? 'habilitado' : 'desabilitado'}</span>.
         </div>
+        {billingRuntime && (
+          <div className='mt-4 rounded border border-zinc-800/70 bg-zinc-950/50 p-3 text-xs text-zinc-400'>
+            Runtime: <span className='text-zinc-200'>{billingRuntime.status}</span> | provider{' '}
+            <span className='text-zinc-200'>{billingRuntime.provider?.label || 'unknown'}</span> | checkout{' '}
+            <span className='text-zinc-200'>{String(Boolean(billingRuntime.checkoutReady))}</span> | portal{' '}
+            <span className='text-zinc-200'>{String(Boolean(billingRuntime.portalReady))}</span> | webhook{' '}
+            <span className='text-zinc-200'>{String(Boolean(billingRuntime.webhookReady))}</span>
+            {billingRuntime.stripe ? (
+              <>
+                {' '}| publishable <span className='text-zinc-200'>{String(billingRuntime.stripe.publishableKeyConfigured)}</span> | prices{' '}
+                <span className='text-zinc-200'>{billingRuntime.stripe.configuredPriceCount}/{billingRuntime.stripe.requiredPriceCount}</span>
+              </>
+            ) : null}
+            {billingRuntime.stripe?.missingEnv?.length ? (
+              <div className='mt-2 text-amber-300'>
+                Missing env: {billingRuntime.stripe.missingEnv.join(', ')}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
 
       <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>

@@ -96,6 +96,39 @@ export interface ModelOption {
   supportsVoice?: boolean
 }
 
+export interface CodebaseContextPreviewItem {
+  id: string
+  filePath: string
+  score: number
+  excerpt: string
+  startLine: number
+  endLine: number
+  language: string
+}
+
+export interface CodebaseContextPreview {
+  loading: boolean
+  error?: string | null
+  scope?: 'project' | 'repository'
+  source?: 'local-transient' | 'local-persistent-cache'
+  incrementalReindex?: boolean
+  blockers?: string[]
+  stats?: {
+    filesIndexed: number
+    chunksIndexed: number
+    indexedAt: string
+    changedFiles: number
+    reusedFiles: number
+  }
+  results: CodebaseContextPreviewItem[]
+}
+
+export interface MentionContextPreviewBlock {
+  tag: string
+  kind: 'codebase' | 'docs' | 'file' | 'folder' | 'git' | 'error'
+  content: string
+}
+
 export interface AIChatPanelProps {
   messages?: Message[]
   onSendMessage?: (message: string, context?: MessageContext) => void
@@ -120,6 +153,8 @@ export interface AIChatPanelProps {
   onToggleLiveMode?: () => void
   liveStatus?: 'idle' | 'listening' | 'thinking' | 'speaking'
   allowAttachments?: boolean
+  projectId?: string
+  codebaseContextPreview?: CodebaseContextPreview
 }
 
 export const DEFAULT_MODELS: ModelOption[] = [

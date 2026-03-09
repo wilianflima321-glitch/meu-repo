@@ -878,7 +878,7 @@ export default function AethelDashboard() {
     }
   }, [isGenerating, selectedPreviewPoint, copilotProjectId])
 
-  useFirstValueTracking({
+  const firstValueSessionSummary = useFirstValueTracking({
     projectsCount: projects.length,
     defaultProjectsCount: DEFAULT_PROJECTS.length,
     firstValueAiSuccess,
@@ -1057,6 +1057,8 @@ export default function AethelDashboard() {
             firstProjectCreated={projects.length > DEFAULT_PROJECTS.length}
             firstValueAiSuccess={firstValueAiSuccess}
             firstValueOpenedIde={firstValueOpenedIde}
+            firstValueSessionSummary={firstValueSessionSummary}
+            onFirstValueStartTemplate={handleTemplateSelect}
             onFirstValueCreateProject={() => {
               trackEvent('project', 'project_open', { source: 'first-value-guide', action: 'open-project-tab' })
               handleTabChange('projects')

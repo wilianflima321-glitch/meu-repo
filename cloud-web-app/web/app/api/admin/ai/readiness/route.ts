@@ -39,7 +39,7 @@ export const GET = withAdminAuth(async () => {
   const now = new Date()
 
   const providerConfigured = isAnyAiProviderConfigured()
-  const runtimeReadiness = getProductionRuntimeReadiness()
+  const runtimeReadiness = await getProductionRuntimeReadiness()
   const windows = await Promise.all(
     WINDOW_HOURS.map(async (hours) => {
       const sinceIso = new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString()

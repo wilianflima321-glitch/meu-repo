@@ -12,6 +12,7 @@ function parseArgs(argv) {
     runs: Number.isFinite(DEFAULT_RUNS) ? DEFAULT_RUNS : 6,
     projectId: DEFAULT_PROJECT_ID,
     token: process.env.AETHEL_TOKEN || process.env.AETHEL_AUTH_TOKEN || '',
+    allowUnready: false,
   }
 
   for (let i = 2; i < argv.length; i += 1) {
@@ -35,6 +36,10 @@ function parseArgs(argv) {
     if (arg === '--token' && argv[i + 1]) {
       out.token = argv[i + 1]
       i += 1
+      continue
+    }
+    if (arg === '--allow-unready') {
+      out.allowUnready = true
     }
   }
 
@@ -55,13 +60,37 @@ function ensureToken(token) {
 }
 
 async function fetchJson(url, options = {}) {
-  const response = await fetch(url, options)
+  let response
+  try {
+    response = await fetch(url, options)
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'network_error'
+    throw new Error(`request_failed ${url} (${reason})`)
+  }
   const payload = await response.json().catch(() => ({}))
   if (!response.ok) {
     const reason = payload?.error || payload?.message || `HTTP ${response.status}`
-    throw new Error(reason)
+    throw new Error(`${url} (${reason})`)
   }
   return payload
+}
+
+function printList(prefix, values) {
+  if (!Array.isArray(values)) return
+  for (const value of values) {
+    const normalized = String(value || '').trim()
+    if (!normalized) continue
+    console.error(`${prefix}${normalized}`)
+  }
+}
+
+async function checkAppRuntime(baseUrl) {
+  try {
+    const response = await fetch(`${baseUrl}/api/health/live`, { method: 'GET' })
+    return response.ok
+  } catch {
+    return false
+  }
 }
 
 async function main() {
@@ -73,6 +102,36 @@ async function main() {
     Authorization: `Bearer ${args.token}`,
     'x-project-id': args.projectId,
   }
+
+  const appRuntimeReachable = await checkAppRuntime(args.baseUrl)
+  if (!appRuntimeReachable) {
+    console.error(`[core-loop-production-probe] app runtime unreachable at ${args.baseUrl}`)
+    console.error('[core-loop-production-probe] command: npm run dev')
+    console.error('[core-loop-production-probe] command: npm run qa:production-runtime-readiness')
+    process.exit(1)
+  }
+
+  const readiness = await fetchJson(`${args.baseUrl}/api/admin/ai/readiness`, {
+    method: 'GET',
+    headers,
+  })
+  const runtimeReadiness = readiness?.runtimeReadiness || {}
+  const probeReady = runtimeReadiness?.probeReady === true
+
+  if (!probeReady && !args.allowUnready) {
+    console.error(
+      `[core-loop-production-probe] readiness blocked authReady=${runtimeReadiness?.authReady === true} probeReady=false`
+    )
+    printList('[core-loop-production-probe] blocker: ', runtimeReadiness?.blockers)
+    printList('[core-loop-production-probe] instruction: ', runtimeReadiness?.instructions)
+    printList('[core-loop-production-probe] command: ', runtimeReadiness?.recommendedCommands)
+    console.error('[core-loop-production-probe] use --allow-unready to bypass the readiness gate')
+    process.exit(1)
+  }
+
+  console.log(
+    `[core-loop-production-probe] readiness authReady=${runtimeReadiness?.authReady === true} probeReady=${probeReady} sampleSize=${Number(readiness?.metrics?.sampleSize || 0)}`
+  )
 
   const payload = await fetchJson(`${args.baseUrl}/api/admin/ai/core-loop-production-probe`, {
     method: 'POST',

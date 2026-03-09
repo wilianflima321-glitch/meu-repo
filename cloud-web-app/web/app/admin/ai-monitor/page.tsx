@@ -535,6 +535,98 @@ export default function AgentMonitorPage() {
               {((readiness.thresholds.feedbackCoverageMin ?? 0.6) * 100).toFixed(0)}%
             </p>
           )}
+          {readiness.runtimeReadiness && (
+            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3 text-xs">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="font-medium text-zinc-300">Production runtime preflight</p>
+                <span
+                  className={`rounded px-2 py-1 ${
+                    readiness.runtimeReadiness.probeReady
+                      ? 'bg-emerald-500/20 text-emerald-200'
+                      : 'bg-amber-500/20 text-amber-200'
+                  }`}
+                >
+                  {readiness.runtimeReadiness.probeReady ? 'PROBE READY' : 'BLOCKED'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-8 gap-3">
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">.env.local</p>
+                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.envLocalPresent ? 'present' : 'missing'}</p>
+                </div>
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">Database</p>
+                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.databaseConfigured ? 'configured' : 'missing'}</p>
+                </div>
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">DB reachability</p>
+                  <p className="mt-1 text-zinc-200">
+                    {readiness.runtimeReadiness.databaseReachable ? 'reachable' : 'unreachable'}
+                  </p>
+                  {readiness.runtimeReadiness.databaseTarget && (
+                    <p className="mt-1 text-[10px] text-zinc-500">{readiness.runtimeReadiness.databaseTarget}</p>
+                  )}
+                </div>
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">App runtime</p>
+                  <p className="mt-1 text-zinc-200">
+                    {readiness.runtimeReadiness.appRuntimeReachable ? 'reachable' : 'unreachable'}
+                  </p>
+                  {readiness.runtimeReadiness.appBaseUrl && (
+                    <p className="mt-1 text-[10px] text-zinc-500">{readiness.runtimeReadiness.appBaseUrl}</p>
+                  )}
+                </div>
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">JWT</p>
+                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.jwtConfigured ? 'configured' : 'missing'}</p>
+                </div>
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">CSRF</p>
+                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.csrfConfigured ? 'configured' : 'missing'}</p>
+                </div>
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">Docker CLI</p>
+                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.dockerCliPresent ? 'present' : 'missing'}</p>
+                </div>
+                <div className="rounded bg-zinc-900/60 p-2">
+                  <p className="text-zinc-500">Docker daemon</p>
+                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.dockerDaemonReady ? 'ready' : 'blocked'}</p>
+                </div>
+              </div>
+              <p className="mt-2 text-zinc-500">
+                authReady={String(readiness.runtimeReadiness.authReady)} | probeReady={String(readiness.runtimeReadiness.probeReady)}
+              </p>
+              {readiness.runtimeReadiness.blockers.length > 0 && (
+                <ul className="mt-2 list-disc pl-4 space-y-1 text-amber-100">
+                  {readiness.runtimeReadiness.blockers.map((blocker) => (
+                    <li key={blocker}>{blocker}</li>
+                  ))}
+                </ul>
+              )}
+              {readiness.runtimeReadiness.instructions.length > 0 && (
+                <div className="mt-3 rounded border border-zinc-700 bg-zinc-900/40 p-3">
+                  <p className="font-medium text-zinc-300">Next actions</p>
+                  <ul className="mt-2 list-disc pl-4 space-y-1 text-zinc-300">
+                    {readiness.runtimeReadiness.instructions.map((instruction) => (
+                      <li key={instruction}>{instruction}</li>
+                    ))}
+                  </ul>
+                  {readiness.runtimeReadiness.recommendedCommands.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {readiness.runtimeReadiness.recommendedCommands.map((command) => (
+                        <code
+                          key={command}
+                          className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-[11px] text-cyan-300"
+                        >
+                          {command}
+                        </code>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           {(readiness.metricsAll || readiness.rehearsalMetrics) && (
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               {readiness.metricsAll && (

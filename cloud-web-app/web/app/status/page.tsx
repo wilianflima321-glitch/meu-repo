@@ -1,216 +1,321 @@
-import Link from 'next/link';
-import Image from 'next/image';
+'use client'
 
-const CheckIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-);
+import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 
-const services = [
-  { name: 'API Principal', status: 'operational', uptime: '99.99%' },
-  { name: 'Editor Web (Monaco)', status: 'operational', uptime: '99.98%' },
-  { name: 'Servico de IA/Copilot', status: 'operational', uptime: '99.95%' },
-  { name: 'Sistema de Autenticacao', status: 'operational', uptime: '99.99%' },
-  { name: 'CDN & Assets', status: 'operational', uptime: '100%' },
-  { name: 'WebSocket (Colaboracao)', status: 'operational', uptime: '99.97%' },
-  { name: 'Build & Deploy', status: 'operational', uptime: '99.92%' },
-  { name: 'Banco de Dados', status: 'operational', uptime: '99.99%' },
-];
+type SurfaceState = 'healthy' | 'partial' | 'unhealthy' | 'unknown'
 
-const incidents: { date: string; title: string; status: 'resolved' | 'investigating'; desc: string }[] = [
-  // No current incidents
-];
+interface SurfaceCheck {
+  id: string
+  name: string
+  endpoint: string
+  required?: boolean
+}
 
-const uptimeData = [
-  { day: '7 dias', uptime: '99.98%' },
-  { day: '30 dias', uptime: '99.97%' },
-  { day: '90 dias', uptime: '99.95%' },
-];
+interface SurfaceResult {
+  id: string
+  name: string
+  state: SurfaceState
+  detail: string
+  latency?: number
+}
+
+const SURFACE_CHECKS: SurfaceCheck[] = [
+  { id: 'runtime', name: 'Runtime base', endpoint: '/api/health/live', required: true },
+  { id: 'readiness', name: 'App readiness', endpoint: '/api/health/ready', required: true },
+  { id: 'ai', name: 'AI providers', endpoint: '/api/health/ai' },
+  { id: 'database', name: 'Database', endpoint: '/api/health/db', required: true },
+  { id: 'cache', name: 'Cache / rate limiting', endpoint: '/api/health/cache' },
+  { id: 'storage', name: 'Asset storage', endpoint: '/api/health/storage' },
+  { id: 'stripe', name: 'Stripe gateway', endpoint: '/api/health/stripe' },
+  { id: 'billing', name: 'Billing runtime', endpoint: '/api/billing/readiness' },
+]
+
+function stateStyles(state: SurfaceState) {
+  switch (state) {
+    case 'healthy':
+      return 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+    case 'partial':
+      return 'bg-amber-500/10 border-amber-500/30 text-amber-200'
+    case 'unhealthy':
+      return 'bg-red-500/10 border-red-500/30 text-red-300'
+    default:
+      return 'bg-slate-500/10 border-slate-500/20 text-slate-300'
+  }
+}
+
+function stateLabel(state: SurfaceState) {
+  switch (state) {
+    case 'healthy':
+      return 'Healthy'
+    case 'partial':
+      return 'Partial'
+    case 'unhealthy':
+      return 'Unavailable'
+    default:
+      return 'Unknown'
+  }
+}
+
+function summarizePayload(checkId: string, payload: any, ok: boolean): { state: SurfaceState; detail: string; latency?: number } {
+  const latency = typeof payload?.latency === 'number' ? payload.latency : undefined
+
+  if (checkId === 'runtime') {
+    return {
+      state: ok ? 'healthy' : 'unhealthy',
+      detail: ok ? 'HTTP liveness route responding.' : 'Base runtime probe failed.',
+      latency,
+    }
+  }
+
+  if (checkId === 'readiness') {
+    return {
+      state: payload?.status === 'ready' ? 'healthy' : ok ? 'partial' : 'unhealthy',
+      detail:
+        payload?.status === 'ready'
+          ? 'Required runtime dependencies are available.'
+          : 'Runtime still missing one or more required dependencies.',
+      latency,
+    }
+  }
+
+  if (checkId === 'ai') {
+    if (payload?.ai?.configured) {
+      const provider = payload?.ai?.provider ?? 'provider configured'
+      return { state: 'healthy', detail: `Configured via ${provider}.`, latency }
+    }
+    return {
+      state: payload?.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
+      detail: payload?.ai?.message ?? 'No AI provider configured yet.',
+      latency,
+    }
+  }
+
+  if (checkId === 'database') {
+    if (payload?.database?.connected) {
+      const projects = payload?.database?.stats?.projects
+      return {
+        state: 'healthy',
+        detail: typeof projects === 'number' ? `Connected. ${projects} projects visible.` : 'Connected.',
+        latency,
+      }
+    }
+    return { state: 'unhealthy', detail: payload?.database?.error ?? 'Database connection failed.', latency }
+  }
+
+  if (checkId === 'cache') {
+    if (payload?.cache?.configured) return { state: 'healthy', detail: 'Configured and reachable.', latency }
+    return {
+      state: payload?.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
+      detail: payload?.cache?.message ?? payload?.cache?.error ?? 'Cache not configured.',
+      latency,
+    }
+  }
+
+  if (checkId === 'storage') {
+    if (payload?.storage?.configured) {
+      return { state: 'healthy', detail: `Configured on ${payload?.storage?.type ?? 'storage'}.`, latency }
+    }
+    return {
+      state: payload?.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
+      detail: payload?.storage?.message ?? payload?.storage?.error ?? 'Storage not configured.',
+      latency,
+    }
+  }
+
+  if (checkId === 'stripe') {
+    if (payload?.healthy) return { state: 'healthy', detail: 'Stripe gateway is ready for checkout.', latency }
+    const priceCoverage =
+      typeof payload?.configuredPriceCount === 'number' && typeof payload?.requiredPriceCount === 'number'
+        ? ` prices=${payload.configuredPriceCount}/${payload.requiredPriceCount}.`
+        : ''
+    const missingEnv = Array.isArray(payload?.missingEnv) && payload.missingEnv.length > 0
+      ? ` Missing: ${payload.missingEnv.join(', ')}.`
+      : ''
+    return {
+      state: ok ? 'partial' : 'unhealthy',
+      detail: `Gateway=${payload?.gateway ?? 'unknown'}, checkout=${payload?.checkoutEnabled ? 'enabled' : 'disabled'}, provider=${payload?.providerLabel ?? payload?.provider ?? 'unknown'}.${priceCoverage}${missingEnv}`.trim(),
+      latency,
+    }
+  }
+
+  if (checkId === 'billing') {
+    if (payload?.checkoutReady) return { state: 'healthy', detail: 'Checkout runtime is ready.', latency }
+    const gateway = payload?.gateway?.activeGateway ?? payload?.gateway?.gateway ?? 'unknown'
+    const provider = payload?.provider?.label ?? payload?.provider?.id ?? 'unknown'
+    const priceCoverage =
+      typeof payload?.stripe?.configuredPriceCount === 'number' && typeof payload?.stripe?.requiredPriceCount === 'number'
+        ? ` prices=${payload.stripe.configuredPriceCount}/${payload.stripe.requiredPriceCount}.`
+        : ''
+    const missingEnv = Array.isArray(payload?.stripe?.missingEnv) && payload.stripe.missingEnv.length > 0
+      ? ` Missing: ${payload.stripe.missingEnv.join(', ')}.`
+      : ''
+    return {
+      state: payload?.status === 'partial' ? 'partial' : ok ? 'partial' : 'unhealthy',
+      detail: `Billing runtime still partial. Gateway=${gateway}, provider=${provider}.${priceCoverage}${missingEnv}`.trim(),
+      latency,
+    }
+  }
+
+  return {
+    state: ok ? 'healthy' : 'unhealthy',
+    detail: ok ? 'Operational.' : 'Endpoint failed.',
+    latency,
+  }
+}
+
+async function fetchSurface(check: SurfaceCheck): Promise<SurfaceResult> {
+  try {
+    const response = await fetch(check.endpoint, { cache: 'no-store' })
+    const payload = await response.json().catch(() => ({}))
+    const summary = summarizePayload(check.id, payload, response.ok)
+    return { id: check.id, name: check.name, ...summary }
+  } catch (error) {
+    return {
+      id: check.id,
+      name: check.name,
+      state: 'unhealthy',
+      detail: error instanceof Error ? error.message : 'Request failed.',
+    }
+  }
+}
 
 export default function StatusPage() {
-  const allOperational = services.every(s => s.status === 'operational');
+  const [surfaces, setSurfaces] = useState<SurfaceResult[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const load = async () => {
+      const results = await Promise.all(SURFACE_CHECKS.map(fetchSurface))
+      if (cancelled) return
+      setSurfaces(results)
+      setLastUpdated(new Date().toISOString())
+      setIsLoading(false)
+    }
+
+    void load()
+    const interval = window.setInterval(load, 30_000)
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+    }
+  }, [])
+
+  const overall = useMemo(() => {
+    if (surfaces.length === 0) return 'unknown'
+    const required = surfaces.filter((surface) => SURFACE_CHECKS.find((check) => check.id === surface.id)?.required)
+    if (required.some((surface) => surface.state === 'unhealthy')) return 'unhealthy'
+    if (surfaces.some((surface) => surface.state === 'partial')) return 'partial'
+    if (surfaces.every((surface) => surface.state === 'healthy')) return 'healthy'
+    return 'unknown'
+  }, [surfaces])
+
+  const overallTitle =
+    overall === 'healthy'
+      ? 'Runtime publico operacional'
+      : overall === 'partial'
+        ? 'Runtime publico parcial'
+        : overall === 'unhealthy'
+          ? 'Runtime com bloqueios ativos'
+          : 'Coletando sinais'
+
+  const overallDescription =
+    overall === 'healthy'
+      ? 'Os checks publicos configurados responderam sem bloqueios relevantes.'
+      : overall === 'partial'
+        ? 'A base publica responde, mas alguns subsistemas ainda estao em estado parcial.'
+        : overall === 'unhealthy'
+          ? 'Um ou mais blocos essenciais do runtime falharam na verificacao publica.'
+          : 'Atualizando checks operacionais em tempo real.'
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-emerald-600/5 rounded-full blur-[150px]" />
+        <div className="absolute top-0 left-1/4 h-[600px] w-[600px] rounded-full bg-emerald-600/5 blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/5 blur-[150px]" />
       </div>
 
-      {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3">
             <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={36} height={36} className="rounded-xl" />
             <span className="text-xl font-bold">Aethel</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/docs" className="text-slate-400 hover:text-white transition-colors">
-              Docs
-            </Link>
-            <Link href="/pricing" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/pricing" className="text-slate-400 transition-colors hover:text-white">
               Precos
+            </Link>
+            <Link href="/contact-sales" className="text-slate-400 transition-colors hover:text-white">
+              Contato
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Content */}
-      <div className="relative pt-32 pb-16 px-6">
-        <div className="max-w-3xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold mb-4">
-              Status do Sistema
-            </h1>
-            <p className="text-slate-400 text-lg">
-              Monitoramento em tempo real de todos os servicos Aethel
+      <main className="relative px-6 pb-16 pt-32">
+        <div className="mx-auto max-w-5xl">
+          <header className="mb-10 text-center">
+            <p className="mb-4 text-sm uppercase tracking-[0.18em] text-sky-300">Public Runtime Status</p>
+            <h1 className="text-4xl font-bold sm:text-5xl">Status publico baseado em checks reais</h1>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
+              Esta pagina nao usa uptime inventado, incidentes ficticios ou SLAs simulados. Ela mostra apenas o que os checks publicos conseguem provar agora.
             </p>
-          </div>
+          </header>
 
-          {/* Overall Status */}
-          <div className={`p-6 rounded-2xl border mb-8 ${
-            allOperational
-              ? 'bg-emerald-500/10 border-emerald-500/30'
-              : 'bg-amber-500/10 border-amber-500/30'
-          }`}>
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                allOperational ? 'bg-emerald-500/20' : 'bg-amber-500/20'
-              }`}>
-                {allOperational ? (
-                  <CheckIcon />
-                ) : (
-                  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                )}
-              </div>
+          <section className={`mb-8 rounded-2xl border p-6 ${stateStyles(overall)}`}>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className={`text-xl font-bold ${allOperational ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {allOperational ? 'Todos os sistemas operacionais' : 'Alguns sistemas com degradacao'}
-                </h2>
-                <p className="text-slate-400 text-sm">
-                  Ultima verificacao: {new Date().toLocaleTimeString('pt-BR')}
-                </p>
+                <h2 className="text-2xl font-semibold">{overallTitle}</h2>
+                <p className="mt-2 text-sm opacity-80">{overallDescription}</p>
+              </div>
+              <div className="text-sm opacity-80">
+                {isLoading ? 'Atualizando checks...' : `Ultima atualizacao: ${lastUpdated ? new Date(lastUpdated).toLocaleTimeString('pt-BR') : 'agora'}`}
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Uptime Summary */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {uptimeData.map((item, i) => (
-              <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                <p className="text-2xl font-bold text-white mb-1">{item.uptime}</p>
-                <p className="text-sm text-slate-500">{item.day}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Services List */}
-          <div className="rounded-2xl border border-white/10 overflow-hidden mb-8">
-            <div className="px-6 py-4 bg-white/5 border-b border-white/10">
-              <h3 className="font-semibold">Servicos</h3>
-            </div>
-            <div className="divide-y divide-white/5">
-              {services.map((service, i) => (
-                <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      service.status === 'operational'
-                        ? 'bg-emerald-500 shadow-lg shadow-emerald-500/50'
-                        : service.status === 'degraded'
-                        ? 'bg-amber-500 shadow-lg shadow-amber-500/50'
-                        : 'bg-red-500 shadow-lg shadow-red-500/50'
-                    }`} />
-                    <span className="text-white">{service.name}</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-slate-500">{service.uptime}</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      service.status === 'operational'
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : service.status === 'degraded'
-                        ? 'bg-amber-500/20 text-amber-400'
-                        : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {service.status === 'operational' ? 'Operacional' : service.status === 'degraded' ? 'Degradado' : 'Indisponivel'}
+          <section className="grid gap-4 md:grid-cols-2">
+            {SURFACE_CHECKS.map((check) => {
+              const result = surfaces.find((surface) => surface.id === check.id)
+              const state = result?.state ?? 'unknown'
+              return (
+                <article key={check.id} className={`rounded-2xl border p-5 ${stateStyles(state)}`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold">{check.name}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] opacity-70">
+                        {check.required ? 'Required' : 'Optional'}
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-current/20 px-3 py-1 text-xs font-medium">
+                      {stateLabel(state)}
                     </span>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                  <p className="mt-4 text-sm leading-6 opacity-90">
+                    {result?.detail ?? 'Aguardando resposta do endpoint.'}
+                  </p>
+                  {typeof result?.latency === 'number' && (
+                    <p className="mt-3 text-xs opacity-70">Latencia reportada: {result.latency}ms</p>
+                  )}
+                </article>
+              )
+            })}
+          </section>
 
-          {/* Recent Incidents */}
-          <div className="rounded-2xl border border-white/10 overflow-hidden">
-            <div className="px-6 py-4 bg-white/5 border-b border-white/10">
-              <h3 className="font-semibold">Incidentes Recentes</h3>
-            </div>
-            <div className="p-6">
-              {incidents.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">
-                  Nenhum incidente nos últimos 90 dias.
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {incidents.map((incident, i) => (
-                    <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          incident.status === 'resolved'
-                            ? 'bg-emerald-500/20 text-emerald-400'
-                            : 'bg-amber-500/20 text-amber-400'
-                        }`}>
-                          {incident.status === 'resolved' ? 'Resolvido' : 'Investigando'}
-                        </span>
-                        <span className="text-xs text-slate-500">{incident.date}</span>
-                      </div>
-                      <h4 className="font-semibold text-white mb-1">{incident.title}</h4>
-                      <p className="text-sm text-slate-400">{incident.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Subscribe */}
-          <div className="mt-8 p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
-            <h3 className="font-semibold text-white mb-2">Receba atualizacoes de status</h3>
-            <p className="text-sm text-slate-400 mb-4">
-              Seja notificado quando houver problemas ou manutencoes programadas.
-            </p>
-            <div className="flex gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="seu@email.com"
-                className="flex-1 h-11 px-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
-              />
-              <button className="h-11 px-6 bg-white text-black font-semibold rounded-xl hover:bg-slate-200 transition-colors">
-                Inscrever
-              </button>
-            </div>
-          </div>
+          <section className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6">
+            <h2 className="text-xl font-semibold text-white">Limites desta pagina</h2>
+            <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
+              <li>Checks publicos nao substituem evidencia de producao para L4/L5.</li>
+              <li>Historico de incidentes e uptime rolling ainda nao sao publicados aqui.</li>
+              <li>Billing pode aparecer parcial mesmo com pricing publico pronto, porque depende de runtime real do gateway.</li>
+            </ul>
+          </section>
         </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-8 px-6">
-        <div className="max-w-3xl mx-auto flex items-center justify-between text-sm text-slate-500">
-          <p>&copy; 2026 Aethel Engine</p>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
-            <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
-            <Link href="/contact-sales" className="hover:text-white transition-colors">Contato</Link>
-          </div>
-        </div>
-      </footer>
+      </main>
     </div>
-  );
+  )
 }
-
-
-
-

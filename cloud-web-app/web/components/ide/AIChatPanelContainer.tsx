@@ -135,8 +135,25 @@ function resolveProfileFromMentions(
 } {
   const tags = (message.match(/@[a-z0-9:_-]+/gi) || []).map((tag) => tag.toLowerCase())
   const profile: AdvancedProfile = { ...fallback }
-  const supportedTagSet = new Set(['@studio', '@delivery', '@fast', '@web'])
-  const supportedTags = tags.filter((tag) => supportedTagSet.has(tag) || /^@agents:[123]$/.test(tag))
+  const profileTagSet = new Set(['@studio', '@delivery', '@fast', '@web'])
+  const contextualTagMatchers = [
+    /^@file:[^\s]+$/,
+    /^@folder:[^\s]+$/,
+    /^@function:[^\s]+$/,
+    /^@symbol:[^\s]+$/,
+    /^@selection$/,
+    /^@diagnostics$/,
+    /^@git:(diff|staged|status)$/,
+    /^@terminal$/,
+    /^@web:[^\s]+$/,
+    /^@docs:[^\s]+$/,
+    /^@codebase$/,
+  ]
+  const supportedTags = tags.filter((tag) =>
+    profileTagSet.has(tag) ||
+    /^@agents:[123]$/.test(tag) ||
+    contextualTagMatchers.some((pattern) => pattern.test(tag))
+  )
   const unsupportedTags = tags.filter((tag) => !supportedTags.includes(tag))
 
   if (tags.includes('@studio')) {
@@ -164,7 +181,8 @@ function resolveProfileFromMentions(
   }
 
   const cleaned = message
-    .replace(/@[a-z0-9:_-]+/gi, ' ')
+    .replace(/@(studio|delivery|fast|web)\b/gi, ' ')
+    .replace(/@agents:[123]\b/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 
@@ -586,6 +604,7 @@ export default function AIChatPanelContainer() {
           models={modelOptions}
           onModelChange={setCurrentModel}
           allowAttachments={false}
+          projectId={projectId}
         />
       </div>
     </div>

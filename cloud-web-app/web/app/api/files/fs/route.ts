@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getFileSystemRuntime } from '@/lib/server/filesystem-runtime';
+import { invalidateSemanticCodeSearchCache } from '@/lib/server/semantic-code-search';
 import {
   getScopedProjectId,
   resolveScopedWorkspacePath,
@@ -42,6 +43,12 @@ export async function POST(request: NextRequest) {
       requestedPath: filePath,
     });
     const canonical = { runtime: 'filesystem-runtime', authority: 'canonical' as const };
+    const invalidateSemanticCache = () => {
+      invalidateSemanticCodeSearchCache({
+        rootPath: scopedRoot,
+        scope: 'project',
+      })
+    }
 
     switch (action) {
       case 'list': {
@@ -76,6 +83,7 @@ export async function POST(request: NextRequest) {
           );
         }
         await fsRuntime.writeFile(resolvedPath, content, options);
+        invalidateSemanticCache()
         return NextResponse.json({
           success: true,
           path: toVirtualWorkspacePath(resolvedPath, scopedRoot),
@@ -86,6 +94,7 @@ export async function POST(request: NextRequest) {
 
       case 'delete': {
         await fsRuntime.delete(resolvedPath, options);
+        invalidateSemanticCache()
         return NextResponse.json({
           success: true,
           path: toVirtualWorkspacePath(resolvedPath, scopedRoot),
@@ -107,6 +116,7 @@ export async function POST(request: NextRequest) {
           requestedPath: destination,
         });
         await fsRuntime.copy(resolvedPath, resolvedDestination, options);
+        invalidateSemanticCache()
         return NextResponse.json({
           success: true,
           source: toVirtualWorkspacePath(resolvedPath, scopedRoot),
@@ -129,6 +139,7 @@ export async function POST(request: NextRequest) {
           requestedPath: destination,
         });
         await fsRuntime.move(resolvedPath, resolvedDestination, options);
+        invalidateSemanticCache()
         return NextResponse.json({
           success: true,
           source: toVirtualWorkspacePath(resolvedPath, scopedRoot),
@@ -140,6 +151,7 @@ export async function POST(request: NextRequest) {
 
       case 'mkdir': {
         await fsRuntime.createDirectory(resolvedPath, options);
+        invalidateSemanticCache()
         return NextResponse.json({
           success: true,
           path: toVirtualWorkspacePath(resolvedPath, scopedRoot),

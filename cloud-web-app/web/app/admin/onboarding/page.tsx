@@ -21,9 +21,11 @@ type OnboardingStats = {
     completionRateFromSignup: number | null
     completionRateFromEntry: number | null
     medianFirstValueTimeMs: number | null
+    p95FirstValueTimeMs: number | null
     sampleSize: number
     sloTargetMs: number
     sloStatus: 'pass' | 'fail' | 'insufficient_sample'
+    latestCompletedAt: string | null
   }
   funnel: {
     signups: number
@@ -126,7 +128,7 @@ export default function OnboardingAdminPage() {
         </div>
       )}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-5" aria-busy={loading}>
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-6" aria-busy={loading}>
         <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
           <p className="text-xs text-zinc-500">Usuarios unicos</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : stats?.totals.uniqueUsers ?? 0}</p>
@@ -147,6 +149,13 @@ export default function OnboardingAdminPage() {
           )}
         </div>
         <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
+          <p className="text-xs text-zinc-500">P95 first value time</p>
+          <p className="mt-2 text-2xl font-semibold">{loading ? '--' : formatMs(stats?.firstValue.p95FirstValueTimeMs ?? null)}</p>
+          {!loading && stats?.firstValue?.latestCompletedAt && (
+            <p className="mt-1 text-xs text-zinc-500">last={new Date(stats.firstValue.latestCompletedAt).toLocaleString()}</p>
+          )}
+        </div>
+        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
           <p className="text-xs text-zinc-500">First value SLO</p>
           <p className="mt-2 text-lg font-semibold">
             {loading ? '--' : `target ${formatMs(stats?.firstValue.sloTargetMs ?? null)}`}
@@ -161,7 +170,7 @@ export default function OnboardingAdminPage() {
                     : 'text-amber-300'
               }`}
             >
-              {formatSloStatus(stats.firstValue.sloStatus)}
+              {formatSloStatus(stats.firstValue.sloStatus)} (evaluated on P95)
             </p>
           )}
         </div>

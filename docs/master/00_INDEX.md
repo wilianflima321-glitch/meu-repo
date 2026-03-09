@@ -33,6 +33,7 @@ Status: CANONICAL ENTRYPOINT
 28. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
 29. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
 30. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
+31. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -64,6 +65,7 @@ Status: CANONICAL ENTRYPOINT
 | `33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md` | L4/L5 core-loop promotion program | ACTIVE |
 | `34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md` | Executive text verification and canonical reconciliation | ACTIVE |
 | `35_L4_L5_COMPLETION_MAP_2026-03-05.md` | Canonical completion order for L4/L5 closure | ACTIVE |
+| `36_QUALITY_90_EXECUTION_MAP_2026-03-08.md` | Canonical path to reach >=9.0 quality across product dimensions without inflating claims | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -78,7 +80,7 @@ Status: CANONICAL ENTRYPOINT
 | `8_ADMIN_SYSTEM_SPEC.md` | Admin scope | ACTIVE |
 | `9_BACKEND_SYSTEM_SPEC.md` | Backend scope | ACTIVE |
 
-## Current Factual Snapshot (2026-03-07)
+## Current Factual Snapshot (2026-03-08)
 - Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
   - `legacy-accent-tokens=0`
   - `admin-light-theme-tokens=0`
@@ -86,7 +88,7 @@ Status: CANONICAL ENTRYPOINT
   - `blocking-browser-dialogs=0`
   - `not-implemented-ui=0`
 - Explicit API NOT_IMPLEMENTED gates (`tools/find-not-implemented.mjs`): `0`
-- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1190`
+- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1189`
 - Structural baseline closed for connectivity P0:
   - `npm run qa:repo-connectivity` passes.
   - `npm run qa:canonical-doc-alignment` passes.
@@ -126,6 +128,13 @@ Status: CANONICAL ENTRYPOINT
   - `DUPLICATIONS_AND_CONFLICTS.md` was fully refreshed and moved back to active state with canonical conflict IDs and closure checklist,
   - IDE chat now has explicit local demo fallback for provider-missing first-value flow (`DEMO LOCAL` + daily usage cap + telemetry),
   - dashboard shell initialization logic extracted to dedicated helper module (`components/dashboard/aethel-dashboard-initial-state.ts`) to reduce shell churn risk and preserve gate margin.
+- Delta 2026-03-08:
+  - provider configuration is now centralized in `lib/ai-provider-config.ts` and reflected consistently across admin/provider/readiness surfaces,
+  - `OPENROUTER_API_KEY` is now treated as a first-class runtime provider and was validated via real routed model calls,
+  - `/api/ai/chat` and `/api/ai/stream` now share explicit model-access/provider-gate behavior instead of diverging between proxy and internal-provider paths,
+  - auth/admin/CSRF secret handling is now fail-closed; missing runtime secrets are surfaced as readiness blockers instead of silently using fallback values,
+  - local authenticated production proof remains blocked by explicit preflight failures: missing `.env.local`, `DATABASE_URL`, `JWT_SECRET`, `CSRF_SECRET`, and inactive Docker daemon,
+  - audit-language drift is now a tracked risk: some executive texts still describe landing, billing, mentions, RAG, and preview as absent when current repo state is more accurately `PARTIAL`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

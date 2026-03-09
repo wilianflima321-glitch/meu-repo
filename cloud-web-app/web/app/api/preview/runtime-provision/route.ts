@@ -12,6 +12,10 @@ import {
   PREVIEW_PROVISION_RATE_LIMIT,
   enforcePreviewRuntimeRateLimit,
 } from '@/lib/server/preview-runtime-rate-limit'
+import {
+  getManagedPreviewProviderConfig,
+  parseConfiguredProvisionEndpoints,
+} from '@/lib/server/preview-provider-config'
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'
 const DEFAULT_TIMEOUT_MS = 12_000
@@ -51,23 +55,7 @@ function parseProjectId(raw: unknown): string {
 }
 
 function parseProvisionEndpoints(rawSingle: string, rawList: string): string[] {
-  const values = [rawSingle, ...rawList.split(',')]
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-  const unique: string[] = []
-  const seen = new Set<string>()
-  for (const entry of values) {
-    let normalized = entry
-    try {
-      normalized = new URL(entry).toString()
-    } catch {
-      // Keep original value to surface explicit invalid endpoint failures.
-    }
-    if (seen.has(normalized)) continue
-    seen.add(normalized)
-    unique.push(normalized)
-  }
-  return unique
+  return parseConfiguredProvisionEndpoints(rawSingle, rawList)
 }
 
 function parseReadyWaitMs(raw: string | undefined): number {
@@ -218,10 +206,28 @@ export async function POST(request: NextRequest) {
     const provisionEndpoint = String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINT || '').trim()
     const provisionEndpointsCsv = String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINTS || '').trim()
     const provisionToken = String(process.env.AETHEL_PREVIEW_PROVISION_TOKEN || '').trim()
+    const providerConfig =
+      getManagedPreviewProviderConfig(process.env.AETHEL_PREVIEW_PROVIDER) ||
+      (provisionEndpoint || provisionEndpointsCsv ? getManagedPreviewProviderConfig('custom-endpoint') : null)
     const timeoutMs = parseTimeoutMs(process.env.AETHEL_PREVIEW_PROVISION_TIMEOUT_MS)
     const readyWaitMs = parseReadyWaitMs(process.env.AETHEL_PREVIEW_PROVISION_READY_WAIT_MS)
     const readyPollMs = parseReadyPollMs(process.env.AETHEL_PREVIEW_PROVISION_READY_POLL_MS)
-    const provisionEndpoints = parseProvisionEndpoints(provisionEndpoint, provisionEndpointsCsv)
+    const provisionEndpoints = parseConfiguredProvisionEndpoints(provisionEndpoint, provisionEndpointsCsv)
+
+    if (providerConfig?.id === 'webcontainers') {
+      return capabilityResponse({
+        error: 'RUNTIME_PROVISION_BROWSER_SIDE_PROVIDER',
+        status: 501,
+        message: 'WebContainers is declared as the managed preview provider, but browser-side runtime wiring is not active in this route.',
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          mode: 'browser_side_provider',
+          provider: providerConfig.id,
+          setupEnv: providerConfig.setupEnv,
+        },
+      })
+    }
 
     if (provisionEndpoints.length === 0) {
       const localRuntime = await localFallbackDiscover()
@@ -235,7 +241,8 @@ export async function POST(request: NextRequest) {
           metadata: {
             mode: 'local_fallback',
             preferredRuntimeUrl: null,
-            setupEnv: ['AETHEL_PREVIEW_PROVISION_ENDPOINT', 'AETHEL_PREVIEW_PROVISION_ENDPOINTS'],
+            provider: providerConfig?.id || null,
+            setupEnv: providerConfig?.setupEnv || ['AETHEL_PREVIEW_PROVISION_ENDPOINT', 'AETHEL_PREVIEW_PROVISION_ENDPOINTS'],
           },
         })
       }
@@ -294,6 +301,7 @@ export async function POST(request: NextRequest) {
             capabilityStatus: 'PARTIAL',
             metadata: {
               mode: 'managed',
+              provider: providerConfig?.id || 'custom-endpoint',
               projectId,
               endpoint,
               attempt: index + 1,
@@ -313,6 +321,7 @@ export async function POST(request: NextRequest) {
         capabilityStatus: 'PARTIAL',
         metadata: {
           mode: 'managed',
+          provider: providerConfig?.id || 'custom-endpoint',
           projectId,
           attempts: failures,
           attemptCount: failures.length,
@@ -362,6 +371,7 @@ export async function POST(request: NextRequest) {
           metadata: {
             mode: 'managed',
             managed: true,
+            provider: providerConfig?.id || 'custom-endpoint',
             projectId,
             endpoint: managedSuccess.endpoint,
             attempt: managedSuccess.attempt,
@@ -390,6 +400,7 @@ export async function POST(request: NextRequest) {
         capabilityStatus: 'PARTIAL',
         metadata: {
           mode: 'managed',
+          provider: providerConfig?.id || 'custom-endpoint',
           projectId,
           endpoint: managedSuccess.endpoint,
           attempt: managedSuccess.attempt,
@@ -408,6 +419,7 @@ export async function POST(request: NextRequest) {
       capabilityStatus: 'PARTIAL',
       metadata: {
         mode: 'managed',
+        provider: providerConfig?.id || null,
       },
     })
   }

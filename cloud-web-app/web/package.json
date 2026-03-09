@@ -45,7 +45,6 @@
     "@heroicons/react": "^2.0.18",
     "@monaco-editor/react": "^4.6.0",
     "@prisma/client": "^5.7.0",
-    "@react-three/cannon": "^6.6.0",
     "@react-three/drei": "9.122.0",
     "@react-three/fiber": "8.15",
     "@react-three/postprocessing": "^2.19.1",

@@ -1,6 +1,7 @@
 'use client'
 
 import type { PreviewRuntimeHealthStatus } from '@/lib/preview/runtime-manager'
+import type { PreviewRuntimeReadinessResponse } from '@/lib/preview/runtime-manager'
 
 type Props = {
   previewRuntimeUrl: string | null
@@ -8,6 +9,11 @@ type Props = {
   runtimeHealthLatencyMs?: number
   runtimeHealthCheckedAt: Date | null
   runtimeHealthHint: string
+  runtimeReadiness: PreviewRuntimeReadinessResponse | null
+  runtimeStrategyLabel: string
+  runtimeStrategyHint: string
+  runtimePrimaryAction: 'provision' | 'discover' | 'inline'
+  runtimePrimaryActionLabel: string
   showRuntimeSettings: boolean
   previewRuntimeInput: string
   onToggleSettings: () => void
@@ -18,6 +24,7 @@ type Props = {
   onOpenRuntime: () => void
   onDiscoverRuntime: () => void
   onProvisionRuntime: () => void
+  onRunRecommendedAction: () => void
   isDiscoveringRuntime: boolean
   isProvisioningRuntime: boolean
   runtimeDiscoveryMessage?: string | null
@@ -30,6 +37,11 @@ export default function PreviewRuntimeToolbar({
   runtimeHealthLatencyMs,
   runtimeHealthCheckedAt,
   runtimeHealthHint,
+  runtimeReadiness,
+  runtimeStrategyLabel,
+  runtimeStrategyHint,
+  runtimePrimaryAction,
+  runtimePrimaryActionLabel,
   showRuntimeSettings,
   previewRuntimeInput,
   onToggleSettings,
@@ -40,11 +52,21 @@ export default function PreviewRuntimeToolbar({
   onOpenRuntime,
   onDiscoverRuntime,
   onProvisionRuntime,
+  onRunRecommendedAction,
   isDiscoveringRuntime,
   isProvisioningRuntime,
   runtimeDiscoveryMessage,
   runtimeDiscoveryTone = 'info',
 }: Props) {
+  const reachableCandidates = runtimeReadiness?.metadata?.localDiscovery?.reachableCandidates ?? 0
+  const totalCandidates = runtimeReadiness?.metadata?.localDiscovery?.totalCandidates ?? 0
+  const configuredEndpoints = runtimeReadiness?.metadata?.configuredEndpoints ?? []
+  const managedProvider = runtimeReadiness?.managedProvider ?? null
+  const managedProviderLabel = runtimeReadiness?.managedProviderLabel ?? managedProvider
+  const managedProviderMode = runtimeReadiness?.managedProviderMode ?? 'unknown'
+  const managedSetupEnv = runtimeReadiness?.managedSetupEnv ?? []
+  const routeProvisionSupported = runtimeReadiness?.routeProvisionSupported !== false
+  const recommendedCommands = runtimeReadiness?.recommendedCommands ?? []
   const discoveryToneClass =
     runtimeDiscoveryTone === 'success'
       ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
@@ -59,6 +81,9 @@ export default function PreviewRuntimeToolbar({
           Preview runtime:{' '}
           <span className={previewRuntimeUrl ? 'text-cyan-300' : 'text-zinc-300'}>
             {previewRuntimeUrl ? 'dev-server externo' : 'inline fallback'}
+          </span>
+          <span className="ml-2 rounded border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-[10px] text-zinc-300">
+            strategy:{runtimeStrategyLabel}
           </span>
           {previewRuntimeUrl && (
             <span
@@ -95,6 +120,24 @@ export default function PreviewRuntimeToolbar({
           </button>
           <button
             type="button"
+            onClick={onRunRecommendedAction}
+            disabled={
+              runtimePrimaryAction === 'provision'
+                ? isProvisioningRuntime
+                : runtimePrimaryAction === 'discover'
+                  ? isDiscoveringRuntime
+                  : false
+            }
+            className="rounded border border-sky-500/40 bg-sky-500/10 px-2 py-1 text-[11px] text-sky-200 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {runtimePrimaryAction === 'provision' && isProvisioningRuntime
+              ? 'Provisionando...'
+              : runtimePrimaryAction === 'discover' && isDiscoveringRuntime
+                ? 'Detectando...'
+                : runtimePrimaryActionLabel}
+          </button>
+          <button
+            type="button"
             onClick={onDiscoverRuntime}
             disabled={isDiscoveringRuntime}
             className="rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[11px] text-zinc-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
@@ -104,10 +147,10 @@ export default function PreviewRuntimeToolbar({
           <button
             type="button"
             onClick={onProvisionRuntime}
-            disabled={isProvisioningRuntime}
+            disabled={isProvisioningRuntime || !routeProvisionSupported}
             className="rounded border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isProvisioningRuntime ? 'Provisionando...' : 'Provisionar runtime'}
+            {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponivel'}
           </button>
           {previewRuntimeUrl && (
             <button
@@ -158,6 +201,73 @@ export default function PreviewRuntimeToolbar({
       )}
       {runtimeDiscoveryMessage && (
         <div className={`mt-2 rounded px-2 py-1 text-[11px] ${discoveryToneClass}`}>{runtimeDiscoveryMessage}</div>
+      )}
+      <div className="mt-2 rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1 text-[11px] text-zinc-300">
+        {runtimeStrategyHint}
+        {runtimeReadiness?.blockers && runtimeReadiness.blockers.length > 0 && (
+          <span className="ml-1 text-zinc-500">
+            Blockers: {runtimeReadiness.blockers.join(', ')}.
+          </span>
+        )}
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
+        {managedProvider && (
+          <span className="rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1">
+            provider:{managedProviderLabel}
+          </span>
+        )}
+        {managedProvider && (
+          <span className="rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1">
+            mode:{managedProviderMode}
+          </span>
+        )}
+        <span className="rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1">
+          endpoints:{configuredEndpoints.length}
+        </span>
+        <span className="rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1">
+          local:{reachableCandidates}/{totalCandidates} reachable
+        </span>
+        {runtimeReadiness?.preferredRuntimeUrl && (
+          <span className="rounded border border-zinc-800 bg-zinc-900/70 px-2 py-1 text-cyan-300">
+            preferred:{runtimeReadiness.preferredRuntimeUrl}
+          </span>
+        )}
+      </div>
+      {runtimeReadiness?.instructions && runtimeReadiness.instructions.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {runtimeReadiness.instructions.map((instruction) => (
+            <span
+              key={instruction}
+              className="rounded border border-zinc-800 bg-zinc-900/80 px-2 py-1 text-[11px] text-zinc-300"
+            >
+              {instruction}
+            </span>
+          ))}
+        </div>
+      )}
+      {managedSetupEnv.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {managedSetupEnv.map((envKey) => (
+            <span
+              key={envKey}
+              className="rounded border border-zinc-800 bg-zinc-900/80 px-2 py-1 text-[11px] text-zinc-400"
+            >
+              env:{envKey}
+            </span>
+          ))}
+        </div>
+      )}
+      {recommendedCommands.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {recommendedCommands.map((command) => (
+            <code
+              key={command}
+              className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1 text-[11px] text-cyan-300"
+            >
+              {command}
+            </code>
+          ))}
+        </div>
       )}
       {previewRuntimeUrl && runtimeHealthStatus !== 'reachable' && (
         <div className="mt-2 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[11px] text-amber-100">

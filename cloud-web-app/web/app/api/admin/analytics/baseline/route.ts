@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAdminAuth } from '@/lib/rbac'
 import { prisma } from '@/lib/db'
+import { getFirstValueSloTargetMs } from '@/lib/server/first-value-slo'
 
 const CAPABILITY = 'ADMIN_ANALYTICS_BASELINE'
 
@@ -196,6 +197,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
   })
 
   const metricBuckets: Record<string, { values: number[]; timestamps: Date[]; unit: string }> = {}
+  const firstValueSloTargetMs = getFirstValueSloTargetMs()
   let funnel: FunnelSummary = {
     landingViews: 0,
     signups: 0,
@@ -237,7 +239,7 @@ export const GET = withAdminAuth(async (request: NextRequest) => {
     CLS: { target: 0.1, unit: 'count' },
     TTI: { target: 3800, unit: 'ms' },
     ai_chat_latency: { target: 2500, unit: 'ms' },
-    first_value_time: { target: 15000, unit: 'ms' },
+    first_value_time: { target: firstValueSloTargetMs, unit: 'ms' },
   }
 
   const performance = Object.fromEntries(

@@ -7,8 +7,8 @@ Owner: Platform + PM Tecnico
 Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no estado atual do repositorio.
 
 ## 2) Snapshot factual
-1. Markdown total no repo: `3656`
-2. Markdown canonico (`docs/master`): `50`
+1. Markdown total no repo: `3657`
+2. Markdown canonico (`docs/master`): `51`
 3. Markdown fora do canonico: `3606`
 4. Arquivos grandes (`>=1200` linhas) em `cloud-web-app/web`: `0`
 5. Uso de dialogs bloqueantes (ativo): `0`

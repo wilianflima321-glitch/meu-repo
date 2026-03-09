@@ -486,6 +486,11 @@ export function useMentions(initialValue = '') {
   return {
     text,
     setText: handleTextChange,
+    replaceText: (newText: string) => {
+      setText(newText)
+      setShowSuggestions(false)
+      setActiveSuggestionIndex(0)
+    },
     parsed,
     suggestions,
     showSuggestions,

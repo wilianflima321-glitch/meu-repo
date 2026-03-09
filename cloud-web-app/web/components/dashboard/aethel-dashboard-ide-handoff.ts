@@ -1,5 +1,6 @@
 import {
-  discoverPreviewRuntime,
+  discoverPreviewRuntimeDetails,
+  getPreviewRuntimeReadiness,
   getStoredPreviewRuntimeUrl,
   persistPreviewRuntimeUrl,
   provisionPreviewRuntime,
@@ -8,7 +9,15 @@ import {
 export type IdeHandoffResolution = {
   params: URLSearchParams
   runtimeUrl: string | null
-  discoveryStatus: 'stored' | 'provisioned' | 'found' | 'not-found' | 'provision-error' | 'error'
+  discoveryStatus:
+    | 'stored'
+    | 'provisioned'
+    | 'found'
+    | 'not-found'
+    | 'provision-error'
+    | 'provision-skipped'
+    | 'inline'
+    | 'error'
 }
 
 type ResolveIdeHandoffParamsInput = {
@@ -42,28 +51,50 @@ export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInpu
     }
   }
 
+  const readiness = await getPreviewRuntimeReadiness().catch(() => null)
+  const shouldAttemptProvision =
+    readiness?.recommendedAction === 'provision' && readiness.routeProvisionSupported !== false
+  const shouldAttemptDiscover =
+    readiness?.recommendedAction === 'discover' || (!readiness?.recommendedAction && !shouldAttemptProvision)
+
   try {
-    const provisionedRuntime = (await provisionPreviewRuntime(input.projectId)).runtimeUrl
-    if (provisionedRuntime) {
-      params.set('previewUrl', provisionedRuntime)
-      persistPreviewRuntimeUrl(provisionedRuntime, input.previewRuntimeStorageKey)
-      return {
-        params,
-        runtimeUrl: provisionedRuntime,
-        discoveryStatus: 'provisioned',
+    if (shouldAttemptProvision) {
+      const provisionedRuntime = (await provisionPreviewRuntime(input.projectId)).runtimeUrl
+      if (provisionedRuntime) {
+        params.set('previewUrl', provisionedRuntime)
+        persistPreviewRuntimeUrl(provisionedRuntime, input.previewRuntimeStorageKey)
+        return {
+          params,
+          runtimeUrl: provisionedRuntime,
+          discoveryStatus: 'provisioned',
+        }
       }
     }
   } catch {
     provisionFailed = true
   }
 
+  if (!shouldAttemptDiscover && !provisionFailed) {
+    return {
+      params,
+      runtimeUrl: null,
+      discoveryStatus: shouldAttemptProvision ? 'provision-skipped' : 'inline',
+    }
+  }
+
   try {
-    const runtimeUrl = await discoverPreviewRuntime()
+    const discovery = await discoverPreviewRuntimeDetails()
+    const runtimeUrl = (discovery.preferredRuntimeUrl || '').trim() || null
     if (!runtimeUrl) {
       return {
         params,
         runtimeUrl: null,
-        discoveryStatus: provisionFailed ? 'provision-error' : 'not-found',
+        discoveryStatus:
+          readiness?.recommendedAction === 'inline'
+            ? 'inline'
+            : provisionFailed
+              ? 'provision-error'
+              : 'not-found',
       }
     }
 

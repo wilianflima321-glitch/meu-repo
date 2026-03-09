@@ -8,9 +8,8 @@ import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { optionalEnv } from '@/lib/env';
 import { getStripe, getStripePriceIdForPlan } from '@/lib/stripe';
-import { readPaymentGatewayConfig } from '@/lib/server/payment-gateway-config';
-import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAppUrl } from '@/lib/server/app-origin';
+import { billingRuntimeCapabilityResponse, getBillingRuntimeState } from '@/lib/server/billing-runtime';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +21,12 @@ interface CheckoutRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    // Route-contract anchor:
+    // error: 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE'
+    // status: 503
+    // capabilityStatus: 'PARTIAL'
+    // capability: 'PAYMENT_GATEWAY_RUNTIME'
+    // supportedGateway: 'stripe'
     const user = requireAuth(req);
     const body: CheckoutRequest = await req.json();
 
@@ -43,27 +48,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const gatewayConfig = await readPaymentGatewayConfig();
-    if (!gatewayConfig.checkoutEnabled) {
-      return NextResponse.json(
-        { error: 'CHECKOUT_DISABLED', message: 'Checkout is temporarily disabled by admin.' },
-        { status: 503 }
-      );
-    }
-    if (gatewayConfig.activeGateway !== 'stripe') {
-      return capabilityResponse({
-        error: 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE',
-        message: `Active gateway "${gatewayConfig.activeGateway}" is not available in this build.`,
-        status: 503,
-        capability: 'PAYMENT_GATEWAY_RUNTIME',
-        capabilityStatus: 'PARTIAL',
-        milestone: 'P1',
-        metadata: {
-          activeGateway: gatewayConfig.activeGateway,
-          supportedGateway: 'stripe',
-          checkoutEnabled: gatewayConfig.checkoutEnabled,
-        },
-      });
+    const billingRuntime = await getBillingRuntimeState();
+    if (!billingRuntime.checkoutReady) {
+      return billingRuntimeCapabilityResponse('checkout', billingRuntime);
     }
 
     // Stripe (real-or-fail)
@@ -89,7 +76,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const appUrl = (gatewayConfig.checkoutOrigin || optionalEnv('NEXT_PUBLIC_APP_URL') || buildAppUrl('', req)).replace(/\/+$/, '');
+    const appUrl = (billingRuntime.gateway.checkoutOrigin || optionalEnv('NEXT_PUBLIC_APP_URL') || buildAppUrl('', req)).replace(/\/+$/, '');
     const resolvedSuccessUrl = successUrl || `${appUrl}/billing/success?plan=${encodeURIComponent(planId)}`;
     const resolvedCancelUrl = cancelUrl || `${appUrl}/billing/cancel`;
 
