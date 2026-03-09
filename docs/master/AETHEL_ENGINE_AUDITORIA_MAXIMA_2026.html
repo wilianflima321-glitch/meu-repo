@@ -24,7 +24,7 @@
       background: var(--bg);
       color: var(--ink);
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.5;
+      line-height: 1.55;
     }
     .page {
       max-width: 1100px;
@@ -125,6 +125,14 @@
     .kicker { color: var(--secondary); font-weight: 700; font-size: 12px; text-transform: uppercase; }
     .small { font-size: 12px; color: var(--muted); }
     .muted { color: var(--muted); }
+    .code {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
   </style>
 </head>
 <body>
@@ -132,7 +140,7 @@
     <section class="cover" id="capa">
       <div class="kicker">Aethel Engine</div>
       <h1>Aethel Engine – Auditoria Máxima Completa 2026: Análise Bit a Bit</h1>
-      <p>Documento executivo e técnico completo, em formato profissional, com status real do repositório, comparações de mercado e plano de execução priorizado.</p>
+      <p>Documento executivo e técnico completo, com status real do repositório, comparações de mercado e plano de execução priorizado.</p>
       <div class="meta">
         <div class="box"><strong>Data</strong><br/>2026-03-08</div>
         <div class="box"><strong>Versão</strong><br/>3.0 Final</div>
@@ -175,7 +183,7 @@
           <div class="small">6.2 / 10</div>
         </div>
         <div>
-          <div class="kicker">Score Alvo</div>
+          <div class="kicker">Score Alvo (pós-sprints)</div>
           <div class="scorebar"><span style="width:85%"></span></div>
           <div class="small">8.5 / 10</div>
         </div>
@@ -239,6 +247,22 @@
       <p><span class="badge b-warn">PARTIAL</span> WCAG (sem evidência completa), Core Loop Probe (production sample 0), Global Gap Scan (G1-G10).</p>
       <h3>2.4 Stack Principal</h3>
       <p>Next.js 14.2.5, React 18.3.1, Prisma 5.7.0, Three.js, @react-three/fiber, TailwindCSS, Zustand, Zod, OpenAI SDK, Anthropic SDK, Google Generative AI, AWS SDK, Headless UI, Heroicons.</p>
+      <h3>2.5 Gaps Críticos (G1–G10)</h3>
+      <table>
+        <thead><tr><th>Gap</th><th>Descrição</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>G1</td><td>Preview runtime sem HMR real</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G2</td><td>Onboarding zero-to-value parcial (SLO &lt; 90s não provado)</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G3</td><td>Mobile readiness parcial</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G4</td><td>Core Web Vitals sem baseline pública</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G5</td><td>AI recovery UX parcial</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G6</td><td>Dashboard monólito (1.199 linhas)</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G7</td><td>Colaboração sem stress test</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G8</td><td>Tema claro sem paridade WCAG completa</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G9</td><td>Telemetria parcial</td><td><span class="badge b-warn">Parcial</span></td></tr>
+          <tr><td>G10</td><td>Empty states e micro-interações parciais</td><td><span class="badge b-warn">Parcial</span></td></tr>
+        </tbody>
+      </table>
       <div class="note">Oportunidades imediatas: reduzir ruído de docs não canônicos, decompor AethelDashboard.tsx, publicar baseline público de performance.</div>
     </section>
 
@@ -259,12 +283,12 @@
         </tbody>
       </table>
       <h3>Melhorias concretas</h3>
-      <p>Exemplos: <code>@Codebase</code> e <code>@Docs</code> no chat, preview sandbox via <code>E2B</code>, e onboarding com template demo.</p>
+      <p>Exemplos: <code>@Codebase</code> e <code>@Docs</code> no chat, preview sandbox via <code>E2B</code>, onboarding com template demo.</p>
       <h3>Comparações de Mercado (resumo)</h3>
       <table>
         <thead><tr><th>Produto</th><th>Forças</th><th>Limitações</th><th>Preço</th></tr></thead>
         <tbody>
-          <tr><td>Cursor</td><td>RAG com Merkle+embeddings, @mentions completos, multi-file edits.</td><td>Sem deploy one-click.</td><td>$20/mês</td></tr>
+          <tr><td>Cursor</td><td>RAG Merkle+embeddings, @mentions, multi-file edits.</td><td>Sem deploy one-click.</td><td>$20/mês</td></tr>
           <tr><td>Bolt.new</td><td>WebContainers, deploy one-click, Supabase nativo.</td><td>Sem RAG, sem multi-agent real.</td><td>~$20/mês</td></tr>
           <tr><td>Lovable</td><td>UI React + Supabase + GitHub sync.</td><td>Apenas web/React, sync issues.</td><td>$25/mês</td></tr>
           <tr><td>Replit</td><td>Cloud IDE, colaboração real, deploy integrado.</td><td>Custo variável por uso.</td><td>$20/mês</td></tr>
@@ -287,6 +311,15 @@
         </tbody>
       </table>
       <p><strong>Core loop:</strong> PLAN → PATCH → VALIDATE → APPLY → ROLLBACK → LEARN. Production samples = 0, apply success = 75%, feedback = 50%.</p>
+      <table>
+        <thead><tr><th>Comparação</th><th>Cursor</th><th>Windsurf</th><th>Replit</th><th>Aethel</th></tr></thead>
+        <tbody>
+          <tr><td>RAG codebase</td><td>Merkle + embeddings</td><td>Básico</td><td>Básico</td><td>Parcial</td></tr>
+          <tr><td>Memories</td><td>—</td><td>Sim</td><td>—</td><td>Não</td></tr>
+          <tr><td>Multi-agent</td><td>Não</td><td>Não</td><td>Limitado</td><td>Sim</td></tr>
+          <tr><td>Preview sandbox</td><td>Local</td><td>Local</td><td>Cloud VM</td><td>Parcial</td></tr>
+        </tbody>
+      </table>
       <div class="note">Plano de promoção L4: aumentar sample size, elevar apply success acima de 90%, feedback ≥ 60%, evidência de produção real.</div>
     </section>
 
@@ -326,6 +359,7 @@
       <p>Stack: Next.js 14, Prisma, AWS, Node WebSockets.</p>
       <p>Sandbox: runtimeUrl parcial, sem E2B/WebContainers real.</p>
       <p>Comparações: Bolt (WebContainers), Replit (VMs cloud), Codespaces ($0.18/hr).</p>
+      <p>Custos estimados: $8-34/mês por usuário (meta $5-14/mês).</p>
       <div class="note">Recomendação: E2B ($0.05/hr), Railway/Render para deploy, Upstash Redis/rate-limit.</div>
     </section>
 
@@ -346,7 +380,7 @@
     <section class="section" id="onboarding">
       <h2>12. Onboarding e First Value</h2>
       <p>Estado: rail com milestones e telemetria parcial, SLO &lt; 90s não provado.</p>
-      <p>Fluxo ideal: signup → demo projeto → AI → preview → convida colaborador.</p>
+      <p>Benchmarks: Slack (&lt;5 min), Canva (template click), Bolt (live app &lt;10 min).</p>
       <p>Targets: first action &lt; 30s, first preview &lt; 90s, first deploy &lt; 5min.</p>
     </section>
 
@@ -354,12 +388,14 @@
       <h2>13. Mobile e Responsividade</h2>
       <p>Estado: desktop-first. Mobile crítico para landing, onboarding e Nexus Chat view-only.</p>
       <p>Comparação: Linear (mobile excelente), Replit (mobile limitado).</p>
+      <p>Recomendação: touch targets &gt; 44px e layout responsivo em superfícies públicas.</p>
     </section>
 
     <section class="section" id="a11y">
       <h2>14. Acessibilidade</h2>
       <p>WCAG gate operacional, mas sem evidência completa de contraste.</p>
       <p>Falta: contraste 4.5:1, skip links, focus trapping, navegação por teclado total.</p>
+      <p>Gate deve bloquear release se WCAG AA falhar.</p>
     </section>
 
     <section class="section" id="design">
@@ -372,13 +408,14 @@
       <h2>16. Segurança e Compliance</h2>
       <p>Existe: RBAC, security headers, audit trail, rate limits.</p>
       <p>Gaps: SOC 2, GDPR docs, penetration test público, bug bounty.</p>
+      <p>Impacto: sem compliance docs = bloqueio para enterprise.</p>
     </section>
 
     <section class="section" id="repoorg">
       <h2>17. Organização do Repositório</h2>
-      <p>Problemas: 3.606 MDs não canônicos, DUPLICATIONS_AND_CONFLICTS.md desatualizado, orphan folders.</p>
-      <pre class="small">git mv cloud-admin-ia/... docs/archive/
-git mv shared/tools/... docs/archive/</pre>
+      <p>Problemas: 3.606 MDs não canônicos, DUPLICATIONS_AND_CONFLICTS desatualizado, orphan folders.</p>
+      <div class="code">git mv cloud-admin-ia/... docs/archive/
+git mv shared/tools/... docs/archive/</div>
       <div class="note">Política proposta: TTL 7 dias para métricas, arquivar docs &gt; 90 dias sem update.</div>
     </section>
 
