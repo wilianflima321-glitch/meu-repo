@@ -132,6 +132,7 @@
       border-radius: 8px;
       font-size: 12px;
       overflow-x: auto;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -193,6 +194,7 @@
           <div class="small">Bloqueado por evidência de produção</div>
         </div>
       </div>
+      <p><strong>Meta final (north star):</strong> 10.0 / 10 em todas as dimensões, após completar as sprints e hardening adicional.</p>
       <table>
         <thead>
           <tr><th>Forças</th><th>Bloqueios Críticos</th></tr>
@@ -282,28 +284,20 @@
           <tr><td>Admin Panel</td><td>Métricas e readiness, sem billing real.</td><td>Stripe/Vercel</td><td>7.0/10</td><td>Alertas, cohorts, billing metrics.</td></tr>
         </tbody>
       </table>
-      <h3>Melhorias concretas</h3>
+      <h3>Melhorias concretas (exemplos)</h3>
       <p>Exemplos: <code>@Codebase</code> e <code>@Docs</code> no chat, preview sandbox via <code>E2B</code>, onboarding com template demo.</p>
-      <h3>Comparações de Mercado (resumo)</h3>
+      <h3>Comparações de Mercado (detalhado)</h3>
       <table>
-        <thead><tr><th>Produto</th><th>Forças</th><th>Limitações</th><th>Preço</th></tr></thead>
+        <thead><tr><th>Produto</th><th>Destaques</th><th>Limitações</th><th>Preço</th></tr></thead>
         <tbody>
-          <tr><td>Cursor</td><td>RAG Merkle+embeddings, @mentions, multi-file edits.</td><td>Sem deploy one-click.</td><td>$20/mês</td></tr>
-          <tr><td>Bolt.new</td><td>WebContainers, deploy one-click, Supabase nativo.</td><td>Sem RAG, sem multi-agent real.</td><td>~$20/mês</td></tr>
-          <tr><td>Lovable</td><td>UI React + Supabase + GitHub sync.</td><td>Apenas web/React, sync issues.</td><td>$25/mês</td></tr>
-          <tr><td>Replit</td><td>Cloud IDE, colaboração real, deploy integrado.</td><td>Custo variável por uso.</td><td>$20/mês</td></tr>
-          <tr><td>Windsurf</td><td>Cascade + Memories.</td><td>Comunidade menor.</td><td>$15/mês</td></tr>
-          <tr><td>Vercel v0</td><td>UI generation forte em Next.js.</td><td>Foco em UI, não fullstack.</td><td>N/A</td></tr>
-        </tbody>
-      </table>
-      <h3>Concorrentes em Games/Films/Research</h3>
-      <table>
-        <thead><tr><th>Produto</th><th>Forças</th><th>Foco</th></tr></thead>
-        <tbody>
-          <tr><td>LTX Studio</td><td>Audio-to-Video, Retake, Elements, Projects, Camera Presets.</td><td>Films</td></tr>
-          <tr><td>Scenario.gg</td><td>LoRA training, assets 2D/3D, SDK runtime, Unity/Unreal.</td><td>Games</td></tr>
-          <tr><td>Meshy AI</td><td>Text/image → 3D, PBR, export GLB/FBX/OBJ/USDZ.</td><td>3D Assets</td></tr>
-          <tr><td>Perplexity</td><td>DRACO 67.15%, citations, web RAG real-time.</td><td>Research</td></tr>
+          <tr><td>Cursor IDE</td><td>RAG Merkle+embeddings, AST chunking, @Codebase/@Docs/@Git, multi-file edits.</td><td>Sem deploy one-click nativo.</td><td>$20/mês</td></tr>
+          <tr><td>Bolt.new</td><td>WebContainers, deploy one-click, Supabase nativo, Figma import.</td><td>Sem RAG, sem multi-agent real, web-only.</td><td>~$20/mês</td></tr>
+          <tr><td>Lovable</td><td>React UI + Supabase + GitHub sync, Stripe nativo.</td><td>Apenas web/React, sync issues.</td><td>$25/mês</td></tr>
+          <tr><td>Replit</td><td>Cloud IDE, colaboração real, deploy integrado, Ghostwriter.</td><td>Custo variável por uso.</td><td>$20/mês</td></tr>
+          <tr><td>Windsurf</td><td>Cascade + Memories, custo-benefício.</td><td>Comunidade menor.</td><td>$15/mês</td></tr>
+          <tr><td>GitHub Codespaces</td><td>Dev Containers, integração Actions, compliance forte.</td><td>Custo por hora/GB.</td><td>$0.18/h + $0.07/GB</td></tr>
+          <tr><td>Vercel v0</td><td>UI generation de alta qualidade em Next.js.</td><td>Foco em UI, não fullstack.</td><td>N/A</td></tr>
+          <tr><td>Linear</td><td>Design system referência, performance sub-16ms.</td><td>N/A</td><td>N/A</td></tr>
         </tbody>
       </table>
     </section>
@@ -337,7 +331,19 @@
       <h2>5. Módulo Games</h2>
       <p>Status: <span class="badge b-warn">L2 experimental</span></p>
       <p>Existe: WebGPU canvas, asset preview, WASM engine, scene graphs.</p>
-      <p>Falta: Meshy API, Rapier.js, XState, ElevenLabs, sprite gen, export Unity/Godot/Unreal, replay QA, tilemap editor.</p>
+      <table>
+        <thead><tr><th>Gap</th><th>Impacto</th><th>Solução</th></tr></thead>
+        <tbody>
+          <tr><td>3D assets (Meshy API)</td><td>Alto</td><td>Integrar Meshy API</td></tr>
+          <tr><td>Physics (Rapier)</td><td>Alto</td><td>Adicionar Rapier.js</td></tr>
+          <tr><td>State machine</td><td>Alto</td><td>XState</td></tr>
+          <tr><td>Sound AI</td><td>Médio</td><td>ElevenLabs</td></tr>
+          <tr><td>Sprite generation</td><td>Médio</td><td>DALL-E 3</td></tr>
+          <tr><td>Export Unity/Godot</td><td>Médio</td><td>Export GLB/FBX</td></tr>
+          <tr><td>Replay QA loop</td><td>Médio</td><td>Recorder + verifier</td></tr>
+          <tr><td>2D tilemap</td><td>Médio</td><td>Editor dedicado</td></tr>
+        </tbody>
+      </table>
       <div class="note">Roadmap L3: integrar Meshy API, physics Rapier, state machine XState, export GLB/FBX, QA replay loop.</div>
     </section>
 
@@ -345,7 +351,19 @@
       <h2>6. Módulo Films</h2>
       <p>Status: <span class="badge b-warn">L2 experimental</span></p>
       <p>Existe: Director Mode, shot timeline, workflow orchestration.</p>
-      <p>Falta: geração de vídeo real (Kling/Runway/Veo), audio-to-video, continuity, Elements, Retake, storyboard pipeline, NLE, export profissional.</p>
+      <table>
+        <thead><tr><th>Gap</th><th>Impacto</th><th>Solução</th></tr></thead>
+        <tbody>
+          <tr><td>Video gen real</td><td>Alto</td><td>Integrar Kling/Runway/Veo</td></tr>
+          <tr><td>Audio-to-Video</td><td>Alto</td><td>Pipeline lipsync</td></tr>
+          <tr><td>Continuity engine</td><td>Alto</td><td>Identity store</td></tr>
+          <tr><td>Elements</td><td>Médio</td><td>Bindings via @</td></tr>
+          <tr><td>Retake</td><td>Médio</td><td>Segment regen</td></tr>
+          <tr><td>Storyboard → vídeo</td><td>Médio</td><td>Pipeline dedicado</td></tr>
+          <tr><td>NLE</td><td>Médio</td><td>Editor timeline</td></tr>
+          <tr><td>Export profissional</td><td>Médio</td><td>MP4/ProRes presets</td></tr>
+        </tbody>
+      </table>
       <div class="note">Roadmap L3: integrar APIs de vídeo, continuity store, retake segmentado, export MP4.</div>
     </section>
 
@@ -353,7 +371,19 @@
       <h2>7. Módulo Apps</h2>
       <p>Status: <span class="badge b-warn">L3 beta</span></p>
       <p>Forças: multi-agent, anti-fake-success, RBAC, CI/CD, dependency guard.</p>
-      <p>Gaps: @-mentions completas, RAG semântico, preview sandbox real, deploy one-click, Figma import, diff viewer, billing completo, colaboração sem stress test.</p>
+      <table>
+        <thead><tr><th>Gap</th><th>Comparação de Mercado</th><th>Solução</th></tr></thead>
+        <tbody>
+          <tr><td>@-mentions completas</td><td>Cursor</td><td>UI + parser + resolução</td></tr>
+          <tr><td>RAG semântico persistente</td><td>Cursor</td><td>Merkle + embeddings + vector DB</td></tr>
+          <tr><td>Preview sandbox real</td><td>Bolt/Replit</td><td>E2B/WebContainers</td></tr>
+          <tr><td>Deploy one-click</td><td>Bolt/Lovable</td><td>Railway/Render</td></tr>
+          <tr><td>Figma import</td><td>Bolt</td><td>Parser + UI</td></tr>
+          <tr><td>Diff/blame</td><td>Cursor/VSCode</td><td>UI diff viewer</td></tr>
+          <tr><td>Billing completo</td><td>Lovable</td><td>Stripe checkout + portal</td></tr>
+          <tr><td>Colaboração stress test</td><td>Replit</td><td>Load tests 10/50/100</td></tr>
+        </tbody>
+      </table>
       <div class="note">Caminho para L4: RAG persistente, HMR sandbox, deploy one-click, evidência de production runs.</div>
     </section>
 
@@ -456,7 +486,7 @@ git mv shared/tools/... docs/archive/</div>
           <tr><td>Velocidade de evolução</td><td>10.0</td><td>10.0</td><td>—</td><td>Manter</td></tr>
         </tbody>
       </table>
-      <p><strong>Média:</strong> 6.2 / 10 → Alvo pós-sprints: 8.5 / 10</p>
+      <p><strong>Média:</strong> 6.2 / 10 → Alvo pós-sprints: 8.5 / 10 → Meta final: 10.0 / 10</p>
     </section>
 
     <section class="section" id="roadmap">
@@ -526,6 +556,7 @@ git mv shared/tools/... docs/archive/</div>
       <h2>20. Conclusão e Recomendação Estratégica</h2>
       <p>Recomendação: lançar em 60 dias como “o IDE mais honesto do mercado”, com foco em Apps, multi-agent e anti-fake-success. Billing e preview sandbox real são os desbloqueadores obrigatórios.</p>
       <p><strong>Critérios de sucesso:</strong> evidência L4 em produção, checkout funcional, SLO de first value comprovado, preview HMR-like.</p>
+      <p><strong>Meta final:</strong> 10.0/10 em todas as dimensões após hardening, compliance e maturidade comercial.</p>
     </section>
   </div>
 </body>
