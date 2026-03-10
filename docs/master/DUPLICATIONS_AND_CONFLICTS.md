@@ -1,6 +1,6 @@
 # DUPLICATIONS_AND_CONFLICTS
 Status: ACTIVE (REFRESHED)
-Date: 2026-03-07
+Date: 2026-03-10
 Owner: Platform Architecture
 
 ## 1) Objective
@@ -21,7 +21,7 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 | C-01 | Preview runtime parity vs managed bootstrap | Managed provision exists, real HMR parity is still partial | High UX friction | Decide canonical runtime path (managed sandbox or webcontainer) and ship one default |
 | C-02 | L4 claim vs production evidence | Core loop code exists, production sample for promotion is still insufficient | High (claim invalidation) | Grow production evidence and publish readiness dossier |
 | C-03 | Billing narrative vs runtime reality | Billing routes are `PARTIAL`, gateway runtime may be unavailable | High (monetization block) | Wire checkout runtime and webhook path for paid plans |
-| C-04 | Canonical docs vs historical volume | `docs/master` is clean, but non-canonical markdown volume remains very high | Medium (agent drift) | Continue archive consolidation and keep `00_INDEX` authoritative |
+| C-04 | Canonical docs vs historical volume | `docs/master` is clean, non-canonical markdown has been archived to `docs/archive/bulk-2026-03-10` | Low (agent drift) | Keep archive consolidation and keep `00_INDEX` authoritative |
 | C-05 | Dashboard shell margin risk | `AethelDashboard.tsx` is bounded but still near threshold | Medium (fast regressions) | Keep decomposition; avoid adding new feature blocks in shell |
 | C-06 | Shell authority drift | `AethelDashboardSidebar` is canonical, but `DashboardSidebar`/`DashboardLayout` still exist as parallel legacy primitives | Medium (new drift) | Keep legacy exports explicit, route new work to canonical shell only |
 | C-07 | Preview surface fragmentation | `LivePreview`, `PreviewPanel`, `NexusCanvasV2`, and detached `TheForgeUnified` still represent different runtime stories | High UX inconsistency | Collapse preview/runtime authority behind one canonical manager and keep detached shells non-authoritative |
@@ -160,6 +160,9 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 33. Placeholder readiness drift reduced:
 - Stripe and preview readiness no longer treat scaffold placeholders as proof of live configuration.
 - remaining gap is still real secret/endpoint closure, not false-positive readiness from helper-generated example values.
+34. Non-canonical markdown archive completed:
+- moved 3,233 `.md` files from `cloud-admin-ia/` and `shared/tools/` into `docs/archive/bulk-2026-03-10`,
+- remaining gap is ensuring agents never treat archive as canonical.
 
 ## 4) Canonical UX Decisions (locked)
 1. `/dashboard` stays primary entry.

@@ -1,29 +1,27 @@
 # 32_GLOBAL_GAP_REGISTER_2026-03-01
 Status: ACTIVE GAP REGISTER
-Date: 2026-03-01
+Date: 2026-03-10
 Owner: Platform + PM Tecnico
 
 ## 1) Objetivo
 Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no estado atual do repositorio.
 
 ## 2) Snapshot factual
-1. Markdown total no repo: `3657`
+1. Markdown total no repo: `3636`
 2. Markdown canonico (`docs/master`): `51`
-3. Markdown fora do canonico: `3606`
+3. Markdown fora do canonico: `3585`
 4. Arquivos grandes (`>=1200` linhas) em `cloud-web-app/web`: `0`
 5. Uso de dialogs bloqueantes (ativo): `0`
 6. Uso de dialogs bloqueantes (deprecated): `0`
 7. APIs com gate `NOT_IMPLEMENTED` explicito: `0`
 8. Docs canonicos sem referencia no read-order do `00_INDEX`: `0`
 9. Top origens de markdown nao-canonico:
-   - `cloud-admin-ia/aethel_llamaindex_fork`: 1954
-   - `shared/tools`: 1293
-   - `docs/archive`: 256
+   - `docs/archive`: 3489 (inclui `docs/archive/bulk-2026-03-10`)
    - `cloud-web-app/web`: 16
    - `docs/gaps`: 7
+   - `.github`: 5
    - `src/common`: 3
    - `cloud-web-app/docs`: 2
-   - `meu-repo/.github`: 2
    - `tools/ci`: 2
    - `tools/llm-mock`: 2
 
@@ -35,7 +33,7 @@ Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no est
 4. Manter `00_INDEX` com read-order canonico completo (sem drift).
 
 ### P1
-1. Consolidar markdown nao-canonico e reduzir volume consultivo fora de `docs/master`.
+1. Consolidar markdown nao-canonico remanescente fora de `docs/archive` e reduzir volume consultivo fora de `docs/master`.
 2. Fechar evidencias de colaboracao (carga/conflito) para promocao de `PARTIAL` -> `IMPLEMENTED`.
 3. Fechar varredura runtime de acessibilidade (axe/lighthouse) para claim de cobertura completa.
 

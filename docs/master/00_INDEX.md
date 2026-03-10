@@ -1,5 +1,5 @@
 # 00_INDEX
-Date: 2026-03-07
+Date: 2026-03-10
 Status: CANONICAL ENTRYPOINT
 
 ## Read Order (Required)
@@ -95,7 +95,7 @@ Status: CANONICAL ENTRYPOINT
   - Broken root path references and tracked `.venv` artifacts were removed.
 - Structural debt still open:
   - very large monolithic files in engine/media modules (dashboard shell now bounded by gate),
-  - high markdown volume outside `docs/master`,
+  - large markdown archive outside `docs/master` (contained under `docs/archive/bulk-2026-03-10`),
   - orphan-candidate top-level folders not in runtime-critical flow.
 - UX-market gap debt still open (tracked in `31`):
   - preview real-time fluency,
@@ -135,6 +135,9 @@ Status: CANONICAL ENTRYPOINT
   - auth/admin/CSRF secret handling is now fail-closed; missing runtime secrets are surfaced as readiness blockers instead of silently using fallback values,
   - local authenticated production proof remains blocked by explicit preflight failures: missing `.env.local`, `DATABASE_URL`, `JWT_SECRET`, `CSRF_SECRET`, and inactive Docker daemon,
   - audit-language drift is now a tracked risk: some executive texts still describe landing, billing, mentions, RAG, and preview as absent when current repo state is more accurately `PARTIAL`.
+- Delta 2026-03-10:
+  - non-canonical markdown archived: 3,233 `.md` files moved from `cloud-admin-ia/` and `shared/tools/` into `docs/archive/bulk-2026-03-10`,
+  - `docs/master/DUPLICATIONS_AND_CONFLICTS.md` refreshed to reflect archive closure and reduced drift risk.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
