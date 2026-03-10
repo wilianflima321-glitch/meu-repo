@@ -144,6 +144,10 @@ Status: CANONICAL ENTRYPOINT
     - production runtime blockers: `DATABASE_UNREACHABLE`, `APP_RUNTIME_UNREACHABLE`, `DOCKER_DAEMON_NOT_RUNNING`,
     - billing runtime blockers: missing Stripe secret/publishable/webhook + price IDs,
     - preview runtime blocker: `AETHEL_PREVIEW_PROVISION_TOKEN_MISSING`.
+  - runtime setup attempts:
+    - `setup:local-db` blocked by `DOCKER_DAEMON_NOT_RUNNING`,
+    - `setup:billing-runtime` seeded `.env.local` placeholders (Stripe values still missing),
+    - `setup:preview-runtime` seeded `.env.local` placeholders (provision token still missing).
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
