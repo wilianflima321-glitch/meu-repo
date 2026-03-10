@@ -90,7 +90,7 @@ Status: CANONICAL ENTRYPOINT
   - `blocking-browser-dialogs=0`
   - `not-implemented-ui=0`
 - Explicit API NOT_IMPLEMENTED gates (`tools/find-not-implemented.mjs`): `0`
-- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=1189`
+- Dashboard shell integrity (`qa:dashboard-shell`): `AethelDashboard.tsx=7` (shell), `AethelDashboardRuntime.tsx=1191` (runtime)
 - Structural baseline closed for connectivity P0:
   - `npm run qa:repo-connectivity` passes.
   - `npm run qa:canonical-doc-alignment` passes.
@@ -107,7 +107,7 @@ Status: CANONICAL ENTRYPOINT
 - Delta 2026-03-03:
   - `qa:interface-gate` is green again after closing the mismatch (`not-implemented-ui=6`, gate limit `6`),
   - static accessibility baseline gate now operational (`npm run qa:wcag-critical`),
-  - dashboard shell integrity gate now operational (`npm run qa:dashboard-shell`) with `AethelDashboard.tsx <= 1200` + no direct `@xyflow/react` coupling,
+  - dashboard shell integrity gate now operational (`npm run qa:dashboard-shell`) with `AethelDashboard.tsx <= 1200` (shell) + no direct `@xyflow/react` coupling,
   - global gap register now confirms active blocking dialogs at `0` (`docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`),
   - collaboration readiness now includes stress-proof attachment workflow (`/api/admin/collaboration/evidence/stress-proof`) before promotion eligibility,
   - dashboard first-load bundle pressure reduced in current build profile (`/dashboard` ~495kB -> ~174kB) after runtime-split hardening,

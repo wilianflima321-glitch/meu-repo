@@ -28,7 +28,8 @@ Top 5 Bloqueios (Riscos)
 Estrutura de arquivos
 - docs/master/: 51 documentos canonicos (CORE)
 - MDs nao-canonicos: 3.585 arquivos (majoritariamente em docs/archive) (DEBT)
-- AethelDashboard.tsx: 1.199 linhas (Gate: 1.200) (LIMIT)
+- AethelDashboard.tsx: 7 linhas (shell)
+- AethelDashboardRuntime.tsx: 1.191 linhas (Gate: 1.200) (LIMIT)
 - Bundle JS: 174 kB (reduzido de 495 kB) (OPTIMIZED)
 - Stack: Next.js 14.2, React 18.3, Prisma 5.7, Three.js (MODERN)
 
@@ -67,7 +68,7 @@ Dashboard / Studio Home
 - Estado: funcional, monolito de codigo.
 
 Gaps
-- AethelDashboard.tsx grande.
+- AethelDashboardRuntime.tsx grande.
 - Sem SLO <90s.
 - Friccao alta no setup de AI Provider.
 
@@ -284,7 +285,7 @@ Plano
 ## 19) Plano de Execucao Priorizado
 Sprint 0
 - Ativar modo producao AI.
-- Decompor AethelDashboard.tsx.
+- Decompor AethelDashboardRuntime.tsx.
 - Arquivar MDs nao-canonicos.
 - Validar quality gates.
 

@@ -9,7 +9,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 ## 2) Baseline factual coletado
 - `tracked_md_like=3617` (excluindo `node_modules/.next/.git`).
 - `docs/master/*.md=35`.
-- `docs/archive/**/*.md=236`.
+- `docs/archive/**/*.md=3489`.
 - `cloud-web-app/web` com `21` arquivos `.md` soltos na raiz.
 - `cloud-web-app/web/.venv` presente e versionado.
 - `package.json` (raiz) com caminhos inexistentes em scripts:
@@ -79,9 +79,9 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 
 ## 8) Recalibration snapshot (2026-02-28)
 1. Repository markdown inventory:
-- `md_total=3644`
+- `md_total=3636`
 - `docs/master/*.md=41`
-- `docs/archive/**/*.md=256`
+- `docs/archive/**/*.md=3489`
  - legacy external-path references in canonical folder: `116` (requires staged cleanup)
 2. Structural gate:
 - `npm run qa:repo-connectivity` -> PASS
@@ -239,9 +239,9 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 
 ## 24) Recalibration snapshot 2026-02-28 (full repo sweep)
 1. Markdown/document inventory (tracked scope):
-- `md_total=3623`
+- `md_total=3636`
 - `docs/master/*.md=41`
-- `docs/archive/**/*.md=256`
+- `docs/archive/**/*.md=3489`
 - `cloud-web-app/web/*.md=1`
 2. Large-file pressure (tracked TS/TSX in `cloud-web-app/web`):
 - `>=1200 lines = 55 files`
@@ -349,7 +349,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - command: `npm run qa:global-gap-scan`
 - output: `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
 2. Snapshot from current wave:
-- markdown inventory: `md_total=3653`, `docs/master=47`, `outside_canonical=3606`
+- markdown inventory: `md_total=3636`, `docs/master=51`, `outside_canonical=3585`
 - code pressure: `large_files_ge_1200=26`
 - blocking dialogs in active surfaces: `0` (deprecated residual: `4`)
 - explicit API gates with `NOT_IMPLEMENTED`: `18`

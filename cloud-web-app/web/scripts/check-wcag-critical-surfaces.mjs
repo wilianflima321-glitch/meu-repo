@@ -27,7 +27,7 @@ const CHECKS = [
   },
   {
     name: 'dashboard-main-skip-link',
-    file: 'components/AethelDashboard.tsx',
+    file: 'components/AethelDashboardRuntime.tsx',
     patterns: ['href="#dashboard-main-content"', '<main id="dashboard-main-content"', 'aria-live="polite"'],
   },
   {

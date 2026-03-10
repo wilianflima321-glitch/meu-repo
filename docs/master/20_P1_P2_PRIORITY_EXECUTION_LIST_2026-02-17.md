@@ -4,12 +4,12 @@ Date: 2026-02-17
 Source Base: `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
 
 ## 0.1 Current Freeze Snapshot (2026-03-01)
-1. `>=1200` code hotspots in `cloud-web-app/web`: `1` (`AethelDashboard.tsx` at hard limit `1200`).
+1. `>=1200` code hotspots in `cloud-web-app/web`: `0` (`AethelDashboardRuntime.tsx` at `1191`, `AethelDashboard.tsx` shell at `7`).
 2. Blocking dialogs in active scope: `0`.
 3. Blocking dialogs in deprecated scope: `0`.
 4. Canonical read-order drift: `0`.
 5. Remaining structural pressures:
-- non-canonical markdown volume (`3606`)
+- non-canonical markdown volume (`3585`)
 - explicit runtime-gated capabilities still under `PARTIAL` promotion threshold evidence
 
 ## 0. Scope
@@ -244,7 +244,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
  - status 2026-03-01-b: `ADVANCED` (`app/landing-v2.tsx` now includes mobile-first mission shortcuts + skip-link landmark flow; `app/dashboard/page.tsx` now has deterministic loading state; `components/AethelDashboard.tsx` replaces blank auth bootstrap with explicit loading state and responsive toast placement; `AethelDashboardSidebar` now includes mobile close control and bounded drawer width for tablet/phone).
 8. `P0-P` Complete dashboard monolith decomposition:
 - extract remaining heavy tab blocks and finalize stable prop contracts.
- - status 2026-03-01: `ADVANCED` (`AethelDashboard.tsx` reduced to ~1189 lines; first-value rail extracted to `components/dashboard/FirstValueGuide.tsx`; chat request/fallback logic unified via `lib/ai-chat-advanced-client.ts`; dashboard shell remains below >=1200 hotspot cutoff).
+ - status 2026-03-01: `ADVANCED` (`AethelDashboardRuntime.tsx` at ~1191 lines; first-value rail extracted to `components/dashboard/FirstValueGuide.tsx`; chat request/fallback logic unified via `lib/ai-chat-advanced-client.ts`; dashboard shell remains below >=1200 hotspot cutoff).
 9. `P1-Q` Collaboration readiness evidence:
 - publish SLO (`p95 latency`, reconnect, conflict handling) and stress-test baseline.
  - status 2026-03-01: `PARTIAL` (SLO baseline published in `cloud-web-app/web/docs/COLLAB_RUNTIME_SLO.md`; readiness now aggregates audit-backed evidence history; new ledger endpoint `app/api/admin/collaboration/evidence/route.ts` plus admin controls in `app/admin/collaboration/page.tsx`; external stress proof bundle still pending).

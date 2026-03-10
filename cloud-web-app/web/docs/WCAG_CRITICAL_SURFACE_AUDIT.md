@@ -5,7 +5,7 @@ Scope: P1-R evidence baseline (critical surfaces only)
 
 ## 1) Surfaces audited
 1. `/` (`app/landing-v2.tsx`)
-2. `/dashboard` (`components/AethelDashboard.tsx` + extracted tabs)
+2. `/dashboard` (`components/AethelDashboardRuntime.tsx` + extracted tabs)
 3. `/ide` (`components/ide/FullscreenIDE.tsx`, `components/ide/FileExplorerPro.tsx`, `components/ide/PreviewPanel.tsx`)
 4. `/settings` (`app/settings/page.tsx`)
 5. `/admin/analytics` (`app/admin/analytics/page.tsx`)
