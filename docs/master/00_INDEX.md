@@ -34,6 +34,7 @@ Status: CANONICAL ENTRYPOINT
 29. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
 30. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
 31. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
+32. `docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -66,6 +67,7 @@ Status: CANONICAL ENTRYPOINT
 | `34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md` | Executive text verification and canonical reconciliation | ACTIVE |
 | `35_L4_L5_COMPLETION_MAP_2026-03-05.md` | Canonical completion order for L4/L5 closure | ACTIVE |
 | `36_QUALITY_90_EXECUTION_MAP_2026-03-08.md` | Canonical path to reach >=9.0 quality across product dimensions without inflating claims | ACTIVE |
+| `37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md` | Definitive technical evaluation and market comparison | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
