@@ -92,7 +92,8 @@ Current values:
 1. Current factual state from canonical scanners:
 - `not-implemented-ui=0`
 - `api-not-implemented-gates=0`
-- `AethelDashboard.tsx=1199` (bounded by `qa:dashboard-shell`)
+- `AethelDashboardRuntime.tsx=1199` (bounded by `qa:dashboard-shell`)
 2. Transition inventories in sections `8..12` are historical deltas and must not be interpreted as current status.
 3. Executive-text reconciliation is tracked in:
 - `34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`.
+

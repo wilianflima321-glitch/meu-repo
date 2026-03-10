@@ -7,23 +7,25 @@ Owner: Platform + PM Tecnico
 Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no estado atual do repositorio.
 
 ## 2) Snapshot factual
-1. Markdown total no repo: `3636`
-2. Markdown canonico (`docs/master`): `51`
-3. Markdown fora do canonico: `3585`
+1. Markdown total no repo: `3658`
+2. Markdown canonico (`docs/master`): `52`
+3. Markdown fora do canonico: `3606`
 4. Arquivos grandes (`>=1200` linhas) em `cloud-web-app/web`: `0`
 5. Uso de dialogs bloqueantes (ativo): `0`
 6. Uso de dialogs bloqueantes (deprecated): `0`
 7. APIs com gate `NOT_IMPLEMENTED` explicito: `0`
 8. Docs canonicos sem referencia no read-order do `00_INDEX`: `0`
 9. Top origens de markdown nao-canonico:
-   - `docs/archive`: 3489 (inclui `docs/archive/bulk-2026-03-10`)
+   - `docs/archive`: 3503
    - `cloud-web-app/web`: 16
    - `docs/gaps`: 7
-   - `.github`: 5
    - `src/common`: 3
    - `cloud-web-app/docs`: 2
+   - `meu-repo/.github`: 2
    - `tools/ci`: 2
    - `tools/llm-mock`: 2
+   - `.github/agents`: 1
+   - `.github/BRANCH_PROTECTION_POLICY.md`: 1
 
 ## 3) Lacunas abertas (prioridade)
 ### P0
@@ -33,7 +35,7 @@ Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no est
 4. Manter `00_INDEX` com read-order canonico completo (sem drift).
 
 ### P1
-1. Consolidar markdown nao-canonico remanescente fora de `docs/archive` e reduzir volume consultivo fora de `docs/master`.
+1. Consolidar markdown nao-canonico e reduzir volume consultivo fora de `docs/master`.
 2. Fechar evidencias de colaboracao (carga/conflito) para promocao de `PARTIAL` -> `IMPLEMENTED`.
 3. Fechar varredura runtime de acessibilidade (axe/lighthouse) para claim de cobertura completa.
 

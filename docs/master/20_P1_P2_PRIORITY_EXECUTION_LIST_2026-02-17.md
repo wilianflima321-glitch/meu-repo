@@ -1,15 +1,15 @@
-﻿# 20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17
+# 20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17
 Status: DECISION-COMPLETE EXECUTION LIST
 Date: 2026-02-17
 Source Base: `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
 
 ## 0.1 Current Freeze Snapshot (2026-03-01)
-1. `>=1200` code hotspots in `cloud-web-app/web`: `0` (`AethelDashboardRuntime.tsx` at `1191`, `AethelDashboard.tsx` shell at `7`).
+1. `>=1200` code hotspots in `cloud-web-app/web`: `0` (`AethelDashboardRuntime.tsx` at `1191`, `AethelDashboardRuntime.tsx` shell at `7`).
 2. Blocking dialogs in active scope: `0`.
 3. Blocking dialogs in deprecated scope: `0`.
 4. Canonical read-order drift: `0`.
 5. Remaining structural pressures:
-- non-canonical markdown volume (`3585`)
+- non-canonical markdown volume (`3606`)
 - explicit runtime-gated capabilities still under `PARTIAL` promotion threshold evidence
 
 ## 0. Scope
@@ -235,13 +235,13 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - readiness payloads now expose feedback diagnostics to support promotion decisions.
 6. `P0-N` Onboarding first-value flow:
 - deterministic first project path with clear progress and first successful outcome.
- - status 2026-02-28: `PARTIAL` (`components/AethelDashboard.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff; `app/landing-v2.tsx` now seeds mission via `/dashboard?mission=`).
- - status 2026-03-01: `ADVANCED` (`app/(auth)/register/register-v2.tsx` now routes new users to `/dashboard?onboarding=1&source=register&mission=...`; `app/(auth)/login/login-v2.tsx` now routes to deterministic dashboard/next target with transactional states; `components/AethelDashboard.tsx` now consumes onboarding/source query context and starts first-value guide without dead-end entry).
+ - status 2026-02-28: `PARTIAL` (`components/AethelDashboardRuntime.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff; `app/landing-v2.tsx` now seeds mission via `/dashboard?mission=`).
+ - status 2026-03-01: `ADVANCED` (`app/(auth)/register/register-v2.tsx` now routes new users to `/dashboard?onboarding=1&source=register&mission=...`; `app/(auth)/login/login-v2.tsx` now routes to deterministic dashboard/next target with transactional states; `components/AethelDashboardRuntime.tsx` now consumes onboarding/source query context and starts first-value guide without dead-end entry).
 7. `P0-O` Responsive entry surface hardening:
 - `/dashboard` and landing must meet defined mobile/tablet acceptance.
- - status 2026-02-28: `PARTIAL` (`components/dashboard/AethelDashboardSidebar.tsx` + `components/AethelDashboard.tsx` now include mobile close behavior and backdrop handling).
+ - status 2026-02-28: `PARTIAL` (`components/dashboard/AethelDashboardSidebar.tsx` + `components/AethelDashboardRuntime.tsx` now include mobile close behavior and backdrop handling).
  - status 2026-03-01: `PARTIAL` (`components/dashboard/DashboardHeader.tsx` now has mobile-safe density (`text`, action visibility, compact `IDE` CTA), and `AethelDashboard` routes header IDE open through canonical context handoff without fake desktop CTA).
- - status 2026-03-01-b: `ADVANCED` (`app/landing-v2.tsx` now includes mobile-first mission shortcuts + skip-link landmark flow; `app/dashboard/page.tsx` now has deterministic loading state; `components/AethelDashboard.tsx` replaces blank auth bootstrap with explicit loading state and responsive toast placement; `AethelDashboardSidebar` now includes mobile close control and bounded drawer width for tablet/phone).
+ - status 2026-03-01-b: `ADVANCED` (`app/landing-v2.tsx` now includes mobile-first mission shortcuts + skip-link landmark flow; `app/dashboard/page.tsx` now has deterministic loading state; `components/AethelDashboardRuntime.tsx` replaces blank auth bootstrap with explicit loading state and responsive toast placement; `AethelDashboardSidebar` now includes mobile close control and bounded drawer width for tablet/phone).
 8. `P0-P` Complete dashboard monolith decomposition:
 - extract remaining heavy tab blocks and finalize stable prop contracts.
  - status 2026-03-01: `ADVANCED` (`AethelDashboardRuntime.tsx` at ~1191 lines; first-value rail extracted to `components/dashboard/FirstValueGuide.tsx`; chat request/fallback logic unified via `lib/ai-chat-advanced-client.ts`; dashboard shell remains below >=1200 hotspot cutoff).
@@ -261,7 +261,7 @@ This backlog is limited to P1/P2 hardening on the current product scope:
  - status 2026-03-01: `ADVANCED` (route-level web vitals and AI latency telemetry integrated; `admin/analytics` now consumes `/api/admin/analytics/baseline` with P50/P95 + target comparisons + funnel checkpoints; `/dashboard` non-critical tabs are now lazy-loaded to reduce initial bundle pressure).
  - status 2026-03-01-b: `ADVANCED` (dashboard heavy runtime dependencies moved behind tab-local boundaries: `AgentCanvasTab` now owns React Flow state and `DashboardOverviewTab` lazy-loads `LivePreview`; local production build reduced `/dashboard` first-load JS from ~495kB to ~174kB in current profile output).
  - status 2026-03-01-c: `ADVANCED` (full `qa:enterprise-gate` executed green with new `qa:wcag-critical` stage and updated performance profile preserved in freeze evidence).
- - status 2026-03-01-d: `ADVANCED` (new `qa:dashboard-shell` guard enforces `AethelDashboard.tsx <= 1200` lines and blocks direct `@xyflow/react` coupling in shell path; gate wired in local enterprise chain and CI pre-audit/pre-compare workflows).
+ - status 2026-03-01-d: `ADVANCED` (new `qa:dashboard-shell` guard enforces `AethelDashboardRuntime.tsx <= 1200` lines and blocks direct `@xyflow/react` coupling in shell path; gate wired in local enterprise chain and CI pre-audit/pre-compare workflows).
  - status 2026-03-01-e: `ADVANCED` (freeze chain revalidated after IPC cache-env hardening in `next.config.js`; full `qa:enterprise-gate` green with no `revalidateTag localhost:undefined` build crash).
 
 ### Gate for market-level UX claim
@@ -372,3 +372,5 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 3. Optional onboarding demo fallback added for provider-missing flows (guarded by `AETHEL_AI_DEMO_MODE`) across core AI endpoints, preserving explicit `PARTIAL` contract and setup guidance.
 4. Provider preflight now exposes `demoModeEnabled` via `/api/ai/provider-status`; IDE/dashboard suppress hard provider gate when demo is enabled to keep first-value path unblocked.
 5. Demo fallback now includes per-user daily budget enforcement with explicit overflow contract (`429 AI_DEMO_LIMIT_REACHED`) to keep cost/risk bounded while preserving first-value access.
+
+

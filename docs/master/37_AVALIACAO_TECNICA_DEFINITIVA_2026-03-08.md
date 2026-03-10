@@ -26,8 +26,8 @@ Top 5 Bloqueios (Riscos)
 
 ## 2) Estado Atual do Repositorio
 Estrutura de arquivos
-- docs/master/: 51 documentos canonicos (CORE)
-- MDs nao-canonicos: 3.585 arquivos (majoritariamente em docs/archive) (DEBT)
+- docs/master/: 52 documentos canonicos (CORE)
+- MDs nao-canonicos: 3.606 arquivos (majoritariamente em docs/archive) (DEBT)
 - AethelDashboard.tsx: 7 linhas (shell)
 - AethelDashboardRuntime.tsx: 1.191 linhas (Gate: 1.200) (LIMIT)
 - Bundle JS: 174 kB (reduzido de 495 kB) (OPTIMIZED)

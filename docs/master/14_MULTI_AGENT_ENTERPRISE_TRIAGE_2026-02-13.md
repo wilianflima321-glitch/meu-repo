@@ -1,4 +1,4 @@
-ï»¿# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
+# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
 Status: AUDITORIA EXECUTAVEL  
 Data: 2026-02-14  
 Direcao: Equilibrado + corte legado faseado + sem mudanca de escopo
@@ -103,7 +103,7 @@ Regra operacional:
 2. Claims externos podem orientar backlog, mas nao alteram status factual de prontidao.
 
 Delta operacional (2026-02-16, sem rodar suite completa):
-1. APIs de notificacao e confirmacao de asset agora expÃƒÂµem estado real de operacao deferida (sem fake success silencioso).
+1. APIs de notificacao e confirmacao de asset agora expÃµem estado real de operacao deferida (sem fake success silencioso).
 2. `TODO` de API critica zerado.
 3. `NOT_IMPLEMENTED` retirado de copy de UI; mantido apenas em contratos de API.
 4. Rotas legadas continuam 410 + telemetria, sem quebra abrupta.
@@ -272,7 +272,7 @@ SLO minimo proposto para declarar "real-time ready":
 1. Produto/UX:
 - jornada principal esta coerente, mas ainda depende de gates em capacidades de IA/render/billing.
 2. Frontend/IDE:
-- shell esta estavel; hotspot de manutencao segue em `AethelDashboard.tsx` (monolito).
+- shell esta estavel; hotspot de manutencao segue em `AethelDashboardRuntime.tsx` (monolito).
 3. Backend/Infra:
 - contratos estao alinhados; readiness real ainda depende de freeze completo de gates.
 4. IA/Automacao:
@@ -662,17 +662,17 @@ Delivered:
 Triaged impact:
 1. Improves user trust by replacing silent blank previews with explicit capability messaging.
 
-## 7) Delta 2026-02-27 â€” triagem estrutural obrigatÃ³ria
+## 7) Delta 2026-02-27 — triagem estrutural obrigatória
 Prioridade atual (sem mudar escopo):
 1. P0 estrutural: conectividade de scripts/config e higiene de artefatos locais.
-2. P0 produto: remover ambiguidade no caminho crÃ­tico do `/ide` (eliminar fluxos mock no shell avanÃ§ado).
-3. P1 manutenÃ§Ã£o: decompor monÃ³litos e reduzir duplicatas de superfÃ­cie.
+2. P0 produto: remover ambiguidade no caminho crítico do `/ide` (eliminar fluxos mock no shell avançado).
+3. P1 manutenção: decompor monólitos e reduzir duplicatas de superfície.
 
-EvidÃªncia consolidada:
+Evidência consolidada:
 - `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
 - `docs/master/00_INDEX.md`
 
-## 8) Delta 2026-03-01 â€” Collaboration SLO baseline
+## 8) Delta 2026-03-01 — Collaboration SLO baseline
 Concluido:
 1. Publicado baseline formal de readiness colaborativo em:
 - `cloud-web-app/web/docs/COLLAB_RUNTIME_SLO.md`
@@ -681,9 +681,10 @@ Concluido:
 3. Regra de claim preservada:
 - sem "real-time ready" sem bundle de evidencia reproduzivel.
 
-## 9) Delta 2026-03-03 â€” Runtime gate inventory sync
+## 9) Delta 2026-03-03 — Runtime gate inventory sync
 Concluido:
 1. Inventario explicito `NOT_IMPLEMENTED` em APIs ativas foi reduzido para `0` (fonte: `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`).
 2. Billing mismatch path agora segue contrato runtime parcial:
 - `PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE` (`503`, `PARTIAL`).
 3. Gate enterprise segue verde sem relaxamento de regra.
+

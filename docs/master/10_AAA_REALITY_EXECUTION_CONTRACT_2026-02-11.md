@@ -1,4 +1,4 @@
-﻿# 10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11
+# 10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11
 Status: EXECUTABLE CONTRACT  
 Date: 2026-02-11  
 Owner: Multi-agent internal review (Product, UX, Frontend, Backend, AI, Infra, PM, Competitive, AAA tools)
@@ -816,24 +816,24 @@ Validation for this delta:
 - `npm run build` -> PASS
 
 ## 19) Delta implementado nesta iteracao (command palette canonical + file API hard unification)
-1. Command Palette canÃ´nica migrada para Codicons e removido acoplamento Lucide:
+1. Command Palette canônica migrada para Codicons e removido acoplamento Lucide:
 - `cloud-web-app/web/components/ide/CommandPalette.tsx`
-  - Ãcones agora seguem `Codicon` wrapper.
+  - Ícones agora seguem `Codicon` wrapper.
   - Mantido contrato de abertura global (`aethel.commandPalette.open`).
   - Corrigido texto de atalhos sem mojibake.
 
-2. `/ide` atualizado para integraÃ§Ã£o limpa de comandos de layout:
+2. `/ide` atualizado para integração limpa de comandos de layout:
 - `cloud-web-app/web/app/ide/page.tsx`
-  - `onToggleSidebar`, `onToggleTerminal`, `onAIChat` agora disparam eventos de layout dedicados (sem injeÃ§Ã£o de `KeyboardEvent`).
+  - `onToggleSidebar`, `onToggleTerminal`, `onAIChat` agora disparam eventos de layout dedicados (sem injeção de `KeyboardEvent`).
 - `cloud-web-app/web/components/ide/IDELayout.tsx`
   - Adicionados listeners para:
     - `aethel.layout.toggleSidebar`
     - `aethel.layout.toggleTerminal`
     - `aethel.layout.toggleAI`
-  - MantÃ©m atalhos VS Code-like e melhora previsibilidade do estado de painel.
+  - Mantém atalhos VS Code-like e melhora previsibilidade do estado de painel.
 
-3. UnificaÃ§Ã£o real de File API com wrappers de compatibilidade:
-- Rotas de compatibilidade migradas para runtime canÃ´nico (`filesystem-runtime`) com resposta explÃ­cita:
+3. Unificação real de File API com wrappers de compatibilidade:
+- Rotas de compatibilidade migradas para runtime canônico (`filesystem-runtime`) com resposta explícita:
   - `cloud-web-app/web/app/api/files/read/route.ts`
   - `cloud-web-app/web/app/api/files/write/route.ts`
   - `cloud-web-app/web/app/api/files/delete/route.ts`
@@ -848,7 +848,7 @@ Validation for this delta:
   - `canonicalEndpoint: "/api/files/fs"`
   - header `x-aethel-route-status: compatibility-wrapper`
 
-4. DeprecaÃ§Ã£o explÃ­cita de rotas duplicadas workspace/auth session:
+4. Deprecação explícita de rotas duplicadas workspace/auth session:
 - `cloud-web-app/web/app/api/workspace/tree/route.ts`
 - `cloud-web-app/web/app/api/workspace/files/route.ts`
 - `cloud-web-app/web/app/api/auth/sessions/route.ts`
@@ -858,7 +858,7 @@ Validation for this delta:
 Validation for this delta:
 - `npm run docs:routes-inventory` -> PASS
 - `npm run qa:canonical-components` -> PASS
-- `npm run qa:mojibake` -> PASS (`165` findings no inventÃ¡rio atual)
+- `npm run qa:mojibake` -> PASS (`165` findings no inventário atual)
 - `npm run typecheck` -> PASS
 - `npm run build` -> PASS
 
@@ -900,7 +900,7 @@ Validation for this delta:
   - Ignora `docs/MOJIBAKE_SCAN.md` para evitar auto-referencia no relatorio.
 2. Correcao de texto corrompido em pagina publica:
 - `cloud-web-app/web/app/status/page.tsx`
-  - `Ã‚Â©` substituido por `&copy;`.
+  - `Â©` substituido por `&copy;`.
 3. Estado atual de qualidade:
 - `npm run qa:mojibake` -> PASS com `0` findings.
 - `npm run typecheck` -> PASS
@@ -912,7 +912,7 @@ Validation for this delta:
   - Define raiz efetiva por namespace: `.aethel/workspaces/<userId>/<projectId>`.
   - Resolve caminhos virtuais com protecao de boundary.
   - Converte caminho absoluto para caminho virtual (`/`-based) para resposta da API.
-2. Endpoints canÃ´nicos migrados para escopo:
+2. Endpoints canônicos migrados para escopo:
 - `cloud-web-app/web/app/api/files/fs/route.ts`
 - `cloud-web-app/web/app/api/files/tree/route.ts`
 3. Endpoints de compatibilidade `/api/files/*` alinhados ao mesmo escopo:
@@ -955,7 +955,7 @@ Critica executiva atual:
 - Entrega mantida em formato "Plano Executavel + Critica" com corte legado faseado.
 
 2. UX bloqueante removido nas superficies criticas:
-- `cloud-web-app/web/components/AethelDashboard.tsx`
+- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`
 - `cloud-web-app/web/components/ChatComponent.tsx`
 - `cloud-web-app/web/components/git/GitPanel.tsx`
 - `cloud-web-app/web/components/extensions/ExtensionManager.tsx`
@@ -988,7 +988,7 @@ Critica executiva atual:
 
 ## 26) Delta implementado nesta iteracao (continue hardening + quality gates)
 1. Dialogos bloqueantes zerados nas superficies restantes:
-- `components/AethelDashboard.tsx`
+- `components/AethelDashboardRuntime.tsx`
 - `components/ChatComponent.tsx`
 - `components/git/GitPanel.tsx`
 - `components/extensions/ExtensionManager.tsx`
@@ -1212,7 +1212,7 @@ Status geral: qualidade visual/UX P0 estabilizada; faltas remanescentes estao co
 - `cloud-web-app/web/app/admin/moderation/page.tsx`
   - `handleAction` convertido para `useCallback` e integrado no ciclo de atalhos com deps corretas.
 - `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`
-  - ajuste de deps/estrutura para reduzir ruÃ­do de hooks no core do editor.
+  - ajuste de deps/estrutura para reduzir ruído de hooks no core do editor.
 
 2. Validacao executada:
 - `npm run typecheck` -> PASS
@@ -1832,7 +1832,7 @@ Factual findings collected in this wave:
 3. Documentation governance risk remains high outside canonical set:
 - high volume of markdown outside `docs/master`.
 4. Maintainability pressure remains high:
-- many large files (`>=1200` lines), with `components/AethelDashboard.tsx` as top offender.
+- many large files (`>=1200` lines), with `components/AethelDashboardRuntime.tsx` as top offender.
 
 Execution lock for next commits:
 1. Eliminate broken connectivity references before adding new surfaces.
@@ -1901,22 +1901,22 @@ Execution interpretation:
 Implemented:
 1. Extracted dashboard domain types/storage-state helpers into:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-model.ts`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now imports canonical model contract from that module.
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now imports canonical model contract from that module.
 
 Impact:
-1. Reduced `AethelDashboard.tsx` monolith size and improved ownership boundaries for next decomposition batches.
+1. Reduced `AethelDashboardRuntime.tsx` monolith size and improved ownership boundaries for next decomposition batches.
 
 ## 0.38 Delta Update 2026-02-27 (Dashboard decomposition batch 2 + CI gate hardening)
 Implemented:
 1. Extracted dashboard defaults/constants/format helpers into:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-defaults.ts`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now consumes this canonical defaults module.
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now consumes this canonical defaults module.
 3. Added root connectivity gate to visual CI workflows:
 - `.github/workflows/ui-audit.yml`
 - `.github/workflows/visual-regression-compare.yml`
 
 Impact:
-1. Additional reduction of monolith pressure in `AethelDashboard.tsx`.
+1. Additional reduction of monolith pressure in `AethelDashboardRuntime.tsx`.
 2. Connectivity regressions are now blocked across both UI-audit and visual-regression pipelines.
 
 ## 0.39 Delta Update 2026-02-27 (Repo connectivity gate hardening v2)
@@ -1935,7 +1935,7 @@ Impact:
 Implemented:
 1. Extracted session-history helper operations into:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-session-utils.ts`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - new session entry creation
 - saved session entry creation
 - favorite/scheduled toggles
@@ -1973,7 +1973,7 @@ Implemented:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-project-utils.ts`
 2. Extracted wallet metrics/receivable derivations into:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-wallet-utils.ts`
-3. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+3. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - project create/delete entry derivation
 - wallet usage stats and receivable summary calculations
 
@@ -2048,7 +2048,7 @@ Impact:
 Implemented:
 1. Extracted live-preview AI helper logic into:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-livepreview-ai-utils.ts`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - live preview context payload builder
 - live preview prompt/system message builders
 - assistant primary-content extraction
@@ -2062,7 +2062,7 @@ Impact:
 Implemented:
 1. Extracted billing action helpers into:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-billing-utils.ts`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - purchase/transfer input validation
 - currency normalization + positive integer parsing
 - purchase/transfer success message builders
@@ -2076,7 +2076,7 @@ Impact:
 Implemented:
 1. Extracted copilot/chat helper logic into:
 - `cloud-web-app/web/components/dashboard/aethel-dashboard-copilot-utils.ts`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - API chat-message payload normalization
 - copilot workflow list extraction
 - workflow title generation helpers
@@ -2103,17 +2103,17 @@ Impact:
 Implemented:
 1. Extracted trial banner UI block into:
 - `cloud-web-app/web/components/dashboard/TrialBanner.tsx`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now consumes `TrialBanner` with explicit dismiss callback.
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now consumes `TrialBanner` with explicit dismiss callback.
 
 Impact:
 1. Reduces top-level UI shell inline markup and improves component boundary clarity.
-2. Moves `AethelDashboard.tsx` below 3000 lines (`2995` current), continuing P0-D split sequence.
+2. Moves `AethelDashboardRuntime.tsx` below 3000 lines (`2995` current), continuing P0-D split sequence.
 
 ## 0.53 Delta Update 2026-02-28 (Dashboard decomposition batch 9)
 Implemented:
 1. Extracted header UI block into:
 - `cloud-web-app/web/components/dashboard/DashboardHeader.tsx`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - sidebar toggle control
 - dashboard reset action
 - theme toggle control
@@ -2131,7 +2131,7 @@ Impact:
 Implemented:
 1. Extracted sidebar UI/navigation block into:
 - `cloud-web-app/web/components/dashboard/AethelDashboardSidebar.tsx`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - sidebar open/close rendering
 - session filter controls (`all`, `favorites`, `scheduled`)
 - tab navigation item rendering and selection wiring
@@ -2142,13 +2142,13 @@ Implemented:
 
 Impact:
 1. Removes one of the largest inline UI regions from dashboard shell.
-2. Reduces `AethelDashboard.tsx` to `2744` lines while preserving current navigation contract.
+2. Reduces `AethelDashboardRuntime.tsx` to `2744` lines while preserving current navigation contract.
 
 ## 0.55 Delta Update 2026-02-28 (Dashboard decomposition batch 11)
 Implemented:
 1. Extracted overview tab block into:
 - `cloud-web-app/web/components/dashboard/DashboardOverviewTab.tsx`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - overview status cards
 - wallet summary panel
 - connectivity summary panel
@@ -2161,13 +2161,13 @@ Implemented:
 
 Impact:
 1. Removes one more high-density UI region from the monolith.
-2. Reduces `AethelDashboard.tsx` to `2595` lines while keeping behavior and gate policy unchanged.
+2. Reduces `AethelDashboardRuntime.tsx` to `2595` lines while keeping behavior and gate policy unchanged.
 
 ## 0.56 Delta Update 2026-02-28 (Dashboard decomposition batch 12)
 Implemented:
 1. Extracted projects tab block into:
 - `cloud-web-app/web/components/dashboard/DashboardProjectsTab.tsx`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - projects list grid and removal actions
 - create-project form controls
 - project version slider hook point
@@ -2179,13 +2179,13 @@ Implemented:
 
 Impact:
 1. Moves another sizeable UI section out of the monolithic shell.
-2. Reduces `AethelDashboard.tsx` to `2535` lines while preserving current project-tab behavior.
+2. Reduces `AethelDashboardRuntime.tsx` to `2535` lines while preserving current project-tab behavior.
 
 ## 0.57 Delta Update 2026-02-28 (Dashboard decomposition batch 13)
 Implemented:
 1. Extracted AI-chat workflow control bar into:
 - `cloud-web-app/web/components/dashboard/DashboardCopilotWorkflowBar.tsx`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates:
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates:
 - workflow selection/create actions
 - workflow rename/archive actions
 - connect/copy/import/merge controls for workflow context
@@ -2196,7 +2196,7 @@ Implemented:
 
 Impact:
 1. Reduces dense control markup in AI-chat tab and centralizes workflow toolbar behavior.
-2. Reduces `AethelDashboard.tsx` to `2469` lines while preserving existing workflow control contract.
+2. Reduces `AethelDashboardRuntime.tsx` to `2469` lines while preserving existing workflow control contract.
 
 ## 0.58 Delta Update 2026-02-28 (Dashboard decomposition batch 14)
 Implemented:
@@ -2206,13 +2206,13 @@ Implemented:
 - `cloud-web-app/web/components/dashboard/DashboardConnectivityTab.tsx`
 - `cloud-web-app/web/components/dashboard/DashboardContentCreationTab.tsx`
 - `cloud-web-app/web/components/dashboard/DashboardUnrealTab.tsx`
-2. `cloud-web-app/web/components/AethelDashboard.tsx` now delegates full rendering for those tabs through explicit props contracts.
+2. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now delegates full rendering for those tabs through explicit props contracts.
 3. Targeted lint executed for changed surfaces:
-- `npm --prefix cloud-web-app/web run lint -- --file components/AethelDashboard.tsx --file components/dashboard/DashboardAIChatTab.tsx --file components/dashboard/DashboardWalletTab.tsx --file components/dashboard/DashboardConnectivityTab.tsx --file components/dashboard/DashboardContentCreationTab.tsx --file components/dashboard/DashboardUnrealTab.tsx` -> PASS.
+- `npm --prefix cloud-web-app/web run lint -- --file components/AethelDashboardRuntime.tsx --file components/dashboard/DashboardAIChatTab.tsx --file components/dashboard/DashboardWalletTab.tsx --file components/dashboard/DashboardConnectivityTab.tsx --file components/dashboard/DashboardContentCreationTab.tsx --file components/dashboard/DashboardUnrealTab.tsx` -> PASS.
 
 Impact:
 1. Removes multiple high-density tab blocks from monolithic shell without changing product scope.
-2. Reduces `AethelDashboard.tsx` to `2003` lines and lowers regression risk for future tab-level changes.
+2. Reduces `AethelDashboardRuntime.tsx` to `2003` lines and lowers regression risk for future tab-level changes.
 
 ## 0.59 Delta Update 2026-02-28 (asset intake/upload reliability alignment)
 Implemented:
@@ -2444,3 +2444,5 @@ Implemented:
 Impact:
 1. Full-access governance moved from promise-only to executable audited flow.
 2. Capability remains `PARTIAL` (intentional): control path exists, but broader studio runtime remains gated by policy/evidence.
+
+

@@ -181,7 +181,7 @@ If work competes with this order:
 
 ## 10) Delta 2026-03-07
 1. First-value path improved with explicit local demo bridge on IDE chat when provider is missing and server demo mode is off.
-2. Dashboard shell margin improved (`AethelDashboard.tsx` moved from `1199` to `1190` lines) by extracting initial-state logic to a dedicated helper module.
+2. Dashboard shell margin improved (`AethelDashboardRuntime.tsx` moved from `1199` to `1190` lines) by extracting initial-state logic to a dedicated helper module.
 3. `DUPLICATIONS_AND_CONFLICTS.md` is refreshed and active again; conflict map now tracks open blockers with explicit IDs (`C-01..C-05`).
 4. L4 block conditions remain unchanged:
    - production evidence still required;
@@ -449,3 +449,4 @@ If work competes with this order:
 16. Production preflight is now executable instead of implicit:
    - `tools/check-production-runtime-readiness.mjs` provides a deterministic local preflight for `.env.local`, `DATABASE_URL`, `JWT_SECRET`, `CSRF_SECRET`, Docker CLI, and Docker daemon state;
    - `npm run qa:production-runtime-readiness` now fails with explicit blockers instead of leaving operators to infer why production probes cannot start.
+

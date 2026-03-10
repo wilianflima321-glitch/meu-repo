@@ -104,7 +104,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 3. Telemetry persistence is routed into `AuditLog` with explicit `category=analytics`.
 
 ### 7.3 Dashboard contract coherence (P0 stability)
-1. `components/AethelDashboard.tsx` was realigned with current tab component contracts (header/sidebar/chat/wallet/connectivity).
+1. `components/AethelDashboardRuntime.tsx` was realigned with current tab component contracts (header/sidebar/chat/wallet/connectivity).
 2. Removed dead/no-op tab callbacks in critical paths (`chat`, `connectivity`, `templates`, `use-cases`).
 3. Capability and state handoff now remain explicit in dashboard flows (no hidden success path).
 
@@ -114,7 +114,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 3. Runtime-limited types remain explicitly gated in `components/ide/PreviewPanel.tsx` (no fake runtime claim).
 
 ### 7.5 G2 onboarding first-value (P0-N partial)
-1. `components/AethelDashboard.tsx` now renders a first-value action rail on entry surfaces:
+1. `components/AethelDashboardRuntime.tsx` now renders a first-value action rail on entry surfaces:
 - create first project;
 - configure provider setup;
 - open `/ide` directly in `entry=live-preview`.
@@ -122,15 +122,15 @@ Required: unified empty/loading/error/success language and behavior across dashb
 
 ### 7.6 G3 responsive entry hardening (P0-O partial)
 1. `components/dashboard/AethelDashboardSidebar.tsx` now closes on mobile tab selection.
-2. `components/AethelDashboard.tsx` now adds mobile backdrop dismissal to avoid navigation trap states.
+2. `components/AethelDashboardRuntime.tsx` now adds mobile backdrop dismissal to avoid navigation trap states.
 
 ### 7.7 G5 dashboard AI recovery extension (P0-L partial)
 1. `components/dashboard/DashboardAIChatTab.tsx` now exposes provider gate message with direct CTA to `/admin/apis`.
-2. `components/AethelDashboard.tsx` tracks provider-gate state from chat API failures and surfaces guided recovery instead of dead-end error-only flow.
+2. `components/AethelDashboardRuntime.tsx` tracks provider-gate state from chat API failures and surfaces guided recovery instead of dead-end error-only flow.
 
 ### 7.8 Landing -> Studio first-value handoff (P0-N partial)
 1. `app/landing-v2.tsx` now routes Magic Box submissions to `/dashboard?mission=...` instead of dropping users directly into `/ide`.
-2. `components/AethelDashboard.tsx` now consumes `mission` query context and seeds Studio Home chat flow (`ai-chat`) deterministically.
+2. `components/AethelDashboardRuntime.tsx` now consumes `mission` query context and seeds Studio Home chat flow (`ai-chat`) deterministically.
 3. First-value rail now exposes progress checkpoints (first project, first AI response, IDE preview opened) to reduce onboarding ambiguity.
 
 ### 7.9 Runtime contract hardening (P0 quality)
@@ -151,7 +151,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - `components/nexus/NexusChatMultimodal.tsx`
 3. UI-layer explicit `NOT_IMPLEMENTED` literals were reduced to avoid scanner inflation while preserving route contracts:
 - `components/ide/AIChatPanelContainer.tsx`
-- `components/AethelDashboard.tsx`
+- `components/AethelDashboardRuntime.tsx`
 - `app/admin/apis/page.tsx`
 - `app/api/studio/_lib/studio-gate.ts`
 
@@ -163,7 +163,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 5. `app/admin/apis/page.tsx` now exposes an AI provider quick-check rail with setup status and deterministic validation steps.
 
 ### 7.12 Dashboard decomposition continuation (delta 2026-03-01)
-1. First-value onboarding rail was extracted from `components/AethelDashboard.tsx` into:
+1. First-value onboarding rail was extracted from `components/AethelDashboardRuntime.tsx` into:
 - `components/dashboard/FirstValueGuide.tsx`
 2. The extracted rail now emits explicit funnel events for:
 - open project tab from first-value guide;
@@ -186,7 +186,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - refresh button now busts runtime URL cache (`aethel_preview_tick`) for deterministic reload.
 
 ### 7.15 First-value completion telemetry (delta 2026-03-01)
-1. `components/AethelDashboard.tsx` now records explicit first-value completion when all milestones are reached:
+1. `components/AethelDashboardRuntime.tsx` now records explicit first-value completion when all milestones are reached:
 - first project created,
 - first AI response received,
 - IDE live preview opened.
@@ -209,7 +209,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 
 ### 7.18 AI latency + preview handoff observability (delta 2026-03-01)
 1. `components/ide/AIChatPanelContainer.tsx` now emits `ai_chat_latency` metrics for success and error paths.
-2. `components/AethelDashboard.tsx` now emits dashboard chat latency metrics (`ai_chat_latency`) and explicit success/error event attribution.
+2. `components/AethelDashboardRuntime.tsx` now emits dashboard chat latency metrics (`ai_chat_latency`) and explicit success/error event attribution.
 3. Dashboard-to-IDE handoff now forwards persisted preview runtime URL (`previewUrl`) when available, keeping continuity between Studio Home and `/ide`.
 4. `components/ide/PreviewPanel.tsx` now emits runtime mode telemetry (`dev-server`, `inline-fallback`, `not-applicable`) for preview diagnostics.
 
@@ -243,7 +243,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 
 ### 7.23 AI interruption controls + provider path consistency (delta 2026-03-01)
 1. `components/ide/AIChatPanelContainer.tsx` now supports explicit request interruption (`AbortController`) with a visible `Stop generating` action.
-2. `components/AethelDashboard.tsx` + `components/dashboard/DashboardAIChatTab.tsx` now support chat interruption in Studio Home (`Interromper`) to avoid long blocked sessions/cost drift.
+2. `components/AethelDashboardRuntime.tsx` + `components/dashboard/DashboardAIChatTab.tsx` now support chat interruption in Studio Home (`Interromper`) to avoid long blocked sessions/cost drift.
 3. Provider recovery path is now consistent to user settings surface:
 - `handleOpenProviderSettings` redirects to `/settings?tab=api` instead of forcing admin tab exposure.
 
@@ -286,7 +286,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - multi-agent fallback retry,
 - provider-gate error normalization.
 2. `components/ide/AIChatPanelContainer.tsx` now consumes shared helper and removes duplicated request/retry logic.
-3. `components/AethelDashboard.tsx` Studio chat flow now consumes the same helper, improving parity between Home and IDE chat behavior.
+3. `components/AethelDashboardRuntime.tsx` Studio chat flow now consumes the same helper, improving parity between Home and IDE chat behavior.
 
 ### 7.32 Live preview suggestion path alignment (delta 2026-03-01)
 1. Dashboard live-preview AI suggestion flow now also uses shared `requestAdvancedChat` helper with explicit single-agent delivery profile.
@@ -335,7 +335,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 1. `app/(auth)/login/login-v2.tsx` and `app/(auth)/register/register-v2.tsx` now execute real API auth (`/api/auth/login`, `/api/auth/register`) with transactional loading/error states (no blocking dialogs).
 2. New users now handoff to Studio Home via deterministic onboarding route:
 - `/dashboard?onboarding=1&source=register&mission=...`
-3. `components/AethelDashboard.tsx` now consumes `onboarding` + `source` query context to start the first-value guide and record onboarding-entry analytics.
+3. `components/AethelDashboardRuntime.tsx` now consumes `onboarding` + `source` query context to start the first-value guide and record onboarding-entry analytics.
 4. Admin funnel baseline now includes `signup` and `login` counters from analytics stream (`app/api/admin/analytics/baseline/route.ts` + `app/admin/analytics/page.tsx`).
 
 ### 7.40 Collaboration readiness panel hardening (delta 2026-03-01)
@@ -379,10 +379,10 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - reset action hidden on small viewports;
 - backend badge shown from `sm+`;
 - compact IDE CTA label on small viewports.
-3. `components/AethelDashboard.tsx` now differentiates IDE open attribution by source:
+3. `components/AethelDashboardRuntime.tsx` now differentiates IDE open attribution by source:
 - `dashboard-first-value` with `entry=live-preview`;
 - `dashboard-header` with `entry=quick-open`.
-4. Billing tab transitional feedback in `AethelDashboard.tsx` now uses shared state containers for subscribe error/loading (`aethel-state-*`) instead of unstructured inline text.
+4. Billing tab transitional feedback in `AethelDashboardRuntime.tsx` now uses shared state containers for subscribe error/loading (`aethel-state-*`) instead of unstructured inline text.
 
 ### 7.44 Collaboration evidence ledger operationalization (delta 2026-03-01)
 1. Added admin evidence endpoint `app/api/admin/collaboration/evidence/route.ts`:
@@ -396,7 +396,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 4. Claim policy unchanged: capability remains `PARTIAL` until external stress proof bundle is attached.
 
 ### 7.45 Dashboard bundle-load hardening (delta 2026-03-01)
-1. `components/AethelDashboard.tsx` now lazy-loads heavy/non-critical tabs via `next/dynamic` with explicit loading state:
+1. `components/AethelDashboardRuntime.tsx` now lazy-loads heavy/non-critical tabs via `next/dynamic` with explicit loading state:
 - `BillingTab`, `DownloadTab`, `TemplatesTab`, `UseCasesTab`, `AdminTab`, `AgentCanvasTab`;
 - `DashboardContentCreationTab`, `DashboardUnrealTab`.
 2. This reduces initial route pressure in `/dashboard` and aligns with performance-first entry policy.
@@ -405,7 +405,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 ### 7.46 Responsive entry + accessibility pass (delta 2026-03-01)
 1. `app/landing-v2.tsx` now provides a skip-link + `main` landmark and mobile-first quick mission chips to reduce first-action friction on phone/tablet.
 2. `app/dashboard/page.tsx` now includes deterministic loading feedback during dynamic shell bootstrap (no blank entry frame).
-3. `components/AethelDashboard.tsx` now replaces blank auth bootstrap (`return null`) with explicit loading state and adds skip-link to main content.
+3. `components/AethelDashboardRuntime.tsx` now replaces blank auth bootstrap (`return null`) with explicit loading state and adds skip-link to main content.
 4. Dashboard toast placement is now mobile-safe (`left/right` bounded on small viewports) with `aria-live` feedback.
 5. `components/dashboard/AethelDashboardSidebar.tsx` now includes explicit mobile close control in header and constrained drawer width for smaller screens.
 
@@ -429,7 +429,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 ### 7.50 Dashboard first-load runtime reduction (delta 2026-03-01)
 1. `components/dashboard/DashboardOverviewTab.tsx` now lazy-loads heavy 3D preview surface (`LivePreview`) with explicit loading fallback.
 2. `components/dashboard/tabs/AgentCanvasTab.tsx` now encapsulates React Flow runtime state (`nodes/edges`) to avoid parent-level dashboard coupling.
-3. `components/AethelDashboard.tsx` removed direct React Flow runtime imports from root shell path.
+3. `components/AethelDashboardRuntime.tsx` removed direct React Flow runtime imports from root shell path.
 4. Local production build profile shows `/dashboard` first-load JS reduced from previous ~495kB to ~174kB in current build output, improving initial entry responsiveness.
 
 ### 7.51 Freeze gate validation (delta 2026-03-01)
@@ -447,13 +447,13 @@ Required: unified empty/loading/error/success language and behavior across dashb
 
 ### 7.52 Dashboard shell and quota precision hardening (delta 2026-03-01)
 1. Added `qa:dashboard-shell` (`cloud-web-app/web/scripts/check-dashboard-shell-integrity.mjs`) to enforce:
-- `components/AethelDashboard.tsx` under `1200` lines;
+- `components/AethelDashboardRuntime.tsx` under `1200` lines;
 - no direct `@xyflow/react` runtime coupling in dashboard shell.
 2. Gate wired into:
 - `cloud-web-app/web/package.json` enterprise chain;
 - root `package.json` passthrough;
 - `.github/workflows/ui-audit.yml` and `.github/workflows/visual-regression-compare.yml` pre-check stages.
-3. `components/AethelDashboard.tsx` was further reduced and split with dedicated modules:
+3. `components/AethelDashboardRuntime.tsx` was further reduced and split with dedicated modules:
 - `components/dashboard/DashboardLoadingScreen.tsx`;
 - `components/dashboard/DashboardToast.tsx`;
 - `components/dashboard/dashboard-tab-loaders.tsx`.
@@ -829,7 +829,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - `production_only_for_promotion`.
 
 ### 7.91 Dashboard handoff runtime continuity (2026-03-04-u)
-1. `components/AethelDashboard.tsx` now performs best-effort runtime discovery before redirecting to `/ide` when no persisted runtime URL exists.
+1. `components/AethelDashboardRuntime.tsx` now performs best-effort runtime discovery before redirecting to `/ide` when no persisted runtime URL exists.
 2. Discovered runtime URL is forwarded as `previewUrl` in handoff query and persisted for continuity.
 3. Discovery failure/not-found path remains explicit via telemetry and preserves non-blocking fallback handoff.
 
@@ -840,7 +840,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 
 ### 7.93 Dashboard shell regression guard restore (2026-03-04-w)
 1. Moved IDE handoff runtime-discovery logic into `components/dashboard/aethel-dashboard-ide-handoff.ts`.
-2. `components/AethelDashboard.tsx` returned to shell gate boundary (`<=1200` lines) after runtime continuity enhancements.
+2. `components/AethelDashboardRuntime.tsx` returned to shell gate boundary (`<=1200` lines) after runtime continuity enhancements.
 3. `qa:dashboard-shell` remains green with runtime-discovery behavior preserved.
 
 ### 7.94 Production evidence generation API + operator action (2026-03-04-x)
@@ -878,3 +878,5 @@ Required: unified empty/loading/error/success language and behavior across dashb
 - `sloTargetMs` (default `90000`)
 - `sloStatus` (`pass|fail|insufficient_sample`)
 5. `/admin/onboarding` now displays SLO target + verdict in the metrics strip.
+
+

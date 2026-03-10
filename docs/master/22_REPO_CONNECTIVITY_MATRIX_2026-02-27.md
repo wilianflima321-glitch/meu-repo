@@ -9,7 +9,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 ## 2) Baseline factual coletado
 - `tracked_md_like=3617` (excluindo `node_modules/.next/.git`).
 - `docs/master/*.md=35`.
-- `docs/archive/**/*.md=3489`.
+- `docs/archive/**/*.md=3503`.
 - `cloud-web-app/web` com `21` arquivos `.md` soltos na raiz.
 - `cloud-web-app/web/.venv` presente e versionado.
 - `package.json` (raiz) com caminhos inexistentes em scripts:
@@ -20,7 +20,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `.gitmodules` aponta submódulo ausente:
   - `cloud-ide-desktop/aethel_theia_fork`
 - Pressão de manutenção:
-  - `55` arquivos `>=1200` linhas em `cloud-web-app/web` (top offender: `components/AethelDashboard.tsx`, `3528` linhas).
+  - `55` arquivos `>=1200` linhas em `cloud-web-app/web` (top offender: `components/AethelDashboardRuntime.tsx`, `3528` linhas).
 
 ## 3) Matriz de risco de conectividade
 | Domínio | Evidência | Impacto | Prioridade | Ação |
@@ -30,7 +30,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 | TS references inválidas | `tsconfig.json` com path inexistente | `tsc --build` instável | P0 | Ajustar `references` para módulos existentes |
 | Binários versionados | `.venv` com executáveis no Git | Ruído operacional e risco de segurança | P0 | Remover do versionamento + adicionar ignore |
 | Documentação dispersa | muitos `.md` fora de `docs/master` | Decisão por fonte errada | P1 | Consolidar índice e mover docs operacionais para `docs/archive` |
-| Componentes monolíticos | `AethelDashboard.tsx` 3k+ linhas | Manutenção e regressão | P1 | Decompor em blocos (header, mission, chat, preview, ops) |
+| Componentes monolíticos | `AethelDashboardRuntime.tsx` 3k+ linhas | Manutenção e regressão | P1 | Decompor em blocos (header, mission, chat, preview, ops) |
 | Duplicatas de superfície | `NexusCanvas` raiz + `nexus/NexusCanvasV2` | Drift visual/funcional | P1 | Declarar canônico e remover legado |
 
 ## 3.1) Classificação de diretórios de topo
@@ -79,15 +79,15 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 
 ## 8) Recalibration snapshot (2026-02-28)
 1. Repository markdown inventory:
-- `md_total=3636`
+- `md_total=3658`
 - `docs/master/*.md=41`
-- `docs/archive/**/*.md=3489`
+- `docs/archive/**/*.md=3503`
  - legacy external-path references in canonical folder: `116` (requires staged cleanup)
 2. Structural gate:
 - `npm run qa:repo-connectivity` -> PASS
 3. Remaining structural pressure:
 - high historical markdown volume outside canonical docs,
-- monolithic hotspots still present (`cloud-web-app/web/components/AethelDashboard.tsx` > 3000 lines),
+- monolithic hotspots still present (`cloud-web-app/web/components/AethelDashboardRuntime.tsx` > 3000 lines),
 - orphan-candidate top-level folders still requiring explicit keep/remove policy.
 
 ## 9) Immediate closure actions (no scope change)
@@ -151,14 +151,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `components/dashboard/TrialBanner.tsx`
 2. Removed trial-banner markup from monolithic shell and delegated to component.
 3. Current top offender size:
-- `components/AethelDashboard.tsx` -> `2995` lines (decomposition continues).
+- `components/AethelDashboardRuntime.tsx` -> `2995` lines (decomposition continues).
 
 ## 18) Incremental closure 2026-02-28 (dashboard header extraction)
 1. Added:
 - `components/dashboard/DashboardHeader.tsx`
 2. Removed header markup from monolithic shell and delegated status/actions to dedicated component.
 3. Current top offender size:
-- `components/AethelDashboard.tsx` -> `2936` lines (decomposition continues).
+- `components/AethelDashboardRuntime.tsx` -> `2936` lines (decomposition continues).
 4. Verification snapshot:
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
@@ -169,7 +169,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `components/dashboard/AethelDashboardSidebar.tsx`
 2. Removed sidebar nav/filter/session UI block from monolithic shell and delegated to dedicated component.
 3. Current top offender size:
-- `components/AethelDashboard.tsx` -> `2744` lines (decomposition continues).
+- `components/AethelDashboardRuntime.tsx` -> `2744` lines (decomposition continues).
 4. Verification snapshot:
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
@@ -180,7 +180,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `components/dashboard/DashboardOverviewTab.tsx`
 2. Removed overview block (status cards + wallet/connectivity summary + preview wrapper) from monolithic shell and delegated to dedicated component.
 3. Current top offender size:
-- `components/AethelDashboard.tsx` -> `2595` lines (decomposition continues).
+- `components/AethelDashboardRuntime.tsx` -> `2595` lines (decomposition continues).
 4. Verification snapshot:
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
@@ -191,7 +191,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `components/dashboard/DashboardProjectsTab.tsx`
 2. Removed projects tab block from monolithic shell and delegated to dedicated component.
 3. Current top offender size:
-- `components/AethelDashboard.tsx` -> `2535` lines (decomposition continues).
+- `components/AethelDashboardRuntime.tsx` -> `2535` lines (decomposition continues).
 4. Verification snapshot:
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
@@ -202,7 +202,7 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `components/dashboard/DashboardCopilotWorkflowBar.tsx`
 2. Removed AI-chat workflow control toolbar from monolithic shell and delegated to dedicated component.
 3. Current top offender size:
-- `components/AethelDashboard.tsx` -> `2469` lines (decomposition continues).
+- `components/AethelDashboardRuntime.tsx` -> `2469` lines (decomposition continues).
 4. Verification snapshot:
 - `qa:canonical-doc-alignment` -> PASS
 - `qa:repo-connectivity` -> PASS
@@ -215,14 +215,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `components/dashboard/DashboardConnectivityTab.tsx`
 - `components/dashboard/DashboardContentCreationTab.tsx`
 - `components/dashboard/DashboardUnrealTab.tsx`
-2. `components/AethelDashboard.tsx` now delegates:
+2. `components/AethelDashboardRuntime.tsx` now delegates:
 - full AI chat tab surface (modes + workflow controls + streaming panel)
 - full wallet tab surface (balance/receivables/forms/history)
 
 ## 24) Incremental closure 2026-03-01 (dashboard monolith threshold)
 1. Added:
 - `components/dashboard/FirstValueGuide.tsx`
-2. `components/AethelDashboard.tsx` line count reduced to `1098` (below 1200-pressure threshold used in this matrix).
+2. `components/AethelDashboardRuntime.tsx` line count reduced to `1098` (below 1200-pressure threshold used in this matrix).
 3. Updated pressure snapshot (`cloud-web-app/web`, >=1200 lines):
 - total files still high (`55`), but top offender moved from dashboard shell to domain-heavy modules.
 - current top offender: `lib/translations.ts` (`1698` lines).
@@ -232,20 +232,20 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - connectivity monitor tab
 - content-creation tab and unreal tab static surfaces
 3. Current top offender size:
-- `components/AethelDashboard.tsx` -> `2003` lines (decomposition continues).
+- `components/AethelDashboardRuntime.tsx` -> `2003` lines (decomposition continues).
 4. Local quality snapshot:
 - targeted lint for changed dashboard surfaces -> PASS
 - `qa:repo-connectivity` baseline remains PASS
 
 ## 24) Recalibration snapshot 2026-02-28 (full repo sweep)
 1. Markdown/document inventory (tracked scope):
-- `md_total=3636`
+- `md_total=3658`
 - `docs/master/*.md=41`
-- `docs/archive/**/*.md=3489`
+- `docs/archive/**/*.md=3503`
 - `cloud-web-app/web/*.md=1`
 2. Large-file pressure (tracked TS/TSX in `cloud-web-app/web`):
 - `>=1200 lines = 55 files`
-- current top hotspot remains `components/AethelDashboard.tsx` at `2003` lines
+- current top hotspot remains `components/AethelDashboardRuntime.tsx` at `2003` lines
 3. Remaining structural risks to close:
 - canonical docs still carry mixed historical narrative blocks that can confuse execution if read without baseline `26`
 - many large runtime modules (`lib/*`, `components/*`) still exceed maintainability threshold and need staged decomposition
@@ -264,14 +264,14 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - `cloud-web-app/web/scripts/check-dashboard-shell-integrity.mjs`
 - command: `npm run qa:dashboard-shell`
 2. Guard rules:
-- `components/AethelDashboard.tsx` must stay `<=1200` lines;
+- `components/AethelDashboardRuntime.tsx` must stay `<=1200` lines;
 - no direct `@xyflow/react` import in dashboard shell path.
 3. Gate wiring:
 - included in `cloud-web-app/web` `qa:enterprise-gate`;
 - mirrored in root scripts;
 - enforced pre-audit/pre-compare in CI workflows.
 4. Current state:
-- `AethelDashboard.tsx` at `1198` lines.
+- `AethelDashboardRuntime.tsx` at `1198` lines.
 
 ## 27) Incremental closure 2026-03-01 (quota precision alignment)
 1. `cloud-web-app/web/lib/plan-limits.ts` daily request checks now use canonical day buckets (`window='day'`, UTC) instead of monthly-average approximation.
@@ -349,10 +349,12 @@ Registrar conectividade real do repositório, identificar peças soltas e defini
 - command: `npm run qa:global-gap-scan`
 - output: `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
 2. Snapshot from current wave:
-- markdown inventory: `md_total=3636`, `docs/master=51`, `outside_canonical=3585`
+- markdown inventory: `md_total=3658`, `docs/master=52`, `outside_canonical=3606`
 - code pressure: `large_files_ge_1200=26`
 - blocking dialogs in active surfaces: `0` (deprecated residual: `4`)
 - explicit API gates with `NOT_IMPLEMENTED`: `18`
 - active canonical docs missing in read-order: `0` (closed in current wave)
 3. Decision:
 - treat this scanner output as freeze input for P0 sequencing (`P0-U..P0-X`) until counts trend down.
+
+

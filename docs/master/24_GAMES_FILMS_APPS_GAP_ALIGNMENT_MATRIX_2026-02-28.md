@@ -21,7 +21,7 @@ Scope lock:
 - `blocking-browser-dialogs=0`
 - `not-implemented-ui=0`
 3. Dashboard hotspot still large:
-- `cloud-web-app/web/components/AethelDashboard.tsx` -> `1198` lines (split progressed; below `>=1200` hotspot cutoff).
+- `cloud-web-app/web/components/AethelDashboardRuntime.tsx` -> `1198` lines (split progressed; below `>=1200` hotspot cutoff).
 4. Large-file maintainability pressure remains high:
 - `>=1200 lines` in tracked `cloud-web-app/web` TS/TSX: `0` files.
 5. Canonical drift pressure still exists:
@@ -86,3 +86,4 @@ Scope lock:
 2. If comparator and implementation status diverge, implementation evidence wins.
 3. Active numeric/status baseline must follow:
 - `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`.
+

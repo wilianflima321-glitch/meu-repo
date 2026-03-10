@@ -1,4 +1,4 @@
-Ôªø# 13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13
+# 13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13
 
 ## Escopo e evidencias
 Fontes canonicas usadas:
@@ -7,7 +7,7 @@ Fontes canonicas usadas:
 - `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`
 
 Superficies auditadas nesta rodada:
-- `cloud-web-app/web/components/AethelDashboard.tsx`
+- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`
 - `cloud-web-app/web/components/ChatComponent.tsx`
 - `cloud-web-app/web/components/git/GitPanel.tsx`
 - `cloud-web-app/web/components/extensions/ExtensionManager.tsx`
@@ -277,7 +277,7 @@ Evidencias desta rodada:
 
 Critica objetiva atual:
 1. O maior risco residual nao e visual; e manutencao estrutural e governanca de escopo.
-2. O monolito `components/AethelDashboard.tsx` ainda e grande e continua como principal hotspot tecnico.
+2. O monolito `components/AethelDashboardRuntime.tsx` ainda e grande e continua como principal hotspot tecnico.
 3. O volume de markdown fora de `docs/master` segue alto e aumenta risco de decisao por fonte historica.
 4. Claims de L4/L5 e colaboracao avancada continuam proibidos sem evidencia operacional reproduzivel.
 
@@ -634,22 +634,23 @@ Implemented:
 Critical reading:
 1. Reduces false perception of "empty preview" by showing exact failure class (`PARTIAL` capability runtime).
 
-## Snapshot incremental (2026-02-27) - conectividade e governan√ßa
+## Snapshot incremental (2026-02-27) - conectividade e governanÁa
 Fatos novos desta varredura:
-1. A fonte can√¥nica foi consolidada em `docs/master` com `00_INDEX.md`.
+1. A fonte canÙnica foi consolidada em `docs/master` com `00_INDEX.md`.
 2. Risco estrutural P0 confirmado fora da camada de UX:
 - scripts de raiz com paths inexistentes;
-- `tsconfig` com refer√™ncia ausente;
-- subm√≥dulo √≥rf√£o em `.gitmodules`;
+- `tsconfig` com referÍncia ausente;
+- submÛdulo Ûrf„o em `.gitmodules`;
 - `.venv` versionado em `cloud-web-app/web`.
-3. Press√£o de manuten√ß√£o confirmada por arquivos monol√≠ticos de grande porte.
+3. Press„o de manutenÁ„o confirmada por arquivos monolÌticos de grande porte.
 
-Leitura cr√≠tica:
-1. A plataforma mant√©m contratos visuais/route gates importantes, mas ainda carrega risco operacional de reposit√≥rio.
-2. O pr√≥ximo ganho real de qualidade √© reduzir d√≠vida estrutural e n√£o criar novas superf√≠cies.
-3. Claims de maturidade devem permanecer bloqueados enquanto conectividade/base de build n√£o estiver limpa.
+Leitura crÌtica:
+1. A plataforma mantÈm contratos visuais/route gates importantes, mas ainda carrega risco operacional de repositÛrio.
+2. O prÛximo ganho real de qualidade È reduzir dÌvida estrutural e n„o criar novas superfÌcies.
+3. Claims de maturidade devem permanecer bloqueados enquanto conectividade/base de build n„o estiver limpa.
 
 ## Delta 2026-03-03 IX - hard gate inventory and warning profile
 1. Explicit API `NOT_IMPLEMENTED` inventory moved to `0` in active scope after billing runtime-gate normalization (`PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE`, `503`, `PARTIAL`).
 2. Remaining local build warning profile is currently bounded to Docker sandbox fallback only.
 3. Limitation that remains: capability state is still `PARTIAL` in multiple core-loop/runtime areas and cannot be promoted to L4/L5 without evidence thresholds.
+

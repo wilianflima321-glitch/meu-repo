@@ -167,7 +167,7 @@ CI workflows:
 - external dev-server iframe mode (`runtime:dev-server`) when `previewUrl` is provided.
 3. `cloud-web-app/web/components/ide/FullscreenIDE.tsx` now auto-opens first viable file from canonical file tree when no `file` query is provided.
 4. `cloud-web-app/web/components/ide/FileExplorerPro.tsx` now supports keyboard context-menu interaction (`ContextMenu`/`Shift+F10` + arrow/enter/escape flow).
-5. `cloud-web-app/web/components/AethelDashboard.tsx` forwards persisted `previewUrl` into `/ide` handoff when runtime URL is configured.
+5. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` forwards persisted `previewUrl` into `/ide` handoff when runtime URL is configured.
 
 ## 11. Delta 2026-03-01 (provider setup recovery + compact UX guard)
 1. `cloud-web-app/web/components/ai/AIProviderSetupGuide.tsx` is now canonical for provider-missing recovery in chat surfaces.
@@ -186,7 +186,7 @@ CI workflows:
 ## 13. Delta 2026-03-01 (chat interruption controls)
 1. `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx` now exposes explicit stop action during in-flight generation.
 2. `cloud-web-app/web/components/dashboard/DashboardAIChatTab.tsx` now supports stop action in Studio Home chat mode.
-3. `cloud-web-app/web/components/AethelDashboard.tsx` now routes provider setup recovery to `/settings?tab=api` as canonical non-admin path.
+3. `cloud-web-app/web/components/AethelDashboardRuntime.tsx` now routes provider setup recovery to `/settings?tab=api` as canonical non-admin path.
 
 ## 14. Delta 2026-03-01 (preview health observability)
 1. `/ide` runtime settings now display probe status (`checking`, `reachable`, `unreachable`, `unhealthy`) for external preview runtime.
@@ -241,7 +241,7 @@ CI workflows:
 ## 25. Delta 2026-03-01 (auth entry + onboarding handoff hardening)
 1. `app/(auth)/login/login-v2.tsx` and `app/(auth)/register/register-v2.tsx` now use real auth routes (`/api/auth/login`, `/api/auth/register`) with transactional loading/error states.
 2. Register flow now routes to deterministic Studio Home onboarding handoff (`/dashboard?onboarding=1&source=register&mission=...`) instead of direct IDE jump.
-3. `components/AethelDashboard.tsx` now consumes onboarding/source query context to activate first-value guidance on entry.
+3. `components/AethelDashboardRuntime.tsx` now consumes onboarding/source query context to activate first-value guidance on entry.
 4. `app/admin/analytics/page.tsx` + `/api/admin/analytics/baseline` now expose signup/login counters in funnel checkpoints.
 
 ## 26. Delta 2026-03-01 (collaboration readiness surface)
@@ -263,7 +263,7 @@ CI workflows:
 ## 29. Delta 2026-03-01 (responsive entry hardening)
 1. `app/landing-v2.tsx` now includes skip-link + `main` landmark and mobile mission shortcuts to reduce first-action friction.
 2. `app/dashboard/page.tsx` now shows deterministic loading state while dynamic dashboard shell hydrates.
-3. `components/AethelDashboard.tsx` now exposes explicit auth bootstrap loading state (no blank frame), plus skip-link to main dashboard content.
+3. `components/AethelDashboardRuntime.tsx` now exposes explicit auth bootstrap loading state (no blank frame), plus skip-link to main dashboard content.
 4. Dashboard toast placement now adapts to small viewports (`left/right` bounded) with `aria-live` status feedback.
 5. `components/dashboard/AethelDashboardSidebar.tsx` now has a mobile close control in header and constrained drawer width for phone/tablet ergonomics.
 
@@ -281,13 +281,13 @@ CI workflows:
 ## 32. Delta 2026-03-01 (dashboard runtime weight reduction)
 1. `components/dashboard/DashboardOverviewTab.tsx` now lazy-loads `components/LivePreview.tsx` (`ssr:false`) with deterministic loading state.
 2. `components/dashboard/tabs/AgentCanvasTab.tsx` now owns React Flow node/edge state internally (parent dashboard no longer carries `@xyflow/react` runtime orchestration).
-3. `components/AethelDashboard.tsx` no longer imports React Flow runtime helpers or global React Flow stylesheet directly.
+3. `components/AethelDashboardRuntime.tsx` no longer imports React Flow runtime helpers or global React Flow stylesheet directly.
 
 ## 33. Delta 2026-03-04 (onboarding friction + provider preflight hardening)
 1. `app/landing-v2.tsx` now always forwards Studio entry with explicit onboarding context (`onboarding=1`, `source=landing-*`) for deterministic first-value activation.
 2. `components/dashboard/FirstValueGuide.tsx` now exposes completion progress bar (`0..100%`) and remaining-time hint to reduce ambiguity.
-3. `components/AethelDashboard.tsx` now tracks first-value milestones individually (`first-project`, `first-ai-success`, `first-ide-open`) before final completion metric.
-4. `components/ide/AIChatPanelContainer.tsx` and `components/AethelDashboard.tsx` now run provider preflight (`/api/ai/provider-status`) to show setup gate before first failed prompt.
+3. `components/AethelDashboardRuntime.tsx` now tracks first-value milestones individually (`first-project`, `first-ai-success`, `first-ide-open`) before final completion metric.
+4. `components/ide/AIChatPanelContainer.tsx` and `components/AethelDashboardRuntime.tsx` now run provider preflight (`/api/ai/provider-status`) to show setup gate before first failed prompt.
 5. `components/dashboard/DashboardHeader.tsx` now exposes an explicit global CTA (`Configurar IA`) when provider gate is active.
 
 ## 34. Delta 2026-03-04 (onboarding observability surface hardening)
@@ -320,13 +320,13 @@ CI workflows:
 3. `components/ide/PreviewRuntimeToolbar.tsx` now surfaces runtime discovery state/result messages to avoid silent fallback ambiguity.
 
 ## 39. Delta 2026-03-04 (dashboard -> ide runtime continuity hardening)
-1. `components/AethelDashboard.tsx` now attempts runtime discovery during IDE handoff when no persisted runtime URL exists.
+1. `components/AethelDashboardRuntime.tsx` now attempts runtime discovery during IDE handoff when no persisted runtime URL exists.
 2. On successful discovery, handoff now forwards `previewUrl` to `/ide` and persists it in local storage for subsequent sessions.
 3. Failure/not-found path remains explicit and non-blocking (handoff continues with inline preview fallback).
 
 ## 40. Delta 2026-03-04 (dashboard shell decomposition guard)
 1. Added runtime handoff helper `components/dashboard/aethel-dashboard-ide-handoff.ts` to keep shell composition compact.
-2. `AethelDashboard.tsx` keeps orchestration-only role while preserving runtime continuity behavior.
+2. `AethelDashboardRuntime.tsx` keeps orchestration-only role while preserving runtime continuity behavior.
 
 ## 41. Delta 2026-03-04 (admin AI monitor production probe control)
 1. Added production evidence trigger button in `app/admin/ai-monitor/page.tsx` (`Run Production Probe`).
@@ -348,3 +348,5 @@ CI workflows:
 - `sloTargetMs`
 - `sloStatus` (`pass|fail|insufficient_sample`)
 2. `app/admin/onboarding/page.tsx` now renders explicit SLO card with target + verdict.
+
+

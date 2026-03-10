@@ -109,7 +109,7 @@ This is a workflow/reliability competition, not a raw-model-marketing competitio
 
 ## 8) Immediate backlog additions
 1. Add canonical drift check for stale legacy path references in `docs/master`.
-2. Continue decomposition of `cloud-web-app/web/components/AethelDashboard.tsx`.
+2. Continue decomposition of `cloud-web-app/web/components/AethelDashboardRuntime.tsx`.
 3. Run full freeze gate suite and publish evidence package in canonical docs.
 4. Execute cross-domain gap matrix in `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`.
 5. Use `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md` as comparator guardrail before any "equal/superior" claim.
@@ -125,8 +125,10 @@ This is a workflow/reliability competition, not a raw-model-marketing competitio
 - `DashboardContentCreationTab`
 - `DashboardUnrealTab`
 2. Monolith pressure reduced but not closed:
-- `AethelDashboard.tsx`: `2469 -> 2003` lines in this wave.
+- `AethelDashboardRuntime.tsx`: `2469 -> 2003` lines in this wave.
 3. Remaining high-risk maintainability debt:
 - `>=1200` lines in tracked web TS/TSX: `55` files (requires staged decomposition policy by owner).
 4. Execution focus remains unchanged:
 - finish P0-D decomposition and structural coherence before any "best-in-market" claim expansion.
+
+
