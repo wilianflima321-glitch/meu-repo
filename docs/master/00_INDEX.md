@@ -148,6 +148,8 @@ Status: CANONICAL ENTRYPOINT
     - `setup:local-db` blocked by `DOCKER_DAEMON_NOT_RUNNING`,
     - `setup:billing-runtime` seeded `.env.local` placeholders (Stripe values still missing),
     - `setup:preview-runtime` seeded `.env.local` placeholders (provision token still missing).
+  - repo connectivity and canonical alignment checks: `PASS`.
+  - NOT_IMPLEMENTED scan refreshed: `docs/master/not-implemented-scan.csv` with `rows=0`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
