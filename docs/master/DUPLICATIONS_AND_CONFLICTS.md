@@ -163,6 +163,11 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 34. Non-canonical markdown archive completed:
 - moved 3,233 `.md` files from `cloud-admin-ia/` and `shared/tools/` into `docs/archive/bulk-2026-03-10`,
 - remaining gap is ensuring agents never treat archive as canonical.
+35. Operator readiness preflight captured:
+- production runtime blockers: `DATABASE_UNREACHABLE`, `APP_RUNTIME_UNREACHABLE`, `DOCKER_DAEMON_NOT_RUNNING`,
+- billing runtime blockers: missing Stripe secret/publishable/webhook + price IDs,
+- preview runtime blocker: `AETHEL_PREVIEW_PROVISION_TOKEN_MISSING`,
+- remaining gap is runtime closure, not visibility of blockers.
 
 ## 4) Canonical UX Decisions (locked)
 1. `/dashboard` stays primary entry.

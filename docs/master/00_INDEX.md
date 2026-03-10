@@ -140,6 +140,10 @@ Status: CANONICAL ENTRYPOINT
 - Delta 2026-03-10:
   - non-canonical markdown archived: 3,233 `.md` files moved from `cloud-admin-ia/` and `shared/tools/` into `docs/archive/bulk-2026-03-10`,
   - `docs/master/DUPLICATIONS_AND_CONFLICTS.md` refreshed to reflect archive closure and reduced drift risk.
+  - operator readiness preflight captured:
+    - production runtime blockers: `DATABASE_UNREACHABLE`, `APP_RUNTIME_UNREACHABLE`, `DOCKER_DAEMON_NOT_RUNNING`,
+    - billing runtime blockers: missing Stripe secret/publishable/webhook + price IDs,
+    - preview runtime blocker: `AETHEL_PREVIEW_PROVISION_TOKEN_MISSING`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
