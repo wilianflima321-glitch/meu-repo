@@ -15,11 +15,13 @@ export const dynamic = 'force-dynamic';
 
 interface CheckoutRequest {
   planId: string;
+  interval?: 'month' | 'year';
   successUrl?: string;
   cancelUrl?: string;
 }
 
 export async function POST(req: NextRequest) {
+  let requestedInterval: 'month' | 'year' = 'month';
   try {
     // Route-contract anchor:
     // error: 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE'
@@ -30,7 +32,14 @@ export async function POST(req: NextRequest) {
     const user = requireAuth(req);
     const body: CheckoutRequest = await req.json();
 
-    const { planId, successUrl, cancelUrl } = body;
+    const { planId, interval = 'month', successUrl, cancelUrl } = body;
+    if (interval !== 'month' && interval !== 'year') {
+      return NextResponse.json(
+        { error: 'INVALID_INTERVAL', message: 'Valid intervals: month, year.' },
+        { status: 400 }
+      );
+    }
+    requestedInterval = interval === 'year' ? 'year' : 'month';
 
     if (!planId) {
       return NextResponse.json(
@@ -55,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     // Stripe (real-or-fail)
     const stripe = getStripe();
-    const priceId = getStripePriceIdForPlan(planId);
+    const priceId = getStripePriceIdForPlan(planId, requestedInterval);
 
     const dbUser = await prisma.user.findUnique({ where: { id: user.userId } });
     if (!dbUser) {
@@ -77,14 +86,14 @@ export async function POST(req: NextRequest) {
     }
 
     const appUrl = (billingRuntime.gateway.checkoutOrigin || optionalEnv('NEXT_PUBLIC_APP_URL') || buildAppUrl('', req)).replace(/\/+$/, '');
-    const resolvedSuccessUrl = successUrl || `${appUrl}/billing/success?plan=${encodeURIComponent(planId)}`;
+    const resolvedSuccessUrl = successUrl || `${appUrl}/billing/success?plan=${encodeURIComponent(planId)}&interval=${encodeURIComponent(requestedInterval)}`;
     const resolvedCancelUrl = cancelUrl || `${appUrl}/billing/cancel`;
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: stripeCustomerId,
       client_reference_id: dbUser.id,
-      metadata: { userId: dbUser.id, planId },
+      metadata: { userId: dbUser.id, planId, interval: requestedInterval },
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: resolvedSuccessUrl,
       cancel_url: resolvedCancelUrl,
@@ -117,7 +126,24 @@ export async function POST(req: NextRequest) {
         {
           error: 'STRIPE_NOT_CONFIGURED',
           message: (error as Error).message,
-          required: ['STRIPE_SECRET_KEY', 'STRIPE_PRICE_STARTER', 'STRIPE_PRICE_BASIC', 'STRIPE_PRICE_PRO', 'STRIPE_PRICE_STUDIO', 'STRIPE_PRICE_ENTERPRISE'],
+          required:
+            requestedInterval === 'year'
+              ? [
+                  'STRIPE_SECRET_KEY',
+                  'STRIPE_PRICE_STARTER_ANNUAL',
+                  'STRIPE_PRICE_BASIC_ANNUAL',
+                  'STRIPE_PRICE_PRO_ANNUAL',
+                  'STRIPE_PRICE_STUDIO_ANNUAL',
+                  'STRIPE_PRICE_ENTERPRISE_ANNUAL',
+                ]
+              : [
+                  'STRIPE_SECRET_KEY',
+                  'STRIPE_PRICE_STARTER',
+                  'STRIPE_PRICE_BASIC',
+                  'STRIPE_PRICE_PRO',
+                  'STRIPE_PRICE_STUDIO',
+                  'STRIPE_PRICE_ENTERPRISE',
+                ],
         },
         { status: 503 }
       );

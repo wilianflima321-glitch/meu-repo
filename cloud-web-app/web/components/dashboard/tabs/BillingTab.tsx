@@ -26,6 +26,7 @@ export interface Plan {
   name: string
   description: string
   price: number
+  priceAnnual?: number
   currency: string
   interval: 'month' | 'year'
   popular?: boolean
@@ -42,7 +43,7 @@ interface BillingTabProps {
   plans?: Plan[]
   currentPlan?: string
   loading?: boolean
-  onSelectPlan?: (planId: string) => void
+  onSelectPlan?: (planId: string, interval?: 'month' | 'year') => void
   onManageSubscription?: () => void
   showHeader?: boolean
   showHighlights?: boolean
@@ -109,6 +110,7 @@ const planToCard = (plan: PlanDefinition): Plan => {
     name: plan.name,
     description: plan.description,
     price: plan.priceBRL,
+    priceAnnual: plan.priceAnnualBRL,
     currency: 'BRL',
     interval: plan.interval,
     popular: plan.popular,
@@ -124,12 +126,14 @@ const planToCard = (plan: PlanDefinition): Plan => {
 
 const apiPlanToCard = (plan: BillingPlan): Plan => {
   const price = Number(plan.priceBRL ?? plan.price ?? 0)
+  const priceAnnual = Number(plan.priceAnnualBRL ?? plan.priceAnnual ?? 0)
   const limits = (plan.limits ?? {}) as Record<string, unknown>
   return {
     id: String(plan.id),
     name: plan.name ?? String(plan.id),
     description: plan.description ?? '',
     price,
+    priceAnnual: priceAnnual || undefined,
     currency: plan.currency ?? 'BRL',
     interval: (plan.interval as Plan['interval']) ?? 'month',
     popular: plan.popular ?? false,
@@ -277,6 +281,7 @@ export function BillingTab({
   const [subscriptionStatus, setSubscriptionStatus] = useState<BillingSubscriptionStatus | null>(null)
   const [billingActionBusy, setBillingActionBusy] = useState<'checkout' | 'portal' | null>(null)
   const [billingActionError, setBillingActionError] = useState<string | null>(null)
+  const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
 
   useEffect(() => {
     if (plans?.length) return
@@ -318,7 +323,7 @@ export function BillingTab({
 
   const handleSelectPlan = async (planId: string) => {
     if (onSelectPlan) {
-      onSelectPlan(planId)
+      onSelectPlan(planId, billingCycle)
       return
     }
 
@@ -370,6 +375,29 @@ export function BillingTab({
           </p>
         </div>
       )}
+
+      <div className="flex justify-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1 text-sm">
+          <button
+            type="button"
+            onClick={() => setBillingCycle('month')}
+            className={`rounded-full px-4 py-1.5 transition-colors ${
+              billingCycle === 'month' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            type="button"
+            onClick={() => setBillingCycle('year')}
+            className={`rounded-full px-4 py-1.5 transition-colors ${
+              billingCycle === 'year' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
+            }`}
+          >
+            Annual (-20%)
+          </button>
+        </div>
+      </div>
 
       {showHighlights && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -541,11 +569,19 @@ export function BillingTab({
               : plan.price === 0
                 ? 'Start free'
                 : 'Subscribe'
+            const displayPrice =
+              billingCycle === 'year'
+                ? plan.priceAnnual ?? Number((plan.price * 12 * 0.8).toFixed(2))
+                : plan.price
 
             return (
               <PlanCard
                 key={plan.id}
-                plan={plan}
+                plan={{
+                  ...plan,
+                  price: displayPrice,
+                  interval: billingCycle,
+                }}
                 isCurrent={isCurrent}
                 disabled={isCheckoutBlocked || billingActionBusy === 'checkout'}
                 actionLabel={actionLabel}

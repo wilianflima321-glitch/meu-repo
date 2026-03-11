@@ -17,7 +17,9 @@ export type PlanDefinition = {
 	id: PlanId;
 	name: string;
 	price: number;
+	priceAnnual?: number;
 	priceBRL: number;
+	priceAnnualBRL?: number;
 	currency: 'USD';
 	interval: 'month';
 	popular?: boolean;
@@ -34,8 +36,10 @@ export const PLANS: PlanDefinition[] = [
 	{
 		id: 'starter',
 		name: 'Starter',
-		price: 3,
-		priceBRL: 15,
+		price: 20,
+		priceAnnual: 192,
+		priceBRL: 100,
+		priceAnnualBRL: 960,
 		currency: 'USD',
 		interval: 'month',
 		description: 'Para iniciantes e projetos pessoais',
@@ -67,8 +71,10 @@ export const PLANS: PlanDefinition[] = [
 	{
 		id: 'basic',
 		name: 'Basic',
-		price: 9,
-		priceBRL: 45,
+		price: 29,
+		priceAnnual: 278.4,
+		priceBRL: 145,
+		priceAnnualBRL: 1392,
 		currency: 'USD',
 		interval: 'month',
 		description: 'Para desenvolvedores ativos',
@@ -101,8 +107,10 @@ export const PLANS: PlanDefinition[] = [
 	{
 		id: 'pro',
 		name: 'Pro',
-		price: 29,
-		priceBRL: 149,
+		price: 49.99,
+		priceAnnual: 479.9,
+		priceBRL: 250,
+		priceAnnualBRL: 2400,
 		currency: 'USD',
 		interval: 'month',
 		popular: true,
@@ -141,8 +149,10 @@ export const PLANS: PlanDefinition[] = [
 	{
 		id: 'studio',
 		name: 'Studio',
-		price: 79,
-		priceBRL: 399,
+		price: 99.99,
+		priceAnnual: 959.9,
+		priceBRL: 500,
+		priceAnnualBRL: 4800,
 		currency: 'USD',
 		interval: 'month',
 		description: 'Para times e studios',
@@ -183,7 +193,9 @@ export const PLANS: PlanDefinition[] = [
 		id: 'enterprise',
 		name: 'Enterprise',
 		price: 199,
-		priceBRL: 999,
+		priceAnnual: 1910.4,
+		priceBRL: 995,
+		priceAnnualBRL: 9552,
 		currency: 'USD',
 		interval: 'month',
 		description: 'Para empresas e grandes times',

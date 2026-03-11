@@ -14,7 +14,9 @@ type Plan = {
   description?: string
   popular?: boolean
   price?: number
+  priceAnnual?: number
   priceBRL?: number
+  priceAnnualBRL?: number
   features?: string[]
   limits?: {
     tokensPerMonth?: number
@@ -49,6 +51,7 @@ function formatPrice(value: number, currency: Currency): string {
 export default function BillingPage() {
   const toast = useToast()
   const [currency, setCurrency] = useState<Currency>('BRL')
+  const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [showUsage, setShowUsage] = useState(true)
 
@@ -65,7 +68,7 @@ export default function BillingPage() {
         return
       }
 
-      window.location.href = `/billing/checkout?plan=${encodeURIComponent(planId)}`
+      window.location.href = `/billing/checkout?plan=${encodeURIComponent(planId)}&interval=${billingCycle}`
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro inesperado no checkout'
       console.error('[billing/checkout]', message)
@@ -123,6 +126,23 @@ export default function BillingPage() {
         </div>
       </div>
 
+      <div className="aethel-mb-6">
+        <div className="aethel-inline-flex aethel-items-center aethel-gap-2 aethel-rounded-full aethel-border aethel-border-slate-800 aethel-bg-slate-900/50 aethel-p-1">
+          <button
+            onClick={() => setBillingCycle('month')}
+            className={`aethel-rounded-full aethel-px-4 aethel-py-1.5 aethel-text-sm ${billingCycle === 'month' ? 'aethel-bg-slate-200 aethel-text-slate-900' : 'aethel-text-slate-300'}`}
+          >
+            Mensal
+          </button>
+          <button
+            onClick={() => setBillingCycle('year')}
+            className={`aethel-rounded-full aethel-px-4 aethel-py-1.5 aethel-text-sm ${billingCycle === 'year' ? 'aethel-bg-slate-200 aethel-text-slate-900' : 'aethel-text-slate-300'}`}
+          >
+            Anual (-20%)
+          </button>
+        </div>
+      </div>
+
       <div className="aethel-mb-8">
         <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-3">
           <h2 className="aethel-text-xl aethel-font-bold">Uso atual</h2>
@@ -139,6 +159,10 @@ export default function BillingPage() {
       <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 lg:aethel-grid-cols-5 aethel-gap-4">
         {plans.map((plan) => {
           const monthlyPrice = currency === 'BRL' ? plan.priceBRL || 0 : plan.price || 0
+          const annualPrice = currency === 'BRL'
+            ? (plan.priceAnnualBRL ?? Math.round((plan.priceBRL || 0) * 12 * 0.8))
+            : (plan.priceAnnual ?? Number(((plan.price || 0) * 12 * 0.8).toFixed(2)))
+          const displayPrice = billingCycle === 'year' ? annualPrice : monthlyPrice
           const tokens = plan.limits?.tokensPerMonth || 0
           const isBusy = selectedPlan === plan.id
           return (
@@ -153,8 +177,8 @@ export default function BillingPage() {
               <p className="aethel-text-sm aethel-text-slate-400 aethel-mb-4">{plan.description || 'Plano sem descricao detalhada.'}</p>
 
               <div className="aethel-mb-4">
-                <span className="aethel-text-3xl aethel-font-bold">{formatPrice(monthlyPrice, currency)}</span>
-                <span className="aethel-text-slate-400">/mes</span>
+                <span className="aethel-text-3xl aethel-font-bold">{formatPrice(displayPrice, currency)}</span>
+                <span className="aethel-text-slate-400">/{billingCycle === 'year' ? 'ano' : 'mes'}</span>
               </div>
 
               <div className="aethel-mb-4 aethel-p-3 aethel-bg-slate-900 aethel-rounded aethel-border aethel-border-slate-800">

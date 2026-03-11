@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => ({}));
     const planId = typeof body?.planId === 'string' ? body.planId.trim().toLowerCase() : '';
+    const intervalRaw = typeof body?.interval === 'string' ? body.interval.trim().toLowerCase() : '';
+    const interval = intervalRaw === 'year' || intervalRaw === 'month' ? intervalRaw : 'month';
 
     if (!ALLOWED_PLANS.has(planId)) {
       return NextResponse.json(
@@ -52,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     const origin = (gatewayConfig.checkoutOrigin || buildAppUrl('', req)).replace(/\/+$/, '');
-    const webCheckoutUrl = `${origin}/billing/checkout?plan=${encodeURIComponent(planId)}`;
+    const webCheckoutUrl = `${origin}/billing/checkout?plan=${encodeURIComponent(planId)}&interval=${encodeURIComponent(interval)}`;
 
     return NextResponse.json({
       planId,

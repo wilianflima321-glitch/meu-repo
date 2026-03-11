@@ -16,15 +16,15 @@ type PlanSummary = {
 };
 
 const PLAN_PRICES: Record<string, number> = {
-  starter: 0,
+  starter: 20,
   starter_trial: 0,
   basic: 29,
   basic_trial: 0,
-  pro: 79,
+  pro: 49.99,
   pro_trial: 0,
-  studio: 199,
+  studio: 99.99,
   studio_trial: 0,
-  enterprise: 499,
+  enterprise: 199,
   enterprise_trial: 0,
 };
 

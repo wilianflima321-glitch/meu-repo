@@ -55,7 +55,9 @@ export type BillingPlan = {
 	name: string;
 	description?: string;
 	price?: number;
+	priceAnnual?: number;
 	priceBRL?: number;
+	priceAnnualBRL?: number;
 	currency?: string;
 	interval?: string;
 	popular?: boolean;
@@ -356,10 +358,10 @@ export const AethelAPIClient = {
 		return requestJSON<TransferResponse>('/credits/transfer', { method: 'POST', body: input });
 	},
 
-	subscribe: async (planId: string): Promise<{ status: string; checkoutUrl?: string }> => {
+	subscribe: async (planId: string, interval: 'month' | 'year' = 'month'): Promise<{ status: string; checkoutUrl?: string }> => {
 		const data = await requestJSON<{ success?: boolean; checkoutUrl?: string; sessionId?: string }>('/billing/checkout', {
 			method: 'POST',
-			body: { planId },
+			body: { planId, interval },
 		});
 		return { status: data?.success ? 'checkout_created' : 'checkout_unknown', checkoutUrl: data?.checkoutUrl };
 	},

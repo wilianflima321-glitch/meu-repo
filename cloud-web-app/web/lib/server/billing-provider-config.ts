@@ -16,6 +16,11 @@ const STRIPE_SETUP_ENV = [
   'STRIPE_PRICE_PRO',
   'STRIPE_PRICE_STUDIO',
   'STRIPE_PRICE_ENTERPRISE',
+  'STRIPE_PRICE_STARTER_ANNUAL',
+  'STRIPE_PRICE_BASIC_ANNUAL',
+  'STRIPE_PRICE_PRO_ANNUAL',
+  'STRIPE_PRICE_STUDIO_ANNUAL',
+  'STRIPE_PRICE_ENTERPRISE_ANNUAL',
 ] as const
 
 export function getBillingProviderConfig(provider: BillingProviderId): BillingProviderConfig {

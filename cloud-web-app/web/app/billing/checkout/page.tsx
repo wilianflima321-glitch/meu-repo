@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { getToken } from '@/lib/auth';
 
 const ALLOWED_PLANS = new Set(['starter', 'basic', 'pro', 'studio', 'enterprise']);
+const ALLOWED_INTERVALS = new Set(['month', 'year']);
 
 export default function BillingCheckoutPage() {
   const router = useRouter();
@@ -18,6 +19,11 @@ export default function BillingCheckoutPage() {
     return ALLOWED_PLANS.has(raw) ? raw : '';
   }, [searchParams]);
 
+  const interval = useMemo(() => {
+    const raw = (searchParams.get('interval') || searchParams.get('billingInterval') || '').trim().toLowerCase();
+    return ALLOWED_INTERVALS.has(raw) ? raw : 'month';
+  }, [searchParams]);
+
   useEffect(() => {
     const run = async () => {
       try {
@@ -27,7 +33,7 @@ export default function BillingCheckoutPage() {
 
         const token = getToken();
         if (!token) {
-          const nextPath = encodeURIComponent(`/billing/checkout?plan=${planId}`);
+          const nextPath = encodeURIComponent(`/billing/checkout?plan=${planId}&interval=${interval}`);
           router.replace(`/login?next=${nextPath}`);
           return;
         }
@@ -38,7 +44,7 @@ export default function BillingCheckoutPage() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ planId }),
+          body: JSON.stringify({ planId, interval }),
         });
 
         const payload = await res.json().catch(() => ({}));

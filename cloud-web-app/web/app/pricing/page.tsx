@@ -1,5 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useMemo, useState } from 'react'
 import { PLANS } from '@/lib/plans'
 import PublicBillingReadiness from '@/components/billing/PublicBillingReadiness'
 
@@ -13,6 +16,21 @@ function formatLimit(value: number) {
 }
 
 export default function PricingPage() {
+  const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
+  const isAnnual = billingCycle === 'year'
+
+  const plans = useMemo(() => {
+    return PLANS.map((plan) => {
+      const annualFallback = Number((plan.price * 12 * 0.8).toFixed(2))
+      const annualBRLFallback = Math.round((plan.priceBRL || 0) * 12 * 0.8)
+      return {
+        ...plan,
+        displayPrice: isAnnual ? (plan.priceAnnual ?? annualFallback) : plan.price,
+        displayPriceBRL: isAnnual ? (plan.priceAnnualBRL ?? annualBRLFallback) : plan.priceBRL,
+      }
+    })
+  }, [isAnnual])
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="fixed inset-0 pointer-events-none">
@@ -75,11 +93,32 @@ export default function PricingPage() {
               Falar com vendas
             </Link>
           </div>
+
+          <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1 text-sm">
+            <button
+              type="button"
+              onClick={() => setBillingCycle('month')}
+              className={`rounded-full px-4 py-1.5 transition-colors ${
+                billingCycle === 'month' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle('year')}
+              className={`rounded-full px-4 py-1.5 transition-colors ${
+                billingCycle === 'year' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Anual (-20%)
+            </button>
+          </div>
         </section>
 
         <section className="mx-auto mt-16 max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-5">
-            {PLANS.map((plan) => (
+            {plans.map((plan) => (
               <article
                 key={plan.id}
                 className={`relative rounded-2xl border p-6 ${
@@ -102,10 +141,12 @@ export default function PricingPage() {
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-white">R${plan.priceBRL}</span>
-                    <span className="text-sm text-slate-400">/mes</span>
+                    <span className="text-4xl font-bold text-white">R${plan.displayPriceBRL}</span>
+                    <span className="text-sm text-slate-400">/{isAnnual ? 'ano' : 'mes'}</span>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">US${plan.price}/{plan.interval}</p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    US${plan.displayPrice}/{isAnnual ? 'year' : plan.interval}
+                  </p>
                 </div>
 
                 <div className="mb-6 grid grid-cols-2 gap-3 text-sm">
@@ -140,7 +181,11 @@ export default function PricingPage() {
 
                 <div className="mt-8">
                   <Link
-                    href={plan.id === 'enterprise' ? '/contact-sales' : `/dashboard?tab=billing&plan=${plan.id}`}
+                    href={
+                      plan.id === 'enterprise'
+                        ? '/contact-sales'
+                        : `/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`
+                    }
                     className={`flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
                       plan.popular
                         ? 'bg-gradient-to-r from-blue-600 to-sky-600 text-white hover:from-blue-500 hover:to-sky-500'

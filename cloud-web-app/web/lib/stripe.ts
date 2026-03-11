@@ -6,18 +6,21 @@ export function getStripe(): Stripe {
 	return new Stripe(secretKey);
 }
 
-export function getStripePriceIdForPlan(planId: string): string {
+export type BillingInterval = 'month' | 'year';
+
+export function getStripePriceIdForPlan(planId: string, interval: BillingInterval = 'month'): string {
+	const normalizedInterval = interval === 'year' ? 'year' : 'month';
 	switch (planId) {
 		case 'starter':
-			return requireEnv('STRIPE_PRICE_STARTER');
+			return requireEnv(normalizedInterval === 'year' ? 'STRIPE_PRICE_STARTER_ANNUAL' : 'STRIPE_PRICE_STARTER');
 		case 'basic':
-			return requireEnv('STRIPE_PRICE_BASIC');
+			return requireEnv(normalizedInterval === 'year' ? 'STRIPE_PRICE_BASIC_ANNUAL' : 'STRIPE_PRICE_BASIC');
 		case 'pro':
-			return requireEnv('STRIPE_PRICE_PRO');
+			return requireEnv(normalizedInterval === 'year' ? 'STRIPE_PRICE_PRO_ANNUAL' : 'STRIPE_PRICE_PRO');
 		case 'studio':
-			return requireEnv('STRIPE_PRICE_STUDIO');
+			return requireEnv(normalizedInterval === 'year' ? 'STRIPE_PRICE_STUDIO_ANNUAL' : 'STRIPE_PRICE_STUDIO');
 		case 'enterprise':
-			return requireEnv('STRIPE_PRICE_ENTERPRISE');
+			return requireEnv(normalizedInterval === 'year' ? 'STRIPE_PRICE_ENTERPRISE_ANNUAL' : 'STRIPE_PRICE_ENTERPRISE');
 		default:
 			throw Object.assign(new Error(`INVALID_PLAN: ${planId}`), { code: 'INVALID_PLAN' });
 	}

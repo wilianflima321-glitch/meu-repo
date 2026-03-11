@@ -245,6 +245,7 @@ export default function AethelDashboard() {
       name: plan.name,
       description: plan.description ?? '',
       price: plan.priceBRL ?? plan.price ?? 0,
+      priceAnnual: plan.priceAnnualBRL ?? plan.priceAnnual ?? undefined,
       currency: plan.currency ?? 'BRL',
       interval:
         String(plan.interval).toLowerCase().includes('year') || String(plan.interval).toLowerCase().includes('ano')
@@ -491,12 +492,12 @@ export default function AethelDashboard() {
     showToastMessage(`Download iniciado para ${platform}.`, 'info')
   }, [startDownload, showToastMessage])
 
-  const handleSubscribe = useCallback(async (planId: string) => {
+  const handleSubscribe = useCallback(async (planId: string, interval: 'month' | 'year' = 'month') => {
     setSubscribingPlan(planId)
     setSubscribeError(null)
 
     try {
-      const response = await AethelAPIClient.subscribe(planId)
+      const response = await AethelAPIClient.subscribe(planId, interval)
       if (response.checkoutUrl && typeof window !== 'undefined') {
         window.open(response.checkoutUrl, '_blank', 'noopener,noreferrer')
       }
