@@ -145,6 +145,8 @@ function IDEContent() {
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
+  const runtimeSyncTimerRef = useRef<number | null>(null)
+  const lastRuntimeSyncAtRef = useRef<number>(0)
 
   const {
     previewRuntimeUrl,
@@ -180,6 +182,29 @@ function IDEContent() {
     hasToken,
     previewUrlParam,
   })
+
+  const scheduleRuntimeSync = useCallback(() => {
+    if (!previewSandboxId || isSyncingRuntime) return
+    if (runtimeSyncTimerRef.current) {
+      window.clearTimeout(runtimeSyncTimerRef.current)
+    }
+    runtimeSyncTimerRef.current = window.setTimeout(() => {
+      runtimeSyncTimerRef.current = null
+      const now = Date.now()
+      if (now - lastRuntimeSyncAtRef.current < 1000) return
+      lastRuntimeSyncAtRef.current = now
+      void syncRuntime()
+    }, 1500)
+  }, [previewSandboxId, isSyncingRuntime, syncRuntime])
+
+  useEffect(() => {
+    return () => {
+      if (runtimeSyncTimerRef.current) {
+        window.clearTimeout(runtimeSyncTimerRef.current)
+        runtimeSyncTimerRef.current = null
+      }
+    }
+  }, [])
 
   const { data: fullAccessData, mutate: mutateFullAccess } = useSWR<FullAccessResponse>(
     hasToken ? '/api/studio/access/full' : null,
@@ -311,13 +336,16 @@ function IDEContent() {
             timestamp: new Date().toISOString(),
           },
         }))
+        if (previewEnabled && previewSandboxId) {
+          scheduleRuntimeSync()
+        }
       } catch (error) {
         setFileError(error instanceof Error ? error.message : "Unable to save file.");
       } finally {
         setIsSavingFile(false);
       }
     },
-    [projectId]
+    [projectId, previewEnabled, previewSandboxId, scheduleRuntimeSync]
   );
 
   useEffect(() => {
