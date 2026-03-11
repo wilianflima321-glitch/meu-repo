@@ -23,6 +23,7 @@
     "qa:no-fake-success": "node scripts/check-no-fake-success.mjs",
     "qa:wcag-critical": "node scripts/check-wcag-critical-surfaces.mjs",
     "qa:dashboard-shell": "node scripts/check-dashboard-shell-integrity.mjs",
+    "qa:billing-runtime-readiness": "node scripts/check-billing-runtime-readiness.mjs",
     "qa:mojibake": "node scripts/scan-mojibake.mjs",
     "qa:interface-critical": "node scripts/interface-critical-scan.mjs",
     "qa:interface-gate": "node scripts/interface-critical-gate.mjs",
@@ -149,3 +150,4 @@
     "vitest": "^4.0.17"
   }
 }
+
