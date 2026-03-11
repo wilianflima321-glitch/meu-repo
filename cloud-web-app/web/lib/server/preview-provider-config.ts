@@ -19,7 +19,13 @@ const PROVIDERS: Record<ManagedPreviewProviderId, ManagedPreviewProviderConfig> 
   e2b: {
     id: 'e2b',
     label: 'E2B',
-    setupEnv: ['AETHEL_PREVIEW_PROVIDER', 'AETHEL_PREVIEW_PROVISION_ENDPOINT', 'AETHEL_PREVIEW_PROVISION_TOKEN'],
+    setupEnv: [
+      'AETHEL_PREVIEW_PROVIDER',
+      'E2B_API_KEY',
+      'AETHEL_PREVIEW_E2B_TEMPLATE',
+      'AETHEL_PREVIEW_E2B_PORT',
+      'AETHEL_PREVIEW_ALLOWED_HOSTS',
+    ],
     routeProvisionSupported: true,
     mode: 'route-managed',
   },

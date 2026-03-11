@@ -21,6 +21,8 @@ const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'
 const DEFAULT_TIMEOUT_MS = 12_000
 const DEFAULT_READY_WAIT_MS = 10_000
 const DEFAULT_READY_POLL_MS = 1_200
+const DEFAULT_E2B_TIMEOUT_MS = 300_000
+const DEFAULT_E2B_PORT = 3000
 
 export const dynamic = 'force-dynamic'
 
@@ -68,6 +70,18 @@ function parseReadyPollMs(raw: string | undefined): number {
   const parsed = Number.parseInt(String(raw ?? ''), 10)
   if (!Number.isFinite(parsed)) return DEFAULT_READY_POLL_MS
   return Math.max(200, Math.min(parsed, 5_000))
+}
+
+function parseE2BTimeoutMs(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_E2B_TIMEOUT_MS
+  return Math.max(30_000, Math.min(parsed, 3_600_000))
+}
+
+function parseE2BPort(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_E2B_PORT
+  return Math.max(80, Math.min(parsed, 65_535))
 }
 
 function sleep(ms: number): Promise<void> {
@@ -189,6 +203,29 @@ async function callManagedProvisionEndpoint(params: {
   }
 }
 
+async function provisionWithE2B(params: {
+  apiKey: string
+  templateId: string
+  port: number
+  timeoutMs: number
+}): Promise<{ runtimeUrl: string; sandboxId: string; host: string }> {
+  const module = await import('e2b')
+  const Sandbox = (module as { default?: any; Sandbox?: any }).default || (module as { Sandbox?: any }).Sandbox
+  if (!Sandbox) {
+    throw new Error('E2B SDK not available')
+  }
+  const sandbox = await Sandbox.create(params.templateId, {
+    apiKey: params.apiKey,
+    timeoutMs: params.timeoutMs,
+  })
+  const host = sandbox.getHost(params.port)
+  return {
+    runtimeUrl: `https://${host}`,
+    sandboxId: sandbox.sandboxId || 'unknown',
+    host,
+  }
+}
+
 export async function POST(request: NextRequest) {
   const rateLimited = enforcePreviewRuntimeRateLimit({
     req: request,
@@ -206,6 +243,10 @@ export async function POST(request: NextRequest) {
     const provisionEndpoint = String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINT || '').trim()
     const provisionEndpointsCsv = String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINTS || '').trim()
     const provisionToken = String(process.env.AETHEL_PREVIEW_PROVISION_TOKEN || '').trim()
+    const e2bApiKey = String(process.env.E2B_API_KEY || '').trim()
+    const e2bTemplateId = String(process.env.AETHEL_PREVIEW_E2B_TEMPLATE || '').trim()
+    const e2bPort = parseE2BPort(process.env.AETHEL_PREVIEW_E2B_PORT)
+    const e2bTimeoutMs = parseE2BTimeoutMs(process.env.AETHEL_PREVIEW_E2B_TIMEOUT_MS)
     const providerConfig =
       getManagedPreviewProviderConfig(process.env.AETHEL_PREVIEW_PROVIDER) ||
       (provisionEndpoint || provisionEndpointsCsv ? getManagedPreviewProviderConfig('custom-endpoint') : null)
@@ -229,7 +270,85 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    if (provisionEndpoints.length === 0) {
+    const failures: ManagedProvisionAttempt[] = []
+    let managedSuccess: ManagedProvisionSuccess | null = null
+
+    if (providerConfig?.id === 'e2b' && provisionEndpoints.length === 0) {
+      if (!e2bApiKey) {
+        return capabilityResponse({
+          error: 'RUNTIME_PROVISION_FAILED',
+          status: 503,
+          message: 'E2B provisioning requires E2B_API_KEY.',
+          capability: CAPABILITY,
+          capabilityStatus: 'PARTIAL',
+          metadata: {
+            mode: 'managed',
+            provider: providerConfig.id,
+            projectId,
+            missing: ['E2B_API_KEY'],
+          },
+        })
+      }
+      if (!e2bTemplateId) {
+        return capabilityResponse({
+          error: 'RUNTIME_PROVISION_FAILED',
+          status: 503,
+          message: 'E2B provisioning requires AETHEL_PREVIEW_E2B_TEMPLATE.',
+          capability: CAPABILITY,
+          capabilityStatus: 'PARTIAL',
+          metadata: {
+            mode: 'managed',
+            provider: providerConfig.id,
+            projectId,
+            missing: ['AETHEL_PREVIEW_E2B_TEMPLATE'],
+          },
+        })
+      }
+      try {
+        const e2bResult = await provisionWithE2B({
+          apiKey: e2bApiKey,
+          templateId: e2bTemplateId,
+          port: e2bPort,
+          timeoutMs: e2bTimeoutMs,
+        })
+        const normalized = normalizeRuntimeCandidate(e2bResult.runtimeUrl)
+        if (!normalized) {
+          return capabilityResponse({
+            error: 'RUNTIME_PROVISION_INVALID_URL',
+            status: 502,
+            message: 'E2B returned an invalid or blocked runtime URL.',
+            capability: CAPABILITY,
+            capabilityStatus: 'PARTIAL',
+            metadata: {
+              mode: 'managed',
+              provider: providerConfig.id,
+              projectId,
+              runtimeUrl: e2bResult.runtimeUrl,
+              host: e2bResult.host,
+            },
+          })
+        }
+        managedSuccess = {
+          runtimeUrl: normalized,
+          endpoint: 'e2b',
+          attempt: 1,
+          totalEndpoints: 1,
+        }
+      } catch (error) {
+        return capabilityResponse({
+          error: 'RUNTIME_PROVISION_FAILED',
+          status: 503,
+          message: error instanceof Error ? error.message : 'E2B provision failed.',
+          capability: CAPABILITY,
+          capabilityStatus: 'PARTIAL',
+          metadata: {
+            mode: 'managed',
+            provider: providerConfig?.id || 'e2b',
+            projectId,
+          },
+        })
+      }
+    } else if (provisionEndpoints.length === 0) {
       const localRuntime = await localFallbackDiscover()
       if (!localRuntime) {
         return capabilityResponse({
@@ -267,47 +386,46 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const failures: ManagedProvisionAttempt[] = []
-    let managedSuccess: ManagedProvisionSuccess | null = null
-
-    for (let index = 0; index < provisionEndpoints.length; index += 1) {
-      const endpoint = provisionEndpoints[index]
-      const attemptResult = await callManagedProvisionEndpoint({
-        endpoint,
-        projectId,
-        userId: auth.userId,
-        timeoutMs,
-        provisionToken,
-      })
-      if (attemptResult.success) {
-        managedSuccess = {
-          ...attemptResult.success,
-          attempt: index + 1,
-          totalEndpoints: provisionEndpoints.length,
+    if (!managedSuccess) {
+      for (let index = 0; index < provisionEndpoints.length; index += 1) {
+        const endpoint = provisionEndpoints[index]
+        const attemptResult = await callManagedProvisionEndpoint({
+          endpoint,
+          projectId,
+          userId: auth.userId,
+          timeoutMs,
+          provisionToken,
+        })
+        if (attemptResult.success) {
+          managedSuccess = {
+            ...attemptResult.success,
+            attempt: index + 1,
+            totalEndpoints: provisionEndpoints.length,
+          }
+          break
         }
-        break
-      }
-      if (attemptResult.failure) {
-        failures.push(attemptResult.failure)
-        if (
-          attemptResult.failure.mode === 'invalid_runtime_url' &&
-          index === provisionEndpoints.length - 1
-        ) {
-          return capabilityResponse({
-            error: 'RUNTIME_PROVISION_INVALID_URL',
-            status: 502,
-            message: 'Provision backend returned an invalid or blocked runtime URL.',
-            capability: CAPABILITY,
-            capabilityStatus: 'PARTIAL',
-            metadata: {
-              mode: 'managed',
-              provider: providerConfig?.id || 'custom-endpoint',
-              projectId,
-              endpoint,
-              attempt: index + 1,
-              totalEndpoints: provisionEndpoints.length,
-            },
-          })
+        if (attemptResult.failure) {
+          failures.push(attemptResult.failure)
+          if (
+            attemptResult.failure.mode === 'invalid_runtime_url' &&
+            index === provisionEndpoints.length - 1
+          ) {
+            return capabilityResponse({
+              error: 'RUNTIME_PROVISION_INVALID_URL',
+              status: 502,
+              message: 'Provision backend returned an invalid or blocked runtime URL.',
+              capability: CAPABILITY,
+              capabilityStatus: 'PARTIAL',
+              metadata: {
+                mode: 'managed',
+                provider: providerConfig?.id || 'custom-endpoint',
+                projectId,
+                endpoint,
+                attempt: index + 1,
+                totalEndpoints: provisionEndpoints.length,
+              },
+            })
+          }
         }
       }
     }

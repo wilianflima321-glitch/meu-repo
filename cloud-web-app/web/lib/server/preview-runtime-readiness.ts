@@ -46,6 +46,15 @@ export async function getPreviewRuntimeReadiness(): Promise<PreviewRuntimeReadin
       ? String(process.env.AETHEL_PREVIEW_PROVISION_ENDPOINTS || '').trim()
       : ''
   )
+  const e2bApiKey = String(process.env.E2B_API_KEY || '').trim()
+  const e2bTemplate = String(process.env.AETHEL_PREVIEW_E2B_TEMPLATE || '').trim()
+  const previewAllowedHosts = String(process.env.AETHEL_PREVIEW_ALLOWED_HOSTS || '').trim()
+  const allowedHostsSet = new Set(
+    previewAllowedHosts
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+  )
   const providerConfig =
     getManagedPreviewProviderConfig(process.env.AETHEL_PREVIEW_PROVIDER) ||
     (configuredEndpoints.length > 0 ? getManagedPreviewProviderConfig('custom-endpoint') : null)
@@ -68,6 +77,26 @@ export async function getPreviewRuntimeReadiness(): Promise<PreviewRuntimeReadin
     if (providerConfig && !providerConfig.routeProvisionSupported) {
       instructions.push('WebContainers path is declared, but runtime wiring still depends on browser-side integration.')
       recommendedCommands.push('Set NEXT_PUBLIC_PREVIEW_RUNTIME_URL or implement browser-side WebContainers boot path.')
+    } else if (providerConfig?.id === 'e2b') {
+      const e2bHostAllowed =
+        allowedHostsSet.has('.e2b.app') ||
+        allowedHostsSet.has('e2b.app') ||
+        allowedHostsSet.has('.e2b.dev') ||
+        allowedHostsSet.has('e2b.dev')
+      if (!isRuntimeConfigured(e2bApiKey)) {
+        blockers.push('E2B_API_KEY_MISSING')
+        instructions.push('Set E2B_API_KEY to enable managed provisioning via E2B.')
+      }
+      if (!isRuntimeConfigured(e2bTemplate)) {
+        blockers.push('AETHEL_PREVIEW_E2B_TEMPLATE_MISSING')
+        instructions.push('Set AETHEL_PREVIEW_E2B_TEMPLATE to the E2B template ID for preview runtime.')
+      }
+      if (!e2bHostAllowed) {
+        blockers.push('AETHEL_PREVIEW_ALLOWED_HOSTS_MISSING')
+        instructions.push('Allow E2B sandbox host domain via AETHEL_PREVIEW_ALLOWED_HOSTS (e.g., .e2b.app).')
+      }
+      recommendedCommands.push('npm run setup:preview-runtime')
+      recommendedCommands.push('Populate E2B envs in cloud-web-app/web/.env.local')
     } else if (!isRuntimeConfigured(process.env.AETHEL_PREVIEW_PROVISION_TOKEN)) {
       blockers.push('AETHEL_PREVIEW_PROVISION_TOKEN_MISSING')
       instructions.push('Set AETHEL_PREVIEW_PROVISION_TOKEN to enable managed provisioning.')
@@ -95,7 +124,7 @@ export async function getPreviewRuntimeReadiness(): Promise<PreviewRuntimeReadin
   const readyForManagedProvision =
     managedConfigured &&
     providerConfig?.routeProvisionSupported !== false &&
-    !blockers.includes('AETHEL_PREVIEW_PROVISION_TOKEN_MISSING')
+    blockers.length === 0
 
   return {
     status:

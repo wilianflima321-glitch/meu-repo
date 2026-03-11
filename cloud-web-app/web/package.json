@@ -64,6 +64,7 @@
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
+    "e2b": "^2.0.1",
     "framer-motion": "^10.16.16",
     "howler": "^2.2.4",
     "i18next": "^25.5.2",
