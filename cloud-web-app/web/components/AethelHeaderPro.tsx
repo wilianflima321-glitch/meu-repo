@@ -113,7 +113,7 @@ export default function AethelHeader() {
       label: 'Sair',
       icon: <LogOut className="w-4 h-4" />,
       onClick: () => {
-        localStorage.removeItem('aethel-token')
+        localStorage.removeItem('token')
         window.location.href = '/login'
       },
       danger: true,

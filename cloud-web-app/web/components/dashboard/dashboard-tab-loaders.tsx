@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 
 const TabLoading = () => (
-  <div className="aethel-state aethel-state-loading aethel-m-6 aethel-text-xs">
+  <div className="aethel-state aethel-state-loading aethel-m-6 text-xs">
     <p className="aethel-state-title">Carregando modulo...</p>
   </div>
 )

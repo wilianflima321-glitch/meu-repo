@@ -29,7 +29,7 @@ const RUN_SOURCE = 'production'
 const MAX_BATCH_CHANGES = 50
 const MAX_LOCAL_IMPORT_FANOUT = 40
 const MAX_REVERSE_DEPENDENTS = 80
-const SANDBOX_PREFIX = 'aethel-change-apply-'
+const SANDBOX_PREFIX = 'change-apply-'
 const SANDBOX_TTL_MS = 6 * 60 * 60 * 1000
 
 type ApplyExecutionMode = 'workspace' | 'sandbox'

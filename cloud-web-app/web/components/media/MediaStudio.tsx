@@ -651,7 +651,7 @@ export default function MediaStudio({
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'aethel-export.webm'
+      a.download = 'export.webm'
       a.click()
       URL.revokeObjectURL(url)
 

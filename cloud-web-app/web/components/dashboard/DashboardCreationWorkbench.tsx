@@ -18,7 +18,7 @@ const makeId = (prefix: string) => `${prefix}_${Date.now()}_${Math.random().toSt
 
 function getAuthHeaders(): HeadersInit {
   if (typeof window === 'undefined') return { 'Content-Type': 'application/json' };
-  const token = window.localStorage.getItem('aethel-token');
+  const token = window.localStorage.getItem('token');
   return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 }
 

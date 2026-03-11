@@ -187,13 +187,13 @@ export function AethelDashboardSidebar({
         </div>
       </div>
 
-      <div className="aethel-sidebar-nav aethel-space-y-1">
+      <div className="aethel-sidebar-nav space-y-1">
         {NAV_ITEMS.map((item) => (
           <button
             key={item.tab}
             type="button"
             onClick={() => selectTab(item.tab)}
-            className={`aethel-sidebar-item aethel-w-full ${activeTab === item.tab ? 'active' : ''}`}
+            className={`aethel-sidebar-item w-full ${activeTab === item.tab ? 'active' : ''}`}
             aria-current={activeTab === item.tab ? 'page' : undefined}
           >
             <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -34,8 +34,8 @@ export function DashboardCopilotWorkflowBar({
   const controlsDisabled = copilotWorkflowsLoading || connectBusy
 
   return (
-    <div className="aethel-flex aethel-items-center aethel-gap-2 aethel-mb-4">
-      <span className="aethel-text-sm aethel-text-slate-400">Trabalho</span>
+    <div className="aethel-flex aethel-items-center aethel-gap-2 mb-4">
+      <span className="text-sm text-slate-400">Trabalho</span>
       <select
         value={activeWorkflowId ?? ''}
         onChange={(event) => {

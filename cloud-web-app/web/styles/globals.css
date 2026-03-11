@@ -1,3 +1,9 @@
+@import url('https://cdn.jsdelivr.net/npm/@vscode/codicons@0.0.36/dist/codicon.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Aethel IDE - Professional Design System */
 /* Version 2.0 - Enterprise Grade UI */
 
@@ -208,7 +214,7 @@ html.light {
 }
 
 html {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   line-height: var(--aethel-line-height-normal);
   color: var(--aethel-text-primary);
   background-color: var(--aethel-surface-primary);
@@ -271,7 +277,7 @@ small {
 }
 
 code, pre {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-family: var(--font-mono), 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
@@ -423,6 +429,17 @@ code, pre {
 
 .aethel-button-secondary:hover:not(:disabled) {
   background-color: var(--aethel-surface-secondary);
+}
+
+.aethel-button-danger {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.aethel-button-danger:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.55);
 }
 
 .aethel-button-ghost {

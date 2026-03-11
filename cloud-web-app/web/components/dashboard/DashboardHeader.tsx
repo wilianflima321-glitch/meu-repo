@@ -70,7 +70,7 @@ export function DashboardHeader({
         </div>
 
         <div className="aethel-flex aethel-items-center aethel-gap-2 md:aethel-gap-4">
-          <button type="button" onClick={onResetDashboard} className="hidden md:inline-flex aethel-button aethel-button-ghost aethel-text-xs">
+          <button type="button" onClick={onResetDashboard} className="hidden md:inline-flex aethel-button aethel-button-ghost text-xs">
             Redefinir painel
           </button>
           <button
@@ -91,23 +91,23 @@ export function DashboardHeader({
           </button>
 
           <div
-            className={`aethel-flex aethel-items-center aethel-gap-2 aethel-px-3 aethel-py-1 aethel-rounded-full text-sm font-medium ${
+            className={`aethel-flex aethel-items-center aethel-gap-2 px-3 py-1 rounded-full text-sm font-medium ${
               backendOnline
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                 : 'bg-red-500/20 text-red-400 border border-red-500/30'
             } hidden sm:flex`}
           >
-            <div className={`w-2 h-2 aethel-rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
+            <div className={`w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
             Backend: {backendOnline ? 'Online' : 'Offline'}
           </div>
 
           {authErrorText && (
-            <span className="hidden lg:inline text-xs aethel-text-red-400" title={authErrorText}>
+            <span className="hidden lg:inline text-xs text-red-400" title={authErrorText}>
               Auth providers indisponiveis
             </span>
           )}
           {billingErrorText && (
-            <span className="hidden lg:inline text-xs aethel-text-yellow-400" title={billingErrorText}>
+            <span className="hidden lg:inline text-xs text-yellow-400" title={billingErrorText}>
               Planos indisponiveis
             </span>
           )}
@@ -146,7 +146,7 @@ export function DashboardHeader({
           <button
             type="button"
             onClick={onOpenIde}
-            className="aethel-button aethel-button-primary aethel-shadow-md hover:aethel-shadow-lg aethel-transition"
+            className="aethel-button aethel-button-primary shadow-md hover:aethel-shadow-lg aethel-transition"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

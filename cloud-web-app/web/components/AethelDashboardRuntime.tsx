@@ -999,7 +999,7 @@ export default function AethelDashboard() {
   }
 
   return (
-    <div className={`aethel-min-h-screen aethel-flex aethel-flex-column ${settings.theme === 'dark' ? 'aethel-bg-slate-950 aethel-text-slate-50' : 'aethel-bg-slate-100 aethel-text-slate-900'}`}>
+    <div className={`min-h-screen aethel-flex flex-column ${settings.theme === 'dark' ? 'bg-slate-950 text-slate-50' : 'bg-slate-100 text-slate-900'}`}>
       <a
         href="#dashboard-main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-3 focus:py-2 focus:text-white focus:ring-2 focus:ring-blue-500"
@@ -1032,7 +1032,7 @@ export default function AethelDashboard() {
         authErrorText={authErrorText}
         billingErrorText={billingErrorText}
       />
-      <div className="aethel-flex aethel-flex-1 aethel-overflow-hidden">
+      <div className="aethel-flex flex-1 overflow-hidden">
         {sidebarOpen && (
           <button
             type="button"
@@ -1051,7 +1051,7 @@ export default function AethelDashboard() {
           onSelectTab={handleTabChange}
           onCloseMobile={() => setSidebarOpen(false)}
         />
-        <main id="dashboard-main-content" className="aethel-flex-1 aethel-overflow-y-auto aethel-relative">
+        <main id="dashboard-main-content" className="flex-1 overflow-y-auto relative">
           <DashboardMainContent
             activeTab={activeTab}
             showFirstValueGuide={showFirstValueGuide}

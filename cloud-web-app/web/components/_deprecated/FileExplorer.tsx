@@ -74,7 +74,7 @@ export default function FileExplorer() {
       return (
         <div
           key={node.path}
-          className="aethel-file-tree-item aethel-cursor-pointer"
+          className="aethel-file-tree-item cursor-pointer"
           style={indent}
           onClick={() => console.log('Open file:', node.path)}
         >
@@ -87,7 +87,7 @@ export default function FileExplorer() {
     return (
       <div key={node.path}>
         <div
-          className="aethel-file-tree-item aethel-cursor-pointer"
+          className="aethel-file-tree-item cursor-pointer"
           style={indent}
           onClick={() => toggleFolder(node.path)}
         >
@@ -150,10 +150,10 @@ export default function FileExplorer() {
         </div>
       </div>
 
-      <div className="aethel-panel-content aethel-p-0">
+      <div className="aethel-panel-content p-0">
         <div className="aethel-file-tree">
           {errorMessage ? (
-            <div className="aethel-p-4 aethel-text-sm aethel-text-slate-400">{errorMessage}</div>
+            <div className="aethel-p-4 text-sm text-slate-400">{errorMessage}</div>
           ) : (
             files.map(node => renderNode(node))
           )}

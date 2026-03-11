@@ -240,10 +240,10 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
   {
     key: 'workbench.iconTheme',
     type: 'enum',
-    default: 'aethel-icons',
+    default: 'icons',
     description: 'Specifies the icon theme used in the workbench.',
     category: ['Workbench', 'Appearance'],
-    enum: ['aethel-icons', 'material-icons', 'seti', 'none'],
+    enum: ['icons', 'material-icons', 'seti', 'none'],
   },
   {
     key: 'workbench.sideBar.location',

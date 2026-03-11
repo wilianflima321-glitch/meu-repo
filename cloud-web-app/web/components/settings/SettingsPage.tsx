@@ -977,7 +977,7 @@ export default function SettingsPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    const saved = localStorage.getItem('aethel-settings')
+    const saved = localStorage.getItem('settings')
     if (saved) {
       try {
         setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(saved) })
@@ -988,13 +988,13 @@ export default function SettingsPage() {
   }, [])
 
   const saveSettings = useCallback(() => {
-    localStorage.setItem('aethel-settings', JSON.stringify(settings))
+    localStorage.setItem('settings', JSON.stringify(settings))
   }, [settings])
 
   const updateSetting = useCallback((id: string, value: any) => {
     setSettings((prev) => {
       const next = { ...prev, [id]: value }
-      localStorage.setItem('aethel-settings', JSON.stringify(next))
+      localStorage.setItem('settings', JSON.stringify(next))
       return next
     })
   }, [])
@@ -1002,14 +1002,14 @@ export default function SettingsPage() {
   const resetSetting = useCallback((id: string) => {
     setSettings((prev) => {
       const next = { ...prev, [id]: DEFAULT_SETTINGS[id] }
-      localStorage.setItem('aethel-settings', JSON.stringify(next))
+      localStorage.setItem('settings', JSON.stringify(next))
       return next
     })
   }, [])
 
   const resetAllSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS)
-    localStorage.setItem('aethel-settings', JSON.stringify(DEFAULT_SETTINGS))
+    localStorage.setItem('settings', JSON.stringify(DEFAULT_SETTINGS))
   }, [])
 
   const filteredSettings = useMemo(() => {
@@ -1046,7 +1046,7 @@ export default function SettingsPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'aethel-settings.json'
+    a.download = 'settings.json'
     a.click()
   }, [settings])
 

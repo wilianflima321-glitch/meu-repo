@@ -57,7 +57,7 @@ type InlineApplyResult = {
 
 function getAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {}
-  const token = window.localStorage.getItem('aethel-token')
+  const token = window.localStorage.getItem('token')
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
@@ -236,7 +236,7 @@ function IDEContent() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    setHasToken(Boolean(window.localStorage.getItem('aethel-token')))
+    setHasToken(Boolean(window.localStorage.getItem('token')))
   }, [])
 
   useEffect(() => {

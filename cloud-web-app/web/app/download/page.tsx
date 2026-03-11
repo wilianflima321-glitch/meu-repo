@@ -63,7 +63,7 @@ export default function DownloadPage() {
       icon: WindowsIcon,
       version: '0.3.0',
       size: '~180 MB',
-      file: 'aethel-engine-0.3.0-win-x64.exe',
+      file: 'engine-0.3.0-win-x64.exe',
       requirements: 'Windows 10+ (64-bit)',
     },
     mac: {
@@ -71,7 +71,7 @@ export default function DownloadPage() {
       icon: AppleIcon,
       version: '0.3.0',
       size: '~200 MB',
-      file: 'aethel-engine-0.3.0-mac-universal.dmg',
+      file: 'engine-0.3.0-mac-universal.dmg',
       requirements: 'macOS 11+ (Intel & Apple Silicon)',
     },
     linux: {
@@ -79,7 +79,7 @@ export default function DownloadPage() {
       icon: LinuxIcon,
       version: '0.3.0',
       size: '~170 MB',
-      file: 'aethel-engine-0.3.0-linux-x64.tar.gz',
+      file: 'engine-0.3.0-linux-x64.tar.gz',
       requirements: 'Ubuntu 20.04+, Debian 11+, Fedora 35+',
     },
   }

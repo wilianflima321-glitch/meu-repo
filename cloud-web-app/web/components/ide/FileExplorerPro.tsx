@@ -333,7 +333,7 @@ export default function FileExplorerPro({
   onFileDelete,
   onFileRename,
   onRefresh,
-  workspaceName = 'aethel-engine',
+  workspaceName = 'engine',
   className = '',
 }: FileExplorerProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)

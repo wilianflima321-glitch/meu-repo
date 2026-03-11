@@ -424,7 +424,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'aethel-settings.json';
+    a.download = 'settings.json';
     a.click();
     URL.revokeObjectURL(url);
   }, [settingsService]);

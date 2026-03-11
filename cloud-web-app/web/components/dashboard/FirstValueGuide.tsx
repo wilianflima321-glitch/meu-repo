@@ -119,13 +119,13 @@ export function FirstValueGuide({
 
   return (
     <section className="aethel-m-4 aethel-rounded-lg border border-blue-500/30 bg-blue-500/10 aethel-p-4 md:aethel-m-6">
-      <div className="aethel-flex aethel-flex-col aethel-gap-4 md:aethel-flex-row md:aethel-items-center md:aethel-justify-between">
-        <div className="aethel-flex-1">
-          <h3 className="aethel-text-sm aethel-font-semibold aethel-text-blue-200">Primeiro valor em menos de 2 minutos</h3>
-          <p className="aethel-mt-1 aethel-text-xs aethel-text-slate-300">
+      <div className="aethel-flex aethel-flex-col aethel-gap-4 md:flex-row md:aethel-items-center md:aethel-justify-between">
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold text-blue-200">Primeiro valor em menos de 2 minutos</h3>
+          <p className="mt-1 text-xs text-slate-300">
             Crie um projeto, configure o provider de IA e abra o preview da IDE com um starter pronto para iteracao.
           </p>
-          <div className="aethel-mt-3">
+          <div className="mt-3">
             <div className="h-1.5 w-full rounded-full bg-slate-800/70">
               <div
                 className="h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300"
@@ -137,13 +137,13 @@ export function FirstValueGuide({
               {estimatedRemainingMinutes > 0 ? ` - ~${estimatedRemainingMinutes} min restantes` : ' - concluido'}
             </p>
           </div>
-          <ul className="aethel-mt-2 aethel-space-y-1 text-[11px] text-slate-300">
+          <ul className="mt-2 space-y-1 text-[11px] text-slate-300">
             <li>{firstProjectCreated ? '[OK]' : '[ ]'} Primeiro projeto criado ({formatDuration(milestoneDurations.firstProjectCreatedMs)})</li>
             <li>{firstAiSuccess ? '[OK]' : '[ ]'} Primeira resposta de IA recebida ({formatDuration(milestoneDurations.firstAiSuccessMs)})</li>
             <li>{firstIdeOpened ? '[OK]' : '[ ]'} IDE live preview aberta ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
           </ul>
 
-          <div className="aethel-mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
+          <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-[11px] font-medium text-slate-200">First value session</p>
               <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-slate-300">
@@ -168,7 +168,7 @@ export function FirstValueGuide({
             </div>
           </div>
 
-          <div className="aethel-mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
+          <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-[11px] font-medium text-slate-200">Preview readiness</p>
               <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-slate-300">
@@ -217,7 +217,7 @@ export function FirstValueGuide({
             )}
           </div>
 
-          <div className="aethel-mt-4">
+          <div className="mt-4">
             <p className="text-[11px] font-medium text-slate-200">Starters recomendados</p>
             <div className="mt-2 grid gap-2 md:[grid-template-columns:repeat(3,minmax(0,1fr))]">
               {STARTER_TEMPLATES.map((template) => (
@@ -235,20 +235,20 @@ export function FirstValueGuide({
           </div>
         </div>
 
-        <div className="aethel-flex aethel-flex-col aethel-gap-2 sm:aethel-flex-row sm:aethel-flex-wrap">
-          <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary aethel-text-xs">
+        <div className="aethel-flex aethel-flex-col aethel-gap-2 sm:flex-row sm:flex-wrap">
+          <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary text-xs">
             Criar projeto
           </button>
-          <button type="button" onClick={onConfigureAI} className="aethel-button aethel-button-secondary aethel-text-xs">
+          <button type="button" onClick={onConfigureAI} className="aethel-button aethel-button-secondary text-xs">
             Configurar IA
           </button>
-          <button type="button" onClick={onOpenAIChat} className="aethel-button aethel-button-secondary aethel-text-xs">
+          <button type="button" onClick={onOpenAIChat} className="aethel-button aethel-button-secondary text-xs">
             Abrir Chat IA
           </button>
-          <button type="button" onClick={onOpenIdePreview} className="aethel-button aethel-button-secondary aethel-text-xs">
+          <button type="button" onClick={onOpenIdePreview} className="aethel-button aethel-button-secondary text-xs">
             {previewActionLabel}
           </button>
-          <button type="button" onClick={onDismiss} className="aethel-button aethel-button-ghost aethel-text-xs">
+          <button type="button" onClick={onDismiss} className="aethel-button aethel-button-ghost text-xs">
             Dispensar
           </button>
         </div>

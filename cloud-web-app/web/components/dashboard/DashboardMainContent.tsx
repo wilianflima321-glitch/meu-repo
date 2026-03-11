@@ -107,12 +107,12 @@ export function DashboardMainContent({
         <div className="aethel-p-6">
           <BillingTab {...billingProps} />
           {billingError && (
-            <div className="aethel-state aethel-state-error aethel-mt-4 aethel-text-xs" role="alert" aria-live="polite">
+            <div className="aethel-state aethel-state-error mt-4 text-xs" role="alert" aria-live="polite">
               {billingError}
             </div>
           )}
           {subscribingPlan && (
-            <div className="aethel-state aethel-state-loading aethel-mt-2 aethel-text-xs" role="status" aria-live="polite">
+            <div className="aethel-state aethel-state-loading mt-2 text-xs" role="status" aria-live="polite">
               Processando plano {subscribingPlan}...
             </div>
           )}

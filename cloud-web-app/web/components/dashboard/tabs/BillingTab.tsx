@@ -59,12 +59,12 @@ const formatCompactNumber = (value: number) => {
 }
 
 const formatTokenLimit = (value: number | 'unlimited') => {
-  if (value === 'unlimited' || value < 0) return 'Unlimited'
+  if (value === 'unlimited' || value < 0) return 'Ilimitado'
   return `${formatCompactNumber(value)} tokens`
 }
 
 const formatLimitValue = (value: number | 'unlimited') => {
-  if (value === 'unlimited' || value < 0) return 'Unlimited'
+  if (value === 'unlimited' || value < 0) return 'Ilimitado'
   return value
 }
 
@@ -89,13 +89,13 @@ const buildRuntimeErrorMessage = (error: unknown) => {
     if (typeof error.data === 'object' && error.data && 'error' in error.data) {
       const code = String((error.data as { error?: unknown }).error ?? '')
       if (code === 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE') {
-        return 'Billing runtime is not ready yet. Configure Stripe and webhook secrets before promoting checkout.'
+        return 'O runtime de billing ainda nao esta pronto. Configure Stripe e webhook antes de liberar o checkout.'
       }
     }
     return error.message
   }
   if (error instanceof Error) return error.message
-  return 'Billing action failed.'
+  return 'Falha na acao de billing.'
 }
 
 const planToCard = (plan: PlanDefinition): Plan => {
@@ -183,7 +183,7 @@ function PlanCard({
         <div className="absolute top-4 right-4">
           <Badge variant="primary" size="sm">
             <Crown className="w-3 h-3 mr-1" />
-            Recommended
+            Recomendado
           </Badge>
         </div>
       )}
@@ -206,21 +206,21 @@ function PlanCard({
 
         <div className="mb-6">
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-white">{isFree ? 'Free' : `R$${plan.price}`}</span>
-            {!isFree && <span className="text-slate-400">/{plan.interval === 'month' ? 'month' : 'year'}</span>}
+            <span className="text-4xl font-bold text-white">{isFree ? 'Gratis' : `R$${plan.price}`}</span>
+            {!isFree && <span className="text-slate-400">/{plan.interval === 'month' ? 'mes' : 'ano'}</span>}
           </div>
           {!isFree && (
-            <p className="text-xs text-slate-500 mt-2">Recurring billing. Cancel any time.</p>
+            <p className="text-xs text-slate-500 mt-2">Cobranca recorrente. Cancele quando quiser.</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="rounded-lg bg-slate-900/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">Tokens/month</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-500">Tokens/mes</p>
             <p className="text-sm text-white font-semibold">{formatTokenLimit(plan.limits.requests)}</p>
           </div>
           <div className="rounded-lg bg-slate-900/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">Projects</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-500">Projetos</p>
             <p className="text-sm text-white font-semibold">{formatLimitValue(plan.limits.projects)}</p>
           </div>
           <div className="rounded-lg bg-slate-900/60 p-3">
@@ -228,7 +228,7 @@ function PlanCard({
             <p className="text-sm text-white font-semibold">{plan.limits.storage}</p>
           </div>
           <div className="rounded-lg bg-slate-900/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">Collaborators</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-500">Colaboradores</p>
             <p className="text-sm text-white font-semibold">{formatLimitValue(plan.limits.collaborators)}</p>
           </div>
         </div>
@@ -246,7 +246,7 @@ function PlanCard({
       <div className="px-6 pb-6">
         {isCurrent ? (
           <Button variant="secondary" fullWidth disabled>
-            Current plan
+            Plano atual
           </Button>
         ) : (
           <Button
@@ -255,7 +255,7 @@ function PlanCard({
             disabled={disabled}
             onClick={onSelect}
           >
-            {actionLabel ?? (isFree ? 'Start free' : 'Subscribe')}
+            {actionLabel ?? (isFree ? 'Comecar gratis' : 'Assinar')}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         )}
@@ -369,9 +369,9 @@ export function BillingTab({
     <div className="space-y-8">
       {showHeader && (
         <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-4">Choose the right plan</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">Escolha o plano ideal</h1>
           <p className="text-slate-400">
-            Plans aligned with real AI and infrastructure usage. Upgrade or downgrade when needed.
+            Planos alinhados ao uso real de IA e infraestrutura. Troque quando precisar.
           </p>
         </div>
       )}
@@ -385,7 +385,7 @@ export function BillingTab({
               billingCycle === 'month' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
             }`}
           >
-            Monthly
+            Mensal
           </button>
           <button
             type="button"
@@ -394,7 +394,7 @@ export function BillingTab({
               billingCycle === 'year' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
             }`}
           >
-            Annual (-20%)
+            Anual (-20%)
           </button>
         </div>
       </div>
@@ -404,22 +404,22 @@ export function BillingTab({
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
             <div>
-              <p className="text-sm text-white font-semibold">Secure billing</p>
-              <p className="text-xs text-slate-400">Stripe-backed payment and runtime checks.</p>
+              <p className="text-sm text-white font-semibold">Billing seguro</p>
+              <p className="text-xs text-slate-400">Stripe com checagens reais de runtime.</p>
             </div>
           </Card>
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
             <Rocket className="w-5 h-5 text-sky-400" />
             <div>
-              <p className="text-sm text-white font-semibold">Fast activation</p>
-              <p className="text-xs text-slate-400">Plan changes depend on live checkout and webhook readiness.</p>
+              <p className="text-sm text-white font-semibold">Ativacao rapida</p>
+              <p className="text-xs text-slate-400">Mudancas dependem de checkout e webhook prontos.</p>
             </div>
           </Card>
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
             <Crown className="w-5 h-5 text-yellow-400" />
             <div>
-              <p className="text-sm text-white font-semibold">Canonical plans</p>
-              <p className="text-xs text-slate-400">Rendered from the same billing contract used by the backend.</p>
+              <p className="text-sm text-white font-semibold">Planos canonicos</p>
+              <p className="text-xs text-slate-400">Renderizados do mesmo contrato usado no backend.</p>
             </div>
           </Card>
         </div>
@@ -429,9 +429,9 @@ export function BillingTab({
         <Card variant="outlined" padding="md" className="border-amber-500/30 bg-amber-500/10">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-amber-200">Checkout is not production-ready yet</p>
+              <p className="text-sm font-semibold text-amber-200">Checkout ainda nao esta pronto</p>
               <p className="mt-1 text-xs text-amber-100/80">
-                Billing routes exist, but the current runtime still reports partial readiness.
+                As rotas existem, mas o runtime ainda reporta readiness parcial.
               </p>
               {billingReadiness.provider ? (
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-amber-100/80">
@@ -446,12 +446,12 @@ export function BillingTab({
                 </div>
               ) : null}
               <ul className="mt-3 list-disc space-y-1 pl-4 text-xs text-amber-100/80">
-                {billingReadiness.gateway?.checkoutEnabled === false && <li>Checkout is disabled in gateway configuration.</li>}
+                {billingReadiness.gateway?.checkoutEnabled === false && <li>Checkout desabilitado na configuracao do gateway.</li>}
                 {billingReadiness.gateway?.activeGateway !== 'stripe' && (
-                  <li>Active gateway: {billingReadiness.gateway?.activeGateway || 'unknown'}.</li>
+                  <li>Gateway ativo: {billingReadiness.gateway?.activeGateway || 'unknown'}.</li>
                 )}
-                {billingReadiness.portalReady === false && <li>Subscription portal is not ready in this runtime.</li>}
-                {billingReadiness.webhookReady === false && <li>Webhook processing is not ready, so subscription events should not be treated as active.</li>}
+                {billingReadiness.portalReady === false && <li>Portal de assinatura nao esta pronto neste runtime.</li>}
+                {billingReadiness.webhookReady === false && <li>Webhook nao esta pronto, eventos nao devem ser tratados como ativos.</li>}
                 {billingReadiness.stripe?.missingEnv?.map((envKey) => (
                   <li key={envKey}>Missing {envKey}.</li>
                 ))}
@@ -476,7 +476,7 @@ export function BillingTab({
               {billingReadiness.instructions?.length ? (
                 <div className="mt-4 rounded-xl border border-amber-500/20 bg-black/20 p-3">
                   <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-amber-100/80">
-                    Next actions
+                    Proximas acoes
                   </p>
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-amber-100/80">
                     {billingReadiness.instructions.map((instruction) => (
@@ -509,11 +509,11 @@ export function BillingTab({
         <Card variant="outlined" padding="md" className="border-red-500/30 bg-red-500/10">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-red-200">Billing action failed</p>
+              <p className="text-sm font-semibold text-red-200">Falha na acao de billing</p>
               <p className="mt-1 text-xs text-red-100/80">{billingActionError}</p>
             </div>
             <Badge variant="error" size="sm">
-              action blocked
+              acao bloqueada
             </Badge>
           </div>
         </Card>
@@ -527,19 +527,19 @@ export function BillingTab({
                 {planIcons[effectiveCurrentPlan] || <Sparkles className="w-6 h-6 text-sky-400" />}
               </div>
               <div>
-                <p className="text-sm text-slate-400">Current plan</p>
+                <p className="text-sm text-slate-400">Plano atual</p>
                 <p className="text-lg font-semibold text-white">{currentPlanLabel}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                   {subscriptionState ? (
                     <Badge variant={subscriptionState === 'active' ? 'success' : 'info'} size="sm">
-                      subscription: {subscriptionState}
+                      assinatura: {subscriptionState}
                     </Badge>
                   ) : (
                     <Badge variant="secondary" size="sm">
-                      no active subscription
+                      sem assinatura ativa
                     </Badge>
                   )}
-                  {currentPeriodEnd && <span>Renews on {currentPeriodEnd}</span>}
+                  {currentPeriodEnd && <span>Renova em {currentPeriodEnd}</span>}
                 </div>
               </div>
             </div>
@@ -549,7 +549,7 @@ export function BillingTab({
               disabled={billingReadiness?.portalReady === false}
               onClick={handleManageSubscription}
             >
-              {billingReadiness?.portalReady === false ? 'Portal unavailable' : 'Manage subscription'}
+              {billingReadiness?.portalReady === false ? 'Portal indisponivel' : 'Gerenciar assinatura'}
             </Button>
           </div>
         </Card>
@@ -558,17 +558,17 @@ export function BillingTab({
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {isLoading ? (
           <Card variant="elevated" padding="lg" className="text-slate-400">
-            Loading plans...
+            Carregando planos...
           </Card>
         ) : (
           resolvedPlans.map((plan) => {
             const isCurrent = effectiveCurrentPlan === plan.id
             const isCheckoutBlocked = billingReadiness?.checkoutReady === false
             const actionLabel = isCheckoutBlocked
-              ? 'Checkout unavailable'
+              ? 'Checkout indisponivel'
               : plan.price === 0
-                ? 'Start free'
-                : 'Subscribe'
+                ? 'Comecar gratis'
+                : 'Assinar'
             const displayPrice =
               billingCycle === 'year'
                 ? plan.priceAnnual ?? Number((plan.price * 12 * 0.8).toFixed(2))
@@ -597,27 +597,27 @@ export function BillingTab({
           <h3 className="text-lg font-semibold text-white mb-4">FAQ</h3>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">Can I cancel at any time?</h4>
+              <h4 className="font-medium text-slate-200 mb-2">Posso cancelar a qualquer momento?</h4>
               <p className="text-sm text-slate-400">
-                Yes. Cancellation is controlled by Stripe runtime state and takes effect according to the current subscription period.
+                Sim. O cancelamento segue o estado real do Stripe e vale no fim do periodo vigente.
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">What happens if I exceed limits?</h4>
+              <h4 className="font-medium text-slate-200 mb-2">O que acontece se eu ultrapassar os limites?</h4>
               <p className="text-sm text-slate-400">
-                Usage limits are enforced by plan policy. Upgrade when needed or wait for the next billing window.
+                Os limites sao aplicados por plano. Faca upgrade ou aguarde o proximo ciclo.
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">Do you support team pricing?</h4>
+              <h4 className="font-medium text-slate-200 mb-2">Existe plano para equipes?</h4>
               <p className="text-sm text-slate-400">
-                Yes. Enterprise remains the right path for custom seats, support expectations, and contract review.
+                Sim. Enterprise cobre assentos, suporte e contrato sob medida.
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">Which payment methods are live?</h4>
+              <h4 className="font-medium text-slate-200 mb-2">Quais metodos de pagamento estao ativos?</h4>
               <p className="text-sm text-slate-400">
-                Public billing readiness reflects the actual gateway state. Do not assume payment methods are active until checkout and webhook readiness are green.
+                O readiness publico reflete o estado real do gateway. So considere ativo quando checkout e webhook estiverem verdes.
               </p>
             </div>
           </div>

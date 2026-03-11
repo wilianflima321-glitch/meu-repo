@@ -176,7 +176,7 @@ export function MonacoEditorPro({
   wordWrap = 'off',
   fontSize = 12,
   tabSize = 2,
-  theme = 'aethel-dark',
+  theme = 'dark',
   height = '100%',
   enableInlineEdit = true,
   enableAISuggestions = true,
@@ -210,8 +210,8 @@ export function MonacoEditorPro({
     monacoRef.current = monaco;
     
     // Register custom theme
-    monaco.editor.defineTheme('aethel-dark', AETHEL_DARK_THEME);
-    monaco.editor.setTheme('aethel-dark');
+    monaco.editor.defineTheme('dark', AETHEL_DARK_THEME);
+    monaco.editor.setTheme('dark');
     
     // Register LSP providers for supported languages
     const lspLanguages = ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'];
@@ -823,7 +823,7 @@ export function MonacoEditorPro({
         value={value}
         defaultValue={defaultValue}
         path={path}
-        theme="aethel-dark"
+        theme="dark"
         onMount={handleMount}
         onChange={onChange}
         options={{

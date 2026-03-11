@@ -86,7 +86,7 @@ export default function Terminal({
 
   // Load command history from localStorage
   useEffect(() => {
-    const savedHistory = localStorage.getItem('aethel-terminal-history')
+    const savedHistory = localStorage.getItem('terminal-history')
     if (savedHistory) {
       try {
         const parsed = JSON.parse(savedHistory)
@@ -104,7 +104,7 @@ export default function Terminal({
   useEffect(() => {
     if (commandHistory.length > 0) {
       localStorage.setItem(
-        'aethel-terminal-history',
+        'terminal-history',
         JSON.stringify(commandHistory.slice(-100)) // Keep last 100 commands
       )
     }

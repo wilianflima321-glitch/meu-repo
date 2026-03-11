@@ -750,7 +750,7 @@ export default function CommandPalette({
   
   // Load recent commands
   useEffect(() => {
-    const saved = localStorage.getItem('aethel-recent-commands')
+    const saved = localStorage.getItem('recent-commands')
     if (saved) {
       try {
         setRecentCommands(JSON.parse(saved))
@@ -798,7 +798,7 @@ export default function CommandPalette({
     // Add to recent
     const newRecent = [cmd.id, ...recentCommands.filter((id) => id !== cmd.id)].slice(0, 10)
     setRecentCommands(newRecent)
-    localStorage.setItem('aethel-recent-commands', JSON.stringify(newRecent))
+    localStorage.setItem('recent-commands', JSON.stringify(newRecent))
     
     // Close and execute
     onClose()

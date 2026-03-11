@@ -997,7 +997,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
       blendShapes,
       lipSyncKeyframes,
       metadata: {
-        format: 'aethel-facial-animation',
+        format: 'facial-animation',
         version: '1.0.0',
         blendShapeCount: Object.keys(blendShapes).length,
       },

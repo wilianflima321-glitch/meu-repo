@@ -61,7 +61,7 @@ export default function BillingPage() {
   const handleSubscribe = async (planId: string) => {
     setSelectedPlan(planId)
     try {
-      const token = localStorage.getItem('aethel-token')
+      const token = localStorage.getItem('token')
       if (!token) {
         toast.warning('Faça login para continuar com a assinatura.')
         window.location.href = '/login'
@@ -80,9 +80,9 @@ export default function BillingPage() {
 
   if (isLoading) {
     return (
-      <div className="aethel-flex aethel-items-center aethel-justify-center aethel-min-h-screen">
+      <div className="aethel-flex aethel-items-center aethel-justify-center min-h-screen">
         <div className="aethel-card aethel-p-6">
-          <p className="aethel-text-sm aethel-text-slate-400">Carregando planos...</p>
+          <p className="text-sm text-slate-400">Carregando planos...</p>
         </div>
       </div>
     )
@@ -90,10 +90,10 @@ export default function BillingPage() {
 
   if (error) {
     return (
-      <div className="aethel-flex aethel-items-center aethel-justify-center aethel-min-h-screen">
-        <div className="aethel-card aethel-p-6 aethel-max-w-md">
-          <h1 className="aethel-text-xl aethel-font-bold aethel-mb-2">Falha ao carregar billing</h1>
-          <p className="aethel-text-sm aethel-text-slate-400">
+      <div className="aethel-flex aethel-items-center aethel-justify-center min-h-screen">
+        <div className="aethel-card aethel-p-6 max-w-md">
+          <h1 className="text-xl font-bold mb-2">Falha ao carregar billing</h1>
+          <p className="text-sm text-slate-400">
             Nao foi possivel recuperar os planos neste momento. Tente novamente em instantes.
           </p>
         </div>
@@ -102,53 +102,53 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="aethel-p-6 aethel-max-w-7xl aethel-mx-auto">
-      <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-6">
+    <div className="aethel-p-6 max-w-7xl mx-auto">
+      <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
         <div>
-          <h1 className="aethel-text-3xl aethel-font-bold">Planos e Consumo</h1>
-          <p className="aethel-text-slate-400 aethel-text-sm">
+          <h1 className="text-3xl font-bold">Planos e Consumo</h1>
+          <p className="text-slate-400 text-sm">
             Controle de uso, previsibilidade de custos e upgrade instantaneo.
           </p>
         </div>
         <div className="aethel-flex aethel-gap-2">
           <button
             onClick={() => setCurrency('BRL')}
-            className={`aethel-px-4 aethel-py-2 aethel-rounded ${currency === 'BRL' ? 'aethel-bg-slate-200 aethel-text-slate-900' : 'aethel-bg-slate-800 aethel-text-slate-300'}`}
+            className={`px-4 py-2 aethel-rounded ${currency === 'BRL' ? 'bg-slate-200 text-slate-900' : 'bg-slate-800 text-slate-300'}`}
           >
             BRL
           </button>
           <button
             onClick={() => setCurrency('USD')}
-            className={`aethel-px-4 aethel-py-2 aethel-rounded ${currency === 'USD' ? 'aethel-bg-slate-200 aethel-text-slate-900' : 'aethel-bg-slate-800 aethel-text-slate-300'}`}
+            className={`px-4 py-2 aethel-rounded ${currency === 'USD' ? 'bg-slate-200 text-slate-900' : 'bg-slate-800 text-slate-300'}`}
           >
             USD
           </button>
         </div>
       </div>
 
-      <div className="aethel-mb-6">
-        <div className="aethel-inline-flex aethel-items-center aethel-gap-2 aethel-rounded-full aethel-border aethel-border-slate-800 aethel-bg-slate-900/50 aethel-p-1">
+      <div className="mb-6">
+        <div className="inline-flex aethel-items-center aethel-gap-2 rounded-full border border-slate-800 bg-slate-900/50 aethel-p-1">
           <button
             onClick={() => setBillingCycle('month')}
-            className={`aethel-rounded-full aethel-px-4 aethel-py-1.5 aethel-text-sm ${billingCycle === 'month' ? 'aethel-bg-slate-200 aethel-text-slate-900' : 'aethel-text-slate-300'}`}
+            className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'month' ? 'bg-slate-200 text-slate-900' : 'text-slate-300'}`}
           >
             Mensal
           </button>
           <button
             onClick={() => setBillingCycle('year')}
-            className={`aethel-rounded-full aethel-px-4 aethel-py-1.5 aethel-text-sm ${billingCycle === 'year' ? 'aethel-bg-slate-200 aethel-text-slate-900' : 'aethel-text-slate-300'}`}
+            className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'year' ? 'bg-slate-200 text-slate-900' : 'text-slate-300'}`}
           >
             Anual (-20%)
           </button>
         </div>
       </div>
 
-      <div className="aethel-mb-8">
-        <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-3">
-          <h2 className="aethel-text-xl aethel-font-bold">Uso atual</h2>
+      <div className="mb-8">
+        <div className="aethel-flex aethel-items-center aethel-justify-between mb-3">
+          <h2 className="text-xl font-bold">Uso atual</h2>
           <button
             onClick={() => setShowUsage((prev) => !prev)}
-            className="aethel-text-sm aethel-text-slate-400 hover:aethel-text-slate-100"
+            className="text-sm text-slate-400 hover:text-slate-100"
           >
             {showUsage ? 'Ocultar detalhes' : 'Mostrar detalhes'}
           </button>
@@ -156,7 +156,7 @@ export default function BillingPage() {
         {showUsage && <UsageDashboard />}
       </div>
 
-      <div className="aethel-grid aethel-grid-cols-1 md:aethel-grid-cols-3 lg:aethel-grid-cols-5 aethel-gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 aethel-gap-4">
         {plans.map((plan) => {
           const monthlyPrice = currency === 'BRL' ? plan.priceBRL || 0 : plan.price || 0
           const annualPrice = currency === 'BRL'
@@ -168,29 +168,29 @@ export default function BillingPage() {
           return (
             <div
               key={plan.id}
-              className={`aethel-card aethel-p-6 aethel-flex aethel-flex-col ${plan.popular ? 'aethel-border aethel-border-slate-500' : ''}`}
+              className={`aethel-card aethel-p-6 aethel-flex aethel-flex-col ${plan.popular ? 'border border-slate-500' : ''}`}
             >
-              <div className="aethel-flex aethel-items-center aethel-justify-between aethel-mb-2">
-                <h3 className="aethel-text-xl aethel-font-bold">{plan.name}</h3>
-                {plan.popular ? <span className="aethel-badge aethel-badge-primary">Recomendado</span> : null}
+              <div className="aethel-flex aethel-items-center aethel-justify-between mb-2">
+                <h3 className="text-xl font-bold">{plan.name}</h3>
+                {plan.popular ? <span className="badge badge-primary">Recomendado</span> : null}
               </div>
-              <p className="aethel-text-sm aethel-text-slate-400 aethel-mb-4">{plan.description || 'Plano sem descricao detalhada.'}</p>
+              <p className="text-sm text-slate-400 mb-4">{plan.description || 'Plano sem descricao detalhada.'}</p>
 
-              <div className="aethel-mb-4">
-                <span className="aethel-text-3xl aethel-font-bold">{formatPrice(displayPrice, currency)}</span>
-                <span className="aethel-text-slate-400">/{billingCycle === 'year' ? 'ano' : 'mes'}</span>
-              </div>
-
-              <div className="aethel-mb-4 aethel-p-3 aethel-bg-slate-900 aethel-rounded aethel-border aethel-border-slate-800">
-                <span className="aethel-text-2xl aethel-font-bold aethel-text-slate-100">{formatTokens(tokens)}</span>
-                <span className="aethel-text-slate-400 aethel-text-sm"> tokens/mes</span>
+              <div className="mb-4">
+                <span className="text-3xl font-bold">{formatPrice(displayPrice, currency)}</span>
+                <span className="text-slate-400">/{billingCycle === 'year' ? 'ano' : 'mes'}</span>
               </div>
 
-              <ul className="aethel-flex-1 aethel-space-y-2 aethel-mb-4">
+              <div className="mb-4 aethel-p-3 bg-slate-900 aethel-rounded border border-slate-800">
+                <span className="text-2xl font-bold text-slate-100">{formatTokens(tokens)}</span>
+                <span className="text-slate-400 text-sm"> tokens/mes</span>
+              </div>
+
+              <ul className="flex-1 space-y-2 mb-4">
                 {(plan.features || []).slice(0, 6).map((feature) => (
-                  <li key={feature} className="aethel-flex aethel-items-start aethel-gap-2 aethel-text-sm">
-                    <span className="aethel-text-green-400">+</span>
-                    <span className="aethel-text-slate-300">{feature}</span>
+                  <li key={feature} className="aethel-flex items-start aethel-gap-2 text-sm">
+                    <span className="text-green-400">+</span>
+                    <span className="text-slate-300">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -198,7 +198,7 @@ export default function BillingPage() {
               <button
                 onClick={() => handleSubscribe(plan.id)}
                 disabled={isBusy}
-                className={`aethel-button aethel-button-primary aethel-w-full ${isBusy ? 'aethel-opacity-50' : ''}`}
+                className={`aethel-button aethel-button-primary w-full ${isBusy ? 'opacity-50' : ''}`}
               >
                 {isBusy ? 'Processando...' : 'Assinar plano'}
               </button>
@@ -207,11 +207,11 @@ export default function BillingPage() {
         })}
       </div>
 
-      <div className="aethel-mt-8 aethel-text-center">
-        <p className="aethel-text-slate-400 aethel-text-sm">
+      <div className="mt-8 text-center">
+        <p className="text-slate-400 text-sm">
           Os limites de IA, execucao e deploy variam por plano. Upgrade e downgrade sao aplicados sem migracao manual.
         </p>
-        <p className="aethel-mt-2 aethel-text-slate-500 aethel-text-xs">
+        <p className="mt-2 text-slate-500 text-xs">
           Checkout seguro via Stripe | Cancelamento a qualquer momento
         </p>
       </div>

@@ -247,7 +247,7 @@ export default function KeybindingsEditor({
   
   // Load saved keybindings and register with manager
   useEffect(() => {
-    const saved = localStorage.getItem('aethel-keybindings')
+    const saved = localStorage.getItem('keybindings')
     let loadedBindings = DEFAULT_KEYBINDINGS
     
     if (saved) {
@@ -383,7 +383,7 @@ export default function KeybindingsEditor({
   // Save and register with manager
   const handleSave = useCallback(() => {
     const customized = keybindings.filter((kb) => kb.source === 'user')
-    localStorage.setItem('aethel-keybindings', JSON.stringify(customized))
+    localStorage.setItem('keybindings', JSON.stringify(customized))
     
     // Re-register all keybindings with the manager
     const manager = getKeybindingManager()
@@ -409,7 +409,7 @@ export default function KeybindingsEditor({
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'aethel-keybindings.json'
+    a.download = 'keybindings.json'
     a.click()
     URL.revokeObjectURL(url)
   }, [keybindings])
@@ -725,7 +725,7 @@ export function useKeybindings(customBindings?: Keybinding[]) {
   )
   
   useEffect(() => {
-    const saved = localStorage.getItem('aethel-keybindings')
+    const saved = localStorage.getItem('keybindings')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
