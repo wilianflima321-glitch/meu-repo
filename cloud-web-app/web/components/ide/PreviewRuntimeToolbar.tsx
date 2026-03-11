@@ -163,7 +163,7 @@ export default function PreviewRuntimeToolbar({
               type="button"
               onClick={onSyncRuntime}
               disabled={isSyncingRuntime}
-              className="rounded border border-indigo-500/40 bg-indigo-500/10 px-2 py-1 text-[11px] text-indigo-200 hover:bg-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded border border-sky-500/40 bg-sky-500/10 px-2 py-1 text-[11px] text-sky-200 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSyncingRuntime ? 'Sincronizando...' : 'Sync runtime'}
             </button>

@@ -66,13 +66,13 @@ const WORKFLOW_STEPS = [
     step: '02',
     title: 'Itere com agentes',
     description: 'Chat com contexto explicito, @mentions, preview em tempo real e sugestoes multi-agent.',
-    color: 'from-blue-500 to-indigo-500',
+    color: 'from-blue-500 to-sky-500',
   },
   {
     step: '03',
     title: 'Valide e publique',
     description: 'Apply/rollback, readiness check, audit trail e deploy. Tudo no mesmo contrato operacional.',
-    color: 'from-indigo-500 to-violet-500',
+    color: 'from-cyan-500 to-sky-500',
   },
 ]
 
@@ -171,7 +171,7 @@ export default function LandingPageV2() {
       {/* ── Ambient background ── */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/2 top-0 h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600/[0.07] blur-[180px]" />
-        <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-indigo-600/[0.05] blur-[150px]" />
+        <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[150px]" />
         <div className="absolute bottom-1/3 left-0 h-[400px] w-[400px] rounded-full bg-cyan-600/[0.04] blur-[120px]" />
       </div>
 
@@ -189,7 +189,7 @@ export default function LandingPageV2() {
               {/* Headline */}
               <h1 className="max-w-[680px] text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-[3.5rem]">
                 Crie apps com IA que{' '}
-                <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
                   nao mente
                 </span>{' '}
                 sobre o resultado.
@@ -204,7 +204,7 @@ export default function LandingPageV2() {
               {/* Magic Box */}
               <form onSubmit={handleMagicSubmit} className="mt-8 w-full max-w-xl" aria-label="Campo de missao inicial">
                 <div className={`relative transition-transform duration-300 ${isFocused ? 'scale-[1.01]' : ''}`}>
-                  <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-cyan-500/60 via-blue-500/60 to-indigo-500/60 opacity-50 blur-xl transition-opacity duration-300" />
+                  <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-cyan-500/60 via-blue-500/60 to-sky-500/60 opacity-50 blur-xl transition-opacity duration-300" />
                   <div className="relative flex items-center rounded-2xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl">
                     <span className="pl-4 pr-2 text-zinc-500">
                       <Codicon name="sparkle" />
@@ -361,7 +361,7 @@ export default function LandingPageV2() {
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-400">Como funciona</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">Como funciona</p>
                 <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
                   Fluxo unico, sem trocar de produto
                 </h2>
@@ -461,7 +461,7 @@ export default function LandingPageV2() {
                 >
                   <p className="text-sm leading-relaxed text-zinc-400">&ldquo;{t.text}&rdquo;</p>
                   <div className="mt-5 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-sm font-bold text-white">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 text-sm font-bold text-white">
                       {t.name[0]}
                     </div>
                     <div>
@@ -477,7 +477,7 @@ export default function LandingPageV2() {
 
         {/* ════ CTA FINAL ════ */}
         <section className="mx-auto w-full max-w-5xl px-4 py-24 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-blue-500/[0.08] via-indigo-500/[0.05] to-transparent p-10 text-center sm:p-16">
+          <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-blue-500/[0.08] via-sky-500/[0.05] to-transparent p-10 text-center sm:p-16">
             <h2 className="text-3xl font-bold text-white sm:text-4xl">Comece com uma missao real</h2>
             <p className="mx-auto mt-4 max-w-lg text-base text-zinc-400">
               Abra o dashboard, escolha um template e leve a primeira iteracao para o IDE.

@@ -66,7 +66,7 @@ export default function PricingPage() {
       {/* Ambient bg */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.07] blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-indigo-600/[0.05] blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[150px]" />
       </div>
 
       <PublicHeader />
@@ -216,7 +216,7 @@ export default function PricingPage() {
         {/* ── FAQ ── */}
         <section className="mx-auto mt-24 w-full max-w-3xl px-4 pb-24 sm:px-6">
           <div className="text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-400">FAQ</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">FAQ</p>
             <h2 className="mt-3 text-3xl font-bold text-white">Perguntas frequentes</h2>
           </div>
 

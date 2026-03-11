@@ -632,7 +632,7 @@ export default function DashboardCreationWorkbench({
             </div>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => setRuntimeMode('interactive')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'interactive' ? 'bg-blue-600 border-blue-500' : 'border-slate-700'}`}>Interactive</button>
-              <button type="button" onClick={() => setRuntimeMode('render')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'render' ? 'bg-purple-600 border-purple-500' : 'border-slate-700'}`}>Render</button>
+              <button type="button" onClick={() => setRuntimeMode('render')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'render' ? 'bg-cyan-600 border-cyan-500' : 'border-slate-700'}`}>Render</button>
             </div>
           </div>
           <div className="flex-1 overflow-hidden bg-slate-950">

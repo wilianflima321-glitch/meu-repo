@@ -98,7 +98,7 @@ export function MentionChip({
         border transition-all duration-150
         ${colors.bg} ${colors.text} ${colors.border}
         hover:brightness-125 cursor-pointer
-        focus:outline-none focus:ring-1 focus:ring-violet-500
+        focus:outline-none focus:ring-1 focus:ring-cyan-500
       `}
       title={data.tag}
       aria-label={`Mention: ${data.label}`}

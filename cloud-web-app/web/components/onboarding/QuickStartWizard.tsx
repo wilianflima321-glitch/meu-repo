@@ -34,7 +34,7 @@ const DOMAIN_TEMPLATES = [
     name: 'Landing Page',
     description: 'Landing de conversao com SEO e analytics',
     stack: ['Next.js', 'Tailwind', 'Framer Motion'],
-    color: 'from-violet-500 to-purple-500',
+    color: 'from-sky-500 to-blue-500',
     mission: 'Criar landing page premium com SEO, CTAs e analytics',
   },
   {
@@ -54,7 +54,7 @@ const DOMAIN_TEMPLATES = [
     name: 'Jogo 2D',
     description: 'Jogo com sprites, fisica e leaderboard',
     stack: ['Canvas', 'Rapier', 'Sprites'],
-    color: 'from-pink-500 to-rose-500',
+    color: 'from-cyan-500 to-sky-500',
     mission: 'Criar jogo 2D com sprites, fisica e pontuacao',
   },
   {
@@ -64,7 +64,7 @@ const DOMAIN_TEMPLATES = [
     name: 'Storyboard',
     description: 'Director de cenas com AI e timeline',
     stack: ['Scenes', 'Timeline', 'AI Gen'],
-    color: 'from-indigo-500 to-blue-500',
+    color: 'from-blue-500 to-cyan-500',
     mission: 'Criar storyboard com cenas, diretor AI e timeline',
   },
 ]
@@ -383,7 +383,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               )}
               {selectedProvider && (
                 <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3.5">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
                     <Codicon name="key" />
                   </span>
                   <div>

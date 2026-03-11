@@ -34,7 +34,8 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
-    "postinstall": "prisma generate && node scripts/fix-prisma-client.cjs"
+    "postinstall": "prisma generate && node scripts/fix-prisma-client.cjs",
+    "qa:preview-runtime-readiness": "node scripts/check-preview-runtime-readiness.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
