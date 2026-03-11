@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import path from 'node:path'
+import fs from 'node:fs/promises'
 import { requireAuth } from '@/lib/auth-server'
 import { apiErrorToResponse } from '@/lib/api-errors'
 import { capabilityResponse } from '@/lib/server/capability-response'
@@ -16,6 +18,7 @@ import {
   getManagedPreviewProviderConfig,
   parseConfiguredProvisionEndpoints,
 } from '@/lib/server/preview-provider-config'
+import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'
 const DEFAULT_TIMEOUT_MS = 12_000
@@ -23,6 +26,11 @@ const DEFAULT_READY_WAIT_MS = 10_000
 const DEFAULT_READY_POLL_MS = 1_200
 const DEFAULT_E2B_TIMEOUT_MS = 300_000
 const DEFAULT_E2B_PORT = 3000
+const DEFAULT_E2B_WORKDIR = '/workspace'
+const DEFAULT_E2B_MAX_FILES = 2000
+const DEFAULT_E2B_MAX_FILE_SIZE_MB = 5
+const DEFAULT_E2B_UPLOAD_BATCH = 200
+const DEFAULT_E2B_INSTALL_TIMEOUT_MS = 180_000
 
 export const dynamic = 'force-dynamic'
 
@@ -82,6 +90,225 @@ function parseE2BPort(raw: string | undefined): number {
   const parsed = Number.parseInt(String(raw ?? ''), 10)
   if (!Number.isFinite(parsed)) return DEFAULT_E2B_PORT
   return Math.max(80, Math.min(parsed, 65_535))
+}
+
+function parseE2BMaxFiles(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_E2B_MAX_FILES
+  return Math.max(10, Math.min(parsed, 20_000))
+}
+
+function parseE2BMaxFileSizeMb(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_E2B_MAX_FILE_SIZE_MB
+  return Math.max(1, Math.min(parsed, 100))
+}
+
+function parseE2BUploadBatch(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_E2B_UPLOAD_BATCH
+  return Math.max(10, Math.min(parsed, 1000))
+}
+
+function parseE2BInstallTimeoutMs(raw: string | undefined): number {
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(parsed)) return DEFAULT_E2B_INSTALL_TIMEOUT_MS
+  return Math.max(30_000, Math.min(parsed, 900_000))
+}
+
+function resolveE2BWorkdir(raw: string | undefined): string {
+  const value = String(raw ?? '').trim()
+  if (!value) return DEFAULT_E2B_WORKDIR
+  if (!value.startsWith('/')) return `/${value}`
+  return value
+}
+
+type WorkspaceFileEntry = {
+  absolutePath: string
+  relativePath: string
+  size: number
+}
+
+const SKIP_DIRS = new Set([
+  '.git',
+  '.next',
+  '.turbo',
+  '.cache',
+  '.idea',
+  '.vscode',
+  'node_modules',
+  'dist',
+  'build',
+  'out',
+  'coverage',
+  '.aethel',
+])
+
+const SKIP_FILES = new Set([
+  '.DS_Store',
+  'Thumbs.db',
+])
+
+const BINARY_EXTENSIONS = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+  '.ico',
+  '.bmp',
+  '.tiff',
+  '.mp3',
+  '.wav',
+  '.ogg',
+  '.mp4',
+  '.mov',
+  '.m4v',
+  '.webm',
+  '.glb',
+  '.gltf',
+  '.fbx',
+  '.obj',
+  '.usd',
+  '.usdz',
+  '.zip',
+  '.gz',
+  '.tar',
+  '.wasm',
+  '.bin',
+])
+
+function toPosixPath(input: string): string {
+  return input.replace(/\\/g, '/')
+}
+
+function isBinaryFile(relativePath: string): boolean {
+  const ext = path.extname(relativePath).toLowerCase()
+  if (!ext) return false
+  return BINARY_EXTENSIONS.has(ext)
+}
+
+async function collectWorkspaceFiles(params: {
+  root: string
+  maxFiles: number
+  maxFileSizeBytes: number
+}): Promise<WorkspaceFileEntry[]> {
+  const results: WorkspaceFileEntry[] = []
+
+  async function walk(current: string) {
+    const entries = await fs.readdir(current, { withFileTypes: true }).catch(() => [])
+    for (const entry of entries) {
+      if (results.length >= params.maxFiles) return
+      const entryPath = path.join(current, entry.name)
+      if (entry.isDirectory()) {
+        if (SKIP_DIRS.has(entry.name)) continue
+        await walk(entryPath)
+        continue
+      }
+      if (!entry.isFile()) continue
+      if (SKIP_FILES.has(entry.name)) continue
+      const stat = await fs.stat(entryPath).catch(() => null)
+      if (!stat) continue
+      if (stat.size > params.maxFileSizeBytes) continue
+      const relativePath = toPosixPath(path.relative(params.root, entryPath))
+      results.push({
+        absolutePath: entryPath,
+        relativePath,
+        size: stat.size,
+      })
+    }
+  }
+
+  await walk(params.root)
+  return results
+}
+
+function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
+  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+}
+
+async function syncWorkspaceToSandbox(params: {
+  sandbox: any
+  workspaceRoot: string
+  workdir: string
+  maxFiles: number
+  maxFileSizeBytes: number
+  batchSize: number
+}) {
+  const files = await collectWorkspaceFiles({
+    root: params.workspaceRoot,
+    maxFiles: params.maxFiles,
+    maxFileSizeBytes: params.maxFileSizeBytes,
+  })
+
+  const entries = await Promise.all(
+    files.map(async (file) => {
+      const data = await fs.readFile(file.absolutePath)
+      const isBinary = isBinaryFile(file.relativePath)
+      const payload = isBinary ? bufferToArrayBuffer(data) : data.toString('utf8')
+      const sandboxPath = toPosixPath(path.posix.join(params.workdir, file.relativePath))
+      return {
+        path: sandboxPath,
+        data: payload,
+        size: file.size,
+      }
+    })
+  )
+
+  let totalBytes = 0
+  for (const entry of entries) totalBytes += entry.size
+
+  for (let i = 0; i < entries.length; i += params.batchSize) {
+    const batch = entries.slice(i, i + params.batchSize).map(({ path: filePath, data }) => ({
+      path: filePath,
+      data,
+    }))
+    await params.sandbox.files.writeFiles(batch)
+  }
+
+  return {
+    filesCount: entries.length,
+    totalBytes,
+  }
+}
+
+async function startSandboxRuntime(params: {
+  sandbox: any
+  workdir: string
+  port: number
+  installTimeoutMs: number
+}) {
+  const packageJsonPath = path.posix.join(params.workdir, 'package.json')
+  const indexHtmlPath = path.posix.join(params.workdir, 'index.html')
+  const hasPackageJson = await params.sandbox.files.exists(packageJsonPath)
+  if (hasPackageJson) {
+    await params.sandbox.commands.run('npm install --no-audit --no-fund', {
+      cwd: params.workdir,
+      timeoutMs: params.installTimeoutMs,
+    })
+    await params.sandbox.commands.run(`npm run dev -- --hostname 0.0.0.0 --port ${params.port}`, {
+      cwd: params.workdir,
+      background: true,
+    })
+    return {
+      mode: 'node-dev',
+      command: 'npm run dev',
+    }
+  }
+
+  const hasIndexHtml = await params.sandbox.files.exists(indexHtmlPath)
+  if (hasIndexHtml) {
+    await params.sandbox.commands.run(`python3 -m http.server ${params.port} --bind 0.0.0.0`, {
+      cwd: params.workdir,
+      background: true,
+    })
+    return {
+      mode: 'static',
+      command: 'python3 -m http.server',
+    }
+  }
+
+  throw new Error('No package.json or index.html found in workspace.')
 }
 
 function sleep(ms: number): Promise<void> {
@@ -208,7 +435,20 @@ async function provisionWithE2B(params: {
   templateId: string
   port: number
   timeoutMs: number
-}): Promise<{ runtimeUrl: string; sandboxId: string; host: string }> {
+  workspaceRoot: string
+  workdir: string
+  maxFiles: number
+  maxFileSizeBytes: number
+  uploadBatchSize: number
+  installTimeoutMs: number
+}): Promise<{
+  runtimeUrl: string
+  sandboxId: string
+  host: string
+  filesCount: number
+  totalBytes: number
+  startMode: string
+}> {
   const module = await import('e2b')
   const Sandbox = (module as { default?: any; Sandbox?: any }).default || (module as { Sandbox?: any }).Sandbox
   if (!Sandbox) {
@@ -218,11 +458,28 @@ async function provisionWithE2B(params: {
     apiKey: params.apiKey,
     timeoutMs: params.timeoutMs,
   })
+  const syncResult = await syncWorkspaceToSandbox({
+    sandbox,
+    workspaceRoot: params.workspaceRoot,
+    workdir: params.workdir,
+    maxFiles: params.maxFiles,
+    maxFileSizeBytes: params.maxFileSizeBytes,
+    batchSize: params.uploadBatchSize,
+  })
+  const startResult = await startSandboxRuntime({
+    sandbox,
+    workdir: params.workdir,
+    port: params.port,
+    installTimeoutMs: params.installTimeoutMs,
+  })
   const host = sandbox.getHost(params.port)
   return {
     runtimeUrl: `https://${host}`,
     sandboxId: sandbox.sandboxId || 'unknown',
     host,
+    filesCount: syncResult.filesCount,
+    totalBytes: syncResult.totalBytes,
+    startMode: startResult.mode,
   }
 }
 
@@ -247,6 +504,12 @@ export async function POST(request: NextRequest) {
     const e2bTemplateId = String(process.env.AETHEL_PREVIEW_E2B_TEMPLATE || '').trim()
     const e2bPort = parseE2BPort(process.env.AETHEL_PREVIEW_E2B_PORT)
     const e2bTimeoutMs = parseE2BTimeoutMs(process.env.AETHEL_PREVIEW_E2B_TIMEOUT_MS)
+    const e2bWorkdir = resolveE2BWorkdir(process.env.AETHEL_PREVIEW_E2B_WORKDIR)
+    const e2bMaxFiles = parseE2BMaxFiles(process.env.AETHEL_PREVIEW_E2B_MAX_FILES)
+    const e2bMaxFileSizeBytes = parseE2BMaxFileSizeMb(process.env.AETHEL_PREVIEW_E2B_MAX_FILE_SIZE_MB) * 1024 * 1024
+    const e2bUploadBatch = parseE2BUploadBatch(process.env.AETHEL_PREVIEW_E2B_UPLOAD_BATCH_SIZE)
+    const e2bInstallTimeoutMs = parseE2BInstallTimeoutMs(process.env.AETHEL_PREVIEW_E2B_INSTALL_TIMEOUT_MS)
+    const workspaceRoot = getScopedWorkspaceRoot(auth.userId, projectId)
     const providerConfig =
       getManagedPreviewProviderConfig(process.env.AETHEL_PREVIEW_PROVIDER) ||
       (provisionEndpoint || provisionEndpointsCsv ? getManagedPreviewProviderConfig('custom-endpoint') : null)
@@ -272,8 +535,25 @@ export async function POST(request: NextRequest) {
 
     const failures: ManagedProvisionAttempt[] = []
     let managedSuccess: ManagedProvisionSuccess | null = null
+    let managedMetadata: Record<string, unknown> | null = null
 
     if (providerConfig?.id === 'e2b' && provisionEndpoints.length === 0) {
+      const workspaceStat = await fs.stat(workspaceRoot).catch(() => null)
+      if (!workspaceStat || !workspaceStat.isDirectory()) {
+        return capabilityResponse({
+          error: 'RUNTIME_PROVISION_FAILED',
+          status: 503,
+          message: 'Workspace root not found for E2B provisioning.',
+          capability: CAPABILITY,
+          capabilityStatus: 'PARTIAL',
+          metadata: {
+            mode: 'managed',
+            provider: providerConfig.id,
+            projectId,
+            workspaceRoot,
+          },
+        })
+      }
       if (!e2bApiKey) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_FAILED',
@@ -310,6 +590,12 @@ export async function POST(request: NextRequest) {
           templateId: e2bTemplateId,
           port: e2bPort,
           timeoutMs: e2bTimeoutMs,
+          workspaceRoot,
+          workdir: e2bWorkdir,
+          maxFiles: e2bMaxFiles,
+          maxFileSizeBytes: e2bMaxFileSizeBytes,
+          uploadBatchSize: e2bUploadBatch,
+          installTimeoutMs: e2bInstallTimeoutMs,
         })
         const normalized = normalizeRuntimeCandidate(e2bResult.runtimeUrl)
         if (!normalized) {
@@ -325,6 +611,7 @@ export async function POST(request: NextRequest) {
               projectId,
               runtimeUrl: e2bResult.runtimeUrl,
               host: e2bResult.host,
+              sandboxId: e2bResult.sandboxId,
             },
           })
         }
@@ -333,6 +620,13 @@ export async function POST(request: NextRequest) {
           endpoint: 'e2b',
           attempt: 1,
           totalEndpoints: 1,
+        }
+        managedMetadata = {
+          sandboxId: e2bResult.sandboxId,
+          filesCount: e2bResult.filesCount,
+          totalBytes: e2bResult.totalBytes,
+          startMode: e2bResult.startMode,
+          workdir: e2bWorkdir,
         }
       } catch (error) {
         return capabilityResponse({
@@ -500,6 +794,7 @@ export async function POST(request: NextRequest) {
             readyElapsedMs: readiness.elapsedMs,
             readyWaitMs,
             readyPollMs,
+            ...(managedMetadata || {}),
           },
         },
         {
