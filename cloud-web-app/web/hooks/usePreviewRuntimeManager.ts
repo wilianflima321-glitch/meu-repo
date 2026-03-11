@@ -16,6 +16,7 @@ import {
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
   provisionPreviewRuntime,
   syncPreviewRuntime,
+  syncPreviewRuntimeFile,
   type PreviewRuntimeHealthState,
   type PreviewRuntimeReadinessResponse,
 } from '@/lib/preview/runtime-manager'
@@ -284,6 +285,23 @@ export function usePreviewRuntimeManager({
     }
   }, [isSyncingRuntime, previewSandboxId, projectId])
 
+  const syncRuntimeFile = useCallback(
+    async (path: string): Promise<boolean> => {
+      if (!previewSandboxId) return false
+      try {
+        const result = await syncPreviewRuntimeFile(projectId, previewSandboxId, path)
+        return Boolean(result.success)
+      } catch (error) {
+        setRuntimeDiscoveryTone('warning')
+        setRuntimeDiscoveryMessage(
+          error instanceof Error ? `Falha ao sincronizar arquivo: ${error.message}` : 'Falha ao sincronizar arquivo.'
+        )
+        return false
+      }
+    },
+    [previewSandboxId, projectId]
+  )
+
   const checkRuntime = useCallback(async (runtimeUrl: string | null) => {
     if (!runtimeUrl) {
       setRuntimeHealth({ status: 'idle' })
@@ -445,6 +463,7 @@ export function usePreviewRuntimeManager({
     discoverRuntime,
     provisionRuntime,
     syncRuntime,
+    syncRuntimeFile,
     checkRuntimeHealth: checkRuntime,
     handleUseInlineFallback,
     previewSandboxId,

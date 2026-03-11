@@ -173,6 +173,7 @@ function IDEContent() {
     discoverRuntime,
     provisionRuntime,
     syncRuntime,
+    syncRuntimeFile,
     checkRuntimeHealth,
     handleUseInlineFallback,
     previewSandboxId,
@@ -337,7 +338,9 @@ function IDEContent() {
           },
         }))
         if (previewEnabled && previewSandboxId) {
-          scheduleRuntimeSync()
+          void syncRuntimeFile(normalizedPath).then((synced) => {
+            if (!synced) scheduleRuntimeSync()
+          })
         }
       } catch (error) {
         setFileError(error instanceof Error ? error.message : "Unable to save file.");

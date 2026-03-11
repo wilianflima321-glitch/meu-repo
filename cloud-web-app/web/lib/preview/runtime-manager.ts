@@ -191,6 +191,40 @@ export async function syncPreviewRuntime(projectId: string | null, sandboxId: st
   };
 }
 
+export async function syncPreviewRuntimeFile(projectId: string | null, sandboxId: string | null, filePath: string): Promise<{
+  success: boolean;
+  metadata?: {
+    sandboxId?: string;
+    path?: string;
+    sandboxPath?: string;
+    size?: number;
+  };
+}> {
+  if (!sandboxId) {
+    throw new Error('sandboxId is required for runtime sync.')
+  }
+  if (!filePath) {
+    throw new Error('path is required for runtime sync.')
+  }
+  const response = await fetch('/api/preview/runtime-sync-file', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getRuntimeAuthHeaders(),
+    },
+    body: JSON.stringify({ projectId, sandboxId, path: filePath }),
+  })
+  const payload = (await response.json().catch(() => null)) as { success?: boolean; error?: string; message?: string; metadata?: any } | null
+  if (!response.ok) {
+    const reason = payload?.error || payload?.message || `HTTP ${response.status}`
+    throw new Error(reason)
+  }
+  return {
+    success: Boolean(payload?.success),
+    metadata: payload?.metadata,
+  }
+}
+
 export async function checkPreviewRuntimeHealth(runtimeUrl: string | null): Promise<PreviewRuntimeHealthState> {
   if (!runtimeUrl) {
     return { status: 'idle' };
