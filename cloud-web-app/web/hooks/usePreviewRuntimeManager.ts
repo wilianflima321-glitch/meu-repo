@@ -7,11 +7,15 @@ import {
   DEFAULT_PREVIEW_RUNTIME_URL,
   discoverPreviewRuntimeDetails,
   getPreviewRuntimeReadiness,
+  getStoredPreviewSandboxId,
   getStoredPreviewRuntimeUrl,
   normalizeRuntimeUrl,
+  persistPreviewSandboxId,
   persistPreviewRuntimeUrl,
+  PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY,
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
   provisionPreviewRuntime,
+  syncPreviewRuntime,
   type PreviewRuntimeHealthState,
   type PreviewRuntimeReadinessResponse,
 } from '@/lib/preview/runtime-manager'
@@ -37,6 +41,10 @@ export function usePreviewRuntimeManager({
     if (fromStorage) return fromStorage
     return normalizeRuntimeUrl(DEFAULT_PREVIEW_RUNTIME_URL)
   })
+  const [previewSandboxId, setPreviewSandboxId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return getStoredPreviewSandboxId(PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
+  })
   const [previewRuntimeInput, setPreviewRuntimeInput] = useState('')
   const [showRuntimeSettings, setShowRuntimeSettings] = useState(false)
   const [runtimeHealth, setRuntimeHealth] = useState<PreviewRuntimeHealthState>({ status: 'idle' })
@@ -46,6 +54,7 @@ export function usePreviewRuntimeManager({
   const [isProvisioningRuntime, setIsProvisioningRuntime] = useState(false)
   const [runtimeDiscoveryMessage, setRuntimeDiscoveryMessage] = useState<string | null>(null)
   const [runtimeDiscoveryTone, setRuntimeDiscoveryTone] = useState<RuntimeMessageTone>('info')
+  const [isSyncingRuntime, setIsSyncingRuntime] = useState(false)
   const runtimeAutoDiscoveryTriggeredRef = useRef(false)
   const runtimeAutoProvisionTriggeredRef = useRef(false)
 
@@ -92,6 +101,8 @@ export function usePreviewRuntimeManager({
     setRuntimeHealth({ status: normalized ? 'checking' : 'idle' })
     setRuntimeDiscoveryMessage(null)
     persistPreviewRuntimeUrl(normalized, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+    setPreviewSandboxId(null)
+    persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
     analytics?.track?.('user', 'settings_change', {
       metadata: {
         source: 'ide-preview-runtime',
@@ -142,6 +153,8 @@ export function usePreviewRuntimeManager({
       setRuntimeDiscoveryTone('success')
       setRuntimeDiscoveryMessage(`Runtime detectado: ${preferredRuntimeUrl}`)
       persistPreviewRuntimeUrl(preferredRuntimeUrl, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+      setPreviewSandboxId(null)
+      persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
 
       analytics?.track?.('engine', 'render_time', {
         metadata: {
@@ -196,6 +209,7 @@ export function usePreviewRuntimeManager({
       setRuntimeDiscoveryTone('success')
       const filesCount = provisionResult.metadata?.filesCount
       const startMode = provisionResult.metadata?.startMode
+      const sandboxId = provisionResult.metadata?.sandboxId ?? null
       const suffix = [startMode ? `modo=${startMode}` : null, Number.isFinite(filesCount) ? `arquivos=${filesCount}` : null]
         .filter(Boolean)
         .join(', ')
@@ -203,6 +217,8 @@ export function usePreviewRuntimeManager({
         suffix ? `Runtime provisionado (${suffix}): ${runtimeUrl}` : `Runtime provisionado: ${runtimeUrl}`
       )
       persistPreviewRuntimeUrl(runtimeUrl, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+      setPreviewSandboxId(sandboxId)
+      persistPreviewSandboxId(sandboxId, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
 
       analytics?.track?.('engine', 'render_time', {
         metadata: {
@@ -237,6 +253,36 @@ export function usePreviewRuntimeManager({
       setIsProvisioningRuntime(false)
     }
   }, [isProvisioningRuntime, projectId, refreshRuntimeReadiness])
+
+  const syncRuntime = useCallback(async (): Promise<boolean> => {
+    if (isSyncingRuntime) return false
+    if (!previewSandboxId) {
+      setRuntimeDiscoveryTone('warning')
+      setRuntimeDiscoveryMessage('Sync indisponivel: sandboxId nao encontrado.')
+      return false
+    }
+    setIsSyncingRuntime(true)
+    setRuntimeDiscoveryTone('info')
+    setRuntimeDiscoveryMessage('Sincronizando workspace com runtime...')
+    try {
+      const result = await syncPreviewRuntime(projectId, previewSandboxId)
+      const filesCount = result.metadata?.filesCount
+      const suffix = Number.isFinite(filesCount) ? `arquivos=${filesCount}` : null
+      setRuntimeDiscoveryTone('success')
+      setRuntimeDiscoveryMessage(
+        suffix ? `Runtime sincronizado (${suffix}).` : 'Runtime sincronizado.'
+      )
+      return true
+    } catch (error) {
+      setRuntimeDiscoveryTone('warning')
+      setRuntimeDiscoveryMessage(
+        error instanceof Error ? `Falha ao sincronizar runtime: ${error.message}` : 'Falha ao sincronizar runtime.'
+      )
+      return false
+    } finally {
+      setIsSyncingRuntime(false)
+    }
+  }, [isSyncingRuntime, previewSandboxId, projectId])
 
   const checkRuntime = useCallback(async (runtimeUrl: string | null) => {
     if (!runtimeUrl) {
@@ -364,6 +410,8 @@ export function usePreviewRuntimeManager({
     setRuntimeDiscoveryTone('info')
     setRuntimeDiscoveryMessage('Modo inline fallback ativo.')
     persistPreviewRuntimeUrl(null, PREVIEW_RUNTIME_URL_STORAGE_KEY)
+    setPreviewSandboxId(null)
+    persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
   }, [])
 
   const forceInlinePreviewFallback =
@@ -382,6 +430,7 @@ export function usePreviewRuntimeManager({
     runtimeHealthCheckedAt,
     isDiscoveringRuntime,
     isProvisioningRuntime,
+    isSyncingRuntime,
     runtimeDiscoveryMessage,
     runtimeDiscoveryTone,
     runtimeHealthHint,
@@ -395,7 +444,9 @@ export function usePreviewRuntimeManager({
     applyRuntimeUrl,
     discoverRuntime,
     provisionRuntime,
+    syncRuntime,
     checkRuntimeHealth: checkRuntime,
     handleUseInlineFallback,
+    previewSandboxId,
   }
 }

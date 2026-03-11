@@ -7,6 +7,7 @@ export type PreviewRuntimeHealthStatus =
   | 'invalid'
 
 export const PREVIEW_RUNTIME_URL_STORAGE_KEY = 'aethel.workbench.preview.runtimeUrl';
+export const PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY = 'aethel.workbench.preview.sandboxId';
 export const DEFAULT_PREVIEW_RUNTIME_URL = process.env.NEXT_PUBLIC_PREVIEW_RUNTIME_URL?.trim() || null;
 
 export type PreviewRuntimeHealthState = {
@@ -98,6 +99,21 @@ export function persistPreviewRuntimeUrl(runtimeUrl: string | null, storageKey =
   }
 }
 
+export function getStoredPreviewSandboxId(storageKey = PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY): string | null {
+  if (typeof window === 'undefined') return null;
+  const value = window.localStorage.getItem(storageKey);
+  return value && value.trim() ? value.trim() : null;
+}
+
+export function persistPreviewSandboxId(sandboxId: string | null, storageKey = PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY) {
+  if (typeof window === 'undefined') return;
+  if (sandboxId) {
+    window.localStorage.setItem(storageKey, sandboxId);
+  } else {
+    window.localStorage.removeItem(storageKey);
+  }
+}
+
 function getRuntimeAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   const token = window.localStorage.getItem('aethel-token');
@@ -141,6 +157,37 @@ export async function provisionPreviewRuntime(projectId: string | null): Promise
     runtimeUrl: normalizeRuntimeUrl(payload?.runtimeUrl ?? null),
     metadataMode: payload?.metadata?.mode,
     metadata: payload?.metadata ?? null,
+  };
+}
+
+export async function syncPreviewRuntime(projectId: string | null, sandboxId: string | null): Promise<{
+  success: boolean;
+  metadata?: {
+    sandboxId?: string;
+    filesCount?: number;
+    totalBytes?: number;
+    workdir?: string;
+  };
+}> {
+  if (!sandboxId) {
+    throw new Error('sandboxId is required for runtime sync.');
+  }
+  const response = await fetch('/api/preview/runtime-sync', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getRuntimeAuthHeaders(),
+    },
+    body: JSON.stringify({ projectId, sandboxId }),
+  });
+  const payload = (await response.json().catch(() => null)) as { success?: boolean; error?: string; message?: string; metadata?: any } | null;
+  if (!response.ok) {
+    const reason = payload?.error || payload?.message || `HTTP ${response.status}`;
+    throw new Error(reason);
+  }
+  return {
+    success: Boolean(payload?.success),
+    metadata: payload?.metadata,
   };
 }
 

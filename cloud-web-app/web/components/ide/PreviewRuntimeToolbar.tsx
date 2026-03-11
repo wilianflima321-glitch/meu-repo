@@ -24,9 +24,12 @@ type Props = {
   onOpenRuntime: () => void
   onDiscoverRuntime: () => void
   onProvisionRuntime: () => void
+  onSyncRuntime: () => void
   onRunRecommendedAction: () => void
   isDiscoveringRuntime: boolean
   isProvisioningRuntime: boolean
+  isSyncingRuntime: boolean
+  canSyncRuntime: boolean
   runtimeDiscoveryMessage?: string | null
   runtimeDiscoveryTone?: 'info' | 'success' | 'warning'
 }
@@ -52,9 +55,12 @@ export default function PreviewRuntimeToolbar({
   onOpenRuntime,
   onDiscoverRuntime,
   onProvisionRuntime,
+  onSyncRuntime,
   onRunRecommendedAction,
   isDiscoveringRuntime,
   isProvisioningRuntime,
+  isSyncingRuntime,
+  canSyncRuntime,
   runtimeDiscoveryMessage,
   runtimeDiscoveryTone = 'info',
 }: Props) {
@@ -152,6 +158,16 @@ export default function PreviewRuntimeToolbar({
           >
             {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponivel'}
           </button>
+          {canSyncRuntime && (
+            <button
+              type="button"
+              onClick={onSyncRuntime}
+              disabled={isSyncingRuntime}
+              className="rounded border border-indigo-500/40 bg-indigo-500/10 px-2 py-1 text-[11px] text-indigo-200 hover:bg-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isSyncingRuntime ? 'Sincronizando...' : 'Sync runtime'}
+            </button>
+          )}
           {previewRuntimeUrl && (
             <button
               type="button"

@@ -156,6 +156,7 @@ function IDEContent() {
     runtimeHealthCheckedAt,
     isDiscoveringRuntime,
     isProvisioningRuntime,
+    isSyncingRuntime,
     runtimeDiscoveryMessage,
     runtimeDiscoveryTone,
     runtimeHealthHint,
@@ -169,8 +170,10 @@ function IDEContent() {
     applyRuntimeUrl,
     discoverRuntime,
     provisionRuntime,
+    syncRuntime,
     checkRuntimeHealth,
     handleUseInlineFallback,
+    previewSandboxId,
   } = usePreviewRuntimeManager({
     projectId,
     previewEnabled,
@@ -674,6 +677,8 @@ function IDEContent() {
                 onUseFallback={handleUseInlineFallback}
                 isDiscoveringRuntime={isDiscoveringRuntime}
                 isProvisioningRuntime={isProvisioningRuntime}
+                isSyncingRuntime={isSyncingRuntime}
+                canSyncRuntime={Boolean(previewSandboxId)}
                 runtimeDiscoveryMessage={runtimeDiscoveryMessage}
                 runtimeDiscoveryTone={runtimeDiscoveryTone}
                 onRunRecommendedAction={handleRunRecommendedPreviewAction}
@@ -684,6 +689,11 @@ function IDEContent() {
                 }}
                 onProvisionRuntime={() => {
                   void provisionRuntime('manual').then(() => {
+                    void refreshRuntimeReadiness()
+                  })
+                }}
+                onSyncRuntime={() => {
+                  void syncRuntime().then(() => {
                     void refreshRuntimeReadiness()
                   })
                 }}
