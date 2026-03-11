@@ -56,3 +56,5 @@ package-lock.json
 # Copilot/agent chat artifacts
 .zencoder/
 .gh_token
+.aethel/
+.playwright-cli/

@@ -206,3 +206,18 @@ Al�m de L4:
 3. Configurar E2B → testar provisionamento
 4. Rodar `npm run qa:core-loop-production-probe -- --runs 100`
 5. Verificar exitCriteria em `metrics/l4-readiness-dossier.json`
+
+## 13) Delta 2026-03-11 23:40 UTC-3 - Alignment after sync
+
+- Base branch synced with upstream changes (`main`).
+- Interface critical gate normalized to zero legacy accent tokens across app/components.
+- Preview runtime readiness check script wired in package scripts:
+  - `qa:preview-runtime-readiness` -> `scripts/check-preview-runtime-readiness.mjs`
+- Readiness checks executed:
+  - `npm run qa:interface-gate` -> PASS
+  - `npm run qa:preview-runtime-readiness` -> PASS
+  - `npm run qa:billing-runtime-readiness` -> PASS
+- Remaining hard blockers for L4 stay unchanged:
+  - production sample size still below target (`>= 100`)
+  - typecheck is still failing in multiple non-canonical surfaces/routes and codicon unions
+  - checkout/deploy/preview still depend on external credentials and live integrations
