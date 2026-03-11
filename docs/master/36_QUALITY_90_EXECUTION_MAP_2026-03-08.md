@@ -268,4 +268,10 @@ Aethel needs:
 4. visible context intelligence,
 5. stricter claim discipline.
 
+## 11) Delta 2026-03-10 (alignment)
+1. Preview runtime: E2B direct provisioning wired, full workspace sync + single-file sync endpoints added.
+   - Status remains `PARTIAL` until token + HMR parity are live.
+2. Core-loop evidence tooling now supports `--runs 50` in both API and CLI.
+3. Master execution board published: `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`.
+
 That is the shortest path to `>=9.0` quality without inflating L5 language.

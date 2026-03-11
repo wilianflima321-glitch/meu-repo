@@ -35,6 +35,7 @@ Status: CANONICAL ENTRYPOINT
 30. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
 31. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
 32. `docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md`
+33. `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -68,6 +69,7 @@ Status: CANONICAL ENTRYPOINT
 | `35_L4_L5_COMPLETION_MAP_2026-03-05.md` | Canonical completion order for L4/L5 closure | ACTIVE |
 | `36_QUALITY_90_EXECUTION_MAP_2026-03-08.md` | Canonical path to reach >=9.0 quality across product dimensions without inflating claims | ACTIVE |
 | `37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md` | Definitive technical evaluation and market comparison | ACTIVE |
+| `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -150,6 +152,9 @@ Status: CANONICAL ENTRYPOINT
     - `setup:preview-runtime` seeded `.env.local` placeholders (provision token still missing).
   - repo connectivity and canonical alignment checks: `PASS`.
   - NOT_IMPLEMENTED scan refreshed: `docs/master/not-implemented-scan.csv` with `rows=0`.
+  - preview runtime: E2B direct provisioning wired with full sync + single-file sync endpoints (runtime still `PARTIAL` until token + HMR parity).
+  - core-loop production probe tooling now accepts `--runs 50` in both API and CLI.
+  - master execution board published: `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

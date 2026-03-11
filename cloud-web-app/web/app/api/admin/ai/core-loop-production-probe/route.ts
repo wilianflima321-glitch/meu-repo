@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 
 const CAPABILITY = 'ADMIN_AI_CORE_LOOP_PRODUCTION_PROBE'
 const DEFAULT_RUNS = 6
-const MAX_RUNS = 20
+const MAX_RUNS = 50
 const MAX_SCAN_DEPTH = 5
 const IGNORED_DIRS = new Set(['.git', '.next', 'node_modules', 'dist', 'build', '.turbo', '.vercel'])
 const EXTENSION_PRIORITY = ['ts', 'tsx', 'js', 'jsx', 'md', 'json', 'css', 'html']

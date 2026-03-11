@@ -26,8 +26,8 @@ Top 5 Bloqueios (Riscos)
 
 ## 2) Estado Atual do Repositorio
 Estrutura de arquivos
-- docs/master/: 52 documentos canonicos (CORE)
-- MDs nao-canonicos: 3.606 arquivos (majoritariamente em docs/archive) (DEBT)
+- docs/master/: 53 documentos canonicos (CORE)
+- MDs nao-canonicos: 3.585 arquivos (majoritariamente em docs/archive) (DEBT)
 - AethelDashboard.tsx: 7 linhas (shell)
 - AethelDashboardRuntime.tsx: 1.191 linhas (Gate: 1.200) (LIMIT)
 - Bundle JS: 174 kB (reduzido de 495 kB) (OPTIMIZED)
@@ -37,7 +37,7 @@ Quality gates (status 2026-03-08)
 - Interface Critical Gate: ZERO
 - Enterprise Gate: PASS
 - WCAG Gate: OPERATIONAL (contraste nao validado)
-- Dashboard shell: RISK (1.199 linhas)
+- Dashboard runtime: RISK (1.191 linhas)
 
 Divida tecnica identificada
 - Limpeza: arquivamento em massa concluido (docs/archive/bulk-2026-03-10).
@@ -83,9 +83,9 @@ IDE / Workbench
 - Estado: funcional com Monaco.
 
 Gaps
-- Sem @-mentions.
-- Sem RAG semantico.
-- Preview sem HMR real.
+- Mention foundation existe, mas nao e product-grade.
+- RAG semantico persistente ausente.
+- Preview sem HMR real (E2B wired, token e HMR pendentes).
 - Sem git blame/diff.
 
 Melhorias
@@ -99,7 +99,7 @@ Core Loop
 - PLAN: OK
 - PATCH: OK
 - VALIDATE: OK
-- APPLY: WARN (batch 20, sucesso 75%)
+- APPLY: WARN (batch 50, sucesso 75%)
 - ROLLBACK: PARTIAL
 - LEARN: MISSING
 
@@ -112,7 +112,7 @@ Plano L4
 - Habilitar modo producao AI.
 - Executar qa:core-loop-production-probe.
 - Implementar feedback loop.
-- Expandir batch para 50.
+- Batch ja permite ate 50; falta evidenciar sucesso >90%.
 - Publicar readiness dossier.
 
 ## 5) Modulo Games
@@ -153,9 +153,9 @@ Maturidade: 6.5/10
 Status: L3 beta.
 
 Gaps vs mercado
-- Sem @-mentions.
-- Sem RAG semantico.
-- Sem preview sandbox real.
+- @-mentions incompletos (foundation existe).
+- RAG semantico persistente ausente.
+- Preview sandbox parcial (E2B wired, token/HMR pendentes).
 - Sem deploy one-click.
 - Sem Figma import.
 - Sem git blame/diff completo.
@@ -184,7 +184,7 @@ Stack
 - Prisma 5.7
 - AWS SDK
 - WebSockets
-- Sem sandbox real.
+- Sandbox managed parcial (E2B wired, dependente de token + HMR).
 
 Opcoes de sandbox
 - E2B: $0.05/hr, cold start ~150ms (recomendado).
@@ -316,6 +316,8 @@ Sprint 5
 - Games: Meshy + physics.
 - Films: Kling + continuidade.
 - Security: bug bounty + GDPR.
+
+Nota: o backlog detalhado e criterios de saida L4/L5 estao em `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`.
 
 ## 20) Conclusao e Recomendacao
 Veredito: fundacao tecnica solida, casca comercial/UX imatura.

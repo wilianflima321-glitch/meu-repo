@@ -7,25 +7,39 @@ Owner: Platform + PM Tecnico
 Publicar uma varredura factual unica de lacunas tecnicas/ux ainda abertas no estado atual do repositorio.
 
 ## 2) Snapshot factual
-1. Markdown total no repo: `3658`
-2. Markdown canonico (`docs/master`): `52`
-3. Markdown fora do canonico: `3606`
+1. Markdown total no repo: `3638`
+2. Markdown canonico (`docs/master`): `53`
+3. Markdown fora do canonico: `3585`
 4. Arquivos grandes (`>=1200` linhas) em `cloud-web-app/web`: `0`
 5. Uso de dialogs bloqueantes (ativo): `0`
 6. Uso de dialogs bloqueantes (deprecated): `0`
 7. APIs com gate `NOT_IMPLEMENTED` explicito: `0`
 8. Docs canonicos sem referencia no read-order do `00_INDEX`: `0`
 9. Top origens de markdown nao-canonico:
-   - `docs/archive`: 3503
-   - `cloud-web-app/web`: 16
+   - `docs/archive`: 3489
+   - `docs/root`: 48
+   - `cloud-web-app`: 18
    - `docs/gaps`: 7
-   - `src/common`: 3
-   - `cloud-web-app/docs`: 2
-   - `meu-repo/.github`: 2
-   - `tools/ci`: 2
-   - `tools/llm-mock`: 2
-   - `.github/agents`: 1
-   - `.github/BRANCH_PROTECTION_POLICY.md`: 1
+   - `diagnostics`: 6
+   - `meu-repo`: 5
+   - `tools`: 5
+   - `src`: 3
+   - `README.md`: 1
+   - `infra-playwright-ci-agent`: 1
+   - `infra`: 1
+   - `docs/tutorials`: 1
+
+## 2.1) G1-G10 (lacunas criticas padrao)
+G1: Preview runtime sem HMR real (PARTIAL, E2B wired sem token/hmr real).
+G2: Onboarding zero-to-value parcial (SLO <90s nao provado).
+G3: Mobile readiness parcial (entry surfaces ainda inconsistentes).
+G4: Core Web Vitals sem baseline publica consolidada.
+G5: AI recovery UX parcial (provider recovery existe, falta fechamento completo).
+G6: Dashboard monolito (AethelDashboardRuntime 1191 linhas, perto do gate).
+G7: Colaboracao sem stress test de carga (evidencia parcial).
+G8: Tema claro sem paridade WCAG completa (contraste nao validado).
+G9: Telemetria parcial (first-value P50/P95 ainda sem evidencia).
+G10: Empty states e micro-interacoes parciais.
 
 ## 3) Lacunas abertas (prioridade)
 ### P0

@@ -18,7 +18,7 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 ## 3) Active Conflicts (open)
 | ID | Conflict | Current state | Risk | Required closure |
 |---|---|---|---|---|
-| C-01 | Preview runtime parity vs managed bootstrap | Managed provision exists, real HMR parity is still partial | High UX friction | Decide canonical runtime path (managed sandbox or webcontainer) and ship one default |
+| C-01 | Preview runtime parity vs managed bootstrap | Managed provision exists (E2B wiring + sync endpoints), HMR parity still partial and token missing | High UX friction | Decide canonical runtime path (managed sandbox or webcontainer) and ship one default |
 | C-02 | L4 claim vs production evidence | Core loop code exists, production sample for promotion is still insufficient | High (claim invalidation) | Grow production evidence and publish readiness dossier |
 | C-03 | Billing narrative vs runtime reality | Billing routes are `PARTIAL`, gateway runtime may be unavailable | High (monetization block) | Wire checkout runtime and webhook path for paid plans |
 | C-04 | Canonical docs vs historical volume | `docs/master` is clean, non-canonical markdown has been archived to `docs/archive/bulk-2026-03-10` | Low (agent drift) | Keep archive consolidation and keep `00_INDEX` authoritative |

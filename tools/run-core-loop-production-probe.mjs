@@ -44,7 +44,7 @@ function parseArgs(argv) {
   }
 
   out.baseUrl = String(out.baseUrl || '').replace(/\/+$/, '')
-  out.runs = Math.max(1, Math.min(out.runs, 30))
+  out.runs = Math.max(1, Math.min(out.runs, 50))
   out.projectId = String(out.projectId || 'default').trim() || 'default'
   out.token = String(out.token || '').trim()
   return out
