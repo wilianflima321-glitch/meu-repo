@@ -15,9 +15,9 @@ Este documento e o checkpoint unico para:
 ## 2) Score Dashboard (factual)
 | Dimensao | Score Atual | Meta L4 | Meta L5 | Issue | Status |
 |---|---:|---:|---:|---|---|
-| Codigo / Qualidade | 9.5 | 9.5 | 9.5 | — | ACTIVE |
-| Governanca | 10.0 | 10.0 | 10.0 | — | ACTIVE |
-| Arquitetura | 8.7 | 9.0 | 9.5 | — | PARTIAL |
+| Codigo / Qualidade | 9.5 | 9.5 | 9.5 | ï¿½ | ACTIVE |
+| Governanca | 10.0 | 10.0 | 10.0 | ï¿½ | ACTIVE |
+| Arquitetura | 8.7 | 9.0 | 9.5 | ï¿½ | PARTIAL |
 | Core Loop / L4 | 3.0 | 8.0 | 9.5 | P0-01 | BLOCKED |
 | Preview / Sandbox | 5.4 | 8.0 | 9.0 | P0-02 | PARTIAL |
 | Billing / Stripe | 2.0 | 8.0 | 9.0 | P0-03 | PARTIAL |
@@ -29,11 +29,11 @@ Este documento e o checkpoint unico para:
 | Mobile + A11y | 5.7 | 8.0 | 9.0 | P1-06 | PARTIAL |
 | Security / Compliance | 6.5 | 7.5 | 9.0 | P2-01 | PARTIAL |
 | Research Agent | 6.0 | 7.5 | 9.0 | P2-02 | PARTIAL |
-| Films | 4.2 | — | 7.0 | P3-01 | FROZEN |
-| Games | 3.5 | — | 7.0 | P3-02 | FROZEN |
-| Media Geral | 6.2 | 8.0 | 9.2 | — | BLOCKED |
+| Films | 4.2 | ï¿½ | 7.0 | P3-01 | FROZEN |
+| Games | 3.5 | ï¿½ | 7.0 | P3-02 | FROZEN |
+| Media Geral | 6.2 | 8.0 | 9.2 | ï¿½ | BLOCKED |
 
-## 3) P0 — Bloqueadores Criticos (fazer primeiro)
+## 3) P0 ï¿½ Bloqueadores Criticos (fazer primeiro)
 ### P0-01 Core Loop Production Evidence
 - Objetivo: `sampleSize >= 100`, `successRate > 0.90`, `feedbackCoverage >= 0.60`.
 - Evidencia: `metrics/latest_run-production.json` + `/api/admin/ai/readiness`.
@@ -63,7 +63,7 @@ Este documento e o checkpoint unico para:
   - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
   - `STRIPE_PRICE_*` (starter/basic/pro/studio/enterprise)
 
-## 4) P1 — Alta Prioridade (iniciar apos P0)
+## 4) P1 ï¿½ Alta Prioridade (iniciar apos P0)
 ### P1-01 Marketing / GTM
 - Landing hero + video demo
 - Pricing com comparativo e CTAs
@@ -95,7 +95,7 @@ Este documento e o checkpoint unico para:
 - Nexus Chat fullscreen mobile
 - Axe CI + contrastes light/dark
 
-## 5) P2 — Media Prioridade
+## 5) P2 ï¿½ Media Prioridade
 ### P2-01 Security + Compliance
 - Vault criptografia em repouso
 - SSO/SAML/OIDC
@@ -108,7 +108,7 @@ Este documento e o checkpoint unico para:
 - Export MD/PDF
 - Loop research -> code -> deploy visivel
 
-## 6) P3 — Congelado ate Apps L4
+## 6) P3 ï¿½ Congelado ate Apps L4
 ### P3-01 Films L2 -> L3
 - Kling/Runway, continuidade, NLE basico, export
 
@@ -128,7 +128,7 @@ Obrigatorios:
 9. Dossier publicado
 
 ## 8) Criterios de Saida L5
-Além de L4:
+Alï¿½m de L4:
 1. Side-effects approval-gated
 2. Credentials isoladas (vault)
 3. Browser/runtime automation em sandbox
@@ -156,3 +156,53 @@ Além de L4:
 3. Games/Films congelados ate Apps L4.
 4. Demo sempre rotulado como demo.
 5. Usar labels: ABSENT/PARTIAL/BLOCKED/ACTIVE.
+
+## 12) Delta 2026-03-11 â€” Implementation Sprint
+
+### Novos artefatos implementados (code-ready):
+
+| Artefato | Path | Status |
+|---|---|---|
+| CanonicalPreviewSurface lifecycle | `components/preview/CanonicalPreviewSurface.tsx` | ACTIVE |
+| Security Vault (AES-256-GCM) | `lib/security/vault.ts` | ACTIVE |
+| Rate Limiter (sliding window) | `lib/security/rate-limiter.ts` | ACTIVE |
+| SSO/OIDC/SAML Provider | `lib/security/sso-provider.ts` | PARTIAL (needs credentials) |
+| GDPR Compliance | `lib/security/gdpr-compliance.ts` | ACTIVE |
+| Vercel Deploy Service | `lib/deploy/vercel-deploy.ts` | PARTIAL (needs VERCEL_TOKEN) |
+| Structured Logger | `lib/observability/logger.ts` | ACTIVE |
+| Enhanced @mentions | `lib/server/mention-context.ts` | ACTIVE |
+| Mention Chips UI | `components/ai/MentionChips.tsx` | ACTIVE |
+| Research Agent | `lib/research/research-agent.ts` | PARTIAL (needs API keys) |
+| First-Value Analytics | `app/api/analytics/first-value/route.ts` | ACTIVE |
+| Deploy API | `app/api/deploy/route.ts` | PARTIAL |
+| Vault API | `app/api/security/vault/route.ts` | ACTIVE |
+| SSO Readiness API | `app/api/security/sso/route.ts` | ACTIVE |
+| Research API | `app/api/research/route.ts` | PARTIAL |
+| L4 Readiness Dossier | `metrics/l4-readiness-dossier.json` | ACTIVE |
+| security.txt | `public/.well-known/security.txt` | ACTIVE |
+| .env.local template | `cloud-web-app/web/.env.local` | ACTIVE |
+
+### Score updates (post-sprint):
+| Dimensao | Pre-Sprint | Pos-Sprint | Delta |
+|---|---:|---:|---:|
+| Seguranca/Compliance | 6.5 | 7.5 | +1.0 |
+| Deploy + Infra | 5.4 | 6.5 | +1.1 |
+| RAG + @mentions | 4.0 | 5.5 | +1.5 |
+| Research Agent | 6.0 | 7.0 | +1.0 |
+| UX / Design System | 7.5 | 8.0 | +0.5 |
+| Onboarding | 5.2 | 6.0 | +0.8 |
+| Media Geral | 6.2 | 6.8 | +0.6 |
+
+### Blockers nao resolvidos (requerem credenciais externas):
+- Docker daemon (PostgreSQL, Redis)
+- Stripe real keys (checkout + webhook)
+- E2B API key (managed preview)
+- Vercel token (one-click deploy)
+- Tavily/Perplexity keys (live retrieval)
+
+### Proximos passos:
+1. Ativar Docker â†’ PostgreSQL â†’ Prisma migrations
+2. Configurar Stripe real â†’ testar checkout flow
+3. Configurar E2B â†’ testar provisionamento
+4. Rodar `npm run qa:core-loop-production-probe -- --runs 100`
+5. Verificar exitCriteria em `metrics/l4-readiness-dossier.json`

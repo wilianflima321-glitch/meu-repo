@@ -84,14 +84,12 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   images: { unoptimized: true },
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   experimental: {
     cpus: 1,
     workerThreads: true,
     webpackBuildWorker: false,
   },
-  i18n,
   async headers() {
     return [
       {

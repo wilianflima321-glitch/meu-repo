@@ -154,6 +154,27 @@
   --aethel-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --aethel-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --aethel-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --aethel-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --aethel-ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Motion tokens */
+  --aethel-motion-micro: 100ms var(--aethel-ease-out);
+  --aethel-motion-fast: 150ms var(--aethel-ease-in-out);
+  --aethel-motion-normal: 250ms var(--aethel-ease-in-out);
+  --aethel-motion-slow: 400ms var(--aethel-ease-in-out);
+  --aethel-motion-enter: 250ms var(--aethel-ease-out);
+  --aethel-motion-exit: 200ms var(--aethel-ease-in);
+  --aethel-motion-bounce: 500ms var(--aethel-ease-spring);
+
+  /* Semantic text styles */
+  --aethel-text-display: 600 var(--aethel-font-size-5xl)/var(--aethel-line-height-tight) var(--font-inter, Inter, sans-serif);
+  --aethel-text-heading-1: 700 var(--aethel-font-size-4xl)/var(--aethel-line-height-tight) var(--font-inter, Inter, sans-serif);
+  --aethel-text-heading-2: 600 var(--aethel-font-size-3xl)/var(--aethel-line-height-tight) var(--font-inter, Inter, sans-serif);
+  --aethel-text-heading-3: 600 var(--aethel-font-size-2xl)/var(--aethel-line-height-snug) var(--font-inter, Inter, sans-serif);
+  --aethel-text-body: 400 var(--aethel-font-size-base)/var(--aethel-line-height-relaxed) var(--font-inter, Inter, sans-serif);
+  --aethel-text-caption: 500 var(--aethel-font-size-xs)/var(--aethel-line-height-normal) var(--font-inter, Inter, sans-serif);
+  --aethel-text-overline: 600 var(--aethel-font-size-2xs)/var(--aethel-line-height-normal) var(--font-inter, Inter, sans-serif);
+  --aethel-text-code: 400 var(--aethel-font-size-sm)/var(--aethel-line-height-relaxed) var(--font-mono, JetBrains Mono, monospace);
 
   /* Z-index scale */
   --aethel-z-dropdown: 1000;
@@ -728,4 +749,121 @@ html.light .aethel-state-success {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--aethel-surface-quaternary);
+}
+
+/* ===== Focus ring utility ===== */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--aethel-primary);
+  outline-offset: 2px;
+}
+
+/* ===== Touch target utility ===== */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ===== Safe area padding for mobile ===== */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* ===== Gradient border utility ===== */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--aethel-gradient-primary);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ===== Responsive typography ===== */
+@media (max-width: 640px) {
+  h1 { font-size: var(--aethel-font-size-3xl); }
+  h2 { font-size: var(--aethel-font-size-2xl); }
+  h3 { font-size: var(--aethel-font-size-xl); }
+}
+
+/* ===== Smooth text animation ===== */
+@keyframes aethel-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes aethel-fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes aethel-slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes aethel-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: aethel-fade-in 250ms var(--aethel-ease-out) forwards;
+}
+
+.animate-fade-in-up {
+  animation: aethel-fade-in-up 400ms var(--aethel-ease-out) forwards;
+}
+
+.animate-slide-in-right {
+  animation: aethel-slide-in-right 300ms var(--aethel-ease-out) forwards;
+}
+
+.animate-scale-in {
+  animation: aethel-scale-in 200ms var(--aethel-ease-out) forwards;
+}
+
+/* ===== Mobile IDE compact mode ===== */
+@media (max-width: 768px) {
+  .aethel-ide-compact .aethel-sidebar {
+    display: none;
+  }
+  
+  .aethel-ide-compact .aethel-editor {
+    font-size: var(--aethel-font-size-xs);
+  }
+}
+
+/* ===== Print styles ===== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ===== High contrast mode refinements ===== */
+@media (forced-colors: active) {
+  .aethel-button {
+    border: 1px solid ButtonText;
+  }
+  
+  .aethel-input {
+    border: 1px solid ButtonText;
+  }
 }

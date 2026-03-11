@@ -1,56 +1,35 @@
-// UI Components - Professional Design System v2.0
-// Aethel Platform - Enterprise Grade UI
+/**
+ * Aethel UI Component Library
+ * 
+ * Canonical exports for shared UI primitives, layout components, and 
+ * accessibility utilities used across the Aethel product surface.
+ */
 
-// Core Components
-export { Button, type ButtonProps } from './Button'
-export { Input, type InputProps } from './Input'
-export { Card, CardHeader, CardFooter, CardContent, type CardProps } from './Card'
-export { Textarea, type TextareaProps } from './Textarea'
+// Layout
+export { default as PublicHeader } from './PublicHeader'
+export { default as PublicFooter } from './PublicFooter'
 
-// Selection & Dropdown
-export { Select, type SelectProps, type SelectOption } from './Select'
-export { Dropdown, DropdownButton, type DropdownProps, type DropdownItem } from './Dropdown'
-
-// Navigation & Layout
-export { Tabs, TabList, TabTrigger, TabContent, type TabsProps } from './Tabs'
-export { ScrollArea, type ScrollAreaProps } from './ScrollArea'
-export { VirtualList, type VirtualListProps } from './VirtualList'
-
-// Feedback
-export { ToastProvider, useToast, type Toast, type ToastType } from './Toast'
-export { Modal, ConfirmModal, type ModalProps, type ConfirmModalProps } from './Modal'
-export { Tooltip, type TooltipProps } from './Tooltip'
-
-// Loading States
-export { Skeleton, SkeletonCard, SkeletonTable, SkeletonList, type SkeletonProps } from './Skeleton'
-export { LoadingScreen, PageLoader, InlineLoader, DotsLoader, PulseLoader } from './LoadingScreen'
-
-// Advanced Skeleton Loading (UX Strategy)
+// Primitives
 export {
-  SkeletonBox,
-  SkeletonText,
-  SkeletonAvatar,
-  SkeletonAssetCard,
-  SkeletonContentBrowser,
-  SkeletonProjectCard,
-  SkeletonDashboard,
-  SkeletonChatMessage,
-  SkeletonChatPanel,
-  SkeletonEditorPanel,
-  SkeletonHierarchyTree,
-  SkeletonPropertiesPanel,
-  SkeletonIDELayout,
-  useSkeleton,
-  WithSkeleton,
-} from './SkeletonLoading'
+  EmptyState,
+  Skeleton,
+  CardSkeleton,
+  ListSkeleton,
+  StatsSkeleton,
+  ProgressStepper,
+  Toast,
+  StatusBadge,
+  Kbd,
+} from './UXPrimitives'
 
-// Empty States
-export { EmptyState, EmptyProjects, EmptySearch, EmptyChat, EmptyWorkflows, type EmptyStateProps } from './EmptyState'
+// Toast System
+export { ToastProvider, useToast } from './ToastProvider'
 
-// Data Display
-export { Badge, PlanBadge, StatusBadge, type BadgeProps } from './Badge'
-export { Avatar, AvatarGroup, type AvatarProps, type AvatarGroupProps } from './Avatar'
-
-// Design System (full component library)
-export * from './DesignSystem'
-
+// Accessibility
+export {
+  SkipToContent,
+  FocusTrap,
+  LiveRegion,
+  VisuallyHidden,
+  IconButton,
+} from './Accessibility'

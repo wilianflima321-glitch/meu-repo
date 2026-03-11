@@ -5,7 +5,7 @@ import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
 import { searchSemanticCodebase } from '@/lib/server/semantic-code-search'
 
 const CONTEXTUAL_TAG_PATTERN =
-  /@(file:[^\s]+|folder:[^\s]+|docs:[^\s]+|codebase|git:(?:diff|staged|status))/gi
+  /@(file:[^\s]+|folder:[^\s]+|docs:[^\s]+|codebase|git:(?:diff|staged|status|log|blame:[^\s]+)|diff|error|errors|diagnostics)/gi
 
 async function pathExists(target: string): Promise<boolean> {
   try {
@@ -192,6 +192,30 @@ async function resolveGitTag(tag: string): Promise<string> {
       .join('\n')
   }
 
+  if (tag === 'git:log') {
+    try {
+      const { execSync } = require('node:child_process')
+      const log = execSync('git log --oneline -10', { encoding: 'utf8', timeout: 5000 }).trim()
+      return log || '[no git log available]'
+    } catch {
+      return '[git log unavailable]'
+    }
+  }
+
+  if (tag.startsWith('git:blame:')) {
+    const filePath = tag.slice('git:blame:'.length)
+    try {
+      const { execSync } = require('node:child_process')
+      const blame = execSync(`git blame --line-porcelain -L 1,20 "${filePath}" 2>/dev/null | head -60`, {
+        encoding: 'utf8',
+        timeout: 5000,
+      }).trim()
+      return blame || `[no blame data for ${filePath}]`
+    } catch {
+      return `[git blame unavailable for ${filePath}]`
+    }
+  }
+
   return '[unsupported git tag]'
 }
 
@@ -199,10 +223,85 @@ export function extractContextualMentionTags(message: string): string[] {
   return [...new Set((message.match(CONTEXTUAL_TAG_PATTERN) || []).map((tag) => tag.toLowerCase()))]
 }
 
+/**
+ * Resolve recent build/lint errors and diagnostics from the workspace
+ */
+async function resolveErrorDiagnostics(repoRoot: string): Promise<string> {
+  const diagnostics: string[] = []
+
+  // Try to read TypeScript errors from build output
+  const buildOutputPaths = [
+    path.join(repoRoot, 'cloud-web-app/web/build_out.txt'),
+    path.join(repoRoot, '.next/build-error.log'),
+  ]
+
+  for (const buildPath of buildOutputPaths) {
+    try {
+      const content = await fs.readFile(buildPath, 'utf8')
+      if (content.trim()) {
+        const errorLines = content
+          .split('\n')
+          .filter((line) => /error|Error|ERR|TS\d{4}|warning/i.test(line))
+          .slice(0, 20)
+        if (errorLines.length > 0) {
+          diagnostics.push(`Build diagnostics (${path.basename(buildPath)}):`)
+          diagnostics.push(errorLines.join('\n'))
+        }
+      }
+    } catch {
+      // File doesn't exist, skip
+    }
+  }
+
+  // Try to read ESLint output
+  try {
+    const { execSync } = require('node:child_process')
+    const eslintOutput = execSync(
+      'npx eslint --format compact --max-warnings 0 "app/**/*.{ts,tsx}" 2>&1 | head -30',
+      { cwd: path.join(repoRoot, 'cloud-web-app/web'), encoding: 'utf8', timeout: 15000 }
+    ).trim()
+    if (eslintOutput && eslintOutput.includes('Error') || eslintOutput.includes('Warning')) {
+      diagnostics.push('ESLint diagnostics:')
+      diagnostics.push(eslintOutput)
+    }
+  } catch {
+    // ESLint not available or no errors
+  }
+
+  // Try to read TypeScript compiler errors
+  try {
+    const { execSync } = require('node:child_process')
+    const tscOutput = execSync(
+      'npx tsc --noEmit --pretty false 2>&1 | head -30',
+      { cwd: path.join(repoRoot, 'cloud-web-app/web'), encoding: 'utf8', timeout: 30000 }
+    ).trim()
+    if (tscOutput && tscOutput.includes('error TS')) {
+      diagnostics.push('TypeScript diagnostics:')
+      diagnostics.push(tscOutput)
+    }
+  } catch {
+    // TypeScript check not available
+  }
+
+  if (diagnostics.length === 0) {
+    return '[no recent errors or diagnostics found]'
+  }
+
+  return diagnostics.join('\n\n')
+}
+
 export type MentionContextPreviewBlock = {
   tag: string
-  kind: 'codebase' | 'docs' | 'file' | 'folder' | 'git' | 'error'
+  kind: 'codebase' | 'docs' | 'file' | 'folder' | 'git' | 'diff' | 'error' | 'diagnostics' | 'resolution-error'
   content: string
+  /** Preview chip data for UI rendering */
+  chip?: {
+    label: string
+    icon: 'code' | 'file' | 'folder' | 'git' | 'search' | 'warning' | 'bug' | 'diff'
+    color: 'violet' | 'blue' | 'green' | 'amber' | 'red' | 'slate'
+    fileCount?: number
+    lineRange?: string
+  }
 }
 
 export async function buildMentionContextPreview(
@@ -220,58 +319,98 @@ export async function buildMentionContextPreview(
   for (const tag of tags) {
     try {
       if (tag === '@codebase') {
+        const content = await resolveCodebaseContext({
+          repoRoot,
+          message,
+          userId: options.userId,
+          projectId: options.projectId,
+        })
         blocks.push({
           tag,
           kind: 'codebase',
-          content: await resolveCodebaseContext({
-            repoRoot,
-            message,
-            userId: options.userId,
-            projectId: options.projectId,
-          }),
+          content,
+          chip: { label: 'Codebase', icon: 'code', color: 'violet' },
         })
         continue
       }
 
       if (tag.startsWith('@docs:')) {
+        const query = tag.slice('@docs:'.length)
+        const content = await resolveDocsQuery(repoRoot, query)
         blocks.push({
           tag,
           kind: 'docs',
-          content: await resolveDocsQuery(repoRoot, tag.slice('@docs:'.length)),
+          content,
+          chip: { label: `Docs: ${query}`, icon: 'search', color: 'blue' },
         })
         continue
       }
 
       if (tag.startsWith('@file:')) {
+        const filePath = tag.slice('@file:'.length)
+        const content = await readSafeFile(repoRoot, filePath)
         blocks.push({
           tag,
           kind: 'file',
-          content: await readSafeFile(repoRoot, tag.slice('@file:'.length)),
+          content,
+          chip: { label: filePath.split('/').pop() || filePath, icon: 'file', color: 'green' },
         })
         continue
       }
 
       if (tag.startsWith('@folder:')) {
+        const folderPath = tag.slice('@folder:'.length)
+        const content = await listSafeFolder(repoRoot, folderPath)
         blocks.push({
           tag,
           kind: 'folder',
-          content: await listSafeFolder(repoRoot, tag.slice('@folder:'.length)),
+          content,
+          chip: { label: folderPath.split('/').pop() || folderPath, icon: 'folder', color: 'amber' },
         })
         continue
       }
 
       if (tag.startsWith('@git:')) {
+        const gitTag = tag.slice(1)
+        const content = await resolveGitTag(gitTag)
         blocks.push({
           tag,
           kind: 'git',
-          content: await resolveGitTag(tag.slice(1)),
+          content,
+          chip: { label: gitTag, icon: 'git', color: 'amber' },
         })
+        continue
+      }
+
+      // @Diff - working tree diff (shorthand for @git:diff)
+      if (tag === '@diff') {
+        const content = await resolveGitTag('git:diff')
+        blocks.push({
+          tag,
+          kind: 'diff',
+          content,
+          chip: { label: 'Working Diff', icon: 'diff', color: 'amber' },
+        })
+        continue
+      }
+
+      // @Error / @Errors / @Diagnostics - collect recent build/lint errors
+      if (tag === '@error' || tag === '@errors' || tag === '@diagnostics') {
+        const content = await resolveErrorDiagnostics(repoRoot)
+        blocks.push({
+          tag,
+          kind: 'diagnostics',
+          content,
+          chip: { label: 'Diagnostics', icon: 'bug', color: 'red' },
+        })
+        continue
       }
     } catch (error) {
       blocks.push({
         tag,
-        kind: 'error',
+        kind: 'resolution-error',
         content: `[context resolution failed: ${error instanceof Error ? error.message : 'unknown error'}]`,
+        chip: { label: tag, icon: 'warning', color: 'red' },
       })
     }
   }

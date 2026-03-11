@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import PublicHeader from '@/components/ui/PublicHeader'
+import PublicFooter from '@/components/ui/PublicFooter'
 
 const enterpriseFeatures = [
   { icon: 'RBAC', title: 'Governanca e RBAC', desc: 'Controles operacionais, audit trail e readiness por superficie.' },
@@ -49,32 +51,14 @@ export default function ContactSalesPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 h-[600px] w-[600px] rounded-full bg-blue-600/10 blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/10 blur-[150px]" />
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.07] blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-indigo-600/[0.05] blur-[150px]" />
       </div>
 
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={36} height={36} className="rounded-xl" />
-            <span className="text-xl font-bold">Aethel</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pricing" className="text-slate-400 transition-colors hover:text-white">
-              Precos
-            </Link>
-            <Link
-              href="/dashboard?onboarding=1&source=contact-sales"
-              className="flex h-9 items-center rounded-lg bg-white px-4 font-medium text-black transition-colors hover:bg-slate-200"
-            >
-              Abrir produto
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <PublicHeader />
 
-      <main className="relative px-6 pb-16 pt-24">
+      <main className="relative z-10 px-6 pb-16 pt-8">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             <section className="lg:pt-8">
@@ -227,6 +211,8 @@ export default function ContactSalesPage() {
           </div>
         </div>
       </main>
+
+      <PublicFooter />
     </div>
   )
 }

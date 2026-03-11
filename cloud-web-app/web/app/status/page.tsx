@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import PublicHeader from '@/components/ui/PublicHeader'
+import PublicFooter from '@/components/ui/PublicFooter'
 
 type SurfaceState = 'healthy' | 'partial' | 'unhealthy' | 'unknown'
 
@@ -234,29 +236,14 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 h-[600px] w-[600px] rounded-full bg-emerald-600/5 blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/5 blur-[150px]" />
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-emerald-600/[0.04] blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-blue-600/[0.04] blur-[150px]" />
       </div>
 
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={36} height={36} className="rounded-xl" />
-            <span className="text-xl font-bold">Aethel</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pricing" className="text-slate-400 transition-colors hover:text-white">
-              Precos
-            </Link>
-            <Link href="/contact-sales" className="text-slate-400 transition-colors hover:text-white">
-              Contato
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <PublicHeader />
 
-      <main className="relative px-6 pb-16 pt-32">
+      <main className="relative z-10 px-6 pb-16 pt-12">
         <div className="mx-auto max-w-5xl">
           <header className="mb-10 text-center">
             <p className="mb-4 text-sm uppercase tracking-[0.18em] text-sky-300">Public Runtime Status</p>
@@ -316,6 +303,8 @@ export default function StatusPage() {
           </section>
         </div>
       </main>
+
+      <PublicFooter />
     </div>
   )
 }

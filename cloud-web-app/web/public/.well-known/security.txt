@@ -1,0 +1,11 @@
+Contact: mailto:security@aethel.dev
+Expires: 2027-03-11T00:00:00.000Z
+Preferred-Languages: en, pt-BR
+Canonical: https://aethel.dev/.well-known/security.txt
+Policy: https://aethel.dev/security-policy
+Acknowledgments: https://aethel.dev/security-acknowledgments
+
+# Aethel Engine Security Policy
+# Report security vulnerabilities to: security@aethel.dev
+# Expected response time: 48 hours
+# Bug bounty program: Coming soon

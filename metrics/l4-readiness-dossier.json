@@ -1,0 +1,149 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-03-11T00:00:00.000Z",
+  "status": "BLOCKED",
+  "statusReason": "Runtime prerequisites not satisfied - Docker, DB, Stripe keys missing",
+  "level": "L3",
+  "targetLevel": "L4",
+  "exitCriteria": {
+    "productionSampleSize": {
+      "current": 0,
+      "target": 100,
+      "met": false,
+      "blocker": "DOCKER_DAEMON_NOT_RUNNING + DATABASE_UNREACHABLE"
+    },
+    "applySuccessRate": {
+      "current": 0.75,
+      "target": 0.90,
+      "met": false,
+      "source": "rehearsal (n=24)"
+    },
+    "regressionRate": {
+      "current": 0.0,
+      "target": 0.05,
+      "met": true,
+      "note": "Max threshold, current is 0% on rehearsal"
+    },
+    "feedbackCoverage": {
+      "current": 0.50,
+      "target": 0.60,
+      "met": false,
+      "source": "rehearsal"
+    },
+    "previewManaged": {
+      "current": false,
+      "target": true,
+      "met": false,
+      "blocker": "E2B_API_KEY not configured"
+    },
+    "billingCheckout": {
+      "current": false,
+      "target": true,
+      "met": false,
+      "blocker": "STRIPE_SECRET_KEY placeholder"
+    },
+    "onboardingP50Under90s": {
+      "current": null,
+      "target": 90000,
+      "met": false,
+      "blocker": "No production funnel data"
+    },
+    "enterpriseGateGreen": {
+      "current": true,
+      "target": true,
+      "met": true,
+      "source": "qa:enterprise-gate"
+    },
+    "dossierPublished": {
+      "current": true,
+      "target": true,
+      "met": true,
+      "source": "metrics/l4-readiness-dossier.json"
+    }
+  },
+  "scores": {
+    "codeQuality": 9.5,
+    "governance": 10.0,
+    "architecture": 8.7,
+    "coreLoop": 3.0,
+    "previewSandbox": 5.4,
+    "billingStripe": 2.0,
+    "marketingGTM": 1.5,
+    "onboarding": 5.2,
+    "ragMentions": 4.0,
+    "uxDesignSystem": 7.5,
+    "deployInfra": 5.4,
+    "mobileA11y": 5.7,
+    "securityCompliance": 6.5,
+    "researchAgent": 6.0,
+    "overallMedia": 6.2
+  },
+  "blockers": {
+    "P0": [
+      {
+        "id": "P0-01",
+        "name": "Core Loop Production Evidence",
+        "status": "BLOCKED",
+        "requirements": ["Docker daemon", "DATABASE_URL", "JWT_SECRET", "CSRF_SECRET"],
+        "action": "Start Docker, configure .env.local, run production probes"
+      },
+      {
+        "id": "P0-02",
+        "name": "Preview Runtime + HMR (E2B)",
+        "status": "PARTIAL",
+        "requirements": ["E2B_API_KEY", "AETHEL_PREVIEW_E2B_TEMPLATE"],
+        "action": "Configure E2B credentials, test provisioning"
+      },
+      {
+        "id": "P0-03",
+        "name": "Billing Stripe Complete",
+        "status": "PARTIAL",
+        "requirements": ["STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET"],
+        "action": "Configure real Stripe keys, verify webhook"
+      }
+    ],
+    "P1": [
+      "Marketing/GTM landing optimization",
+      "Onboarding < 90s first-value SLO",
+      "RAG + @mentions pgvector backend",
+      "UX Design System semantic tokens",
+      "One-click deploy (Vercel API)",
+      "Mobile + WCAG accessibility"
+    ]
+  },
+  "implementedSinceLastAudit": [
+    "CanonicalPreviewSurface with lifecycle states (idle/provisioning/warming/healthy/degraded/failed)",
+    "AES-256-GCM security vault for API key encryption",
+    "Redis-compatible rate limiting with plan-aware quotas",
+    "SSO/OIDC/SAML provider framework",
+    "Vercel one-click deploy service",
+    "Structured logging (pino-compatible) with OpenTelemetry spans",
+    "Enhanced @mentions: @Diff, @Error, @Diagnostics, @git:log, @git:blame",
+    "Research Agent with Tavily/Perplexity live retrieval + citations + export",
+    "First-value analytics API (/api/analytics/first-value)",
+    "Deploy API (/api/deploy) with Vercel integration",
+    "security.txt for responsible disclosure",
+    ".env.local with all required configuration keys",
+    "Preview chip metadata for UI rendering"
+  ],
+  "canonicalDocs": {
+    "completionMap": "docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md",
+    "qualityMap": "docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md",
+    "technicalAudit": "docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md",
+    "executionBoard": "docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md",
+    "gapRegister": "docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md",
+    "duplicationsConflicts": "docs/master/DUPLICATIONS_AND_CONFLICTS.md"
+  },
+  "nextSteps": [
+    "1. Activate Docker daemon and PostgreSQL",
+    "2. Run: npm run setup:local-db (Prisma migrations)",
+    "3. Configure real Stripe keys and test checkout flow",
+    "4. Configure E2B API key and test preview provisioning",
+    "5. Run: npm run qa:core-loop-production-probe -- --runs 50",
+    "6. Achieve sampleSize >= 100 with successRate > 0.90",
+    "7. Verify feedbackCoverage >= 0.60",
+    "8. Update this dossier with production evidence",
+    "9. Run: npm run qa:enterprise-gate (must pass)",
+    "10. Promote to L4 when all exit criteria met"
+  ]
+}

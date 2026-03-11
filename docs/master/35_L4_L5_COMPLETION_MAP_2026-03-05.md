@@ -450,3 +450,85 @@ If work competes with this order:
    - `tools/check-production-runtime-readiness.mjs` provides a deterministic local preflight for `.env.local`, `DATABASE_URL`, `JWT_SECRET`, `CSRF_SECRET`, Docker CLI, and Docker daemon state;
    - `npm run qa:production-runtime-readiness` now fails with explicit blockers instead of leaving operators to infer why production probes cannot start.
 
+## Delta 2026-03-11 — Infrastructure & Security Implementation Sprint
+
+### New implementations (code-ready, runtime blocked by credentials):
+
+17. **CanonicalPreviewSurface with full lifecycle states**:
+   - `components/preview/CanonicalPreviewSurface.tsx` now implements all lifecycle states: `idle → provisioning → warming → syncing → healthy → degraded → failed → offline`;
+   - E2B provision hook with automatic health polling and WebSocket HMR bridge;
+   - Visual lifecycle indicator bar with latency display and HMR connection status;
+   - Inline fallback when managed runtime unavailable; resolves C-07 from DUPLICATIONS_AND_CONFLICTS.md.
+
+18. **AES-256-GCM Security Vault** (`lib/security/vault.ts`):
+   - Encrypts API keys at rest using PBKDF2-SHA512 key derivation + AES-256-GCM;
+   - Store/retrieve/rotate/delete operations; vault health validation;
+   - API route at `/api/security/vault` (readiness check + CRUD).
+
+19. **Redis-compatible Rate Limiting** (`lib/security/rate-limiter.ts`):
+   - Sliding window algorithm with plan-aware quotas;
+   - Per-action limits (api/ai/preview/deploy) derived from `PLAN_LIMITS`;
+   - IP-based rate limiting for unauthenticated endpoints;
+   - Falls back to in-memory when Redis unavailable.
+
+20. **SSO/OIDC/SAML Provider Framework** (`lib/security/sso-provider.ts`):
+   - Supports Google, GitHub, Microsoft/Azure AD, custom OIDC, and SAML 2.0;
+   - Provider discovery and readiness check at `/api/security/sso`;
+   - Claims mapping for roles/groups extraction from enterprise IdPs.
+
+21. **Vercel One-Click Deploy** (`lib/deploy/vercel-deploy.ts`):
+   - Project creation/management, git-based deployment, status monitoring;
+   - Environment variable injection, deployment listing;
+   - Readiness check at `/api/deploy?readiness=true`.
+
+22. **Structured Logging & Observability** (`lib/observability/logger.ts`):
+   - Pino-compatible structured JSON logging with log levels;
+   - Child loggers, request context, timed operations;
+   - OpenTelemetry span integration (traceId/spanId propagation);
+   - RUM metrics processing endpoint.
+
+23. **Enhanced @mentions system** (`lib/server/mention-context.ts`):
+   - New mentions: `@Diff` (working tree diff), `@Error`/`@Errors`/`@Diagnostics` (build/lint errors);
+   - Extended `@git:log`, `@git:blame:<file>` support;
+   - Preview chip metadata (label, icon, color) for every mention type;
+   - `MentionChips.tsx` UI component with suggestion list and preview panel.
+
+24. **Research Agent Premium** (`lib/research/research-agent.ts`):
+   - Live web retrieval via Tavily and Perplexity APIs;
+   - Inline citation formatting and bibliography generation;
+   - Export to Markdown/JSON with full attribution;
+   - API route at `/api/research` (query + readiness).
+
+25. **First-Value Analytics** (`app/api/analytics/first-value/route.ts`):
+   - Funnel tracking: landing → signup → onboarding → AI → preview → IDE → deploy;
+   - Per-step timing with SLO targets (P50/P95);
+   - Aggregate conversion rates and time-to-first-value metrics.
+
+26. **GDPR Compliance Framework** (`lib/security/gdpr-compliance.ts`):
+   - Data export (GDPR Art. 20 portability), deletion requests (Art. 17 erasure);
+   - Consent management (Art. 7), processing activity records (Art. 30);
+   - Sub-processor registry and DPO contact information.
+
+27. **L4 Readiness Dossier** published at `metrics/l4-readiness-dossier.json`:
+   - Complete exit criteria tracking with current vs target values;
+   - Blocker inventory for P0/P1 items;
+   - Implementation changelog since last audit.
+
+28. **Security disclosure** at `public/.well-known/security.txt`:
+   - Responsible disclosure contact and policy link;
+   - Bug bounty program announcement.
+
+29. **Environment configuration** at `cloud-web-app/web/.env.local`:
+   - All required keys configured (placeholder values for external services);
+   - Includes DATABASE_URL, JWT_SECRET, CSRF_SECRET, NEXTAUTH_SECRET;
+   - Stripe, E2B, Vercel, Vault, Redis, Tavily/Perplexity configuration sections.
+
+### Remaining L4 blockers (unchanged from P0):
+- Docker daemon not available → cannot start PostgreSQL/Redis
+- Real Stripe credentials required for checkout/webhook verification
+- Real E2B token required for managed preview provisioning
+- Production probe sample size still 0 (needs live runtime)
+
+### Closure rule:
+No L4 promotion claim is valid until `metrics/l4-readiness-dossier.json` shows all `exitCriteria[*].met === true`.
+
