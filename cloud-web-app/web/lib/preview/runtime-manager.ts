@@ -41,6 +41,13 @@ export type PreviewRuntimeProvisionResponse = {
   message?: string;
   metadata?: {
     mode?: string;
+    provider?: string;
+    endpoint?: string;
+    sandboxId?: string;
+    filesCount?: number;
+    totalBytes?: number;
+    startMode?: string;
+    workdir?: string;
   };
 };
 
@@ -115,6 +122,7 @@ export async function discoverPreviewRuntime(): Promise<string | null> {
 export async function provisionPreviewRuntime(projectId: string | null): Promise<{
   runtimeUrl: string | null;
   metadataMode?: string;
+  metadata?: PreviewRuntimeProvisionResponse['metadata'] | null;
 }> {
   const response = await fetch('/api/preview/runtime-provision', {
     method: 'POST',
@@ -132,6 +140,7 @@ export async function provisionPreviewRuntime(projectId: string | null): Promise
   return {
     runtimeUrl: normalizeRuntimeUrl(payload?.runtimeUrl ?? null),
     metadataMode: payload?.metadata?.mode,
+    metadata: payload?.metadata ?? null,
   };
 }
 

@@ -194,7 +194,14 @@ export function usePreviewRuntimeManager({
       setRuntimeHealth({ status: 'checking' })
       setRuntimeHealthCheckedAt(new Date())
       setRuntimeDiscoveryTone('success')
-      setRuntimeDiscoveryMessage(`Runtime provisionado: ${runtimeUrl}`)
+      const filesCount = provisionResult.metadata?.filesCount
+      const startMode = provisionResult.metadata?.startMode
+      const suffix = [startMode ? `modo=${startMode}` : null, Number.isFinite(filesCount) ? `arquivos=${filesCount}` : null]
+        .filter(Boolean)
+        .join(', ')
+      setRuntimeDiscoveryMessage(
+        suffix ? `Runtime provisionado (${suffix}): ${runtimeUrl}` : `Runtime provisionado: ${runtimeUrl}`
+      )
       persistPreviewRuntimeUrl(runtimeUrl, PREVIEW_RUNTIME_URL_STORAGE_KEY)
 
       analytics?.track?.('engine', 'render_time', {
@@ -203,6 +210,9 @@ export function usePreviewRuntimeManager({
           status: 'provisioned',
           runtimeUrl,
           mode: provisionResult.metadataMode || mode || 'unknown',
+          sandboxId: provisionResult.metadata?.sandboxId,
+          filesCount: provisionResult.metadata?.filesCount,
+          startMode: provisionResult.metadata?.startMode,
         },
       })
       void refreshRuntimeReadiness()
