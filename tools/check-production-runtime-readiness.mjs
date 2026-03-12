@@ -71,6 +71,19 @@ function checkDockerDaemon() {
   return result.status === 0
 }
 
+function isLocalDatabaseHost(databaseUrl) {
+  if (!databaseUrl) return false
+  try {
+    const host = new URL(databaseUrl).hostname.toLowerCase()
+    if (!host) return false
+    if (host === 'localhost' || host === '127.0.0.1' || host === '::1') return true
+    if (host.endsWith('.local')) return true
+    return false
+  } catch {
+    return false
+  }
+}
+
 const databaseProbe = await canReachDatabaseTarget(process.env.DATABASE_URL)
 const appRuntimeReachable = await checkHttpEndpoint(`${baseUrl}/api/health/live`)
 
@@ -94,6 +107,7 @@ const readiness = {
   ]),
   dockerCliPresent: spawnSync('docker', ['--version'], { stdio: 'ignore', shell: true }).status === 0,
   dockerDaemonReady: false,
+  dockerRequired: isLocalDatabaseHost(process.env.DATABASE_URL),
 }
 
 if (readiness.dockerCliPresent) {
@@ -107,8 +121,10 @@ else if (!readiness.databaseReachable) blockers.push('DATABASE_UNREACHABLE')
 if (!readiness.appRuntimeReachable) blockers.push('APP_RUNTIME_UNREACHABLE')
 if (!readiness.jwtConfigured) blockers.push('JWT_SECRET_MISSING')
 if (!readiness.csrfConfigured) blockers.push('CSRF_SECRET_MISSING')
-if (!readiness.dockerCliPresent) blockers.push('DOCKER_CLI_MISSING')
-else if (!readiness.dockerDaemonReady) blockers.push('DOCKER_DAEMON_NOT_RUNNING')
+if (readiness.dockerRequired) {
+  if (!readiness.dockerCliPresent) blockers.push('DOCKER_CLI_MISSING')
+  else if (!readiness.dockerDaemonReady) blockers.push('DOCKER_DAEMON_NOT_RUNNING')
+}
 
 const instructions = []
 const recommendedCommands = []
@@ -118,15 +134,21 @@ if (!readiness.envLocalPresent || !readiness.jwtConfigured || !readiness.csrfCon
   recommendedCommands.push('npm run setup:local-runtime')
 }
 
-if (!readiness.dockerCliPresent) {
-  instructions.push('Install Docker Desktop or expose the docker CLI in PATH.')
-} else if (!readiness.dockerDaemonReady) {
-  instructions.push('Start the Docker daemon before bringing up the local Postgres/Redis stack.')
+if (readiness.dockerRequired) {
+  if (!readiness.dockerCliPresent) {
+    instructions.push('Install Docker Desktop or expose the docker CLI in PATH.')
+  } else if (!readiness.dockerDaemonReady) {
+    instructions.push('Start the Docker daemon before bringing up the local Postgres/Redis stack.')
+  }
 }
 
 if (!(readiness.databaseConfigured && readiness.databaseReachable)) {
-  instructions.push('Bring up the local Postgres/Redis stack and apply the Prisma schema before probing.')
-  recommendedCommands.push('npm run setup:local-db')
+  if (readiness.dockerRequired) {
+    instructions.push('Bring up the local Postgres/Redis stack and apply the Prisma schema before probing.')
+    recommendedCommands.push('npm run setup:local-db')
+  } else {
+    instructions.push('Ensure remote DATABASE_URL is reachable and credentials are valid before probing.')
+  }
 }
 
 if (!readiness.appRuntimeReachable) {

@@ -164,6 +164,11 @@ Status: CANONICAL ENTRYPOINT
   - `/nexus` now consumes the shared Studio navigation rail while preserving the productivity-first layout,
   - `components/ui` toast exports now resolve to a single runtime provider (`components/ui/Toast.tsx`),
   - unified Studio IA baseline published in `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`.
+- Delta 2026-03-12:
+  - production runtime preflight now treats Docker as required only for local DB hosts, unblocking remote Postgres workflows,
+  - preview runtime preflight now enforces E2B-native requirements (`E2B_API_KEY`, `AETHEL_PREVIEW_E2B_TEMPLATE`, allowlist hosts) without requiring provision token for `provider=e2b`,
+  - billing runtime preflight now checks monthly + annual Stripe price IDs,
+  - new execution helpers added: `setup:operator-token`, `setup:billing-webhook`, `qa:core-loop-production-wave`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

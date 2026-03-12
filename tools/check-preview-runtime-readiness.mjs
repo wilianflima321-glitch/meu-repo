@@ -47,6 +47,17 @@ const endpoints = isRuntimeConfigured(env.AETHEL_PREVIEW_PROVISION_ENDPOINTS)
   .filter(Boolean)
   : []
 const tokenConfigured = isRuntimeConfigured(env.AETHEL_PREVIEW_PROVISION_TOKEN)
+const e2bApiKeyConfigured = isRuntimeConfigured(env.E2B_API_KEY)
+const e2bTemplateConfigured = isRuntimeConfigured(env.AETHEL_PREVIEW_E2B_TEMPLATE)
+const allowedHosts = String(env.AETHEL_PREVIEW_ALLOWED_HOSTS || '')
+  .split(',')
+  .map((entry) => entry.trim())
+  .filter(Boolean)
+const e2bHostsConfigured =
+  allowedHosts.includes('.e2b.app') ||
+  allowedHosts.includes('e2b.app') ||
+  allowedHosts.includes('.e2b.dev') ||
+  allowedHosts.includes('e2b.dev')
 const nextPublicRuntimeUrl = String(env.NEXT_PUBLIC_PREVIEW_RUNTIME_URL || '').trim()
 
 const configuredEndpoints = Array.from(new Set([endpoint, ...endpoints].filter(Boolean)))
@@ -76,7 +87,24 @@ if (effectiveProvider === 'inline') {
   recommendedCommands.push('Set AETHEL_PREVIEW_PROVIDER=e2b or configure AETHEL_PREVIEW_PROVISION_ENDPOINT')
 }
 
-if (routeProvisionSupported && !tokenConfigured) {
+if (routeProvisionSupported && effectiveProvider === 'e2b') {
+  if (!e2bApiKeyConfigured) {
+    blockers.push('E2B_API_KEY_MISSING')
+    instructions.push('E2B provisioning requires E2B_API_KEY.')
+  }
+  if (!e2bTemplateConfigured) {
+    blockers.push('AETHEL_PREVIEW_E2B_TEMPLATE_MISSING')
+    instructions.push('E2B provisioning requires AETHEL_PREVIEW_E2B_TEMPLATE.')
+  }
+  if (!e2bHostsConfigured) {
+    blockers.push('AETHEL_PREVIEW_ALLOWED_HOSTS_MISSING')
+    instructions.push('Allow E2B sandbox hosts in AETHEL_PREVIEW_ALLOWED_HOSTS (e.g., .e2b.app,.e2b.dev).')
+  }
+  if (!e2bApiKeyConfigured || !e2bTemplateConfigured || !e2bHostsConfigured) {
+    recommendedCommands.push('npm run setup:preview-runtime')
+    recommendedCommands.push('Edit cloud-web-app/web/.env.local')
+  }
+} else if (routeProvisionSupported && !tokenConfigured) {
   blockers.push('AETHEL_PREVIEW_PROVISION_TOKEN_MISSING')
   instructions.push('Managed preview route provisioning requires AETHEL_PREVIEW_PROVISION_TOKEN.')
   recommendedCommands.push('npm run setup:preview-runtime')
@@ -109,6 +137,9 @@ const summary = {
   routeProvisionSupported,
   configuredEndpoints,
   tokenConfigured,
+  e2bApiKeyConfigured,
+  e2bTemplateConfigured,
+  e2bHostsConfigured,
   nextPublicRuntimeUrl: nextPublicRuntimeUrl || null,
   status: blockers.length === 0 ? 'ready' : 'partial',
   blockers,

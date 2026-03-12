@@ -62,6 +62,19 @@ function checkDockerDaemon() {
   }).status === 0
 }
 
+function isLocalDatabaseHost(databaseUrl: string | undefined): boolean {
+  if (!databaseUrl) return false
+  try {
+    const host = new URL(databaseUrl).hostname.toLowerCase()
+    if (!host) return false
+    if (host === 'localhost' || host === '127.0.0.1' || host === '::1') return true
+    if (host.endsWith('.local')) return true
+    return false
+  } catch {
+    return false
+  }
+}
+
 export async function getProductionRuntimeReadiness(): Promise<ProductionRuntimeReadiness> {
   const envLocalPath = path.join(process.cwd(), '.env.local')
   const envLocalPresent = fs.existsSync(envLocalPath)
@@ -71,6 +84,7 @@ export async function getProductionRuntimeReadiness(): Promise<ProductionRuntime
   const csrfConfigured = Boolean(process.env.CSRF_SECRET || process.env.JWT_SECRET)
   const dockerCliPresent = checkDockerCliPresent()
   const dockerDaemonReady = dockerCliPresent ? checkDockerDaemon() : false
+  const dockerRequired = isLocalDatabaseHost(process.env.DATABASE_URL)
   const blockers: string[] = []
   const instructions: string[] = []
   const recommendedCommands: string[] = []
@@ -80,23 +94,31 @@ export async function getProductionRuntimeReadiness(): Promise<ProductionRuntime
   else if (!databaseProbe.reachable) blockers.push('DATABASE_UNREACHABLE')
   if (!jwtConfigured) blockers.push('JWT_SECRET_MISSING')
   if (!csrfConfigured) blockers.push('CSRF_SECRET_MISSING')
-  if (!dockerCliPresent) blockers.push('DOCKER_CLI_MISSING')
-  else if (!dockerDaemonReady) blockers.push('DOCKER_DAEMON_NOT_RUNNING')
+  if (dockerRequired) {
+    if (!dockerCliPresent) blockers.push('DOCKER_CLI_MISSING')
+    else if (!dockerDaemonReady) blockers.push('DOCKER_DAEMON_NOT_RUNNING')
+  }
 
   if (!envLocalPresent || !jwtConfigured || !csrfConfigured || !databaseConfigured) {
     instructions.push('Bootstrap the local runtime env before running the production probe.')
     recommendedCommands.push('npm run setup:local-runtime')
   }
 
-  if (!dockerCliPresent) {
-    instructions.push('Install Docker Desktop or ensure the docker CLI is available in PATH.')
-  } else if (!dockerDaemonReady) {
-    instructions.push('Start the Docker daemon before bringing up the local database stack.')
+  if (dockerRequired) {
+    if (!dockerCliPresent) {
+      instructions.push('Install Docker Desktop or ensure the docker CLI is available in PATH.')
+    } else if (!dockerDaemonReady) {
+      instructions.push('Start the Docker daemon before bringing up the local database stack.')
+    }
   }
 
   if (!databaseReachableAfterConfig(databaseConfigured, databaseProbe.reachable)) {
-    instructions.push('Bring up the local Postgres/Redis stack and apply the Prisma schema before probing.')
-    recommendedCommands.push('npm run setup:local-db')
+    if (dockerRequired) {
+      instructions.push('Bring up the local Postgres/Redis stack and apply the Prisma schema before probing.')
+      recommendedCommands.push('npm run setup:local-db')
+    } else {
+      instructions.push('Ensure remote DATABASE_URL is reachable and credentials are valid before probing.')
+    }
   }
 
   if (envLocalPresent && databaseConfigured && databaseProbe.reachable && jwtConfigured) {

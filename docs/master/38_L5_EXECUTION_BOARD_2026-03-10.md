@@ -218,6 +218,24 @@ Al�m de L4:
   - `npm run qa:preview-runtime-readiness` -> PASS
   - `npm run qa:billing-runtime-readiness` -> PASS
   - `npm run typecheck` -> PASS
+
+## 14) Delta 2026-03-12 - Runtime preflight hardening
+
+- Production runtime preflight now treats Docker as **required only for local DB hosts** (`localhost/127.0.0.1/.local`), preventing false blockers when using remote Postgres (Neon).
+- Preview runtime preflight now aligns with E2B route-managed requirements:
+  - requires `E2B_API_KEY`,
+  - requires `AETHEL_PREVIEW_E2B_TEMPLATE`,
+  - requires `AETHEL_PREVIEW_ALLOWED_HOSTS` containing `.e2b.app`/`.e2b.dev`,
+  - no longer blocks on `AETHEL_PREVIEW_PROVISION_TOKEN` when provider is `e2b`.
+- Billing preflight now validates both monthly and annual Stripe price IDs.
+- New operator tooling added:
+  - `npm run setup:operator-token` -> creates/normalizes owner-capable operator token and seeds scoped probe workspace.
+  - `npm run setup:billing-webhook` -> attempts Stripe webhook endpoint creation and writes `STRIPE_WEBHOOK_SECRET` when URL is public.
+  - `npm run qa:core-loop-production-wave` -> orchestrates local runtime startup + production probe wave.
+
+Current blockers after hardening:
+- `productionRuntime:APP_RUNTIME_UNREACHABLE` (runtime not active during preflight),
+- `billingRuntime:STRIPE_WEBHOOK_SECRET_MISSING` (public webhook URL/secret still pending).
   - `npm run qa:enterprise-gate` -> PASS
 - Remaining hard blockers for L4 stay unchanged:
   - production sample size still below target (`>= 100`)
