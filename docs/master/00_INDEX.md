@@ -36,6 +36,7 @@ Status: CANONICAL ENTRYPOINT
 31. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
 32. `docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md`
 33. `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`
+34. `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -70,6 +71,7 @@ Status: CANONICAL ENTRYPOINT
 | `36_QUALITY_90_EXECUTION_MAP_2026-03-08.md` | Canonical path to reach >=9.0 quality across product dimensions without inflating claims | ACTIVE |
 | `37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md` | Definitive technical evaluation and market comparison | ACTIVE |
 | `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
+| `39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md` | Unified Studio information architecture and navigation contract | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -155,6 +157,12 @@ Status: CANONICAL ENTRYPOINT
   - preview runtime: E2B direct provisioning wired with full sync + single-file sync endpoints (runtime still `PARTIAL` until token + HMR parity).
   - core-loop production probe tooling now accepts `--runs 50` in both API and CLI.
   - master execution board published: `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`.
+- Delta 2026-03-11:
+  - Studio navigation contract centralized in `cloud-web-app/web/lib/navigation/surfaces.ts`,
+  - shared studio shell header added in `cloud-web-app/web/components/studio/StudioGlobalNav.tsx`,
+  - `/billing`, `/settings`, and `/profile` now consume the unified studio header baseline,
+  - `components/ui` toast exports now resolve to a single runtime provider (`components/ui/Toast.tsx`),
+  - unified Studio IA baseline published in `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import StudioGlobalNav from '@/components/studio/StudioGlobalNav'
 
 const SettingsEditor = dynamic(() => import('../../components/SettingsEditor'), { ssr: false })
 
@@ -80,32 +81,12 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-sm text-zinc-400 hover:text-zinc-100">
-              Dashboard
-            </Link>
-            <span className="text-zinc-700">/</span>
-            <span className="text-sm text-zinc-300">Settings</span>
-          </div>
-          <Link
-            href="/ide"
-            className="rounded border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-200 hover:bg-cyan-500/20"
-          >
-            Open IDE
-          </Link>
-        </div>
-      </header>
+      <StudioGlobalNav
+        title="Workspace Settings"
+        subtitle="Configuracao de editor, conta e providers IA com contratos explicitos de status."
+      />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-        <div className="mb-4">
-          <h1 className="text-xl font-semibold sm:text-2xl">Workspace Settings</h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Configuracao de editor, conta e providers IA com contratos explicitos de status.
-          </p>
-        </div>
-
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
           <nav className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-2">
             <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-1">

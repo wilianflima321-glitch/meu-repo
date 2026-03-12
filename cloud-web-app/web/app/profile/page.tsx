@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { AethelAPIClient } from '@/lib/api'
 import { isAuthenticated, logout } from '@/lib/auth'
+import StudioGlobalNav from '@/components/studio/StudioGlobalNav'
 
 // ============================================================================
 // Types
@@ -284,22 +285,29 @@ export default function ProfilePage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-slate-950 text-white">
+        <StudioGlobalNav title="Perfil" subtitle="Conta, seguranca e preferencias do workspace." />
+        <div className="flex items-center justify-center px-6 py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
       </div>
     )
   }
   
   if (!profile) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-slate-400">{profileError || 'Perfil indisponível.'}</div>
+      <div className="min-h-screen bg-slate-950 text-white">
+        <StudioGlobalNav title="Perfil" subtitle="Conta, seguranca e preferencias do workspace." />
+        <div className="flex items-center justify-center px-6 py-12">
+          <div className="text-slate-400">{profileError || 'Perfil indisponivel.'}</div>
+        </div>
       </div>
     )
   }
   
   return (
     <div className="min-h-screen bg-slate-950 text-white">
+      <StudioGlobalNav title="Perfil" subtitle="Conta, seguranca e preferencias do workspace." />
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/50">
         <div className="max-w-5xl mx-auto px-4 py-6">

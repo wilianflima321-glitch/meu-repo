@@ -4,13 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-
-const NAV_LINKS = [
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/docs', label: 'Docs' },
-  { href: '/status', label: 'Status' },
-  { href: '/contact-sales', label: 'Contato' },
-]
+import { isNavLinkActive, PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'
 
 export default function PublicHeader() {
   const [scrolled, setScrolled] = useState(false)
@@ -51,8 +45,8 @@ export default function PublicHeader() {
 
           {/* Desktop nav */}
           <div className="hidden items-center gap-1 md:flex">
-            {NAV_LINKS.map((link) => {
-              const isActive = pathname === link.href
+            {PUBLIC_NAV_LINKS.map((link) => {
+              const isActive = isNavLinkActive(pathname, link)
               return (
                 <Link
                   key={link.href}
@@ -111,8 +105,8 @@ export default function PublicHeader() {
           }`}
         >
           <div className="space-y-1 px-4 py-4">
-            {NAV_LINKS.map((link) => {
-              const isActive = pathname === link.href
+            {PUBLIC_NAV_LINKS.map((link) => {
+              const isActive = isNavLinkActive(pathname, link)
               return (
                 <Link
                   key={link.href}

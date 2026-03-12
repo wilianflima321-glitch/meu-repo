@@ -45,7 +45,7 @@ export { EmptyProjects, EmptyChat } from './EmptyState'
 export { SkeletonCard } from './Skeleton'
 
 // Toast System
-export { ToastProvider, useToast } from './ToastProvider'
+export { ToastProvider, useToast } from './Toast'
 
 // Accessibility
 export {
