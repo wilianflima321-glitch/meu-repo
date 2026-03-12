@@ -696,7 +696,11 @@ function IDEContent() {
                 runtimeHealthCheckedAt={runtimeHealthCheckedAt}
                 runtimeHealthHint={runtimeHealthHint}
                 runtimeReadiness={runtimeReadiness}
-                runtimePrimaryAction={runtimePrimaryAction}
+                runtimePrimaryAction={
+                  runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
+                    ? runtimePrimaryAction
+                    : 'inline'
+                }
                 runtimePrimaryActionLabel={runtimePrimaryActionLabel}
                 runtimeStrategyLabel={runtimeStrategyLabel}
                 runtimeStrategyHint={runtimeStrategyHint}

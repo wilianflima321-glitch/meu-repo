@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import type { Dirent } from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import { getScopedWorkspaceRoot, toVirtualWorkspacePath } from '@/lib/server/workspace-scope'
@@ -295,7 +296,7 @@ async function collectCandidateFiles(rootPath: string): Promise<string[]> {
     const current = queue.shift()
     if (!current) break
 
-    let entries: fs.Dirent[] = []
+    let entries: Dirent[] = []
     try {
       entries = await fs.readdir(current, { withFileTypes: true })
     } catch {

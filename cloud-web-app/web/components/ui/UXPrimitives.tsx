@@ -1,5 +1,6 @@
 'use client'
 
+import type { HTMLAttributes } from 'react'
 import Codicon from '@/components/ide/Codicon'
 
 /* ── Empty State ── */
@@ -58,15 +59,14 @@ export function EmptyState({ icon = 'inbox', title, description, action, seconda
 }
 
 /* ── Skeleton Loader ── */
-interface SkeletonProps {
-  className?: string
-}
+interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {}
 
-export function Skeleton({ className = '' }: SkeletonProps) {
+export function Skeleton({ className = '', ...props }: SkeletonProps) {
   return (
     <div
       className={`animate-pulse rounded-md bg-zinc-800/60 ${className}`}
       aria-hidden="true"
+      {...props}
     />
   )
 }
@@ -78,7 +78,7 @@ export function CardSkeleton({ rows = 3 }: { rows?: number }) {
       <Skeleton className="mb-4 h-4 w-1/3" />
       <div className="space-y-3">
         {Array.from({ length: rows }).map((_, i) => (
-          <Skeleton key={i} className="h-3 w-full" style={{ width: `${85 - i * 12}%` } as React.CSSProperties} />
+          <Skeleton key={i} className="h-3 w-full" style={{ width: `${85 - i * 12}%` }} />
         ))}
       </div>
     </div>

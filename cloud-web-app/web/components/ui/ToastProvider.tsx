@@ -16,11 +16,19 @@ interface ToastItem {
 
 interface ToastContextType {
   toast: (message: string, options?: { type?: ToastType; duration?: number; action?: { label: string; onClick: () => void } }) => void
+  success: (message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => void
+  error: (message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => void
+  warning: (message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => void
+  info: (message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => void
   dismiss: (id: string) => void
 }
 
 const ToastContext = createContext<ToastContextType>({
   toast: () => {},
+  success: () => {},
+  error: () => {},
+  warning: () => {},
+  info: () => {},
   dismiss: () => {},
 })
 
@@ -66,8 +74,24 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [dismiss]
   )
 
+  const success = useCallback((message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => {
+    toast(message, { ...options, type: 'success' })
+  }, [toast])
+
+  const error = useCallback((message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => {
+    toast(message, { ...options, type: 'error' })
+  }, [toast])
+
+  const warning = useCallback((message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => {
+    toast(message, { ...options, type: 'warning' })
+  }, [toast])
+
+  const info = useCallback((message: string, options?: { duration?: number; action?: { label: string; onClick: () => void } }) => {
+    toast(message, { ...options, type: 'info' })
+  }, [toast])
+
   return (
-    <ToastContext.Provider value={{ toast, dismiss }}>
+    <ToastContext.Provider value={{ toast, success, error, warning, info, dismiss }}>
       {children}
 
       {/* Toast container - bottom right */}

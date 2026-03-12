@@ -148,7 +148,9 @@ async function collectWorkspaceFiles(params: {
 }
 
 function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
-  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  const view = new Uint8Array(buffer.byteLength)
+  view.set(buffer)
+  return view.buffer
 }
 
 async function syncWorkspaceToSandbox(params: {
@@ -242,8 +244,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const module = await import('e2b')
-    const Sandbox = (module as { default?: any; Sandbox?: any }).default || (module as { Sandbox?: any }).Sandbox
+    const e2bModule = await import('e2b')
+    const Sandbox = (e2bModule as { default?: any; Sandbox?: any }).default || (e2bModule as { Sandbox?: any }).Sandbox
     if (!Sandbox) {
       return capabilityResponse({
         error: 'RUNTIME_SYNC_SDK_UNAVAILABLE',

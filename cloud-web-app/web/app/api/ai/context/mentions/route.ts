@@ -38,6 +38,14 @@ export async function POST(request: NextRequest) {
       blocks: preview.blocks,
     })
   } catch (error) {
-    return apiErrorToResponse(error)
+    const mapped = apiErrorToResponse(error)
+    if (mapped) return mapped
+    return NextResponse.json(
+      {
+        error: 'MENTION_CONTEXT_ERROR',
+        message: error instanceof Error ? error.message : 'Unable to build mention context preview',
+      },
+      { status: 500 }
+    )
   }
 }

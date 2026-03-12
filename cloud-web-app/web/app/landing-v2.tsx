@@ -160,7 +160,7 @@ export default function LandingPageV2() {
     <div className="min-h-screen bg-black text-zinc-100">
       {/* Skip to content */}
       <a
-        href="#hero"
+        href="#landing-mission"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-20 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-black focus:shadow-lg"
       >
         Pular para conteudo principal
@@ -175,7 +175,7 @@ export default function LandingPageV2() {
         <div className="absolute bottom-1/3 left-0 h-[400px] w-[400px] rounded-full bg-cyan-600/[0.04] blur-[120px]" />
       </div>
 
-      <main className="relative z-10">
+      <main id="landing-mission" className="relative z-10">
         {/* ════ HERO ════ */}
         <section id="hero" className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col justify-center px-4 pb-12 pt-8 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_0.8fr]">

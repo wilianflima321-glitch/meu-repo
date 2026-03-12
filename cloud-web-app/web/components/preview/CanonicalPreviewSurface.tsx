@@ -423,7 +423,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           <LifecycleIndicator state="failed" latencyMs={null} hmrConnected={false} />
         )}
         <PreviewFailedState
-          error={runtime.error || runtimeUnavailableReason}
+          error={runtime.error ?? runtimeUnavailableReason ?? null}
           onRetry={provision}
           onFallback={switchToInline}
         />

@@ -119,13 +119,13 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
 
   useEffect(() => {
     if (isOpen) {
-      analytics?.track?.('onboarding', 'project_open', { metadata: { source: 'quick-start-wizard' } })
+      analytics?.track?.('project', 'project_open', { metadata: { source: 'quick-start-wizard' } })
     }
   }, [isOpen])
 
   const handleComplete = useCallback(() => {
     const tpl = DOMAIN_TEMPLATES.find((t) => t.id === selectedTemplate)
-    analytics?.track?.('onboarding', 'project_open', {
+    analytics?.track?.('project', 'project_open', {
       metadata: {
         source: 'quick-start-wizard-complete',
         template: selectedTemplate,

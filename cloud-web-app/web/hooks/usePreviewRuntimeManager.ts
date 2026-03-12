@@ -336,10 +336,8 @@ export function usePreviewRuntimeManager({
       runtimeAutoProvisionTriggeredRef.current = true
       void provisionRuntime('auto').then((provisioned) => {
         if (provisioned || runtimeAutoDiscoveryTriggeredRef.current) return
-        if (recommendedAction === 'discover') {
-          runtimeAutoDiscoveryTriggeredRef.current = true
-          void discoverRuntime('auto')
-        }
+        runtimeAutoDiscoveryTriggeredRef.current = true
+        void discoverRuntime('auto')
       })
       return
     }

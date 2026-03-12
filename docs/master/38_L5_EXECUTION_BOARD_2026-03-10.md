@@ -217,7 +217,9 @@ Al�m de L4:
   - `npm run qa:interface-gate` -> PASS
   - `npm run qa:preview-runtime-readiness` -> PASS
   - `npm run qa:billing-runtime-readiness` -> PASS
+  - `npm run typecheck` -> PASS
+  - `npm run qa:enterprise-gate` -> PASS
 - Remaining hard blockers for L4 stay unchanged:
   - production sample size still below target (`>= 100`)
-  - typecheck is still failing in multiple non-canonical surfaces/routes and codicon unions
-  - checkout/deploy/preview still depend on external credentials and live integrations
+  - production evidence is still blocked by missing `sampleSize >= 100` on real wave
+  - checkout/deploy/preview still depend on external credentials and live runtime integrations

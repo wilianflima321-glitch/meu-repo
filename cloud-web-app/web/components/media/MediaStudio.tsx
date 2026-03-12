@@ -12,6 +12,7 @@ import {
   computeVisualAlphaAtTime,
   decodeAudioBuffer,
   drawFitContain,
+  getEffectValue,
   inferMediaKindFromPath,
   resolveSrcFromWorkspacePath,
   timelineToRendererClips,

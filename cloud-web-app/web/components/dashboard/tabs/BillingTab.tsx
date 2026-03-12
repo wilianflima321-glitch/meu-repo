@@ -426,7 +426,7 @@ export function BillingTab({
       )}
 
       {billingReadiness && !billingReadiness.checkoutReady && (
-        <Card variant="outlined" padding="md" className="border-amber-500/30 bg-amber-500/10">
+        <Card variant="bordered" padding="md" className="border-amber-500/30 bg-amber-500/10">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
               <p className="text-sm font-semibold text-amber-200">Checkout ainda nao esta pronto</p>
@@ -506,7 +506,7 @@ export function BillingTab({
       )}
 
       {billingActionError && (
-        <Card variant="outlined" padding="md" className="border-red-500/30 bg-red-500/10">
+        <Card variant="bordered" padding="md" className="border-red-500/30 bg-red-500/10">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-red-200">Falha na acao de billing</p>

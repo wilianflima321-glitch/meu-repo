@@ -2,44 +2,9 @@
 
 import type { HTMLAttributes } from 'react';
 
-export type CodiconName =
-  | 'symbol-file'
-  | 'files'
-  | 'folder'
-  | 'folder-opened'
-  | 'search'
-  | 'source-control'
-  | 'sparkle'
-  | 'extensions'
-  | 'terminal'
-  | 'output'
-  | 'warning'
-  | 'debug'
-  | 'plug'
-  | 'layout-sidebar-left'
-  | 'layout-panel'
-  | 'chevron-left'
-  | 'chevron-right'
-  | 'chevron-down'
-  | 'x'
-  | 'add'
-  | 'new-file'
-  | 'new-folder'
-  | 'refresh'
-  | 'menu'
-  | 'rocket'
-  | 'git-branch'
-  | 'comment-discussion'
-  | 'circle-filled'
-  | 'fold-up'
-  | 'fold-down'
-  | 'symbol-number'
-  | 'symbol-color'
-  | 'gear'
-  | 'edit'
-  | 'trash'
-  | 'github-inverted'
-  | 'google';
+// Keep open to support the expanded icon surface used by landing/onboarding/dashboard.
+// Rendering safety still comes from the codicon CSS class generation itself.
+export type CodiconName = string;
 
 type CodiconProps = HTMLAttributes<HTMLSpanElement> & {
   name: CodiconName;

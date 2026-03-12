@@ -169,8 +169,8 @@ async function resolveDocsQuery(repoRoot: string, query: string): Promise<string
     .join('\n')
 }
 
-async function resolveGitTag(tag: string): Promise<string> {
-  const git = getGitService()
+async function resolveGitTag(repoRoot: string, tag: string): Promise<string> {
+  const git = getGitService(repoRoot)
 
   if (tag === 'git:status') {
     const status = await git.getStatus()
@@ -372,7 +372,7 @@ export async function buildMentionContextPreview(
 
       if (tag.startsWith('@git:')) {
         const gitTag = tag.slice(1)
-        const content = await resolveGitTag(gitTag)
+        const content = await resolveGitTag(repoRoot, gitTag)
         blocks.push({
           tag,
           kind: 'git',
@@ -384,7 +384,7 @@ export async function buildMentionContextPreview(
 
       // @Diff - working tree diff (shorthand for @git:diff)
       if (tag === '@diff') {
-        const content = await resolveGitTag('git:diff')
+        const content = await resolveGitTag(repoRoot, 'git:diff')
         blocks.push({
           tag,
           kind: 'diff',
