@@ -141,8 +141,37 @@ async function main() {
       data: {
         role: 'admin',
         adminRole: 'owner',
+        plan: 'pro',
       },
     })
+
+    const nextBillingWindow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    const probePriceId = String(process.env.STRIPE_PRICE_PRO_MONTHLY || 'price_probe_pro_monthly').trim()
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { userId: user.id },
+      select: { id: true, stripeSubscriptionId: true },
+    })
+    if (existingSubscription) {
+      await prisma.subscription.update({
+        where: { userId: user.id },
+        data: {
+          status: 'active',
+          stripePriceId: probePriceId,
+          currentPeriodEnd: nextBillingWindow,
+        },
+      })
+    } else {
+      const probeSubscriptionId = `sub_probe_${Date.now()}_${user.id.slice(-8)}`
+      await prisma.subscription.create({
+        data: {
+          userId: user.id,
+          stripeSubscriptionId: probeSubscriptionId,
+          stripePriceId: probePriceId,
+          status: 'active',
+          currentPeriodEnd: nextBillingWindow,
+        },
+      })
+    }
 
     const token = jwt.sign(
       {

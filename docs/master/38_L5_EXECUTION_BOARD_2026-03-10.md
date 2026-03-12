@@ -241,3 +241,20 @@ Current blockers after hardening:
   - production sample size still below target (`>= 100`)
   - production evidence is still blocked by missing `sampleSize >= 100` on real wave
   - checkout/deploy/preview still depend on external credentials and live runtime integrations
+
+## 15) Delta 2026-03-12 - Production Probe Wave Unblocked
+
+- `qa:core-loop-production-wave` now runs end-to-end in local Windows environments and exits cleanly even when billing readiness is still `PARTIAL`.
+- Core-loop production probe blockers fixed:
+  - admin probe now sends normalized relative file paths (fix for `WORKSPACE_ROOT_OUT_OF_BOUNDS`),
+  - apply route now preserves raw `original/fullDocument` payload content (fix for false `ORIGINAL_MISMATCH`),
+  - operator bootstrap now guarantees active probe entitlements (plan + active subscription seed).
+- RBAC/admin consistency hardening:
+  - middleware now recognizes full admin role set (`owner/super_admin/admin/moderator/support`),
+  - `withAdminAuth` now respects `adminRole` as effective role for permission checks.
+- Middleware reliability hardening for local/dev probes:
+  - `/api/health/*` bypasses API rate-limit gate,
+  - rate limit is dev-optional by default (`AETHEL_ENFORCE_DEV_RATE_LIMIT=true` to enforce in dev).
+- Production evidence status after new waves:
+  - `metrics/latest_run-production.json`: `sampleSize=12`, `apply_success_rate=1.0`, `regression_rate=0`,
+  - L4 promotion still blocked by threshold gap (`sampleSize >= 100`) and billing webhook secret pending.

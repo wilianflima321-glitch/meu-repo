@@ -181,6 +181,8 @@ const PROTECTED_API_ROUTES = [
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isApi = pathname.startsWith('/api');
+  const enforceDevRateLimit = process.env.AETHEL_ENFORCE_DEV_RATE_LIMIT === 'true';
+  const shouldApplyRateLimit = process.env.NODE_ENV === 'production' || enforceDevRateLimit;
 
   // Cookie-first para páginas; Bearer-first para APIs.
   const cookieToken = req.cookies.get('token')?.value;
@@ -194,7 +196,7 @@ export async function middleware(req: NextRequest) {
              'anonymous';
 
   // 1) Rate limiting (somente API)
-  if (isApi && !pathname.startsWith('/api/billing/webhook')) {
+  if (shouldApplyRateLimit && isApi && !pathname.startsWith('/api/billing/webhook') && !pathname.startsWith('/api/health')) {
     if (!upstashLimiters) {
       if (process.env.NODE_ENV === 'production') {
         return withSecurityHeaders(
@@ -285,7 +287,8 @@ export async function middleware(req: NextRequest) {
     // Admin Check - verifica role no token
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
       const userRole = payload.role as string | undefined;
-      if (userRole !== 'admin' && userRole !== 'super_admin') {
+      const adminRoles = new Set(['owner', 'super_admin', 'admin', 'moderator', 'support']);
+      if (!userRole || !adminRoles.has(userRole)) {
         if (!pathname.startsWith('/api')) {
           const url = req.nextUrl.clone();
           url.pathname = '/dashboard';

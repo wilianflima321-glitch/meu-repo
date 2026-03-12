@@ -72,6 +72,10 @@ function asString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function asRawString(value: unknown): string {
+  return typeof value === 'string' ? value : ''
+}
+
 function getRequestedChanges(body: ApplyBody): ApplyChangeInput[] {
   if (Array.isArray(body.changes) && body.changes.length > 0) {
     return body.changes
@@ -314,8 +318,8 @@ async function buildPreparedChange(params: {
   }
 
   const currentContent = current.content
-  const requestedOriginal = asString(params.requested.original)
-  const nextDocument = asString(params.requested.fullDocument) || asString(params.requested.modified)
+  const requestedOriginal = asRawString(params.requested.original)
+  const nextDocument = asRawString(params.requested.fullDocument) || asRawString(params.requested.modified)
   if (!nextDocument.trim()) {
     return {
       ok: false,

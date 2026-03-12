@@ -298,8 +298,7 @@ export function withAdminAuth(
       const { payload } = await jwtVerify(token, getAdminJwtSecret());
       
       const userId = payload.sub as string;
-      const userRole = payload.role as AdminRole;
-      
+
       // Busca usuário no banco
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -308,6 +307,7 @@ export function withAdminAuth(
           email: true,
           name: true,
           role: true,
+          adminRole: true,
           mfaEnabled: true,
         },
       });
@@ -318,14 +318,15 @@ export function withAdminAuth(
       
       // Verifica se é admin
       const adminRoles: string[] = ['owner', 'super_admin', 'admin', 'moderator', 'support'];
-      if (!adminRoles.includes(user.role)) {
+      const effectiveRole = (user.adminRole || user.role) as AdminRole;
+      if (!adminRoles.includes(effectiveRole)) {
         return NextResponse.json({ error: 'Not Found' }, { status: 404 });
       }
       
       // Verifica permissão específica
       if (requiredPermission) {
-        const permissions = AdminRolePermissions[user.role as AdminRole];
-        if (!hasAdminPermission(user.role as AdminRole, permissions, requiredPermission)) {
+        const permissions = AdminRolePermissions[effectiveRole];
+        if (!hasAdminPermission(effectiveRole, permissions, requiredPermission)) {
           return NextResponse.json({ error: 'Not Found' }, { status: 404 });
         }
       }
@@ -335,8 +336,8 @@ export function withAdminAuth(
         id: user.id,
         email: user.email,
         name: user.name || 'Admin',
-        role: user.role as AdminRole,
-        permissions: AdminRolePermissions[user.role as AdminRole],
+        role: effectiveRole,
+        permissions: AdminRolePermissions[effectiveRole],
         mfaEnabled: user.mfaEnabled || false,
         lastLoginAt: null,
       };

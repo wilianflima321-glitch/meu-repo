@@ -169,6 +169,9 @@ Status: CANONICAL ENTRYPOINT
   - preview runtime preflight now enforces E2B-native requirements (`E2B_API_KEY`, `AETHEL_PREVIEW_E2B_TEMPLATE`, allowlist hosts) without requiring provision token for `provider=e2b`,
   - billing runtime preflight now checks monthly + annual Stripe price IDs,
   - new execution helpers added: `setup:operator-token`, `setup:billing-webhook`, `qa:core-loop-production-wave`.
+  - core-loop production probe wave is now executing successfully in local runtime (`sampleSize=12`, `apply_success_rate=1.0`) after fixing workspace-path and original-content comparison issues.
+  - admin role enforcement is now consistent across middleware and RBAC checks (`adminRole` considered for permissions), removing false denials in admin probe routes.
+  - remaining hard P0 blocker is now isolated to Stripe webhook secret (`STRIPE_WEBHOOK_SECRET`) for full billing readiness.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

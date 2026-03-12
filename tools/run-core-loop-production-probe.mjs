@@ -147,12 +147,16 @@ async function main() {
   const failed = Number(totals.applyFailed || 0)
   const selectedFile = String(payload?.metadata?.selectedFile || 'n/a')
   const runs = Number(payload?.metadata?.runs || args.runs)
+  const errors = Array.isArray(payload?.metadata?.errors) ? payload.metadata.errors : []
   const total = success + blocked + failed || runs
   const successRate = total > 0 ? success / total : 0
 
   console.log(
     `[core-loop-production-probe] baseUrl=${args.baseUrl} projectId=${args.projectId} file=${selectedFile} runs=${runs} success=${success} blocked=${blocked} failed=${failed} successRate=${successRate.toFixed(4)}`
   )
+  if (errors.length > 0) {
+    console.log(`[core-loop-production-probe] errors=${JSON.stringify(errors.slice(0, 6))}`)
+  }
 }
 
 main().catch((error) => {

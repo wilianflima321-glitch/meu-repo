@@ -147,7 +147,7 @@ export const POST = withAdminAuth(async (request: NextRequest, { user }) => {
         },
         body: JSON.stringify({
           projectId,
-          filePath: selected.virtualPath,
+          filePath: selected.virtualPath.replace(/^\/+/, ''),
           original,
           fullDocument,
           executionMode: 'sandbox',
@@ -161,6 +161,7 @@ export const POST = withAdminAuth(async (request: NextRequest, { user }) => {
 
       const payload = (await response.json().catch(() => null)) as { error?: string; message?: string } | null
       const reason = payload?.error || payload?.message || `HTTP_${response.status}`
+      const detail = payload?.message && payload.message !== reason ? `${reason}: ${payload.message}` : reason
       if (
         reason.includes('APPROVAL_REQUIRED') ||
         reason.includes('FULL_ACCESS_GRANT_REQUIRED') ||
@@ -170,7 +171,7 @@ export const POST = withAdminAuth(async (request: NextRequest, { user }) => {
       } else {
         applyFailed += 1
       }
-      errors.push(reason)
+      errors.push(detail)
     } catch (error) {
       applyFailed += 1
       errors.push(error instanceof Error ? error.message : 'unknown_error')

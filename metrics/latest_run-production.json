@@ -1,33 +1,38 @@
 {
-  "generatedAt": "2026-03-06T23:21:05.106Z",
+  "generatedAt": "2026-03-12T04:24:42.688Z",
   "windowHours": 168,
   "sampleClass": "production",
-  "sampleSize": 0,
+  "sampleSize": 12,
   "totals": {
-    "rows": 0,
-    "applyRuns": 0,
-    "applySuccess": 0,
+    "rows": 12,
+    "applyRuns": 12,
+    "applySuccess": 12,
     "applyBlocked": 0,
     "applyFailed": 0,
     "rollbackSuccess": 0,
     "rollbackBlocked": 0,
     "rollbackFailed": 0,
     "learnFeedback": 0,
-    "sandboxApplyRuns": 0,
+    "sandboxApplyRuns": 12,
     "workspaceApplyRuns": 0
   },
   "metrics": {
-    "apply_success_rate": 0,
+    "apply_success_rate": 1,
     "blocked_rate": 0,
     "regression_rate": 0,
-    "sandbox_coverage": 0,
+    "sandbox_coverage": 1,
     "workspace_coverage": 0,
     "feedback_coverage": 0
   },
   "diagnostics": {
     "regressionSignals": [],
     "feedbackCounts": [],
-    "runSourceCounts": [],
-    "lastEventAt": null
+    "runSourceCounts": [
+      [
+        "production",
+        12
+      ]
+    ],
+    "lastEventAt": "2026-03-12T04:23:12.285Z"
   }
 }
