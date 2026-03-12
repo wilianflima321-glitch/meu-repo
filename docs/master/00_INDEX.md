@@ -161,6 +161,7 @@ Status: CANONICAL ENTRYPOINT
   - Studio navigation contract centralized in `cloud-web-app/web/lib/navigation/surfaces.ts`,
   - shared studio shell header added in `cloud-web-app/web/components/studio/StudioGlobalNav.tsx`,
   - `/billing`, `/settings`, and `/profile` now consume the unified studio header baseline,
+  - `/nexus` now consumes the shared Studio navigation rail while preserving the productivity-first layout,
   - `components/ui` toast exports now resolve to a single runtime provider (`components/ui/Toast.tsx`),
   - unified Studio IA baseline published in `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`.
 

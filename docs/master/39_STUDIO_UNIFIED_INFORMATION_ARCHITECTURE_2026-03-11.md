@@ -53,7 +53,7 @@ Decisao canonica:
 - Billing com shell unificado: ACTIVE
 - Settings com shell unificado: ACTIVE
 - Profile com shell unificado: ACTIVE
-- Nexus com shell unificado: PARTIAL (layout proprio, requer harmonizacao)
+- Nexus com shell/rail unificado: ACTIVE (hibrido com layout de produtividade proprio)
 - Dashboard/IDE shell: PARTIAL (consistencia visual ainda depende de workbench)
 - Toast provider unificado: ACTIVE
 
