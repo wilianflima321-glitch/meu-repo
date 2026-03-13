@@ -8,6 +8,22 @@ import process from 'node:process'
 const repoRoot = process.cwd()
 const webRoot = path.join(repoRoot, 'cloud-web-app', 'web')
 const baseUrl = String(process.env.AETHEL_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '')
+const defaultRuns = Number.parseInt(process.env.AETHEL_PROBE_RUNS || '6', 10)
+
+function parseArgs(argv) {
+  const out = {
+    runs: Number.isFinite(defaultRuns) && defaultRuns > 0 ? defaultRuns : 6,
+  }
+  for (let i = 2; i < argv.length; i += 1) {
+    const arg = argv[i]
+    if (arg === '--runs' && argv[i + 1]) {
+      const parsed = Number.parseInt(argv[i + 1], 10)
+      if (Number.isFinite(parsed) && parsed > 0) out.runs = Math.min(parsed, 50)
+      i += 1
+    }
+  }
+  return out
+}
 
 function sanitizedEnv(overrides = {}) {
   const env = { ...process.env, ...overrides }
@@ -139,6 +155,7 @@ async function generateOperatorToken() {
 }
 
 async function main() {
+  const args = parseArgs(process.argv)
   let devProcess = null
   let startedByScript = false
 
@@ -203,7 +220,13 @@ async function main() {
     })
     await runCommand(
       process.execPath,
-      [path.join(repoRoot, 'tools', 'run-core-loop-production-probe.mjs'), '--runs', '6', '--token', token],
+      [
+        path.join(repoRoot, 'tools', 'run-core-loop-production-probe.mjs'),
+        '--runs',
+        String(args.runs),
+        '--token',
+        token,
+      ],
       { cwd: repoRoot }
     )
     try {

@@ -172,6 +172,9 @@ Status: CANONICAL ENTRYPOINT
   - core-loop production probe wave is now executing successfully in local runtime (`sampleSize=12`, `apply_success_rate=1.0`) after fixing workspace-path and original-content comparison issues.
   - admin role enforcement is now consistent across middleware and RBAC checks (`adminRole` considered for permissions), removing false denials in admin probe routes.
   - remaining hard P0 blocker is now isolated to Stripe webhook secret (`STRIPE_WEBHOOK_SECRET`) for full billing readiness.
+- Delta 2026-03-13:
+  - production evidence threshold achieved (`sampleSize=112` in `metrics/latest_run-production.json`),
+  - L4 promotion blockers now reduced to Stripe webhook secret + missing LEARN feedback coverage.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-03-12T04:24:42.688Z",
+  "generatedAt": "2026-03-13T23:56:12.198Z",
   "windowHours": 168,
   "sampleClass": "production",
-  "sampleSize": 12,
+  "sampleSize": 112,
   "totals": {
-    "rows": 12,
-    "applyRuns": 12,
-    "applySuccess": 12,
+    "rows": 112,
+    "applyRuns": 112,
+    "applySuccess": 112,
     "applyBlocked": 0,
     "applyFailed": 0,
     "rollbackSuccess": 0,
     "rollbackBlocked": 0,
     "rollbackFailed": 0,
     "learnFeedback": 0,
-    "sandboxApplyRuns": 12,
+    "sandboxApplyRuns": 112,
     "workspaceApplyRuns": 0
   },
   "metrics": {
@@ -30,9 +30,9 @@
     "runSourceCounts": [
       [
         "production",
-        12
+        112
       ]
     ],
-    "lastEventAt": "2026-03-12T04:23:12.285Z"
+    "lastEventAt": "2026-03-13T23:55:18.172Z"
   }
 }

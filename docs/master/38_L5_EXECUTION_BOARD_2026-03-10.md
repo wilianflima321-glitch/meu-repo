@@ -258,3 +258,12 @@ Current blockers after hardening:
 - Production evidence status after new waves:
   - `metrics/latest_run-production.json`: `sampleSize=12`, `apply_success_rate=1.0`, `regression_rate=0`,
   - L4 promotion still blocked by threshold gap (`sampleSize >= 100`) and billing webhook secret pending.
+
+## 16) Delta 2026-03-13 - Production Evidence Threshold Reached
+
+- Production sample threshold reached:
+  - `metrics/latest_run-production.json`: `sampleSize=112`, `apply_success_rate=1.0`, `regression_rate=0`.
+- L4 promotion is now blocked only by:
+  - Billing webhook secret (`STRIPE_WEBHOOK_SECRET`) + runtime validation,
+  - Learn feedback coverage (`>= 60%`) still at `0` (no LEARN events recorded),
+  - Sandbox vs workspace coverage still skewed to sandbox-only (expected for probe).
