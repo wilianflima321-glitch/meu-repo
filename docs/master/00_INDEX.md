@@ -174,7 +174,8 @@ Status: CANONICAL ENTRYPOINT
   - remaining hard P0 blocker is now isolated to Stripe webhook secret (`STRIPE_WEBHOOK_SECRET`) for full billing readiness.
 - Delta 2026-03-13:
   - production evidence threshold achieved (`sampleSize=112` in `metrics/latest_run-production.json`),
-  - L4 promotion blockers now reduced to Stripe webhook secret + missing LEARN feedback coverage.
+  - LEARN feedback coverage restored to `0.8947` for production probes,
+  - L4 promotion blockers now reduced to Stripe webhook secret only.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.

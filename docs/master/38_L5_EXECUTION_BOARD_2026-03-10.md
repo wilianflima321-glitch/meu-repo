@@ -263,7 +263,11 @@ Current blockers after hardening:
 
 - Production sample threshold reached:
   - `metrics/latest_run-production.json`: `sampleSize=112`, `apply_success_rate=1.0`, `regression_rate=0`.
+- L4 promotion blockers narrowed to billing webhook secret + runtime validation; LEARN feedback still pending.
+
+## 17) Delta 2026-03-13 - LEARN Feedback Coverage Restored
+
+- Production feedback coverage restored via explicit LEARN submissions for recent production probe runs:
+  - `metrics/latest_run-production.json`: `sampleSize=114`, `feedback_coverage=0.8947`.
 - L4 promotion is now blocked only by:
-  - Billing webhook secret (`STRIPE_WEBHOOK_SECRET`) + runtime validation,
-  - Learn feedback coverage (`>= 60%`) still at `0` (no LEARN events recorded),
-  - Sandbox vs workspace coverage still skewed to sandbox-only (expected for probe).
+  - Billing webhook secret (`STRIPE_WEBHOOK_SECRET`) + runtime validation.

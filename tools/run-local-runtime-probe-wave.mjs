@@ -13,12 +13,30 @@ const defaultRuns = Number.parseInt(process.env.AETHEL_PROBE_RUNS || '6', 10)
 function parseArgs(argv) {
   const out = {
     runs: Number.isFinite(defaultRuns) && defaultRuns > 0 ? defaultRuns : 6,
+    submitFeedback: false,
+    feedback: 'accepted',
+    feedbackSinceMinutes: 60,
   }
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i]
     if (arg === '--runs' && argv[i + 1]) {
       const parsed = Number.parseInt(argv[i + 1], 10)
       if (Number.isFinite(parsed) && parsed > 0) out.runs = Math.min(parsed, 50)
+      i += 1
+    }
+    if (arg === '--submit-feedback') {
+      out.submitFeedback = true
+    }
+    if (arg === '--feedback' && argv[i + 1]) {
+      const value = String(argv[i + 1]).trim().toLowerCase()
+      if (value === 'accepted' || value === 'rejected' || value === 'needs_work') {
+        out.feedback = value
+      }
+      i += 1
+    }
+    if (arg === '--feedback-since-minutes' && argv[i + 1]) {
+      const parsed = Number.parseInt(argv[i + 1], 10)
+      if (Number.isFinite(parsed) && parsed > 0) out.feedbackSinceMinutes = Math.min(parsed, 24 * 60)
       i += 1
     }
   }
@@ -218,6 +236,7 @@ async function main() {
     await runCommand(process.execPath, [path.join(repoRoot, 'tools', 'check-production-runtime-readiness.mjs')], {
       cwd: repoRoot,
     })
+    const waveStartedAt = Date.now()
     await runCommand(
       process.execPath,
       [
@@ -229,6 +248,21 @@ async function main() {
       ],
       { cwd: repoRoot }
     )
+    if (args.submitFeedback) {
+      await runCommand(
+        process.execPath,
+        [
+          path.join(repoRoot, 'tools', 'submit-core-loop-feedback.mjs'),
+          '--token',
+          token,
+          '--feedback',
+          args.feedback,
+          '--since',
+          String(Math.max(1, Math.floor((Date.now() - waveStartedAt) / 60000) + args.feedbackSinceMinutes)),
+        ],
+        { cwd: repoRoot }
+      )
+    }
     try {
       await runCommand(process.execPath, [path.join(repoRoot, 'tools', 'check-operator-readiness.mjs')], {
         cwd: repoRoot,
