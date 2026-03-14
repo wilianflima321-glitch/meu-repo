@@ -271,3 +271,11 @@ Current blockers after hardening:
   - `metrics/latest_run-production.json`: `sampleSize=114`, `feedback_coverage=0.8947`.
 - L4 promotion is now blocked only by:
   - Billing webhook secret (`STRIPE_WEBHOOK_SECRET`) + runtime validation.
+
+## 18) Delta 2026-03-13 - Billing Runtime Green (Test Webhook)
+
+- Stripe CLI pairing + webhook secret generated (test mode) and added to local runtime.
+- Operator readiness is now `ready` end-to-end (production + billing + preview).
+- Latest production metrics:
+  - `metrics/latest_run-production.json`: `sampleSize=115`, `apply_success_rate=1.0`, `feedback_coverage=0.8957`.
+- Remaining L4 blocker is now external: validate real checkout + webhook flow in Stripe project.

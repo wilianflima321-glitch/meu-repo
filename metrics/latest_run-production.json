@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-03-14T00:05:00.718Z",
+  "generatedAt": "2026-03-14T00:13:07.204Z",
   "windowHours": 168,
   "sampleClass": "production",
-  "sampleSize": 114,
+  "sampleSize": 115,
   "totals": {
-    "rows": 216,
-    "applyRuns": 114,
-    "applySuccess": 114,
+    "rows": 218,
+    "applyRuns": 115,
+    "applySuccess": 115,
     "applyBlocked": 0,
     "applyFailed": 0,
     "rollbackSuccess": 0,
     "rollbackBlocked": 0,
     "rollbackFailed": 0,
-    "learnFeedback": 102,
-    "sandboxApplyRuns": 114,
+    "learnFeedback": 103,
+    "sandboxApplyRuns": 115,
     "workspaceApplyRuns": 0
   },
   "metrics": {
@@ -22,22 +22,22 @@
     "regression_rate": 0,
     "sandbox_coverage": 1,
     "workspace_coverage": 0,
-    "feedback_coverage": 0.8947
+    "feedback_coverage": 0.8957
   },
   "diagnostics": {
     "regressionSignals": [],
     "feedbackCounts": [
       [
         "accepted",
-        102
+        103
       ]
     ],
     "runSourceCounts": [
       [
         "production",
-        216
+        218
       ]
     ],
-    "lastEventAt": "2026-03-14T00:04:13.878Z"
+    "lastEventAt": "2026-03-14T00:12:23.104Z"
   }
 }

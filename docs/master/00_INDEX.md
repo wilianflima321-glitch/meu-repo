@@ -176,6 +176,10 @@ Status: CANONICAL ENTRYPOINT
   - production evidence threshold achieved (`sampleSize=112` in `metrics/latest_run-production.json`),
   - LEARN feedback coverage restored to `0.8947` for production probes,
   - L4 promotion blockers now reduced to Stripe webhook secret only.
+- Delta 2026-03-13 (late):
+  - billing runtime now green in local test mode (Stripe CLI webhook secret configured),
+  - operator readiness green end-to-end,
+  - latest production probe metrics: `sampleSize=115`, `feedback_coverage=0.8957`.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
