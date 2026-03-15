@@ -3,7 +3,7 @@
 import type { HTMLAttributes } from 'react'
 import Codicon from '@/components/ide/Codicon'
 
-/* ── Empty State ── */
+// --- Empty State ---
 interface EmptyStateProps {
   icon?: string
   title: string
@@ -23,7 +23,7 @@ interface EmptyStateProps {
 export function EmptyState({ icon = 'inbox', title, description, action, secondaryAction, compact }: EmptyStateProps) {
   return (
     <div className={`flex flex-col items-center justify-center text-center ${compact ? 'py-8' : 'py-16'}`} role="status">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/50 text-zinc-500">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-zinc-500">
         <Codicon name={icon} />
       </div>
       <h3 className="mt-4 text-sm font-semibold text-zinc-200">{title}</h3>
@@ -34,10 +34,10 @@ export function EmptyState({ icon = 'inbox', title, description, action, seconda
             <button
               type="button"
               onClick={action.onClick}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all active:scale-[0.97] ${
-                action.variant === 'secondary'
-                  ? 'border border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                  : 'bg-blue-600 text-white hover:bg-blue-500'
+              className={`aethel-button rounded-lg px-4 py-2 text-sm font-medium ${
+                action.variant == 'secondary'
+                  ? 'aethel-button-secondary'
+                  : 'aethel-button-primary'
               }`}
             >
               {action.label}
@@ -58,7 +58,7 @@ export function EmptyState({ icon = 'inbox', title, description, action, seconda
   )
 }
 
-/* ── Skeleton Loader ── */
+// --- Skeleton Loader ---
 interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {}
 
 export function Skeleton({ className = '', ...props }: SkeletonProps) {
@@ -71,7 +71,7 @@ export function Skeleton({ className = '', ...props }: SkeletonProps) {
   )
 }
 
-/* ── Card Skeleton ── */
+// --- Card Skeleton ---
 export function CardSkeleton({ rows = 3 }: { rows?: number }) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
@@ -85,7 +85,7 @@ export function CardSkeleton({ rows = 3 }: { rows?: number }) {
   )
 }
 
-/* ── List Skeleton ── */
+// --- List Skeleton ---
 export function ListSkeleton({ items = 5 }: { items?: number }) {
   return (
     <div className="space-y-2" aria-label="Carregando..." role="status">
@@ -102,7 +102,7 @@ export function ListSkeleton({ items = 5 }: { items?: number }) {
   )
 }
 
-/* ── Dashboard Stats Skeleton ── */
+// --- Dashboard Stats Skeleton ---
 export function StatsSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Carregando estatisticas..." role="status">
@@ -117,7 +117,7 @@ export function StatsSkeleton() {
   )
 }
 
-/* ── Progress Stepper ── */
+// --- Progress Stepper ---
 interface ProgressStep {
   label: string
   completed: boolean
@@ -150,7 +150,7 @@ export function ProgressStepper({ steps }: { steps: ProgressStep[] }) {
   )
 }
 
-/* ── Toast Notification ── */
+// --- Toast Notification ---
 interface ToastProps {
   message: string
   type?: 'success' | 'error' | 'info' | 'warning'
@@ -200,7 +200,7 @@ export function Toast({ message, type = 'info', onDismiss, action }: ToastProps)
   )
 }
 
-/* ── Badge / Status indicator ── */
+// --- Badge / Status indicator ---
 interface BadgeProps {
   label: string
   variant?: 'active' | 'partial' | 'blocked' | 'absent' | 'frozen'
@@ -222,7 +222,7 @@ export function StatusBadge({ label, variant = 'active' }: BadgeProps) {
   )
 }
 
-/* ── Keyboard shortcut display ── */
+// --- Keyboard shortcut display ---
 export function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-zinc-700 bg-zinc-800 px-1.5 text-[10px] font-medium text-zinc-400">

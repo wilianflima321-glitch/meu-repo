@@ -50,32 +50,16 @@ export function EmptyState({
   }
 
   return (
-    <div
-      className={`
-        flex flex-col items-center justify-center text-center
-        ${sizeClasses[variant]}
-      `}
-    >
-      {/* Icon */}
-      <div className="mb-4 p-4 rounded-full bg-slate-800/50 text-slate-400">
+    <div className={`flex flex-col items-center justify-center text-center ${sizeClasses[variant]}`}>
+      <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-slate-400 shadow-lg shadow-black/20">
         {icon || <Inbox className={iconSizeClasses[variant]} />}
       </div>
-
-      {/* Title */}
-      <h3 className="text-lg font-semibold text-slate-100 mb-2">{title}</h3>
-
-      {/* Description */}
-      <p className="text-sm text-slate-400 max-w-sm mb-6">{description}</p>
-
-      {/* Actions */}
+      <h3 className="mb-2 text-lg font-semibold text-slate-100">{title}</h3>
+      <p className="mb-6 max-w-sm text-sm text-slate-400">{description}</p>
       {(action || secondaryAction) && (
         <div className="flex items-center gap-3">
           {action && (
-            <Button
-              variant="primary"
-              onClick={action.onClick}
-              icon={action.icon}
-            >
+            <Button variant="primary" onClick={action.onClick} icon={action.icon}>
               {action.label}
             </Button>
           )}
@@ -90,13 +74,12 @@ export function EmptyState({
   )
 }
 
-// Pre-built empty states
 export function EmptyProjects({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
       icon={<FolderOpen className="h-12 w-12" />}
       title="Nenhum projeto ainda"
-      description="Crie seu primeiro projeto para começar a desenvolver com IA."
+      description="Crie seu primeiro projeto para comecar a desenvolver com IA."
       action={{
         label: 'Criar Projeto',
         onClick: onCreate,
@@ -111,7 +94,7 @@ export function EmptySearch({ query }: { query: string }) {
     <EmptyState
       icon={<Search className="h-12 w-12" />}
       title="Nenhum resultado encontrado"
-      description={`Não encontramos resultados para "${query}". Tente usar termos diferentes.`}
+      description={`Nao encontramos resultados para "${query}". Tente usar termos diferentes.`}
     />
   )
 }
@@ -121,7 +104,7 @@ export function EmptyChat({ onStart }: { onStart: () => void }) {
     <EmptyState
       icon={<Sparkles className="h-12 w-12" />}
       title="Comece uma conversa"
-      description="Pergunte qualquer coisa sobre código, arquitetura, ou peça para criar algo novo."
+      description="Pergunte qualquer coisa sobre codigo, arquitetura, ou peca para criar algo novo."
       action={{
         label: 'Iniciar Chat',
         onClick: onStart,
@@ -135,7 +118,7 @@ export function EmptyWorkflows({ onCreate }: { onCreate: () => void }) {
     <EmptyState
       icon={<FileText className="h-12 w-12" />}
       title="Nenhum workflow criado"
-      description="Workflows ajudam a organizar tarefas complexas com múltiplos agentes de IA."
+      description="Workflows ajudam a organizar tarefas complexas com multiplos agentes de IA."
       action={{
         label: 'Criar Workflow',
         onClick: onCreate,
