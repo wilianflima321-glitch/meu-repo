@@ -1,46 +1,46 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-03-11T00:00:00.000Z",
-  "status": "BLOCKED",
-  "statusReason": "Runtime prerequisites not satisfied - Docker, DB, Stripe keys missing",
+  "generatedAt": "2026-03-15T00:00:00.000Z",
+  "status": "PARTIAL",
+  "statusReason": "Core loop production evidence collected, but preview/billing/onboarding criteria not verified",
   "level": "L3",
   "targetLevel": "L4",
   "exitCriteria": {
     "productionSampleSize": {
-      "current": 0,
+      "current": 115,
       "target": 100,
-      "met": false,
-      "blocker": "DOCKER_DAEMON_NOT_RUNNING + DATABASE_UNREACHABLE"
+      "met": true,
+      "source": "metrics/latest_run-production.json"
     },
     "applySuccessRate": {
-      "current": 0.75,
+      "current": 1.0,
       "target": 0.90,
-      "met": false,
-      "source": "rehearsal (n=24)"
+      "met": true,
+      "source": "metrics/latest_run-production.json"
     },
     "regressionRate": {
       "current": 0.0,
       "target": 0.05,
       "met": true,
-      "note": "Max threshold, current is 0% on rehearsal"
+      "source": "metrics/latest_run-production.json"
     },
     "feedbackCoverage": {
-      "current": 0.50,
+      "current": 0.8957,
       "target": 0.60,
-      "met": false,
-      "source": "rehearsal"
+      "met": true,
+      "source": "metrics/latest_run-production.json"
     },
     "previewManaged": {
-      "current": false,
+      "current": null,
       "target": true,
       "met": false,
-      "blocker": "E2B_API_KEY not configured"
+      "blocker": "Not verified in runtime"
     },
     "billingCheckout": {
-      "current": false,
+      "current": null,
       "target": true,
       "met": false,
-      "blocker": "STRIPE_SECRET_KEY placeholder"
+      "blocker": "Not verified in runtime"
     },
     "onboardingP50Under90s": {
       "current": null,
@@ -49,10 +49,10 @@
       "blocker": "No production funnel data"
     },
     "enterpriseGateGreen": {
-      "current": true,
+      "current": null,
       "target": true,
-      "met": true,
-      "source": "qa:enterprise-gate"
+      "met": false,
+      "source": "qa:enterprise-gate (not executed in this run)"
     },
     "dossierPublished": {
       "current": true,
@@ -111,21 +111,7 @@
       "Mobile + WCAG accessibility"
     ]
   },
-  "implementedSinceLastAudit": [
-    "CanonicalPreviewSurface with lifecycle states (idle/provisioning/warming/healthy/degraded/failed)",
-    "AES-256-GCM security vault for API key encryption",
-    "Redis-compatible rate limiting with plan-aware quotas",
-    "SSO/OIDC/SAML provider framework",
-    "Vercel one-click deploy service",
-    "Structured logging (pino-compatible) with OpenTelemetry spans",
-    "Enhanced @mentions: @Diff, @Error, @Diagnostics, @git:log, @git:blame",
-    "Research Agent with Tavily/Perplexity live retrieval + citations + export",
-    "First-value analytics API (/api/analytics/first-value)",
-    "Deploy API (/api/deploy) with Vercel integration",
-    "security.txt for responsible disclosure",
-    ".env.local with all required configuration keys",
-    "Preview chip metadata for UI rendering"
-  ],
+  "implementedSinceLastAudit": [],
   "canonicalDocs": {
     "completionMap": "docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md",
     "qualityMap": "docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md",
@@ -135,15 +121,10 @@
     "duplicationsConflicts": "docs/master/DUPLICATIONS_AND_CONFLICTS.md"
   },
   "nextSteps": [
-    "1. Activate Docker daemon and PostgreSQL",
-    "2. Run: npm run setup:local-db (Prisma migrations)",
-    "3. Configure real Stripe keys and test checkout flow",
-    "4. Configure E2B API key and test preview provisioning",
-    "5. Run: npm run qa:core-loop-production-probe -- --runs 50",
-    "6. Achieve sampleSize >= 100 with successRate > 0.90",
-    "7. Verify feedbackCoverage >= 0.60",
-    "8. Update this dossier with production evidence",
-    "9. Run: npm run qa:enterprise-gate (must pass)",
-    "10. Promote to L4 when all exit criteria met"
+    "1. Verify preview runtime (E2B/WebContainers) end-to-end in production",
+    "2. Verify Stripe checkout + webhooks with real keys",
+    "3. Publish onboarding P50/P95 metrics (first-value <90s)",
+    "4. Run: npm run qa:enterprise-gate (must pass)",
+    "5. Promote to L4 when remaining exit criteria are met"
   ]
 }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import {
   ReactFlow,
@@ -16,7 +16,6 @@ import {
   Position,
   Panel,
   MarkerType,
-  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
@@ -31,14 +30,31 @@ export type { PortDefinition } from './visual-node-catalog';
 
 export type VisualNodeType = Node<VisualNodeData>;
 
+const ui = {
+  surface: 'var(--aethel-surface-secondary)',
+  surfaceAlt: 'var(--aethel-surface-tertiary)',
+  surfaceDeep: 'var(--aethel-surface-primary)',
+  surfaceMuted: 'var(--aethel-surface-quaternary)',
+  border: 'var(--aethel-border-primary)',
+  borderStrong: 'var(--aethel-border-secondary)',
+  text: 'var(--aethel-text-primary)',
+  textMuted: 'var(--aethel-text-tertiary)',
+  textDim: 'var(--aethel-text-quaternary)',
+  focus: 'var(--aethel-primary)',
+  success: 'var(--aethel-success)',
+  error: 'var(--aethel-error)',
+  warning: 'var(--aethel-warning)',
+  info: 'var(--aethel-info)',
+};
+
 const portColors: Record<string, string> = {
-  exec: '#ffffff',
-  boolean: '#e74c3c',
-  number: '#27ae60',
-  string: '#f39c12',
-  vector3: '#9b59b6',
-  object: '#3498db',
-  any: '#95a5a6',
+  exec: ui.text,
+  boolean: ui.error,
+  number: ui.success,
+  string: ui.warning,
+  vector3: 'var(--aethel-accent)',
+  object: ui.info,
+  any: ui.textDim,
 };
 
 interface VisualNodeProps {
@@ -56,24 +72,24 @@ function VisualNode({ data }: VisualNodeProps) {
       className="visual-node"
       style={{
         background: definition.color,
-        borderRadius: '8px',
+        borderRadius: '10px',
         minWidth: '180px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        boxShadow: 'var(--aethel-shadow-md)',
+        border: `1px solid ${ui.border}`,
       }}
     >
-      {/* Header */}
       <div
         style={{
           padding: '8px 12px',
-          borderBottom: '1px solid rgba(255,255,255,0.2)',
-          fontWeight: 'bold',
-          color: '#fff',
+          borderBottom: `1px solid ${ui.borderStrong}`,
+          fontWeight: 600,
+          color: ui.text,
           fontSize: '12px',
+          letterSpacing: '0.02em',
         }}
       >
         {definition.label}
       </div>
-      {/* Inputs */}
       <div style={{ padding: '8px 0' }}>
         {definition.inputs.map((port) => (
           <div
@@ -94,11 +110,11 @@ function VisualNode({ data }: VisualNodeProps) {
                 width: port.type === 'exec' ? '12px' : '8px',
                 height: port.type === 'exec' ? '12px' : '8px',
                 borderRadius: port.type === 'exec' ? '2px' : '50%',
-                border: '2px solid #fff',
+                border: `2px solid ${ui.text}`,
                 left: '-6px',
               }}
             />
-            <span style={{ color: '#fff', fontSize: '11px', marginLeft: '8px' }}>
+            <span style={{ color: ui.text, fontSize: '11px', marginLeft: '8px' }}>
               {port.label}
             </span>
             {port.type !== 'exec' && port.type !== 'object' && (
@@ -106,22 +122,20 @@ function VisualNode({ data }: VisualNodeProps) {
                 type={port.type === 'number' ? 'number' : 'text'}
                 defaultValue={values[port.id] as string ?? port.default}
                 onChange={(e) => onValueChange?.(port.id, e.target.value)}
+                className="aethel-input"
                 style={{
                   marginLeft: 'auto',
-                  width: '60px',
-                  padding: '2px 4px',
+                  width: '70px',
+                  padding: '2px 6px',
                   fontSize: '10px',
-                  background: 'rgba(0,0,0,0.3)',
-                  border: 'none',
-                  borderRadius: '3px',
-                  color: '#fff',
+                  background: ui.surfaceMuted,
+                  borderRadius: '4px',
                 }}
               />
             )}
           </div>
         ))}
       </div>
-      {/* Outputs */}
       <div style={{ padding: '8px 0' }}>
         {definition.outputs.map((port) => (
           <div
@@ -134,7 +148,7 @@ function VisualNode({ data }: VisualNodeProps) {
               position: 'relative',
             }}
           >
-            <span style={{ color: '#fff', fontSize: '11px', marginRight: '8px' }}>
+            <span style={{ color: ui.text, fontSize: '11px', marginRight: '8px' }}>
               {port.label}
             </span>
             <Handle
@@ -146,7 +160,7 @@ function VisualNode({ data }: VisualNodeProps) {
                 width: port.type === 'exec' ? '12px' : '8px',
                 height: port.type === 'exec' ? '12px' : '8px',
                 borderRadius: port.type === 'exec' ? '2px' : '50%',
-                border: '2px solid #fff',
+                border: `2px solid ${ui.text}`,
                 right: '-6px',
               }}
             />
@@ -172,16 +186,16 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     return cats;
   }, []);
   const categoryLabels: Record<NodeCategory, string> = {
-    event: '🎯 Eventos',
-    action: '⚡ Ações',
-    condition: '❓ Condições',
-    variable: '📦 Variáveis',
-    math: '🔢 Matemática',
-    flow: '🔀 Fluxo',
-    input: '🎮 Input',
-    physics: '🔮 Física',
-    audio: '🔊 Áudio',
-    ui: '🖼️ UI',
+    event: 'Eventos',
+    action: 'Acoes',
+    condition: 'Condicoes',
+    variable: 'Variaveis',
+    math: 'Matematica',
+    flow: 'Fluxo',
+    input: 'Input',
+    physics: 'Fisica',
+    audio: 'Audio',
+    ui: 'UI',
   };
   const filteredCategories = useMemo(() => {
     if (!searchTerm) return categories;
@@ -202,8 +216,8 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
     <div
       style={{
         width: '250px',
-        background: '#1e1e1e',
-        borderRight: '1px solid #333',
+        background: ui.surface,
+        borderRight: `1px solid ${ui.border}`,
         overflowY: 'auto',
         height: '100%',
       }}
@@ -211,16 +225,13 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
       <div style={{ padding: '12px' }}>
         <input
           type="text"
-          placeholder="Buscar nós..."
+          placeholder="Buscar nos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="aethel-input"
           style={{
             width: '100%',
-            padding: '8px',
-            background: '#333',
-            border: 'none',
-            borderRadius: '4px',
-            color: '#fff',
+            background: ui.surfaceAlt,
             fontSize: '13px',
           }}
         />
@@ -231,19 +242,21 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
             onClick={() =>
               setExpandedCategory(expandedCategory === category ? null : category)
             }
+            className="aethel-button aethel-button-ghost"
             style={{
               width: '100%',
               padding: '10px 12px',
-              background: expandedCategory === category ? '#333' : 'transparent',
-              border: 'none',
-              color: '#fff',
+              background: expandedCategory === category ? ui.surfaceAlt : 'transparent',
+              borderRadius: 0,
+              color: ui.text,
               textAlign: 'left',
-              cursor: 'pointer',
               fontSize: '13px',
-              fontWeight: 'bold',
+              fontWeight: 600,
+              justifyContent: 'space-between',
             }}
           >
-            {categoryLabels[category]} ({nodes.length})
+            <span>{categoryLabels[category]}</span>
+            <span style={{ color: ui.textDim }}>({nodes.length})</span>
           </button>
           {expandedCategory === category && (
             <div style={{ padding: '4px 8px' }}>
@@ -256,9 +269,9 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
                     padding: '8px',
                     marginBottom: '4px',
                     background: node.color,
-                    border: 'none',
-                    borderRadius: '4px',
-                    color: '#fff',
+                    border: `1px solid ${ui.border}`,
+                    borderRadius: '6px',
+                    color: ui.text,
                     textAlign: 'left',
                     cursor: 'pointer',
                     fontSize: '12px',
@@ -316,16 +329,16 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
     return cats;
   }, []);
   const categoryLabels: Record<NodeCategory, string> = {
-    event: '🎯 Eventos',
-    action: '⚡ Ações',
-    condition: '❓ Condições',
-    variable: '📦 Variáveis',
-    math: '🔢 Matemática',
-    flow: '🔀 Fluxo',
-    input: '🎮 Input',
-    physics: '🔮 Física',
-    audio: '🔊 Áudio',
-    ui: '🖼️ UI',
+    event: 'Eventos',
+    action: 'Acoes',
+    condition: 'Condicoes',
+    variable: 'Variaveis',
+    math: 'Matematica',
+    flow: 'Fluxo',
+    input: 'Input',
+    physics: 'Fisica',
+    audio: 'Audio',
+    ui: 'UI',
   };
   const filteredNodes = useMemo(() => {
     if (!searchTerm) return null;
@@ -348,44 +361,39 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
         top: y,
         width: '280px',
         maxHeight: '400px',
-        background: '#1e1e1e',
-        border: '1px solid #444',
-        borderRadius: '8px',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+        background: ui.surface,
+        border: `1px solid ${ui.borderStrong}`,
+        borderRadius: '10px',
+        boxShadow: 'var(--aethel-shadow-lg)',
         overflow: 'hidden',
         zIndex: 1000,
       }}
     >
-      {/* Header */}
-      <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
+      <div style={{ padding: '12px', borderBottom: `1px solid ${ui.border}` }}>
         <input
           ref={inputRef}
           type="text"
-          placeholder="Buscar nó para criar..."
+          placeholder="Buscar no para criar..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="aethel-input"
           style={{
             width: '100%',
             padding: '10px 12px',
-            background: '#2a2a2a',
-            border: '1px solid #444',
-            borderRadius: '6px',
-            color: '#fff',
+            background: ui.surfaceAlt,
             fontSize: '14px',
-            outline: 'none',
           }}
         />
-        <div style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>
-          Clique direito no canvas para abrir este menu
+        <div style={{ fontSize: '11px', color: ui.textDim, marginTop: '6px' }}>
+          Clique com o botao direito no canvas para abrir este menu
         </div>
       </div>
-      {/* Results */}
       <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
         {filteredNodes ? (
           <div style={{ padding: '8px' }}>
             {filteredNodes.length === 0 ? (
-              <div style={{ padding: '16px', textAlign: 'center', color: '#666' }}>
-                Nenhum nó encontrado
+              <div style={{ padding: '16px', textAlign: 'center', color: ui.textDim }}>
+                Nenhum no encontrado
               </div>
             ) : (
               filteredNodes.map((node) => (
@@ -397,9 +405,9 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                     padding: '10px 12px',
                     marginBottom: '4px',
                     background: node.color,
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#fff',
+                    border: `1px solid ${ui.border}`,
+                    borderRadius: '8px',
+                    color: ui.text,
                     textAlign: 'left',
                     cursor: 'pointer',
                     fontSize: '13px',
@@ -421,15 +429,15 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                 onClick={() =>
                   setExpandedCategory(expandedCategory === category ? null : category)
                 }
+                className="aethel-button aethel-button-ghost"
                 style={{
                   width: '100%',
                   padding: '10px 14px',
-                  background: expandedCategory === category ? '#2a2a2a' : 'transparent',
-                  border: 'none',
-                  borderBottom: '1px solid #2a2a2a',
-                  color: '#fff',
+                  background: expandedCategory === category ? ui.surfaceAlt : 'transparent',
+                  borderRadius: 0,
+                  borderBottom: `1px solid ${ui.border}`,
+                  color: ui.text,
                   textAlign: 'left',
-                  cursor: 'pointer',
                   fontSize: '13px',
                   fontWeight: 500,
                   display: 'flex',
@@ -438,10 +446,10 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                 }}
               >
                 <span>{categoryLabels[category]}</span>
-                <span style={{ color: '#666' }}>{nodes.length}</span>
+                <span style={{ color: ui.textDim }}>{nodes.length}</span>
               </button>
               {expandedCategory === category && (
-                <div style={{ padding: '6px 10px', background: '#181818' }}>
+                <div style={{ padding: '6px 10px', background: ui.surfaceDeep }}>
                   {nodes.map((node) => (
                     <button
                       key={node.type}
@@ -451,9 +459,9 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                         padding: '8px 10px',
                         marginBottom: '4px',
                         background: node.color,
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff',
+                        border: `1px solid ${ui.border}`,
+                        borderRadius: '6px',
+                        color: ui.text,
                         textAlign: 'left',
                         cursor: 'pointer',
                         fontSize: '12px',
@@ -475,8 +483,8 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
 export interface VisualScript {
   id: string;
   name: string;
-	nodes: VisualNodeType[];
-	edges: Edge[];
+  nodes: VisualNodeType[];
+  edges: Edge[];
   variables: { name: string; type: string; defaultValue: unknown }[];
 }
 interface VisualScriptEditorProps {
@@ -489,7 +497,7 @@ const nodeTypes: NodeTypes = {
 export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps) {
   const initialNodes = script?.nodes ?? [];
   const initialEdges = script?.edges ?? [];
-	const [nodes, setNodes, onNodesChange] = useNodesState<VisualNodeType>(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<VisualNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -503,7 +511,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
         ...connection,
         id: `edge-${Date.now()}`,
         markerEnd: { type: MarkerType.ArrowClosed },
-        style: { stroke: '#fff', strokeWidth: 2 },
+        style: { stroke: ui.text, strokeWidth: 2 },
         animated: connection.sourceHandle === 'exec',
       } as Edge;
       setEdges((eds) => addEdge(newEdge, eds));
@@ -512,7 +520,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
   );
   const handleAddNode = useCallback(
     (definition: NodeDefinition) => {
-			const newNode: VisualNodeType = {
+      const newNode: VisualNodeType = {
         id: `node-${Date.now()}`,
         type: 'visual',
         position: { x: 300 + Math.random() * 200, y: 200 + Math.random() * 200 },
@@ -592,14 +600,14 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
           fitView
           snapToGrid
           snapGrid={[16, 16]}
-          style={{ background: '#0d0d0d' }}
+          style={{ background: ui.surfaceDeep }}
           onPaneClick={() => setContextMenu(null)}
         >
-          <Background color="#333" gap={16} />
+          <Background color={ui.borderStrong} gap={16} />
           <Controls />
           <MiniMap
-            nodeColor={(node: VisualNodeType) => node.data?.definition?.color || '#666'}
-            style={{ background: '#1e1e1e' }}
+            nodeColor={(node: VisualNodeType) => node.data?.definition?.color || ui.surfaceAlt}
+            style={{ background: ui.surface }}
           />
           <Panel position="top-right">
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -609,37 +617,22 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
                   console.log('Compiled Script:', json);
                   navigator.clipboard.writeText(json);
                 }}
-                style={{
-                  padding: '8px 16px',
-                  background: '#27ae60',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                }}
+                className="aethel-button aethel-button-primary"
+                style={{ padding: '8px 16px' }}
               >
-                💾 Salvar
+                Salvar
               </button>
               <button
                 onClick={handleClearGraph}
-                style={{
-                  padding: '8px 16px',
-                  background: '#e74c3c',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                }}
+                className="aethel-button aethel-button-danger"
+                style={{ padding: '8px 16px' }}
               >
-                🗑️ Limpar
+                Limpar
               </button>
             </div>
           </Panel>
         </ReactFlow>
       </div>
-      {/* Context Menu */}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}

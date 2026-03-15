@@ -120,34 +120,34 @@ interface ContentBrowserProps {
 // ============================================================================
 
 const colors = {
-  bg: '#0f0f14',
-  surface: '#16161d',
-  surfaceHover: '#1e1e28',
-  surfaceActive: '#26263a',
-  border: '#2a2a3a',
-  borderFocus: '#4f46e5',
-  text: '#e4e4eb',
-  textMuted: '#8b8b9e',
-  textDim: '#5a5a6e',
-  primary: '#6366f1',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  accent: '#8b5cf6',
+  bg: 'var(--aethel-surface-primary)',
+  surface: 'var(--aethel-surface-secondary)',
+  surfaceHover: 'var(--aethel-surface-tertiary)',
+  surfaceActive: 'var(--aethel-surface-quaternary)',
+  border: 'var(--aethel-border-primary)',
+  borderFocus: 'var(--aethel-border-focus)',
+  text: 'var(--aethel-text-primary)',
+  textMuted: 'var(--aethel-text-tertiary)',
+  textDim: 'var(--aethel-text-quaternary)',
+  primary: 'var(--aethel-primary)',
+  success: 'var(--aethel-success)',
+  warning: 'var(--aethel-warning)',
+  error: 'var(--aethel-error)',
+  accent: 'var(--aethel-accent)',
 };
 
 const assetTypeConfig: Record<AssetType, { icon: typeof File; color: string; label: string }> = {
-  mesh: { icon: Box, color: '#22c55e', label: '3D Model' },
-  texture: { icon: Image, color: '#f59e0b', label: 'Texture' },
-  material: { icon: Sparkles, color: '#ec4899', label: 'Material' },
-  audio: { icon: Music, color: '#06b6d4', label: 'Audio' },
-  video: { icon: Video, color: '#8b5cf6', label: 'Video' },
-  blueprint: { icon: Zap, color: '#6366f1', label: 'Blueprint' },
-  animation: { icon: Layers, color: '#f97316', label: 'Animation' },
-  prefab: { icon: Package, color: '#14b8a6', label: 'Prefab' },
-  level: { icon: Layers, color: '#a855f7', label: 'Level' },
-  folder: { icon: Folder, color: '#f59e0b', label: 'Folder' },
-  other: { icon: File, color: '#8b8b9e', label: 'File' },
+  mesh: { icon: Box, color: colors.success, label: '3D Model' },
+  texture: { icon: Image, color: colors.warning, label: 'Texture' },
+  material: { icon: Sparkles, color: colors.accent, label: 'Material' },
+  audio: { icon: Music, color: 'var(--aethel-info)', label: 'Audio' },
+  video: { icon: Video, color: colors.accent, label: 'Video' },
+  blueprint: { icon: Zap, color: colors.primary, label: 'Blueprint' },
+  animation: { icon: Layers, color: 'var(--aethel-warning-light)' , label: 'Animation' },
+  prefab: { icon: Package, color: 'var(--aethel-info-light)', label: 'Prefab' },
+  level: { icon: Layers, color: 'var(--aethel-accent-light)', label: 'Level' },
+  folder: { icon: Folder, color: colors.warning, label: 'Folder' },
+  other: { icon: File, color: colors.textDim, label: 'File' },
 };
 
 // ============================================================================
@@ -211,9 +211,9 @@ const FolderTreeItem: React.FC<FolderTreeItemProps> = ({
           <span style={{ width: '14px' }} />
         )}
         {folder.isExpanded ? (
-          <FolderOpen size={16} color="#f59e0b" />
+          <FolderOpen size={16} color={colors.warning} />
         ) : (
-          <Folder size={16} color="#f59e0b" />
+          <Folder size={16} color={colors.warning} />
         )}
         <span
           style={{
@@ -812,7 +812,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
               background: colors.primary,
               border: 'none',
               borderRadius: '6px',
-              color: '#fff',
+              color: colors.text,
               fontSize: '12px',
               cursor: 'pointer',
             }}

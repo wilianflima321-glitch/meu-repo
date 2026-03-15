@@ -184,7 +184,7 @@ function AssetPreviewModal({
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(6, 6, 10, 0.75)',
+      background: 'rgba(6, 6, 10, 0.7)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -194,8 +194,8 @@ function AssetPreviewModal({
       <div style={{
         width: 'min(900px, 92vw)',
         height: 'min(640px, 86vh)',
-        background: '#0f0f14',
-        border: '1px solid #2a2a3a',
+        background: 'var(--aethel-surface-primary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '12px',
         display: 'flex',
         flexDirection: 'column',
@@ -206,8 +206,8 @@ function AssetPreviewModal({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '12px 16px',
-          borderBottom: '1px solid #1f1f2d',
-          color: '#e4e4eb',
+          borderBottom: '1px solid var(--aethel-border-secondary)',
+          color: 'var(--aethel-text-primary)',
           fontSize: '14px',
         }}>
           <div style={{ fontWeight: 600 }}>{asset.name}</div>
@@ -216,7 +216,7 @@ function AssetPreviewModal({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#a1a1b3',
+              color: 'var(--aethel-text-quaternary)',
               cursor: 'pointer',
               fontSize: '18px',
             }}
@@ -227,12 +227,12 @@ function AssetPreviewModal({
         </div>
 
         <div style={{ flex: 1, padding: '16px', display: 'flex', gap: '16px', minHeight: 0 }}>
-          <div style={{ flex: 1, minHeight: 0, background: '#12121a', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ flex: 1, minHeight: 0, background: 'var(--aethel-surface-tertiary)', borderRadius: '8px', padding: '12px' }}>
             {isLoading && (
-              <div style={{ color: '#8b8b9e', fontSize: '13px' }}>Carregando preview...</div>
+              <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '13px' }}>Carregando preview...</div>
             )}
             {error && (
-              <div style={{ color: '#ef4444', fontSize: '13px' }}>{error}</div>
+              <div style={{ color: 'var(--aethel-error)', fontSize: '13px' }}>{error}</div>
             )}
             {!isLoading && !error && isImageAsset(asset) && (
               <Image
@@ -250,9 +250,9 @@ function AssetPreviewModal({
               </video>
             )}
             {!isLoading && !error && isAudioAsset(asset) && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: '#e4e4eb' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: 'var(--aethel-text-primary)' }}>
                 <audio controls src={previewUrl || asset.path} />
-                <span style={{ fontSize: '12px', color: '#8b8b9e' }}>Preview de áudio</span>
+                <span style={{ fontSize: '12px', color: 'var(--aethel-text-tertiary)' }}>Preview de áudio</span>
               </div>
             )}
             {!isLoading && !error && isModelAsset(asset) && (
@@ -261,27 +261,27 @@ function AssetPreviewModal({
               </div>
             )}
             {!isLoading && !error && !isImageAsset(asset) && !isVideoAsset(asset) && !isAudioAsset(asset) && !isModelAsset(asset) && (
-              <div style={{ color: '#8b8b9e', fontSize: '13px' }}>Preview não disponível para este tipo.</div>
+              <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '13px' }}>Preview não disponível para este tipo.</div>
             )}
           </div>
 
-          <div style={{ width: '260px', color: '#c9c9d4', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ width: '260px', color: 'var(--aethel-text-secondary)', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div>
-              <div style={{ color: '#8b8b9e', textTransform: 'uppercase', fontSize: '10px' }}>Tipo</div>
+              <div style={{ color: 'var(--aethel-text-tertiary)', textTransform: 'uppercase', fontSize: '10px' }}>Tipo</div>
               <div>{asset.type}</div>
             </div>
             <div>
-              <div style={{ color: '#8b8b9e', textTransform: 'uppercase', fontSize: '10px' }}>Tamanho</div>
+              <div style={{ color: 'var(--aethel-text-tertiary)', textTransform: 'uppercase', fontSize: '10px' }}>Tamanho</div>
               <div>{((asset.size ?? 0) / (1024 * 1024)).toFixed(2)} MB</div>
             </div>
             <div>
-              <div style={{ color: '#8b8b9e', textTransform: 'uppercase', fontSize: '10px' }}>Path</div>
+              <div style={{ color: 'var(--aethel-text-tertiary)', textTransform: 'uppercase', fontSize: '10px' }}>Path</div>
               <div style={{ wordBreak: 'break-all' }}>{asset.path}</div>
             </div>
             {asset.metadata && (
               <div>
-                <div style={{ color: '#8b8b9e', textTransform: 'uppercase', fontSize: '10px' }}>Metadata</div>
-                <pre style={{ whiteSpace: 'pre-wrap', fontSize: '11px', color: '#9fa0b3' }}>
+                <div style={{ color: 'var(--aethel-text-tertiary)', textTransform: 'uppercase', fontSize: '10px' }}>Metadata</div>
+                <pre style={{ whiteSpace: 'pre-wrap', fontSize: '11px', color: 'var(--aethel-text-tertiary)' }}>
                   {JSON.stringify(asset.metadata, null, 2)}
                 </pre>
               </div>
@@ -541,8 +541,8 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        background: '#0f0f14',
-        color: '#8b8b9e',
+        background: 'var(--aethel-surface-primary)',
+        color: 'var(--aethel-text-tertiary)',
       }}>
         <Loader2 size={32} className="animate-spin" style={{ marginRight: '12px' }} />
         <span>Carregando assets...</span>
@@ -562,18 +562,18 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
-        background: '#0f0f14',
-        color: '#ef4444',
+        background: 'var(--aethel-surface-primary)',
+        color: 'var(--aethel-error)',
         gap: '12px',
       }}>
         <AlertCircle size={48} />
         <span>Erro ao carregar assets</span>
-        <span style={{ color: '#8b8b9e', fontSize: '12px' }}>{error.message}</span>
+        <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>{error.message}</span>
         <button
           onClick={refresh}
           style={{
             padding: '8px 16px',
-            background: '#6366f1',
+            background: 'var(--aethel-primary)',
             color: 'white',
             border: 'none',
             borderRadius: '6px',
@@ -656,15 +656,15 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
           position: 'absolute',
           bottom: '16px',
           right: '16px',
-          background: '#16161d',
-          border: '1px solid #2a2a3a',
+          background: 'var(--aethel-surface-secondary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '8px',
           padding: '12px',
           minWidth: '280px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
           zIndex: 100,
         }}>
-          <div style={{ fontWeight: 600, marginBottom: '12px', color: '#e4e4eb' }}>
+          <div style={{ fontWeight: 600, marginBottom: '12px', color: 'var(--aethel-text-primary)' }}>
             Uploading {uploadProgress.length} file(s)
           </div>
 
@@ -677,16 +677,16 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
                 marginBottom: '4px',
               }}>
                 {item.status === 'uploading' && (
-                  <Loader2 size={14} className="animate-spin" style={{ color: '#6366f1' }} />
+                  <Loader2 size={14} className="animate-spin" style={{ color: 'var(--aethel-primary)' }} />
                 )}
                 {item.status === 'done' && (
-                  <CheckCircle2 size={14} style={{ color: '#22c55e' }} />
+                  <CheckCircle2 size={14} style={{ color: 'var(--aethel-success)' }} />
                 )}
                 {item.status === 'error' && (
-                  <AlertCircle size={14} style={{ color: '#ef4444' }} />
+                  <AlertCircle size={14} style={{ color: 'var(--aethel-error)' }} />
                 )}
                 <span style={{
-                  color: '#e4e4eb',
+                  color: 'var(--aethel-text-primary)',
                   fontSize: '12px',
                   flex: 1,
                   overflow: 'hidden',
@@ -695,7 +695,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
                 }}>
                   {item.fileName}
                 </span>
-                <span style={{ color: '#8b8b9e', fontSize: '11px' }}>
+                <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>
                   {item.progress}%
                 </span>
               </div>
@@ -703,20 +703,20 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
               {/* Progress bar */}
               <div style={{
                 height: '4px',
-                background: '#2a2a3a',
+                background: 'var(--aethel-border-primary)',
                 borderRadius: '2px',
                 overflow: 'hidden',
               }}>
                 <div style={{
                   height: '100%',
                   width: `${item.progress}%`,
-                  background: item.status === 'error' ? '#ef4444' : '#6366f1',
+                  background: item.status === 'error' ? 'var(--aethel-error)' : 'var(--aethel-primary)',
                   transition: 'width 0.2s',
                 }} />
               </div>
 
               {item.error && (
-                <div style={{ color: '#ef4444', fontSize: '11px', marginTop: '4px' }}>
+                <div style={{ color: 'var(--aethel-error)', fontSize: '11px', marginTop: '4px' }}>
                   {item.error}
                 </div>
               )}
@@ -738,8 +738,8 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
           alignItems: 'center',
           gap: '6px',
         }}>
-          <Loader2 size={12} className="animate-spin" style={{ color: '#6366f1' }} />
-          <span style={{ color: '#6366f1', fontSize: '11px' }}>Sincronizando...</span>
+          <Loader2 size={12} className="animate-spin" style={{ color: 'var(--aethel-primary)' }} />
+          <span style={{ color: 'var(--aethel-primary)', fontSize: '11px' }}>Sincronizando...</span>
         </div>
       )}
     </div>

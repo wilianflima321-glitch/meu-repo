@@ -64,6 +64,7 @@
   --aethel-gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
   --aethel-gradient-subtle: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
   --aethel-gradient-glow: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  --aethel-app-background: radial-gradient(circle at top, rgba(99, 102, 241, 0.14), transparent 30%), radial-gradient(circle at right top, rgba(14, 165, 233, 0.08), transparent 24%), linear-gradient(180deg, #0a0c12 0%, #06070a 100%);
 
   /* Spacing Scale */
   --aethel-space-0: 0;
@@ -225,6 +226,7 @@ html.light {
   --aethel-gradient-primary: linear-gradient(135deg, #2563eb 0%, #0891b2 50%, #0f766e 100%);
   --aethel-gradient-subtle: linear-gradient(180deg, rgba(37, 99, 235, 0.08) 0%, transparent 100%);
   --aethel-gradient-glow: radial-gradient(ellipse at center, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+  --aethel-app-background: radial-gradient(circle at top, rgba(37, 99, 235, 0.08), transparent 30%), radial-gradient(circle at right top, rgba(14, 165, 233, 0.06), transparent 24%), linear-gradient(180deg, #f5f7fb 0%, #ffffff 100%);
 }
 
 /* ===== Global Styles ===== */

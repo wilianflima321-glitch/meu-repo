@@ -175,7 +175,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
 
   if (!asset) {
     return (
-      <div style={{ padding: '16px', color: '#8b8b9e', fontSize: '12px' }}>
+      <div style={{ padding: '16px', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
         Selecione um asset para visualizar o preview.
       </div>
     );
@@ -195,8 +195,8 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
           width: '100%',
           aspectRatio: '16 / 10',
           borderRadius: '10px',
-          border: '1px solid #2a2a3a',
-          background: '#0f0f14',
+          border: '1px solid var(--aethel-border-primary)',
+          background: 'var(--aethel-surface-primary)',
           overflow: 'hidden',
           position: 'relative',
         }}
@@ -210,7 +210,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
               alignItems: 'center',
               justifyContent: 'center',
               background: 'rgba(15, 15, 20, 0.8)',
-              color: '#8b8b9e',
+              color: 'var(--aethel-text-tertiary)',
               fontSize: '12px',
               zIndex: 2,
             }}
@@ -251,7 +251,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#6b7280',
+              color: 'var(--aethel-text-quaternary)',
               fontSize: '12px',
               textAlign: 'center',
               padding: '12px',
@@ -263,26 +263,26 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
       </div>
 
       {error && (
-        <div style={{ color: '#ef4444', fontSize: '11px' }}>{error}</div>
+        <div style={{ color: 'var(--aethel-error)', fontSize: '11px' }}>{error}</div>
       )}
 
-      <div style={{ display: 'grid', gap: '6px', fontSize: '12px', color: '#cbd5f5' }}>
-        <div style={{ fontWeight: 600, color: '#e4e4eb' }}>{asset.name}</div>
+      <div style={{ display: 'grid', gap: '6px', fontSize: '12px', color: 'var(--aethel-text-secondary)' }}>
+        <div style={{ fontWeight: 600, color: 'var(--aethel-text-primary)' }}>{asset.name}</div>
         <div>Tipo: {asset.type}</div>
         <div>Tamanho: {formatSize(asset.size)}</div>
         <div>Extensão: {extension || '-'}</div>
-        <div style={{ color: '#8b8b9e', wordBreak: 'break-all' }}>{asset.path}</div>
+        <div style={{ color: 'var(--aethel-text-tertiary)', wordBreak: 'break-all' }}>{asset.path}</div>
       </div>
 
       {asset.metadata && (
         <div
           style={{
-            borderTop: '1px solid #2a2a3a',
+            borderTop: '1px solid var(--aethel-border-primary)',
             paddingTop: '10px',
             display: 'grid',
             gap: '6px',
             fontSize: '11px',
-            color: '#9aa4b2',
+            color: 'var(--aethel-text-quaternary)',
           }}
         >
           {asset.metadata.vertices !== undefined && (

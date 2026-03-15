@@ -191,7 +191,7 @@ export default function NexusPage() {
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col bg-[#020202] p-4">
+          <div className="flex flex-1 flex-col bg-[var(--aethel-surface-primary)] p-4">
             <NexusCanvas
               mode={canvasMode}
               onSelectElement={(id, pos) => console.log('Selected:', id, pos)}
