@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   Search,
   ChevronDown,
@@ -18,6 +17,8 @@ import {
   ThumbsUp,
   ThumbsDown,
 } from 'lucide-react'
+import PublicHeader from '@/components/ui/PublicHeader'
+import PublicFooter from '@/components/ui/PublicFooter'
 
 interface FAQ {
   question: string
@@ -37,19 +38,19 @@ const categories: Category[] = [
     faqs: [
       {
         question: 'Como criar minha primeira conta?',
-        answer: 'Acesse aethel.io/register e siga o processo de cadastro. Você pode se registrar usando seu email ou fazer login com GitHub/Google. O processo leva menos de 2 minutos.',
+        answer: 'Acesse a p?gina de cadastro e siga o fluxo guiado. O cadastro leva poucos minutos e j? permite iniciar um projeto com templates prontos.',
       },
       {
         question: 'Preciso instalar algo no meu computador?',
-        answer: 'Não! A Aethel é 100% baseada na nuvem. Você só precisa de um navegador moderno (Chrome, Firefox, Safari ou Edge). Para acesso offline, oferecemos um app desktop opcional.',
+        answer: 'N?o. O Aethel roda no navegador. Para uso offline ou performance local, o app desktop pode ser usado quando dispon?vel.',
       },
       {
-        question: 'Quais linguagens de programação são suportadas?',
-        answer: 'Suportamos todas as principais linguagens: JavaScript/TypeScript, Python, Java, C#, Go, Rust, PHP, Ruby, e mais. A IA entende e gera código em qualquer uma delas.',
+        question: 'Quais linguagens s?o suportadas?',
+        answer: 'O IDE suporta JavaScript/TypeScript, Python, Java, C#, Go, Rust, PHP e outras. A IA entende o contexto do projeto e gera c?digo de acordo com a stack.',
       },
       {
         question: 'Posso importar projetos existentes?',
-        answer: 'Sim! Você pode importar projetos diretamente do GitHub, GitLab, Bitbucket ou fazer upload de arquivos ZIP. A Aethel detecta automaticamente as configurações do projeto.',
+        answer: 'Sim. Voc? pode importar projetos via GitHub ou upload ZIP. O sistema detecta a stack e configura o ambiente automaticamente.',
       },
     ],
   },
@@ -58,20 +59,20 @@ const categories: Category[] = [
     icon: CreditCard,
     faqs: [
       {
-        question: 'Qual a diferença entre os planos?',
-        answer: 'O plano Gratuito é ideal para projetos pessoais e aprendizado. O Pro oferece recursos avançados como projetos ilimitados e mais execuções de IA. O Empresarial inclui SSO, SLA garantido e suporte dedicado.',
+        question: 'Qual a diferen?a entre os planos?',
+        answer: 'Os planos variam por limites de projetos, tokens de IA, colabora??o e acesso a recursos avan?ados (preview sandbox, RAG, deploy). Os detalhes est?o na p?gina de pricing.',
       },
       {
-        question: 'Posso testar o plano Pro antes de assinar?',
-        answer: 'Sim! Oferecemos 14 dias de teste gratuito do plano Pro, sem necessidade de cartão de crédito. Você terá acesso completo a todas as funcionalidades durante o período de teste.',
+        question: 'Preciso de cart?o de cr?dito para come?ar?',
+        answer: 'Voc? pode iniciar pelo plano gratuito. Quando o checkout Stripe estiver ativo, os planos pagos poder?o ser contratados diretamente pela plataforma.',
       },
       {
-        question: 'Como funciona a cobrança?',
-        answer: 'A cobrança é mensal ou anual (com 20% de desconto). Aceitamos cartões de crédito, PIX e boleto bancário. Você pode cancelar a qualquer momento sem multa.',
+        question: 'Como funciona a cobran?a?',
+        answer: 'A cobran?a ? mensal ou anual (com desconto no ciclo anual). O gateway padr?o ? Stripe. Ajustes e cancelamentos ficam dispon?veis no portal do cliente.',
       },
       {
-        question: 'O que acontece se eu exceder minha cota de IA?',
-        answer: 'Você receberá um aviso quando estiver próximo do limite. Após atingir o limite, as funcionalidades de IA ficam pausadas até o próximo ciclo, mas você pode comprar créditos adicionais.',
+        question: 'O que acontece se eu exceder minha cota?',
+        answer: 'Voc? recebe avisos antes de atingir o limite. Quando a cota estoura, novas execu??es de IA ficam suspensas at? o ciclo seguinte ou upgrade de plano.',
       },
     ],
   },
@@ -80,64 +81,64 @@ const categories: Category[] = [
     icon: Settings,
     faqs: [
       {
-        question: 'Como funciona a IA da Aethel?',
-        answer: 'Nossa IA usa modelos de última geração treinados especificamente para programação. Ela pode gerar código, explicar trechos complexos, encontrar bugs, sugerir melhorias e muito mais.',
+        question: 'Como funciona a IA do Aethel?',
+        answer: 'O sistema opera com agentes especializados (Architect, Engineer, Critic) e aplica mudan?as com valida??o e rollback. Nada ? tratado como ?sucesso? sem evid?ncia.',
       },
       {
-        question: 'Posso usar a Aethel offline?',
-        answer: 'O editor web requer conexão à internet. No entanto, oferecemos um app desktop que permite trabalhar offline com sincronização automática quando você reconectar.',
+        question: 'Existe colabora??o em tempo real?',
+        answer: 'Sim, com limites por plano. Colabora??o avan?ada e stress tests ficam mais completos nos tiers superiores.',
       },
       {
-        question: 'Como funciona a colaboração em tempo real?',
-        answer: 'Disponível no plano Pro, a colaboração permite que múltiplos usuários editem o mesmo arquivo simultaneamente, com cursores coloridos, chat integrado e histórico de alterações.',
+        question: 'Posso integrar com meu CI/CD?',
+        answer: 'Sim. O Aethel se integra com GitHub Actions e outros fluxos. Deploy one-click est? em fase de ativa??o para servi?os compat?veis.',
       },
       {
-        question: 'Posso integrar com meu fluxo de CI/CD existente?',
-        answer: 'Sim! Oferecemos integrações nativas com GitHub Actions, GitLab CI, Jenkins, CircleCI e outros. Também temos uma API completa para integrações customizadas.',
+        question: 'O preview ? em sandbox real?',
+        answer: 'O preview ? can?nico e unificado. O sandbox gerenciado (E2B/WebContainers) entra como default assim que o token e o runtime estiverem ativos.',
       },
     ],
   },
   {
-    name: 'Segurança e privacidade',
+    name: 'Seguran?a e privacidade',
     icon: Shield,
     faqs: [
       {
-        question: 'Meu código está seguro na Aethel?',
-        answer: 'Absolutamente. Usamos criptografia AES-256 para dados em repouso e TLS 1.3 para dados em trânsito. Somos compatíveis com SOC 2 Type II e GDPR.',
+        question: 'Meu c?digo est? seguro no Aethel?',
+        answer: 'Sim. Os dados s?o criptografados em tr?nsito (TLS). Para dados em repouso e vault de credenciais, seguimos a pol?tica de seguran?a descrita na documenta??o.',
       },
       {
-        question: 'A IA tem acesso ao meu código?',
-        answer: 'A IA processa seu código apenas quando você a invoca explicitamente. Não usamos seu código para treinar nossos modelos sem consentimento expresso.',
+        question: 'A IA treina com meu c?digo?',
+        answer: 'N?o. O c?digo s? ? enviado ao provider quando voc? solicita uma a??o. N?o usamos o seu c?digo para treinar modelos sem consentimento expl?cito.',
       },
       {
-        question: 'Onde meus dados são armazenados?',
-        answer: 'Nossos servidores estão localizados no Brasil (São Paulo) e nos EUA. Clientes Empresarial podem escolher a região de armazenamento de acordo com requisitos de conformidade.',
+        question: 'Voc?s possuem certifica??es de seguran?a?',
+        answer: 'Estamos estruturando o caminho para SOC2 e compliance completo. As evid?ncias p?blicas ser?o publicadas conforme o processo avan?ar.',
       },
       {
-        question: 'Vocês têm certificações de segurança?',
-        answer: 'Sim! Somos certificados SOC 2 Type II, ISO 27001, e estamos em conformidade com LGPD e GDPR. Realizamos auditorias de segurança trimestrais.',
+        question: 'Onde meus dados ficam?',
+        answer: 'O ambiente pode operar em regi?es espec?ficas via cloud providers. Para requisitos enterprise, a regi?o ? negociada com o time comercial.',
       },
     ],
   },
   {
-    name: 'Times e colaboração',
+    name: 'Times e colabora??o',
     icon: Users,
     faqs: [
       {
         question: 'Como adiciono membros ao meu time?',
-        answer: 'No painel, vá em Configurações > Time > Convidar membros. Você pode convidar por e-mail ou gerar um link de convite. Os convites expiram em 7 dias.',
+        answer: 'No painel, acesse Configura??es ? Time. Voc? pode convidar pessoas por email e controlar permiss?es por papel.',
       },
       {
-        question: 'Quais são os níveis de permissão disponíveis?',
-        answer: 'Oferecemos 4 níveis: Visualizador (apenas leitura), Editor (pode editar), Administrador (gerencia membros) e Proprietário (controle total). Você pode criar papéis customizados no plano Empresarial.',
+        question: 'Quais n?veis de permiss?o est?o dispon?veis?',
+        answer: 'Visualizador, Editor e Admin. Pap?is customizados e RBAC completo ficam dispon?veis nos planos superiores.',
       },
       {
-        question: 'Posso ter projetos privados e públicos?',
-        answer: 'Sim! Projetos podem ser privados (apenas membros do time), internos (todos da organização) ou públicos (qualquer pessoa). A configuração está nas opções de cada projeto.',
+        question: 'Posso ter projetos privados e p?blicos?',
+        answer: 'Sim. Cada projeto tem controle de visibilidade e acesso, ajust?vel pelo propriet?rio.',
       },
       {
-        question: 'Como funciona o faturamento para times?',
-        answer: 'O faturamento é por usuário ativo. Você paga apenas pelos membros que realmente usam a plataforma no mês. Usuários inativos não são cobrados.',
+        question: 'O faturamento ? por usu?rio?',
+        answer: 'Sim, os planos em geral escalam por assentos. O detalhamento completo aparece no pricing e no portal de billing quando ativo.',
       },
     ],
   },
@@ -149,240 +150,211 @@ export default function HelpPage() {
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
   const [helpful, setHelpful] = useState<Record<string, boolean | null>>({})
 
-  const filteredCategories = categories.map((cat) => ({
-    ...cat,
-    faqs: cat.faqs.filter(
-      (faq) =>
-        faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-  })).filter((cat) => searchQuery === '' || cat.faqs.length > 0)
+  const filteredCategories = categories
+    .map((cat) => ({
+      ...cat,
+      faqs: cat.faqs.filter(
+        (faq) =>
+          faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    }))
+    .filter((cat) => searchQuery === '' || cat.faqs.length > 0)
 
   const handleHelpful = (question: string, isHelpful: boolean) => {
     setHelpful((prev) => ({ ...prev, [question]: isHelpful }))
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-3">
-                <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={36} height={36} className="rounded-xl" />
-                <span className="text-xl font-bold text-white">Aethel</span>
-              </Link>
-              <span className="text-slate-600">|</span>
-              <span className="text-slate-400 font-medium">Central de Ajuda</span>
-            </div>
-            <Link
-              href="/dashboard"
-              className="text-sm text-slate-400 hover:text-white transition-colors"
-            >
-              Voltar ao Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <div className="bg-gradient-to-b from-blue-600/10 to-transparent border-b border-slate-800">
-        <div className="max-w-6xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Como podemos ajudar?
-          </h1>
-          <p className="text-lg text-slate-400 mb-8 max-w-2xl mx-auto">
-            Encontre respostas para as perguntas mais frequentes ou entre em contato com nosso suporte
-          </p>
-          
-          {/* Search */}
-          <div className="max-w-xl mx-auto relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Buscar perguntas..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-            />
-          </div>
-        </div>
+    <div className="min-h-screen bg-black text-white">
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[160px]" />
       </div>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Quick Links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <Link
-            href="/docs"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
-          >
-            <Book className="w-6 h-6 text-blue-400 mb-2" />
-            <h3 className="font-medium text-white group-hover:text-blue-400 transition-colors">
-              Documentação
-            </h3>
-            <p className="text-sm text-slate-500">Guias completos</p>
-          </Link>
-          <Link
-            href="/contact"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
-          >
-            <MessageSquare className="w-6 h-6 text-emerald-400 mb-2" />
-            <h3 className="font-medium text-white group-hover:text-emerald-400 transition-colors">
-              Suporte
-            </h3>
-            <p className="text-sm text-slate-500">Fale conosco</p>
-          </Link>
-          <Link
-            href="https://status.aethel.io"
-            target="_blank"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
-          >
-            <Zap className="w-6 h-6 text-yellow-400 mb-2" />
-            <h3 className="font-medium text-white group-hover:text-yellow-400 transition-colors">
-              Status
-            </h3>
-            <p className="text-sm text-slate-500">Disponibilidade</p>
-          </Link>
-          <Link
-            href="https://discord.gg/aethel"
-            target="_blank"
-            className="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
-          >
-            <Users className="w-6 h-6 text-cyan-400 mb-2" />
-            <h3 className="font-medium text-white group-hover:text-cyan-400 transition-colors">
-              Comunidade
-            </h3>
-            <p className="text-sm text-slate-500">Discord</p>
-          </Link>
-        </div>
+      <PublicHeader />
 
-        {/* FAQ Categories */}
-        <h2 className="text-xl font-semibold text-white mb-6">
-          Perguntas Frequentes
-        </h2>
-
-        <div className="space-y-4">
-          {filteredCategories.map((category) => (
-            <div
-              key={category.name}
-              className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden"
-            >
-              <button
-                onClick={() =>
-                  setExpandedCategory(
-                    expandedCategory === category.name ? null : category.name
-                  )
-                }
-                className="w-full flex items-center gap-4 p-5 hover:bg-slate-800/50 transition-colors"
-              >
-                <div className="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center">
-                  <category.icon className="w-5 h-5 text-blue-400" />
-                </div>
-                <span className="flex-1 text-left font-medium text-white">
-                  {category.name}
-                </span>
-                <span className="text-sm text-slate-500 mr-2">
-                  {category.faqs.length} perguntas
-                </span>
-                <ChevronDown
-                  className={`w-5 h-5 text-slate-400 transition-transform ${
-                    expandedCategory === category.name ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {expandedCategory === category.name && (
-                <div className="border-t border-slate-800">
-                  {category.faqs.map((faq) => (
-                    <div
-                      key={faq.question}
-                      className="border-b border-slate-800 last:border-0"
-                    >
-                      <button
-                        onClick={() =>
-                          setExpandedFaq(
-                            expandedFaq === faq.question ? null : faq.question
-                          )
-                        }
-                        className="w-full flex items-center justify-between p-4 px-6 hover:bg-slate-800/30 transition-colors"
-                      >
-                        <span className="text-slate-200 text-left pr-4">
-                          {faq.question}
-                        </span>
-                        <ChevronRight
-                          className={`w-4 h-4 text-slate-500 flex-shrink-0 transition-transform ${
-                            expandedFaq === faq.question ? 'rotate-90' : ''
-                          }`}
-                        />
-                      </button>
-
-                      {expandedFaq === faq.question && (
-                        <div className="px-6 pb-4">
-                          <p className="text-slate-400 mb-4">{faq.answer}</p>
-                          <div className="flex items-center gap-4 pt-4 border-t border-slate-800">
-                            <span className="text-sm text-slate-500">
-                              Esta resposta foi útil?
-                            </span>
-                            <button
-                              onClick={() => handleHelpful(faq.question, true)}
-                              className={`p-2 rounded-lg transition-colors ${
-                                helpful[faq.question] === true
-                                  ? 'bg-emerald-500/20 text-emerald-400'
-                                  : 'text-slate-400 hover:bg-slate-800'
-                              }`}
-                            >
-                              <ThumbsUp className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleHelpful(faq.question, false)}
-                              className={`p-2 rounded-lg transition-colors ${
-                                helpful[faq.question] === false
-                                  ? 'bg-red-500/20 text-red-400'
-                                  : 'text-slate-400 hover:bg-slate-800'
-                              }`}
-                            >
-                              <ThumbsDown className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Still need help */}
-        <div className="mt-12 p-8 bg-gradient-to-br from-blue-600/20 to-cyan-600/10 border border-blue-500/30 rounded-2xl text-center">
-          <h3 className="text-xl font-semibold text-white mb-2">
-            Ainda precisa de ajuda?
-          </h3>
-          <p className="text-slate-400 mb-6">
-            Nossa equipe de suporte está pronta para ajudar você
+      <main className="relative z-10">
+        <section className="mx-auto max-w-6xl px-6 pt-12 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+            Central de ajuda
+          </div>
+          <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Como podemos ajudar?</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
+            Respostas objetivas, sem promessas infladas. Se faltar evid?ncia, n?s falamos.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          <div className="mx-auto mt-8 max-w-xl">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Buscar perguntas..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder-slate-500 transition-colors focus:border-blue-500/60 focus:outline-none"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto mt-12 max-w-6xl px-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <Link
+              href="/docs"
+              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-blue-500/40 hover:bg-white/[0.06]"
+            >
+              <Book className="mb-2 h-6 w-6 text-blue-400" />
+              <h3 className="text-sm font-semibold text-white group-hover:text-blue-300">Documenta??o</h3>
+              <p className="mt-1 text-xs text-slate-500">Guias e refer?ncia t?cnica</p>
+            </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
+              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-emerald-500/40 hover:bg-white/[0.06]"
             >
-              <MessageSquare className="w-4 h-4" />
-              Abrir ticket
+              <MessageSquare className="mb-2 h-6 w-6 text-emerald-400" />
+              <h3 className="text-sm font-semibold text-white group-hover:text-emerald-300">Suporte</h3>
+              <p className="mt-1 text-xs text-slate-500">Fale com o time</p>
+            </Link>
+            <Link
+              href="/status"
+              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-yellow-500/40 hover:bg-white/[0.06]"
+            >
+              <Zap className="mb-2 h-6 w-6 text-yellow-400" />
+              <h3 className="text-sm font-semibold text-white group-hover:text-yellow-300">Status</h3>
+              <p className="mt-1 text-xs text-slate-500">Checks p?blicos em tempo real</p>
             </Link>
             <Link
               href="https://discord.gg/aethel"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors"
               target="_blank"
+              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-cyan-500/40 hover:bg-white/[0.06]"
             >
-              <ExternalLink className="w-4 h-4" />
-              Discord
+              <Users className="mb-2 h-6 w-6 text-cyan-400" />
+              <h3 className="text-sm font-semibold text-white group-hover:text-cyan-300">Comunidade</h3>
+              <p className="mt-1 text-xs text-slate-500">Discord oficial</p>
             </Link>
           </div>
-        </div>
+        </section>
+
+        <section className="mx-auto mt-12 max-w-6xl px-6 pb-10">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-white">Perguntas frequentes</h2>
+            <span className="text-xs uppercase tracking-[0.2em] text-slate-500">Atualizado continuamente</span>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            {filteredCategories.map((category) => (
+              <div
+                key={category.name}
+                className="rounded-2xl border border-white/10 bg-white/[0.03]"
+              >
+                <button
+                  onClick={() =>
+                    setExpandedCategory(expandedCategory === category.name ? null : category.name)
+                  }
+                  className="flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-white/[0.04]"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                    <category.icon className="h-5 w-5" />
+                  </div>
+                  <span className="flex-1 font-medium text-white">{category.name}</span>
+                  <span className="text-xs text-slate-500">{category.faqs.length} perguntas</span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-slate-400 transition-transform ${
+                      expandedCategory === category.name ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                {expandedCategory === category.name && (
+                  <div className="border-t border-white/10">
+                    {category.faqs.map((faq) => (
+                      <div key={faq.question} className="border-b border-white/10 last:border-0">
+                        <button
+                          onClick={() =>
+                            setExpandedFaq(expandedFaq === faq.question ? null : faq.question)
+                          }
+                          className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-white/[0.02]"
+                        >
+                          <span className="text-sm text-slate-200">{faq.question}</span>
+                          <ChevronRight
+                            className={`h-4 w-4 text-slate-500 transition-transform ${
+                              expandedFaq === faq.question ? 'rotate-90' : ''
+                            }`}
+                          />
+                        </button>
+
+                        {expandedFaq === faq.question && (
+                          <div className="px-6 pb-5">
+                            <p className="text-sm text-slate-400">{faq.answer}</p>
+                            <div className="mt-4 flex items-center gap-4 border-t border-white/10 pt-4">
+                              <span className="text-xs text-slate-500">Esta resposta foi ?til?</span>
+                              <button
+                                onClick={() => handleHelpful(faq.question, true)}
+                                className={`rounded-lg p-2 transition-colors ${
+                                  helpful[faq.question] === true
+                                    ? 'bg-emerald-500/20 text-emerald-400'
+                                    : 'text-slate-400 hover:bg-white/[0.06]'
+                                }`}
+                              >
+                                <ThumbsUp className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleHelpful(faq.question, false)}
+                                className={`rounded-lg p-2 transition-colors ${
+                                  helpful[faq.question] === false
+                                    ? 'bg-red-500/20 text-red-400'
+                                    : 'text-slate-400 hover:bg-white/[0.06]'
+                                }`}
+                              >
+                                <ThumbsDown className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-5xl px-6 pb-20">
+          <div className="rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 via-cyan-500/10 to-transparent p-10 text-center">
+            <h3 className="text-2xl font-semibold text-white">Ainda precisa de ajuda?</h3>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
+              Nosso time responde por email ou comunidade. Em demandas enterprise, fale direto com vendas.
+            </p>
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link
+                href="/contact"
+                className="aethel-button aethel-button-primary rounded-xl px-6 py-3 text-sm font-semibold"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Abrir ticket
+              </Link>
+              <Link
+                href="/contact-sales"
+                className="aethel-button aethel-button-secondary rounded-xl px-6 py-3 text-sm font-semibold"
+              >
+                Falar com vendas
+              </Link>
+              <Link
+                href="https://discord.gg/aethel"
+                target="_blank"
+                className="aethel-button aethel-button-ghost rounded-xl px-6 py-3 text-sm font-semibold"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Discord
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <PublicFooter />
     </div>
   )
 }
