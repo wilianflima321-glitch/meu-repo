@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import {
@@ -61,7 +61,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 }
 
 const typeLabels: Record<string, string> = {
-  code: 'Código',
+  code: 'Codigo',
   web: 'Web App',
   unreal: 'Unreal',
   api: 'API',
@@ -70,7 +70,7 @@ const typeLabels: Record<string, string> = {
 const statusConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'default' | 'info' }> = {
   active: { label: 'Ativo', variant: 'success' },
   paused: { label: 'Pausado', variant: 'warning' },
-  completed: { label: 'Concluído', variant: 'info' },
+  completed: { label: 'Concluido', variant: 'info' },
   archived: { label: 'Arquivado', variant: 'default' },
 }
 
@@ -213,7 +213,7 @@ export function ProjectsTab({
         <div>
           <h1 className="text-2xl font-bold text-white">Projetos</h1>
           <p className="text-slate-400 mt-1">
-            Gerencie seus projetos e colaborações
+            Gerencie seus projetos e colaboracoes
           </p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={onCreateProject}>
@@ -238,7 +238,7 @@ export function ProjectsTab({
             className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-sky-500"
           >
             <option value="">Todos os tipos</option>
-            <option value="code">Código</option>
+            <option value="code">Codigo</option>
             <option value="web">Web App</option>
             <option value="unreal">Unreal</option>
             <option value="api">API</option>
@@ -251,7 +251,7 @@ export function ProjectsTab({
             <option value="">Todos os status</option>
             <option value="active">Ativo</option>
             <option value="paused">Pausado</option>
-            <option value="completed">Concluído</option>
+            <option value="completed">Concluido</option>
             <option value="archived">Arquivado</option>
           </select>
         </div>
@@ -315,3 +315,4 @@ export function ProjectsTab({
 }
 
 export default ProjectsTab
+
