@@ -92,13 +92,6 @@ const PROVIDER_PRESETS = [
     envKey: 'ANTHROPIC_API_KEY',
     recommended: false,
   },
-  {
-    id: 'demo',
-    name: 'Modo Demo',
-    description: 'Exploracao limitada com respostas rotuladas como demo.',
-    envKey: '',
-    recommended: false,
-  },
 ]
 
 type Step = 'domain' | 'provider' | 'ready'
@@ -330,9 +323,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <p className="flex items-start gap-2 text-xs text-amber-300/80">
                 <Codicon name="info" />
                 <span>
-                  {selectedProvider === 'demo'
-                    ? 'O modo demo usa respostas pre-geradas para exploracao. Nao requer API key.'
-                    : 'Voce pode configurar a API key depois em Settings > AI Provider. O wizard nao armazena keys.'}
+                  Voce pode configurar a API key depois em Settings > AI Provider. O wizard nao armazena keys.
                 </span>
               </p>
             </div>
