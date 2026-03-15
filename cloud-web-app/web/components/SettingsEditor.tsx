@@ -3,35 +3,35 @@
  * Professional settings UI with search, categories, and live preview
  */
 
-'use client';
+'use client'
 
-import { useState, useEffect, useMemo } from 'react';
-import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
+import { useState, useEffect, useMemo } from 'react'
+import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
 interface SettingDefinition {
-  key: string;
-  title: string;
-  description: string;
-  type: 'string' | 'number' | 'boolean' | 'enum' | 'object' | 'array';
-  default: any;
-  enum?: string[];
-  category: string;
-  scope?: 'user' | 'workspace' | 'both';
-  tags?: string[];
+  key: string
+  title: string
+  description: string
+  type: 'string' | 'number' | 'boolean' | 'enum' | 'object' | 'array'
+  default: any
+  enum?: string[]
+  category: string
+  scope?: 'user' | 'workspace' | 'both'
+  tags?: string[]
 }
 
 interface SettingsCategory {
-  id: string;
-  label: string;
-  icon: string;
-  settings: SettingDefinition[];
+  id: string
+  label: string
+  icon: string
+  settings: SettingDefinition[]
 }
 
 const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'editor',
     label: 'Editor',
-    icon: '',
+    icon: 'ED',
     settings: [
       {
         key: 'editor.fontSize',
@@ -44,17 +44,17 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.fontFamily',
-        title: 'Família da fonte',
-        description: 'Controla a família da fonte',
+        title: 'Familia da fonte',
+        description: 'Controla a familia da fonte',
         type: 'string',
-        default: 'Consolas, "Courier New", monospace',
+        default: 'Consolas, \"Courier New\", monospace',
         category: 'editor',
         scope: 'both',
       },
       {
         key: 'editor.tabSize',
-        title: 'Tamanho da tabulação',
-        description: 'Número de espaços equivalentes a uma tabulação',
+        title: 'Tamanho da tabulacao',
+        description: 'Numero de espacos equivalentes a uma tabulacao',
         type: 'number',
         default: 4,
         category: 'editor',
@@ -62,8 +62,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.insertSpaces',
-        title: 'Inserir espaços',
-        description: 'Insere espaços ao pressionar Tab',
+        title: 'Inserir espacos',
+        description: 'Insere espacos ao pressionar Tab',
         type: 'boolean',
         default: true,
         category: 'editor',
@@ -82,7 +82,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       {
         key: 'editor.minimap.enabled',
         title: 'Minimapa ativado',
-        description: 'Controla se o minimapa é exibido',
+        description: 'Controla se o minimapa e exibido',
         type: 'boolean',
         default: true,
         category: 'editor',
@@ -90,8 +90,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'editor.lineNumbers',
-        title: 'Números de linha',
-        description: 'Controla a exibição de números de linha',
+        title: 'Numeros de linha',
+        description: 'Controla a exibicao de numeros de linha',
         type: 'enum',
         enum: ['off', 'on', 'relative', 'interval'],
         default: 'on',
@@ -103,7 +103,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'workbench',
     label: 'Ambiente',
-    icon: '',
+    icon: 'WB',
     settings: [
       {
         key: 'workbench.colorTheme',
@@ -117,8 +117,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'workbench.iconTheme',
-        title: 'Tema de ícones',
-        description: 'Especifica o tema de ícones usado no ambiente',
+        title: 'Tema de icones',
+        description: 'Especifica o tema de icones usado no ambiente',
         type: 'enum',
         enum: ['vs-seti', 'vs-minimal', 'None'],
         default: 'vs-seti',
@@ -128,7 +128,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       {
         key: 'workbench.sideBar.location',
         title: 'Local da barra lateral',
-        description: 'Controla a localização da barra lateral',
+        description: 'Controla a localizacao da barra lateral',
         type: 'enum',
         enum: ['left', 'right'],
         default: 'left',
@@ -137,7 +137,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'workbench.activityBar.visible',
-        title: 'Barra de atividade visível',
+        title: 'Barra de atividade visivel',
         description: 'Controla a visibilidade da barra de atividade',
         type: 'boolean',
         default: true,
@@ -149,12 +149,12 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'files',
     label: 'Arquivos',
-    icon: '',
+    icon: 'FL',
     settings: [
       {
         key: 'files.autoSave',
         title: 'Salvar automaticamente',
-        description: 'Controla o salvamento automático de arquivos modificados',
+        description: 'Controla o salvamento automatico de arquivos modificados',
         type: 'enum',
         enum: ['off', 'afterDelay', 'onFocusChange', 'onWindowChange'],
         default: 'off',
@@ -163,7 +163,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'files.autoSaveDelay',
-        title: 'Atraso do salvamento automático',
+        title: 'Atraso do salvamento automatico',
         description: 'Controla o atraso em ms para salvar automaticamente arquivos modificados',
         type: 'number',
         default: 1000,
@@ -172,8 +172,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'files.encoding',
-        title: 'Codificação',
-        description: 'Codificação padrão de caracteres a ser usada',
+        title: 'Codificacao',
+        description: 'Codificacao padrao de caracteres a ser usada',
         type: 'enum',
         enum: ['utf8', 'utf16le', 'utf16be', 'windows1252', 'iso88591'],
         default: 'utf8',
@@ -183,7 +183,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       {
         key: 'files.eol',
         title: 'Fim de linha',
-        description: 'Caractere padrão de fim de linha',
+        description: 'Caractere padrao de fim de linha',
         type: 'enum',
         enum: ['\\n', '\\r\\n', 'auto'],
         default: 'auto',
@@ -195,7 +195,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'terminal',
     label: 'Terminal',
-    icon: '💻',
+    icon: 'TR',
     settings: [
       {
         key: 'terminal.integrated.fontSize',
@@ -208,8 +208,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'terminal.integrated.fontFamily',
-        title: 'Família da fonte',
-        description: 'Controla a família da fonte do terminal',
+        title: 'Familia da fonte',
+        description: 'Controla a familia da fonte do terminal',
         type: 'string',
         default: 'monospace',
         category: 'terminal',
@@ -229,12 +229,12 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'git',
     label: 'Git',
-    icon: '',
+    icon: 'GT',
     settings: [
       {
         key: 'git.enabled',
         title: 'Ativado',
-        description: 'Define se o git está ativado',
+        description: 'Define se o git esta ativado',
         type: 'boolean',
         default: true,
         category: 'git',
@@ -242,7 +242,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'git.autoFetch',
-        title: 'Busca automática',
+        title: 'Busca automatica',
         description: 'Define se deve buscar automaticamente do remoto',
         type: 'boolean',
         default: false,
@@ -251,8 +251,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'git.confirmSync',
-        title: 'Confirmar sincronização',
-        description: 'Confirma antes de sincronizar repositórios git',
+        title: 'Confirmar sincronizacao',
+        description: 'Confirma antes de sincronizar repositorios git',
         type: 'boolean',
         default: true,
         category: 'git',
@@ -263,7 +263,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
   {
     id: 'ai',
     label: 'Recursos de IA',
-    icon: '',
+    icon: 'AI',
     settings: [
       {
         key: 'ai.enabled',
@@ -277,7 +277,7 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       {
         key: 'ai.completions.enabled',
         title: 'Autocompletar com IA',
-        description: 'Ativa sugestões de código com IA',
+        description: 'Ativa sugestoes de codigo com IA',
         type: 'boolean',
         default: true,
         category: 'ai',
@@ -285,8 +285,8 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
       {
         key: 'ai.debug.enabled',
-        title: 'Assistente de depuração com IA',
-        description: 'Ativa assistência de depuração com IA',
+        title: 'Assistente de depuracao com IA',
+        description: 'Ativa assistencia de depuracao com IA',
         type: 'boolean',
         default: true,
         category: 'ai',
@@ -304,193 +304,169 @@ const SETTINGS_DEFINITIONS: SettingsCategory[] = [
       },
     ],
   },
-];
+]
 
 export default function SettingsEditor() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [settings, setSettings] = useState<Record<string, any>>({});
-  const [modifiedSettings, setModifiedSettings] = useState<Set<string>>(new Set());
-  const [scope, setScope] = useState<'user' | 'workspace'>('user');
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    SETTINGS_DEFINITIONS[0]?.id ?? 'general'
-  );
+  const [searchQuery, setSearchQuery] = useState('')
+  const [settings, setSettings] = useState<Record<string, any>>({})
+  const [modifiedSettings, setModifiedSettings] = useState<Set<string>>(new Set())
+  const [scope, setScope] = useState<'user' | 'workspace'>('user')
+  const [selectedCategory, setSelectedCategory] = useState<string>(SETTINGS_DEFINITIONS[0]?.id ?? 'general')
 
-  // Load settings from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('ide-settings');
+    const stored = localStorage.getItem('ide-settings')
     if (stored) {
       try {
-        setSettings(JSON.parse(stored));
+        setSettings(JSON.parse(stored))
       } catch (error) {
-        console.error('Falha ao carregar configurações:', error);
+        console.error('Falha ao carregar configuracoes:', error)
       }
     }
-  }, []);
+  }, [])
 
-  // Save settings to localStorage
   const saveSettings = (newSettings: Record<string, any>) => {
-    setSettings(newSettings);
-  };
+    setSettings(newSettings)
+  }
 
-  // Filter settings based on search
   const filteredCategories = useMemo(() => {
     if (!searchQuery) {
-      return SETTINGS_DEFINITIONS;
+      return SETTINGS_DEFINITIONS
     }
 
-    const query = searchQuery.toLowerCase();
-    return SETTINGS_DEFINITIONS.map(category => ({
+    const query = searchQuery.toLowerCase()
+    return SETTINGS_DEFINITIONS.map((category) => ({
       ...category,
-      settings: category.settings.filter(setting =>
-        setting.title.toLowerCase().includes(query) ||
-        setting.description.toLowerCase().includes(query) ||
-        setting.key.toLowerCase().includes(query)
+      settings: category.settings.filter(
+        (setting) =>
+          setting.title.toLowerCase().includes(query) ||
+          setting.description.toLowerCase().includes(query) ||
+          setting.key.toLowerCase().includes(query),
       ),
-    })).filter(category => category.settings.length > 0);
-  }, [searchQuery]);
+    })).filter((category) => category.settings.length > 0)
+  }, [searchQuery])
 
-  // Get current category settings
   const currentCategory = useMemo(() => {
-    return filteredCategories.find(cat => cat.id === selectedCategory) || filteredCategories[0];
-  }, [filteredCategories, selectedCategory]);
+    return filteredCategories.find((cat) => cat.id === selectedCategory) || filteredCategories[0]
+  }, [filteredCategories, selectedCategory])
 
-  // Update setting value
   const updateSetting = (key: string, value: any) => {
-    const newSettings = { ...settings, [key]: value };
-    saveSettings(newSettings);
-    setModifiedSettings(prev => new Set(prev).add(key));
-  };
+    const newSettings = { ...settings, [key]: value }
+    saveSettings(newSettings)
+    setModifiedSettings((prev) => new Set(prev).add(key))
+  }
 
-  // Reset setting to default
   const resetSetting = (key: string) => {
-    const setting = SETTINGS_DEFINITIONS
-      .flatMap(cat => cat.settings)
-      .find(s => s.key === key);
-    
-    if (setting) {
-      const newSettings = { ...settings };
-      delete newSettings[key];
-      saveSettings(newSettings);
-      setModifiedSettings(prev => {
-        const next = new Set(prev);
-        next.delete(key);
-        return next;
-      });
-    }
-  };
+    const setting = SETTINGS_DEFINITIONS.flatMap((cat) => cat.settings).find((s) => s.key === key)
 
-  // Reset all settings
+    if (setting) {
+      const newSettings = { ...settings }
+      delete newSettings[key]
+      saveSettings(newSettings)
+      setModifiedSettings((prev) => {
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+    }
+  }
+
   const resetAllSettings = async () => {
     const shouldReset = await openConfirmDialog({
       title: 'Redefinir configuracoes',
       message: 'Tem certeza de que deseja redefinir todas as configuracoes?',
       confirmText: 'Redefinir',
       cancelText: 'Cancelar',
-    });
-    if (!shouldReset) return;
-    saveSettings({});
-    setModifiedSettings(new Set());
-  };
+    })
+    if (!shouldReset) return
+    saveSettings({})
+    setModifiedSettings(new Set())
+  }
 
-  // Render setting input based on type
   const renderSettingInput = (setting: SettingDefinition) => {
-    const value = settings[setting.key] ?? setting.default;
-    const isModified = modifiedSettings.has(setting.key);
+    const value = settings[setting.key] ?? setting.default
+    const isModified = modifiedSettings.has(setting.key)
 
     switch (setting.type) {
       case 'boolean':
         return (
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-zinc-300">
             <input
               type="checkbox"
               checked={value}
-              onChange={(e) => updateSetting(setting.key, e.target.checked)}
-              className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-2 focus:ring-blue-500"
+              onChange={(event) => updateSetting(setting.key, event.target.checked)}
+              className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-sky-400 focus:ring-2 focus:ring-sky-400"
             />
-            <span className="text-sm text-gray-300">
-              {value ? 'Ativado' : 'Desativado'}
-            </span>
+            {value ? 'Ativado' : 'Desativado'}
           </label>
-        );
+        )
 
       case 'number':
         return (
           <input
             type="number"
             value={value}
-            onChange={(e) => updateSetting(setting.key, parseInt(e.target.value))}
-            className="w-32 px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(event) => updateSetting(setting.key, parseInt(event.target.value))}
+            className="aethel-input w-32 text-xs"
           />
-        );
+        )
 
       case 'string':
         return (
           <input
             type="text"
             value={value}
-            onChange={(e) => updateSetting(setting.key, e.target.value)}
-            className="w-full max-w-md px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(event) => updateSetting(setting.key, event.target.value)}
+            className="aethel-input w-full max-w-md text-xs"
           />
-        );
+        )
 
       case 'enum':
         return (
           <select
             value={value}
-            onChange={(e) => updateSetting(setting.key, e.target.value)}
-            className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(event) => updateSetting(setting.key, event.target.value)}
+            className="aethel-input text-xs"
           >
-            {setting.enum?.map(option => (
+            {setting.enum?.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
           </select>
-        );
+        )
 
       default:
-        return (
-          <span className="text-sm text-gray-400">
-            Tipo não suportado: {setting.type}
-          </span>
-        );
+        return <span className="text-xs text-zinc-500">Tipo nao suportado: {setting.type}</span>
     }
-  };
+  }
 
   return (
-    <div className="flex h-full bg-gray-900 text-white">
-      {/* Sidebar */}
-      <div className="w-64 border-r border-gray-700 flex flex-col">
-        {/* Search */}
-        <div className="p-4 border-b border-gray-700">
+    <div className="flex h-full bg-transparent text-white">
+      <div className="w-72 border-r border-white/10">
+        <div className="border-b border-white/10 p-4">
           <input
             type="text"
-            placeholder="Buscar configurações..."
+            placeholder="Buscar configuracoes..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="aethel-input w-full text-xs"
           />
         </div>
 
-        {/* Scope selector */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="border-b border-white/10 p-4">
           <div className="flex gap-2">
             <button
               onClick={() => setScope('user')}
-              className={`flex-1 px-3 py-1.5 rounded text-sm ${
-                scope === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              className={`aethel-button flex-1 text-xs ${
+                scope === 'user' ? 'aethel-button-primary' : 'aethel-button-secondary'
               }`}
             >
-              Usuário
+              Usuario
             </button>
             <button
               onClick={() => setScope('workspace')}
-              className={`flex-1 px-3 py-1.5 rounded text-sm ${
-                scope === 'workspace'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              className={`aethel-button flex-1 text-xs ${
+                scope === 'workspace' ? 'aethel-button-primary' : 'aethel-button-secondary'
               }`}
             >
               Workspace
@@ -498,105 +474,82 @@ export default function SettingsEditor() {
           </div>
         </div>
 
-        {/* Categories */}
         <div className="flex-1 overflow-y-auto">
-          {filteredCategories.map(category => (
+          {filteredCategories.map((category) => (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-800 ${
-                selectedCategory === category.id ? 'bg-gray-800 border-l-2 border-blue-500' : ''
+              className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
+                selectedCategory === category.id ? 'bg-white/[0.06] text-white' : 'text-zinc-400 hover:bg-white/[0.04]'
               }`}
             >
-              <span className="text-xl">{category.icon}</span>
+              <span className="rounded-md bg-white/5 px-2 py-1 text-[11px] text-zinc-400">{category.icon}</span>
               <div className="flex-1">
                 <div className="text-sm font-medium">{category.label}</div>
-                <div className="text-xs text-gray-400">
-                  {category.settings.length} configurações
-                </div>
+                <div className="text-xs text-zinc-500">{category.settings.length} configuracoes</div>
               </div>
             </button>
           ))}
         </div>
 
-        {/* Reset all */}
-        <div className="p-4 border-t border-gray-700">
-          <button
-            onClick={resetAllSettings}
-            className="w-full px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
-          >
-            Redefinir todas as configurações
+        <div className="border-t border-white/10 p-4">
+          <button onClick={resetAllSettings} className="aethel-button aethel-button-danger w-full text-xs">
+            Redefinir todas as configuracoes
           </button>
         </div>
       </div>
 
-      {/* Main content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto p-8">
-          {/* Header */}
+        <div className="mx-auto max-w-4xl p-8">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2 flex items-center gap-3">
-              <span className="text-3xl">{currentCategory?.icon}</span>
+            <h1 className="flex items-center gap-3 text-2xl font-semibold">
+              <span className="rounded-md bg-white/5 px-2 py-1 text-sm text-zinc-300">{currentCategory?.icon}</span>
               {currentCategory?.label}
             </h1>
-            <p className="text-gray-400">
-              {currentCategory?.settings.length} configurações
-            </p>
+            <p className="text-sm text-zinc-500">{currentCategory?.settings.length} configuracoes</p>
           </div>
 
-          {/* Settings list */}
           <div className="space-y-6">
-            {currentCategory?.settings.map(setting => {
-              const isModified = modifiedSettings.has(setting.key);
-              const value = settings[setting.key] ?? setting.default;
+            {currentCategory?.settings.map((setting) => {
+              const isModified = modifiedSettings.has(setting.key)
 
               return (
-                <div
-                  key={setting.key}
-                  className="pb-6 border-b border-gray-700 last:border-0"
-                >
-                  <div className="flex items-start justify-between gap-4 mb-3">
+                <div key={setting.key} className="border-b border-white/10 pb-6 last:border-0">
+                  <div className="mb-3 flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-sm font-medium">{setting.title}</h3>
+                      <div className="mb-1 flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-white">{setting.title}</h3>
                         {isModified && (
-                          <span className="px-2 py-0.5 bg-blue-600 text-xs rounded">
+                          <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[11px] text-sky-200">
                             Alterado
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-400 mb-2">
-                        {setting.description}
-                      </p>
-                      <code className="text-xs text-gray-500 font-mono">
-                        {setting.key}
-                      </code>
+                      <p className="mb-2 text-xs text-zinc-500">{setting.description}</p>
+                      <code className="text-[11px] text-zinc-600">{setting.key}</code>
                     </div>
                     {isModified && (
                       <button
                         onClick={() => resetSetting(setting.key)}
-                        className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded"
+                        className="aethel-button aethel-button-ghost text-xs"
                       >
                         Redefinir
                       </button>
                     )}
                   </div>
-                  <div className="flex items-center gap-4">
-                    {renderSettingInput(setting)}
-                  </div>
+                  <div className="flex items-center gap-4">{renderSettingInput(setting)}</div>
                 </div>
-              );
+              )
             })}
           </div>
 
-          {/* Empty state */}
           {currentCategory?.settings.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
-              <p>Nenhuma configuração encontrada para &quot;{searchQuery}&quot;</p>
+            <div className="aethel-state aethel-state-empty py-12">
+              <p>Nenhuma configuracao encontrada para &quot;{searchQuery}&quot;</p>
             </div>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }
