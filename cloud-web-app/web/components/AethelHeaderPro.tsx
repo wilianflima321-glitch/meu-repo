@@ -248,7 +248,7 @@ export default function AethelHeader() {
                   href="/register"
                   className="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors"
                 >
-                  ComeÃ§ar GrÃ¡tis
+                  Comecar Gratis
                 </Link>
               </div>
             )}
@@ -332,4 +332,5 @@ export default function AethelHeader() {
     </header>
   )
 }
+
 

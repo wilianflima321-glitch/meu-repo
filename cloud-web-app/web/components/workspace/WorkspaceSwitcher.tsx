@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Workspace Switcher Component
- * Switch between workspaces and manage workspace folders
+ * Switch between Workspaces and manage Workspace folders
  */
 
 import React, { useState, useEffect } from 'react';
@@ -45,7 +45,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
   const handleRemoveFolder = async (index: number) => {
     const shouldRemove = await openConfirmDialog({
       title: 'Remover pasta',
-      message: 'Remove this folder from workspace?',
+      message: 'Remover esta pasta do workspace?',
       confirmText: 'Remover',
       cancelText: 'Cancelar',
     });
@@ -69,19 +69,19 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
         <div className="switcher-header">
           <h3>Workspace</h3>
           <button className="close-button" onClick={onClose}>
-            ×
+            x
           </button>
         </div>
 
         <div className="switcher-content">
           <div className="section">
             <div className="section-header">
-              <h4>Current Workspace Folders</h4>
+              <h4>Pastas do workspace</h4>
               <button
                 className="add-button"
                 onClick={() => setShowAddFolder(!showAddFolder)}
               >
-                + Add Folder
+                + Adicionar pasta
               </button>
             </div>
 
@@ -89,18 +89,18 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
               <div className="add-folder-form">
                 <input
                   type="text"
-                  placeholder="Folder path..."
+                  placeholder="Caminho da pasta..."
                   value={newFolderPath}
                   onChange={(e) => setNewFolderPath(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddFolder()}
                 />
-                <button onClick={handleAddFolder}>Add</button>
+                <button onClick={handleAddFolder}>Adicionar</button>
               </div>
             )}
 
             <div className="folder-list">
               {folders.length === 0 ? (
-                <div className="empty-state">No folders in workspace</div>
+                <div className="empty-state">Nenhuma pasta no workspace</div>
               ) : (
                 folders.map((folder) => (
                   <div key={folder.uri} className="folder-item">
@@ -112,7 +112,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
                       className="remove-button"
                       onClick={() => handleRemoveFolder(folder.index)}
                     >
-                      ×
+                      x
                     </button>
                   </div>
                 ))
@@ -122,23 +122,23 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
 
           <div className="section">
             <div className="section-header">
-              <h4>Recent Workspaces</h4>
+              <h4>Workspaces recentes</h4>
             </div>
 
             <div className="recent-list">
               {recentWorkspaces.length === 0 ? (
-                <div className="empty-state">No recent workspaces</div>
+                <div className="empty-state">No Workspaces recentes</div>
               ) : (
-                recentWorkspaces.map((workspace) => (
+                recentWorkspaces.map((Workspace) => (
                   <div
-                    key={workspace}
+                    key={Workspace}
                     className="recent-item"
-                    onClick={() => handleOpenRecent(workspace)}
+                    onClick={() => handleOpenRecent(Workspace)}
                   >
                     <div className="recent-name">
-                      {workspace.split('/').pop() || workspace}
+                      {Workspace.split('/').pop() || Workspace}
                     </div>
-                    <div className="recent-path">{workspace}</div>
+                    <div className="recent-path">{Workspace}</div>
                   </div>
                 ))
               )}
@@ -147,7 +147,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
         </div>
 
         <style jsx>{`
-          .workspace-switcher-overlay {
+          .Workspace-switcher-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -160,7 +160,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
             z-index: 10000;
           }
 
-          .workspace-switcher {
+          .Workspace-switcher {
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
             border-radius: 6px;
@@ -327,3 +327,5 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
     </div>
   );
 };
+
+

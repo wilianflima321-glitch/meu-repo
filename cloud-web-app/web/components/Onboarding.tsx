@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 /**
  * Onboarding Components - Aethel Engine
- * 
+ *
  * Componentes para:
  * - Tour guiado
  * - Checklist de onboarding
@@ -184,24 +184,24 @@ export function WelcomeModal() {
 
   const welcomeSteps = [
     {
-      title: 'Bem-vindo ao Aethel Engine! 🎮',
-      description: 'A plataforma mais avançada para criar jogos. Vamos configurar sua conta e explorar as funcionalidades.',
-      icon: <Sparkles className="w-12 h-12 text-blue-400" />,
+      title: 'Bem-vindo ao Aethel Engine',
+      description: 'Studio focado em Apps e Research com governanca rigorosa. Games e Films seguem em roadmap.',
+      icon: <Sparkles className="w-12 h-12 text-indigo-400" />,
     },
     {
-      title: 'Crie Projetos Incríveis',
-      description: 'Use templates prontos ou comece do zero. Nossa IA ajuda você em cada etapa do desenvolvimento.',
-      icon: <Rocket className="w-12 h-12 text-blue-400" />,
+      title: 'Crie seu primeiro projeto',
+      description: 'Escolha um template e defina o objetivo. O sistema cria a base e voce valida cada passo.',
+      icon: <Rocket className="w-12 h-12 text-sky-400" />,
     },
     {
-      title: 'Colabore em Tempo Real',
-      description: 'Trabalhe com sua equipe simultaneamente. Veja cursores, edições e chat em tempo real.',
-      icon: <Users className="w-12 h-12 text-green-400" />,
+      title: 'Conecte sua IA',
+      description: 'Configure seu provider para respostas reais e rastreaveis. Nada e simulado.',
+      icon: <Target className="w-12 h-12 text-emerald-400" />,
     },
     {
-      title: 'Publique e Monetize',
-      description: 'Exporte para Web, Desktop e Mobile. Venda seus assets no Marketplace.',
-      icon: <Target className="w-12 h-12 text-yellow-400" />,
+      title: 'Colabore com sua equipe',
+      description: 'Convide colegas, revise mudancas e mantenha rastreabilidade nas entregas.',
+      icon: <Users className="w-12 h-12 text-amber-400" />,
     },
   ];
 
@@ -221,13 +221,13 @@ export function WelcomeModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="w-full max-w-lg bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-700 overflow-hidden">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
         {/* Header */}
-        <div className="relative h-40 bg-gradient-to-br from-blue-600 to-blue-600 flex items-center justify-center">
+        <div className="relative h-40 bg-gradient-to-br from-indigo-600/90 via-sky-600/80 to-indigo-500/80 flex items-center justify-center">
           {currentWelcomeStep.icon}
           <button
             onClick={skipOnboarding}
-            className="absolute top-4 right-4 p-1 text-white/70 hover:text-white transition-colors"
+            className="absolute top-4 right-4 rounded-full border border-white/10 bg-white/10 p-2 text-white/70 transition-colors hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -248,7 +248,7 @@ export function WelcomeModal() {
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? 'bg-blue-500' : 'bg-neutral-600'
+                  i === step ? 'bg-sky-400' : 'bg-white/20'
                 }`}
               />
             ))}
@@ -258,15 +258,15 @@ export function WelcomeModal() {
           <div className="flex gap-3 justify-center">
             <button
               onClick={skipOnboarding}
-              className="px-4 py-2 text-neutral-400 hover:text-white transition-colors"
+              className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm font-medium"
             >
               Pular
             </button>
             <button
               onClick={handleNext}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="aethel-button aethel-button-primary rounded-xl px-6 py-2 text-sm font-semibold flex items-center gap-2"
             >
-              {isLastStep ? 'Começar' : 'Próximo'}
+              {isLastStep ? 'Comecar' : 'Proximo'}
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -283,44 +283,44 @@ export function WelcomeModal() {
 const CHECKLIST_ITEMS: OnboardingStep[] = [
   {
     id: 'dependency_check',
-    title: 'Verificar dependências locais',
-    description: 'Blender, Ollama, FFMPEG e ambiente de runtime',
+    title: 'Checar runtime e integracoes',
+    description: 'Preview, storage, billing e provedores de IA',
     completed: false,
   },
   {
     id: 'profile_setup',
-    title: 'Complete seu perfil',
-    description: 'Adicione foto e informações',
+    title: 'Ajuste seu perfil',
+    description: 'Nome, time e preferencias do studio',
     completed: false,
   },
   {
     id: 'first_project',
     title: 'Crie seu primeiro projeto',
-    description: 'Comece com um template ou do zero',
+    description: 'Use um template base para acelerar o fluxo',
     completed: false,
   },
   {
     id: 'explore_editor',
     title: 'Explore o editor',
-    description: 'Conheça as ferramentas disponíveis',
+    description: 'Conheca o IDE, preview e painel de status',
     completed: false,
   },
   {
     id: 'try_ai',
     title: 'Use a IA',
-    description: 'Peça ajuda ao assistente de IA',
+    description: 'Peca uma mudanca pequena e valide o resultado',
     completed: false,
   },
   {
     id: 'invite_team',
     title: 'Convide sua equipe',
-    description: 'Colabore em tempo real',
+    description: 'Compartilhe o workspace com o time',
     completed: false,
   },
   {
     id: 'publish_first',
-    title: 'Publique algo',
-    description: 'Exporte ou publique no Marketplace',
+    title: 'Finalize uma entrega',
+    description: 'Exportar ou preparar deploy para validar o ciclo',
     completed: false,
   },
 ];
@@ -343,7 +343,7 @@ export function OnboardingChecklist() {
       const data = (await res.json()) as SystemHealthReport;
       setHealth(data);
     } catch (error) {
-      setHealthError(error instanceof Error ? error.message : 'Falha ao checar dependências');
+      setHealthError(error instanceof Error ? error.message : 'Falha ao checar dependencias');
     } finally {
       setHealthLoading(false);
     }
@@ -363,14 +363,14 @@ export function OnboardingChecklist() {
   if (!state || state.currentStep === 'completed') return null;
 
   const dependencySummary = (() => {
-    if (!health) return 'Aguardando verificação de dependências...';
+    if (!health) return 'Aguardando verificacao de dependencias...';
     const total = health.dependencies?.length || 0;
     const ok = health.dependencies?.filter(dep => dep.status === 'healthy').length || 0;
     const requiredMissing = health.missingRequired?.length || 0;
     if (requiredMissing > 0) {
-      return `Faltam ${requiredMissing} dependências críticas`;
+      return `Faltam ${requiredMissing} dependencias criticas`;
     }
-    return `${ok}/${total} dependências ok`;
+    return `${ok}/${total} dependencias ok`;
   })();
 
   const items = CHECKLIST_ITEMS.map(item => {
@@ -390,14 +390,27 @@ export function OnboardingChecklist() {
   const completedCount = items.filter(i => i.completed).length;
   const progress = Math.round((completedCount / items.length) * 100);
 
+  const healthLabel = (value: SystemHealthReport['overall']) => {
+    switch (value) {
+      case 'healthy':
+        return 'Saudavel';
+      case 'degraded':
+        return 'Parcial';
+      case 'unhealthy':
+        return 'Indisponivel';
+      default:
+        return 'Desconhecido';
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-40">
       {isOpen ? (
-        <div className="w-80 bg-neutral-900 rounded-lg shadow-2xl border border-neutral-700 overflow-hidden">
+        <div className="w-80 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-blue-600/20 to-blue-600/20 border-b border-neutral-700">
+          <div className="p-4 bg-gradient-to-r from-indigo-600/20 to-sky-600/20 border-b border-white/10">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-white">Primeiros Passos</h3>
+              <h3 className="font-semibold text-white">Primeiros passos</h3>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-neutral-400 hover:text-white"
@@ -406,14 +419,14 @@ export function OnboardingChecklist() {
               </button>
             </div>
             {/* Progress bar */}
-            <div className="h-2 bg-neutral-700 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-blue-500 transition-all duration-500"
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-indigo-500 to-sky-500 transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
             <div className="text-xs text-neutral-400 mt-1">
-              {completedCount} de {items.length} concluídos
+              {completedCount} de {items.length} concluidos
             </div>
           </div>
 
@@ -421,7 +434,7 @@ export function OnboardingChecklist() {
           <div className="p-2 max-h-64 overflow-y-auto">
             <div className="px-2 pb-3">
               <div className="flex items-center justify-between text-xs text-neutral-400">
-                <span>Dependências do sistema</span>
+                <span>Dependencias do sistema</span>
                 <button
                   onClick={fetchHealth}
                   className="text-blue-400 hover:text-blue-300 transition-colors"
@@ -440,17 +453,17 @@ export function OnboardingChecklist() {
                     <span>Status geral</span>
                     <span className={
                       health.overall === 'healthy'
-                        ? 'text-green-400'
+                        ? 'text-emerald-400'
                         : health.overall === 'degraded'
-                        ? 'text-yellow-400'
-                        : 'text-red-400'
+                        ? 'text-amber-400'
+                        : 'text-rose-400'
                     }>
-                      {health.overall}
+                      {healthLabel(health.overall)}
                     </span>
                   </div>
                   {health.missingRequired && health.missingRequired.length > 0 && (
                     <div className="text-red-400">
-                      Críticas: {health.missingRequired.join(', ')}
+                      Criticas: {health.missingRequired.join(', ')}
                     </div>
                   )}
                   {health.missingOptional && health.missingOptional.length > 0 && (
@@ -465,7 +478,7 @@ export function OnboardingChecklist() {
                         .slice(0, 6)
                         .map(dep => (
                           <div key={dep.name} className="text-xs text-neutral-400">
-                            <span className={dep.status === 'unhealthy' ? 'text-red-400' : 'text-yellow-400'}>
+                            <span className={dep.status === 'unhealthy' ? 'text-rose-400' : 'text-amber-400'}>
                               {dep.name}
                             </span>
                             {dep.installCommand && (
@@ -486,17 +499,17 @@ export function OnboardingChecklist() {
                 key={item.id}
                 onClick={() => !item.completed && completeStep(item.id)}
                 disabled={item.completed}
-                className={`w-full p-3 rounded-lg text-left transition-colors ${
-                  item.completed 
-                    ? 'opacity-60' 
-                    : 'hover:bg-neutral-800'
+                className={`w-full p-3 rounded-xl text-left transition-colors ${
+                  item.completed
+                    ? 'opacity-60'
+                    : 'hover:bg-white/[0.06]'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                    item.completed 
-                      ? 'bg-green-500 border-green-500' 
-                      : 'border-neutral-500'
+                    item.completed
+                      ? 'bg-emerald-500 border-emerald-500'
+                      : 'border-white/20'
                   }`}>
                     {item.completed && <Check className="w-3 h-3 text-white" />}
                   </div>
@@ -516,7 +529,7 @@ export function OnboardingChecklist() {
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          className="aethel-button aethel-button-primary rounded-xl px-4 py-2 text-xs font-semibold shadow-lg flex items-center gap-2"
         >
           <Target className="w-4 h-4" />
           {completedCount}/{items.length}
@@ -531,11 +544,11 @@ export function OnboardingChecklist() {
 // ============================================================================
 
 const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_project', name: 'Primeiro Projeto', description: 'Criou seu primeiro projeto', icon: '🎮', category: 'beginner' },
-  { id: 'ai_master', name: 'Mestre da IA', description: 'Usou a IA 100 vezes', icon: '🤖', category: 'ai' },
-  { id: 'collaborator', name: 'Colaborador', description: 'Convidou 5 pessoas', icon: '👥', category: 'social' },
-  { id: 'publisher', name: 'Publisher', description: 'Publicou no Marketplace', icon: '🚀', category: 'marketplace' },
-  { id: 'week_streak', name: '7 Dias Seguidos', description: 'Acessou por 7 dias', icon: '🔥', category: 'engagement' },
+  { id: 'first_project', name: 'Primeiro projeto', description: 'Criou o primeiro projeto', icon: 'P1', category: 'beginner' },
+  { id: 'ai_master', name: 'Fluxo de IA', description: 'Executou 10 mudancas com IA', icon: 'AI', category: 'ai' },
+  { id: 'collaborator', name: 'Colaboracao', description: 'Convidou uma pessoa do time', icon: 'TEAM', category: 'social' },
+  { id: 'publisher', name: 'Entrega pronta', description: 'Gerou uma entrega valida', icon: 'DEP', category: 'delivery' },
+  { id: 'week_streak', name: 'Ritmo semanal', description: 'Ativo por 7 dias', icon: '7D', category: 'engagement' },
 ];
 
 export function AchievementBadge({ achievement }: { achievement: Achievement }) {
@@ -561,7 +574,7 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
       <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-lg shadow-2xl">
         <Award className="w-8 h-8 text-yellow-400" />
         <div>
-          <div className="text-xs text-yellow-400 font-medium">Conquista Desbloqueada!</div>
+          <div className="text-xs text-yellow-400 font-medium">Conquista desbloqueada</div>
           <div className="text-white font-semibold">{achievement.name}</div>
           <div className="text-sm text-neutral-300">{achievement.description}</div>
         </div>
@@ -575,7 +588,7 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
 
 export function AchievementsPanel() {
   const { state } = useOnboarding();
-  
+
   if (!state) return null;
 
   const unlockedIds = state.achievements;
@@ -590,14 +603,14 @@ export function AchievementsPanel() {
         <Award className="w-5 h-5 text-yellow-400" />
         Conquistas
       </h2>
-      
+
       <div className="grid gap-3">
         {achievements.map(achievement => (
-          <div 
+          <div
             key={achievement.id}
             className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-              achievement.unlocked 
-                ? 'bg-gradient-to-r from-yellow-600/10 to-orange-600/10 border border-yellow-500/20' 
+              achievement.unlocked
+                ? 'bg-gradient-to-r from-yellow-600/10 to-orange-600/10 border border-yellow-500/20'
                 : 'bg-neutral-800 opacity-50 grayscale'
             }`}
           >
