@@ -1,5 +1,6 @@
 import { DirectorNotePanel } from '../ai/DirectorNotePanel'
 import { TimeMachineSlider } from '../collaboration/TimeMachineSlider'
+import { EmptyProjects } from '../ui/EmptyState'
 
 import type { Project } from './aethel-dashboard-model'
 
@@ -32,7 +33,7 @@ export function DashboardProjectsTab({
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Studio Projects</p>
           <h2 className="text-2xl font-bold">Projetos</h2>
-          <p className="text-sm text-slate-400 mt-1">Gerencie apps, filmes e jogos em um unico painel.</p>
+          <p className="text-sm text-slate-400 mt-1">Gerencie apps e research. Games e films seguem em roadmap.</p>
         </div>
         {projects.length > 0 && (
           <div className="w-96">
@@ -40,6 +41,39 @@ export function DashboardProjectsTab({
           </div>
         )}
       </div>
+
+      {projects.length === 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr,1fr] aethel-gap-6 mb-6">
+          <div className="aethel-card aethel-p-6">
+            <EmptyProjects onCreate={onCreateProject} />
+          </div>
+          <div className="aethel-card aethel-p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Novo projeto</p>
+            <h3 className="text-lg font-semibold mb-4">Criar novo projeto</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={newProjectName}
+                onChange={(event) => onProjectNameChange(event.target.value)}
+                placeholder="Nome do projeto"
+                className="aethel-input w-full"
+              />
+              <select
+                value={newProjectType}
+                onChange={(event) => onProjectTypeChange(event.target.value)}
+                className="aethel-input w-full"
+              >
+                <option value="code">Projeto de codigo</option>
+                <option value="unreal">Unreal Engine</option>
+                <option value="web">Aplicacao web</option>
+              </select>
+              <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary w-full">
+                Criar projeto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {projects.length > 0 && (
         <div className="mb-6">
@@ -51,64 +85,68 @@ export function DashboardProjectsTab({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 aethel-gap-6 mb-6">
-        {projects.map((project) => (
-          <div key={project.id} className="aethel-card aethel-p-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-slate-100">{project.name}</h3>
-              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs text-slate-400">
-                {project.type}
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-slate-400">Ultima atualizacao recente</p>
-            <p className="text-sm mb-4">
-              Status:{' '}
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs ${
-                  project.status === 'active'
-                    ? 'bg-green-500/20 text-green-400'
-                    : 'bg-gray-500/20 text-gray-400'
-                }`}
+      {projects.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 aethel-gap-6 mb-6">
+          {projects.map((project) => (
+            <div key={project.id} className="aethel-card aethel-p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-slate-100">{project.name}</h3>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs text-slate-400">
+                  {project.type}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-slate-400">Ultima atualizacao recente</p>
+              <p className="text-sm mb-4">
+                Status:{' '}
+                <span
+                  className={`px-2.5 py-1 rounded-full text-xs ${
+                    project.status === 'active'
+                      ? 'bg-green-500/20 text-green-400'
+                      : 'bg-gray-500/20 text-gray-400'
+                  }`}
+                >
+                  {project.status}
+                </span>
+              </p>
+              <button
+                type="button"
+                onClick={() => onDeleteProject(project.id)}
+                className="aethel-button aethel-button-danger text-xs"
               >
-                {project.status}
-              </span>
-            </p>
-            <button
-              type="button"
-              onClick={() => onDeleteProject(project.id)}
-              className="aethel-button aethel-button-danger text-xs"
+                Remover
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {projects.length > 0 && (
+        <div className="aethel-card aethel-p-6 max-w-md">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Novo projeto</p>
+          <h3 className="text-lg font-semibold mb-4">Criar novo projeto</h3>
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={newProjectName}
+              onChange={(event) => onProjectNameChange(event.target.value)}
+              placeholder="Nome do projeto"
+              className="aethel-input w-full"
+            />
+            <select
+              value={newProjectType}
+              onChange={(event) => onProjectTypeChange(event.target.value)}
+              className="aethel-input w-full"
             >
-              Remover
+              <option value="code">Projeto de codigo</option>
+              <option value="unreal">Unreal Engine</option>
+              <option value="web">Aplicacao web</option>
+            </select>
+            <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary w-full">
+              Criar projeto
             </button>
           </div>
-        ))}
-      </div>
-
-      <div className="aethel-card aethel-p-6 max-w-md">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Novo projeto</p>
-        <h3 className="text-lg font-semibold mb-4">Criar novo projeto</h3>
-        <div className="space-y-4">
-          <input
-            type="text"
-            value={newProjectName}
-            onChange={(event) => onProjectNameChange(event.target.value)}
-            placeholder="Nome do projeto"
-            className="aethel-input w-full"
-          />
-          <select
-            value={newProjectType}
-            onChange={(event) => onProjectTypeChange(event.target.value)}
-            className="aethel-input w-full"
-          >
-            <option value="code">Projeto de codigo</option>
-            <option value="unreal">Unreal Engine</option>
-            <option value="web">Aplicacao web</option>
-          </select>
-          <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary w-full">
-            Criar projeto
-          </button>
         </div>
-      </div>
+      )}
     </div>
   )
 }
