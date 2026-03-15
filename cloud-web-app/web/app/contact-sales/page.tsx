@@ -71,7 +71,8 @@ export default function ContactSalesPage() {
               </h1>
 
               <p className="mt-6 text-xl leading-relaxed text-slate-400">
-                Esta pagina nao simula envio nem mostra logos inventados. Use o formulario para abrir um email pre-preenchido para o time comercial, com o contexto do seu time.
+                Esta pagina nao simula envio nem mostra logos inventados. O CTA abaixo abre um email
+                pre-preenchido com o contexto do seu time.
               </p>
 
               <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -184,9 +185,9 @@ export default function ContactSalesPage() {
                     <a
                       href={requiredReady ? mailtoUrl : undefined}
                       aria-disabled={!requiredReady}
-                      className={`flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold transition-colors ${
+                      className={`aethel-button w-full rounded-xl px-6 py-3 text-sm font-semibold ${
                         requiredReady
-                          ? 'bg-white text-black hover:bg-slate-200'
+                          ? 'aethel-button-primary'
                           : 'cursor-not-allowed bg-white/10 text-slate-500'
                       }`}
                     >
@@ -194,7 +195,7 @@ export default function ContactSalesPage() {
                     </a>
                     <Link
                       href="/pricing"
-                      className="flex h-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                      className="aethel-button aethel-button-secondary w-full rounded-xl px-6 py-3 text-sm font-semibold"
                     >
                       Revisar pricing
                     </Link>

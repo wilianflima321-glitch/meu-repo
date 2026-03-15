@@ -2,24 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import {
-  Send,
-  Mail,
-  MessageSquare,
-  Phone,
-  MapPin,
-  Clock,
-  CheckCircle,
-  Building,
-  Users,
-  Briefcase,
-} from 'lucide-react'
-import { Button, Input, Card } from '@/components/ui'
+import { Send, Mail, MessageSquare, Phone, MapPin, Clock, CheckCircle, Building, Users, Briefcase } from 'lucide-react'
+import PublicHeader from '@/components/ui/PublicHeader'
+import PublicFooter from '@/components/ui/PublicFooter'
 
 const contactReasons = [
   { value: 'sales', label: 'Falar com vendas', icon: Briefcase },
-  { value: 'support', label: 'Suporte técnico', icon: MessageSquare },
+  { value: 'support', label: 'Suporte tecnico', icon: MessageSquare },
   { value: 'enterprise', label: 'Plano Enterprise', icon: Building },
   { value: 'partnership', label: 'Parcerias', icon: Users },
 ]
@@ -72,171 +61,167 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-6">
-        <Card variant="elevated" padding="lg" className="max-w-md w-full text-center">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-emerald-400" />
+      <div className="min-h-screen bg-black text-white">
+        <PublicHeader />
+        <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
+              <CheckCircle className="h-8 w-8 text-emerald-400" />
+            </div>
+            <h1 className="text-2xl font-bold">Mensagem enviada</h1>
+            <p className="mt-3 text-sm text-slate-400">
+              Obrigado pelo contato. Respondemos por email em ate 24 horas uteis.
+            </p>
+            <Link
+              href="/"
+              className="aethel-button aethel-button-primary mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
+            >
+              Voltar ao inicio
+            </Link>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-3">
-            Mensagem enviada!
-          </h1>
-          <p className="text-slate-400 mb-6">
-            Obrigado pelo contato. Nossa equipe responderá em até 24 horas úteis.
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
-          >
-            Voltar ao início
-          </Link>
-        </Card>
+        </main>
+        <PublicFooter />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      {/* Header */}
-      <header className="border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <nav className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
-              <Image src="/branding/aethel-icon-source.png" alt="Aethel" width={40} height={40} className="rounded-xl" />
-              <span className="text-xl font-bold text-white">Aethel</span>
-            </Link>
-            <Link
-              href="/login"
-              className="text-slate-300 hover:text-white transition-colors"
-            >
-              Entrar
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-black text-white">
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[170px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-cyan-600/[0.05] blur-[160px]" />
+      </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid lg:grid-cols-2 gap-16">
-          {/* Left Column - Info */}
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Entre em contato
-            </h1>
-            <p className="text-xl text-slate-400 mb-12">
-              Estamos aqui para ajudar. Preencha o formulário e nossa equipe
-              entrará em contato o mais breve possível.
-            </p>
+      <PublicHeader />
 
-            {/* Contact Info */}
-            <div className="space-y-6 mb-12">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-white font-medium mb-1">Email</h3>
-                  <p className="text-slate-400">contato@aethel.io</p>
-                  <p className="text-slate-400">suporte@aethel.io</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-white font-medium mb-1">Telefone</h3>
-                  <p className="text-slate-400">+55 (11) 4000-0000</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-white font-medium mb-1">Endereço</h3>
-                  <p className="text-slate-400">
-                    Av. Paulista, 1000 - Bela Vista
-                    <br />
-                    São Paulo - SP, 01310-100
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-white font-medium mb-1">Horário</h3>
-                  <p className="text-slate-400">
-                    Segunda a Sexta: 9h - 18h
-                    <br />
-                    Suporte 24/7 para planos Pro e Enterprise
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* FAQ Link */}
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl">
-              <h3 className="text-white font-medium mb-2">
-                Perguntas frequentes
-              </h3>
-              <p className="text-slate-400 text-sm mb-4">
-                Talvez sua dúvida já tenha sido respondida em nossa FAQ.
-              </p>
-              <Link
-                href="/pricing#faq"
-                className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
-              >
-                Ver perguntas frequentes →
-              </Link>
-            </div>
+      <main className="relative z-10">
+        <section className="mx-auto max-w-6xl px-6 pt-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+            Contato
           </div>
+          <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Entre em contato</h1>
+          <p className="mt-4 max-w-2xl text-lg text-slate-400">
+            Envie sua mensagem e descreva seu contexto. Se for enterprise, detalhe requisitos de compliance.
+          </p>
+        </section>
 
-          {/* Right Column - Form */}
-          <div>
-            <Card variant="elevated" padding="lg">
-              <form onSubmit={handleSubmit} className="space-y-6">
+        <section className="mx-auto mt-10 max-w-6xl px-6 pb-20">
+          <div className="grid gap-10 lg:grid-cols-2">
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                <h2 className="text-lg font-semibold">Canais</h2>
+                <div className="mt-4 space-y-4 text-sm text-slate-400">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                      <Mail className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-white">Email</p>
+                      <p>contato@aethel.io</p>
+                      <p>suporte@aethel.io</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                      <Phone className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-white">Telefone</p>
+                      <p>+55 (11) 4000-0000</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                      <MapPin className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-white">Endereco</p>
+                      <p>Av. Paulista, 1000 - Bela Vista</p>
+                      <p>Sao Paulo - SP</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-white">Horario</p>
+                      <p>Seg a sex: 9h - 18h</p>
+                      <p>Suporte estendido para planos avancados</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                <h3 className="text-white font-semibold">Perguntas frequentes</h3>
+                <p className="mt-2 text-sm text-slate-400">
+                  Algumas respostas estao na FAQ do pricing. Confira antes de abrir um ticket.
+                </p>
+                <Link
+                  href="/pricing#faq"
+                  className="mt-4 inline-flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200"
+                >
+                  Ver FAQ
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <h2 className="text-lg font-semibold">Envie sua mensagem</h2>
+              <p className="mt-2 text-sm text-slate-400">
+                Preencha o formulario com o maximo de contexto possivel.
+              </p>
+
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 {error && (
-                  <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
+                  <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
                     {error}
                   </div>
                 )}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <Input
-                    label="Nome"
-                    name="name"
-                    placeholder="Seu nome"
-                    value={formData.name}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">Nome</label>
+                    <input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                      placeholder="Seu nome"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">Email</label>
+                    <input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                      placeholder="voce@empresa.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-300">Empresa (opcional)</label>
+                  <input
+                    name="company"
+                    value={formData.company}
                     onChange={handleChange}
-                    required
-                  />
-                  <Input
-                    label="Email"
-                    name="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
+                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                    placeholder="Nome da empresa"
                   />
                 </div>
 
-                <Input
-                  label="Empresa (opcional)"
-                  name="company"
-                  placeholder="Nome da empresa"
-                  value={formData.company}
-                  onChange={handleChange}
-                />
-
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Motivo do contato
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <label className="mb-2 block text-sm font-medium text-slate-300">Motivo do contato</label>
+                  <div className="grid gap-3 sm:grid-cols-2">
                     {contactReasons.map((reason) => (
                       <button
                         key={reason.value}
@@ -244,59 +229,53 @@ export default function ContactPage() {
                         onClick={() =>
                           setFormData((prev) => ({ ...prev, reason: reason.value }))
                         }
-                        className={`
-                          flex items-center gap-3 p-4 rounded-xl border transition-all text-left
-                          ${
-                            formData.reason === reason.value
-                              ? 'bg-blue-600/20 border-blue-500 text-white'
-                              : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
-                          }
-                        `}
+                        className={`flex items-center gap-3 rounded-xl border p-4 text-left text-sm transition-all ${
+                          formData.reason == reason.value
+                            ? 'border-blue-500/50 bg-blue-500/15 text-white'
+                            : 'border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/20'
+                        }`}
                       >
-                        <reason.icon className="w-5 h-5" />
-                        <span className="text-sm font-medium">{reason.label}</span>
+                        <reason.icon className="h-5 w-5" />
+                        <span className="font-medium">{reason.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Mensagem
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-slate-300">Mensagem</label>
                   <textarea
                     name="message"
-                    placeholder="Como podemos ajudar?"
                     value={formData.message}
                     onChange={handleChange}
                     rows={5}
                     required
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                    className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                    placeholder="Como podemos ajudar?"
                   />
                 </div>
 
-                <Button
+                <button
                   type="submit"
-                  fullWidth
-                  size="lg"
-                  loading={loading}
-                  icon={!loading && <Send className="w-4 h-4" />}
-                  iconPosition="right"
+                  className="aethel-button aethel-button-primary w-full rounded-xl px-6 py-3 text-sm font-semibold"
                 >
                   {loading ? 'Enviando...' : 'Enviar mensagem'}
-                </Button>
+                  {!loading && <Send className="h-4 w-4" />}
+                </button>
 
                 <p className="text-xs text-slate-500 text-center">
-                  Ao enviar, você concorda com nossa{' '}
-                  <Link href="/privacy" className="text-slate-400 hover:text-slate-300">
-                    Política de Privacidade
+                  Ao enviar, voce concorda com a nossa{' '}
+                  <Link href="/privacy" className="text-blue-300 hover:text-blue-200">
+                    Politica de Privacidade
                   </Link>
                 </p>
               </form>
-            </Card>
+            </div>
           </div>
-        </div>
+        </section>
       </main>
+
+      <PublicFooter />
     </div>
   )
 }
