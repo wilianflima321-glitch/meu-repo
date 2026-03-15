@@ -1,75 +1,75 @@
-'use client';
+﻿'use client'
 
 /**
  * AETHEL ENGINE - AI Agent Dashboard
  * 
  * Dashboard profissional para monitoramento de agentes de IA.
- * Mostra agentes ativos, execuções, erros, custos e métricas.
+ * Mostra agentes ativos, execucoes, erros, custos e Metricas.
  * 
  * Features:
  * - Lista de agentes ativos com status
- * - Histórico de execuções
- * - Métricas de custo (tokens/API calls)
+ * - Historico de execucoes
+ * - Metricas de custo (tokens/API calls)
  * - Log de erros e warnings
  * - Controle de sandbox
  * 
  * @module components/dashboard/AIAgentDashboard
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-type AgentStatus = 'idle' | 'running' | 'waiting' | 'error' | 'completed';
-type AgentType = 'code' | 'web' | 'file' | 'terminal' | 'vision' | 'custom';
+type AgentStatus = 'idle' | 'running' | 'waiting' | 'error' | 'completed'
+type AgentType = 'code' | 'web' | 'file' | 'terminal' | 'vision' | 'custom'
 
 interface AIAgent {
-  id: string;
-  name: string;
-  type: AgentType;
-  status: AgentStatus;
-  currentTask?: string;
-  progress: number;
-  startedAt?: Date;
-  tokensUsed: number;
-  apiCalls: number;
-  errors: number;
-  lastError?: string;
-  model: string;
-  sandboxed: boolean;
+  id: string
+  name: string
+  type: AgentType
+  status: AgentStatus
+  currentTask?: string
+  progress: number
+  startedAt?: Date
+  tokensUsed: number
+  apiCalls: number
+  errors: number
+  lastError?: string
+  model: string
+  sandboxed: boolean
 }
 
 interface AgentExecution {
-  id: string;
-  agentId: string;
-  agentName: string;
-  task: string;
-  status: 'success' | 'error' | 'cancelled';
-  startTime: Date;
-  endTime: Date;
-  duration: number;
-  tokensUsed: number;
-  cost: number;
-  error?: string;
+  id: string
+  agentId: string
+  agentName: string
+  task: string
+  status: 'success' | 'error' | 'cancelled'
+  startTime: Date
+  endTime: Date
+  duration: number
+  tokensUsed: number
+  cost: number
+  error?: string
 }
 
 interface AgentMetrics {
-  totalAgents: number;
-  activeAgents: number;
-  totalExecutions: number;
-  successRate: number;
-  totalTokensUsed: number;
-  totalCost: number;
-  avgExecutionTime: number;
-  errorsToday: number;
+  totalAgents: number
+  activeAgents: number
+  totalExecutions: number
+  successRate: number
+  totalTokensUsed: number
+  totalCost: number
+  avgExecutionTime: number
+  errorsToday: number
 }
 
 interface AIAgentDashboardProps {
-  className?: string;
-  onAgentSelect?: (agent: AIAgent) => void;
-  onKillAgent?: (agentId: string) => void;
+  className?: string
+  onAgentSelect?: (agent: AIAgent) => void
+  onKillAgent?: (agentId: string) => void
 }
 
 // ============================================================================
@@ -156,7 +156,7 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
     </svg>
   ),
-};
+}
 
 // ============================================================================
 // UTILITIES
@@ -164,49 +164,49 @@ const Icons = {
 
 function getAgentTypeIcon(type: AgentType) {
   switch (type) {
-    case 'code': return <Icons.Code />;
-    case 'web': return <Icons.Globe />;
-    case 'file': return <Icons.Folder />;
-    case 'terminal': return <Icons.Terminal />;
-    case 'vision': return <Icons.Eye />;
-    default: return <Icons.Cog />;
+    case 'code': return <Icons.Code />
+    case 'web': return <Icons.Globe />
+    case 'file': return <Icons.Folder />
+    case 'terminal': return <Icons.Terminal />
+    case 'vision': return <Icons.Eye />
+    default: return <Icons.Cog />
   }
 }
 
 function getStatusColor(status: AgentStatus): string {
   switch (status) {
-    case 'running': return 'text-green-400';
-    case 'waiting': return 'text-yellow-400';
-    case 'error': return 'text-red-400';
-    case 'completed': return 'text-blue-400';
-    default: return 'text-gray-400';
+    case 'running': return 'text-green-400'
+    case 'waiting': return 'text-yellow-400'
+    case 'error': return 'text-red-400'
+    case 'completed': return 'text-blue-400'
+    default: return 'text-gray-400'
   }
 }
 
 function getStatusBg(status: AgentStatus): string {
   switch (status) {
-    case 'running': return 'bg-green-500/20';
-    case 'waiting': return 'bg-yellow-500/20';
-    case 'error': return 'bg-red-500/20';
-    case 'completed': return 'bg-blue-500/20';
-    default: return 'bg-gray-500/20';
+    case 'running': return 'bg-green-500/20'
+    case 'waiting': return 'bg-yellow-500/20'
+    case 'error': return 'bg-red-500/20'
+    case 'completed': return 'bg-blue-500/20'
+    default: return 'bg-gray-500/20'
   }
 }
 
 function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${(ms / 60000).toFixed(1)}m`;
+  if (ms < 1000) return `${ms}ms`
+  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
+  return `${(ms / 60000).toFixed(1)}m`
 }
 
 function formatCost(cost: number): string {
-  return `$${cost.toFixed(4)}`;
+  return `$${cost.toFixed(4)}`
 }
 
 function formatTokens(tokens: number): string {
-  if (tokens < 1000) return tokens.toString();
-  if (tokens < 1000000) return `${(tokens / 1000).toFixed(1)}K`;
-  return `${(tokens / 1000000).toFixed(2)}M`;
+  if (tokens < 1000) return tokens.toString()
+  if (tokens < 1000000) return `${(tokens / 1000).toFixed(1)}K`
+  return `${(tokens / 1000000).toFixed(2)}M`
 }
 
 // ============================================================================
@@ -215,31 +215,31 @@ function formatTokens(tokens: number): string {
 
 async function fetchAgents(): Promise<AIAgent[]> {
   try {
-    const res = await fetch('/api/ai/agents');
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.agents || [];
+    const res = await fetch('/api/ai/agents')
+    if (!res.ok) return []
+    const data = await res.json()
+    return data.agents || []
   } catch {
-    return [];
+    return []
   }
 }
 
 async function fetchExecutions(): Promise<AgentExecution[]> {
   try {
-    const res = await fetch('/api/ai/agents/executions?limit=20');
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.executions || [];
+    const res = await fetch('/api/ai/agents/executions?limit=20')
+    if (!res.ok) return []
+    const data = await res.json()
+    return data.executions || []
   } catch {
-    return [];
+    return []
   }
 }
 
 async function fetchMetrics(): Promise<AgentMetrics> {
   try {
-    const res = await fetch('/api/ai/agents/metrics');
-    if (!res.ok) throw new Error('Failed');
-    return await res.json();
+    const res = await fetch('/api/ai/agents/metrics')
+    if (!res.ok) throw new Error('Failed')
+    return await res.json()
   } catch {
     return {
       totalAgents: 0,
@@ -250,7 +250,7 @@ async function fetchMetrics(): Promise<AgentMetrics> {
       totalCost: 0,
       avgExecutionTime: 0,
       errorsToday: 0,
-    };
+    }
   }
 }
 
@@ -263,8 +263,8 @@ export function AIAgentDashboard({
   onAgentSelect,
   onKillAgent,
 }: AIAgentDashboardProps) {
-  const [agents, setAgents] = useState<AIAgent[]>([]);
-  const [executions, setExecutions] = useState<AgentExecution[]>([]);
+  const [agents, setAgents] = useState<AIAgent[]>([])
+  const [executions, setExecutions] = useState<AgentExecution[]>([])
   const [metrics, setMetrics] = useState<AgentMetrics>({
     totalAgents: 0,
     activeAgents: 0,
@@ -274,57 +274,57 @@ export function AIAgentDashboard({
     totalCost: 0,
     avgExecutionTime: 0,
     errorsToday: 0,
-  });
-  const [selectedAgent, setSelectedAgent] = useState<AIAgent | null>(null);
-  const [view, setView] = useState<'agents' | 'history' | 'metrics'>('agents');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  })
+  const [selectedAgent, setSelectedAgent] = useState<AIAgent | null>(null)
+  const [view, setView] = useState<'agents' | 'history' | 'metrics'>('agents')
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Fetch real data from API
   const refresh = useCallback(async () => {
-    setIsRefreshing(true);
+    setIsRefreshing(true)
     const [agentsData, executionsData, metricsData] = await Promise.all([
       fetchAgents(),
       fetchExecutions(),
       fetchMetrics(),
-    ]);
-    setAgents(agentsData);
-    setExecutions(executionsData);
-    setMetrics(metricsData);
-    setIsRefreshing(false);
-    setIsLoading(false);
-  }, []);
+    ])
+    setAgents(agentsData)
+    setExecutions(executionsData)
+    setMetrics(metricsData)
+    setIsRefreshing(false)
+    setIsLoading(false)
+  }, [])
 
   // Initial load
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    refresh()
+  }, [refresh])
 
   // Auto-refresh every 5 seconds
   useEffect(() => {
-    const interval = setInterval(refresh, 5000);
-    return () => clearInterval(interval);
-  }, [refresh]);
+    const interval = setInterval(refresh, 5000)
+    return () => clearInterval(interval)
+  }, [refresh])
 
   // Kill agent handler
   const handleKillAgent = useCallback((agentId: string) => {
     setAgents(prev => prev.map(a => 
       a.id === agentId ? { ...a, status: 'idle' as AgentStatus, currentTask: undefined, progress: 0 } : a
-    ));
-    onKillAgent?.(agentId);
-  }, [onKillAgent]);
+    ))
+    onKillAgent?.(agentId)
+  }, [onKillAgent])
 
   return (
-    <div className={`bg-[#1e1e1e] rounded-lg border border-[#3c3c3c] flex flex-col h-full ${className}`}>
+    <div className={`aethel-card flex flex-col h-full ${className}`}>
       {/* Header */}
-      <div className="p-4 border-b border-[#3c3c3c]">
+      <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="text-blue-400">
               <Icons.Robot />
             </div>
             <h2 className="text-white font-semibold">AI Agents</h2>
-            <span className="text-xs text-gray-500 bg-[#2d2d2d] px-2 py-0.5 rounded">
+            <span className="text-xs text-slate-400 bg-white/5 px-2 py-0.5 rounded">
               {metrics.activeAgents} ativos
             </span>
           </div>
@@ -332,7 +332,7 @@ export function AIAgentDashboard({
           <button
             onClick={refresh}
             disabled={isRefreshing}
-            className="p-2 text-gray-400 hover:text-white hover:bg-[#2d2d2d] rounded transition-colors"
+            className="aethel-button aethel-button-ghost rounded-lg p-2"
           >
             <div className={isRefreshing ? 'animate-spin' : ''}>
               <Icons.Refresh />
@@ -341,18 +341,18 @@ export function AIAgentDashboard({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-[#252526] rounded-lg p-1">
+        <div className="flex gap-1 rounded-lg bg-white/5 p-1">
           {(['agents', 'history', 'metrics'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setView(tab)}
-              className={`flex-1 px-3 py-1.5 text-sm rounded transition-colors ${
+              className={`flex-1 aethel-button rounded-lg px-3 py-1.5 text-xs font-semibold ${
                 view === tab
-                  ? 'bg-[#0e639c] text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'aethel-button-primary'
+                  : 'aethel-button-ghost'
               }`}
             >
-              {tab === 'agents' ? 'Agentes' : tab === 'history' ? 'Histórico' : 'Métricas'}
+              {tab === 'agents' ? 'Agentes' : tab === 'history' ? 'Historico' : 'Metricas'}
             </button>
           ))}
         </div>
@@ -363,17 +363,20 @@ export function AIAgentDashboard({
         {/* Agents View */}
         {view === 'agents' && (
           <div className="space-y-3">
+            {agents.length === 0 && !isLoading && (
+              <div className="aethel-state aethel-state-empty">Nenhum agente ativo no momento.</div>
+            )}
             {agents.map((agent) => (
               <div
                 key={agent.id}
                 onClick={() => {
-                  setSelectedAgent(agent);
-                  onAgentSelect?.(agent);
+                  setSelectedAgent(agent)
+                  onAgentSelect?.(agent)
                 }}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
                   selectedAgent?.id === agent.id
                     ? 'border-blue-500/50 bg-blue-500/10'
-                    : 'border-[#3c3c3c] bg-[#252526] hover:border-[#4c4c4c]'
+                    : 'border-white/10 bg-white/[0.03] hover:border-white/20'
                 }`}
               >
                 {/* Agent Header */}
@@ -394,8 +397,8 @@ export function AIAgentDashboard({
                     {(agent.status === 'running' || agent.status === 'waiting') && (
                       <button
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleKillAgent(agent.id);
+                          e.stopPropagation()
+                          handleKillAgent(agent.id)
                         }}
                         className="p-1 text-red-400 hover:bg-red-500/20 rounded"
                         title="Parar agente"
@@ -414,7 +417,7 @@ export function AIAgentDashboard({
                 {/* Progress */}
                 {agent.status === 'running' && (
                   <div className="mb-2">
-                    <div className="h-1 bg-[#3c3c3c] rounded-full overflow-hidden">
+                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-blue-500 transition-all duration-300"
                         style={{ width: `${agent.progress}%` }}
@@ -457,10 +460,13 @@ export function AIAgentDashboard({
         {/* History View */}
         {view === 'history' && (
           <div className="space-y-2">
+            {executions.length === 0 && !isLoading && (
+              <div className="aethel-state aethel-state-empty">Nenhuma execucao registrada.</div>
+            )}
             {executions.map((exec) => (
               <div
                 key={exec.id}
-                className="p-3 bg-[#252526] rounded-lg border border-[#3c3c3c]"
+                className="p-3 bg-white/[0.03] rounded-lg border border-white/10"
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
@@ -520,7 +526,7 @@ export function AIAgentDashboard({
               />
               <MetricCard
                 icon={<Icons.Clock />}
-                label="Tempo Médio"
+                label="Tempo Medio"
                 value={formatDuration(metrics.avgExecutionTime)}
                 color="text-cyan-400"
               />
@@ -533,33 +539,33 @@ export function AIAgentDashboard({
             </div>
 
             {/* Executions Chart - Uses real execution data */}
-            <div className="p-4 bg-[#252526] rounded-lg border border-[#3c3c3c]">
-              <h3 className="text-sm text-gray-400 mb-3">Execuções (24h)</h3>
+            <div className="p-4 bg-white/[0.03] rounded-lg border border-white/10">
+              <h3 className="text-sm text-gray-400 mb-3">Execucoes (24h)</h3>
               <div className="h-32 flex items-end gap-1">
                 {(() => {
-                  // Agrupa execuções por hora das últimas 24h
-                  const hourlyData = Array(24).fill(0);
-                  const now = new Date();
+                  // Agrupa execucoes por hora das ultimas 24h
+                  const hourlyData = Array(24).fill(0)
+                  const now = new Date()
                   executions.forEach(exec => {
-                    const hoursDiff = Math.floor((now.getTime() - new Date(exec.startTime).getTime()) / (1000 * 60 * 60));
+                    const hoursDiff = Math.floor((now.getTime() - new Date(exec.startTime).getTime()) / (1000 * 60 * 60))
                     if (hoursDiff >= 0 && hoursDiff < 24) {
-                      hourlyData[23 - hoursDiff]++;
+                      hourlyData[23 - hoursDiff]++
                     }
-                  });
-                  const maxExecs = Math.max(...hourlyData, 1);
+                  })
+                  const maxExecs = Math.max(...hourlyData, 1)
                   
                   return hourlyData.map((count, i) => {
-                    const height = (count / maxExecs) * 100;
-                    const hour = (now.getHours() - 23 + i + 24) % 24;
+                    const height = (count / maxExecs) * 100
+                    const hour = (now.getHours() - 23 + i + 24) % 24
                     return (
                       <div
                         key={i}
                         className={`flex-1 rounded-t transition-colors ${count > 0 ? 'bg-blue-500/70 hover:bg-blue-500' : 'bg-blue-500/20'}`}
                         style={{ height: `${Math.max(height, 2)}%` }}
-                        title={`${count} execução(ões) às ${hour.toString().padStart(2, '0')}:00`}
+                        title={`${count} execucao(oes)  as  ${hour.toString().padStart(2, '0')}:00`}
                       />
-                    );
-                  });
+                    )
+                  })
                 })()}
               </div>
               <div className="flex justify-between text-xs text-gray-500 mt-2">
@@ -570,42 +576,42 @@ export function AIAgentDashboard({
             </div>
 
             {/* Model Usage - Calculated from real execution data */}
-            <div className="p-4 bg-[#252526] rounded-lg border border-[#3c3c3c]">
-              <h3 className="text-sm text-gray-400 mb-3">Uso por Modelo</h3>
+            <div className="p-4 bg-white/[0.03] rounded-lg border border-white/10">
+              <h3 className="text-sm text-gray-400 mb-3">Uso por modelo</h3>
               <div className="space-y-2">
                 {(() => {
-                  // Agrupa uso por modelo das execuções + agentes ativos
-                  const modelUsage: Record<string, { tokens: number; cost: number }> = {};
+                  // Agrupa uso por modelo das execucoes + agentes ativos
+                  const modelUsage: Record<string, { tokens: number; cost: number }> = {}
                   
                   // Dados dos agentes ativos
                   agents.forEach(agent => {
                     if (!modelUsage[agent.model]) {
-                      modelUsage[agent.model] = { tokens: 0, cost: 0 };
+                      modelUsage[agent.model] = { tokens: 0, cost: 0 }
                     }
-                    modelUsage[agent.model].tokens += agent.tokensUsed;
-                  });
+                    modelUsage[agent.model].tokens += agent.tokensUsed
+                  })
                   
-                  // Dados das execuções
+                  // Dados das execucoes
                   executions.forEach(exec => {
-                    const agent = agents.find(a => a.id === exec.agentId);
-                    const model = agent?.model || 'unknown';
+                    const agent = agents.find(a => a.id === exec.agentId)
+                    const model = agent?.model || 'unknown'
                     if (!modelUsage[model]) {
-                      modelUsage[model] = { tokens: 0, cost: 0 };
+                      modelUsage[model] = { tokens: 0, cost: 0 }
                     }
-                    modelUsage[model].tokens += exec.tokensUsed;
-                    modelUsage[model].cost += exec.cost;
-                  });
+                    modelUsage[model].tokens += exec.tokensUsed
+                    modelUsage[model].cost += exec.cost
+                  })
                   
-                  const entries = Object.entries(modelUsage);
+                  const entries = Object.entries(modelUsage)
                   if (entries.length === 0) {
                     return (
-                      <p className="text-xs text-gray-500 text-center py-4">
-                        Nenhum dado de uso disponível
-                      </p>
-                    );
+                      <div className="aethel-state aethel-state-empty text-xs text-center py-4">
+                        Nenhum dado de uso disponivel
+                      </div>
+                    )
                   }
                   
-                  const totalTokens = entries.reduce((sum, [, data]) => sum + data.tokens, 0) || 1;
+                  const totalTokens = entries.reduce((sum, [, data]) => sum + data.tokens, 0) || 1
                   
                   return entries
                     .sort((a, b) => b[1].tokens - a[1].tokens)
@@ -618,7 +624,7 @@ export function AIAgentDashboard({
                         tokens={data.tokens}
                         cost={data.cost}
                       />
-                    ));
+                    ))
                 })()}
               </div>
             </div>
@@ -626,7 +632,7 @@ export function AIAgentDashboard({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 // ============================================================================
@@ -639,18 +645,18 @@ function MetricCard({
   value,
   color,
 }: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  color: string;
+  icon: React.ReactNode
+  label: string
+  value: string
+  color: string
 }) {
   return (
-    <div className="p-3 bg-[#252526] rounded-lg border border-[#3c3c3c]">
+    <div className="p-3 bg-white/[0.03] rounded-lg border border-white/10">
       <div className={`${color} mb-1`}>{icon}</div>
       <div className="text-lg text-white font-semibold">{value}</div>
       <div className="text-xs text-gray-500">{label}</div>
     </div>
-  );
+  )
 }
 
 function ModelUsageBar({
@@ -659,10 +665,10 @@ function ModelUsageBar({
   tokens,
   cost,
 }: {
-  model: string;
-  percent: number;
-  tokens: number;
-  cost: number;
+  model: string
+  percent: number
+  tokens: number
+  cost: number
 }) {
   return (
     <div>
@@ -670,14 +676,18 @@ function ModelUsageBar({
         <span className="text-white">{model}</span>
         <span className="text-gray-400">{formatTokens(tokens)} ({formatCost(cost)})</span>
       </div>
-      <div className="h-2 bg-[#3c3c3c] rounded-full overflow-hidden">
+      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-blue-500 to-blue-500"
           style={{ width: `${percent}%` }}
         />
       </div>
     </div>
-  );
+  )
 }
 
-export default AIAgentDashboard;
+export default AIAgentDashboard
+
+
+
+
