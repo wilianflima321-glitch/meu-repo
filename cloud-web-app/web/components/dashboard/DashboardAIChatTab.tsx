@@ -74,7 +74,7 @@ export function DashboardAIChatTab({
           <button
             type="button"
             onClick={() => onChatModeChange('chat')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'chat'
                 ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-white border border-sky-400/30'
                 : 'border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
@@ -85,7 +85,7 @@ export function DashboardAIChatTab({
           <button
             type="button"
             onClick={() => onChatModeChange('agent')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'agent'
                 ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-white border border-sky-400/30'
                 : 'border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
@@ -96,7 +96,7 @@ export function DashboardAIChatTab({
           <button
             type="button"
             onClick={() => onChatModeChange('canvas')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'canvas'
                 ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-white border border-sky-400/30'
                 : 'border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
