@@ -482,10 +482,10 @@ export function OnboardingChecklist() {
                               {dep.name}
                             </span>
                             {dep.installCommand && (
-                              <span className="text-neutral-500"> · {dep.installCommand}</span>
+                              <span className="text-neutral-500"> - {dep.installCommand}</span>
                             )}
                             {dep.installUrl && !dep.installCommand && (
-                              <span className="text-neutral-500"> · {dep.installUrl}</span>
+                              <span className="text-neutral-500"> - {dep.installUrl}</span>
                             )}
                           </div>
                         ))}
