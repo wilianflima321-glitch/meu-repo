@@ -29,7 +29,11 @@ export function DashboardProjectsTab({
   return (
     <div className="aethel-p-6">
       <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
-        <h2 className="text-2xl font-bold">Projetos</h2>
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Studio Projects</p>
+          <h2 className="text-2xl font-bold">Projetos</h2>
+          <p className="text-sm text-slate-400 mt-1">Gerencie apps, filmes e jogos em um unico painel.</p>
+        </div>
         {projects.length > 0 && (
           <div className="w-96">
             <TimeMachineSlider versions={[]} onVersionChange={onProjectVersionChange} variant="compact" />
@@ -50,12 +54,17 @@ export function DashboardProjectsTab({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 aethel-gap-6 mb-6">
         {projects.map((project) => (
           <div key={project.id} className="aethel-card aethel-p-4">
-            <h3 className="font-semibold mb-2">{project.name}</h3>
-            <p className="text-sm text-slate-400 mb-2">Tipo: {project.type}</p>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-slate-100">{project.name}</h3>
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs text-slate-400">
+                {project.type}
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-slate-400">Ultima atualizacao recente</p>
             <p className="text-sm mb-4">
               Status:{' '}
               <span
-                className={`px-2 py-1 aethel-rounded text-xs ${
+                className={`px-2.5 py-1 rounded-full text-xs ${
                   project.status === 'active'
                     ? 'bg-green-500/20 text-green-400'
                     : 'bg-gray-500/20 text-gray-400'
@@ -76,6 +85,7 @@ export function DashboardProjectsTab({
       </div>
 
       <div className="aethel-card aethel-p-6 max-w-md">
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Novo projeto</p>
         <h3 className="text-lg font-semibold mb-4">Criar novo projeto</h3>
         <div className="space-y-4">
           <input

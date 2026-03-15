@@ -414,7 +414,7 @@ code, pre {
   gap: var(--aethel-space-2);
   padding: var(--aethel-space-2) var(--aethel-space-4);
   border: 1px solid transparent;
-  border-radius: var(--aethel-radius-md);
+  border-radius: var(--aethel-radius-lg);
   font-size: var(--aethel-font-size-sm);
   font-weight: var(--aethel-font-weight-medium);
   cursor: pointer;
@@ -434,22 +434,24 @@ code, pre {
 }
 
 .aethel-button-primary {
-  background-color: var(--aethel-primary);
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(14, 165, 233, 0.9));
   color: white;
+  box-shadow: var(--aethel-shadow-sm);
 }
 
 .aethel-button-primary:hover:not(:disabled) {
-  background-color: var(--aethel-primary-dark);
+  background: linear-gradient(135deg, rgba(79, 70, 229, 1), rgba(2, 132, 199, 0.95));
 }
 
 .aethel-button-secondary {
-  background-color: var(--aethel-surface-tertiary);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--aethel-text-primary);
-  border-color: var(--aethel-border-primary);
+  border-color: var(--aethel-border-subtle);
+  box-shadow: var(--aethel-shadow-xs);
 }
 
 .aethel-button-secondary:hover:not(:disabled) {
-  background-color: var(--aethel-surface-secondary);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .aethel-button-danger {
@@ -469,7 +471,7 @@ code, pre {
 }
 
 .aethel-button-ghost:hover:not(:disabled) {
-  background-color: var(--aethel-surface-tertiary);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .aethel-input {
@@ -494,11 +496,11 @@ code, pre {
 }
 
 .aethel-card {
-  background-color: var(--aethel-surface-secondary);
-  border: 1px solid var(--aethel-border-primary);
+  background: linear-gradient(180deg, rgba(20, 24, 34, 0.96), rgba(13, 15, 21, 0.98));
+  border: 1px solid var(--aethel-border-subtle);
   border-radius: var(--aethel-radius-lg);
   padding: var(--aethel-space-6);
-  box-shadow: var(--aethel-shadow-sm);
+  box-shadow: var(--aethel-shadow-md);
 }
 
 .aethel-state {
@@ -567,16 +569,17 @@ html.light .aethel-state-success {
 }
 
 .aethel-sidebar {
-  background-color: var(--aethel-surface-secondary);
-  border-right: 1px solid var(--aethel-border-primary);
+  background: linear-gradient(180deg, rgba(17, 20, 28, 0.98), rgba(12, 14, 20, 0.98));
+  border-right: 1px solid var(--aethel-border-subtle);
   width: 280px;
   height: 100vh;
   overflow-y: auto;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
 }
 
 .aethel-sidebar-header {
   padding: var(--aethel-space-4);
-  border-bottom: 1px solid var(--aethel-border-primary);
+  border-bottom: 1px solid var(--aethel-border-subtle);
 }
 
 .aethel-sidebar-nav {
@@ -592,16 +595,54 @@ html.light .aethel-state-success {
   cursor: pointer;
   transition: all var(--aethel-transition-fast);
   color: var(--aethel-text-secondary);
+  border: 1px solid transparent;
 }
 
 .aethel-sidebar-item:hover {
-  background-color: var(--aethel-surface-tertiary);
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--aethel-border-subtle);
   color: var(--aethel-text-primary);
 }
 
 .aethel-sidebar-item.active {
-  background-color: var(--aethel-primary);
-  color: white;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.35), rgba(14, 165, 233, 0.2));
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #f8fafc;
+}
+
+[data-aethel-theme='light'] .aethel-card,
+[data-theme='light'] .aethel-card,
+[data-theme='hc-light'] .aethel-card,
+html.light .aethel-card {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border-color: var(--aethel-border-primary);
+  box-shadow: var(--aethel-shadow-sm);
+}
+
+[data-aethel-theme='light'] .aethel-sidebar,
+[data-theme='light'] .aethel-sidebar,
+[data-theme='hc-light'] .aethel-sidebar,
+html.light .aethel-sidebar {
+  background: linear-gradient(180deg, #ffffff, #f1f5f9);
+  border-right-color: var(--aethel-border-primary);
+  box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.05);
+}
+
+[data-aethel-theme='light'] .aethel-sidebar-item:hover,
+[data-theme='light'] .aethel-sidebar-item:hover,
+[data-theme='hc-light'] .aethel-sidebar-item:hover,
+html.light .aethel-sidebar-item:hover {
+  background-color: rgba(15, 23, 42, 0.05);
+  border-color: var(--aethel-border-primary);
+}
+
+[data-aethel-theme='light'] .aethel-sidebar-item.active,
+[data-theme='light'] .aethel-sidebar-item.active,
+[data-theme='hc-light'] .aethel-sidebar-item.active,
+html.light .aethel-sidebar-item.active {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(14, 165, 233, 0.12));
+  border-color: rgba(14, 165, 233, 0.3);
+  color: #0f172a;
 }
 
 .aethel-sidebar-icon {

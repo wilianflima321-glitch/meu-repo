@@ -32,18 +32,28 @@ const FOOTER_SECTIONS = [
 
 export default function PublicFooter() {
   return (
-    <footer className="border-t border-white/[0.06] bg-black" role="contentinfo">
+    <footer className="border-t border-white/[0.06] bg-gradient-to-b from-black via-black to-[#0b0b12]" role="contentinfo">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           {/* Brand column */}
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5">
               <Image src="/branding/aethel-icon-source.png" alt="" width={28} height={28} className="rounded-lg" />
-              <span className="text-lg font-bold text-white">Aethel Engine</span>
+              <span className="text-lg font-bold text-white">Aethel Studio</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-500">
-              Multi-agent software studio com contratos de capability explicitos e politica anti-fake-success.
+              Studio operacional multi-agent com contratos de capability explicitos e politica anti-fake-success.
             </p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              {['Apps', 'Research', 'Deploy', 'Governanca'].map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
             <div className="mt-6 flex items-center gap-4">
               <a
                 href="https://github.com/aethel-engine"
@@ -102,7 +112,7 @@ export default function PublicFooter() {
           <p className="text-xs text-zinc-600">&copy; {new Date().getFullYear()} Aethel Engine. Todos os direitos reservados.</p>
           <div className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-xs text-zinc-500">Todos os sistemas operacionais</span>
+            <span className="text-xs text-zinc-500">Studio-grade workflow, atualizado continuamente</span>
           </div>
         </div>
       </div>

@@ -64,26 +64,42 @@ export function DashboardAIChatTab({
   return (
     <div className="aethel-p-6">
       <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
-        <h2 className="text-2xl font-bold">Chat IA</h2>
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Studio Copilot</p>
+          <h2 className="text-2xl font-bold">Chat IA</h2>
+          <p className="text-sm text-slate-400 mt-1">Orquestracao multi-agent com contexto do studio.</p>
+        </div>
         <div className="aethel-flex aethel-gap-2">
           <button
             type="button"
             onClick={() => onChatModeChange('chat')}
-            className={`px-4 py-2 aethel-rounded-lg text-sm font-medium ${chatMode === 'chat' ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+              chatMode === 'chat'
+                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-white border border-sky-400/30'
+                : 'border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
+            }`}
           >
             Chat
           </button>
           <button
             type="button"
             onClick={() => onChatModeChange('agent')}
-            className={`px-4 py-2 aethel-rounded-lg text-sm font-medium ${chatMode === 'agent' ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+              chatMode === 'agent'
+                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-white border border-sky-400/30'
+                : 'border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
+            }`}
           >
             Modo agente
           </button>
           <button
             type="button"
             onClick={() => onChatModeChange('canvas')}
-            className={`px-4 py-2 aethel-rounded-lg text-sm font-medium ${chatMode === 'canvas' ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+              chatMode === 'canvas'
+                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-white border border-sky-400/30'
+                : 'border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
+            }`}
           >
             Canvas
           </button>
@@ -131,7 +147,14 @@ export function DashboardAIChatTab({
           )}
           <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
             {chatHistory.map((msg, index) => (
-              <div key={index} className={`aethel-p-3 aethel-rounded-lg ${msg.role === 'user' ? 'bg-blue-500/20 ml-12' : 'bg-slate-700/50 mr-12'}`}>
+              <div
+                key={index}
+                className={`aethel-p-3 aethel-rounded-lg border border-white/10 ${
+                  msg.role === 'user'
+                    ? 'bg-[linear-gradient(135deg,rgba(59,130,246,0.22),rgba(14,165,233,0.12))] ml-12'
+                    : 'bg-white/[0.04] mr-12'
+                }`}
+              >
                 <p className="text-sm font-medium mb-1">{msg.role === 'user' ? 'Voce' : 'IA'}</p>
                 <p className="text-sm">{msg.content}</p>
               </div>
@@ -181,35 +204,35 @@ export function DashboardAIChatTab({
           </div>
           <div className="space-y-4 mb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 aethel-gap-4">
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Pesquisa e analise</h3>
                 <p className="text-sm text-slate-400">Coletar informacoes, analisar dados e gerar insights</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Criacao de conteudo</h3>
                 <p className="text-sm text-slate-400">Gerar artigos, codigo, documentacao e conteudo criativo</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Automacao</h3>
                 <p className="text-sm text-slate-400">Criar fluxos, scripts e processos automatizados</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Resolucao de problemas</h3>
                 <p className="text-sm text-slate-400">Depurar codigo, otimizar performance e resolver issues complexas</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Geracao de codigo</h3>
                 <p className="text-sm text-slate-400">Gerar, depurar e otimizar codigo em varias linguagens</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Analise de dados</h3>
                 <p className="text-sm text-slate-400">Analisar datasets, criar visualizacoes e extrair insights</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Design criativo</h3>
                 <p className="text-sm text-slate-400">Desenhar UI/UX, graficos e conceitos criativos</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-slate-700/50 aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
                 <h3 className="font-semibold mb-2">Estrategia de negocios</h3>
                 <p className="text-sm text-slate-400">Planejamento estrategico e analise de mercado</p>
               </button>
@@ -240,7 +263,7 @@ export function DashboardAIChatTab({
           <div className="mb-4 text-sm text-slate-400">
             Canvas visual para colaboracao com IA.
           </div>
-          <div className="bg-slate-800 aethel-rounded-lg aethel-p-4 min-h-96 border border-slate-700 relative">
+          <div className="min-h-96 rounded-xl border border-white/10 bg-white/[0.03] p-4 relative">
             <div className="absolute top-4 left-4 aethel-flex aethel-gap-2">
               <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Desenhar</button>
               <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Formas</button>

@@ -8,7 +8,7 @@ import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import { analytics } from '@/lib/analytics'
 
-/* ── Data ─────────────────────────────────────────────── */
+// --- Data ---
 const QUICK_MISSIONS = [
   'Criar dashboard SaaS com auth, billing e deploy',
   'Gerar MVP de jogo 2D com fisica e leaderboard',
@@ -109,7 +109,7 @@ const TESTIMONIALS_PLACEHOLDER = [
   },
 ]
 
-/* ── Landing Page V3 Premium ─────────────────────── */
+// --- Landing Page V3 Premium ---
 export default function LandingPageV2() {
   const [inputValue, setInputValue] = useState('')
   const [isFocused, setIsFocused] = useState(false)
@@ -168,7 +168,7 @@ export default function LandingPageV2() {
 
       <PublicHeader />
 
-      {/* ── Ambient background ── */}
+      {/* Ambient background */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/2 top-0 h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600/[0.07] blur-[180px]" />
         <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[150px]" />
@@ -176,14 +176,14 @@ export default function LandingPageV2() {
       </div>
 
       <main id="landing-mission" className="relative z-10">
-        {/* ════ HERO ════ */}
+        {/* HERO */}
         <section id="hero" className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col justify-center px-4 pb-12 pt-8 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_0.8fr]">
             <div>
               {/* Badge */}
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[13px] font-medium text-blue-300">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-                Multi-agent software studio
+                Multi-agent studio OS
               </div>
 
               {/* Headline */}
@@ -250,13 +250,13 @@ export default function LandingPageV2() {
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
                   href="/dashboard?onboarding=1&source=landing-hero"
-                  className="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-500 hover:to-cyan-500 hover:shadow-xl hover:shadow-blue-500/30 active:scale-[0.98]"
+                  className="aethel-button aethel-button-primary rounded-xl px-6 py-3 text-sm font-semibold shadow-lg shadow-blue-500/25"
                 >
                   Comecar gratis
                 </Link>
                 <Link
                   href="/pricing"
-                  className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:bg-zinc-900"
+                  className="aethel-button aethel-button-secondary rounded-xl px-5 py-3 text-sm font-medium"
                 >
                   Ver planos
                 </Link>
@@ -271,7 +271,7 @@ export default function LandingPageV2() {
                   <h2 className="mt-1 text-lg font-bold text-white">Aethel agora</h2>
                 </div>
                 <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
-                  Apps = L4 candidate
+                  Apps = L4 target
                 </span>
               </div>
 
@@ -311,7 +311,7 @@ export default function LandingPageV2() {
           </div>
         </section>
 
-        {/* ════ METRICS BAR ════ */}
+        {/* Metrics bar */}
         <section className="border-y border-white/[0.04] bg-zinc-950/60">
           <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-10 sm:px-6 md:grid-cols-4 lg:px-8">
             {METRICS.map((m) => (
@@ -323,7 +323,7 @@ export default function LandingPageV2() {
           </div>
         </section>
 
-        {/* ════ FEATURES GRID ════ */}
+        {/* Features grid */}
         <section className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-400">Diferenciais</p>
@@ -356,7 +356,7 @@ export default function LandingPageV2() {
           </div>
         </section>
 
-        {/* ════ WORKFLOW ════ */}
+        {/* Workflow */}
         <section className="border-y border-white/[0.04] bg-zinc-950/40 py-24">
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
@@ -371,7 +371,7 @@ export default function LandingPageV2() {
                 </p>
                 <Link
                   href="/dashboard?onboarding=1&source=landing-workflow"
-                  className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:bg-zinc-200 active:scale-[0.98]"
+                  className="aethel-button aethel-button-primary mt-8 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold"
                 >
                   Experimentar agora
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -400,7 +400,7 @@ export default function LandingPageV2() {
           </div>
         </section>
 
-        {/* ════ COMPARISON TABLE ════ */}
+        {/* Comparison table */}
         <section className="mx-auto w-full max-w-4xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">Comparacao</p>
@@ -446,7 +446,7 @@ export default function LandingPageV2() {
           </div>
         </section>
 
-        {/* ════ TESTIMONIALS ════ */}
+        {/* Testimonials */}
         <section className="border-y border-white/[0.04] bg-zinc-950/40 py-24">
           <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
@@ -475,7 +475,7 @@ export default function LandingPageV2() {
           </div>
         </section>
 
-        {/* ════ CTA FINAL ════ */}
+        {/* Final CTA */}
         <section className="mx-auto w-full max-w-5xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-blue-500/[0.08] via-sky-500/[0.05] to-transparent p-10 text-center sm:p-16">
             <h2 className="text-3xl font-bold text-white sm:text-4xl">Comece com uma missao real</h2>
@@ -486,13 +486,13 @@ export default function LandingPageV2() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/dashboard?onboarding=1&source=landing-final-cta"
-                className="rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-black shadow-lg shadow-white/10 transition-all hover:bg-zinc-200 hover:shadow-xl active:scale-[0.98]"
+                className="aethel-button aethel-button-primary rounded-xl px-6 py-3.5 text-sm font-semibold shadow-lg shadow-blue-500/25"
               >
                 Abrir dashboard
               </Link>
               <Link
                 href="/pricing"
-                className="rounded-xl border border-zinc-700 px-6 py-3.5 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:bg-zinc-900"
+                className="aethel-button aethel-button-secondary rounded-xl px-6 py-3.5 text-sm font-medium"
               >
                 Ver planos
               </Link>

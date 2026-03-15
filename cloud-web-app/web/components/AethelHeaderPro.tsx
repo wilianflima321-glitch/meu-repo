@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -96,7 +96,7 @@ export default function AethelHeader() {
     },
     {
       id: 'settings',
-      label: 'Configurações',
+      label: 'Configuracoes',
       icon: <Settings className="w-4 h-4" />,
       href: '/settings',
     },
@@ -127,7 +127,7 @@ export default function AethelHeader() {
   ]
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-lg">
+    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Left Section: Logo + Nav */}
@@ -139,7 +139,7 @@ export default function AethelHeader() {
                 alt="Aethel"
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-lg shadow-lg shadow-sky-500/20 transition-shadow group-hover:shadow-sky-500/40"
+                className="h-8 w-8 rounded-xl border border-white/10 bg-white/[0.04] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)] transition-shadow group-hover:shadow-[0_12px_34px_rgba(99,102,241,0.35)]"
                 priority
               />
               <span className="font-bold text-xl text-white">
@@ -151,7 +151,7 @@ export default function AethelHeader() {
             <nav className="hidden md:flex items-center gap-1">
               <Dropdown
                 trigger={
-                  <span className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+                  <span className="flex items-center gap-1.5 rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-white/10 hover:bg-white/[0.06] hover:text-white">
                     Produtos
                     <ChevronDown className="w-4 h-4" />
                   </span>
@@ -166,10 +166,10 @@ export default function AethelHeader() {
                   key={link.href}
                   href={link.href}
                   className={`
-                    px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                    rounded-xl px-3 py-2 text-sm font-medium transition-colors
                     ${pathname === link.href
-                      ? 'text-white bg-slate-800'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                      ? 'text-white bg-white/[0.08] border border-white/10'
+                      : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
                     }
                   `}
                 >
@@ -186,11 +186,11 @@ export default function AethelHeader() {
               type="button"
               aria-label="Abrir busca global"
               onClick={() => setSearchOpen(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-800 hover:text-slate-300 transition-colors"
+              className="hidden sm:flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-slate-200"
             >
               <Search className="w-4 h-4" />
               <span>Buscar...</span>
-              <kbd className="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-slate-500 bg-slate-900 rounded">
+              <kbd className="hidden lg:inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-1.5 py-0.5 text-xs text-slate-500">
                 Ctrl+K
               </kbd>
             </button>
@@ -201,7 +201,7 @@ export default function AethelHeader() {
                 <button
                   type="button"
                   aria-label={`Abrir notificacoes${notifications > 0 ? `, ${notifications} pendentes` : ''}`}
-                  className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  className="relative rounded-xl p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
                 >
                   <Bell className="w-5 h-5" />
                   {notifications > 0 && (
@@ -221,7 +221,7 @@ export default function AethelHeader() {
                 {/* User Menu */}
                 <Dropdown
                   trigger={
-                    <div className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-2 rounded-xl border border-transparent p-1 transition-colors hover:border-white/10 hover:bg-white/[0.06] cursor-pointer">
                       <Avatar
                         src={user?.avatar}
                         name={user?.name || 'User'}
@@ -248,7 +248,7 @@ export default function AethelHeader() {
                   href="/register"
                   className="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors"
                 >
-                  Começar Grátis
+                  ComeÃ§ar GrÃ¡tis
                 </Link>
               </div>
             )}
@@ -332,3 +332,4 @@ export default function AethelHeader() {
     </header>
   )
 }
+

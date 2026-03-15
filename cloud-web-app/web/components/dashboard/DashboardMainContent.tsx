@@ -79,7 +79,7 @@ export function DashboardMainContent({
   onUseCaseSelect,
 }: DashboardMainContentProps) {
   return (
-    <>
+    <div className="space-y-6">
       {showFirstValueGuide && (
         <FirstValueGuide
           firstProjectCreated={firstProjectCreated}
@@ -128,7 +128,7 @@ export function DashboardMainContent({
       {activeTab === 'use-cases' && <UseCasesTab useCases={useCases} onSelect={onUseCaseSelect} />}
       {activeTab === 'admin' && <AdminTab />}
       {activeTab === 'agent-canvas' && <AgentCanvasTab />}
-    </>
+    </div>
   )
 }
 

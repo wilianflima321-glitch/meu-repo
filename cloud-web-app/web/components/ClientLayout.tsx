@@ -29,10 +29,16 @@ interface ClientLayoutProps {
 // Loading fallback para componentes assíncronos
 function LoadingFallback() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm z-50">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-slate-400">Carregando Aethel Engine...</span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#05060a]/88 backdrop-blur-xl">
+      <div className="flex min-w-[260px] flex-col items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] px-8 py-7 shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
+        <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-400/20 bg-gradient-to-br from-indigo-500/20 via-slate-900 to-sky-500/10">
+          <div className="h-9 w-9 rounded-xl border-2 border-sky-400/80 border-t-transparent animate-spin" />
+          <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.22),transparent_60%)]" />
+        </div>
+        <div className="space-y-1 text-center">
+          <p className="text-sm font-medium text-slate-100">Inicializando studio</p>
+          <p className="text-xs text-slate-400">Carregando runtime, comandos e contexto do Aethel.</p>
+        </div>
       </div>
     </div>
   );

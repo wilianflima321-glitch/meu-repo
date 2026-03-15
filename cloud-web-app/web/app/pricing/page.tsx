@@ -89,13 +89,13 @@ export default function PricingPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/dashboard?onboarding=1&source=pricing-hero"
-              className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
+              className="aethel-button aethel-button-primary rounded-xl px-5 py-3 text-sm font-semibold"
             >
               Comecar gratis
             </Link>
             <Link
               href="/contact-sales"
-              className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10"
+              className="aethel-button aethel-button-secondary rounded-xl px-5 py-3 text-sm font-medium"
             >
               Falar com vendas
             </Link>
@@ -195,10 +195,10 @@ export default function PricingPage() {
                       ? '/contact-sales'
                       : `/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`
                   }
-                  className={`flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+                  className={`aethel-button w-full rounded-xl px-4 py-3 text-sm font-semibold ${
                     plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-cyan-500'
-                      : 'bg-white/[0.08] text-white hover:bg-white/[0.14]'
+                      ? 'aethel-button-primary shadow-lg shadow-blue-500/20'
+                      : 'aethel-button-secondary'
                   }`}
                 >
                   {plan.id === 'enterprise' ? 'Falar com vendas' : 'Selecionar'}

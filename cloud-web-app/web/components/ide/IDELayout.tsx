@@ -478,32 +478,37 @@ export default function IDELayout({
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0b0d12] text-slate-100 density-compact">
-      <header className="density-header flex items-center justify-between px-2 border-b border-slate-800/80 bg-[#11141c]">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-sm shadow-blue-900/50">
-              <Codicon name="menu" className="text-white text-[13px]" />
+    <div className="flex h-screen flex-col overflow-hidden bg-[#07080c] text-slate-100 density-compact">
+      <header className="density-header flex items-center justify-between border-b border-white/10 bg-[linear-gradient(180deg,rgba(19,23,31,0.96),rgba(11,13,18,0.98))] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-indigo-400 to-sky-400 shadow-[0_10px_24px_rgba(79,70,229,0.45)]">
+              <Codicon name="sparkle" className="text-[13px] text-white" />
             </div>
-            <span className="font-semibold text-xs tracking-tight">Aethel Workbench</span>
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-200">Aethel Studio</div>
+              <div className="truncate text-[10px] text-slate-500">Apps · Research · Runtime orchestration</div>
+            </div>
           </div>
 
-          <nav ref={menuRef} className="hidden md:flex items-center gap-0.5 text-xs relative">
+          <nav ref={menuRef} className="relative hidden items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] px-1 py-1 text-xs md:flex">
             {menuConfigs.map((menu) => (
               <div key={menu.label} className="relative">
                 <button
                   onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
-                  className={`px-1.5 py-1 rounded transition-colors ${
-                    activeMenu === menu.label ? 'bg-slate-700/90 text-white' : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                  className={`rounded-lg px-2 py-1.5 transition-colors ${
+                    activeMenu === menu.label
+                      ? 'bg-slate-700/90 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
+                      : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`}
                 >
                   {menu.label}
                 </button>
                 {activeMenu === menu.label && (
-                  <div className="absolute top-full left-0 mt-1 w-56 py-1 rounded-md shadow-xl z-50 bg-[#171b25] border border-slate-700/80 backdrop-blur">
+                  <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-white/10 bg-[#171b25]/98 py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                     {menu.items.map((item, idx) =>
                       item.separator ? (
-                        <div key={idx} className="my-1 border-t border-slate-700" />
+                        <div key={idx} className="my-1 border-t border-white/10" />
                       ) : (
                         <button
                           key={idx}
@@ -512,16 +517,14 @@ export default function IDELayout({
                             setActiveMenu(null)
                           }}
                           disabled={item.disabled ?? !item.action}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs ${
+                          className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs ${
                             item.disabled ?? !item.action
-                              ? 'opacity-50 cursor-not-allowed'
+                              ? 'cursor-not-allowed opacity-50'
                               : 'hover:bg-slate-700/70 focus-visible:bg-slate-700/70'
                           }`}
                         >
                           <span>{item.label}</span>
-                          {item.shortcut && (
-                            <span className="text-xs text-slate-500">{item.shortcut}</span>
-                          )}
+                          {item.shortcut && <span className="text-xs text-slate-500">{item.shortcut}</span>}
                         </button>
                       )
                     )}
@@ -533,18 +536,30 @@ export default function IDELayout({
         </div>
 
         <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-200 lg:flex">
+            <Codicon name="pulse" className="text-[11px]" />
+            Ready for apply
+          </div>
+          <div className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] text-slate-400 xl:flex">
+            <span className="flex items-center gap-1 text-slate-200">
+              <Codicon name="git-branch" className="text-[11px]" />
+              main
+            </span>
+            <span className="h-3 w-px bg-white/10" />
+            <span>Workspace local</span>
+          </div>
           <button
             onClick={() => onCommandPalette?.()}
-            className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded border border-slate-700/80 bg-slate-900/40 text-[11px] text-slate-300 hover:bg-slate-800/80 focus-visible:bg-slate-800/80"
+            className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] text-slate-300 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] md:flex"
             title="Command Palette (Ctrl+Shift+P)"
           >
-            <Codicon name="sparkle" className="text-[12px]" />
+            <Codicon name="sparkle" className="text-[12px] text-sky-300" />
             <span>Command Palette</span>
-            <span className="text-slate-500">Ctrl+Shift+P</span>
+            <span className="rounded-md border border-white/10 bg-black/20 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">Ctrl+Shift+P</span>
           </button>
           <button
             onClick={toggleLeftSidebar}
-            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.leftSidebar ? 'text-blue-300' : 'text-slate-400'}`}
+            className={`rounded-lg p-2 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] ${panels.leftSidebar ? 'text-sky-300' : 'text-slate-400'}`}
             title="Toggle Sidebar"
             aria-pressed={panels.leftSidebar}
           >
@@ -552,7 +567,7 @@ export default function IDELayout({
           </button>
           <button
             onClick={toggleBottomPanel}
-            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.bottomPanel ? 'text-blue-300' : 'text-slate-400'}`}
+            className={`rounded-lg p-2 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] ${panels.bottomPanel ? 'text-sky-300' : 'text-slate-400'}`}
             title="Toggle Panel"
             aria-pressed={panels.bottomPanel}
           >
@@ -560,7 +575,7 @@ export default function IDELayout({
           </button>
           <button
             onClick={toggleRightSidebar}
-            className={`p-1.5 rounded hover:bg-slate-800/80 focus-visible:bg-slate-800/80 ${panels.rightSidebar ? 'text-blue-300' : 'text-slate-400'}`}
+            className={`rounded-lg p-2 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] ${panels.rightSidebar ? 'text-sky-300' : 'text-slate-400'}`}
             title="Toggle AI Panel"
             aria-pressed={panels.rightSidebar}
           >
@@ -569,8 +584,8 @@ export default function IDELayout({
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <div className="w-11 flex flex-col items-center py-1.5 bg-[#11141c] border-r border-slate-800/80">
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex w-12 flex-col items-center border-r border-white/10 bg-[linear-gradient(180deg,rgba(18,22,30,0.95),rgba(11,14,19,0.98))] py-2 shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]">
           {SIDEBAR_TABS.map((tab) => (
             <button
               key={tab.id}
@@ -578,14 +593,17 @@ export default function IDELayout({
                 setActiveSidebarTab(tab.id)
                 if (!panels.leftSidebar) setPanels((prev) => ({ ...prev, leftSidebar: true }))
               }}
-              className={`w-9 h-9 flex items-center justify-center rounded-md mb-1 relative ${
+              className={`relative mb-1 flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
                 activeSidebarTab === tab.id && panels.leftSidebar
-                  ? 'text-white bg-slate-800/90'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/80 focus-visible:text-white focus-visible:bg-slate-800/80'
+                  ? 'bg-white/[0.1] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)]'
+                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white focus-visible:bg-white/[0.06] focus-visible:text-white'
               }`}
               title={`${tab.label} (${tab.shortcut})`}
               aria-pressed={activeSidebarTab === tab.id && panels.leftSidebar}
             >
+              {activeSidebarTab === tab.id && panels.leftSidebar && (
+                <span className="absolute -left-1 top-2 h-4 w-0.5 rounded-full bg-sky-400" />
+              )}
               <Codicon name={tab.icon} className="text-[14px]" />
             </button>
           ))}
@@ -593,12 +611,15 @@ export default function IDELayout({
 
         {panels.leftSidebar && (
           <div
-            className="flex flex-col border-r border-slate-800/80 bg-[#10131a]"
+            className="flex flex-col border-r border-white/10 bg-[linear-gradient(180deg,rgba(16,19,26,0.98),rgba(12,14,20,0.98))] shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]"
             style={{ width: sidebarWidth }}
           >
-            <div className="density-header flex items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400 border-b border-slate-800/70">
-              {SIDEBAR_TABS.find((t) => t.id === activeSidebarTab)?.label}
-              <button onClick={toggleLeftSidebar} className="p-1 rounded hover:bg-slate-800/80">
+            <div className="density-header flex items-center justify-between border-b border-white/10 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <div className="flex flex-col">
+                <span>{SIDEBAR_TABS.find((t) => t.id === activeSidebarTab)?.label}</span>
+                <span className="text-[9px] font-normal tracking-[0.08em] text-slate-600">Studio surface</span>
+              </div>
+              <button onClick={toggleLeftSidebar} className="rounded-lg p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200">
                 <Codicon name="chevron-left" />
               </button>
             </div>
@@ -608,7 +629,7 @@ export default function IDELayout({
 
         {panels.leftSidebar && (
           <div
-            className="w-1 cursor-col-resize bg-slate-800/80 hover:bg-blue-500/50 transition-colors"
+            className="w-[3px] cursor-col-resize bg-transparent transition-colors before:block before:h-full before:w-px before:bg-white/10 hover:before:bg-sky-400/45"
             onMouseDown={(e) => {
               setIsResizingSidebar(true)
               resizeStateRef.current.startX = e.clientX
@@ -617,31 +638,33 @@ export default function IDELayout({
           />
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-hidden bg-[#0b0d12]">{children}</div>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex-1 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.07),transparent_18%),linear-gradient(180deg,#0b0d12_0%,#090b10_100%)]">
+            {children}
+          </div>
 
           {panels.bottomPanel && (
             <div
-              className="flex flex-col border-t border-slate-800/80 bg-[#10131a]"
+              className="flex flex-col border-t border-white/10 bg-[linear-gradient(180deg,rgba(16,19,26,0.98),rgba(10,12,17,0.98))]"
               style={{ height: bottomPanelHeight }}
             >
               <div
-                className="h-1 cursor-row-resize bg-slate-800/80 hover:bg-blue-500/50 transition-colors"
+                className="h-[3px] cursor-row-resize bg-transparent transition-colors before:block before:h-px before:w-full before:bg-white/10 hover:before:bg-sky-400/45"
                 onMouseDown={(e) => {
                   setIsResizingBottom(true)
                   resizeStateRef.current.startY = e.clientY
                   resizeStateRef.current.startHeight = bottomPanelHeight
                 }}
               />
-              <div className="density-header flex items-center px-1.5 gap-0.5 border-b border-slate-800/70">
+              <div className="density-header flex items-center gap-0.5 border-b border-white/10 px-1.5">
                 {BOTTOM_TABS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveBottomTab(tab.id)}
-                    className={`density-row flex items-center gap-1.5 px-2.5 text-[11px] rounded transition-colors ${
+                    className={`density-row flex items-center gap-1.5 rounded-lg px-2.5 text-[11px] transition-colors ${
                       activeBottomTab === tab.id
-                        ? 'bg-slate-800/90 text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60 focus-visible:text-white focus-visible:bg-slate-800/60'
+                        ? 'bg-white/[0.08] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.05)]'
+                        : 'text-slate-400 hover:bg-white/[0.05] hover:text-white focus-visible:bg-white/[0.05] focus-visible:text-white'
                     }`}
                     aria-pressed={activeBottomTab === tab.id}
                   >
@@ -654,11 +677,11 @@ export default function IDELayout({
 
                 <button
                   onClick={() => setBottomPanelHeight((h) => (h === 260 ? 380 : 260))}
-                  className="p-1 rounded hover:bg-slate-800/80 text-slate-400"
+                  className="rounded-lg p-1 text-slate-400 hover:bg-white/[0.06]"
                 >
                   {bottomPanelHeight === 260 ? <Codicon name="fold-down" /> : <Codicon name="fold-up" />}
                 </button>
-                <button onClick={toggleBottomPanel} className="p-1 rounded hover:bg-slate-800/80 text-slate-400">
+                <button onClick={toggleBottomPanel} className="rounded-lg p-1 text-slate-400 hover:bg-white/[0.06]">
                   <Codicon name="x" />
                 </button>
               </div>
@@ -668,30 +691,36 @@ export default function IDELayout({
         </div>
 
         {panels.rightSidebar && (
-          <div className="w-80 flex flex-col border-l border-slate-800/80 bg-[#10131a]">
-            <div className="density-header flex items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400 border-b border-slate-800/70">
-              AI Panel
-              <button onClick={toggleRightSidebar} className="p-1 rounded hover:bg-slate-800/80">
+          <div className="flex w-80 flex-col border-l border-white/10 bg-[linear-gradient(180deg,rgba(15,18,25,0.98),rgba(11,13,18,0.98))] shadow-[inset_1px_0_0_rgba(255,255,255,0.03)]">
+            <div className="density-header flex items-center justify-between border-b border-white/10 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <div className="flex flex-col">
+                <span>AI Copilot</span>
+                <span className="text-[9px] font-normal tracking-[0.08em] text-slate-600">Plans · edits · critique</span>
+              </div>
+              <button onClick={toggleRightSidebar} className="rounded-lg p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200">
                 <Codicon name="chevron-right" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {aiChatPanel || <NotImplementedPanel title="AI Panel" capability="AI_CHAT_PANEL" milestone="P0" />}
+              {aiChatPanel || <NotImplementedPanel title="AI Copilot" capability="AI_CHAT_PANEL" milestone="P0" />}
             </div>
           </div>
         )}
       </div>
 
-      <footer className="h-5 flex items-center justify-between px-2 text-[10px] bg-[#11141c] border-t border-slate-800/80 text-slate-200">
+      <footer className="flex h-6 items-center justify-between border-t border-white/10 bg-[linear-gradient(180deg,rgba(13,15,21,0.98),rgba(10,12,16,0.98))] px-3 text-[10px] text-slate-200">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1 text-slate-300">
             <Codicon name="git-branch" className="text-[11px]" />
             main
           </span>
+          <span className="rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-slate-400">
+            Studio
+          </span>
         </div>
         <div className="flex items-center gap-3">
           {statusBar}
-          <span className="text-slate-400">UTF-8</span>
+          <span className="text-slate-500">UTF-8</span>
           <span className="flex items-center gap-1 text-slate-300">
             <Codicon name="comment-discussion" className="text-[11px]" />
             Ready

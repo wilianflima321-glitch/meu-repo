@@ -599,15 +599,15 @@ function Tab({
       onDragOver={onDragOver}
       onDrop={onDrop}
       className={`
-        group flex items-center gap-2 h-9 px-3 border-r border-slate-800 cursor-pointer
-        transition-colors select-none
+        group flex h-9 items-center gap-2 border-r border-white/10 px-3 cursor-pointer
+        transition-all select-none
         ${isActive
-          ? 'bg-slate-900 text-white border-t-2 border-t-sky-500'
-          : 'bg-slate-950 text-slate-400 hover:bg-slate-800/50 border-t-2 border-t-transparent'
+          ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-white border-t-2 border-t-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
+          : 'bg-[#0d1016] text-slate-400 border-t-2 border-t-transparent hover:bg-white/[0.05] hover:text-white'
         }
         ${tab.isPreview ? 'italic' : ''}
         ${isDragging ? 'opacity-50' : ''}
-        ${isDragOver ? 'border-l-2 border-l-sky-500' : ''}
+        ${isDragOver ? 'border-l-2 border-l-sky-400' : ''}
         ${tab.isPinned ? 'px-2' : ''}
       `}
     >
@@ -628,10 +628,10 @@ function Tab({
 
       {/* Tab title */}
       {!tab.isPinned && (
-        <span className="truncate max-w-32 text-sm">
+        <span className="max-w-32 truncate text-[13px] font-medium">
           {tab.title}
           {tab.isDirty && (
-            <span className="text-white ml-0.5">*</span>
+            <span className="ml-1 text-amber-300">*</span>
           )}
         </span>
       )}
@@ -644,16 +644,16 @@ function Tab({
             onClose();
           }}
           className={`
-            flex-shrink-0 p-0.5 rounded
+            flex-shrink-0 rounded-md p-0.5
             ${isActive || tab.isDirty
               ? 'opacity-100'
               : 'opacity-0 group-hover:opacity-100'
             }
-            hover:bg-slate-700
+            hover:bg-white/[0.08]
           `}
         >
           {tab.isDirty ? (
-            <div className="w-3 h-3 rounded-full bg-white" />
+            <div className="h-2.5 w-2.5 rounded-full bg-amber-300" />
           ) : (
             <X className="w-3 h-3" />
           )}
@@ -733,7 +733,7 @@ export function TabBar({ className }: { className?: string }) {
   return (
     <div
       ref={tabBarRef}
-      className={`flex items-center bg-slate-950 border-b border-slate-800 ${className || ''}`}
+      className={`flex items-center border-b border-white/10 bg-[linear-gradient(180deg,rgba(14,17,24,0.98),rgba(10,12,17,0.98))] ${className || ''}`}
       onDragEnd={handleDragEnd}
     >
       {/* Tabs */}
@@ -760,7 +760,7 @@ export function TabBar({ className }: { className?: string }) {
         <div className="relative">
           <button
             onClick={() => setShowOverflowMenu(!showOverflowMenu)}
-            className="flex items-center gap-1 px-2 py-1.5 text-sm text-slate-400 hover:text-white hover:bg-slate-800"
+            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-400 hover:bg-white/[0.06] hover:text-white"
           >
             <MoreHorizontal className="w-4 h-4" />
             <span className="text-xs">{overflowTabs.length}</span>
@@ -768,7 +768,7 @@ export function TabBar({ className }: { className?: string }) {
           </button>
 
           {showOverflowMenu && (
-            <div className="absolute right-0 top-full mt-1 w-64 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl py-1 z-50">
+            <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-white/10 bg-[#151922]/98 py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
               {overflowTabs.map(tab => {
                 const Icon = typeof tab.icon !== 'string' ? tab.icon || getFileIcon(tab.path).icon : FileText;
                 return (
@@ -778,10 +778,10 @@ export function TabBar({ className }: { className?: string }) {
                       setActiveTab(tab.id);
                       setShowOverflowMenu(false);
                     }}
-                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left ${
+                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
                       tab.id === activeTabId
-                        ? 'bg-sky-600/20 text-sky-400'
-                        : 'text-slate-300 hover:bg-slate-800'
+                        ? 'bg-sky-600/20 text-sky-300'
+                        : 'text-slate-300 hover:bg-white/[0.06]'
                     }`}
                   >
                     <Icon className="w-4 h-4" />

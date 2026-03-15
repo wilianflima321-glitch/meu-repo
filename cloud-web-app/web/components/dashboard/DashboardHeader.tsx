@@ -41,7 +41,7 @@ export function DashboardHeader({
 
   return (
     <header className="aethel-card aethel-m-4 aethel-rounded-xl aethel-shadow-lg">
-      <div className="aethel-flex aethel-items-center aethel-justify-between aethel-p-4">
+      <div className="aethel-flex aethel-items-center aethel-justify-between aethel-gap-4">
         <div className="aethel-flex aethel-items-center aethel-gap-4">
           <button
             type="button"
@@ -59,13 +59,16 @@ export function DashboardHeader({
             <Image
               src="/branding/aethel-icon-source.png"
               alt="Aethel"
-              width={32}
-              height={32}
-              className="rounded-lg ring-1 ring-zinc-700/70"
+              width={36}
+              height={36}
+              className="rounded-xl border border-white/10 bg-white/[0.04] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
             />
-            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              Aethel IDE
-            </h1>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Studio Home</p>
+              <h1 className="text-xl sm:text-2xl font-semibold text-slate-100">
+                Aethel Studio
+              </h1>
+            </div>
           </div>
         </div>
 
@@ -91,14 +94,14 @@ export function DashboardHeader({
           </button>
 
           <div
-            className={`aethel-flex aethel-items-center aethel-gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+            className={`hidden sm:flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
               backendOnline
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-red-500/20 text-red-400 border border-red-500/30'
-            } hidden sm:flex`}
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+                : 'border-red-500/30 bg-red-500/10 text-red-200'
+            }`}
           >
-            <div className={`w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
-            Backend: {backendOnline ? 'Online' : 'Offline'}
+            <div className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
+            Backend {backendOnline ? 'online' : 'offline'}
           </div>
 
           {authErrorText && (
@@ -115,7 +118,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={onOpenProviderSettings}
-              className="hidden lg:inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
+              className="hidden lg:inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
               title="Configure ao menos um provider para liberar o chat de IA"
             >
               Configurar IA
@@ -125,10 +128,10 @@ export function DashboardHeader({
             type="button"
             onClick={onToggleFullAccess}
             disabled={fullAccessBusy}
-            className={`hidden lg:inline-flex rounded border px-2 py-1 text-xs disabled:opacity-60 ${
+            className={`hidden lg:inline-flex rounded-full border px-3 py-1 text-xs disabled:opacity-60 ${
               fullAccessActive
                 ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20'
-                : 'border-zinc-600/70 bg-zinc-800/70 text-zinc-200 hover:bg-zinc-700/70'
+                : 'border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08]'
             }`}
             title={
               fullAccessActive

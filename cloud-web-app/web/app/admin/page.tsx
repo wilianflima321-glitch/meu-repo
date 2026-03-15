@@ -66,12 +66,13 @@ export default function Admin() {
     <div className='p-6 max-w-7xl mx-auto'>
       <div className='mb-6 flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl font-bold'>Admin Enterprise Console</h1>
+          <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>Admin Control Center</p>
+          <h1 className='text-3xl font-semibold text-zinc-100'>Admin Enterprise Console</h1>
           <p className='mt-1 text-zinc-400'>Operacao central de usuarios, billing, seguranca e integracoes.</p>
         </div>
         <button
           onClick={() => mutate()}
-          className='rounded bg-zinc-800/70 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-700/80'
+          className='rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-zinc-200 hover:bg-white/[0.08]'
         >
           Recarregar
         </button>
@@ -84,8 +85,8 @@ export default function Admin() {
         <Stat title='Free' value={freeCount} tone='slate' />
       </div>
 
-      <div className='mb-8 rounded-lg border border-zinc-800/80 bg-zinc-900/70 shadow'>
-        <div className='flex items-center justify-between border-b border-zinc-800/80 px-4 py-3'>
+      <div className='mb-8 rounded-xl border border-white/10 bg-white/[0.03] shadow-[0_18px_45px_rgba(0,0,0,0.35)]'>
+        <div className='flex items-center justify-between border-b border-white/10 px-4 py-3'>
           <h2 className='text-lg font-semibold'>Usuarios recentes</h2>
           <p className='text-xs text-zinc-500'>Fonte: /admin/users</p>
         </div>
@@ -100,7 +101,7 @@ export default function Admin() {
           <div className='overflow-x-auto'>
             <table className='min-w-full text-left text-sm'>
               <thead>
-                <tr className='border-b border-zinc-800/80 text-zinc-400'>
+                <tr className='border-b border-white/10 text-zinc-400'>
                   <th className='p-2'>Nome</th>
                   <th className='p-2'>Email</th>
                   <th className='p-2'>Plano</th>
@@ -110,17 +111,17 @@ export default function Admin() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className='border-b border-zinc-800/60 hover:bg-zinc-900/60'>
+                  <tr key={user.id} className='border-b border-white/5 hover:bg-white/[0.04]'>
                     <td className='p-2 font-medium'>{user.name || 'Sem nome'}</td>
                     <td className='p-2 text-zinc-400'>{user.email}</td>
                     <td className='p-2'>
                       <span
-                        className={`rounded-full px-2 py-1 text-xs ${
+                        className={`rounded-full px-2.5 py-1 text-xs ${
                           user.plan === 'enterprise'
                             ? 'bg-emerald-500/15 text-emerald-300'
                             : user.plan === 'pro'
                               ? 'bg-sky-500/15 text-sky-300'
-                              : 'bg-zinc-800/70 text-zinc-300'
+                              : 'bg-white/[0.06] text-zinc-300'
                         }`}
                       >
                         {planLabels[user.plan] ?? user.plan}
@@ -141,7 +142,7 @@ export default function Admin() {
           <Link
             key={card.href}
             href={card.href}
-            className='block rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4 shadow transition hover:border-zinc-700 hover:bg-zinc-900'
+            className='block rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition hover:border-white/20 hover:bg-white/[0.05]'
           >
             <h2 className='text-base font-semibold'>{card.title}</h2>
             <p className='mt-2 text-sm text-zinc-400'>{card.description}</p>

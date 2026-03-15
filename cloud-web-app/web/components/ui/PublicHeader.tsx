@@ -27,7 +27,7 @@ export default function PublicHeader() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
             ? 'border-b border-white/[0.06] bg-black/80 backdrop-blur-2xl shadow-xl shadow-black/20'
-            : 'bg-transparent'
+            : 'bg-black/20 backdrop-blur-xl'
         }`}
       >
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navegacao principal">
@@ -40,7 +40,12 @@ export default function PublicHeader() {
               className="rounded-lg transition-transform duration-200 group-hover:scale-105"
               priority
             />
-            <span className="text-lg font-bold tracking-tight text-white">Aethel</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold tracking-tight text-white">Aethel</span>
+              <span className="hidden rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-300 sm:inline-flex">
+                Studio
+              </span>
+            </div>
           </Link>
 
           {/* Desktop nav */}
@@ -66,13 +71,13 @@ export default function PublicHeader() {
           <div className="hidden items-center gap-3 md:flex">
             <Link
               href="/login"
-              className="rounded-lg px-3.5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:text-white"
+              className="aethel-button aethel-button-ghost rounded-lg px-3.5 py-2 text-sm font-medium"
             >
               Entrar
             </Link>
             <Link
               href="/dashboard?onboarding=1&source=header"
-              className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black transition-all hover:bg-zinc-200 hover:shadow-lg hover:shadow-white/10"
+              className="aethel-button aethel-button-primary rounded-xl px-4 py-2 text-sm font-semibold"
             >
               Comecar gratis
             </Link>
@@ -124,13 +129,13 @@ export default function PublicHeader() {
             <div className="my-3 h-px bg-white/[0.06]" />
             <Link
               href="/login"
-              className="block rounded-lg px-4 py-3 text-sm font-medium text-zinc-300 hover:text-white"
+              className="aethel-button aethel-button-ghost block rounded-lg px-4 py-3 text-sm font-medium"
             >
               Entrar
             </Link>
             <Link
               href="/dashboard?onboarding=1&source=header-mobile"
-              className="mt-2 block rounded-xl bg-white px-4 py-3 text-center text-sm font-semibold text-black"
+              className="aethel-button aethel-button-primary mt-2 block rounded-xl px-4 py-3 text-center text-sm font-semibold"
             >
               Comecar gratis
             </Link>

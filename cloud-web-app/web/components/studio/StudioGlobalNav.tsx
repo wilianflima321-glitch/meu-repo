@@ -14,15 +14,15 @@ type StudioGlobalNavProps = {
 
 function linkClass(active: boolean): string {
   return active
-    ? 'rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-sm font-medium text-cyan-200'
-    : 'rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/70 hover:text-zinc-100'
+    ? 'rounded-xl border border-sky-400/30 bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] px-3 py-2 text-sm font-medium text-slate-100'
+    : 'rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-zinc-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-zinc-100'
 }
 
 export default function StudioGlobalNav({ title, subtitle, rightSlot, className = '' }: StudioGlobalNavProps) {
   const pathname = usePathname()
 
   return (
-    <header className={`sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-xl ${className}`}>
+    <header className={`sticky top-0 z-40 border-b border-white/10 bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${className}`}>
       <div className="mx-auto w-full max-w-7xl px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">

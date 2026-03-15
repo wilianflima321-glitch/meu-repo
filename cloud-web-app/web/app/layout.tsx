@@ -90,10 +90,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className="antialiased">
+      <body className="antialiased bg-[#06070a] text-slate-100">
         <ServiceWorkerProvider>
           <WebVitalsReporter />
-          <div id="root" className="min-h-screen bg-slate-900 text-slate-100">
+          <div
+            id="root"
+            className="min-h-screen bg-[#06070a] text-slate-100 [background-image:radial-gradient(circle_at_top,rgba(99,102,241,0.14),transparent_30%),radial-gradient(circle_at_right_top,rgba(14,165,233,0.08),transparent_24%),linear-gradient(180deg,#0a0c12_0%,#06070a_100%)]"
+          >
             <ClientLayout>
               {children}
             </ClientLayout>

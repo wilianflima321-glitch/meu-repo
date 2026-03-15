@@ -61,40 +61,65 @@ export function DashboardOverviewTab({
 }: DashboardOverviewTabProps) {
   return (
     <div className="aethel-p-6 space-y-6">
+      <div className="aethel-card">
+        <div className="aethel-flex aethel-justify-between aethel-items-center">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Studio Home</p>
+            <h2 className="mt-2 text-2xl font-semibold text-slate-100">Visao geral do ambiente</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Sinais de atividade, conectividade e preview em uma unica tela.
+            </p>
+          </div>
+          <div className="hidden md:flex items-center gap-2">
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
+              Sessao segura
+            </span>
+            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200">
+              Runtime pronto
+            </span>
+          </div>
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 aethel-gap-6">
         <div className="aethel-card aethel-p-6">
-          <h3 className="text-lg font-semibold mb-2">Atividade de IA</h3>
-          <p className="text-2xl font-bold text-blue-400">{aiActivity}</p>
+          <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Atividade IA</div>
+          <p className="mt-3 text-3xl font-semibold text-sky-300">{aiActivity}</p>
+          <p className="mt-2 text-xs text-slate-400">Planos, execucoes e revisoes no studio.</p>
         </div>
         <div className="aethel-card aethel-p-6">
-          <h3 className="text-lg font-semibold mb-2">Projetos ativos</h3>
-          <p className="text-2xl font-bold text-green-400">
+          <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Projetos ativos</div>
+          <p className="mt-3 text-3xl font-semibold text-emerald-300">
             {projects.filter((project) => project.status === 'active').length}
           </p>
+          <p className="mt-2 text-xs text-slate-400">Fluxos em andamento e builds recentes.</p>
         </div>
         <div className="aethel-card aethel-p-6">
-          <h3 className="text-lg font-semibold mb-2">Previa ao vivo</h3>
-          <p className="text-2xl font-bold text-cyan-400">
+          <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Preview ao vivo</div>
+          <p className="mt-3 text-3xl font-semibold text-cyan-300">
             {livePreviewSuggestions.length} sugestoes
           </p>
+          <p className="mt-2 text-xs text-slate-400">Ideias prontas para testar agora.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 aethel-gap-6">
         <div className="aethel-card aethel-p-6">
           <div className="aethel-flex aethel-items-center aethel-justify-between">
-            <h3 className="text-lg font-semibold">Saldo da carteira</h3>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Carteira</p>
+              <h3 className="text-lg font-semibold">Saldo da carteira</h3>
+            </div>
             {authReady && hasToken && (
               <button
                 type="button"
                 onClick={onRefreshWallet}
-                className="text-xs border border-slate-700 aethel-rounded px-2 py-1 hover:border-slate-500"
+                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300 hover:bg-white/[0.08]"
               >
                 Atualizar
               </button>
             )}
             {lastWalletUpdate && (
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 Atualizado - {new Date(lastWalletUpdate).toLocaleTimeString()}
               </span>
             )}
@@ -116,15 +141,15 @@ export function DashboardOverviewTab({
             )}
             {authReady && hasToken && !walletLoading && !walletError && walletData && (
               <>
-                <p className="text-3xl font-bold text-slate-100">
+                <p className="text-3xl font-semibold text-slate-100">
                   {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="mt-1 text-xs text-slate-400">
                   {walletTransactions.length} transacoes registradas
                 </p>
                 <ul className="mt-4 space-y-3">
                   {walletTransactions.slice(-3).reverse().map((entry) => (
-                    <li key={entry.id} className="border border-slate-800 aethel-rounded-lg aethel-p-3">
+                    <li key={entry.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                       <div className="aethel-flex aethel-justify-between aethel-items-center">
                         <span className="text-sm font-medium">
                           {entry.reference || entry.entry_type.toUpperCase()}
@@ -160,10 +185,13 @@ export function DashboardOverviewTab({
 
         <div className="aethel-card aethel-p-6">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
-            <h3 className="text-lg font-semibold">Status de conectividade</h3>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Infra</p>
+              <h3 className="text-lg font-semibold">Status de conectividade</h3>
+            </div>
             {connectivityData && (
               <span
-                className={`text-xs rounded-full px-2 py-1 border ${
+                className={`text-xs rounded-full px-3 py-1 border ${
                   connectivityData.overall_status === 'healthy'
                     ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-300'
                     : connectivityData.overall_status === 'degraded'
@@ -186,13 +214,13 @@ export function DashboardOverviewTab({
             {!connectivityLoading && !connectivityError && connectivityServices.length > 0 && (
               <div className="space-y-3">
                 {connectivityServices.map((service) => (
-                  <div key={service.name} className="border border-slate-800 aethel-rounded-lg aethel-p-3">
+                  <div key={service.name} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                     <div className="aethel-flex aethel-justify-between aethel-items-center">
                       <span className="text-sm font-medium capitalize">
                         {service.name.replace(/_/g, ' ')}
                       </span>
                       <span
-                        className={`text-xs rounded-full px-2 py-1 ${
+                        className={`text-xs rounded-full px-2.5 py-1 ${
                           service.status === 'healthy'
                             ? 'bg-emerald-500/20 text-emerald-300'
                             : service.status === 'degraded'
@@ -230,7 +258,10 @@ export function DashboardOverviewTab({
 
       <div className="aethel-card aethel-p-6">
         <div className="aethel-flex aethel-items-center aethel-justify-between mb-4">
-          <h3 className="text-xl font-semibold">Previa ao vivo</h3>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Preview</p>
+            <h3 className="text-xl font-semibold">Previa ao vivo</h3>
+          </div>
           <button type="button" onClick={onToggleMiniPreviewExpanded} className="aethel-button aethel-button-ghost text-sm">
             {miniPreviewExpanded ? 'Recolher' : 'Expandir'}
           </button>
