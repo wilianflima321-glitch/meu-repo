@@ -240,13 +240,13 @@ export default function AethelHeader() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
+                  className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm font-medium"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors"
+                  className="aethel-button aethel-button-primary rounded-xl px-4 py-2 text-sm font-semibold"
                 >
                   Comecar Gratis
                 </Link>
