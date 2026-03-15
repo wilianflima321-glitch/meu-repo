@@ -223,7 +223,7 @@ function ItemCard({
           <span className="text-zinc-500">Motivo:</span>{' '}
           <span className="text-zinc-200">{item.reason}</span>
           {item.category && (
-            <span className="ml-2 px-2 py-0.5 text-xs bg-[#333] rounded capitalize">
+            <span className="ml-2 px-2 py-0.5 text-xs bg-[var(--aethel-surface-quaternary)] rounded capitalize">
               {item.category}
             </span>
           )}

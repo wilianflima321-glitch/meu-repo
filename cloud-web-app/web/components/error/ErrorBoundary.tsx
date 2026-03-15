@@ -305,12 +305,12 @@ User Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}
           </button>
           
           {showStack && (
-            <div className="bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg overflow-hidden">
-              <div className="flex items-center justify-between px-3 py-2 border-b border-[#3c3c3c]">
+            <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-secondary)]">
                 <span className="text-xs text-gray-400 font-mono">{error.name}</span>
                 <button
                   onClick={copyErrorDetails}
-                  className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-white hover:bg-[#3c3c3c] rounded"
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-white hover:bg-[var(--aethel-surface-quaternary)] rounded"
                 >
                   <Copy size={12} />
                   {copied ? 'Copied!' : 'Copy'}
@@ -324,7 +324,7 @@ User Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}
                 
                 {errorInfo?.componentStack && (
                   <>
-                    <div className="border-t border-[#3c3c3c] my-3" />
+                    <div className="border-t border-[var(--aethel-border-secondary)] my-3" />
                     <p className="text-xs text-gray-500 mb-2">Component Stack:</p>
                     <pre className="text-xs text-gray-400 font-mono whitespace-pre-wrap">
                       {errorInfo.componentStack}
@@ -497,7 +497,7 @@ export const EditorErrorBoundary: React.FC<{ children: ReactNode }> = ({ childre
       level="warning"
       showDetails={false}
       fallback={(error, reset) => (
-        <div className="flex flex-col items-center justify-center h-full p-4 bg-[#1e1e1e]">
+        <div className="flex flex-col items-center justify-center h-full p-4 bg-[var(--aethel-surface-secondary)]">
           <AlertTriangle className="w-8 h-8 text-yellow-500 mb-2" />
           <p className="text-sm text-gray-400 mb-3">Failed to render editor</p>
           <button

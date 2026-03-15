@@ -205,7 +205,7 @@ export default function AdminOpsLayout({ children }: { children: React.ReactNode
   const quickStats = statsData?.stats || null
 
   return (
-    <div className="admin-unified-theme density-compact flex min-h-screen bg-[#07080c] text-zinc-100 [background-image:radial-gradient(circle_at_top,rgba(99,102,241,0.12),transparent_30%),radial-gradient(circle_at_right_top,rgba(14,165,233,0.08),transparent_24%),linear-gradient(180deg,#0a0c12_0%,#06070a_100%)]">
+    <div className="admin-unified-theme density-compact flex min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex min-h-screen flex-1 flex-col">
         <Header onMenuClick={() => setSidebarOpen(true)} systemStatus={systemStatus} quickStats={quickStats} />

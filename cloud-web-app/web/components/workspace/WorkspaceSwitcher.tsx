@@ -313,7 +313,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
 
           .remove-button:hover {
             opacity: 1;
-            color: #f14c4c;
+            color: var(--aethel-error);
           }
 
           .empty-state {

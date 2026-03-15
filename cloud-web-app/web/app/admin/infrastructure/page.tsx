@@ -115,12 +115,12 @@ function StatusBadge({ status }: { status: 'healthy' | 'degraded' | 'down' }) {
 function ServiceCard({ service }: { service: ServiceHealth }) {
   return (
     <div className={`
-      bg-[#1a1a1a] border rounded-lg p-4
-      ${service.status === 'healthy' ? 'border-[#333]' : 
+      bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
+      ${service.status === 'healthy' ? 'border-[var(--aethel-border-primary)]' : 
         service.status === 'degraded' ? 'border-yellow-500/30' : 'border-red-500/30'}
     `}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-white">{service.name}</h3>
+        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">{service.name}</h3>
         <StatusBadge status={service.status} />
       </div>
       
@@ -140,7 +140,7 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
         {service.uptime !== undefined && (
           <div>
             <span className="text-zinc-500">Disponibilidade</span>
-            <p className="text-sm font-medium text-white">{service.uptime.toFixed(2)}%</p>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{service.uptime.toFixed(2)}%</p>
           </div>
         )}
       </div>
@@ -180,7 +180,7 @@ function ResourceGauge({
                    percentage >= warning ? 'bg-yellow-500' : 'bg-green-500';
   
   return (
-    <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+    <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Icon className="w-4 h-4 text-zinc-500" />
@@ -191,7 +191,7 @@ function ResourceGauge({
         </span>
       </div>
       
-      <div className="h-2 bg-[#252525] rounded-full overflow-hidden">
+      <div className="h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
         <div 
           className={`h-full rounded-full transition-all duration-500 ${barColor}`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -213,11 +213,11 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
   
   return (
     <div className={`
-      bg-[#1a1a1a] border rounded-lg p-4
-      ${queue.isPaused ? 'border-yellow-500/30' : 'border-[#333]'}
+      bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
+      ${queue.isPaused ? 'border-yellow-500/30' : 'border-[var(--aethel-border-primary)]'}
     `}>
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-white capitalize">
+        <h4 className="text-sm font-medium text-[var(--aethel-text-primary)] capitalize">
           {queue.name.replace(/_/g, ' ')}
         </h4>
         {queue.isPaused && (
@@ -267,13 +267,13 @@ function MetricCard({
   subtitle?: string;
 }) {
   return (
-    <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+    <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs text-zinc-500">{label}</span>
         <Icon className="w-4 h-4 text-zinc-500" />
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-white">
+        <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
           {typeof value === 'number' ? value.toLocaleString() : value}
         </span>
         {unit && <span className="text-sm text-zinc-500">{unit}</span>}
@@ -340,7 +340,7 @@ export default function InfrastructureDashboard() {
         <p className="text-red-400">{error || 'Sem dados disponíveis'}</p>
         <button 
           onClick={fetchData}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+          className="px-4 py-2 bg-blue-600 text-[var(--aethel-text-primary)] rounded-lg text-sm"
         >
           Tentar novamente
         </button>
@@ -356,7 +356,7 @@ export default function InfrastructureDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)] flex items-center gap-2">
             <Server className="w-6 h-6" />
             Infraestrutura
             <StatusBadge status={overallStatus} />
@@ -375,7 +375,7 @@ export default function InfrastructureDashboard() {
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
               autoRefresh 
                 ? 'border-green-500/30 bg-green-500/10 text-green-400' 
-                : 'border-[#333] text-zinc-500'
+                : 'border-[var(--aethel-border-primary)] text-zinc-500'
             }`}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -447,7 +447,7 @@ export default function InfrastructureDashboard() {
             unit="GB"
             icon={HardDrive}
           />
-          <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
+          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
               <Globe className="w-4 h-4 text-zinc-500" />
               <span className="text-sm text-zinc-500">Rede I/O</span>
@@ -472,8 +472,8 @@ export default function InfrastructureDashboard() {
       
       {/* Database */}
       <div className="grid grid-cols-2 gap-6">
-        <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
-          <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
+        <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
+          <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
             <Database className="w-4 h-4" />
             Banco de dados
           </h3>
@@ -489,11 +489,11 @@ export default function InfrastructureDashboard() {
             </div>
             <div>
               <p className="text-xs text-zinc-500">Máximo</p>
-              <p className="text-xl font-bold text-white">{data.dbConnections.max}</p>
+              <p className="text-xl font-bold text-[var(--aethel-text-primary)]">{data.dbConnections.max}</p>
             </div>
           </div>
           
-          <div className="mt-4 pt-4 border-t border-[#333]">
+          <div className="mt-4 pt-4 border-t border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-zinc-500">Tempo médio de consulta</span>
               <span className={`text-sm font-medium ${
@@ -507,8 +507,8 @@ export default function InfrastructureDashboard() {
         </div>
         
         {/* Cache */}
-        <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-4">
-          <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
+        <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
+          <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
             <Zap className="w-4 h-4" />
             Cache (Redis)
           </h3>
@@ -525,7 +525,7 @@ export default function InfrastructureDashboard() {
             </div>
             <div>
               <p className="text-xs text-zinc-500">Memória usada</p>
-              <p className="text-xl font-bold text-white">
+              <p className="text-xl font-bold text-[var(--aethel-text-primary)]">
                 {(data.cacheMemory / 1024 / 1024).toFixed(0)} MB
               </p>
             </div>

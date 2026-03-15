@@ -133,7 +133,7 @@ function MetricCard({
 }
 
 function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] }) {
-  const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'];
+  const colors = ['var(--aethel-primary)', 'var(--aethel-accent)', 'var(--aethel-secondary)', 'var(--aethel-warning)', 'var(--aethel-success)', 'var(--aethel-info)'];
   const total = data.reduce((sum, item) => sum + item.cost, 0);
   
   return (
@@ -181,11 +181,11 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
 
 function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] }) {
   const colors: Record<string, string> = {
-    'starter': '#6b7280',
-    'basic': '#3b82f6',
-    'pro': '#8b5cf6',
-    'studio': '#f59e0b',
-    'enterprise': '#10b981'
+    'starter': 'var(--aethel-text-quaternary)',
+    'basic': 'var(--aethel-primary)',
+    'pro': 'var(--aethel-accent)',
+    'studio': 'var(--aethel-warning)',
+    'enterprise': 'var(--aethel-success)'
   };
   
   return (
@@ -200,7 +200,7 @@ function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] })
           <div key={item.plan} className="flex items-center gap-3">
             <div 
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: colors[item.plan.toLowerCase()] || '#6366f1' }}
+              style={{ backgroundColor: colors[item.plan.toLowerCase()] || 'var(--aethel-primary)' }}
             />
             <div className="flex-1">
               <div className="flex justify-between text-sm">
