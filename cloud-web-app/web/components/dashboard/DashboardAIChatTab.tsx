@@ -2,6 +2,7 @@ import type { ChatMessage, CopilotWorkflowSummary } from '@/lib/api'
 
 import { AIThinkingPanel } from '../ai/AIThinkingPanel'
 import AIProviderSetupGuide from '../ai/AIProviderSetupGuide'
+import { EmptyState } from '../ui/EmptyState'
 import { DashboardCopilotWorkflowBar } from './DashboardCopilotWorkflowBar'
 
 type ChatMode = 'chat' | 'agent' | 'canvas'
@@ -140,9 +141,19 @@ export function DashboardAIChatTab({
             Chat conversacional padrao com os agentes avancados do Aethel.
           </div>
           {chatHistory.length === 0 && !isStreaming && (
-            <div className="aethel-state aethel-state-empty mb-4">
-              <p className="aethel-state-title">Nenhuma conversa iniciada</p>
-              <p className="text-xs mt-1">Envie uma mensagem para iniciar o fluxo Planner/Coder/Reviewer.</p>
+            <div className="mb-6">
+              <EmptyState
+                title="Inicie o chat"
+                description="Descreva o que voce quer construir. O Aethel responde com um plano e os proximos passos."
+                action={{
+                  label: 'Usar prompt inicial',
+                  onClick: () => onChatMessageChange('Quero criar um app SaaS com dashboard e autenticao.'),
+                }}
+                secondaryAction={{
+                  label: 'Ver exemplos',
+                  onClick: () => onChatMessageChange('Mostre exemplos de prompts e boas praticas.'),
+                }}
+              />
             </div>
           )}
           <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">

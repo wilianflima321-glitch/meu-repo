@@ -113,7 +113,7 @@ export function DashboardOverviewTab({
               <button
                 type="button"
                 onClick={onRefreshWallet}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300 hover:bg-white/[0.08]"
+                className="aethel-button aethel-button-ghost rounded-full px-3 py-1 text-xs"
               >
                 Atualizar
               </button>
