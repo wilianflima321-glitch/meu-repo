@@ -175,7 +175,7 @@ export function DashboardOverviewTab({
                     </li>
                   ))}
                   {walletTransactions.length === 0 && (
-                    <li className="text-sm text-slate-400">Nenhuma transacao registrada.</li>
+                    <li className="aethel-state aethel-state-empty text-sm">Nenhuma transacao registrada.</li>
                   )}
                 </ul>
               </>
@@ -209,7 +209,7 @@ export function DashboardOverviewTab({
               <p className="text-sm text-red-400">Falha ao consultar conectividade.</p>
             )}
             {!connectivityLoading && !connectivityError && connectivityServices.length === 0 && (
-              <p className="text-sm text-slate-400">Nenhum servico configurado.</p>
+              <div className="aethel-state aethel-state-empty text-sm">Nenhum servico configurado.</div>
             )}
             {!connectivityLoading && !connectivityError && connectivityServices.length > 0 && (
               <div className="space-y-3">
