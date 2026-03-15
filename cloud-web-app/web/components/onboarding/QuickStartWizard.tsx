@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Codicon from '@/components/ide/Codicon'
 import { analytics } from '@/lib/analytics'
 
-/* ── Domain templates ─────────────────────── */
+// Domain templates
 const DOMAIN_TEMPLATES = [
   {
     id: 'app-saas',
@@ -55,7 +55,7 @@ const DOMAIN_TEMPLATES = [
     description: 'Jogo com sprites, fisica e leaderboard',
     stack: ['Canvas', 'Rapier', 'Sprites'],
     color: 'from-cyan-500 to-sky-500',
-    mission: 'Criar jogo 2D com sprites, fisica e pontuacao',
+    mission: 'Criar jogo 2D com sprites, fisica e pontuacao',\n    availability: 'experimental',
   },
   {
     id: 'film-storyboard',
@@ -65,11 +65,11 @@ const DOMAIN_TEMPLATES = [
     description: 'Director de cenas com AI e timeline',
     stack: ['Scenes', 'Timeline', 'AI Gen'],
     color: 'from-blue-500 to-cyan-500',
-    mission: 'Criar storyboard com cenas, diretor AI e timeline',
+    mission: 'Criar storyboard com cenas, diretor AI e timeline',\n    availability: 'experimental',
   },
 ]
 
-/* ── Provider presets ─────────────────────── */
+// Provider presets
 const PROVIDER_PRESETS = [
   {
     id: 'openrouter',
@@ -95,7 +95,7 @@ const PROVIDER_PRESETS = [
   {
     id: 'demo',
     name: 'Modo Demo',
-    description: 'Explore sem API key. Respostas pre-geradas.',
+    description: 'Exploracao limitada com respostas rotuladas como demo.',
     envKey: '',
     recommended: false,
   },
@@ -180,7 +180,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
           ))}
         </div>
 
-        {/* ── Step 1: Domain / Template ── */}
+        {/* Step 1: Domain / Template */}
         {step === 'domain' && (
           <div className="p-6">
             <div className="text-center">
@@ -216,34 +216,43 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
 
             {/* Template grid */}
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {filtered.map((tpl) => (
-                <button
-                  key={tpl.id}
-                  type="button"
-                  onClick={() => setSelectedTemplate(tpl.id)}
-                  className={`group relative rounded-xl border p-4 text-left transition-all ${
-                    selectedTemplate === tpl.id
-                      ? 'border-blue-500/50 bg-blue-500/[0.08]'
-                      : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
-                  }`}
-                >
-                  {selectedTemplate === tpl.id && (
-                    <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white text-xs">
-                      <Codicon name="check" />
-                    </span>
-                  )}
-                  <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${tpl.color} text-white`}>
-                    <Codicon name={tpl.icon} />
-                  </div>
-                  <h3 className="text-sm font-semibold text-white">{tpl.name}</h3>
-                  <p className="mt-1 text-xs text-zinc-500">{tpl.description}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {tpl.stack.map((s) => (
-                      <span key={s} className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-zinc-400">{s}</span>
-                    ))}
-                  </div>
-                </button>
-              ))}
+              {filtered.map((tpl) => {
+                const isDisabled = tpl.availability === 'experimental'
+                return (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => !isDisabled && setSelectedTemplate(tpl.id)}
+                    disabled={isDisabled}
+                    className={`group relative rounded-xl border p-4 text-left transition-all ${
+                      selectedTemplate === tpl.id
+                        ? 'border-blue-500/50 bg-blue-500/[0.08]'
+                        : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
+                    } ${isDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                  >
+                    {isDisabled && (
+                      <span className="absolute right-3 top-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                        Em roadmap
+                      </span>
+                    )}
+                    {selectedTemplate === tpl.id && !isDisabled && (
+                      <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white text-xs">
+                        <Codicon name="check" />
+                      </span>
+                    )}
+                    <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${tpl.color} text-white`}>
+                      <Codicon name={tpl.icon} />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">{tpl.name}</h3>
+                    <p className="mt-1 text-xs text-zinc-500">{tpl.description}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {tpl.stack.map((s) => (
+                        <span key={s} className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-zinc-400">{s}</span>
+                      ))}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
 
             {/* Actions */}
@@ -269,7 +278,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
           </div>
         )}
 
-        {/* ── Step 2: Provider ── */}
+        {/* Step 2: Provider */}
         {step === 'provider' && (
           <div className="p-6">
             <div className="text-center">
@@ -353,7 +362,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
           </div>
         )}
 
-        {/* ── Step 3: Ready ── */}
+        {/* Step 3: Ready */}
         {step === 'ready' && (
           <div className="p-6">
             <div className="text-center">
@@ -440,3 +449,4 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
     </div>
   )
 }
+
