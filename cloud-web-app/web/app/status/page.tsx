@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 
@@ -37,26 +35,26 @@ const SURFACE_CHECKS: SurfaceCheck[] = [
 function stateStyles(state: SurfaceState) {
   switch (state) {
     case 'healthy':
-      return 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
     case 'partial':
-      return 'bg-amber-500/10 border-amber-500/30 text-amber-200'
+      return 'border-amber-500/30 bg-amber-500/10 text-amber-200'
     case 'unhealthy':
-      return 'bg-red-500/10 border-red-500/30 text-red-300'
+      return 'border-red-500/30 bg-red-500/10 text-red-300'
     default:
-      return 'bg-slate-500/10 border-slate-500/20 text-slate-300'
+      return 'border-slate-500/20 bg-slate-500/10 text-slate-300'
   }
 }
 
 function stateLabel(state: SurfaceState) {
   switch (state) {
     case 'healthy':
-      return 'Healthy'
+      return 'Operacional'
     case 'partial':
-      return 'Partial'
+      return 'Parcial'
     case 'unhealthy':
-      return 'Unavailable'
+      return 'Indisponivel'
     default:
-      return 'Unknown'
+      return 'Desconhecido'
   }
 }
 
@@ -76,7 +74,7 @@ function summarizePayload(checkId: string, payload: any, ok: boolean): { state: 
       state: payload?.status === 'ready' ? 'healthy' : ok ? 'partial' : 'unhealthy',
       detail:
         payload?.status === 'ready'
-          ? 'Required runtime dependencies are available.'
+          ? 'Obrigatorio runtime dependencies are available.'
           : 'Runtime still missing one or more required dependencies.',
       latency,
     }
@@ -237,8 +235,8 @@ export default function StatusPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-emerald-600/[0.04] blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-blue-600/[0.04] blur-[150px]" />
+        <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-emerald-600/[0.05] blur-[170px]" />
+        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-blue-600/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
@@ -246,10 +244,12 @@ export default function StatusPage() {
       <main className="relative z-10 px-6 pb-16 pt-12">
         <div className="mx-auto max-w-5xl">
           <header className="mb-10 text-center">
-            <p className="mb-4 text-sm uppercase tracking-[0.18em] text-sky-300">Public Runtime Status</p>
-            <h1 className="text-4xl font-bold sm:text-5xl">Status publico baseado em checks reais</h1>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-sky-300">
+              Status publico
+            </div>
+            <h1 className="text-4xl font-bold sm:text-5xl">Runtime baseado em evidencia</h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
-              Esta pagina nao usa uptime inventado, incidentes ficticios ou SLAs simulados. Ela mostra apenas o que os checks publicos conseguem provar agora.
+              Esta pagina nao inventa uptime. Ela mostra apenas o que os checks publicos conseguem provar agora.
             </p>
           </header>
 
@@ -275,7 +275,7 @@ export default function StatusPage() {
                     <div>
                       <p className="text-sm font-semibold">{check.name}</p>
                       <p className="mt-1 text-xs uppercase tracking-[0.18em] opacity-70">
-                        {check.required ? 'Required' : 'Optional'}
+                        {check.required ? 'Obrigatorio' : 'Opcional'}
                       </p>
                     </div>
                     <span className="rounded-full border border-current/20 px-3 py-1 text-xs font-medium">
