@@ -1,4 +1,4 @@
-import type { FormEvent, Dispatch, SetStateAction } from 'react'
+﻿import type { FormEvent, Dispatch, SetStateAction } from 'react'
 
 import type {
   PurchaseIntentResponse,
@@ -155,14 +155,14 @@ export function DashboardWalletTab({
                   </div>
                   {lastPurchaseIntent && (
                     <p className="text-xs text-slate-400 mt-2">
-                      Ultima intencao #{lastPurchaseIntent.intent_id} • +
+                      Ultima intencao #{lastPurchaseIntent.intent_id} - +
                       {lastPurchaseIntent.entry.amount.toLocaleString()} {formatCurrencyLabel(lastPurchaseIntent.entry.currency)}{' '}
                       em {new Date(lastPurchaseIntent.entry.created_at).toLocaleString()}
                     </p>
                   )}
                   {lastTransferReceipt && (
                     <p className="text-xs text-slate-400">
-                      Ultima transferencia #{lastTransferReceipt.transfer_id} • -
+                      Ultima transferencia #{lastTransferReceipt.transfer_id} - -
                       {lastTransferReceipt.sender_entry.amount.toLocaleString()} {formatCurrencyLabel(lastTransferReceipt.sender_entry.currency)}{' '}
                       em {new Date(lastTransferReceipt.sender_entry.created_at).toLocaleString()}
                     </p>
@@ -269,7 +269,7 @@ export function DashboardWalletTab({
                     </div>
                     <div className="aethel-flex aethel-justify-between aethel-items-center mt-1">
                       <span className="text-xs text-slate-400">
-                        Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
+                        Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : 'â€”'} {formatCurrencyLabel(entry.currency)}
                       </span>
                       <span className="text-xs text-slate-500">
                         {new Date(entry.created_at).toLocaleString()}
@@ -346,7 +346,7 @@ export function DashboardWalletTab({
                           {statusLabel}
                         </td>
                         <td className="py-2 pr-4 text-slate-400">
-                          {entry.balance_after != null ? entry.balance_after.toLocaleString() : '—'} {formatCurrencyLabel(entry.currency)}
+                          {entry.balance_after != null ? entry.balance_after.toLocaleString() : 'â€”'} {formatCurrencyLabel(entry.currency)}
                         </td>
                         <td className="py-2 text-slate-400">
                           {new Date(entry.created_at).toLocaleString()}
@@ -363,3 +363,4 @@ export function DashboardWalletTab({
     </div>
   )
 }
+
