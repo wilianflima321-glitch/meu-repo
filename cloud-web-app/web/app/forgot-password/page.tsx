@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Mail, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react'
+import PublicHeader from '@/components/ui/PublicHeader'
+import PublicFooter from '@/components/ui/PublicFooter'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -22,115 +24,109 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       })
 
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setError(data.error || 'Falha ao enviar e-mail de redefinição')
+        setError(data.error || 'Falha ao enviar email de redefinicao')
         return
       }
 
       setIsSuccess(true)
-    } catch (err) {
+    } catch {
       setError('Erro de rede. Tente novamente.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  if (isSuccess) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 text-center">
-            <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Verifique seu e-mail</h1>
-            <p className="text-slate-400 mb-6">
-              Se existir uma conta com <span className="text-white">{email}</span>, você receberá um link de redefinição em instantes.
-            </p>
-            <p className="text-sm text-slate-500 mb-6">
-              Não encontrou o e-mail? Verifique a pasta de spam.
-            </p>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar para o login
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-md w-full mx-4">
-        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/25">
-              <Mail className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Esqueceu a senha?</h1>
-            <p className="text-slate-400">
-              Sem problemas, enviaremos as instruções de redefinição.
-            </p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                Endereço de e-mail
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                required
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-violet-500/50 transition-all"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                'Enviar link de redefinição'
-              )}
-            </button>
-          </form>
-
-          {/* Back to login */}
-          <div className="mt-6 text-center">
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar para o login
-            </Link>
-          </div>
-        </div>
+    <div className="min-h-screen bg-black text-white">
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[160px]" />
       </div>
+
+      <PublicHeader />
+
+      <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6 pb-16 pt-12">
+        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-8">
+          {isSuccess ? (
+            <div className="text-center">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
+                <CheckCircle className="h-8 w-8 text-emerald-400" />
+              </div>
+              <h1 className="text-2xl font-bold">Verifique seu email</h1>
+              <p className="mt-3 text-sm text-slate-400">
+                Se existir uma conta com <span className="text-white">{email}</span>, voce recebera um link de redefinicao em instantes.
+              </p>
+              <p className="mt-3 text-xs text-slate-500">Nao encontrou? Verifique sua caixa de spam.</p>
+              <Link
+                href="/login"
+                className="aethel-button aethel-button-ghost mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar para o login
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+                  <Mail className="h-8 w-8 text-blue-300" />
+                </div>
+                <h1 className="text-2xl font-bold">Esqueceu a senha?</h1>
+                <p className="mt-2 text-sm text-slate-400">Vamos enviar as instrucoes para redefinir sua senha.</p>
+              </div>
+
+              {error && (
+                <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-300">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="aethel-button aethel-button-primary w-full rounded-xl px-4 py-3 text-sm font-semibold"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  'Enviar link de redefinicao'
+                )}
+              </button>
+
+              <Link
+                href="/login"
+                className="aethel-button aethel-button-ghost w-full rounded-xl px-4 py-2 text-sm font-semibold"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar para o login
+              </Link>
+            </form>
+          )}
+        </div>
+      </main>
+
+      <PublicFooter />
     </div>
   )
 }
