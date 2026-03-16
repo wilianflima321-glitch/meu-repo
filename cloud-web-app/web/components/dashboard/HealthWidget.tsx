@@ -156,13 +156,13 @@ async function checkDatabase(): Promise<ServiceStatus> {
 const StatusIcon: React.FC<{ status: ServiceStatus['status'] }> = ({ status }) => {
   switch (status) {
     case 'online':
-      return <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+      return <CheckCircle2 className="h-4 w-4 text-[var(--aethel-success)]" />
     case 'offline':
-      return <XCircle className="h-4 w-4 text-rose-300" />
+      return <XCircle className="h-4 w-4 text-[var(--aethel-error)]" />
     case 'warning':
-      return <AlertTriangle className="h-4 w-4 text-yellow-300" />
+      return <AlertTriangle className="h-4 w-4 text-[var(--aethel-warning)]" />
     case 'checking':
-      return <RefreshCw className="h-4 w-4 text-sky-300 animate-spin" />
+      return <RefreshCw className="h-4 w-4 text-[var(--aethel-info)] animate-spin" />
   }
 }
 
@@ -179,7 +179,7 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
       <div className="mb-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <StatusIcon status={service.status} />
-          <span className="text-sm font-semibold text-white">{service.name}</span>
+          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{service.name}</span>
         </div>
         {service.status === 'offline' && onFix && (
           <button onClick={onFix} className="aethel-button aethel-button-secondary text-xs">
@@ -188,24 +188,24 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
         )}
       </div>
 
-      {service.version && <p className="mb-1 text-xs text-zinc-500">{service.version}</p>}
-      {service.path && <p className="mb-1 truncate font-mono text-xs text-zinc-600">{service.path}</p>}
+      {service.version && <p className="mb-1 text-xs text-[var(--aethel-text-tertiary)]">{service.version}</p>}
+      {service.path && <p className="mb-1 truncate font-mono text-xs text-[var(--aethel-text-tertiary)]">{service.path}</p>}
 
       {service.message && (
         <p
           className={`text-xs ${
             service.status === 'offline'
-              ? 'text-rose-300'
+              ? 'text-[var(--aethel-error)]'
               : service.status === 'warning'
-                ? 'text-yellow-300'
-                : 'text-zinc-500'
+                ? 'text-[var(--aethel-warning)]'
+                : 'text-[var(--aethel-text-tertiary)]'
           }`}
         >
           {service.message}
         </p>
       )}
 
-      <p className="mt-2 text-[11px] text-zinc-600">Verificado: {service.lastCheck.toLocaleTimeString()}</p>
+      <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">Verificado: {service.lastCheck.toLocaleTimeString()}</p>
     </div>
   )
 }
@@ -219,11 +219,11 @@ const ResourceBar: React.FC<{ label: string; value: number; icon: React.ReactNod
 
   return (
     <div className="flex items-center gap-3">
-      <div className="text-zinc-500">{icon}</div>
+      <div className="text-[var(--aethel-text-tertiary)]">{icon}</div>
       <div className="flex-1">
         <div className="mb-1 flex justify-between text-xs">
-          <span className="text-zinc-300">{label}</span>
-          <span className="text-zinc-500">{value.toFixed(0)}%</span>
+          <span className="text-[var(--aethel-text-secondary)]">{label}</span>
+          <span className="text-[var(--aethel-text-tertiary)]">{value.toFixed(0)}%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-white/10">
           <div className={`h-full ${getColor(value)} transition-all duration-500`} style={{ width: `${value}%` }} />
@@ -294,10 +294,10 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-3">
-          <Activity className={`h-4 w-4 ${allOnline ? 'text-emerald-300' : hasOffline ? 'text-rose-300' : 'text-yellow-300'}`} />
+          <Activity className={`h-4 w-4 ${allOnline ? 'text-[var(--aethel-success)]' : hasOffline ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-warning)]'}`} />
           <div>
-            <h3 className="text-sm font-semibold text-white">Status do sistema</h3>
-            <p className="text-xs text-zinc-500">
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Status do sistema</h3>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {allOnline ? 'Todos os servicos online' : hasOffline ? 'Alguns servicos offline' : 'Verificando...'}
             </p>
           </div>
@@ -313,7 +313,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
             className="aethel-button aethel-button-ghost rounded-lg p-2"
             title="Atualizar"
           >
-            <RefreshCw className={`h-4 w-4 text-zinc-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 text-[var(--aethel-text-secondary)] ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
 
           {onSettingsClick && (
@@ -325,7 +325,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
               className="aethel-button aethel-button-ghost rounded-lg p-2"
               title="Configuracoes"
             >
-              <Settings className="h-4 w-4 text-zinc-400" />
+              <Settings className="h-4 w-4 text-[var(--aethel-text-secondary)]" />
             </button>
           )}
         </div>
@@ -350,7 +350,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
           </div>
 
           <div className="border-t border-white/10 pt-4">
-            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">Recursos do sistema</h4>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--aethel-text-tertiary)]">Recursos do sistema</h4>
             <div className="space-y-3">
               <ResourceBar label="CPU" value={resources.cpuUsage} icon={<Cpu className="h-4 w-4" />} />
               <ResourceBar label="Memoria" value={resources.memoryUsage} icon={<HardDrive className="h-4 w-4" />} />
@@ -358,8 +358,8 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
             </div>
 
             {resources.gpuAvailable && (
-              <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500">
-                <Wifi className="h-4 w-4 text-emerald-300" />
+              <div className="mt-3 flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)]">
+                <Wifi className="h-4 w-4 text-[var(--aethel-success)]" />
                 <span>GPU: {resources.gpuName}</span>
               </div>
             )}
@@ -367,7 +367,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
 
           {hasOffline && (
             <div className="border-t border-white/10 pt-4">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Acoes rapidas</h4>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--aethel-text-tertiary)]">Acoes rapidas</h4>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleFixOllama}

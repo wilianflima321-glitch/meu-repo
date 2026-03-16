@@ -124,19 +124,19 @@ const Icons = {
 // ============================================================================
 
 const STATUS_COLORS: Record<JobStatus, { bg: string; text: string; dot: string }> = {
-  pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', dot: 'bg-yellow-400' },
-  running: { bg: 'bg-sky-500/20', text: 'text-sky-300', dot: 'bg-sky-400 animate-pulse' },
-  completed: { bg: 'bg-emerald-500/20', text: 'text-emerald-300', dot: 'bg-emerald-400' },
-  failed: { bg: 'bg-rose-500/20', text: 'text-rose-300', dot: 'bg-rose-400' },
-  cancelled: { bg: 'bg-zinc-500/20', text: 'text-zinc-300', dot: 'bg-zinc-400' },
+  pending: { bg: 'bg-yellow-500/20', text: 'text-[var(--aethel-warning)]', dot: 'bg-yellow-400' },
+  running: { bg: 'bg-sky-500/20', text: 'text-[var(--aethel-info)]', dot: 'bg-sky-400 animate-pulse' },
+  completed: { bg: 'bg-emerald-500/20', text: 'text-[var(--aethel-success)]', dot: 'bg-emerald-400' },
+  failed: { bg: 'bg-rose-500/20', text: 'text-[var(--aethel-error)]', dot: 'bg-rose-400' },
+  cancelled: { bg: 'bg-zinc-500/20', text: 'text-[var(--aethel-text-secondary)]', dot: 'bg-zinc-400' },
   timeout: { bg: 'bg-orange-500/20', text: 'text-orange-300', dot: 'bg-orange-400' },
 }
 
 const PRIORITY_COLORS: Record<JobPriority, string> = {
-  critical: 'text-rose-300',
+  critical: 'text-[var(--aethel-error)]',
   high: 'text-orange-300',
-  normal: 'text-sky-300',
-  low: 'text-zinc-400',
+  normal: 'text-[var(--aethel-info)]',
+  low: 'text-[var(--aethel-text-secondary)]',
 }
 
 // ============================================================================
@@ -151,18 +151,18 @@ interface StatCardProps {
   color?: string
 }
 
-function StatCard({ label, value, icon, trend, color = 'text-white' }: StatCardProps) {
+function StatCard({ label, value, icon, trend, color = 'text-[var(--aethel-text-primary)]' }: StatCardProps) {
   return (
     <div className="aethel-card aethel-p-4">
-      <div className="flex items-center justify-between text-xs text-zinc-500">
+      <div className="flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
         <span>{label}</span>
-        <span className="text-zinc-600">{icon}</span>
+        <span className="text-[var(--aethel-text-tertiary)]">{icon}</span>
       </div>
       <div className={`mt-2 text-2xl font-semibold ${color}`}>
         {typeof value === 'number' && value > 1000 ? `${(value / 1000).toFixed(1)}k` : value}
       </div>
       {trend && (
-        <div className={`mt-2 text-xs ${trend.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
+        <div className={`mt-2 text-xs ${trend.isUp ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'}`}>
           {trend.isUp ? 'up' : 'down'} {trend.value}% da ultima hora
         </div>
       )}
@@ -206,7 +206,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
   return (
     <div className="border-b border-white/10 transition-colors hover:bg-white/[0.03]">
       <div className="flex cursor-pointer items-center gap-4 px-4 py-3" onClick={onToggle}>
-        <span className={`text-zinc-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+        <span className={`text-[var(--aethel-text-tertiary)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
           <Icons.ChevronDown />
         </span>
 
@@ -216,7 +216,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
         </div>
 
         <div className="w-24">
-          <span className="font-mono text-sm text-white">{job.type}</span>
+          <span className="font-mono text-sm text-[var(--aethel-text-primary)]">{job.type}</span>
         </div>
 
         <div className="w-16">
@@ -232,19 +232,19 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
                   style={{ width: `${job.progress}%` }}
                 />
               </div>
-              <span className="w-10 text-right text-xs text-zinc-400">{job.progress.toFixed(0)}%</span>
+              <span className="w-10 text-right text-xs text-[var(--aethel-text-secondary)]">{job.progress.toFixed(0)}%</span>
             </div>
           ) : (
-            <span className="text-xs text-zinc-500">-</span>
+            <span className="text-xs text-[var(--aethel-text-tertiary)]">-</span>
           )}
         </div>
 
         <div className="w-24 text-right">
-          <span className="text-xs text-zinc-400">{formatDuration(job.startedAt, job.completedAt)}</span>
+          <span className="text-xs text-[var(--aethel-text-secondary)]">{formatDuration(job.startedAt, job.completedAt)}</span>
         </div>
 
         <div className="w-20 text-right">
-          <span className="text-xs text-zinc-500">{formatTime(job.createdAt)}</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{formatTime(job.createdAt)}</span>
         </div>
 
         <div className="ml-auto flex items-center gap-1">
@@ -254,7 +254,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
                 event.stopPropagation()
                 onRetry(job.id)
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-zinc-300 hover:text-sky-200"
+              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-info-light)]"
               title="Tentar novamente"
             >
               <Icons.Refresh />
@@ -266,7 +266,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
                 event.stopPropagation()
                 onCancel(job.id)
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-zinc-300 hover:text-rose-200"
+              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-error)]"
               title="Cancelar"
             >
               <Icons.X />
@@ -279,32 +279,32 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
         <div className="border-t border-white/10 bg-white/[0.02] px-4 py-3">
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
-              <h4 className="mb-2 text-xs font-semibold uppercase text-zinc-500">Detalhes do job</h4>
+              <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Detalhes do job</h4>
               <dl className="space-y-1">
                 <div className="flex">
-                  <dt className="w-24 text-xs text-zinc-500">ID:</dt>
-                  <dd className="text-xs font-mono text-zinc-300">{job.id}</dd>
+                  <dt className="w-24 text-xs text-[var(--aethel-text-tertiary)]">ID:</dt>
+                  <dd className="text-xs font-mono text-[var(--aethel-text-secondary)]">{job.id}</dd>
                 </div>
                 <div className="flex">
-                  <dt className="w-24 text-xs text-zinc-500">Worker:</dt>
-                  <dd className="text-xs font-mono text-zinc-300">{job.workerId || '-'}</dd>
+                  <dt className="w-24 text-xs text-[var(--aethel-text-tertiary)]">Worker:</dt>
+                  <dd className="text-xs font-mono text-[var(--aethel-text-secondary)]">{job.workerId || '-'}</dd>
                 </div>
                 <div className="flex">
-                  <dt className="w-24 text-xs text-zinc-500">Retries:</dt>
-                  <dd className="text-xs text-zinc-300">
+                  <dt className="w-24 text-xs text-[var(--aethel-text-tertiary)]">Retries:</dt>
+                  <dd className="text-xs text-[var(--aethel-text-secondary)]">
                     {job.retryCount} / {job.maxRetries}
                   </dd>
                 </div>
                 <div className="flex">
-                  <dt className="w-24 text-xs text-zinc-500">Timeout:</dt>
-                  <dd className="text-xs text-zinc-300">{job.timeoutMs / 1000}s</dd>
+                  <dt className="w-24 text-xs text-[var(--aethel-text-tertiary)]">Timeout:</dt>
+                  <dd className="text-xs text-[var(--aethel-text-secondary)]">{job.timeoutMs / 1000}s</dd>
                 </div>
               </dl>
             </div>
 
             <div>
-              <h4 className="mb-2 text-xs font-semibold uppercase text-zinc-500">Payload</h4>
-              <pre className="max-h-32 overflow-auto rounded-md bg-white/[0.04] p-2 text-xs font-mono text-zinc-300">
+              <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Payload</h4>
+              <pre className="max-h-32 overflow-auto rounded-md bg-white/[0.04] p-2 text-xs font-mono text-[var(--aethel-text-secondary)]">
                 {JSON.stringify(job.payload, null, 2)}
               </pre>
             </div>
@@ -312,8 +312,8 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
           {Boolean(job.error) && (
             <div className="mt-3">
-              <h4 className="mb-1 text-xs font-semibold uppercase text-rose-300">Erro</h4>
-              <div className="rounded-md bg-rose-500/10 p-2 text-xs font-mono text-rose-200">
+              <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-error)]">Erro</h4>
+              <div className="rounded-md bg-rose-500/10 p-2 text-xs font-mono text-[var(--aethel-error)]">
                 {String(job.error)}
               </div>
             </div>
@@ -321,8 +321,8 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
           {Boolean(job.result) && (
             <div className="mt-3">
-              <h4 className="mb-1 text-xs font-semibold uppercase text-emerald-300">Resultado</h4>
-              <pre className="max-h-32 overflow-auto rounded-md bg-emerald-500/10 p-2 text-xs font-mono text-emerald-200">
+              <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-success)]">Resultado</h4>
+              <pre className="max-h-32 overflow-auto rounded-md bg-emerald-500/10 p-2 text-xs font-mono text-[var(--aethel-success-light)]">
                 {JSON.stringify(job.result, null, 2)}
               </pre>
             </div>
@@ -464,10 +464,10 @@ export function JobQueueDashboard({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-3">
           <Icons.Server />
-          <h2 className="text-base font-semibold text-white">Fila de jobs</h2>
+          <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Fila de jobs</h2>
           <span
             className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-              isQueueRunning ? 'bg-emerald-500/20 text-emerald-300' : 'bg-yellow-500/20 text-yellow-300'
+              isQueueRunning ? 'bg-emerald-500/20 text-[var(--aethel-success)]' : 'bg-yellow-500/20 text-[var(--aethel-warning)]'
             }`}
           >
             {isQueueRunning ? 'Executando' : 'Pausada'}
@@ -498,20 +498,20 @@ export function JobQueueDashboard({
 
       {stats && (
         <div className="grid gap-4 border-b border-white/10 p-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Pendentes" value={stats.pending} icon={<Icons.Clock />} color="text-yellow-300" />
-          <StatCard label="Executando" value={stats.running} icon={<Icons.Play />} color="text-sky-300" />
-          <StatCard label="Concluidos" value={stats.completed} icon={<Icons.Check />} color="text-emerald-300" />
+          <StatCard label="Pendentes" value={stats.pending} icon={<Icons.Clock />} color="text-[var(--aethel-warning)]" />
+          <StatCard label="Executando" value={stats.running} icon={<Icons.Play />} color="text-[var(--aethel-info)]" />
+          <StatCard label="Concluidos" value={stats.completed} icon={<Icons.Check />} color="text-[var(--aethel-success)]" />
           <StatCard
             label="Taxa de sucesso"
             value={`${(stats.successRate * 100).toFixed(1)}%`}
             icon={<Icons.Check />}
-            color={stats.successRate > 0.9 ? 'text-emerald-300' : 'text-yellow-300'}
+            color={stats.successRate > 0.9 ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'}
           />
         </div>
       )}
 
       <div className="flex flex-wrap items-center gap-3 border-b border-white/10 px-4 py-3">
-        <div className="flex items-center gap-2 text-zinc-500">
+        <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
           <Icons.Filter />
           <select
             value={filter}
@@ -537,7 +537,7 @@ export function JobQueueDashboard({
           />
         </div>
 
-        <div className="text-xs text-zinc-500">{filteredJobs.length} jobs</div>
+        <div className="text-xs text-[var(--aethel-text-tertiary)]">{filteredJobs.length} jobs</div>
       </div>
 
       {error && (
@@ -547,7 +547,7 @@ export function JobQueueDashboard({
       )}
 
       <div className="flex-1 overflow-auto">
-        <div className="sticky top-0 flex items-center gap-4 border-b border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] uppercase text-zinc-500">
+        <div className="sticky top-0 flex items-center gap-4 border-b border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] uppercase text-[var(--aethel-text-tertiary)]">
           <span className="w-4"></span>
           <span className="w-20">Status</span>
           <span className="w-24">Tipo</span>
@@ -582,7 +582,7 @@ export function JobQueueDashboard({
         >
           &lt; Anterior
         </button>
-        <span className="text-xs text-zinc-500">Pagina {page}</span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">Pagina {page}</span>
         <button
           onClick={() => setPage(page + 1)}
           disabled={filteredJobs.length < pageSize}

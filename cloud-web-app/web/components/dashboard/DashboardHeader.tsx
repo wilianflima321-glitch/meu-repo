@@ -61,11 +61,11 @@ export function DashboardHeader({
               alt="Aethel"
               width={36}
               height={36}
-              className="rounded-xl border border-white/10 bg-white/[0.04] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
+              className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
             />
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Studio Home</p>
-              <h1 className="text-xl sm:text-2xl font-semibold text-slate-100">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Studio Home</p>
+              <h1 className="text-xl sm:text-2xl font-semibold text-[var(--aethel-text-primary)]">
                 Aethel Studio
               </h1>
             </div>
@@ -96,21 +96,25 @@ export function DashboardHeader({
           <div
             className={`hidden sm:flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
               backendOnline
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                : 'border-red-500/30 bg-red-500/10 text-red-200'
+                ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+                : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]'
             }`}
           >
-            <div className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
+            <div
+              className={`h-2 w-2 rounded-full ${
+                backendOnline ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'
+              }`}
+            />
             Backend {backendOnline ? 'online' : 'offline'}
           </div>
 
           {authErrorText && (
-            <span className="hidden lg:inline text-xs text-red-400" title={authErrorText}>
+            <span className="hidden lg:inline text-xs text-[var(--aethel-error)]" title={authErrorText}>
               Auth providers indisponiveis
             </span>
           )}
           {billingErrorText && (
-            <span className="hidden lg:inline text-xs text-yellow-400" title={billingErrorText}>
+            <span className="hidden lg:inline text-xs text-[var(--aethel-warning-light)]" title={billingErrorText}>
               Planos indisponiveis
             </span>
           )}
@@ -118,7 +122,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={onOpenProviderSettings}
-              className="hidden lg:inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs text-amber-200 hover:bg-amber-500/20"
+              className="hidden lg:inline-flex rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-warning-light)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]"
               title="Configure ao menos um provider para liberar o chat de IA"
             >
               Configurar IA
@@ -130,8 +134,8 @@ export function DashboardHeader({
             disabled={fullAccessBusy}
             className={`hidden lg:inline-flex rounded-full border px-3 py-1 text-xs disabled:opacity-60 ${
               fullAccessActive
-                ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20'
-                : 'border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08]'
+                ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]'
+                : 'border-white/10 bg-white/[0.04] text-[var(--aethel-text-primary)] hover:bg-white/[0.08]'
             }`}
             title={
               fullAccessActive

@@ -96,10 +96,10 @@ const NAV_ITEMS: NavItem[] = [
 
 function buildFilterClass(isActive: boolean) {
   const base =
-    'flex items-center justify-center clickable rounded-full px-3 py-1.5 text-xs leading-4 border border-white/10 bg-white/[0.03] text-slate-300 transition'
+    'flex items-center justify-center clickable rounded-full px-3 py-1.5 text-xs leading-4 border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)] transition'
   return isActive
-    ? `${base} bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-white border-sky-400/30`
-    : `${base} text-slate-400 hover:bg-white/[0.06] hover:text-slate-200 hover:border-white/15`
+    ? `${base} bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]`
+    : `${base} text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]`
 }
 
 export function AethelDashboardSidebar({
@@ -155,15 +155,15 @@ export function AethelDashboardSidebar({
         <button
           type="button"
           onClick={onCreateNewSession}
-          className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(59,130,246,0.25)] transition active:opacity-80 hover:brightness-110"
+          className="inline-flex w-full min-w-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-3 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_10px_24px_rgba(59,130,246,0.25)] transition active:opacity-80 hover:brightness-110"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           <span>Nova tarefa</span>
           <div className="flex items-center gap-0.5 ml-auto">
-            <span className="flex text-slate-300 justify-center items-center min-w-4 h-4 px-1 rounded text-xs font-normal">Ctrl</span>
-            <span className="flex justify-center items-center w-4 h-4 px-1 rounded text-xs font-normal text-slate-300">K</span>
+            <span className="flex text-[var(--aethel-text-secondary)] justify-center items-center min-w-4 h-4 px-1 rounded text-xs font-normal">Ctrl</span>
+            <span className="flex justify-center items-center w-4 h-4 px-1 rounded text-xs font-normal text-[var(--aethel-text-secondary)]">K</span>
           </div>
         </button>
       </div>

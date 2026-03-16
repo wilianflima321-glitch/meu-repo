@@ -94,11 +94,11 @@ export function DashboardWalletTab({
         )}
       </div>
 
-      {!authReady && <p className="text-sm text-slate-400">Verificando autenticacao...</p>}
+      {!authReady && <p className="text-sm text-[var(--aethel-text-secondary)]">Verificando autenticacao...</p>}
 
       {authReady && !hasToken && (
         <div className="aethel-card aethel-p-6 max-w-2xl">
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-[var(--aethel-text-secondary)]">
             Para visualizar o saldo e realizar operacoes, faca login no portal.
           </p>
         </div>
@@ -109,59 +109,59 @@ export function DashboardWalletTab({
           <div className="aethel-card aethel-p-6 space-y-4">
             <div>
               <h3 className="text-lg font-semibold">Saldo Atual</h3>
-              {walletLoading && <p className="text-sm text-slate-400">Carregando carteira...</p>}
+              {walletLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando carteira...</p>}
               {hasWalletError && (
-                <p className="text-sm text-red-400">
+                <p className="text-sm text-[var(--aethel-error)]">
                   Falha ao carregar os dados. Tente novamente.
                 </p>
               )}
               {!walletLoading && !hasWalletError && walletData && (
                 <>
-                  <div className="text-4xl font-bold text-slate-100">
+                  <div className="text-4xl font-bold text-[var(--aethel-text-primary)]">
                     {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                   </div>
                   {creditsInfo && (
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[var(--aethel-text-secondary)]">
                       Creditos faturaveis: {creditsInfo.credits.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                     </p>
                   )}
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">
                     {walletTransactions.length} transacoes
                   </p>
                   {lastWalletUpdate && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">
                       Atualizado em {new Date(lastWalletUpdate).toLocaleString()}
                     </p>
                   )}
                   <div className="grid grid-cols-1 sm:grid-cols-3 aethel-gap-3 mt-4">
                     <div className="bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                      <p className="text-xs text-slate-500">Gasto hoje</p>
-                      <p className="text-lg font-semibold text-rose-300">
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Gasto hoje</p>
+                      <p className="text-lg font-semibold text-[var(--aethel-error)]">
                         {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
                     </div>
                     <div className="bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                      <p className="text-xs text-slate-500">Gasto no mes</p>
-                      <p className="text-lg font-semibold text-amber-300">
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Gasto no mes</p>
+                      <p className="text-lg font-semibold text-[var(--aethel-warning)]">
                         {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
                     </div>
                     <div className="bg-slate-900/40 aethel-rounded-lg aethel-p-3">
-                      <p className="text-xs text-slate-500">Recebido no mes</p>
-                      <p className="text-lg font-semibold text-emerald-300">
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Recebido no mes</p>
+                      <p className="text-lg font-semibold text-[var(--aethel-success)]">
                         {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
                     </div>
                   </div>
                   {lastPurchaseIntent && (
-                    <p className="text-xs text-slate-400 mt-2">
+                    <p className="text-xs text-[var(--aethel-text-secondary)] mt-2">
                       Ultima intencao #{lastPurchaseIntent.intent_id} - +
                       {lastPurchaseIntent.entry.amount.toLocaleString()} {formatCurrencyLabel(lastPurchaseIntent.entry.currency)}{' '}
                       em {new Date(lastPurchaseIntent.entry.created_at).toLocaleString()}
                     </p>
                   )}
                   {lastTransferReceipt && (
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[var(--aethel-text-secondary)]">
                       Ultima transferencia #{lastTransferReceipt.transfer_id} - -
                       {lastTransferReceipt.sender_entry.amount.toLocaleString()} {formatCurrencyLabel(lastTransferReceipt.sender_entry.currency)}{' '}
                       em {new Date(lastTransferReceipt.sender_entry.created_at).toLocaleString()}
@@ -172,7 +172,7 @@ export function DashboardWalletTab({
             </div>
 
             {(walletActionMessage || walletActionError) && (
-              <div className={`text-sm ${walletActionError ? 'text-red-400' : 'text-emerald-400'}`}>
+              <div className={`text-sm ${walletActionError ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-success)]'}`}>
                 {walletActionError || walletActionMessage}
               </div>
             )}
@@ -255,7 +255,7 @@ export function DashboardWalletTab({
               <h4 className="text-sm font-semibold mb-2">Historico Recente</h4>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {walletTransactions.length === 0 && (
-                  <p className="text-sm text-slate-500">Nenhuma transacao registrada.</p>
+                  <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma transacao registrada.</p>
                 )}
                 {walletTransactions.slice().reverse().map((entry) => (
                   <div key={entry.id} className="border border-slate-800 aethel-rounded-lg aethel-p-3">
@@ -263,15 +263,15 @@ export function DashboardWalletTab({
                       <span className="text-sm font-medium">
                         {entry.reference || entry.entry_type.toUpperCase()}
                       </span>
-                      <span className={`text-sm font-semibold ${entry.entry_type === 'credit' ? 'text-emerald-400' : entry.entry_type === 'transfer' ? 'text-amber-300' : 'text-red-400'}`}>
+                      <span className={`text-sm font-semibold ${entry.entry_type === 'credit' ? 'text-[var(--aethel-success)]' : entry.entry_type === 'transfer' ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'}`}>
                         {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
                       </span>
                     </div>
                     <div className="aethel-flex aethel-justify-between aethel-items-center mt-1">
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-[var(--aethel-text-secondary)]">
                         Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'} {formatCurrencyLabel(entry.currency)}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--aethel-text-tertiary)]">
                         {new Date(entry.created_at).toLocaleString()}
                       </span>
                     </div>
@@ -284,26 +284,26 @@ export function DashboardWalletTab({
           <div className="aethel-card aethel-p-6 lg:col-span-2 space-y-4">
             <div className="aethel-flex aethel-items-center aethel-justify-between">
               <h3 className="text-lg font-semibold">Recebiveis</h3>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">
                 {creditEntries.length} lancamentos de entrada
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 aethel-gap-4">
               <div className="bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                <p className="text-xs text-slate-500">Recebido no mes</p>
-                <p className="text-lg font-semibold text-emerald-300">
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Recebido no mes</p>
+                <p className="text-lg font-semibold text-[var(--aethel-success)]">
                   {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
               </div>
               <div className="bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                <p className="text-xs text-slate-500">Total creditado</p>
-                <p className="text-lg font-semibold text-blue-300">
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Total creditado</p>
+                <p className="text-lg font-semibold text-[var(--aethel-primary-light)]">
                   {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
               </div>
               <div className="bg-slate-900/40 aethel-rounded-lg aethel-p-4">
-                <p className="text-xs text-slate-500">Pendente de conciliacao</p>
-                <p className="text-lg font-semibold text-amber-300">
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Pendente de conciliacao</p>
+                <p className="text-lg font-semibold text-[var(--aethel-warning)]">
                   {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
               </div>
@@ -311,7 +311,7 @@ export function DashboardWalletTab({
             <div className="overflow-x-auto">
               <table className="min-w-full text-xs text-left">
                 <thead>
-                  <tr className="text-slate-400">
+                  <tr className="text-[var(--aethel-text-secondary)]">
                     <th className="py-2 pr-4">Referencia</th>
                     <th className="py-2 pr-4">Valor</th>
                     <th className="py-2 pr-4">Status</th>
@@ -322,7 +322,7 @@ export function DashboardWalletTab({
                 <tbody>
                   {receivableSummary.recent.length === 0 && (
                     <tr>
-                      <td className="py-3 text-slate-500" colSpan={5}>
+                      <td className="py-3 text-[var(--aethel-text-tertiary)]" colSpan={5}>
                         Nenhum recebimento registrado.
                       </td>
                     </tr>
@@ -336,19 +336,19 @@ export function DashboardWalletTab({
                     const amountLabel = `+${entry.amount.toLocaleString()} ${formatCurrencyLabel(entry.currency)}`
                     return (
                       <tr key={entry.id} className="border-t border-slate-800">
-                        <td className="py-2 pr-4 font-medium text-slate-200">
+                        <td className="py-2 pr-4 font-medium text-[var(--aethel-text-primary)]">
                           {invoiceLabel || 'Recebimento'}
                         </td>
-                        <td className="py-2 pr-4 text-emerald-300">
+                        <td className="py-2 pr-4 text-[var(--aethel-success)]">
                           {amountLabel}
                         </td>
                         <td className="py-2 pr-4 uppercase">
                           {statusLabel}
                         </td>
-                        <td className="py-2 pr-4 text-slate-400">
+                        <td className="py-2 pr-4 text-[var(--aethel-text-secondary)]">
                           {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'} {formatCurrencyLabel(entry.currency)}
                         </td>
-                        <td className="py-2 text-slate-400">
+                        <td className="py-2 text-[var(--aethel-text-secondary)]">
                           {new Date(entry.created_at).toLocaleString()}
                         </td>
                       </tr>

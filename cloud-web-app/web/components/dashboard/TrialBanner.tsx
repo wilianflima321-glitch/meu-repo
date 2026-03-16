@@ -6,7 +6,7 @@ type TrialBannerProps = {
 
 export function TrialBanner({ trialDaysLeft, onDismiss, onUpgrade }: TrialBannerProps) {
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 text-sm flex items-center justify-between shadow-lg">
+    <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-[var(--aethel-text-primary)] px-6 py-3 text-sm flex items-center justify-between shadow-lg">
       <div className="flex items-center gap-2">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -17,14 +17,14 @@ export function TrialBanner({ trialDaysLeft, onDismiss, onUpgrade }: TrialBanner
         <button
           type="button"
           onClick={onUpgrade}
-          className="text-white underline text-xs hover:text-gray-200"
+          className="text-[var(--aethel-text-primary)] underline text-xs hover:text-[var(--aethel-text-secondary)]"
         >
           Fazer upgrade
         </button>
         <button
           type="button"
           onClick={onDismiss}
-          className="text-white hover:text-gray-200 ml-2"
+          className="text-[var(--aethel-text-primary)] hover:text-[var(--aethel-text-secondary)] ml-2"
           aria-label="Dismiss trial banner"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

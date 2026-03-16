@@ -93,14 +93,14 @@ function getStatusColor(status: string): string {
   switch (status) {
     case 'healthy':
     case 'online':
-      return 'text-emerald-300'
+      return 'text-[var(--aethel-success)]'
     case 'degraded':
-      return 'text-yellow-300'
+      return 'text-[var(--aethel-warning)]'
     case 'critical':
     case 'offline':
-      return 'text-rose-300'
+      return 'text-[var(--aethel-error)]'
     default:
-      return 'text-zinc-500'
+      return 'text-[var(--aethel-text-tertiary)]'
   }
 }
 
@@ -120,9 +120,9 @@ function getStatusBg(status: string): string {
 }
 
 function getMetricColor(value: number, thresholds: [number, number] = [70, 90]): string {
-  if (value >= thresholds[1]) return 'text-rose-300'
-  if (value >= thresholds[0]) return 'text-yellow-300'
-  return 'text-emerald-300'
+  if (value >= thresholds[1]) return 'text-[var(--aethel-error)]'
+  if (value >= thresholds[0]) return 'text-[var(--aethel-warning)]'
+  return 'text-[var(--aethel-success)]'
 }
 
 // ============================================================================
@@ -142,7 +142,7 @@ const StatusIcon: React.FC<{ status: string; size?: number }> = ({ status, size 
     case 'offline':
       return <XCircle size={size} className={className} />
     default:
-      return <Activity size={size} className="text-zinc-500" />
+      return <Activity size={size} className="text-[var(--aethel-text-tertiary)]" />
   }
 }
 
@@ -159,7 +159,7 @@ const MetricBar: React.FC<{
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2 text-zinc-500">
+        <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
           {icon}
           <span>{label}</span>
         </div>
@@ -178,13 +178,13 @@ const ComponentStatus: React.FC<{ name: string; component: ComponentHealth; icon
       <div className="flex items-center gap-3">
         <div className={getStatusColor(component.status)}>{icon}</div>
         <div>
-          <div className="text-sm font-semibold text-white">{name}</div>
-          {component.message && <div className="text-xs text-zinc-500">{component.message}</div>}
+          <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">{name}</div>
+          {component.message && <div className="text-xs text-[var(--aethel-text-tertiary)]">{component.message}</div>}
         </div>
       </div>
       <div className="flex items-center gap-3">
         {component.latency !== undefined && (
-          <span className="text-xs font-mono text-zinc-500">{formatLatency(component.latency)}</span>
+          <span className="text-xs font-mono text-[var(--aethel-text-tertiary)]">{formatLatency(component.latency)}</span>
         )}
         <StatusIcon status={component.status} />
       </div>
@@ -209,9 +209,9 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
     return (
       <div className={`aethel-card ${className}`}>
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <WifiOff size={40} className="mb-4 text-rose-300" />
-          <h3 className="mb-2 text-lg font-semibold text-white">Desconectado</h3>
-          <p className="mb-4 text-sm text-zinc-500">Nao foi possivel conectar ao servidor</p>
+          <WifiOff size={40} className="mb-4 text-[var(--aethel-error)]" />
+          <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Desconectado</h3>
+          <p className="mb-4 text-sm text-[var(--aethel-text-tertiary)]">Nao foi possivel conectar ao servidor</p>
           {onRefresh && (
             <button onClick={onRefresh} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
               <RefreshCw size={16} />
@@ -227,8 +227,8 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
     return (
       <div className={`aethel-card ${className}`}>
         <div className="flex flex-col items-center justify-center py-12">
-          <RefreshCw size={28} className="mb-4 animate-spin text-sky-300" />
-          <p className="text-sm text-zinc-500">Carregando dados de saude...</p>
+          <RefreshCw size={28} className="mb-4 animate-spin text-[var(--aethel-info)]" />
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando dados de saude...</p>
         </div>
       </div>
     )
@@ -242,9 +242,9 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
             <Activity size={20} className={getStatusColor(health.status)} />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">System Health</h2>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-              <Wifi size={14} className="text-emerald-300" />
+            <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">System Health</h2>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--aethel-text-tertiary)]">
+              <Wifi size={14} className="text-[var(--aethel-success)]" />
               <span>Conectado</span>
               <span>•</span>
               <Clock size={14} />
@@ -259,7 +259,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
           </span>
           {onRefresh && (
             <button onClick={onRefresh} className="aethel-button aethel-button-ghost rounded-lg p-2" title="Atualizar">
-              <RefreshCw size={18} className="text-zinc-400" />
+              <RefreshCw size={18} className="text-[var(--aethel-text-secondary)]" />
             </button>
           )}
         </div>
@@ -267,26 +267,26 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="aethel-card aethel-p-4 text-center">
-          <div className="text-2xl font-semibold text-sky-300">{health.activeJobs}</div>
-          <div className="text-xs text-zinc-500">Jobs ativos</div>
+          <div className="text-2xl font-semibold text-[var(--aethel-info)]">{health.activeJobs}</div>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">Jobs ativos</div>
         </div>
         <div className="aethel-card aethel-p-4 text-center">
-          <div className="text-2xl font-semibold text-yellow-300">{health.queuedJobs}</div>
-          <div className="text-xs text-zinc-500">Na fila</div>
+          <div className="text-2xl font-semibold text-[var(--aethel-warning)]">{health.queuedJobs}</div>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">Na fila</div>
         </div>
         <div className="aethel-card aethel-p-4 text-center">
-          <div className="text-2xl font-semibold text-emerald-300">{health.completedToday}</div>
-          <div className="text-xs text-zinc-500">Completos hoje</div>
+          <div className="text-2xl font-semibold text-[var(--aethel-success)]">{health.completedToday}</div>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">Completos hoje</div>
         </div>
         <div className="aethel-card aethel-p-4 text-center">
-          <div className="text-2xl font-semibold text-rose-300">{health.errors24h}</div>
-          <div className="text-xs text-zinc-500">Erros 24h</div>
+          <div className="text-2xl font-semibold text-[var(--aethel-error)]">{health.errors24h}</div>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">Erros 24h</div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Recursos do sistema</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Recursos do sistema</h3>
           <MetricBar label="CPU" value={health.metrics.cpu} icon={<Cpu size={14} />} />
           <MetricBar label="Memoria" value={health.metrics.memory} icon={<MemoryStick size={14} />} />
           <MetricBar label="Disco" value={health.metrics.disk} icon={<HardDrive size={14} />} />
@@ -296,7 +296,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
           {health.metrics.gpuTemp !== undefined && (
             <MetricBar label="GPU Temp" value={health.metrics.gpuTemp} icon={<Thermometer size={14} />} suffix="C" thresholds={[70, 85]} />
           )}
-          <div className="flex items-center justify-between pt-2 text-xs text-zinc-500">
+          <div className="flex items-center justify-between pt-2 text-xs text-[var(--aethel-text-tertiary)]">
             <div className="flex items-center gap-2">
               <Wifi size={14} />
               <span>Latencia</span>
@@ -308,7 +308,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Status dos componentes</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Status dos componentes</h3>
           <ComponentStatus name="Servidor" component={health.components.server} icon={<Server size={18} />} />
           <ComponentStatus name="Blender" component={health.components.blender} icon={<Activity size={18} />} />
           <ComponentStatus name="AI Engine" component={health.components.ai} icon={<Activity size={18} />} />
@@ -317,7 +317,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap justify-between gap-2 border-t border-white/10 pt-4 text-xs text-zinc-500">
+      <div className="mt-6 flex flex-wrap justify-between gap-2 border-t border-white/10 pt-4 text-xs text-[var(--aethel-text-tertiary)]">
         <span>Ultima atualizacao: {lastUpdate.toLocaleTimeString()}</span>
         <span>Aethel Engine v1.0.0</span>
       </div>

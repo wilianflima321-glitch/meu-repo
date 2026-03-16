@@ -68,23 +68,23 @@ function StatCard({
       
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-400 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-white">{value}</p>
+          <p className="text-sm text-[var(--aethel-text-secondary)] mb-1">{title}</p>
+          <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">{value}</p>
           
           {change !== undefined && (
             <div className="flex items-center gap-1 mt-2">
               {trend === 'up' ? (
-                <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+                <ArrowUpRight className="w-4 h-4 text-[var(--aethel-success)]" />
               ) : trend === 'down' ? (
-                <ArrowDownRight className="w-4 h-4 text-red-400" />
+                <ArrowDownRight className="w-4 h-4 text-[var(--aethel-error)]" />
               ) : null}
               <span
                 className={`text-sm ${
                   trend === 'up'
-                    ? 'text-emerald-400'
+                    ? 'text-[var(--aethel-success)]'
                     : trend === 'down'
-                    ? 'text-red-400'
-                    : 'text-slate-400'
+                    ? 'text-[var(--aethel-error)]'
+                    : 'text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {change > 0 ? '+' : ''}{change}% vs mês passado
@@ -142,8 +142,8 @@ export function OverviewTab({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Bem-vindo de volta!</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Bem-vindo de volta!</h1>
+          <p className="text-[var(--aethel-text-secondary)] mt-1">
             Aqui está um resumo da sua atividade recente.
           </p>
         </div>
@@ -158,27 +158,27 @@ export function OverviewTab({
           title="Projetos Ativos"
           value={currentStats.projects}
           change={currentStats.projectsChange}
-          icon={<FolderKanban className="w-6 h-6 text-sky-400" />}
+          icon={<FolderKanban className="w-6 h-6 text-[var(--aethel-info)]" />}
           trend={currentStats.projectsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
           title="Sessões de Chat"
           value={currentStats.chatSessions}
           change={currentStats.chatSessionsChange}
-          icon={<MessageSquare className="w-6 h-6 text-blue-400" />}
+          icon={<MessageSquare className="w-6 h-6 text-[var(--aethel-primary-light)]" />}
           trend={currentStats.chatSessionsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
           title="Requests AI"
           value={currentStats.aiRequests}
           change={currentStats.aiRequestsChange}
-          icon={<Zap className="w-6 h-6 text-amber-400" />}
+          icon={<Zap className="w-6 h-6 text-[var(--aethel-warning)]" />}
           trend={currentStats.aiRequestsChange >= 0 ? 'up' : 'down'}
         />
         <StatCard
           title="Tempo Codando"
           value={currentStats.timeSpent}
-          icon={<Clock className="w-6 h-6 text-emerald-400" />}
+          icon={<Clock className="w-6 h-6 text-[var(--aethel-success)]" />}
         />
       </div>
 
@@ -208,14 +208,14 @@ export function OverviewTab({
                 >
                   <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
                     {project.type === 'unreal' ? (
-                      <Code className="w-5 h-5 text-sky-400" />
+                      <Code className="w-5 h-5 text-[var(--aethel-info)]" />
                     ) : (
-                      <FileCode className="w-5 h-5 text-sky-400" />
+                      <FileCode className="w-5 h-5 text-[var(--aethel-info)]" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white truncate">{project.name}</p>
-                    <p className="text-sm text-slate-400">{project.lastOpened}</p>
+                    <p className="font-medium text-[var(--aethel-text-primary)] truncate">{project.name}</p>
+                    <p className="text-sm text-[var(--aethel-text-secondary)]">{project.lastOpened}</p>
                   </div>
                   <Badge variant="default" size="sm">
                     {project.type}
@@ -235,9 +235,9 @@ export function OverviewTab({
           
           {recentActivity.length === 0 ? (
             <div className="py-12 text-center">
-              <TrendingUp className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-500">Nenhuma atividade ainda</p>
-              <p className="text-sm text-slate-600 mt-1">
+              <TrendingUp className="w-12 h-12 text-[var(--aethel-text-tertiary)] mx-auto mb-4" />
+              <p className="text-[var(--aethel-text-tertiary)]">Nenhuma atividade ainda</p>
+              <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">
                 Suas ações aparecerão aqui
               </p>
             </div>
@@ -250,11 +250,11 @@ export function OverviewTab({
                 >
                   <div className="w-2 h-2 rounded-full bg-sky-500 mt-2" />
                   <div className="flex-1">
-                    <p className="text-slate-200">
+                    <p className="text-[var(--aethel-text-primary)]">
                       <span className="font-medium">{activity.action}</span>{' '}
-                      <span className="text-slate-400">{activity.target}</span>
+                      <span className="text-[var(--aethel-text-secondary)]">{activity.target}</span>
                     </p>
-                    <p className="text-slate-500 text-xs mt-0.5">{activity.time}</p>
+                    <p className="text-[var(--aethel-text-tertiary)] text-xs mt-0.5">{activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -267,10 +267,10 @@ export function OverviewTab({
       <Card variant="gradient" padding="lg">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-xl font-bold text-[var(--aethel-text-primary)] mb-2">
               Comece algo novo com IA
             </h3>
-            <p className="text-slate-400">
+            <p className="text-[var(--aethel-text-secondary)]">
               Use nossos agentes de IA para criar, refatorar ou debugar código.
             </p>
           </div>

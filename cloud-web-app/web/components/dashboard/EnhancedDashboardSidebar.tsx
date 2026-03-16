@@ -87,17 +87,17 @@ export function EnhancedDashboardSidebar({
       <div className={`flex h-14 items-center border-b border-white/[0.04] ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs font-bold">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-[var(--aethel-text-primary)] text-xs font-bold">
               A
             </div>
-            <span className="text-sm font-semibold text-white">Aethel</span>
+            <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Aethel</span>
           </div>
         )}
         {onToggleCollapse && (
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/[0.06] hover:text-[var(--aethel-text-primary)]"
             aria-label={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
           >
             <Codicon name={collapsed ? 'chevron-right' : 'chevron-left'} />
@@ -114,7 +114,7 @@ export function EnhancedDashboardSidebar({
           return (
             <div key={sectionKey} className={sectionKey !== 'main' ? 'mt-4' : ''}>
               {sectionLabels[sectionKey] && !collapsed && (
-                <p className="mb-1 px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                <p className="mb-1 px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   {sectionLabels[sectionKey]}
                 </p>
               )}
@@ -138,21 +138,21 @@ export function EnhancedDashboardSidebar({
                         disabled={isDisabled}
                         className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all ${
                           isActive
-                            ? 'bg-blue-500/10 text-blue-300'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
                             : isDisabled
-                            ? 'cursor-not-allowed text-zinc-700'
-                            : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200'
+                            ? 'cursor-not-allowed text-[var(--aethel-text-tertiary)]'
+                            : 'text-[var(--aethel-text-secondary)] hover:bg-white/[0.04] hover:text-[var(--aethel-text-secondary)]'
                         } ${collapsed ? 'justify-center' : ''}`}
                         aria-current={isActive ? 'page' : undefined}
                         title={collapsed ? item.label : undefined}
                       >
                         {/* Active indicator */}
                         {isActive && (
-                          <div className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-blue-400" />
+                          <div className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-[var(--aethel-primary)]" />
                         )}
 
                         {/* Icon */}
-                        <span className={`flex-shrink-0 ${isActive ? 'text-blue-400' : ''}`}>
+                        <span className={`flex-shrink-0 ${isActive ? 'text-[var(--aethel-primary)]' : ''}`}>
                           <Codicon name={item.icon} />
                         </span>
 
@@ -165,10 +165,10 @@ export function EnhancedDashboardSidebar({
                               <span
                                 className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
                                   item.badgeVariant === 'error'
-                                    ? 'bg-red-500/15 text-red-400'
+                                    ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                                     : item.badgeVariant === 'warning'
-                                    ? 'bg-amber-500/15 text-amber-400'
-                                    : 'bg-white/[0.06] text-zinc-500'
+                                    ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+                                    : 'bg-white/[0.06] text-[var(--aethel-text-tertiary)]'
                                 }`}
                               >
                                 {item.badge}
@@ -180,10 +180,10 @@ export function EnhancedDashboardSidebar({
 
                       {/* Tooltip when collapsed */}
                       {collapsed && isHovered && (
-                        <div className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-lg border border-white/[0.08] bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white shadow-xl whitespace-nowrap">
+                        <div className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-lg border border-white/[0.08] bg-zinc-900 px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] shadow-xl whitespace-nowrap">
                           {item.label}
                           {item.disabledReason && (
-                            <span className="mt-0.5 block text-zinc-500">{item.disabledReason}</span>
+                            <span className="mt-0.5 block text-[var(--aethel-text-tertiary)]">{item.disabledReason}</span>
                           )}
                         </div>
                       )}
@@ -201,7 +201,7 @@ export function EnhancedDashboardSidebar({
         <div className="border-t border-white/[0.04] px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-xs text-zinc-500">Plano {userPlan}</span>
+            <span className="text-xs text-[var(--aethel-text-tertiary)]">Plano {userPlan}</span>
           </div>
         </div>
       )}

@@ -72,9 +72,9 @@ function MessageBubble({
         `}
       >
         {isUser ? (
-          <User className="w-4 h-4 text-white" />
+          <User className="w-4 h-4 text-[var(--aethel-text-primary)]" />
         ) : (
-          <Bot className="w-4 h-4 text-white" />
+          <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />
         )}
       </div>
 
@@ -84,8 +84,8 @@ function MessageBubble({
           className={`
             inline-block p-4 rounded-2xl
             ${isUser
-              ? 'bg-sky-600 text-white rounded-tr-none'
-              : 'bg-slate-800 text-slate-100 rounded-tl-none'
+              ? 'bg-sky-600 text-[var(--aethel-text-primary)] rounded-tr-none'
+              : 'bg-slate-800 text-[var(--aethel-text-primary)] rounded-tl-none'
             }
           `}
         >
@@ -95,7 +95,7 @@ function MessageBubble({
         {/* Actions */}
         <div
           className={`
-            flex items-center gap-2 mt-2 text-xs text-slate-500
+            flex items-center gap-2 mt-2 text-xs text-[var(--aethel-text-tertiary)]
             ${isUser ? 'justify-end' : 'justify-start'}
           `}
         >
@@ -110,10 +110,10 @@ function MessageBubble({
               <span>•</span>
               <button
                 onClick={handleCopy}
-                className="hover:text-slate-300 transition-colors"
+                className="hover:text-[var(--aethel-text-secondary)] transition-colors"
               >
                 {copied ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" />
                 ) : (
                   <Copy className="w-3.5 h-3.5" />
                 )}
@@ -130,7 +130,7 @@ function TypingIndicator() {
   return (
     <div className="flex gap-4">
       <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-        <Bot className="w-4 h-4 text-white" />
+        <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />
       </div>
       <div className="bg-slate-800 rounded-2xl rounded-tl-none px-4 py-3">
         <div className="flex items-center gap-1">
@@ -203,10 +203,10 @@ export function AIChatTab({
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <Sparkles className="w-6 h-6 text-sky-400" />
+          <Sparkles className="w-6 h-6 text-[var(--aethel-info)]" />
           <div>
-            <h1 className="text-xl font-bold text-white">AI Chat</h1>
-            <p className="text-sm text-slate-400">
+            <h1 className="text-xl font-bold text-[var(--aethel-text-primary)]">AI Chat</h1>
+            <p className="text-sm text-[var(--aethel-text-secondary)]">
               {currentThread?.title || 'Nova conversa'}
             </p>
           </div>
@@ -260,7 +260,7 @@ export function AIChatTab({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-            className="w-full px-4 py-3 pr-24 bg-slate-800 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 resize-none focus:outline-none focus:border-sky-500 transition-colors"
+            className="w-full px-4 py-3 pr-24 bg-slate-800 border border-slate-700 rounded-xl text-[var(--aethel-text-primary)] placeholder-slate-500 resize-none focus:outline-none focus:border-sky-500 transition-colors"
             rows={1}
             disabled={isGenerating}
           />
@@ -290,24 +290,24 @@ export function AIChatTab({
         
         {/* Quick Actions */}
         <div className="flex items-center gap-2 mt-3">
-          <span className="text-xs text-slate-500">Sugestões:</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Sugestões:</span>
           <button
             onClick={() => setInputValue('Explique este código: ')}
-            className="px-3 py-1 text-xs text-slate-400 bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
+            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
           >
             <Code className="w-3 h-3 inline mr-1" />
             Explicar código
           </button>
           <button
             onClick={() => setInputValue('Refatore este código para: ')}
-            className="px-3 py-1 text-xs text-slate-400 bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
+            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
           >
             <RefreshCw className="w-3 h-3 inline mr-1" />
             Refatorar
           </button>
           <button
             onClick={() => setInputValue('Crie um teste para: ')}
-            className="px-3 py-1 text-xs text-slate-400 bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
+            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
           >
             <Sparkles className="w-3 h-3 inline mr-1" />
             Criar teste

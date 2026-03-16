@@ -121,8 +121,8 @@ export function FirstValueGuide({
     <section className="aethel-m-4 aethel-rounded-lg border border-blue-500/30 bg-blue-500/10 aethel-p-4 md:aethel-m-6">
       <div className="aethel-flex aethel-flex-col aethel-gap-4 md:flex-row md:aethel-items-center md:aethel-justify-between">
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-blue-200">Primeiro valor em menos de 2 minutos</h3>
-          <p className="mt-1 text-xs text-slate-300">
+          <h3 className="text-sm font-semibold text-[var(--aethel-primary-light)]">Primeiro valor em menos de 2 minutos</h3>
+          <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
             Crie um projeto, configure o provider de IA e abra o preview da IDE com um starter pronto para iteracao.
           </p>
           <div className="mt-3">
@@ -132,12 +132,12 @@ export function FirstValueGuide({
                 style={{ width: `${Math.round(completionRatio * 100)}%` }}
               />
             </div>
-            <p className="mt-1 text-[11px] text-slate-300">
+            <p className="mt-1 text-[11px] text-[var(--aethel-text-secondary)]">
               Progresso: {completedSteps}/{totalSteps} ({Math.round(completionRatio * 100)}%)
               {estimatedRemainingMinutes > 0 ? ` - ~${estimatedRemainingMinutes} min restantes` : ' - concluido'}
             </p>
           </div>
-          <ul className="mt-2 space-y-1 text-[11px] text-slate-300">
+          <ul className="mt-2 space-y-1 text-[11px] text-[var(--aethel-text-secondary)]">
             <li>{firstProjectCreated ? '[OK]' : '[ ]'} Primeiro projeto criado ({formatDuration(milestoneDurations.firstProjectCreatedMs)})</li>
             <li>{firstAiSuccess ? '[OK]' : '[ ]'} Primeira resposta de IA recebida ({formatDuration(milestoneDurations.firstAiSuccessMs)})</li>
             <li>{firstIdeOpened ? '[OK]' : '[ ]'} IDE live preview aberta ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
@@ -145,61 +145,61 @@ export function FirstValueGuide({
 
           <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-slate-200">First value session</p>
-              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-slate-300">
+              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">First value session</p>
+              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                 {sessionStatusLabel}
               </span>
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div className="rounded border border-white/10 bg-slate-900/50 p-2">
-                <p className="text-[10px] text-slate-500">Started</p>
-                <p className="mt-1 text-[11px] text-slate-200">
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Started</p>
+                <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">
                   {sessionSummary.startedAt ? new Date(sessionSummary.startedAt).toLocaleTimeString() : '--'}
                 </p>
               </div>
               <div className="rounded border border-white/10 bg-slate-900/50 p-2">
-                <p className="text-[10px] text-slate-500">Duration</p>
-                <p className="mt-1 text-[11px] text-slate-200">{formatDuration(sessionSummary.durationMs)}</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Duration</p>
+                <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.durationMs)}</p>
               </div>
               <div className="rounded border border-white/10 bg-slate-900/50 p-2">
-                <p className="text-[10px] text-slate-500">Target</p>
-                <p className="mt-1 text-[11px] text-slate-200">{formatDuration(sessionSummary.targetMs)}</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Target</p>
+                <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.targetMs)}</p>
               </div>
             </div>
           </div>
 
           <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-slate-200">Preview readiness</p>
-              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-slate-300">
+              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Preview readiness</p>
+              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                 {previewReadiness?.strategy || 'unknown'}
               </span>
               {previewReadiness?.managedProvider && (
-              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-slate-300">
+              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                   {previewReadiness.managedProviderLabel || previewReadiness.managedProvider}
                 </span>
               )}
               {previewReadiness?.status && (
-                <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-slate-300">
+                <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                   {previewReadiness.status}
                 </span>
               )}
             </div>
-            <p className="mt-2 text-[11px] text-slate-300">{previewStatusLabel}</p>
+            <p className="mt-2 text-[11px] text-[var(--aethel-text-secondary)]">{previewStatusLabel}</p>
             {previewReadiness?.instructions && previewReadiness.instructions.length > 0 && (
-              <ul className="mt-2 space-y-1 text-[10px] text-slate-400">
+              <ul className="mt-2 space-y-1 text-[10px] text-[var(--aethel-text-secondary)]">
                 {previewReadiness.instructions.slice(0, 2).map((instruction) => (
                   <li key={instruction}>- {instruction}</li>
                 ))}
               </ul>
             )}
             {previewReadiness?.blockers && previewReadiness.blockers.length > 0 && (
-              <p className="mt-2 text-[10px] text-amber-300">
+              <p className="mt-2 text-[10px] text-[var(--aethel-warning)]">
                 Blockers: {previewReadiness.blockers.join(', ')}
               </p>
             )}
             {previewReadiness?.managedSetupEnv && previewReadiness.managedSetupEnv.length > 0 && (
-              <p className="mt-2 text-[10px] text-slate-400">
+              <p className="mt-2 text-[10px] text-[var(--aethel-text-secondary)]">
                 Setup env: {previewReadiness.managedSetupEnv.join(', ')}
               </p>
             )}
@@ -208,7 +208,7 @@ export function FirstValueGuide({
                 {previewReadiness.recommendedCommands.slice(0, 2).map((command) => (
                   <code
                     key={command}
-                    className="rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-[10px] text-cyan-300"
+                    className="rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-[10px] text-[var(--aethel-info)]"
                   >
                     {command}
                   </code>
@@ -218,7 +218,7 @@ export function FirstValueGuide({
           </div>
 
           <div className="mt-4">
-            <p className="text-[11px] font-medium text-slate-200">Starters recomendados</p>
+            <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Starters recomendados</p>
             <div className="mt-2 grid gap-2 md:[grid-template-columns:repeat(3,minmax(0,1fr))]">
               {STARTER_TEMPLATES.map((template) => (
                 <button
@@ -227,8 +227,8 @@ export function FirstValueGuide({
                   onClick={() => onStartTemplate(template.id)}
                   className="rounded-lg border border-white/10 bg-slate-950/40 p-3 text-left transition-colors hover:border-blue-400/40 hover:bg-slate-900/70"
                 >
-                  <div className="text-xs font-semibold text-white">{template.label}</div>
-                  <div className="mt-1 text-[11px] text-slate-400">{template.description}</div>
+                  <div className="text-xs font-semibold text-[var(--aethel-text-primary)]">{template.label}</div>
+                  <div className="mt-1 text-[11px] text-[var(--aethel-text-secondary)]">{template.description}</div>
                 </button>
               ))}
             </div>

@@ -176,10 +176,10 @@ function getAgentTypeIcon(type: AgentType) {
 function getStatusColor(status: AgentStatus): string {
   switch (status) {
     case 'running': return 'text-green-400'
-    case 'waiting': return 'text-yellow-400'
-    case 'error': return 'text-red-400'
-    case 'completed': return 'text-blue-400'
-    default: return 'text-gray-400'
+    case 'waiting': return 'text-[var(--aethel-warning)]'
+    case 'error': return 'text-[var(--aethel-error)]'
+    case 'completed': return 'text-[var(--aethel-primary-light)]'
+    default: return 'text-[var(--aethel-text-secondary)]'
   }
 }
 
@@ -320,11 +320,11 @@ export function AIAgentDashboard({
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="text-blue-400">
+            <div className="text-[var(--aethel-primary-light)]">
               <Icons.Robot />
             </div>
-            <h2 className="text-white font-semibold">AI Agents</h2>
-            <span className="text-xs text-slate-400 bg-white/5 px-2 py-0.5 rounded">
+            <h2 className="text-[var(--aethel-text-primary)] font-semibold">AI Agents</h2>
+            <span className="text-xs text-[var(--aethel-text-secondary)] bg-white/5 px-2 py-0.5 rounded">
               {metrics.activeAgents} ativos
             </span>
           </div>
@@ -382,8 +382,8 @@ export function AIAgentDashboard({
                 {/* Agent Header */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="text-gray-400">{getAgentTypeIcon(agent.type)}</div>
-                    <span className="text-white font-medium">{agent.name}</span>
+                    <div className="text-[var(--aethel-text-secondary)]">{getAgentTypeIcon(agent.type)}</div>
+                    <span className="text-[var(--aethel-text-primary)] font-medium">{agent.name}</span>
                     {agent.sandboxed && (
                       <div className="text-green-400" title="Executando em Sandbox">
                         <Icons.Shield />
@@ -400,7 +400,7 @@ export function AIAgentDashboard({
                           e.stopPropagation()
                           handleKillAgent(agent.id)
                         }}
-                        className="p-1 text-red-400 hover:bg-red-500/20 rounded"
+                        className="p-1 text-[var(--aethel-error)] hover:bg-red-500/20 rounded"
                         title="Parar agente"
                       >
                         <Icons.Stop />
@@ -411,7 +411,7 @@ export function AIAgentDashboard({
 
                 {/* Current Task */}
                 {agent.currentTask && (
-                  <p className="text-sm text-gray-400 mb-2 truncate">{agent.currentTask}</p>
+                  <p className="text-sm text-[var(--aethel-text-secondary)] mb-2 truncate">{agent.currentTask}</p>
                 )}
 
                 {/* Progress */}
@@ -423,7 +423,7 @@ export function AIAgentDashboard({
                         style={{ width: `${agent.progress}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <div className="flex justify-between text-xs text-[var(--aethel-text-tertiary)] mt-1">
                       <span>{agent.progress}%</span>
                       {agent.startedAt && (
                         <span>{formatDuration(Date.now() - agent.startedAt.getTime())}</span>
@@ -434,14 +434,14 @@ export function AIAgentDashboard({
 
                 {/* Error */}
                 {agent.status === 'error' && agent.lastError && (
-                  <div className="flex items-start gap-2 text-sm text-red-400 bg-red-500/10 p-2 rounded mb-2">
+                  <div className="flex items-start gap-2 text-sm text-[var(--aethel-error)] bg-red-500/10 p-2 rounded mb-2">
                     <Icons.Warning />
                     <span>{agent.lastError}</span>
                   </div>
                 )}
 
                 {/* Stats */}
-                <div className="flex items-center gap-4 text-xs text-gray-500">
+                <div className="flex items-center gap-4 text-xs text-[var(--aethel-text-tertiary)]">
                   <span className="flex items-center gap-1">
                     <Icons.Code />
                     {agent.model}
@@ -449,7 +449,7 @@ export function AIAgentDashboard({
                   <span>{formatTokens(agent.tokensUsed)} tokens</span>
                   <span>{agent.apiCalls} calls</span>
                   {agent.errors > 0 && (
-                    <span className="text-red-400">{agent.errors} errors</span>
+                    <span className="text-[var(--aethel-error)]">{agent.errors} errors</span>
                   )}
                 </div>
               </div>
@@ -473,19 +473,19 @@ export function AIAgentDashboard({
                     {exec.status === 'success' ? (
                       <div className="text-green-400"><Icons.Check /></div>
                     ) : (
-                      <div className="text-red-400"><Icons.Warning /></div>
+                      <div className="text-[var(--aethel-error)]"><Icons.Warning /></div>
                     )}
-                    <span className="text-white text-sm">{exec.agentName}</span>
+                    <span className="text-[var(--aethel-text-primary)] text-sm">{exec.agentName}</span>
                   </div>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-[var(--aethel-text-tertiary)]">
                     {formatDuration(exec.duration)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-400 mb-2">{exec.task}</p>
+                <p className="text-sm text-[var(--aethel-text-secondary)] mb-2">{exec.task}</p>
                 {exec.error && (
-                  <p className="text-xs text-red-400 mb-2">{exec.error}</p>
+                  <p className="text-xs text-[var(--aethel-error)] mb-2">{exec.error}</p>
                 )}
-                <div className="flex items-center gap-4 text-xs text-gray-500">
+                <div className="flex items-center gap-4 text-xs text-[var(--aethel-text-tertiary)]">
                   <span>{formatTokens(exec.tokensUsed)} tokens</span>
                   <span>{formatCost(exec.cost)}</span>
                   <span>{exec.startTime.toLocaleTimeString()}</span>
@@ -504,7 +504,7 @@ export function AIAgentDashboard({
                 icon={<Icons.Robot />}
                 label="Agentes Ativos"
                 value={`${metrics.activeAgents}/${metrics.totalAgents}`}
-                color="text-blue-400"
+                color="text-[var(--aethel-primary-light)]"
               />
               <MetricCard
                 icon={<Icons.Check />}
@@ -516,31 +516,31 @@ export function AIAgentDashboard({
                 icon={<Icons.Code />}
                 label="Tokens Usados"
                 value={formatTokens(metrics.totalTokensUsed)}
-                color="text-blue-400"
+                color="text-[var(--aethel-primary-light)]"
               />
               <MetricCard
                 icon={<Icons.Dollar />}
                 label="Custo Total"
                 value={formatCost(metrics.totalCost)}
-                color="text-yellow-400"
+                color="text-[var(--aethel-warning)]"
               />
               <MetricCard
                 icon={<Icons.Clock />}
                 label="Tempo Medio"
                 value={formatDuration(metrics.avgExecutionTime)}
-                color="text-cyan-400"
+                color="text-[var(--aethel-info)]"
               />
               <MetricCard
                 icon={<Icons.Warning />}
                 label="Erros Hoje"
                 value={metrics.errorsToday.toString()}
-                color="text-red-400"
+                color="text-[var(--aethel-error)]"
               />
             </div>
 
             {/* Executions Chart - Uses real execution data */}
             <div className="p-4 bg-white/[0.03] rounded-lg border border-white/10">
-              <h3 className="text-sm text-gray-400 mb-3">Execucoes (24h)</h3>
+              <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Execucoes (24h)</h3>
               <div className="h-32 flex items-end gap-1">
                 {(() => {
                   // Agrupa execucoes por hora das ultimas 24h
@@ -568,7 +568,7 @@ export function AIAgentDashboard({
                   })
                 })()}
               </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-2">
+              <div className="flex justify-between text-xs text-[var(--aethel-text-tertiary)] mt-2">
                 <span>00:00</span>
                 <span>12:00</span>
                 <span>Agora</span>
@@ -577,7 +577,7 @@ export function AIAgentDashboard({
 
             {/* Model Usage - Calculated from real execution data */}
             <div className="p-4 bg-white/[0.03] rounded-lg border border-white/10">
-              <h3 className="text-sm text-gray-400 mb-3">Uso por modelo</h3>
+              <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Uso por modelo</h3>
               <div className="space-y-2">
                 {(() => {
                   // Agrupa uso por modelo das execucoes + agentes ativos
@@ -653,8 +653,8 @@ function MetricCard({
   return (
     <div className="p-3 bg-white/[0.03] rounded-lg border border-white/10">
       <div className={`${color} mb-1`}>{icon}</div>
-      <div className="text-lg text-white font-semibold">{value}</div>
-      <div className="text-xs text-gray-500">{label}</div>
+      <div className="text-lg text-[var(--aethel-text-primary)] font-semibold">{value}</div>
+      <div className="text-xs text-[var(--aethel-text-tertiary)]">{label}</div>
     </div>
   )
 }
@@ -673,8 +673,8 @@ function ModelUsageBar({
   return (
     <div>
       <div className="flex justify-between text-sm mb-1">
-        <span className="text-white">{model}</span>
-        <span className="text-gray-400">{formatTokens(tokens)} ({formatCost(cost)})</span>
+        <span className="text-[var(--aethel-text-primary)]">{model}</span>
+        <span className="text-[var(--aethel-text-secondary)]">{formatTokens(tokens)} ({formatCost(cost)})</span>
       </div>
       <div className="h-2 bg-white/10 rounded-full overflow-hidden">
         <div

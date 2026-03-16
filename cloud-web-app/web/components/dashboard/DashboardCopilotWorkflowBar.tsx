@@ -35,7 +35,7 @@ export function DashboardCopilotWorkflowBar({
 
   return (
     <div className="aethel-flex aethel-items-center aethel-gap-2 mb-4">
-      <span className="text-sm text-slate-400">Trabalho</span>
+      <span className="text-sm text-[var(--aethel-text-secondary)]">Trabalho</span>
       <select
         value={activeWorkflowId ?? ''}
         onChange={(event) => {

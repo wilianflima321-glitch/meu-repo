@@ -27,7 +27,7 @@ const DOWNLOAD_OPTIONS: DownloadOption[] = [
     version: 'v2.1.0',
     color: 'from-blue-500 to-cyan-600',
     icon: (
-      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-[var(--aethel-text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
     ),
@@ -41,7 +41,7 @@ const DOWNLOAD_OPTIONS: DownloadOption[] = [
     version: 'v2.1.0',
     color: 'from-blue-500 to-cyan-600',
     icon: (
-      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-[var(--aethel-text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     ),
@@ -55,7 +55,7 @@ const DOWNLOAD_OPTIONS: DownloadOption[] = [
     version: 'v2.1.0',
     color: 'from-orange-500 to-red-600',
     icon: (
-      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-[var(--aethel-text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
       </svg>
     ),
@@ -67,7 +67,7 @@ export default function DownloadTab({ onDownload }: DownloadTabProps) {
     <div className="aethel-p-6 space-y-12">
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-4">Baixar Aethel IDE</h2>
-        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+        <p className="text-lg text-[var(--aethel-text-secondary)] max-w-2xl mx-auto">
           Experimente todo o poder do Aethel com a nossa IDE local. Inclui integração com IA,
           ferramentas avançadas de código e conectividade total com o backend.
           <br /><br />
@@ -83,7 +83,7 @@ export default function DownloadTab({ onDownload }: DownloadTabProps) {
                 {option.icon}
               </div>
               <h3 className="text-xl font-semibold mb-2">{option.name}</h3>
-              <p className="text-slate-400">{option.description}</p>
+              <p className="text-[var(--aethel-text-secondary)]">{option.description}</p>
             </div>
             <div className="space-y-3">
               <div className="aethel-flex aethel-justify-between text-sm">
@@ -108,29 +108,29 @@ export default function DownloadTab({ onDownload }: DownloadTabProps) {
         <div className="aethel-card aethel-p-6">
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-600 rounded-full aethel-flex aethel-items-center aethel-justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 text-[var(--aethel-text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <h3 className="text-xl font-semibold mb-2">Requisitos do sistema</h3>
-            <p className="text-slate-400">Verifique se seu hardware é compatível</p>
+            <p className="text-[var(--aethel-text-secondary)]">Verifique se seu hardware é compatível</p>
           </div>
-          <ul className="space-y-2 text-sm text-slate-300">
+          <ul className="space-y-2 text-sm text-[var(--aethel-text-secondary)]">
             <li className="aethel-flex aethel-justify-between">
               <span>RAM:</span>
-              <span className="text-white">8GB+ Recomendado</span>
+              <span className="text-[var(--aethel-text-primary)]">8GB+ Recomendado</span>
             </li>
             <li className="aethel-flex aethel-justify-between">
               <span>CPU:</span>
-              <span className="text-white">Quad-core 2GHz+</span>
+              <span className="text-[var(--aethel-text-primary)]">Quad-core 2GHz+</span>
             </li>
             <li className="aethel-flex aethel-justify-between">
               <span>Espaço:</span>
-              <span className="text-white">1GB Livre</span>
+              <span className="text-[var(--aethel-text-primary)]">1GB Livre</span>
             </li>
             <li className="aethel-flex aethel-justify-between">
               <span>Internet:</span>
-              <span className="text-white">Conexão Estável</span>
+              <span className="text-[var(--aethel-text-primary)]">Conexão Estável</span>
             </li>
           </ul>
         </div>

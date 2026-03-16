@@ -46,23 +46,23 @@ export function DashboardConnectivityTab({
       </div>
 
       {connectivityLoading && (
-        <p className="text-sm text-slate-400">Monitorando servicos...</p>
+        <p className="text-sm text-[var(--aethel-text-secondary)]">Monitorando servicos...</p>
       )}
 
       {hasConnectivityError && (
-        <p className="text-sm text-red-400">Nao foi possivel consultar os endpoints.</p>
+        <p className="text-sm text-[var(--aethel-error)]">Nao foi possivel consultar os endpoints.</p>
       )}
 
       {!connectivityLoading && !hasConnectivityError && connectivityData && (
         <div className="space-y-4">
           <div className="aethel-card aethel-p-6 aethel-flex aethel-justify-between aethel-items-center">
             <div>
-              <p className="text-sm text-slate-400">Status geral</p>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">Status geral</p>
               <p className="text-3xl font-bold">
                 {String(formatConnectivityStatus(connectivityData.overall_status)).toUpperCase()}
               </p>
             </div>
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-[var(--aethel-text-secondary)]">
               Atualizado em {connectivityData.timestamp ? new Date(connectivityData.timestamp).toLocaleString() : '—'}
             </div>
           </div>
@@ -74,10 +74,10 @@ export function DashboardConnectivityTab({
                   <h3 className="text-lg font-semibold capitalize">{service.name.replace(/_/g, ' ')}</h3>
                   <span className={`text-xs rounded-full px-2 py-1 ${
                     service.status === 'healthy'
-                      ? 'bg-emerald-500/20 text-emerald-300'
+                      ? 'bg-emerald-500/20 text-[var(--aethel-success)]'
                       : service.status === 'degraded'
-                      ? 'bg-amber-500/20 text-amber-300'
-                      : 'bg-red-500/20 text-red-300'
+                      ? 'bg-amber-500/20 text-[var(--aethel-warning)]'
+                      : 'bg-red-500/20 text-[var(--aethel-error)]'
                   }`}>
                     {String(formatConnectivityStatus(service.status)).toUpperCase()}
                   </span>
@@ -87,15 +87,15 @@ export function DashboardConnectivityTab({
                   {service.endpoints.map((endpoint) => (
                     <div key={`${service.name}-${endpoint.url}`} className="border border-slate-800 aethel-rounded aethel-p-3">
                       <div className="aethel-flex aethel-justify-between aethel-items-center">
-                        <span className={`${endpoint.healthy ? 'text-emerald-300' : 'text-red-300'} text-sm`}>
+                        <span className={`${endpoint.healthy ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'} text-sm`}>
                           {endpoint.url}
                         </span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-[var(--aethel-text-secondary)]">
                           {endpoint.latency_ms !== null ? `${endpoint.latency_ms.toFixed(0)} ms` : '—'} • {endpoint.status_code ?? '—'}
                         </span>
                       </div>
                       {endpoint.error && (
-                        <p className="text-xs text-red-300 mt-1">{endpoint.error}</p>
+                        <p className="text-xs text-[var(--aethel-error)] mt-1">{endpoint.error}</p>
                       )}
                     </div>
                   ))}

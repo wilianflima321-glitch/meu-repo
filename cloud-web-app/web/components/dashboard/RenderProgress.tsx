@@ -133,19 +133,19 @@ function getStatusColor(status: RenderJobStatus): string {
             return 'text-green-500';
         case 'rendering':
         case 'compositing':
-            return 'text-blue-500';
+            return 'text-[var(--aethel-primary)]';
         case 'preparing':
         case 'finalizing':
-            return 'text-yellow-500';
+            return 'text-[var(--aethel-warning)]';
         case 'queued':
-            return 'text-gray-400';
+            return 'text-[var(--aethel-text-secondary)]';
         case 'paused':
             return 'text-orange-500';
         case 'failed':
         case 'cancelled':
-            return 'text-red-500';
+            return 'text-[var(--aethel-error)]';
         default:
-            return 'text-gray-500';
+            return 'text-[var(--aethel-text-tertiary)]';
     }
 }
 
@@ -279,16 +279,16 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                     onClick={() => onViewFull(job.thumbnail!)}
                                     className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
                                 >
-                                    <Maximize2 size={20} className="text-white" />
+                                    <Maximize2 size={20} className="text-[var(--aethel-text-primary)]" />
                                 </button>
                             )}
                         </>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
                             {job.type === 'animation' ? (
-                                <Film size={24} className="text-gray-500" />
+                                <Film size={24} className="text-[var(--aethel-text-tertiary)]" />
                             ) : (
-                                <ImageIcon size={24} className="text-gray-500" />
+                                <ImageIcon size={24} className="text-[var(--aethel-text-tertiary)]" />
                             )}
                         </div>
                     )}
@@ -297,13 +297,13 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-white truncate">{job.name}</h3>
+                        <h3 className="font-medium text-[var(--aethel-text-primary)] truncate">{job.name}</h3>
                         <span className={`px-2 py-0.5 rounded text-xs ${getStatusColor(job.status)} bg-gray-700`}>
                             {getStatusLabel(job.status)}
                         </span>
                     </div>
                     
-                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                    <div className="flex items-center gap-3 mt-1 text-xs text-[var(--aethel-text-secondary)]">
                         <span>{job.resolution.width}x{job.resolution.height}</span>
                         <span>•</span>
                         <span>{job.samples} samples</span>
@@ -325,7 +325,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                 style={{ width: `${job.progress}%` }}
                             />
                         </div>
-                        <div className="flex justify-between mt-1 text-xs text-gray-400">
+                        <div className="flex justify-between mt-1 text-xs text-[var(--aethel-text-secondary)]">
                             <span>{job.progress.toFixed(1)}%</span>
                             {isActive && job.estimatedTimeRemaining && (
                                 <span>{formatTimeRemaining(job.estimatedTimeRemaining)}</span>
@@ -345,7 +345,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
                             title="Pausar"
                         >
-                            <Pause size={18} className="text-gray-400" />
+                            <Pause size={18} className="text-[var(--aethel-text-secondary)]" />
                         </button>
                     )}
                     
@@ -365,7 +365,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
                             title="Cancelar"
                         >
-                            <Square size={18} className="text-red-400" />
+                            <Square size={18} className="text-[var(--aethel-error)]" />
                         </button>
                     )}
                     
@@ -375,7 +375,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
                             title="Tentar novamente"
                         >
-                            <RotateCcw size={18} className="text-blue-400" />
+                            <RotateCcw size={18} className="text-[var(--aethel-primary-light)]" />
                         </button>
                     )}
                     
@@ -395,9 +395,9 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
                         >
                             {expanded ? (
-                                <ChevronUp size={18} className="text-gray-400" />
+                                <ChevronUp size={18} className="text-[var(--aethel-text-secondary)]" />
                             ) : (
-                                <ChevronDown size={18} className="text-gray-400" />
+                                <ChevronDown size={18} className="text-[var(--aethel-text-secondary)]" />
                             )}
                         </button>
                     )}
@@ -410,34 +410,34 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     {/* Error message */}
                     {job.error && (
                         <div className="mb-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                            <div className="flex items-center gap-2 text-red-500 text-sm">
+                            <div className="flex items-center gap-2 text-[var(--aethel-error)] text-sm">
                                 <AlertCircle size={16} />
                                 <span className="font-medium">Erro:</span>
                             </div>
-                            <p className="text-red-400 text-sm mt-1">{job.error}</p>
+                            <p className="text-[var(--aethel-error)] text-sm mt-1">{job.error}</p>
                         </div>
                     )}
                     
                     {/* Stats grid */}
                     <div className="grid grid-cols-4 gap-4 text-sm">
                         <div>
-                            <span className="text-gray-500">Tipo</span>
-                            <p className="text-white capitalize">{job.type}</p>
+                            <span className="text-[var(--aethel-text-tertiary)]">Tipo</span>
+                            <p className="text-[var(--aethel-text-primary)] capitalize">{job.type}</p>
                         </div>
                         <div>
-                            <span className="text-gray-500">Engine</span>
-                            <p className="text-white capitalize">{job.engine}</p>
+                            <span className="text-[var(--aethel-text-tertiary)]">Engine</span>
+                            <p className="text-[var(--aethel-text-primary)] capitalize">{job.engine}</p>
                         </div>
                         {job.renderTime !== undefined && (
                             <div>
-                                <span className="text-gray-500">Tempo Total</span>
-                                <p className="text-white">{formatDuration(job.renderTime)}</p>
+                                <span className="text-[var(--aethel-text-tertiary)]">Tempo Total</span>
+                                <p className="text-[var(--aethel-text-primary)]">{formatDuration(job.renderTime)}</p>
                             </div>
                         )}
                         {job.peakMemory !== undefined && (
                             <div>
-                                <span className="text-gray-500">Memória Pico</span>
-                                <p className="text-white">{(job.peakMemory / 1024 / 1024).toFixed(0)} MB</p>
+                                <span className="text-[var(--aethel-text-tertiary)]">Memória Pico</span>
+                                <p className="text-[var(--aethel-text-primary)]">{(job.peakMemory / 1024 / 1024).toFixed(0)} MB</p>
                             </div>
                         )}
                     </div>
@@ -445,7 +445,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     {/* Frame progress for animations */}
                     {job.type === 'animation' && job.frames && job.frames.length > 0 && (
                         <div className="mt-4">
-                            <h4 className="text-sm font-medium text-gray-400 mb-2">
+                            <h4 className="text-sm font-medium text-[var(--aethel-text-secondary)] mb-2">
                                 Frames ({job.frames.filter(f => f.status === 'completed').length}/{job.totalFrames})
                             </h4>
                             <div className="flex gap-1 flex-wrap">
@@ -462,7 +462,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                     />
                                 ))}
                                 {job.frames.length > 50 && (
-                                    <span className="text-gray-500 text-xs self-center ml-2">
+                                    <span className="text-[var(--aethel-text-tertiary)] text-xs self-center ml-2">
                                         +{job.frames.length - 50} more
                                     </span>
                                 )}
@@ -506,11 +506,11 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
     if (jobs.length === 0) {
         return (
             <div className={`bg-gray-900 rounded-xl p-8 text-center ${className}`}>
-                <ImageIcon size={48} className="mx-auto text-gray-600 mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
+                <ImageIcon size={48} className="mx-auto text-[var(--aethel-text-tertiary)] mb-4" />
+                <h3 className="text-lg font-medium text-[var(--aethel-text-primary)] mb-2">
                     Nenhum render na fila
                 </h3>
-                <p className="text-gray-400 text-sm">
+                <p className="text-[var(--aethel-text-secondary)] text-sm">
                     Inicie um render no editor para ver o progresso aqui.
                 </p>
             </div>
@@ -522,8 +522,8 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-bold text-white">Fila de Render</h2>
-                    <span className="px-2 py-1 bg-gray-700 rounded text-sm text-gray-300">
+                    <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Fila de Render</h2>
+                    <span className="px-2 py-1 bg-gray-700 rounded text-sm text-[var(--aethel-text-secondary)]">
                         {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
                     </span>
                 </div>
@@ -531,7 +531,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                 {completedJobs.length > 0 && onClearCompleted && (
                     <button
                         onClick={onClearCompleted}
-                        className="text-sm text-gray-400 hover:text-white transition-colors"
+                        className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                     >
                         Limpar concluídos
                     </button>
@@ -541,23 +541,23 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             {/* Summary */}
             <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-gray-800 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-blue-500">{activeJobs.length}</div>
-                    <div className="text-xs text-gray-400">Ativos</div>
+                    <div className="text-2xl font-bold text-[var(--aethel-primary)]">{activeJobs.length}</div>
+                    <div className="text-xs text-[var(--aethel-text-secondary)]">Ativos</div>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-yellow-500">{queuedJobs.length}</div>
-                    <div className="text-xs text-gray-400">Na Fila</div>
+                    <div className="text-2xl font-bold text-[var(--aethel-warning)]">{queuedJobs.length}</div>
+                    <div className="text-xs text-[var(--aethel-text-secondary)]">Na Fila</div>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-green-500">{completedJobs.length}</div>
-                    <div className="text-xs text-gray-400">Concluídos</div>
+                    <div className="text-xs text-[var(--aethel-text-secondary)]">Concluídos</div>
                 </div>
             </div>
             
             {/* Active Jobs */}
             {activeJobs.length > 0 && (
                 <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    <h3 className="text-sm font-semibold text-[var(--aethel-text-secondary)] uppercase tracking-wider mb-3">
                         Renderizando
                     </h3>
                     <div className="space-y-3">
@@ -577,7 +577,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             {/* Queued Jobs */}
             {queuedJobs.length > 0 && (
                 <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    <h3 className="text-sm font-semibold text-[var(--aethel-text-secondary)] uppercase tracking-wider mb-3">
                         Aguardando ({queuedJobs.length})
                     </h3>
                     <div className="space-y-2">
@@ -596,7 +596,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             {/* Completed Jobs */}
             {completedJobs.length > 0 && (
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    <h3 className="text-sm font-semibold text-[var(--aethel-text-secondary)] uppercase tracking-wider mb-3">
                         Histórico ({completedJobs.length})
                     </h3>
                     <div className="space-y-2 max-h-64 overflow-y-auto">

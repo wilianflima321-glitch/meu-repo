@@ -193,51 +193,51 @@ function PlanCard({
           <div
             className={`
               w-12 h-12 rounded-xl flex items-center justify-center
-              ${isPopular ? 'bg-sky-500/20 text-sky-400' : 'bg-slate-800 text-slate-400'}
+              ${isPopular ? 'bg-sky-500/20 text-[var(--aethel-info)]' : 'bg-slate-800 text-[var(--aethel-text-secondary)]'}
             `}
           >
             {planIcons[plan.id] || <Sparkles className="w-6 h-6" />}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-            <p className="text-sm text-slate-400">{plan.description}</p>
+            <h3 className="text-xl font-bold text-[var(--aethel-text-primary)]">{plan.name}</h3>
+            <p className="text-sm text-[var(--aethel-text-secondary)]">{plan.description}</p>
           </div>
         </div>
 
         <div className="mb-6">
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-white">{isFree ? 'Gratis' : `R$${plan.price}`}</span>
-            {!isFree && <span className="text-slate-400">/{plan.interval === 'month' ? 'mes' : 'ano'}</span>}
+            <span className="text-4xl font-bold text-[var(--aethel-text-primary)]">{isFree ? 'Gratis' : `R$${plan.price}`}</span>
+            {!isFree && <span className="text-[var(--aethel-text-secondary)]">/{plan.interval === 'month' ? 'mes' : 'ano'}</span>}
           </div>
           {!isFree && (
-            <p className="text-xs text-slate-500 mt-2">Cobranca recorrente. Cancele quando quiser.</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">Cobranca recorrente. Cancele quando quiser.</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="rounded-lg bg-slate-900/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">Tokens/mes</p>
-            <p className="text-sm text-white font-semibold">{formatTokenLimit(plan.limits.requests)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Tokens/mes</p>
+            <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatTokenLimit(plan.limits.requests)}</p>
           </div>
           <div className="rounded-lg bg-slate-900/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">Projetos</p>
-            <p className="text-sm text-white font-semibold">{formatLimitValue(plan.limits.projects)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Projetos</p>
+            <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatLimitValue(plan.limits.projects)}</p>
           </div>
           <div className="rounded-lg bg-slate-900/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">Storage</p>
-            <p className="text-sm text-white font-semibold">{plan.limits.storage}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Storage</p>
+            <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{plan.limits.storage}</p>
           </div>
           <div className="rounded-lg bg-slate-900/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">Colaboradores</p>
-            <p className="text-sm text-white font-semibold">{formatLimitValue(plan.limits.collaborators)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Colaboradores</p>
+            <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatLimitValue(plan.limits.collaborators)}</p>
           </div>
         </div>
 
         <ul className="space-y-3 mb-6">
           {plan.features.map((feature, index) => (
             <li key={index} className="flex items-start gap-3">
-              <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <span className="text-slate-300 text-sm">{feature}</span>
+              <Check className="w-5 h-5 text-[var(--aethel-success)] flex-shrink-0 mt-0.5" />
+              <span className="text-[var(--aethel-text-secondary)] text-sm">{feature}</span>
             </li>
           ))}
         </ul>
@@ -369,8 +369,8 @@ export function BillingTab({
     <div className="space-y-8">
       {showHeader && (
         <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-4">Escolha o plano ideal</h1>
-          <p className="text-slate-400">
+          <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)] mb-4">Escolha o plano ideal</h1>
+          <p className="text-[var(--aethel-text-secondary)]">
             Planos alinhados ao uso real de IA e infraestrutura. Troque quando precisar.
           </p>
         </div>
@@ -382,7 +382,7 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('month')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'month' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
+              billingCycle === 'month' ? 'bg-white text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Mensal
@@ -391,7 +391,7 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('year')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'year' ? 'bg-white text-black' : 'text-slate-300 hover:text-white'
+              billingCycle === 'year' ? 'bg-white text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Anual (-20%)
@@ -402,24 +402,24 @@ export function BillingTab({
       {showHighlights && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <ShieldCheck className="w-5 h-5 text-[var(--aethel-success)]" />
             <div>
-              <p className="text-sm text-white font-semibold">Billing seguro</p>
-              <p className="text-xs text-slate-400">Stripe com checagens reais de runtime.</p>
+              <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">Billing seguro</p>
+              <p className="text-xs text-[var(--aethel-text-secondary)]">Stripe com checagens reais de runtime.</p>
             </div>
           </Card>
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
-            <Rocket className="w-5 h-5 text-sky-400" />
+            <Rocket className="w-5 h-5 text-[var(--aethel-info)]" />
             <div>
-              <p className="text-sm text-white font-semibold">Ativacao rapida</p>
-              <p className="text-xs text-slate-400">Mudancas dependem de checkout e webhook prontos.</p>
+              <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">Ativacao rapida</p>
+              <p className="text-xs text-[var(--aethel-text-secondary)]">Mudancas dependem de checkout e webhook prontos.</p>
             </div>
           </Card>
           <Card variant="elevated" padding="md" className="flex items-center gap-3">
-            <Crown className="w-5 h-5 text-yellow-400" />
+            <Crown className="w-5 h-5 text-[var(--aethel-warning)]" />
             <div>
-              <p className="text-sm text-white font-semibold">Planos canonicos</p>
-              <p className="text-xs text-slate-400">Renderizados do mesmo contrato usado no backend.</p>
+              <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">Planos canonicos</p>
+              <p className="text-xs text-[var(--aethel-text-secondary)]">Renderizados do mesmo contrato usado no backend.</p>
             </div>
           </Card>
         </div>
@@ -429,12 +429,12 @@ export function BillingTab({
         <Card variant="bordered" padding="md" className="border-amber-500/30 bg-amber-500/10">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-amber-200">Checkout ainda nao esta pronto</p>
-              <p className="mt-1 text-xs text-amber-100/80">
+              <p className="text-sm font-semibold text-[var(--aethel-warning-light)]">Checkout ainda nao esta pronto</p>
+              <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                 As rotas existem, mas o runtime ainda reporta readiness parcial.
               </p>
               {billingReadiness.provider ? (
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-amber-100/80">
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                   <span className="rounded-full border border-amber-500/20 bg-black/20 px-2.5 py-1">
                     provider {billingReadiness.provider.label}
                   </span>
@@ -445,7 +445,7 @@ export function BillingTab({
                   ) : null}
                 </div>
               ) : null}
-              <ul className="mt-3 list-disc space-y-1 pl-4 text-xs text-amber-100/80">
+              <ul className="mt-3 list-disc space-y-1 pl-4 text-xs text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                 {billingReadiness.gateway?.checkoutEnabled === false && <li>Checkout desabilitado na configuracao do gateway.</li>}
                 {billingReadiness.gateway?.activeGateway !== 'stripe' && (
                   <li>Gateway ativo: {billingReadiness.gateway?.activeGateway || 'unknown'}.</li>
@@ -461,7 +461,7 @@ export function BillingTab({
                   {billingReadiness.provider.setupEnv.map((envKey) => (
                     <span
                       key={envKey}
-                      className="rounded-full border border-amber-500/20 bg-black/20 px-2.5 py-1 text-[11px] text-amber-100/80"
+                      className="rounded-full border border-amber-500/20 bg-black/20 px-2.5 py-1 text-[11px] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]"
                     >
                       {envKey}
                     </span>
@@ -469,16 +469,16 @@ export function BillingTab({
                 </div>
               ) : null}
               {billingReadiness.stripe ? (
-                <p className="mt-3 text-[11px] text-amber-100/80">
+                <p className="mt-3 text-[11px] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                   publishable={String(billingReadiness.stripe.publishableKeyConfigured)} | prices={billingReadiness.stripe.configuredPriceCount}/{billingReadiness.stripe.requiredPriceCount}
                 </p>
               ) : null}
               {billingReadiness.instructions?.length ? (
                 <div className="mt-4 rounded-xl border border-amber-500/20 bg-black/20 p-3">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-amber-100/80">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                     Proximas acoes
                   </p>
-                  <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-amber-100/80">
+                  <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                     {billingReadiness.instructions.map((instruction) => (
                       <li key={instruction}>{instruction}</li>
                     ))}
@@ -488,7 +488,7 @@ export function BillingTab({
                       {billingReadiness.recommendedCommands.map((command) => (
                         <code
                           key={command}
-                          className="rounded-full border border-amber-500/20 bg-slate-950/70 px-2.5 py-1 text-[11px] text-cyan-300"
+                          className="rounded-full border border-amber-500/20 bg-slate-950/70 px-2.5 py-1 text-[11px] text-[var(--aethel-info)]"
                         >
                           {command}
                         </code>
@@ -509,8 +509,8 @@ export function BillingTab({
         <Card variant="bordered" padding="md" className="border-red-500/30 bg-red-500/10">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-red-200">Falha na acao de billing</p>
-              <p className="mt-1 text-xs text-red-100/80">{billingActionError}</p>
+              <p className="text-sm font-semibold text-[var(--aethel-error)]">Falha na acao de billing</p>
+              <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--aethel-error)_80%,transparent)]">{billingActionError}</p>
             </div>
             <Badge variant="error" size="sm">
               acao bloqueada
@@ -524,12 +524,12 @@ export function BillingTab({
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center">
-                {planIcons[effectiveCurrentPlan] || <Sparkles className="w-6 h-6 text-sky-400" />}
+                {planIcons[effectiveCurrentPlan] || <Sparkles className="w-6 h-6 text-[var(--aethel-info)]" />}
               </div>
               <div>
-                <p className="text-sm text-slate-400">Plano atual</p>
-                <p className="text-lg font-semibold text-white">{currentPlanLabel}</p>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <p className="text-sm text-[var(--aethel-text-secondary)]">Plano atual</p>
+                <p className="text-lg font-semibold text-[var(--aethel-text-primary)]">{currentPlanLabel}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--aethel-text-secondary)]">
                   {subscriptionState ? (
                     <Badge variant={subscriptionState === 'active' ? 'success' : 'info'} size="sm">
                       assinatura: {subscriptionState}
@@ -557,7 +557,7 @@ export function BillingTab({
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {isLoading ? (
-          <Card variant="elevated" padding="lg" className="text-slate-400">
+          <Card variant="elevated" padding="lg" className="text-[var(--aethel-text-secondary)]">
             Carregando planos...
           </Card>
         ) : (
@@ -594,29 +594,29 @@ export function BillingTab({
 
       {showFaq && (
         <Card variant="default" padding="lg">
-          <h3 className="text-lg font-semibold text-white mb-4">FAQ</h3>
+          <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4">FAQ</h3>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">Posso cancelar a qualquer momento?</h4>
-              <p className="text-sm text-slate-400">
+              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">Posso cancelar a qualquer momento?</h4>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">
                 Sim. O cancelamento segue o estado real do Stripe e vale no fim do periodo vigente.
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">O que acontece se eu ultrapassar os limites?</h4>
-              <p className="text-sm text-slate-400">
+              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">O que acontece se eu ultrapassar os limites?</h4>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">
                 Os limites sao aplicados por plano. Faca upgrade ou aguarde o proximo ciclo.
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">Existe plano para equipes?</h4>
-              <p className="text-sm text-slate-400">
+              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">Existe plano para equipes?</h4>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">
                 Sim. Enterprise cobre assentos, suporte e contrato sob medida.
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-slate-200 mb-2">Quais metodos de pagamento estao ativos?</h4>
-              <p className="text-sm text-slate-400">
+              <h4 className="font-medium text-[var(--aethel-text-primary)] mb-2">Quais metodos de pagamento estao ativos?</h4>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">
                 O readiness publico reflete o estado real do gateway. So considere ativo quando checkout e webhook estiverem verdes.
               </p>
             </div>
