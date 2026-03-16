@@ -140,12 +140,12 @@ const NODE_TEMPLATES: Record<string, Omit<VFXNode, 'id' | 'position'>> = {
 
 // Node colors by type
 const NODE_COLORS: Record<string, string> = {
-  emitter: '#22c55e',
-  module: '#3b82f6',
-  renderer: '#a855f7',
-  output: '#ef4444',
-  math: '#f59e0b',
-  parameter: '#ec4899'
+  emitter: 'var(--aethel-success)',
+  module: 'var(--aethel-primary)',
+  renderer: 'var(--aethel-accent)',
+  output: 'var(--aethel-error)',
+  math: 'var(--aethel-warning)',
+  parameter: 'var(--aethel-secondary)'
 };
 
 // Single Node Component
@@ -188,7 +188,7 @@ const VFXNodeComponent: React.FC<{
     };
   }, [dragging, onMove]);
 
-  const borderColor = NODE_COLORS[node.type] || '#666';
+  const borderColor = NODE_COLORS[node.type] || 'var(--aethel-border-secondary)';
 
   return (
     <div
@@ -197,7 +197,7 @@ const VFXNodeComponent: React.FC<{
         left: node.position.x,
         top: node.position.y,
         minWidth: 180,
-        backgroundColor: '#1e293b',
+        backgroundColor: 'var(--aethel-surface-tertiary)',
         border: `2px solid ${borderColor}`
       }}
       onMouseDown={handleMouseDown}
@@ -355,7 +355,7 @@ export default function VFXGraphEditor() {
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
         <div className="flex items-center gap-4">
-          <h2 className="text-white font-semibold">🎆 VFX Graph Editor</h2>
+          <h2 className="text-white font-semibold"> VFX Graph Editor</h2>
           <input
             type="text"
             value={graph.name}
@@ -370,7 +370,7 @@ export default function VFXGraphEditor() {
               isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
             } text-white`}
           >
-            {isPlaying ? '⏹ Stop' : '▶ Play'}
+            {isPlaying ? ' Stop' : ' Play'}
           </button>
           <button
             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
@@ -432,7 +432,7 @@ export default function VFXGraphEditor() {
                 <path
                   key={conn.id}
                   d={`M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`}
-                  stroke="#6366f1"
+                  stroke="var(--aethel-primary)"
                   strokeWidth="2"
                   fill="none"
                 />
@@ -567,7 +567,7 @@ export default function VFXGraphEditor() {
                 onClick={deleteSelectedNode}
                 className="mt-4 w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
               >
-                🗑️ Delete Node
+                 Delete Node
               </button>
             </div>
           </div>
@@ -577,7 +577,7 @@ export default function VFXGraphEditor() {
       {/* Status Bar */}
       <div className="flex items-center justify-between px-4 py-1 bg-slate-800 border-t border-slate-700 text-xs text-gray-400">
         <span>Nodes: {graph.nodes.length} | Connections: {graph.connections.length}</span>
-        <span>{isPlaying ? '🔴 Running' : '⚪ Stopped'}</span>
+        <span>{isPlaying ? ' Running' : ' Stopped'}</span>
       </div>
     </div>
   );
