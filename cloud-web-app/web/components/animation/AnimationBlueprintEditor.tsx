@@ -50,19 +50,19 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
   const { state, isDefault, onEdit, onSetDefault } = data;
   const getNodeColor = () => {
     switch (state.type) {
-      case 'entry': return '#22c55e';
-      case 'exit': return '#ef4444';
-      case 'conduit': return '#f59e0b';
+      case 'entry': return 'var(--aethel-success)';
+      case 'exit': return 'var(--aethel-error)';
+      case 'conduit': return 'var(--aethel-warning)';
       case 'blend_space_1d':
-      case 'blend_space_2d': return '#8b5cf6';
-      default: return '#3b82f6';
+      case 'blend_space_2d': return 'var(--aethel-accent)';
+      default: return 'var(--aethel-primary)';
     }
   };
   return (
     <div
       style={{
-        background: selected ? '#1e3a5f' : '#1e293b',
-        border: `2px solid ${isDefault ? '#22c55e' : getNodeColor()}`,
+        background: selected ? 'var(--aethel-surface-quaternary)' : 'var(--aethel-surface-tertiary)',
+        border: `2px solid ${isDefault ? 'var(--aethel-success)' : getNodeColor()}`,
         borderRadius: '8px',
         padding: '12px 16px',
         minWidth: '150px',
@@ -74,7 +74,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
       <Handle
         type="target"
         position={Position.Left}
-        style={{ background: '#64748b', width: 10, height: 10 }}
+        style={{ background: 'var(--aethel-text-quaternary)', width: 10, height: 10 }}
       />
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -88,31 +88,31 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
         />
         <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{state.name}</span>
         {isDefault && (
-          <span style={{ fontSize: '10px', background: '#22c55e', padding: '2px 6px', borderRadius: '4px' }}>
+          <span style={{ fontSize: '10px', background: 'var(--aethel-success)', padding: '2px 6px', borderRadius: '4px' }}>
             Default
           </span>
         )}
       </div>
       {/* Animation info */}
       {state.animation && (
-        <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
-          🎬 {state.animation}
+        <div style={{ fontSize: '12px', color: 'var(--aethel-text-tertiary)', marginBottom: '4px' }}>
+          Anim {state.animation}
         </div>
       )}
       {/* Blend tree indicator */}
       {state.blendTree && (
-        <div style={{ fontSize: '12px', color: '#8b5cf6' }}>
-          ⚡ Blend Tree ({state.blendTree.type})
+        <div style={{ fontSize: '12px', color: 'var(--aethel-accent)' }}>
+          Blend Blend Tree ({state.blendTree.type})
         </div>
       )}
       {/* Speed */}
-      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-        Speed: {state.speed}x {state.loop ? '🔄' : ''}
+      <div style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginTop: '4px' }}>
+        Speed: {state.speed}x {state.loop ? 'loop' : ''}
       </div>
       {/* Notifies count */}
       {state.notifies.length > 0 && (
-        <div style={{ fontSize: '11px', color: '#f59e0b', marginTop: '2px' }}>
-          📌 {state.notifies.length} notifies
+        <div style={{ fontSize: '11px', color: 'var(--aethel-warning)', marginTop: '2px' }}>
+          Notes {state.notifies.length} notifies
         </div>
       )}
       {/* Context menu buttons (visible on hover) */}
@@ -130,7 +130,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
         <button
           onClick={(e) => { e.stopPropagation(); onEdit(state); }}
           style={{
-            background: '#374151',
+            background: 'var(--aethel-surface-quaternary)',
             border: 'none',
             borderRadius: '4px',
             padding: '4px 8px',
@@ -145,7 +145,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           <button
             onClick={(e) => { e.stopPropagation(); onSetDefault(state.id); }}
             style={{
-              background: '#374151',
+              background: 'var(--aethel-surface-quaternary)',
               border: 'none',
               borderRadius: '4px',
               padding: '4px 8px',
@@ -162,7 +162,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: '#64748b', width: 10, height: 10 }}
+        style={{ background: 'var(--aethel-text-quaternary)', width: 10, height: 10 }}
       />
     </div>
   );
@@ -194,7 +194,7 @@ function TransitionEdge({
         className="react-flow__edge-path"
         d={edgePath}
         strokeWidth={selected ? 3 : 2}
-        stroke={selected ? '#3b82f6' : '#64748b'}
+        stroke={selected ? 'var(--aethel-primary)' : 'var(--aethel-text-quaternary)'}
         fill="none"
         markerEnd="url(#arrow)"
       />
@@ -209,12 +209,12 @@ function TransitionEdge({
         >
           <div
             style={{
-              background: '#1e293b',
-              border: '1px solid #374151',
+              background: 'var(--aethel-surface-tertiary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '4px',
               padding: '4px 8px',
               fontSize: '10px',
-              color: '#94a3b8',
+              color: 'var(--aethel-text-tertiary)',
               textAlign: 'center',
               cursor: 'pointer',
             }}
@@ -224,7 +224,7 @@ function TransitionEdge({
               ? `${transition.conditions.length} conditions`
               : 'No conditions'}
             <br />
-            <span style={{ color: '#64748b' }}>{transition.blendTime}s blend</span>
+            <span style={{ color: 'var(--aethel-text-quaternary)' }}>{transition.blendTime}s blend</span>
           </div>
         </foreignObject>
       )}
@@ -256,7 +256,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
     onChange(parameters.filter(p => p.id !== id));
   };
   return (
-    <div style={{ padding: '12px', background: '#0f172a', borderRadius: '8px' }}>
+    <div style={{ padding: '12px', background: 'var(--aethel-surface-primary)', borderRadius: '8px' }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>
         Parameters
       </h3>
@@ -271,7 +271,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               gap: '8px',
               marginBottom: '8px',
               padding: '8px',
-              background: '#1e293b',
+              background: 'var(--aethel-surface-tertiary)',
               borderRadius: '4px',
             }}
           >
@@ -280,8 +280,8 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               fontSize: '10px', 
               padding: '2px 6px', 
               borderRadius: '4px',
-              background: param.type === 'bool' ? '#22c55e' : 
-                         param.type === 'trigger' ? '#f59e0b' : '#3b82f6',
+              background: param.type === 'bool' ? 'var(--aethel-success)' : 
+                         param.type === 'trigger' ? 'var(--aethel-warning)' : 'var(--aethel-primary)',
               color: 'white',
             }}>
               {param.type}
@@ -316,7 +316,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
                   setTimeout(() => onValueChange(param.id, false), 100);
                 }}
                 style={{
-                  background: '#f59e0b',
+                  background: 'var(--aethel-warning)',
                   border: 'none',
                   borderRadius: '4px',
                   padding: '4px 8px',
@@ -329,7 +329,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               </button>
             )}
             {/* Value display */}
-            <span style={{ color: '#64748b', fontSize: '11px', width: '40px', textAlign: 'right' }}>
+            <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px', width: '40px', textAlign: 'right' }}>
               {typeof param.value === 'boolean' ? (param.value ? 'true' : 'false') : param.value.toFixed(2)}
             </span>
             {/* Delete */}
@@ -338,12 +338,12 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#ef4444',
+                color: 'var(--aethel-error)',
                 cursor: 'pointer',
                 fontSize: '14px',
               }}
             >
-              ×
+              x
             </button>
           </div>
         ))}
@@ -357,8 +357,8 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
           placeholder="Parameter name"
           style={{
             flex: 1,
-            background: '#1e293b',
-            border: '1px solid #374151',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '6px 10px',
             color: 'white',
@@ -369,8 +369,8 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
           value={newParamType}
           onChange={(e) => setNewParamType(e.target.value as AnimationParameter['type'])}
           style={{
-            background: '#1e293b',
-            border: '1px solid #374151',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '6px',
             color: 'white',
@@ -385,7 +385,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
         <button
           onClick={addParameter}
           style={{
-            background: '#3b82f6',
+            background: 'var(--aethel-primary)',
             border: 'none',
             borderRadius: '4px',
             padding: '6px 12px',
@@ -430,7 +430,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
     >
       <div
         style={{
-          background: '#1e293b',
+          background: 'var(--aethel-surface-tertiary)',
           borderRadius: '12px',
           padding: '24px',
           width: '500px',
@@ -442,7 +442,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
         <h2 style={{ color: 'white', marginBottom: '20px' }}>Edit State: {state.name}</h2>
         {/* Name */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
             Name
           </label>
           <input
@@ -451,8 +451,8 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             onChange={(e) => updateField('name', e.target.value)}
             style={{
               width: '100%',
-              background: '#0f172a',
-              border: '1px solid #374151',
+              background: 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '4px',
               padding: '8px 12px',
               color: 'white',
@@ -461,7 +461,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
         </div>
         {/* Animation */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
             Animation
           </label>
           <select
@@ -469,8 +469,8 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
             onChange={(e) => updateField('animation', e.target.value || undefined)}
             style={{
               width: '100%',
-              background: '#0f172a',
-              border: '1px solid #374151',
+              background: 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '4px',
               padding: '8px 12px',
               color: 'white',
@@ -484,7 +484,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
         </div>
         {/* Speed */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
             Speed: {editedState.speed.toFixed(2)}x
           </label>
           <input
@@ -499,7 +499,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
         </div>
         {/* Loop */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input
               type="checkbox"
               checked={editedState.loop}
@@ -509,8 +509,8 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
           </label>
         </div>
         {/* Blend Tree option */}
-        <div style={{ marginBottom: '16px', padding: '12px', background: '#0f172a', borderRadius: '8px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--aethel-surface-primary)', borderRadius: '8px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <input
               type="checkbox"
               checked={!!editedState.blendTree}
@@ -532,8 +532,8 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
                 })}
                 style={{
                   width: '100%',
-                  background: '#1e293b',
-                  border: '1px solid #374151',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
                   padding: '6px',
                   color: 'white',
@@ -552,8 +552,8 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
                 })}
                 style={{
                   width: '100%',
-                  background: '#1e293b',
-                  border: '1px solid #374151',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
                   padding: '6px',
                   color: 'white',
@@ -572,7 +572,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
           <button
             onClick={onClose}
             style={{
-              background: '#374151',
+              background: 'var(--aethel-surface-quaternary)',
               border: 'none',
               borderRadius: '6px',
               padding: '10px 20px',
@@ -585,7 +585,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
           <button
             onClick={() => onSave(editedState)}
             style={{
-              background: '#3b82f6',
+              background: 'var(--aethel-primary)',
               border: 'none',
               borderRadius: '6px',
               padding: '10px 20px',
@@ -649,7 +649,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
     >
       <div
         style={{
-          background: '#1e293b',
+          background: 'var(--aethel-surface-tertiary)',
           borderRadius: '12px',
           padding: '24px',
           width: '500px',
@@ -661,7 +661,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         <h2 style={{ color: 'white', marginBottom: '20px' }}>Edit Transition</h2>
         {/* Blend Time */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
             Blend Time: {editedTransition.blendTime.toFixed(2)}s
           </label>
           <input
@@ -676,7 +676,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         </div>
         {/* Blend Mode */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
             Blend Mode
           </label>
           <select
@@ -687,8 +687,8 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
             }))}
             style={{
               width: '100%',
-              background: '#0f172a',
-              border: '1px solid #374151',
+              background: 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '4px',
               padding: '8px',
               color: 'white',
@@ -701,7 +701,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         </div>
         {/* Interruptible */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input
               type="checkbox"
               checked={editedTransition.interruptible}
@@ -712,7 +712,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         </div>
         {/* Priority */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
             Priority: {editedTransition.priority}
           </label>
           <input
@@ -728,11 +728,11 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         {/* Conditions */}
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <label style={{ color: '#94a3b8', fontSize: '12px' }}>Conditions</label>
+            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Conditions</label>
             <button
               onClick={addCondition}
               style={{
-                background: '#3b82f6',
+                background: 'var(--aethel-primary)',
                 border: 'none',
                 borderRadius: '4px',
                 padding: '4px 8px',
@@ -753,7 +753,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                 alignItems: 'center',
                 marginBottom: '8px',
                 padding: '8px',
-                background: '#0f172a',
+                background: 'var(--aethel-surface-primary)',
                 borderRadius: '4px',
               }}
             >
@@ -762,8 +762,8 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                 onChange={(e) => updateCondition(index, { parameter: e.target.value })}
                 style={{
                   flex: 1,
-                  background: '#1e293b',
-                  border: '1px solid #374151',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
                   padding: '4px',
                   color: 'white',
@@ -778,8 +778,8 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                 value={condition.comparison}
                 onChange={(e) => updateCondition(index, { comparison: e.target.value as TransitionCondition['comparison'] })}
                 style={{
-                  background: '#1e293b',
-                  border: '1px solid #374151',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
                   padding: '4px',
                   color: 'white',
@@ -787,7 +787,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                 }}
               >
                 <option value="==">=</option>
-                <option value="!=">≠</option>
+                <option value="!=">!=</option>
                 <option value=">">&gt;</option>
                 <option value="<">&lt;</option>
                 <option value=">=">&gt;=</option>
@@ -799,8 +799,8 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                 onChange={(e) => updateCondition(index, { value: parseFloat(e.target.value) })}
                 style={{
                   width: '60px',
-                  background: '#1e293b',
-                  border: '1px solid #374151',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
                   padding: '4px',
                   color: 'white',
@@ -812,11 +812,11 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#ef4444',
+                  color: 'var(--aethel-error)',
                   cursor: 'pointer',
                 }}
               >
-                ×
+                x
               </button>
             </div>
           ))}
@@ -826,7 +826,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
           <button
             onClick={onClose}
             style={{
-              background: '#374151',
+              background: 'var(--aethel-surface-quaternary)',
               border: 'none',
               borderRadius: '6px',
               padding: '10px 20px',
@@ -839,7 +839,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
           <button
             onClick={() => onSave(editedTransition)}
             style={{
-              background: '#3b82f6',
+              background: 'var(--aethel-primary)',
               border: 'none',
               borderRadius: '6px',
               padding: '10px 20px',
@@ -1051,9 +1051,9 @@ export function AnimationBlueprintEditor({
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex' }}>
       {/* Left sidebar - Parameters */}
-      <div style={{ width: '280px', background: '#0f172a', borderRight: '1px solid #1e293b', padding: '12px' }}>
+      <div style={{ width: '280px', background: 'var(--aethel-surface-primary)', borderRight: '1px solid var(--aethel-border-primary)', padding: '12px' }}>
         <h2 style={{ color: 'white', fontSize: '16px', marginBottom: '16px' }}>
-          🎬 {blueprint.name}
+          Anim {blueprint.name}
         </h2>
         <ParameterPanel
           parameters={blueprint.parameters}
@@ -1065,7 +1065,7 @@ export function AnimationBlueprintEditor({
             onClick={addState}
             style={{
               width: '100%',
-              background: '#3b82f6',
+              background: 'var(--aethel-primary)',
               border: 'none',
               borderRadius: '6px',
               padding: '10px',
@@ -1078,9 +1078,9 @@ export function AnimationBlueprintEditor({
           </button>
         </div>
         {/* Layers panel would go here */}
-        <div style={{ marginTop: '20px', padding: '12px', background: '#1e293b', borderRadius: '8px' }}>
+        <div style={{ marginTop: '20px', padding: '12px', background: 'var(--aethel-surface-tertiary)', borderRadius: '8px' }}>
           <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '8px' }}>Layers</h3>
-          <p style={{ color: '#64748b', fontSize: '12px' }}>
+          <p style={{ color: 'var(--aethel-text-quaternary)', fontSize: '12px' }}>
             Add animation layers for blending multiple state machines
           </p>
         </div>
@@ -1097,20 +1097,20 @@ export function AnimationBlueprintEditor({
           edgeTypes={edgeTypes}
           fitView
           deleteKeyCode={['Backspace', 'Delete']}
-          style={{ background: '#0f172a' }}
+          style={{ background: 'var(--aethel-surface-primary)' }}
         >
           <Controls />
           <MiniMap
-            style={{ background: '#1e293b' }}
-            nodeColor="#3b82f6"
+            style={{ background: 'var(--aethel-surface-tertiary)' }}
+            nodeColor="var(--aethel-primary)"
           />
-          <Background color="#1e293b" gap={20} />
+          <Background color="var(--aethel-surface-tertiary)" gap={20} />
           <Panel position="top-right">
             <div style={{ 
-              background: '#1e293b', 
+              background: 'var(--aethel-surface-tertiary)', 
               padding: '8px 12px', 
               borderRadius: '6px',
-              color: '#94a3b8',
+              color: 'var(--aethel-text-tertiary)',
               fontSize: '12px',
             }}>
               States: {blueprint.states.length} | Transitions: {blueprint.transitions.length}
@@ -1148,7 +1148,7 @@ export function AnimationBlueprintEditor({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--aethel-text-quaternary)" />
           </marker>
         </defs>
       </svg>

@@ -2,6 +2,28 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+function resolveCssVarColor(varName: string, fallback: string): string {
+  if (typeof window === 'undefined') return fallback
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
+  return value || fallback
+}
+
+function withAlpha(color: string, alpha: number): string {
+  if (color.startsWith('rgb(')) {
+    return `rgba(${color.slice(4, -1)}, ${alpha})`
+  }
+  if (color.startsWith('rgba(')) {
+    const parts = color.slice(5, -1).split(',').map((p) => p.trim())
+    return `rgba(${parts.slice(0, 3).join(', ')}, ${alpha})`
+  }
+  return color
+}
+
+function resolveCssVarRgba(varName: string, alpha: number, fallback: string): string {
+  const base = resolveCssVarColor(varName, fallback)
+  return withAlpha(base, alpha)
+}
+
 // ============================================================================
 // TYPES - Professional Keyframe System (Premiere/After Effects style)
 // ============================================================================
@@ -38,7 +60,7 @@ export interface AnimatedProperty {
   min?: number
   max?: number
   step?: number
-  unit?: string         // e.g., 'px', '%', '°'
+  unit?: string         // e.g., 'px', '%', 'deg'
 }
 
 export interface KeyframeTrack {
@@ -235,6 +257,23 @@ export function KeyframeEditor({
   const propertyHeight = 20
   const headerWidth = 200
   const keyframeSize = 10
+  const palette = useMemo(() => ({
+    primary: resolveCssVarColor('--aethel-primary', 'rgb(99, 102, 241)'),
+    primaryLight: resolveCssVarColor('--aethel-primary-light', 'rgb(129, 140, 248)'),
+    primaryDark: resolveCssVarColor('--aethel-primary-dark', 'rgb(79, 70, 229)'),
+    surfaceBase: resolveCssVarColor('--aethel-surface-primary', 'rgb(10, 10, 15)'),
+    surfaceMid: resolveCssVarColor('--aethel-surface-secondary', 'rgb(17, 17, 24)'),
+    surfaceStrong: resolveCssVarColor('--aethel-surface-tertiary', 'rgb(26, 26, 36)'),
+    surfaceDeep: resolveCssVarColor('--aethel-surface-quaternary', 'rgb(37, 37, 50)'),
+    textPrimary: resolveCssVarColor('--aethel-text-primary', 'rgb(248, 250, 252)'),
+    textSecondary: resolveCssVarColor('--aethel-text-secondary', 'rgb(226, 232, 240)'),
+    textTertiary: resolveCssVarColor('--aethel-text-tertiary', 'rgb(148, 163, 184)'),
+    textQuaternary: resolveCssVarColor('--aethel-text-quaternary', 'rgb(100, 116, 139)'),
+    textMuted: resolveCssVarColor('--aethel-text-muted', 'rgb(71, 85, 105)'),
+    border: resolveCssVarColor('--aethel-border-primary', 'rgba(255, 255, 255, 0.12)'),
+    error: resolveCssVarColor('--aethel-error', 'rgb(239, 68, 68)'),
+    primaryAlpha: resolveCssVarRgba('--aethel-primary', 0.5, 'rgb(99, 102, 241)'),
+  }), [])
   
   // Calculate total height
   const totalHeight = useMemo(() => {
@@ -264,43 +303,43 @@ export function KeyframeEditor({
     
     // Shadow for depth
     if (selected || hovered) {
-      ctx.shadowColor = selected ? '#4dabf7' : '#aaa'
+      ctx.shadowColor = selected ? palette.primaryLight : palette.textMuted
       ctx.shadowBlur = 6
     }
     
     // Fill based on state
     if (selected) {
-      ctx.fillStyle = '#339af0'
+      ctx.fillStyle = palette.primary
     } else if (hovered) {
-      ctx.fillStyle = '#74c0fc'
+      ctx.fillStyle = palette.primaryLight
     } else {
-      ctx.fillStyle = '#495057'
+      ctx.fillStyle = palette.textMuted
     }
     
     ctx.fillRect(-size, -size, size * 2, size * 2)
     
     // Border
-    ctx.strokeStyle = selected ? '#228be6' : '#868e96'
+    ctx.strokeStyle = selected ? palette.primaryDark : palette.textQuaternary
     ctx.lineWidth = 1
     ctx.strokeRect(-size, -size, size * 2, size * 2)
     
     // Easing indicator (small icon inside)
     ctx.shadowBlur = 0
     if (easing !== 'linear') {
-      ctx.fillStyle = '#fff'
+      ctx.fillStyle = palette.textPrimary
       ctx.font = '6px sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       
       let icon = ''
       switch (easing) {
-        case 'easeIn': icon = '⟩'; break
-        case 'easeOut': icon = '⟨'; break
-        case 'easeInOut': icon = '∿'; break
-        case 'hold': icon = '▬'; break
-        case 'bezier': icon = '∼'; break
-        case 'bounce': icon = '⌢'; break
-        case 'elastic': icon = '≋'; break
+        case 'easeIn': icon = 'I'; break
+        case 'easeOut': icon = 'O'; break
+        case 'easeInOut': icon = 'S'; break
+        case 'hold': icon = '='; break
+        case 'bezier': icon = 'B'; break
+        case 'bounce': icon = '~'; break
+        case 'elastic': icon = 'E'; break
       }
       
       ctx.rotate(-Math.PI / 4)
@@ -308,7 +347,7 @@ export function KeyframeEditor({
     }
     
     ctx.restore()
-  }, [])
+  }, [keyframeSize, palette])
   
   // Draw easing curve preview between keyframes
   const drawEasingCurve = useCallback((
@@ -334,10 +373,10 @@ export function KeyframeEditor({
       ctx.lineTo(x, y + yOffset)
     }
     
-    ctx.strokeStyle = 'rgba(77, 171, 247, 0.5)'
+    ctx.strokeStyle = palette.primaryAlpha
     ctx.lineWidth = 1
     ctx.stroke()
-  }, [])
+  }, [palette])
   
   // Main render
   useEffect(() => {
@@ -351,11 +390,11 @@ export function KeyframeEditor({
     const height = canvas.height
     
     // Clear
-    ctx.fillStyle = '#1a1b1e'
+    ctx.fillStyle = palette.surfaceBase
     ctx.fillRect(0, 0, width, height)
     
     // Draw timeline grid
-    ctx.strokeStyle = '#2c2e33'
+    ctx.strokeStyle = palette.border
     ctx.lineWidth = 1
     
     const secondWidth = pixelsPerSecond
@@ -372,23 +411,23 @@ export function KeyframeEditor({
     
     for (const track of tracks) {
       // Track header background
-      ctx.fillStyle = '#25262b'
+      ctx.fillStyle = palette.surfaceMid
       ctx.fillRect(0, y, headerWidth, trackHeight)
       
       // Track label
-      ctx.fillStyle = '#c1c2c5'
+      ctx.fillStyle = palette.textSecondary
       ctx.font = 'bold 11px system-ui'
       ctx.textAlign = 'left'
       ctx.textBaseline = 'middle'
       ctx.fillText(track.clipId.slice(0, 20), 24, y + trackHeight / 2)
       
       // Expand/collapse button
-      ctx.fillStyle = '#868e96'
+      ctx.fillStyle = palette.textQuaternary
       ctx.font = '10px system-ui'
-      ctx.fillText(track.expanded ? '▼' : '▶', 8, y + trackHeight / 2)
+      ctx.fillText(track.expanded ? 'v' : '>', 8, y + trackHeight / 2)
       
       // Track background
-      ctx.fillStyle = '#2c2e33'
+      ctx.fillStyle = palette.surfaceStrong
       ctx.fillRect(headerWidth, y, width - headerWidth, trackHeight)
       
       y += trackHeight
@@ -396,16 +435,16 @@ export function KeyframeEditor({
       if (track.expanded) {
         for (const prop of track.properties) {
           // Property row background
-          ctx.fillStyle = '#212226'
+          ctx.fillStyle = palette.surfaceMid
           ctx.fillRect(0, y, headerWidth, propertyHeight)
           
           // Property label
-          ctx.fillStyle = '#909296'
+          ctx.fillStyle = palette.textTertiary
           ctx.font = '10px system-ui'
           ctx.fillText(`  ${prop.name}`, 24, y + propertyHeight / 2)
           
           // Property timeline background
-          ctx.fillStyle = '#1e1f23'
+          ctx.fillStyle = palette.surfaceBase
           ctx.fillRect(headerWidth, y, width - headerWidth, propertyHeight)
           
           // Draw keyframes and curves
@@ -441,7 +480,7 @@ export function KeyframeEditor({
     
     // Draw playhead
     const playheadX = headerWidth + currentTime * pixelsPerSecond
-    ctx.strokeStyle = '#fa5252'
+    ctx.strokeStyle = palette.error
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.moveTo(playheadX, 0)
@@ -449,7 +488,7 @@ export function KeyframeEditor({
     ctx.stroke()
     
     // Playhead head
-    ctx.fillStyle = '#fa5252'
+    ctx.fillStyle = palette.error
     ctx.beginPath()
     ctx.moveTo(playheadX - 6, 0)
     ctx.lineTo(playheadX + 6, 0)
@@ -642,8 +681,8 @@ export function KeyframeEditor({
           position: 'fixed',
           left: contextMenu.x,
           top: contextMenu.y,
-          background: '#2c2e33',
-          border: '1px solid #373a40',
+          background: palette.surfaceStrong,
+          border: `1px solid ${palette.border}`,
           borderRadius: 4,
           padding: 4,
           zIndex: 1000,
@@ -652,7 +691,7 @@ export function KeyframeEditor({
         }}
         onClick={() => setContextMenu(null)}
       >
-        <div style={{ padding: '4px 8px', color: '#909296', fontSize: 10, borderBottom: '1px solid #373a40' }}>
+        <div style={{ padding: '4px 8px', color: palette.textTertiary, fontSize: 10, borderBottom: `1px solid ${palette.border}` }}>
           Easing
         </div>
         {(['linear', 'easeIn', 'easeOut', 'easeInOut', 'hold', 'bounce', 'elastic', 'bezier'] as EasingType[]).map(easing => (
@@ -662,41 +701,41 @@ export function KeyframeEditor({
             style={{
               padding: '6px 8px',
               cursor: 'pointer',
-              color: '#c1c2c5',
+              color: palette.textSecondary,
               fontSize: 11,
               display: 'flex',
               alignItems: 'center',
               gap: 8
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#373a40')}
+            onMouseEnter={e => (e.currentTarget.style.background = palette.surfaceDeep)}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             <span style={{ width: 16 }}>
-              {easing === 'linear' && '—'}
-              {easing === 'easeIn' && '⟩'}
-              {easing === 'easeOut' && '⟨'}
-              {easing === 'easeInOut' && '∿'}
-              {easing === 'hold' && '▬'}
-              {easing === 'bounce' && '⌢'}
-              {easing === 'elastic' && '≋'}
-              {easing === 'bezier' && '∼'}
+              {easing === 'linear' && '-'}
+              {easing === 'easeIn' && 'I'}
+              {easing === 'easeOut' && 'O'}
+              {easing === 'easeInOut' && 'S'}
+              {easing === 'hold' && '='}
+              {easing === 'bounce' && '~'}
+              {easing === 'elastic' && 'E'}
+              {easing === 'bezier' && 'B'}
             </span>
             {easing.charAt(0).toUpperCase() + easing.slice(1)}
           </div>
         ))}
-        <div style={{ borderTop: '1px solid #373a40', marginTop: 4, paddingTop: 4 }}>
+        <div style={{ borderTop: `1px solid ${palette.border}`, marginTop: 4, paddingTop: 4 }}>
           <div
             onClick={handleDelete}
             style={{
               padding: '6px 8px',
               cursor: 'pointer',
-              color: '#fa5252',
+              color: palette.error,
               fontSize: 11
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#373a40')}
+            onMouseEnter={e => (e.currentTarget.style.background = palette.surfaceDeep)}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
-            🗑️ Delete Keyframe
+            [x] Delete keyframe
           </div>
         </div>
       </div>
@@ -710,7 +749,7 @@ export function KeyframeEditor({
         width={Math.max(600, headerWidth + duration * pixelsPerSecond + 100)}
         height={Math.max(100, totalHeight)}
         style={{
-          background: '#1a1b1e',
+          background: palette.surfaceBase,
           borderRadius: 4,
           cursor: dragging ? 'grabbing' : hoveredKeyframe ? 'pointer' : 'default'
         }}
@@ -757,7 +796,7 @@ export function KeyframeControls({
   
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ color: '#909296', fontSize: 11, minWidth: 80 }}>{property.name}</span>
+      <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, minWidth: 80 }}>{property.name}</span>
       
       {/* Keyframe toggle button */}
       <button
@@ -769,8 +808,8 @@ export function KeyframeControls({
           }
         }}
         style={{
-          background: hasKeyframeAtTime ? '#339af0' : 'transparent',
-          border: '1px solid #339af0',
+          background: hasKeyframeAtTime ? 'var(--aethel-primary)' : 'transparent',
+          border: '1px solid var(--aethel-primary)',
           borderRadius: 2,
           width: 16,
           height: 16,
@@ -782,8 +821,8 @@ export function KeyframeControls({
         }}
         title={hasKeyframeAtTime ? 'Remove keyframe' : 'Add keyframe'}
       >
-        <span style={{ transform: 'rotate(-45deg)', color: hasKeyframeAtTime ? '#fff' : '#339af0', fontSize: 10 }}>
-          {hasKeyframeAtTime ? '✓' : '+'}
+        <span style={{ transform: 'rotate(-45deg)', color: hasKeyframeAtTime ? 'var(--aethel-text-primary)' : 'var(--aethel-primary)', fontSize: 10 }}>
+          {hasKeyframeAtTime ? 'v' : '+'}
         </span>
       </button>
       
@@ -802,10 +841,10 @@ export function KeyframeControls({
           max={property.max}
           step={property.step ?? 0.01}
           style={{
-            background: '#25262b',
-            border: '1px solid #373a40',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: 3,
-            color: '#c1c2c5',
+            color: 'var(--aethel-text-secondary)',
             padding: '2px 6px',
             width: 60,
             fontSize: 11
@@ -814,7 +853,7 @@ export function KeyframeControls({
       )}
       
       {property.unit && (
-        <span style={{ color: '#909296', fontSize: 10 }}>{property.unit}</span>
+        <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10 }}>{property.unit}</span>
       )}
       
       {/* Navigation to prev/next keyframe */}
@@ -829,13 +868,13 @@ export function KeyframeControls({
         style={{
           background: 'transparent',
           border: 'none',
-          color: '#868e96',
+          color: 'var(--aethel-text-quaternary)',
           cursor: 'pointer',
           fontSize: 10
         }}
         title="Previous keyframe"
       >
-        ◀
+        <
       </button>
       <button
         onClick={() => {
@@ -848,13 +887,13 @@ export function KeyframeControls({
         style={{
           background: 'transparent',
           border: 'none',
-          color: '#868e96',
+          color: 'var(--aethel-text-quaternary)',
           cursor: 'pointer',
           fontSize: 10
         }}
         title="Next keyframe"
       >
-        ▶
+        &gt;
       </button>
     </div>
   )
@@ -909,7 +948,7 @@ export function createDefaultAnimatedProperties(): AnimatedProperty[] {
       property: 'rotation',
       keyframes: [],
       defaultValue: 0,
-      unit: '°'
+      unit: 'deg'
     },
     {
       id: 'volume',
