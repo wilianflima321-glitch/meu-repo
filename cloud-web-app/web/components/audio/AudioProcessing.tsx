@@ -511,11 +511,11 @@ export function EQVisualizer({
     if (!ctx) return
     
     // Clear
-    ctx.fillStyle = '#1a1b1e'
+    ctx.fillStyle = 'var(--aethel-surface-secondary)'
     ctx.fillRect(0, 0, width, height)
     
     // Grid lines
-    ctx.strokeStyle = '#2c2e33'
+    ctx.strokeStyle = 'var(--aethel-surface-tertiary)'
     ctx.lineWidth = 1
     
     // Frequency grid (logarithmic)
@@ -528,7 +528,7 @@ export function EQVisualizer({
       ctx.stroke()
       
       // Label
-      ctx.fillStyle = '#5c5f66'
+      ctx.fillStyle = 'var(--aethel-text-quaternary)'
       ctx.font = '9px system-ui'
       ctx.textAlign = 'center'
       const label = freq >= 1000 ? `${freq / 1000}k` : `${freq}`
@@ -545,7 +545,7 @@ export function EQVisualizer({
       ctx.stroke()
       
       // Label
-      ctx.fillStyle = '#5c5f66'
+      ctx.fillStyle = 'var(--aethel-text-quaternary)'
       ctx.font = '9px system-ui'
       ctx.textAlign = 'left'
       ctx.fillText(`${gain > 0 ? '+' : ''}${gain}dB`, 4, y - 2)
@@ -553,7 +553,7 @@ export function EQVisualizer({
     
     // Draw response curve
     ctx.beginPath()
-    ctx.strokeStyle = '#339af0'
+    ctx.strokeStyle = 'var(--aethel-primary)'
     ctx.lineWidth = 2
     
     for (let x = 0; x < width; x++) {
@@ -592,9 +592,9 @@ export function EQVisualizer({
       
       ctx.beginPath()
       ctx.arc(x, y, 8, 0, Math.PI * 2)
-      ctx.fillStyle = dragging === band.id ? '#228be6' : '#339af0'
+      ctx.fillStyle = dragging === band.id ? 'var(--aethel-primary-dark)' : 'var(--aethel-primary)'
       ctx.fill()
-      ctx.strokeStyle = '#fff'
+      ctx.strokeStyle = 'var(--aethel-text-primary)'
       ctx.lineWidth = 2
       ctx.stroke()
       
@@ -730,11 +730,11 @@ export function CompressorVisualizer({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     
-    ctx.fillStyle = '#1a1b1e'
+    ctx.fillStyle = 'var(--aethel-surface-secondary)'
     ctx.fillRect(0, 0, width, height)
     
     // Grid
-    ctx.strokeStyle = '#2c2e33'
+    ctx.strokeStyle = 'var(--aethel-surface-tertiary)'
     ctx.lineWidth = 1
     
     for (let db = 0; db >= -60; db -= 10) {
@@ -753,7 +753,7 @@ export function CompressorVisualizer({
     }
     
     // Unity line
-    ctx.strokeStyle = '#5c5f66'
+    ctx.strokeStyle = 'var(--aethel-text-quaternary)'
     ctx.beginPath()
     ctx.moveTo(0, height)
     ctx.lineTo(width, 0)
@@ -761,7 +761,7 @@ export function CompressorVisualizer({
     
     // Compression curve
     ctx.beginPath()
-    ctx.strokeStyle = '#339af0'
+    ctx.strokeStyle = 'var(--aethel-primary)'
     ctx.lineWidth = 2
     
     for (let input = -60; input <= 0; input += 0.5) {
@@ -787,7 +787,7 @@ export function CompressorVisualizer({
     
     // Threshold line
     const threshX = ((params.threshold + 60) / 60) * width
-    ctx.strokeStyle = '#fa5252'
+    ctx.strokeStyle = 'var(--aethel-error)'
     ctx.setLineDash([4, 4])
     ctx.beginPath()
     ctx.moveTo(threshX, 0)
@@ -801,15 +801,15 @@ export function CompressorVisualizer({
     
     ctx.beginPath()
     ctx.arc(inputX, inputY, 6, 0, Math.PI * 2)
-    ctx.fillStyle = '#fab005'
+    ctx.fillStyle = 'var(--aethel-warning)'
     ctx.fill()
     
     // Gain reduction meter
-    ctx.fillStyle = '#2c2e33'
+    ctx.fillStyle = 'var(--aethel-surface-tertiary)'
     ctx.fillRect(width - 20, 0, 20, height)
     
     const grHeight = Math.min(height, (-gainReduction / 24) * height)
-    ctx.fillStyle = '#fa5252'
+    ctx.fillStyle = 'var(--aethel-error)'
     ctx.fillRect(width - 18, 0, 16, grHeight)
     
   }, [params, inputLevel, outputLevel, gainReduction])
@@ -844,29 +844,29 @@ export function EffectRack({
   const [expandedEffect, setExpandedEffect] = useState<string | null>(null)
   
   const effectTypes: { type: AudioEffectType; name: string; icon: string }[] = [
-    { type: 'eq', name: 'Parametric EQ', icon: '📊' },
-    { type: 'compressor', name: 'Compressor', icon: '📉' },
-    { type: 'limiter', name: 'Limiter', icon: '🔒' },
-    { type: 'reverb', name: 'Reverb', icon: '🏛️' },
-    { type: 'delay', name: 'Delay', icon: '⏱️' },
-    { type: 'chorus', name: 'Chorus', icon: '🎭' },
-    { type: 'distortion', name: 'Distortion', icon: '⚡' },
-    { type: 'filter', name: 'Filter', icon: '🎚️' },
-    { type: 'gate', name: 'Gate', icon: '🚪' },
-    { type: 'deEsser', name: 'De-Esser', icon: '🔇' },
+    { type: 'eq', name: 'Parametric EQ', icon: '' },
+    { type: 'compressor', name: 'Compressor', icon: '' },
+    { type: 'limiter', name: 'Limiter', icon: '' },
+    { type: 'reverb', name: 'Reverb', icon: '' },
+    { type: 'delay', name: 'Delay', icon: '' },
+    { type: 'chorus', name: 'Chorus', icon: '' },
+    { type: 'distortion', name: 'Distortion', icon: '' },
+    { type: 'filter', name: 'Filter', icon: '' },
+    { type: 'gate', name: 'Gate', icon: '' },
+    { type: 'deEsser', name: 'De-Esser', icon: '' },
   ]
   
   return (
-    <div style={{ background: '#1a1b1e', borderRadius: 6, padding: 8 }}>
+    <div style={{ background: 'var(--aethel-surface-secondary)', borderRadius: 6, padding: 8 }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 8,
         paddingBottom: 8,
-        borderBottom: '1px solid #373a40'
+        borderBottom: '1px solid var(--aethel-border-primary)'
       }}>
-        <span style={{ color: '#c1c2c5', fontSize: 12, fontWeight: 600 }}>Effect Rack</span>
+        <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12, fontWeight: 600 }}>Effect Rack</span>
         
         {/* Add effect dropdown */}
         <select
@@ -877,10 +877,10 @@ export function EffectRack({
             }
           }}
           style={{
-            background: '#25262b',
-            border: '1px solid #373a40',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: 3,
-            color: '#c1c2c5',
+            color: 'var(--aethel-text-secondary)',
             padding: '2px 8px',
             fontSize: 11,
             cursor: 'pointer'
@@ -895,7 +895,7 @@ export function EffectRack({
       
       {/* Effect list */}
       {effects.length === 0 ? (
-        <div style={{ color: '#5c5f66', fontSize: 11, textAlign: 'center', padding: 20 }}>
+        <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: 11, textAlign: 'center', padding: 20 }}>
           No effects. Add one above.
         </div>
       ) : (
@@ -904,9 +904,9 @@ export function EffectRack({
             <div
               key={effect.id}
               style={{
-                background: '#25262b',
+                background: 'var(--aethel-surface-tertiary)',
                 borderRadius: 4,
-                border: '1px solid #373a40',
+                border: '1px solid var(--aethel-border-primary)',
                 overflow: 'hidden'
               }}
             >
@@ -921,10 +921,10 @@ export function EffectRack({
                 }}
                 onClick={() => setExpandedEffect(expandedEffect === effect.id ? null : effect.id)}
               >
-                <span style={{ color: '#868e96', fontSize: 10 }}>
-                  {expandedEffect === effect.id ? '▼' : '▶'}
+                <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10 }}>
+                  {expandedEffect === effect.id ? '' : ''}
                 </span>
-                <span style={{ color: '#c1c2c5', fontSize: 11, flex: 1 }}>
+                <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 11, flex: 1 }}>
                   {effectTypes.find(t => t.type === effect.type)?.icon} {effect.name}
                 </span>
                 
@@ -937,10 +937,10 @@ export function EffectRack({
                     ))
                   }}
                   style={{
-                    background: effect.bypass ? '#373a40' : '#339af0',
+                    background: effect.bypass ? 'var(--aethel-border-primary)' : 'var(--aethel-primary)',
                     border: 'none',
                     borderRadius: 3,
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     padding: '2px 6px',
                     fontSize: 9,
                     cursor: 'pointer'
@@ -958,12 +958,12 @@ export function EffectRack({
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: '#868e96',
+                    color: 'var(--aethel-text-tertiary)',
                     cursor: 'pointer',
                     fontSize: 12
                   }}
                 >
-                  ✕
+                  
                 </button>
               </div>
               
@@ -971,8 +971,8 @@ export function EffectRack({
               {expandedEffect === effect.id && (
                 <div style={{
                   padding: 8,
-                  borderTop: '1px solid #373a40',
-                  background: '#1e1f23'
+                  borderTop: '1px solid var(--aethel-border-primary)',
+                  background: 'var(--aethel-surface-secondary)'
                 }}>
                   {effect.type === 'eq' && (
                     <EQVisualizer
@@ -989,7 +989,7 @@ export function EffectRack({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {Object.entries(effect.params as CompressorParams).map(([key, value]) => (
                         <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ color: '#909296', fontSize: 10, minWidth: 70 }}>
+                          <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, minWidth: 70 }}>
                             {key.replace(/([A-Z])/g, ' $1').trim()}
                           </span>
                           <input
@@ -1005,7 +1005,7 @@ export function EffectRack({
                             step={key === 'ratio' ? 0.5 : 1}
                             style={{ flex: 1 }}
                           />
-                          <span style={{ color: '#c1c2c5', fontSize: 10, minWidth: 40 }}>
+                          <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 10, minWidth: 40 }}>
                             {typeof value === 'number' ? value.toFixed(1) : value}
                           </span>
                         </div>
@@ -1019,7 +1019,7 @@ export function EffectRack({
                       {Object.entries(effect.params).map(([key, value]) => (
                         typeof value === 'number' && (
                           <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ color: '#909296', fontSize: 10, minWidth: 70 }}>
+                            <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, minWidth: 70 }}>
                               {key.replace(/([A-Z])/g, ' $1').trim()}
                             </span>
                             <input
@@ -1035,7 +1035,7 @@ export function EffectRack({
                               step={key.includes('time') || key.includes('delay') ? 10 : 0.01}
                               style={{ flex: 1 }}
                             />
-                            <span style={{ color: '#c1c2c5', fontSize: 10, minWidth: 40 }}>
+                            <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 10, minWidth: 40 }}>
                               {typeof value === 'number' ? value.toFixed(2) : value}
                             </span>
                           </div>
