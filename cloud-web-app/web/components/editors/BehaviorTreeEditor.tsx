@@ -140,21 +140,21 @@ const BT_NODE_TEMPLATES: Record<string, Partial<BTNode>> = {
 
 // Node colors and icons
 const NODE_STYLES: Record<BTNodeType, { color: string; icon: string }> = {
-  root: { color: '#ef4444', icon: '🌳' },
-  selector: { color: '#f59e0b', icon: '❓' },
-  sequence: { color: '#22c55e', icon: '→' },
-  parallel: { color: '#3b82f6', icon: '⇉' },
-  decorator: { color: '#8b5cf6', icon: '🔄' },
-  task: { color: '#06b6d4', icon: '⚡' },
-  condition: { color: '#ec4899', icon: '❔' }
+  root: { color: 'var(--aethel-error)', icon: '' },
+  selector: { color: 'var(--aethel-warning)', icon: '' },
+  sequence: { color: 'var(--aethel-success)', icon: '' },
+  parallel: { color: 'var(--aethel-primary)', icon: '' },
+  decorator: { color: 'var(--aethel-accent)', icon: '' },
+  task: { color: 'var(--aethel-info)', icon: '' },
+  condition: { color: 'var(--aethel-secondary)', icon: '' }
 };
 
 // Status colors
 const STATUS_COLORS: Record<string, string> = {
-  inactive: '#64748b',
-  running: '#f59e0b',
-  success: '#22c55e',
-  failure: '#ef4444'
+  inactive: 'var(--aethel-text-quaternary)',
+  running: 'var(--aethel-warning)',
+  success: 'var(--aethel-success)',
+  failure: 'var(--aethel-error)'
 };
 
 // Single Node Component
@@ -212,7 +212,7 @@ const BTNodeComponent: React.FC<{
       <div
         className={`rounded-lg shadow-lg min-w-[140px] ${selected ? 'ring-2 ring-white' : ''}`}
         style={{
-          backgroundColor: '#1e293b',
+          backgroundColor: 'var(--aethel-surface-tertiary)',
           borderLeft: `4px solid ${style.color}`,
           borderTop: `2px solid ${statusColor}`,
           borderRight: `2px solid ${statusColor}`,
@@ -417,7 +417,7 @@ export default function BehaviorTreeEditor() {
           <path
             key={`${node.id}-${childId}`}
             d={`M ${startX} ${startY} C ${startX} ${(startY + endY) / 2}, ${endX} ${(startY + endY) / 2}, ${endX} ${endY}`}
-            stroke="#475569"
+            stroke="var(--aethel-text-tertiary)"
             strokeWidth="2"
             fill="none"
           />
@@ -433,7 +433,7 @@ export default function BehaviorTreeEditor() {
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
         <div className="flex items-center gap-4">
-          <h2 className="text-white font-semibold">🧠 Behavior Tree Editor</h2>
+          <h2 className="text-white font-semibold"> Behavior Tree Editor</h2>
           <input
             type="text"
             value={tree.name}
@@ -448,7 +448,7 @@ export default function BehaviorTreeEditor() {
               isSimulating ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
             } text-white`}
           >
-            {isSimulating ? '⏹ Stop' : '▶ Simulate'}
+            {isSimulating ? ' Stop' : ' Simulate'}
           </button>
           <button
             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
@@ -640,7 +640,7 @@ export default function BehaviorTreeEditor() {
                 onClick={() => deleteNode(selectedNodeId!)}
                 className="mt-4 w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
               >
-                🗑️ Delete Node
+                 Delete Node
               </button>
             </div>
           </div>
@@ -650,7 +650,7 @@ export default function BehaviorTreeEditor() {
       {/* Status Bar */}
       <div className="flex items-center justify-between px-4 py-1 bg-slate-800 border-t border-slate-700 text-xs text-gray-400">
         <span>Nodes: {Object.keys(tree.nodes).length}</span>
-        <span>{isSimulating ? '🔴 Simulating' : '⚪ Idle'}</span>
+        <span>{isSimulating ? ' Simulating' : ' Idle'}</span>
       </div>
     </div>
   );
