@@ -1,13 +1,13 @@
 /**
- * Projects Dashboard Component - Gestão Limpa
- * 
- * Dashboard focado APENAS em gestão:
+ * Projects Dashboard Component - Gestao Limpa
+ *
+ * Dashboard focado APENAS em gestao:
  * - Lista de projetos
  * - Criar novo projeto
- * - Configurações
+ * - Configuracoes
  * - Billing
- * 
- * Clicando em projeto → abre /ide/[id] ou /editor/[id]
+ *
+ * Clicando em projeto -> abre /ide/[id] ou /editor/[id]
  */
 
 'use client';
@@ -78,22 +78,25 @@ interface DashboardStats {
 // ============================================================================
 
 const colors = {
-  bg: '#0a0a0f',
-  surface: '#12121a',
-  surfaceHover: '#1a1a25',
-  surfaceActive: '#22222f',
-  border: '#2a2a3a',
-  borderFocus: '#4f46e5',
-  text: '#e4e4eb',
-  textMuted: '#8b8b9e',
-  textDim: '#5a5a6e',
-  primary: '#6366f1',
-  primaryHover: '#5558e3',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  accent: '#8b5cf6',
+  bg: 'var(--aethel-surface-primary)',
+  surface: 'var(--aethel-surface-secondary)',
+  surfaceHover: 'var(--aethel-surface-tertiary)',
+  surfaceActive: 'var(--aethel-surface-quaternary)',
+  border: 'var(--aethel-border-primary)',
+  borderFocus: 'var(--aethel-border-focus)',
+  text: 'var(--aethel-text-primary)',
+  textMuted: 'var(--aethel-text-tertiary)',
+  textDim: 'var(--aethel-text-quaternary)',
+  primary: 'var(--aethel-primary)',
+  primaryHover: 'var(--aethel-primary-dark)',
+  success: 'var(--aethel-success)',
+  warning: 'var(--aethel-warning)',
+  error: 'var(--aethel-error)',
+  accent: 'var(--aethel-accent)',
 };
+
+const tint = (color: string, percent: number) =>
+  `color-mix(in_srgb, ${color} ${percent}%, transparent)`;
 
 const typeIcons: Record<Project['type'], React.ReactNode> = {
   game: <Gamepad2 size={18} />,
@@ -146,7 +149,7 @@ const StatCard: React.FC<{
           width: '40px',
           height: '40px',
           borderRadius: '10px',
-          background: color + '15',
+          background: tint(color, 15),
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -196,8 +199,8 @@ const ProjectCard: React.FC<{
     const diff = Date.now() - new Date(date).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
-    if (days > 0) return `${days}d atrás`;
-    if (hours > 0) return `${hours}h atrás`;
+    if (days > 0) return `${days}d atras`;
+    if (hours > 0) return `${hours}h atras`;
     return 'Agora';
   };
 
@@ -223,7 +226,7 @@ const ProjectCard: React.FC<{
             width: '40px',
             height: '40px',
             borderRadius: '8px',
-            background: typeColors[project.type] + '15',
+            background: tint(typeColors[project.type], 15),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -238,7 +241,7 @@ const ProjectCard: React.FC<{
             <span style={{ color: colors.text, fontWeight: 500, fontSize: '14px' }}>{project.name}</span>
             {project.isFavorite && <Star size={14} fill={colors.warning} color={colors.warning} />}
           </div>
-          <div style={{ fontSize: '12px', color: colors.textMuted }}>{project.description || 'Sem descrição'}</div>
+          <div style={{ fontSize: '12px', color: colors.textMuted }}>{project.description || 'Sem descricao'}</div>
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -306,7 +309,7 @@ const ProjectCard: React.FC<{
               padding: '4px 8px',
               borderRadius: '4px',
               background: project.status === 'paused' ? colors.warning : colors.textDim,
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               fontSize: '10px',
               fontWeight: 500,
               textTransform: 'uppercase',
@@ -369,7 +372,7 @@ const ProjectCard: React.FC<{
                 whiteSpace: 'nowrap',
               }}
             >
-              {project.description || 'Sem descrição'}
+              {project.description || 'Sem descricao'}
             </p>
           </div>
           
@@ -437,7 +440,7 @@ const ProjectCard: React.FC<{
               gap: '4px',
               padding: '4px 8px',
               borderRadius: '4px',
-              background: typeColors[project.type] + '15',
+              background: tint(typeColors[project.type], 15),
               color: typeColors[project.type],
               fontSize: '11px',
               fontWeight: 500,
@@ -570,7 +573,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Meu Projeto Incrível"
+              placeholder="Meu Projeto Incrivel"
               style={{
                 width: '100%',
                 padding: '10px 12px',
@@ -621,12 +624,12 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
           {/* Description */}
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: colors.text }}>
-              Descrição (opcional)
+              Descricao (opcional)
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Uma breve descrição do projeto..."
+              placeholder="Uma breve descricao do projeto..."
               rows={3}
               style={{
                 width: '100%',
@@ -667,7 +670,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
                 background: !name.trim() ? colors.textDim : colors.primary,
                 border: 'none',
                 borderRadius: '8px',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: '14px',
                 fontWeight: 500,
                 cursor: !name.trim() ? 'not-allowed' : 'pointer',
@@ -786,7 +789,7 @@ export const ProjectsDashboard: React.FC = () => {
               background: colors.primary,
               border: 'none',
               borderRadius: '10px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               fontSize: '14px',
               fontWeight: 500,
               cursor: 'pointer',
@@ -928,7 +931,7 @@ export const ProjectsDashboard: React.FC = () => {
             <p style={{ margin: '0 0 24px 0', color: colors.textMuted, fontSize: '14px' }}>
               {search 
                 ? 'Tente uma busca diferente ou ajuste os filtros.'
-                : 'Crie um novo projeto e comece a desenvolver sua próxima grande ideia.'}
+                : 'Crie um novo projeto e comece a desenvolver sua proxima grande ideia.'}
             </p>
             {!search && (
               <button
@@ -941,7 +944,7 @@ export const ProjectsDashboard: React.FC = () => {
                   background: colors.primary,
                   border: 'none',
                   borderRadius: '10px',
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   fontSize: '14px',
                   fontWeight: 500,
                   cursor: 'pointer',
@@ -994,12 +997,12 @@ export const ProjectsDashboard: React.FC = () => {
       {/* Quick Actions */}
       <div style={{ maxWidth: '1400px', margin: '48px auto 0' }}>
         <h2 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 500, color: colors.text }}>
-          Acesso Rápido
+          Acesso Rapido
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
           <QuickActionCard
             icon={<Settings size={20} />}
-            label="Configurações"
+            label="Configuracoes"
             href="/settings"
           />
           <QuickActionCard

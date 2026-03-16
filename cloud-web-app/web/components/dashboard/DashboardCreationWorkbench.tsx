@@ -41,39 +41,52 @@ function buildPreviewHtml(name: string, runtimeMode: RuntimeMode, assetCount: nu
       :root {
         color-scheme: dark;
         font-family: "IBM Plex Sans", Inter, system-ui, sans-serif;
+        --aethel-primary: #6366f1;
+        --aethel-primary-dark: #4f46e5;
+        --aethel-accent: #8b5cf6;
+        --aethel-info: #06b6d4;
+        --aethel-info-light: #22d3ee;
+        --aethel-surface-primary: #0a0a0f;
+        --aethel-surface-secondary: #111118;
+        --aethel-surface-tertiary: #1a1a24;
+        --aethel-text-secondary: #e2e8f0;
+        --aethel-text-tertiary: #94a3b8;
+        --aethel-text-quaternary: #64748b;
+        --aethel-border-primary: rgba(255, 255, 255, 0.1);
+        --aethel-border-secondary: rgba(255, 255, 255, 0.15);
       }
       body {
         margin: 0;
         padding: 24px;
-        background: linear-gradient(180deg, #0b0d12 0%, #11141c 100%);
-        color: #e2e8f0;
+        background: linear-gradient(180deg, var(--aethel-surface-primary) 0%, var(--aethel-surface-secondary) 100%);
+        color: var(--aethel-text-secondary);
       }
       .shell {
         max-width: 880px;
         margin: 0 auto;
-        border: 1px solid #243042;
+        border: 1px solid var(--aethel-border-primary);
         border-radius: 20px;
         overflow: hidden;
-        background: rgba(13, 18, 28, 0.9);
+        background: color-mix(in_srgb, var(--aethel-surface-secondary) 90%, transparent);
         box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
       }
       .hero {
         padding: 28px;
-        border-bottom: 1px solid #243042;
-        background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.2), transparent 34%);
+        border-bottom: 1px solid var(--aethel-border-primary);
+        background: radial-gradient(circle at top right, color-mix(in_srgb, var(--aethel-info) 20%, transparent), transparent 34%);
       }
       .eyebrow {
         display: inline-flex;
         gap: 8px;
         align-items: center;
         padding: 6px 10px;
-        border: 1px solid #26405f;
+        border: 1px solid var(--aethel-border-secondary);
         border-radius: 999px;
         font-size: 12px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #7dd3fc;
-        background: rgba(14, 165, 233, 0.08);
+        color: var(--aethel-info-light);
+        background: color-mix(in_srgb, var(--aethel-info) 8%, transparent);
       }
       h1 {
         margin: 16px 0 10px;
@@ -82,7 +95,7 @@ function buildPreviewHtml(name: string, runtimeMode: RuntimeMode, assetCount: nu
       }
       p {
         margin: 0;
-        color: #94a3b8;
+        color: var(--aethel-text-tertiary);
         font-size: 15px;
         line-height: 1.6;
       }
@@ -94,16 +107,16 @@ function buildPreviewHtml(name: string, runtimeMode: RuntimeMode, assetCount: nu
       }
       .card {
         padding: 18px;
-        border: 1px solid #243042;
+        border: 1px solid var(--aethel-border-primary);
         border-radius: 16px;
-        background: rgba(15, 23, 42, 0.8);
+        background: color-mix(in_srgb, var(--aethel-surface-tertiary) 80%, transparent);
       }
       .label {
         margin-bottom: 8px;
         font-size: 12px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #64748b;
+        color: var(--aethel-text-quaternary);
       }
       .value {
         font-size: 30px;
@@ -571,38 +584,38 @@ export default function DashboardCreationWorkbench({
 
   return (
     <div className="aethel-p-4 h-[calc(100vh-8.5rem)] min-h-[720px]">
-      <div className="h-full aethel-card grid grid-cols-[260px,1fr,420px] overflow-hidden border border-slate-800">
-        <aside className="border-r border-slate-800 p-3 bg-slate-950/70 overflow-y-auto">
-          <h3 className="text-xs uppercase tracking-wider text-slate-400 mb-2">Project Graph</h3>
+      <div className="h-full aethel-card grid grid-cols-[260px,1fr,420px] overflow-hidden border border-[var(--aethel-border-primary)]">
+        <aside className="border-r border-[var(--aethel-border-primary)] p-3 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] overflow-y-auto">
+          <h3 className="text-xs uppercase tracking-wider text-[var(--aethel-text-tertiary)] mb-2">Project Graph</h3>
           <div className="space-y-2 text-xs">
-            <button type="button" onClick={() => selectEntity(null)} className="w-full text-left px-2 py-1 rounded bg-slate-900 border border-slate-800">
+            <button type="button" onClick={() => selectEntity(null)} className="w-full text-left px-2 py-1 rounded bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]">
               Root - {graph.name}
             </button>
-            <div className="px-2 py-1 rounded bg-slate-900/40 border border-slate-800">Assets - {graph.assets.length}</div>
-            <div className="px-2 py-1 rounded bg-slate-900/40 border border-slate-800">Scenes - {graph.scenes.length}</div>
-            <div className="px-2 py-1 rounded bg-slate-900/40 border border-slate-800">Timeline Clips - {graph.timeline.clips.length}</div>
-            <div className="px-2 py-1 rounded bg-slate-900/40 border border-slate-800">Jobs - {graph.jobs.length}</div>
+            <div className="px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border border-[var(--aethel-border-primary)]">Assets - {graph.assets.length}</div>
+            <div className="px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border border-[var(--aethel-border-primary)]">Scenes - {graph.scenes.length}</div>
+            <div className="px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border border-[var(--aethel-border-primary)]">Timeline Clips - {graph.timeline.clips.length}</div>
+            <div className="px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border border-[var(--aethel-border-primary)]">Jobs - {graph.jobs.length}</div>
           </div>
 
           <div className="mt-4">
-            <div className="mb-2 text-[11px] uppercase tracking-wider text-slate-500">Recent Assets</div>
+            <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Recent Assets</div>
             <div className="space-y-2">
               {recentAssets.map((asset) => (
                 <button
                   key={asset.id}
                   type="button"
                   onClick={() => selectEntity(asset.id)}
-                  className={`w-full text-left px-2 py-1 rounded border text-xs ${selectedEntityId === asset.id ? 'bg-blue-500/20 border-blue-500/40' : 'bg-slate-900/40 border-slate-800'}`}
+                  className={`w-full text-left px-2 py-1 rounded border text-xs ${selectedEntityId === asset.id ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border-[var(--aethel-border-primary)]'}`}
                 >
                   <div className="truncate">{asset.name}</div>
-                  <div className="text-[10px] text-slate-400">{asset.kind} - v{asset.version}</div>
+                  <div className="text-[10px] text-[var(--aethel-text-tertiary)]">{asset.kind} - v{asset.version}</div>
                 </button>
               ))}
             </div>
           </div>
 
           <div className="mt-4">
-            <div className="mb-2 text-[11px] uppercase tracking-wider text-slate-500">Recent Jobs</div>
+            <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Recent Jobs</div>
             <div className="space-y-2">
               {recentJobs.map((job) => (
                 <button
@@ -612,10 +625,10 @@ export default function DashboardCreationWorkbench({
                     selectEntity(job.id);
                     setRightPanel('inspector');
                   }}
-                  className={`w-full text-left px-2 py-1 rounded border text-xs ${selectedEntityId === job.id ? 'bg-cyan-500/20 border-cyan-500/40' : 'bg-slate-900/40 border-slate-800'}`}
+                  className={`w-full text-left px-2 py-1 rounded border text-xs ${selectedEntityId === job.id ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border-[var(--aethel-border-primary)]'}`}
                 >
                   <div className="truncate">{job.kind}</div>
-                  <div className="text-[10px] text-slate-400">{job.status} - {Math.round(job.progress)}%</div>
+                  <div className="text-[10px] text-[var(--aethel-text-tertiary)]">{job.status} - {Math.round(job.progress)}%</div>
                 </button>
               ))}
             </div>
@@ -623,19 +636,19 @@ export default function DashboardCreationWorkbench({
         </aside>
 
         <section className="min-w-0 h-full flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+          <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center justify-between bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
             <div className="flex items-center gap-2">
-              <span className="mr-2 text-[11px] uppercase tracking-wider text-slate-500">{surfaceLabel}</span>
-              <button type="button" onClick={() => setCenterPanel('scene')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'scene' ? 'bg-slate-700' : 'text-slate-300'}`}>Scene</button>
-              <button type="button" onClick={() => setCenterPanel('timeline')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'timeline' ? 'bg-slate-700' : 'text-slate-300'}`}>Timeline</button>
-              <button type="button" onClick={() => setCenterPanel('preview')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'preview' ? 'bg-slate-700' : 'text-slate-300'}`}>Preview</button>
+              <span className="mr-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">{surfaceLabel}</span>
+              <button type="button" onClick={() => setCenterPanel('scene')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'scene' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Scene</button>
+              <button type="button" onClick={() => setCenterPanel('timeline')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'timeline' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Timeline</button>
+              <button type="button" onClick={() => setCenterPanel('preview')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'preview' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Preview</button>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setRuntimeMode('interactive')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'interactive' ? 'bg-blue-600 border-blue-500' : 'border-slate-700'}`}>Interactive</button>
-              <button type="button" onClick={() => setRuntimeMode('render')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'render' ? 'bg-cyan-600 border-cyan-500' : 'border-slate-700'}`}>Render</button>
+              <button type="button" onClick={() => setRuntimeMode('interactive')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'interactive' ? 'bg-[var(--aethel-primary-dark)] border-[var(--aethel-primary)]' : 'border-[var(--aethel-border-primary)]'}`}>Interactive</button>
+              <button type="button" onClick={() => setRuntimeMode('render')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'render' ? 'bg-[var(--aethel-info-dark)] border-[var(--aethel-info)]' : 'border-[var(--aethel-border-primary)]'}`}>Render</button>
             </div>
           </div>
-          <div className="flex-1 overflow-hidden bg-slate-950">
+          <div className="flex-1 overflow-hidden bg-[var(--aethel-surface-primary)]">
             {centerPanel === 'scene' && (
               <CanonicalPreviewSurface
                 variant="scene"
@@ -663,23 +676,23 @@ export default function DashboardCreationWorkbench({
           </div>
         </section>
 
-        <aside className="border-l border-slate-800 p-3 bg-slate-950/80 overflow-y-auto">
+        <aside className="border-l border-[var(--aethel-border-primary)] p-3 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] overflow-y-auto">
           <div className="flex items-center gap-2 mb-3">
-            <button type="button" onClick={() => setRightPanel('jobs')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'jobs' ? 'bg-slate-700' : 'text-slate-300'}`}>AI Jobs</button>
-            <button type="button" onClick={() => setRightPanel('audio-policy')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'audio-policy' ? 'bg-slate-700' : 'text-slate-300'}`}>Audio Policy</button>
-            <button type="button" onClick={() => setRightPanel('inspector')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'inspector' ? 'bg-slate-700' : 'text-slate-300'}`}>Inspector</button>
+            <button type="button" onClick={() => setRightPanel('jobs')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'jobs' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>AI Jobs</button>
+            <button type="button" onClick={() => setRightPanel('audio-policy')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'audio-policy' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Audio Policy</button>
+            <button type="button" onClick={() => setRightPanel('inspector')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'inspector' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Inspector</button>
           </div>
           {error && <div className="aethel-state aethel-state-error text-xs mb-2">{error}</div>}
           {notice && <div className="aethel-state aethel-state-loading text-xs mb-2">{notice}</div>}
 
           {rightPanel === 'jobs' && (
             <div className="space-y-3">
-              <textarea value={musicPrompt} onChange={(e) => setMusicPrompt(e.target.value)} placeholder="Prompt de musica..." className="w-full min-h-16 rounded border border-slate-700 bg-slate-950 p-2 text-xs" />
-              <button type="button" onClick={() => void doAction(generateMusic)} className="w-full px-3 py-1 rounded bg-cyan-600 text-xs">Gerar Musica</button>
-              <textarea value={voiceText} onChange={(e) => setVoiceText(e.target.value)} placeholder="Texto de voz..." className="w-full min-h-16 rounded border border-slate-700 bg-slate-950 p-2 text-xs" />
-              <button type="button" onClick={() => void doAction(generateVoice)} className="w-full px-3 py-1 rounded bg-emerald-600 text-xs">Gerar Voz</button>
-              <textarea value={modelPrompt} onChange={(e) => setModelPrompt(e.target.value)} placeholder="Prompt 3D..." className="w-full min-h-16 rounded border border-slate-700 bg-slate-950 p-2 text-xs" />
-              <button type="button" onClick={() => void doAction(generate3D)} className="w-full px-3 py-1 rounded bg-violet-600 text-xs">Gerar 3D</button>
+              <textarea value={musicPrompt} onChange={(e) => setMusicPrompt(e.target.value)} placeholder="Prompt de musica..." className="w-full min-h-16 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 text-xs" />
+              <button type="button" onClick={() => void doAction(generateMusic)} className="w-full px-3 py-1 rounded bg-[var(--aethel-info-dark)] text-xs">Gerar Musica</button>
+              <textarea value={voiceText} onChange={(e) => setVoiceText(e.target.value)} placeholder="Texto de voz..." className="w-full min-h-16 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 text-xs" />
+              <button type="button" onClick={() => void doAction(generateVoice)} className="w-full px-3 py-1 rounded bg-[var(--aethel-success-dark)] text-xs">Gerar Voz</button>
+              <textarea value={modelPrompt} onChange={(e) => setModelPrompt(e.target.value)} placeholder="Prompt 3D..." className="w-full min-h-16 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 text-xs" />
+              <button type="button" onClick={() => void doAction(generate3D)} className="w-full px-3 py-1 rounded bg-[var(--aethel-accent-dark)] text-xs">Gerar 3D</button>
               <RenderQueue
                 jobs={queueJobs}
                 onCancel={(jobId) => {
@@ -688,18 +701,18 @@ export default function DashboardCreationWorkbench({
                 }}
                 onRetry={(jobId) => void doAction(() => retryJob(jobId))}
                 onClearCompleted={() => graph.jobs.filter((job) => ['completed', 'failed', 'cancelled'].includes(job.status)).forEach((job) => removeJob(job.id))}
-                className="!bg-slate-900/60 !p-3"
+                className="!bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] !p-3"
               />
-              <div className="rounded border border-slate-800 bg-slate-900/40 p-3 text-xs">
-                <div className="mb-2 text-[11px] uppercase tracking-wider text-slate-500">Provenance</div>
+              <div className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-3 text-xs">
+                <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Provenance</div>
                 <div className="space-y-2">
-                  {recentJobs.length === 0 && <div className="text-slate-400">No jobs recorded yet.</div>}
+                  {recentJobs.length === 0 && <div className="text-[var(--aethel-text-tertiary)]">No jobs recorded yet.</div>}
                   {recentJobs.map((job) => (
-                    <div key={job.id} className="rounded border border-slate-800 bg-slate-950/70 p-2">
-                      <div className="font-medium text-slate-100">{job.kind}</div>
-                      <div className="text-slate-400">route: {job.sourceRoute}</div>
-                      <div className="text-slate-400">provider: {job.provider || 'auto'}</div>
-                      <div className="text-slate-400">status: {job.status}</div>
+                    <div key={job.id} className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] p-2">
+                      <div className="font-medium text-[var(--aethel-text-primary)]">{job.kind}</div>
+                      <div className="text-[var(--aethel-text-tertiary)]">route: {job.sourceRoute}</div>
+                      <div className="text-[var(--aethel-text-tertiary)]">provider: {job.provider || 'auto'}</div>
+                      <div className="text-[var(--aethel-text-tertiary)]">status: {job.status}</div>
                     </div>
                   ))}
                 </div>
@@ -709,29 +722,29 @@ export default function DashboardCreationWorkbench({
 
           {rightPanel === 'audio-policy' && (
             <div className="space-y-2 text-xs">
-              <label className="block">Target LUFS<input type="number" value={graph.audioPolicy.targetLufs} onChange={(e) => setAudioPolicy({ targetLufs: Number(e.target.value) })} className="mt-1 w-full rounded border border-slate-700 bg-slate-950 p-1" /></label>
-              <label className="block">True Peak (dBTP)<input type="number" value={graph.audioPolicy.truePeakDbtp} onChange={(e) => setAudioPolicy({ truePeakDbtp: Number(e.target.value) })} className="mt-1 w-full rounded border border-slate-700 bg-slate-950 p-1" /></label>
-              <label className="block">Stem Versioning<select value={graph.audioPolicy.stemVersioning} onChange={(e) => setAudioPolicy({ stemVersioning: e.target.value as 'none' | 'by-scene' | 'by-shot' })} className="mt-1 w-full rounded border border-slate-700 bg-slate-950 p-1"><option value="none">None</option><option value="by-scene">By Scene</option><option value="by-shot">By Shot</option></select></label>
-              <label className="block">Export Preset<select value={graph.audioPolicy.exportPreset} onChange={(e) => setAudioPolicy({ exportPreset: e.target.value as 'web-preview' | 'master-48k' | 'cinema' })} className="mt-1 w-full rounded border border-slate-700 bg-slate-950 p-1"><option value="web-preview">Web Preview</option><option value="master-48k">Master 48k</option><option value="cinema">Cinema</option></select></label>
+              <label className="block">Target LUFS<input type="number" value={graph.audioPolicy.targetLufs} onChange={(e) => setAudioPolicy({ targetLufs: Number(e.target.value) })} className="mt-1 w-full rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" /></label>
+              <label className="block">True Peak (dBTP)<input type="number" value={graph.audioPolicy.truePeakDbtp} onChange={(e) => setAudioPolicy({ truePeakDbtp: Number(e.target.value) })} className="mt-1 w-full rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1" /></label>
+              <label className="block">Stem Versioning<select value={graph.audioPolicy.stemVersioning} onChange={(e) => setAudioPolicy({ stemVersioning: e.target.value as 'none' | 'by-scene' | 'by-shot' })} className="mt-1 w-full rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1"><option value="none">None</option><option value="by-scene">By Scene</option><option value="by-shot">By Shot</option></select></label>
+              <label className="block">Export Preset<select value={graph.audioPolicy.exportPreset} onChange={(e) => setAudioPolicy({ exportPreset: e.target.value as 'web-preview' | 'master-48k' | 'cinema' })} className="mt-1 w-full rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-1"><option value="web-preview">Web Preview</option><option value="master-48k">Master 48k</option><option value="cinema">Cinema</option></select></label>
             </div>
           )}
 
           {rightPanel === 'inspector' && (
             <div className="space-y-3">
               {selectedAsset && (
-                <div className="rounded border border-slate-800 bg-slate-950 p-3 text-xs">
-                  <div className="mb-2 text-[11px] uppercase tracking-wider text-slate-500">Selected Asset</div>
-                  <div className="font-medium text-slate-100">{selectedAsset.name}</div>
-                  <div className="text-slate-400">kind: {selectedAsset.kind}</div>
-                  <div className="text-slate-400">version: {selectedAsset.version}</div>
+                <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 text-xs">
+                  <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Selected Asset</div>
+                  <div className="font-medium text-[var(--aethel-text-primary)]">{selectedAsset.name}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">kind: {selectedAsset.kind}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">version: {selectedAsset.version}</div>
                   <div className="mt-3 flex gap-2">
                     {(selectedAsset.kind === 'audio' || selectedAsset.kind === 'video') && (
-                      <button type="button" onClick={() => importAsset(selectedAsset)} className="rounded bg-blue-600 px-2 py-1 text-[11px]">
+                      <button type="button" onClick={() => importAsset(selectedAsset)} className="rounded bg-[var(--aethel-primary-dark)] px-2 py-1 text-[11px]">
                         Import to Timeline
                       </button>
                     )}
                     {selectedAsset.url && (
-                      <button type="button" onClick={() => downloadAsset(selectedAsset)} className="rounded border border-slate-700 px-2 py-1 text-[11px]">
+                      <button type="button" onClick={() => downloadAsset(selectedAsset)} className="rounded border border-[var(--aethel-border-primary)] px-2 py-1 text-[11px]">
                         Download
                       </button>
                     )}
@@ -739,30 +752,30 @@ export default function DashboardCreationWorkbench({
                 </div>
               )}
               {selectedJob && (
-                <div className="rounded border border-slate-800 bg-slate-950 p-3 text-xs">
-                  <div className="mb-2 text-[11px] uppercase tracking-wider text-slate-500">Selected Job</div>
-                  <div className="font-medium text-slate-100">{selectedJob.kind}</div>
-                  <div className="text-slate-400">status: {selectedJob.status}</div>
-                  <div className="text-slate-400">provider: {selectedJob.provider || 'auto'}</div>
-                  <div className="text-slate-400">route: {selectedJob.sourceRoute}</div>
-                  {selectedJob.prompt && <div className="mt-2 text-slate-300">{selectedJob.prompt}</div>}
+                <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 text-xs">
+                  <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Selected Job</div>
+                  <div className="font-medium text-[var(--aethel-text-primary)]">{selectedJob.kind}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">status: {selectedJob.status}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">provider: {selectedJob.provider || 'auto'}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">route: {selectedJob.sourceRoute}</div>
+                  {selectedJob.prompt && <div className="mt-2 text-[var(--aethel-text-secondary)]">{selectedJob.prompt}</div>}
                 </div>
               )}
               {selectedClip && (
-                <div className="rounded border border-slate-800 bg-slate-950 p-3 text-xs">
-                  <div className="mb-2 text-[11px] uppercase tracking-wider text-slate-500">Selected Clip</div>
-                  <div className="font-medium text-slate-100">{selectedClip.id}</div>
-                  <div className="text-slate-400">assetId: {selectedClip.assetId}</div>
-                  <div className="text-slate-400">startSec: {selectedClip.startSec}</div>
-                  <div className="text-slate-400">durationSec: {selectedClip.durationSec}</div>
+                <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 text-xs">
+                  <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Selected Clip</div>
+                  <div className="font-medium text-[var(--aethel-text-primary)]">{selectedClip.id}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">assetId: {selectedClip.assetId}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">startSec: {selectedClip.startSec}</div>
+                  <div className="text-[var(--aethel-text-tertiary)]">durationSec: {selectedClip.durationSec}</div>
                 </div>
               )}
               {!selectedAsset && !selectedJob && !selectedClip && (
-                <div className="rounded border border-slate-800 bg-slate-950 p-3 text-xs text-slate-400">
+                <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 text-xs text-[var(--aethel-text-tertiary)]">
                   Select an asset, job or clip to inspect linked project graph data.
                 </div>
               )}
-              <pre className="text-xs rounded border border-slate-800 bg-slate-950 p-2 overflow-auto max-h-[42vh]">
+              <pre className="text-xs rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 overflow-auto max-h-[42vh]">
                 {JSON.stringify(selectedEntityId ? (selectedAsset || selectedJob || selectedClip || null) : null, null, 2)}
               </pre>
             </div>

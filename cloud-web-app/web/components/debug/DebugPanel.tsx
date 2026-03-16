@@ -314,7 +314,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
     return (
       <div key={variable.name} style={{ marginLeft: depth * 16 }}>
         <div
-          className="flex items-center gap-1 py-0.5 px-2 hover:bg-[#313244] cursor-pointer rounded text-sm"
+          className="flex items-center gap-1 py-0.5 px-2 hover:bg-[var(--aethel-border-primary)] cursor-pointer rounded text-sm"
           onClick={() => hasChildren && toggleVariable(variable.variablesReference)}
         >
           {hasChildren ? (
@@ -322,11 +322,11 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
           ) : (
             <span className="w-3" />
           )}
-          <span className="text-[#89dceb]">{variable.name}</span>
-          <span className="text-[#6c7086]">:</span>
-          <span className="text-[#a6e3a1] ml-1 truncate">{variable.value}</span>
+          <span className="text-[var(--aethel-info)]">{variable.name}</span>
+          <span className="text-[var(--aethel-text-quaternary)]">:</span>
+          <span className="text-[var(--aethel-success-light)] ml-1 truncate">{variable.value}</span>
           {variable.type && (
-            <span className="text-[#6c7086] ml-1 text-xs">({variable.type})</span>
+            <span className="text-[var(--aethel-text-quaternary)] ml-1 text-xs">({variable.type})</span>
           )}
         </div>
         
@@ -348,41 +348,41 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
   ];
   
   return (
-    <div className="h-full flex flex-col bg-[#1e1e2e] text-[#cdd6f4]">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b border-[#313244]">
+      <div className="flex items-center gap-1 p-2 border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={status === 'paused' ? handleContinue : handlePause}
-          className="p-1.5 hover:bg-[#313244] rounded transition-colors"
+          className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title={status === 'paused' ? 'Continue (F5)' : 'Pause (F6)'}
           disabled={status === 'stopped'}
         >
-          {status === 'paused' ? <Play size={16} className="text-[#a6e3a1]" /> : <Pause size={16} />}
+          {status === 'paused' ? <Play size={16} className="text-[var(--aethel-success-light)]" /> : <Pause size={16} />}
         </button>
         
         <button
           onClick={handleStop}
-          className="p-1.5 hover:bg-[#313244] rounded transition-colors"
+          className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Stop (Shift+F5)"
           disabled={status === 'stopped'}
         >
-          <Square size={16} className="text-[#f38ba8]" />
+          <Square size={16} className="text-[var(--aethel-error-light)]" />
         </button>
         
         <button
           onClick={handleRestart}
-          className="p-1.5 hover:bg-[#313244] rounded transition-colors"
+          className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Restart (Ctrl+Shift+F5)"
           disabled={status === 'stopped'}
         >
           <RotateCcw size={16} />
         </button>
         
-        <div className="w-px h-4 bg-[#313244] mx-1" />
+        <div className="w-px h-4 bg-[var(--aethel-border-primary)] mx-1" />
         
         <button
           onClick={handleStepOver}
-          className="p-1.5 hover:bg-[#313244] rounded transition-colors"
+          className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Step Over (F10)"
           disabled={status !== 'paused'}
         >
@@ -391,7 +391,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         
         <button
           onClick={handleStepInto}
-          className="p-1.5 hover:bg-[#313244] rounded transition-colors"
+          className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Step Into (F11)"
           disabled={status !== 'paused'}
         >
@@ -400,7 +400,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         
         <button
           onClick={handleStepOut}
-          className="p-1.5 hover:bg-[#313244] rounded transition-colors"
+          className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Step Out (Shift+F11)"
           disabled={status !== 'paused'}
         >
@@ -409,7 +409,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         
         <div className="flex-1" />
         
-        <div className="flex items-center gap-2 text-xs text-[#6c7086]">
+        <div className="flex items-center gap-2 text-xs text-[var(--aethel-text-quaternary)]">
           <Bug size={14} />
           <span>
             {status === 'stopped' ? 'Not debugging' : 
@@ -419,7 +419,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
       </div>
       
       {/* Tabs */}
-      <div className="flex border-b border-[#313244]">
+      <div className="flex border-b border-[var(--aethel-border-primary)]">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -427,8 +427,8 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
             className={`
               flex items-center gap-1.5 px-3 py-2 text-xs transition-colors
               ${activeTab === tab.id 
-                ? 'text-[#cdd6f4] border-b-2 border-[#89b4fa]' 
-                : 'text-[#6c7086] hover:text-[#a6adc8]'}
+                ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary-light)]' 
+                : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'}
             `}
           >
             {tab.icon}
@@ -452,7 +452,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               {scopes.map(scope => (
                 <div key={scope.variablesReference} className="mb-2">
                   <div
-                    className="flex items-center gap-1 py-1 px-2 bg-[#313244] rounded cursor-pointer"
+                    className="flex items-center gap-1 py-1 px-2 bg-[var(--aethel-border-primary)] rounded cursor-pointer"
                     onClick={() => toggleScope(scope.variablesReference)}
                   >
                     {expandedScopes.has(scope.variablesReference) 
@@ -470,7 +470,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               ))}
               
               {scopes.length === 0 && (
-                <div className="text-center text-[#6c7086] py-8">
+                <div className="text-center text-[var(--aethel-text-quaternary)] py-8">
                   No variables available
                 </div>
               )}
@@ -493,11 +493,11 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   onChange={(e) => setNewWatch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addWatch()}
                   placeholder="Add expression..."
-                  className="flex-1 bg-[#313244] rounded px-2 py-1 text-sm outline-none focus:ring-1 ring-[#89b4fa]"
+                  className="flex-1 bg-[var(--aethel-border-primary)] rounded px-2 py-1 text-sm outline-none focus:ring-1 ring-[var(--aethel-primary-light)]"
                 />
                 <button
                   onClick={addWatch}
-                  className="p-1.5 bg-[#313244] hover:bg-[#45475a] rounded"
+                  className="p-1.5 bg-[var(--aethel-border-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                 >
                   <Plus size={14} />
                 </button>
@@ -506,17 +506,17 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               {watchResults.map((watch, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 py-1 px-2 hover:bg-[#313244] rounded group"
+                  className="flex items-center gap-2 py-1 px-2 hover:bg-[var(--aethel-border-primary)] rounded group"
                 >
-                  <Eye size={12} className="text-[#6c7086]" />
-                  <span className="text-[#89dceb]">{watch.expression}</span>
-                  <span className="text-[#6c7086]">=</span>
-                  <span className={watch.error ? 'text-[#f38ba8]' : 'text-[#a6e3a1]'}>
+                  <Eye size={12} className="text-[var(--aethel-text-quaternary)]" />
+                  <span className="text-[var(--aethel-info)]">{watch.expression}</span>
+                  <span className="text-[var(--aethel-text-quaternary)]">=</span>
+                  <span className={watch.error ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-success-light)]'}>
                     {watch.error || watch.result}
                   </span>
                   <button
                     onClick={() => removeWatch(watch.expression)}
-                    className="ml-auto opacity-0 group-hover:opacity-100 p-1 hover:bg-[#45475a] rounded"
+                    className="ml-auto opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                   >
                     <X size={12} />
                   </button>
@@ -539,7 +539,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                 <select
                   value={currentThread}
                   onChange={(e) => setCurrentThread(Number(e.target.value))}
-                  className="w-full bg-[#313244] rounded px-2 py-1 text-sm mb-2"
+                  className="w-full bg-[var(--aethel-border-primary)] rounded px-2 py-1 text-sm mb-2"
                 >
                   {threads.map(thread => (
                     <option key={thread.id} value={thread.id}>
@@ -555,18 +555,18 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   onClick={() => handleFrameSelect(frame)}
                   className={`
                     flex items-center gap-2 py-1 px-2 cursor-pointer rounded text-sm
-                    ${selectedFrame === frame.id ? 'bg-[#45475a]' : 'hover:bg-[#313244]'}
+                    ${selectedFrame === frame.id ? 'bg-[var(--aethel-surface-quaternary)]' : 'hover:bg-[var(--aethel-border-primary)]'}
                   `}
                 >
-                  <span className="text-[#f9e2af]">{frame.name}</span>
-                  <span className="text-[#6c7086] text-xs">
+                  <span className="text-[var(--aethel-warning-light)]">{frame.name}</span>
+                  <span className="text-[var(--aethel-text-quaternary)] text-xs">
                     {frame.source?.name}:{frame.line}
                   </span>
                 </div>
               ))}
               
               {callStack.length === 0 && (
-                <div className="text-center text-[#6c7086] py-8">
+                <div className="text-center text-[var(--aethel-text-quaternary)] py-8">
                   No call stack
                 </div>
               )}
@@ -584,20 +584,20 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
             >
               {Array.from(breakpoints.entries()).map(([file, bps]) => (
                 <div key={file} className="mb-2">
-                  <div className="text-xs text-[#6c7086] mb-1">{file}</div>
+                  <div className="text-xs text-[var(--aethel-text-quaternary)] mb-1">{file}</div>
                   {bps.map(bp => (
                     <div
                       key={bp.id}
                       onClick={() => onBreakpointClick?.(file, bp.line || 0)}
-                      className="flex items-center gap-2 py-1 px-2 hover:bg-[#313244] rounded cursor-pointer"
+                      className="flex items-center gap-2 py-1 px-2 hover:bg-[var(--aethel-border-primary)] rounded cursor-pointer"
                     >
                       <Circle
                         size={12}
-                        className={bp.verified ? 'text-[#f38ba8] fill-[#f38ba8]' : 'text-[#6c7086]'}
+                        className={bp.verified ? 'text-[var(--aethel-error-light)] fill-[var(--aethel-error-light)]' : 'text-[var(--aethel-text-quaternary)]'}
                       />
                       <span>Line {bp.line}</span>
                       {bp.message && (
-                        <span className="text-xs text-[#6c7086]">{bp.message}</span>
+                        <span className="text-xs text-[var(--aethel-text-quaternary)]">{bp.message}</span>
                       )}
                     </div>
                   ))}
@@ -605,7 +605,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               ))}
               
               {breakpoints.size === 0 && (
-                <div className="text-center text-[#6c7086] py-8">
+                <div className="text-center text-[var(--aethel-text-quaternary)] py-8">
                   No breakpoints set
                 </div>
               )}
@@ -627,10 +627,10 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                     key={i}
                     className={`
                       flex items-start gap-2 py-0.5
-                      ${msg.type === 'error' ? 'text-[#f38ba8]' : ''}
-                      ${msg.type === 'warn' ? 'text-[#f9e2af]' : ''}
-                      ${msg.type === 'info' ? 'text-[#89b4fa]' : ''}
-                      ${msg.type === 'input' ? 'text-[#6c7086]' : ''}
+                      ${msg.type === 'error' ? 'text-[var(--aethel-error-light)]' : ''}
+                      ${msg.type === 'warn' ? 'text-[var(--aethel-warning-light)]' : ''}
+                      ${msg.type === 'info' ? 'text-[var(--aethel-primary-light)]' : ''}
+                      ${msg.type === 'input' ? 'text-[var(--aethel-text-quaternary)]' : ''}
                     `}
                   >
                     {msg.type === 'error' && <AlertCircle size={12} />}
@@ -642,9 +642,9 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                 <div ref={consoleEndRef} />
               </div>
               
-              <form onSubmit={handleConsoleSubmit} className="border-t border-[#313244] p-2">
+              <form onSubmit={handleConsoleSubmit} className="border-t border-[var(--aethel-border-primary)] p-2">
                 <div className="flex items-center gap-2">
-                  <ChevronRight size={14} className="text-[#6c7086]" />
+                  <ChevronRight size={14} className="text-[var(--aethel-text-quaternary)]" />
                   <input
                     type="text"
                     value={consoleInput}

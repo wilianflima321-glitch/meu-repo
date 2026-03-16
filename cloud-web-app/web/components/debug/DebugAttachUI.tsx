@@ -2,7 +2,7 @@
  * Debug Process Attach UI
  * 
  * Interface para selecionar e anexar debugger a processos.
- * Suporta múltiplos tipos: Game, Server, Editor, Worker.
+ * Suporta multiplos tipos: Game, Server, Editor, Worker.
  */
 
 'use client';
@@ -83,26 +83,30 @@ interface DebugAttachUIProps {
 // ============================================================================
 
 const colors = {
-  bg: '#0f0f14',
-  surface: '#16161d',
-  surfaceHover: '#1e1e28',
-  surfaceActive: '#26263a',
-  border: '#2a2a3a',
-  borderFocus: '#4f46e5',
-  text: '#e4e4eb',
-  textMuted: '#8b8b9e',
-  textDim: '#5a5a6e',
-  primary: '#6366f1',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
+  bg: 'var(--aethel-surface-primary)',
+  surface: 'var(--aethel-surface-secondary)',
+  surfaceHover: 'var(--aethel-surface-tertiary)',
+  surfaceActive: 'var(--aethel-surface-quaternary)',
+  border: 'var(--aethel-border-primary)',
+  borderFocus: 'var(--aethel-border-focus)',
+  text: 'var(--aethel-text-primary)',
+  textMuted: 'var(--aethel-text-tertiary)',
+  textDim: 'var(--aethel-text-quaternary)',
+  primary: 'var(--aethel-primary)',
+  success: 'var(--aethel-success)',
+  warning: 'var(--aethel-warning)',
+  error: 'var(--aethel-error)',
+  accent: 'var(--aethel-accent)',
 };
+
+const tint = (color: string, percent: number) =>
+  `color-mix(in_srgb, ${color} ${percent}%, transparent)`;
 
 const processTypeConfig: Record<ProcessType, { icon: typeof Bug; color: string; label: string }> = {
   game: { icon: Gamepad2, color: colors.success, label: 'Game Process' },
   server: { icon: Server, color: colors.primary, label: 'Server Process' },
   editor: { icon: Code, color: colors.warning, label: 'Editor Process' },
-  worker: { icon: Box, color: '#8b5cf6', label: 'Worker Process' },
+  worker: { icon: Box, color: colors.accent, label: 'Worker Process' },
   external: { icon: Terminal, color: colors.textMuted, label: 'External Process' },
 };
 
@@ -140,7 +144,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
   return (
     <div
       style={{
-        background: isAttached ? `${colors.primary}15` : colors.surface,
+        background: isAttached ? tint(colors.primary, 15) : colors.surface,
         border: `1px solid ${isAttached ? colors.primary : colors.border}`,
         borderRadius: '8px',
         overflow: 'hidden',
@@ -279,7 +283,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
                 background: colors.error,
                 border: 'none',
                 borderRadius: '6px',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: '12px',
                 cursor: 'pointer',
               }}
@@ -299,7 +303,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
                 background: process.status === 'stopped' ? colors.surfaceActive : colors.primary,
                 border: 'none',
                 borderRadius: '6px',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: '12px',
                 cursor: process.status === 'stopped' ? 'not-allowed' : 'pointer',
                 opacity: isAttaching ? 0.7 : 1,
@@ -783,7 +787,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
             justifyContent: 'space-between',
             padding: '8px 16px',
             borderTop: `1px solid ${colors.border}`,
-            background: `${colors.success}15`,
+            background: tint(colors.success, 15),
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -830,7 +834,7 @@ const QuickConnectButton: React.FC<{
       alignItems: 'center',
       gap: '6px',
       padding: '6px 12px',
-      background: `${color}15`,
+      background: tint(color, 15),
       border: `1px solid ${color}40`,
       borderRadius: '6px',
       color: color,

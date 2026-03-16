@@ -1,16 +1,16 @@
 /**
- * NewProjectWizard - Experiência de Onboarding "Time-to-Fun"
+ * NewProjectWizard - Experiencia de Onboarding "Time-to-Fun"
  * 
- * Wizard visual imersivo para criação de projetos.
- * Meta: Usuário com jogo rodando em < 30 segundos.
+ * Wizard visual imersivo para criacao de projetos.
+ * Meta: Usuario com jogo rodando em < 30 segundos.
  * 
  * Fluxo:
- * 1. Escolha de Gênero (Cards com vídeo preview)
+ * 1. Escolha de Genero (Cards com video preview)
  * 2. Escolha de Estilo Visual (Vibe)
- * 3. Loading cinematográfico
+ * 3. Loading cinematografico
  * 4. Redirect para editor com projeto pronto
  * 
- * @see DETALHAMENTO_UX_STRATEGY_2026.md - Seção 1
+ * @see DETALHAMENTO_UX_STRATEGY_2026.md - Secao 1
  */
 
 'use client';
@@ -77,50 +77,50 @@ interface NewProjectWizardProps {
 }
 
 // ============================================================================
-// DADOS DOS GÊNEROS
+// DADOS DOS GENEROS
 // ============================================================================
 
 const GENRES: GenreOption[] = [
   {
     id: 'fps',
     name: 'FPS Shooter',
-    description: 'Ação em primeira pessoa com tiroteio e combate',
+    description: 'Acao em primeira pessoa com tiroteio e combate',
     icon: <Crosshair className="w-8 h-8" />,
     previewImage: '/templates/fps-preview.webp',
     previewVideo: '/templates/fps-preview.webm',
-    features: ['Sistema de armas', 'IA de inimigos', 'HUD completo', 'Física de projéteis'],
+    features: ['Sistema de armas', 'IA de inimigos', 'HUD completo', 'Fisica de projeteis'],
   },
   {
     id: 'rpg',
     name: 'RPG Top-Down',
-    description: 'Aventura com exploração, inventário e batalhas',
+    description: 'Aventura com exploracao, inventario e batalhas',
     icon: <Sword className="w-8 h-8" />,
     previewImage: '/templates/rpg-preview.webp',
     previewVideo: '/templates/rpg-preview.webm',
-    features: ['Sistema de inventário', 'Diálogos', 'Quests', 'Combate por turnos'],
+    features: ['Sistema de inventario', 'Dialogos', 'Quests', 'Combate por turnos'],
   },
   {
     id: 'platformer',
     name: 'Platformer 2D',
-    description: 'Plataforma side-scrolling com pulos e obstáculos',
+    description: 'Plataforma side-scrolling com pulos e obstaculos',
     icon: <Gamepad2 className="w-8 h-8" />,
     previewImage: '/templates/platformer-preview.webp',
     previewVideo: '/templates/platformer-preview.webm',
-    features: ['Física 2D', 'Parallax scrolling', 'Coletáveis', 'Checkpoints'],
+    features: ['Fisica 2D', 'Parallax scrolling', 'Coletaveis', 'Checkpoints'],
   },
   {
     id: 'racing',
     name: 'Racing',
-    description: 'Corrida arcade com veículos e pistas',
+    description: 'Corrida arcade com veiculos e pistas',
     icon: <Car className="w-8 h-8" />,
     previewImage: '/templates/racing-preview.webp',
     previewVideo: '/templates/racing-preview.webm',
-    features: ['Física de veículos', 'Waypoints de pista', 'Volta cronometrada', 'Power-ups'],
+    features: ['Fisica de veiculos', 'Waypoints de pista', 'Volta cronometrada', 'Power-ups'],
   },
   {
     id: 'blank',
     name: 'Blank Project',
-    description: 'Projeto vazio para experts. Você constrói tudo.',
+    description: 'Projeto vazio para experts. Voce constroi tudo.',
     icon: <Box className="w-8 h-8" />,
     previewImage: '/templates/blank-preview.webp',
     features: ['Cena vazia', 'Liberdade total'],
@@ -136,43 +136,43 @@ const STYLES: StyleOption[] = [
   {
     id: 'pixel',
     name: 'Pixel Art',
-    description: 'Estética retro com pixels visíveis',
+    description: 'Estetica retro com pixels visiveis',
     previewImage: '/templates/style-pixel.webp',
-    colors: ['#8B5CF6', '#EC4899', '#F59E0B'],
+    colors: ['var(--aethel-accent)', 'var(--aethel-secondary)', 'var(--aethel-warning)'],
   },
   {
     id: 'lowpoly',
     name: 'Low Poly 3D',
     description: 'Geometria simplificada, visual moderno',
     previewImage: '/templates/style-lowpoly.webp',
-    colors: ['#10B981', '#3B82F6', '#F97316'],
+    colors: ['var(--aethel-success)', 'var(--aethel-primary)', 'var(--aethel-warning-light)'],
   },
   {
     id: 'realistic',
     name: 'Realistic PBR',
-    description: 'Gráficos realistas com materiais avançados',
+    description: 'Graficos realistas com materiais avancados',
     previewImage: '/templates/style-realistic.webp',
     requiresGPU: true,
-    colors: ['#6B7280', '#374151', '#1F2937'],
+    colors: ['var(--aethel-text-quaternary)', 'var(--aethel-surface-quaternary)', 'var(--aethel-surface-tertiary)'],
   },
   {
     id: 'scifi',
     name: 'Sci-Fi Neon',
     description: 'Futurista com cores vibrantes e bloom',
     previewImage: '/templates/style-scifi.webp',
-    colors: ['#06B6D4', '#8B5CF6', '#EC4899'],
+    colors: ['var(--aethel-info)', 'var(--aethel-accent)', 'var(--aethel-secondary)'],
   },
   {
     id: 'stylized',
     name: 'Stylized Toon',
     description: 'Cel-shading e outlines estilizados',
     previewImage: '/templates/style-stylized.webp',
-    colors: ['#F472B6', '#A78BFA', '#34D399'],
+    colors: ['var(--aethel-secondary-light)', 'var(--aethel-accent-light)', 'var(--aethel-success-light)'],
   },
 ];
 
 // ============================================================================
-// STEPS DE LOADING (fake mas útil)
+// STEPS DE LOADING (fake mas util)
 // ============================================================================
 
 const LOADING_STEPS: LoadingStep[] = [
@@ -181,8 +181,8 @@ const LOADING_STEPS: LoadingStep[] = [
   { id: 'shaders', message: 'Compilando shaders...', duration: 1000 },
   { id: 'assets', message: 'Carregando assets base...', duration: 1500 },
   { id: 'ai', message: 'Acordando agentes de IA...', duration: 800 },
-  { id: 'physics', message: 'Calibrando motor de física...', duration: 600 },
-  { id: 'audio', message: 'Sincronizando áudio espacial...', duration: 400 },
+  { id: 'physics', message: 'Calibrando motor de fisica...', duration: 600 },
+  { id: 'audio', message: 'Sincronizando audio espacial...', duration: 400 },
   { id: 'final', message: 'Materializando seu universo...', duration: 700 },
 ];
 
@@ -334,11 +334,11 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)] mb-2">
           O que vamos criar hoje?
         </h1>
-        <p className="text-zinc-400">
-          Escolha um gênero para começar com um template pronto para jogar
+        <p className="text-[var(--aethel-text-tertiary)]">
+          Escolha um genero para comecar com um template pronto para jogar
         </p>
       </div>
 
@@ -351,7 +351,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           loop
           playsInline
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--aethel-surface-primary)] via-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)]" />
       </div>
 
       {/* Genre Cards Grid */}
@@ -365,15 +365,15 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             className={`
               relative group p-4 rounded-xl border-2 transition-all duration-300
               ${selectedGenre === genre.id
-                ? 'border-purple-500 bg-blue-500/20 scale-105'
-                : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-500 hover:bg-zinc-800'
+                ? 'border-[var(--aethel-accent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] scale-105'
+                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
               }
               ${genre.expertOnly ? 'opacity-60' : ''}
             `}
           >
             {/* Expert Badge */}
             {genre.expertOnly && (
-              <span className="absolute top-2 right-2 text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">
+              <span className="absolute top-2 right-2 text-[10px] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] px-1.5 py-0.5 rounded">
                 Expert
               </span>
             )}
@@ -382,22 +382,22 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             <div className={`
               w-16 h-16 mx-auto mb-3 rounded-xl flex items-center justify-center
               ${selectedGenre === genre.id
-                ? 'bg-blue-500 text-white'
-                : 'bg-zinc-700 text-zinc-300 group-hover:bg-zinc-600'
+                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+                : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] group-hover:bg-[var(--aethel-surface-quaternary)]'
               }
             `}>
               {genre.icon}
             </div>
 
             {/* Name & Description */}
-            <h3 className="text-lg font-semibold text-white mb-1">{genre.name}</h3>
-            <p className="text-xs text-zinc-400 mb-3 line-clamp-2">{genre.description}</p>
+            <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-1">{genre.name}</h3>
+            <p className="text-xs text-[var(--aethel-text-tertiary)] mb-3 line-clamp-2">{genre.description}</p>
 
             {/* Features */}
             <div className="space-y-1">
               {genre.features.slice(0, 2).map((feature) => (
-                <div key={feature} className="flex items-center gap-1 text-[10px] text-zinc-500">
-                  <Check className="w-3 h-3 text-green-500" />
+                <div key={feature} className="flex items-center gap-1 text-[10px] text-[var(--aethel-text-quaternary)]">
+                  <Check className="w-3 h-3 text-[var(--aethel-success)]" />
                   {feature}
                 </div>
               ))}
@@ -405,8 +405,8 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
             {/* Selection indicator */}
             {selectedGenre === genre.id && (
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                <Check className="w-4 h-4 text-white" />
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--aethel-primary)] rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-[var(--aethel-text-primary)]" />
               </div>
             )}
           </button>
@@ -414,10 +414,10 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-800">
+      <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--aethel-border-primary)]">
         <button
           onClick={onCancel}
-          className="px-4 py-2 text-zinc-400 hover:text-white transition-colors"
+          className="px-4 py-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
         >
           Cancelar
         </button>
@@ -426,7 +426,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           {/* Mute toggle */}
           <button
             onClick={() => setIsMuted(!isMuted)}
-            className="p-2 text-zinc-500 hover:text-white transition-colors"
+            className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </button>
@@ -437,12 +437,12 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             className={`
               flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all
               ${selectedGenre
-                ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                : 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
+                ? 'bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+                : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
               }
             `}
           >
-            Próximo
+            Proximo
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -458,11 +458,11 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)] mb-2">
           Escolha a vibe visual
         </h1>
-        <p className="text-zinc-400">
-          Define a estética do seu jogo. Você pode mudar depois.
+        <p className="text-[var(--aethel-text-tertiary)]">
+          Define a estetica do seu jogo. Voce pode mudar depois.
         </p>
       </div>
 
@@ -475,21 +475,21 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             className={`
               relative group p-4 rounded-xl border-2 transition-all duration-300
               ${selectedStyle === style.id
-                ? 'border-purple-500 bg-blue-500/20 scale-105'
-                : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-500'
+                ? 'border-[var(--aethel-accent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] scale-105'
+                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
               }
             `}
           >
             {/* GPU Badge */}
             {style.requiresGPU && (
-              <span className="absolute top-2 right-2 text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+              <span className="absolute top-2 right-2 text-[10px] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] px-1.5 py-0.5 rounded flex items-center gap-1">
                 <Cpu className="w-3 h-3" />
                 GPU
               </span>
             )}
 
             {/* Preview Image */}
-            <div className="relative w-full aspect-video rounded-lg bg-zinc-700 mb-3 overflow-hidden">
+            <div className="relative w-full aspect-video rounded-lg bg-[var(--aethel-surface-quaternary)] mb-3 overflow-hidden">
               <Image
                 src={style.previewImage}
                 alt={style.name}
@@ -516,13 +516,13 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             </div>
 
             {/* Name & Description */}
-            <h3 className="text-lg font-semibold text-white mb-1">{style.name}</h3>
-            <p className="text-xs text-zinc-400 line-clamp-2">{style.description}</p>
+            <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-1">{style.name}</h3>
+            <p className="text-xs text-[var(--aethel-text-tertiary)] line-clamp-2">{style.description}</p>
 
             {/* Selection indicator */}
             {selectedStyle === style.id && (
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                <Check className="w-4 h-4 text-white" />
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--aethel-primary)] rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-[var(--aethel-text-primary)]" />
               </div>
             )}
           </button>
@@ -531,28 +531,28 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Project Name Input */}
       <div className="mt-6 flex items-center gap-4">
-        <label className="text-zinc-400 whitespace-nowrap">Nome do Projeto:</label>
+        <label className="text-[var(--aethel-text-tertiary)] whitespace-nowrap">Nome do Projeto:</label>
         <input
           type="text"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
-          className="flex-1 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
-          placeholder="Meu Jogo Épico"
+          className="flex-1 px-4 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)] focus:outline-none focus:border-[var(--aethel-accent)]"
+          placeholder="Meu Jogo Epico"
         />
       </div>
 
       {/* Error message */}
       {error && (
-        <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+        <div className="mt-4 p-3 bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)] rounded-lg text-[var(--aethel-error-light)] text-sm">
           {error}
         </div>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-800">
+      <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--aethel-border-primary)]">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-white transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
           Voltar
@@ -564,8 +564,8 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           className={`
             flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all
             ${selectedStyle && projectName.trim()
-              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white'
-              : 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-[var(--aethel-primary-dark)] to-[var(--aethel-info-dark)] hover:from-[var(--aethel-primary)] hover:to-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
             }
           `}
         >
@@ -584,23 +584,23 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
     <div className="flex flex-col items-center justify-center h-full">
       {/* Animated Icon */}
       <div className="relative w-32 h-32 mb-8">
-        <div className="absolute inset-0 rounded-full border-4 border-purple-500/30 animate-ping" />
-        <div className="absolute inset-2 rounded-full border-4 border-purple-500/50 animate-pulse" />
+        <div className="absolute inset-0 rounded-full border-4 border-[var(--aethel-accent)]/30 animate-ping" />
+        <div className="absolute inset-2 rounded-full border-4 border-[var(--aethel-accent)]/50 animate-pulse" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <Sparkles className="w-12 h-12 text-blue-400 animate-bounce" />
+          <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)] animate-bounce" />
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="w-80 h-2 bg-zinc-800 rounded-full overflow-hidden mb-4">
+      <div className="w-80 h-2 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden mb-4">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300"
+          className="h-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] transition-all duration-300"
           style={{ width: `${loadingProgress}%` }}
         />
       </div>
 
       {/* Current Step Message */}
-      <p className="text-lg text-white mb-2 font-medium">
+      <p className="text-lg text-[var(--aethel-text-primary)] mb-2 font-medium">
         {LOADING_STEPS[loadingStep]?.message || 'Finalizando...'}
       </p>
 
@@ -611,22 +611,22 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             key={s.id}
             className={`w-2 h-2 rounded-full transition-all ${
               i < loadingStep
-                ? 'bg-blue-500'
+                ? 'bg-[var(--aethel-primary)]'
                 : i === loadingStep
-                ? 'bg-blue-400 animate-pulse'
-                : 'bg-zinc-700'
+                ? 'bg-[var(--aethel-primary-light)] animate-pulse'
+                : 'bg-[var(--aethel-surface-quaternary)]'
             }`}
           />
         ))}
       </div>
 
       {/* Project Info */}
-      <div className="mt-8 text-center text-zinc-500 text-sm">
-        <p>Criando: <span className="text-zinc-300">{projectName}</span></p>
+      <div className="mt-8 text-center text-[var(--aethel-text-quaternary)] text-sm">
+        <p>Criando: <span className="text-[var(--aethel-text-secondary)]">{projectName}</span></p>
         <p>
-          Template: <span className="text-zinc-300">{GENRES.find(g => g.id === selectedGenre)?.name}</span>
-          {' • '}
-          Estilo: <span className="text-zinc-300">{STYLES.find(s => s.id === selectedStyle)?.name}</span>
+          Template: <span className="text-[var(--aethel-text-secondary)]">{GENRES.find(g => g.id === selectedGenre)?.name}</span>
+          {' | '}
+          Estilo: <span className="text-[var(--aethel-text-secondary)]">{STYLES.find(s => s.id === selectedStyle)?.name}</span>
         </p>
       </div>
     </div>
@@ -638,12 +638,12 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
   const renderCompleteStep = () => (
     <div className="flex flex-col items-center justify-center h-full">
-      <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
-        <Check className="w-10 h-10 text-green-400" />
+      <div className="w-20 h-20 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] flex items-center justify-center mb-6">
+        <Check className="w-10 h-10 text-[var(--aethel-success-light)]" />
       </div>
-      <h2 className="text-2xl font-bold text-white mb-2">Universo Criado!</h2>
-      <p className="text-zinc-400 mb-6">Abrindo o editor...</p>
-      <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+      <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)] mb-2">Universo Criado!</h2>
+      <p className="text-[var(--aethel-text-tertiary)] mb-6">Abrindo o editor...</p>
+      <Loader2 className="w-6 h-6 text-[var(--aethel-primary-light)] animate-spin" />
     </div>
   );
 
@@ -652,20 +652,20 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
   // ============================================================================
 
   return (
-    <div className="fixed inset-0 bg-zinc-950 z-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-6xl h-[80vh] bg-zinc-900 rounded-2xl border border-zinc-800 p-8 overflow-hidden">
+    <div className="fixed inset-0 bg-[var(--aethel-surface-primary)] z-50 flex items-center justify-center p-6">
+      <div className="w-full max-w-6xl h-[80vh] bg-[var(--aethel-surface-secondary)] rounded-2xl border border-[var(--aethel-border-primary)] p-8 overflow-hidden">
         {/* Step Indicator */}
         {step !== 'loading' && step !== 'complete' && (
           <div className="flex items-center justify-center gap-4 mb-8">
-            <div className={`flex items-center gap-2 ${step === 'genre' ? 'text-blue-400' : 'text-zinc-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'genre' ? 'bg-blue-500 text-white' : 'bg-zinc-700'}`}>
+            <div className={`flex items-center gap-2 ${step === 'genre' ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-quaternary)]'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'genre' ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}>
                 1
               </div>
-              <span className="hidden sm:inline">Gênero</span>
+              <span className="hidden sm:inline">Genero</span>
             </div>
-            <div className="w-12 h-0.5 bg-zinc-700" />
-            <div className={`flex items-center gap-2 ${step === 'style' ? 'text-blue-400' : 'text-zinc-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'style' ? 'bg-blue-500 text-white' : 'bg-zinc-700'}`}>
+            <div className="w-12 h-0.5 bg-[var(--aethel-surface-quaternary)]" />
+            <div className={`flex items-center gap-2 ${step === 'style' ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-quaternary)]'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'style' ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}>
                 2
               </div>
               <span className="hidden sm:inline">Estilo</span>

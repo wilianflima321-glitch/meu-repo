@@ -225,7 +225,7 @@ function SkeletonThreatBreakdown() {
 
 function SkeletonRateLimitCard() {
   return (
-    <div className="p-3 rounded-lg border border-[#3c3c3c] bg-[#252526] animate-pulse">
+    <div className="p-3 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] animate-pulse">
       <div className="flex items-center justify-between mb-2">
         <div className="w-20 h-4 bg-gray-700 rounded" />
         <div className="w-16 h-3 bg-gray-700 rounded" />
@@ -240,7 +240,7 @@ function SkeletonRateLimitCard() {
 
 function SkeletonEventRow() {
   return (
-    <div className="border-b border-[#3c3c3c] animate-pulse">
+    <div className="border-b border-[var(--aethel-border-primary)] animate-pulse">
       <div className="px-4 py-3 flex items-center gap-4">
         <div className="w-2 h-2 bg-gray-700 rounded-full" />
         <div className="w-5 h-5 bg-gray-700 rounded" />
@@ -345,7 +345,7 @@ function SecurityScoreGauge({ score }: SecurityScoreGaugeProps) {
             cy="50"
             r="45"
             fill="none"
-            stroke="#3c3c3c"
+            stroke="var(--aethel-border-primary)"
             strokeWidth="8"
           />
           {/* Score circle */}
@@ -403,7 +403,7 @@ function ThreatBreakdown({ data }: ThreatBreakdownProps) {
               </div>
               <span className="text-sm text-gray-400">{count}</span>
             </div>
-            <div className="h-1.5 bg-[#3c3c3c] rounded-full overflow-hidden">
+            <div className="h-1.5 bg-[var(--aethel-border-primary)] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-blue-500 transition-all duration-300"
                 style={{ width: `${percent}%` }}
@@ -433,7 +433,7 @@ function RateLimitCard({ status }: RateLimitCardProps) {
     <div className={`p-3 rounded-lg border ${
       isCritical ? 'border-red-500/50 bg-red-500/10' :
       isWarning ? 'border-yellow-500/50 bg-yellow-500/10' :
-      'border-[#3c3c3c] bg-[#252526]'
+      'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]'
     }`}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm text-white">{status.category}</span>
@@ -442,7 +442,7 @@ function RateLimitCard({ status }: RateLimitCardProps) {
         )}
       </div>
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-2 bg-[#3c3c3c] rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-[var(--aethel-border-primary)] rounded-full overflow-hidden">
           <div 
             className={`h-full transition-all duration-300 ${
               isCritical ? 'bg-red-500' :
@@ -485,9 +485,9 @@ function ThreatEventRow({ event, isExpanded, onToggle }: ThreatEventRowProps) {
   };
   
   return (
-    <div className={`border-b border-[#3c3c3c] ${event.blocked ? '' : 'bg-red-500/5'}`}>
+    <div className={`border-b border-[var(--aethel-border-primary)] ${event.blocked ? '' : 'bg-[color-mix(in_srgb,var(--aethel-error)_5%,transparent)]'}`}>
       <div 
-        className="px-4 py-3 flex items-center gap-4 cursor-pointer hover:bg-[#2a2a2a] transition-colors"
+        className="px-4 py-3 flex items-center gap-4 cursor-pointer hover:bg-[var(--aethel-surface-tertiary)] transition-colors"
         onClick={onToggle}
       >
         {/* Level indicator */}
@@ -524,7 +524,7 @@ function ThreatEventRow({ event, isExpanded, onToggle }: ThreatEventRowProps) {
       
       {/* Expanded details */}
       {isExpanded && (
-        <div className="px-4 py-3 bg-[#1e1e1e] border-t border-[#3c3c3c]">
+        <div className="px-4 py-3 bg-[var(--aethel-surface-primary)] border-t border-[var(--aethel-border-primary)]">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h4 className="text-xs text-gray-500 uppercase mb-2">Source Details</h4>
@@ -717,8 +717,8 @@ export function SecurityDashboard({
   // Error state
   if (error && !isRefreshing) {
     return (
-      <div className={`flex flex-col h-full bg-[#1e1e1e] ${className}`}>
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#3c3c3c]">
+      <div className={`flex flex-col h-full bg-[var(--aethel-surface-primary)] ${className}`}>
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
           <Icons.Shield />
           <h2 className="text-lg font-semibold text-white">Security Dashboard</h2>
         </div>
@@ -730,9 +730,9 @@ export function SecurityDashboard({
   // Loading state with skeleton
   if (isLoading) {
     return (
-      <div className={`flex flex-col h-full bg-[#1e1e1e] ${className}`}>
+      <div className={`flex flex-col h-full bg-[var(--aethel-surface-primary)] ${className}`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#3c3c3c]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center gap-3">
             <Icons.Shield />
             <h2 className="text-lg font-semibold text-white">Security Dashboard</h2>
@@ -743,11 +743,11 @@ export function SecurityDashboard({
         </div>
         
         {/* Stats Overview Skeleton */}
-        <div className="grid grid-cols-4 gap-4 p-4 border-b border-[#3c3c3c]">
-          <div className="bg-[#252526] border border-[#3c3c3c] rounded-lg p-4 flex items-center justify-center">
+        <div className="grid grid-cols-4 gap-4 p-4 border-b border-[var(--aethel-border-primary)]">
+          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4 flex items-center justify-center">
             <SkeletonScoreGauge />
           </div>
-          <div className="col-span-2 bg-[#252526] border border-[#3c3c3c] rounded-lg p-4">
+          <div className="col-span-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
             <div className="h-4 w-24 bg-gray-700 rounded mb-3" />
             <div className="grid grid-cols-3 gap-4">
               <SkeletonStatsCard />
@@ -755,14 +755,14 @@ export function SecurityDashboard({
               <SkeletonStatsCard />
             </div>
           </div>
-          <div className="bg-[#252526] border border-[#3c3c3c] rounded-lg p-4">
+          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
             <div className="h-4 w-20 bg-gray-700 rounded mb-3" />
             <SkeletonThreatBreakdown />
           </div>
         </div>
         
         {/* Rate Limits Skeleton */}
-        <div className="px-4 py-3 border-b border-[#3c3c3c]">
+        <div className="px-4 py-3 border-b border-[var(--aethel-border-primary)]">
           <div className="h-4 w-20 bg-gray-700 rounded mb-3" />
           <div className="grid grid-cols-3 gap-3">
             <SkeletonRateLimitCard />
@@ -782,9 +782,9 @@ export function SecurityDashboard({
   }
   
   return (
-    <div className={`flex flex-col h-full bg-[#1e1e1e] ${className}`}>
+    <div className={`flex flex-col h-full bg-[var(--aethel-surface-primary)] ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#3c3c3c]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <Icons.Shield />
           <h2 className="text-lg font-semibold text-white">Security Dashboard</h2>
@@ -795,7 +795,7 @@ export function SecurityDashboard({
         
         <button
           onClick={fetchData}
-          className="p-1.5 text-gray-400 hover:text-white hover:bg-[#3c3c3c] rounded transition-colors"
+          className="p-1.5 text-gray-400 hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Refresh"
         >
           <Icons.Refresh />
@@ -803,14 +803,14 @@ export function SecurityDashboard({
       </div>
       
       {/* Stats Overview */}
-      <div className="grid grid-cols-4 gap-4 p-4 border-b border-[#3c3c3c]">
+      <div className="grid grid-cols-4 gap-4 p-4 border-b border-[var(--aethel-border-primary)]">
         {/* Security Score */}
-        <div className="bg-[#252526] border border-[#3c3c3c] rounded-lg p-4 flex items-center justify-center">
+        <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4 flex items-center justify-center">
           {stats && <SecurityScoreGauge score={stats.securityScore} />}
         </div>
         
         {/* Quick Stats */}
-        <div className="col-span-2 bg-[#252526] border border-[#3c3c3c] rounded-lg p-4">
+        <div className="col-span-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
           <h3 className="text-xs text-gray-500 uppercase mb-3">Last 24 Hours</h3>
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -829,14 +829,14 @@ export function SecurityDashboard({
         </div>
         
         {/* Threat Breakdown */}
-        <div className="bg-[#252526] border border-[#3c3c3c] rounded-lg p-4">
+        <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
           <h3 className="text-xs text-gray-500 uppercase mb-3">Top Threats</h3>
           {stats && <ThreatBreakdown data={stats.threatsByType} />}
         </div>
       </div>
       
       {/* Rate Limits */}
-      <div className="px-4 py-3 border-b border-[#3c3c3c]">
+      <div className="px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <h3 className="text-xs text-gray-500 uppercase mb-3">Rate Limits</h3>
         <div className="grid grid-cols-3 gap-3">
           {rateLimits.map((status, i) => (
@@ -846,11 +846,11 @@ export function SecurityDashboard({
       </div>
       
       {/* Filters */}
-      <div className="flex items-center gap-4 px-4 py-3 border-b border-[#3c3c3c]">
+      <div className="flex items-center gap-4 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <select
           value={filterLevel}
           onChange={(e) => setFilterLevel(e.target.value as ThreatLevel | 'all')}
-          className="bg-[#252526] border border-[#3c3c3c] text-white text-sm rounded px-2 py-1 focus:outline-none focus:border-blue-500"
+          className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] text-white text-sm rounded px-2 py-1 focus:outline-none focus:border-[var(--aethel-border-focus)]"
         >
           <option value="all">All Levels</option>
           <option value="critical">Critical</option>
@@ -862,7 +862,7 @@ export function SecurityDashboard({
         <select
           value={showBlocked}
           onChange={(e) => setShowBlocked(e.target.value as 'all' | 'blocked' | 'passed')}
-          className="bg-[#252526] border border-[#3c3c3c] text-white text-sm rounded px-2 py-1 focus:outline-none focus:border-blue-500"
+          className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] text-white text-sm rounded px-2 py-1 focus:outline-none focus:border-[var(--aethel-border-focus)]"
         >
           <option value="all">All Status</option>
           <option value="blocked">Blocked Only</option>
