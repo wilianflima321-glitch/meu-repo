@@ -2,8 +2,8 @@
  * Aethel IDE - Split Editor Component
  * 
  * Componente profissional para split editor como VS Code.
- * Suporta múltiplos grupos de editores, drag & drop de tabs,
- * e redimensionamento de painéis.
+ * Suporta multiplos grupos de editores, drag & drop de tabs,
+ * e redimensionamento de paineis.
  */
 
 'use client';
@@ -108,34 +108,34 @@ const Tab: React.FC<TabProps> = ({
     
     const ext = tab.path?.split('.').pop()?.toLowerCase();
     const iconColors: Record<string, string> = {
-      ts: 'text-blue-400',
-      tsx: 'text-blue-400',
-      js: 'text-yellow-400',
-      jsx: 'text-yellow-400',
-      py: 'text-green-400',
-      rs: 'text-orange-400',
-      go: 'text-cyan-400',
-      java: 'text-red-400',
-      css: 'text-blue-400',
-      html: 'text-orange-500',
-      json: 'text-yellow-500',
-      md: 'text-gray-400',
+      ts: 'text-[var(--aethel-primary-light)]',
+      tsx: 'text-[var(--aethel-primary-light)]',
+      js: 'text-[var(--aethel-warning-light)]',
+      jsx: 'text-[var(--aethel-warning-light)]',
+      py: 'text-[var(--aethel-success-light)]',
+      rs: 'text-[var(--aethel-warning-light)]',
+      go: 'text-[var(--aethel-info-light)]',
+      java: 'text-[var(--aethel-error-light)]',
+      css: 'text-[var(--aethel-primary-light)]',
+      html: 'text-[var(--aethel-warning)]',
+      json: 'text-[var(--aethel-warning)]',
+      md: 'text-[var(--aethel-text-tertiary)]',
     };
     
-    return <FileCode size={14} className={iconColors[ext || ''] || 'text-gray-400'} />;
+    return <FileCode size={14} className={iconColors[ext || ''] || 'text-[var(--aethel-text-tertiary)]'} />;
   };
   
   return (
     <div
       className={`
         group relative flex items-center gap-1.5 h-9 px-3 cursor-pointer
-        border-r border-[#252526] select-none
+        border-r border-[var(--aethel-border-primary)] select-none
         ${isActive 
-          ? 'bg-[#1e1e1e] text-white border-t-2 border-t-blue-500' 
-          : 'bg-[#2d2d2d] text-gray-400 hover:bg-[#323232]'
+          ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-primary)]' 
+          : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
         }
         ${tab.preview ? 'italic' : ''}
-        ${tab.pinned ? 'bg-[#2a2a2a]' : ''}
+        ${tab.pinned ? 'bg-[var(--aethel-surface-tertiary)]' : ''}
       `}
       onClick={onTabClick}
       onDoubleClick={() => {
@@ -155,7 +155,7 @@ const Tab: React.FC<TabProps> = ({
     >
       {/* Pinned indicator */}
       {tab.pinned && (
-        <Pin size={10} className="text-gray-500 flex-shrink-0" />
+        <Pin size={10} className="text-[var(--aethel-text-quaternary)] flex-shrink-0" />
       )}
       
       {/* File icon */}
@@ -170,13 +170,13 @@ const Tab: React.FC<TabProps> = ({
       
       {/* Dirty indicator */}
       {tab.dirty && (
-        <Circle size={8} className="flex-shrink-0 fill-current text-white" />
+        <Circle size={8} className="flex-shrink-0 fill-current text-[var(--aethel-text-primary)]" />
       )}
       
       {/* Close button */}
       <button
         className={`
-          flex-shrink-0 p-0.5 rounded hover:bg-white/10
+          flex-shrink-0 p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]
           ${isActive || tab.dirty ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
           transition-opacity
         `}
@@ -197,57 +197,57 @@ const Tab: React.FC<TabProps> = ({
       {showMenu && (
         <div
           ref={menuRef}
-          className="absolute top-full left-0 mt-1 w-48 bg-[#252526] border border-[#3c3c3c]
+          className="absolute top-full left-0 mt-1 w-48 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)]
                      rounded-md shadow-xl z-50 py-1"
           onClick={(e) => e.stopPropagation()}
         >
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => { onTabClose(); setShowMenu(false); }}
           >
             Close
           </button>
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close Others
           </button>
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close All
           </button>
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close to the Right
           </button>
-          <div className="border-t border-[#3c3c3c] my-1" />
+          <div className="border-t border-[var(--aethel-border-secondary)] my-1" />
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] flex items-center gap-2"
             onClick={() => { onTabPin(); setShowMenu(false); }}
           >
             {tab.pinned ? <PinOff size={14} /> : <Pin size={14} />}
             {tab.pinned ? 'Unpin' : 'Pin'}
           </button>
-          <div className="border-t border-[#3c3c3c] my-1" />
+          <div className="border-t border-[var(--aethel-border-secondary)] my-1" />
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Copy Path
           </button>
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Copy Relative Path
           </button>
           <button
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Reveal in Explorer
@@ -330,8 +330,8 @@ const TabBar: React.FC<TabBarProps> = ({
   return (
     <div 
       className={`
-        flex items-center h-9 bg-[#252526] border-b 
-        ${isActiveGroup ? 'border-b-[#1e1e1e]' : 'border-b-[#3c3c3c]'}
+        flex items-center h-9 bg-[var(--aethel-surface-tertiary)] border-b 
+        ${isActiveGroup ? 'border-b-[var(--aethel-surface-secondary)]' : 'border-b-[var(--aethel-border-secondary)]'}
       `}
       onClick={onGroupFocus}
       role="tablist"
@@ -340,14 +340,14 @@ const TabBar: React.FC<TabBarProps> = ({
       <div 
         ref={tabsContainerRef}
         className="flex-1 flex items-center overflow-x-auto overflow-y-hidden
-                   scrollbar-thin scrollbar-thumb-[#424242] scrollbar-track-transparent"
+                   scrollbar-thin scrollbar-thumb-[var(--aethel-border-secondary)] scrollbar-track-transparent"
         onDragLeave={handleDragLeave}
       >
         {sortedTabs.map((tab, index) => (
           <React.Fragment key={tab.id}>
             {/* Drop indicator */}
             {dragOverIndex === index && (
-              <div className="w-0.5 h-full bg-blue-500" />
+              <div className="w-0.5 h-full bg-[var(--aethel-primary)]" />
             )}
             <Tab
               tab={tab}
@@ -370,45 +370,45 @@ const TabBar: React.FC<TabBarProps> = ({
           onDrop={(e) => handleDrop(e, sortedTabs.length)}
         >
           {dragOverIndex === sortedTabs.length && (
-            <div className="w-0.5 h-full bg-blue-500" />
+            <div className="w-0.5 h-full bg-[var(--aethel-primary)]" />
           )}
         </div>
       </div>
       
       {/* Actions */}
-      <div className="flex items-center gap-0.5 px-1 border-l border-[#3c3c3c]">
+      <div className="flex items-center gap-0.5 px-1 border-l border-[var(--aethel-border-secondary)]">
         <button
-          className="p-1.5 rounded hover:bg-white/10 transition-colors"
+          className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           onClick={() => onSplit('horizontal')}
           title="Split Editor Right"
           aria-label="Split editor right"
         >
-          <SplitSquareHorizontal size={14} className="text-gray-400" />
+          <SplitSquareHorizontal size={14} className="text-[var(--aethel-text-tertiary)]" />
         </button>
         <button
-          className="p-1.5 rounded hover:bg-white/10 transition-colors"
+          className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           onClick={() => onSplit('vertical')}
           title="Split Editor Down"
           aria-label="Split editor down"
         >
-          <SplitSquareVertical size={14} className="text-gray-400" />
+          <SplitSquareVertical size={14} className="text-[var(--aethel-text-tertiary)]" />
         </button>
         {canClose && (
           <button
-            className="p-1.5 rounded hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
             onClick={onGroupClose}
             title="Close Editor Group"
             aria-label="Close editor group"
           >
-            <X size={14} className="text-gray-400" />
+            <X size={14} className="text-[var(--aethel-text-tertiary)]" />
           </button>
         )}
         <button
-          className="p-1.5 rounded hover:bg-white/10 transition-colors"
+          className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           title="More Actions"
           aria-label="More actions"
         >
-          <MoreHorizontal size={14} className="text-gray-400" />
+          <MoreHorizontal size={14} className="text-[var(--aethel-text-tertiary)]" />
         </button>
       </div>
     </div>
@@ -452,7 +452,7 @@ const EditorGroupView: React.FC<EditorGroupViewProps> = ({
     <div 
       className={`
         flex flex-col h-full
-        ${isActiveGroup ? 'ring-1 ring-blue-500/30' : ''}
+        ${isActiveGroup ? 'ring-1 ring-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]' : ''}
       `}
       onClick={onGroupFocus}
     >
@@ -472,10 +472,10 @@ const EditorGroupView: React.FC<EditorGroupViewProps> = ({
       
       {/* Breadcrumbs */}
       {activeTab && activeTab.path && (
-        <div className="flex items-center gap-1 h-6 px-3 bg-[#1e1e1e] border-b border-[#3c3c3c] text-xs text-gray-400">
+        <div className="flex items-center gap-1 h-6 px-3 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-secondary)] text-xs text-[var(--aethel-text-tertiary)]">
           {activeTab.path.split(/[/\\]/).map((part, i, arr) => (
             <React.Fragment key={i}>
-              <span className="hover:text-gray-200 cursor-pointer">{part}</span>
+              <span className="hover:text-[var(--aethel-text-secondary)] cursor-pointer">{part}</span>
               {i < arr.length - 1 && <ChevronRight size={12} />}
             </React.Fragment>
           ))}
@@ -483,7 +483,7 @@ const EditorGroupView: React.FC<EditorGroupViewProps> = ({
       )}
       
       {/* Editor Content */}
-      <div className="flex-1 overflow-hidden bg-[#1e1e1e]">
+      <div className="flex-1 overflow-hidden bg-[var(--aethel-surface-secondary)]">
         {renderEditor(activeTab)}
       </div>
     </div>
@@ -540,10 +540,10 @@ const ResizableDivider: React.FC<ResizableDividerProps> = ({
     <div
       className={`
         ${direction === 'horizontal' 
-          ? 'w-1 cursor-col-resize hover:bg-blue-500/50' 
-          : 'h-1 cursor-row-resize hover:bg-blue-500/50'
+          ? 'w-1 cursor-col-resize hover:bg-[var(--aethel-primary)]/50' 
+          : 'h-1 cursor-row-resize hover:bg-[var(--aethel-primary)]/50'
         }
-        ${isDragging ? 'bg-blue-500' : 'bg-[#3c3c3c]'}
+        ${isDragging ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-border-secondary)]'}
         transition-colors
       `}
       onMouseDown={handleMouseDown}
@@ -605,7 +605,7 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
   
   if (groups.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#1e1e1e] text-gray-500">
+      <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-quaternary)]">
         <div className="text-center">
           <FileCode size={48} className="mx-auto mb-4 opacity-50" />
           <p className="text-lg">No editors open</p>
