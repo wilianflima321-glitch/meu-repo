@@ -22,12 +22,12 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as const,
     height: '100%',
-    backgroundColor: '#1e1e2e',
-    color: '#cdd6f4',
+    backgroundColor: 'var(--aethel-surface-primary)',
+    color: 'var(--aethel-text-primary)',
   },
   header: {
     padding: '16px',
-    borderBottom: '1px solid #313244',
+    borderBottom: '1px solid var(--aethel-surface-tertiary)',
   },
   title: {
     fontSize: '18px',
@@ -42,10 +42,10 @@ const styles = {
     width: '100%',
     padding: '8px 12px',
     paddingLeft: '36px',
-    backgroundColor: '#313244',
-    border: '1px solid #45475a',
+    backgroundColor: 'var(--aethel-surface-tertiary)',
+    border: '1px solid var(--aethel-border-secondary)',
     borderRadius: '6px',
-    color: '#cdd6f4',
+    color: 'var(--aethel-text-primary)',
     fontSize: '14px',
     outline: 'none',
   },
@@ -54,29 +54,29 @@ const styles = {
     left: '12px',
     top: '50%',
     transform: 'translateY(-50%)',
-    color: '#6c7086',
+    color: 'var(--aethel-text-quaternary)',
   },
   toolbar: {
     display: 'flex',
     gap: '8px',
     padding: '12px 16px',
-    borderBottom: '1px solid #313244',
+    borderBottom: '1px solid var(--aethel-surface-tertiary)',
     flexWrap: 'wrap' as const,
   },
   filterButton: {
     padding: '6px 12px',
     backgroundColor: 'transparent',
-    border: '1px solid #45475a',
+    border: '1px solid var(--aethel-border-secondary)',
     borderRadius: '4px',
-    color: '#cdd6f4',
+    color: 'var(--aethel-text-primary)',
     fontSize: '12px',
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
   filterButtonActive: {
-    backgroundColor: '#89b4fa',
-    borderColor: '#89b4fa',
-    color: '#1e1e2e',
+    backgroundColor: 'var(--aethel-primary)',
+    borderColor: 'var(--aethel-primary)',
+    color: 'var(--aethel-surface-primary)',
   },
   content: {
     flex: 1,
@@ -91,7 +91,7 @@ const styles = {
     transition: 'background-color 0.2s',
   },
   keybindingRowHover: {
-    backgroundColor: '#313244',
+    backgroundColor: 'var(--aethel-surface-tertiary)',
   },
   commandColumn: {
     flex: 1,
@@ -99,14 +99,14 @@ const styles = {
   },
   commandName: {
     fontSize: '14px',
-    color: '#cdd6f4',
+    color: 'var(--aethel-text-primary)',
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
   commandWhen: {
     fontSize: '11px',
-    color: '#6c7086',
+    color: 'var(--aethel-text-quaternary)',
     marginTop: '2px',
   },
   keyColumn: {
@@ -117,11 +117,11 @@ const styles = {
   keyBadge: {
     display: 'inline-flex',
     padding: '4px 8px',
-    backgroundColor: '#45475a',
+    backgroundColor: 'var(--aethel-border-secondary)',
     borderRadius: '4px',
     fontSize: '12px',
     fontFamily: 'monospace',
-    color: '#f5c2e7',
+    color: 'var(--aethel-secondary)',
   },
   sourceColumn: {
     width: '80px',
@@ -150,7 +150,7 @@ const styles = {
     backgroundColor: 'transparent',
     border: 'none',
     borderRadius: '4px',
-    color: '#cdd6f4',
+    color: 'var(--aethel-text-primary)',
     cursor: 'pointer',
     fontSize: '12px',
   },
@@ -160,22 +160,22 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: '#1e1e2e',
+    backgroundColor: 'var(--aethel-surface-primary)',
     borderRadius: '8px',
-    border: '1px solid #313244',
+    border: '1px solid var(--aethel-surface-tertiary)',
     width: '450px',
     maxWidth: '90%',
   },
   modalHeader: {
     padding: '16px',
-    borderBottom: '1px solid #313244',
+    borderBottom: '1px solid var(--aethel-surface-tertiary)',
   },
   modalTitle: {
     margin: 0,
@@ -187,7 +187,7 @@ const styles = {
   },
   modalFooter: {
     padding: '16px',
-    borderTop: '1px solid #313244',
+    borderTop: '1px solid var(--aethel-surface-tertiary)',
     display: 'flex',
     justifyContent: 'flex-end',
     gap: '8px',
@@ -201,16 +201,16 @@ const styles = {
     transition: 'all 0.2s',
   },
   primaryButton: {
-    backgroundColor: '#89b4fa',
-    color: '#1e1e2e',
+    backgroundColor: 'var(--aethel-primary)',
+    color: 'var(--aethel-surface-primary)',
   },
   secondaryButton: {
-    backgroundColor: '#313244',
-    color: '#cdd6f4',
+    backgroundColor: 'var(--aethel-surface-tertiary)',
+    color: 'var(--aethel-text-primary)',
   },
   recordBox: {
     padding: '24px',
-    backgroundColor: '#313244',
+    backgroundColor: 'var(--aethel-surface-tertiary)',
     borderRadius: '8px',
     textAlign: 'center' as const,
     marginBottom: '16px',
@@ -218,20 +218,20 @@ const styles = {
   recordKey: {
     fontSize: '24px',
     fontFamily: 'monospace',
-    color: '#f5c2e7',
+    color: 'var(--aethel-secondary)',
     marginBottom: '8px',
   },
   recordHint: {
     fontSize: '12px',
-    color: '#6c7086',
+    color: 'var(--aethel-text-quaternary)',
   },
   input: {
     width: '100%',
     padding: '8px 12px',
-    backgroundColor: '#313244',
-    border: '1px solid #45475a',
+    backgroundColor: 'var(--aethel-surface-tertiary)',
+    border: '1px solid var(--aethel-border-secondary)',
     borderRadius: '4px',
-    color: '#cdd6f4',
+    color: 'var(--aethel-text-primary)',
     fontSize: '14px',
     outline: 'none',
     marginBottom: '12px',
@@ -239,15 +239,15 @@ const styles = {
   label: {
     display: 'block',
     fontSize: '12px',
-    color: '#a6adc8',
+    color: 'var(--aethel-text-secondary)',
     marginBottom: '4px',
   },
   conflictWarning: {
     padding: '12px',
-    backgroundColor: 'rgba(250, 179, 135, 0.1)',
-    border: '1px solid #fab387',
+    backgroundColor: 'color-mix(in_srgb,var(--aethel-warning-light)_10%,transparent)',
+    border: '1px solid var(--aethel-warning-light)',
     borderRadius: '4px',
-    color: '#fab387',
+    color: 'var(--aethel-warning-light)',
     fontSize: '12px',
     marginTop: '12px',
   },
@@ -257,7 +257,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '48px',
-    color: '#6c7086',
+    color: 'var(--aethel-text-quaternary)',
   },
 };
 
@@ -330,7 +330,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
         </div>
         <div style={styles.modalBody}>
           <label style={styles.label}>Comando</label>
-          <div style={{ ...styles.input, backgroundColor: '#45475a', marginBottom: '16px' }}>
+          <div style={{ ...styles.input, backgroundColor: 'var(--aethel-border-secondary)', marginBottom: '16px' }}>
             {command}
           </div>
           
@@ -338,7 +338,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
           <div
             style={{
               ...styles.recordBox,
-              border: isRecording ? '2px solid #89b4fa' : '2px solid transparent',
+              border: isRecording ? '2px solid var(--aethel-primary)' : '2px solid transparent',
             }}
             onClick={() => setIsRecording(true)}
           >
@@ -350,7 +350,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
             </div>
           </div>
           
-          <label style={styles.label}>Condição (When)</label>
+          <label style={styles.label}>Condicao (When)</label>
           <input
             type="text"
             style={styles.input}
@@ -361,7 +361,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
           
           {conflict && (
             <div style={styles.conflictWarning}>
-              ⚠️ Conflito: Este atalho já está sendo usado por {`"${conflict.command}"`}
+               Conflito: Este atalho ja esta sendo usado por {`"${conflict.command}"`}
             </div>
           )}
         </div>
@@ -400,9 +400,9 @@ const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onRes
   
   const getSourceColor = (source: string) => {
     switch (source) {
-      case 'user': return '#a6e3a1';
-      case 'extension': return '#89b4fa';
-      default: return '#6c7086';
+      case 'user': return 'var(--aethel-success)';
+      case 'extension': return 'var(--aethel-primary)';
+      default: return 'var(--aethel-text-quaternary)';
     }
   };
   
@@ -445,11 +445,11 @@ const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onRes
         ...(isHovered ? styles.actionsVisible : {}),
       }}>
         <button style={styles.iconButton} onClick={onEdit} title="Editar">
-          ✏️
+          
         </button>
         {keybinding.source === 'user' && (
           <button style={styles.iconButton} onClick={onReset} title="Resetar">
-            🔄
+            
           </button>
         )}
       </div>
@@ -548,7 +548,7 @@ export const KeybindingsPanel: React.FC = () => {
       <div style={styles.header}>
         <h2 style={styles.title}>Atalhos de Teclado</h2>
         <div style={styles.searchContainer}>
-          <span style={styles.searchIcon}>🔍</span>
+          <span style={styles.searchIcon}></span>
           <input
             type="text"
             placeholder="Buscar atalhos..."
@@ -569,24 +569,24 @@ export const KeybindingsPanel: React.FC = () => {
             }}
             onClick={() => setFilter(f)}
           >
-            {f === 'all' ? 'Todos' : f === 'default' ? 'Padrão' : f === 'user' ? 'Usuário' : 'Extensões'}
+            {f === 'all' ? 'Todos' : f === 'default' ? 'Padrao' : f === 'user' ? 'Usuario' : 'Extensoes'}
           </button>
         ))}
         
         <div style={{ flex: 1 }} />
         
         <button style={styles.filterButton} onClick={handleImport}>
-          📥 Importar
+           Importar
         </button>
         <button style={styles.filterButton} onClick={handleExport}>
-          📤 Exportar
+           Exportar
         </button>
       </div>
       
       <div style={styles.content}>
         {filteredKeybindings.length === 0 ? (
           <div style={styles.emptyState}>
-            <span style={{ fontSize: '48px', marginBottom: '16px' }}>⌨️</span>
+            <span style={{ fontSize: '48px', marginBottom: '16px' }}></span>
             <span>Nenhum atalho encontrado</span>
           </div>
         ) : (
