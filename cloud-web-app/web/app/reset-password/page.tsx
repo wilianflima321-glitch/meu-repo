@@ -85,7 +85,7 @@ function ResetPasswordForm() {
           <div className={frameClass}>
             <div className="text-center">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--aethel-error)]/10">
-                <XCircle className="h-8 w-8 text-red-400" />
+                <XCircle className="h-8 w-8 text-[var(--aethel-error)]" />
               </div>
               <h1 className="text-2xl font-bold">Link invalido</h1>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">Este link expirou ou nao e valido.</p>
@@ -100,8 +100,8 @@ function ResetPasswordForm() {
         ) : isSuccess ? (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
-                <CheckCircle className="h-8 w-8 text-emerald-400" />
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
+                <CheckCircle className="h-8 w-8 text-[var(--aethel-success)]" />
               </div>
               <h1 className="text-2xl font-bold">Senha redefinida</h1>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">Sua senha foi redefinida. Redirecionando para o login.</p>
@@ -118,7 +118,7 @@ function ResetPasswordForm() {
           <div className={frameClass}>
             <div className="text-center mb-6">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-                <Lock className="h-8 w-8 text-blue-300" />
+                <Lock className="h-8 w-8 text-[var(--aethel-primary-light)]" />
               </div>
               <h1 className="text-2xl font-bold">Redefinir senha</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Defina uma nova senha para sua conta.</p>
@@ -126,7 +126,7 @@ function ResetPasswordForm() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="rounded-xl border border-red-500/40 bg-[var(--aethel-error)]/10 p-3 text-sm text-red-200">
+                <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
                   {error}
                 </div>
               )}
@@ -144,7 +144,7 @@ function ResetPasswordForm() {
                     placeholder="????????"
                     required
                     minLength={8}
-                    className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 pr-12 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
+                    className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 pr-12 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                   />
                   <button
                     type="button"
@@ -168,13 +168,13 @@ function ResetPasswordForm() {
                   placeholder="????????"
                   required
                   minLength={8}
-                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
+                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                 />
               </div>
 
               <div className="space-y-1 text-xs text-[var(--aethel-text-tertiary)]">
-                <p className={password.length >= 8 ? 'text-emerald-400' : ''}>? Pelo menos 8 caracteres</p>
-                <p className={password === confirmPassword && password.length > 0 ? 'text-emerald-400' : ''}>
+                <p className={password.length >= 8 ? 'text-[var(--aethel-success)]' : ''}>? Pelo menos 8 caracteres</p>
+                <p className={password === confirmPassword && password.length > 0 ? 'text-[var(--aethel-success)]' : ''}>
                   ? Senhas coincidem
                 </p>
               </div>
@@ -216,7 +216,7 @@ export default function ResetPasswordPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-black">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--aethel-primary-light)]" />
         </div>
       }
     >

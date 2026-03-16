@@ -120,7 +120,7 @@ function MetricCard({
         </span>
         {change !== undefined && (
           <span className={`text-xs flex items-center ${
-            isPositive ? 'text-[var(--aethel-success)]' : isNegative ? 'text-red-400' : 'text-[var(--aethel-text-tertiary)]'
+            isPositive ? 'text-[var(--aethel-success)]' : isNegative ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'
           }`}>
             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : isNegative ? <ArrowDownRight className="w-3 h-3" /> : null}
             {Math.abs(change).toFixed(1)}%
@@ -246,12 +246,12 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
             key={i}
             className={`p-3 rounded-lg border ${
               alert.type === 'critical' 
-                ? 'bg-[var(--aethel-error)]/10 border-red-500/30' 
-                : 'bg-yellow-500/10 border-yellow-500/30'
+                ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' 
+                : 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
             }`}
           >
             <p className={`text-sm ${
-              alert.type === 'critical' ? 'text-red-400' : 'text-yellow-400'
+              alert.type === 'critical' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-warning)]'
             }`}>
               {alert.message}
             </p>
@@ -268,8 +268,8 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
 function TransactionsTable({ transactions }: { transactions: FinanceMetrics['recentTransactions'] }) {
   const typeColors: Record<string, string> = {
     subscription: 'text-[var(--aethel-success)]',
-    usage: 'text-blue-400',
-    refund: 'text-red-400',
+    usage: 'text-[var(--aethel-primary-light)]',
+    refund: 'text-[var(--aethel-error)]',
     credit: 'text-[var(--aethel-info)]'
   };
 
@@ -319,7 +319,7 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
                   <span className="text-[var(--aethel-text-tertiary)]">{tx.description}</span>
                 </td>
                 <td className="px-4 py-2 text-right">
-                  <span className={tx.type === 'refund' ? 'text-red-400' : 'text-[var(--aethel-success)]'}>
+                  <span className={tx.type === 'refund' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-success)]'}>
                     {tx.type === 'refund' ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
                   </span>
                 </td>
@@ -380,7 +380,7 @@ export default function FinanceDashboard() {
   if (error || !metrics) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-red-400">{error || 'Sem dados disponíveis'}</p>
+        <p className="text-[var(--aethel-error)]">{error || 'Sem dados disponíveis'}</p>
         <button 
           onClick={fetchMetrics}
           className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
@@ -391,7 +391,7 @@ export default function FinanceDashboard() {
     );
   }
   
-  const profitColor = metrics.dailyProfit >= 0 ? 'text-[var(--aethel-success)]' : 'text-red-400';
+  const profitColor = metrics.dailyProfit >= 0 ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]';
   
   return (
     <div className="space-y-6">

@@ -95,7 +95,7 @@ export default function Support() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Abertos</h3>
@@ -103,7 +103,7 @@ export default function Support() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Pendentes</h3>
-          <p className="text-2xl font-bold text-yellow-600">{summary.pending}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-warning)]">{summary.pending}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Urgentes</h3>
@@ -194,9 +194,9 @@ export default function Support() {
                 <td className='p-2'>
                   <span className={`px-2 py-1 rounded text-xs ${
                     ticket.priority === 'urgent'
-                      ? 'bg-rose-500/15 text-rose-300'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                       : ticket.priority === 'high'
-                      ? 'bg-amber-500/15 text-amber-300'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                       : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                   }`}>
                     {priorityLabels[ticket.priority] ?? ticket.priority}

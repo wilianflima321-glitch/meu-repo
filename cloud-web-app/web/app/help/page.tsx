@@ -176,7 +176,7 @@ export default function HelpPage() {
 
       <main className="relative z-10">
         <section className="mx-auto max-w-6xl px-6 pt-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
             Central de ajuda
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Como podemos ajudar?</h1>
@@ -192,7 +192,7 @@ export default function HelpPage() {
                 placeholder="Buscar perguntas..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-14 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] pl-12 pr-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-colors focus:border-blue-500/60 focus:outline-none"
+                className="h-14 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] pl-12 pr-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-colors focus:border-[var(--aethel-primary)]/60 focus:outline-none"
               />
             </div>
           </div>
@@ -202,35 +202,35 @@ export default function HelpPage() {
           <div className="grid gap-4 md:grid-cols-4">
             <Link
               href="/docs"
-              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-blue-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
-              <Book className="mb-2 h-6 w-6 text-blue-400" />
-              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-blue-300">Documenta??o</h3>
+              <Book className="mb-2 h-6 w-6 text-[var(--aethel-primary-light)]" />
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary-light)]">Documenta??o</h3>
               <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Guias e refer?ncia t?cnica</p>
             </Link>
             <Link
               href="/contact"
-              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-emerald-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
-              <MessageSquare className="mb-2 h-6 w-6 text-emerald-400" />
-              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-emerald-300">Suporte</h3>
+              <MessageSquare className="mb-2 h-6 w-6 text-[var(--aethel-success)]" />
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-success)]">Suporte</h3>
               <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Fale com o time</p>
             </Link>
             <Link
               href="/status"
-              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-yellow-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
-              <Zap className="mb-2 h-6 w-6 text-yellow-400" />
-              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-yellow-300">Status</h3>
+              <Zap className="mb-2 h-6 w-6 text-[var(--aethel-warning)]" />
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-warning)]">Status</h3>
               <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Checks p?blicos em tempo real</p>
             </Link>
             <Link
               href="https://discord.gg/aethel"
               target="_blank"
-              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-cyan-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
               <Users className="mb-2 h-6 w-6 text-[var(--aethel-info)]" />
-              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-cyan-300">Comunidade</h3>
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-info-light)]">Comunidade</h3>
               <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Discord oficial</p>
             </Link>
           </div>
@@ -254,7 +254,7 @@ export default function HelpPage() {
                   }
                   className="flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-[var(--aethel-primary-light)]">
                     <category.icon className="h-5 w-5" />
                   </div>
                   <span className="flex-1 font-medium text-[var(--aethel-text-primary)]">{category.name}</span>
@@ -293,7 +293,7 @@ export default function HelpPage() {
                                 onClick={() => handleHelpful(faq.question, true)}
                                 className={`rounded-lg p-2 transition-colors ${
                                   helpful[faq.question] === true
-                                    ? 'bg-emerald-500/20 text-emerald-400'
+                                    ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
                                     : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
                                 }`}
                               >
@@ -303,7 +303,7 @@ export default function HelpPage() {
                                 onClick={() => handleHelpful(faq.question, false)}
                                 className={`rounded-lg p-2 transition-colors ${
                                   helpful[faq.question] === false
-                                    ? 'bg-[var(--aethel-error)]/20 text-red-400'
+                                    ? 'bg-[var(--aethel-error)]/20 text-[var(--aethel-error)]'
                                     : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
                                 }`}
                               >
@@ -322,7 +322,7 @@ export default function HelpPage() {
         </section>
 
         <section className="mx-auto max-w-5xl px-6 pb-20">
-          <div className="rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 via-cyan-500/10 to-transparent p-10 text-center">
+          <div className="rounded-3xl border border-[var(--aethel-primary)]/20 bg-gradient-to-br from-blue-500/15 via-cyan-500/10 to-transparent p-10 text-center">
             <h3 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Ainda precisa de ajuda?</h3>
             <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--aethel-text-secondary)]">
               Nosso time responde por email ou comunidade. Em demandas enterprise, fale direto com vendas.

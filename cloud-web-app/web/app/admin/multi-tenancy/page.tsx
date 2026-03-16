@@ -69,7 +69,7 @@ export default function MultiTenancyPage() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Locatários detectados</h3>
-          <p className="text-2xl font-bold text-blue-600">{tenants.length}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{tenants.length}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Usuários totais</h3>
@@ -106,7 +106,7 @@ export default function MultiTenancyPage() {
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
                       tenant.status === 'active'
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}
                   >

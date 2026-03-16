@@ -62,7 +62,7 @@ export default function Compliance() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Políticas monitoradas</h3>
-          <p className='text-2xl font-bold text-blue-600'>{summary.total}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{summary.total}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Incidentes críticos</h3>
@@ -100,9 +100,9 @@ export default function Compliance() {
                   <td className='p-2'>
                     <span className={`px-2 py-1 rounded text-xs ${
                       policy.status === 'active'
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
                         : policy.status === 'review'
-                        ? 'bg-amber-500/15 text-amber-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}>
                       {policy.status === 'active'

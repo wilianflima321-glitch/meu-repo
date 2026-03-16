@@ -74,7 +74,7 @@ export default function PricingPage() {
       <main className="relative z-10">
         {/* ── Hero ── */}
         <section className="mx-auto max-w-4xl px-4 pb-6 pt-16 text-center sm:px-6">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[13px] font-medium text-blue-300">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[13px] font-medium text-[var(--aethel-primary-light)]">
             Pricing transparente
           </div>
           <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
@@ -120,7 +120,7 @@ export default function PricingPage() {
               }`}
             >
               Anual
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+              <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] px-2 py-0.5 text-[10px] font-bold text-[var(--aethel-success)]">
                 -20%
               </span>
             </button>
@@ -135,7 +135,7 @@ export default function PricingPage() {
                 key={plan.id}
                 className={`relative flex flex-col rounded-2xl border p-5 transition-all ${
                   plan.popular
-                    ? 'border-blue-500/40 bg-gradient-to-b from-blue-500/[0.1] to-transparent shadow-xl shadow-blue-500/10'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-blue-500/[0.1] to-transparent shadow-xl shadow-blue-500/10'
                     : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'
                 }`}
               >
@@ -180,7 +180,7 @@ export default function PricingPage() {
                 <ul className="mb-6 flex-1 space-y-2.5 border-t border-[var(--aethel-border-subtle)] pt-5">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-xs text-[var(--aethel-text-secondary)]">
-                      <span className="mt-0.5 text-emerald-500 flex-shrink-0">
+                      <span className="mt-0.5 text-[var(--aethel-success)] flex-shrink-0">
                         <Codicon name="check" />
                       </span>
                       <span>{feature}</span>

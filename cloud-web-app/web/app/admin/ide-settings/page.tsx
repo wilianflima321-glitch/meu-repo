@@ -319,7 +319,7 @@ export default function IDESettings() {
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
+        <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
           {error}
         </div>
       )}
@@ -327,15 +327,15 @@ export default function IDESettings() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Categorias</h3>
-          <p className='text-2xl font-bold text-blue-600'>{categories.length}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{categories.length}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Configurações</h3>
-          <p className='text-2xl font-bold text-blue-600'>{Object.keys(data?.definitions || {}).length}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{Object.keys(data?.definitions || {}).length}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Alterações pendentes</h3>
-          <p className='text-2xl font-bold text-yellow-600'>{hasChanges ? 'Sim' : 'Não'}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{hasChanges ? 'Sim' : 'Não'}</p>
         </div>
       </div>
 

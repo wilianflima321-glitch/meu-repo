@@ -62,7 +62,7 @@ export default function ContactSalesPage() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             <section className="lg:pt-8">
-              <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-3 py-1.5 text-sm font-medium text-blue-300">
+              <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-3 py-1.5 text-sm font-medium text-[var(--aethel-primary-light)]">
                 Enterprise
               </span>
 
@@ -85,9 +85,9 @@ export default function ContactSalesPage() {
                 ))}
               </div>
 
-              <div className="mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
-                <p className="text-sm font-semibold text-amber-200">Estado atual para compras enterprise</p>
-                <p className="mt-2 text-sm leading-6 text-amber-100/85">
+              <div className="mt-10 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-5">
+                <p className="text-sm font-semibold text-[var(--aethel-warning-light)]">Estado atual para compras enterprise</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-warning-light)]/85">
                   A base tecnica e forte, mas ainda existem lacunas objetivas em billing runtime, preview sandbox default e evidencia operacional de L4. Esta conversa comercial deve tratar o estado do produto como ele realmente esta.
                 </p>
               </div>
@@ -108,7 +108,7 @@ export default function ContactSalesPage() {
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-[var(--aethel-primary)]/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="Seu nome"
                       />
                     </div>
@@ -118,7 +118,7 @@ export default function ContactSalesPage() {
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-[var(--aethel-primary)]/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="voce@empresa.com"
                       />
                     </div>
@@ -130,7 +130,7 @@ export default function ContactSalesPage() {
                       type="text"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-[var(--aethel-primary)]/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       placeholder="Nome da empresa"
                     />
                   </div>
@@ -142,7 +142,7 @@ export default function ContactSalesPage() {
                         type="text"
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-[var(--aethel-primary)]/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="Seu cargo"
                       />
                     </div>
@@ -151,7 +151,7 @@ export default function ContactSalesPage() {
                       <select
                         value={formData.teamSize}
                         onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] transition-all focus:border-[var(--aethel-primary)]/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       >
                         <option value="" className="bg-[var(--aethel-surface-secondary)]">Selecione</option>
                         <option value="1-10" className="bg-[var(--aethel-surface-secondary)]">1-10</option>
@@ -169,7 +169,7 @@ export default function ContactSalesPage() {
                       rows={5}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full resize-none rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="w-full resize-none rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-[var(--aethel-primary)]/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       placeholder="Ex: tamanho do time, necessidades de compliance, preview sandbox, billing enterprise, SSO."
                     />
                   </div>

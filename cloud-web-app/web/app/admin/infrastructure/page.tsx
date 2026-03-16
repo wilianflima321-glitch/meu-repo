@@ -96,8 +96,8 @@ interface InfrastructureData {
 function StatusBadge({ status }: { status: 'healthy' | 'degraded' | 'down' }) {
   const config = {
     healthy: { icon: CheckCircle, color: 'text-[var(--aethel-success)]', bg: 'bg-[var(--aethel-success)]/10', border: 'border-green-500/30' },
-    degraded: { icon: AlertTriangle, color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30' },
-    down: { icon: XCircle, color: 'text-red-400', bg: 'bg-[var(--aethel-error)]/10', border: 'border-red-500/30' },
+    degraded: { icon: AlertTriangle, color: 'text-[var(--aethel-warning)]', bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' },
+    down: { icon: XCircle, color: 'text-[var(--aethel-error)]', bg: 'bg-[var(--aethel-error)]/10', border: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' },
   };
   
   const { icon: Icon, color, bg, border } = config[status];
@@ -117,7 +117,7 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
     <div className={`
       bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
       ${service.status === 'healthy' ? 'border-[var(--aethel-border-primary)]' : 
-        service.status === 'degraded' ? 'border-yellow-500/30' : 'border-red-500/30'}
+        service.status === 'degraded' ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'}
     `}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">{service.name}</h3>
@@ -130,7 +130,7 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
             <span className="text-[var(--aethel-text-tertiary)]">Latência</span>
             <p className={`text-sm font-medium ${
               service.latency < 100 ? 'text-[var(--aethel-success)]' :
-              service.latency < 500 ? 'text-yellow-400' : 'text-red-400'
+              service.latency < 500 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
             }`}>
               {service.latency}ms
             </p>
@@ -174,10 +174,10 @@ function ResourceGauge({
   critical?: number;
 }) {
   const percentage = max ? (value / max) * 100 : value;
-  const color = percentage >= critical ? 'text-red-400' : 
-                percentage >= warning ? 'text-yellow-400' : 'text-[var(--aethel-success)]';
+  const color = percentage >= critical ? 'text-[var(--aethel-error)]' : 
+                percentage >= warning ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-success)]';
   const barColor = percentage >= critical ? 'bg-[var(--aethel-error)]' : 
-                   percentage >= warning ? 'bg-yellow-500' : 'bg-[var(--aethel-success)]';
+                   percentage >= warning ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]';
   
   return (
     <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
@@ -214,14 +214,14 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
   return (
     <div className={`
       bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
-      ${queue.isPaused ? 'border-yellow-500/30' : 'border-[var(--aethel-border-primary)]'}
+      ${queue.isPaused ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'border-[var(--aethel-border-primary)]'}
     `}>
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-medium text-[var(--aethel-text-primary)] capitalize">
           {queue.name.replace(/_/g, ' ')}
         </h4>
         {queue.isPaused && (
-          <span className="text-xs text-yellow-400 px-2 py-0.5 bg-yellow-500/10 rounded">
+          <span className="text-xs text-[var(--aethel-warning)] px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] rounded">
             PAUSADA
           </span>
         )}
@@ -229,11 +229,11 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
       
       <div className="grid grid-cols-4 gap-2 text-center">
         <div>
-          <p className="text-lg font-bold text-yellow-400">{queue.waiting}</p>
+          <p className="text-lg font-bold text-[var(--aethel-warning)]">{queue.waiting}</p>
           <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Aguardando</p>
         </div>
         <div>
-          <p className="text-lg font-bold text-blue-400">{queue.active}</p>
+          <p className="text-lg font-bold text-[var(--aethel-primary-light)]">{queue.active}</p>
           <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Ativos</p>
         </div>
         <div>
@@ -241,7 +241,7 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
           <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Concluídos</p>
         </div>
         <div>
-          <p className={`text-lg font-bold ${failRate > 5 ? 'text-red-400' : 'text-[var(--aethel-text-tertiary)]'}`}>
+          <p className={`text-lg font-bold ${failRate > 5 ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'}`}>
             {queue.failed}
           </p>
           <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Falhas</p>
@@ -281,7 +281,7 @@ function MetricCard({
           trend === 'up' ? (
             <TrendingUp className="w-4 h-4 text-[var(--aethel-success)]" />
           ) : (
-            <TrendingDown className="w-4 h-4 text-red-400" />
+            <TrendingDown className="w-4 h-4 text-[var(--aethel-error)]" />
           )
         )}
       </div>
@@ -336,8 +336,8 @@ export default function InfrastructureDashboard() {
   if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <XCircle className="w-12 h-12 text-red-400" />
-        <p className="text-red-400">{error || 'Sem dados disponíveis'}</p>
+        <XCircle className="w-12 h-12 text-[var(--aethel-error)]" />
+        <p className="text-[var(--aethel-error)]">{error || 'Sem dados disponíveis'}</p>
         <button 
           onClick={fetchData}
           className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
@@ -461,7 +461,7 @@ export default function InfrastructureDashboard() {
               </div>
               <div>
                 <p className="text-xs text-[var(--aethel-text-tertiary)]">Saída</p>
-                <p className="text-sm font-medium text-blue-400">
+                <p className="text-sm font-medium text-[var(--aethel-primary-light)]">
                   {(data.resources.network.out / 1024 / 1024).toFixed(1)} MB/s
                 </p>
               </div>
@@ -481,7 +481,7 @@ export default function InfrastructureDashboard() {
           <div className="grid grid-cols-3 gap-4">
             <div>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Ativas</p>
-              <p className="text-xl font-bold text-blue-400">{data.dbConnections.active}</p>
+              <p className="text-xl font-bold text-[var(--aethel-primary-light)]">{data.dbConnections.active}</p>
             </div>
             <div>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Ociosas</p>
@@ -498,7 +498,7 @@ export default function InfrastructureDashboard() {
               <span className="text-xs text-[var(--aethel-text-tertiary)]">Tempo médio de consulta</span>
               <span className={`text-sm font-medium ${
                 data.dbQueryTime < 50 ? 'text-[var(--aethel-success)]' :
-                data.dbQueryTime < 200 ? 'text-yellow-400' : 'text-red-400'
+                data.dbQueryTime < 200 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
               }`}>
                 {data.dbQueryTime}ms
               </span>
@@ -518,7 +518,7 @@ export default function InfrastructureDashboard() {
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Taxa de acerto</p>
               <p className={`text-xl font-bold ${
                 data.cacheHitRate > 80 ? 'text-[var(--aethel-success)]' :
-                data.cacheHitRate > 50 ? 'text-yellow-400' : 'text-red-400'
+                data.cacheHitRate > 50 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
               }`}>
                 {data.cacheHitRate.toFixed(1)}%
               </p>

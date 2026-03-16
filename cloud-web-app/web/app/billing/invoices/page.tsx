@@ -49,15 +49,15 @@ interface BillingData {
 }
 
 const statusStyles: Record<string, string> = {
-  paid: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
-  open: 'bg-amber-500/15 text-amber-300 border border-amber-500/30',
+  paid: 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
+  open: 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
   draft: 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_40%,transparent)] text-[var(--aethel-text-secondary)] border border-[var(--aethel-border-secondary)]',
-  uncollectible: 'bg-[var(--aethel-error)]/15 text-red-300 border border-red-500/30',
+  uncollectible: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
   void: 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_40%,transparent)] text-[var(--aethel-text-secondary)] border border-[var(--aethel-border-secondary)]',
-  active: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
-  trialing: 'bg-sky-500/15 text-sky-300 border border-sky-500/30',
-  canceled: 'bg-[var(--aethel-error)]/15 text-red-300 border border-red-500/30',
-  incomplete: 'bg-amber-500/15 text-amber-300 border border-amber-500/30',
+  active: 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
+  trialing: 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
+  canceled: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
+  incomplete: 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
 }
 
 const statusLabels: Record<string, string> = {
@@ -223,12 +223,12 @@ export default function InvoicesPage() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-500/30 bg-[var(--aethel-error)]/10 p-4">
+          <div className="mb-6 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 text-red-300" />
+              <AlertCircle className="mt-0.5 h-5 w-5 text-[var(--aethel-error-light)]" />
               <div>
-                <p className="text-sm font-medium text-red-200">Billing data could not be loaded</p>
-                <p className="mt-1 text-sm text-red-100/80">{error}</p>
+                <p className="text-sm font-medium text-[var(--aethel-error-light)]">Billing data could not be loaded</p>
+                <p className="mt-1 text-sm text-[var(--aethel-error-light)]/80">{error}</p>
               </div>
             </div>
           </div>
@@ -291,7 +291,7 @@ export default function InvoicesPage() {
         )}
 
         {billingData?.trial?.isActive && (
-          <section className="mb-6 rounded-xl border border-sky-500/30 bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-4 text-sm text-sky-100">
+          <section className="mb-6 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-4 text-sm text-[var(--aethel-info-light)]">
             Trial active. {billingData.trial.daysRemaining} days remaining. Trial ends on {formatIsoDate(billingData.trial.endsAt)}.
           </section>
         )}
@@ -307,7 +307,7 @@ export default function InvoicesPage() {
                 type="button"
                 onClick={() => void openPortal()}
                 disabled={portalLoading || readiness?.portalReady === false}
-                className="text-sm text-blue-300 hover:text-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
+                className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Update in portal
               </button>
@@ -356,7 +356,7 @@ export default function InvoicesPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-3 text-sm">
                           {invoice.hostedUrl && (
-                            <a href={invoice.hostedUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200">
+                            <a href={invoice.hostedUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]">
                               View
                               <ExternalLink className="h-3.5 w-3.5" />
                             </a>

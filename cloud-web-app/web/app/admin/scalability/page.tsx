@@ -89,7 +89,7 @@ export default function ScalabilityPage() {
       <h1 className="text-2xl font-bold mb-6">Métricas de escalabilidade</h1>
 
       {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-rose-300">
+        <div className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] p-4 text-[var(--aethel-error)]">
           {error}
         </div>
       )}
@@ -103,7 +103,7 @@ export default function ScalabilityPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Uso de CPU</h3>
-          <p className="text-2xl font-bold text-blue-600">{metrics.cpuUsage}%</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.cpuUsage}%</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Uso de memória</h3>
@@ -111,7 +111,7 @@ export default function ScalabilityPage() {
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Tráfego de rede</h3>
-          <p className="text-2xl font-bold text-blue-600">{metrics.networkTraffic} Mbps</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.networkTraffic} Mbps</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Conexões ativas</h3>
@@ -119,7 +119,7 @@ export default function ScalabilityPage() {
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Taxa de erro</h3>
-          <p className="text-2xl font-bold text-yellow-600">{metrics.errorRate}%</p>
+          <p className="text-2xl font-bold text-[var(--aethel-warning)]">{metrics.errorRate}%</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Tempo de resposta</h3>
@@ -132,7 +132,7 @@ export default function ScalabilityPage() {
         <div className="grid grid-cols-4 gap-4">
           <div className="text-center">
             <h3 className="text-lg font-semibold">Plano</h3>
-            <p className="text-2xl font-bold text-blue-600">{usage.planName}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-primary)]">{usage.planName}</p>
           </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Tokens de IA</h3>
@@ -140,7 +140,7 @@ export default function ScalabilityPage() {
           </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Armazenamento</h3>
-            <p className="text-2xl font-bold text-blue-600">{usage.storageUsedMb.toLocaleString()} MB</p>
+            <p className="text-2xl font-bold text-[var(--aethel-primary)]">{usage.storageUsedMb.toLocaleString()} MB</p>
           </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Minutos de compilação</h3>

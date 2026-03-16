@@ -101,7 +101,7 @@ const SkeletonEventRow: React.FC = () => (
 
 const ErrorState: React.FC<{ message: string; onRetry: () => void }> = ({ message, onRetry }) => (
   <div className="flex flex-col items-center justify-center py-12 text-center">
-    <AlertCircle className="mb-4 h-12 w-12 text-rose-300" />
+    <AlertCircle className="mb-4 h-12 w-12 text-[var(--aethel-error-light)]" />
     <h3 className="mb-2 text-lg font-semibold text-white">Erro ao carregar dados</h3>
     <p className="mb-4 max-w-md text-sm text-zinc-500">{message}</p>
     <button onClick={onRetry} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
@@ -113,7 +113,7 @@ const ErrorState: React.FC<{ message: string; onRetry: () => void }> = ({ messag
 
 const EmptyState: React.FC = () => (
   <div className="flex flex-col items-center justify-center py-12 text-center">
-    <ShieldCheck className="mb-4 h-16 w-16 text-emerald-300/60" />
+    <ShieldCheck className="mb-4 h-16 w-16 text-[var(--aethel-success-light)]/60" />
     <h3 className="mb-2 text-lg font-semibold text-white">Nenhum evento de seguranca</h3>
     <p className="max-w-md text-sm text-zinc-500">
       Nenhum evento registrado. O ambiente esta protegido e operando normalmente.
@@ -129,10 +129,10 @@ const THREAT_LEVELS: Record<
   ThreatLevel,
   { color: string; icon: React.ElementType; label: string }
 > = {
-  critical: { color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', icon: ShieldX, label: 'CRITICO' },
+  critical: { color: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border-rose-500/30', icon: ShieldX, label: 'CRITICO' },
   high: { color: 'bg-orange-500/15 text-orange-300 border-orange-500/30', icon: ShieldAlert, label: 'ALTO' },
-  medium: { color: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30', icon: AlertTriangle, label: 'MEDIO' },
-  low: { color: 'bg-sky-500/15 text-sky-300 border-sky-500/30', icon: Shield, label: 'BAIXO' },
+  medium: { color: 'bg-[var(--aethel-warning)]/15 text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]', icon: AlertTriangle, label: 'MEDIO' },
+  low: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]', icon: Shield, label: 'BAIXO' },
   info: { color: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30', icon: ShieldCheck, label: 'INFO' },
 }
 
@@ -172,7 +172,7 @@ const StatsCard: React.FC<{
     <div className="flex items-center justify-between">
       <div className="rounded-lg bg-white/[0.05] p-2 text-zinc-400">{icon}</div>
       {trend !== undefined && (
-        <div className={`flex items-center gap-1 text-xs ${trend > 0 ? 'text-rose-300' : 'text-emerald-300'}`}>
+        <div className={`flex items-center gap-1 text-xs ${trend > 0 ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-success-light)]'}`}>
           <TrendingUp className={`h-3 w-3 ${trend < 0 ? 'rotate-180' : ''}`} />
           {Math.abs(trend)}%
         </div>
@@ -204,7 +204,7 @@ const EventRow: React.FC<{
             <ThreatLevelBadge level={event.level} />
             <ThreatTypeBadge type={event.type} />
             {event.blocked && (
-              <span className="rounded-md bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">
+              <span className="rounded-md bg-[var(--aethel-success)]/20 px-2 py-1 text-xs text-[var(--aethel-success-light)]">
                 Bloqueado
               </span>
             )}
@@ -239,7 +239,7 @@ const EventRow: React.FC<{
         <div className="flex items-center gap-1">
           <button
             onClick={onInvestigate}
-            className="aethel-button aethel-button-ghost rounded-md p-2 text-sky-200"
+            className="aethel-button aethel-button-ghost rounded-md p-2 text-[var(--aethel-info-light)]"
             title="Investigar"
           >
             <Eye className="h-4 w-4" />
@@ -247,7 +247,7 @@ const EventRow: React.FC<{
           {!event.blocked && (
             <button
               onClick={onBlock}
-              className="aethel-button aethel-button-ghost rounded-md p-2 text-rose-200"
+              className="aethel-button aethel-button-ghost rounded-md p-2 text-[var(--aethel-error-light)]"
               title="Bloquear IP"
             >
               <Ban className="h-4 w-4" />
@@ -351,7 +351,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
     return (
       <div className={`aethel-card ${className}`}>
         <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-          <Shield className="h-5 w-5 text-emerald-300" />
+          <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
             <h2 className="text-base font-semibold text-white">Central de seguranca</h2>
             <p className="text-xs text-zinc-500">Monitoramento de ameacas em tempo real</p>
@@ -366,7 +366,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
     return (
       <div className={`aethel-card ${className}`}>
         <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-          <Shield className="h-5 w-5 text-emerald-300" />
+          <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
             <h2 className="text-base font-semibold text-white">Central de seguranca</h2>
             <p className="text-xs text-zinc-500">Monitoramento de ameacas em tempo real</p>
@@ -390,7 +390,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
     <div className={`aethel-card ${className}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-3">
-          <Shield className="h-5 w-5 text-emerald-300" />
+          <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
             <h2 className="text-base font-semibold text-white">Central de seguranca</h2>
             <p className="text-xs text-zinc-500">Monitoramento de ameacas em tempo real</p>
@@ -400,7 +400,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
         <div className="flex flex-wrap items-center gap-2">
           <div
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              stats.activeAttacks > 0 ? 'bg-rose-500/20 text-rose-300 animate-pulse' : 'bg-emerald-500/20 text-emerald-300'
+              stats.activeAttacks > 0 ? 'bg-[var(--aethel-error)]/20 text-[var(--aethel-error-light)] animate-pulse' : 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success-light)]'
             }`}
           >
             {stats.activeAttacks > 0 ? `${stats.activeAttacks} ataques ativos` : 'Sistema seguro'}
@@ -421,15 +421,15 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
         <StatsCard
           label="Bloqueados (24h)"
           value={stats.totalBlocked24h}
-          icon={<ShieldCheck className="h-5 w-5 text-emerald-300" />}
-          color="border border-emerald-500/30 bg-emerald-500/5"
+          icon={<ShieldCheck className="h-5 w-5 text-[var(--aethel-success-light)]" />}
+          color="border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/5"
         />
         <StatsCard
           label="Criticos"
           value={stats.criticalThreats}
-          icon={<ShieldX className="h-5 w-5 text-rose-300" />}
+          icon={<ShieldX className="h-5 w-5 text-[var(--aethel-error-light)]" />}
           trend={15}
-          color="border border-rose-500/30 bg-rose-500/5"
+          color="border border-rose-500/30 bg-[var(--aethel-error)]/5"
         />
         <StatsCard
           label="IPs bloqueados"
@@ -440,21 +440,21 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
         <StatsCard
           label="Rate limits"
           value={stats.rateLimitHits}
-          icon={<Activity className="h-5 w-5 text-yellow-300" />}
-          color="border border-yellow-500/30 bg-yellow-500/5"
+          icon={<Activity className="h-5 w-5 text-[var(--aethel-warning-light)]" />}
+          color="border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5"
         />
         <StatsCard
           label="Injecoes de prompt"
           value={stats.promptInjections}
-          icon={<AlertTriangle className="h-5 w-5 text-sky-300" />}
+          icon={<AlertTriangle className="h-5 w-5 text-[var(--aethel-info-light)]" />}
           trend={-8}
-          color="border border-sky-500/30 bg-sky-500/5"
+          color="border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[var(--aethel-info)]/5"
         />
         <StatsCard
           label="Ataques ativos"
           value={stats.activeAttacks}
-          icon={<Zap className="h-5 w-5 text-cyan-300" />}
-          color="border border-cyan-500/30 bg-cyan-500/5"
+          icon={<Zap className="h-5 w-5 text-[var(--aethel-info-light)]" />}
+          color="border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[var(--aethel-info)]/5"
         />
       </div>
 

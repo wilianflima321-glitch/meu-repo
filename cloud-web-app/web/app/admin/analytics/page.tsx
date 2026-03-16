@@ -84,8 +84,8 @@ function formatValue(value: number | null, unit: string): string {
 }
 
 function statusBadgeClass(status: 'ok' | 'warn' | 'no_data'): string {
-  if (status === 'ok') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-  if (status === 'warn') return 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+  if (status === 'ok') return 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
+  if (status === 'warn') return 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
   return 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)]/40'
 }
 
@@ -243,7 +243,7 @@ export default function AdminAnalytics() {
           <button
             type='button'
             onClick={handleExport}
-            className='rounded border border-blue-500/40 bg-[var(--aethel-primary)]/20 px-4 py-2 text-sm text-blue-100 hover:bg-[var(--aethel-primary)]/30'
+            className='rounded border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[var(--aethel-primary)]/20 px-4 py-2 text-sm text-[var(--aethel-primary-light)] hover:bg-[var(--aethel-primary)]/30'
           >
             Exportar JSON
           </button>

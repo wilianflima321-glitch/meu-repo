@@ -117,7 +117,7 @@ export default function RegisterPageV2() {
               className="rounded-lg ring-1 ring-zinc-700/70"
               priority
             />
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300/90">Aethel Studio</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
           </div>
           <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Criar conta no Aethel</h1>
           <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
@@ -137,7 +137,7 @@ export default function RegisterPageV2() {
               autoComplete="name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
               placeholder="Seu nome (opcional)"
             />
           </div>
@@ -155,7 +155,7 @@ export default function RegisterPageV2() {
               onChange={(event) => setEmail(event.target.value)}
               required
               aria-invalid={Boolean(formError)}
-              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
               placeholder="voce@empresa.com"
             />
           </div>
@@ -174,7 +174,7 @@ export default function RegisterPageV2() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 aria-invalid={Boolean(formError)}
-                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
                 placeholder="Minimo 8 caracteres"
               />
             </div>
@@ -191,7 +191,7 @@ export default function RegisterPageV2() {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
                 aria-invalid={Boolean(formError)}
-                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
                 placeholder="Repita a senha"
               />
             </div>
@@ -241,7 +241,7 @@ export default function RegisterPageV2() {
 
         <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">
           Ja tem conta?{' '}
-          <Link href="/login" className="font-medium text-cyan-300 hover:text-cyan-200">
+          <Link href="/login" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]">
             Fazer login
           </Link>
         </p>

@@ -169,7 +169,7 @@ export default function Payments() {
       </div>
 
       {error && (
-        <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
+        <div className='mb-4 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-sm text-[var(--aethel-error)]'>
           {error}
         </div>
       )}
@@ -247,7 +247,7 @@ export default function Payments() {
               </>
             ) : null}
             {billingRuntime.stripe?.missingEnv?.length ? (
-              <div className='mt-2 text-amber-300'>
+              <div className='mt-2 text-[var(--aethel-warning)]'>
                 Missing env: {billingRuntime.stripe.missingEnv.join(', ')}
               </div>
             ) : null}
@@ -258,7 +258,7 @@ export default function Payments() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-blue-600'>US${totals.total.toFixed(2)}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>US${totals.total.toFixed(2)}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Aprovados</h3>
@@ -266,7 +266,7 @@ export default function Payments() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Pendentes</h3>
-          <p className='text-2xl font-bold text-yellow-600'>US${totals.pending.toFixed(2)}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>US${totals.pending.toFixed(2)}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Falhas</h3>
@@ -327,10 +327,10 @@ export default function Payments() {
                     <span
                       className={`px-2 py-1 rounded text-xs ${
                         item.status === 'succeeded'
-                          ? 'bg-emerald-500/15 text-emerald-300'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
                           : item.status === 'pending'
-                          ? 'bg-amber-500/15 text-amber-300'
-                          : 'bg-rose-500/15 text-rose-300'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+                          : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                       }`}
                     >
                       {statusLabels[item.status] ?? item.status}

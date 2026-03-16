@@ -57,11 +57,11 @@ export default function RolesPage() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Usuários totais</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.totalUsers}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.totalUsers}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Administradores totais</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.totalAdmins}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.totalAdmins}</p>
         </div>
       </div>
 

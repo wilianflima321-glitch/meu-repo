@@ -90,7 +90,7 @@ export default function Backup() {
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
+        <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
           {error}
         </div>
       )}
@@ -142,7 +142,7 @@ export default function Backup() {
                   {b.storageUrl ? (
                     <a
                       href={b.storageUrl}
-                      className='px-2 py-1 bg-yellow-500 text-[var(--aethel-text-primary)] rounded mr-2 inline-block text-sm'
+                      className='px-2 py-1 bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] rounded mr-2 inline-block text-sm'
                     >
                       Baixar
                     </a>

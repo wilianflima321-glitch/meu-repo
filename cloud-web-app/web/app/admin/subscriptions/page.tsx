@@ -78,7 +78,7 @@ export default function AdminSubscriptions() {
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
         <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 text-center'>
           <h3 className='text-sm font-semibold'>Usuários totais</h3>
-          <p className='text-2xl font-bold text-blue-600'>{summary.totalUsers}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{summary.totalUsers}</p>
         </div>
         <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 text-center'>
           <h3 className='text-sm font-semibold'>MRR total (US$)</h3>
@@ -141,7 +141,7 @@ export default function AdminSubscriptions() {
                   <td className='p-3'>US${plan.mrr.toFixed(2)}</td>
                   <td className='p-3'>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      plan.isTrial ? 'bg-amber-500/15 text-amber-200' : 'bg-emerald-500/15 text-emerald-200'
+                      plan.isTrial ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
                     }`}>
                       {plan.isTrial ? 'Teste' : 'Pago'}
                     </span>

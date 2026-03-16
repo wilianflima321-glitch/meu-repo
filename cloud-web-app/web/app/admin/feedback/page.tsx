@@ -90,11 +90,11 @@ export default function Feedback() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Abertos</h3>
-          <p className="text-2xl font-bold text-yellow-600">{summary.open}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-warning)]">{summary.open}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Resolvidos</h3>

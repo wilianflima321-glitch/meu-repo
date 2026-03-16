@@ -77,7 +77,7 @@ export default function ArpuChurnPage() {
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Taxa de Retenção</h3>
-          <p className="text-2xl font-bold text-blue-600">{retentionRate.toFixed(1)}%</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{retentionRate.toFixed(1)}%</p>
         </div>
       </div>
 

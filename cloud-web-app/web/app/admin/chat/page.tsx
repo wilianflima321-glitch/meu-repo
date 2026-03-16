@@ -83,7 +83,7 @@ export default function Chat() {
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
+        <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
           {error}
         </div>
       )}

@@ -164,10 +164,10 @@ export default function OnboardingAdminPage() {
             <p
               className={`mt-1 text-xs ${
                 stats.firstValue.sloStatus === 'pass'
-                  ? 'text-emerald-300'
+                  ? 'text-[var(--aethel-success)]'
                   : stats.firstValue.sloStatus === 'fail'
-                    ? 'text-rose-300'
-                    : 'text-amber-300'
+                    ? 'text-[var(--aethel-error)]'
+                    : 'text-[var(--aethel-warning)]'
               }`}
             >
               {formatSloStatus(stats.firstValue.sloStatus)} (evaluated on P95)

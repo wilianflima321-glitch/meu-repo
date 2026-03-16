@@ -65,8 +65,8 @@ export default function ContactPage() {
         <PublicHeader />
         <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6">
           <div className="w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8 text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
-              <CheckCircle className="h-8 w-8 text-emerald-400" />
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
+              <CheckCircle className="h-8 w-8 text-[var(--aethel-success)]" />
             </div>
             <h1 className="text-2xl font-bold">Mensagem enviada</h1>
             <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
@@ -89,14 +89,14 @@ export default function ContactPage() {
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-cyan-600/[0.05] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
 
       <main className="relative z-10">
         <section className="mx-auto max-w-6xl px-6 pt-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
             Contato
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Entre em contato</h1>
@@ -112,7 +112,7 @@ export default function ContactPage() {
                 <h2 className="text-lg font-semibold">Canais</h2>
                 <div className="mt-4 space-y-4 text-sm text-[var(--aethel-text-secondary)]">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-[var(--aethel-primary-light)]">
                       <Mail className="h-5 w-5" />
                     </div>
                     <div>
@@ -122,7 +122,7 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-[var(--aethel-primary-light)]">
                       <Phone className="h-5 w-5" />
                     </div>
                     <div>
@@ -131,7 +131,7 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-[var(--aethel-primary-light)]">
                       <MapPin className="h-5 w-5" />
                     </div>
                     <div>
@@ -141,7 +141,7 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-[var(--aethel-primary-light)]">
                       <Clock className="h-5 w-5" />
                     </div>
                     <div>
@@ -160,7 +160,7 @@ export default function ContactPage() {
                 </p>
                 <Link
                   href="/pricing#faq"
-                  className="mt-4 inline-flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200"
+                  className="mt-4 inline-flex items-center gap-2 text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]"
                 >
                   Ver FAQ
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +178,7 @@ export default function ContactPage() {
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 {error && (
-                  <div className="rounded-xl border border-red-500/40 bg-[var(--aethel-error)]/10 p-3 text-sm text-red-200">
+                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
                     {error}
                   </div>
                 )}
@@ -190,7 +190,7 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
+                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                       placeholder="Seu nome"
                     />
                   </div>
@@ -202,7 +202,7 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
+                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                       placeholder="voce@empresa.com"
                     />
                   </div>
@@ -214,7 +214,7 @@ export default function ContactPage() {
                     name="company"
                     value={formData.company}
                     onChange={handleChange}
-                    className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
+                    className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                     placeholder="Nome da empresa"
                   />
                 </div>
@@ -231,7 +231,7 @@ export default function ContactPage() {
                         }
                         className={`flex items-center gap-3 rounded-xl border p-4 text-left text-sm transition-all ${
                           formData.reason == reason.value
-                            ? 'border-blue-500/50 bg-[var(--aethel-primary)]/15 text-[var(--aethel-text-primary)]'
+                            ? 'border-[var(--aethel-primary)]/50 bg-[var(--aethel-primary)]/15 text-[var(--aethel-text-primary)]'
                             : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
                         }`}
                       >
@@ -250,7 +250,7 @@ export default function ContactPage() {
                     onChange={handleChange}
                     rows={5}
                     required
-                    className="w-full resize-none rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
+                    className="w-full resize-none rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                     placeholder="Como podemos ajudar?"
                   />
                 </div>
@@ -265,7 +265,7 @@ export default function ContactPage() {
 
                 <p className="text-xs text-[var(--aethel-text-tertiary)] text-center">
                   Ao enviar, voce concorda com a nossa{' '}
-                  <Link href="/privacy" className="text-blue-300 hover:text-blue-200">
+                  <Link href="/privacy" className="text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]">
                     Politica de Privacidade
                   </Link>
                 </p>

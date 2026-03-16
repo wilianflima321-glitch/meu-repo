@@ -35,11 +35,11 @@ const SURFACE_CHECKS: SurfaceCheck[] = [
 function stateStyles(state: SurfaceState) {
   switch (state) {
     case 'healthy':
-      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+      return 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success)]'
     case 'partial':
-      return 'border-amber-500/30 bg-amber-500/10 text-amber-200'
+      return 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning-light)]'
     case 'unhealthy':
-      return 'border-red-500/30 bg-[var(--aethel-error)]/10 text-red-300'
+      return 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
     default:
       return 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-border-secondary)_10%,transparent)] text-[var(--aethel-text-secondary)]'
   }
@@ -235,7 +235,7 @@ export default function StatusPage() {
   return (
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-emerald-600/[0.05] blur-[170px]" />
+        <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-[color-mix(in_srgb,var(--aethel-success-dark)_5%,transparent)] blur-[170px]" />
         <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-[var(--aethel-primary-dark)]/[0.05] blur-[160px]" />
       </div>
 
@@ -244,7 +244,7 @@ export default function StatusPage() {
       <main className="relative z-10 px-6 pb-16 pt-12">
         <div className="mx-auto max-w-5xl">
           <header className="mb-10 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-sky-300">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info)]">
               Status publico
             </div>
             <h1 className="text-4xl font-bold sm:text-5xl">Runtime baseado em evidencia</h1>

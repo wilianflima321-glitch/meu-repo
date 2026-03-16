@@ -274,7 +274,7 @@ function PatternSelector({ value, onChange }: PatternSelectorProps) {
           onClick={() => onChange(pattern.id)}
           className={`w-full p-2 rounded flex items-center gap-2 transition-colors ${
             value === pattern.id
-              ? 'bg-[var(--aethel-error-dark)]/30 border border-red-500 text-[var(--aethel-text-primary)]'
+              ? 'bg-[var(--aethel-error-dark)]/30 border border-[color-mix(in_srgb,var(--aethel-error)_60%,transparent)] text-[var(--aethel-text-primary)]'
               : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
           }`}
         >
@@ -730,7 +730,7 @@ export default function DestructionEditor({
           <div className="text-xs text-[var(--aethel-text-secondary)] mb-2">Destruction Status</div>
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
-              <Heart className="w-3 h-3 text-red-400" />
+              <Heart className="w-3 h-3 text-[var(--aethel-error)]" />
               <span>Health: {currentHealth.toFixed(0)} / {config.maxHealth}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -738,7 +738,7 @@ export default function DestructionEditor({
               <span>Level: {currentLevel + 1} / {config.fractureLevels}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Box className="w-3 h-3 text-blue-400" />
+              <Box className="w-3 h-3 text-[var(--aethel-primary-light)]" />
               <span>Fragments: {config.fragmentCount}</span>
             </div>
           </div>
@@ -751,7 +751,7 @@ export default function DestructionEditor({
             {events.slice(-5).map((event, i) => (
               <div key={i} className="text-[10px] text-[var(--aethel-text-secondary)] flex items-center gap-1">
                 {event.type === 'destroy' ? (
-                  <Bomb className="w-2.5 h-2.5 text-red-400" />
+                  <Bomb className="w-2.5 h-2.5 text-[var(--aethel-error)]" />
                 ) : (
                   <Zap className="w-2.5 h-2.5 text-orange-400" />
                 )}
@@ -768,7 +768,7 @@ export default function DestructionEditor({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Hammer className="w-5 h-5 text-red-400" />
+              <Hammer className="w-5 h-5 text-[var(--aethel-error)]" />
               Destruction
             </h2>
             <button
@@ -781,7 +781,7 @@ export default function DestructionEditor({
           </div>
           
           {/* Presets */}
-          <CollapsibleSection title="Material Presets" icon={<Zap className="w-4 h-4 text-yellow-400" />}>
+          <CollapsibleSection title="Material Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
               {DESTRUCTION_PRESETS.map((preset) => (
                 <button
@@ -798,7 +798,7 @@ export default function DestructionEditor({
           </CollapsibleSection>
           
           {/* Fracture Pattern */}
-          <CollapsibleSection title="Fracture Pattern" icon={<Sparkles className="w-4 h-4 text-blue-400" />}>
+          <CollapsibleSection title="Fracture Pattern" icon={<Sparkles className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <PatternSelector value={pattern} onChange={setPattern} />
             
             <div className="mt-3 flex items-center justify-between">
@@ -822,7 +822,7 @@ export default function DestructionEditor({
               step={10}
               unit=" HP"
               onChange={(v) => setConfig((p) => ({ ...p, maxHealth: v }))}
-              icon={<Heart className="w-3 h-3 text-red-400" />}
+              icon={<Heart className="w-3 h-3 text-[var(--aethel-error)]" />}
             />
             
             <Slider
@@ -851,8 +851,8 @@ export default function DestructionEditor({
                 <button
                   key={dmg}
                   onClick={() => applyDamage(dmg)}
-                  className="p-1.5 text-xs bg-red-900/50 hover:bg-red-800/50 rounded 
-                           text-red-300 transition-colors"
+                  className="p-1.5 text-xs bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] rounded 
+                           text-[var(--aethel-error-light)] transition-colors"
                 >
                   -{dmg}
                 </button>
@@ -861,7 +861,7 @@ export default function DestructionEditor({
           </CollapsibleSection>
           
           {/* Fragment Settings */}
-          <CollapsibleSection title="Fragments" icon={<Box className="w-4 h-4 text-blue-400" />}>
+          <CollapsibleSection title="Fragments" icon={<Box className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Slider
               label="Fragment Count"
               value={config.fragmentCount}
@@ -935,7 +935,7 @@ export default function DestructionEditor({
           
           {/* Impact Point */}
           {impactPoint && (
-            <CollapsibleSection title="Impact Point" icon={<Target className="w-4 h-4 text-red-400" />}>
+            <CollapsibleSection title="Impact Point" icon={<Target className="w-4 h-4 text-[var(--aethel-error)]" />}>
               <div className="text-xs space-y-2">
                 <div className="flex justify-between">
                   <span className="text-[var(--aethel-text-secondary)]">Position:</span>

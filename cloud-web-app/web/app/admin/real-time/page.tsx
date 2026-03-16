@@ -88,7 +88,7 @@ export default function RealTimePage() {
           <button
             onClick={() => setAutoRefresh((prev) => !prev)}
             className={`px-3 py-2 rounded text-sm ${
-              autoRefresh ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+              autoRefresh ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             {autoRefresh ? 'Auto: ativado' : 'Auto: desativado'}
@@ -103,7 +103,7 @@ export default function RealTimePage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4">
           {error}
         </div>
       )}
@@ -118,7 +118,7 @@ export default function RealTimePage() {
                 {index === 0 && (
                   <>
                     <h3 className="text-lg font-semibold">Usuários online</h3>
-                    <p className="text-2xl font-bold text-blue-600">{metrics.usersOnline}</p>
+                    <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.usersOnline}</p>
                   </>
                 )}
                 {index === 1 && (
@@ -136,7 +136,7 @@ export default function RealTimePage() {
                 {index === 3 && (
                   <>
                     <h3 className="text-lg font-semibold">Uso de memória</h3>
-                    <p className="text-2xl font-bold text-blue-600">{metrics.memoryUsage.toFixed(0)}%</p>
+                    <p className="text-2xl font-bold text-[var(--aethel-primary)]">{metrics.memoryUsage.toFixed(0)}%</p>
                   </>
                 )}
               </>

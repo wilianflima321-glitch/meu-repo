@@ -23,7 +23,7 @@ import {
 
 function studioLinkClass(active: boolean): string {
   return active
-    ? 'rounded-md border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-cyan-200'
+    ? 'rounded-md border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-info-light)]'
     : 'rounded-md border border-transparent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]'
 }
 
@@ -54,7 +54,7 @@ export default function NexusPage() {
           </Link>
           <Link
             href="/nexus"
-            className="rounded-lg border border-blue-500/20 bg-[var(--aethel-primary)]/10 p-2 text-blue-400"
+            className="rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 p-2 text-[var(--aethel-primary-light)]"
             aria-label="Nexus"
           >
             <Grid size={22} />
@@ -107,7 +107,7 @@ export default function NexusPage() {
               <h1 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--aethel-text-secondary)]">The Nexus</h1>
               <div className="h-4 w-px bg-[var(--aethel-surface-tertiary)]"></div>
               <div className="flex items-center gap-2 rounded-md border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-1">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--aethel-success)] shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--aethel-text-secondary)]">Aethel Core Online</span>
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function NexusPage() {
             <div className="border-b border-[var(--aethel-border-primary)] p-4">
               <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Project Context</h2>
               <div className="space-y-1">
-                <button className="flex w-full items-center gap-3 rounded-lg border border-blue-500/20 bg-[var(--aethel-primary)]/5 px-3 py-2 text-xs text-blue-400">
+                <button className="flex w-full items-center gap-3 rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/5 px-3 py-2 text-xs text-[var(--aethel-primary-light)]">
                   <Layout size={14} /> <span>Aethel Engine V2</span>
                 </button>
                 <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)]">
@@ -176,13 +176,13 @@ export default function NexusPage() {
                 {[1, 2, 3, 4, 5].map((item) => (
                   <div
                     key={item}
-                    className="group flex cursor-pointer items-center gap-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2 transition-all hover:border-blue-500/30"
+                    className="group flex cursor-pointer items-center gap-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2 transition-all hover:border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-[var(--aethel-surface-tertiary)] font-mono text-[10px] text-[var(--aethel-text-tertiary)] transition-colors group-hover:bg-[var(--aethel-primary-dark)]/20 group-hover:text-blue-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded bg-[var(--aethel-surface-tertiary)] font-mono text-[10px] text-[var(--aethel-text-tertiary)] transition-colors group-hover:bg-[var(--aethel-primary-dark)]/20 group-hover:text-[var(--aethel-primary-light)]">
                       3D
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[10px] font-bold transition-colors group-hover:text-blue-400">Asset_Prototype_0{item}.obj</p>
+                      <p className="truncate text-[10px] font-bold transition-colors group-hover:text-[var(--aethel-primary-light)]">Asset_Prototype_0{item}.obj</p>
                       <p className="text-[9px] uppercase text-[var(--aethel-text-tertiary)]">Optimized</p>
                     </div>
                   </div>

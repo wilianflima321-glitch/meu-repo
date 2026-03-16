@@ -66,7 +66,7 @@ export default function BillingSuccessPage() {
             Loading live billing state...
           </div>
         ) : error ? (
-          <div className="rounded-lg border border-red-500/30 bg-[var(--aethel-error)]/10 px-3 py-3 text-sm text-red-200">
+          <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 px-3 py-3 text-sm text-[var(--aethel-error-light)]">
             {error}
           </div>
         ) : (

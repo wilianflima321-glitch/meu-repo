@@ -45,10 +45,10 @@ const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
 
 const LIFECYCLE_COLORS: Record<PreviewLifecycleState, string> = {
   idle: 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]',
-  provisioning: 'bg-amber-500 animate-pulse',
-  warming: 'bg-amber-400 animate-pulse',
+  provisioning: 'bg-[var(--aethel-warning)] animate-pulse',
+  warming: 'bg-[var(--aethel-warning-light)] animate-pulse',
   syncing: 'bg-[var(--aethel-primary)] animate-pulse',
-  healthy: 'bg-emerald-500',
+  healthy: 'bg-[var(--aethel-success)]',
   degraded: 'bg-orange-500',
   failed: 'bg-[var(--aethel-error)]',
   offline: 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]',
@@ -102,7 +102,7 @@ function LifecycleIndicator({
         <span className="text-[var(--aethel-text-tertiary)]">{latencyMs}ms</span>
       )}
       {hmrConnected && (
-        <span className="ml-auto flex items-center gap-1 text-emerald-400">
+        <span className="ml-auto flex items-center gap-1 text-[var(--aethel-success)]">
           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
             <path d="M8 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 1zm0 10a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 11z" />
             <path d="M4.5 4a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1-.708.708l-1.5-1.5A.5.5 0 0 1 4.5 4zm7 0a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708-.708l1.5-1.5A.5.5 0 0 1 11.5 4z" />
@@ -126,7 +126,7 @@ function PreviewFailedState({
   return (
     <div className="flex flex-col items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] gap-4 p-6">
       <div className="w-12 h-12 rounded-full bg-[var(--aethel-error)]/10 flex items-center justify-center">
-        <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <svg className="w-6 h-6 text-[var(--aethel-error)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       </div>
@@ -465,7 +465,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           onRefresh={onRefresh}
         />
         {isStale && (
-          <div className="absolute top-1 right-1 px-2 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] rounded-full">
+          <div className="absolute top-1 right-1 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)] text-[10px] rounded-full">
             Stale
           </div>
         )}

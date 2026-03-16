@@ -94,7 +94,7 @@ export default function Admin() {
         {isLoading ? (
           <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Carregando usuarios...</div>
         ) : error ? (
-          <div className='p-4 text-sm text-rose-300'>{error.message}</div>
+          <div className='p-4 text-sm text-[var(--aethel-error)]'>{error.message}</div>
         ) : users.length === 0 ? (
           <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Nenhum usuario retornado no momento.</div>
         ) : (
@@ -118,9 +118,9 @@ export default function Admin() {
                       <span
                         className={`rounded-full px-2.5 py-1 text-xs ${
                           user.plan === 'enterprise'
-                            ? 'bg-emerald-500/15 text-emerald-300'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
                             : user.plan === 'pro'
-                              ? 'bg-sky-500/15 text-sky-300'
+                              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info)]'
                               : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
                         }`}
                       >
@@ -164,10 +164,10 @@ function Stat({
 }) {
   const toneClass =
     tone === 'emerald'
-      ? 'text-emerald-300'
+      ? 'text-[var(--aethel-success)]'
       : tone === 'slate'
         ? 'text-[var(--aethel-text-secondary)]'
-        : 'text-sky-300';
+        : 'text-[var(--aethel-info)]';
 
   return (
     <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>

@@ -112,7 +112,7 @@ export default function LoginPageV2() {
               className="rounded-lg ring-1 ring-zinc-700/70"
               priority
             />
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300/90">Aethel Studio</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
           </div>
           <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Entrar no Studio</h1>
           <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
@@ -134,7 +134,7 @@ export default function LoginPageV2() {
               onChange={(event) => setEmail(event.target.value)}
               required
               aria-invalid={Boolean(formError)}
-              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
               placeholder="voce@empresa.com"
             />
           </div>
@@ -144,7 +144,7 @@ export default function LoginPageV2() {
               <label htmlFor="password" className="text-sm text-[var(--aethel-text-secondary)]">
                 Senha
               </label>
-              <Link href="/forgot-password" className="text-xs text-cyan-300 hover:text-cyan-200">
+              <Link href="/forgot-password" className="text-xs text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]">
                 Esqueci a senha
               </Link>
             </div>
@@ -157,7 +157,7 @@ export default function LoginPageV2() {
               onChange={(event) => setPassword(event.target.value)}
               required
               aria-invalid={Boolean(formError)}
-              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
               placeholder="Digite sua senha"
             />
           </div>
@@ -206,7 +206,7 @@ export default function LoginPageV2() {
 
         <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">
           Nao tem conta?{' '}
-          <Link href="/register" className="font-medium text-cyan-300 hover:text-cyan-200">
+          <Link href="/register" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]">
             Criar conta
           </Link>
         </p>

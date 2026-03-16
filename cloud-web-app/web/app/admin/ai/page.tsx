@@ -97,7 +97,7 @@ export default function AdminAI() {
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
+        <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
           {error}
         </div>
       )}
@@ -111,11 +111,11 @@ export default function AdminAI() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Modelo</h3>
-          <p className='text-2xl font-bold text-blue-600'>{aiSettings.model}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{aiSettings.model}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Máx. tokens</h3>
-          <p className='text-2xl font-bold text-blue-600'>{aiSettings.maxTokens}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{aiSettings.maxTokens}</p>
         </div>
       </div>
 

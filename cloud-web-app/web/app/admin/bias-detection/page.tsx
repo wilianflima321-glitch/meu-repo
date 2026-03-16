@@ -36,9 +36,9 @@ function getBiasLabel(score?: number | null) {
 
 function getBiasColor(score?: number | null) {
   if (score === null || score === undefined) return 'bg-gray-200 text-[var(--aethel-text-secondary)]';
-  if (score >= 0.7) return 'bg-rose-500/15 text-rose-300';
-  if (score >= 0.4) return 'bg-amber-500/15 text-amber-300';
-  return 'bg-emerald-500/15 text-emerald-300';
+  if (score >= 0.7) return 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]';
+  if (score >= 0.4) return 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]';
+  return 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]';
 }
 
 export default function BiasDetectionPage() {
@@ -236,7 +236,7 @@ export default function BiasDetectionPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center">
             <h3 className="text-sm font-semibold">Total de auditorias</h3>
-            <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-primary)]">{stats.total}</p>
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Viés alto</h3>
@@ -244,7 +244,7 @@ export default function BiasDetectionPage() {
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Viés médio</h3>
-            <p className="text-2xl font-bold text-yellow-600">{stats.mediumBias}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-warning)]">{stats.mediumBias}</p>
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Viés baixo</h3>
@@ -347,13 +347,13 @@ export default function BiasDetectionPage() {
                 <div className="mt-3 flex items-center gap-2">
                   <button
                     onClick={() => handleModerationAction(item.id, 'approve')}
-                    className="px-3 py-1 rounded text-xs bg-emerald-500/15 text-emerald-300"
+                    className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]"
                   >
                     Aprovar
                   </button>
                   <button
                     onClick={() => handleModerationAction(item.id, 'reject')}
-                    className="px-3 py-1 rounded text-xs bg-rose-500/15 text-rose-300"
+                    className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]"
                   >
                     Rejeitar
                   </button>

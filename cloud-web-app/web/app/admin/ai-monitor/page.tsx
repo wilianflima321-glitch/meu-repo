@@ -76,18 +76,18 @@ function MetricCard({
     <div
       className={`
         p-4 rounded-xl border
-        ${alert ? 'bg-[var(--aethel-error)]/10 border-red-500/30' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] border-[var(--aethel-border-secondary)]'}
+        ${alert ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] border-[var(--aethel-border-secondary)]'}
       `}
     >
       <div className="flex items-center justify-between mb-2">
-        <Icon className={`w-5 h-5 ${alert ? 'text-red-400' : 'text-[var(--aethel-text-secondary)]'}`} />
+        <Icon className={`w-5 h-5 ${alert ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-secondary)]'}`} />
         {trend && (
-          <span className={trend === 'up' ? 'text-red-400' : 'text-[var(--aethel-success)]'}>
+          <span className={trend === 'up' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-success)]'}>
             {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
           </span>
         )}
       </div>
-      <p className={`text-2xl font-bold ${alert ? 'text-red-400' : 'text-[var(--aethel-text-primary)]'}`}>{value}</p>
+      <p className={`text-2xl font-bold ${alert ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-primary)]'}`}>{value}</p>
       <p className="text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
       {subValue && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subValue}</p>}
     </div>
@@ -107,16 +107,16 @@ function AICallRow({
 
   const statusColors = {
     success: 'text-[var(--aethel-success)]',
-    error: 'text-red-400',
-    timeout: 'text-amber-400',
+    error: 'text-[var(--aethel-error)]',
+    timeout: 'text-[var(--aethel-warning)]',
   } as const;
 
   const modelColors: Record<string, string> = {
     'gpt-4o': 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success)]',
-    'gpt-4o-mini': 'bg-[var(--aethel-primary)]/20 text-blue-400',
-    'gpt-4-turbo': 'bg-[var(--aethel-primary)]/20 text-blue-400',
-    'claude-3-5-sonnet': 'bg-amber-500/20 text-amber-400',
-    'claude-3-5-haiku': 'bg-cyan-500/20 text-[var(--aethel-info)]',
+    'gpt-4o-mini': 'bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)]',
+    'gpt-4-turbo': 'bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)]',
+    'claude-3-5-sonnet': 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]',
+    'claude-3-5-haiku': 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]',
   };
 
   return (
@@ -141,7 +141,7 @@ function AICallRow({
         <span className="text-xs text-[var(--aethel-text-tertiary)] w-24 text-right">{call.inputTokens + call.outputTokens} tokens</span>
         <span className="text-xs text-[var(--aethel-text-tertiary)] w-20 text-right">{call.latencyMs}ms</span>
 
-        <span className={`text-xs font-mono w-16 text-right ${call.cost > 0.01 ? 'text-amber-400' : 'text-[var(--aethel-text-tertiary)]'}`}>
+        <span className={`text-xs font-mono w-16 text-right ${call.cost > 0.01 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-text-tertiary)]'}`}>
           ${call.cost.toFixed(4)}
         </span>
       </div>
@@ -422,7 +422,7 @@ export default function AgentMonitorPage() {
           <button
             onClick={() => void runCoreLoopDrill()}
             disabled={isRunningDrill}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-300 disabled:opacity-60"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] text-[var(--aethel-info-light)] disabled:opacity-60"
             type="button"
           >
             <Zap className="w-4 h-4" />
@@ -431,7 +431,7 @@ export default function AgentMonitorPage() {
           <button
             onClick={() => void runProductionProbe()}
             disabled={isRunningProductionProbe}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/40 text-emerald-300 disabled:opacity-60"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] text-[var(--aethel-success)] disabled:opacity-60"
             type="button"
           >
             <Zap className="w-4 h-4" />
@@ -444,8 +444,8 @@ export default function AgentMonitorPage() {
         <div
           className={`rounded-xl border p-3 text-sm ${
             operatorNotice.tone === 'success'
-              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
-              : 'border-rose-500/40 bg-rose-500/10 text-rose-100'
+              ? 'border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success-light)]'
+              : 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
           }`}
         >
           {operatorNotice.text}
@@ -458,15 +458,15 @@ export default function AgentMonitorPage() {
             flex items-center justify-between p-4 rounded-xl border
             ${
               emergencyState.level === 'shutdown'
-                ? 'bg-[var(--aethel-error)]/20 border-red-500/50'
+                ? 'bg-[var(--aethel-error)]/20 border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)]'
                 : emergencyState.level === 'critical'
                   ? 'bg-orange-500/20 border-orange-500/50'
-                  : 'bg-amber-500/20 border-amber-500/50'
+                  : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]'
             }
           `}
         >
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
+            <AlertTriangle className="w-5 h-5 text-[var(--aethel-error)]" />
             <div>
               <p className="font-medium text-[var(--aethel-text-primary)]">Modo de emergencia: {String(emergencyState.level).toUpperCase()}</p>
               <p className="text-sm text-[var(--aethel-text-secondary)]">{emergencyState.reason}</p>
@@ -494,7 +494,7 @@ export default function AgentMonitorPage() {
             <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Core Loop Readiness (L4 gate)</h3>
             <span
               className={`text-xs px-2 py-1 rounded ${
-                readiness.promotionEligible ? 'bg-[var(--aethel-success)]/20 text-green-300' : 'bg-amber-500/20 text-amber-300'
+                readiness.promotionEligible ? 'bg-[var(--aethel-success)]/20 text-green-300' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
               }`}
             >
               {readiness.promotionEligible ? 'PROMOTION ELIGIBLE' : 'PARTIAL'}
@@ -542,8 +542,8 @@ export default function AgentMonitorPage() {
                 <span
                   className={`rounded px-2 py-1 ${
                     readiness.runtimeReadiness.probeReady
-                      ? 'bg-emerald-500/20 text-emerald-200'
-                      : 'bg-amber-500/20 text-amber-200'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+                      : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
                   }`}
                 >
                   {readiness.runtimeReadiness.probeReady ? 'PROBE READY' : 'BLOCKED'}
@@ -597,7 +597,7 @@ export default function AgentMonitorPage() {
                 authReady={String(readiness.runtimeReadiness.authReady)} | probeReady={String(readiness.runtimeReadiness.probeReady)}
               </p>
               {readiness.runtimeReadiness.blockers.length > 0 && (
-                <ul className="mt-2 list-disc pl-4 space-y-1 text-amber-100">
+                <ul className="mt-2 list-disc pl-4 space-y-1 text-[var(--aethel-warning-light)]">
                   {readiness.runtimeReadiness.blockers.map((blocker) => (
                     <li key={blocker}>{blocker}</li>
                   ))}
@@ -616,7 +616,7 @@ export default function AgentMonitorPage() {
                       {readiness.runtimeReadiness.recommendedCommands.map((command) => (
                         <code
                           key={command}
-                          className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-2 py-1 text-[11px] text-cyan-300"
+                          className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-2 py-1 text-[11px] text-[var(--aethel-info-light)]"
                         >
                           {command}
                         </code>
@@ -638,9 +638,9 @@ export default function AgentMonitorPage() {
                 </div>
               )}
               {readiness.rehearsalMetrics && (
-                <div className="rounded border border-cyan-500/30 bg-cyan-500/10 p-3">
-                  <p className="text-cyan-100">Rehearsal samples</p>
-                  <p className="text-cyan-200 mt-1">
+                <div className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-3">
+                  <p className="text-[var(--aethel-info-light)]">Rehearsal samples</p>
+                  <p className="text-[var(--aethel-info-light)] mt-1">
                     sample={readiness.rehearsalMetrics.sampleSize} | success={(readiness.rehearsalMetrics.applySuccessRate * 100).toFixed(1)}%
                   </p>
                 </div>
@@ -648,7 +648,7 @@ export default function AgentMonitorPage() {
             </div>
           )}
           {readiness.blockers && readiness.blockers.length > 0 && (
-            <div className="mt-3 rounded border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-100">
+            <div className="mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-3 text-xs text-[var(--aethel-warning-light)]">
               <p className="font-medium mb-1">Promotion blockers</p>
               <ul className="list-disc pl-4 space-y-1">
                 {readiness.blockers.map((blocker) => (
@@ -680,8 +680,8 @@ export default function AgentMonitorPage() {
             <span
               className={`rounded px-2 py-1 text-xs ${
                 promotionData.promotionEligible
-                  ? 'bg-emerald-500/20 text-emerald-200'
-                  : 'bg-rose-500/20 text-rose-200'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+                  : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
               }`}
             >
               {promotionData.promotionEligible ? 'ELIGIBLE' : 'BLOCKED'}
@@ -695,15 +695,15 @@ export default function AgentMonitorPage() {
                 sample={promotionData.production.sampleSize} | success={(promotionData.production.applySuccessRate * 100).toFixed(1)}% | regression={(promotionData.production.regressionRate * 100).toFixed(1)}%
               </p>
             </div>
-            <div className="rounded border border-cyan-500/30 bg-cyan-500/10 p-3">
-              <p className="text-cyan-100">Rehearsal</p>
-              <p className="text-cyan-200 mt-1">
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-3">
+              <p className="text-[var(--aethel-info-light)]">Rehearsal</p>
+              <p className="text-[var(--aethel-info-light)] mt-1">
                 sample={promotionData.rehearsal.sampleSize} | success={(promotionData.rehearsal.applySuccessRate * 100).toFixed(1)}% | regression={(promotionData.rehearsal.regressionRate * 100).toFixed(1)}%
               </p>
             </div>
           </div>
           {promotionData.blockers.length > 0 && (
-            <ul className="mt-3 list-disc pl-4 text-xs text-rose-100 space-y-1">
+            <ul className="mt-3 list-disc pl-4 text-xs text-[var(--aethel-error-light)] space-y-1">
               {promotionData.blockers.map((blocker) => (
                 <li key={blocker}>{blocker}</li>
               ))}
@@ -752,9 +752,9 @@ export default function AgentMonitorPage() {
                 </div>
               )}
               {coreLoopLatest.rehearsalMetrics && (
-                <div className="rounded border border-cyan-500/30 bg-cyan-500/10 p-3">
-                  <p className="text-cyan-100">Rehearsal samples</p>
-                  <p className="text-cyan-200 mt-1">
+                <div className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-3">
+                  <p className="text-[var(--aethel-info-light)]">Rehearsal samples</p>
+                  <p className="text-[var(--aethel-info-light)] mt-1">
                     sample={coreLoopLatest.rehearsalMetrics.sampleSize} | success={(coreLoopLatest.rehearsalMetrics.applySuccessRate * 100).toFixed(1)}%
                   </p>
                 </div>
@@ -776,13 +776,13 @@ export default function AgentMonitorPage() {
             Last event: {coreLoopLatest.lastEventAt ? new Date(coreLoopLatest.lastEventAt).toLocaleString() : 'none'}
           </div>
           {coreLoopLatest.metrics.sampleSize === 0 && (
-            <div className="mt-3 rounded border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-100">
+            <div className="mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-3 text-xs text-[var(--aethel-warning-light)]">
               No apply-run evidence in this window. L4 promotion remains evidence-blocked.
             </div>
           )}
           {coreLoopLatest.metrics.sampleSize === 0 &&
             (coreLoopLatest.rehearsalMetrics?.sampleSize || 0) > 0 && (
-              <div className="mt-3 rounded border border-cyan-500/30 bg-cyan-500/10 p-3 text-xs text-cyan-100">
+              <div className="mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-3 text-xs text-[var(--aethel-info-light)]">
                 Rehearsal evidence exists, but production evidence is still zero. Promotion remains blocked by policy.
               </div>
             )}
@@ -837,9 +837,9 @@ export default function AgentMonitorPage() {
                     <span
                       className={`mr-2 inline-flex rounded px-1.5 py-0.5 text-[10px] ${
                         recommendation.severity === 'critical'
-                          ? 'bg-rose-500/20 text-rose-200'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
                           : recommendation.severity === 'warning'
-                            ? 'bg-amber-500/20 text-amber-200'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
                             : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >
@@ -876,8 +876,8 @@ export default function AgentMonitorPage() {
             <span
               className={`rounded px-2 py-1 text-xs ${
                 ledgerIntegrity.integrityOk
-                  ? 'bg-emerald-500/20 text-emerald-200'
-                  : 'bg-rose-500/20 text-rose-200'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+                  : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
               }`}
             >
               {ledgerIntegrity.integrityOk ? 'OK' : 'ISSUES'}
@@ -906,7 +906,7 @@ export default function AgentMonitorPage() {
             </div>
           </div>
           {ledgerIntegrity.report.invalidRows > 0 && (
-            <div className="mt-3 rounded border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-100">
+            <div className="mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-3 text-xs text-[var(--aethel-error-light)]">
               <p className="font-medium mb-2">First integrity issues</p>
               <ul className="space-y-1">
                 {ledgerIntegrity.report.issues.slice(0, 8).map((issue) => (

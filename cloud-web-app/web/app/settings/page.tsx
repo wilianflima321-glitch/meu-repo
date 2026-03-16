@@ -99,7 +99,7 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`rounded-md border px-3 py-2 text-left transition ${
                       isActive
-                        ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200'
+                        ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
                         : 'border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
                     }`}
                   >
@@ -191,7 +191,7 @@ export default function SettingsPage() {
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-3">
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">Providers configurados</p>
-                      <p className="mt-1 text-xl font-semibold text-emerald-300">{configuredProviders.length}</p>
+                      <p className="mt-1 text-xl font-semibold text-[var(--aethel-success)]">{configuredProviders.length}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {configuredProviders.length === 0 && (
                           <span className="aethel-state aethel-state-empty text-xs">Nenhum provider configurado.</span>
@@ -199,7 +199,7 @@ export default function SettingsPage() {
                         {configuredProviders.map((provider) => (
                           <span
                             key={provider}
-                            className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200"
+                            className="rounded border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-success-light)]"
                           >
                             {provider}
                           </span>
@@ -209,13 +209,13 @@ export default function SettingsPage() {
 
                     <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-3">
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">Providers pendentes</p>
-                      <p className="mt-1 text-xl font-semibold text-amber-300">{missingProviders.length}</p>
+                      <p className="mt-1 text-xl font-semibold text-[var(--aethel-warning)]">{missingProviders.length}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {missingProviders.length === 0 && <span className="aethel-state aethel-state-empty text-xs">Nenhum pendente.</span>}
                         {missingProviders.map((provider) => (
                           <span
                             key={provider}
-                            className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[11px] text-amber-200"
+                            className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-warning-light)]"
                           >
                             {provider}
                           </span>
@@ -241,7 +241,7 @@ export default function SettingsPage() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
                     href={providerStatus?.setupUrl || '/settings?tab=api'}
-                    className="rounded border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-200 hover:bg-cyan-500/20"
+                    className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
                   >
                     Abrir setup guiado
                   </Link>

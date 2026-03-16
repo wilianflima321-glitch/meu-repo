@@ -126,7 +126,7 @@ export default function AdminDashboardPro() {
                   <div className="flex items-end justify-between">
                     <p className="text-2xl font-bold text-zinc-100">{metric.value}</p>
                     <div className={`flex items-center gap-1 text-xs font-bold ${
-                      metric.status === 'up' ? 'text-emerald-400' :
+                      metric.status === 'up' ? 'text-[var(--aethel-success)]' :
                       metric.status === 'down' ? 'text-rose-400' : 'text-zinc-400'
                     }`}>
                       <TrendingUp size={14} />
@@ -140,7 +140,7 @@ export default function AdminDashboardPro() {
             {/* System Status */}
             <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Activity size={20} className="text-blue-400" />
+                <Activity size={20} className="text-[var(--aethel-primary)]" />
                 System Status
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -153,9 +153,9 @@ export default function AdminDashboardPro() {
                   <div key={idx} className="p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-xs font-bold text-zinc-400 uppercase">{service.label}</p>
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                      <div className="w-2 h-2 rounded-full bg-[var(--aethel-success)] shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
                     </div>
-                    <p className="text-xs text-emerald-400 font-bold">{service.status}</p>
+                    <p className="text-xs text-[var(--aethel-success)] font-bold">{service.status}</p>
                   </div>
                 ))}
               </div>
@@ -168,17 +168,17 @@ export default function AdminDashboardPro() {
           <div className="space-y-6">
             <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <CreditCard size={20} className="text-amber-400" />
+                <CreditCard size={20} className="text-[var(--aethel-warning)]" />
                 Billing Overview
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-zinc-800/50 rounded-lg">
                   <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Monthly Revenue</p>
-                  <p className="text-2xl font-bold text-amber-400">$47,234</p>
+                  <p className="text-2xl font-bold text-[var(--aethel-warning)]">$47,234</p>
                 </div>
                 <div className="p-4 bg-zinc-800/50 rounded-lg">
                   <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Active Subscriptions</p>
-                  <p className="text-2xl font-bold text-emerald-400">1,847</p>
+                  <p className="text-2xl font-bold text-[var(--aethel-success)]">1,847</p>
                 </div>
                 <div className="p-4 bg-zinc-800/50 rounded-lg">
                   <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Churn Rate</p>
@@ -194,7 +194,7 @@ export default function AdminDashboardPro() {
           <div className="space-y-6">
             <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Shield size={20} className="text-blue-400" />
+                <Shield size={20} className="text-[var(--aethel-primary)]" />
                 Security Events
               </h2>
               <div className="space-y-3">
@@ -202,9 +202,9 @@ export default function AdminDashboardPro() {
                   <div key={event.id} className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-zinc-600 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        {event.status === 'success' && <CheckCircle size={16} className="text-emerald-400" />}
+                        {event.status === 'success' && <CheckCircle size={16} className="text-[var(--aethel-success)]" />}
                         {event.status === 'failed' && <XCircle size={16} className="text-rose-400" />}
-                        {event.status === 'suspicious' && <AlertTriangle size={16} className="text-amber-400" />}
+                        {event.status === 'suspicious' && <AlertTriangle size={16} className="text-[var(--aethel-warning)]" />}
                         <div>
                           <p className="text-sm font-bold text-zinc-200 capitalize">{event.type.replace('_', ' ')}</p>
                           <p className="text-xs text-zinc-500">{event.user}</p>
@@ -224,15 +224,15 @@ export default function AdminDashboardPro() {
           <div className="space-y-6">
             <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Zap size={20} className="text-blue-400" />
+                <Zap size={20} className="text-[var(--aethel-primary)]" />
                 Operations
               </h2>
               {opsNotice && (
                 <div
                   className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
                     opsNotice.type === 'success'
-                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
-                      : 'border-rose-500/40 bg-rose-500/10 text-rose-200'
+                      ? 'border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success-light)]'
+                      : 'border-rose-500/40 bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
                   }`}
                   role="status"
                   aria-live="polite"
@@ -246,7 +246,7 @@ export default function AdminDashboardPro() {
                   disabled={runningAction !== null}
                   className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Database Backup</p>
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Database Backup</p>
                   <p className="text-xs text-zinc-600 mt-1">Last backup: 2 hours ago</p>
                 </button>
                 <button
@@ -254,7 +254,7 @@ export default function AdminDashboardPro() {
                   disabled={runningAction !== null}
                   className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Cache Flush</p>
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Cache Flush</p>
                   <p className="text-xs text-zinc-600 mt-1">Clear all cached data</p>
                 </button>
                 <button
@@ -262,7 +262,7 @@ export default function AdminDashboardPro() {
                   disabled={runningAction !== null}
                   className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Logs Export</p>
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Logs Export</p>
                   <p className="text-xs text-zinc-600 mt-1">Download system logs</p>
                 </button>
                 <button
@@ -270,7 +270,7 @@ export default function AdminDashboardPro() {
                   disabled={runningAction !== null}
                   className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">Feature Flags</p>
+                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Feature Flags</p>
                   <p className="text-xs text-zinc-600 mt-1">Manage feature toggles</p>
                 </button>
               </div>

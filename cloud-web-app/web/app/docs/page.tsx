@@ -10,8 +10,8 @@ const sections = [
     title: 'Guia de inicio',
     description: 'Comece a usar o Aethel com passos diretos.',
     icon: Rocket,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
+    color: 'text-[var(--aethel-success)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]',
     items: [
       { title: 'Instalacao', href: '/docs/getting-started/installation' },
       { title: 'Primeiro projeto', href: '/docs/getting-started/first-project' },
@@ -23,7 +23,7 @@ const sections = [
     title: 'API Reference',
     description: 'Documentacao tecnica da API.',
     icon: Code2,
-    color: 'text-blue-400',
+    color: 'text-[var(--aethel-primary-light)]',
     bgColor: 'bg-[var(--aethel-primary)]/10',
     items: [
       { title: 'Autenticacao', href: '/docs/api/authentication' },
@@ -37,7 +37,7 @@ const sections = [
     description: 'Biblioteca UI e padroes do studio.',
     icon: Layers,
     color: 'text-[var(--aethel-info)]',
-    bgColor: 'bg-cyan-500/10',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]',
     items: [
       { title: 'Buttons', href: '/docs/components/button' },
       { title: 'Inputs', href: '/docs/components/input' },
@@ -49,8 +49,8 @@ const sections = [
     title: 'CLI',
     description: 'Ferramentas de linha de comando.',
     icon: Terminal,
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/10',
+    color: 'text-[var(--aethel-warning)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
     items: [
       { title: 'Instalacao', href: '/docs/cli/installation' },
       { title: 'Comandos', href: '/docs/cli/commands' },
@@ -63,7 +63,7 @@ const sections = [
     description: 'Conecte com ferramentas externas.',
     icon: Puzzle,
     color: 'text-[var(--aethel-info)]',
-    bgColor: 'bg-cyan-500/10',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]',
     items: [
       { title: 'GitHub', href: '/docs/integrations/github' },
       { title: 'VS Code', href: '/docs/integrations/vscode' },
@@ -75,7 +75,7 @@ const sections = [
     title: 'Guias avancados',
     description: 'Operacao, seguranca e escala.',
     icon: Book,
-    color: 'text-blue-400',
+    color: 'text-[var(--aethel-primary-light)]',
     bgColor: 'bg-[var(--aethel-primary)]/10',
     items: [
       { title: 'Performance', href: '/docs/guides/performance' },
@@ -99,14 +99,14 @@ export default function DocsPage() {
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-cyan-600/[0.05] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
 
       <main className="relative z-10">
         <section className="mx-auto max-w-5xl px-6 pt-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
             Documentacao oficial
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Como podemos ajudar?</h1>
@@ -120,7 +120,7 @@ export default function DocsPage() {
               <input
                 type="text"
                 placeholder="Buscar artigos, guias, API..."
-                className="h-14 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] pl-12 pr-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-colors focus:border-blue-500/60 focus:outline-none"
+                className="h-14 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] pl-12 pr-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-colors focus:border-[var(--aethel-primary)]/60 focus:outline-none"
               />
             </div>
           </div>
@@ -143,7 +143,7 @@ export default function DocsPage() {
                     <li key={item.title}>
                       <Link
                         href={item.href}
-                        className="flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:text-blue-300"
+                        className="flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:text-[var(--aethel-primary-light)]"
                       >
                         <ChevronRight className="h-4 w-4 text-[var(--aethel-text-tertiary)]" />
                         {item.title}
@@ -166,7 +166,7 @@ export default function DocsPage() {
               <Link
                 key={article.title}
                 href="#"
-                className="flex items-center justify-between rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-blue-500/40"
+                className="flex items-center justify-between rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]"
               >
                 <div className="flex items-center gap-3">
                   <Book className="h-5 w-5 text-[var(--aethel-text-tertiary)]" />
@@ -185,7 +185,7 @@ export default function DocsPage() {
           <div className="grid gap-6 md:grid-cols-3">
             <Link
               href="/docs/changelog"
-              className="rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-600/20 to-cyan-600/10 p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-blue-500/50"
+              className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-gradient-to-br from-blue-600/20 to-cyan-600/10 p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-[var(--aethel-primary)]/50"
             >
               <h3 className="text-lg font-semibold">Changelog</h3>
               <p className="mt-2 text-sm text-[var(--aethel-text-primary)]">
@@ -194,7 +194,7 @@ export default function DocsPage() {
             </Link>
             <Link
               href="/docs/support"
-              className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-600/20 to-teal-600/10 p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-emerald-500/50"
+              className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-gradient-to-br from-emerald-600/20 to-teal-600/10 p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-success)_50%,transparent)]"
             >
               <h3 className="text-lg font-semibold">Suporte</h3>
               <p className="mt-2 text-sm text-[var(--aethel-text-primary)]">
@@ -203,7 +203,7 @@ export default function DocsPage() {
             </Link>
             <Link
               href="/docs/community"
-              className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-600/20 to-orange-600/10 p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-amber-500/50"
+              className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-gradient-to-br from-amber-600/20 to-orange-600/10 p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]"
             >
               <h3 className="text-lg font-semibold">Comunidade</h3>
               <p className="mt-2 text-sm text-[var(--aethel-text-primary)]">

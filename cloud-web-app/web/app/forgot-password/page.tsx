@@ -52,8 +52,8 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8">
           {isSuccess ? (
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
-                <CheckCircle className="h-8 w-8 text-emerald-400" />
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
+                <CheckCircle className="h-8 w-8 text-[var(--aethel-success)]" />
               </div>
               <h1 className="text-2xl font-bold">Verifique seu email</h1>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
@@ -72,14 +72,14 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-                  <Mail className="h-8 w-8 text-blue-300" />
+                  <Mail className="h-8 w-8 text-[var(--aethel-primary-light)]" />
                 </div>
                 <h1 className="text-2xl font-bold">Esqueceu a senha?</h1>
                 <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Vamos enviar as instrucoes para redefinir sua senha.</p>
               </div>
 
               {error && (
-                <div className="rounded-xl border border-red-500/40 bg-[var(--aethel-error)]/10 p-3 text-sm text-red-200">
+                <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
                   {error}
                 </div>
               )}
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   required
-                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
+                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]/60"
                 />
               </div>
 

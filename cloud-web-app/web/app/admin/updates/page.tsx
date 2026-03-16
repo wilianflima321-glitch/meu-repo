@@ -95,7 +95,7 @@ export default function Updates() {
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
+        <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
           {error}
         </div>
       )}
@@ -103,7 +103,7 @@ export default function Updates() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-2 md:grid-cols-4 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-blue-600'>{data?.summary.total ?? 0}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{data?.summary.total ?? 0}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Aprovadas</h3>
@@ -111,7 +111,7 @@ export default function Updates() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Revisão</h3>
-          <p className='text-2xl font-bold text-yellow-600'>{data?.summary.review ?? 0}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{data?.summary.review ?? 0}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Bloqueadas</h3>
@@ -170,10 +170,10 @@ export default function Updates() {
                   <td className='p-2'>
                     <span className={`px-2 py-1 rounded text-xs ${
                       item.status === 'approved'
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
                         : item.status === 'review'
-                        ? 'bg-amber-500/15 text-amber-300'
-                        : 'bg-rose-500/15 text-rose-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+                        : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                     }`}>
                       {statusLabels[item.status] ?? item.status}
                     </span>

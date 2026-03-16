@@ -77,7 +77,7 @@ export default function AdminMarketplace() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-blue-600'>{summary.total}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{summary.total}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Pagos</h3>

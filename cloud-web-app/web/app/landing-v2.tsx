@@ -172,7 +172,7 @@ export default function LandingPageV2() {
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/2 top-0 h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--aethel-primary-dark)]/[0.07] blur-[180px]" />
         <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[150px]" />
-        <div className="absolute bottom-1/3 left-0 h-[400px] w-[400px] rounded-full bg-cyan-600/[0.04] blur-[120px]" />
+        <div className="absolute bottom-1/3 left-0 h-[400px] w-[400px] rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_4%,transparent)] blur-[120px]" />
       </div>
 
       <main id="landing-mission" className="relative z-10">
@@ -181,8 +181,8 @@ export default function LandingPageV2() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_0.8fr]">
             <div>
               {/* Badge */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[13px] font-medium text-blue-300">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[13px] font-medium text-[var(--aethel-primary-light)]">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--aethel-primary-light)] animate-pulse" />
                 Multi-agent studio OS
               </div>
 
@@ -270,7 +270,7 @@ export default function LandingPageV2() {
                   <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Honestidade tecnica</p>
                   <h2 className="mt-1 text-lg font-bold text-[var(--aethel-text-primary)]">Aethel agora</h2>
                 </div>
-                <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-xs font-medium text-[var(--aethel-success)]">
                   Apps = L4 target
                 </span>
               </div>
@@ -284,7 +284,7 @@ export default function LandingPageV2() {
                   'Preview canonico unificado',
                 ].map((claim) => (
                   <div key={claim} className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-3">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 text-xs">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] text-xs">
                       <Codicon name="check" />
                     </span>
                     <span className="text-sm text-[var(--aethel-text-secondary)]">{claim}</span>
@@ -294,8 +294,8 @@ export default function LandingPageV2() {
 
               {/* Partial / Frozen */}
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-400">Parcial</p>
+                <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_6%,transparent)] p-3.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-warning)]">Parcial</p>
                   <p className="mt-1.5 text-xs leading-relaxed text-[var(--aethel-text-secondary)]">
                     Preview sandbox, billing, mobile IDE, production evidence.
                   </p>
@@ -326,7 +326,7 @@ export default function LandingPageV2() {
         {/* Features grid */}
         <section className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-400">Diferenciais</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">Diferenciais</p>
             <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)] sm:text-4xl">
               O que torna Aethel diferente
             </h2>
@@ -342,7 +342,7 @@ export default function LandingPageV2() {
                 className="group relative rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-6 transition-all duration-300 hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
               >
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400 transition-colors group-hover:bg-[var(--aethel-primary)]/15">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-[var(--aethel-primary-light)] transition-colors group-hover:bg-[var(--aethel-primary)]/15">
                     <Codicon name={f.icon} />
                   </div>
                   <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
@@ -415,7 +415,7 @@ export default function LandingPageV2() {
               <thead>
                 <tr className="border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)]">
                   <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Feature</th>
-                  <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-blue-400">Aethel</th>
+                  <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-[var(--aethel-primary-light)]">Aethel</th>
                   <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Outros IDEs AI</th>
                 </tr>
               </thead>
@@ -425,18 +425,18 @@ export default function LandingPageV2() {
                     <td className="px-5 py-3.5 text-sm text-[var(--aethel-text-secondary)]">{row.feature}</td>
                     <td className="px-5 py-3.5 text-center">
                       {row.aethel === true ? (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 text-xs"><Codicon name="check" /></span>
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] text-xs"><Codicon name="check" /></span>
                       ) : row.aethel === 'partial' ? (
-                        <span className="text-xs font-medium text-amber-400">Parcial</span>
+                        <span className="text-xs font-medium text-[var(--aethel-warning)]">Parcial</span>
                       ) : (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--aethel-error)]/10 text-red-400 text-xs"><Codicon name="close" /></span>
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--aethel-error)]/10 text-[var(--aethel-error)] text-xs"><Codicon name="close" /></span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 text-center">
                       {row.others === true ? (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 text-xs"><Codicon name="check" /></span>
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success)] text-xs"><Codicon name="check" /></span>
                       ) : (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--aethel-error)]/10 text-red-400 text-xs"><Codicon name="close" /></span>
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--aethel-error)]/10 text-[var(--aethel-error)] text-xs"><Codicon name="close" /></span>
                       )}
                     </td>
                   </tr>

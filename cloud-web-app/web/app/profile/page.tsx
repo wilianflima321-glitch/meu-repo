@@ -90,11 +90,11 @@ function SettingRow({
   danger?: boolean
 }) {
   return (
-    <div className={`flex items-center justify-between py-3 border-b border-[var(--aethel-border-secondary)]/50 last:border-0 ${danger ? 'text-red-400' : ''}`}>
+    <div className={`flex items-center justify-between py-3 border-b border-[var(--aethel-border-secondary)]/50 last:border-0 ${danger ? 'text-[var(--aethel-error)]' : ''}`}>
       <div className="flex items-center gap-3">
         <Icon className="w-5 h-5 text-[var(--aethel-text-secondary)]" />
         <div>
-          <div className={`text-sm font-medium ${danger ? 'text-red-400' : 'text-[var(--aethel-text-primary)]'}`}>{label}</div>
+          <div className={`text-sm font-medium ${danger ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-primary)]'}`}>{label}</div>
           {value && <div className="text-xs text-[var(--aethel-text-tertiary)]">{value}</div>}
         </div>
       </div>
@@ -288,7 +288,7 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <StudioGlobalNav title="Perfil" subtitle="Conta, seguranca e preferencias do workspace." />
         <div className="flex items-center justify-center px-6 py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--aethel-primary)]"></div>
         </div>
       </div>
     )
@@ -348,7 +348,7 @@ export default function ProfilePage() {
                     <button onClick={saveName} className="text-[var(--aethel-success)] hover:text-green-300">
                       <Check className="w-5 h-5" />
                     </button>
-                    <button onClick={() => setEditingName(false)} className="text-red-400 hover:text-red-300">
+                    <button onClick={() => setEditingName(false)} className="text-[var(--aethel-error)] hover:text-[var(--aethel-error-light)]">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
@@ -366,7 +366,7 @@ export default function ProfilePage() {
               </div>
               <p className="text-[var(--aethel-text-secondary)]">{profile.email}</p>
               <div className="flex items-center gap-4 mt-2">
-                <span className="px-2 py-1 text-xs rounded-full bg-[var(--aethel-primary)]/20 text-blue-400 border border-blue-500/30">
+                <span className="px-2 py-1 text-xs rounded-full bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]">
                   {planLabels[profile.plan] ?? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 </span>
                 {profile.emailVerified && (
@@ -402,7 +402,7 @@ export default function ProfilePage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 border-b-2 transition-colors ${
                   activeTab === tab.id 
-                    ? 'border-blue-500 text-[var(--aethel-text-primary)]' 
+                    ? 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' 
                     : 'border-transparent text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
@@ -428,7 +428,7 @@ export default function ProfilePage() {
                 action={
                   <button 
                     onClick={() => { setTempName(profile.name); setEditingName(true); }}
-                    className="text-sm text-blue-400 hover:text-blue-300"
+                    className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]"
                   >
                     Editar
                   </button>
@@ -439,7 +439,7 @@ export default function ProfilePage() {
                 label="E-mail" 
                 value={profile.email}
                 action={
-                  <button className="text-sm text-blue-400 hover:text-blue-300">
+                  <button className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]">
                     Alterar
                   </button>
                 }
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                 action={
                   <button 
                     onClick={() => router.push('/billing')}
-                    className="px-3 py-1 text-sm bg-[var(--aethel-primary-dark)] hover:bg-blue-700 rounded-lg transition-colors"
+                    className="px-3 py-1 text-sm bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary-dark)] rounded-lg transition-colors"
                   >
                     Atualizar plano
                   </button>
@@ -482,7 +482,7 @@ export default function ProfilePage() {
                 label="Senha" 
                 value="Última alteração há 30 dias"
                 action={
-                  <button className="text-sm text-blue-400 hover:text-blue-300">
+                  <button className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]">
                     Alterar senha
                   </button>
                 }
@@ -506,7 +506,7 @@ export default function ProfilePage() {
                     disabled={twoFactorLoading}
                     className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                       profile.twoFactorEnabled 
-                        ? 'bg-[var(--aethel-error-dark)] hover:bg-red-700' 
+                        ? 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error-dark)]' 
                         : 'bg-green-600 hover:bg-green-700'
                     }`}
                   >
@@ -525,7 +525,7 @@ export default function ProfilePage() {
                 action={
                   <button 
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-3 py-1 text-sm bg-[var(--aethel-error-dark)] hover:bg-red-700 rounded-lg transition-colors"
+                    className="px-3 py-1 text-sm bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error-dark)] rounded-lg transition-colors"
                   >
                     Excluir
                   </button>
@@ -647,7 +647,7 @@ export default function ProfilePage() {
           <div className="bg-[var(--aethel-surface-tertiary)] rounded-xl p-6 max-w-lg w-full mx-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-[var(--aethel-primary)]/20 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-blue-400" />
+                <Shield className="w-5 h-5 text-[var(--aethel-primary-light)]" />
               </div>
               <h3 className="text-xl font-bold text-[var(--aethel-text-primary)]">
                 {twoFactorModal === 'setup' ? 'Ativar 2FA' : 'Desativar 2FA'}
@@ -655,7 +655,7 @@ export default function ProfilePage() {
             </div>
 
             {twoFactorError && (
-              <div className="mb-4 rounded-lg border border-red-500/40 bg-[var(--aethel-error)]/10 p-3 text-sm text-red-300">
+              <div className="mb-4 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
                 {twoFactorError}
               </div>
             )}
@@ -770,7 +770,7 @@ export default function ProfilePage() {
               </button>
               <button
                 onClick={deleteAccount}
-                className="flex-1 px-4 py-2 bg-[var(--aethel-error-dark)] hover:bg-red-700 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error-dark)] rounded-lg transition-colors"
               >
                 Excluir minha conta
               </button>

@@ -85,7 +85,7 @@ function VerifyEmailContent() {
         {isLoading ? (
           <div className={frameClass}>
             <div className="text-center">
-              <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-blue-400" />
+              <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-[var(--aethel-primary-light)]" />
               <h1 className="text-xl font-semibold">Verificando email</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Validando seu link de acesso.</p>
             </div>
@@ -93,8 +93,8 @@ function VerifyEmailContent() {
         ) : isVerified ? (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10">
-                <CheckCircle className="h-7 w-7 text-emerald-400" />
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]">
+                <CheckCircle className="h-7 w-7 text-[var(--aethel-success)]" />
               </div>
               <h1 className="text-xl font-semibold">Email verificado</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Conta validada. Redirecionando para o painel.</p>
@@ -110,7 +110,7 @@ function VerifyEmailContent() {
           <div className={frameClass}>
             <div className="text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-primary)]/10">
-                <Mail className="h-7 w-7 text-blue-400" />
+                <Mail className="h-7 w-7 text-[var(--aethel-primary-light)]" />
               </div>
               <h1 className="text-xl font-semibold">Confirme seu email</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Abra o link enviado para ativar sua conta.</p>
@@ -130,14 +130,14 @@ function VerifyEmailContent() {
                   Continuar para dashboard
                 </Link>
               </div>
-              {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
+              {error ? <p className="mt-4 text-sm text-[var(--aethel-error-light)]">{error}</p> : null}
             </div>
           </div>
         ) : (
           <div className={frameClass}>
             <div className="text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-error)]/10">
-                <XCircle className="h-7 w-7 text-red-400" />
+                <XCircle className="h-7 w-7 text-[var(--aethel-error)]" />
               </div>
               <h1 className="text-xl font-semibold">Falha na verificacao</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">{error || 'Link invalido ou expirado.'}</p>
@@ -172,7 +172,7 @@ export default function VerifyEmailPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-black">
-          <Loader2 className="h-7 w-7 animate-spin text-blue-400" />
+          <Loader2 className="h-7 w-7 animate-spin text-[var(--aethel-primary-light)]" />
         </div>
       }
     >

@@ -95,7 +95,7 @@ export default function CostOptimization() {
             <p className='text-2xl'>${dailyRevenue.toFixed(2)}</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Baseada em pagamentos confirmados</p>
           </div>
-          <div className={`p-4 rounded-lg shadow ${dailyProfit >= 0 ? 'bg-emerald-500/15' : 'bg-rose-500/15'}`}>
+          <div className={`p-4 rounded-lg shadow ${dailyProfit >= 0 ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)]'}`}>
             <h3 className='font-semibold'>Lucro (diário)</h3>
             <p className='text-2xl'>${dailyProfit.toFixed(2)}</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Margem: {metrics?.profitMargin?.toFixed(1)}%</p>
@@ -119,7 +119,7 @@ export default function CostOptimization() {
         </div>
       </div>
 
-      <div className='mt-6 p-4 bg-sky-500/15 rounded-lg'>
+      <div className='mt-6 p-4 bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] rounded-lg'>
         <h3 className='font-semibold'>Recomendações</h3>
         {metrics?.alerts?.length ? (
           <ul className='list-disc ml-5'>

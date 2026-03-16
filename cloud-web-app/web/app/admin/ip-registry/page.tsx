@@ -136,7 +136,7 @@ export default function AdminIpRegistryPage() {
         </div>
       </div>
 
-      {message && <div className="bg-green-50 border border-green-200 text-emerald-300 p-3 rounded">{message}</div>}
+      {message && <div className="bg-green-50 border border-green-200 text-[var(--aethel-success)] p-3 rounded">{message}</div>}
 
       {!data ? <div>Nenhum dado disponível.</div> : (
         <div className="grid md:grid-cols-2 gap-6">
@@ -155,7 +155,7 @@ export default function AdminIpRegistryPage() {
               {allowedList.map(ip => (
                 <li key={ip} className="flex items-center gap-2">
                   <span>{ip}</span>
-                  <button className="text-xs text-blue-600 underline" onClick={() => ingestIp(ip)}>Ingerir RAG</button>
+                  <button className="text-xs text-[var(--aethel-primary)] underline" onClick={() => ingestIp(ip)}>Ingerir RAG</button>
                 </li>
               ))}
             </ul>

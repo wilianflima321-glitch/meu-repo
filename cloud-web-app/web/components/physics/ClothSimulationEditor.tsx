@@ -202,10 +202,10 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, tool
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-3
                    [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-sky-500
+                   [&::-webkit-slider-thumb]:bg-[var(--aethel-info)]
                    [&::-webkit-slider-thumb]:rounded-full
                    [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-sky-400
+                   [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)]
                    [&::-webkit-slider-thumb]:transition-colors"
       />
     </div>
@@ -591,7 +591,7 @@ function Toolbar({
   const tools: { id: ClothToolType; icon: React.ReactNode; label: string }[] = [
     { id: 'select', icon: <Move className="w-4 h-4" />, label: 'Select' },
     { id: 'pin', icon: <Pin className="w-4 h-4" />, label: 'Pin Vertices' },
-    { id: 'unpin', icon: <Pin className="w-4 h-4 text-red-400" />, label: 'Unpin' },
+    { id: 'unpin', icon: <Pin className="w-4 h-4 text-[var(--aethel-error)]" />, label: 'Unpin' },
     { id: 'tear', icon: <Scissors className="w-4 h-4" />, label: 'Tear' },
     { id: 'move_collider', icon: <Box className="w-4 h-4" />, label: 'Move Collider' },
   ];
@@ -904,12 +904,12 @@ export default function ClothSimulationEditor({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Layers className="w-5 h-5 text-sky-400" />
+              <Layers className="w-5 h-5 text-[var(--aethel-info)]" />
               Cloth Settings
             </h2>
             <button
               onClick={handleExport}
-              className="p-1.5 rounded bg-[var(--aethel-info)] hover:bg-sky-500 transition-colors"
+              className="p-1.5 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] transition-colors"
               title="Export Configuration"
             >
               <Download className="w-4 h-4" />
@@ -917,7 +917,7 @@ export default function ClothSimulationEditor({
           </div>
           
           {/* Presets */}
-          <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-yellow-400" />}>
+          <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
               {CLOTH_PRESETS.map((preset) => (
                 <button
@@ -937,7 +937,7 @@ export default function ClothSimulationEditor({
           </CollapsibleSection>
           
           {/* Physics Parameters */}
-          <CollapsibleSection title="Physics" icon={<Settings className="w-4 h-4 text-blue-400" />}>
+          <CollapsibleSection title="Physics" icon={<Settings className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Slider
               label="Mass"
               value={config.mass}
@@ -1030,7 +1030,7 @@ export default function ClothSimulationEditor({
           </CollapsibleSection>
           
           {/* Gravity */}
-          <CollapsibleSection title="Gravity" icon={<Circle className="w-4 h-4 text-blue-400" />}>
+          <CollapsibleSection title="Gravity" icon={<Circle className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Vector3Input
               label="Gravity Vector"
               value={{ x: config.gravity.x, y: config.gravity.y, z: config.gravity.z }}
@@ -1071,7 +1071,7 @@ export default function ClothSimulationEditor({
                 key={index}
                 className={`p-2 rounded mb-1.5 cursor-pointer transition-colors ${
                   selectedCollider === index 
-                    ? 'bg-[var(--aethel-info)]/30 border border-sky-500' 
+                    ? 'bg-[var(--aethel-info)]/30 border border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]' 
                     : 'bg-[var(--aethel-surface-quaternary)]'
                 }`}
                 onClick={() => setSelectedCollider(index)}
@@ -1083,7 +1083,7 @@ export default function ClothSimulationEditor({
                       e.stopPropagation();
                       setColliders((prev) => prev.filter((_, i) => i !== index));
                     }}
-                    className="text-red-400 hover:text-red-300 text-xs"
+                    className="text-[var(--aethel-error)] hover:text-[var(--aethel-error-light)] text-xs"
                   >
                     Remove
                   </button>

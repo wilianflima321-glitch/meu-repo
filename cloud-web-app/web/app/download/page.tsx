@@ -30,7 +30,7 @@ const DownloadIcon = () => (
 )
 
 const CheckIcon = () => (
-  <svg className="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="h-5 w-5 text-[var(--aethel-success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
   </svg>
 )
@@ -107,7 +107,7 @@ export default function DownloadPage() {
 
       <main className="relative z-10">
         <section className="mx-auto max-w-5xl px-6 pt-14 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
             <DownloadIcon />
             Versao {current.version} disponivel
           </div>
@@ -132,14 +132,14 @@ export default function DownloadPage() {
                   onClick={() => setSelectedPlatform(platform)}
                   className={`flex items-center gap-3 rounded-2xl border px-5 py-4 text-left transition-all ${
                     isSelected
-                      ? 'border-blue-500/40 bg-[var(--aethel-primary)]/10 text-[var(--aethel-text-primary)]'
+                      ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[var(--aethel-primary)]/10 text-[var(--aethel-text-primary)]'
                       : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
                   }`}
                 >
                   <Icon />
                   <div>
                     <div className="font-medium">{p.name}</div>
-                    {isDetected && <div className="text-xs text-blue-300">Detectado</div>}
+                    {isDetected && <div className="text-xs text-[var(--aethel-primary-light)]">Detectado</div>}
                   </div>
                 </button>
               )
@@ -184,15 +184,15 @@ export default function DownloadPage() {
           </div>
 
           <div className="mt-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-            <a href="/downloads/checksums.txt" className="text-blue-400 hover:underline">
+            <a href="/downloads/checksums.txt" className="text-[var(--aethel-primary-light)] hover:underline">
               Verificar checksums SHA-256
             </a>
             {' ? '}
-            <a href="/downloads/RELEASE_NOTES.md" className="text-blue-400 hover:underline">
+            <a href="/downloads/RELEASE_NOTES.md" className="text-[var(--aethel-primary-light)] hover:underline">
               Notas de versao
             </a>
             {' ? '}
-            <Link href="/docs/getting-started" className="text-blue-400 hover:underline">
+            <Link href="/docs/getting-started" className="text-[var(--aethel-primary-light)] hover:underline">
               Guia de instalacao
             </Link>
           </div>

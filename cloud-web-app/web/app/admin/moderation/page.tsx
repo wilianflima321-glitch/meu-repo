@@ -110,17 +110,17 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Pendentes</span>
-          <Clock className="w-4 h-4 text-yellow-400" />
+          <Clock className="w-4 h-4 text-[var(--aethel-warning)]" />
         </div>
         <p className="text-xl font-bold text-[var(--aethel-text-primary)] mt-1">{stats.pending}</p>
       </div>
       
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-red-500/30 rounded-lg p-3">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg p-3">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Urgentes</span>
-          <AlertTriangle className="w-4 h-4 text-red-400" />
+          <AlertTriangle className="w-4 h-4 text-[var(--aethel-error)]" />
         </div>
-        <p className="text-xl font-bold text-red-400 mt-1">{stats.urgent}</p>
+        <p className="text-xl font-bold text-[var(--aethel-error)] mt-1">{stats.urgent}</p>
       </div>
       
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
@@ -134,7 +134,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Tempo médio</span>
-          <Clock className="w-4 h-4 text-blue-400" />
+          <Clock className="w-4 h-4 text-[var(--aethel-primary-light)]" />
         </div>
         <p className="text-xl font-bold text-[var(--aethel-text-primary)] mt-1">{stats.avgResponseTime}m</p>
       </div>
@@ -158,9 +158,9 @@ function ItemCard({
   
   const priorityColors = {
     low: 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
-    normal: 'border-blue-500/30 bg-[var(--aethel-primary)]/5',
-    high: 'border-yellow-500/30 bg-yellow-500/5',
-    urgent: 'border-red-500/30 bg-[var(--aethel-error)]/10',
+    normal: 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[var(--aethel-primary)]/5',
+    high: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5',
+    urgent: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10',
   };
   
   const typeIcons = {
@@ -194,7 +194,7 @@ function ItemCard({
             </span>
           )}
           {item.autoScore && item.autoScore > 0.7 && (
-            <span className="px-2 py-0.5 text-xs bg-yellow-500/20 text-yellow-400 rounded">
+            <span className="px-2 py-0.5 text-xs bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)] rounded">
               Sinalizado por IA: {Math.round(item.autoScore * 100)}%
             </span>
           )}
@@ -254,7 +254,7 @@ function ItemCard({
       {item.autoFlags && item.autoFlags.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-1">
           {item.autoFlags.map((flag, i) => (
-            <span key={i} className="px-2 py-0.5 text-xs bg-[var(--aethel-error)]/20 text-red-400 rounded">
+            <span key={i} className="px-2 py-0.5 text-xs bg-[var(--aethel-error)]/20 text-[var(--aethel-error)] rounded">
               {flag}
             </span>
           ))}
@@ -273,21 +273,21 @@ function ItemCard({
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('reject'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-error-dark)] hover:bg-red-700 text-[var(--aethel-text-primary)] text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <XCircle className="w-4 h-4" />
             Rejeitar (R)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('escalate'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-[var(--aethel-text-primary)] text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <ArrowUp className="w-4 h-4" />
             Escalar (E)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('shadowban'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-[var(--aethel-text-primary)] text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <UserX className="w-4 h-4" />
             Banimento sombra (B)

@@ -113,11 +113,11 @@ export default function AuditLogsPage() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Avisos</h3>
-          <p className="text-2xl font-bold text-yellow-600">{summary.warning}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-warning)]">{summary.warning}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Críticos</h3>
@@ -201,9 +201,9 @@ export default function AuditLogsPage() {
                   <td className="p-2">
                     <span className={`px-2 py-1 rounded text-xs ${
                       log.severity === 'critical'
-                        ? 'bg-rose-500/15 text-rose-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                         : log.severity === 'warning'
-                        ? 'bg-amber-500/15 text-amber-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}>
                       {severityLabels[log.severity || 'info'] ?? log.severity ?? 'informação'}

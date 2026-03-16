@@ -233,26 +233,26 @@ export default function APIs() {
       )}
 
       {aiProvidersMissing.length > 0 && (
-        <div className='mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4'>
+        <div className='mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-4'>
           <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
             <div>
-              <p className='text-sm font-semibold text-amber-200'>AI provider setup pendente</p>
-              <p className='text-xs text-amber-100/90'>
+              <p className='text-sm font-semibold text-[var(--aethel-warning-light)]'>AI provider setup pendente</p>
+              <p className='text-xs text-[var(--aethel-warning-light)]/90'>
                 Configure pelo menos um provider para liberar chat, complete e inline edit sem bloqueio de capability.
               </p>
             </div>
-            <span className='inline-flex rounded bg-amber-500/20 px-2 py-1 text-xs text-amber-100'>
+            <span className='inline-flex rounded bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] px-2 py-1 text-xs text-[var(--aethel-warning-light)]'>
               {aiProvidersMissing.length} pendente(s)
             </span>
           </div>
-          <ol className='mt-3 list-decimal space-y-1 pl-4 text-xs text-amber-100/90'>
+          <ol className='mt-3 list-decimal space-y-1 pl-4 text-xs text-[var(--aethel-warning-light)]/90'>
             <li>Defina a chave do provider no ambiente seguro (nunca no client).</li>
             <li>Reinicie o runtime da aplicação para aplicar variáveis.</li>
             <li>Clique em Atualizar e valide status configurado nesta página.</li>
           </ol>
           <div className='mt-3 flex flex-wrap gap-2'>
             {aiProvidersMissing.map((provider) => (
-              <span key={provider.id} className='rounded border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-xs text-amber-100'>
+              <span key={provider.id} className='rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning-light)]/10 px-2 py-1 text-xs text-[var(--aethel-warning-light)]'>
                 {provider.name} ({provider.envKey})
               </span>
             ))}
@@ -265,7 +265,7 @@ export default function APIs() {
         <div className='mt-3 space-y-2 text-xs'>
           <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
             <span className='text-[var(--aethel-text-secondary)]'>1. Pelo menos um provider configurado</span>
-            <span className={hasConfiguredAIProvider ? 'text-emerald-300' : 'text-amber-300'}>
+            <span className={hasConfiguredAIProvider ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'}>
               {hasConfiguredAIProvider ? 'OK' : 'PENDENTE'}
             </span>
           </div>
@@ -286,7 +286,7 @@ export default function APIs() {
           <div className='mt-3 space-y-2 text-xs'>
             <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
               <span className='text-[var(--aethel-text-secondary)]'>Probe readiness</span>
-              <span className={productionRuntime.runtimeReadiness.probeReady ? 'text-emerald-300' : 'text-amber-300'}>
+              <span className={productionRuntime.runtimeReadiness.probeReady ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'}>
                 {productionRuntime.runtimeReadiness.probeReady ? 'READY' : 'BLOCKED'}
               </span>
             </div>
@@ -313,7 +313,7 @@ export default function APIs() {
               </div>
             ) : null}
             {productionRuntime.runtimeReadiness.blockers?.length ? (
-              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-[var(--aethel-warning-light)]'>
                 Blockers: {productionRuntime.runtimeReadiness.blockers.join(', ')}
               </div>
             ) : null}
@@ -347,7 +347,7 @@ export default function APIs() {
           <div className='mt-3 space-y-2 text-xs'>
             <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
               <span className='text-[var(--aethel-text-secondary)]'>Runtime status</span>
-              <span className={billingRuntime.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
+              <span className={billingRuntime.status === 'ready' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'}>
                 {String(billingRuntime.status).toUpperCase()}
               </span>
             </div>
@@ -382,7 +382,7 @@ export default function APIs() {
               </div>
             ) : null}
             {billingRuntime.stripe?.missingEnv?.length ? (
-              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-[var(--aethel-warning-light)]'>
                 Missing env: {billingRuntime.stripe.missingEnv.join(', ')}
               </div>
             ) : null}
@@ -400,7 +400,7 @@ export default function APIs() {
           <div className='mt-3 space-y-2 text-xs'>
             <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
               <span className='text-[var(--aethel-text-secondary)]'>Runtime status</span>
-              <span className={previewRuntime.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
+              <span className={previewRuntime.status === 'ready' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'}>
                 {String(previewRuntime.status || 'unknown').toUpperCase()}
               </span>
             </div>
@@ -424,7 +424,7 @@ export default function APIs() {
               </div>
             ) : null}
             {previewRuntime.blockers?.length ? (
-              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-[var(--aethel-warning-light)]'>
                 Blockers: {previewRuntime.blockers.join(', ')}
               </div>
             ) : null}
@@ -458,12 +458,12 @@ export default function APIs() {
           <div className='mt-3 space-y-2 text-xs'>
             <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
               <span className='text-[var(--aethel-text-secondary)]'>Aggregate status</span>
-              <span className={operatorReadiness.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
+              <span className={operatorReadiness.status === 'ready' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-warning)]'}>
                 {String(operatorReadiness.status).toUpperCase()}
               </span>
             </div>
             {operatorReadiness.blockers?.length ? (
-              <div className='rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-200'>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-[var(--aethel-warning-light)]'>
                 Blockers: {operatorReadiness.blockers.join(', ')}
               </div>
             ) : null}
@@ -490,19 +490,19 @@ export default function APIs() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-blue-300'>{summary.total}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary-light)]'>{summary.total}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Configuradas</h3>
-          <p className='text-2xl font-bold text-emerald-300'>{summary.configured}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{summary.configured}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Ausentes</h3>
-          <p className='text-2xl font-bold text-amber-300'>{summary.missing}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{summary.missing}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Cutoff candidates</h3>
-          <p className='text-2xl font-bold text-emerald-300'>{removalCandidates.length}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{removalCandidates.length}</p>
         </div>
       </div>
 
@@ -563,7 +563,7 @@ export default function APIs() {
                 <td className='p-2'>
                   <span
                     className={`px-2 py-1 rounded text-xs ${
-                      integration.configured ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
+                      integration.configured ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                     }`}
                   >
                     {integration.configured ? 'Configurada' : 'Ausente'}
@@ -627,8 +627,8 @@ export default function APIs() {
                       <span
                         className={`rounded px-2 py-1 text-xs ${
                           route.candidateForRemoval
-                            ? 'bg-emerald-500/15 text-emerald-300'
-                            : 'bg-amber-500/15 text-amber-300'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
+                            : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                         }`}
                       >
                         {route.candidateForRemoval ? 'candidate' : 'monitor'}
@@ -644,7 +644,7 @@ export default function APIs() {
           </div>
         )}
         {removalCandidates.length > 0 && (
-          <div className='mt-3 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200'>
+          <div className='mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-2 text-xs text-[var(--aethel-success-light)]'>
             Candidates ready for cutoff (subject to PM approval): {removalCandidates.join(', ')}
           </div>
         )}

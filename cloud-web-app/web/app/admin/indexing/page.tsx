@@ -76,7 +76,7 @@ export default function IndexingPage() {
         <button onClick={fetchData} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
 
-      {error && <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">{error}</div>}
+      {error && <div className="bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4">{error}</div>}
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Busca no projeto</h2>
@@ -124,7 +124,7 @@ export default function IndexingPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">{file.indexed ? 'Indexado' : 'Não Indexado'}</span>
-                  <button onClick={() => toggleIndex(file)} className="bg-yellow-500 text-[var(--aethel-text-primary)] px-3 py-1 rounded text-sm">Alternar</button>
+                  <button onClick={() => toggleIndex(file)} className="bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] px-3 py-1 rounded text-sm">Alternar</button>
                 </div>
               </li>
             ))}

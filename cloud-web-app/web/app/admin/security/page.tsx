@@ -94,7 +94,7 @@ export default function AdminSecurity() {
       </div>
 
       {error && (
-        <div className='mb-4 rounded border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200'>
+        <div className='mb-4 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-sm text-[var(--aethel-error)]'>
           {error}
         </div>
       )}
@@ -102,15 +102,15 @@ export default function AdminSecurity() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Eventos</h3>
-          <p className='text-2xl font-bold text-blue-300'>{data?.stats.total ?? 0}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-primary-light)]'>{data?.stats.total ?? 0}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Avisos</h3>
-          <p className='text-2xl font-bold text-amber-300'>{data?.stats.warning ?? 0}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{data?.stats.warning ?? 0}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Criticos</h3>
-          <p className='text-2xl font-bold text-rose-300'>{data?.stats.critical ?? 0}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-error)]'>{data?.stats.critical ?? 0}</p>
         </div>
       </div>
 
@@ -127,7 +127,7 @@ export default function AdminSecurity() {
               </div>
               <span
                 className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.enforce2FA ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+                  data?.settings.enforce2FA ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
@@ -140,7 +140,7 @@ export default function AdminSecurity() {
               </div>
               <span
                 className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.blockSuspiciousIps ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+                  data?.settings.blockSuspiciousIps ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
@@ -189,9 +189,9 @@ export default function AdminSecurity() {
                     <span
                       className={`px-2 py-1 rounded text-xs ${
                         log.severity === 'critical'
-                          ? 'bg-rose-500/15 text-rose-300'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                           : log.severity === 'warning'
-                            ? 'bg-amber-500/15 text-amber-300'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                             : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >

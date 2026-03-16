@@ -84,9 +84,9 @@ function statusLabel(status: ProjectItem['status']): string {
 }
 
 function readinessBadge(status: ReadinessResponse['capabilityStatus']): string {
-  if (status === 'IMPLEMENTED') return 'border-emerald-500/30 bg-emerald-500/15 text-emerald-200'
-  if (status === 'PARTIAL') return 'border-amber-500/30 bg-amber-500/15 text-amber-200'
-  return 'border-rose-500/30 bg-rose-500/15 text-rose-200'
+  if (status === 'IMPLEMENTED') return 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
+  if (status === 'PARTIAL') return 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
+  return 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
 }
 
 export default function CollaborationAdminPage() {
@@ -367,13 +367,13 @@ export default function CollaborationAdminPage() {
                 <div className="flex items-center gap-2">
                   <span
                     className={`rounded border px-2 py-0.5 text-xs ${
-                      row.value ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-200' : 'border-amber-500/30 bg-amber-500/15 text-amber-200'
+                      row.value ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]' : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
                     }`}
                   >
                     {row.value ? 'OK' : 'PENDENTE'}
                   </span>
                   {row.stale ? (
-                    <span className="rounded border border-rose-500/40 bg-rose-500/15 px-2 py-0.5 text-[11px] text-rose-200">
+                    <span className="rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] px-2 py-0.5 text-[11px] text-[var(--aethel-error)]">
                       STALE
                     </span>
                   ) : null}
@@ -388,8 +388,8 @@ export default function CollaborationAdminPage() {
               <span
                 className={`rounded border px-2 py-0.5 text-[11px] ${
                   readiness.promotionEligible
-                    ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-200'
-                    : 'border-amber-500/30 bg-amber-500/15 text-amber-200'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
+                    : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
                 }`}
               >
                 {readiness.promotionEligible ? 'promotion-eligible' : 'pending-evidence'}
@@ -411,8 +411,8 @@ export default function CollaborationAdminPage() {
                       <span
                         className={`rounded border px-2 py-0.5 text-[11px] ${
                           passed
-                            ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-200'
-                            : 'border-amber-500/30 bg-amber-500/15 text-amber-200'
+                            ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
+                            : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
                         }`}
                       >
                         {passed ? 'PASS' : 'PENDING'}
@@ -435,7 +435,7 @@ export default function CollaborationAdminPage() {
                         onClick={() => {
                           void recordEvidence(evidenceType, false)
                         }}
-                        className="aethel-button aethel-button-ghost rounded px-2 py-1 text-[11px] border border-amber-500/40 text-amber-200 disabled:opacity-60"
+                        className="aethel-button aethel-button-ghost rounded px-2 py-1 text-[11px] border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] text-[var(--aethel-warning-light)] disabled:opacity-60"
                       >
                         {submittingEvidenceKey === `${evidenceType}:fail` ? 'Salvando...' : 'Mark FAIL'}
                       </button>
@@ -460,14 +460,14 @@ export default function CollaborationAdminPage() {
                 value={stressProofUrlInput}
                 onChange={(event) => setStressProofUrlInput(event.target.value)}
                 placeholder="https://evidence.company.com/collab/stress-report"
-                className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-cyan-500/60"
+                className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]"
               />
               <input
                 type="text"
                 value={stressProofSummaryInput}
                 onChange={(event) => setStressProofSummaryInput(event.target.value)}
                 placeholder="Resumo curto (opcional)"
-                className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-cyan-500/60"
+                className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]"
               />
               <button
                 type="button"
@@ -484,15 +484,15 @@ export default function CollaborationAdminPage() {
               <span className="mr-2 text-[var(--aethel-text-tertiary)]">Status:</span>
               {readiness.evidence.stressProofAttached ? (
                 <>
-                  <span className="rounded border border-emerald-500/30 bg-emerald-500/15 px-1.5 py-0.5 text-emerald-200">ATTACHED</span>
+                  <span className="rounded border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] px-1.5 py-0.5 text-[var(--aethel-success-light)]">ATTACHED</span>
                   {readiness.evidence.stale?.stressProof ? (
-                    <span className="ml-2 rounded border border-rose-500/40 bg-rose-500/15 px-1.5 py-0.5 text-rose-200">
+                    <span className="ml-2 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] px-1.5 py-0.5 text-[var(--aethel-error)]">
                       STALE ({readiness.evidence.maxAgeDays ?? 30}d)
                     </span>
                   ) : null}
                   {readiness.evidence.stressProofUrl ? (
                     <a
-                      className="ml-2 text-cyan-300 underline hover:text-cyan-200"
+                      className="ml-2 text-[var(--aethel-info-light)] underline hover:text-[var(--aethel-info-light)]"
                       href={readiness.evidence.stressProofUrl}
                       target="_blank"
                       rel="noreferrer"
@@ -505,7 +505,7 @@ export default function CollaborationAdminPage() {
                   ) : null}
                 </>
               ) : (
-                <span className="rounded border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 text-amber-200">PENDING</span>
+                <span className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] px-1.5 py-0.5 text-[var(--aethel-warning-light)]">PENDING</span>
               )}
             </div>
           </div>
@@ -520,8 +520,8 @@ export default function CollaborationAdminPage() {
                     <span
                       className={`rounded border px-1.5 py-0.5 ${
                         event.passed
-                          ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-200'
-                          : 'border-amber-500/30 bg-amber-500/15 text-amber-200'
+                          ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
+                          : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
                       }`}
                     >
                       {event.passed ? 'PASS' : 'FAIL'}

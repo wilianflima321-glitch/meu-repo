@@ -50,7 +50,7 @@ const navItems = [
 ]
 
 function StatusIndicator({ status }: { status: 'healthy' | 'degraded' | 'down' }) {
-  const color = status === 'healthy' ? 'bg-[var(--aethel-success)]' : status === 'degraded' ? 'bg-amber-500' : 'bg-[var(--aethel-error)]'
+  const color = status === 'healthy' ? 'bg-[var(--aethel-success)]' : status === 'degraded' ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-error)]'
   return <span className={`h-2 w-2 rounded-full ${color} ${status !== 'healthy' ? 'animate-pulse' : ''}`} />
 }
 
@@ -66,11 +66,11 @@ function QuickStatCard({
   alert?: boolean
 }) {
   return (
-    <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 ${alert ? 'border-red-500/40 bg-[var(--aethel-error)]/10' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'}`}>
-      <Icon className={`h-3.5 w-3.5 ${alert ? 'text-red-400' : 'text-[var(--aethel-text-secondary)]'}`} />
+    <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 ${alert ? 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'}`}>
+      <Icon className={`h-3.5 w-3.5 ${alert ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-secondary)]'}`} />
       <div>
         <p className="text-[10px] text-[var(--aethel-text-tertiary)]">{label}</p>
-        <p className={`text-xs font-semibold ${alert ? 'text-red-300' : 'text-[var(--aethel-text-primary)]'}`}>{value}</p>
+        <p className={`text-xs font-semibold ${alert ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-text-primary)]'}`}>{value}</p>
       </div>
     </div>
   )
@@ -119,7 +119,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
                 key={item.href}
                 href={item.href}
                 className={`flex items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors ${
-                  isActive ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-sky-200 border border-sky-400/25' : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]'
+                  isActive ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-info-light)] border border-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -139,7 +139,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
         <div className="absolute bottom-0 left-0 right-0 border-t border-[var(--aethel-border-subtle)] p-3">
           <Link
             href="/admin/emergency"
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/40 bg-[var(--aethel-error)]/15 px-3 py-2 text-xs font-semibold text-red-100 transition-colors hover:bg-[var(--aethel-error)]/25"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/15 px-3 py-2 text-xs font-semibold text-[var(--aethel-error-light)] transition-colors hover:bg-[var(--aethel-error)]/25"
           >
             <AlertTriangle className="h-3.5 w-3.5" />
             Emergency Mode

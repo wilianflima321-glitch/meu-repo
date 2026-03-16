@@ -22,13 +22,13 @@ export default function HealthPage(){
 
   <section className="aethel-card p-4">
         <h2 className="text-lg font-semibold mb-2">/auth/providers</h2>
-        {provErr && <div className="text-yellow-500">Aviso: {String(provErr)}</div>}
+        {provErr && <div className="text-[var(--aethel-warning)]">Aviso: {String(provErr)}</div>}
         <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(providers ?? {}, null, 2)}</pre>
       </section>
 
   <section className="aethel-card p-4">
         <h2 className="text-lg font-semibold mb-2">/billing/plans</h2>
-        {plansErr && <div className="text-yellow-500">Aviso: {String(plansErr)}</div>}
+        {plansErr && <div className="text-[var(--aethel-warning)]">Aviso: {String(plansErr)}</div>}
         <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(plans ?? [], null, 2)}</pre>
       </section>
     </div>

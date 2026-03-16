@@ -57,19 +57,19 @@ interface QueueStats {
 // ============================================================================
 
 const STATUS_CONFIG: Record<JobStatus, { color: string; icon: React.ElementType; label: string }> = {
-  pending: { color: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30', icon: Clock, label: 'Pendente' },
-  running: { color: 'bg-sky-500/15 text-sky-300 border-sky-500/30', icon: Activity, label: 'Executando' },
-  completed: { color: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30', icon: CheckCircle2, label: 'Concluido' },
-  failed: { color: 'bg-rose-500/15 text-rose-300 border-rose-500/30', icon: XCircle, label: 'Falhou' },
+  pending: { color: 'bg-[var(--aethel-warning)]/15 text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]', icon: Clock, label: 'Pendente' },
+  running: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]', icon: Activity, label: 'Executando' },
+  completed: { color: 'bg-[var(--aethel-success)]/15 text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]', icon: CheckCircle2, label: 'Concluido' },
+  failed: { color: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border-rose-500/30', icon: XCircle, label: 'Falhou' },
   paused: { color: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30', icon: Pause, label: 'Pausado' },
 }
 
 const TYPE_CONFIG: Record<JobType, { color: string; label: string }> = {
-  render: { color: 'bg-sky-500/15 text-sky-300', label: 'Render' },
+  render: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)]', label: 'Render' },
   build: { color: 'bg-orange-500/15 text-orange-300', label: 'Build' },
-  ai: { color: 'bg-cyan-500/15 text-cyan-300', label: 'AI' },
-  export: { color: 'bg-emerald-500/15 text-emerald-300', label: 'Export' },
-  import: { color: 'bg-blue-500/15 text-blue-300', label: 'Import' },
+  ai: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)]', label: 'AI' },
+  export: { color: 'bg-[var(--aethel-success)]/15 text-[var(--aethel-success-light)]', label: 'Export' },
+  import: { color: 'bg-blue-500/15 text-[var(--aethel-primary-light)]', label: 'Import' },
   other: { color: 'bg-zinc-500/15 text-zinc-300', label: 'Outro' },
 }
 
@@ -91,10 +91,10 @@ const TypeBadge: React.FC<{ type: JobType }> = ({ type }) => {
 
 const ProgressBar: React.FC<{ progress: number; status: JobStatus }> = ({ progress, status }) => {
   const colors: Record<JobStatus, string> = {
-    pending: 'bg-yellow-400',
-    running: 'bg-sky-400',
-    completed: 'bg-emerald-400',
-    failed: 'bg-rose-400',
+    pending: 'bg-[var(--aethel-warning-light)]',
+    running: 'bg-[var(--aethel-info-light)]',
+    completed: 'bg-[var(--aethel-success-light)]',
+    failed: 'bg-[var(--aethel-error-light)]',
     paused: 'bg-zinc-400',
   }
 
@@ -148,7 +148,7 @@ const JobRow: React.FC<{
                 event.stopPropagation()
                 onRetry()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-sky-200"
+              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-info-light)]"
               title="Reenfileirar"
             >
               <RefreshCw className="h-4 w-4" />
@@ -160,7 +160,7 @@ const JobRow: React.FC<{
                 event.stopPropagation()
                 onPause()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-yellow-200"
+              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-warning-light)]"
               title="Pausar"
             >
               <Pause className="h-4 w-4" />
@@ -172,7 +172,7 @@ const JobRow: React.FC<{
                 event.stopPropagation()
                 onPause()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-emerald-200"
+              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-success-light)]"
               title="Retomar"
             >
               <Play className="h-4 w-4" />
@@ -184,7 +184,7 @@ const JobRow: React.FC<{
                 event.stopPropagation()
                 onCancel()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-rose-200"
+              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-error-light)]"
               title="Cancelar"
             >
               <Trash2 className="h-4 w-4" />
@@ -217,7 +217,7 @@ const JobRow: React.FC<{
           </div>
 
           {job.error && (
-            <div className="mt-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-2 text-sm text-rose-200">
+            <div className="mt-2 rounded-lg border border-rose-500/30 bg-[var(--aethel-error)]/10 p-2 text-sm text-[var(--aethel-error-light)]">
               <strong>Erro:</strong> {job.error}
             </div>
           )}
@@ -361,7 +361,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
     <div className={`aethel-card ${className}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-3">
-          <Layers className="h-5 w-5 text-sky-300" />
+          <Layers className="h-5 w-5 text-[var(--aethel-info-light)]" />
           <div>
             <h2 className="text-base font-semibold text-white">Fila de jobs</h2>
             <p className="text-xs text-zinc-500">{jobs.length} jobs no total</p>
@@ -392,26 +392,26 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
           <StatsCard
             label="Pendentes"
             value={stats.pending}
-            icon={<Clock className="h-5 w-5 text-yellow-300" />}
-            color="border border-yellow-500/30 bg-yellow-500/5"
+            icon={<Clock className="h-5 w-5 text-[var(--aethel-warning-light)]" />}
+            color="border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5"
           />
           <StatsCard
             label="Executando"
             value={stats.running}
-            icon={<Cpu className="h-5 w-5 text-sky-300" />}
-            color="border border-sky-500/30 bg-sky-500/5"
+            icon={<Cpu className="h-5 w-5 text-[var(--aethel-info-light)]" />}
+            color="border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[var(--aethel-info)]/5"
           />
           <StatsCard
             label="Concluidos"
             value={stats.completed}
-            icon={<CheckCircle2 className="h-5 w-5 text-emerald-300" />}
-            color="border border-emerald-500/30 bg-emerald-500/5"
+            icon={<CheckCircle2 className="h-5 w-5 text-[var(--aethel-success-light)]" />}
+            color="border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/5"
           />
           <StatsCard
             label="Falhos"
             value={stats.failed}
-            icon={<AlertTriangle className="h-5 w-5 text-rose-300" />}
-            color="border border-rose-500/30 bg-rose-500/5"
+            icon={<AlertTriangle className="h-5 w-5 text-[var(--aethel-error-light)]" />}
+            color="border border-rose-500/30 bg-[var(--aethel-error)]/5"
           />
         </div>
       )}

@@ -44,9 +44,9 @@ export default function AdminEmergencyPage() {
 
   const levelTone = useMemo(() => {
     if (!state?.level || state.level === 'normal') return 'text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] border-[var(--aethel-border-secondary)]'
-    if (state.level === 'warning') return 'text-amber-300 bg-amber-500/10 border-amber-500/30'
+    if (state.level === 'warning') return 'text-[var(--aethel-warning)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
     if (state.level === 'critical') return 'text-orange-300 bg-orange-500/10 border-orange-500/30'
-    return 'text-red-300 bg-[var(--aethel-error)]/10 border-red-500/30'
+    return 'text-[var(--aethel-error-light)] bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
   }, [state?.level])
 
   async function activateEmergency() {
@@ -148,7 +148,7 @@ export default function AdminEmergencyPage() {
       <section className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[var(--aethel-text-primary)]">
-            <ShieldAlert className="h-4 w-4 text-amber-300" />
+            <ShieldAlert className="h-4 w-4 text-[var(--aethel-warning)]" />
             Ativar Contingência
           </h2>
           <label className="mb-2 block text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">Nível</label>
@@ -174,7 +174,7 @@ export default function AdminEmergencyPage() {
           <button
             onClick={activateEmergency}
             disabled={pending !== null}
-            className="inline-flex items-center gap-2 rounded bg-amber-600 px-4 py-2 text-sm font-medium text-amber-50 hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded bg-[var(--aethel-warning-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-warning)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <AlertTriangle className="h-4 w-4" />
             {pending === 'activate' ? 'Ativando...' : 'Ativar Emergency'}
@@ -183,7 +183,7 @@ export default function AdminEmergencyPage() {
 
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[var(--aethel-text-primary)]">
-            <StopCircle className="h-4 w-4 text-rose-300" />
+            <StopCircle className="h-4 w-4 text-[var(--aethel-error)]" />
             Normalizar Operação
           </h2>
           <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
@@ -192,7 +192,7 @@ export default function AdminEmergencyPage() {
           <button
             onClick={deactivateEmergency}
             disabled={!isActive || pending !== null}
-            className="inline-flex items-center gap-2 rounded bg-rose-600 px-4 py-2 text-sm font-medium text-rose-50 hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded bg-[var(--aethel-error-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <StopCircle className="h-4 w-4" />
             {pending === 'deactivate' ? 'Desativando...' : 'Desativar Emergency'}
@@ -201,7 +201,7 @@ export default function AdminEmergencyPage() {
       </section>
 
       {error ? (
-        <div className="mt-4 rounded border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+        <div className="mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-3 text-sm text-[var(--aethel-error)]">{error}</div>
       ) : null}
     </div>
   )

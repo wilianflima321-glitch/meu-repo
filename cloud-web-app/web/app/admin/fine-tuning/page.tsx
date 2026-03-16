@@ -132,8 +132,8 @@ export default function FineTuningPage() {
         <button onClick={() => Promise.all([fetchDatasets(), fetchJobs()])} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
 
-      {error && <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">{error}</div>}
-      {message && <div className="bg-green-50 border border-green-200 text-emerald-300 p-3 rounded mb-4">{message}</div>}
+      {error && <div className="bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4">{error}</div>}
+      {message && <div className="bg-green-50 border border-green-200 text-[var(--aethel-success)] p-3 rounded mb-4">{message}</div>}
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Envio de conjunto de dados</h2>

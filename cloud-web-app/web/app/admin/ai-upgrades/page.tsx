@@ -21,10 +21,10 @@ const statusLabels: Record<UpgradeStatus, string> = {
 };
 
 const statusColors: Record<UpgradeStatus, string> = {
-  applied: 'bg-emerald-500/15 text-emerald-200 border-emerald-500/40',
-  partial: 'bg-amber-500/15 text-amber-200 border-amber-500/40',
-  missing: 'bg-rose-500/15 text-rose-200 border-rose-500/40',
-  planned: 'bg-sky-500/15 text-sky-200 border-sky-500/40',
+  applied: 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)]',
+  partial: 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)]',
+  missing: 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)] border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)]',
+  planned: 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]',
 };
 
 export default function AIUpgrades() {
@@ -110,7 +110,7 @@ export default function AIUpgrades() {
           />
         </div>
         {error && (
-          <div className='bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4'>
+          <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>
             {error}
           </div>
         )}
@@ -132,7 +132,7 @@ export default function AIUpgrades() {
                   </div>
                   <button
                     onClick={() => applyUpgrade(upgrade)}
-                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-primary-dark)] hover:bg-blue-700 text-[var(--aethel-text-primary)]'}`}
+                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'}`}
                   >
                     {upgrade.applied ? 'Reverter' : 'Aplicar melhoria'}
                   </button>
@@ -143,7 +143,7 @@ export default function AIUpgrades() {
         )}
       </div>
 
-      <div className='p-4 bg-sky-500/15 rounded-lg'>
+      <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] rounded-lg'>
         <h3 className='font-semibold'>Diretrizes de Evolução:</h3>
         <ul className='list-disc ml-5'>
           <li>Priorize confiabilidade com validação, métricas e aprovação por ambiente.</li>

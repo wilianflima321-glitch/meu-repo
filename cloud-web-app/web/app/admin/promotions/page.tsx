@@ -164,7 +164,7 @@ export default function PromotionsPage() {
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Ativas</h3>
@@ -295,14 +295,14 @@ export default function PromotionsPage() {
                 <div className="flex items-center gap-2 mt-2 md:mt-0">
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
-                      promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+                      promo.active ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}
                   >
                     {promo.active ? 'Ativa' : 'Inativa'}
                   </span>
                   <button
                     onClick={() => handleToggle(promo)}
-                    className="px-3 py-1 rounded text-xs bg-amber-500/15 text-amber-200"
+                    className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]"
                   >
                     {promo.active ? 'Desativar' : 'Ativar'}
                   </button>
