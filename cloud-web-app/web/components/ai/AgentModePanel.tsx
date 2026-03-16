@@ -182,15 +182,15 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
   const getStatusColor = (s: string) => {
     switch (s) {
       case 'running':
-        return 'text-sky-300'
+        return 'text-[var(--aethel-info-light)]'
       case 'paused':
-        return 'text-yellow-300'
+        return 'text-[var(--aethel-warning-light)]'
       case 'completed':
-        return 'text-emerald-300'
+        return 'text-[var(--aethel-success-light)]'
       case 'failed':
-        return 'text-rose-300'
+        return 'text-[var(--aethel-error-light)]'
       default:
-        return 'text-zinc-500'
+        return 'text-[var(--aethel-text-quaternary)]'
     }
   }
 
@@ -202,13 +202,13 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed right-0 top-0 bottom-0 z-50 flex w-[500px] flex-col border-l border-white/10 bg-[#0b0f16] shadow-2xl"
+      className="fixed right-0 top-0 bottom-0 z-50 flex w-[500px] flex-col border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-2xl"
     >
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-sky-300" />
-          <span className="font-semibold text-white">Agent Mode</span>
-          <span className={cn('rounded-full bg-white/5 px-2 py-0.5 text-xs', getStatusColor(status))}>
+          <Bot className="h-5 w-5 text-[var(--aethel-info-light)]" />
+          <span className="font-semibold text-[var(--aethel-text-primary)]">Agent Mode</span>
+          <span className={cn('rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] px-2 py-0.5 text-xs', getStatusColor(status))}>
             {status.toUpperCase()}
           </span>
         </div>
@@ -224,7 +224,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             </Button>
           )}
           {(status === 'running' || status === 'paused') && (
-            <Button variant="ghost" size="icon" onClick={handleStop} className="h-8 w-8 text-rose-300">
+            <Button variant="ghost" size="icon" onClick={handleStop} className="h-8 w-8 text-[var(--aethel-error-light)]">
               <Square className="h-4 w-4" />
             </Button>
           )}
@@ -235,9 +235,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       </div>
 
       {status === 'running' && (
-        <div className="h-1 bg-white/10">
+        <div className="h-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]">
           <motion.div
-            className="h-full bg-sky-400"
+            className="h-full bg-[var(--aethel-info)]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.3 }}
@@ -246,16 +246,16 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       )}
 
       {task && (
-        <div className="border-b border-white/10 bg-white/[0.03] px-4 py-3">
+        <div className="border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-4 py-3">
           <div className="mb-2 flex items-center gap-2">
-            {task.status === 'completed' && <CheckCircle className="h-4 w-4 text-emerald-300" />}
-            {task.status === 'failed' && <XCircle className="h-4 w-4 text-rose-300" />}
+            {task.status === 'completed' && <CheckCircle className="h-4 w-4 text-[var(--aethel-success-light)]" />}
+            {task.status === 'failed' && <XCircle className="h-4 w-4 text-[var(--aethel-error-light)]" />}
             {(task.status === 'executing' || task.status === 'planning') && (
-              <Loader2 className="h-4 w-4 animate-spin text-sky-300" />
+              <Loader2 className="h-4 w-4 animate-spin text-[var(--aethel-info-light)]" />
             )}
-            <span className="text-sm font-medium text-white">{task.description.slice(0, 50)}...</span>
+            <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{task.description.slice(0, 50)}...</span>
           </div>
-          <div className="flex items-center gap-4 text-xs text-zinc-500">
+          <div className="flex items-center gap-4 text-xs text-[var(--aethel-text-quaternary)]">
             <span>{task.subtasks.length} subtarefas</span>
             <span>{steps.length} passos</span>
             <span>{progress}% completo</span>
@@ -269,22 +269,22 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="mx-4 mt-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4"
+            className="mx-4 mt-4 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-4"
           >
             <div className="mb-2 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-yellow-300" />
-              <span className="text-sm font-semibold text-yellow-200">Aprovacao necessaria</span>
+              <AlertCircle className="h-4 w-4 text-[var(--aethel-warning-light)]" />
+              <span className="text-sm font-semibold text-[var(--aethel-warning-light)]">Aprovacao necessaria</span>
             </div>
-            <p className="mb-2 text-xs text-zinc-300">{pendingApproval.thinking}</p>
-            <div className="mb-3 rounded bg-white/5 p-2 text-xs font-mono text-zinc-400">
+            <p className="mb-2 text-xs text-[var(--aethel-text-secondary)]">{pendingApproval.thinking}</p>
+            <div className="mb-3 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] p-2 text-xs font-mono text-[var(--aethel-text-tertiary)]">
               {pendingApproval.action.tool}: {JSON.stringify(pendingApproval.action.input)}
             </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleApprove} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button size="sm" onClick={handleApprove} className="bg-[var(--aethel-success-dark)] hover:bg-[var(--aethel-success)]">
                 <CheckCircle className="mr-1 h-3 w-3" />
                 Aprovar
               </Button>
-              <Button size="sm" variant="outline" onClick={handleReject} className="border-rose-500 text-rose-300">
+              <Button size="sm" variant="outline" onClick={handleReject} className="border-[var(--aethel-error)] text-[var(--aethel-error-light)]">
                 <XCircle className="mr-1 h-3 w-3" />
                 Rejeitar
               </Button>
@@ -304,68 +304,68 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
                 key={step.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.03]"
+                className="overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)]"
               >
                 <button
                   onClick={() => toggleStepExpand(step.id)}
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-white/[0.05]"
                 >
                   {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-zinc-500" />
+                    <ChevronDown className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-zinc-500" />
+                    <ChevronRight className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
                   )}
                   <StepIcon
                     className={cn(
                       'h-4 w-4',
-                      step.type === 'think' && 'text-sky-300',
-                      step.type === 'plan' && 'text-sky-300',
-                      step.type === 'execute' && 'text-emerald-300',
-                      step.type === 'observe' && 'text-yellow-300',
-                      step.type === 'reflect' && 'text-cyan-300',
-                      step.type === 'correct' && 'text-orange-300',
+                      step.type === 'think' && 'text-[var(--aethel-info-light)]',
+                      step.type === 'plan' && 'text-[var(--aethel-info-light)]',
+                      step.type === 'execute' && 'text-[var(--aethel-success-light)]',
+                      step.type === 'observe' && 'text-[var(--aethel-warning-light)]',
+                      step.type === 'reflect' && 'text-[var(--aethel-info-light)]',
+                      step.type === 'correct' && 'text-[var(--aethel-warning-light)]',
                     )}
                   />
-                  <span className="font-medium text-zinc-200 capitalize">{step.type}</span>
-                  <span className="flex-1 truncate text-zinc-500">{step.content.slice(0, 40)}...</span>
-                  <span className="text-zinc-500">{new Date(step.timestamp).toLocaleTimeString()}</span>
+                  <span className="font-medium text-[var(--aethel-text-secondary)] capitalize">{step.type}</span>
+                  <span className="flex-1 truncate text-[var(--aethel-text-quaternary)]">{step.content.slice(0, 40)}...</span>
+                  <span className="text-[var(--aethel-text-quaternary)]">{new Date(step.timestamp).toLocaleTimeString()}</span>
                 </button>
 
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-                      <div className="border-t border-white/10 bg-white/[0.02] px-3 py-2">
-                        <p className="whitespace-pre-wrap text-xs text-zinc-400">{step.content}</p>
+                      <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_2%,transparent)] px-3 py-2">
+                        <p className="whitespace-pre-wrap text-xs text-[var(--aethel-text-tertiary)]">{step.content}</p>
 
                         {step.toolCalls && step.toolCalls.length > 0 && (
                           <div className="mt-2 space-y-1">
                             {step.toolCalls.map((tc) => (
-                              <div key={tc.id} className="rounded bg-white/5 p-2 text-xs">
+                              <div key={tc.id} className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] p-2 text-xs">
                                 <div className="mb-1 flex items-center gap-2">
-                                  <Terminal className="h-3 w-3 text-zinc-500" />
-                                  <span className="font-mono text-sky-300">{tc.tool}</span>
+                                  <Terminal className="h-3 w-3 text-[var(--aethel-text-quaternary)]" />
+                                  <span className="font-mono text-[var(--aethel-info-light)]">{tc.tool}</span>
                                   <span
                                     className={cn(
                                       'rounded px-1 py-0.5 text-[10px]',
-                                      tc.status === 'success' && 'bg-emerald-500/20 text-emerald-300',
-                                      tc.status === 'failed' && 'bg-rose-500/20 text-rose-300',
-                                      tc.status === 'running' && 'bg-sky-500/20 text-sky-300',
+                                      tc.status === 'success' && 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]',
+                                      tc.status === 'failed' && 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error-light)]',
+                                      tc.status === 'running' && 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]',
                                     )}
                                   >
                                     {tc.status}
                                   </span>
                                 </div>
-                                <pre className="max-h-20 overflow-auto text-zinc-500">
+                                <pre className="max-h-20 overflow-auto text-[var(--aethel-text-quaternary)]">
                                   {JSON.stringify(tc.input, null, 2)}
                                 </pre>
                                 {tc.output && (
-                                  <pre className="mt-1 max-h-20 overflow-auto text-emerald-300">
+                                  <pre className="mt-1 max-h-20 overflow-auto text-[var(--aethel-success-light)]">
                                     {typeof tc.output === 'string'
                                       ? tc.output.slice(0, 200)
                                       : JSON.stringify(tc.output, null, 2).slice(0, 200)}
                                   </pre>
                                 )}
-                                {tc.error && <pre className="mt-1 text-rose-300">{tc.error}</pre>}
+                                {tc.error && <pre className="mt-1 text-[var(--aethel-error-light)]">{tc.error}</pre>}
                               </div>
                             ))}
                           </div>
@@ -380,20 +380,20 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
 
           {steps.length === 0 && status === 'idle' && (
             <div className="py-12 text-center">
-              <Bot className="mx-auto mb-4 h-12 w-12 text-white/20" />
-              <p className="text-sm text-zinc-500">Descreva uma tarefa e o agente vai executar autonomamente</p>
+              <Bot className="mx-auto mb-4 h-12 w-12 text-[var(--aethel-text-primary)]/20" />
+              <p className="text-sm text-[var(--aethel-text-quaternary)]">Descreva uma tarefa e o agente vai executar autonomamente</p>
             </div>
           )}
         </div>
       </ScrollArea>
 
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-[var(--aethel-border-primary)] p-4">
         <div className="relative">
           <Textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Descreva a tarefa para o agente executar..."
-            className="min-h-[80px] border-white/10 bg-white/[0.03] text-white placeholder:text-zinc-500 pr-12"
+            className="min-h-[80px] border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] pr-12"
             onKeyDown={(event) => {
               if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
                 event.preventDefault()
@@ -406,14 +406,14 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             size="icon"
             onClick={handleSubmit}
             disabled={!input.trim() || status === 'running'}
-            className="absolute bottom-2 right-2 h-8 w-8 bg-sky-600 hover:bg-sky-700"
+            className="absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)]"
           >
             {status === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
-        <p className="mt-2 text-xs text-zinc-500">
-          Pressione <kbd className="rounded bg-white/10 px-1">Ctrl</kbd> +{' '}
-          <kbd className="rounded bg-white/10 px-1">Enter</kbd> para enviar
+        <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">
+          Pressione <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Ctrl</kbd> +{' '}
+          <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Enter</kbd> para enviar
         </p>
       </div>
     </motion.div>
