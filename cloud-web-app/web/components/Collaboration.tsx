@@ -3,11 +3,11 @@
 /**
  * Collaboration Components - Aethel Engine
  * 
- * Componentes para colaboração em tempo real:
- * - Avatares de presença
+ * Componentes para colaboracao em tempo real:
+ * - Avatares de presenca
  * - Cursores remotos
- * - Indicador de digitação
- * - Status de usuário
+ * - Indicador de digitacao
+ * - Status de usuario
  */
 
 import { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
@@ -45,9 +45,18 @@ interface CollaborationContextType {
 // ============================================================================
 
 const USER_COLORS = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-  '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
-  '#BB8FCE', '#85C1E9', '#F8B500', '#00CED1',
+  'var(--aethel-primary)',
+  'var(--aethel-secondary)',
+  'var(--aethel-accent)',
+  'var(--aethel-info)',
+  'var(--aethel-success)',
+  'var(--aethel-warning)',
+  'var(--aethel-error)',
+  'var(--aethel-primary-light)',
+  'var(--aethel-secondary-light)',
+  'var(--aethel-accent-light)',
+  'var(--aethel-info-light)',
+  'var(--aethel-success-light)',
 ];
 
 function getColorForUser(id: string): string {
@@ -244,7 +253,7 @@ export function PresenceAvatars({
 }: PresenceAvatarsProps) {
   const { roomUsers, currentUser } = useCollaboration();
   
-  // Filtra usuário atual
+  // Filtra usuario atual
   const otherUsers = roomUsers.filter(u => u.id !== currentUser?.id);
   const displayed = otherUsers.slice(0, maxDisplay);
   const overflow = otherUsers.length - maxDisplay;
@@ -262,17 +271,17 @@ export function PresenceAvatars({
   };
 
   const statusColors = {
-    online: 'bg-green-500',
-    away: 'bg-yellow-500',
-    busy: 'bg-red-500',
-    offline: 'bg-neutral-500',
+    online: 'bg-[var(--aethel-success)]',
+    away: 'bg-[var(--aethel-warning)]',
+    busy: 'bg-[var(--aethel-error)]',
+    offline: 'bg-[var(--aethel-text-quaternary)]',
   };
 
   if (otherUsers.length === 0) {
     return (
-      <div className="flex items-center gap-2 text-neutral-400 text-sm">
+      <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] text-sm">
         <Users className="w-4 h-4" />
-        <span>Só você aqui</span>
+        <span>So voce aqui</span>
       </div>
     );
   }
@@ -282,7 +291,7 @@ export function PresenceAvatars({
       {displayed.map((user, index) => (
         <div
           key={user.id}
-          className={`relative rounded-full border-2 border-neutral-900 ${sizeClasses[size]}`}
+          className={`relative rounded-full border-2 border-[var(--aethel-border-primary)] ${sizeClasses[size]}`}
           style={{ 
             marginLeft: index > 0 ? -8 : 0,
             backgroundColor: user.color,
@@ -299,14 +308,14 @@ export function PresenceAvatars({
               className="rounded-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-white font-medium">
+            <div className="w-full h-full flex items-center justify-center text-[var(--aethel-text-primary)] font-medium">
               {user.name.charAt(0).toUpperCase()}
             </div>
           )}
           
           {showStatus && (
             <div 
-              className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-neutral-900 ${statusColors[user.status]}`}
+              className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--aethel-border-primary)] ${statusColors[user.status]}`}
             />
           )}
         </div>
@@ -314,7 +323,7 @@ export function PresenceAvatars({
       
       {overflow > 0 && (
         <div 
-          className={`rounded-full bg-neutral-700 border-2 border-neutral-900 flex items-center justify-center text-white font-medium ${sizeClasses[size]}`}
+          className={`rounded-full bg-[var(--aethel-surface-quaternary)] border-2 border-[var(--aethel-border-primary)] flex items-center justify-center text-[var(--aethel-text-primary)] font-medium ${sizeClasses[size]}`}
           style={{ marginLeft: -8 }}
         >
           +{overflow}
@@ -366,7 +375,7 @@ export function CursorOverlay() {
           
           {/* Name label */}
           <div
-            className="absolute top-5 left-2 px-2 py-0.5 rounded text-xs text-white whitespace-nowrap"
+            className="absolute top-5 left-2 px-2 py-0.5 rounded text-xs text-[var(--aethel-text-primary)] whitespace-nowrap"
             style={{ backgroundColor: color }}
           >
             {name}
@@ -392,21 +401,21 @@ export function TypingIndicator() {
   let text = '';
   
   if (names.length === 1) {
-    text = `${names[0]} está digitando...`;
+    text = `${names[0]} esta digitando...`;
   } else if (names.length === 2) {
-    text = `${names.join(' e ')} estão digitando...`;
+    text = `${names.join(' e ')} estao digitando...`;
   } else {
-    text = `${names.length} pessoas estão digitando...`;
+    text = `${names.length} pessoas estao digitando...`;
   }
 
   return (
-    <div className="flex items-center gap-2 text-neutral-400 text-sm">
+    <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] text-sm">
       <MessageCircle className="w-4 h-4" />
       <span>{text}</span>
       <span className="flex gap-1">
-        <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        <span className="w-1.5 h-1.5 bg-[var(--aethel-text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+        <span className="w-1.5 h-1.5 bg-[var(--aethel-text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+        <span className="w-1.5 h-1.5 bg-[var(--aethel-text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
       </span>
     </div>
   );
@@ -423,10 +432,10 @@ export function StatusSelector() {
   if (!currentUser) return null;
 
   const statuses = [
-    { value: 'online', label: 'Online', color: 'bg-green-500' },
-    { value: 'away', label: 'Ausente', color: 'bg-yellow-500' },
-    { value: 'busy', label: 'Ocupado', color: 'bg-red-500' },
-    { value: 'offline', label: 'Invisível', color: 'bg-neutral-500' },
+    { value: 'online', label: 'Online', color: 'bg-[var(--aethel-success)]' },
+    { value: 'away', label: 'Ausente', color: 'bg-[var(--aethel-warning)]' },
+    { value: 'busy', label: 'Ocupado', color: 'bg-[var(--aethel-error)]' },
+    { value: 'offline', label: 'Invisivel', color: 'bg-[var(--aethel-text-quaternary)]' },
   ] as const;
 
   const current = statuses.find(s => s.value === currentUser.status) || statuses[0];
@@ -435,14 +444,14 @@ export function StatusSelector() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800 rounded-lg hover:bg-neutral-700 transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] rounded-lg hover:bg-[var(--aethel-surface-quaternary)] transition-colors"
       >
         <div className={`w-2.5 h-2.5 rounded-full ${current.color}`} />
-        <span className="text-sm text-white">{current.label}</span>
+        <span className="text-sm text-[var(--aethel-text-primary)]">{current.label}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-1 right-0 w-40 bg-neutral-800 rounded-lg shadow-xl border border-neutral-700 overflow-hidden z-50">
+        <div className="absolute top-full mt-1 right-0 w-40 bg-[var(--aethel-surface-tertiary)] rounded-lg shadow-xl border border-[var(--aethel-border-primary)] overflow-hidden z-50">
           {statuses.map(status => (
             <button
               key={status.value}
@@ -450,12 +459,12 @@ export function StatusSelector() {
                 updateStatus(status.value);
                 setIsOpen(false);
               }}
-              className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-neutral-700 transition-colors ${
-                status.value === currentUser.status ? 'bg-neutral-700' : ''
+              className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-[var(--aethel-surface-quaternary)] transition-colors ${
+                status.value === currentUser.status ? 'bg-[var(--aethel-surface-quaternary)]' : ''
               }`}
             >
               <div className={`w-2.5 h-2.5 rounded-full ${status.color}`} />
-              <span className="text-sm text-white">{status.label}</span>
+              <span className="text-sm text-[var(--aethel-text-primary)]">{status.label}</span>
             </button>
           ))}
         </div>
@@ -473,8 +482,8 @@ export function UserListPanel() {
 
   if (!isConnected) {
     return (
-      <div className="p-4 text-neutral-400 text-sm">
-        Não conectado à sala
+      <div className="p-4 text-[var(--aethel-text-tertiary)] text-sm">
+        Nao conectado a sala
       </div>
     );
   }
@@ -482,11 +491,11 @@ export function UserListPanel() {
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-white flex items-center gap-2">
+        <h3 className="font-semibold text-[var(--aethel-text-primary)] flex items-center gap-2">
           <Users className="w-4 h-4" />
           Na Sala ({roomUsers.length})
         </h3>
-        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'}`} />
       </div>
 
       <div className="space-y-2">
@@ -494,11 +503,11 @@ export function UserListPanel() {
           <div 
             key={user.id}
             className={`flex items-center gap-3 p-2 rounded-lg ${
-              user.id === currentUser?.id ? 'bg-neutral-800' : ''
+              user.id === currentUser?.id ? 'bg-[var(--aethel-surface-tertiary)]' : ''
             }`}
           >
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white font-medium relative"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--aethel-text-primary)] font-medium relative"
               style={{ backgroundColor: user.color }}
             >
               {user.avatar ? (
@@ -512,22 +521,22 @@ export function UserListPanel() {
               ) : (
                 user.name.charAt(0).toUpperCase()
               )}
-              <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-neutral-900 ${
-                user.status === 'online' ? 'bg-green-500' :
-                user.status === 'away' ? 'bg-yellow-500' :
-                user.status === 'busy' ? 'bg-red-500' : 'bg-neutral-500'
+              <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--aethel-border-primary)] ${
+                user.status === 'online' ? 'bg-[var(--aethel-success)]' :
+                user.status === 'away' ? 'bg-[var(--aethel-warning)]' :
+                user.status === 'busy' ? 'bg-[var(--aethel-error)]' : 'bg-[var(--aethel-text-quaternary)]'
               }`} />
             </div>
             
             <div className="flex-1 min-w-0">
-              <div className="text-sm text-white truncate">
+              <div className="text-sm text-[var(--aethel-text-primary)] truncate">
                 {user.name}
                 {user.id === currentUser?.id && (
-                  <span className="text-neutral-400 ml-1">(você)</span>
+                  <span className="text-[var(--aethel-text-tertiary)] ml-1">(voce)</span>
                 )}
               </div>
               {user.currentFile && (
-                <div className="text-xs text-neutral-400 truncate flex items-center gap-1">
+                <div className="text-xs text-[var(--aethel-text-tertiary)] truncate flex items-center gap-1">
                   <Eye className="w-3 h-3" />
                   {user.currentFile}
                 </div>
@@ -535,7 +544,7 @@ export function UserListPanel() {
             </div>
 
             {user.typing && (
-              <MessageCircle className="w-4 h-4 text-blue-400 animate-pulse" />
+              <MessageCircle className="w-4 h-4 text-[var(--aethel-primary-light)] animate-pulse" />
             )}
           </div>
         ))}
