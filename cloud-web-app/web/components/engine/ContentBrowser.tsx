@@ -74,7 +74,7 @@ function AssetCard({
       style={{
         width: '120px',
         padding: '8px',
-        background: isSelected ? '#3f51b533' : 'transparent',
+        background: isSelected ? 'var(--aethel-surface-quaternary)' : 'transparent',
         border: `1px solid ${isSelected ? 'var(--aethel-primary)' : 'transparent'}`,
         borderRadius: '8px',
         cursor: 'pointer',
@@ -85,7 +85,7 @@ function AssetCard({
         transition: 'all 0.15s',
       }}
       onMouseOver={(e) => {
-        if (!isSelected) e.currentTarget.style.background = '#ffffff08';
+        if (!isSelected) e.currentTarget.style.background = 'var(--aethel-surface-quaternary)';
       }}
       onMouseOut={(e) => {
         if (!isSelected) e.currentTarget.style.background = 'transparent';
@@ -124,7 +124,7 @@ function AssetCard({
             right: '4px',
             fontSize: '14px',
           }}>
-            ⭐
+            STAR
           </div>
         )}
       </div>
@@ -172,13 +172,13 @@ function AssetRow({
         gap: '12px',
         alignItems: 'center',
         padding: '8px 12px',
-        background: isSelected ? '#3f51b533' : 'transparent',
+        background: isSelected ? 'var(--aethel-surface-quaternary)' : 'transparent',
         borderBottom: '1px solid var(--aethel-border-primary)',
         cursor: 'pointer',
         fontSize: '13px',
       }}
       onMouseOver={(e) => {
-        if (!isSelected) e.currentTarget.style.background = '#ffffff08';
+        if (!isSelected) e.currentTarget.style.background = 'var(--aethel-surface-quaternary)';
       }}
       onMouseOut={(e) => {
         if (!isSelected) e.currentTarget.style.background = 'transparent';
@@ -186,7 +186,7 @@ function AssetRow({
     >
       <span style={{ fontSize: '20px' }}>{config.icon}</span>
       <span style={{ color: 'var(--aethel-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-        {asset.starred && '⭐ '}{asset.name}
+        {asset.starred && 'STAR '}{asset.name}
       </span>
       <span style={{ color: config.color }}>{asset.type}</span>
       <span style={{ color: 'var(--aethel-text-quaternary)' }}>{formatFileSize(asset.size)}</span>
@@ -219,7 +219,7 @@ function ContextMenu({
     { id: 'open', label: '📂 Open', divider: false },
     { id: 'rename', label: '✏️ Rename', divider: false },
     { id: 'duplicate', label: '📋 Duplicate', divider: false },
-    { id: 'star', label: asset.starred ? '⭐ Unstar' : '☆ Star', divider: true },
+    { id: 'star', label: asset.starred ? 'Star Unstar' : 'Star', divider: true },
     { id: 'export', label: '📤 Export', divider: false },
     { id: 'reimport', label: '🔄 Reimport', divider: true },
     { id: 'delete', label: '🗑️ Delete', divider: false },
@@ -303,14 +303,14 @@ function FolderTree({
             gap: '4px',
             padding: '4px 8px',
             paddingLeft: `${8 + level * 16}px`,
-            background: isSelected ? '#3f51b533' : 'transparent',
+            background: isSelected ? 'var(--aethel-surface-quaternary)' : 'transparent',
             cursor: 'pointer',
             fontSize: '13px',
             color: isSelected ? 'var(--aethel-text-primary)' : 'var(--aethel-text-tertiary)',
           }}
-          onMouseOver={(e) => {
-            if (!isSelected) e.currentTarget.style.background = '#ffffff08';
-          }}
+            onMouseOver={(e) => {
+              if (!isSelected) e.currentTarget.style.background = 'var(--aethel-surface-quaternary)';
+            }}
           onMouseOut={(e) => {
             if (!isSelected) e.currentTarget.style.background = 'transparent';
           }}

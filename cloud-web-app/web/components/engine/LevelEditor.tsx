@@ -30,6 +30,7 @@ import {
   useHelper,
 } from '@react-three/drei';
 import * as THREE from 'three';
+import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 
 // ============================================================================
 // PHYSICS RUNTIME (Simplified for Play Mode)
@@ -64,13 +65,22 @@ interface SceneObjectProps {
 function SceneObject({ object, isSelected, onSelect, transformMode, onTransform }: SceneObjectProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+  const selectionColor = useMemo(() => resolveCssVarColor('--aethel-warning', '#ffaa00'), []);
+  const neutralColor = useMemo(() => resolveCssVarColor('--aethel-text-quaternary', '#888888'), []);
+  const lightHelperColor = useMemo(() => resolveCssVarColor('--aethel-warning', '#ffaa00'), []);
+  const lightHelperBright = useMemo(() => resolveCssVarColor('--aethel-warning-light', '#ffcc66'), []);
+  const cameraSelectedColor = useMemo(() => resolveCssVarColor('--aethel-success', '#22c55e'), []);
+  const cameraNeutralColor = useMemo(() => resolveCssVarColor('--aethel-text-muted', '#666666'), []);
+  const cameraNeutralAltColor = useMemo(() => resolveCssVarColor('--aethel-text-quaternary', '#444444'), []);
+  const emptySelectedColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
+  const lightFallbackColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
   
   if (!object.visible) return null;
   
   const renderMesh = () => {
     const meshComp = object.components.find(c => c.type === 'StaticMesh');
     const meshType = (meshComp?.properties?.mesh as string) || 'Cube';
-    const color = isSelected ? '#ffaa00' : '#888888';
+    const color = isSelected ? selectionColor : neutralColor;
     
     let geometry: THREE.BufferGeometry;
     switch (meshType) {
@@ -110,7 +120,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
     const lightComp = object.components.find(c => c.type === 'DirectionalLight' || c.type === 'PointLight' || c.type === 'SpotLight');
     if (!lightComp) return null;
     
-    const color = (lightComp.properties.color as string) || '#ffffff';
+    const color = (lightComp.properties.color as string) || lightFallbackColor;
     const intensity = (lightComp.properties.intensity as number) || 1;
     
     switch (lightComp.type) {
@@ -126,7 +136,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
             {isSelected && (
               <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
                 <sphereGeometry args={[0.3, 16, 16]} />
-                <meshBasicMaterial color="#ffff00" wireframe />
+                <meshBasicMaterial color={lightHelperBright} wireframe />
               </mesh>
             )}
           </>
@@ -143,7 +153,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
             {isSelected && (
               <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
                 <sphereGeometry args={[0.3, 16, 16]} />
-                <meshBasicMaterial color="#ffaa00" wireframe />
+                <meshBasicMaterial color={lightHelperColor} wireframe />
               </mesh>
             )}
           </>
@@ -161,7 +171,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
             {isSelected && (
               <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
                 <coneGeometry args={[0.3, 0.5, 16]} />
-                <meshBasicMaterial color="#ff8800" wireframe />
+                <meshBasicMaterial color={lightHelperColor} wireframe />
               </mesh>
             )}
           </>
@@ -177,12 +187,12 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
         {/* Camera icon */}
         <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
           <boxGeometry args={[0.4, 0.3, 0.3]} />
-          <meshBasicMaterial color={isSelected ? '#00ff00' : '#666666'} wireframe />
+          <meshBasicMaterial color={isSelected ? cameraSelectedColor : cameraNeutralColor} wireframe />
         </mesh>
         {/* Lens */}
         <mesh position={[0, 0, 0.25]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.1, 0.15, 0.2, 16]} />
-          <meshBasicMaterial color={isSelected ? '#00ff00' : '#444444'} wireframe />
+          <meshBasicMaterial color={isSelected ? cameraSelectedColor : cameraNeutralAltColor} wireframe />
         </mesh>
       </group>
     );
@@ -192,7 +202,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
     return (
       <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
         <octahedronGeometry args={[0.2]} />
-        <meshBasicMaterial color={isSelected ? '#ffffff' : '#888888'} wireframe />
+        <meshBasicMaterial color={isSelected ? emptySelectedColor : neutralColor} wireframe />
       </mesh>
     );
   };
@@ -230,6 +240,9 @@ interface ViewportProps {
 
 function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, viewMode, showGrid, showStats, environment }: ViewportProps) {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+  const sceneBackground = useMemo(() => resolveCssVarColor('--aethel-surface-primary', '#1a1a1a'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#333333'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#555555'), []);
   
   // Get camera position based on view mode
   const cameraPosition = useMemo(() => {
@@ -249,7 +262,7 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
       camera={{ position: cameraPosition, fov: 60 }}
       onPointerMissed={() => onSelect(null)}
     >
-      <color attach="background" args={['#1a1a1a']} />
+      <color attach="background" args={[sceneBackground]} />
       
       {/* Ambient Light */}
       <ambientLight intensity={environment.ambientIntensity} />
@@ -280,10 +293,10 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
           args={[100, 100]}
           cellSize={1}
           cellThickness={0.5}
-          cellColor="#333333"
+          cellColor={gridCellColor}
           sectionSize={5}
           sectionThickness={1}
-          sectionColor="#555555"
+          sectionColor={gridSectionColor}
           fadeDistance={100}
           infiniteGrid
         />
@@ -562,7 +575,7 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
               alignItems: 'center',
               gap: '8px',
               padding: '6px 8px',
-              background: selectedId === obj.id ? '#3498db33' : 'transparent',
+              background: selectedId === obj.id ? 'var(--aethel-surface-quaternary)' : 'transparent',
               borderRadius: '4px',
               cursor: 'pointer',
               opacity: obj.visible ? 1 : 0.5,

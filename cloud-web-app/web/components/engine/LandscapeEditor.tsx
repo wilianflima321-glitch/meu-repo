@@ -13,6 +13,7 @@ import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { Canvas, useThree, useFrame, ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport, Grid } from '@react-three/drei';
 import * as THREE from 'three';
+import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 
 // ============================================================================
 // TIPOS
@@ -95,6 +96,7 @@ function TerrainMesh({
   const meshRef = useRef<THREE.Mesh>(null);
   const brushIndicatorRef = useRef<THREE.Mesh>(null);
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
+  const brushColor = useMemo(() => resolveCssVarColor('--aethel-success', '#22c55e'), []);
   
   // Generate geometry from heightmap
   const geometry = useMemo(() => {
@@ -164,7 +166,7 @@ function TerrainMesh({
       {brushPosition && brushActive && (
         <mesh ref={brushIndicatorRef} rotation-x={-Math.PI / 2}>
           <ringGeometry args={[brushSize * 0.95, brushSize, 32]} />
-          <meshBasicMaterial color="#00ff00" transparent opacity={0.5} side={THREE.DoubleSide} />
+          <meshBasicMaterial color={brushColor} transparent opacity={0.5} side={THREE.DoubleSide} />
         </mesh>
       )}
     </group>
@@ -191,6 +193,19 @@ function LandscapeScene({
   onHeightmapChange,
 }: LandscapeSceneProps) {
   const heightmapRef = useRef(heightmap);
+  const skyColor = useMemo(() => resolveCssVarColor('--aethel-info-light', '#87ceeb'), []);
+  const groundColor = useMemo(() => resolveCssVarColor('--aethel-success-dark', '#556b2f'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#333333'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#555555'), []);
+  const gizmoAxisColors = useMemo(
+    () => [
+      resolveCssVarColor('--aethel-error', '#e74c3c'),
+      resolveCssVarColor('--aethel-success', '#22c55e'),
+      resolveCssVarColor('--aethel-info', '#06b6d4'),
+    ] as [string, string, string],
+    []
+  );
+  const gizmoLabelColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
   
   useEffect(() => {
     heightmapRef.current = heightmap;
@@ -294,10 +309,10 @@ function LandscapeScene({
         shadow-camera-top={100}
         shadow-camera-bottom={-100}
       />
-      <hemisphereLight args={['#87ceeb', '#556b2f', 0.3]} />
+      <hemisphereLight args={[skyColor, groundColor, 0.3]} />
       
       {/* Sky */}
-      <color attach="background" args={['#87ceeb']} />
+      <color attach="background" args={[skyColor]} />
       
       {/* Terrain */}
       <TerrainMesh
@@ -318,10 +333,10 @@ function LandscapeScene({
         args={[config.width, config.height]}
         cellSize={10}
         cellThickness={0.5}
-        cellColor="#333"
+        cellColor={gridCellColor}
         sectionSize={50}
         sectionThickness={1}
-        sectionColor="#555"
+        sectionColor={gridSectionColor}
         fadeDistance={300}
         fadeStrength={1}
         followCamera={false}
@@ -337,7 +352,7 @@ function LandscapeScene({
       
       {/* Gizmo */}
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
-        <GizmoViewport axisColors={['#e74c3c', '#2ecc71', '#3498db']} labelColor="white" />
+        <GizmoViewport axisColors={gizmoAxisColors} labelColor={gizmoLabelColor} />
       </GizmoHelper>
     </>
   );
@@ -947,6 +962,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
   const [brushActive, setBrushActive] = useState(false);
   const [selectedLayer, setSelectedLayer] = useState<string | null>('1');
   const [activePanel, setActivePanel] = useState<'brush' | 'layers'>('brush');
+  const canvasBackground = useMemo(() => resolveCssVarColor('--aethel-info-light', '#87ceeb'), []);
   
   // Generate terrain
   const handleGenerateTerrain = useCallback((type: string) => {
@@ -1084,7 +1100,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
           <Canvas
             shadows
             camera={{ position: [100, 80, 100], fov: 50 }}
-            style={{ background: '#87ceeb' }}
+            style={{ background: canvasBackground }}
           >
             <LandscapeScene
               heightmap={heightmap}

@@ -19,6 +19,7 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { resolveCssVarRgba } from '@/lib/style/resolve-css-var';
 
 
 export type AnimationStateType = 
@@ -96,7 +97,7 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
       case 'blend': return '🔀';
       case 'blendspace1d': return '📊';
       case 'blendspace2d': return '📈';
-      case 'montage': return '🎬';
+      case 'montage': return 'ANIM';
       case 'slot': return '📍';
       default: return '🎭';
     }
@@ -153,7 +154,7 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
           background: 'var(--aethel-surface-primary)',
           borderRadius: '4px',
         }}>
-          🎬 {data.animation}
+          ANIM {data.animation}
         </div>
       )}
       
@@ -393,7 +394,7 @@ function VariablesPanel({
               padding: '2px',
             }}
           >
-            ✕
+            X
           </button>
         </div>
       ))}
@@ -779,7 +780,7 @@ function TransitionInspector({
                 fontSize: '10px',
               }}
             >
-              ✕
+              X
             </button>
           </div>
         ))}
@@ -848,6 +849,10 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
   
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [selectedTransition, setSelectedTransition] = useState<string | null>(null);
+  const minimapMaskColor = useMemo(
+    () => resolveCssVarRgba('--aethel-surface-primary', 0.8, 'rgba(13,17,23,0.8)'),
+    []
+  );
   
   const nodes: Node[] = useMemo(() => 
     states.map(state => ({
@@ -1081,7 +1086,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
                 default: return 'var(--aethel-primary)';
               }
             }}
-            maskColor="#0d1117cc"
+            maskColor={minimapMaskColor}
           />
         </ReactFlow>
       </div>
@@ -1104,7 +1109,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           color: 'var(--aethel-text-primary)',
           background: 'var(--aethel-surface-tertiary)',
         }}>
-          🎬 Animation Blueprint
+          Animation Blueprint
         </div>
         
         <div style={{ flex: 1, overflow: 'auto' }}>

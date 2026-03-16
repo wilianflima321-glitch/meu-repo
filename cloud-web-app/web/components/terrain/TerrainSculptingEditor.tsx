@@ -10,6 +10,7 @@ import {
   GizmoViewport,
 } from '@react-three/drei';
 import * as THREE from 'three';
+import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 export type TerrainToolType =
   | 'sculpt_raise'
   | 'sculpt_lower'
@@ -143,6 +144,10 @@ function TerrainMesh({
   const meshRef = useRef<THREE.Mesh>(null);
   const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
   const [isPainting, setIsPainting] = useState(false);
+  const terrainColor = useMemo(
+    () => resolveCssVarColor('--aethel-success', '#4a7c59'),
+    []
+  );
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(
       settings.size.x,
@@ -163,12 +168,12 @@ function TerrainMesh({
   }, [data.heightmap, data.resolution, settings]);
   const material = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: '#4a7c59',
+      color: terrainColor,
       roughness: 0.8,
       metalness: 0.1,
       wireframe: false,
     });
-  }, []);
+  }, [terrainColor]);
   const handlePointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (e.point && e.uv) {
@@ -742,13 +747,28 @@ function ViewportScene({
   onApplyBrush,
 }: ViewportSceneProps) {
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
+  const gridCellColor = useMemo(
+    () => resolveCssVarColor('--aethel-border-primary', '#374151'),
+    []
+  );
+  const gridSectionColor = useMemo(
+    () => resolveCssVarColor('--aethel-border-secondary', '#475569'),
+    []
+  );
+  const brushPalette = useMemo(() => ({
+    success: resolveCssVarColor('--aethel-success', '#22c55e'),
+    error: resolveCssVarColor('--aethel-error', '#ef4444'),
+    primary: resolveCssVarColor('--aethel-primary', '#3b82f6'),
+    warning: resolveCssVarColor('--aethel-warning', '#f59e0b'),
+    muted: resolveCssVarColor('--aethel-text-quaternary', '#64748b'),
+  }), []);
   const getBrushColor = () => {
-    if (selectedTool.startsWith('sculpt_raise')) return 'var(--aethel-success)';
-    if (selectedTool.startsWith('sculpt_lower')) return 'var(--aethel-error)';
-    if (selectedTool.startsWith('sculpt_smooth')) return 'var(--aethel-primary)';
-    if (selectedTool.startsWith('paint')) return 'var(--aethel-warning)';
-    if (selectedTool.startsWith('foliage')) return 'var(--aethel-success)';
-    return 'var(--aethel-text-quaternary)';
+    if (selectedTool.startsWith('sculpt_raise')) return brushPalette.success;
+    if (selectedTool.startsWith('sculpt_lower')) return brushPalette.error;
+    if (selectedTool.startsWith('sculpt_smooth')) return brushPalette.primary;
+    if (selectedTool.startsWith('paint')) return brushPalette.warning;
+    if (selectedTool.startsWith('foliage')) return brushPalette.success;
+    return brushPalette.muted;
   };
   const handleBrushStart = useCallback((position: THREE.Vector3, _uv: THREE.Vector2) => {
     onApplyBrush(position.x, position.z);
@@ -776,10 +796,10 @@ function ViewportScene({
         position={[0, 0.01, 0]}
         cellSize={1}
         cellThickness={0.5}
-        cellColor="#374151"
+        cellColor={gridCellColor}
         sectionSize={10}
         sectionThickness={1}
-        sectionColor="#475569"
+        sectionColor={gridSectionColor}
         fadeDistance={100}
         fadeStrength={1}
       />

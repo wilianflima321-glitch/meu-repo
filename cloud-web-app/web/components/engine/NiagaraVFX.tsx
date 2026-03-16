@@ -21,6 +21,7 @@ import '@xyflow/react/dist/style.css';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport, Grid, Stats } from '@react-three/drei';
 import * as THREE from 'three';
+import { resolveCssVarColor, resolveCssVarRgba } from '@/lib/style/resolve-css-var';
 interface ParticleSystemState {
   id: string;
   name: string;
@@ -670,6 +671,10 @@ export default function NiagaraVFX() {
   const [activeTab, setActiveTab] = useState<'parameters' | 'presets' | 'timeline'>('parameters');
   const [emitterConfig, setEmitterConfig] = useState<EmitterConfig>(defaultEmitterConfig);
   const [showStats, setShowStats] = useState(true);
+  const sceneBackground = useMemo(() => resolveCssVarColor('--aethel-surface-primary', '#1a1a1a'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#333333'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#555555'), []);
+  const overlayBackground = useMemo(() => resolveCssVarRgba('--aethel-surface-primary', 0.7, 'rgba(0,0,0,0.7)'), []);
   const emittersRef = useRef<ParticleEmitter[]>([new ParticleEmitter(defaultEmitterConfig)]);
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: 'var(--aethel-text-primary)' } }, eds)),
@@ -895,7 +900,7 @@ export default function NiagaraVFX() {
             cursor: 'pointer',
           }}
         >
-          💾 Save
+          Save
         </button>
         <button
           style={{
@@ -907,7 +912,7 @@ export default function NiagaraVFX() {
             cursor: 'pointer',
           }}
         >
-          📤 Export
+          Export
         </button>
       </div>
       {/* Main Content */}
@@ -919,7 +924,7 @@ export default function NiagaraVFX() {
           </div>
           <div style={{ flex: 1, position: 'relative' }}>
             <Canvas camera={{ position: [5, 5, 5], fov: 60 }}>
-              <color attach="background" args={['#1a1a1a']} />
+              <color attach="background" args={[sceneBackground]} />
               <ambientLight intensity={0.3} />
               <directionalLight position={[10, 10, 5]} intensity={0.5} />
               <ParticleRenderer emitters={emittersRef.current} isPlaying={isPlaying} />
@@ -928,10 +933,10 @@ export default function NiagaraVFX() {
                 args={[20, 20]}
                 cellSize={1}
                 cellThickness={0.5}
-                cellColor="var(--aethel-border-primary)"
+                cellColor={gridCellColor}
                 sectionSize={5}
                 sectionThickness={1}
-                sectionColor="var(--aethel-border-secondary)"
+                sectionColor={gridSectionColor}
                 fadeDistance={50}
                 infiniteGrid
               />
@@ -946,7 +951,7 @@ export default function NiagaraVFX() {
               position: 'absolute',
               top: '8px',
               left: '8px',
-              background: 'rgba(0,0,0,0.7)',
+              background: overlayBackground,
               padding: '8px 12px',
               borderRadius: '4px',
               fontSize: '11px',
@@ -1049,7 +1054,14 @@ export default function NiagaraVFX() {
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Color Over Life</div>
-                  <div style={{ height: '24px', borderRadius: '4px', background: 'linear-gradient(to right, #ffff00, #ff8000, #ff0000, #330000)' }} />
+                  <div
+                    style={{
+                      height: '24px',
+                      borderRadius: '4px',
+                      background:
+                        'linear-gradient(to right, var(--aethel-warning, #f59e0b), var(--aethel-accent-orange, #f97316), var(--aethel-error, #ef4444), var(--aethel-surface-primary, #1a1a1a))',
+                    }}
+                  />
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Alpha Over Life</div>

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';
+import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 
 // Rapier physics é opcional - usar fallback quando não disponível
 let Physics: React.ComponentType<any> | null = null;
@@ -32,14 +33,14 @@ loadRapier();
 
 // --- Physics Components (with fallback) ---
 
-function Ground() {
+function Ground({ color }: { color: string }) {
   if (RigidBody) {
     const RB = RigidBody;
     return (
       <RB type="fixed" colliders="cuboid">
         <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
           <planeGeometry args={[100, 100]} />
-          <meshStandardMaterial color="#303030" transparent opacity={0.5} />
+          <meshStandardMaterial color={color} transparent opacity={0.5} />
         </mesh>
       </RB>
     );
@@ -48,19 +49,19 @@ function Ground() {
   return (
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
       <planeGeometry args={[100, 100]} />
-      <meshStandardMaterial color="#303030" transparent opacity={0.5} />
+      <meshStandardMaterial color={color} transparent opacity={0.5} />
     </mesh>
   );
 }
 
-function PhysicsBox({ position }: { position: [number, number, number] }) {
+function PhysicsBox({ position, color }: { position: [number, number, number]; color: string }) {
   if (RigidBody) {
     const RB = RigidBody;
     return (
       <RB position={position} colliders="cuboid" restitution={0.7}>
         <mesh castShadow receiveShadow>
           <boxGeometry />
-          <meshStandardMaterial color="orange" />
+          <meshStandardMaterial color={color} />
         </mesh>
       </RB>
     );
@@ -69,7 +70,7 @@ function PhysicsBox({ position }: { position: [number, number, number] }) {
   return (
     <mesh castShadow receiveShadow position={position}>
       <boxGeometry />
-      <meshStandardMaterial color="orange" />
+      <meshStandardMaterial color={color} />
     </mesh>
   );
 }
@@ -86,6 +87,10 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
     [2, 8, 0],
     [-2, 10, 0]
   ]);
+  const groundColor = useMemo(() => resolveCssVarColor('--aethel-surface-tertiary', '#303030'), []);
+  const boxColor = useMemo(() => resolveCssVarColor('--aethel-warning', '#f59e0b'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#303030'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#4f4f4f'), []);
 
   // Reset physics when switching modes (simple way: remount)
   const [key, setKey] = useState(0);
@@ -125,22 +130,22 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
           <Environment preset="city" />
           
           {/* Editor Helpers */}
-          {mode === 'edit' && <Grid infiniteGrid fadeDistance={50} sectionColor="#4f4f4f" cellColor="#303030" />}
+          {mode === 'edit' && <Grid infiniteGrid fadeDistance={50} sectionColor={gridSectionColor} cellColor={gridCellColor} />}
           <OrbitControls makeDefault />
 
           {/* Physics World (Rapier) - com fallback */}
           {Physics ? (
             <Physics gravity={[0, -9.81, 0]}>
-              <Ground />
+              <Ground color={groundColor} />
               {boxes.map((pos, i) => (
-                <PhysicsBox key={i} position={pos} />
+                <PhysicsBox key={i} position={pos} color={boxColor} />
               ))}
             </Physics>
           ) : (
             <>
-              <Ground />
+              <Ground color={groundColor} />
               {boxes.map((pos, i) => (
-                <PhysicsBox key={i} position={pos} />
+                <PhysicsBox key={i} position={pos} color={boxColor} />
               ))}
             </>
           )}
