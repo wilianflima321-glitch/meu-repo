@@ -1,7 +1,7 @@
 /**
  * Image Editor - Editor de imagem REAL com Canvas
  * 
- * Suporta layers, blend modes, brushes básicos.
+ * Suporta layers, blend modes, brushes basicos.
  */
 
 'use client';
@@ -86,7 +86,7 @@ export function ImageEditor({
     size: 10,
     hardness: 100,
     opacity: 100,
-    color: '#ffffff',
+    color: 'var(--aethel-text-primary)',
   });
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState<{ x: number; y: number } | null>(null);
@@ -96,7 +96,7 @@ export function ImageEditor({
     const bgLayer = createLayer('Background', width, height);
     const ctx = bgLayer.canvas.getContext('2d');
     if (ctx) {
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = 'var(--aethel-text-primary)';
       ctx.fillRect(0, 0, width, height);
     }
     
@@ -109,8 +109,8 @@ export function ImageEditor({
       img.onload = () => {
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          // Força um re-render do preview quando a imagem termina de carregar
-          // (o canvas da layer mudou, mas o array de layers não muda sozinho)
+          // Forca um re-render do preview quando a imagem termina de carregar
+          // (o canvas da layer mudou, mas o array de layers nao muda sozinho)
           setLayers((prev) =>
             prev.map((layer) => (layer.id === bgLayer.id ? { ...layer } : layer))
           );
@@ -128,13 +128,13 @@ export function ImageEditor({
     const ctx = mainCanvas.getContext('2d');
     if (!ctx) return;
 
-    // Limpar com padrão xadrez (transparência)
-    ctx.fillStyle = '#1e1e1e';
+    // Limpar com padrao xadrez (transparencia)
+    ctx.fillStyle = 'var(--aethel-surface-secondary)';
     ctx.fillRect(0, 0, width, height);
     
-    // Desenhar padrão de transparência
+    // Desenhar padrao de transparencia
     const checkSize = 10;
-    ctx.fillStyle = '#2a2a2a';
+    ctx.fillStyle = 'var(--aethel-surface-tertiary)';
     for (let y = 0; y < height; y += checkSize * 2) {
       for (let x = 0; x < width; x += checkSize * 2) {
         ctx.fillRect(x, y, checkSize, checkSize);
@@ -142,7 +142,7 @@ export function ImageEditor({
       }
     }
 
-    // Desenhar cada layer visível
+    // Desenhar cada layer visivel
     layers.forEach(layer => {
       if (!layer.visible) return;
 
@@ -198,12 +198,12 @@ export function ImageEditor({
       return;
     }
 
-    // Desenhar círculo (brush)
+    // Desenhar circulo (brush)
     ctx.beginPath();
     ctx.arc(x, y, brush.size / 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Conectar com posição anterior (linha suave)
+    // Conectar com posicao anterior (linha suave)
     if (lastPos) {
       ctx.beginPath();
       ctx.moveTo(lastPos.x, lastPos.y);
@@ -271,7 +271,7 @@ export function ImageEditor({
     setBrush(prev => ({ ...prev, color }));
   };
 
-  // Flood fill (simples, não otimizado)
+  // Flood fill (simples, nao otimizado)
   const floodFill = (startX: number, startY: number) => {
     const activeLayer = layers.find(l => l.id === activeLayerId);
     if (!activeLayer || activeLayer.locked) return;
@@ -355,7 +355,7 @@ export function ImageEditor({
     const mainCanvas = canvasRef.current;
     if (!mainCanvas) return;
 
-    // Criar canvas final sem o padrão de transparência
+    // Criar canvas final sem o padrao de transparencia
     const exportCanvas = document.createElement('canvas');
     exportCanvas.width = width;
     exportCanvas.height = height;
@@ -386,11 +386,11 @@ export function ImageEditor({
             }`}
             title={t.charAt(0).toUpperCase() + t.slice(1)}
           >
-            {t === 'brush' && '🖌️'}
-            {t === 'eraser' && '🧽'}
-            {t === 'fill' && '🪣'}
-            {t === 'eyedropper' && '💉'}
-            {t === 'move' && '✋'}
+            {t === 'brush' && ''}
+            {t === 'eraser' && ''}
+            {t === 'fill' && ''}
+            {t === 'eyedropper' && ''}
+            {t === 'move' && ''}
           </button>
         ))}
         
@@ -492,7 +492,7 @@ export function ImageEditor({
                   }}
                   className="text-red-400 hover:text-red-300"
                 >
-                  ×
+                  
                 </button>
               )}
             </div>
@@ -503,7 +503,7 @@ export function ImageEditor({
           onClick={handleSave}
           className="w-full py-2 bg-green-600 rounded text-sm mt-4 hover:bg-green-500"
         >
-          💾 Export PNG
+           Export PNG
         </button>
       </div>
     </div>
