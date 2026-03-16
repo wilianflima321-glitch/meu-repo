@@ -82,11 +82,11 @@ function markdownToHtml(markdown: string): string {
 <head>
   <meta charset="utf-8" />
   <style>
-    body { margin: 0; padding: 16px; font-family: Inter, Segoe UI, sans-serif; background: #0b0d12; color: #e2e8f0; line-height: 1.45; }
-    a { color: #93c5fd; }
-    pre { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 12px; overflow: auto; }
-    code { color: #cbd5e1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    h1,h2,h3,h4,h5,h6 { margin: 14px 0 8px; color: #f8fafc; }
+    body { margin: 0; padding: 16px; font-family: Inter, Segoe UI, sans-serif; background: var(--aethel-surface-primary); color: var(--aethel-text-secondary); line-height: 1.45; }
+    a { color: var(--aethel-primary-light); }
+    pre { background: var(--aethel-surface-secondary); border: 1px solid var(--aethel-border-primary); border-radius: 8px; padding: 12px; overflow: auto; }
+    code { color: var(--aethel-text-secondary); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    h1,h2,h3,h4,h5,h6 { margin: 14px 0 8px; color: var(--aethel-text-primary); }
     p { margin: 8px 0; }
     li { margin-left: 18px; }
   </style>
@@ -101,10 +101,10 @@ function buildCssPreview(css: string): string {
 <head>
   <meta charset="utf-8" />
   <style>
-    html, body { margin: 0; padding: 0; font-family: Inter, Segoe UI, sans-serif; background: #0f172a; color: #e2e8f0; }
+    html, body { margin: 0; padding: 0; font-family: Inter, Segoe UI, sans-serif; background: var(--aethel-surface-primary); color: var(--aethel-text-secondary); }
     .app { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
-    .card { width: min(520px, 95vw); border: 1px solid #334155; border-radius: 12px; background: #111827; padding: 20px; }
-    .btn { border: 1px solid #334155; border-radius: 8px; background: #1e293b; color: #f8fafc; padding: 8px 12px; }
+    .card { width: min(520px, 95vw); border: 1px solid var(--aethel-border-primary); border-radius: 12px; background: var(--aethel-surface-secondary); padding: 20px; }
+    .btn { border: 1px solid var(--aethel-border-primary); border-radius: 8px; background: var(--aethel-surface-tertiary); color: var(--aethel-text-primary); padding: 8px 12px; }
     ${css}
   </style>
 </head>
@@ -126,10 +126,10 @@ function buildJavaScriptPreview(source: string): string {
 <head>
   <meta charset="utf-8" />
   <style>
-    html, body { margin: 0; padding: 0; background: #0b0d12; color: #e2e8f0; font-family: Inter, Segoe UI, sans-serif; }
-    #app { padding: 16px; min-height: 140px; border-bottom: 1px solid #1e293b; }
-    #log { margin: 0; padding: 12px 16px; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; color: #94a3b8; }
-    .error { color: #fda4af; }
+    html, body { margin: 0; padding: 0; background: var(--aethel-surface-primary); color: var(--aethel-text-secondary); font-family: Inter, Segoe UI, sans-serif; }
+    #app { padding: 16px; min-height: 140px; border-bottom: 1px solid var(--aethel-border-primary); }
+    #log { margin: 0; padding: 12px 16px; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; color: var(--aethel-text-tertiary); }
+    .error { color: var(--aethel-error-light); }
   </style>
 </head>
 <body>
@@ -167,10 +167,10 @@ function buildTypeScriptPreview(source: string, extension: string): string {
 <head>
   <meta charset="utf-8" />
   <style>
-    html, body { margin: 0; padding: 0; background: #0b0d12; color: #e2e8f0; font-family: Inter, Segoe UI, sans-serif; }
-    #app { padding: 16px; min-height: 140px; border-bottom: 1px solid #1e293b; }
-    #log { margin: 0; padding: 12px 16px; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; color: #94a3b8; }
-    .error { color: #fda4af; }
+    html, body { margin: 0; padding: 0; background: var(--aethel-surface-primary); color: var(--aethel-text-secondary); font-family: Inter, Segoe UI, sans-serif; }
+    #app { padding: 16px; min-height: 140px; border-bottom: 1px solid var(--aethel-border-primary); }
+    #log { margin: 0; padding: 12px 16px; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; color: var(--aethel-text-tertiary); }
+    .error { color: var(--aethel-error-light); }
   </style>
 </head>
 <body>
