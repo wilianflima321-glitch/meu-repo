@@ -53,7 +53,7 @@ interface BlendShapeCategory {
 const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   {
     name: 'Eye',
-    icon: '👁️',
+    icon: '',
     shapes: [
       'eyeBlinkLeft',
       'eyeBlinkRight',
@@ -73,7 +73,7 @@ const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   },
   {
     name: 'Mouth',
-    icon: '👄',
+    icon: '',
     shapes: [
       'jawOpen',
       'jawForward',
@@ -106,7 +106,7 @@ const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   },
   {
     name: 'Brow',
-    icon: '🤨',
+    icon: '',
     shapes: [
       'browDownLeft',
       'browDownRight',
@@ -117,7 +117,7 @@ const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   },
   {
     name: 'Cheek',
-    icon: '😊',
+    icon: '',
     shapes: [
       'cheekPuff',
       'cheekSquintLeft',
@@ -126,7 +126,7 @@ const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   },
   {
     name: 'Nose',
-    icon: '👃',
+    icon: '',
     shapes: [
       'noseSneerLeft',
       'noseSneerRight',
@@ -134,7 +134,7 @@ const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
   },
   {
     name: 'Tongue',
-    icon: '👅',
+    icon: '',
     shapes: [
       'tongueOut',
     ],
@@ -146,12 +146,12 @@ const BLEND_SHAPE_CATEGORIES: BlendShapeCategory[] = [
 const EMOTION_PRESETS: EmotionPreset[] = [
   {
     name: 'Neutral',
-    icon: '😐',
+    icon: '',
     blendShapes: {},
   },
   {
     name: 'Happy',
-    icon: '😊',
+    icon: '',
     blendShapes: {
       mouthSmileLeft: 0.8,
       mouthSmileRight: 0.8,
@@ -164,7 +164,7 @@ const EMOTION_PRESETS: EmotionPreset[] = [
   },
   {
     name: 'Sad',
-    icon: '😢',
+    icon: '',
     blendShapes: {
       mouthFrownLeft: 0.7,
       mouthFrownRight: 0.7,
@@ -177,7 +177,7 @@ const EMOTION_PRESETS: EmotionPreset[] = [
   },
   {
     name: 'Angry',
-    icon: '😠',
+    icon: '',
     blendShapes: {
       browDownLeft: 0.8,
       browDownRight: 0.8,
@@ -192,7 +192,7 @@ const EMOTION_PRESETS: EmotionPreset[] = [
   },
   {
     name: 'Surprised',
-    icon: '😲',
+    icon: '',
     blendShapes: {
       eyeWideLeft: 0.9,
       eyeWideRight: 0.9,
@@ -205,7 +205,7 @@ const EMOTION_PRESETS: EmotionPreset[] = [
   },
   {
     name: 'Disgusted',
-    icon: '🤢',
+    icon: '',
     blendShapes: {
       noseSneerLeft: 0.8,
       noseSneerRight: 0.8,
@@ -219,7 +219,7 @@ const EMOTION_PRESETS: EmotionPreset[] = [
   },
   {
     name: 'Fear',
-    icon: '😨',
+    icon: '',
     blendShapes: {
       eyeWideLeft: 0.8,
       eyeWideRight: 0.8,
@@ -434,7 +434,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = React.memo(({ audioData, dur
     const playheadX = (currentTime / duration) * width
 
     // Clear canvas
-    ctx.fillStyle = '#1e293b'
+    ctx.fillStyle = 'var(--aethel-surface-tertiary)'
     ctx.fillRect(0, 0, width, height)
 
     // Draw waveform bars
@@ -444,12 +444,12 @@ const AudioWaveform: React.FC<AudioWaveformProps> = React.memo(({ audioData, dur
       const y = (height - barHeight) / 2
 
       const isPast = x < playheadX
-      ctx.fillStyle = isPast ? '#6366f1' : '#475569'
+      ctx.fillStyle = isPast ? 'var(--aethel-primary)' : 'var(--aethel-text-quaternary)'
       ctx.fillRect(x, y, barWidth - 1, barHeight)
     })
 
     // Draw playhead
-    ctx.fillStyle = '#f97316'
+    ctx.fillStyle = 'var(--aethel-warning)'
     ctx.fillRect(playheadX - 1, 0, 2, height)
 
   }, [audioData, currentTime, duration])
@@ -555,7 +555,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
             onClick={togglePlayback}
             className="px-3 py-1 bg-sky-600 hover:bg-sky-500 rounded text-xs font-medium transition-colors"
           >
-            {isPlaying ? '⏸ Pause' : '▶ Play'}
+            {isPlaying ? ' Pause' : ' Play'}
           </button>
           <span className="text-xs text-slate-400 font-mono">
             {currentTime.toFixed(2)}s / {duration.toFixed(2)}s
@@ -625,7 +625,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
       </div>
 
       <p className="text-xs text-slate-500 mt-2">
-        Shift+Click to add keyframe • Alt+Click on keyframe to remove • Click to seek
+        Shift+Click to add keyframe  Alt+Click on keyframe to remove  Click to seek
       </p>
     </div>
   )
@@ -681,7 +681,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
                 </span>
                 <span className="text-sm text-slate-300">{au.name}</span>
               </div>
-              <span className="text-slate-500">{expandedAU === au.au ? '▼' : '▶'}</span>
+              <span className="text-slate-500">{expandedAU === au.au ? '' : ''}</span>
             </div>
             
             {expandedAU === au.au && (
@@ -704,7 +704,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
                   }}
                   className="mt-2 text-xs text-sky-400 hover:text-sky-300"
                 >
-                  Apply to sliders →
+                  Apply to sliders 
                 </button>
               </div>
             )}
@@ -1030,7 +1030,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
       <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-bold text-sky-400">
-            🎭 Facial Animation Editor
+             Facial Animation Editor
           </h2>
           <span className="text-xs text-slate-500 bg-slate-700 px-2 py-1 rounded">
             Character: {characterId}
@@ -1045,19 +1045,19 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
             className={`px-3 py-1.5 text-sm rounded transition-colors
                         ${showFACS ? 'bg-sky-600' : 'bg-slate-700 hover:bg-slate-600'}`}
           >
-            📖 FACS Reference
+             FACS Reference
           </button>
           <button
             onClick={handleReset}
             className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded transition-colors"
           >
-            🔄 Reset
+             Reset
           </button>
           <button
             onClick={handleExport}
             className="px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-500 rounded transition-colors"
           >
-            📥 Export JSON
+             Export JSON
           </button>
         </div>
       </div>
@@ -1162,15 +1162,15 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           height: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #1e293b;
+          background: var(--aethel-surface-tertiary);
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #475569;
+          background: var(--aethel-text-quaternary);
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #64748b;
+          background: var(--aethel-text-tertiary);
         }
       `}</style>
     </div>
