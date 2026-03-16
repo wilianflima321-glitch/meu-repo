@@ -599,11 +599,11 @@ function Tab({
       onDragOver={onDragOver}
       onDrop={onDrop}
       className={`
-        group flex h-9 items-center gap-2 border-r border-white/10 px-3 cursor-pointer
+        group flex h-9 items-center gap-2 border-r border-[var(--aethel-border-subtle)] px-3 cursor-pointer
         transition-all select-none
         ${isActive
           ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-white border-t-2 border-t-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
-          : 'bg-[#0d1016] text-slate-400 border-t-2 border-t-transparent hover:bg-white/[0.05] hover:text-white'
+          : 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)] border-t-2 border-t-transparent hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)]'
         }
         ${tab.isPreview ? 'italic' : ''}
         ${isDragging ? 'opacity-50' : ''}
@@ -733,7 +733,7 @@ export function TabBar({ className }: { className?: string }) {
   return (
     <div
       ref={tabBarRef}
-      className={`flex items-center border-b border-white/10 bg-[linear-gradient(180deg,rgba(14,17,24,0.98),rgba(10,12,17,0.98))] ${className || ''}`}
+      className={`flex items-center border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(14,17,24,0.98),rgba(10,12,17,0.98))] ${className || ''}`}
       onDragEnd={handleDragEnd}
     >
       {/* Tabs */}
@@ -760,7 +760,7 @@ export function TabBar({ className }: { className?: string }) {
         <div className="relative">
           <button
             onClick={() => setShowOverflowMenu(!showOverflowMenu)}
-            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-400 hover:bg-white/[0.06] hover:text-white"
+            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:bg-white/[0.06] hover:text-[var(--aethel-text-primary)]"
           >
             <MoreHorizontal className="w-4 h-4" />
             <span className="text-xs">{overflowTabs.length}</span>
@@ -768,7 +768,7 @@ export function TabBar({ className }: { className?: string }) {
           </button>
 
           {showOverflowMenu && (
-            <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-white/10 bg-[#151922]/98 py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+            <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent)] py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
               {overflowTabs.map(tab => {
                 const Icon = typeof tab.icon !== 'string' ? tab.icon || getFileIcon(tab.path).icon : FileText;
                 return (
