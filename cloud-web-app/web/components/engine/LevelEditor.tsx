@@ -365,8 +365,8 @@ function Toolbar({
   return (
     <div style={{
       height: '40px',
-      background: '#252525',
-      borderBottom: '1px solid #333',
+      background: 'var(--aethel-surface-tertiary)',
+      borderBottom: '1px solid var(--aethel-border-primary)',
       display: 'flex',
       alignItems: 'center',
       padding: '0 12px',
@@ -382,10 +382,10 @@ function Toolbar({
             style={{
               width: '32px',
               height: '28px',
-              background: transformMode === mode ? '#3498db' : '#333',
+              background: transformMode === mode ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
               border: 'none',
               borderRadius: '3px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '14px',
             }}
@@ -395,17 +395,17 @@ function Toolbar({
         ))}
       </div>
       
-      <div style={{ width: '1px', height: '20px', background: '#444' }} />
+      <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
       
       {/* Snap Mode */}
       <select
         value={snapMode}
         onChange={(e) => onSnapModeChange(e.target.value as SnapMode)}
         style={{
-          background: '#333',
-          border: '1px solid #444',
+          background: 'var(--aethel-surface-quaternary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '3px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           padding: '4px 8px',
           fontSize: '11px',
         }}
@@ -425,27 +425,27 @@ function Toolbar({
           step={0.1}
           style={{
             width: '60px',
-            background: '#333',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-quaternary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '3px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '4px 8px',
             fontSize: '11px',
           }}
         />
       )}
       
-      <div style={{ width: '1px', height: '20px', background: '#444' }} />
+      <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
       
       {/* View Mode */}
       <select
         value={viewMode}
         onChange={(e) => onViewModeChange(e.target.value as ViewportMode)}
         style={{
-          background: '#333',
-          border: '1px solid #444',
+          background: 'var(--aethel-surface-quaternary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '3px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           padding: '4px 8px',
           fontSize: '11px',
         }}
@@ -463,10 +463,10 @@ function Toolbar({
         onClick={onPlayPause}
         style={{
           padding: '6px 16px',
-          background: isPlaying ? '#e74c3c' : '#2ecc71',
+          background: isPlaying ? 'var(--aethel-error)' : 'var(--aethel-success)',
           border: 'none',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -477,17 +477,17 @@ function Toolbar({
         {isPlaying ? '⏹ Stop' : '▶ Play'}
       </button>
       
-      <div style={{ width: '1px', height: '20px', background: '#444' }} />
+      <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
       
       {/* Save & Build */}
       <button
         onClick={onSave}
         style={{
           padding: '6px 12px',
-          background: '#333',
-          border: '1px solid #555',
+          background: 'var(--aethel-surface-quaternary)',
+          border: '1px solid var(--aethel-border-secondary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontSize: '12px',
         }}
@@ -499,10 +499,10 @@ function Toolbar({
         onClick={onBuild}
         style={{
           padding: '6px 12px',
-          background: '#3498db',
+          background: 'var(--aethel-primary)',
           border: 'none',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontSize: '12px',
         }}
@@ -544,7 +544,7 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
   
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '8px 12px', borderBottom: '1px solid #333', fontWeight: 'bold', fontSize: '12px' }}>
+      <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
         World Outliner
       </div>
       
@@ -589,16 +589,16 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
       </div>
       
       {/* Add object buttons */}
-      <div style={{ padding: '8px', borderTop: '1px solid #333', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+      <div style={{ padding: '8px', borderTop: '1px solid var(--aethel-border-primary)', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
         {['Cube', 'Sphere', 'Light', 'Camera', 'Empty'].map((type) => (
           <button
             key={type}
             style={{
               padding: '4px 8px',
-              background: '#333',
-              border: '1px solid #444',
+              background: 'var(--aethel-surface-quaternary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '3px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '10px',
             }}
@@ -624,10 +624,10 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
   if (!object) {
     return (
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '8px 12px', borderBottom: '1px solid #333', fontWeight: 'bold', fontSize: '12px' }}>
+        <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
           Details
         </div>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--aethel-text-muted)' }}>
           Select an object
         </div>
       </div>
@@ -636,24 +636,24 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
   
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '8px 12px', borderBottom: '1px solid #333', fontWeight: 'bold', fontSize: '12px' }}>
+      <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
         Details - {object.name}
       </div>
       
       <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
         {/* Name */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontSize: '11px', color: '#888', marginBottom: '4px' }}>Name</label>
+          <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>Name</label>
           <input
             type="text"
             value={object.name}
             onChange={(e) => onChange(object.id, { name: e.target.value })}
             style={{
               width: '100%',
-              background: '#333',
-              border: '1px solid #444',
+              background: 'var(--aethel-surface-quaternary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '4px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               padding: '6px 10px',
               fontSize: '12px',
             }}
@@ -665,11 +665,11 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
           <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>Transform</div>
           
           {/* Position */}
-          <label style={{ display: 'block', fontSize: '11px', color: '#888', marginBottom: '4px' }}>Position</label>
+          <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>Position</label>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
             {['X', 'Y', 'Z'].map((axis, i) => (
               <div key={axis} style={{ flex: 1 }}>
-                <div style={{ fontSize: '10px', color: ['#e74c3c', '#2ecc71', '#3498db'][i], marginBottom: '2px' }}>{axis}</div>
+                <div style={{ fontSize: '10px', color: ['var(--aethel-error)', 'var(--aethel-success)', 'var(--aethel-primary)'][i], marginBottom: '2px' }}>{axis}</div>
                 <input
                   type="number"
                   value={object.position[i]}
@@ -681,10 +681,10 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
                   }}
                   style={{
                     width: '100%',
-                    background: '#252525',
-                    border: '1px solid #444',
+                    background: 'var(--aethel-surface-tertiary)',
+                    border: '1px solid var(--aethel-border-primary)',
                     borderRadius: '3px',
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     padding: '4px 6px',
                     fontSize: '11px',
                   }}
@@ -694,11 +694,11 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
           </div>
           
           {/* Rotation */}
-          <label style={{ display: 'block', fontSize: '11px', color: '#888', marginBottom: '4px' }}>Rotation</label>
+          <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>Rotation</label>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
             {['X', 'Y', 'Z'].map((axis, i) => (
               <div key={axis} style={{ flex: 1 }}>
-                <div style={{ fontSize: '10px', color: ['#e74c3c', '#2ecc71', '#3498db'][i], marginBottom: '2px' }}>{axis}</div>
+                <div style={{ fontSize: '10px', color: ['var(--aethel-error)', 'var(--aethel-success)', 'var(--aethel-primary)'][i], marginBottom: '2px' }}>{axis}</div>
                 <input
                   type="number"
                   value={object.rotation[i]}
@@ -710,10 +710,10 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
                   }}
                   style={{
                     width: '100%',
-                    background: '#252525',
-                    border: '1px solid #444',
+                    background: 'var(--aethel-surface-tertiary)',
+                    border: '1px solid var(--aethel-border-primary)',
                     borderRadius: '3px',
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     padding: '4px 6px',
                     fontSize: '11px',
                   }}
@@ -723,11 +723,11 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
           </div>
           
           {/* Scale */}
-          <label style={{ display: 'block', fontSize: '11px', color: '#888', marginBottom: '4px' }}>Scale</label>
+          <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>Scale</label>
           <div style={{ display: 'flex', gap: '4px' }}>
             {['X', 'Y', 'Z'].map((axis, i) => (
               <div key={axis} style={{ flex: 1 }}>
-                <div style={{ fontSize: '10px', color: ['#e74c3c', '#2ecc71', '#3498db'][i], marginBottom: '2px' }}>{axis}</div>
+                <div style={{ fontSize: '10px', color: ['var(--aethel-error)', 'var(--aethel-success)', 'var(--aethel-primary)'][i], marginBottom: '2px' }}>{axis}</div>
                 <input
                   type="number"
                   value={object.scale[i]}
@@ -740,10 +740,10 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
                   }}
                   style={{
                     width: '100%',
-                    background: '#252525',
-                    border: '1px solid #444',
+                    background: 'var(--aethel-surface-tertiary)',
+                    border: '1px solid var(--aethel-border-primary)',
                     borderRadius: '3px',
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     padding: '4px 6px',
                     fontSize: '11px',
                   }}
@@ -760,7 +760,7 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
             <div
               key={comp.id}
               style={{
-                background: '#333',
+                background: 'var(--aethel-surface-quaternary)',
                 borderRadius: '4px',
                 padding: '8px',
                 marginBottom: '8px',
@@ -777,10 +777,10 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
             style={{
               width: '100%',
               padding: '8px',
-              background: '#333',
-              border: '1px dashed #555',
+              background: 'var(--aethel-surface-quaternary)',
+              border: '1px dashed var(--aethel-border-secondary)',
               borderRadius: '4px',
-              color: '#888',
+              color: 'var(--aethel-text-quaternary)',
               cursor: 'pointer',
               fontSize: '11px',
             }}
@@ -1057,7 +1057,7 @@ export default function LevelEditor() {
   }, []);
   
   return (
-    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#1a1a1a', color: '#fff' }}>
+    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--aethel-surface-primary)', color: 'var(--aethel-text-primary)' }}>
       {/* Play Mode Indicator */}
       {isPlaying && (
         <div style={{
@@ -1065,8 +1065,8 @@ export default function LevelEditor() {
           top: '50px',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: '#22c55e',
-          color: '#000',
+          background: 'var(--aethel-success)',
+          color: 'var(--aethel-surface-primary)',
           padding: '4px 16px',
           borderRadius: '0 0 8px 8px',
           fontSize: '12px',
@@ -1096,7 +1096,7 @@ export default function LevelEditor() {
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Left Panel - World Outliner */}
-        <div style={{ width: '250px', borderRight: '1px solid #333', background: '#222' }}>
+        <div style={{ width: '250px', borderRight: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)' }}>
           <OutlinerMini
             objects={objects}
             selectedId={selectedId}
@@ -1134,10 +1134,10 @@ export default function LevelEditor() {
               onClick={() => setShowGrid(!showGrid)}
               style={{
                 padding: '4px 8px',
-                background: showGrid ? '#3498db' : '#333',
+                background: showGrid ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
                 border: 'none',
                 borderRadius: '3px',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 cursor: 'pointer',
                 fontSize: '11px',
               }}
@@ -1148,10 +1148,10 @@ export default function LevelEditor() {
               onClick={() => setShowStats(!showStats)}
               style={{
                 padding: '4px 8px',
-                background: showStats ? '#3498db' : '#333',
+                background: showStats ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
                 border: 'none',
                 borderRadius: '3px',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 cursor: 'pointer',
                 fontSize: '11px',
               }}
@@ -1172,7 +1172,7 @@ export default function LevelEditor() {
             alignItems: 'center',
             padding: '0 12px',
             fontSize: '11px',
-            color: '#888',
+            color: 'var(--aethel-text-quaternary)',
           }}>
             <span>Objects: {objects.length}</span>
             <span style={{ margin: '0 16px' }}>|</span>
@@ -1185,7 +1185,7 @@ export default function LevelEditor() {
         </div>
         
         {/* Right Panel - Details */}
-        <div style={{ width: '300px', borderLeft: '1px solid #333', background: '#222' }}>
+        <div style={{ width: '300px', borderLeft: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)' }}>
           <DetailsPanelMini
             object={selectedObject}
             onChange={handleObjectChange}

@@ -17,114 +17,127 @@ const swaggerHtml = (specUrl: string) => `
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
   <link rel="icon" href="/favicon.ico" />
   <style>
+  :root {
+    --aethel-docs-bg: var(--aethel-docs-bg);
+    --aethel-docs-surface: var(--aethel-docs-surface);
+    --aethel-docs-border: var(--aethel-docs-border);
+    --aethel-docs-text: var(--aethel-docs-text);
+    --aethel-docs-text-muted: var(--aethel-docs-text-muted);
+    --aethel-docs-primary: var(--aethel-docs-primary);
+    --aethel-docs-success: var(--aethel-docs-success);
+    --aethel-docs-warning: var(--aethel-docs-warning);
+    --aethel-docs-error: var(--aethel-docs-error);
+    --aethel-docs-info: var(--aethel-docs-info);
+  }
+
     body {
       margin: 0;
-      background: #0d0d12;
+      background: var(--aethel-docs-bg);
     }
     .swagger-ui {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
     .swagger-ui .topbar {
-      background: #14141c;
-      border-bottom: 1px solid #2a2a3c;
+      background: var(--aethel-docs-surface);
+      border-bottom: 1px solid var(--aethel-docs-border);
     }
     .swagger-ui .topbar .download-url-wrapper .select-label {
-      color: #e4e4eb;
+      color: var(--aethel-docs-text);
     }
     .swagger-ui .info {
       margin: 30px 0;
     }
     .swagger-ui .info .title {
-      color: #e4e4eb;
+      color: var(--aethel-docs-text);
     }
     .swagger-ui .info .description p {
-      color: #8b8b9e;
+      color: var(--aethel-docs-text-muted);
     }
     .swagger-ui .scheme-container {
-      background: #14141c;
+      background: var(--aethel-docs-surface);
       box-shadow: none;
-      border: 1px solid #2a2a3c;
+      border: 1px solid var(--aethel-docs-border);
     }
     .swagger-ui section.models {
-      border: 1px solid #2a2a3c;
+      border: 1px solid var(--aethel-docs-border);
     }
     .swagger-ui .model-container {
-      background: #14141c;
+      background: var(--aethel-docs-surface);
     }
     .swagger-ui .opblock.opblock-get {
-      border-color: #22c55e;
-      background: rgba(34, 197, 94, 0.1);
+      border-color: var(--aethel-docs-success);
+      background: color-mix(in_srgb,var(--aethel-docs-success) 10%, transparent);
     }
     .swagger-ui .opblock.opblock-post {
-      border-color: #6366f1;
-      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--aethel-docs-primary);
+      background: color-mix(in_srgb,var(--aethel-docs-primary) 10%, transparent);
     }
     .swagger-ui .opblock.opblock-put {
-      border-color: #f59e0b;
-      background: rgba(245, 158, 11, 0.1);
+      border-color: var(--aethel-docs-warning);
+      background: color-mix(in_srgb,var(--aethel-docs-warning) 10%, transparent);
     }
     .swagger-ui .opblock.opblock-delete {
-      border-color: #ef4444;
-      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--aethel-docs-error);
+      background: color-mix(in_srgb,var(--aethel-docs-error) 10%, transparent);
     }
     .swagger-ui .opblock.opblock-patch {
-      border-color: #06b6d4;
-      background: rgba(6, 182, 212, 0.1);
+      border-color: var(--aethel-docs-info);
+      background: color-mix(in_srgb,var(--aethel-docs-info) 10%, transparent);
     }
     .swagger-ui .btn.authorize {
-      background: #6366f1;
-      border-color: #6366f1;
+      background: var(--aethel-docs-primary);
+      border-color: var(--aethel-docs-primary);
       color: white;
     }
     .swagger-ui .btn.authorize:hover {
-      background: #7c7ff2;
+      background: color-mix(in_srgb,var(--aethel-docs-primary) 80%, white);
     }
     /* Dark mode adjustments */
     .swagger-ui .opblock .opblock-summary-operation-id,
     .swagger-ui .opblock .opblock-summary-path,
     .swagger-ui .opblock .opblock-summary-description {
-      color: #e4e4eb !important;
+      color: var(--aethel-docs-text) !important;
     }
     .swagger-ui table thead tr td, 
     .swagger-ui table thead tr th {
-      color: #e4e4eb;
-      border-color: #2a2a3c;
+      color: var(--aethel-docs-text);
+      border-color: var(--aethel-docs-border);
     }
     .swagger-ui .response-col_status {
-      color: #e4e4eb;
+      color: var(--aethel-docs-text);
     }
     .swagger-ui .tab li {
-      color: #8b8b9e;
+      color: var(--aethel-docs-text-muted);
     }
     .swagger-ui .tab li.active {
-      color: #e4e4eb;
+      color: var(--aethel-docs-text);
     }
     .swagger-ui .opblock-description-wrapper p,
     .swagger-ui .opblock-external-docs-wrapper p {
-      color: #8b8b9e;
+      color: var(--aethel-docs-text-muted);
     }
     .swagger-ui .parameter__name,
     .swagger-ui .parameter__type,
     .swagger-ui .parameter__in {
-      color: #e4e4eb;
+      color: var(--aethel-docs-text);
     }
     .swagger-ui input[type=text],
     .swagger-ui textarea {
-      background: #14141c;
-      border-color: #2a2a3c;
-      color: #e4e4eb;
+      background: var(--aethel-docs-surface);
+      border-color: var(--aethel-docs-border);
+      color: var(--aethel-docs-text);
     }
     .swagger-ui select {
-      background: #14141c;
-      border-color: #2a2a3c;
-      color: #e4e4eb;
+      background: var(--aethel-docs-surface);
+      border-color: var(--aethel-docs-border);
+      color: var(--aethel-docs-text);
     }
     .swagger-ui .model-title,
     .swagger-ui .model {
-      color: #e4e4eb;
+      color: var(--aethel-docs-text);
     }
     .swagger-ui .prop-type {
-      color: #6366f1;
+      color: var(--aethel-docs-primary);
     }
     /* Logo */
     .swagger-ui .topbar .topbar-wrapper::before {

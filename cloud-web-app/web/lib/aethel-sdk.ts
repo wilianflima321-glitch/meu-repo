@@ -406,16 +406,16 @@ function showToast(message: string, type: 'info' | 'warning' | 'error' = 'info',
     const container = ensureToastContainer();
     
     const colors = {
-        info: { bg: '#2563eb', border: '#3b82f6' },
-        warning: { bg: '#d97706', border: '#f59e0b' },
-        error: { bg: '#dc2626', border: '#ef4444' }
+        info: { bg: 'var(--aethel-primary, #2563eb)', border: 'var(--aethel-primary-light, #3b82f6)' },
+        warning: { bg: 'var(--aethel-warning, #f59e0b)', border: 'var(--aethel-warning-light, #f59e0b)' },
+        error: { bg: 'var(--aethel-error, #ef4444)', border: 'var(--aethel-error-light, #ef4444)' }
     };
     
     const toast = document.createElement('div');
     toast.style.cssText = `
         background: ${colors[type].bg};
         border: 1px solid ${colors[type].border};
-        color: white;
+        color: var(--aethel-text-primary, #ffffff);
         padding: 12px 16px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -526,8 +526,8 @@ const webAdapter = {
                 
                 const dialog = document.createElement('div');
                 dialog.style.cssText = `
-                    background: #1e1e1e;
-                    border: 1px solid #3c3c3c;
+                    background: var(--aethel-surface-primary, #1e1e1e);
+                    border: 1px solid var(--aethel-border-primary, #3c3c3c);
                     border-radius: 8px;
                     width: 500px;
                     max-height: 400px;
@@ -537,7 +537,7 @@ const webAdapter = {
                 
                 if (options?.title) {
                     const header = document.createElement('div');
-                    header.style.cssText = 'padding: 12px 16px; border-bottom: 1px solid #3c3c3c; color: white; font-weight: 500;';
+                    header.style.cssText = 'padding: 12px 16px; border-bottom: 1px solid var(--aethel-border-primary, #3c3c3c); color: var(--aethel-text-primary, #ffffff); font-weight: 500;';
                     header.textContent = options.title;
                     dialog.appendChild(header);
                 }
@@ -550,14 +550,14 @@ const webAdapter = {
                     option.style.cssText = `
                         padding: 8px 16px;
                         cursor: pointer;
-                        color: white;
+                        color: var(--aethel-text-primary, #ffffff);
                         transition: background 0.2s;
                     `;
-                    option.onmouseenter = () => option.style.background = '#2d2d2d';
+                    option.onmouseenter = () => option.style.background = 'var(--aethel-surface-quaternary, #2d2d2d)';
                     option.onmouseleave = () => option.style.background = 'transparent';
                     option.innerHTML = `
                         <div style="font-weight: 500;">${item.label}</div>
-                        ${item.description ? `<div style="font-size: 12px; color: #888;">${item.description}</div>` : ''}
+                        ${item.description ? `<div style="font-size: 12px; color: var(--aethel-text-quaternary, #888);">${item.description}</div>` : ''}
                     `;
                     option.onclick = () => {
                         overlay.remove();
@@ -622,9 +622,9 @@ const webAdapter = {
             
             const progressEl = document.createElement('div');
             progressEl.style.cssText = `
-                background: #1e1e1e;
-                border: 1px solid #3c3c3c;
-                color: white;
+                background: var(--aethel-surface-primary, #1e1e1e);
+                border: 1px solid var(--aethel-border-primary, #3c3c3c);
+                color: var(--aethel-text-primary, #ffffff);
                 padding: 12px 16px;
                 border-radius: 8px;
                 min-width: 300px;
@@ -636,13 +636,13 @@ const webAdapter = {
             title.textContent = options.title;
             
             const message = document.createElement('div');
-            message.style.cssText = 'font-size: 12px; color: #888; margin-bottom: 8px;';
+            message.style.cssText = 'font-size: 12px; color: var(--aethel-text-quaternary, #888); margin-bottom: 8px;';
             
             const bar = document.createElement('div');
-            bar.style.cssText = 'height: 4px; background: #3c3c3c; border-radius: 2px; overflow: hidden;';
+            bar.style.cssText = 'height: 4px; background: var(--aethel-border-primary, #3c3c3c); border-radius: 2px; overflow: hidden;';
             
             const fill = document.createElement('div');
-            fill.style.cssText = 'height: 100%; background: #2563eb; width: 0%; transition: width 0.3s;';
+            fill.style.cssText = 'height: 100%; background: var(--aethel-primary, #2563eb); width: 0%; transition: width 0.3s;';
             bar.appendChild(fill);
             
             progressEl.appendChild(title);
@@ -681,8 +681,8 @@ const webAdapter = {
                     left: 0;
                     right: 0;
                     height: 24px;
-                    background: #007acc;
-                    color: white;
+                    background: var(--aethel-primary, #007acc);
+                    color: var(--aethel-text-primary, #ffffff);
                     font-size: 12px;
                     display: flex;
                     align-items: center;

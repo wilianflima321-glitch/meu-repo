@@ -72,14 +72,14 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
       className={`
         min-w-[180px] rounded-lg shadow-lg border-2
         ${selected ? 'ring-2 ring-blue-500' : ''}
-        ${isEvent ? 'border-red-600' : 'border-gray-600'}
+        ${isEvent ? 'border-red-600' : 'border-[var(--aethel-border-secondary)]'}
       `}
-      style={{ backgroundColor: '#1e1e1e' }}
+      style={{ backgroundColor: 'var(--aethel-surface-primary)' }}
     >
       {/* Header */}
       <div
-        className="px-3 py-2 rounded-t-md text-white text-sm font-semibold flex items-center gap-2"
-        style={{ backgroundColor: definition?.color || '#6b7280' }}
+        className="px-3 py-2 rounded-t-md text-[var(--aethel-text-primary)] text-sm font-semibold flex items-center gap-2"
+        style={{ backgroundColor: definition?.color || 'var(--aethel-text-quaternary)' }}
       >
         {isEvent && <span className="text-xs">⚡</span>}
         {isPure && <span className="text-xs">ƒ</span>}
@@ -104,7 +104,7 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
                 `}
                 style={{ left: -6 }}
               />
-              <span className="text-xs text-gray-300 ml-2">{input.name}</span>
+              <span className="text-xs text-[var(--aethel-text-secondary)] ml-2">{input.name}</span>
             </div>
           ))}
         </div>
@@ -113,7 +113,7 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
         <div className="flex flex-col py-2 px-1 min-w-[80px] items-end ml-auto">
           {definition?.outputs.map((output, i) => (
             <div key={output.id} className="flex items-center gap-1 py-1 relative">
-              <span className="text-xs text-gray-300 mr-2">{output.name}</span>
+              <span className="text-xs text-[var(--aethel-text-secondary)] mr-2">{output.name}</span>
               <Handle
                 type="source"
                 position={Position.Right}
@@ -185,14 +185,14 @@ const NodePalette: React.FC<{
   };
   
   return (
-    <div className="w-64 bg-[#1e1e1e] border-r border-gray-700 flex flex-col">
-      <div className="p-3 border-b border-gray-700">
+    <div className="w-64 bg-[var(--aethel-surface-primary)] border-r border-[var(--aethel-border-primary)] flex flex-col">
+      <div className="p-3 border-b border-[var(--aethel-border-primary)]">
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search nodes..."
-          className="w-full px-3 py-2 bg-[#2d2d2d] border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+          className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:border-[var(--aethel-primary)] focus:outline-none"
         />
       </div>
       
@@ -201,7 +201,7 @@ const NodePalette: React.FC<{
           <div key={category}>
             <button
               onClick={() => toggleCategory(category)}
-              className="w-full px-3 py-2 flex items-center justify-between text-sm font-medium text-gray-300 hover:bg-[#2d2d2d] border-b border-gray-800"
+              className="w-full px-3 py-2 flex items-center justify-between text-sm font-medium text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-primary)]"
             >
               <span>{category}</span>
               <span>{expandedCats.has(category) ? '▼' : '▶'}</span>
@@ -213,7 +213,7 @@ const NodePalette: React.FC<{
                   <button
                     key={node.type}
                     onClick={() => onAddNode(node.type)}
-                    className="w-full px-4 py-1.5 text-left text-xs text-gray-400 hover:bg-[#2d2d2d] hover:text-white flex items-center gap-2"
+                    className="w-full px-4 py-1.5 text-left text-xs text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-2"
                     title={node.description}
                   >
                     <span
@@ -243,12 +243,12 @@ const VariablesPanel: React.FC<{
   onUpdate: (id: string, updates: Partial<BlueprintVariable>) => void;
 }> = ({ variables, onAdd, onDelete, onUpdate }) => {
   return (
-    <div className="p-3 border-b border-gray-700">
+    <div className="p-3 border-b border-[var(--aethel-border-primary)]">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-300">Variables</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Variables</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-white"
+          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
@@ -261,11 +261,11 @@ const VariablesPanel: React.FC<{
           variables.map(v => (
             <div
               key={v.id}
-              className="flex items-center justify-between px-2 py-1 bg-[#2d2d2d] rounded text-xs"
+              className="flex items-center justify-between px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs"
             >
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                <span className="text-white">{v.name}</span>
+                <span className="text-[var(--aethel-text-primary)]">{v.name}</span>
                 <span className="text-gray-500">({v.type})</span>
               </div>
               <button
@@ -306,7 +306,7 @@ const ComponentsPanel: React.FC<{
           onClick={() => onSelect(comp.id)}
           className={`
             flex items-center gap-2 px-2 py-1 text-xs cursor-pointer rounded
-            ${selectedId === comp.id ? 'bg-blue-600 text-white' : 'hover:bg-[#3d3d3d] text-gray-300'}
+            ${selectedId === comp.id ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}
           `}
           style={{ paddingLeft: `${8 + depth * 16}px` }}
         >
@@ -322,18 +322,18 @@ const ComponentsPanel: React.FC<{
   const rootComponents = buildTree(undefined);
   
   return (
-    <div className="p-3 border-b border-gray-700">
+    <div className="p-3 border-b border-[var(--aethel-border-primary)]">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-300">Components</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Components</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-white"
+          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
       </div>
       
-      <div className="space-y-0.5 max-h-48 overflow-y-auto bg-[#1a1a1a] rounded p-1">
+      <div className="space-y-0.5 max-h-48 overflow-y-auto bg-[var(--aethel-surface-primary)] rounded p-1">
         {rootComponents.length === 0 ? (
           <div className="text-xs text-gray-500 italic p-2">No components</div>
         ) : (
@@ -358,10 +358,10 @@ const FunctionsPanel: React.FC<{
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-300">Functions</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Functions</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-white"
+          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
@@ -377,7 +377,7 @@ const FunctionsPanel: React.FC<{
               onClick={() => onSelect(f.id)}
               className={`
                 flex items-center justify-between px-2 py-1 rounded text-xs cursor-pointer
-                ${selectedId === f.id ? 'bg-blue-600 text-white' : 'bg-[#2d2d2d] hover:bg-[#3d3d3d] text-gray-300'}
+                ${selectedId === f.id ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}
               `}
             >
               <div className="flex items-center gap-2">
@@ -418,31 +418,31 @@ const DetailsPanel: React.FC<{
   
   return (
     <div className="p-4">
-      <h3 className="text-white font-semibold mb-3">
+      <h3 className="text-[var(--aethel-text-primary)] font-semibold mb-3">
         {definition?.displayName || 'Node Details'}
       </h3>
       
       <div className="space-y-3 text-sm">
         <div>
-          <label className="text-gray-400 text-xs">Type</label>
-          <div className="text-white">{selectedNode.type}</div>
+          <label className="text-[var(--aethel-text-tertiary)] text-xs">Type</label>
+          <div className="text-[var(--aethel-text-primary)]">{selectedNode.type}</div>
         </div>
         
         <div>
-          <label className="text-gray-400 text-xs">Category</label>
-          <div className="text-white">{definition?.category || 'Unknown'}</div>
+          <label className="text-[var(--aethel-text-tertiary)] text-xs">Category</label>
+          <div className="text-[var(--aethel-text-primary)]">{definition?.category || 'Unknown'}</div>
         </div>
         
         {definition?.description && (
           <div>
-            <label className="text-gray-400 text-xs">Description</label>
-            <div className="text-gray-300 text-xs">{definition.description}</div>
+            <label className="text-[var(--aethel-text-tertiary)] text-xs">Description</label>
+            <div className="text-[var(--aethel-text-secondary)] text-xs">{definition.description}</div>
           </div>
         )}
         
         <div>
-          <label className="text-gray-400 text-xs">Position</label>
-          <div className="flex gap-2 text-white">
+          <label className="text-[var(--aethel-text-tertiary)] text-xs">Position</label>
+          <div className="flex gap-2 text-[var(--aethel-text-primary)]">
             <span>X: {Math.round(selectedNode.position.x)}</span>
             <span>Y: {Math.round(selectedNode.position.y)}</span>
           </div>
@@ -451,11 +451,11 @@ const DetailsPanel: React.FC<{
         {/* Input default values */}
         {definition?.inputs.filter(i => i.type === 'data').map(input => (
           <div key={input.id}>
-            <label className="text-gray-400 text-xs">{input.name}</label>
+            <label className="text-[var(--aethel-text-tertiary)] text-xs">{input.name}</label>
             <input
               type="text"
               defaultValue={String(input.defaultValue ?? '')}
-              className="w-full px-2 py-1 bg-[#2d2d2d] border border-gray-600 rounded text-white text-xs"
+              className="w-full px-2 py-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-[var(--aethel-text-primary)] text-xs"
             />
           </div>
         ))}
@@ -540,12 +540,12 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       type: 'smoothstep',
       animated: sourcePin.type === 'exec',
       style: { 
-        stroke: sourcePin.type === 'exec' ? '#ffffff' : '#06b6d4',
+        stroke: sourcePin.type === 'exec' ? 'var(--aethel-text-primary)' : 'var(--aethel-info)',
         strokeWidth: 2,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: sourcePin.type === 'exec' ? '#ffffff' : '#06b6d4',
+        color: sourcePin.type === 'exec' ? 'var(--aethel-text-primary)' : 'var(--aethel-info)',
       },
     } as Edge;
     
@@ -672,7 +672,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
   }, [handleCompile, onSave, blueprint]);
   
   return (
-    <div className="flex h-full bg-[#1e1e1e] text-white">
+    <div className="flex h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Left Sidebar - Node Palette */}
       <NodePalette
         onAddNode={handleAddNode}
@@ -683,21 +683,21 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       {/* Main Graph Area */}
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="h-12 border-b border-gray-700 flex items-center px-4 gap-4 bg-[#252525]">
+        <div className="h-12 border-b border-[var(--aethel-border-primary)] flex items-center px-4 gap-4 bg-[var(--aethel-surface-tertiary)]">
           <div className="flex items-center gap-2">
             <span className="text-blue-400">📘</span>
             <input
               type="text"
               value={blueprint.name}
               onChange={(e) => setBlueprint(prev => ({ ...prev, name: e.target.value }))}
-              className="bg-transparent border-b border-transparent hover:border-gray-600 focus:border-blue-500 outline-none px-1 text-white font-semibold"
+              className="bg-transparent border-b border-transparent hover:border-[var(--aethel-border-secondary)] focus:border-[var(--aethel-primary)] outline-none px-1 text-[var(--aethel-text-primary)] font-semibold"
             />
           </div>
           
           <select
             value={blueprint.type}
             onChange={(e) => setBlueprint(prev => ({ ...prev, type: e.target.value as BlueprintType }))}
-            className="bg-[#2d2d2d] border border-gray-600 rounded px-2 py-1 text-sm"
+            className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-sm"
           >
             <option value="Actor">Actor</option>
             <option value="Character">Character</option>
@@ -722,7 +722,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium"
+              className="px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded text-sm font-medium"
             >
               Save
             </button>
@@ -738,13 +738,13 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
         </div>
         
         {/* Tab Bar */}
-        <div className="h-8 border-b border-gray-700 flex items-center px-2 gap-1 bg-[#2d2d2d]">
+        <div className="h-8 border-b border-[var(--aethel-border-primary)] flex items-center px-2 gap-1 bg-[var(--aethel-surface-tertiary)]">
           <button
             onClick={() => setActiveTab('eventGraph')}
             className={`px-3 py-1 text-xs rounded ${
               activeTab === 'eventGraph' 
-                ? 'bg-[#1e1e1e] text-white' 
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]' 
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Event Graph
@@ -753,8 +753,8 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
             onClick={() => setActiveTab('constructionScript')}
             className={`px-3 py-1 text-xs rounded ${
               activeTab === 'constructionScript' 
-                ? 'bg-[#1e1e1e] text-white' 
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]' 
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Construction Script
@@ -777,16 +777,16 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
             defaultEdgeOptions={{
               type: 'smoothstep',
             }}
-            style={{ background: '#1a1a1a' }}
+            style={{ background: 'var(--aethel-surface-primary)' }}
           >
-            <Background color="#333" gap={16} />
-            <Controls className="bg-[#2d2d2d] border border-gray-600 rounded" />
+            <Background color="var(--aethel-border-primary)" gap={16} />
+            <Controls className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded" />
             <MiniMap 
-              className="bg-[#2d2d2d] border border-gray-600 rounded"
+              className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded"
               nodeColor="#3b82f6"
             />
             
-            <Panel position="top-right" className="bg-[#2d2d2d] p-2 rounded border border-gray-600 text-xs text-gray-400">
+            <Panel position="top-right" className="bg-[var(--aethel-surface-tertiary)] p-2 rounded border border-[var(--aethel-border-secondary)] text-xs text-[var(--aethel-text-tertiary)]">
               Right-click for context menu • Drag to pan • Scroll to zoom
             </Panel>
           </ReactFlow>
@@ -794,11 +794,11 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       </div>
       
       {/* Right Sidebar */}
-      <div className="w-72 border-l border-gray-700 flex flex-col bg-[#252525]">
+      <div className="w-72 border-l border-[var(--aethel-border-primary)] flex flex-col bg-[var(--aethel-surface-tertiary)]">
         {/* Blueprint Info */}
-        <div className="p-3 border-b border-gray-700">
-          <h3 className="text-sm font-semibold text-white mb-2">My Blueprint</h3>
-          <div className="text-xs text-gray-400">
+        <div className="p-3 border-b border-[var(--aethel-border-primary)]">
+          <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] mb-2">My Blueprint</h3>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">
             <div>Type: {blueprint.type}</div>
             <div>Parent: {blueprint.parentClass || 'None'}</div>
           </div>
@@ -831,7 +831,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
         />
         
         {/* Details */}
-        <div className="flex-1 border-t border-gray-700 overflow-y-auto">
+        <div className="flex-1 border-t border-[var(--aethel-border-primary)] overflow-y-auto">
           <DetailsPanel
             selectedNode={selectedNode}
             onUpdate={() => {}}

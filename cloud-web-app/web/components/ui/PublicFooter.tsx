@@ -32,7 +32,7 @@ const FOOTER_SECTIONS = [
 
 export default function PublicFooter() {
   return (
-    <footer className="border-t border-white/[0.06] bg-gradient-to-b from-black via-black to-[#0b0b12]" role="contentinfo">
+    <footer className="border-t border-[var(--aethel-border-subtle)] bg-gradient-to-b from-[var(--aethel-surface-primary)] via-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)]" role="contentinfo">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           {/* Brand column */}

@@ -408,18 +408,18 @@ function Toolbar({
       alignItems: 'center',
       gap: '12px',
       padding: '8px 12px',
-      background: '#1a1a2e',
-      borderBottom: '1px solid #333',
+      background: 'var(--aethel-surface-tertiary)',
+      borderBottom: '1px solid var(--aethel-border-primary)',
     }}>
       {/* Brush Active Toggle */}
       <button
         onClick={() => onBrushActiveChange(!brushActive)}
         style={{
           padding: '8px 16px',
-          background: brushActive ? '#4caf50' : '#333',
+          background: brushActive ? 'var(--aethel-success)' : 'var(--aethel-surface-quaternary)',
           border: 'none',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontWeight: 'bold',
           fontSize: '13px',
@@ -428,7 +428,7 @@ function Toolbar({
         ✏️ {brushActive ? 'Painting' : 'Navigate'}
       </button>
       
-      <div style={{ width: '1px', height: '24px', background: '#333' }} />
+      <div style={{ width: '1px', height: '24px', background: 'var(--aethel-surface-quaternary)' }} />
       
       {/* Mode Buttons */}
       <div style={{ display: 'flex', gap: '4px' }}>
@@ -438,10 +438,10 @@ function Toolbar({
             onClick={() => onBrushSettingsChange({ ...brushSettings, mode })}
             style={{
               padding: '6px 12px',
-              background: brushSettings.mode === mode ? '#3f51b5' : '#0f0f23',
-              border: '1px solid #333',
+              background: brushSettings.mode === mode ? 'var(--aethel-primary)' : 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '4px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '12px',
             }}
@@ -455,7 +455,7 @@ function Toolbar({
       {/* Sculpt Operations (only show when in sculpt mode) */}
       {brushSettings.mode === 'sculpt' && (
         <>
-          <div style={{ width: '1px', height: '24px', background: '#333' }} />
+          <div style={{ width: '1px', height: '24px', background: 'var(--aethel-surface-quaternary)' }} />
           <div style={{ display: 'flex', gap: '4px' }}>
             {operations.map(({ op, icon, label }) => (
               <button
@@ -463,10 +463,10 @@ function Toolbar({
                 onClick={() => onBrushSettingsChange({ ...brushSettings, operation: op })}
                 style={{
                   padding: '6px 10px',
-                  background: brushSettings.operation === op ? '#ff9800' : '#0f0f23',
-                  border: '1px solid #333',
+                  background: brushSettings.operation === op ? 'var(--aethel-warning)' : 'var(--aethel-surface-primary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   cursor: 'pointer',
                   fontSize: '11px',
                 }}
@@ -486,10 +486,10 @@ function Toolbar({
         <button
           style={{
             padding: '6px 12px',
-            background: '#0f0f23',
-            border: '1px solid #333',
+            background: 'var(--aethel-surface-primary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '12px',
           }}
@@ -508,8 +508,8 @@ function Toolbar({
             top: '100%',
             right: 0,
             marginTop: '4px',
-            background: '#1a1a2e',
-            border: '1px solid #333',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '4px',
             minWidth: '150px',
@@ -530,13 +530,13 @@ function Toolbar({
                 padding: '6px 12px',
                 background: 'none',
                 border: 'none',
-                color: '#ccc',
+                color: 'var(--aethel-text-secondary)',
                 textAlign: 'left',
                 cursor: 'pointer',
                 fontSize: '12px',
                 textTransform: 'capitalize',
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = '#333'}
+              onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
               onMouseOut={(e) => e.currentTarget.style.background = 'none'}
             >
               {type}
@@ -550,10 +550,10 @@ function Toolbar({
         onClick={onImport}
         style={{
           padding: '6px 12px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-primary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontSize: '12px',
         }}
@@ -564,10 +564,10 @@ function Toolbar({
         onClick={onExport}
         style={{
           padding: '6px 12px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-primary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontSize: '12px',
         }}
@@ -591,16 +591,16 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
   return (
     <div style={{
       width: '280px',
-      background: '#0f0f23',
-      borderLeft: '1px solid #333',
+      background: 'var(--aethel-surface-primary)',
+      borderLeft: '1px solid var(--aethel-border-primary)',
       overflow: 'auto',
     }}>
       <div style={{
         padding: '12px',
-        borderBottom: '1px solid #333',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         fontWeight: 'bold',
         fontSize: '13px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
       }}>
         🖌️ Brush Settings
       </div>
@@ -608,7 +608,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
       <div style={{ padding: '12px' }}>
         {/* Size */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '4px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
             Size: {brushSettings.size.toFixed(1)}
           </label>
           <input
@@ -624,7 +624,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
         
         {/* Strength */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '4px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
             Strength: {brushSettings.strength.toFixed(2)}
           </label>
           <input
@@ -640,7 +640,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
         
         {/* Falloff */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '4px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
             Falloff: {brushSettings.falloff.toFixed(1)}
           </label>
           <input
@@ -657,7 +657,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
         {/* Target Height (for level operation) */}
         {brushSettings.mode === 'sculpt' && brushSettings.operation === 'level' && (
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '4px' }}>
+            <label style={{ display: 'block', fontSize: '12px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
               Target Height: {(brushSettings.targetHeight ?? 0.5).toFixed(2)}
             </label>
             <input
@@ -676,11 +676,11 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
       {/* Brush Presets */}
       <div style={{
         padding: '12px',
-        borderTop: '1px solid #333',
+        borderTop: '1px solid var(--aethel-border-primary)',
       }}>
         <div style={{
           fontSize: '12px',
-          color: '#888',
+          color: 'var(--aethel-text-quaternary)',
           marginBottom: '8px',
         }}>
           Presets
@@ -702,10 +702,10 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
               })}
               style={{
                 padding: '6px',
-                background: '#1a1a2e',
-                border: '1px solid #333',
+                background: 'var(--aethel-surface-tertiary)',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: '4px',
-                color: '#ccc',
+                color: 'var(--aethel-text-secondary)',
                 cursor: 'pointer',
                 fontSize: '11px',
               }}
@@ -743,16 +743,16 @@ function LayersPanel({
   return (
     <div style={{
       width: '280px',
-      background: '#0f0f23',
-      borderLeft: '1px solid #333',
+      background: 'var(--aethel-surface-primary)',
+      borderLeft: '1px solid var(--aethel-border-primary)',
       overflow: 'auto',
     }}>
       <div style={{
         padding: '12px',
-        borderBottom: '1px solid #333',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         fontWeight: 'bold',
         fontSize: '13px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -762,10 +762,10 @@ function LayersPanel({
           onClick={onAddLayer}
           style={{
             padding: '4px 8px',
-            background: '#3f51b5',
+            background: 'var(--aethel-primary)',
             border: 'none',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '12px',
           }}
@@ -782,8 +782,8 @@ function LayersPanel({
             style={{
               padding: '8px',
               marginBottom: '4px',
-              background: selectedLayer === layer.id ? '#3f51b533' : '#1a1a2e',
-              border: `1px solid ${selectedLayer === layer.id ? '#3f51b5' : '#333'}`,
+              background: selectedLayer === layer.id ? 'color-mix(in_srgb,var(--aethel-primary)_20%,transparent)' : 'var(--aethel-surface-tertiary)',
+              border: `1px solid ${selectedLayer === layer.id ? 'var(--aethel-primary)' : 'var(--aethel-border-primary)'}`,
               borderRadius: '4px',
               cursor: 'pointer',
             }}
@@ -794,17 +794,17 @@ function LayersPanel({
                 height: '24px',
                 background: layer.color,
                 borderRadius: '4px',
-                border: '1px solid #555',
+                border: '1px solid var(--aethel-border-secondary)',
               }} />
-              <span style={{ flex: 1, color: '#fff', fontSize: '13px' }}>{layer.name}</span>
-              <span style={{ color: '#666', fontSize: '11px' }}>#{index}</span>
+              <span style={{ flex: 1, color: 'var(--aethel-text-primary)', fontSize: '13px' }}>{layer.name}</span>
+              <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>#{index}</span>
               {layers.length > 1 && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onRemoveLayer(layer.id); }}
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#e74c3c',
+                    color: 'var(--aethel-error)',
                     cursor: 'pointer',
                     fontSize: '12px',
                   }}
@@ -819,7 +819,7 @@ function LayersPanel({
                 {/* Color */}
                 <div style={{ marginBottom: '8px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '11px', color: '#888', width: '60px' }}>Color:</span>
+                    <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)', width: '60px' }}>Color:</span>
                     <input
                       type="color"
                       value={layer.color}
@@ -832,7 +832,7 @@ function LayersPanel({
                 {/* Tiling */}
                 <div style={{ marginBottom: '8px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '11px', color: '#888', width: '60px' }}>Tiling:</span>
+                    <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)', width: '60px' }}>Tiling:</span>
                     <input
                       type="number"
                       value={layer.tiling}
@@ -840,10 +840,10 @@ function LayersPanel({
                       style={{
                         flex: 1,
                         padding: '4px',
-                        background: '#0f0f23',
-                        border: '1px solid #333',
+                        background: 'var(--aethel-surface-primary)',
+                        border: '1px solid var(--aethel-border-primary)',
                         borderRadius: '3px',
-                        color: '#fff',
+                        color: 'var(--aethel-text-primary)',
                         fontSize: '11px',
                       }}
                     />
@@ -852,7 +852,7 @@ function LayersPanel({
                 
                 {/* Height Range */}
                 <div style={{ marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', color: '#888' }}>Height Range:</span>
+                  <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Height Range:</span>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                     <input
                       type="number"
@@ -862,10 +862,10 @@ function LayersPanel({
                       style={{
                         flex: 1,
                         padding: '4px',
-                        background: '#0f0f23',
-                        border: '1px solid #333',
+                        background: 'var(--aethel-surface-primary)',
+                        border: '1px solid var(--aethel-border-primary)',
                         borderRadius: '3px',
-                        color: '#fff',
+                        color: 'var(--aethel-text-primary)',
                         fontSize: '11px',
                       }}
                     />
@@ -877,10 +877,10 @@ function LayersPanel({
                       style={{
                         flex: 1,
                         padding: '4px',
-                        background: '#0f0f23',
-                        border: '1px solid #333',
+                        background: 'var(--aethel-surface-primary)',
+                        border: '1px solid var(--aethel-border-primary)',
                         borderRadius: '3px',
-                        color: '#fff',
+                        color: 'var(--aethel-text-primary)',
                         fontSize: '11px',
                       }}
                     />
@@ -1064,7 +1064,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      background: '#0d1117',
+      background: 'var(--aethel-surface-primary)',
     }}>
       {/* Toolbar */}
       <Toolbar
@@ -1101,12 +1101,12 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
           width: '280px',
           display: 'flex',
           flexDirection: 'column',
-          borderLeft: '1px solid #333',
+          borderLeft: '1px solid var(--aethel-border-primary)',
         }}>
           {/* Panel Tabs */}
           <div style={{
             display: 'flex',
-            borderBottom: '1px solid #333',
+            borderBottom: '1px solid var(--aethel-border-primary)',
           }}>
             {(['brush', 'layers'] as const).map((panel) => (
               <button
@@ -1115,10 +1115,10 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
                 style={{
                   flex: 1,
                   padding: '10px',
-                  background: activePanel === panel ? '#1a1a2e' : '#0f0f23',
+                  background: activePanel === panel ? 'var(--aethel-surface-tertiary)' : 'var(--aethel-surface-primary)',
                   border: 'none',
-                  borderBottom: activePanel === panel ? '2px solid #3f51b5' : '2px solid transparent',
-                  color: activePanel === panel ? '#fff' : '#888',
+                  borderBottom: activePanel === panel ? '2px solid var(--aethel-primary)' : '2px solid transparent',
+                  color: activePanel === panel ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)',
                   cursor: 'pointer',
                   fontSize: '12px',
                   textTransform: 'capitalize',
@@ -1153,10 +1153,10 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
       {/* Status Bar */}
       <div style={{
         padding: '6px 12px',
-        background: '#1a1a2e',
-        borderTop: '1px solid #333',
+        background: 'var(--aethel-surface-tertiary)',
+        borderTop: '1px solid var(--aethel-border-primary)',
         fontSize: '11px',
-        color: '#666',
+        color: 'var(--aethel-text-muted)',
         display: 'flex',
         gap: '24px',
       }}>

@@ -335,12 +335,12 @@ function NiagaraNode({ data, selected }: NiagaraNodeProps) {
         padding: '12px 16px',
         borderRadius: '8px',
         minWidth: '180px',
-        boxShadow: selected ? '0 0 0 2px #fff, 0 4px 12px rgba(0,0,0,0.4)' : '0 4px 8px rgba(0,0,0,0.3)',
+        boxShadow: selected ? '0 0 0 2px var(--aethel-text-primary), 0 4px 12px rgba(0,0,0,0.4)' : '0 4px 8px rgba(0,0,0,0.3)',
         transition: 'box-shadow 0.2s',
       }}
     >
-      <Handle type="target" position={Position.Left} style={{ background: '#fff', width: 10, height: 10 }} />
-      <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '12px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+      <Handle type="target" position={Position.Left} style={{ background: 'var(--aethel-text-primary)', width: 10, height: 10 }} />
+      <div style={{ color: 'var(--aethel-text-primary)', fontWeight: 'bold', fontSize: '12px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
         {data.label}
       </div>
       {data.params && Object.entries(data.params).slice(0, 3).map(([key, value]) => (
@@ -349,7 +349,7 @@ function NiagaraNode({ data, selected }: NiagaraNodeProps) {
           <span style={{ fontWeight: 'bold' }}>{typeof value === 'number' ? value.toFixed(2) : String(value)}</span>
         </div>
       ))}
-      <Handle type="source" position={Position.Right} style={{ background: '#fff', width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: 'var(--aethel-text-primary)', width: 10, height: 10 }} />
     </div>
   );
 }
@@ -441,14 +441,14 @@ const initialNodes: Node[] = [
   },
 ];
 const initialEdges: Edge[] = [
-  { id: 'e1', source: 'emitter-1', target: 'spawn-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e2', source: 'emitter-1', target: 'velocity-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e3', source: 'spawn-1', target: 'size-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e4', source: 'velocity-1', target: 'color-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e5', source: 'velocity-1', target: 'force-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e6', source: 'size-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e7', source: 'color-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
-  { id: 'e8', source: 'force-1', target: 'render-1', animated: true, style: { stroke: '#fff' } },
+  { id: 'e1', source: 'emitter-1', target: 'spawn-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
+  { id: 'e2', source: 'emitter-1', target: 'velocity-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
+  { id: 'e3', source: 'spawn-1', target: 'size-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
+  { id: 'e4', source: 'velocity-1', target: 'color-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
+  { id: 'e5', source: 'velocity-1', target: 'force-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
+  { id: 'e6', source: 'size-1', target: 'render-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
+  { id: 'e7', source: 'color-1', target: 'render-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
+  { id: 'e8', source: 'force-1', target: 'render-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
 ];
 interface EmitterPanelProps {
   config: EmitterConfig;
@@ -465,14 +465,14 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
       </div>
       {/* Spawn Settings */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#3498db' }}>Spawn</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--aethel-primary)' }}>Spawn</div>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Spawn Rate:</span>
           <input
             type="number"
             value={config.spawnRate}
             onChange={(e) => handleChange('spawnRate', parseFloat(e.target.value))}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -481,7 +481,7 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             type="number"
             value={config.maxParticles}
             onChange={(e) => handleChange('maxParticles', parseInt(e.target.value))}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -489,7 +489,7 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
           <select
             value={config.spawnShape}
             onChange={(e) => handleChange('spawnShape', e.target.value)}
-            style={{ width: '100px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px' }}
+            style={{ width: '100px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px' }}
           >
             <option value="point">Point</option>
             <option value="sphere">Sphere</option>
@@ -501,7 +501,7 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
       </div>
       {/* Lifetime */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#9b59b6' }}>Lifetime</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--aethel-accent)' }}>Lifetime</div>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Min:</span>
           <input
@@ -509,7 +509,7 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             value={config.lifetime.min}
             step={0.1}
             onChange={(e) => handleChange('lifetime', { ...config.lifetime, min: parseFloat(e.target.value) })}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -519,13 +519,13 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             value={config.lifetime.max}
             step={0.1}
             onChange={(e) => handleChange('lifetime', { ...config.lifetime, max: parseFloat(e.target.value) })}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
       </div>
       {/* Size */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#2ecc71' }}>Size</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--aethel-success)' }}>Size</div>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Min Size:</span>
           <input
@@ -533,7 +533,7 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             value={config.initialSize.min}
             step={0.05}
             onChange={(e) => handleChange('initialSize', { ...config.initialSize, min: parseFloat(e.target.value) })}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -543,13 +543,13 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             value={config.initialSize.max}
             step={0.05}
             onChange={(e) => handleChange('initialSize', { ...config.initialSize, max: parseFloat(e.target.value) })}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
       </div>
       {/* Forces */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1abc9c' }}>Forces</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--aethel-info)' }}>Forces</div>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Gravity Y:</span>
           <input
@@ -557,7 +557,7 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             value={config.gravity.y}
             step={0.5}
             onChange={(e) => handleChange('gravity', new THREE.Vector3(config.gravity.x, parseFloat(e.target.value), config.gravity.z))}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -569,7 +569,7 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             min={0}
             max={1}
             onChange={(e) => handleChange('drag', parseFloat(e.target.value))}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -580,19 +580,19 @@ function EmitterPanel({ config, onChange }: EmitterPanelProps) {
             step={0.1}
             min={0}
             onChange={(e) => handleChange('turbulence', { ...config.turbulence, strength: parseFloat(e.target.value) })}
-            style={{ width: '80px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px 4px' }}
+            style={{ width: '80px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px 4px' }}
           />
         </label>
       </div>
       {/* Rendering */}
       <div>
-        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#e74c3c' }}>Rendering</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--aethel-error)' }}>Rendering</div>
         <label style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
           <span>Blend Mode:</span>
           <select
             value={config.blendMode}
             onChange={(e) => handleChange('blendMode', e.target.value as EmitterConfig['blendMode'])}
-            style={{ width: '100px', background: '#333', border: '1px solid #555', borderRadius: '3px', color: '#fff', padding: '2px' }}
+            style={{ width: '100px', background: 'var(--aethel-surface-quaternary)', border: '1px solid var(--aethel-border-secondary)', borderRadius: '3px', color: 'var(--aethel-text-primary)', padding: '2px' }}
           >
             <option value="additive">Additive</option>
             <option value="alpha">Alpha</option>
@@ -633,10 +633,10 @@ function EffectPresetsPanel({ onSelect }: EffectPresetsPanelProps) {
             onClick={() => onSelect(preset.id)}
             style={{
               padding: '12px 8px',
-              background: '#333',
-              border: '1px solid #555',
+              background: 'var(--aethel-surface-quaternary)',
+              border: '1px solid var(--aethel-border-secondary)',
               borderRadius: '6px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
@@ -646,12 +646,12 @@ function EffectPresetsPanel({ onSelect }: EffectPresetsPanelProps) {
               transition: 'all 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#444';
-              e.currentTarget.style.borderColor = '#666';
+              e.currentTarget.style.background = 'var(--aethel-surface-tertiary)';
+              e.currentTarget.style.borderColor = 'var(--aethel-border-secondary)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#333';
-              e.currentTarget.style.borderColor = '#555';
+              e.currentTarget.style.background = 'var(--aethel-surface-quaternary)';
+              e.currentTarget.style.borderColor = 'var(--aethel-border-secondary)';
             }}
           >
             <span style={{ fontSize: '24px' }}>{preset.icon}</span>
@@ -672,7 +672,7 @@ export default function NiagaraVFX() {
   const [showStats, setShowStats] = useState(true);
   const emittersRef = useRef<ParticleEmitter[]>([new ParticleEmitter(defaultEmitterConfig)]);
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#fff' } }, eds)),
+    (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: 'var(--aethel-text-primary)' } }, eds)),
     [setEdges]
   );
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -835,12 +835,12 @@ export default function NiagaraVFX() {
     setIsPlaying(true);
   }, []);
   return (
-    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#1a1a1a', color: '#fff' }}>
+    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--aethel-surface-primary)', color: 'var(--aethel-text-primary)' }}>
       {/* Toolbar */}
       <div style={{
         height: '48px',
-        background: '#252525',
-        borderBottom: '1px solid #333',
+        background: 'var(--aethel-surface-tertiary)',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 16px',
@@ -851,10 +851,10 @@ export default function NiagaraVFX() {
           onClick={handlePlayPause}
           style={{
             padding: '6px 12px',
-            background: isPlaying ? '#e74c3c' : '#2ecc71',
+            background: isPlaying ? 'var(--aethel-error)' : 'var(--aethel-success)',
             border: 'none',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -867,10 +867,10 @@ export default function NiagaraVFX() {
           onClick={handleRestart}
           style={{
             padding: '6px 12px',
-            background: '#3498db',
+            background: 'var(--aethel-primary)',
             border: 'none',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
           }}
         >
@@ -888,10 +888,10 @@ export default function NiagaraVFX() {
         <button
           style={{
             padding: '6px 12px',
-            background: '#333',
-            border: '1px solid #555',
+            background: 'var(--aethel-surface-quaternary)',
+            border: '1px solid var(--aethel-border-secondary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
           }}
         >
@@ -900,10 +900,10 @@ export default function NiagaraVFX() {
         <button
           style={{
             padding: '6px 12px',
-            background: '#333',
-            border: '1px solid #555',
+            background: 'var(--aethel-surface-quaternary)',
+            border: '1px solid var(--aethel-border-secondary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
           }}
         >
@@ -913,8 +913,8 @@ export default function NiagaraVFX() {
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex' }}>
         {/* Left Panel - 3D Preview */}
-        <div style={{ width: '40%', borderRight: '1px solid #333', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '8px 12px', background: '#252525', borderBottom: '1px solid #333', fontWeight: 'bold', fontSize: '12px' }}>
+        <div style={{ width: '40%', borderRight: '1px solid var(--aethel-border-primary)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '8px 12px', background: 'var(--aethel-surface-tertiary)', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
             Preview
           </div>
           <div style={{ flex: 1, position: 'relative' }}>
@@ -958,7 +958,7 @@ export default function NiagaraVFX() {
         </div>
         {/* Center Panel - Node Graph */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '8px 12px', background: '#252525', borderBottom: '1px solid #333', fontWeight: 'bold', fontSize: '12px' }}>
+          <div style={{ padding: '8px 12px', background: 'var(--aethel-surface-tertiary)', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
             Particle Graph
           </div>
           <div style={{ flex: 1 }}>
@@ -971,12 +971,12 @@ export default function NiagaraVFX() {
               onNodeClick={onNodeClick}
               nodeTypes={nodeTypes}
               fitView
-              style={{ background: '#1a1a1a' }}
+              style={{ background: 'var(--aethel-surface-primary)' }}
             >
-              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#333" />
-              <Controls style={{ background: '#252525', borderRadius: '8px' }} />
+              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--aethel-border-primary)" />
+              <Controls style={{ background: 'var(--aethel-surface-tertiary)', borderRadius: '8px' }} />
               <Panel position="top-left">
-                <div style={{ background: '#252525', padding: '8px 12px', borderRadius: '4px', fontSize: '11px' }}>
+                <div style={{ background: 'var(--aethel-surface-tertiary)', padding: '8px 12px', borderRadius: '4px', fontSize: '11px' }}>
                   <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Node Types:</div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {Object.entries(nodeStyles).map(([type, style]) => (
@@ -987,7 +987,7 @@ export default function NiagaraVFX() {
                           borderRadius: '3px',
                           fontSize: '10px',
                           ...style,
-                          color: '#fff',
+                          color: 'var(--aethel-text-primary)',
                         }}
                       >
                         {type}
@@ -1000,9 +1000,9 @@ export default function NiagaraVFX() {
           </div>
         </div>
         {/* Right Panel - Properties */}
-        <div style={{ width: '280px', borderLeft: '1px solid #333', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: '280px', borderLeft: '1px solid var(--aethel-border-primary)', display: 'flex', flexDirection: 'column' }}>
           {/* Tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #333' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--aethel-border-primary)' }}>
             {(['parameters', 'presets', 'timeline'] as const).map((tab) => (
               <button
                 key={tab}
@@ -1010,10 +1010,10 @@ export default function NiagaraVFX() {
                 style={{
                   flex: 1,
                   padding: '10px',
-                  background: activeTab === tab ? '#333' : 'transparent',
+                  background: activeTab === tab ? 'var(--aethel-surface-quaternary)' : 'transparent',
                   border: 'none',
-                  borderBottom: activeTab === tab ? '2px solid #3498db' : '2px solid transparent',
-                  color: activeTab === tab ? '#fff' : '#888',
+                  borderBottom: activeTab === tab ? '2px solid var(--aethel-primary)' : '2px solid transparent',
+                  color: activeTab === tab ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)',
                   cursor: 'pointer',
                   fontSize: '12px',
                   textTransform: 'capitalize',
@@ -1032,11 +1032,11 @@ export default function NiagaraVFX() {
               <EffectPresetsPanel onSelect={handlePresetSelect} />
             )}
             {activeTab === 'timeline' && (
-              <div style={{ padding: '12px', fontSize: '12px', color: '#888' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '12px', color: '#fff' }}>Timeline</div>
+              <div style={{ padding: '12px', fontSize: '12px', color: 'var(--aethel-text-quaternary)' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--aethel-text-primary)' }}>Timeline</div>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Size Over Life</div>
-                  <div style={{ height: '60px', background: '#252525', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ height: '60px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
                     <svg width="100%" height="100%" style={{ position: 'absolute' }}>
                       <path
                         d="M 0 60 L 40 30 L 100 45 L 160 10 L 220 60"
@@ -1053,7 +1053,7 @@ export default function NiagaraVFX() {
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Alpha Over Life</div>
-                  <div style={{ height: '60px', background: '#252525', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ height: '60px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
                     <svg width="100%" height="100%" style={{ position: 'absolute' }}>
                       <path
                         d="M 0 10 L 80 10 L 180 50 L 220 60"
@@ -1066,7 +1066,7 @@ export default function NiagaraVFX() {
                 </div>
                 <div>
                   <div style={{ marginBottom: '8px' }}>Velocity Over Life</div>
-                  <div style={{ height: '60px', background: '#252525', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ height: '60px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
                     <svg width="100%" height="100%" style={{ position: 'absolute' }}>
                       <path
                         d="M 0 10 L 220 50"

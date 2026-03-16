@@ -357,9 +357,9 @@ function BooleanEditor({ setting, value, onChange }: SettingEditorProps) {
         type="checkbox"
         checked={value as boolean}
         onChange={(e) => onChange(e.target.checked)}
-        style={{ width: '18px', height: '18px', accentColor: '#3498db' }}
+        style={{ width: '18px', height: '18px', accentColor: 'var(--aethel-primary)' }}
       />
-      <span style={{ color: value ? '#fff' : '#888' }}>{value ? 'Enabled' : 'Disabled'}</span>
+      <span style={{ color: value ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)' }}>{value ? 'Enabled' : 'Disabled'}</span>
     </label>
   );
 }
@@ -377,7 +377,7 @@ function NumberEditor({ setting, value, onChange }: SettingEditorProps) {
         max={setting.max ?? 100}
         step={setting.step ?? 1}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        style={{ flex: 1, accentColor: '#3498db' }}
+        style={{ flex: 1, accentColor: 'var(--aethel-primary)' }}
       />
       <input
         type="number"
@@ -388,15 +388,15 @@ function NumberEditor({ setting, value, onChange }: SettingEditorProps) {
         onChange={(e) => onChange(parseFloat(e.target.value))}
         style={{
           width: '80px',
-          background: '#252525',
-          border: '1px solid #444',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           padding: '4px 8px',
           textAlign: 'right',
         }}
       />
-      {isPercentage && <span style={{ color: '#888', fontSize: '12px' }}>({Math.round(numValue * 100)}%)</span>}
+      {isPercentage && <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '12px' }}>({Math.round(numValue * 100)}%)</span>}
     </div>
   );
 }
@@ -410,10 +410,10 @@ function StringEditor({ setting, value, onChange }: SettingEditorProps) {
       placeholder={setting.name}
       style={{
         width: '100%',
-        background: '#252525',
-        border: '1px solid #444',
+        background: 'var(--aethel-surface-tertiary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '4px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
         padding: '8px 12px',
       }}
     />
@@ -427,10 +427,10 @@ function EnumEditor({ setting, value, onChange }: SettingEditorProps) {
       onChange={(e) => onChange(e.target.value)}
       style={{
         width: '100%',
-        background: '#252525',
-        border: '1px solid #444',
+        background: 'var(--aethel-surface-tertiary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '4px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
         padding: '8px 12px',
         cursor: 'pointer',
       }}
@@ -456,7 +456,7 @@ function ColorEditor({ setting, value, onChange }: SettingEditorProps) {
         style={{
           width: '48px',
           height: '32px',
-          border: '1px solid #444',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
           cursor: 'pointer',
           padding: '0',
@@ -468,10 +468,10 @@ function ColorEditor({ setting, value, onChange }: SettingEditorProps) {
         onChange={(e) => onChange(e.target.value)}
         style={{
           flex: 1,
-          background: '#252525',
-          border: '1px solid #444',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           padding: '6px 12px',
           fontFamily: 'monospace',
         }}
@@ -486,33 +486,33 @@ function Vector2Editor({ setting, value, onChange }: SettingEditorProps) {
   return (
     <div style={{ display: 'flex', gap: '8px' }}>
       <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>X</span>
+        <span style={{ color: 'var(--aethel-error)', fontWeight: 'bold' }}>X</span>
         <input
           type="number"
           value={vec.x}
           onChange={(e) => onChange({ ...vec, x: parseFloat(e.target.value) })}
           style={{
             flex: 1,
-            background: '#252525',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '6px 8px',
           }}
         />
       </label>
       <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>Y</span>
+        <span style={{ color: 'var(--aethel-success)', fontWeight: 'bold' }}>Y</span>
         <input
           type="number"
           value={vec.y}
           onChange={(e) => onChange({ ...vec, y: parseFloat(e.target.value) })}
           style={{
             flex: 1,
-            background: '#252525',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '6px 8px',
           }}
         />
@@ -527,49 +527,49 @@ function Vector3Editor({ setting, value, onChange }: SettingEditorProps) {
   return (
     <div style={{ display: 'flex', gap: '8px' }}>
       <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>X</span>
+        <span style={{ color: 'var(--aethel-error)', fontWeight: 'bold' }}>X</span>
         <input
           type="number"
           value={vec.x}
           onChange={(e) => onChange({ ...vec, x: parseFloat(e.target.value) })}
           style={{
             flex: 1,
-            background: '#252525',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '6px 8px',
           }}
         />
       </label>
       <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>Y</span>
+        <span style={{ color: 'var(--aethel-success)', fontWeight: 'bold' }}>Y</span>
         <input
           type="number"
           value={vec.y}
           onChange={(e) => onChange({ ...vec, y: parseFloat(e.target.value) })}
           style={{
             flex: 1,
-            background: '#252525',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '6px 8px',
           }}
         />
       </label>
       <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <span style={{ color: '#3498db', fontWeight: 'bold' }}>Z</span>
+        <span style={{ color: 'var(--aethel-primary)', fontWeight: 'bold' }}>Z</span>
         <input
           type="number"
           value={vec.z}
           onChange={(e) => onChange({ ...vec, z: parseFloat(e.target.value) })}
           style={{
             flex: 1,
-            background: '#252525',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '6px 8px',
           }}
         />
@@ -588,10 +588,10 @@ function PathEditor({ setting, value, onChange }: SettingEditorProps) {
         placeholder="Select path..."
         style={{
           flex: 1,
-          background: '#252525',
-          border: '1px solid #444',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           padding: '8px 12px',
         }}
       />
@@ -599,10 +599,10 @@ function PathEditor({ setting, value, onChange }: SettingEditorProps) {
         onClick={() => {/* Open file picker */}}
         style={{
           padding: '8px 16px',
-          background: '#333',
-          border: '1px solid #555',
+          background: 'var(--aethel-surface-quaternary)',
+          border: '1px solid var(--aethel-border-secondary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
         }}
       >
@@ -643,10 +643,10 @@ function KeybindEditor({ setting, value, onChange }: SettingEditorProps) {
       onClick={startListening}
       style={{
         padding: '8px 16px',
-        background: isListening ? '#3498db' : '#333',
-        border: `1px solid ${isListening ? '#3498db' : '#555'}`,
+        background: isListening ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
+        border: `1px solid ${isListening ? 'var(--aethel-primary)' : 'var(--aethel-border-secondary)'}`,
         borderRadius: '4px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
         cursor: 'pointer',
         minWidth: '120px',
         textAlign: 'center',
@@ -788,12 +788,12 @@ export default function ProjectSettings() {
   }, [toast]);
   
   return (
-    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: '#1a1a1a', color: '#fff' }}>
+    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--aethel-surface-primary)', color: 'var(--aethel-text-primary)' }}>
       {/* Header */}
       <div style={{
         height: '56px',
-        background: '#252525',
-        borderBottom: '1px solid #333',
+        background: 'var(--aethel-surface-tertiary)',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 20px',
@@ -810,10 +810,10 @@ export default function ProjectSettings() {
           placeholder="Search settings..."
           style={{
             width: '300px',
-            background: '#333',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-quaternary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '8px 12px',
           }}
         />
@@ -827,16 +827,16 @@ export default function ProjectSettings() {
           Show Advanced
         </label>
         
-        <div style={{ width: '1px', height: '24px', background: '#444' }} />
+        <div style={{ width: '1px', height: '24px', background: 'var(--aethel-border-primary)' }} />
         
         <button
           onClick={handleImport}
           style={{
             padding: '8px 16px',
-            background: '#333',
-            border: '1px solid #555',
+            background: 'var(--aethel-surface-quaternary)',
+            border: '1px solid var(--aethel-border-secondary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
           }}
         >
@@ -847,10 +847,10 @@ export default function ProjectSettings() {
           onClick={handleExport}
           style={{
             padding: '8px 16px',
-            background: '#333',
-            border: '1px solid #555',
+            background: 'var(--aethel-surface-quaternary)',
+            border: '1px solid var(--aethel-border-secondary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
           }}
         >
@@ -861,10 +861,10 @@ export default function ProjectSettings() {
           onClick={handleReset}
           style={{
             padding: '8px 16px',
-            background: '#333',
-            border: '1px solid #555',
+            background: 'var(--aethel-surface-quaternary)',
+            border: '1px solid var(--aethel-border-secondary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
           }}
         >
@@ -876,10 +876,10 @@ export default function ProjectSettings() {
           disabled={!hasChanges}
           style={{
             padding: '8px 20px',
-            background: hasChanges ? '#3498db' : '#333',
+            background: hasChanges ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
             border: 'none',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: hasChanges ? 'pointer' : 'not-allowed',
             opacity: hasChanges ? 1 : 0.5,
           }}
@@ -893,8 +893,8 @@ export default function ProjectSettings() {
         {/* Category Sidebar */}
         <div style={{
           width: '220px',
-          background: '#252525',
-          borderRight: '1px solid #333',
+          background: 'var(--aethel-surface-tertiary)',
+          borderRight: '1px solid var(--aethel-border-primary)',
           padding: '12px 0',
           overflowY: 'auto',
         }}>
@@ -905,10 +905,10 @@ export default function ProjectSettings() {
               style={{
                 width: '100%',
                 padding: '12px 20px',
-                background: selectedCategory === category.id ? '#333' : 'transparent',
+                background: selectedCategory === category.id ? 'var(--aethel-surface-quaternary)' : 'transparent',
                 border: 'none',
-                borderLeft: selectedCategory === category.id ? '3px solid #3498db' : '3px solid transparent',
-                color: selectedCategory === category.id ? '#fff' : '#aaa',
+                borderLeft: selectedCategory === category.id ? '3px solid var(--aethel-primary)' : '3px solid transparent',
+                color: selectedCategory === category.id ? 'var(--aethel-text-primary)' : 'var(--aethel-text-tertiary)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 display: 'flex',
@@ -932,7 +932,7 @@ export default function ProjectSettings() {
                 <span>{currentCategory.icon}</span>
                 {currentCategory.name}
               </h1>
-              <p style={{ color: '#888', marginBottom: '32px' }}>
+              <p style={{ color: 'var(--aethel-text-quaternary)', marginBottom: '32px' }}>
                 Configure {currentCategory.name.toLowerCase()} settings for your project
               </p>
               
@@ -941,19 +941,19 @@ export default function ProjectSettings() {
                   key={section.id}
                   style={{
                     marginBottom: '32px',
-                    background: '#252525',
+                    background: 'var(--aethel-surface-tertiary)',
                     borderRadius: '8px',
                     overflow: 'hidden',
                   }}
                 >
                   <div style={{
                     padding: '16px 20px',
-                    borderBottom: '1px solid #333',
-                    background: '#2a2a2a',
+                    borderBottom: '1px solid var(--aethel-border-primary)',
+                    background: 'var(--aethel-surface-tertiary)',
                   }}>
                     <h2 style={{ fontSize: '16px', fontWeight: 'bold', margin: 0 }}>{section.name}</h2>
                     {section.description && (
-                      <p style={{ fontSize: '12px', color: '#888', margin: '4px 0 0 0' }}>{section.description}</p>
+                      <p style={{ fontSize: '12px', color: 'var(--aethel-text-quaternary)', margin: '4px 0 0 0' }}>{section.description}</p>
                     )}
                   </div>
                   
@@ -963,7 +963,7 @@ export default function ProjectSettings() {
                         key={setting.id}
                         style={{
                           padding: '16px 20px',
-                          borderBottom: index < section.settings.length - 1 ? '1px solid #333' : 'none',
+                          borderBottom: index < section.settings.length - 1 ? '1px solid var(--aethel-border-primary)' : 'none',
                           display: 'flex',
                           alignItems: 'flex-start',
                           gap: '20px',
@@ -976,7 +976,7 @@ export default function ProjectSettings() {
                               <span style={{
                                 fontSize: '10px',
                                 padding: '2px 6px',
-                                background: '#e74c3c',
+                                background: 'var(--aethel-error)',
                                 borderRadius: '3px',
                               }}>
                                 Requires Restart
@@ -986,14 +986,14 @@ export default function ProjectSettings() {
                               <span style={{
                                 fontSize: '10px',
                                 padding: '2px 6px',
-                                background: '#9b59b6',
+                                background: 'var(--aethel-accent)',
                                 borderRadius: '3px',
                               }}>
                                 Advanced
                               </span>
                             )}
                           </div>
-                          <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>{setting.description}</p>
+                          <p style={{ fontSize: '12px', color: 'var(--aethel-text-quaternary)', margin: 0 }}>{setting.description}</p>
                         </div>
                         
                         <div style={{ flex: 1, maxWidth: '400px' }}>
@@ -1013,7 +1013,7 @@ export default function ProjectSettings() {
                 <div style={{
                   textAlign: 'center',
                   padding: '48px',
-                  color: '#888',
+                  color: 'var(--aethel-text-quaternary)',
                 }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
                   <p>No settings found matching your search.</p>
@@ -1027,19 +1027,19 @@ export default function ProjectSettings() {
       {/* Footer Status Bar */}
       <div style={{
         height: '28px',
-        background: '#252525',
-        borderTop: '1px solid #333',
+        background: 'var(--aethel-surface-tertiary)',
+        borderTop: '1px solid var(--aethel-border-primary)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 16px',
         fontSize: '11px',
-        color: '#888',
+        color: 'var(--aethel-text-quaternary)',
       }}>
         <span>
           {hasChanges ? (
-            <span style={{ color: '#f39c12' }}>● Unsaved changes</span>
+            <span style={{ color: 'var(--aethel-warning)' }}>● Unsaved changes</span>
           ) : (
-            <span style={{ color: '#2ecc71' }}>✓ All changes saved</span>
+            <span style={{ color: 'var(--aethel-success)' }}>✓ All changes saved</span>
           )}
         </span>
         <div style={{ flex: 1 }} />

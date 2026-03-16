@@ -75,7 +75,7 @@ function AssetCard({
         width: '120px',
         padding: '8px',
         background: isSelected ? '#3f51b533' : 'transparent',
-        border: `1px solid ${isSelected ? '#3f51b5' : 'transparent'}`,
+        border: `1px solid ${isSelected ? 'var(--aethel-primary)' : 'transparent'}`,
         borderRadius: '8px',
         cursor: 'pointer',
         display: 'flex',
@@ -95,7 +95,7 @@ function AssetCard({
       <div style={{
         width: '96px',
         height: '96px',
-        background: '#0f0f23',
+        background: 'var(--aethel-surface-primary)',
         borderRadius: '6px',
         display: 'flex',
         alignItems: 'center',
@@ -132,7 +132,7 @@ function AssetCard({
       {/* Name */}
       <div style={{
         fontSize: '12px',
-        color: '#ccc',
+        color: 'var(--aethel-text-secondary)',
         textAlign: 'center',
         width: '100%',
         overflow: 'hidden',
@@ -173,7 +173,7 @@ function AssetRow({
         alignItems: 'center',
         padding: '8px 12px',
         background: isSelected ? '#3f51b533' : 'transparent',
-        borderBottom: '1px solid #222',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         cursor: 'pointer',
         fontSize: '13px',
       }}
@@ -185,12 +185,12 @@ function AssetRow({
       }}
     >
       <span style={{ fontSize: '20px' }}>{config.icon}</span>
-      <span style={{ color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <span style={{ color: 'var(--aethel-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {asset.starred && '⭐ '}{asset.name}
       </span>
       <span style={{ color: config.color }}>{asset.type}</span>
-      <span style={{ color: '#888' }}>{formatFileSize(asset.size)}</span>
-      <span style={{ color: '#666' }}>{asset.modifiedAt.toLocaleDateString()}</span>
+      <span style={{ color: 'var(--aethel-text-quaternary)' }}>{formatFileSize(asset.size)}</span>
+      <span style={{ color: 'var(--aethel-text-muted)' }}>{asset.modifiedAt.toLocaleDateString()}</span>
     </div>
   );
 }
@@ -237,8 +237,8 @@ function ContextMenu({
         position: 'fixed',
         left: x,
         top: y,
-        background: '#1a1a2e',
-        border: '1px solid #333',
+        background: 'var(--aethel-surface-tertiary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '6px',
         padding: '4px 0',
         minWidth: '180px',
@@ -260,17 +260,17 @@ function ContextMenu({
               padding: '8px 16px',
               background: 'none',
               border: 'none',
-              color: item.id === 'delete' ? '#e74c3c' : '#ccc',
+              color: item.id === 'delete' ? 'var(--aethel-error)' : 'var(--aethel-text-secondary)',
               fontSize: '13px',
               textAlign: 'left',
               cursor: 'pointer',
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#333'}
+            onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'none'}
           >
             {item.label}
           </button>
-          {item.divider && <div style={{ borderBottom: '1px solid #333', margin: '4px 0' }} />}
+          {item.divider && <div style={{ borderBottom: '1px solid var(--aethel-border-primary)', margin: '4px 0' }} />}
         </React.Fragment>
       ))}
     </div>
@@ -306,7 +306,7 @@ function FolderTree({
             background: isSelected ? '#3f51b533' : 'transparent',
             cursor: 'pointer',
             fontSize: '13px',
-            color: isSelected ? '#fff' : '#aaa',
+            color: isSelected ? 'var(--aethel-text-primary)' : 'var(--aethel-text-tertiary)',
           }}
           onMouseOver={(e) => {
             if (!isSelected) e.currentTarget.style.background = '#ffffff08';
@@ -353,16 +353,16 @@ function FolderTree({
   return (
     <div style={{
       width: '220px',
-      background: '#0f0f23',
-      borderRight: '1px solid #333',
+      background: 'var(--aethel-surface-primary)',
+      borderRight: '1px solid var(--aethel-border-primary)',
       overflow: 'auto',
     }}>
       <div style={{
         padding: '12px',
-        borderBottom: '1px solid #333',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         fontWeight: 'bold',
         fontSize: '12px',
-        color: '#888',
+        color: 'var(--aethel-text-quaternary)',
         textTransform: 'uppercase',
       }}>
         Folders
@@ -408,7 +408,7 @@ function ImportModal({
       zIndex: 1000,
     }}>
       <div style={{
-        background: '#1a1a2e',
+        background: 'var(--aethel-surface-tertiary)',
         borderRadius: '12px',
         width: '600px',
         maxHeight: '80vh',
@@ -416,18 +416,18 @@ function ImportModal({
       }}>
         <div style={{
           padding: '16px 20px',
-          borderBottom: '1px solid #333',
+          borderBottom: '1px solid var(--aethel-border-primary)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-          <h2 style={{ margin: 0, fontSize: '18px', color: '#fff' }}>Import Assets</h2>
+          <h2 style={{ margin: 0, fontSize: '18px', color: 'var(--aethel-text-primary)' }}>Import Assets</h2>
           <button
             onClick={onClose}
             style={{
               background: 'none',
               border: 'none',
-              color: '#888',
+              color: 'var(--aethel-text-quaternary)',
               fontSize: '20px',
               cursor: 'pointer',
             }}
@@ -444,20 +444,20 @@ function ImportModal({
           style={{
             margin: '20px',
             padding: '40px',
-            border: '2px dashed #333',
+            border: '2px dashed var(--aethel-border-primary)',
             borderRadius: '8px',
             textAlign: 'center',
             cursor: 'pointer',
             transition: 'all 0.2s',
           }}
-          onMouseOver={(e) => e.currentTarget.style.borderColor = '#3f51b5'}
-          onMouseOut={(e) => e.currentTarget.style.borderColor = '#333'}
+          onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--aethel-primary)'}
+          onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--aethel-border-primary)'}
         >
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>📥</div>
-          <div style={{ color: '#888', marginBottom: '8px' }}>
+          <div style={{ color: 'var(--aethel-text-quaternary)', marginBottom: '8px' }}>
             Drop files here or click to browse
           </div>
-          <div style={{ color: '#555', fontSize: '12px' }}>
+          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '12px' }}>
             Supports: FBX, GLTF, OBJ, PNG, JPG, WAV, MP3, etc.
           </div>
           <input
@@ -481,19 +481,19 @@ function ImportModal({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '8px 12px',
-                background: '#0f0f23',
+                background: 'var(--aethel-surface-primary)',
                 borderRadius: '4px',
                 marginBottom: '4px',
                 fontSize: '13px',
               }}>
-                <span style={{ color: '#fff' }}>{file.name}</span>
-                <span style={{ color: '#666' }}>{formatFileSize(file.size)}</span>
+                <span style={{ color: 'var(--aethel-text-primary)' }}>{file.name}</span>
+                <span style={{ color: 'var(--aethel-text-muted)' }}>{formatFileSize(file.size)}</span>
                 <button
                   onClick={() => setFiles(files.filter((_, j) => j !== i))}
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#e74c3c',
+                    color: 'var(--aethel-error)',
                     cursor: 'pointer',
                   }}
                 >
@@ -505,7 +505,7 @@ function ImportModal({
         )}
         
         {/* Options */}
-        <div style={{ padding: '20px', borderTop: '1px solid #333' }}>
+        <div style={{ padding: '20px', borderTop: '1px solid var(--aethel-border-primary)' }}>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: '1fr 1fr', 
@@ -523,7 +523,7 @@ function ImportModal({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                color: '#ccc',
+                color: 'var(--aethel-text-secondary)',
                 fontSize: '13px',
                 cursor: 'pointer',
               }}>
@@ -538,7 +538,7 @@ function ImportModal({
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <label style={{ color: '#ccc', fontSize: '13px' }}>Scale:</label>
+            <label style={{ color: 'var(--aethel-text-secondary)', fontSize: '13px' }}>Scale:</label>
             <input
               type="number"
               value={options.scale}
@@ -548,10 +548,10 @@ function ImportModal({
               style={{
                 width: '80px',
                 padding: '6px 8px',
-                background: '#0f0f23',
-                border: '1px solid #333',
+                background: 'var(--aethel-surface-primary)',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: '4px',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: '13px',
               }}
             />
@@ -561,7 +561,7 @@ function ImportModal({
         {/* Actions */}
         <div style={{
           padding: '16px 20px',
-          borderTop: '1px solid #333',
+          borderTop: '1px solid var(--aethel-border-primary)',
           display: 'flex',
           justifyContent: 'flex-end',
           gap: '12px',
@@ -570,10 +570,10 @@ function ImportModal({
             onClick={onClose}
             style={{
               padding: '8px 24px',
-              background: '#333',
+              background: 'var(--aethel-surface-quaternary)',
               border: 'none',
               borderRadius: '6px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '14px',
             }}
@@ -588,10 +588,10 @@ function ImportModal({
             disabled={files.length === 0}
             style={{
               padding: '8px 24px',
-              background: files.length > 0 ? '#3f51b5' : '#333',
+              background: files.length > 0 ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
               border: 'none',
               borderRadius: '6px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: files.length > 0 ? 'pointer' : 'not-allowed',
               fontSize: '14px',
               fontWeight: 'bold',
@@ -840,8 +840,8 @@ export default function ContentBrowser({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      background: '#0d1117',
-      color: '#fff',
+      background: 'var(--aethel-surface-primary)',
+      color: 'var(--aethel-text-primary)',
     }}>
       {/* Header */}
       <BreadcrumbNav path={currentPath} onNavigate={setCurrentPath} />
@@ -899,9 +899,9 @@ export default function ContentBrowser({
                 gap: '12px',
                 alignItems: 'center',
                 padding: '8px 12px',
-                borderBottom: '1px solid #333',
+                borderBottom: '1px solid var(--aethel-border-primary)',
                 fontSize: '11px',
-                color: '#666',
+                color: 'var(--aethel-text-muted)',
                 textTransform: 'uppercase',
                 fontWeight: 'bold',
               }}>
@@ -932,7 +932,7 @@ export default function ContentBrowser({
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              color: '#555',
+              color: 'var(--aethel-text-muted)',
             }}>
               <div style={{ fontSize: '64px', marginBottom: '16px' }}>📭</div>
               <div>No assets found</div>
@@ -941,10 +941,10 @@ export default function ContentBrowser({
                 style={{
                   marginTop: '16px',
                   padding: '8px 24px',
-                  background: '#3f51b5',
+                  background: 'var(--aethel-primary)',
                   border: 'none',
                   borderRadius: '6px',
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   cursor: 'pointer',
                 }}
               >
@@ -958,10 +958,10 @@ export default function ContentBrowser({
       {/* Status Bar */}
       <div style={{
         padding: '6px 12px',
-        background: '#1a1a2e',
-        borderTop: '1px solid #333',
+        background: 'var(--aethel-surface-tertiary)',
+        borderTop: '1px solid var(--aethel-border-primary)',
         fontSize: '12px',
-        color: '#666',
+        color: 'var(--aethel-text-muted)',
         display: 'flex',
         gap: '24px',
       }}>

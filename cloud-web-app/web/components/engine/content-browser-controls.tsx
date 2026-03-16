@@ -19,8 +19,8 @@ export function BreadcrumbNav({
       alignItems: 'center',
       gap: '4px',
       padding: '8px 12px',
-      background: '#1a1a2e',
-      borderBottom: '1px solid #333',
+      background: 'var(--aethel-surface-tertiary)',
+      borderBottom: '1px solid var(--aethel-border-primary)',
       fontSize: '13px',
     }}>
       <button
@@ -28,12 +28,12 @@ export function BreadcrumbNav({
         style={{
           background: 'none',
           border: 'none',
-          color: '#888',
+          color: 'var(--aethel-text-quaternary)',
           cursor: 'pointer',
           padding: '2px 6px',
           borderRadius: '3px',
         }}
-        onMouseOver={(e) => e.currentTarget.style.background = '#333'}
+        onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
         onMouseOut={(e) => e.currentTarget.style.background = 'none'}
       >
         📁 Content
@@ -43,18 +43,18 @@ export function BreadcrumbNav({
         const fullPath = '/' + parts.slice(0, i + 1).join('/');
         return (
           <React.Fragment key={fullPath}>
-            <span style={{ color: '#555' }}>/</span>
+            <span style={{ color: 'var(--aethel-text-muted)' }}>/</span>
             <button
               onClick={() => onNavigate(fullPath)}
               style={{
                 background: 'none',
                 border: 'none',
-                color: i === parts.length - 1 ? '#fff' : '#888',
+                color: i === parts.length - 1 ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)',
                 cursor: 'pointer',
                 padding: '2px 6px',
                 borderRadius: '3px',
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = '#333'}
+              onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
               onMouseOut={(e) => e.currentTarget.style.background = 'none'}
             >
               {part}
@@ -92,8 +92,8 @@ export function FilterBar({
       alignItems: 'center',
       gap: '12px',
       padding: '8px 12px',
-      background: '#16213e',
-      borderBottom: '1px solid #333',
+      background: 'var(--aethel-surface-tertiary)',
+      borderBottom: '1px solid var(--aethel-border-primary)',
     }}>
       {/* Search */}
       <div style={{ flex: 1, maxWidth: '300px' }}>
@@ -105,10 +105,10 @@ export function FilterBar({
           style={{
             width: '100%',
             padding: '6px 12px',
-            background: '#0f0f23',
-            border: '1px solid #333',
+            background: 'var(--aethel-surface-primary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             fontSize: '13px',
           }}
         />
@@ -120,10 +120,10 @@ export function FilterBar({
           onClick={() => setShowTypeFilter(!showTypeFilter)}
           style={{
             padding: '6px 12px',
-            background: filter.type?.length ? '#3f51b5' : '#0f0f23',
-            border: '1px solid #333',
+            background: filter.type?.length ? 'var(--aethel-primary)' : 'var(--aethel-surface-primary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '13px',
           }}
@@ -137,8 +137,8 @@ export function FilterBar({
             top: '100%',
             left: 0,
             marginTop: '4px',
-            background: '#1a1a2e',
-            border: '1px solid #333',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '8px',
             zIndex: 100,
@@ -167,7 +167,7 @@ export function FilterBar({
                   }}
                 />
                 <span style={{ color: config.color }}>{config.icon}</span>
-                <span style={{ color: '#ccc', fontSize: '12px' }}>{type}</span>
+                <span style={{ color: 'var(--aethel-text-secondary)', fontSize: '12px' }}>{type}</span>
               </label>
             ))}
           </div>
@@ -179,10 +179,10 @@ export function FilterBar({
         onClick={() => onFilterChange({ ...filter, starred: !filter.starred })}
         style={{
           padding: '6px 12px',
-          background: filter.starred ? '#ffc107' : '#0f0f23',
-          border: '1px solid #333',
+          background: filter.starred ? 'var(--aethel-warning)' : 'var(--aethel-surface-primary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: filter.starred ? '#000' : '#fff',
+          color: filter.starred ? 'var(--aethel-surface-primary)' : 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontSize: '13px',
         }}
@@ -201,10 +201,10 @@ export function FilterBar({
         }}
         style={{
           padding: '6px 12px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-primary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           fontSize: '13px',
         }}
       >
@@ -225,10 +225,10 @@ export function FilterBar({
             onClick={() => onViewModeChange(mode)}
             style={{
               padding: '6px 10px',
-              background: viewMode === mode ? '#3f51b5' : '#0f0f23',
-              border: '1px solid #333',
+              background: viewMode === mode ? 'var(--aethel-primary)' : 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: mode === 'grid' ? '4px 0 0 4px' : mode === 'columns' ? '0 4px 4px 0' : '0',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '13px',
             }}

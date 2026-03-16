@@ -523,6 +523,34 @@ export default function SpriteEditor() {
     if (!ctx) return
     
     const { width, height, zoom, showGrid, gridSize } = state
+
+    const getVar = (name: string, fallback: string) => {
+      if (typeof window === 'undefined') return fallback
+      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+      return value || fallback
+    }
+
+    const toRgba = (color: string, alpha: number) => {
+      const trimmed = color.trim()
+      if (trimmed.startsWith('#')) {
+        const hex = trimmed.replace('#', '')
+        const normalized = hex.length === 3
+          ? hex.split('').map((c) => c + c).join('')
+          : hex
+        const r = parseInt(normalized.slice(0, 2), 16)
+        const g = parseInt(normalized.slice(2, 4), 16)
+        const b = parseInt(normalized.slice(4, 6), 16)
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`
+      }
+      if (trimmed.startsWith('rgb')) {
+        return trimmed.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`)
+      }
+      return `rgba(255, 255, 255, ${alpha})`
+    }
+
+    const gridDark = getVar('--aethel-surface-tertiary', '#2a2a2a')
+    const gridLight = getVar('--aethel-surface-quaternary', '#3a3a3a')
+    const gridStroke = getVar('--aethel-text-primary', '#ffffff')
     
     // Clear
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -532,7 +560,7 @@ export default function SpriteEditor() {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const isLight = (x + y) % 2 === 0
-        ctx.fillStyle = isLight ? '#3a3a3a' : '#2a2a2a'
+        ctx.fillStyle = isLight ? gridLight : gridDark
         ctx.fillRect(x * zoom, y * zoom, zoom, zoom)
       }
     }
@@ -566,7 +594,7 @@ export default function SpriteEditor() {
     
     // Grid
     if (showGrid && zoom >= 4) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+      ctx.strokeStyle = toRgba(gridStroke, 0.1)
       ctx.lineWidth = 1
       
       for (let x = 0; x <= width; x += gridSize) {

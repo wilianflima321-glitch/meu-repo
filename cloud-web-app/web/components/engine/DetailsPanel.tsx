@@ -69,10 +69,10 @@ function NumberInput({
       style={{
         width: '100%',
         padding: '4px 8px',
-        background: '#0f0f23',
-        border: '1px solid #333',
+        background: 'var(--aethel-surface-primary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '3px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
         fontSize: '12px',
         cursor: readOnly ? 'default' : 'ew-resize',
         textAlign: 'right',
@@ -84,7 +84,7 @@ function Vector3Editor({
   value,
   onChange,
   labels = ['X', 'Y', 'Z'],
-  colors = ['#e74c3c', '#2ecc71', '#3498db'],
+  colors = ['var(--aethel-error)', 'var(--aethel-success)', 'var(--aethel-primary)'],
   readOnly,
 }: {
   value: { x: number; y: number; z: number };
@@ -134,8 +134,8 @@ function ColorEditor({
           alignItems: 'center',
           gap: '8px',
           padding: '4px 8px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-primary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '3px',
           cursor: readOnly ? 'default' : 'pointer',
         }}
@@ -145,9 +145,9 @@ function ColorEditor({
           height: '20px',
           background: value,
           borderRadius: '3px',
-          border: '1px solid #555',
+          border: '1px solid var(--aethel-border-secondary)',
         }} />
-        <span style={{ color: '#aaa', fontSize: '12px' }}>{value}</span>
+        <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>{value}</span>
       </div>
       {showPicker && (
         <div style={{
@@ -156,8 +156,8 @@ function ColorEditor({
           left: 0,
           marginTop: '4px',
           padding: '8px',
-          background: '#1a1a2e',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '6px',
           zIndex: 100,
         }}>
@@ -179,10 +179,10 @@ function ColorEditor({
               width: '100%',
               marginTop: '8px',
               padding: '4px',
-              background: '#333',
+              background: 'var(--aethel-surface-quaternary)',
               border: 'none',
               borderRadius: '3px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
             }}
           >
@@ -214,7 +214,7 @@ function BooleanEditor({
         style={{
           width: '36px',
           height: '20px',
-          background: value ? '#3f51b5' : '#333',
+          background: value ? 'var(--aethel-primary)' : 'var(--aethel-surface-quaternary)',
           borderRadius: '10px',
           padding: '2px',
           transition: 'background 0.2s',
@@ -224,7 +224,7 @@ function BooleanEditor({
         <div style={{
           width: '16px',
           height: '16px',
-          background: '#fff',
+          background: 'var(--aethel-text-primary)',
           borderRadius: '8px',
           transform: value ? 'translateX(16px)' : 'translateX(0)',
           transition: 'transform 0.2s',
@@ -255,10 +255,10 @@ function EnumEditor({
       style={{
         width: '100%',
         padding: '4px 8px',
-        background: '#0f0f23',
-        border: '1px solid #333',
+        background: 'var(--aethel-surface-primary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '3px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
         fontSize: '12px',
         cursor: readOnly ? 'default' : 'pointer',
       }}
@@ -292,10 +292,10 @@ function StringEditor({
         style={{
           width: '100%',
           padding: '6px 8px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-primary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '3px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           fontSize: '12px',
           resize: 'vertical',
           fontFamily: 'monospace',
@@ -312,10 +312,10 @@ function StringEditor({
       style={{
         width: '100%',
         padding: '4px 8px',
-        background: '#0f0f23',
-        border: '1px solid #333',
+        background: 'var(--aethel-surface-primary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '3px',
-        color: '#fff',
+        color: 'var(--aethel-text-primary)',
         fontSize: '12px',
       }}
     />
@@ -344,10 +344,10 @@ function AssetSelector({
         style={{
           flex: 1,
           padding: '4px 8px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-primary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '3px',
-          color: value ? '#fff' : '#666',
+          color: value ? 'var(--aethel-text-primary)' : 'var(--aethel-text-muted)',
           fontSize: '12px',
         }}
       />
@@ -356,10 +356,10 @@ function AssetSelector({
         disabled={readOnly}
         style={{
           padding: '4px 8px',
-          background: '#333',
+          background: 'var(--aethel-surface-quaternary)',
           border: 'none',
           borderRadius: '3px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: readOnly ? 'default' : 'pointer',
           fontSize: '12px',
         }}
@@ -372,10 +372,10 @@ function AssetSelector({
           disabled={readOnly}
           style={{
             padding: '4px 8px',
-            background: '#333',
+            background: 'var(--aethel-surface-quaternary)',
             border: 'none',
             borderRadius: '3px',
-            color: '#e74c3c',
+            color: 'var(--aethel-error)',
             cursor: readOnly ? 'default' : 'pointer',
             fontSize: '12px',
           }}
@@ -463,7 +463,7 @@ function PropertyRow({
         );
       default:
         return (
-          <span style={{ color: '#666', fontSize: '12px' }}>
+          <span style={{ color: 'var(--aethel-text-muted)', fontSize: '12px' }}>
             [{property.type}]
           </span>
         );
@@ -480,7 +480,7 @@ function PropertyRow({
       <label
         style={{
           fontSize: '12px',
-          color: '#aaa',
+          color: 'var(--aethel-text-tertiary)',
           paddingTop: '4px',
           cursor: 'default',
         }}
@@ -522,7 +522,7 @@ function ComponentSection({
   return (
     <div style={{
       marginBottom: '8px',
-      background: '#16213e',
+      background: 'var(--aethel-surface-tertiary)',
       borderRadius: '6px',
       overflow: 'hidden',
     }}>
@@ -533,12 +533,12 @@ function ComponentSection({
           alignItems: 'center',
           gap: '8px',
           padding: '8px 12px',
-          background: '#1a1a2e',
+          background: 'var(--aethel-surface-tertiary)',
           cursor: 'pointer',
         }}
         onClick={() => setExpanded(!expanded)}
       >
-        <span style={{ fontSize: '10px', color: '#666' }}>
+        <span style={{ fontSize: '10px', color: 'var(--aethel-text-muted)' }}>
           {expanded ? '▼' : '▶'}
         </span>
         <span style={{ fontSize: '16px' }}>{component.icon}</span>
@@ -546,7 +546,7 @@ function ComponentSection({
           flex: 1,
           fontWeight: 'bold',
           fontSize: '13px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
         }}>
           {component.name}
         </span>
@@ -574,7 +574,7 @@ function ComponentSection({
             style={{
               background: 'none',
               border: 'none',
-              color: '#e74c3c',
+              color: 'var(--aethel-error)',
               cursor: 'pointer',
               fontSize: '14px',
               padding: '4px',
@@ -592,7 +592,7 @@ function ComponentSection({
               {Object.keys(groupedProps).length > 1 && (
                 <div style={{
                   fontSize: '10px',
-                  color: '#666',
+                  color: 'var(--aethel-text-muted)',
                   textTransform: 'uppercase',
                   marginTop: '8px',
                   marginBottom: '4px',
@@ -618,10 +618,10 @@ function ComponentSection({
                 width: '100%',
                 padding: '6px',
                 marginTop: '8px',
-                background: '#0f0f23',
-                border: '1px solid #333',
+                background: 'var(--aethel-surface-primary)',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: '3px',
-                color: '#888',
+                color: 'var(--aethel-text-quaternary)',
                 fontSize: '11px',
                 cursor: 'pointer',
               }}
@@ -649,7 +649,7 @@ function TransformSection({
   return (
     <div style={{
       marginBottom: '8px',
-      background: '#16213e',
+      background: 'var(--aethel-surface-tertiary)',
       borderRadius: '6px',
       overflow: 'hidden',
     }}>
@@ -660,12 +660,12 @@ function TransformSection({
           alignItems: 'center',
           gap: '8px',
           padding: '8px 12px',
-          background: '#1a1a2e',
+          background: 'var(--aethel-surface-tertiary)',
           cursor: 'pointer',
         }}
         onClick={() => setExpanded(!expanded)}
       >
-        <span style={{ fontSize: '10px', color: '#666' }}>
+        <span style={{ fontSize: '10px', color: 'var(--aethel-text-muted)' }}>
           {expanded ? '▼' : '▶'}
         </span>
         <span style={{ fontSize: '16px' }}>🔄</span>
@@ -673,7 +673,7 @@ function TransformSection({
           flex: 1,
           fontWeight: 'bold',
           fontSize: '13px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
         }}>
           Transform
         </span>
@@ -690,7 +690,7 @@ function TransformSection({
           style={{
             background: 'none',
             border: 'none',
-            color: '#888',
+            color: 'var(--aethel-text-quaternary)',
             cursor: 'pointer',
             fontSize: '12px',
             padding: '4px',
@@ -710,13 +710,13 @@ function TransformSection({
               alignItems: 'center',
               marginBottom: '4px',
             }}>
-              <span style={{ fontSize: '11px', color: '#888' }}>Position</span>
+              <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Position</span>
               <button
                 onClick={() => onChange({ ...transform, position: new THREE.Vector3() })}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#666',
+                  color: 'var(--aethel-text-muted)',
                   cursor: 'pointer',
                   fontSize: '10px',
                 }}
@@ -737,13 +737,13 @@ function TransformSection({
               alignItems: 'center',
               marginBottom: '4px',
             }}>
-              <span style={{ fontSize: '11px', color: '#888' }}>Rotation</span>
+              <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Rotation</span>
               <button
                 onClick={() => onChange({ ...transform, rotation: new THREE.Euler() })}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#666',
+                  color: 'var(--aethel-text-muted)',
                   cursor: 'pointer',
                   fontSize: '10px',
                 }}
@@ -775,13 +775,13 @@ function TransformSection({
               alignItems: 'center',
               marginBottom: '4px',
             }}>
-              <span style={{ fontSize: '11px', color: '#888' }}>Scale</span>
+              <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Scale</span>
               <button
                 onClick={() => onChange({ ...transform, scale: new THREE.Vector3(1, 1, 1) })}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#666',
+                  color: 'var(--aethel-text-muted)',
                   cursor: 'pointer',
                   fontSize: '10px',
                 }}
@@ -985,15 +985,15 @@ export default function DetailsPanel({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        background: '#0d1117',
-        color: '#fff',
+        background: 'var(--aethel-surface-primary)',
+        color: 'var(--aethel-text-primary)',
       }}>
         <div style={{
           padding: '8px 12px',
-          borderBottom: '1px solid #333',
+          borderBottom: '1px solid var(--aethel-border-primary)',
           fontWeight: 'bold',
           fontSize: '13px',
-          background: '#1a1a2e',
+          background: 'var(--aethel-surface-tertiary)',
         }}>
           📋 Details
         </div>
@@ -1002,7 +1002,7 @@ export default function DetailsPanel({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#555',
+          color: 'var(--aethel-text-muted)',
         }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎯</div>
@@ -1017,16 +1017,16 @@ export default function DetailsPanel({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      background: '#0d1117',
-      color: '#fff',
+      background: 'var(--aethel-surface-primary)',
+      color: 'var(--aethel-text-primary)',
     }}>
       {/* Header */}
       <div style={{
         padding: '8px 12px',
-        borderBottom: '1px solid #333',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         fontWeight: 'bold',
         fontSize: '13px',
-        background: '#1a1a2e',
+        background: 'var(--aethel-surface-tertiary)',
       }}>
         📋 Details
       </div>
@@ -1039,7 +1039,7 @@ export default function DetailsPanel({
           gap: '12px',
           marginBottom: '16px',
           padding: '12px',
-          background: '#16213e',
+          background: 'var(--aethel-surface-tertiary)',
           borderRadius: '6px',
         }}>
           <span style={{ fontSize: '32px' }}>{selectedObject.icon}</span>
@@ -1056,13 +1056,13 @@ export default function DetailsPanel({
                 width: '100%',
                 background: 'transparent',
                 border: 'none',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: '18px',
                 fontWeight: 'bold',
                 padding: 0,
               }}
             />
-            <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--aethel-text-muted)', marginTop: '2px' }}>
               {selectedObject.type}
             </div>
           </div>
@@ -1072,7 +1072,7 @@ export default function DetailsPanel({
           <div style={{
             marginBottom: '12px',
             padding: '12px',
-            background: '#16213e',
+            background: 'var(--aethel-surface-tertiary)',
             borderRadius: '6px',
           }}>
             {selectedObject.staticProperties.map((prop) => (
@@ -1108,10 +1108,10 @@ export default function DetailsPanel({
             style={{
               width: '100%',
               padding: '10px',
-              background: '#3f51b5',
+              background: 'var(--aethel-primary)',
               border: 'none',
               borderRadius: '6px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               fontSize: '13px',
               fontWeight: 'bold',
               cursor: 'pointer',
@@ -1130,8 +1130,8 @@ export default function DetailsPanel({
               left: 0,
               right: 0,
               marginBottom: '4px',
-              background: '#1a1a2e',
-              border: '1px solid #333',
+              background: 'var(--aethel-surface-tertiary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '6px',
               padding: '8px',
               maxHeight: '300px',
@@ -1153,13 +1153,13 @@ export default function DetailsPanel({
                     padding: '8px 12px',
                     background: 'none',
                     border: 'none',
-                    color: '#ccc',
+                    color: 'var(--aethel-text-secondary)',
                     fontSize: '13px',
                     cursor: 'pointer',
                     borderRadius: '4px',
                     textAlign: 'left',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#333'}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
                   onMouseOut={(e) => e.currentTarget.style.background = 'none'}
                 >
                   <span>{comp.icon}</span>
