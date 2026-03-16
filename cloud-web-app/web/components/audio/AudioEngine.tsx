@@ -1,7 +1,7 @@
 /**
- * Waveform Renderer - Renderização REAL de Audio Waveform
+ * Waveform Renderer - Renderizacao REAL de Audio Waveform
  * 
- * Usa Canvas 2D para renderizar waveform de áudio.
+ * Usa Canvas 2D para renderizar waveform de audio.
  * Funciona com Web Audio API.
  */
 
@@ -25,8 +25,8 @@ export function WaveformRenderer({
   audioUrl,
   width = 800,
   height = 128,
-  color = '#3b82f6',
-  backgroundColor = '#1e293b',
+  color = 'var(--aethel-primary)',
+  backgroundColor = 'var(--aethel-surface-tertiary)',
   progress = 0,
   onSeek,
 }: WaveformProps) {
@@ -35,7 +35,7 @@ export function WaveformRenderer({
   const [isLoading, setIsLoading] = useState(false);
   const [peaks, setPeaks] = useState<number[]>([]);
 
-  // Carregar áudio de URL
+  // Carregar audio de URL
   useEffect(() => {
     if (audioUrl && !audioBuffer) {
       setIsLoading(true);
@@ -49,7 +49,7 @@ export function WaveformRenderer({
           setIsLoading(false);
         })
         .catch(err => {
-          console.error('Erro ao carregar áudio:', err);
+          console.error('Erro ao carregar audio:', err);
           setIsLoading(false);
         });
     }
@@ -106,14 +106,14 @@ export function WaveformRenderer({
       
       // Cor baseada no progresso
       const progressX = progress * width;
-      ctx.fillStyle = x < progressX ? '#60a5fa' : color;
+      ctx.fillStyle = x < progressX ? 'var(--aethel-primary-light)' : color;
       
-      // Desenhar barra simétrica
+      // Desenhar barra simetrica
       ctx.fillRect(x, centerY - barHeight / 2, barWidth, barHeight);
     });
     
     // Linha central
-    ctx.strokeStyle = '#475569';
+    ctx.strokeStyle = 'var(--aethel-text-quaternary)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0, centerY);
@@ -123,7 +123,7 @@ export function WaveformRenderer({
     // Playhead
     if (progress > 0) {
       const playheadX = progress * width;
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = 'var(--aethel-text-primary)';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(playheadX, 0);
@@ -149,10 +149,10 @@ export function WaveformRenderer({
   if (isLoading) {
     return (
       <div 
-        className="flex items-center justify-center bg-slate-800 rounded"
+        className="flex items-center justify-center bg-[var(--aethel-surface-tertiary)] rounded"
         style={{ width, height }}
       >
-        <span className="text-slate-400 text-sm">Carregando áudio...</span>
+        <span className="text-[var(--aethel-text-tertiary)] text-sm">Carregando audio...</span>
       </div>
     );
   }
@@ -198,15 +198,15 @@ export function MixerChannel({
   peakLevel,
 }: MixerChannelProps) {
   return (
-    <div className="flex flex-col items-center p-2 bg-slate-800 rounded w-20 gap-2">
+    <div className="flex flex-col items-center p-2 bg-[var(--aethel-surface-tertiary)] rounded w-20 gap-2">
       {/* Nome */}
-      <span className="text-xs text-slate-300 truncate w-full text-center">{name}</span>
+      <span className="text-xs text-[var(--aethel-text-secondary)] truncate w-full text-center">{name}</span>
       
       {/* Meter */}
-      <div className="w-4 h-32 bg-slate-900 rounded relative">
+      <div className="w-4 h-32 bg-[var(--aethel-surface-secondary)] rounded relative">
         <div 
           className={`absolute bottom-0 w-full rounded transition-all ${
-            peakLevel > 0.9 ? 'bg-red-500' : peakLevel > 0.7 ? 'bg-yellow-500' : 'bg-green-500'
+            peakLevel > 0.9 ? 'bg-[var(--aethel-error)]' : peakLevel > 0.7 ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]'
           }`}
           style={{ height: `${peakLevel * 100}%` }}
         />
@@ -225,8 +225,8 @@ export function MixerChannel({
       />
       
       {/* dB Label */}
-      <span className="text-xs text-slate-400">
-        {volume === 0 ? '-∞' : `${(20 * Math.log10(volume)).toFixed(1)}`}dB
+      <span className="text-xs text-[var(--aethel-text-tertiary)]">
+        {volume === 0 ? '-' : `${(20 * Math.log10(volume)).toFixed(1)}`}dB
       </span>
       
       {/* Pan */}
@@ -239,7 +239,7 @@ export function MixerChannel({
         onChange={(e) => onPanChange(parseFloat(e.target.value))}
         className="w-full"
       />
-      <span className="text-xs text-slate-500">
+      <span className="text-xs text-[var(--aethel-text-quaternary)]">
         {pan === 0 ? 'C' : pan < 0 ? `L${Math.abs(Math.round(pan * 100))}` : `R${Math.round(pan * 100)}`}
       </span>
       
@@ -247,13 +247,13 @@ export function MixerChannel({
       <div className="flex gap-1">
         <button
           onClick={onMuteToggle}
-          className={`px-2 py-1 text-xs rounded ${muted ? 'bg-red-600' : 'bg-slate-600'}`}
+          className={`px-2 py-1 text-xs rounded ${muted ? 'bg-[var(--aethel-error-dark)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
         >
           M
         </button>
         <button
           onClick={onSoloToggle}
-          className={`px-2 py-1 text-xs rounded ${solo ? 'bg-yellow-600' : 'bg-slate-600'}`}
+          className={`px-2 py-1 text-xs rounded ${solo ? 'bg-[var(--aethel-warning-dark)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
         >
           S
         </button>
@@ -263,7 +263,7 @@ export function MixerChannel({
 }
 
 /**
- * Audio Engine - Engine de áudio REAL usando Web Audio API
+ * Audio Engine - Engine de audio REAL usando Web Audio API
  */
 export class AudioEngine {
   private context: AudioContext;
