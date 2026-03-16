@@ -1,8 +1,8 @@
 /**
- * Sequencer Timeline Editor - Editor de Timeline Cinemático
+ * Sequencer Timeline Editor - Editor de Timeline Cinematico
  * 
- * Interface estilo Premiere/After Effects para edição de sequências cinemáticas.
- * Conecta ao SequencerRuntime para reprodução em tempo real.
+ * Interface estilo Premiere/After Effects para edicao de sequencias cinematicas.
+ * Conecta ao SequencerRuntime para reproducao em tempo real.
  */
 
 'use client';
@@ -108,28 +108,28 @@ interface SequencerTimelineProps {
 // ============================================================================
 
 const colors = {
-  bg: '#0d0d12',
-  surface: '#14141c',
-  surfaceHover: '#1a1a26',
-  surfaceActive: '#222232',
-  border: '#2a2a3c',
-  borderLight: '#3a3a4c',
-  text: '#e4e4eb',
-  textMuted: '#8b8b9e',
-  textDim: '#5a5a6e',
-  primary: '#6366f1',
-  primaryHover: '#7c7ff2',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
+  bg: 'var(--aethel-surface-primary)',
+  surface: 'var(--aethel-surface-secondary)',
+  surfaceHover: 'var(--aethel-surface-tertiary)',
+  surfaceActive: 'var(--aethel-surface-quaternary)',
+  border: 'var(--aethel-border-primary)',
+  borderLight: 'var(--aethel-border-secondary)',
+  text: 'var(--aethel-text-primary)',
+  textMuted: 'var(--aethel-text-tertiary)',
+  textDim: 'var(--aethel-text-quaternary)',
+  primary: 'var(--aethel-primary)',
+  primaryHover: 'var(--aethel-primary-light)',
+  success: 'var(--aethel-success)',
+  warning: 'var(--aethel-warning)',
+  error: 'var(--aethel-error)',
   // Track colors
-  camera: '#f59e0b',
-  transform: '#22c55e',
-  light: '#eab308',
-  audio: '#06b6d4',
-  event: '#a855f7',
-  material: '#ec4899',
-  visibility: '#8b8b9e',
+  camera: 'var(--aethel-warning)',
+  transform: 'var(--aethel-success)',
+  light: 'var(--aethel-warning-light)',
+  audio: 'var(--aethel-info)',
+  event: 'var(--aethel-accent)',
+  material: 'var(--aethel-secondary)',
+  visibility: 'var(--aethel-text-tertiary)',
 };
 
 const trackTypeIcons: Record<TrackType, typeof Camera> = {
@@ -276,7 +276,7 @@ const KeyframeDot: React.FC<{
         transform: 'translateY(-50%) rotate(45deg)',
         width: '10px',
         height: '10px',
-        background: keyframe.selected ? '#fff' : trackColor,
+        background: keyframe.selected ? 'var(--aethel-text-primary)' : trackColor,
         border: `2px solid ${keyframe.selected ? colors.primary : trackColor}`,
         borderRadius: '2px',
         cursor: 'pointer',
@@ -435,7 +435,7 @@ const TimeRuler: React.FC<{
   onTimeClick: (time: number) => void;
 }> = ({ duration, pixelsPerSecond, frameRate, currentTime, onTimeClick }) => {
   const width = timeToPixels(duration, pixelsPerSecond);
-  const majorInterval = pixelsPerSecond >= 100 ? 1 : 5; // Segundos entre marcações principais
+  const majorInterval = pixelsPerSecond >= 100 ? 1 : 5; // Segundos entre marcacoes principais
   const minorInterval = majorInterval / 4;
 
   const marks: { time: number; major: boolean }[] = [];
@@ -616,7 +616,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
               background: isPlaying ? colors.warning : colors.primary,
               border: 'none',
               borderRadius: '4px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
             }}
           >
@@ -913,7 +913,7 @@ export const DEMO_SEQUENCE: SequenceData = {
           type: 'camera',
           targetId: 'camera-main',
           property: 'fov',
-          color: '#f97316',
+          color: 'var(--aethel-warning)',
           keyframes: [
             { id: 'kf-fov-1', time: 0, value: 60, easing: 'linear' },
             { id: 'kf-fov-2', time: 8, value: 45, easing: 'easeOut' },
