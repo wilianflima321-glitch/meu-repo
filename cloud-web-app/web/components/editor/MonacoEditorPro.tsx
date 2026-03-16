@@ -9,7 +9,7 @@ import { getAuthHeaders, submitChangeFeedback } from '@/lib/ai/change-feedback-c
 /**
  * Professional Monaco Editor Component
  * 
- * Editor de código de nível profissional com:
+ * Editor de codigo de nivel profissional com:
  * - IntelliSense completo (autocomplete, type hints, etc)
  * - Inline Edit (Cmd+K) integrado
  * - Multi-cursor editing
@@ -114,43 +114,43 @@ const AETHEL_DARK_THEME: monacoEditor.editor.IStandaloneThemeData = {
   base: 'vs-dark',
   inherit: true,
   rules: [
-    { token: 'comment', foreground: '6c7086', fontStyle: 'italic' },
-    { token: 'keyword', foreground: 'cba6f7' },
-    { token: 'string', foreground: 'a6e3a1' },
-    { token: 'number', foreground: 'fab387' },
-    { token: 'type', foreground: 'f9e2af' },
-    { token: 'function', foreground: '89b4fa' },
-    { token: 'variable', foreground: 'cdd6f4' },
-    { token: 'class', foreground: 'f9e2af' },
-    { token: 'interface', foreground: '94e2d5' },
-    { token: 'namespace', foreground: 'f5c2e7' },
-    { token: 'operator', foreground: '89dceb' },
-    { token: 'delimiter', foreground: '9399b2' },
-    { token: 'constant', foreground: 'fab387' },
-    { token: 'regexp', foreground: 'f38ba8' },
+    { token: 'comment', foreground: '64748b', fontStyle: 'italic' },
+    { token: 'keyword', foreground: '8b5cf6' },
+    { token: 'string', foreground: '10b981' },
+    { token: 'number', foreground: 'f59e0b' },
+    { token: 'type', foreground: 'fbbf24' },
+    { token: 'function', foreground: '818cf8' },
+    { token: 'variable', foreground: 'e2e8f0' },
+    { token: 'class', foreground: 'fbbf24' },
+    { token: 'interface', foreground: '22d3ee' },
+    { token: 'namespace', foreground: 'ec4899' },
+    { token: 'operator', foreground: '06b6d4' },
+    { token: 'delimiter', foreground: '94a3b8' },
+    { token: 'constant', foreground: 'f59e0b' },
+    { token: 'regexp', foreground: 'ef4444' },
   ],
   colors: {
-    'editor.background': '#09090b',
-    'editor.foreground': '#f4f4f5',
-    'editor.lineHighlightBackground': '#18181b',
-    'editor.selectionBackground': '#3f3f46',
-    'editor.selectionHighlightBackground': '#3f3f4680',
-    'editorCursor.foreground': '#e4e4e7',
-    'editorWhitespace.foreground': '#3f3f46',
-    'editorIndentGuide.background1': '#27272a',
-    'editorIndentGuide.activeBackground1': '#3f3f46',
-    'editorLineNumber.foreground': '#71717a',
-    'editorLineNumber.activeForeground': '#d4d4d8',
-    'editorBracketMatch.background': '#27272a',
-    'editorBracketMatch.border': '#3b82f6',
-    'editorGutter.addedBackground': '#22c55e',
-    'editorGutter.modifiedBackground': '#f59e0b',
-    'editorGutter.deletedBackground': '#ef4444',
-    'minimap.background': '#09090b',
-    'scrollbar.shadow': '#00000000',
-    'scrollbarSlider.background': '#45475a80',
-    'scrollbarSlider.hoverBackground': '#585b70',
-    'scrollbarSlider.activeBackground': '#6c7086',
+    'editor.background': 'var(--aethel-surface-primary)',
+    'editor.foreground': 'var(--aethel-text-primary)',
+    'editor.lineHighlightBackground': 'var(--aethel-surface-secondary)',
+    'editor.selectionBackground': 'var(--aethel-surface-quaternary)',
+    'editor.selectionHighlightBackground': 'color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)',
+    'editorCursor.foreground': 'var(--aethel-text-primary)',
+    'editorWhitespace.foreground': 'var(--aethel-border-secondary)',
+    'editorIndentGuide.background1': 'var(--aethel-border-primary)',
+    'editorIndentGuide.activeBackground1': 'var(--aethel-border-secondary)',
+    'editorLineNumber.foreground': 'var(--aethel-text-quaternary)',
+    'editorLineNumber.activeForeground': 'var(--aethel-text-secondary)',
+    'editorBracketMatch.background': 'var(--aethel-surface-tertiary)',
+    'editorBracketMatch.border': 'var(--aethel-primary)',
+    'editorGutter.addedBackground': 'var(--aethel-success)',
+    'editorGutter.modifiedBackground': 'var(--aethel-warning)',
+    'editorGutter.deletedBackground': 'var(--aethel-error)',
+    'minimap.background': 'var(--aethel-surface-primary)',
+    'scrollbar.shadow': 'transparent',
+    'scrollbarSlider.background': 'color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)',
+    'scrollbarSlider.hoverBackground': 'var(--aethel-border-secondary)',
+    'scrollbarSlider.activeBackground': 'var(--aethel-text-quaternary)',
   },
 };
 
@@ -579,7 +579,7 @@ export function MonacoEditorPro({
           inlineClassName: className,
           hoverMessage: { value: `**${diag.severity.toUpperCase()}**: ${diag.message}` },
           overviewRuler: {
-            color: diag.severity === 'error' ? '#f38ba8' : '#f9e2af',
+            color: diag.severity === 'error' ? 'var(--aethel-error-light)' : 'var(--aethel-warning-light)',
             position: monaco.editor.OverviewRulerLane.Right,
           },
         },
@@ -830,7 +830,7 @@ export function MonacoEditorPro({
           automaticLayout: true,
         }}
         loading={
-          <div className="flex items-center justify-center h-full bg-[#1e1e2e] text-[#6c7086]">
+          <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-quaternary)]">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
               Carregando Editor...
@@ -856,30 +856,30 @@ export function MonacoEditorPro({
       <style jsx global>{`
         .editor-error-decoration {
           background-color: rgba(243, 139, 168, 0.2);
-          text-decoration: wavy underline #f38ba8;
+          text-decoration: wavy underline var(--aethel-error-light);
         }
         .editor-warning-decoration {
           background-color: rgba(249, 226, 175, 0.1);
-          text-decoration: wavy underline #f9e2af;
+          text-decoration: wavy underline var(--aethel-warning-light);
         }
         .editor-info-decoration {
-          text-decoration: underline dotted #89b4fa;
+          text-decoration: underline dotted var(--aethel-primary-light);
         }
         .editor-hint-decoration {
           opacity: 0.7;
         }
         .git-glyph-added {
-          background-color: #a6e3a1;
+          background-color: var(--aethel-success-light);
           width: 3px !important;
           margin-left: 3px;
         }
         .git-glyph-modified {
-          background-color: #f9e2af;
+          background-color: var(--aethel-warning-light);
           width: 3px !important;
           margin-left: 3px;
         }
         .git-glyph-deleted {
-          background-color: #f38ba8;
+          background-color: var(--aethel-error-light);
           width: 3px !important;
           margin-left: 3px;
         }
