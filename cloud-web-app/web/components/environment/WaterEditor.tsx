@@ -1,7 +1,7 @@
 /**
  * WATER EDITOR - Aethel Engine
  * 
- * Editor profissional de corpos d'água com simulação física.
+ * Editor profissional de corpos d'agua com simulacao fisica.
  * Inspirado em UE5 Water System e Unity HDRP Water.
  * 
  * FEATURES:
@@ -13,7 +13,7 @@
  * - Buoyancy settings
  * - Flow maps
  * - Shore blend
- * - Reflection/refraction
+ * - Reflexao/refraction
  */
 
 'use client';
@@ -45,6 +45,21 @@ import {
   Anchor,
   Sparkles,
 } from 'lucide-react';
+
+function resolveCssVarColor(varName: string, fallback: string): string {
+  if (typeof window === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return value || fallback;
+}
+
+function resolveCssVarValue(value: string, fallback: string): string {
+  if (!value) return fallback;
+  if (value.startsWith('var(')) {
+    const varName = value.slice(4, -1).trim();
+    return resolveCssVarColor(varName, fallback);
+  }
+  return value;
+}
 
 // ============================================================================
 // TYPES
@@ -84,20 +99,20 @@ export interface WaterParams {
   causticsEnabled: boolean;
   causticsIntensity: number;
   causticsScale: number;
-  causticsSpeed: number;
+  causticsVelocidade: number;
   
-  // Refraction
+  // Refracao
   refractionEnabled: boolean;
   refractionStrength: number;
   
-  // Reflection
+  // Reflexao
   reflectionEnabled: boolean;
   reflectionIntensity: number;
   
   // Flow (for rivers)
   flowEnabled: boolean;
-  flowSpeed: number;
-  flowDirection: number;
+  flowVelocidade: number;
+  flowDirecao: number;
   
   // Underwater
   underwaterFogColor: string;
@@ -126,8 +141,8 @@ const WATER_PRESETS: WaterPreset[] = [
     name: 'Tropical Ocean',
     type: 'ocean',
     params: {
-      shallowColor: '#40e0d0',
-      deepColor: '#006994',
+      shallowColor: 'var(--aethel-info-light)',
+      deepColor: 'var(--aethel-info-dark)',
       transparency: 0.8,
       waveScale: 1.5,
       foamIntensity: 0.6,
@@ -139,8 +154,8 @@ const WATER_PRESETS: WaterPreset[] = [
     name: 'Stormy Ocean',
     type: 'ocean',
     params: {
-      shallowColor: '#4a6670',
-      deepColor: '#1a2f38',
+      shallowColor: 'var(--aethel-text-tertiary)',
+      deepColor: 'var(--aethel-surface-tertiary)',
       transparency: 0.5,
       waveScale: 3.0,
       foamIntensity: 1.0,
@@ -152,8 +167,8 @@ const WATER_PRESETS: WaterPreset[] = [
     name: 'Calm Lake',
     type: 'lake',
     params: {
-      shallowColor: '#5f9ea0',
-      deepColor: '#2f4f4f',
+      shallowColor: 'var(--aethel-info)',
+      deepColor: 'var(--aethel-surface-quaternary)',
       transparency: 0.7,
       waveScale: 0.3,
       foamIntensity: 0.1,
@@ -166,12 +181,12 @@ const WATER_PRESETS: WaterPreset[] = [
     name: 'Clear River',
     type: 'river',
     params: {
-      shallowColor: '#7fffd4',
-      deepColor: '#20b2aa',
+      shallowColor: 'var(--aethel-info-light)',
+      deepColor: 'var(--aethel-accent)',
       transparency: 0.85,
       waveScale: 0.5,
       flowEnabled: true,
-      flowSpeed: 2.0,
+      flowVelocidade: 2.0,
       foamIntensity: 0.4,
     },
   },
@@ -180,8 +195,8 @@ const WATER_PRESETS: WaterPreset[] = [
     name: 'Murky Pond',
     type: 'pond',
     params: {
-      shallowColor: '#556b2f',
-      deepColor: '#2f4f2f',
+      shallowColor: 'var(--aethel-success-dark)',
+      deepColor: 'var(--aethel-success-dark)',
       transparency: 0.4,
       waveScale: 0.1,
       foamEnabled: false,
@@ -193,8 +208,8 @@ const WATER_PRESETS: WaterPreset[] = [
     name: 'Crystal Pool',
     type: 'pool',
     params: {
-      shallowColor: '#87ceeb',
-      deepColor: '#4169e1',
+      shallowColor: 'var(--aethel-info-light)',
+      deepColor: 'var(--aethel-primary-dark)',
       transparency: 0.95,
       waveScale: 0.2,
       causticsEnabled: true,
@@ -206,8 +221,8 @@ const WATER_PRESETS: WaterPreset[] = [
 
 const DEFAULT_PARAMS: WaterParams = {
   type: 'ocean',
-  shallowColor: '#40e0d0',
-  deepColor: '#006994',
+  shallowColor: 'var(--aethel-info-light)',
+  deepColor: 'var(--aethel-info-dark)',
   colorDepthFade: 10,
   transparency: 0.75,
   waves: [
@@ -217,22 +232,22 @@ const DEFAULT_PARAMS: WaterParams = {
   ],
   waveScale: 1.0,
   foamEnabled: true,
-  foamColor: '#ffffff',
+  foamColor: 'var(--aethel-text-primary)',
   foamIntensity: 0.5,
   foamScale: 1.0,
   shorelineFoam: 0.5,
   causticsEnabled: true,
   causticsIntensity: 0.5,
   causticsScale: 1.0,
-  causticsSpeed: 1.0,
+  causticsVelocidade: 1.0,
   refractionEnabled: true,
   refractionStrength: 0.3,
   reflectionEnabled: true,
   reflectionIntensity: 0.5,
   flowEnabled: false,
-  flowSpeed: 1.0,
-  flowDirection: 0,
-  underwaterFogColor: '#006994',
+  flowVelocidade: 1.0,
+  flowDirecao: 0,
+  underwaterFogColor: 'var(--aethel-info-dark)',
   underwaterFogDensity: 0.1,
   buoyancyEnabled: true,
   buoyancyStrength: 1.0,
@@ -257,8 +272,8 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange }: Sl
   return (
     <div className="mb-3">
       <div className="flex justify-between items-center mb-1">
-        <label className="text-xs text-slate-400">{label}</label>
-        <span className="text-xs text-slate-300 font-mono">
+        <label className="text-xs text-[var(--aethel-text-tertiary)]">{label}</label>
+        <span className="text-xs text-[var(--aethel-text-secondary)] font-mono">
           {value.toFixed(step < 1 ? 2 : 0)}{unit}
         </span>
       </div>
@@ -269,11 +284,11 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange }: Sl
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-3
                    [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-cyan-500
+                   [&::-webkit-slider-thumb]:bg-[var(--aethel-info)]
                    [&::-webkit-slider-thumb]:rounded-full"
       />
     </div>
@@ -298,8 +313,8 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-slate-200 
-                   hover:text-white transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)] 
+                   hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -321,6 +336,14 @@ interface WaterSurfaceProps {
 function WaterSurface({ params }: WaterSurfaceProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const timeRef = useRef(0);
+  const shallowColorValue = useMemo(
+    () => resolveCssVarValue(params.shallowColor, 'rgb(34, 211, 238)'),
+    [params.shallowColor]
+  );
+  const deepColorValue = useMemo(
+    () => resolveCssVarValue(params.deepColor, 'rgb(8, 145, 178)'),
+    [params.deepColor]
+  );
   
   // Create water geometry
   const geometry = useMemo(() => {
@@ -355,8 +378,8 @@ function WaterSurface({ params }: WaterSurfaceProps) {
       
       // Flow for rivers
       if (params.flowEnabled && params.type === 'river') {
-        const flowDir = (params.flowDirection * Math.PI) / 180;
-        const flowOffset = timeRef.current * params.flowSpeed;
+        const flowDir = (params.flowDirecao * Math.PI) / 180;
+        const flowOffset = timeRef.current * params.flowVelocidade;
         height += Math.sin(x * 0.5 + flowOffset) * 0.1;
       }
       
@@ -368,8 +391,8 @@ function WaterSurface({ params }: WaterSurfaceProps) {
   });
   
   // Water material
-  const shallowColor = new THREE.Color(params.shallowColor);
-  const deepColor = new THREE.Color(params.deepColor);
+  const shallowColor = new THREE.Color(shallowColorValue);
+  const deepColor = new THREE.Color(deepColorValue);
   
   return (
     <mesh
@@ -404,6 +427,10 @@ interface FoamOverlayProps {
 function FoamOverlay({ params }: FoamOverlayProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const timeRef = useRef(0);
+  const foamColor = useMemo(
+    () => resolveCssVarValue(params.foamColor, 'rgb(248, 250, 252)'),
+    [params.foamColor]
+  );
   
   // useFrame must be called before any conditional return
   useFrame((_, delta) => {
@@ -421,7 +448,7 @@ function FoamOverlay({ params }: FoamOverlayProps) {
     <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
       <planeGeometry args={[100, 100]} />
       <meshBasicMaterial
-        color={params.foamColor}
+        color={foamColor}
         transparent
         opacity={params.foamIntensity * 0.2}
         blending={THREE.AdditiveBlending}
@@ -441,11 +468,15 @@ interface CausticsProjectorProps {
 function CausticsProjector({ params }: CausticsProjectorProps) {
   const lightRef = useRef<THREE.SpotLight>(null);
   const timeRef = useRef(0);
+  const causticsColor = useMemo(
+    () => resolveCssVarColor('--aethel-info-light', 'rgb(34, 211, 238)'),
+    []
+  );
   
   // useFrame must be called before any conditional return
   useFrame((_, delta) => {
     if (!params.causticsEnabled) return;
-    timeRef.current += delta * params.causticsSpeed;
+    timeRef.current += delta * params.causticsVelocidade;
     if (lightRef.current) {
       // Animate caustics position slightly
       lightRef.current.position.x = Math.sin(timeRef.current * 0.5) * 2;
@@ -462,7 +493,7 @@ function CausticsProjector({ params }: CausticsProjectorProps) {
       angle={Math.PI / 3}
       penumbra={0.5}
       intensity={params.causticsIntensity * 2}
-      color="#88ccff"
+      color={causticsColor}
       castShadow={false}
     />
   );
@@ -487,8 +518,8 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
   return (
     <div className="space-y-3">
       {waves.map((wave, i) => (
-        <div key={i} className="bg-slate-800/50 rounded p-2">
-          <div className="text-xs text-slate-400 mb-2">Wave {i + 1}</div>
+        <div key={i} className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
+          <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Wave {i + 1}</div>
           
           <Slider
             label="Amplitude"
@@ -499,7 +530,7 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
           />
           
           <Slider
-            label="Frequency"
+            label="Frequencia"
             value={wave.frequency}
             min={0.1}
             max={5}
@@ -507,7 +538,7 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
           />
           
           <Slider
-            label="Speed"
+            label="Velocidade"
             value={wave.speed}
             min={0.1}
             max={5}
@@ -515,12 +546,12 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
           />
           
           <Slider
-            label="Direction"
+            label="Direcao"
             value={wave.direction}
             min={-180}
             max={180}
             step={5}
-            unit="°"
+            unit="deg"
             onChange={(v) => updateWave(i, { direction: v })}
           />
         </div>
@@ -547,6 +578,14 @@ export default function WaterEditor({
   const [params, setParams] = useState<WaterParams>(DEFAULT_PARAMS);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [showCaustics, setShowCaustics] = useState(true);
+  const backgroundColor = useMemo(
+    () => resolveCssVarColor('--aethel-surface-primary', 'rgb(15, 23, 42)'),
+    []
+  );
+  const underwaterColor = useMemo(
+    () => resolveCssVarColor('--aethel-warning-dark', 'rgb(217, 119, 6)'),
+    []
+  );
   
   // Apply preset
   const applyPreset = useCallback((preset: WaterPreset) => {
@@ -576,11 +615,11 @@ export default function WaterEditor({
   };
   
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-200">
+    <div className="flex h-full w-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [30, 20, 30], fov: 50 }}>
-          <color attach="background" args={['#0a1628']} />
+          <color attach="background" args={[backgroundColor]} />
           
           <ambientLight intensity={0.3} />
           <directionalLight position={[20, 30, 10]} intensity={1} />
@@ -593,7 +632,7 @@ export default function WaterEditor({
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 0]}>
             <planeGeometry args={[100, 100]} />
             <meshStandardMaterial 
-              color="#8b7355" 
+              color={underwaterColor} 
               roughness={0.9}
             />
           </mesh>
@@ -607,15 +646,15 @@ export default function WaterEditor({
         </Canvas>
         
         {/* Overlay info */}
-        <div className="absolute top-4 left-4 bg-slate-900/90 p-3 rounded">
+        <div className="absolute top-4 left-4 bg-[var(--aethel-surface-primary)]/90 p-3 rounded">
           <div className="flex items-center gap-2 mb-2">
             {typeIcons[params.type]}
             <span className="font-medium capitalize">{params.type}</span>
           </div>
-          <div className="text-xs text-slate-400 space-y-1">
+          <div className="text-xs text-[var(--aethel-text-tertiary)] space-y-1">
             <div>Waves: {params.waves.length}</div>
             <div>Scale: {params.waveScale.toFixed(1)}x</div>
-            <div>Transparency: {(params.transparency * 100).toFixed(0)}%</div>
+            <div>Transparencia: {(params.transparency * 100).toFixed(0)}%</div>
           </div>
         </div>
         
@@ -623,7 +662,7 @@ export default function WaterEditor({
         <div className="absolute top-4 right-4">
           <button
             onClick={() => onExport?.(params)}
-            className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] rounded"
           >
             <Download className="w-4 h-4" />
             Export
@@ -632,16 +671,16 @@ export default function WaterEditor({
       </div>
       
       {/* Settings Panel */}
-      <div className="w-80 border-l border-slate-700 overflow-y-auto">
+      <div className="w-80 border-l border-[var(--aethel-border-primary)] overflow-y-auto">
         <div className="p-4">
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
-            <Waves className="w-5 h-5 text-cyan-400" />
+            <Waves className="w-5 h-5 text-[var(--aethel-primary)]" />
             Water Editor
           </h2>
           
           {/* Type selector */}
           <div className="mb-4">
-            <label className="text-xs text-slate-400 block mb-2">Water Type</label>
+            <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-2">Water Type</label>
             <div className="grid grid-cols-3 gap-1">
               {(['ocean', 'lake', 'river', 'pond', 'pool'] as WaterType[]).map((type) => (
                 <button
@@ -649,8 +688,8 @@ export default function WaterEditor({
                   onClick={() => updateParam('type', type)}
                   className={`p-2 rounded text-xs capitalize flex flex-col items-center gap-1 ${
                     params.type === type
-                      ? 'bg-cyan-600/30 border border-cyan-500'
-                      : 'bg-slate-700 hover:bg-slate-600'
+                      ? 'bg-[var(--aethel-primary)]/30 border border-[var(--aethel-primary)]'
+                      : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)]'
                   }`}
                 >
                   {typeIcons[type]}
@@ -661,7 +700,7 @@ export default function WaterEditor({
           </div>
           
           {/* Presets */}
-          <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-yellow-400" />}>
+          <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
               {WATER_PRESETS.map((preset) => (
                 <button
@@ -669,42 +708,42 @@ export default function WaterEditor({
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded text-left ${
                     selectedPreset === preset.id
-                      ? 'bg-cyan-600/30 border border-cyan-500'
-                      : 'bg-slate-700 hover:bg-slate-600'
+                      ? 'bg-[var(--aethel-primary)]/30 border border-[var(--aethel-primary)]'
+                      : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)]'
                   }`}
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
-                  <div className="text-[10px] text-slate-400 capitalize">{preset.type}</div>
+                  <div className="text-[10px] text-[var(--aethel-text-tertiary)] capitalize">{preset.type}</div>
                 </button>
               ))}
             </div>
           </CollapsibleSection>
           
           {/* Colors */}
-          <CollapsibleSection title="Colors" icon={<Palette className="w-4 h-4 text-blue-400" />}>
+          <CollapsibleSection title="Colors" icon={<Palette className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1">Shallow</label>
+                <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Shallow</label>
                 <input
                   type="color"
                   value={params.shallowColor}
                   onChange={(e) => updateParam('shallowColor', e.target.value)}
-                  className="w-full h-8 rounded cursor-pointer bg-slate-700 border border-slate-600"
+                  className="w-full h-8 rounded cursor-pointer bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)]"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1">Deep</label>
+                <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Deep</label>
                 <input
                   type="color"
                   value={params.deepColor}
                   onChange={(e) => updateParam('deepColor', e.target.value)}
-                  className="w-full h-8 rounded cursor-pointer bg-slate-700 border border-slate-600"
+                  className="w-full h-8 rounded cursor-pointer bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)]"
                 />
               </div>
             </div>
             
             <Slider
-              label="Transparency"
+              label="Transparencia"
               value={params.transparency}
               min={0}
               max={1}
@@ -712,7 +751,7 @@ export default function WaterEditor({
             />
             
             <Slider
-              label="Depth Fade"
+              label="Depth fade"
               value={params.colorDepthFade}
               min={1}
               max={50}
@@ -723,9 +762,9 @@ export default function WaterEditor({
           </CollapsibleSection>
           
           {/* Waves */}
-          <CollapsibleSection title="Waves" icon={<Waves className="w-4 h-4 text-cyan-400" />}>
+          <CollapsibleSection title="Waves" icon={<Waves className="w-4 h-4 text-[var(--aethel-primary)]" />}>
             <Slider
-              label="Wave Scale"
+              label="Escala das ondas"
               value={params.waveScale}
               min={0}
               max={5}
@@ -739,7 +778,7 @@ export default function WaterEditor({
           </CollapsibleSection>
           
           {/* Foam */}
-          <CollapsibleSection title="Foam" icon={<Sparkles className="w-4 h-4 text-white" />}>
+          <CollapsibleSection title="Foam" icon={<Sparkles className="w-4 h-4 text-[var(--aethel-text-primary)]" />}>
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="checkbox"
@@ -747,18 +786,18 @@ export default function WaterEditor({
                 onChange={(e) => updateParam('foamEnabled', e.target.checked)}
                 className="rounded"
               />
-              <span className="text-sm">Enable Foam</span>
+              <span className="text-sm">Ativar foam</span>
             </div>
             
             {params.foamEnabled && (
               <>
                 <div className="mb-3">
-                  <label className="text-[10px] text-slate-400 block mb-1">Foam Color</label>
+                  <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Cor do foam</label>
                   <input
                     type="color"
                     value={params.foamColor}
                     onChange={(e) => updateParam('foamColor', e.target.value)}
-                    className="w-full h-8 rounded cursor-pointer bg-slate-700 border border-slate-600"
+                    className="w-full h-8 rounded cursor-pointer bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)]"
                   />
                 </div>
                 
@@ -782,7 +821,7 @@ export default function WaterEditor({
           </CollapsibleSection>
           
           {/* Caustics */}
-          <CollapsibleSection title="Caustics" icon={<Sun className="w-4 h-4 text-yellow-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Caustics" icon={<Sun className="w-4 h-4 text-[var(--aethel-warning)]" />} defaultOpen={false}>
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="checkbox"
@@ -790,7 +829,7 @@ export default function WaterEditor({
                 onChange={(e) => updateParam('causticsEnabled', e.target.checked)}
                 className="rounded"
               />
-              <span className="text-sm">Enable Caustics</span>
+              <span className="text-sm">Ativar caustics</span>
             </div>
             
             {params.causticsEnabled && (
@@ -812,18 +851,18 @@ export default function WaterEditor({
                 />
                 
                 <Slider
-                  label="Speed"
-                  value={params.causticsSpeed}
+                  label="Velocidade"
+                  value={params.causticsVelocidade}
                   min={0.1}
                   max={3}
-                  onChange={(v) => updateParam('causticsSpeed', v)}
+                  onChange={(v) => updateParam('causticsVelocidade', v)}
                 />
               </>
             )}
           </CollapsibleSection>
           
-          {/* Reflection/Refraction */}
-          <CollapsibleSection title="Optics" icon={<Eye className="w-4 h-4 text-blue-400" />} defaultOpen={false}>
+          {/* Reflexao/Refracao */}
+          <CollapsibleSection title="Optics" icon={<Eye className="w-4 h-4 text-[var(--aethel-info)]" />} defaultOpen={false}>
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="checkbox"
@@ -831,12 +870,12 @@ export default function WaterEditor({
                 onChange={(e) => updateParam('reflectionEnabled', e.target.checked)}
                 className="rounded"
               />
-              <span className="text-sm">Reflection</span>
+              <span className="text-sm">Reflexao</span>
             </div>
             
             {params.reflectionEnabled && (
               <Slider
-                label="Reflection Intensity"
+                label="Reflexao Intensity"
                 value={params.reflectionIntensity}
                 min={0}
                 max={1}
@@ -851,12 +890,12 @@ export default function WaterEditor({
                 onChange={(e) => updateParam('refractionEnabled', e.target.checked)}
                 className="rounded"
               />
-              <span className="text-sm">Refraction</span>
+              <span className="text-sm">Refracao</span>
             </div>
             
             {params.refractionEnabled && (
               <Slider
-                label="Refraction Strength"
+                label="Refracao Strength"
                 value={params.refractionStrength}
                 min={0}
                 max={1}
@@ -867,7 +906,7 @@ export default function WaterEditor({
           
           {/* Flow (River) */}
           {params.type === 'river' && (
-            <CollapsibleSection title="Flow" icon={<Wind className="w-4 h-4 text-teal-400" />}>
+            <CollapsibleSection title="Flow" icon={<Wind className="w-4 h-4 text-[var(--aethel-accent)]" />}>
               <div className="flex items-center gap-2 mb-3">
                 <input
                   type="checkbox"
@@ -875,27 +914,27 @@ export default function WaterEditor({
                   onChange={(e) => updateParam('flowEnabled', e.target.checked)}
                   className="rounded"
                 />
-                <span className="text-sm">Enable Flow</span>
+                <span className="text-sm">Ativar flow</span>
               </div>
               
               {params.flowEnabled && (
                 <>
                   <Slider
-                    label="Flow Speed"
-                    value={params.flowSpeed}
+                    label="Velocidade do flow"
+                    value={params.flowVelocidade}
                     min={0}
                     max={5}
-                    onChange={(v) => updateParam('flowSpeed', v)}
+                    onChange={(v) => updateParam('flowVelocidade', v)}
                   />
                   
                   <Slider
-                    label="Flow Direction"
-                    value={params.flowDirection}
+                    label="Direcao do flow"
+                    value={params.flowDirecao}
                     min={-180}
                     max={180}
                     step={5}
-                    unit="°"
-                    onChange={(v) => updateParam('flowDirection', v)}
+                    unit="deg"
+                    onChange={(v) => updateParam('flowDirecao', v)}
                   />
                 </>
               )}
@@ -903,7 +942,7 @@ export default function WaterEditor({
           )}
           
           {/* Buoyancy */}
-          <CollapsibleSection title="Buoyancy" icon={<Anchor className="w-4 h-4 text-orange-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Buoyancy" icon={<Anchor className="w-4 h-4 text-[var(--aethel-warning)]" />} defaultOpen={false}>
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="checkbox"
@@ -911,13 +950,13 @@ export default function WaterEditor({
                 onChange={(e) => updateParam('buoyancyEnabled', e.target.checked)}
                 className="rounded"
               />
-              <span className="text-sm">Enable Buoyancy</span>
+              <span className="text-sm">Ativar buoyancy</span>
             </div>
             
             {params.buoyancyEnabled && (
               <>
                 <Slider
-                  label="Buoyancy Strength"
+                  label="Forca de buoyancy"
                   value={params.buoyancyStrength}
                   min={0}
                   max={2}
@@ -925,7 +964,7 @@ export default function WaterEditor({
                 />
                 
                 <Slider
-                  label="Water Density"
+                  label="Densidade da agua"
                   value={params.waterDensity}
                   min={500}
                   max={1500}
@@ -938,19 +977,19 @@ export default function WaterEditor({
           </CollapsibleSection>
           
           {/* Underwater */}
-          <CollapsibleSection title="Underwater" icon={<Droplets className="w-4 h-4 text-blue-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Underwater" icon={<Droplets className="w-4 h-4 text-[var(--aethel-info)]" />} defaultOpen={false}>
             <div className="mb-3">
-              <label className="text-[10px] text-slate-400 block mb-1">Fog Color</label>
+              <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Cor do fog</label>
               <input
                 type="color"
                 value={params.underwaterFogColor}
                 onChange={(e) => updateParam('underwaterFogColor', e.target.value)}
-                className="w-full h-8 rounded cursor-pointer bg-slate-700 border border-slate-600"
+                className="w-full h-8 rounded cursor-pointer bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)]"
               />
             </div>
             
             <Slider
-              label="Fog Density"
+              label="Densidade do fog"
               value={params.underwaterFogDensity}
               min={0}
               max={0.5}

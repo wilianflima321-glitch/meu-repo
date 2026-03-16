@@ -120,45 +120,45 @@ function getToolIcon(tool?: string) {
 function StatsOverview({ stats }: { stats: GodViewStats }) {
   return (
     <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
+      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Usuários ao vivo</span>
-          <Users className="w-4 h-4 text-green-400" />
+          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Usuários ao vivo</span>
+          <Users className="w-4 h-4 text-[var(--aethel-success)]" />
         </div>
-        <p className="text-3xl font-bold text-white">{stats.totalActive}</p>
+        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">{stats.totalActive}</p>
         <div className="flex items-center gap-2 mt-2">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs text-green-400">Ao vivo</span>
+          <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse" />
+          <span className="text-xs text-[var(--aethel-success)]">Ao vivo</span>
         </div>
       </div>
       
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
+      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Chamadas de IA</span>
-          <Bot className="w-4 h-4 text-blue-400" />
+          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Chamadas de IA</span>
+          <Bot className="w-4 h-4 text-[var(--aethel-info)]" />
         </div>
-        <p className="text-3xl font-bold text-white">{stats.totalAICalls.toLocaleString()}</p>
-        <p className="text-xs text-zinc-500 mt-2">{stats.totalTokens.toLocaleString()} tokens</p>
+        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">{stats.totalAICalls.toLocaleString()}</p>
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">{stats.totalTokens.toLocaleString()} tokens</p>
       </div>
       
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
+      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Custo de IA (ao vivo)</span>
-          <DollarSign className="w-4 h-4 text-yellow-400" />
+          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Custo de IA (ao vivo)</span>
+          <DollarSign className="w-4 h-4 text-[var(--aethel-warning)]" />
         </div>
-        <p className="text-3xl font-bold text-white">${stats.totalAICost.toFixed(2)}</p>
-        <p className="text-xs text-zinc-500 mt-2">Sessões atuais</p>
+        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">${stats.totalAICost.toFixed(2)}</p>
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">Sessões atuais</p>
       </div>
       
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
+      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-zinc-500 uppercase">Região principal</span>
-          <Globe className="w-4 h-4 text-cyan-400" />
+          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Região principal</span>
+          <Globe className="w-4 h-4 text-[var(--aethel-info)]" />
         </div>
-        <p className="text-3xl font-bold text-white">
+        <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">
           {stats.byCountry[0]?.country || 'N/D'}
         </p>
-        <p className="text-xs text-zinc-500 mt-2">
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">
           {stats.byCountry[0]?.count || 0} usuários
         </p>
       </div>
@@ -181,40 +181,40 @@ function SessionCard({
   return (
     <div 
       className={`
-        bg-zinc-900/70 border border-zinc-700 rounded-lg overflow-hidden
+        bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden
         ${session.aiCostIncurred > 1 ? 'border-l-4 border-l-yellow-500' : ''}
       `}
     >
       {/* Header Row */}
       <div 
-        className="p-4 cursor-pointer hover:bg-zinc-800/80 transition-colors"
+        className="p-4 cursor-pointer hover:bg-[var(--aethel-surface-tertiary)] transition-colors"
         onClick={onToggle}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Status Indicator */}
             <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-zinc-800/80 flex items-center justify-center">
-                <span className="text-sm font-medium text-white">
+              <div className="w-10 h-10 rounded-full bg-[var(--aethel-surface-tertiary)] flex items-center justify-center">
+                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">
                   {session.userName?.charAt(0) || session.userEmail.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-[#1a1a1a]" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[var(--aethel-success)] border-2 border-[var(--aethel-border-primary)]" />
             </div>
             
             {/* User Info */}
             <div>
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
                 {session.userName || session.userEmail}
               </p>
               <div className="flex items-center gap-2 mt-0.5">
                 {session.projectName && (
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-[var(--aethel-text-tertiary)]">
                     {session.projectName}
                   </span>
                 )}
                 {session.country && (
-                  <span className="text-xs text-zinc-500 flex items-center gap-1">
+                  <span className="text-xs text-[var(--aethel-text-tertiary)] flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
                     {session.city && `${session.city}, `}{session.country}
                   </span>
@@ -226,34 +226,34 @@ function SessionCard({
           {/* Quick Stats */}
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <p className="text-xs text-zinc-500">Duração</p>
-              <p className="text-sm text-white flex items-center gap-1">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Duração</p>
+              <p className="text-sm text-[var(--aethel-text-primary)] flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {formatDuration(session.duration)}
               </p>
             </div>
             
             <div className="text-right">
-              <p className="text-xs text-zinc-500">Chamadas de IA</p>
-              <p className="text-sm text-white flex items-center gap-1">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Chamadas de IA</p>
+              <p className="text-sm text-[var(--aethel-text-primary)] flex items-center gap-1">
                 <Bot className="w-3 h-3" />
                 {session.aiCallsCount}
               </p>
             </div>
             
             <div className="text-right">
-              <p className="text-xs text-zinc-500">Custo</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo</p>
               <p className={`text-sm font-medium flex items-center gap-1 ${
-                session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-white'
+                session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-text-primary)]'
               }`}>
                 <DollarSign className="w-3 h-3" />
                 {session.aiCostIncurred.toFixed(3)}
               </p>
             </div>
             
-            <DeviceIcon className="w-4 h-4 text-zinc-500" />
+            <DeviceIcon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             
-            <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${
+            <ChevronDown className={`w-4 h-4 text-[var(--aethel-text-tertiary)] transition-transform ${
               isExpanded ? 'rotate-180' : ''
             }`} />
           </div>
@@ -262,34 +262,34 @@ function SessionCard({
       
       {/* Expanded Details */}
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-zinc-700 pt-4">
+        <div className="px-4 pb-4 border-t border-[var(--aethel-border-primary)] pt-4">
           <div className="grid grid-cols-3 gap-4">
             {/* Activity */}
             <div className="space-y-3">
-              <h4 className="text-xs text-zinc-500 uppercase">Atividade atual</h4>
+              <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Atividade atual</h4>
               
               <div className="flex items-center gap-2">
-                <MousePointer className="w-4 h-4 text-zinc-500" />
+                <MousePointer className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 <div>
-                  <p className="text-xs text-zinc-500">Página</p>
-                  <p className="text-sm text-white">{session.currentPage || 'Desconhecida'}</p>
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Página</p>
+                  <p className="text-sm text-[var(--aethel-text-primary)]">{session.currentPage || 'Desconhecida'}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
-                <ToolIcon className="w-4 h-4 text-zinc-500" />
+                <ToolIcon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 <div>
-                  <p className="text-xs text-zinc-500">Ferramenta ativa</p>
-                  <p className="text-sm text-white">{session.currentTool || 'Nenhuma'}</p>
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Ferramenta ativa</p>
+                  <p className="text-sm text-[var(--aethel-text-primary)]">{session.currentTool || 'Nenhuma'}</p>
                 </div>
               </div>
               
               {session.lastAction && (
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-zinc-500" />
+                  <Zap className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                   <div>
-                    <p className="text-xs text-zinc-500">Última ação</p>
-                    <p className="text-sm text-white">{session.lastAction}</p>
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Última ação</p>
+                    <p className="text-sm text-[var(--aethel-text-primary)]">{session.lastAction}</p>
                   </div>
                 </div>
               )}
@@ -297,46 +297,46 @@ function SessionCard({
             
             {/* Technical */}
             <div className="space-y-3">
-              <h4 className="text-xs text-zinc-500 uppercase">Técnico</h4>
+              <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Técnico</h4>
               
               <div>
-                <p className="text-xs text-zinc-500">ID da sessão</p>
-                <p className="text-sm text-white font-mono">{session.id.slice(0, 12)}...</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">ID da sessão</p>
+                <p className="text-sm text-[var(--aethel-text-primary)] font-mono">{session.id.slice(0, 12)}...</p>
               </div>
               
               <div>
-                <p className="text-xs text-zinc-500">Endereço IP</p>
-                <p className="text-sm text-white font-mono">{session.ipAddress || 'Desconhecido'}</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Endereço IP</p>
+                <p className="text-sm text-[var(--aethel-text-primary)] font-mono">{session.ipAddress || 'Desconhecido'}</p>
               </div>
               
               <div>
-                <p className="text-xs text-zinc-500">Navegador</p>
-                <p className="text-sm text-white">{session.browser || 'Desconhecido'}</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Navegador</p>
+                <p className="text-sm text-[var(--aethel-text-primary)]">{session.browser || 'Desconhecido'}</p>
               </div>
             </div>
             
             {/* AI Usage */}
             <div className="space-y-3">
-              <h4 className="text-xs text-zinc-500 uppercase">Uso de IA</h4>
+              <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Uso de IA</h4>
               
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-zinc-800/80 rounded p-2">
-                  <p className="text-xs text-zinc-500">Chamadas</p>
-                  <p className="text-lg font-medium text-white">{session.aiCallsCount}</p>
+                <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Chamadas</p>
+                  <p className="text-lg font-medium text-[var(--aethel-text-primary)]">{session.aiCallsCount}</p>
                 </div>
                 
-                <div className="bg-zinc-800/80 rounded p-2">
-                  <p className="text-xs text-zinc-500">Tokens</p>
-                  <p className="text-lg font-medium text-white">
+                <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Tokens</p>
+                  <p className="text-lg font-medium text-[var(--aethel-text-primary)]">
                     {session.aiTokensUsed.toLocaleString()}
                   </p>
                 </div>
               </div>
               
-              <div className="bg-zinc-800/80 rounded p-2">
-                <p className="text-xs text-zinc-500">Custo da sessão</p>
+              <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo da sessão</p>
                 <p className={`text-xl font-bold ${
-                  session.aiCostIncurred > 1 ? 'text-yellow-400' : 'text-green-400'
+                  session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-success)]'
                 }`}>
                   ${session.aiCostIncurred.toFixed(4)}
                 </p>
@@ -354,8 +354,8 @@ function WorldMap({ byCountry }: { byCountry: { country: string; count: number }
   const maxCount = Math.max(...byCountry.map(c => c.count), 1);
   
   return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
+    <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
+      <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
         <Globe className="w-4 h-4" />
         Ativos por região
       </h3>
@@ -363,14 +363,14 @@ function WorldMap({ byCountry }: { byCountry: { country: string; count: number }
       <div className="space-y-2">
         {byCountry.slice(0, 10).map(({ country, count }) => (
           <div key={country} className="flex items-center gap-3">
-            <span className="text-sm text-zinc-500 w-20 truncate">{country}</span>
-            <div className="flex-1 h-2 bg-zinc-800/80 rounded-full overflow-hidden">
+            <span className="text-sm text-[var(--aethel-text-tertiary)] w-20 truncate">{country}</span>
+            <div className="flex-1 h-2 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
               <div 
-                className="h-full bg-blue-500 rounded-full"
+                className="h-full bg-[var(--aethel-primary)] rounded-full"
                 style={{ width: `${(count / maxCount) * 100}%` }}
               />
             </div>
-            <span className="text-sm text-zinc-300 w-12 text-right">{count}</span>
+            <span className="text-sm text-[var(--aethel-text-secondary)] w-12 text-right">{count}</span>
           </div>
         ))}
       </div>
@@ -452,7 +452,7 @@ export default function GodViewPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
+        <RefreshCw className="w-6 h-6 text-[var(--aethel-text-tertiary)] animate-spin" />
       </div>
     );
   }
@@ -462,17 +462,17 @@ export default function GodViewPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)] flex items-center gap-2">
             <Eye className="w-6 h-6" />
             Visão total
             {!paused && (
-              <span className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)] rounded text-xs">
+                <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse" />
                 AO VIVO
               </span>
             )}
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">
             Visão em tempo real de todas as sessões ativas
           </p>
         </div>
@@ -480,13 +480,13 @@ export default function GodViewPage() {
         <div className="flex items-center gap-3">
           {/* Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[var(--aethel-text-tertiary)] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Buscar usuários, projetos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-sm text-white placeholder-gray-500 w-64"
+              className="pl-9 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-gray-500 w-64"
             />
           </div>
           
@@ -494,7 +494,7 @@ export default function GodViewPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-sm text-white"
+            className="px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
           >
             <option value="duration">Ordenar por duração</option>
             <option value="cost">Ordenar por custo de IA</option>
@@ -506,8 +506,8 @@ export default function GodViewPage() {
             onClick={() => setPaused(!paused)}
             className={`p-2 rounded-lg border ${
               paused 
-                ? 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400' 
-                : 'border-zinc-700 text-zinc-500 hover:text-white'
+                ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning)]' 
+                : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
             title={paused ? 'Retomar atualizações ao vivo' : 'Pausar atualizações ao vivo'}
           >
@@ -517,7 +517,7 @@ export default function GodViewPage() {
           {/* Manual Refresh */}
           <button
             onClick={fetchSessions}
-            className="p-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-zinc-500 hover:text-white"
+            className="p-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -532,15 +532,15 @@ export default function GodViewPage() {
         {/* Sessions List */}
         <div className="col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-zinc-500">
+            <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">
               {filteredSessions.length} sessões ativas
             </h2>
           </div>
           
           {filteredSessions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 bg-zinc-900/70 border border-zinc-700 rounded-lg">
-              <Users className="w-12 h-12 text-zinc-400 mb-4" />
-              <p className="text-zinc-500">Nenhuma sessão ativa</p>
+            <div className="flex flex-col items-center justify-center h-64 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg">
+              <Users className="w-12 h-12 text-[var(--aethel-text-quaternary)] mb-4" />
+              <p className="text-[var(--aethel-text-tertiary)]">Nenhuma sessão ativa</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -561,8 +561,8 @@ export default function GodViewPage() {
           <WorldMap byCountry={stats.byCountry} />
           
           {/* Device Breakdown */}
-          <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
+          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
+            <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
               <Monitor className="w-4 h-4" />
               Tipos de dispositivo
             </h3>
@@ -572,13 +572,13 @@ export default function GodViewPage() {
                 <div key={device} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {device === 'mobile' ? (
-                      <Smartphone className="w-4 h-4 text-zinc-500" />
+                      <Smartphone className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                     ) : (
-                      <Monitor className="w-4 h-4 text-zinc-500" />
+                      <Monitor className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                     )}
-                    <span className="text-sm text-zinc-300 capitalize">{device}</span>
+                    <span className="text-sm text-[var(--aethel-text-secondary)] capitalize">{device}</span>
                   </div>
-                  <span className="text-sm text-white font-medium">{count}</span>
+                  <span className="text-sm text-[var(--aethel-text-primary)] font-medium">{count}</span>
                 </div>
               ))}
             </div>
@@ -586,12 +586,12 @@ export default function GodViewPage() {
           
           {/* High Cost Alert */}
           {filteredSessions.some(s => s.aiCostIncurred > 1) && (
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+            <div className="bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm font-medium text-yellow-400">Uso elevado de IA</span>
+                <AlertCircle className="w-4 h-4 text-[var(--aethel-warning)]" />
+                <span className="text-sm font-medium text-[var(--aethel-warning)]">Uso elevado de IA</span>
               </div>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">
                 {filteredSessions.filter(s => s.aiCostIncurred > 1).length} sessão(ões) 
                 ultrapassaram $1 em custos de IA nesta sessão.
               </p>

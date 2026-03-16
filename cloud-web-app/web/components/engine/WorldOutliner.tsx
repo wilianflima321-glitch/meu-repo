@@ -1,10 +1,10 @@
 /**
- * World Outliner - Hierarchia de Objetos da Cena
+ * World Outliner - Hierarquia de Objetos da Cena
  * 
  * Sistema profissional estilo Unreal Engine para visualizar
  * e gerenciar a hierarquia de objetos na cena.
  * 
- * NÃO É MOCK - Sistema real e funcional!
+ * NAO E MOCK - Sistema real e funcional!
  */
 
 'use client';
@@ -38,7 +38,7 @@ export interface SceneObject {
   type: SceneObjectType;
   visible: boolean;
   locked: boolean;
-  selected: boolean;
+  selecionados: boolean;
   children: SceneObject[];
   parentId?: string;
   components?: string[];
@@ -51,7 +51,7 @@ export interface OutlinerFilter {
   search?: string;
   types?: SceneObjectType[];
   showHidden?: boolean;
-  showLocked?: boolean;
+  showBloqueared?: boolean;
   tags?: string[];
 }
 
@@ -60,20 +60,20 @@ export interface OutlinerFilter {
 // ============================================================================
 
 const OBJECT_TYPE_CONFIG: Record<SceneObjectType, { icon: string; color: string }> = {
-  empty: { icon: '⊡', color: '#888' },
-  mesh: { icon: '🔷', color: '#2196f3' },
-  light: { icon: '💡', color: '#ffc107' },
-  camera: { icon: '📷', color: '#9c27b0' },
-  audio: { icon: '🔊', color: '#00bcd4' },
-  particle: { icon: '✨', color: '#ff5722' },
-  trigger: { icon: '🎯', color: '#4caf50' },
-  volume: { icon: '📦', color: '#607d8b' },
-  blueprint: { icon: '📐', color: '#3f51b5' },
-  prefab: { icon: '🧩', color: '#00acc1' },
-  landscape: { icon: '🏔️', color: '#8bc34a' },
-  foliage: { icon: '🌿', color: '#4caf50' },
-  spline: { icon: '〰️', color: '#ff9800' },
-  group: { icon: '📁', color: '#795548' },
+  empty: { icon: '⊡', color: 'var(--aethel-text-quaternary)' },
+  mesh: { icon: '🔷', color: 'var(--aethel-primary)' },
+  light: { icon: '💡', color: 'var(--aethel-warning)' },
+  camera: { icon: '📷', color: 'var(--aethel-accent)' },
+  audio: { icon: '🔊', color: 'var(--aethel-info)' },
+  particle: { icon: '✨', color: 'var(--aethel-error)' },
+  trigger: { icon: '🎯', color: 'var(--aethel-success)' },
+  volume: { icon: '📦', color: 'var(--aethel-text-tertiary)' },
+  blueprint: { icon: '📐', color: 'var(--aethel-primary)' },
+  prefab: { icon: '🧩', color: 'var(--aethel-info)' },
+  landscape: { icon: '🏔️', color: 'var(--aethel-success)' },
+  foliage: { icon: '🌿', color: 'var(--aethel-success)' },
+  spline: { icon: '〰️', color: 'var(--aethel-warning)' },
+  group: { icon: '📁', color: 'var(--aethel-text-tertiary)' },
 };
 
 // ============================================================================
@@ -87,14 +87,14 @@ interface TreeItemProps {
   onToggleExpand: () => void;
   onSelect: (e: React.MouseEvent) => void;
   onToggleVisibility: () => void;
-  onToggleLock: () => void;
-  onRename: (name: string) => void;
+  onToggleBloquear: () => void;
+  onRenomear: (name: string) => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onContextMenu: (e: React.MouseEvent) => void;
   isDragOver: boolean;
-  selectedIds: Set<string>;
+  selecionadosIds: Set<string>;
 }
 
 function TreeItem({
@@ -104,21 +104,21 @@ function TreeItem({
   onToggleExpand,
   onSelect,
   onToggleVisibility,
-  onToggleLock,
-  onRename,
+  onToggleBloquear,
+  onRenomear,
   onDragStart,
   onDragOver,
   onDrop,
   onContextMenu,
   isDragOver,
-  selectedIds,
+  selecionadosIds,
 }: TreeItemProps) {
   const [isRenaming, setIsRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState(object.name);
+  const [renameValue, setRenomearValue] = useState(object.name);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const config = OBJECT_TYPE_CONFIG[object.type];
-  const isSelected = selectedIds.has(object.id);
+  const isSelected = selecionadosIds.has(object.id);
   const hasChildren = object.children.length > 0;
   
   useEffect(() => {
@@ -128,9 +128,9 @@ function TreeItem({
     }
   }, [isRenaming]);
   
-  const handleRenameSubmit = () => {
+  const handleRenomearSubmit = () => {
     if (renameValue.trim() && renameValue !== object.name) {
-      onRename(renameValue.trim());
+      onRenomear(renameValue.trim());
     }
     setIsRenaming(false);
   };
@@ -150,7 +150,7 @@ function TreeItem({
       onDrop={onDrop}
       onContextMenu={onContextMenu}
       style={{
-        borderLeft: isDragOver ? '2px solid #3f51b5' : '2px solid transparent',
+        borderLeft: isDragOver ? '2px solid var(--aethel-primary)' : '2px solid transparent',
       }}
     >
       <div
@@ -162,14 +162,14 @@ function TreeItem({
           height: '26px',
           paddingLeft: `${8 + level * 18}px`,
           paddingRight: '8px',
-          background: isSelected ? '#3f51b533' : isDragOver ? '#3f51b522' : 'transparent',
+          background: isSelected ? 'var(--aethel-primary)33' : isDragOver ? 'var(--aethel-primary)22' : 'transparent',
           cursor: 'pointer',
           fontSize: '13px',
           opacity: object.visible ? 1 : 0.5,
           userSelect: 'none',
         }}
         onMouseOver={(e) => {
-          if (!isSelected) e.currentTarget.style.background = '#ffffff08';
+          if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
         }}
         onMouseOut={(e) => {
           if (!isSelected) e.currentTarget.style.background = 'transparent';
@@ -186,7 +186,7 @@ function TreeItem({
             justifyContent: 'center',
             background: 'none',
             border: 'none',
-            color: '#666',
+            color: 'var(--aethel-text-quaternary)',
             cursor: hasChildren ? 'pointer' : 'default',
             fontSize: '10px',
             visibility: hasChildren ? 'visible' : 'hidden',
@@ -210,22 +210,22 @@ function TreeItem({
             ref={inputRef}
             type="text"
             value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onBlur={handleRenameSubmit}
+            onChange={(e) => setRenomearValue(e.target.value)}
+            onBlur={handleRenomearSubmit}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleRenameSubmit();
+              if (e.key === 'Enter') handleRenomearSubmit();
               if (e.key === 'Escape') {
-                setRenameValue(object.name);
+                setRenomearValue(object.name);
                 setIsRenaming(false);
               }
             }}
             onClick={(e) => e.stopPropagation()}
             style={{
               flex: 1,
-              background: '#0f0f23',
-              border: '1px solid #3f51b5',
+              background: 'var(--aethel-surface-tertiary)',
+              border: '1px solid var(--aethel-primary)',
               borderRadius: '3px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               fontSize: '13px',
               padding: '1px 6px',
               outline: 'none',
@@ -234,7 +234,7 @@ function TreeItem({
         ) : (
           <span style={{ 
             flex: 1, 
-            color: isSelected ? '#fff' : '#ccc',
+            color: isSelected ? 'var(--aethel-text-primary)' : 'var(--aethel-text-secondary)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -247,10 +247,10 @@ function TreeItem({
         {object.components && object.components.length > 0 && (
           <span style={{
             padding: '1px 4px',
-            background: '#333',
+            background: 'var(--aethel-surface-quaternary)',
             borderRadius: '3px',
             fontSize: '10px',
-            color: '#888',
+            color: 'var(--aethel-text-quaternary)',
             marginRight: '6px',
           }}>
             {object.components.length}
@@ -268,18 +268,18 @@ function TreeItem({
             justifyContent: 'center',
             background: 'none',
             border: 'none',
-            color: object.visible ? '#4caf50' : '#666',
+            color: object.visible ? 'var(--aethel-success)' : 'var(--aethel-text-quaternary)',
             cursor: 'pointer',
             fontSize: '12px',
           }}
-          title={object.visible ? 'Hide' : 'Show'}
+          title={object.visible ? 'Ocultar' : 'Mostrar'}
         >
           {object.visible ? '👁' : '👁‍🗨'}
         </button>
         
-        {/* Lock Toggle */}
+        {/* Bloquear Toggle */}
         <button
-          onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
+          onClick={(e) => { e.stopPropagation(); onToggleBloquear(); }}
           style={{
             width: '20px',
             height: '20px',
@@ -288,11 +288,11 @@ function TreeItem({
             justifyContent: 'center',
             background: 'none',
             border: 'none',
-            color: object.locked ? '#ffc107' : '#666',
+            color: object.locked ? 'var(--aethel-warning)' : 'var(--aethel-text-quaternary)',
             cursor: 'pointer',
             fontSize: '12px',
           }}
-          title={object.locked ? 'Unlock' : 'Lock'}
+          title={object.locked ? 'Desbloquear' : 'Bloquear'}
         >
           {object.locked ? '🔒' : '🔓'}
         </button>
@@ -325,26 +325,26 @@ function OutlinerContextMenu({
   }, [onClose]);
   
   const items = object ? [
-    { id: 'focus', label: '🎯 Focus', divider: false },
-    { id: 'rename', label: '✏️ Rename', divider: false },
-    { id: 'duplicate', label: '📋 Duplicate', divider: true },
-    { id: 'visibility', label: object.visible ? '👁‍🗨 Hide' : '👁 Show', divider: false },
-    { id: 'lock', label: object.locked ? '🔓 Unlock' : '🔒 Lock', divider: true },
-    { id: 'group', label: '📁 Group', divider: false },
-    { id: 'ungroup', label: '📂 Ungroup', divider: true },
-    { id: 'create_prefab', label: '🧩 Create Prefab', divider: false },
-    { id: 'create_blueprint', label: '📐 Create Blueprint', divider: true },
-    { id: 'delete', label: '🗑️ Delete', divider: false },
+    { id: 'focus', label: '🎯 Focar', divider: false },
+    { id: 'rename', label: '✏️ Renomear', divider: false },
+    { id: 'duplicate', label: '📋 Duplicar', divider: true },
+    { id: 'visibility', label: object.visible ? '👁‍🗨 Ocultar' : '👁 Mostrar', divider: false },
+    { id: 'lock', label: object.locked ? '🔓 Desbloquear' : '🔒 Bloquear', divider: true },
+    { id: 'group', label: '📁 Agrupar', divider: false },
+    { id: 'ungroup', label: '📂 Desagrupar', divider: true },
+    { id: 'create_prefab', label: '🧩 Criar Prefab', divider: false },
+    { id: 'create_blueprint', label: '📐 Criar Blueprint', divider: true },
+    { id: 'delete', label: '🗑️ Excluir', divider: false },
   ] : [
-    { id: 'create_empty', label: '⊡ Create Empty', divider: false },
-    { id: 'create_cube', label: '🔷 Create Cube', divider: false },
-    { id: 'create_sphere', label: '🔵 Create Sphere', divider: false },
-    { id: 'create_plane', label: '⬜ Create Plane', divider: true },
-    { id: 'create_light', label: '💡 Create Light', divider: false },
-    { id: 'create_camera', label: '📷 Create Camera', divider: false },
-    { id: 'create_audio', label: '🔊 Create Audio Source', divider: true },
-    { id: 'create_particle', label: '✨ Create Particle System', divider: false },
-    { id: 'create_trigger', label: '🎯 Create Trigger', divider: false },
+    { id: 'create_empty', label: '⊡ Criar Vazio', divider: false },
+    { id: 'create_cube', label: '🔷 Criar Cubo', divider: false },
+    { id: 'create_sphere', label: '🔵 Criar Esfera', divider: false },
+    { id: 'create_plane', label: '⬜ Criar Plano', divider: true },
+    { id: 'create_light', label: '💡 Criar Luz', divider: false },
+    { id: 'create_camera', label: '📷 Criar Camera', divider: false },
+    { id: 'create_audio', label: '🔊 Criar Audio', divider: true },
+    { id: 'create_particle', label: '✨ Criar Particulas', divider: false },
+    { id: 'create_trigger', label: '🎯 Criar Trigger', divider: false },
   ];
   
   return (
@@ -353,8 +353,8 @@ function OutlinerContextMenu({
         position: 'fixed',
         left: x,
         top: y,
-        background: '#1a1a2e',
-        border: '1px solid #333',
+        background: 'var(--aethel-surface-secondary)',
+        border: '1px solid var(--aethel-border-primary)',
         borderRadius: '6px',
         padding: '4px 0',
         minWidth: '180px',
@@ -376,17 +376,17 @@ function OutlinerContextMenu({
               padding: '6px 16px',
               background: 'none',
               border: 'none',
-              color: item.id === 'delete' ? '#e74c3c' : '#ccc',
+              color: item.id === 'delete' ? 'var(--aethel-error)' : 'var(--aethel-text-secondary)',
               fontSize: '13px',
               textAlign: 'left',
               cursor: 'pointer',
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#333'}
+            onMouseOver={(e) => e.currentTarget.style.background = 'var(--aethel-surface-quaternary)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'none'}
           >
             {item.label}
           </button>
-          {item.divider && <div style={{ borderBottom: '1px solid #333', margin: '4px 0' }} />}
+          {item.divider && <div style={{ borderBottom: '1px solid var(--aethel-border-primary)', margin: '4px 0' }} />}
         </React.Fragment>
       ))}
     </div>
@@ -408,7 +408,7 @@ function OutlinerFilterBar({
   onCollapseAll: () => void;
   onExpandAll: () => void;
 }) {
-  const [showTypeFilter, setShowTypeFilter] = useState(false);
+  const [showTypeFilter, setMostrarTypeFilter] = useState(false);
   
   return (
     <div style={{
@@ -416,21 +416,21 @@ function OutlinerFilterBar({
       alignItems: 'center',
       gap: '8px',
       padding: '8px',
-      borderBottom: '1px solid #333',
+      borderBottom: '1px solid var(--aethel-border-primary)',
     }}>
       {/* Search */}
       <input
         type="text"
-        placeholder="🔍 Search..."
+        placeholder="🔍 Buscar..."
         value={filter.search || ''}
         onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
         style={{
           flex: 1,
           padding: '4px 8px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           fontSize: '12px',
         }}
       />
@@ -438,17 +438,17 @@ function OutlinerFilterBar({
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
         <button
-          onClick={() => setShowTypeFilter(!showTypeFilter)}
+          onClick={() => setMostrarTypeFilter(!showTypeFilter)}
           style={{
             padding: '4px 8px',
-            background: filter.types?.length ? '#3f51b5' : '#0f0f23',
-            border: '1px solid #333',
+            background: filter.types?.length ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '12px',
           }}
-          title="Filter by type"
+          title="Filtrar por tipo"
         >
           📋
         </button>
@@ -459,8 +459,8 @@ function OutlinerFilterBar({
             top: '100%',
             right: 0,
             marginTop: '4px',
-            background: '#1a1a2e',
-            border: '1px solid #333',
+            background: 'var(--aethel-surface-secondary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '8px',
             zIndex: 100,
@@ -489,43 +489,43 @@ function OutlinerFilterBar({
                   }}
                 />
                 <span style={{ color: config.color }}>{config.icon}</span>
-                <span style={{ color: '#ccc' }}>{type}</span>
+                <span style={{ color: 'var(--aethel-text-secondary)' }}>{type}</span>
               </label>
             ))}
           </div>
         )}
       </div>
       
-      {/* Collapse All */}
+      {/* Recolher tudo */}
       <button
         onClick={onCollapseAll}
         style={{
           padding: '4px 8px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontSize: '12px',
         }}
-        title="Collapse All"
+        title="Recolher tudo"
       >
         ⬆
       </button>
       
-      {/* Expand All */}
+      {/* Expandir tudo */}
       <button
         onClick={onExpandAll}
         style={{
           padding: '4px 8px',
-          background: '#0f0f23',
-          border: '1px solid #333',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
-          color: '#fff',
+          color: 'var(--aethel-text-primary)',
           cursor: 'pointer',
           fontSize: '12px',
         }}
-        title="Expand All"
+        title="Expandir tudo"
       >
         ⬇
       </button>
@@ -538,33 +538,33 @@ function OutlinerFilterBar({
 // ============================================================================
 
 export interface WorldOutlinerProps {
-  objects?: SceneObject[];
-  onSelectionChange?: (selected: SceneObject[]) => void;
+  objetos?: SceneObject[];
+  onSelectionChange?: (selecionados: SceneObject[]) => void;
   onObjectChange?: (object: SceneObject) => void;
   onCreateObject?: (type: SceneObjectType, parent?: SceneObject) => void;
-  onDeleteObject?: (object: SceneObject) => void;
-  onFocusObject?: (object: SceneObject) => void;
+  onExcluirObject?: (object: SceneObject) => void;
+  onFocarObject?: (object: SceneObject) => void;
   onReparentObject?: (object: SceneObject, newParent: SceneObject | null) => void;
 }
 
 export default function WorldOutliner({
-  objects: initialObjects,
+  objetos: initialObjects,
   onSelectionChange,
   onObjectChange,
   onCreateObject,
-  onDeleteObject,
-  onFocusObject,
+  onExcluirObject,
+  onFocarObject,
   onReparentObject,
 }: WorldOutlinerProps) {
   // Sample data
-  const [objects, setObjects] = useState<SceneObject[]>(initialObjects || [
+  const [objetos, setObjects] = useState<SceneObject[]>(initialObjects || [
     {
       id: '1',
       name: 'DirectionalLight',
       type: 'light',
       visible: true,
       locked: false,
-      selected: false,
+      selecionados: false,
       children: [],
     },
     {
@@ -573,7 +573,7 @@ export default function WorldOutliner({
       type: 'camera',
       visible: true,
       locked: true,
-      selected: false,
+      selecionados: false,
       children: [],
     },
     {
@@ -582,7 +582,7 @@ export default function WorldOutliner({
       type: 'group',
       visible: true,
       locked: false,
-      selected: false,
+      selecionados: false,
       children: [
         {
           id: '3a',
@@ -590,7 +590,7 @@ export default function WorldOutliner({
           type: 'landscape',
           visible: true,
           locked: false,
-          selected: false,
+          selecionados: false,
           children: [],
           parentId: '3',
         },
@@ -600,7 +600,7 @@ export default function WorldOutliner({
           type: 'foliage',
           visible: true,
           locked: false,
-          selected: false,
+          selecionados: false,
           children: [],
           parentId: '3',
         },
@@ -612,7 +612,7 @@ export default function WorldOutliner({
       type: 'blueprint',
       visible: true,
       locked: false,
-      selected: true,
+      selecionados: true,
       components: ['CharacterMovement', 'CameraArm', 'SkeletalMesh'],
       children: [
         {
@@ -621,7 +621,7 @@ export default function WorldOutliner({
           type: 'mesh',
           visible: true,
           locked: false,
-          selected: false,
+          selecionados: false,
           children: [],
           parentId: '4',
         },
@@ -633,7 +633,7 @@ export default function WorldOutliner({
       type: 'group',
       visible: true,
       locked: false,
-      selected: false,
+      selecionados: false,
       children: [
         {
           id: '5a',
@@ -641,7 +641,7 @@ export default function WorldOutliner({
           type: 'blueprint',
           visible: true,
           locked: false,
-          selected: false,
+          selecionados: false,
           children: [],
           parentId: '5',
           components: ['AI', 'Health'],
@@ -652,7 +652,7 @@ export default function WorldOutliner({
           type: 'blueprint',
           visible: true,
           locked: false,
-          selected: false,
+          selecionados: false,
           children: [],
           parentId: '5',
           components: ['AI', 'Health'],
@@ -665,7 +665,7 @@ export default function WorldOutliner({
       type: 'audio',
       visible: true,
       locked: false,
-      selected: false,
+      selecionados: false,
       children: [],
     },
     {
@@ -674,7 +674,7 @@ export default function WorldOutliner({
       type: 'group',
       visible: true,
       locked: false,
-      selected: false,
+      selecionados: false,
       children: [
         {
           id: '7a',
@@ -682,7 +682,7 @@ export default function WorldOutliner({
           type: 'particle',
           visible: true,
           locked: false,
-          selected: false,
+          selecionados: false,
           children: [],
           parentId: '7',
         },
@@ -692,7 +692,7 @@ export default function WorldOutliner({
   
   const [filter, setFilter] = useState<OutlinerFilter>({});
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['3', '4', '5', '7']));
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(['4']));
+  const [selecionadosIds, setSelectedIds] = useState<Set<string>>(new Set(['4']));
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; object: SceneObject | null } | null>(null);
@@ -722,12 +722,12 @@ export default function WorldOutliner({
       }
     };
     
-    traverse(objects, 0);
+    traverse(objetos, 0);
     return result;
-  }, [objects, filter, expandedIds]);
+  }, [objetos, filter, expandedIds]);
   
   // Find object by ID in tree
-  const findObjectById = useCallback((id: string, items: SceneObject[] = objects): SceneObject | null => {
+  const findObjectById = useCallback((id: string, items: SceneObject[] = objetos): SceneObject | null => {
     for (const item of items) {
       if (item.id === id) return item;
       if (item.children.length > 0) {
@@ -736,7 +736,7 @@ export default function WorldOutliner({
       }
     }
     return null;
-  }, [objects]);
+  }, [objetos]);
   
   // Update object in tree
   const updateObject = useCallback((id: string, updates: Partial<SceneObject>) => {
@@ -754,8 +754,8 @@ export default function WorldOutliner({
       });
     };
     
-    setObjects(updateInTree(objects));
-  }, [objects, onObjectChange]);
+    setObjects(updateInTree(objetos));
+  }, [objetos, onObjectChange]);
   
   // Handlers
   const handleSelect = useCallback((object: SceneObject, e: React.MouseEvent) => {
@@ -775,11 +775,11 @@ export default function WorldOutliner({
   }, []);
   
   useEffect(() => {
-    const selected = Array.from(selectedIds)
+    const selecionados = Array.from(selecionadosIds)
       .map(id => findObjectById(id))
       .filter(Boolean) as SceneObject[];
-    onSelectionChange?.(selected);
-  }, [selectedIds, findObjectById, onSelectionChange]);
+    onSelectionChange?.(selecionados);
+  }, [selecionadosIds, findObjectById, onSelectionChange]);
   
   const handleToggleExpand = useCallback((id: string) => {
     setExpandedIds(prev => {
@@ -800,14 +800,14 @@ export default function WorldOutliner({
     }
   }, [findObjectById, updateObject]);
   
-  const handleToggleLock = useCallback((id: string) => {
+  const handleToggleBloquear = useCallback((id: string) => {
     const obj = findObjectById(id);
     if (obj) {
       updateObject(id, { locked: !obj.locked });
     }
   }, [findObjectById, updateObject]);
   
-  const handleRename = useCallback((id: string, name: string) => {
+  const handleRenomear = useCallback((id: string, name: string) => {
     updateObject(id, { name });
   }, [updateObject]);
   
@@ -849,7 +849,7 @@ export default function WorldOutliner({
     
     switch (action) {
       case 'focus':
-        if (object) onFocusObject?.(object);
+        if (object) onFocarObject?.(object);
         break;
         
       case 'rename':
@@ -862,7 +862,7 @@ export default function WorldOutliner({
             ...object,
             id: Date.now().toString(),
             name: `${object.name}_copy`,
-            selected: false,
+            selecionados: false,
             children: [],
           };
           setObjects(prev => [...prev, duplicate]);
@@ -874,12 +874,12 @@ export default function WorldOutliner({
         break;
         
       case 'lock':
-        if (object) handleToggleLock(object.id);
+        if (object) handleToggleBloquear(object.id);
         break;
         
       case 'delete':
         if (object) {
-          onDeleteObject?.(object);
+          onExcluirObject?.(object);
           setObjects(prev => {
             const removeFromTree = (items: SceneObject[]): SceneObject[] => {
               return items.filter(item => {
@@ -920,7 +920,7 @@ export default function WorldOutliner({
         onCreateObject?.('trigger');
         break;
     }
-  }, [contextMenu, handleToggleVisibility, handleToggleLock, onFocusObject, onDeleteObject, onCreateObject]);
+  }, [contextMenu, handleToggleVisibility, handleToggleBloquear, onFocarObject, onExcluirObject, onCreateObject]);
   
   const handleCollapseAll = useCallback(() => {
     setExpandedIds(new Set());
@@ -936,9 +936,9 @@ export default function WorldOutliner({
         }
       }
     };
-    collectIds(objects);
+    collectIds(objetos);
     setExpandedIds(allIds);
-  }, [objects]);
+  }, [objetos]);
   
   return (
     <div 
@@ -946,19 +946,19 @@ export default function WorldOutliner({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        background: '#0d1117',
-        color: '#fff',
+        background: 'var(--aethel-surface-primary)',
+        color: 'var(--aethel-text-primary)',
       }}
       onContextMenu={(e) => handleContextMenu(e, null)}
     >
       {/* Header */}
       <div style={{
         padding: '8px 12px',
-        borderBottom: '1px solid #333',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         fontWeight: 'bold',
         fontSize: '13px',
-        color: '#fff',
-        background: '#1a1a2e',
+        color: 'var(--aethel-text-primary)',
+        background: 'var(--aethel-surface-secondary)',
       }}>
         🌍 World Outliner
       </div>
@@ -982,14 +982,14 @@ export default function WorldOutliner({
             onToggleExpand={() => handleToggleExpand(object.id)}
             onSelect={(e) => handleSelect(object, e)}
             onToggleVisibility={() => handleToggleVisibility(object.id)}
-            onToggleLock={() => handleToggleLock(object.id)}
-            onRename={(name) => handleRename(object.id, name)}
+            onToggleBloquear={() => handleToggleBloquear(object.id)}
+            onRenomear={(name) => handleRenomear(object.id, name)}
             onDragStart={(e) => handleDragStart(e, object.id)}
             onDragOver={(e) => handleDragOver(e, object.id)}
             onDrop={(e) => handleDrop(e, object.id)}
             onContextMenu={(e) => handleContextMenu(e, object)}
             isDragOver={dragOverId === object.id}
-            selectedIds={selectedIds}
+            selecionadosIds={selecionadosIds}
           />
         ))}
         
@@ -997,10 +997,10 @@ export default function WorldOutliner({
           <div style={{
             padding: '24px',
             textAlign: 'center',
-            color: '#555',
+            color: 'var(--aethel-text-quaternary)',
           }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌐</div>
-            <div>No objects in scene</div>
+            <div>Nenhum objeto na cena</div>
           </div>
         )}
       </div>
@@ -1008,12 +1008,12 @@ export default function WorldOutliner({
       {/* Status Bar */}
       <div style={{
         padding: '4px 12px',
-        borderTop: '1px solid #333',
+        borderTop: '1px solid var(--aethel-border-primary)',
         fontSize: '11px',
-        color: '#666',
-        background: '#1a1a2e',
+        color: 'var(--aethel-text-quaternary)',
+        background: 'var(--aethel-surface-secondary)',
       }}>
-        {flattenedObjects.length} objects • {selectedIds.size} selected
+        {flattenedObjects.length} objetos • {selecionadosIds.size} selecionados
       </div>
       
       {/* Context Menu */}

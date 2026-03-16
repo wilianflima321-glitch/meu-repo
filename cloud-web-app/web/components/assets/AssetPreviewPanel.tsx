@@ -15,6 +15,12 @@ interface AssetPreviewPanelProps {
   lowPoly: boolean;
 }
 
+function resolveCssVarColor(varName: string, fallback: string): string {
+  if (typeof window === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return value || fallback;
+}
+
 function formatSize(bytes?: number): string {
   if (!bytes) return '-';
   const units = ['B', 'KB', 'MB', 'GB'];
@@ -41,6 +47,7 @@ function getLoaderByExtension(ext: string) {
 }
 
 function applyLowPolyStyle(object: THREE.Object3D) {
+  const baseColor = resolveCssVarColor('--aethel-accent', 'rgb(124, 131, 255)');
   object.traverse((child) => {
     if ((child as THREE.Mesh).isMesh) {
       const mesh = child as THREE.Mesh;
@@ -49,7 +56,7 @@ function applyLowPolyStyle(object: THREE.Object3D) {
       flatGeom.computeVertexNormals();
       mesh.geometry = flatGeom;
       mesh.material = new THREE.MeshStandardMaterial({
-        color: '#7c83ff',
+        color: baseColor,
         roughness: 0.85,
         metalness: 0.1,
         flatShading: true,

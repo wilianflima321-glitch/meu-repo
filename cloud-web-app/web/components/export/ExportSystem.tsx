@@ -3,15 +3,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 export type VideoCodec = 'h264' | 'h265' | 'vp8' | 'vp9' | 'av1' | 'prores' | 'dnxhd'
 export type AudioCodec = 'aac' | 'mp3' | 'opus' | 'pcm' | 'flac'
 export type Container = 'mp4' | 'webm' | 'mov' | 'mkv' | 'avi' | 'gif'
-export interface ExportPreset {
+export interface ExportarPreset {
   id: string
   name: string
   category: string
   description?: string
-  settings: ExportSettings
+  settings: ExportarSettings
   icon?: string
 }
-export interface ExportSettings {
+export interface ExportarSettings {
   container: Container
   videoCodec: VideoCodec | null    // null = no video
   audioCodec: AudioCodec | null    // null = no audio
@@ -22,7 +22,7 @@ export interface ExportSettings {
   crf?: number                      // Constant Rate Factor (0-51 for h264)
   maxBitrate?: number               // For VBR
   keyframeInterval?: number         // Frames between keyframes
-  pixelFormat?: 'yuv420p' | 'yuv422p' | 'yuv444p' | 'rgb24'
+  pixelFormato?: 'yuv420p' | 'yuv422p' | 'yuv444p' | 'rgb24'
   profile?: 'baseline' | 'main' | 'high' | 'high10' | 'high422' | 'high444'
   sampleRate: number
   channels: 1 | 2 | 6               // Mono, Stereo, 5.1
@@ -37,7 +37,7 @@ export interface ExportSettings {
   includeMetadata: boolean
   customMetadata?: Record<string, string>
 }
-export const EXPORT_PRESETS: ExportPreset[] = [
+export const EXPORT_PRESETS: ExportarPreset[] = [
   {
     id: 'youtube-4k',
     name: 'YouTube 4K',
@@ -288,7 +288,7 @@ export const EXPORT_PRESETS: ExportPreset[] = [
       frameRate: 24,
       bitrate: 147000,
       bitrateMode: 'cbr',
-      pixelFormat: 'yuv422p',
+      pixelFormato: 'yuv422p',
       sampleRate: 48000,
       channels: 2,
       audioBitrate: 1536,
@@ -428,12 +428,12 @@ export const EXPORT_PRESETS: ExportPreset[] = [
     }
   }
 ]
-export type ExportJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled'
-export interface ExportJob {
+export type ExportarJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled'
+export interface ExportarJob {
   id: string
   name: string
-  settings: ExportSettings
-  status: ExportJobStatus
+  settings: ExportarSettings
+  status: ExportarJobStatus
   progress: number
   startedAt?: number
   completedAt?: number
@@ -443,17 +443,17 @@ export interface ExportJob {
   sourceProjectId?: string
   sourceRange: { start: number; end: number }
 }
-export class ExportManager {
-  private queue: ExportJob[] = []
-  private currentJob: ExportJob | null = null
+export class ExportarManager {
+  private queue: ExportarJob[] = []
+  private currentJob: ExportarJob | null = null
   private isProcessing = false
   private abortController: AbortController | null = null
-  private onQueueUpdate?: (queue: ExportJob[]) => void
+  private onQueueUpdate?: (queue: ExportarJob[]) => void
   private onJobProgress?: (jobId: string, progress: number) => void
   private onJobComplete?: (jobId: string, outputUrl: string) => void
   private onJobError?: (jobId: string, error: string) => void
   constructor(callbacks?: {
-    onQueueUpdate?: (queue: ExportJob[]) => void
+    onQueueUpdate?: (queue: ExportarJob[]) => void
     onJobProgress?: (jobId: string, progress: number) => void
     onJobComplete?: (jobId: string, outputUrl: string) => void
     onJobError?: (jobId: string, error: string) => void
@@ -465,8 +465,8 @@ export class ExportManager {
       this.onJobError = callbacks.onJobError
     }
   }
-  addJob(name: string, settings: ExportSettings, sourceRange: { start: number; end: number }): string {
-    const job: ExportJob = {
+  addJob(name: string, settings: ExportarSettings, sourceRange: { start: number; end: number }): string {
+    const job: ExportarJob = {
       id: `export-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       name,
       settings,
@@ -504,7 +504,7 @@ export class ExportManager {
     }
     return false
   }
-  getQueue(): ExportJob[] {
+  getQueue(): ExportarJob[] {
     return [...this.queue]
   }
   private async processNext(): Promise<void> {
@@ -540,45 +540,45 @@ export class ExportManager {
     this.abortController = null
     this.processNext()
   }
-  private async processJob(job: ExportJob, signal: AbortSignal): Promise<string> {
+  private async processJob(job: ExportarJob, signal: AbortSignal): Promise<string> {
     const { settings } = job
     const duration = job.sourceRange.end - job.sourceRange.start
     const totalFrames = duration * settings.frameRate
     const framesPerSecond = settings.hardwareAcceleration ? 120 : 30
-    const estimatedDuration = totalFrames / framesPerSecond
+    const estimatedDuracao = totalFrames / framesPerSecond
     for (let progress = 0; progress <= 100; progress += 1) {
       if (signal.aborted) {
         throw new DOMException('Aborted', 'AbortError')
       }
-      await new Promise(resolve => setTimeout(resolve, estimatedDuration * 10))
+      await new Promise(resolve => setTimeout(resolve, estimatedDuracao * 10))
       job.progress = progress
-      job.estimatedTimeRemaining = (estimatedDuration * (100 - progress)) / 100
+      job.estimatedTimeRemaining = (estimatedDuracao * (100 - progress)) / 100
       this.onJobProgress?.(job.id, progress)
     }
     const blob = new Blob(['dummy video data'], { type: 'video/mp4' })
     return URL.createObjectURL(blob)
   }
 }
-interface ExportDialogProps {
+interface ExportarDialogProps {
   open: boolean
   onClose: () => void
-  onExport: (settings: ExportSettings) => void
-  projectDuration: number
-  projectResolution: { width: number; height: number }
+  onExportar: (settings: ExportarSettings) => void
+  projectDuracao: number
+  projectResolucao: { width: number; height: number }
 }
-export function ExportDialog({
+export function ExportarDialog({
   open,
   onClose,
-  onExport,
-  projectDuration,
-  projectResolution
-}: ExportDialogProps) {
-  const [selectedPreset, setSelectedPreset] = useState<ExportPreset | null>(EXPORT_PRESETS[1])
-  const [customSettings, setCustomSettings] = useState<ExportSettings>(EXPORT_PRESETS[1].settings)
+  onExportar,
+  projectDuracao,
+  projectResolucao
+}: ExportarDialogProps) {
+  const [selectedPreset, setSelectedPreset] = useState<ExportarPreset | null>(EXPORT_PRESETS[1])
+  const [customSettings, setCustomSettings] = useState<ExportarSettings>(EXPORT_PRESETS[1].settings)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [outputName, setOutputName] = useState('export')
   const presetsByCategory = useMemo(() => {
-    const grouped: Record<string, ExportPreset[]> = {}
+    const grouped: Record<string, ExportarPreset[]> = {}
     EXPORT_PRESETS.forEach(preset => {
       if (!grouped[preset.category]) {
         grouped[preset.category] = []
@@ -591,19 +591,19 @@ export function ExportDialog({
     const videoBitrate = customSettings.bitrate || 0
     const audioBitrate = customSettings.audioBitrate || 0
     const totalBitrate = videoBitrate + audioBitrate // kbps
-    const sizeKB = (totalBitrate * projectDuration) / 8
+    const sizeKB = (totalBitrate * projectDuracao) / 8
     if (sizeKB < 1024) return `~${Math.round(sizeKB)} KB`
     if (sizeKB < 1024 * 1024) return `~${(sizeKB / 1024).toFixed(1)} MB`
     return `~${(sizeKB / 1024 / 1024).toFixed(1)} GB`
-  }, [customSettings, projectDuration])
+  }, [customSettings, projectDuracao])
   const estimatedTime = useMemo(() => {
-    const frames = projectDuration * customSettings.frameRate
+    const frames = projectDuracao * customSettings.frameRate
     const fps = customSettings.hardwareAcceleration ? 120 : (customSettings.twoPass ? 15 : 30)
     const seconds = frames / fps
     if (seconds < 60) return `~${Math.round(seconds)}s`
     if (seconds < 3600) return `~${Math.round(seconds / 60)}min`
     return `~${(seconds / 3600).toFixed(1)}h`
-  }, [customSettings, projectDuration])
+  }, [customSettings, projectDuracao])
   if (!open) return null
   return (
     <div style={{
@@ -616,7 +616,7 @@ export function ExportDialog({
       zIndex: 1000
     }}>
       <div style={{
-        background: '#1a1b1e',
+        background: 'var(--aethel-surface-secondary)',
         borderRadius: 8,
         width: '90%',
         maxWidth: 900,
@@ -629,18 +629,18 @@ export function ExportDialog({
         {/* Header */}
         <div style={{
           padding: '16px 20px',
-          borderBottom: '1px solid #373a40',
+          borderBottom: '1px solid var(--aethel-border-primary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <h2 style={{ color: '#fff', margin: 0, fontSize: 16 }}>Export Media</h2>
+          <h2 style={{ color: 'var(--aethel-text-primary)', margin: 0, fontSize: 16 }}>Exportar Media</h2>
           <button
             onClick={onClose}
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#868e96',
+              color: 'var(--aethel-text-quaternary)',
               fontSize: 20,
               cursor: 'pointer'
             }}
@@ -653,16 +653,16 @@ export function ExportDialog({
           {/* Presets sidebar */}
           <div style={{
             width: 240,
-            borderRight: '1px solid #373a40',
+            borderRight: '1px solid var(--aethel-border-primary)',
             overflowY: 'auto',
             padding: 12
           }}>
-            <div style={{ color: '#909296', fontSize: 10, fontWeight: 600, marginBottom: 8, textTransform: 'uppercase' }}>
+            <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, fontWeight: 600, marginBottom: 8, textTransform: 'uppercase' }}>
               Presets
             </div>
             {Object.entries(presetsByCategory).map(([category, presets]) => (
               <div key={category} style={{ marginBottom: 12 }}>
-                <div style={{ color: '#5c5f66', fontSize: 10, marginBottom: 4 }}>
+                <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: 10, marginBottom: 4 }}>
                   {category}
                 </div>
                 {presets.map(preset => (
@@ -676,10 +676,10 @@ export function ExportDialog({
                       width: '100%',
                       padding: '8px 10px',
                       marginBottom: 2,
-                      background: selectedPreset?.id === preset.id ? '#339af0' : '#25262b',
+                      background: selectedPreset?.id === preset.id ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
                       border: 'none',
                       borderRadius: 4,
-                      color: selectedPreset?.id === preset.id ? '#fff' : '#c1c2c5',
+                      color: selectedPreset?.id === preset.id ? 'var(--aethel-text-primary)' : 'var(--aethel-text-secondary)',
                       textAlign: 'left',
                       cursor: 'pointer',
                       fontSize: 12,
@@ -699,8 +699,8 @@ export function ExportDialog({
           <div style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
             {/* Output name */}
             <div style={{ marginBottom: 20 }}>
-              <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
-                Output Name
+              <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
+                Nome de saida
               </label>
               <input
                 type="text"
@@ -709,55 +709,55 @@ export function ExportDialog({
                 style={{
                   width: '100%',
                   padding: '8px 12px',
-                  background: '#25262b',
-                  border: '1px solid #373a40',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: 4,
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   fontSize: 14
                 }}
               />
             </div>
-            {/* Format summary */}
+            {/* Formato summary */}
             <div style={{
-              background: '#25262b',
+              background: 'var(--aethel-surface-tertiary)',
               borderRadius: 6,
               padding: 16,
               marginBottom: 20
             }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
                 <div>
-                  <div style={{ color: '#909296', fontSize: 10, marginBottom: 4 }}>Format</div>
-                  <div style={{ color: '#fff', fontSize: 14 }}>
+                  <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Formato</div>
+                  <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
                     {customSettings.container.toUpperCase()}
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#909296', fontSize: 10, marginBottom: 4 }}>Resolution</div>
-                  <div style={{ color: '#fff', fontSize: 14 }}>
+                  <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Resolucao</div>
+                  <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
                     {customSettings.resolution.width}×{customSettings.resolution.height}
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#909296', fontSize: 10, marginBottom: 4 }}>Frame Rate</div>
-                  <div style={{ color: '#fff', fontSize: 14 }}>
+                  <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Frame rate</div>
+                  <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
                     {customSettings.frameRate} fps
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#909296', fontSize: 10, marginBottom: 4 }}>Video Codec</div>
-                  <div style={{ color: '#fff', fontSize: 14 }}>
-                    {customSettings.videoCodec?.toUpperCase() || 'None'}
+                  <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Video codec</div>
+                  <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
+                    {customSettings.videoCodec?.toUpperCase() || 'Nenhum'}
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#909296', fontSize: 10, marginBottom: 4 }}>Audio Codec</div>
-                  <div style={{ color: '#fff', fontSize: 14 }}>
-                    {customSettings.audioCodec?.toUpperCase() || 'None'}
+                  <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Audio codec</div>
+                  <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
+                    {customSettings.audioCodec?.toUpperCase() || 'Nenhum'}
                   </div>
                 </div>
                 <div>
-                  <div style={{ color: '#909296', fontSize: 10, marginBottom: 4 }}>Bitrate</div>
-                  <div style={{ color: '#fff', fontSize: 14 }}>
+                  <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 4 }}>Bitrate</div>
+                  <div style={{ color: 'var(--aethel-text-primary)', fontSize: 14 }}>
                     {customSettings.bitrate ? `${customSettings.bitrate} kbps` : 'N/A'}
                   </div>
                 </div>
@@ -765,10 +765,10 @@ export function ExportDialog({
             </div>
             {/* Quick settings */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-              {/* Resolution */}
+              {/* Resolucao */}
               <div>
-                <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
-                  Resolution
+                <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
+                  Resolucao
                 </label>
                 <select
                   value={`${customSettings.resolution.width}x${customSettings.resolution.height}`}
@@ -779,10 +779,10 @@ export function ExportDialog({
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    background: '#25262b',
-                    border: '1px solid #373a40',
+                    background: 'var(--aethel-surface-tertiary)',
+                    border: '1px solid var(--aethel-border-primary)',
                     borderRadius: 4,
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     fontSize: 12
                   }}
                 >
@@ -795,8 +795,8 @@ export function ExportDialog({
               </div>
               {/* Frame rate */}
               <div>
-                <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
-                  Frame Rate
+                <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
+                  Frame rate
                 </label>
                 <select
                   value={customSettings.frameRate}
@@ -804,10 +804,10 @@ export function ExportDialog({
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    background: '#25262b',
-                    border: '1px solid #373a40',
+                    background: 'var(--aethel-surface-tertiary)',
+                    border: '1px solid var(--aethel-border-primary)',
                     borderRadius: 4,
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     fontSize: 12
                   }}
                 >
@@ -820,7 +820,7 @@ export function ExportDialog({
               </div>
               {/* Bitrate */}
               <div>
-                <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
+                <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
                   Video Bitrate (kbps)
                 </label>
                 <input
@@ -830,17 +830,17 @@ export function ExportDialog({
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    background: '#25262b',
-                    border: '1px solid #373a40',
+                    background: 'var(--aethel-surface-tertiary)',
+                    border: '1px solid var(--aethel-border-primary)',
                     borderRadius: 4,
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     fontSize: 12
                   }}
                 />
               </div>
               {/* Audio bitrate */}
               <div>
-                <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
+                <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
                   Audio Bitrate (kbps)
                 </label>
                 <input
@@ -850,10 +850,10 @@ export function ExportDialog({
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    background: '#25262b',
-                    border: '1px solid #373a40',
+                    background: 'var(--aethel-surface-tertiary)',
+                    border: '1px solid var(--aethel-border-primary)',
                     borderRadius: 4,
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     fontSize: 12
                   }}
                 />
@@ -865,7 +865,7 @@ export function ExportDialog({
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#339af0',
+                color: 'var(--aethel-primary)',
                 cursor: 'pointer',
                 fontSize: 12,
                 marginBottom: 16,
@@ -874,11 +874,11 @@ export function ExportDialog({
                 gap: 4
               }}
             >
-              {showAdvanced ? '▼' : '▶'} Advanced Settings
+              {showAdvanced ? '▼' : '▶'} Configuracoes avancadas
             </button>
             {showAdvanced && (
               <div style={{
-                background: '#25262b',
+                background: 'var(--aethel-surface-tertiary)',
                 borderRadius: 6,
                 padding: 16,
                 marginBottom: 20
@@ -891,16 +891,16 @@ export function ExportDialog({
                       checked={customSettings.twoPass}
                       onChange={e => setCustomSettings({ ...customSettings, twoPass: e.target.checked })}
                     />
-                    <span style={{ color: '#c1c2c5', fontSize: 12 }}>Two-pass encoding</span>
+                    <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12 }}>Codificacao em duas passadas</span>
                   </label>
-                  {/* Hardware acceleration */}
+                  {/* Aceleracao por hardware */}
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={customSettings.hardwareAcceleration}
                       onChange={e => setCustomSettings({ ...customSettings, hardwareAcceleration: e.target.checked })}
                     />
-                    <span style={{ color: '#c1c2c5', fontSize: 12 }}>Hardware acceleration</span>
+                    <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12 }}>Aceleracao por hardware</span>
                   </label>
                   {/* Fast start */}
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
@@ -909,40 +909,40 @@ export function ExportDialog({
                       checked={customSettings.fastStart}
                       onChange={e => setCustomSettings({ ...customSettings, fastStart: e.target.checked })}
                     />
-                    <span style={{ color: '#c1c2c5', fontSize: 12 }}>Fast start (streaming)</span>
+                    <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12 }}>Inicio rapido (streaming)</span>
                   </label>
-                  {/* Include metadata */}
+                  {/* Incluir metadata */}
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={customSettings.includeMetadata}
                       onChange={e => setCustomSettings({ ...customSettings, includeMetadata: e.target.checked })}
                     />
-                    <span style={{ color: '#c1c2c5', fontSize: 12 }}>Include metadata</span>
+                    <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12 }}>Incluir metadata</span>
                   </label>
                 </div>
               </div>
             )}
             {/* Estimates */}
             <div style={{
-              background: '#2c2e33',
+              background: 'var(--aethel-surface-quaternary)',
               borderRadius: 6,
               padding: 12,
               display: 'flex',
               justifyContent: 'space-around'
             }}>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ color: '#909296', fontSize: 10, marginBottom: 2 }}>Est. File Size</div>
-                <div style={{ color: '#51cf66', fontSize: 14, fontWeight: 600 }}>{estimatedSize}</div>
+                <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 2 }}>Tamanho estimado</div>
+                <div style={{ color: 'var(--aethel-success)', fontSize: 14, fontWeight: 600 }}>{estimatedSize}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ color: '#909296', fontSize: 10, marginBottom: 2 }}>Est. Time</div>
-                <div style={{ color: '#fab005', fontSize: 14, fontWeight: 600 }}>{estimatedTime}</div>
+                <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 2 }}>Tempo estimado</div>
+                <div style={{ color: 'var(--aethel-warning)', fontSize: 14, fontWeight: 600 }}>{estimatedTime}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ color: '#909296', fontSize: 10, marginBottom: 2 }}>Duration</div>
-                <div style={{ color: '#c1c2c5', fontSize: 14, fontWeight: 600 }}>
-                  {Math.floor(projectDuration / 60)}:{(projectDuration % 60).toFixed(0).padStart(2, '0')}
+                <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10, marginBottom: 2 }}>Duracao</div>
+                <div style={{ color: 'var(--aethel-text-secondary)', fontSize: 14, fontWeight: 600 }}>
+                  {Math.floor(projectDuracao / 60)}:{(projectDuracao % 60).toFixed(0).padStart(2, '0')}
                 </div>
               </div>
             </div>
@@ -951,7 +951,7 @@ export function ExportDialog({
         {/* Footer */}
         <div style={{
           padding: '12px 20px',
-          borderTop: '1px solid #373a40',
+          borderTop: '1px solid var(--aethel-border-primary)',
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 12
@@ -961,53 +961,53 @@ export function ExportDialog({
             style={{
               padding: '8px 20px',
               background: 'transparent',
-              border: '1px solid #373a40',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: 4,
-              color: '#909296',
+              color: 'var(--aethel-text-tertiary)',
               cursor: 'pointer',
               fontSize: 13
             }}
           >
-            Cancel
+            Cancelar
           </button>
           <button
             onClick={() => {
-              onExport(customSettings)
+              onExportar(customSettings)
               onClose()
             }}
             style={{
               padding: '8px 24px',
-              background: '#339af0',
+              background: 'var(--aethel-primary)',
               border: 'none',
               borderRadius: 4,
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: 13,
               fontWeight: 600
             }}
           >
-            Export
+            Exportar
           </button>
         </div>
       </div>
     </div>
   )
 }
-interface ExportQueuePanelProps {
-  jobs: ExportJob[]
-  onCancel: (jobId: string) => void
-  onRemove: (jobId: string) => void
+interface ExportarQueuePanelProps {
+  jobs: ExportarJob[]
+  onCancelar: (jobId: string) => void
+  onRemover: (jobId: string) => void
 }
-export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelProps) {
+export function ExportarQueuePanel({ jobs, onCancelar, onRemover }: ExportarQueuePanelProps) {
   if (jobs.length === 0) {
     return (
       <div style={{
         padding: 40,
         textAlign: 'center',
-        color: '#5c5f66',
+        color: 'var(--aethel-text-quaternary)',
         fontSize: 12
       }}>
-        No exports in queue
+        Nenhuma exportacao na fila
       </div>
     )
   }
@@ -1017,24 +1017,24 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
         <div
           key={job.id}
           style={{
-            background: '#25262b',
+            background: 'var(--aethel-surface-tertiary)',
             borderRadius: 6,
             padding: 12,
             marginBottom: 8,
-            border: '1px solid #373a40'
+            border: '1px solid var(--aethel-border-primary)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ color: '#c1c2c5', fontSize: 12, fontWeight: 600 }}>{job.name}</span>
+            <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12, fontWeight: 600 }}>{job.name}</span>
             <span style={{
               fontSize: 10,
               padding: '2px 6px',
               borderRadius: 3,
-              background: job.status === 'completed' ? '#2f9e44' :
-                         job.status === 'processing' ? '#339af0' :
-                         job.status === 'failed' ? '#e03131' :
-                         job.status === 'cancelled' ? '#868e96' : '#373a40',
-              color: '#fff'
+              background: job.status === 'completed' ? 'var(--aethel-success)' :
+                         job.status === 'processing' ? 'var(--aethel-primary)' :
+                         job.status === 'failed' ? 'var(--aethel-error)' :
+                         job.status === 'cancelled' ? 'var(--aethel-text-quaternary)' : 'var(--aethel-border-secondary)',
+              color: 'var(--aethel-text-primary)'
             }}>
               {job.status.toUpperCase()}
             </span>
@@ -1042,23 +1042,23 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
           {job.status === 'processing' && (
             <>
               <div style={{
-                background: '#373a40',
+                background: 'var(--aethel-border-secondary)',
                 borderRadius: 4,
                 height: 6,
                 marginBottom: 4,
                 overflow: 'hidden'
               }}>
                 <div style={{
-                  background: '#339af0',
+                  background: 'var(--aethel-primary)',
                   height: '100%',
                   width: `${job.progress}%`,
                   transition: 'width 0.3s'
                 }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#909296' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--aethel-text-tertiary)' }}>
                 <span>{job.progress.toFixed(0)}%</span>
                 {job.estimatedTimeRemaining !== undefined && (
-                  <span>~{Math.ceil(job.estimatedTimeRemaining)}s remaining</span>
+                  <span>~{Math.ceil(job.estimatedTimeRemaining)}s restante</span>
                 )}
               </div>
             </>
@@ -1071,52 +1071,52 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
                 display: 'inline-block',
                 marginTop: 8,
                 padding: '4px 12px',
-                background: '#2f9e44',
+                background: 'var(--aethel-success)',
                 borderRadius: 3,
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: 11,
                 textDecoration: 'none'
               }}
             >
-              Download
+              Baixar
             </a>
           )}
           {job.status === 'failed' && job.error && (
-            <div style={{ color: '#fa5252', fontSize: 11, marginTop: 4 }}>
-              Error: {job.error}
+            <div style={{ color: 'var(--aethel-error)', fontSize: 11, marginTop: 4 }}>
+              Erro: {job.error}
             </div>
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             {job.status === 'processing' && (
               <button
-                onClick={() => onCancel(job.id)}
+                onClick={() => onCancelar(job.id)}
                 style={{
                   padding: '4px 12px',
-                  background: '#e03131',
+                  background: 'var(--aethel-error)',
                   border: 'none',
                   borderRadius: 3,
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   fontSize: 10,
                   cursor: 'pointer'
                 }}
               >
-                Cancel
+                Cancelar
               </button>
             )}
             {['completed', 'failed', 'cancelled'].includes(job.status) && (
               <button
-                onClick={() => onRemove(job.id)}
+                onClick={() => onRemover(job.id)}
                 style={{
                   padding: '4px 12px',
-                  background: '#373a40',
+                  background: 'var(--aethel-border-secondary)',
                   border: 'none',
                   borderRadius: 3,
-                  color: '#909296',
+                  color: 'var(--aethel-text-tertiary)',
                   fontSize: 10,
                   cursor: 'pointer'
                 }}
               >
-                Remove
+                Remover
               </button>
             )}
           </div>
@@ -1125,4 +1125,4 @@ export function ExportQueuePanel({ jobs, onCancel, onRemove }: ExportQueuePanelP
     </div>
   )
 }
-export default ExportDialog
+export default ExportarDialog
