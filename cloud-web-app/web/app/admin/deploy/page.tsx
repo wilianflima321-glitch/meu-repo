@@ -73,9 +73,9 @@ export default function Deploy() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>CI/CD e implantação</h1>
-          <p className='text-sm text-zinc-500'>Pipelines auditáveis para build e lançamento.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Pipelines auditáveis para build e lançamento.</p>
         </div>
-        <button onClick={fetchPipelines} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>Atualizar</button>
+        <button onClick={fetchPipelines} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
 
       {error && (
@@ -84,7 +84,7 @@ export default function Deploy() {
         </div>
       )}
 
-      <div className='mb-6 bg-zinc-900/70 p-4 rounded-lg shadow'>
+      <div className='mb-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow'>
         <h2 className='text-xl font-semibold mb-4'>Novo Pipeline</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <input
@@ -105,16 +105,16 @@ export default function Deploy() {
           <button
             onClick={createPipeline}
             disabled={saving || !form.name.trim()}
-            className='px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50'
+            className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
           >
             {saving ? 'Criando...' : 'Criar pipeline'}
           </button>
         </div>
       </div>
 
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
+      <table className='w-full table-auto bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
         <thead>
-          <tr className='bg-zinc-800/70'>
+          <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
             <th className='p-2 text-left'>Nome</th>
             <th className='p-2 text-left'>Provedor</th>
             <th className='p-2 text-left'>Status</th>
@@ -125,11 +125,11 @@ export default function Deploy() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando pipelines...</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando pipelines...</td>
             </tr>
           ) : pipelines.length === 0 ? (
             <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum pipeline encontrado.</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhum pipeline encontrado.</td>
             </tr>
           ) : (
             pipelines.map((d) => (
@@ -137,13 +137,13 @@ export default function Deploy() {
                 <td className='p-2'>{d.name}</td>
                 <td className='p-2'>{d.provider}</td>
                 <td className='p-2'>
-                  <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>{d.status}</span>
+                  <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>{d.status}</span>
                 </td>
                 <td className='p-2'>
                   {d.lastRunAt ? new Date(d.lastRunAt).toLocaleString() : '—'}
                 </td>
                 <td className='p-2'>
-                  <button onClick={() => runPipeline(d.id)} className='px-2 py-1 bg-yellow-500 text-white rounded mr-2 text-sm'>Executar</button>
+                  <button onClick={() => runPipeline(d.id)} className='px-2 py-1 bg-yellow-500 text-[var(--aethel-text-primary)] rounded mr-2 text-sm'>Executar</button>
                 </td>
               </tr>
             ))

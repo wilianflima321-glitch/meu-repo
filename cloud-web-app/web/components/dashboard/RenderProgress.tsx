@@ -155,17 +155,17 @@ function getStatusBg(status: RenderJobStatus): string {
             return 'bg-green-500';
         case 'rendering':
         case 'compositing':
-            return 'bg-blue-500';
+            return 'bg-[var(--aethel-primary)]';
         case 'preparing':
         case 'finalizing':
-            return 'bg-yellow-500';
+            return 'bg-[var(--aethel-warning)]';
         case 'queued':
             return 'bg-gray-500';
         case 'paused':
             return 'bg-orange-500';
         case 'failed':
         case 'cancelled':
-            return 'bg-red-500';
+            return 'bg-[var(--aethel-error)]';
         default:
             return 'bg-gray-500';
     }
@@ -277,7 +277,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             {onViewFull && (
                                 <button
                                     onClick={() => onViewFull(job.thumbnail!)}
-                                    className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                                    className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
                                 >
                                     <Maximize2 size={20} className="text-[var(--aethel-text-primary)]" />
                                 </button>
@@ -409,7 +409,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                 <div className="px-4 pb-4 border-t border-gray-700 pt-3">
                     {/* Error message */}
                     {job.error && (
-                        <div className="mb-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                        <div className="mb-3 p-3 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg">
                             <div className="flex items-center gap-2 text-[var(--aethel-error)] text-sm">
                                 <AlertCircle size={16} />
                                 <span className="font-medium">Erro:</span>
@@ -454,8 +454,8 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                         key={frame.frame}
                                         className={`w-4 h-4 rounded ${
                                             frame.status === 'completed' ? 'bg-green-500' :
-                                            frame.status === 'rendering' ? 'bg-blue-500 animate-pulse' :
-                                            frame.status === 'failed' ? 'bg-red-500' :
+                                            frame.status === 'rendering' ? 'bg-[var(--aethel-primary)] animate-pulse' :
+                                            frame.status === 'failed' ? 'bg-[var(--aethel-error)]' :
                                             'bg-gray-600'
                                         }`}
                                         title={`Frame ${frame.frame}: ${frame.status}`}

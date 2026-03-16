@@ -95,9 +95,9 @@ interface InfrastructureData {
 
 function StatusBadge({ status }: { status: 'healthy' | 'degraded' | 'down' }) {
   const config = {
-    healthy: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/30' },
+    healthy: { icon: CheckCircle, color: 'text-[var(--aethel-success)]', bg: 'bg-[var(--aethel-success)]/10', border: 'border-green-500/30' },
     degraded: { icon: AlertTriangle, color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30' },
-    down: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30' },
+    down: { icon: XCircle, color: 'text-red-400', bg: 'bg-[var(--aethel-error)]/10', border: 'border-red-500/30' },
   };
   
   const { icon: Icon, color, bg, border } = config[status];
@@ -127,9 +127,9 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
       <div className="grid grid-cols-2 gap-4 text-xs">
         {service.latency !== undefined && (
           <div>
-            <span className="text-zinc-500">Latência</span>
+            <span className="text-[var(--aethel-text-tertiary)]">Latência</span>
             <p className={`text-sm font-medium ${
-              service.latency < 100 ? 'text-green-400' :
+              service.latency < 100 ? 'text-[var(--aethel-success)]' :
               service.latency < 500 ? 'text-yellow-400' : 'text-red-400'
             }`}>
               {service.latency}ms
@@ -139,17 +139,17 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
         
         {service.uptime !== undefined && (
           <div>
-            <span className="text-zinc-500">Disponibilidade</span>
+            <span className="text-[var(--aethel-text-tertiary)]">Disponibilidade</span>
             <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{service.uptime.toFixed(2)}%</p>
           </div>
         )}
       </div>
       
       {service.details && (
-        <p className="text-xs text-zinc-500 mt-3">{service.details}</p>
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-3">{service.details}</p>
       )}
       
-      <p className="text-[10px] text-zinc-400 mt-3">
+      <p className="text-[10px] text-[var(--aethel-text-secondary)] mt-3">
         Última verificação: {new Date(service.lastCheck).toLocaleTimeString()}
       </p>
     </div>
@@ -175,16 +175,16 @@ function ResourceGauge({
 }) {
   const percentage = max ? (value / max) * 100 : value;
   const color = percentage >= critical ? 'text-red-400' : 
-                percentage >= warning ? 'text-yellow-400' : 'text-green-400';
-  const barColor = percentage >= critical ? 'bg-red-500' : 
-                   percentage >= warning ? 'bg-yellow-500' : 'bg-green-500';
+                percentage >= warning ? 'text-yellow-400' : 'text-[var(--aethel-success)]';
+  const barColor = percentage >= critical ? 'bg-[var(--aethel-error)]' : 
+                   percentage >= warning ? 'bg-yellow-500' : 'bg-[var(--aethel-success)]';
   
   return (
     <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-zinc-500" />
-          <span className="text-sm text-zinc-500">{label}</span>
+          <Icon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+          <span className="text-sm text-[var(--aethel-text-tertiary)]">{label}</span>
         </div>
         <span className={`text-lg font-bold ${color}`}>
           {percentage.toFixed(1)}%
@@ -199,7 +199,7 @@ function ResourceGauge({
       </div>
       
       {max && (
-        <p className="text-xs text-zinc-500 mt-2">
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">
           {value.toFixed(1)} / {max.toFixed(1)} {unit}
         </p>
       )}
@@ -230,21 +230,21 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
       <div className="grid grid-cols-4 gap-2 text-center">
         <div>
           <p className="text-lg font-bold text-yellow-400">{queue.waiting}</p>
-          <p className="text-[10px] text-zinc-500">Aguardando</p>
+          <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Aguardando</p>
         </div>
         <div>
           <p className="text-lg font-bold text-blue-400">{queue.active}</p>
-          <p className="text-[10px] text-zinc-500">Ativos</p>
+          <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Ativos</p>
         </div>
         <div>
-          <p className="text-lg font-bold text-green-400">{queue.completed}</p>
-          <p className="text-[10px] text-zinc-500">Concluídos</p>
+          <p className="text-lg font-bold text-[var(--aethel-success)]">{queue.completed}</p>
+          <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Concluídos</p>
         </div>
         <div>
-          <p className={`text-lg font-bold ${failRate > 5 ? 'text-red-400' : 'text-zinc-500'}`}>
+          <p className={`text-lg font-bold ${failRate > 5 ? 'text-red-400' : 'text-[var(--aethel-text-tertiary)]'}`}>
             {queue.failed}
           </p>
-          <p className="text-[10px] text-zinc-500">Falhas</p>
+          <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Falhas</p>
         </div>
       </div>
     </div>
@@ -269,23 +269,23 @@ function MetricCard({
   return (
     <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-zinc-500">{label}</span>
-        <Icon className="w-4 h-4 text-zinc-500" />
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">{label}</span>
+        <Icon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
       </div>
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
           {typeof value === 'number' ? value.toLocaleString() : value}
         </span>
-        {unit && <span className="text-sm text-zinc-500">{unit}</span>}
+        {unit && <span className="text-sm text-[var(--aethel-text-tertiary)]">{unit}</span>}
         {trend && (
           trend === 'up' ? (
-            <TrendingUp className="w-4 h-4 text-green-400" />
+            <TrendingUp className="w-4 h-4 text-[var(--aethel-success)]" />
           ) : (
             <TrendingDown className="w-4 h-4 text-red-400" />
           )
         )}
       </div>
-      {subtitle && <p className="text-xs text-zinc-500 mt-1">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subtitle}</p>}
     </div>
   );
 }
@@ -328,7 +328,7 @@ export default function InfrastructureDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
+        <RefreshCw className="w-6 h-6 text-[var(--aethel-text-tertiary)] animate-spin" />
       </div>
     );
   }
@@ -340,7 +340,7 @@ export default function InfrastructureDashboard() {
         <p className="text-red-400">{error || 'Sem dados disponíveis'}</p>
         <button 
           onClick={fetchData}
-          className="px-4 py-2 bg-blue-600 text-[var(--aethel-text-primary)] rounded-lg text-sm"
+          className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
         >
           Tentar novamente
         </button>
@@ -361,11 +361,11 @@ export default function InfrastructureDashboard() {
             Infraestrutura
             <StatusBadge status={overallStatus} />
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">
             Saúde do sistema e utilização de recursos
           </p>
           {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         
@@ -374,8 +374,8 @@ export default function InfrastructureDashboard() {
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
               autoRefresh 
-                ? 'border-green-500/30 bg-green-500/10 text-green-400' 
-                : 'border-[var(--aethel-border-primary)] text-zinc-500'
+                ? 'border-green-500/30 bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
+                : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
             }`}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -415,7 +415,7 @@ export default function InfrastructureDashboard() {
       
       {/* Services Grid */}
       <div>
-        <h2 className="text-sm font-medium text-zinc-500 mb-4">Serviços</h2>
+        <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">Serviços</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {data.services.map((service) => (
             <ServiceCard key={service.name} service={service} />
@@ -425,7 +425,7 @@ export default function InfrastructureDashboard() {
       
       {/* Resources */}
       <div>
-        <h2 className="text-sm font-medium text-zinc-500 mb-4">Recursos</h2>
+        <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">Recursos</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <ResourceGauge
             label="CPU"
@@ -449,18 +449,18 @@ export default function InfrastructureDashboard() {
           />
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Globe className="w-4 h-4 text-zinc-500" />
-              <span className="text-sm text-zinc-500">Rede I/O</span>
+              <Globe className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+              <span className="text-sm text-[var(--aethel-text-tertiary)]">Rede I/O</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <p className="text-xs text-zinc-500">Entrada</p>
-                <p className="text-sm font-medium text-green-400">
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Entrada</p>
+                <p className="text-sm font-medium text-[var(--aethel-success)]">
                   {(data.resources.network.in / 1024 / 1024).toFixed(1)} MB/s
                 </p>
               </div>
               <div>
-                <p className="text-xs text-zinc-500">Saída</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Saída</p>
                 <p className="text-sm font-medium text-blue-400">
                   {(data.resources.network.out / 1024 / 1024).toFixed(1)} MB/s
                 </p>
@@ -480,24 +480,24 @@ export default function InfrastructureDashboard() {
           
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-xs text-zinc-500">Ativas</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Ativas</p>
               <p className="text-xl font-bold text-blue-400">{data.dbConnections.active}</p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Ociosas</p>
-              <p className="text-xl font-bold text-zinc-500">{data.dbConnections.idle}</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Ociosas</p>
+              <p className="text-xl font-bold text-[var(--aethel-text-tertiary)]">{data.dbConnections.idle}</p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Máximo</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Máximo</p>
               <p className="text-xl font-bold text-[var(--aethel-text-primary)]">{data.dbConnections.max}</p>
             </div>
           </div>
           
           <div className="mt-4 pt-4 border-t border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-500">Tempo médio de consulta</span>
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">Tempo médio de consulta</span>
               <span className={`text-sm font-medium ${
-                data.dbQueryTime < 50 ? 'text-green-400' :
+                data.dbQueryTime < 50 ? 'text-[var(--aethel-success)]' :
                 data.dbQueryTime < 200 ? 'text-yellow-400' : 'text-red-400'
               }`}>
                 {data.dbQueryTime}ms
@@ -515,16 +515,16 @@ export default function InfrastructureDashboard() {
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-zinc-500">Taxa de acerto</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Taxa de acerto</p>
               <p className={`text-xl font-bold ${
-                data.cacheHitRate > 80 ? 'text-green-400' :
+                data.cacheHitRate > 80 ? 'text-[var(--aethel-success)]' :
                 data.cacheHitRate > 50 ? 'text-yellow-400' : 'text-red-400'
               }`}>
                 {data.cacheHitRate.toFixed(1)}%
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Memória usada</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Memória usada</p>
               <p className="text-xl font-bold text-[var(--aethel-text-primary)]">
                 {(data.cacheMemory / 1024 / 1024).toFixed(0)} MB
               </p>
@@ -535,7 +535,7 @@ export default function InfrastructureDashboard() {
       
       {/* Queues */}
       <div>
-        <h2 className="text-sm font-medium text-zinc-500 mb-4 flex items-center gap-2">
+        <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4 flex items-center gap-2">
           <Layers className="w-4 h-4" />
           Filas de tarefas
         </h2>

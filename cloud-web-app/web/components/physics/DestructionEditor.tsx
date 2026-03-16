@@ -190,11 +190,11 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange, icon }:
   return (
     <div className="mb-3">
       <div className="flex justify-between items-center mb-1">
-        <label className="text-xs text-slate-400 flex items-center gap-1.5">
+        <label className="text-xs text-[var(--aethel-text-secondary)] flex items-center gap-1.5">
           {icon}
           {label}
         </label>
-        <span className="text-xs text-slate-300 font-mono">
+        <span className="text-xs text-[var(--aethel-text-secondary)] font-mono">
           {value.toFixed(step < 1 ? 2 : 0)}{unit}
         </span>
       </div>
@@ -205,11 +205,11 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange, icon }:
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-3
                    [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-red-500
+                   [&::-webkit-slider-thumb]:bg-[var(--aethel-error)]
                    [&::-webkit-slider-thumb]:rounded-full
                    [&::-webkit-slider-thumb]:cursor-pointer"
       />
@@ -235,8 +235,8 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-slate-200 
-                   hover:text-white transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] 
+                   hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -267,15 +267,15 @@ function PatternSelector({ value, onChange }: PatternSelectorProps) {
   
   return (
     <div className="space-y-1.5">
-      <label className="text-xs text-slate-400 block mb-2">Fracture Pattern</label>
+      <label className="text-xs text-[var(--aethel-text-secondary)] block mb-2">Fracture Pattern</label>
       {patterns.map((pattern) => (
         <button
           key={pattern.id}
           onClick={() => onChange(pattern.id)}
           className={`w-full p-2 rounded flex items-center gap-2 transition-colors ${
             value === pattern.id
-              ? 'bg-red-600/30 border border-red-500 text-white'
-              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              ? 'bg-[var(--aethel-error-dark)]/30 border border-red-500 text-[var(--aethel-text-primary)]'
+              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
           }`}
         >
           {pattern.icon}
@@ -446,7 +446,7 @@ function DestructibleMesh3D({
             ]}
           />
           <Html position={[0.3, 0.3, 0]}>
-            <div className="bg-slate-900/90 px-2 py-1 rounded text-xs text-white whitespace-nowrap">
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] px-2 py-1 rounded text-xs text-[var(--aethel-text-primary)] whitespace-nowrap">
               Impact: {impactPoint.force.toFixed(0)} N
             </div>
           </Html>
@@ -456,11 +456,11 @@ function DestructibleMesh3D({
       {/* Health bar above mesh */}
       <Html position={[0, 1.8, 0]} center>
         <div className="flex flex-col items-center gap-1">
-          <div className="flex items-center gap-1 text-xs text-white">
+          <div className="flex items-center gap-1 text-xs text-[var(--aethel-text-primary)]">
             <Heart className="w-3 h-3" style={{ color: healthColor }} />
             <span>{health.toFixed(0)} / {maxHealth}</span>
           </div>
-          <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div className="w-24 h-1.5 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
             <div 
               className="h-full transition-all duration-300"
               style={{ 
@@ -499,17 +499,17 @@ function DestructionLevels({ levels, currentLevel, health, maxHealth }: Destruct
         return (
           <div key={i} className="flex items-center gap-2">
             <div className={`w-6 h-6 rounded flex items-center justify-center text-xs ${
-              isActive ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-400'
+              isActive ? 'bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
             }`}>
               {levels - i}
             </div>
-            <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-red-600 to-orange-500 transition-all"
                 style={{ width: `${percent * 100}%` }}
               />
             </div>
-            <span className="text-[10px] text-slate-500 w-8">
+            <span className="text-[10px] text-[var(--aethel-text-tertiary)] w-8">
               {(percent * 100).toFixed(0)}%
             </span>
           </div>
@@ -538,11 +538,11 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
   ];
   
   return (
-    <div className="flex flex-col gap-1 p-2 bg-slate-800/90 rounded-lg">
+    <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Action buttons */}
       <button
         onClick={onPreviewDestruction}
-        className="p-2 rounded bg-red-600 text-white hover:bg-red-500 transition-colors"
+        className="p-2 rounded bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] transition-colors"
         title="Test Destruction"
       >
         <Bomb className="w-4 h-4" />
@@ -550,13 +550,13 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
       
       <button
         onClick={onReset}
-        className="p-2 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
+        className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
         title="Reset"
       >
         <RotateCcw className="w-4 h-4" />
       </button>
       
-      <div className="h-px bg-slate-700 my-2" />
+      <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
       
       {/* Tools */}
       {tools.map((tool) => (
@@ -565,8 +565,8 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
             selectedTool === tool.id
-              ? 'bg-red-600 text-white'
-              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              ? 'bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)]'
+              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
           }`}
           title={tool.label}
         >
@@ -685,7 +685,7 @@ export default function DestructionEditor({
   }, [config, pattern, onExport]);
   
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-200">
+    <div className="flex h-full w-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Toolbar */}
       <div className="p-2">
         <Toolbar
@@ -726,8 +726,8 @@ export default function DestructionEditor({
         </Canvas>
         
         {/* Viewport info */}
-        <div className="absolute top-4 left-4 bg-slate-900/90 p-3 rounded">
-          <div className="text-xs text-slate-400 mb-2">Destruction Status</div>
+        <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-3 rounded">
+          <div className="text-xs text-[var(--aethel-text-secondary)] mb-2">Destruction Status</div>
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
               <Heart className="w-3 h-3 text-red-400" />
@@ -746,10 +746,10 @@ export default function DestructionEditor({
         
         {/* Events log */}
         {events.length > 0 && (
-          <div className="absolute bottom-4 left-4 bg-slate-900/90 p-2 rounded max-w-xs max-h-32 overflow-y-auto">
-            <div className="text-xs text-slate-400 mb-1">Events</div>
+          <div className="absolute bottom-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-2 rounded max-w-xs max-h-32 overflow-y-auto">
+            <div className="text-xs text-[var(--aethel-text-secondary)] mb-1">Events</div>
             {events.slice(-5).map((event, i) => (
-              <div key={i} className="text-[10px] text-slate-300 flex items-center gap-1">
+              <div key={i} className="text-[10px] text-[var(--aethel-text-secondary)] flex items-center gap-1">
                 {event.type === 'destroy' ? (
                   <Bomb className="w-2.5 h-2.5 text-red-400" />
                 ) : (
@@ -763,7 +763,7 @@ export default function DestructionEditor({
       </div>
       
       {/* Settings Panel */}
-      <div className="w-72 bg-slate-850 border-l border-slate-700 overflow-y-auto">
+      <div className="w-72 bg-[var(--aethel-surface-tertiary)] border-l border-[var(--aethel-border-secondary)] overflow-y-auto">
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -773,7 +773,7 @@ export default function DestructionEditor({
             </h2>
             <button
               onClick={handleExport}
-              className="p-1.5 rounded bg-red-600 hover:bg-red-500 transition-colors"
+              className="p-1.5 rounded bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)] transition-colors"
               title="Export Configuration"
             >
               <Download className="w-4 h-4" />
@@ -787,7 +787,7 @@ export default function DestructionEditor({
                 <button
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
-                  className="p-2 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 
+                  className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] 
                            transition-colors text-left"
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
@@ -802,18 +802,18 @@ export default function DestructionEditor({
             <PatternSelector value={pattern} onChange={setPattern} />
             
             <div className="mt-3 flex items-center justify-between">
-              <label className="text-xs text-slate-400">Show Preview</label>
+              <label className="text-xs text-[var(--aethel-text-secondary)]">Show Preview</label>
               <input
                 type="checkbox"
                 checked={showPreview}
                 onChange={(e) => setShowPreview(e.target.checked)}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-red-600"
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-error)]"
               />
             </div>
           </CollapsibleSection>
           
           {/* Health & Damage */}
-          <CollapsibleSection title="Health & Damage" icon={<Shield className="w-4 h-4 text-green-400" />}>
+          <CollapsibleSection title="Health & Damage" icon={<Shield className="w-4 h-4 text-[var(--aethel-success)]" />}>
             <Slider
               label="Max Health"
               value={config.maxHealth}
@@ -836,7 +836,7 @@ export default function DestructionEditor({
             />
             
             <div className="mt-3">
-              <label className="text-xs text-slate-400 block mb-2">Destruction Levels</label>
+              <label className="text-xs text-[var(--aethel-text-secondary)] block mb-2">Destruction Levels</label>
               <DestructionLevels
                 levels={config.fractureLevels}
                 currentLevel={currentLevel}
@@ -879,7 +879,7 @@ export default function DestructionEditor({
               step={1}
               unit="s"
               onChange={(v) => setConfig((p) => ({ ...p, debrisLifetime: v }))}
-              icon={<Timer className="w-3 h-3 text-slate-400" />}
+              icon={<Timer className="w-3 h-3 text-[var(--aethel-text-secondary)]" />}
             />
             
             <Slider
@@ -893,41 +893,41 @@ export default function DestructionEditor({
           </CollapsibleSection>
           
           {/* Effects */}
-          <CollapsibleSection title="Effects" icon={<Sparkles className="w-4 h-4 text-cyan-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Effects" icon={<Sparkles className="w-4 h-4 text-[var(--aethel-info)]" />} defaultOpen={false}>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400 flex items-center gap-1.5">
+                <label className="text-xs text-[var(--aethel-text-secondary)] flex items-center gap-1.5">
                   <Zap className="w-3 h-3" /> Physics
                 </label>
                 <input
                   type="checkbox"
                   checked={config.enablePhysics}
                   onChange={(e) => setConfig((p) => ({ ...p, enablePhysics: e.target.checked }))}
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-red-600"
+                  className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-error)]"
                 />
               </div>
               
               <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400 flex items-center gap-1.5">
+                <label className="text-xs text-[var(--aethel-text-secondary)] flex items-center gap-1.5">
                   <Volume2 className="w-3 h-3" /> Sound
                 </label>
                 <input
                   type="checkbox"
                   checked={config.enableSound}
                   onChange={(e) => setConfig((p) => ({ ...p, enableSound: e.target.checked }))}
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-red-600"
+                  className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-error)]"
                 />
               </div>
               
               <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400 flex items-center gap-1.5">
+                <label className="text-xs text-[var(--aethel-text-secondary)] flex items-center gap-1.5">
                   <Sparkles className="w-3 h-3" /> VFX
                 </label>
                 <input
                   type="checkbox"
                   checked={config.enableVFX}
                   onChange={(e) => setConfig((p) => ({ ...p, enableVFX: e.target.checked }))}
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-red-600"
+                  className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-error)]"
                 />
               </div>
             </div>
@@ -938,13 +938,13 @@ export default function DestructionEditor({
             <CollapsibleSection title="Impact Point" icon={<Target className="w-4 h-4 text-red-400" />}>
               <div className="text-xs space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Position:</span>
+                  <span className="text-[var(--aethel-text-secondary)]">Position:</span>
                   <span className="font-mono">
                     ({impactPoint.position.x.toFixed(2)}, {impactPoint.position.y.toFixed(2)}, {impactPoint.position.z.toFixed(2)})
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Normal:</span>
+                  <span className="text-[var(--aethel-text-secondary)]">Normal:</span>
                   <span className="font-mono">
                     ({impactPoint.normal.x.toFixed(2)}, {impactPoint.normal.y.toFixed(2)}, {impactPoint.normal.z.toFixed(2)})
                   </span>
@@ -960,7 +960,7 @@ export default function DestructionEditor({
                 />
                 <button
                   onClick={() => setImpactPoint(null)}
-                  className="w-full p-1.5 mt-2 text-xs bg-slate-700 hover:bg-slate-600 rounded"
+                  className="w-full p-1.5 mt-2 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
                 >
                   Clear Impact Point
                 </button>

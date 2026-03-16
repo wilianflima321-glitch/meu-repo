@@ -67,20 +67,20 @@ export default function Notifications() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Notificações</h1>
-          <p className='text-zinc-400'>Notificações reais para usuários e administradores.</p>
+          <p className='text-[var(--aethel-text-secondary)]'>Notificações reais para usuários e administradores.</p>
           {lastUpdated && (
-            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchNotifications}
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
+          className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
         >
           Atualizar
         </button>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
           <p className='text-2xl font-bold text-blue-600'>{totals.total}</p>
@@ -95,7 +95,7 @@ export default function Notifications() {
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar por título, mensagem ou e-mail'
@@ -109,7 +109,7 @@ export default function Notifications() {
               key={status}
               onClick={() => setReadFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                readFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
+                readFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
               {status === 'all' ? 'Todas' : status === 'read' ? 'Lidas' : 'Não lidas'}
@@ -128,10 +128,10 @@ export default function Notifications() {
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow overflow-hidden'>
         <table className='w-full table-auto'>
           <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
+            <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
               <th className='p-2'>Tipo</th>
               <th className='p-2'>Título</th>
               <th className='p-2'>Usuário</th>
@@ -142,15 +142,15 @@ export default function Notifications() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando notificações...</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando notificações...</td>
               </tr>
             ) : error ? (
               <tr>
-                <td className='p-2 text-sm text-red-500' colSpan={5}>{error}</td>
+                <td className='p-2 text-sm text-[var(--aethel-error)]' colSpan={5}>{error}</td>
               </tr>
             ) : filteredItems.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhuma notificação encontrada.</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhuma notificação encontrada.</td>
               </tr>
             ) : (
               filteredItems.map((item) => (

@@ -76,20 +76,20 @@ function MetricCard({
     <div
       className={`
         p-4 rounded-xl border
-        ${alert ? 'bg-red-500/10 border-red-500/30' : 'bg-zinc-800/50 border-zinc-700'}
+        ${alert ? 'bg-[var(--aethel-error)]/10 border-red-500/30' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] border-[var(--aethel-border-secondary)]'}
       `}
     >
       <div className="flex items-center justify-between mb-2">
-        <Icon className={`w-5 h-5 ${alert ? 'text-red-400' : 'text-zinc-400'}`} />
+        <Icon className={`w-5 h-5 ${alert ? 'text-red-400' : 'text-[var(--aethel-text-secondary)]'}`} />
         {trend && (
-          <span className={trend === 'up' ? 'text-red-400' : 'text-green-400'}>
+          <span className={trend === 'up' ? 'text-red-400' : 'text-[var(--aethel-success)]'}>
             {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
           </span>
         )}
       </div>
-      <p className={`text-2xl font-bold ${alert ? 'text-red-400' : 'text-white'}`}>{value}</p>
-      <p className="text-sm text-zinc-500">{label}</p>
-      {subValue && <p className="text-xs text-zinc-600 mt-1">{subValue}</p>}
+      <p className={`text-2xl font-bold ${alert ? 'text-red-400' : 'text-[var(--aethel-text-primary)]'}`}>{value}</p>
+      <p className="text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
+      {subValue && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subValue}</p>}
     </div>
   );
 }
@@ -106,23 +106,23 @@ function AICallRow({
   const [showPrompt, setShowPrompt] = useState(false);
 
   const statusColors = {
-    success: 'text-green-400',
+    success: 'text-[var(--aethel-success)]',
     error: 'text-red-400',
     timeout: 'text-amber-400',
   } as const;
 
   const modelColors: Record<string, string> = {
-    'gpt-4o': 'bg-green-500/20 text-green-400',
-    'gpt-4o-mini': 'bg-blue-500/20 text-blue-400',
-    'gpt-4-turbo': 'bg-blue-500/20 text-blue-400',
+    'gpt-4o': 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success)]',
+    'gpt-4o-mini': 'bg-[var(--aethel-primary)]/20 text-blue-400',
+    'gpt-4-turbo': 'bg-[var(--aethel-primary)]/20 text-blue-400',
     'claude-3-5-sonnet': 'bg-amber-500/20 text-amber-400',
-    'claude-3-5-haiku': 'bg-cyan-500/20 text-cyan-400',
+    'claude-3-5-haiku': 'bg-cyan-500/20 text-[var(--aethel-info)]',
   };
 
   return (
-    <div className="border-b border-zinc-800 last:border-0">
-      <div className="flex items-center gap-4 p-3 hover:bg-zinc-800/50 cursor-pointer" onClick={onToggle}>
-        <button className="text-zinc-500" type="button" aria-label="Expand call row">
+    <div className="border-b border-[var(--aethel-border-primary)] last:border-0">
+      <div className="flex items-center gap-4 p-3 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] cursor-pointer" onClick={onToggle}>
+        <button className="text-[var(--aethel-text-tertiary)]" type="button" aria-label="Expand call row">
           {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </button>
 
@@ -130,25 +130,25 @@ function AICallRow({
           ●
         </span>
 
-        <span className="text-xs text-zinc-500 w-20">{new Date(call.timestamp).toLocaleTimeString()}</span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)] w-20">{new Date(call.timestamp).toLocaleTimeString()}</span>
 
-        <span className={`text-xs px-2 py-0.5 rounded ${modelColors[call.model] || 'bg-zinc-700 text-zinc-300'}`}>
+        <span className={`text-xs px-2 py-0.5 rounded ${modelColors[call.model] || 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}`}>
           {call.model}
         </span>
 
-        <span className="text-sm text-zinc-400 truncate flex-1">{call.userEmail}</span>
+        <span className="text-sm text-[var(--aethel-text-secondary)] truncate flex-1">{call.userEmail}</span>
 
-        <span className="text-xs text-zinc-500 w-24 text-right">{call.inputTokens + call.outputTokens} tokens</span>
-        <span className="text-xs text-zinc-500 w-20 text-right">{call.latencyMs}ms</span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)] w-24 text-right">{call.inputTokens + call.outputTokens} tokens</span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)] w-20 text-right">{call.latencyMs}ms</span>
 
-        <span className={`text-xs font-mono w-16 text-right ${call.cost > 0.01 ? 'text-amber-400' : 'text-zinc-500'}`}>
+        <span className={`text-xs font-mono w-16 text-right ${call.cost > 0.01 ? 'text-amber-400' : 'text-[var(--aethel-text-tertiary)]'}`}>
           ${call.cost.toFixed(4)}
         </span>
       </div>
 
       {expanded && (
-        <div className="px-10 pb-4 space-y-3 bg-zinc-900/50">
-          <div className="flex items-center gap-4 text-xs text-zinc-500">
+        <div className="px-10 pb-4 space-y-3 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
+          <div className="flex items-center gap-4 text-xs text-[var(--aethel-text-tertiary)]">
             <span>User: {call.userId}</span>
             <span>Operation: {call.operation}</span>
             {call.projectId && <span>Project: {call.projectId}</span>}
@@ -156,7 +156,7 @@ function AICallRow({
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-zinc-400">Prompt ({call.inputTokens} tokens)</span>
+              <span className="text-xs font-medium text-[var(--aethel-text-secondary)]">Prompt ({call.inputTokens} tokens)</span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -164,7 +164,7 @@ function AICallRow({
                     event.stopPropagation();
                     setShowPrompt((prev) => !prev);
                   }}
-                  className="text-xs text-zinc-500 hover:text-white"
+                  className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   {showPrompt ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                 </button>
@@ -174,7 +174,7 @@ function AICallRow({
                     event.stopPropagation();
                     void navigator.clipboard.writeText(call.prompt);
                   }}
-                  className="text-xs text-zinc-500 hover:text-white"
+                  className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <Copy className="w-3 h-3" />
                 </button>
@@ -182,8 +182,8 @@ function AICallRow({
             </div>
             <pre
               className={`
-                text-xs bg-zinc-950 rounded p-2 overflow-auto max-h-40
-                ${showPrompt ? 'text-zinc-300' : 'text-zinc-600 blur-sm select-none'}
+                text-xs bg-[var(--aethel-surface-primary)] rounded p-2 overflow-auto max-h-40
+                ${showPrompt ? 'text-[var(--aethel-text-secondary)]' : 'text-[var(--aethel-text-tertiary)] blur-sm select-none'}
               `}
             >
               {call.prompt.slice(0, 500)}
@@ -193,19 +193,19 @@ function AICallRow({
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-zinc-400">Response ({call.outputTokens} tokens)</span>
+              <span className="text-xs font-medium text-[var(--aethel-text-secondary)]">Response ({call.outputTokens} tokens)</span>
               <button
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
                   void navigator.clipboard.writeText(call.response);
                 }}
-                className="text-xs text-zinc-500 hover:text-white"
+                className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
               >
                 <Copy className="w-3 h-3" />
               </button>
             </div>
-            <pre className="text-xs bg-zinc-950 rounded p-2 text-zinc-300 overflow-auto max-h-40">
+            <pre className="text-xs bg-[var(--aethel-surface-primary)] rounded p-2 text-[var(--aethel-text-secondary)] overflow-auto max-h-40">
               {call.response.slice(0, 500)}
               {call.response.length > 500 && '...'}
             </pre>
@@ -396,15 +396,15 @@ export default function AgentMonitorPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Monitor de Agentes de IA</h1>
-          <p className="text-sm text-zinc-500">Telemetria operacional em tempo real</p>
-          {lastUpdated && <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>}
+          <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Monitor de Agentes de IA</h1>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Telemetria operacional em tempo real</p>
+          {lastUpdated && <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPaused((prev) => !prev)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
-              isPaused ? 'border-zinc-700 text-zinc-400' : 'border-green-500/30 bg-green-500/10 text-green-400'
+              isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-green-500/30 bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
             }`}
             type="button"
           >
@@ -413,7 +413,7 @@ export default function AgentMonitorPage() {
           </button>
           <button
             onClick={() => void refreshCalls()}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]"
             type="button"
           >
             <RefreshCw className="w-4 h-4" />
@@ -458,7 +458,7 @@ export default function AgentMonitorPage() {
             flex items-center justify-between p-4 rounded-xl border
             ${
               emergencyState.level === 'shutdown'
-                ? 'bg-red-500/20 border-red-500/50'
+                ? 'bg-[var(--aethel-error)]/20 border-red-500/50'
                 : emergencyState.level === 'critical'
                   ? 'bg-orange-500/20 border-orange-500/50'
                   : 'bg-amber-500/20 border-amber-500/50'
@@ -468,11 +468,11 @@ export default function AgentMonitorPage() {
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-red-400" />
             <div>
-              <p className="font-medium text-white">Modo de emergencia: {String(emergencyState.level).toUpperCase()}</p>
-              <p className="text-sm text-zinc-400">{emergencyState.reason}</p>
+              <p className="font-medium text-[var(--aethel-text-primary)]">Modo de emergencia: {String(emergencyState.level).toUpperCase()}</p>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">{emergencyState.reason}</p>
             </div>
           </div>
-          <a href="/admin/emergency" className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-sm text-white">
+          <a href="/admin/emergency" className="px-4 py-2 bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)] rounded-lg text-sm text-[var(--aethel-text-primary)]">
             Gerenciar
           </a>
         </div>
@@ -489,56 +489,56 @@ export default function AgentMonitorPage() {
       )}
 
       {readiness && (
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-zinc-300">Core Loop Readiness (L4 gate)</h3>
+            <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Core Loop Readiness (L4 gate)</h3>
             <span
               className={`text-xs px-2 py-1 rounded ${
-                readiness.promotionEligible ? 'bg-green-500/20 text-green-300' : 'bg-amber-500/20 text-amber-300'
+                readiness.promotionEligible ? 'bg-[var(--aethel-success)]/20 text-green-300' : 'bg-amber-500/20 text-amber-300'
               }`}
             >
               {readiness.promotionEligible ? 'PROMOTION ELIGIBLE' : 'PARTIAL'}
             </span>
           </div>
           {readiness.samplePolicy && (
-            <p className="mb-3 text-xs text-zinc-500">Policy: {readiness.samplePolicy}</p>
+            <p className="mb-3 text-xs text-[var(--aethel-text-tertiary)]">Policy: {readiness.samplePolicy}</p>
           )}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Success Rate</p>
-              <p className="text-white font-semibold">{(readiness.metrics.applySuccessRate * 100).toFixed(1)}%</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Success Rate</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{(readiness.metrics.applySuccessRate * 100).toFixed(1)}%</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Regression Rate</p>
-              <p className="text-white font-semibold">{(readiness.metrics.regressionRate * 100).toFixed(1)}%</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Regression Rate</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{(readiness.metrics.regressionRate * 100).toFixed(1)}%</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Sandbox Coverage</p>
-              <p className="text-white font-semibold">{(readiness.metrics.sandboxCoverage * 100).toFixed(1)}%</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Sandbox Coverage</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{(readiness.metrics.sandboxCoverage * 100).toFixed(1)}%</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Learn Coverage</p>
-              <p className="text-white font-semibold">
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Learn Coverage</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">
                 {((readiness.metrics.learnFeedbackCoverage || 0) * 100).toFixed(1)}%
               </p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Sample Size</p>
-              <p className="text-white font-semibold">{readiness.metrics.sampleSize}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Sample Size</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{readiness.metrics.sampleSize}</p>
             </div>
           </div>
           {(typeof readiness.metrics.reviewedApplyRuns === 'number' ||
             typeof readiness.metrics.unreviewedApplyRuns === 'number') && (
-            <p className="mt-2 text-[11px] text-zinc-500">
+            <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">
               reviewed={readiness.metrics.reviewedApplyRuns ?? 0} | unreviewed=
               {readiness.metrics.unreviewedApplyRuns ?? 0} | target learn coverage=
               {((readiness.thresholds.feedbackCoverageMin ?? 0.6) * 100).toFixed(0)}%
             </p>
           )}
           {readiness.runtimeReadiness && (
-            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3 text-xs">
+            <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3 text-xs">
               <div className="mb-2 flex items-center justify-between">
-                <p className="font-medium text-zinc-300">Production runtime preflight</p>
+                <p className="font-medium text-[var(--aethel-text-secondary)]">Production runtime preflight</p>
                 <span
                   className={`rounded px-2 py-1 ${
                     readiness.runtimeReadiness.probeReady
@@ -550,50 +550,50 @@ export default function AgentMonitorPage() {
                 </span>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-8 gap-3">
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">.env.local</p>
-                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.envLocalPresent ? 'present' : 'missing'}</p>
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">.env.local</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">{readiness.runtimeReadiness.envLocalPresent ? 'present' : 'missing'}</p>
                 </div>
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">Database</p>
-                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.databaseConfigured ? 'configured' : 'missing'}</p>
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">Database</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">{readiness.runtimeReadiness.databaseConfigured ? 'configured' : 'missing'}</p>
                 </div>
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">DB reachability</p>
-                  <p className="mt-1 text-zinc-200">
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">DB reachability</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">
                     {readiness.runtimeReadiness.databaseReachable ? 'reachable' : 'unreachable'}
                   </p>
                   {readiness.runtimeReadiness.databaseTarget && (
-                    <p className="mt-1 text-[10px] text-zinc-500">{readiness.runtimeReadiness.databaseTarget}</p>
+                    <p className="mt-1 text-[10px] text-[var(--aethel-text-tertiary)]">{readiness.runtimeReadiness.databaseTarget}</p>
                   )}
                 </div>
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">App runtime</p>
-                  <p className="mt-1 text-zinc-200">
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">App runtime</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">
                     {readiness.runtimeReadiness.appRuntimeReachable ? 'reachable' : 'unreachable'}
                   </p>
                   {readiness.runtimeReadiness.appBaseUrl && (
-                    <p className="mt-1 text-[10px] text-zinc-500">{readiness.runtimeReadiness.appBaseUrl}</p>
+                    <p className="mt-1 text-[10px] text-[var(--aethel-text-tertiary)]">{readiness.runtimeReadiness.appBaseUrl}</p>
                   )}
                 </div>
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">JWT</p>
-                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.jwtConfigured ? 'configured' : 'missing'}</p>
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">JWT</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">{readiness.runtimeReadiness.jwtConfigured ? 'configured' : 'missing'}</p>
                 </div>
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">CSRF</p>
-                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.csrfConfigured ? 'configured' : 'missing'}</p>
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">CSRF</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">{readiness.runtimeReadiness.csrfConfigured ? 'configured' : 'missing'}</p>
                 </div>
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">Docker CLI</p>
-                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.dockerCliPresent ? 'present' : 'missing'}</p>
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">Docker CLI</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">{readiness.runtimeReadiness.dockerCliPresent ? 'present' : 'missing'}</p>
                 </div>
-                <div className="rounded bg-zinc-900/60 p-2">
-                  <p className="text-zinc-500">Docker daemon</p>
-                  <p className="mt-1 text-zinc-200">{readiness.runtimeReadiness.dockerDaemonReady ? 'ready' : 'blocked'}</p>
+                <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-2">
+                  <p className="text-[var(--aethel-text-tertiary)]">Docker daemon</p>
+                  <p className="mt-1 text-[var(--aethel-text-secondary)]">{readiness.runtimeReadiness.dockerDaemonReady ? 'ready' : 'blocked'}</p>
                 </div>
               </div>
-              <p className="mt-2 text-zinc-500">
+              <p className="mt-2 text-[var(--aethel-text-tertiary)]">
                 authReady={String(readiness.runtimeReadiness.authReady)} | probeReady={String(readiness.runtimeReadiness.probeReady)}
               </p>
               {readiness.runtimeReadiness.blockers.length > 0 && (
@@ -604,9 +604,9 @@ export default function AgentMonitorPage() {
                 </ul>
               )}
               {readiness.runtimeReadiness.instructions.length > 0 && (
-                <div className="mt-3 rounded border border-zinc-700 bg-zinc-900/40 p-3">
-                  <p className="font-medium text-zinc-300">Next actions</p>
-                  <ul className="mt-2 list-disc pl-4 space-y-1 text-zinc-300">
+                <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-3">
+                  <p className="font-medium text-[var(--aethel-text-secondary)]">Next actions</p>
+                  <ul className="mt-2 list-disc pl-4 space-y-1 text-[var(--aethel-text-secondary)]">
                     {readiness.runtimeReadiness.instructions.map((instruction) => (
                       <li key={instruction}>{instruction}</li>
                     ))}
@@ -616,7 +616,7 @@ export default function AgentMonitorPage() {
                       {readiness.runtimeReadiness.recommendedCommands.map((command) => (
                         <code
                           key={command}
-                          className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-[11px] text-cyan-300"
+                          className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-2 py-1 text-[11px] text-cyan-300"
                         >
                           {command}
                         </code>
@@ -630,9 +630,9 @@ export default function AgentMonitorPage() {
           {(readiness.metricsAll || readiness.rehearsalMetrics) && (
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               {readiness.metricsAll && (
-                <div className="rounded border border-zinc-700 bg-zinc-800/30 p-3">
-                  <p className="text-zinc-400">All samples</p>
-                  <p className="text-zinc-200 mt-1">
+                <div className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+                  <p className="text-[var(--aethel-text-secondary)]">All samples</p>
+                  <p className="text-[var(--aethel-text-secondary)] mt-1">
                     sample={readiness.metricsAll.sampleSize} | success={(readiness.metricsAll.applySuccessRate * 100).toFixed(1)}%
                   </p>
                 </div>
@@ -660,12 +660,12 @@ export default function AgentMonitorPage() {
           {readiness.windows && readiness.windows.length > 0 && (
             <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
               {readiness.windows.map((window) => (
-                <div key={window.hours} className="rounded border border-zinc-700 bg-zinc-800/40 p-3 text-xs">
-                  <p className="text-zinc-400">Window {window.hours}h</p>
-                  <p className="text-zinc-200 mt-1">Success: {(window.metrics.applySuccessRate * 100).toFixed(1)}%</p>
-                  <p className="text-zinc-200">Regression: {(window.metrics.regressionRate * 100).toFixed(1)}%</p>
-                  <p className="text-zinc-200">Sandbox: {(window.metrics.sandboxCoverage * 100).toFixed(1)}%</p>
-                  <p className="text-zinc-200">Learn: {((window.metrics.learnFeedbackCoverage || 0) * 100).toFixed(1)}%</p>
+                <div key={window.hours} className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_40%,transparent)] p-3 text-xs">
+                  <p className="text-[var(--aethel-text-secondary)]">Window {window.hours}h</p>
+                  <p className="text-[var(--aethel-text-secondary)] mt-1">Success: {(window.metrics.applySuccessRate * 100).toFixed(1)}%</p>
+                  <p className="text-[var(--aethel-text-secondary)]">Regression: {(window.metrics.regressionRate * 100).toFixed(1)}%</p>
+                  <p className="text-[var(--aethel-text-secondary)]">Sandbox: {(window.metrics.sandboxCoverage * 100).toFixed(1)}%</p>
+                  <p className="text-[var(--aethel-text-secondary)]">Learn: {((window.metrics.learnFeedbackCoverage || 0) * 100).toFixed(1)}%</p>
                 </div>
               ))}
             </div>
@@ -674,9 +674,9 @@ export default function AgentMonitorPage() {
       )}
 
       {promotionData && (
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-zinc-300">Promotion Verdict (Policy Scope)</h3>
+            <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Promotion Verdict (Policy Scope)</h3>
             <span
               className={`rounded px-2 py-1 text-xs ${
                 promotionData.promotionEligible
@@ -687,11 +687,11 @@ export default function AgentMonitorPage() {
               {promotionData.promotionEligible ? 'ELIGIBLE' : 'BLOCKED'}
             </span>
           </div>
-          <p className="text-xs text-zinc-500">Policy: {promotionData.samplePolicy}</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Policy: {promotionData.samplePolicy}</p>
           <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-            <div className="rounded border border-zinc-700 bg-zinc-800/30 p-3">
-              <p className="text-zinc-400">Production</p>
-              <p className="text-zinc-200 mt-1">
+            <div className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+              <p className="text-[var(--aethel-text-secondary)]">Production</p>
+              <p className="text-[var(--aethel-text-secondary)] mt-1">
                 sample={promotionData.production.sampleSize} | success={(promotionData.production.applySuccessRate * 100).toFixed(1)}% | regression={(promotionData.production.regressionRate * 100).toFixed(1)}%
               </p>
             </div>
@@ -713,40 +713,40 @@ export default function AgentMonitorPage() {
       )}
 
       {coreLoopLatest && (
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-zinc-300">Core-loop Operational Metrics (7d)</h3>
-            <span className="rounded border border-zinc-700 bg-zinc-800/60 px-2 py-1 text-xs text-zinc-300">
+            <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Core-loop Operational Metrics (7d)</h3>
+            <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
               {coreLoopMetricsData?.capabilityStatus ?? 'PARTIAL'}
             </span>
           </div>
           {coreLoopMetricsData?.samplePolicy && (
-            <p className="mb-3 text-xs text-zinc-500">Policy: {coreLoopMetricsData.samplePolicy}</p>
+            <p className="mb-3 text-xs text-[var(--aethel-text-tertiary)]">Policy: {coreLoopMetricsData.samplePolicy}</p>
           )}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Apply runs</p>
-              <p className="text-white font-semibold">{coreLoopLatest.metrics.sampleSize}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Apply runs</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{coreLoopLatest.metrics.sampleSize}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Successful applies</p>
-              <p className="text-white font-semibold">{coreLoopLatest.metrics.successfulApplyRuns}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Successful applies</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{coreLoopLatest.metrics.successfulApplyRuns}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Failed applies</p>
-              <p className="text-white font-semibold">{coreLoopLatest.metrics.failedApplyRuns}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Failed applies</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{coreLoopLatest.metrics.failedApplyRuns}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">Blocked applies</p>
-              <p className="text-white font-semibold">{coreLoopLatest.metrics.blockedApplyRuns}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Blocked applies</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{coreLoopLatest.metrics.blockedApplyRuns}</p>
             </div>
           </div>
           {(coreLoopLatest.metricsAll || coreLoopLatest.rehearsalMetrics) && (
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               {coreLoopLatest.metricsAll && (
-                <div className="rounded border border-zinc-700 bg-zinc-800/30 p-3">
-                  <p className="text-zinc-400">All samples</p>
-                  <p className="text-zinc-200 mt-1">
+                <div className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+                  <p className="text-[var(--aethel-text-secondary)]">All samples</p>
+                  <p className="text-[var(--aethel-text-secondary)] mt-1">
                     sample={coreLoopLatest.metricsAll.sampleSize} | success={(coreLoopLatest.metricsAll.applySuccessRate * 100).toFixed(1)}%
                   </p>
                 </div>
@@ -762,17 +762,17 @@ export default function AgentMonitorPage() {
             </div>
           )}
           {coreLoopTrend && (
-            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3 text-xs">
-              <p className="text-zinc-300 font-medium mb-2">Trend (7d vs 30d baseline)</p>
-              <div className="flex flex-wrap gap-2 text-zinc-200">
-                <span className="rounded bg-zinc-800 px-2 py-1">sample: {coreLoopTrend.sampleSize}</span>
-                <span className="rounded bg-zinc-800 px-2 py-1">success: {coreLoopTrend.applySuccessRate}</span>
-                <span className="rounded bg-zinc-800 px-2 py-1">regression: {coreLoopTrend.regressionRate}</span>
-                <span className="rounded bg-zinc-800 px-2 py-1">sandbox: {coreLoopTrend.sandboxCoverage}</span>
+            <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3 text-xs">
+              <p className="text-[var(--aethel-text-secondary)] font-medium mb-2">Trend (7d vs 30d baseline)</p>
+              <div className="flex flex-wrap gap-2 text-[var(--aethel-text-secondary)]">
+                <span className="rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1">sample: {coreLoopTrend.sampleSize}</span>
+                <span className="rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1">success: {coreLoopTrend.applySuccessRate}</span>
+                <span className="rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1">regression: {coreLoopTrend.regressionRate}</span>
+                <span className="rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1">sandbox: {coreLoopTrend.sandboxCoverage}</span>
               </div>
             </div>
           )}
-          <div className="mt-3 text-xs text-zinc-500">
+          <div className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">
             Last event: {coreLoopLatest.lastEventAt ? new Date(coreLoopLatest.lastEventAt).toLocaleString() : 'none'}
           </div>
           {coreLoopLatest.metrics.sampleSize === 0 && (
@@ -787,13 +787,13 @@ export default function AgentMonitorPage() {
               </div>
             )}
           {Object.keys(coreLoopLatest.reasonCounts).length > 0 && (
-            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3">
-              <p className="text-xs font-medium text-zinc-300 mb-2">Top block/failure reasons</p>
+            <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+              <p className="text-xs font-medium text-[var(--aethel-text-secondary)] mb-2">Top block/failure reasons</p>
               <div className="flex flex-wrap gap-2 text-xs">
                 {Object.entries(coreLoopLatest.reasonCounts)
                   .slice(0, 6)
                   .map(([reason, count]) => (
-                    <span key={reason} className="rounded bg-zinc-800 px-2 py-1 text-zinc-300">
+                    <span key={reason} className="rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1 text-[var(--aethel-text-secondary)]">
                       {reason}: {count}
                     </span>
                   ))}
@@ -801,13 +801,13 @@ export default function AgentMonitorPage() {
             </div>
           )}
           {Object.keys(coreLoopLatest.riskCounts).length > 0 && (
-            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3">
-              <p className="text-xs font-medium text-zinc-300 mb-2">Dependency risk distribution</p>
+            <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+              <p className="text-xs font-medium text-[var(--aethel-text-secondary)] mb-2">Dependency risk distribution</p>
               <div className="flex flex-wrap gap-2 text-xs">
                 {Object.entries(coreLoopLatest.riskCounts)
                   .slice(0, 6)
                   .map(([risk, count]) => (
-                    <span key={risk} className="rounded bg-zinc-800 px-2 py-1 text-zinc-300">
+                    <span key={risk} className="rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1 text-[var(--aethel-text-secondary)]">
                       {risk}: {count}
                     </span>
                   ))}
@@ -815,13 +815,13 @@ export default function AgentMonitorPage() {
             </div>
           )}
           {Object.keys(coreLoopLatest.impactedEndpointCounts).length > 0 && (
-            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3">
-              <p className="text-xs font-medium text-zinc-300 mb-2">Most impacted API surfaces</p>
+            <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+              <p className="text-xs font-medium text-[var(--aethel-text-secondary)] mb-2">Most impacted API surfaces</p>
               <div className="flex flex-wrap gap-2 text-xs">
                 {Object.entries(coreLoopLatest.impactedEndpointCounts)
                   .slice(0, 8)
                   .map(([endpoint, count]) => (
-                    <span key={endpoint} className="rounded bg-zinc-800 px-2 py-1 text-zinc-300">
+                    <span key={endpoint} className="rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1 text-[var(--aethel-text-secondary)]">
                       {endpoint}: {count}
                     </span>
                   ))}
@@ -829,18 +829,18 @@ export default function AgentMonitorPage() {
             </div>
           )}
           {coreLoopLatest.recommendations.length > 0 && (
-            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3">
-              <p className="text-xs font-medium text-zinc-300 mb-2">Learning recommendations</p>
+            <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+              <p className="text-xs font-medium text-[var(--aethel-text-secondary)] mb-2">Learning recommendations</p>
               <ul className="space-y-1 text-xs">
                 {coreLoopLatest.recommendations.map((recommendation) => (
-                  <li key={recommendation.id} className="text-zinc-200">
+                  <li key={recommendation.id} className="text-[var(--aethel-text-secondary)]">
                     <span
                       className={`mr-2 inline-flex rounded px-1.5 py-0.5 text-[10px] ${
                         recommendation.severity === 'critical'
                           ? 'bg-rose-500/20 text-rose-200'
                           : recommendation.severity === 'warning'
                             ? 'bg-amber-500/20 text-amber-200'
-                            : 'bg-zinc-700 text-zinc-200'
+                            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >
                       {recommendation.severity.toUpperCase()}
@@ -852,12 +852,12 @@ export default function AgentMonitorPage() {
             </div>
           )}
           {reasonPlaybook.length > 0 && (
-            <div className="mt-3 rounded border border-zinc-700 bg-zinc-800/30 p-3">
-              <p className="text-xs font-medium text-zinc-300 mb-2">Reason playbook</p>
-              <ul className="space-y-1 text-xs text-zinc-200">
+            <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/30 p-3">
+              <p className="text-xs font-medium text-[var(--aethel-text-secondary)] mb-2">Reason playbook</p>
+              <ul className="space-y-1 text-xs text-[var(--aethel-text-secondary)]">
                 {reasonPlaybook.map((item) => (
                   <li key={item.reason}>
-                    <span className="mr-2 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-300">
+                    <span className="mr-2 rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                       {item.reason} ({item.count})
                     </span>
                     {item.action}
@@ -870,9 +870,9 @@ export default function AgentMonitorPage() {
       )}
 
       {ledgerIntegrity && (
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-zinc-300">Ledger integrity</h3>
+            <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Ledger integrity</h3>
             <span
               className={`rounded px-2 py-1 text-xs ${
                 ledgerIntegrity.integrityOk
@@ -884,25 +884,25 @@ export default function AgentMonitorPage() {
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">files</p>
-              <p className="text-white font-semibold">{ledgerIntegrity.report.filesChecked}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">files</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{ledgerIntegrity.report.filesChecked}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">rows</p>
-              <p className="text-white font-semibold">{ledgerIntegrity.report.rowsChecked}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">rows</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{ledgerIntegrity.report.rowsChecked}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">valid</p>
-              <p className="text-white font-semibold">{ledgerIntegrity.report.validRows}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">valid</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{ledgerIntegrity.report.validRows}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">legacy</p>
-              <p className="text-white font-semibold">{ledgerIntegrity.report.legacyRows}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">legacy</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{ledgerIntegrity.report.legacyRows}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">invalid</p>
-              <p className="text-white font-semibold">{ledgerIntegrity.report.invalidRows}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">invalid</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{ledgerIntegrity.report.invalidRows}</p>
             </div>
           </div>
           {ledgerIntegrity.report.invalidRows > 0 && (
@@ -921,43 +921,43 @@ export default function AgentMonitorPage() {
       )}
 
       {fullAccessAuditData && (
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-zinc-300">Full Access audit</h3>
-            <span className="rounded border border-zinc-700 bg-zinc-800/60 px-2 py-1 text-xs text-zinc-300">
+            <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Full Access audit</h3>
+            <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
               {fullAccessAuditData.capabilityStatus}
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">total</p>
-              <p className="text-white font-semibold">{fullAccessAuditData.summary.total}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">total</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{fullAccessAuditData.summary.total}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">active</p>
-              <p className="text-white font-semibold">{fullAccessAuditData.summary.active}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">active</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{fullAccessAuditData.summary.active}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">revoked</p>
-              <p className="text-white font-semibold">{fullAccessAuditData.summary.revoked}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">revoked</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{fullAccessAuditData.summary.revoked}</p>
             </div>
-            <div className="bg-zinc-800/60 rounded p-3">
-              <p className="text-zinc-500">expired</p>
-              <p className="text-white font-semibold">{fullAccessAuditData.summary.expired}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">expired</p>
+              <p className="text-[var(--aethel-text-primary)] font-semibold">{fullAccessAuditData.summary.expired}</p>
             </div>
           </div>
         </div>
       )}
 
       {runSummary && (
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-medium text-zinc-300">Apply/Rollback Ledger (72h)</h3>
-            <span className="rounded border border-zinc-700 bg-zinc-800/60 px-2 py-1 text-xs text-zinc-300">
+            <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Apply/Rollback Ledger (72h)</h3>
+            <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
               capability: {runsData?.capabilityStatus ?? 'PARTIAL'}
             </span>
           </div>
-          <div className="mb-3 flex flex-wrap gap-2 text-xs text-zinc-500">
+          <div className="mb-3 flex flex-wrap gap-2 text-xs text-[var(--aethel-text-tertiary)]">
             <span>sampleClass: {runsData?.metadata?.sampleClass ?? runSampleClass}</span>
             {runSummaryAll && (
               <span>
@@ -966,29 +966,29 @@ export default function AgentMonitorPage() {
             )}
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6 text-xs">
-            <div className="rounded bg-zinc-800/50 p-3">
-              <p className="text-zinc-500">Apply success rate</p>
-              <p className="text-zinc-100 text-lg font-semibold">{(runSummary.applySuccessRate * 100).toFixed(1)}%</p>
+            <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Apply success rate</p>
+              <p className="text-[var(--aethel-text-primary)] text-lg font-semibold">{(runSummary.applySuccessRate * 100).toFixed(1)}%</p>
             </div>
-            <div className="rounded bg-zinc-800/50 p-3">
-              <p className="text-zinc-500">Blocked rate</p>
-              <p className="text-zinc-100 text-lg font-semibold">{(runSummary.blockedRate * 100).toFixed(1)}%</p>
+            <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Blocked rate</p>
+              <p className="text-[var(--aethel-text-primary)] text-lg font-semibold">{(runSummary.blockedRate * 100).toFixed(1)}%</p>
             </div>
-            <div className="rounded bg-zinc-800/50 p-3">
-              <p className="text-zinc-500">Regression rate</p>
-              <p className="text-zinc-100 text-lg font-semibold">{(runSummary.regressionRate * 100).toFixed(1)}%</p>
+            <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Regression rate</p>
+              <p className="text-[var(--aethel-text-primary)] text-lg font-semibold">{(runSummary.regressionRate * 100).toFixed(1)}%</p>
             </div>
-            <div className="rounded bg-zinc-800/50 p-3">
-              <p className="text-zinc-500">Sandbox coverage</p>
-              <p className="text-zinc-100 text-lg font-semibold">{(runSummary.sandboxCoverage * 100).toFixed(1)}%</p>
+            <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Sandbox coverage</p>
+              <p className="text-[var(--aethel-text-primary)] text-lg font-semibold">{(runSummary.sandboxCoverage * 100).toFixed(1)}%</p>
             </div>
-            <div className="rounded bg-zinc-800/50 p-3">
-              <p className="text-zinc-500">Workspace coverage</p>
-              <p className="text-zinc-100 text-lg font-semibold">{(runSummary.workspaceCoverage * 100).toFixed(1)}%</p>
+            <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Workspace coverage</p>
+              <p className="text-[var(--aethel-text-primary)] text-lg font-semibold">{(runSummary.workspaceCoverage * 100).toFixed(1)}%</p>
             </div>
-            <div className="rounded bg-zinc-800/50 p-3">
-              <p className="text-zinc-500">Events tracked</p>
-              <p className="text-zinc-100 text-lg font-semibold">{runSummary.total}</p>
+            <div className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
+              <p className="text-[var(--aethel-text-tertiary)]">Events tracked</p>
+              <p className="text-[var(--aethel-text-primary)] text-lg font-semibold">{runSummary.total}</p>
             </div>
           </div>
 
@@ -996,7 +996,7 @@ export default function AgentMonitorPage() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-500">
+                  <tr className="border-b border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]">
                     <th className="px-2 py-1 text-left">Run</th>
                     <th className="px-2 py-1 text-left">Events</th>
                     <th className="px-2 py-1 text-left">Window</th>
@@ -1007,15 +1007,15 @@ export default function AgentMonitorPage() {
                 </thead>
                 <tbody>
                   {runGroups.slice(0, 8).map((group) => (
-                    <tr key={group.runId} className="border-b border-zinc-800/70">
-                      <td className="px-2 py-1 font-mono text-zinc-300">{group.runId}</td>
-                      <td className="px-2 py-1 text-zinc-300">{group.eventCount}</td>
-                      <td className="px-2 py-1 text-zinc-400">
+                    <tr key={group.runId} className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]">
+                      <td className="px-2 py-1 font-mono text-[var(--aethel-text-secondary)]">{group.runId}</td>
+                      <td className="px-2 py-1 text-[var(--aethel-text-secondary)]">{group.eventCount}</td>
+                      <td className="px-2 py-1 text-[var(--aethel-text-secondary)]">
                         {new Date(group.firstAt || group.firstTimestamp || '').toLocaleTimeString()} - {new Date(group.lastAt || group.lastTimestamp || '').toLocaleTimeString()}
                       </td>
-                      <td className="px-2 py-1 text-zinc-300">{group.eventTypes.join(', ')}</td>
-                      <td className="px-2 py-1 text-zinc-300">{group.outcomes.join(', ')}</td>
-                      <td className="px-2 py-1 text-zinc-400">{(group.paths || group.files || []).slice(0, 2).join(', ') || '-'}</td>
+                      <td className="px-2 py-1 text-[var(--aethel-text-secondary)]">{group.eventTypes.join(', ')}</td>
+                      <td className="px-2 py-1 text-[var(--aethel-text-secondary)]">{group.outcomes.join(', ')}</td>
+                      <td className="px-2 py-1 text-[var(--aethel-text-secondary)]">{(group.paths || group.files || []).slice(0, 2).join(', ') || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1026,14 +1026,14 @@ export default function AgentMonitorPage() {
       )}
 
       {metrics?.modelBreakdown && (
-        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-          <h3 className="text-sm font-medium text-zinc-400 mb-3">Uso por modelo</h3>
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
+          <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)] mb-3">Uso por modelo</h3>
           <div className="flex flex-wrap gap-4">
             {Object.entries(metrics.modelBreakdown).map(([model, data]) => (
-              <div key={model} className="flex items-center gap-3 px-4 py-2 bg-zinc-800 rounded-lg">
-                <span className="text-sm font-medium text-white">{model}</span>
-                <span className="text-xs text-zinc-500">{data.calls} chamadas</span>
-                <span className="text-xs text-zinc-500">${data.cost.toFixed(2)}</span>
+              <div key={model} className="flex items-center gap-3 px-4 py-2 bg-[var(--aethel-surface-tertiary)] rounded-lg">
+                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{model}</span>
+                <span className="text-xs text-[var(--aethel-text-tertiary)]">{data.calls} chamadas</span>
+                <span className="text-xs text-[var(--aethel-text-tertiary)]">${data.cost.toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -1042,14 +1042,14 @@ export default function AgentMonitorPage() {
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-zinc-500" />
-          <span className="text-sm text-zinc-500">Filtros:</span>
+          <Filter className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+          <span className="text-sm text-[var(--aethel-text-tertiary)]">Filtros:</span>
         </div>
 
         <select
           value={modelFilter}
           onChange={(event) => setModelFilter(event.target.value)}
-          className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+          className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
         >
           <option value="all">Todos os modelos</option>
           <option value="gpt-4o">GPT-4o</option>
@@ -1061,7 +1061,7 @@ export default function AgentMonitorPage() {
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value)}
-          className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+          className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
         >
           <option value="all">Todos os status</option>
           <option value="success">Sucesso</option>
@@ -1072,7 +1072,7 @@ export default function AgentMonitorPage() {
         <select
           value={runSampleClass}
           onChange={(event) => setRunSampleClass(event.target.value as 'all' | 'production' | 'rehearsal')}
-          className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+          className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
         >
           <option value="production">Runs: Production</option>
           <option value="rehearsal">Runs: Rehearsal</option>
@@ -1080,13 +1080,13 @@ export default function AgentMonitorPage() {
         </select>
       </div>
 
-      <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-          <h3 className="text-sm font-medium text-white">Chamadas recentes de IA</h3>
-          <span className="text-xs text-zinc-500">{calls.length} chamadas</span>
+      <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
+          <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">Chamadas recentes de IA</h3>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{calls.length} chamadas</span>
         </div>
 
-        <div className="flex items-center gap-4 px-4 py-2 bg-zinc-800/50 text-xs text-zinc-500 font-medium">
+        <div className="flex items-center gap-4 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] text-xs text-[var(--aethel-text-tertiary)] font-medium">
           <span className="w-8"></span>
           <span className="w-4"></span>
           <span className="w-20">Hora</span>
@@ -1108,7 +1108,7 @@ export default function AgentMonitorPage() {
           ))}
 
           {calls.length === 0 && (
-            <div className="p-8 text-center text-zinc-500">
+            <div className="p-8 text-center text-[var(--aethel-text-tertiary)]">
               <Brain className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma chamada de IA no periodo selecionado</p>
             </div>

@@ -186,9 +186,9 @@ function getStatusColor(status: AgentStatus): string {
 function getStatusBg(status: AgentStatus): string {
   switch (status) {
     case 'running': return 'bg-green-500/20'
-    case 'waiting': return 'bg-yellow-500/20'
-    case 'error': return 'bg-red-500/20'
-    case 'completed': return 'bg-blue-500/20'
+    case 'waiting': return 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
+    case 'error': return 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]'
+    case 'completed': return 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
     default: return 'bg-gray-500/20'
   }
 }
@@ -317,14 +317,14 @@ export function AIAgentDashboard({
   return (
     <div className={`aethel-card flex flex-col h-full ${className}`}>
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
+      <div className="p-4 border-b border-[var(--aethel-border-subtle)]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="text-[var(--aethel-primary-light)]">
               <Icons.Robot />
             </div>
             <h2 className="text-[var(--aethel-text-primary)] font-semibold">AI Agents</h2>
-            <span className="text-xs text-[var(--aethel-text-secondary)] bg-white/5 px-2 py-0.5 rounded">
+            <span className="text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2 py-0.5 rounded">
               {metrics.activeAgents} ativos
             </span>
           </div>
@@ -341,7 +341,7 @@ export function AIAgentDashboard({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 rounded-lg bg-white/5 p-1">
+        <div className="flex gap-1 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
           {(['agents', 'history', 'metrics'] as const).map((tab) => (
             <button
               key={tab}
@@ -375,8 +375,8 @@ export function AIAgentDashboard({
                 }}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
                   selectedAgent?.id === agent.id
-                    ? 'border-blue-500/50 bg-blue-500/10'
-                    : 'border-white/10 bg-white/[0.03] hover:border-white/20'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
+                    : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] hover:border-[var(--aethel-border-secondary)]'
                 }`}
               >
                 {/* Agent Header */}
@@ -400,7 +400,7 @@ export function AIAgentDashboard({
                           e.stopPropagation()
                           handleKillAgent(agent.id)
                         }}
-                        className="p-1 text-[var(--aethel-error)] hover:bg-red-500/20 rounded"
+                        className="p-1 text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] rounded"
                         title="Parar agente"
                       >
                         <Icons.Stop />
@@ -417,9 +417,9 @@ export function AIAgentDashboard({
                 {/* Progress */}
                 {agent.status === 'running' && (
                   <div className="mb-2">
-                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-blue-500 transition-all duration-300"
+                        className="h-full bg-[var(--aethel-primary)] transition-all duration-300"
                         style={{ width: `${agent.progress}%` }}
                       />
                     </div>
@@ -434,7 +434,7 @@ export function AIAgentDashboard({
 
                 {/* Error */}
                 {agent.status === 'error' && agent.lastError && (
-                  <div className="flex items-start gap-2 text-sm text-[var(--aethel-error)] bg-red-500/10 p-2 rounded mb-2">
+                  <div className="flex items-start gap-2 text-sm text-[var(--aethel-error)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-2 rounded mb-2">
                     <Icons.Warning />
                     <span>{agent.lastError}</span>
                   </div>
@@ -466,7 +466,7 @@ export function AIAgentDashboard({
             {executions.map((exec) => (
               <div
                 key={exec.id}
-                className="p-3 bg-white/[0.03] rounded-lg border border-white/10"
+                className="p-3 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] rounded-lg border border-[var(--aethel-border-subtle)]"
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
@@ -539,7 +539,7 @@ export function AIAgentDashboard({
             </div>
 
             {/* Executions Chart - Uses real execution data */}
-            <div className="p-4 bg-white/[0.03] rounded-lg border border-white/10">
+            <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] rounded-lg border border-[var(--aethel-border-subtle)]">
               <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Execucoes (24h)</h3>
               <div className="h-32 flex items-end gap-1">
                 {(() => {
@@ -560,7 +560,7 @@ export function AIAgentDashboard({
                     return (
                       <div
                         key={i}
-                        className={`flex-1 rounded-t transition-colors ${count > 0 ? 'bg-blue-500/70 hover:bg-blue-500' : 'bg-blue-500/20'}`}
+                        className={`flex-1 rounded-t transition-colors ${count > 0 ? 'bg-[var(--aethel-primary)]/70 hover:bg-[var(--aethel-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'}`}
                         style={{ height: `${Math.max(height, 2)}%` }}
                         title={`${count} execucao(oes)  as  ${hour.toString().padStart(2, '0')}:00`}
                       />
@@ -576,7 +576,7 @@ export function AIAgentDashboard({
             </div>
 
             {/* Model Usage - Calculated from real execution data */}
-            <div className="p-4 bg-white/[0.03] rounded-lg border border-white/10">
+            <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] rounded-lg border border-[var(--aethel-border-subtle)]">
               <h3 className="text-sm text-[var(--aethel-text-secondary)] mb-3">Uso por modelo</h3>
               <div className="space-y-2">
                 {(() => {
@@ -651,7 +651,7 @@ function MetricCard({
   color: string
 }) {
   return (
-    <div className="p-3 bg-white/[0.03] rounded-lg border border-white/10">
+    <div className="p-3 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] rounded-lg border border-[var(--aethel-border-subtle)]">
       <div className={`${color} mb-1`}>{icon}</div>
       <div className="text-lg text-[var(--aethel-text-primary)] font-semibold">{value}</div>
       <div className="text-xs text-[var(--aethel-text-tertiary)]">{label}</div>
@@ -676,9 +676,9 @@ function ModelUsageBar({
         <span className="text-[var(--aethel-text-primary)]">{model}</span>
         <span className="text-[var(--aethel-text-secondary)]">{formatTokens(tokens)} ({formatCost(cost)})</span>
       </div>
-      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+      <div className="h-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-blue-500"
+          className="h-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-primary)]"
           style={{ width: `${percent}%` }}
         />
       </div>

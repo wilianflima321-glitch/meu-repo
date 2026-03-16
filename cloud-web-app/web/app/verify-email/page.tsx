@@ -70,13 +70,13 @@ function VerifyEmailContent() {
     }
   }
 
-  const frameClass = 'w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-8'
+  const frameClass = 'w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8'
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[160px]" />
+        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
@@ -87,7 +87,7 @@ function VerifyEmailContent() {
             <div className="text-center">
               <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-blue-400" />
               <h1 className="text-xl font-semibold">Verificando email</h1>
-              <p className="mt-2 text-sm text-slate-400">Validando seu link de acesso.</p>
+              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Validando seu link de acesso.</p>
             </div>
           </div>
         ) : isVerified ? (
@@ -97,7 +97,7 @@ function VerifyEmailContent() {
                 <CheckCircle className="h-7 w-7 text-emerald-400" />
               </div>
               <h1 className="text-xl font-semibold">Email verificado</h1>
-              <p className="mt-2 text-sm text-slate-400">Conta validada. Redirecionando para o painel.</p>
+              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Conta validada. Redirecionando para o painel.</p>
               <Link
                 href="/dashboard"
                 className="aethel-button aethel-button-primary mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
@@ -109,11 +109,11 @@ function VerifyEmailContent() {
         ) : !token || !email ? (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500/10">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-primary)]/10">
                 <Mail className="h-7 w-7 text-blue-400" />
               </div>
               <h1 className="text-xl font-semibold">Confirme seu email</h1>
-              <p className="mt-2 text-sm text-slate-400">Abra o link enviado para ativar sua conta.</p>
+              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Abra o link enviado para ativar sua conta.</p>
               <div className="mt-5 space-y-3">
                 <button
                   onClick={resendVerification}
@@ -136,11 +136,11 @@ function VerifyEmailContent() {
         ) : (
           <div className={frameClass}>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--aethel-error)]/10">
                 <XCircle className="h-7 w-7 text-red-400" />
               </div>
               <h1 className="text-xl font-semibold">Falha na verificacao</h1>
-              <p className="mt-2 text-sm text-slate-400">{error || 'Link invalido ou expirado.'}</p>
+              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">{error || 'Link invalido ou expirado.'}</p>
               <div className="mt-5 space-y-3">
                 <button
                   onClick={resendVerification}

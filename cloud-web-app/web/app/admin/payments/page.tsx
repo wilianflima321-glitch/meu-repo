@@ -160,10 +160,10 @@ export default function Payments() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Pagamentos e Checkout</h1>
-          <p className='text-zinc-400'>Gateway controlado por admin e transações reais registradas.</p>
-          {lastUpdated && <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>}
+          <p className='text-[var(--aethel-text-secondary)]'>Gateway controlado por admin e transações reais registradas.</p>
+          {lastUpdated && <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
-        <button onClick={fetchPayments} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>
+        <button onClick={fetchPayments} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
         </button>
       </div>
@@ -174,15 +174,15 @@ export default function Payments() {
         </div>
       )}
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6'>
         <h2 className='text-lg font-semibold mb-4'>Gateway de pagamento (admin)</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <label className='text-sm'>
-            <span className='block mb-1 text-zinc-400'>Gateway ativo</span>
+            <span className='block mb-1 text-[var(--aethel-text-secondary)]'>Gateway ativo</span>
             <select
               value={gateway.activeGateway}
               onChange={(e) => setGateway((prev) => ({ ...prev, activeGateway: e.target.value as 'stripe' | 'disabled' }))}
-              className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full'
+              className='border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] p-2 rounded w-full'
             >
               <option value='stripe'>Stripe</option>
               <option value='disabled'>Desabilitado</option>
@@ -190,12 +190,12 @@ export default function Payments() {
           </label>
 
           <label className='text-sm'>
-            <span className='block mb-1 text-zinc-400'>Origem web do checkout</span>
+            <span className='block mb-1 text-[var(--aethel-text-secondary)]'>Origem web do checkout</span>
             <input
               value={gateway.checkoutOrigin || ''}
               onChange={(e) => setGateway((prev) => ({ ...prev, checkoutOrigin: e.target.value.trim() || null }))}
               placeholder='https://seu-dominio.com'
-              className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full'
+              className='border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] p-2 rounded w-full'
             />
           </label>
         </div>
@@ -222,28 +222,28 @@ export default function Payments() {
           <button
             onClick={saveGateway}
             disabled={savingGateway}
-            className='px-3 py-2 rounded bg-blue-600 text-white text-sm disabled:opacity-60'
+            className='px-3 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-60'
           >
             {savingGateway ? 'Salvando...' : 'Salvar configuração'}
           </button>
         </div>
 
-        <div className='mt-4 rounded border border-zinc-800/70 bg-zinc-950/50 p-3 text-xs text-zinc-400'>
-          Estado operacional: gateway <span className='text-zinc-200'>{gateway.activeGateway}</span>, checkout{' '}
-          <span className='text-zinc-200'>{gateway.checkoutEnabled ? 'habilitado' : 'desabilitado'}</span>, redirecionamento da IDE local{' '}
-          <span className='text-zinc-200'>{gateway.allowLocalIdeRedirect ? 'habilitado' : 'desabilitado'}</span>.
+        <div className='mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]'>
+          Estado operacional: gateway <span className='text-[var(--aethel-text-secondary)]'>{gateway.activeGateway}</span>, checkout{' '}
+          <span className='text-[var(--aethel-text-secondary)]'>{gateway.checkoutEnabled ? 'habilitado' : 'desabilitado'}</span>, redirecionamento da IDE local{' '}
+          <span className='text-[var(--aethel-text-secondary)]'>{gateway.allowLocalIdeRedirect ? 'habilitado' : 'desabilitado'}</span>.
         </div>
         {billingRuntime && (
-          <div className='mt-4 rounded border border-zinc-800/70 bg-zinc-950/50 p-3 text-xs text-zinc-400'>
-            Runtime: <span className='text-zinc-200'>{billingRuntime.status}</span> | provider{' '}
-            <span className='text-zinc-200'>{billingRuntime.provider?.label || 'unknown'}</span> | checkout{' '}
-            <span className='text-zinc-200'>{String(Boolean(billingRuntime.checkoutReady))}</span> | portal{' '}
-            <span className='text-zinc-200'>{String(Boolean(billingRuntime.portalReady))}</span> | webhook{' '}
-            <span className='text-zinc-200'>{String(Boolean(billingRuntime.webhookReady))}</span>
+          <div className='mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]'>
+            Runtime: <span className='text-[var(--aethel-text-secondary)]'>{billingRuntime.status}</span> | provider{' '}
+            <span className='text-[var(--aethel-text-secondary)]'>{billingRuntime.provider?.label || 'unknown'}</span> | checkout{' '}
+            <span className='text-[var(--aethel-text-secondary)]'>{String(Boolean(billingRuntime.checkoutReady))}</span> | portal{' '}
+            <span className='text-[var(--aethel-text-secondary)]'>{String(Boolean(billingRuntime.portalReady))}</span> | webhook{' '}
+            <span className='text-[var(--aethel-text-secondary)]'>{String(Boolean(billingRuntime.webhookReady))}</span>
             {billingRuntime.stripe ? (
               <>
-                {' '}| publishable <span className='text-zinc-200'>{String(billingRuntime.stripe.publishableKeyConfigured)}</span> | prices{' '}
-                <span className='text-zinc-200'>{billingRuntime.stripe.configuredPriceCount}/{billingRuntime.stripe.requiredPriceCount}</span>
+                {' '}| publishable <span className='text-[var(--aethel-text-secondary)]'>{String(billingRuntime.stripe.publishableKeyConfigured)}</span> | prices{' '}
+                <span className='text-[var(--aethel-text-secondary)]'>{billingRuntime.stripe.configuredPriceCount}/{billingRuntime.stripe.requiredPriceCount}</span>
               </>
             ) : null}
             {billingRuntime.stripe?.missingEnv?.length ? (
@@ -255,7 +255,7 @@ export default function Payments() {
         )}
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
           <p className='text-2xl font-bold text-blue-600'>US${totals.total.toFixed(2)}</p>
@@ -270,17 +270,17 @@ export default function Payments() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Falhas</h3>
-          <p className='text-2xl font-bold text-red-600'>US${totals.failed.toFixed(2)}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-error)]'>US${totals.failed.toFixed(2)}</p>
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar por e-mail ou ID'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full md:max-w-sm text-zinc-100 placeholder:text-zinc-500'
+          className='border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] p-2 rounded w-full md:max-w-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]'
         />
         <div className='flex items-center gap-2'>
           {(['all', 'succeeded', 'pending', 'failed'] as const).map((status) => (
@@ -288,7 +288,7 @@ export default function Payments() {
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
+                statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
               {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
@@ -297,10 +297,10 @@ export default function Payments() {
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow overflow-hidden'>
         <table className='w-full table-auto'>
           <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
+            <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
               <th className='p-2'>ID</th>
               <th className='p-2'>Usuário</th>
               <th className='p-2'>Valor</th>
@@ -311,16 +311,16 @@ export default function Payments() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando pagamentos...</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando pagamentos...</td>
               </tr>
             ) : filteredItems.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum pagamento encontrado.</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhum pagamento encontrado.</td>
               </tr>
             ) : (
               filteredItems.map((item) => (
                 <tr key={item.id} className='border-t'>
-                  <td className='p-2 text-xs text-zinc-500'>{item.id.slice(-6)}</td>
+                  <td className='p-2 text-xs text-[var(--aethel-text-tertiary)]'>{item.id.slice(-6)}</td>
                   <td className='p-2'>{item.userEmail || '—'}</td>
                   <td className='p-2'>{item.currency.toUpperCase()} {item.amount.toFixed(2)}</td>
                   <td className='p-2'>

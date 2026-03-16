@@ -166,33 +166,33 @@ export default function HelpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[160px]" />
+        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
 
       <main className="relative z-10">
         <section className="mx-auto max-w-6xl px-6 pt-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
             Central de ajuda
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Como podemos ajudar?</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
             Respostas objetivas, sem promessas infladas. Se faltar evid?ncia, n?s falamos.
           </p>
 
           <div className="mx-auto mt-8 max-w-xl">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--aethel-text-tertiary)]" />
               <input
                 type="text"
                 placeholder="Buscar perguntas..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder-slate-500 transition-colors focus:border-blue-500/60 focus:outline-none"
+                className="h-14 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] pl-12 pr-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-colors focus:border-blue-500/60 focus:outline-none"
               />
             </div>
           </div>
@@ -202,83 +202,83 @@ export default function HelpPage() {
           <div className="grid gap-4 md:grid-cols-4">
             <Link
               href="/docs"
-              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-blue-500/40 hover:bg-white/[0.06]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-blue-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
               <Book className="mb-2 h-6 w-6 text-blue-400" />
-              <h3 className="text-sm font-semibold text-white group-hover:text-blue-300">Documenta??o</h3>
-              <p className="mt-1 text-xs text-slate-500">Guias e refer?ncia t?cnica</p>
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-blue-300">Documenta??o</h3>
+              <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Guias e refer?ncia t?cnica</p>
             </Link>
             <Link
               href="/contact"
-              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-emerald-500/40 hover:bg-white/[0.06]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-emerald-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
               <MessageSquare className="mb-2 h-6 w-6 text-emerald-400" />
-              <h3 className="text-sm font-semibold text-white group-hover:text-emerald-300">Suporte</h3>
-              <p className="mt-1 text-xs text-slate-500">Fale com o time</p>
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-emerald-300">Suporte</h3>
+              <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Fale com o time</p>
             </Link>
             <Link
               href="/status"
-              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-yellow-500/40 hover:bg-white/[0.06]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-yellow-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
               <Zap className="mb-2 h-6 w-6 text-yellow-400" />
-              <h3 className="text-sm font-semibold text-white group-hover:text-yellow-300">Status</h3>
-              <p className="mt-1 text-xs text-slate-500">Checks p?blicos em tempo real</p>
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-yellow-300">Status</h3>
+              <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Checks p?blicos em tempo real</p>
             </Link>
             <Link
               href="https://discord.gg/aethel"
               target="_blank"
-              className="group rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-cyan-500/40 hover:bg-white/[0.06]"
+              className="group rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 transition-colors hover:border-cyan-500/40 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
             >
-              <Users className="mb-2 h-6 w-6 text-cyan-400" />
-              <h3 className="text-sm font-semibold text-white group-hover:text-cyan-300">Comunidade</h3>
-              <p className="mt-1 text-xs text-slate-500">Discord oficial</p>
+              <Users className="mb-2 h-6 w-6 text-[var(--aethel-info)]" />
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] group-hover:text-cyan-300">Comunidade</h3>
+              <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Discord oficial</p>
             </Link>
           </div>
         </section>
 
         <section className="mx-auto mt-12 max-w-6xl px-6 pb-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white">Perguntas frequentes</h2>
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-500">Atualizado continuamente</span>
+            <h2 className="text-xl font-semibold text-[var(--aethel-text-primary)]">Perguntas frequentes</h2>
+            <span className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Atualizado continuamente</span>
           </div>
 
           <div className="mt-6 space-y-4">
             {filteredCategories.map((category) => (
               <div
                 key={category.name}
-                className="rounded-2xl border border-white/10 bg-white/[0.03]"
+                className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]"
               >
                 <button
                   onClick={() =>
                     setExpandedCategory(expandedCategory === category.name ? null : category.name)
                   }
-                  className="flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-white/[0.04]"
+                  className="flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
                     <category.icon className="h-5 w-5" />
                   </div>
-                  <span className="flex-1 font-medium text-white">{category.name}</span>
-                  <span className="text-xs text-slate-500">{category.faqs.length} perguntas</span>
+                  <span className="flex-1 font-medium text-[var(--aethel-text-primary)]">{category.name}</span>
+                  <span className="text-xs text-[var(--aethel-text-tertiary)]">{category.faqs.length} perguntas</span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition-transform ${
+                    className={`h-5 w-5 text-[var(--aethel-text-secondary)] transition-transform ${
                       expandedCategory === category.name ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
 
                 {expandedCategory === category.name && (
-                  <div className="border-t border-white/10">
+                  <div className="border-t border-[var(--aethel-border-subtle)]">
                     {category.faqs.map((faq) => (
-                      <div key={faq.question} className="border-b border-white/10 last:border-0">
+                      <div key={faq.question} className="border-b border-[var(--aethel-border-subtle)] last:border-0">
                         <button
                           onClick={() =>
                             setExpandedFaq(expandedFaq === faq.question ? null : faq.question)
                           }
-                          className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-white/[0.02]"
+                          className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)]"
                         >
-                          <span className="text-sm text-slate-200">{faq.question}</span>
+                          <span className="text-sm text-[var(--aethel-text-primary)]">{faq.question}</span>
                           <ChevronRight
-                            className={`h-4 w-4 text-slate-500 transition-transform ${
+                            className={`h-4 w-4 text-[var(--aethel-text-tertiary)] transition-transform ${
                               expandedFaq === faq.question ? 'rotate-90' : ''
                             }`}
                           />
@@ -286,15 +286,15 @@ export default function HelpPage() {
 
                         {expandedFaq === faq.question && (
                           <div className="px-6 pb-5">
-                            <p className="text-sm text-slate-400">{faq.answer}</p>
-                            <div className="mt-4 flex items-center gap-4 border-t border-white/10 pt-4">
-                              <span className="text-xs text-slate-500">Esta resposta foi ?til?</span>
+                            <p className="text-sm text-[var(--aethel-text-secondary)]">{faq.answer}</p>
+                            <div className="mt-4 flex items-center gap-4 border-t border-[var(--aethel-border-subtle)] pt-4">
+                              <span className="text-xs text-[var(--aethel-text-tertiary)]">Esta resposta foi ?til?</span>
                               <button
                                 onClick={() => handleHelpful(faq.question, true)}
                                 className={`rounded-lg p-2 transition-colors ${
                                   helpful[faq.question] === true
                                     ? 'bg-emerald-500/20 text-emerald-400'
-                                    : 'text-slate-400 hover:bg-white/[0.06]'
+                                    : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
                                 }`}
                               >
                                 <ThumbsUp className="h-4 w-4" />
@@ -303,8 +303,8 @@ export default function HelpPage() {
                                 onClick={() => handleHelpful(faq.question, false)}
                                 className={`rounded-lg p-2 transition-colors ${
                                   helpful[faq.question] === false
-                                    ? 'bg-red-500/20 text-red-400'
-                                    : 'text-slate-400 hover:bg-white/[0.06]'
+                                    ? 'bg-[var(--aethel-error)]/20 text-red-400'
+                                    : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
                                 }`}
                               >
                                 <ThumbsDown className="h-4 w-4" />
@@ -323,8 +323,8 @@ export default function HelpPage() {
 
         <section className="mx-auto max-w-5xl px-6 pb-20">
           <div className="rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 via-cyan-500/10 to-transparent p-10 text-center">
-            <h3 className="text-2xl font-semibold text-white">Ainda precisa de ajuda?</h3>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
+            <h3 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Ainda precisa de ajuda?</h3>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--aethel-text-secondary)]">
               Nosso time responde por email ou comunidade. Em demandas enterprise, fale direto com vendas.
             </p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">

@@ -71,10 +71,10 @@ export function DashboardOverviewTab({
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2">
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
+            <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
               Sessao segura
             </span>
-            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs text-[var(--aethel-success-light)]">
+            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-xs text-[var(--aethel-success-light)]">
               Runtime pronto
             </span>
           </div>
@@ -149,7 +149,7 @@ export function DashboardOverviewTab({
                 </p>
                 <ul className="mt-4 space-y-3">
                   {walletTransactions.slice(-3).reverse().map((entry) => (
-                    <li key={entry.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                    <li key={entry.id} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
                       <div className="aethel-flex aethel-justify-between aethel-items-center">
                         <span className="text-sm font-medium">
                           {entry.reference || entry.entry_type.toUpperCase()}
@@ -193,10 +193,10 @@ export function DashboardOverviewTab({
               <span
                 className={`text-xs rounded-full px-3 py-1 border ${
                   connectivityData.overall_status === 'healthy'
-                    ? 'border-emerald-500/30 bg-emerald-500/20 text-[var(--aethel-success)]'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
                     : connectivityData.overall_status === 'degraded'
-                    ? 'border-amber-500/30 bg-amber-500/20 text-[var(--aethel-warning)]'
-                    : 'border-red-500/30 bg-red-500/20 text-[var(--aethel-error)]'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+                    : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
                 }`}
               >
                 {formatConnectivityStatus(connectivityData.overall_status).toUpperCase()}
@@ -214,7 +214,7 @@ export function DashboardOverviewTab({
             {!connectivityLoading && !connectivityError && connectivityServices.length > 0 && (
               <div className="space-y-3">
                 {connectivityServices.map((service) => (
-                  <div key={service.name} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <div key={service.name} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
                     <div className="aethel-flex aethel-justify-between aethel-items-center">
                       <span className="text-sm font-medium capitalize">
                         {service.name.replace(/_/g, ' ')}
@@ -222,10 +222,10 @@ export function DashboardOverviewTab({
                       <span
                         className={`text-xs rounded-full px-2.5 py-1 ${
                           service.status === 'healthy'
-                            ? 'bg-emerald-500/20 text-[var(--aethel-success)]'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
                             : service.status === 'degraded'
-                            ? 'bg-amber-500/20 text-[var(--aethel-warning)]'
-                            : 'bg-red-500/20 text-[var(--aethel-error)]'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+                            : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
                         }`}
                       >
                         {formatConnectivityStatus(service.status).toUpperCase()}

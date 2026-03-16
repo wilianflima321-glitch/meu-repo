@@ -50,10 +50,10 @@ export default function ContactSalesPage() {
   const requiredReady = formData.name.trim() && formData.email.trim() && formData.company.trim()
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.07] blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[150px]" />
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.07] blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[150px]" />
       </div>
 
       <PublicHeader />
@@ -62,7 +62,7 @@ export default function ContactSalesPage() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             <section className="lg:pt-8">
-              <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-300">
+              <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-3 py-1.5 text-sm font-medium text-blue-300">
                 Enterprise
               </span>
 
@@ -70,17 +70,17 @@ export default function ContactSalesPage() {
                 Conversa comercial sem promessas infladas.
               </h1>
 
-              <p className="mt-6 text-xl leading-relaxed text-slate-400">
+              <p className="mt-6 text-xl leading-relaxed text-[var(--aethel-text-secondary)]">
                 Esta pagina nao simula envio nem mostra logos inventados. O CTA abaixo abre um email
                 pre-preenchido com o contexto do seu time.
               </p>
 
               <div className="mt-10 grid gap-4 sm:grid-cols-2">
                 {enterpriseFeatures.map((feature) => (
-                  <article key={feature.icon} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <span className="mb-2 block text-xs font-bold tracking-[0.2em] text-slate-300">{feature.icon}</span>
-                    <h2 className="font-semibold text-white">{feature.title}</h2>
-                    <p className="mt-1 text-sm text-slate-400">{feature.desc}</p>
+                  <article key={feature.icon} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-4">
+                    <span className="mb-2 block text-xs font-bold tracking-[0.2em] text-[var(--aethel-text-secondary)]">{feature.icon}</span>
+                    <h2 className="font-semibold text-[var(--aethel-text-primary)]">{feature.title}</h2>
+                    <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">{feature.desc}</p>
                   </article>
                 ))}
               </div>
@@ -94,89 +94,89 @@ export default function ContactSalesPage() {
             </section>
 
             <section className="lg:pt-8">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+              <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-8 backdrop-blur-sm">
                 <h2 className="text-2xl font-bold">Abrir email para vendas</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-400">
-                  Preencha os campos essenciais. O CTA abre seu cliente de email com o resumo pronto para enviar para <span className="font-medium text-white">sales@aethel.dev</span>.
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                  Preencha os campos essenciais. O CTA abre seu cliente de email com o resumo pronto para enviar para <span className="font-medium text-[var(--aethel-text-primary)]">sales@aethel.dev</span>.
                 </p>
 
                 <div className="mt-8 space-y-5">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-300">Nome *</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Nome *</label>
                       <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="Seu nome"
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-300">Email corporativo *</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Email corporativo *</label>
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="voce@empresa.com"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Empresa *</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Empresa *</label>
                     <input
                       type="text"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       placeholder="Nome da empresa"
                     />
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-300">Cargo</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Cargo</label>
                       <input
                         type="text"
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         placeholder="Seu cargo"
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-300">Tamanho do time</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Tamanho do time</label>
                       <select
                         value={formData.teamSize}
                         onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
-                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       >
-                        <option value="" className="bg-zinc-900">Selecione</option>
-                        <option value="1-10" className="bg-zinc-900">1-10</option>
-                        <option value="11-50" className="bg-zinc-900">11-50</option>
-                        <option value="51-200" className="bg-zinc-900">51-200</option>
-                        <option value="201-500" className="bg-zinc-900">201-500</option>
-                        <option value="500+" className="bg-zinc-900">500+</option>
+                        <option value="" className="bg-[var(--aethel-surface-secondary)]">Selecione</option>
+                        <option value="1-10" className="bg-[var(--aethel-surface-secondary)]">1-10</option>
+                        <option value="11-50" className="bg-[var(--aethel-surface-secondary)]">11-50</option>
+                        <option value="51-200" className="bg-[var(--aethel-surface-secondary)]">51-200</option>
+                        <option value="201-500" className="bg-[var(--aethel-surface-secondary)]">201-500</option>
+                        <option value="500+" className="bg-[var(--aethel-surface-secondary)]">500+</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Contexto e requisitos</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Contexto e requisitos</label>
                     <textarea
                       rows={5}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="w-full resize-none rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       placeholder="Ex: tamanho do time, necessidades de compliance, preview sandbox, billing enterprise, SSO."
                     />
                   </div>
 
-                  <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-                    <p className="text-sm font-medium text-white">Fluxo atual</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-400">
+                  <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] p-4">
+                    <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Fluxo atual</p>
+                    <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
                       O CTA abaixo abre um email local com o contexto preenchido. Ainda nao existe envio automatizado desta pagina para CRM.
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function ContactSalesPage() {
                       className={`aethel-button w-full rounded-xl px-6 py-3 text-sm font-semibold ${
                         requiredReady
                           ? 'aethel-button-primary'
-                          : 'cursor-not-allowed bg-white/10 text-slate-500'
+                          : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] text-[var(--aethel-text-tertiary)]'
                       }`}
                     >
                       Abrir email para vendas
@@ -202,7 +202,7 @@ export default function ContactSalesPage() {
                   </div>
 
                   {!requiredReady && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">
                       Preencha nome, email e empresa para liberar o CTA de email.
                     </p>
                   )}

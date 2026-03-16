@@ -186,8 +186,8 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, tool
   return (
     <div className="mb-3">
       <div className="flex justify-between items-center mb-1">
-        <label className="text-xs text-slate-400" title={tooltip}>{label}</label>
-        <span className="text-xs text-slate-300 font-mono">
+        <label className="text-xs text-[var(--aethel-text-secondary)]" title={tooltip}>{label}</label>
+        <span className="text-xs text-[var(--aethel-text-secondary)] font-mono">
           {value.toFixed(step < 1 ? 2 : 0)}{unit}
         </span>
       </div>
@@ -198,7 +198,7 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, tool
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-3
                    [&::-webkit-slider-thumb]:h-3
@@ -225,11 +225,11 @@ interface Vector3InputProps {
 function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.1 }: Vector3InputProps) {
   return (
     <div className="mb-3">
-      <label className="text-xs text-slate-400 block mb-1.5">{label}</label>
+      <label className="text-xs text-[var(--aethel-text-secondary)] block mb-1.5">{label}</label>
       <div className="grid grid-cols-3 gap-1.5">
         {(['x', 'y', 'z'] as const).map((axis) => (
           <div key={axis} className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 uppercase">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--aethel-text-tertiary)] uppercase">
               {axis}
             </span>
             <input
@@ -239,8 +239,8 @@ function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.
               max={max}
               step={step}
               onChange={(e) => onChange({ ...value, [axis]: parseFloat(e.target.value) || 0 })}
-              className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 pl-6
-                       text-xs text-slate-200 focus:border-sky-500 focus:outline-none"
+              className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 pl-6
+                       text-xs text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
             />
           </div>
         ))}
@@ -264,8 +264,8 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-slate-200 
-                   hover:text-white transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] 
+                   hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -564,7 +564,7 @@ function WindArrow({ direction, strength, visible }: WindArrowProps) {
         <meshBasicMaterial color="#00ff88" />
       </mesh>
       <Html position={end.clone().add(new THREE.Vector3(0.3, 0.3, 0))}>
-        <div className="text-xs text-green-400 whitespace-nowrap bg-slate-900/80 px-1 rounded">
+        <div className="text-xs text-[var(--aethel-success)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           Wind: {strength.toFixed(1)}
         </div>
       </Html>
@@ -597,14 +597,14 @@ function Toolbar({
   ];
   
   return (
-    <div className="flex flex-col gap-1 p-2 bg-slate-800/90 rounded-lg">
+    <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Simulation controls */}
       <button
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
           isSimulating 
-            ? 'bg-green-600 text-white' 
-            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            ? 'bg-green-600 text-[var(--aethel-text-primary)]' 
+            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
         }`}
         title={isSimulating ? 'Pause Simulation' : 'Play Simulation'}
       >
@@ -613,13 +613,13 @@ function Toolbar({
       
       <button
         onClick={onReset}
-        className="p-2 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
+        className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
         title="Reset Simulation"
       >
         <RotateCcw className="w-4 h-4" />
       </button>
       
-      <div className="h-px bg-slate-700 my-2" />
+      <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
       
       {/* Tools */}
       {tools.map((tool) => (
@@ -628,8 +628,8 @@ function Toolbar({
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
             selectedTool === tool.id
-              ? 'bg-sky-600 text-white'
-              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
           }`}
           title={tool.label}
         >
@@ -822,7 +822,7 @@ export default function ClothSimulationEditor({
   }, [selectedCollider]);
   
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-200">
+    <div className="flex h-full w-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Left toolbar */}
       <div className="p-2">
         <Toolbar
@@ -882,24 +882,24 @@ export default function ClothSimulationEditor({
         </Canvas>
         
         {/* Viewport overlay info */}
-        <div className="absolute top-4 left-4 bg-slate-900/80 p-2 rounded text-xs">
-          <div className="text-slate-400">
+        <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] p-2 rounded text-xs">
+          <div className="text-[var(--aethel-text-secondary)]">
             Vertices: {simulation?.particles.length ?? 0}
           </div>
-          <div className="text-slate-400">
+          <div className="text-[var(--aethel-text-secondary)]">
             Constraints: {simulation?.constraints.filter(c => !c.broken).length ?? 0}
           </div>
-          <div className="text-slate-400">
+          <div className="text-[var(--aethel-text-secondary)]">
             Pinned: {editorState.pinnedVertices.size}
           </div>
           {editorState.isSimulating && (
-            <div className="text-green-400 mt-1">● Simulating</div>
+            <div className="text-[var(--aethel-success)] mt-1">● Simulating</div>
           )}
         </div>
       </div>
       
       {/* Right panel - Settings */}
-      <div className="w-72 bg-slate-850 border-l border-slate-700 overflow-y-auto">
+      <div className="w-72 bg-[var(--aethel-surface-tertiary)] border-l border-[var(--aethel-border-secondary)] overflow-y-auto">
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -909,7 +909,7 @@ export default function ClothSimulationEditor({
             </h2>
             <button
               onClick={handleExport}
-              className="p-1.5 rounded bg-sky-600 hover:bg-sky-500 transition-colors"
+              className="p-1.5 rounded bg-[var(--aethel-info)] hover:bg-sky-500 transition-colors"
               title="Export Configuration"
             >
               <Download className="w-4 h-4" />
@@ -925,8 +925,8 @@ export default function ClothSimulationEditor({
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded text-left transition-colors ${
                     editorState.currentPreset === preset.id
-                      ? 'bg-sky-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+                      : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                   }`}
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
@@ -986,19 +986,19 @@ export default function ClothSimulationEditor({
             />
             
             <div className="flex items-center justify-between mt-3">
-              <label className="text-xs text-slate-400">Self Collision</label>
+              <label className="text-xs text-[var(--aethel-text-secondary)]">Self Collision</label>
               <input
                 type="checkbox"
                 checked={config.selfCollision}
                 onChange={(e) => setConfig((p) => ({ ...p, selfCollision: e.target.checked }))}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600 
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)] 
                          focus:ring-sky-500 focus:ring-offset-slate-900"
               />
             </div>
           </CollapsibleSection>
           
           {/* Wind */}
-          <CollapsibleSection title="Wind" icon={<Wind className="w-4 h-4 text-cyan-400" />}>
+          <CollapsibleSection title="Wind" icon={<Wind className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <Vector3Input
               label="Direction & Strength"
               value={{ x: config.wind.x, y: config.wind.y, z: config.wind.z }}
@@ -1019,12 +1019,12 @@ export default function ClothSimulationEditor({
               tooltip="Wind turbulence"
             />
             <div className="flex items-center justify-between mt-2">
-              <label className="text-xs text-slate-400">Show Wind Arrow</label>
+              <label className="text-xs text-[var(--aethel-text-secondary)]">Show Wind Arrow</label>
               <input
                 type="checkbox"
                 checked={showWindArrow}
                 onChange={(e) => setShowWindArrow(e.target.checked)}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
               />
             </div>
           </CollapsibleSection>
@@ -1048,19 +1048,19 @@ export default function ClothSimulationEditor({
             <div className="flex gap-1 mb-3">
               <button
                 onClick={() => addCollider('sphere')}
-                className="flex-1 p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+                className="flex-1 p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded transition-colors"
               >
                 + Sphere
               </button>
               <button
                 onClick={() => addCollider('box')}
-                className="flex-1 p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+                className="flex-1 p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded transition-colors"
               >
                 + Box
               </button>
               <button
                 onClick={() => addCollider('plane')}
-                className="flex-1 p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+                className="flex-1 p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded transition-colors"
               >
                 + Plane
               </button>
@@ -1071,8 +1071,8 @@ export default function ClothSimulationEditor({
                 key={index}
                 className={`p-2 rounded mb-1.5 cursor-pointer transition-colors ${
                   selectedCollider === index 
-                    ? 'bg-sky-600/30 border border-sky-500' 
-                    : 'bg-slate-700'
+                    ? 'bg-[var(--aethel-info)]/30 border border-sky-500' 
+                    : 'bg-[var(--aethel-surface-quaternary)]'
                 }`}
                 onClick={() => setSelectedCollider(index)}
               >
@@ -1092,52 +1092,52 @@ export default function ClothSimulationEditor({
             ))}
             
             <div className="flex items-center justify-between mt-2">
-              <label className="text-xs text-slate-400">Show Colliders</label>
+              <label className="text-xs text-[var(--aethel-text-secondary)]">Show Colliders</label>
               <input
                 type="checkbox"
                 checked={editorState.showColliders}
                 onChange={(e) => setEditorState((p) => ({ ...p, showColliders: e.target.checked }))}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
               />
             </div>
             
             <div className="flex items-center justify-between mt-2">
-              <label className="text-xs text-slate-400">Ground Plane</label>
+              <label className="text-xs text-[var(--aethel-text-secondary)]">Ground Plane</label>
               <input
                 type="checkbox"
                 checked={config.groundPlane}
                 onChange={(e) => setConfig((p) => ({ ...p, groundPlane: e.target.checked }))}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
               />
             </div>
           </CollapsibleSection>
           
           {/* View Options */}
-          <CollapsibleSection title="View Options" icon={<Eye className="w-4 h-4 text-slate-400" />} defaultOpen={false}>
+          <CollapsibleSection title="View Options" icon={<Eye className="w-4 h-4 text-[var(--aethel-text-secondary)]" />} defaultOpen={false}>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400">Show Wireframe</label>
+                <label className="text-xs text-[var(--aethel-text-secondary)]">Show Wireframe</label>
                 <input
                   type="checkbox"
                   checked={editorState.showWireframe}
                   onChange={(e) => setEditorState((p) => ({ ...p, showWireframe: e.target.checked }))}
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
+                  className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
                 />
               </div>
               <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400">Show Constraints</label>
+                <label className="text-xs text-[var(--aethel-text-secondary)]">Show Constraints</label>
                 <input
                   type="checkbox"
                   checked={editorState.showConstraints}
                   onChange={(e) => setEditorState((p) => ({ ...p, showConstraints: e.target.checked }))}
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-sky-600"
+                  className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
                 />
               </div>
             </div>
           </CollapsibleSection>
           
           {/* Mesh Settings */}
-          <CollapsibleSection title="Mesh Resolution" icon={<Layers className="w-4 h-4 text-green-400" />} defaultOpen={false}>
+          <CollapsibleSection title="Mesh Resolution" icon={<Layers className="w-4 h-4 text-[var(--aethel-success)]" />} defaultOpen={false}>
             <Slider
               label="Width"
               value={config.width}
@@ -1172,7 +1172,7 @@ export default function ClothSimulationEditor({
               step={1}
               onChange={(v) => setConfig((p) => ({ ...p, segmentsY: v }))}
             />
-            <p className="text-[10px] text-slate-500 mt-2">
+            <p className="text-[10px] text-[var(--aethel-text-tertiary)] mt-2">
               Note: Changing resolution will reset the simulation
             </p>
           </CollapsibleSection>

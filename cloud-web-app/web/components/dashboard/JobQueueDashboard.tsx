@@ -124,11 +124,11 @@ const Icons = {
 // ============================================================================
 
 const STATUS_COLORS: Record<JobStatus, { bg: string; text: string; dot: string }> = {
-  pending: { bg: 'bg-yellow-500/20', text: 'text-[var(--aethel-warning)]', dot: 'bg-yellow-400' },
-  running: { bg: 'bg-sky-500/20', text: 'text-[var(--aethel-info)]', dot: 'bg-sky-400 animate-pulse' },
-  completed: { bg: 'bg-emerald-500/20', text: 'text-[var(--aethel-success)]', dot: 'bg-emerald-400' },
-  failed: { bg: 'bg-rose-500/20', text: 'text-[var(--aethel-error)]', dot: 'bg-rose-400' },
-  cancelled: { bg: 'bg-zinc-500/20', text: 'text-[var(--aethel-text-secondary)]', dot: 'bg-zinc-400' },
+  pending: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]', text: 'text-[var(--aethel-warning)]', dot: 'bg-[var(--aethel-warning-light)]' },
+  running: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]', text: 'text-[var(--aethel-info)]', dot: 'bg-[var(--aethel-info-light)] animate-pulse' },
+  completed: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]', text: 'text-[var(--aethel-success)]', dot: 'bg-[var(--aethel-success-light)]' },
+  failed: { bg: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]', text: 'text-[var(--aethel-error)]', dot: 'bg-[var(--aethel-error-light)]' },
+  cancelled: { bg: 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_30%,transparent)]', text: 'text-[var(--aethel-text-secondary)]', dot: 'bg-[var(--aethel-text-tertiary)]' },
   timeout: { bg: 'bg-orange-500/20', text: 'text-orange-300', dot: 'bg-orange-400' },
 }
 
@@ -204,7 +204,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
   }
 
   return (
-    <div className="border-b border-white/10 transition-colors hover:bg-white/[0.03]">
+    <div className="border-b border-[var(--aethel-border-subtle)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]">
       <div className="flex cursor-pointer items-center gap-4 px-4 py-3" onClick={onToggle}>
         <span className={`text-[var(--aethel-text-tertiary)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
           <Icons.ChevronDown />
@@ -226,9 +226,9 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
         <div className="w-32">
           {job.status === 'running' ? (
             <div className="flex items-center gap-2">
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
                 <div
-                  className="h-full bg-sky-400 transition-all duration-300"
+                  className="h-full bg-[var(--aethel-info-light)] transition-all duration-300"
                   style={{ width: `${job.progress}%` }}
                 />
               </div>
@@ -276,7 +276,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
       </div>
 
       {isExpanded && (
-        <div className="border-t border-white/10 bg-white/[0.02] px-4 py-3">
+        <div className="border-t border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] px-4 py-3">
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
               <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Detalhes do job</h4>
@@ -304,7 +304,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
             <div>
               <h4 className="mb-2 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">Payload</h4>
-              <pre className="max-h-32 overflow-auto rounded-md bg-white/[0.04] p-2 text-xs font-mono text-[var(--aethel-text-secondary)]">
+              <pre className="max-h-32 overflow-auto rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-2 text-xs font-mono text-[var(--aethel-text-secondary)]">
                 {JSON.stringify(job.payload, null, 2)}
               </pre>
             </div>
@@ -313,7 +313,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
           {Boolean(job.error) && (
             <div className="mt-3">
               <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-error)]">Erro</h4>
-              <div className="rounded-md bg-rose-500/10 p-2 text-xs font-mono text-[var(--aethel-error)]">
+              <div className="rounded-md bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] p-2 text-xs font-mono text-[var(--aethel-error)]">
                 {String(job.error)}
               </div>
             </div>
@@ -322,7 +322,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
           {Boolean(job.result) && (
             <div className="mt-3">
               <h4 className="mb-1 text-xs font-semibold uppercase text-[var(--aethel-success)]">Resultado</h4>
-              <pre className="max-h-32 overflow-auto rounded-md bg-emerald-500/10 p-2 text-xs font-mono text-[var(--aethel-success-light)]">
+              <pre className="max-h-32 overflow-auto rounded-md bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] p-2 text-xs font-mono text-[var(--aethel-success-light)]">
                 {JSON.stringify(job.result, null, 2)}
               </pre>
             </div>
@@ -461,13 +461,13 @@ export function JobQueueDashboard({
 
   return (
     <div className={`aethel-card flex h-full flex-col ${className}`}>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3">
         <div className="flex items-center gap-3">
           <Icons.Server />
           <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Fila de jobs</h2>
           <span
             className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-              isQueueRunning ? 'bg-emerald-500/20 text-[var(--aethel-success)]' : 'bg-yellow-500/20 text-[var(--aethel-warning)]'
+              isQueueRunning ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
             }`}
           >
             {isQueueRunning ? 'Executando' : 'Pausada'}
@@ -497,7 +497,7 @@ export function JobQueueDashboard({
       </div>
 
       {stats && (
-        <div className="grid gap-4 border-b border-white/10 p-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 border-b border-[var(--aethel-border-subtle)] p-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Pendentes" value={stats.pending} icon={<Icons.Clock />} color="text-[var(--aethel-warning)]" />
           <StatCard label="Executando" value={stats.running} icon={<Icons.Play />} color="text-[var(--aethel-info)]" />
           <StatCard label="Concluidos" value={stats.completed} icon={<Icons.Check />} color="text-[var(--aethel-success)]" />
@@ -510,7 +510,7 @@ export function JobQueueDashboard({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 border-b border-white/10 px-4 py-3">
+      <div className="flex flex-wrap items-center gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3">
         <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
           <Icons.Filter />
           <select
@@ -541,13 +541,13 @@ export function JobQueueDashboard({
       </div>
 
       {error && (
-        <div className="aethel-state aethel-state-error border-b border-rose-500/40">
+        <div className="aethel-state aethel-state-error border-b border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)]">
           {error}
         </div>
       )}
 
       <div className="flex-1 overflow-auto">
-        <div className="sticky top-0 flex items-center gap-4 border-b border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] uppercase text-[var(--aethel-text-tertiary)]">
+        <div className="sticky top-0 flex items-center gap-4 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-[10px] uppercase text-[var(--aethel-text-tertiary)]">
           <span className="w-4"></span>
           <span className="w-20">Status</span>
           <span className="w-24">Tipo</span>
@@ -574,7 +574,7 @@ export function JobQueueDashboard({
         )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-white/10 px-4 py-3">
+      <div className="flex items-center justify-between border-t border-[var(--aethel-border-subtle)] px-4 py-3">
         <button
           onClick={() => setPage(Math.max(1, page - 1))}
           disabled={page === 1}

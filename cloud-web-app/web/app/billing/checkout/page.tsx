@@ -68,13 +68,13 @@ export default function BillingCheckoutPage() {
 
   if (status === 'error') {
     return (
-      <main className='min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6'>
-        <div className='max-w-lg w-full rounded-xl border border-slate-800 bg-slate-900 p-6'>
+      <main className='min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] flex items-center justify-center p-6'>
+        <div className='max-w-lg w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6'>
           <h1 className='text-xl font-semibold mb-2'>Checkout indisponível</h1>
-          <p className='text-sm text-slate-400 mb-4'>{error || 'Não foi possível iniciar o checkout.'}</p>
+          <p className='text-sm text-[var(--aethel-text-secondary)] mb-4'>{error || 'Não foi possível iniciar o checkout.'}</p>
           <button
             onClick={() => router.push('/billing')}
-            className='px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white text-sm'
+            className='px-4 py-2 rounded bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] text-sm'
           >
             Voltar para Billing
           </button>
@@ -84,10 +84,10 @@ export default function BillingCheckoutPage() {
   }
 
   return (
-    <main className='min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6'>
-      <div className='max-w-lg w-full rounded-xl border border-slate-800 bg-slate-900 p-6'>
+    <main className='min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] flex items-center justify-center p-6'>
+      <div className='max-w-lg w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6'>
         <h1 className='text-xl font-semibold mb-2'>Preparando checkout</h1>
-        <p className='text-sm text-slate-400'>Estamos iniciando o gateway de pagamento para o plano selecionado.</p>
+        <p className='text-sm text-[var(--aethel-text-secondary)]'>Estamos iniciando o gateway de pagamento para o plano selecionado.</p>
       </div>
     </main>
   );

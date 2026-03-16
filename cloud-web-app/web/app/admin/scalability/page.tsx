@@ -95,39 +95,39 @@ export default function ScalabilityPage() {
       )}
 
       {loading && !error && (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-600">
+        <div className="mb-6 rounded-lg border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-tertiary)]">
           Carregando métricas...
         </div>
       )}
       
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Uso de CPU</h3>
           <p className="text-2xl font-bold text-blue-600">{metrics.cpuUsage}%</p>
         </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Uso de memória</h3>
           <p className="text-2xl font-bold text-green-600">{metrics.memoryUsage}%</p>
         </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Tráfego de rede</h3>
           <p className="text-2xl font-bold text-blue-600">{metrics.networkTraffic} Mbps</p>
         </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Conexões ativas</h3>
-          <p className="text-2xl font-bold text-red-600">{metrics.activeConnections}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-error)]">{metrics.activeConnections}</p>
         </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Taxa de erro</h3>
           <p className="text-2xl font-bold text-yellow-600">{metrics.errorRate}%</p>
         </div>
-        <div className="bg-zinc-900/70 p-4 rounded-lg shadow text-center">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Tempo de resposta</h3>
-          <p className="text-2xl font-bold text-sky-600">{metrics.responseTime}ms</p>
+          <p className="text-2xl font-bold text-[var(--aethel-info)]">{metrics.responseTime}ms</p>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Uso mensal</h2>
         <div className="grid grid-cols-4 gap-4">
           <div className="text-center">
@@ -144,12 +144,12 @@ export default function ScalabilityPage() {
           </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Minutos de compilação</h3>
-            <p className="text-2xl font-bold text-red-600">{usage.buildMinutesUsed.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-error)]">{usage.buildMinutesUsed.toLocaleString()}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Recomendações de escalabilidade</h2>
         <ul className="list-disc list-inside">
           <li>Considerar autoescalonamento quando CPU &gt; 80%</li>

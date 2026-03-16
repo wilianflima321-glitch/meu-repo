@@ -91,7 +91,7 @@ export function DashboardProjectsTab({
             <div key={project.id} className="aethel-card aethel-p-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--aethel-text-primary)]">{project.name}</h3>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs text-[var(--aethel-text-secondary)]">
+                <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-0.5 text-xs text-[var(--aethel-text-secondary)]">
                   {project.type}
                 </span>
               </div>

@@ -21,7 +21,7 @@ export default function UseCasesTab({ useCases, onSelect }: UseCasesTabProps) {
           <div key={useCase.id} className="aethel-card aethel-p-6 aethel-flex flex-column">
             <div className="mb-4">
               <div className="aethel-flex aethel-items-center aethel-justify-between mb-2">
-                <span className="px-2 py-1 bg-blue-500/10 text-[var(--aethel-primary)] text-[10px] font-bold rounded-full uppercase">
+                <span className="px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] text-[var(--aethel-primary)] text-[10px] font-bold rounded-full uppercase">
                   {useCase.category}
                 </span>
                 <span className="text-xs text-[var(--aethel-text-tertiary)]">
@@ -37,7 +37,7 @@ export default function UseCasesTab({ useCases, onSelect }: UseCasesTabProps) {
               <ul className="space-y-1">
                 {useCase.features.slice(0, 3).map((feature, i) => (
                   <li key={i} className="text-xs text-[var(--aethel-text-secondary)] aethel-flex aethel-items-center aethel-gap-2">
-                    <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                    <div className="w-1 h-1 bg-[var(--aethel-primary)] rounded-full"></div>
                     {feature}
                   </li>
                 ))}

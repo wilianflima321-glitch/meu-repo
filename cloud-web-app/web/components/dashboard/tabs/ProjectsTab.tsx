@@ -108,7 +108,7 @@ function ProjectCard({
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[var(--aethel-surface-tertiary)] flex items-center justify-center">
               {typeIcons[project.type]}
             </div>
             <div>
@@ -132,7 +132,7 @@ function ProjectCard({
             </button>
             <Dropdown
               trigger={
-                <button className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-slate-700 transition-colors">
+                <button className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               }
@@ -150,7 +150,7 @@ function ProjectCard({
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
+        <div className="flex items-center justify-between pt-4 border-t border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)]">
           <div className="flex items-center gap-4">
             <Badge variant={status.variant} size="sm">
               {status.label}
@@ -235,7 +235,7 @@ export function ProjectsTab({
           <select
             value={filterType || ''}
             onChange={(e) => setFilterType(e.target.value || null)}
-            className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-sky-500"
+            className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-sky-500"
           >
             <option value="">Todos os tipos</option>
             <option value="code">Codigo</option>
@@ -246,7 +246,7 @@ export function ProjectsTab({
           <select
             value={filterStatus || ''}
             onChange={(e) => setFilterStatus(e.target.value || null)}
-            className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-sky-500"
+            className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-sky-500"
           >
             <option value="">Todos os status</option>
             <option value="active">Ativo</option>
@@ -301,7 +301,7 @@ export function ProjectsTab({
 
       {/* Stats Footer */}
       {filteredProjects.length > 0 && (
-        <div className="flex items-center justify-between text-sm text-[var(--aethel-text-tertiary)] pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-between text-sm text-[var(--aethel-text-tertiary)] pt-4 border-t border-[var(--aethel-border-primary)]">
           <span>
             {filteredProjects.length} de {projects.length} projetos
           </span>

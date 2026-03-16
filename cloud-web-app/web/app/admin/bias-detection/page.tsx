@@ -35,7 +35,7 @@ function getBiasLabel(score?: number | null) {
 }
 
 function getBiasColor(score?: number | null) {
-  if (score === null || score === undefined) return 'bg-gray-200 text-zinc-300';
+  if (score === null || score === undefined) return 'bg-gray-200 text-[var(--aethel-text-secondary)]';
   if (score >= 0.7) return 'bg-rose-500/15 text-rose-300';
   if (score >= 0.4) return 'bg-amber-500/15 text-amber-300';
   return 'bg-emerald-500/15 text-emerald-300';
@@ -163,18 +163,18 @@ export default function BiasDetectionPage() {
         <div>
           <h1 className="text-2xl font-bold">Detecção de viés e ética</h1>
           {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchItems}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
+          className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Auditar Output da IA</h2>
         <div className="space-y-4">
           <textarea
@@ -223,15 +223,15 @@ export default function BiasDetectionPage() {
           <button
             onClick={handleAnalyze}
             disabled={submitting || !newOutput.trim()}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-60"
+            className="bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-60"
           >
             {submitting ? 'Registrando...' : 'Registrar Auditoria'}
           </button>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-[var(--aethel-error)]">{error}</p>}
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Relatórios Éticos</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center">
@@ -240,7 +240,7 @@ export default function BiasDetectionPage() {
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Viés alto</h3>
-            <p className="text-2xl font-bold text-red-600">{stats.highBias}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-error)]">{stats.highBias}</p>
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Viés médio</h3>
@@ -252,12 +252,12 @@ export default function BiasDetectionPage() {
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Pendentes</h3>
-            <p className="text-2xl font-bold text-zinc-400">{stats.pending}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{stats.pending}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Outputs Auditados</h2>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
           <input
@@ -274,8 +274,8 @@ export default function BiasDetectionPage() {
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
                   statusFilter === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-zinc-800/70 text-zinc-400'
+                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {status === 'all' ? 'Todos' : status === 'pending' ? 'Pendentes' : 'Resolvidos'}
@@ -287,8 +287,8 @@ export default function BiasDetectionPage() {
                 onClick={() => setBiasFilter(bias)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
                   biasFilter === bias
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-zinc-800/70 text-zinc-400'
+                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {bias === 'all'
@@ -307,18 +307,18 @@ export default function BiasDetectionPage() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-20 bg-zinc-800/70 rounded animate-pulse" />
+              <div key={index} className="h-20 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] rounded animate-pulse" />
             ))}
           </div>
         ) : filteredItems.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma auditoria registrada.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma auditoria registrada.</p>
         ) : (
           <ul>
             {filteredItems.map((item) => (
               <li key={item.id} className="p-4 border-b">
-                <p className="mb-2 text-sm text-zinc-200">{item.text}</p>
+                <p className="mb-2 text-sm text-[var(--aethel-text-secondary)]">{item.text}</p>
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3 text-sm text-zinc-400">
+                  <div className="flex items-center gap-3 text-sm text-[var(--aethel-text-secondary)]">
                     <span>
                       Score de viés:{' '}
                       {item.autoScore === null || item.autoScore === undefined
@@ -337,7 +337,7 @@ export default function BiasDetectionPage() {
                     {item.autoFlags.map((flag) => (
                       <span
                         key={flag}
-                        className="text-xs bg-zinc-800/70 text-zinc-400 px-2 py-1 rounded"
+                        className="text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] px-2 py-1 rounded"
                       >
                         {flag}
                       </span>

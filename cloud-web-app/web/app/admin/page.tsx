@@ -66,13 +66,13 @@ export default function Admin() {
     <div className='p-6 max-w-7xl mx-auto'>
       <div className='mb-6 flex items-center justify-between'>
         <div>
-          <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>Admin Control Center</p>
-          <h1 className='text-3xl font-semibold text-zinc-100'>Admin Enterprise Console</h1>
-          <p className='mt-1 text-zinc-400'>Operacao central de usuarios, billing, seguranca e integracoes.</p>
+          <p className='text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]'>Admin Control Center</p>
+          <h1 className='text-3xl font-semibold text-[var(--aethel-text-primary)]'>Admin Enterprise Console</h1>
+          <p className='mt-1 text-[var(--aethel-text-secondary)]'>Operacao central de usuarios, billing, seguranca e integracoes.</p>
         </div>
         <button
           onClick={() => mutate()}
-          className='rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-zinc-200 hover:bg-white/[0.08]'
+          className='rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
         >
           Recarregar
         </button>
@@ -85,23 +85,23 @@ export default function Admin() {
         <Stat title='Free' value={freeCount} tone='slate' />
       </div>
 
-      <div className='mb-8 rounded-xl border border-white/10 bg-white/[0.03] shadow-[0_18px_45px_rgba(0,0,0,0.35)]'>
-        <div className='flex items-center justify-between border-b border-white/10 px-4 py-3'>
+      <div className='mb-8 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_18px_45px_rgba(0,0,0,0.35)]'>
+        <div className='flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-3'>
           <h2 className='text-lg font-semibold'>Usuarios recentes</h2>
-          <p className='text-xs text-zinc-500'>Fonte: /admin/users</p>
+          <p className='text-xs text-[var(--aethel-text-tertiary)]'>Fonte: /admin/users</p>
         </div>
 
         {isLoading ? (
-          <div className='p-4 text-sm text-zinc-500'>Carregando usuarios...</div>
+          <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Carregando usuarios...</div>
         ) : error ? (
           <div className='p-4 text-sm text-rose-300'>{error.message}</div>
         ) : users.length === 0 ? (
-          <div className='p-4 text-sm text-zinc-500'>Nenhum usuario retornado no momento.</div>
+          <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Nenhum usuario retornado no momento.</div>
         ) : (
           <div className='overflow-x-auto'>
             <table className='min-w-full text-left text-sm'>
               <thead>
-                <tr className='border-b border-white/10 text-zinc-400'>
+                <tr className='border-b border-[var(--aethel-border-subtle)] text-[var(--aethel-text-secondary)]'>
                   <th className='p-2'>Nome</th>
                   <th className='p-2'>Email</th>
                   <th className='p-2'>Plano</th>
@@ -111,9 +111,9 @@ export default function Admin() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className='border-b border-white/5 hover:bg-white/[0.04]'>
+                  <tr key={user.id} className='border-b border-[var(--aethel-border-subtle)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'>
                     <td className='p-2 font-medium'>{user.name || 'Sem nome'}</td>
-                    <td className='p-2 text-zinc-400'>{user.email}</td>
+                    <td className='p-2 text-[var(--aethel-text-secondary)]'>{user.email}</td>
                     <td className='p-2'>
                       <span
                         className={`rounded-full px-2.5 py-1 text-xs ${
@@ -121,14 +121,14 @@ export default function Admin() {
                             ? 'bg-emerald-500/15 text-emerald-300'
                             : user.plan === 'pro'
                               ? 'bg-sky-500/15 text-sky-300'
-                              : 'bg-white/[0.06] text-zinc-300'
+                              : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
                         }`}
                       >
                         {planLabels[user.plan] ?? user.plan}
                       </span>
                     </td>
                     <td className='p-2'>{user._count?.projects ?? 0}</td>
-                    <td className='p-2 text-zinc-500'>{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td className='p-2 text-[var(--aethel-text-tertiary)]'>{new Date(user.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -142,10 +142,10 @@ export default function Admin() {
           <Link
             key={card.href}
             href={card.href}
-            className='block rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition hover:border-white/20 hover:bg-white/[0.05]'
+            className='block rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
           >
             <h2 className='text-base font-semibold'>{card.title}</h2>
-            <p className='mt-2 text-sm text-zinc-400'>{card.description}</p>
+            <p className='mt-2 text-sm text-[var(--aethel-text-secondary)]'>{card.description}</p>
           </Link>
         ))}
       </div>
@@ -166,12 +166,12 @@ function Stat({
     tone === 'emerald'
       ? 'text-emerald-300'
       : tone === 'slate'
-        ? 'text-zinc-300'
+        ? 'text-[var(--aethel-text-secondary)]'
         : 'text-sky-300';
 
   return (
-    <div className='rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-      <p className='text-xs uppercase tracking-[0.08em] text-zinc-500'>{title}</p>
+    <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+      <p className='text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]'>{title}</p>
       <p className={`mt-2 text-2xl font-bold ${toneClass}`}>{value}</p>
     </div>
   );

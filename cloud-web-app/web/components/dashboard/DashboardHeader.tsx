@@ -135,7 +135,7 @@ export function DashboardHeader({
             className={`hidden lg:inline-flex rounded-full border px-3 py-1 text-xs disabled:opacity-60 ${
               fullAccessActive
                 ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]'
-                : 'border-white/10 bg-white/[0.04] text-[var(--aethel-text-primary)] hover:bg-white/[0.08]'
+                : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
             }`}
             title={
               fullAccessActive

@@ -268,7 +268,7 @@ export default function CollaborationAdminPage() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Colaboracao</h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-[var(--aethel-text-secondary)]">
             Governanca operacional de rooms/projetos com readiness gate de tempo real.
           </p>
         </div>
@@ -306,11 +306,11 @@ export default function CollaborationAdminPage() {
       )}
 
       {readiness && (
-        <section className="mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
+        <section className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">Readiness SLO gate</h2>
-              <p className="text-xs text-zinc-400">
+              <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Readiness SLO gate</h2>
+              <p className="text-xs text-[var(--aethel-text-secondary)]">
                 Atualizado em {new Date(readiness.updatedAt).toLocaleString()} | {readiness.capability}
               </p>
             </div>
@@ -318,52 +318,52 @@ export default function CollaborationAdminPage() {
               <span className={`rounded border px-2 py-1 text-xs ${readinessBadge(readiness.capabilityStatus)}`}>
                 {readiness.capabilityStatus}
               </span>
-              <span className="rounded border border-zinc-700/70 bg-zinc-950/50 px-2 py-1 text-xs text-zinc-200">
+              <span className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
                 Score: {readiness.readinessScore}/100
               </span>
             </div>
           </div>
 
-          <p className="mb-4 text-sm text-zinc-300">{readiness.message}</p>
+          <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">{readiness.message}</p>
 
           <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <p className="text-xs text-zinc-500">Rooms ativas (30m)</p>
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Rooms ativas (30m)</p>
               <p className="mt-1 text-xl font-semibold">{readiness.observed.activeRooms30m}</p>
             </div>
-            <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <p className="text-xs text-zinc-500">Participantes online</p>
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Participantes online</p>
               <p className="mt-1 text-xl font-semibold">{readiness.observed.onlineParticipants}</p>
             </div>
-            <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <p className="text-xs text-zinc-500">Eventos join (7d)</p>
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Eventos join (7d)</p>
               <p className="mt-1 text-xl font-semibold">{readiness.observed.joinEvents7d}</p>
             </div>
           </div>
 
           <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <p className="text-xs text-zinc-500">Disponibilidade alvo</p>
-              <p className="mt-1 text-sm font-semibold text-zinc-100">{readiness.sloTargets.availability}</p>
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Disponibilidade alvo</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{readiness.sloTargets.availability}</p>
             </div>
-            <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <p className="text-xs text-zinc-500">P95 latencia</p>
-              <p className="mt-1 text-sm font-semibold text-zinc-100">{readiness.sloTargets.p95LatencyMs} ms</p>
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">P95 latencia</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{readiness.sloTargets.p95LatencyMs} ms</p>
             </div>
-            <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <p className="text-xs text-zinc-500">Reconexao</p>
-              <p className="mt-1 text-sm font-semibold text-zinc-100">&lt;= {readiness.sloTargets.reconnectS}s</p>
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Reconexao</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">&lt;= {readiness.sloTargets.reconnectS}s</p>
             </div>
-            <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <p className="text-xs text-zinc-500">Error budget</p>
-              <p className="mt-1 text-sm font-semibold text-zinc-100">{readiness.sloTargets.errorBudgetPercent}%</p>
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Error budget</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{readiness.sloTargets.errorBudgetPercent}%</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {readinessRuntimeRows.map((row) => (
-              <div key={row.label} className="flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2">
-                <span className="text-sm text-zinc-300">{row.label}</span>
+              <div key={row.label} className="flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2">
+                <span className="text-sm text-[var(--aethel-text-secondary)]">{row.label}</span>
                 <div className="flex items-center gap-2">
                   <span
                     className={`rounded border px-2 py-0.5 text-xs ${
@@ -382,9 +382,9 @@ export default function CollaborationAdminPage() {
             ))}
           </div>
 
-          <div className="mt-4 rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
+          <div className="mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-100">Evidence ledger</h3>
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Evidence ledger</h3>
               <span
                 className={`rounded border px-2 py-0.5 text-[11px] ${
                   readiness.promotionEligible
@@ -405,9 +405,9 @@ export default function CollaborationAdminPage() {
               ).map(([evidenceType, label]) => {
                 const passed = readiness.evidence[evidenceType]
                 return (
-                  <div key={evidenceType} className="rounded border border-zinc-800/70 bg-zinc-900/50 p-3">
+                  <div key={evidenceType} className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-xs text-zinc-300">{label}</span>
+                      <span className="text-xs text-[var(--aethel-text-secondary)]">{label}</span>
                       <span
                         className={`rounded border px-2 py-0.5 text-[11px] ${
                           passed
@@ -444,14 +444,14 @@ export default function CollaborationAdminPage() {
                 )
               })}
             </div>
-            <p className="mt-2 text-[11px] text-zinc-500">
+            <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">
               Capability permanece PARTIAL ate evidencia operacional + stress proof fora do painel.
             </p>
           </div>
 
-          <div className="mt-4 rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-            <h3 className="mb-2 text-sm font-semibold text-zinc-100">Stress proof bundle</h3>
-            <p className="mb-3 text-xs text-zinc-500">
+          <div className="mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+            <h3 className="mb-2 text-sm font-semibold text-[var(--aethel-text-primary)]">Stress proof bundle</h3>
+            <p className="mb-3 text-xs text-[var(--aethel-text-tertiary)]">
               Registre link do relatorio externo (k6/artillery/locust) para habilitar promocao factual.
             </p>
             <div className="grid grid-cols-1 gap-2 lg:grid-cols-[2fr,1fr,auto]">
@@ -460,14 +460,14 @@ export default function CollaborationAdminPage() {
                 value={stressProofUrlInput}
                 onChange={(event) => setStressProofUrlInput(event.target.value)}
                 placeholder="https://evidence.company.com/collab/stress-report"
-                className="rounded border border-zinc-700/70 bg-zinc-900/70 px-3 py-2 text-xs text-zinc-100 outline-none focus:border-cyan-500/60"
+                className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-cyan-500/60"
               />
               <input
                 type="text"
                 value={stressProofSummaryInput}
                 onChange={(event) => setStressProofSummaryInput(event.target.value)}
                 placeholder="Resumo curto (opcional)"
-                className="rounded border border-zinc-700/70 bg-zinc-900/70 px-3 py-2 text-xs text-zinc-100 outline-none focus:border-cyan-500/60"
+                className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-cyan-500/60"
               />
               <button
                 type="button"
@@ -480,8 +480,8 @@ export default function CollaborationAdminPage() {
                 {submittingEvidenceKey === 'stress-proof' ? 'Salvando...' : 'Registrar proof'}
               </button>
             </div>
-            <div className="mt-3 rounded border border-zinc-800/70 bg-zinc-900/50 p-2 text-[11px] text-zinc-400">
-              <span className="mr-2 text-zinc-500">Status:</span>
+            <div className="mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2 text-[11px] text-[var(--aethel-text-secondary)]">
+              <span className="mr-2 text-[var(--aethel-text-tertiary)]">Status:</span>
               {readiness.evidence.stressProofAttached ? (
                 <>
                   <span className="rounded border border-emerald-500/30 bg-emerald-500/15 px-1.5 py-0.5 text-emerald-200">ATTACHED</span>
@@ -501,7 +501,7 @@ export default function CollaborationAdminPage() {
                     </a>
                   ) : null}
                   {readiness.evidence.stressProofSummary ? (
-                    <span className="ml-2 text-zinc-300">{readiness.evidence.stressProofSummary}</span>
+                    <span className="ml-2 text-[var(--aethel-text-secondary)]">{readiness.evidence.stressProofSummary}</span>
                   ) : null}
                 </>
               ) : (
@@ -511,12 +511,12 @@ export default function CollaborationAdminPage() {
           </div>
 
           {!!readiness.evidenceHistory?.length && (
-            <div className="mt-4 rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-              <h3 className="mb-2 text-sm font-semibold text-zinc-100">Recent evidence events</h3>
+            <div className="mt-4 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+              <h3 className="mb-2 text-sm font-semibold text-[var(--aethel-text-primary)]">Recent evidence events</h3>
               <div className="space-y-1">
                 {readiness.evidenceHistory.slice(0, 6).map((event) => (
-                  <div key={event.id} className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
-                    <span className="font-mono text-zinc-300">{event.evidenceType}</span>
+                  <div key={event.id} className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--aethel-text-secondary)]">
+                    <span className="font-mono text-[var(--aethel-text-secondary)]">{event.evidenceType}</span>
                     <span
                       className={`rounded border px-1.5 py-0.5 ${
                         event.passed
@@ -527,7 +527,7 @@ export default function CollaborationAdminPage() {
                       {event.passed ? 'PASS' : 'FAIL'}
                     </span>
                     <span>{new Date(event.createdAt).toLocaleString()}</span>
-                    {event.adminEmail && <span className="text-zinc-500">by {event.adminEmail}</span>}
+                    {event.adminEmail && <span className="text-[var(--aethel-text-tertiary)]">by {event.adminEmail}</span>}
                   </div>
                 ))}
               </div>
@@ -541,8 +541,8 @@ export default function CollaborationAdminPage() {
         </div>
       )}
 
-      <section className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-        <h2 className="mb-3 text-base font-semibold text-zinc-100">Projetos colaborativos</h2>
+      <section className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+        <h2 className="mb-3 text-base font-semibold text-[var(--aethel-text-primary)]">Projetos colaborativos</h2>
 
         {!loading && projects.length === 0 && (
           <div className="aethel-state aethel-state-empty">
@@ -554,7 +554,7 @@ export default function CollaborationAdminPage() {
           <div className="overflow-x-auto" role="region" aria-label="Tabela de projetos colaborativos">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800/70 text-zinc-400">
+                <tr className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] text-[var(--aethel-text-secondary)]">
                   <th className="p-2 text-left">Nome</th>
                   <th className="p-2 text-left">Membros</th>
                   <th className="p-2 text-left">Status</th>
@@ -564,15 +564,15 @@ export default function CollaborationAdminPage() {
               </thead>
               <tbody>
                 {projects.map((project) => (
-                  <tr key={project.id} className="border-b border-zinc-800/50">
-                    <td className="p-2 text-zinc-100">{project.name}</td>
-                    <td className="p-2 text-zinc-300">{project.members}</td>
+                  <tr key={project.id} className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]">
+                    <td className="p-2 text-[var(--aethel-text-primary)]">{project.name}</td>
+                    <td className="p-2 text-[var(--aethel-text-secondary)]">{project.members}</td>
                     <td className="p-2">
-                      <span className="rounded border border-zinc-700/80 bg-zinc-950/40 px-2 py-1 text-xs text-zinc-300">
+                      <span className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
                         {statusLabel(project.status)}
                       </span>
                     </td>
-                    <td className="p-2 text-zinc-400">{new Date(project.updatedAt).toLocaleString()}</td>
+                    <td className="p-2 text-[var(--aethel-text-secondary)]">{new Date(project.updatedAt).toLocaleString()}</td>
                     <td className="p-2">
                       {project.status === 'active' ? (
                         <button

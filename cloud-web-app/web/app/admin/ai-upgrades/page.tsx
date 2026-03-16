@@ -74,7 +74,7 @@ export default function AIUpgrades() {
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <h1 className='text-3xl font-bold mb-6'>Melhorias para IA Aethel</h1>
-      <p className='mb-4 text-zinc-400'>Matriz de maturidade: capacidades atuais, lacunas e melhorias priorizadas com governança.</p>
+      <p className='mb-4 text-[var(--aethel-text-secondary)]'>Matriz de maturidade: capacidades atuais, lacunas e melhorias priorizadas com governança.</p>
 
       <div className='mb-6'>
         <h2 className='text-xl font-semibold mb-4'>O que Aethel Já Tem (Pontos Fortes)</h2>
@@ -115,24 +115,24 @@ export default function AIUpgrades() {
           </div>
         )}
         {loading ? (
-          <p className='text-sm text-zinc-500'>Carregando melhorias...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando melhorias...</p>
         ) : filtered.length === 0 ? (
-          <p className='text-sm text-zinc-500'>Nenhuma melhoria encontrada.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma melhoria encontrada.</p>
         ) : (
           <div className='space-y-4'>
             {filtered.map((upgrade) => (
-              <div key={upgrade.id} className='p-4 bg-slate-800 rounded-lg shadow-md border-l-4'>
+              <div key={upgrade.id} className='p-4 bg-[var(--aethel-surface-tertiary)] rounded-lg shadow-md border-l-4'>
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className='text-lg font-semibold text-slate-100'>{upgrade.name}</h3>
+                    <h3 className='text-lg font-semibold text-[var(--aethel-text-primary)]'>{upgrade.name}</h3>
                     <p className={`text-sm font-medium px-2 py-0.5 rounded-full inline-block ${statusColors[upgrade.status]}`}>
                       Status: {statusLabels[upgrade.status]}
                     </p>
-                    <p className="mt-2 text-slate-400">{upgrade.description || 'Sem descrição'}</p>
+                    <p className="mt-2 text-[var(--aethel-text-secondary)]">{upgrade.description || 'Sem descrição'}</p>
                   </div>
                   <button
                     onClick={() => applyUpgrade(upgrade)}
-                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-primary-dark)] hover:bg-blue-700 text-[var(--aethel-text-primary)]'}`}
                   >
                     {upgrade.applied ? 'Reverter' : 'Aplicar melhoria'}
                   </button>

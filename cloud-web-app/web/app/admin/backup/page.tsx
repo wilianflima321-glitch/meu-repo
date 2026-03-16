@@ -84,9 +84,9 @@ export default function Backup() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Backup e recuperação</h1>
-          <p className='text-sm text-zinc-500'>Controle de backups com auditoria e restauração controlada.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle de backups com auditoria e restauração controlada.</p>
         </div>
-        <button onClick={fetchBackups} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>Atualizar</button>
+        <button onClick={fetchBackups} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
 
       {error && (
@@ -95,7 +95,7 @@ export default function Backup() {
         </div>
       )}
 
-      <div className='mb-6 bg-zinc-900/70 p-4 rounded-lg shadow'>
+      <div className='mb-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow'>
         <h2 className='text-xl font-semibold mb-3'>Solicitar Backup Manual</h2>
         <div className='flex flex-col md:flex-row gap-3'>
           <input
@@ -104,15 +104,15 @@ export default function Backup() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <button onClick={requestBackup} disabled={working} className='px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50'>
+          <button onClick={requestBackup} disabled={working} className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'>
             {working ? 'Solicitando...' : 'Iniciar Backup Manual'}
           </button>
         </div>
       </div>
 
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
+      <table className='w-full table-auto bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
         <thead>
-          <tr className='bg-zinc-800/70'>
+          <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
             <th className='p-2 text-left'>ID</th>
             <th className='p-2 text-left'>Data</th>
             <th className='p-2 text-left'>Tamanho</th>
@@ -123,35 +123,35 @@ export default function Backup() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Carregando backups...</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando backups...</td>
             </tr>
           ) : backups.length === 0 ? (
             <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={5}>Nenhum backup encontrado.</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhum backup encontrado.</td>
             </tr>
           ) : (
             backups.map((b) => (
               <tr key={b.id} className='border-t'>
-                <td className='p-2 text-xs text-zinc-500'>{b.id.slice(0, 8)}</td>
+                <td className='p-2 text-xs text-[var(--aethel-text-tertiary)]'>{b.id.slice(0, 8)}</td>
                 <td className='p-2'>{new Date(b.date).toLocaleString()}</td>
                 <td className='p-2'>{formatSize(b.size)}</td>
                 <td className='p-2'>
-                  <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>{b.status}</span>
+                  <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>{b.status}</span>
                 </td>
                 <td className='p-2'>
                   {b.storageUrl ? (
                     <a
                       href={b.storageUrl}
-                      className='px-2 py-1 bg-yellow-500 text-white rounded mr-2 inline-block text-sm'
+                      className='px-2 py-1 bg-yellow-500 text-[var(--aethel-text-primary)] rounded mr-2 inline-block text-sm'
                     >
                       Baixar
                     </a>
                   ) : (
-                    <span className='text-xs text-zinc-500 mr-2'>Sem arquivo</span>
+                    <span className='text-xs text-[var(--aethel-text-tertiary)] mr-2'>Sem arquivo</span>
                   )}
                   <button
                     onClick={() => requestRestore(b.id)}
-                    className='px-2 py-1 bg-red-500 text-white rounded text-sm'
+                    className='px-2 py-1 bg-[var(--aethel-error)] text-[var(--aethel-text-primary)] rounded text-sm'
                   >
                     Restaurar
                   </button>

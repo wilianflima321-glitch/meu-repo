@@ -96,17 +96,17 @@ export default function RegisterPageV2() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950 px-4 py-10 sm:px-6">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-10 sm:px-6">
       <a
         href="#register-form"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-zinc-900 focus:px-3 focus:py-2 focus:text-sm focus:text-zinc-100"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm focus:text-[var(--aethel-text-primary)]"
       >
         Ir para formulario de cadastro
       </a>
       <div className="pointer-events-none absolute inset-0 bg-grid-zinc-700/[0.12]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_55%)]" />
 
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-900/85 p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_85%,transparent)] p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
         <div className="mb-6 text-center">
           <div className="mb-4 flex items-center justify-center gap-3">
             <Image
@@ -119,15 +119,15 @@ export default function RegisterPageV2() {
             />
             <span className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300/90">Aethel Studio</span>
           </div>
-          <h1 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">Criar conta no Aethel</h1>
-          <p className="mt-2 text-sm text-zinc-400">
+          <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Criar conta no Aethel</h1>
+          <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
             Entre no Studio Home e alcance o primeiro valor com chat, plano e preview em poucos passos.
           </p>
         </div>
 
         <form id="register-form" onSubmit={handleRegister} className="space-y-5" noValidate aria-describedby={formError ? 'register-form-error' : undefined}>
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm text-zinc-300">
+            <label htmlFor="name" className="text-sm text-[var(--aethel-text-secondary)]">
               Nome
             </label>
             <input
@@ -137,13 +137,13 @@ export default function RegisterPageV2() {
               autoComplete="name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
               placeholder="Seu nome (opcional)"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm text-zinc-300">
+            <label htmlFor="email" className="text-sm text-[var(--aethel-text-secondary)]">
               Email
             </label>
             <input
@@ -155,14 +155,14 @@ export default function RegisterPageV2() {
               onChange={(event) => setEmail(event.target.value)}
               required
               aria-invalid={Boolean(formError)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
               placeholder="voce@empresa.com"
             />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm text-zinc-300">
+              <label htmlFor="password" className="text-sm text-[var(--aethel-text-secondary)]">
                 Senha
               </label>
               <input
@@ -174,12 +174,12 @@ export default function RegisterPageV2() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 aria-invalid={Boolean(formError)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
                 placeholder="Minimo 8 caracteres"
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="confirm-password" className="text-sm text-zinc-300">
+              <label htmlFor="confirm-password" className="text-sm text-[var(--aethel-text-secondary)]">
                 Confirmar senha
               </label>
               <input
@@ -191,7 +191,7 @@ export default function RegisterPageV2() {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
                 aria-invalid={Boolean(formError)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
                 placeholder="Repita a senha"
               />
             </div>
@@ -213,15 +213,15 @@ export default function RegisterPageV2() {
         </form>
 
         <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-zinc-800" />
-          <span className="text-[11px] tracking-wide text-zinc-500">OU</span>
-          <div className="h-px flex-1 bg-zinc-800" />
+          <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
+          <span className="text-[11px] tracking-wide text-[var(--aethel-text-tertiary)]">OU</span>
+          <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
         </div>
 
         <div className="space-y-2">
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
             onClick={() => setFormError('Cadastro social sera habilitado quando OAuth for configurado.')}
             aria-label="Continuar com GitHub (indisponivel ate configurar OAuth)"
           >
@@ -230,7 +230,7 @@ export default function RegisterPageV2() {
           </button>
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
             onClick={() => setFormError('Cadastro social sera habilitado quando OAuth for configurado.')}
             aria-label="Continuar com Google (indisponivel ate configurar OAuth)"
           >
@@ -239,7 +239,7 @@ export default function RegisterPageV2() {
           </button>
         </div>
 
-        <p className="mt-6 text-center text-sm text-zinc-400">
+        <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">
           Ja tem conta?{' '}
           <Link href="/login" className="font-medium text-cyan-300 hover:text-cyan-200">
             Fazer login

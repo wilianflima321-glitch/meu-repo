@@ -77,7 +77,7 @@ export function DashboardAIChatTab({
             className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'chat'
                 ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-sky-400/30'
-                : 'border border-white/10 bg-white/[0.03] text-[var(--aethel-text-secondary)] hover:bg-white/[0.06]'
+                : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
             }`}
           >
             Chat
@@ -88,7 +88,7 @@ export function DashboardAIChatTab({
             className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'agent'
                 ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-sky-400/30'
-                : 'border border-white/10 bg-white/[0.03] text-[var(--aethel-text-secondary)] hover:bg-white/[0.06]'
+                : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
             }`}
           >
             Modo agente
@@ -99,7 +99,7 @@ export function DashboardAIChatTab({
             className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'canvas'
                 ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-sky-400/30'
-                : 'border border-white/10 bg-white/[0.03] text-[var(--aethel-text-secondary)] hover:bg-white/[0.06]'
+                : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
             }`}
           >
             Canvas
@@ -160,10 +160,10 @@ export function DashboardAIChatTab({
             {chatHistory.map((msg, index) => (
               <div
                 key={index}
-                className={`aethel-p-3 aethel-rounded-lg border border-white/10 ${
+                className={`aethel-p-3 aethel-rounded-lg border border-[var(--aethel-border-subtle)] ${
                   msg.role === 'user'
                     ? 'bg-[linear-gradient(135deg,rgba(59,130,246,0.22),rgba(14,165,233,0.12))] ml-12'
-                    : 'bg-white/[0.04] mr-12'
+                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] mr-12'
                 }`}
               >
                 <p className="text-sm font-medium mb-1">{msg.role === 'user' ? 'Voce' : 'IA'}</p>
@@ -215,35 +215,35 @@ export function DashboardAIChatTab({
           </div>
           <div className="space-y-4 mb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 aethel-gap-4">
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Pesquisa e analise</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Coletar informacoes, analisar dados e gerar insights</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Criacao de conteudo</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Gerar artigos, codigo, documentacao e conteudo criativo</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Automacao</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Criar fluxos, scripts e processos automatizados</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Resolucao de problemas</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Depurar codigo, otimizar performance e resolver issues complexas</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Geracao de codigo</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Gerar, depurar e otimizar codigo em varias linguagens</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Analise de dados</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Analisar datasets, criar visualizacoes e extrair insights</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Design criativo</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Desenhar UI/UX, graficos e conceitos criativos</p>
               </button>
-              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-white/[0.06] aethel-transition">
+              <button type="button" className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition">
                 <h3 className="font-semibold mb-2">Estrategia de negocios</h3>
                 <p className="text-sm text-[var(--aethel-text-secondary)]">Planejamento estrategico e analise de mercado</p>
               </button>
@@ -274,7 +274,7 @@ export function DashboardAIChatTab({
           <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
             Canvas visual para colaboracao com IA.
           </div>
-          <div className="min-h-96 rounded-xl border border-white/10 bg-white/[0.03] p-4 relative">
+          <div className="min-h-96 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 relative">
             <div className="absolute top-4 left-4 aethel-flex aethel-gap-2">
               <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Desenhar</button>
               <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Formas</button>

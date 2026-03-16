@@ -80,7 +80,7 @@ export default function SettingsPage() {
   const missingProviders = providerStatus?.missingProviders ?? []
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <StudioGlobalNav
         title="Workspace Settings"
         subtitle="Configuracao de editor, conta e providers IA com contratos explicitos de status."
@@ -88,7 +88,7 @@ export default function SettingsPage() {
 
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <nav className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-2">
+          <nav className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
             <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-1">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id
@@ -100,23 +100,23 @@ export default function SettingsPage() {
                     className={`rounded-md border px-3 py-2 text-left transition ${
                       isActive
                         ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200'
-                        : 'border-transparent bg-transparent text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800/50'
+                        : 'border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
                     }`}
                   >
                     <p className="text-sm font-medium">{tab.label}</p>
-                    <p className="mt-1 text-[11px] text-zinc-500">{tab.description}</p>
+                    <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">{tab.description}</p>
                   </button>
                 )
               })}
             </div>
           </nav>
 
-          <section className="min-w-0 rounded-lg border border-zinc-800 bg-zinc-900/40">
+          <section className="min-w-0 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
             {activeTab === 'editor' && (
               <div className="p-4 sm:p-6">
                 <h2 className="text-lg font-semibold">Editor</h2>
-                <p className="mt-1 text-sm text-zinc-400">Ajuste tema, comportamento e atalhos do workspace.</p>
-                <div className="mt-4 rounded border border-zinc-800 bg-zinc-950/40 p-4">
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Ajuste tema, comportamento e atalhos do workspace.</p>
+                <div className="mt-4 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
                   <SettingsEditor />
                 </div>
               </div>
@@ -125,11 +125,11 @@ export default function SettingsPage() {
             {activeTab === 'profile' && (
               <div className="p-4 sm:p-6">
                 <h2 className="text-lg font-semibold">Perfil</h2>
-                <p className="mt-1 text-sm text-zinc-400">Gerencie dados de conta e preferencias pessoais.</p>
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Gerencie dados de conta e preferencias pessoais.</p>
                 <div className="mt-4">
                   <Link
                     href="/profile"
-                    className="inline-flex items-center rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+                    className="inline-flex items-center rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
                   >
                     Abrir perfil completo
                   </Link>
@@ -140,11 +140,11 @@ export default function SettingsPage() {
             {activeTab === 'billing' && (
               <div className="p-4 sm:p-6">
                 <h2 className="text-lg font-semibold">Billing</h2>
-                <p className="mt-1 text-sm text-zinc-400">Plano atual, limites e historico de cobranca.</p>
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Plano atual, limites e historico de cobranca.</p>
                 <div className="mt-4">
                   <Link
                     href="/billing"
-                    className="inline-flex items-center rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+                    className="inline-flex items-center rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
                   >
                     Ir para billing
                   </Link>
@@ -157,7 +157,7 @@ export default function SettingsPage() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h2 className="text-lg font-semibold">AI Providers</h2>
-                    <p className="mt-1 text-sm text-zinc-400">
+                    <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
                       Status operacional de provider para chat, complete e inline edit.
                     </p>
                   </div>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
                     onClick={() => {
                       void loadProviderStatus()
                     }}
-                    className="rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800"
+                    className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
                   >
                     {providerLoading ? 'Atualizando...' : 'Atualizar'}
                   </button>
@@ -189,8 +189,8 @@ export default function SettingsPage() {
 
                 {!providerLoading && (
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="rounded border border-zinc-800 bg-zinc-950/40 p-3">
-                      <p className="text-xs text-zinc-500">Providers configurados</p>
+                    <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-3">
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Providers configurados</p>
                       <p className="mt-1 text-xl font-semibold text-emerald-300">{configuredProviders.length}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {configuredProviders.length === 0 && (
@@ -207,8 +207,8 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className="rounded border border-zinc-800 bg-zinc-950/40 p-3">
-                      <p className="text-xs text-zinc-500">Providers pendentes</p>
+                    <div className="rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-3">
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">Providers pendentes</p>
                       <p className="mt-1 text-xl font-semibold text-amber-300">{missingProviders.length}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {missingProviders.length === 0 && <span className="aethel-state aethel-state-empty text-xs">Nenhum pendente.</span>}
@@ -230,7 +230,7 @@ export default function SettingsPage() {
                   </div>
                 )}
 
-                <div className="mt-4 rounded border border-zinc-800 bg-zinc-950/40 p-3 text-xs text-zinc-300">
+                <div className="mt-4 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-3 text-xs text-[var(--aethel-text-secondary)]">
                   <ol className="list-decimal space-y-1 pl-4">
                     <li>Defina a chave do provider no ambiente seguro do servidor.</li>
                     <li>Reinicie o runtime para aplicar variaveis.</li>
@@ -247,13 +247,13 @@ export default function SettingsPage() {
                   </Link>
                   <Link
                     href="/admin/apis"
-                    className="rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800"
+                    className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
                   >
                     Admin APIs (somente admin)
                   </Link>
                   <Link
                     href="/docs"
-                    className="rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800"
+                    className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
                   >
                     Abrir docs
                   </Link>

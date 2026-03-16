@@ -81,19 +81,19 @@ export function DashboardSidebar({
   return (
     <aside
       className={`
-        flex flex-col h-full bg-slate-900 border-r border-slate-800
+        flex flex-col h-full bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)]
         transition-all duration-300 ease-in-out
         ${collapsed ? 'w-16' : 'w-64'}
       `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between h-14 px-4 border-b border-slate-800">
+      <div className="flex items-center justify-between h-14 px-4 border-b border-[var(--aethel-border-primary)]">
         {!collapsed && (
           <span className="font-semibold text-[var(--aethel-text-primary)]">Dashboard</span>
         )}
         <button
           onClick={onToggleCollapse}
-          className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-slate-800 transition-colors"
+          className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors"
           aria-label={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
         >
           {collapsed ? (
@@ -117,8 +117,8 @@ export function DashboardSidebar({
                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
                 transition-all duration-200
                 ${isActive
-                  ? 'bg-sky-600 text-[var(--aethel-text-primary)] shadow-lg shadow-sky-500/20'
-                  : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-slate-800'
+                  ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] shadow-lg shadow-sky-500/20'
+                  : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
                 }
                 ${collapsed ? 'justify-center' : ''}
               `}

@@ -7,7 +7,7 @@ type DashboardToastProps = {
 
 export function DashboardToast({ message, type }: DashboardToastProps) {
   const colorClass =
-    type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+    type === 'success' ? 'bg-[var(--aethel-success-dark)]' : type === 'error' ? 'bg-[var(--aethel-error-dark)]' : 'bg-[var(--aethel-primary-dark)]'
 
   return (
     <div

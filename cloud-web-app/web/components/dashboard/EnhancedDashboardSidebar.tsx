@@ -77,17 +77,17 @@ export function EnhancedDashboardSidebar({
 
   return (
     <aside
-      className={`flex flex-col border-r border-white/[0.06] bg-zinc-950 transition-all duration-200 ${
+      className={`flex flex-col border-r border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] transition-all duration-200 ${
         collapsed ? 'w-16' : 'w-60'
       } ${className}`}
       role="navigation"
       aria-label="Sidebar de navegacao"
     >
       {/* Header */}
-      <div className={`flex h-14 items-center border-b border-white/[0.04] ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+      <div className={`flex h-14 items-center border-b border-[var(--aethel-border-subtle)] ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-[var(--aethel-text-primary)] text-xs font-bold">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] text-[var(--aethel-text-primary)] text-xs font-bold">
               A
             </div>
             <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Aethel</span>
@@ -97,7 +97,7 @@ export function EnhancedDashboardSidebar({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/[0.06] hover:text-[var(--aethel-text-primary)]"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]"
             aria-label={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
           >
             <Codicon name={collapsed ? 'chevron-right' : 'chevron-left'} />
@@ -118,7 +118,7 @@ export function EnhancedDashboardSidebar({
                   {sectionLabels[sectionKey]}
                 </p>
               )}
-              {sectionKey !== 'main' && collapsed && <div className="mx-3 my-2 h-px bg-white/[0.04]" />}
+              {sectionKey !== 'main' && collapsed && <div className="mx-3 my-2 h-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]" />}
 
               <div className="space-y-0.5 px-2">
                 {sectionItems.map((item) => {
@@ -141,7 +141,7 @@ export function EnhancedDashboardSidebar({
                             ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
                             : isDisabled
                             ? 'cursor-not-allowed text-[var(--aethel-text-tertiary)]'
-                            : 'text-[var(--aethel-text-secondary)] hover:bg-white/[0.04] hover:text-[var(--aethel-text-secondary)]'
+                            : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-secondary)]'
                         } ${collapsed ? 'justify-center' : ''}`}
                         aria-current={isActive ? 'page' : undefined}
                         title={collapsed ? item.label : undefined}
@@ -168,7 +168,7 @@ export function EnhancedDashboardSidebar({
                                     ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                                     : item.badgeVariant === 'warning'
                                     ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                                    : 'bg-white/[0.06] text-[var(--aethel-text-tertiary)]'
+                                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)]'
                                 }`}
                               >
                                 {item.badge}
@@ -180,7 +180,7 @@ export function EnhancedDashboardSidebar({
 
                       {/* Tooltip when collapsed */}
                       {collapsed && isHovered && (
-                        <div className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-lg border border-white/[0.08] bg-zinc-900 px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] shadow-xl whitespace-nowrap">
+                        <div className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] shadow-xl whitespace-nowrap">
                           {item.label}
                           {item.disabledReason && (
                             <span className="mt-0.5 block text-[var(--aethel-text-tertiary)]">{item.disabledReason}</span>
@@ -198,9 +198,9 @@ export function EnhancedDashboardSidebar({
 
       {/* Footer */}
       {!collapsed && userPlan && (
-        <div className="border-t border-white/[0.04] px-4 py-3">
+        <div className="border-t border-[var(--aethel-border-subtle)] px-4 py-3">
           <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="inline-block h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
             <span className="text-xs text-[var(--aethel-text-tertiary)]">Plano {userPlan}</span>
           </div>
         </div>

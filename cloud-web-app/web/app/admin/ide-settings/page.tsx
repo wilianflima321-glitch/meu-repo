@@ -275,7 +275,7 @@ export default function IDESettings() {
               className='border p-2 rounded text-xs w-full font-mono min-h-[96px]'
             />
             {jsonErrors[key] && (
-              <p className='text-xs text-red-600 mt-1'>{jsonErrors[key]}</p>
+              <p className='text-xs text-[var(--aethel-error)] mt-1'>{jsonErrors[key]}</p>
             )}
           </div>
         );
@@ -297,21 +297,21 @@ export default function IDESettings() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Configurações Globais do IDE</h1>
-          <p className='text-sm text-zinc-500'>Controle temas, IA, extensões e políticas para toda a plataforma.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle temas, IA, extensões e políticas para toda a plataforma.</p>
           {lastUpdated && (
-            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <div className='flex gap-2'>
           <button
             onClick={fetchSettings}
-            className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
+            className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
           >
             Atualizar
           </button>
           <button
             onClick={handleExport}
-            className='px-3 py-2 rounded bg-black text-white text-sm'
+            className='px-3 py-2 rounded bg-black text-[var(--aethel-text-primary)] text-sm'
           >
             Exportar JSON
           </button>
@@ -324,7 +324,7 @@ export default function IDESettings() {
         </div>
       )}
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Categorias</h3>
           <p className='text-2xl font-bold text-blue-600'>{categories.length}</p>
@@ -339,7 +339,7 @@ export default function IDESettings() {
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow p-4 mb-6'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 mb-6'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
           <div className='flex gap-2'>
             <input
@@ -371,7 +371,7 @@ export default function IDESettings() {
           <div className='flex gap-2'>
             <button
               onClick={handleResetDefaults}
-              className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
+              className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
             >
               Restaurar padrões
             </button>
@@ -379,7 +379,7 @@ export default function IDESettings() {
               <button
                 onClick={handlePublish}
                 disabled={publishing}
-                className='px-3 py-2 rounded bg-black text-white text-sm disabled:opacity-50'
+                className='px-3 py-2 rounded bg-black text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
               >
                 {publishing ? 'Publicando...' : 'Publicar em produção'}
               </button>
@@ -387,7 +387,7 @@ export default function IDESettings() {
             <button
               onClick={handleSave}
               disabled={saving || loading || !hasChanges}
-              className='px-3 py-2 rounded bg-blue-600 text-white text-sm disabled:opacity-50'
+              className='px-3 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
             >
               {saving ? 'Salvando...' : 'Salvar alterações'}
             </button>
@@ -396,9 +396,9 @@ export default function IDESettings() {
 
         <div className='space-y-4'>
           {loading ? (
-            <p className='text-sm text-zinc-500'>Carregando configurações...</p>
+            <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando configurações...</p>
           ) : filteredKeys.length === 0 ? (
-            <p className='text-sm text-zinc-500'>Nenhuma configuração encontrada.</p>
+            <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma configuração encontrada.</p>
           ) : (
             filteredKeys.map((key) => {
               const def = data?.definitions?.[key];
@@ -408,8 +408,8 @@ export default function IDESettings() {
                   <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4'>
                     <div className='md:w-1/2'>
                       <p className='font-medium'>{key}</p>
-                      <p className='text-xs text-zinc-500'>{def.description || 'Sem descrição'}</p>
-                      <p className='text-[11px] text-zinc-500 mt-1'>Tipo: {def.type}</p>
+                      <p className='text-xs text-[var(--aethel-text-tertiary)]'>{def.description || 'Sem descrição'}</p>
+                      <p className='text-[11px] text-[var(--aethel-text-tertiary)] mt-1'>Tipo: {def.type}</p>
                     </div>
                     <div className='md:w-1/2'>
                       {renderInput(key, def)}
@@ -422,19 +422,19 @@ export default function IDESettings() {
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow p-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-xl font-semibold'>Histórico de Mudanças</h2>
           <button
             onClick={fetchHistory}
-            className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
+            className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
           >
             Atualizar
           </button>
         </div>
         <table className='w-full table-auto'>
           <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
+            <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
               <th className='p-2 text-left'>Ação</th>
               <th className='p-2 text-left'>Admin</th>
               <th className='p-2 text-left'>Ambiente</th>
@@ -445,19 +445,19 @@ export default function IDESettings() {
           <tbody>
             {history.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={5}>Sem histórico disponível.</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Sem histórico disponível.</td>
               </tr>
             ) : (
               history.map((item) => (
                 <tr key={item.id} className='border-t'>
                   <td className='p-2'>
-                    <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>
+                    <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
                       {item.action}
                     </span>
                   </td>
                   <td className='p-2'>{item.adminEmail || '—'}</td>
                   <td className='p-2'>{formatEnvironment(item.metadata?.environment || item.metadata?.to)}</td>
-                  <td className='p-2 text-xs text-zinc-400'>
+                  <td className='p-2 text-xs text-[var(--aethel-text-secondary)]'>
                     {item.action === 'IDE_SETTINGS_PUBLISH'
                       ? `Publicação ${formatEnvironment(item.metadata?.from)} → ${formatEnvironment(item.metadata?.to)}`
                       : `Atualizações: ${Object.keys(item.metadata?.updates || {}).length}`}

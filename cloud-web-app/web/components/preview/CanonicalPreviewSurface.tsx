@@ -44,14 +44,14 @@ const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
 };
 
 const LIFECYCLE_COLORS: Record<PreviewLifecycleState, string> = {
-  idle: 'bg-slate-600',
+  idle: 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]',
   provisioning: 'bg-amber-500 animate-pulse',
   warming: 'bg-amber-400 animate-pulse',
-  syncing: 'bg-blue-500 animate-pulse',
+  syncing: 'bg-[var(--aethel-primary)] animate-pulse',
   healthy: 'bg-emerald-500',
   degraded: 'bg-orange-500',
-  failed: 'bg-red-500',
-  offline: 'bg-slate-500',
+  failed: 'bg-[var(--aethel-error)]',
+  offline: 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]',
 };
 
 // Dynamic imports
@@ -76,7 +76,7 @@ const NexusCanvasV2 = dynamic(
 
 function PreviewSkeleton() {
   return (
-    <div className="flex items-center justify-center h-full bg-slate-950 text-slate-400">
+    <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
         <p className="text-sm">Loading preview...</p>
@@ -95,11 +95,11 @@ function LifecycleIndicator({
   hmrConnected: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 text-xs">
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-sm border-b border-[var(--aethel-border-secondary)]/50 text-xs">
       <div className={`w-2 h-2 rounded-full ${LIFECYCLE_COLORS[state]}`} />
-      <span className="text-slate-300">{LIFECYCLE_LABELS[state]}</span>
+      <span className="text-[var(--aethel-text-secondary)]">{LIFECYCLE_LABELS[state]}</span>
       {latencyMs !== null && state === 'healthy' && (
-        <span className="text-slate-500">{latencyMs}ms</span>
+        <span className="text-[var(--aethel-text-tertiary)]">{latencyMs}ms</span>
       )}
       {hmrConnected && (
         <span className="ml-auto flex items-center gap-1 text-emerald-400">
@@ -124,27 +124,27 @@ function PreviewFailedState({
   onFallback?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-slate-950 text-slate-300 gap-4 p-6">
-      <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] gap-4 p-6">
+      <div className="w-12 h-12 rounded-full bg-[var(--aethel-error)]/10 flex items-center justify-center">
         <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       </div>
       <div className="text-center">
-        <h3 className="text-sm font-medium text-slate-200 mb-1">Preview Failed</h3>
-        <p className="text-xs text-slate-500 max-w-xs">{error || 'Could not connect to preview runtime'}</p>
+        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-1">Preview Failed</h3>
+        <p className="text-xs text-[var(--aethel-text-tertiary)] max-w-xs">{error || 'Could not connect to preview runtime'}</p>
       </div>
       <div className="flex gap-2">
         <button
           onClick={onRetry}
-          className="px-3 py-1.5 text-xs bg-violet-600 hover:bg-violet-500 text-white rounded-md transition-colors"
+          className="px-3 py-1.5 text-xs bg-violet-600 hover:bg-violet-500 text-[var(--aethel-text-primary)] rounded-md transition-colors"
         >
           Retry
         </button>
         {onFallback && (
           <button
             onClick={onFallback}
-            className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-md transition-colors"
+            className="px-3 py-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] text-[var(--aethel-text-secondary)] rounded-md transition-colors"
           >
             Use Inline Preview
           </button>

@@ -98,11 +98,11 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, icon
   return (
     <div className="mb-3">
       <div className="flex justify-between items-center mb-1">
-        <label className="text-xs text-slate-400 flex items-center gap-1.5" title={tooltip}>
+        <label className="text-xs text-[var(--aethel-text-secondary)] flex items-center gap-1.5" title={tooltip}>
           {icon}
           {label}
         </label>
-        <span className="text-xs text-slate-300 font-mono">
+        <span className="text-xs text-[var(--aethel-text-secondary)] font-mono">
           {value.toFixed(step < 0.1 ? 3 : step < 1 ? 2 : 0)}{unit}
         </span>
       </div>
@@ -113,7 +113,7 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, icon
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-3
                    [&::-webkit-slider-thumb]:h-3
@@ -143,11 +143,11 @@ interface Vector3InputProps {
 function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.1 }: Vector3InputProps) {
   return (
     <div className="mb-3">
-      <label className="text-xs text-slate-400 block mb-1.5">{label}</label>
+      <label className="text-xs text-[var(--aethel-text-secondary)] block mb-1.5">{label}</label>
       <div className="grid grid-cols-3 gap-1.5">
         {(['x', 'y', 'z'] as const).map((axis) => (
           <div key={axis} className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 uppercase">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--aethel-text-tertiary)] uppercase">
               {axis}
             </span>
             <input
@@ -157,8 +157,8 @@ function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.
               max={max}
               step={step}
               onChange={(e) => onChange({ ...value, [axis]: parseFloat(e.target.value) || 0 })}
-              className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 pl-6
-                       text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"
+              className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 pl-6
+                       text-xs text-[var(--aethel-text-primary)] focus:border-cyan-500 focus:outline-none"
             />
           </div>
         ))}
@@ -180,20 +180,20 @@ interface ColorPickerProps {
 function ColorPicker({ label, value, onChange }: ColorPickerProps) {
   return (
     <div className="mb-3">
-      <label className="text-xs text-slate-400 block mb-1.5">{label}</label>
+      <label className="text-xs text-[var(--aethel-text-secondary)] block mb-1.5">{label}</label>
       <div className="flex gap-2 items-center">
         <input
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-10 h-8 rounded border border-slate-700 cursor-pointer bg-transparent"
+          className="w-10 h-8 rounded border border-[var(--aethel-border-secondary)] cursor-pointer bg-transparent"
         />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1.5
-                   text-xs text-slate-200 font-mono focus:border-cyan-500 focus:outline-none"
+          className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5
+                   text-xs text-[var(--aethel-text-primary)] font-mono focus:border-cyan-500 focus:outline-none"
         />
       </div>
     </div>
@@ -218,8 +218,8 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-slate-200 
-                   hover:text-white transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] 
+                   hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -354,17 +354,17 @@ function BoundaryBox({ params, visible, onResize }: BoundaryBoxProps) {
       
       {/* Dimension labels */}
       <Html position={[boundarySize.x / 2 + 0.3, 0, 0]}>
-        <div className="text-[10px] text-cyan-400 whitespace-nowrap bg-slate-900/80 px-1 rounded">
+        <div className="text-[10px] text-[var(--aethel-info)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           W: {boundarySize.x.toFixed(1)}m
         </div>
       </Html>
       <Html position={[0, boundarySize.y / 2 + 0.3, 0]}>
-        <div className="text-[10px] text-cyan-400 whitespace-nowrap bg-slate-900/80 px-1 rounded">
+        <div className="text-[10px] text-[var(--aethel-info)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           H: {boundarySize.y.toFixed(1)}m
         </div>
       </Html>
       <Html position={[0, 0, boundarySize.z / 2 + 0.3]}>
-        <div className="text-[10px] text-cyan-400 whitespace-nowrap bg-slate-900/80 px-1 rounded">
+        <div className="text-[10px] text-[var(--aethel-info)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           D: {boundarySize.z.toFixed(1)}m
         </div>
       </Html>
@@ -432,7 +432,7 @@ function FlowArrows({ params, visible }: FlowArrowsProps) {
       
       {/* Flow strength indicator */}
       <Html position={[boundaryPosition.x, boundaryPosition.y + boundarySize.y / 2 + 0.5, boundaryPosition.z]}>
-        <div className="text-xs text-green-400 whitespace-nowrap bg-slate-900/80 px-2 py-1 rounded flex items-center gap-1">
+        <div className="text-xs text-[var(--aethel-success)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-2 py-1 rounded flex items-center gap-1">
           <Wind className="w-3 h-3" />
           Flow: {flowStrength.toFixed(2)}
         </div>
@@ -468,14 +468,14 @@ function Toolbar({
   ];
   
   return (
-    <div className="flex flex-col gap-1 p-2 bg-slate-800/90 rounded-lg">
+    <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Simulation controls */}
       <button
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
           isSimulating 
-            ? 'bg-cyan-600 text-white' 
-            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            ? 'bg-cyan-600 text-[var(--aethel-text-primary)]' 
+            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
         }`}
         title={isSimulating ? 'Pause Simulation' : 'Play Simulation'}
       >
@@ -484,13 +484,13 @@ function Toolbar({
       
       <button
         onClick={onReset}
-        className="p-2 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
+        className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
         title="Reset Simulation"
       >
         <RotateCcw className="w-4 h-4" />
       </button>
       
-      <div className="h-px bg-slate-700 my-2" />
+      <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
       
       {/* Tools */}
       {tools.map((tool) => (
@@ -499,8 +499,8 @@ function Toolbar({
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
             selectedTool === tool.id
-              ? 'bg-cyan-600 text-white'
-              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              ? 'bg-cyan-600 text-[var(--aethel-text-primary)]'
+              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
           }`}
           title={tool.label}
         >
@@ -552,19 +552,19 @@ function SimulationStats({ simulation, params }: SimulationStatsProps) {
   return (
     <div className="space-y-1 text-xs">
       <div className="flex justify-between">
-        <span className="text-slate-400">Particles:</span>
+        <span className="text-[var(--aethel-text-secondary)]">Particles:</span>
         <span className="font-mono">{params.particleCount}</span>
       </div>
       <div className="flex justify-between">
-        <span className="text-slate-400">Avg Density:</span>
+        <span className="text-[var(--aethel-text-secondary)]">Avg Density:</span>
         <span className="font-mono">{stats.avgDensity.toFixed(1)}</span>
       </div>
       <div className="flex justify-between">
-        <span className="text-slate-400">Avg Speed:</span>
+        <span className="text-[var(--aethel-text-secondary)]">Avg Speed:</span>
         <span className="font-mono">{stats.avgSpeed.toFixed(2)} m/s</span>
       </div>
       <div className="flex justify-between">
-        <span className="text-slate-400">Max Speed:</span>
+        <span className="text-[var(--aethel-text-secondary)]">Max Speed:</span>
         <span className="font-mono">{stats.maxSpeed.toFixed(2)} m/s</span>
       </div>
     </div>
@@ -733,7 +733,7 @@ export default function FluidSimulationEditor({
   }, []);
   
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-200">
+    <div className="flex h-full w-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Toolbar */}
       <div className="p-2">
         <Toolbar
@@ -787,24 +787,24 @@ export default function FluidSimulationEditor({
         </Canvas>
         
         {/* Viewport info overlay */}
-        <div className="absolute top-4 left-4 bg-slate-900/90 p-3 rounded">
-          <div className="text-xs text-slate-400 mb-2">Simulation Status</div>
+        <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-3 rounded">
+          <div className="text-xs text-[var(--aethel-text-secondary)] mb-2">Simulation Status</div>
           <SimulationStats simulation={simulationRef.current} params={params} />
           
-          <div className="mt-2 pt-2 border-t border-slate-700">
+          <div className="mt-2 pt-2 border-t border-[var(--aethel-border-secondary)]">
             <div className="flex items-center gap-2 text-xs">
-              <div className={`w-2 h-2 rounded-full ${editorState.isSimulating ? 'bg-green-500 animate-pulse' : 'bg-slate-500'}`} />
+              <div className={`w-2 h-2 rounded-full ${editorState.isSimulating ? 'bg-[var(--aethel-success)] animate-pulse' : 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]'}`} />
               <span>{editorState.isSimulating ? 'Running' : 'Paused'}</span>
             </div>
           </div>
         </div>
         
         {/* View toggles */}
-        <div className="absolute top-4 right-80 flex flex-col gap-1 bg-slate-900/90 p-2 rounded">
+        <div className="absolute top-4 right-80 flex flex-col gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-2 rounded">
           <button
             onClick={() => setEditorState((p) => ({ ...p, showBoundary: !p.showBoundary }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showBoundary ? 'bg-cyan-600 text-white' : 'bg-slate-700 text-slate-400'
+              editorState.showBoundary ? 'bg-cyan-600 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             <Box className="w-3 h-3" /> Boundary
@@ -812,7 +812,7 @@ export default function FluidSimulationEditor({
           <button
             onClick={() => setEditorState((p) => ({ ...p, showFlowArrows: !p.showFlowArrows }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showFlowArrows ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-400'
+              editorState.showFlowArrows ? 'bg-green-600 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             <Wind className="w-3 h-3" /> Flow
@@ -820,7 +820,7 @@ export default function FluidSimulationEditor({
           <button
             onClick={() => setEditorState((p) => ({ ...p, showVelocityColors: !p.showVelocityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showVelocityColors ? 'bg-orange-600 text-white' : 'bg-slate-700 text-slate-400'
+              editorState.showVelocityColors ? 'bg-orange-600 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             <Zap className="w-3 h-3" /> Velocity
@@ -828,7 +828,7 @@ export default function FluidSimulationEditor({
           <button
             onClick={() => setEditorState((p) => ({ ...p, showDensityColors: !p.showDensityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showDensityColors ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'
+              editorState.showDensityColors ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             <Layers className="w-3 h-3" /> Density
@@ -837,18 +837,18 @@ export default function FluidSimulationEditor({
       </div>
       
       {/* Settings Panel */}
-      <div className="w-72 bg-slate-850 border-l border-slate-700 overflow-y-auto">
+      <div className="w-72 bg-[var(--aethel-surface-tertiary)] border-l border-[var(--aethel-border-secondary)] overflow-y-auto">
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Droplet className="w-5 h-5 text-cyan-400" />
+              <Droplet className="w-5 h-5 text-[var(--aethel-info)]" />
               Fluid Simulation
             </h2>
             <div className="flex gap-1">
               <button
                 onClick={handleImport}
-                className="p-1.5 rounded bg-slate-700 hover:bg-slate-600 transition-colors"
+                className="p-1.5 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
                 title="Import Configuration"
               >
                 <Upload className="w-4 h-4" />
@@ -872,8 +872,8 @@ export default function FluidSimulationEditor({
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded transition-colors text-left ${
                     editorState.currentPreset === preset.id
-                      ? 'bg-cyan-600/30 border border-cyan-500 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? 'bg-cyan-600/30 border border-cyan-500 text-[var(--aethel-text-primary)]'
+                      : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                   }`}
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
@@ -884,7 +884,7 @@ export default function FluidSimulationEditor({
           </CollapsibleSection>
           
           {/* Particle Settings */}
-          <CollapsibleSection title="Particles" icon={<Droplet className="w-4 h-4 text-cyan-400" />}>
+          <CollapsibleSection title="Particles" icon={<Droplet className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <Slider
               label="Particle Count"
               value={params.particleCount}
@@ -892,7 +892,7 @@ export default function FluidSimulationEditor({
               max={10000}
               step={100}
               onChange={(v) => updateParam('particleCount', v)}
-              icon={<Target className="w-3 h-3 text-slate-400" />}
+              icon={<Target className="w-3 h-3 text-[var(--aethel-text-secondary)]" />}
               tooltip="Number of fluid particles (affects performance)"
             />
             
@@ -973,7 +973,7 @@ export default function FluidSimulationEditor({
           </CollapsibleSection>
           
           {/* Appearance */}
-          <CollapsibleSection title="Appearance" icon={<Palette className="w-4 h-4 text-cyan-400" />}>
+          <CollapsibleSection title="Appearance" icon={<Palette className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <ColorPicker
               label="Fluid Color"
               value={params.color}
@@ -1005,19 +1005,19 @@ export default function FluidSimulationEditor({
             <div className="grid grid-cols-3 gap-1 mt-2">
               <button
                 onClick={() => updateParam('gravity', { x: 0, y: -9.81, z: 0 })}
-                className="p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded"
+                className="p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
               >
                 Earth
               </button>
               <button
                 onClick={() => updateParam('gravity', { x: 0, y: -1.62, z: 0 })}
-                className="p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded"
+                className="p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
               >
                 Moon
               </button>
               <button
                 onClick={() => updateParam('gravity', { x: 0, y: 0, z: 0 })}
-                className="p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded"
+                className="p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
               >
                 Zero-G
               </button>
@@ -1025,7 +1025,7 @@ export default function FluidSimulationEditor({
           </CollapsibleSection>
           
           {/* Boundary */}
-          <CollapsibleSection title="Boundary Volume" icon={<Box className="w-4 h-4 text-cyan-400" />}>
+          <CollapsibleSection title="Boundary Volume" icon={<Box className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <Vector3Input
               label="Size"
               value={params.boundarySize}
@@ -1046,7 +1046,7 @@ export default function FluidSimulationEditor({
           </CollapsibleSection>
           
           {/* Flow */}
-          <CollapsibleSection title="External Flow" icon={<Wind className="w-4 h-4 text-green-400" />} defaultOpen={false}>
+          <CollapsibleSection title="External Flow" icon={<Wind className="w-4 h-4 text-[var(--aethel-success)]" />} defaultOpen={false}>
             <Vector3Input
               label="Flow Direction"
               value={params.flowDirection}
@@ -1069,12 +1069,12 @@ export default function FluidSimulationEditor({
           {/* Bake to Mesh */}
           <CollapsibleSection title="Surface Meshing" icon={<RefreshCw className="w-4 h-4 text-sky-400" />} defaultOpen={false}>
             <div className="flex items-center justify-between mb-3">
-              <label className="text-xs text-slate-400">Enable Surface Mesh</label>
+              <label className="text-xs text-[var(--aethel-text-secondary)]">Enable Surface Mesh</label>
               <input
                 type="checkbox"
                 checked={params.enableSurfaceMeshing}
                 onChange={(e) => updateParam('enableSurfaceMeshing', e.target.checked)}
-                className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-cyan-600"
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
               />
             </div>
             
@@ -1091,8 +1091,8 @@ export default function FluidSimulationEditor({
             <button
               onClick={bakeToMesh}
               disabled={isBaking}
-              className="w-full mt-3 p-2 rounded bg-sky-600 hover:bg-sky-500 
-                       disabled:bg-slate-700 disabled:text-slate-500
+              className="w-full mt-3 p-2 rounded bg-[var(--aethel-info)] hover:bg-sky-500 
+                       disabled:bg-[var(--aethel-surface-quaternary)] disabled:text-[var(--aethel-text-tertiary)]
                        transition-colors flex items-center justify-center gap-2"
             >
               {isBaking ? (
@@ -1111,9 +1111,9 @@ export default function FluidSimulationEditor({
           
           {/* Volume ID */}
           {volumeId && (
-            <div className="mt-4 pt-4 border-t border-slate-700">
-              <div className="text-xs text-slate-500">
-                Volume ID: <span className="font-mono text-slate-400">{volumeId}</span>
+            <div className="mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">
+              <div className="text-xs text-[var(--aethel-text-tertiary)]">
+                Volume ID: <span className="font-mono text-[var(--aethel-text-secondary)]">{volumeId}</span>
               </div>
             </div>
           )}

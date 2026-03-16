@@ -40,26 +40,26 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[160px]" />
+        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
 
       <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6 pb-16 pt-12">
-        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-8">
+        <div className="w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8">
           {isSuccess ? (
             <div className="text-center">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
                 <CheckCircle className="h-8 w-8 text-emerald-400" />
               </div>
               <h1 className="text-2xl font-bold">Verifique seu email</h1>
-              <p className="mt-3 text-sm text-slate-400">
-                Se existir uma conta com <span className="text-white">{email}</span>, voce recebera um link de redefinicao em instantes.
+              <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
+                Se existir uma conta com <span className="text-[var(--aethel-text-primary)]">{email}</span>, voce recebera um link de redefinicao em instantes.
               </p>
-              <p className="mt-3 text-xs text-slate-500">Nao encontrou? Verifique sua caixa de spam.</p>
+              <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">Nao encontrou? Verifique sua caixa de spam.</p>
               <Link
                 href="/login"
                 className="aethel-button aethel-button-ghost mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
@@ -75,17 +75,17 @@ export default function ForgotPasswordPage() {
                   <Mail className="h-8 w-8 text-blue-300" />
                 </div>
                 <h1 className="text-2xl font-bold">Esqueceu a senha?</h1>
-                <p className="mt-2 text-sm text-slate-400">Vamos enviar as instrucoes para redefinir sua senha.</p>
+                <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Vamos enviar as instrucoes para redefinir sua senha.</p>
               </div>
 
               {error && (
-                <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+                <div className="rounded-xl border border-red-500/40 bg-[var(--aethel-error)]/10 p-3 text-sm text-red-200">
                   {error}
                 </div>
               )}
 
               <div>
-                <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-300">
+                <label htmlFor="email" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
                   Email
                 </label>
                 <input
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   required
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
                 />
               </div>
 

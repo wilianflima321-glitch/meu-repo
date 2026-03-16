@@ -81,11 +81,11 @@ export default function BillingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <StudioGlobalNav title="Billing" subtitle="Planos, consumo e faturamento do workspace." />
         <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
           <div className="aethel-card aethel-p-6">
-            <p className="text-sm text-slate-400">Carregando planos...</p>
+            <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando planos...</p>
           </div>
         </div>
       </div>
@@ -94,12 +94,12 @@ export default function BillingPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <StudioGlobalNav title="Billing" subtitle="Planos, consumo e faturamento do workspace." />
         <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
           <div className="aethel-card aethel-p-6 max-w-md">
             <h1 className="text-xl font-bold mb-2">Falha ao carregar billing</h1>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-[var(--aethel-text-secondary)]">
               Nao foi possivel recuperar os planos neste momento. Tente novamente em instantes.
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <StudioGlobalNav
         title="Billing"
         subtitle="Controle de uso, previsibilidade de custos e upgrade instantaneo."
@@ -119,20 +119,20 @@ export default function BillingPage() {
         <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
           <div>
             <h2 className="text-3xl font-bold">Planos e Consumo</h2>
-            <p className="text-slate-400 text-sm">
+            <p className="text-[var(--aethel-text-secondary)] text-sm">
               Ajuste plano mensal/anual e acompanhe limites em tempo real.
             </p>
           </div>
           <div className="aethel-flex aethel-gap-2">
             <button
               onClick={() => setCurrency('BRL')}
-              className={`px-4 py-2 aethel-rounded ${currency === 'BRL' ? 'bg-slate-200 text-slate-900' : 'bg-slate-800 text-slate-300'}`}
+              className={`px-4 py-2 aethel-rounded ${currency === 'BRL' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
             >
               BRL
             </button>
             <button
               onClick={() => setCurrency('USD')}
-              className={`px-4 py-2 aethel-rounded ${currency === 'USD' ? 'bg-slate-200 text-slate-900' : 'bg-slate-800 text-slate-300'}`}
+              className={`px-4 py-2 aethel-rounded ${currency === 'USD' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
             >
               USD
             </button>
@@ -140,16 +140,16 @@ export default function BillingPage() {
         </div>
 
         <div className="mb-6">
-          <div className="inline-flex aethel-items-center aethel-gap-2 rounded-full border border-slate-800 bg-slate-900/50 aethel-p-1">
+          <div className="inline-flex aethel-items-center aethel-gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] aethel-p-1">
             <button
               onClick={() => setBillingCycle('month')}
-              className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'month' ? 'bg-slate-200 text-slate-900' : 'text-slate-300'}`}
+              className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'month' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}`}
             >
               Mensal
             </button>
             <button
               onClick={() => setBillingCycle('year')}
-              className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'year' ? 'bg-slate-200 text-slate-900' : 'text-slate-300'}`}
+              className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'year' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}`}
             >
               Anual (-20%)
             </button>
@@ -161,7 +161,7 @@ export default function BillingPage() {
             <h2 className="text-xl font-bold">Uso atual</h2>
             <button
               onClick={() => setShowUsage((prev) => !prev)}
-              className="text-sm text-slate-400 hover:text-slate-100"
+              className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
               {showUsage ? 'Ocultar detalhes' : 'Mostrar detalhes'}
             </button>
@@ -182,29 +182,29 @@ export default function BillingPage() {
             return (
               <div
                 key={plan.id}
-                className={`aethel-card aethel-p-6 aethel-flex aethel-flex-col ${plan.popular ? 'border border-slate-500' : ''}`}
+                className={`aethel-card aethel-p-6 aethel-flex aethel-flex-col ${plan.popular ? 'border border-[var(--aethel-border-secondary)]' : ''}`}
               >
                 <div className="aethel-flex aethel-items-center aethel-justify-between mb-2">
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   {plan.popular ? <span className="badge badge-primary">Recomendado</span> : null}
                 </div>
-                <p className="text-sm text-slate-400 mb-4">{plan.description || 'Plano sem descricao detalhada.'}</p>
+                <p className="text-sm text-[var(--aethel-text-secondary)] mb-4">{plan.description || 'Plano sem descricao detalhada.'}</p>
 
                 <div className="mb-4">
                   <span className="text-3xl font-bold">{formatPrice(displayPrice, currency)}</span>
-                  <span className="text-slate-400">/{billingCycle === 'year' ? 'ano' : 'mes'}</span>
+                  <span className="text-[var(--aethel-text-secondary)]">/{billingCycle === 'year' ? 'ano' : 'mes'}</span>
                 </div>
 
-                <div className="mb-4 aethel-p-3 bg-slate-900 aethel-rounded border border-slate-800">
-                  <span className="text-2xl font-bold text-slate-100">{formatTokens(tokens)}</span>
-                  <span className="text-slate-400 text-sm"> tokens/mes</span>
+                <div className="mb-4 aethel-p-3 bg-[var(--aethel-surface-secondary)] aethel-rounded border border-[var(--aethel-border-primary)]">
+                  <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">{formatTokens(tokens)}</span>
+                  <span className="text-[var(--aethel-text-secondary)] text-sm"> tokens/mes</span>
                 </div>
 
                 <ul className="flex-1 space-y-2 mb-4">
                   {(plan.features || []).slice(0, 6).map((feature) => (
                     <li key={feature} className="aethel-flex items-start aethel-gap-2 text-sm">
-                      <span className="text-green-400">+</span>
-                      <span className="text-slate-300">{feature}</span>
+                      <span className="text-[var(--aethel-success)]">+</span>
+                      <span className="text-[var(--aethel-text-secondary)]">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -222,10 +222,10 @@ export default function BillingPage() {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-slate-400 text-sm">
+          <p className="text-[var(--aethel-text-secondary)] text-sm">
             Os limites de IA, execucao e deploy variam por plano. Upgrade e downgrade sao aplicados sem migracao manual.
           </p>
-          <p className="mt-2 text-slate-500 text-xs">
+          <p className="mt-2 text-[var(--aethel-text-tertiary)] text-xs">
             Checkout seguro via Stripe | Cancelamento a qualquer momento
           </p>
         </div>

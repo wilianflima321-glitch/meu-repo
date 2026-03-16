@@ -92,9 +92,9 @@ export default function AIEnhancements() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Melhorias Avançadas de IA</h1>
-          <p className='text-sm text-zinc-500'>Roadmap operacional com controle de status e aprovação.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Roadmap operacional com controle de status e aprovação.</p>
         </div>
-        <button onClick={fetchEnhancements} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>
+        <button onClick={fetchEnhancements} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
         </button>
       </div>
@@ -105,7 +105,7 @@ export default function AIEnhancements() {
         </div>
       )}
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6'>
         <h2 className='text-xl font-semibold mb-4'>Criar nova melhoria</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <input
@@ -134,13 +134,13 @@ export default function AIEnhancements() {
         <button
           onClick={handleCreate}
           disabled={saving || !form.name.trim()}
-          className='mt-4 px-4 py-2 rounded bg-blue-600 text-white text-sm disabled:opacity-50'
+          className='mt-4 px-4 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
         >
           {saving ? 'Salvando...' : 'Adicionar'}
         </button>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
           <h2 className='text-xl font-semibold'>Pipeline de melhorias</h2>
           <div className='flex gap-2'>
@@ -164,25 +164,25 @@ export default function AIEnhancements() {
           </div>
         </div>
         {loading ? (
-          <p className='text-sm text-zinc-500'>Carregando melhorias...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando melhorias...</p>
         ) : filteredItems.length === 0 ? (
-          <p className='text-sm text-zinc-500'>Nenhuma melhoria encontrada.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma melhoria encontrada.</p>
         ) : (
           <div className='space-y-4'>
             {filteredItems.map((item) => (
-              <div key={item.id} className='p-4 bg-zinc-900/70 rounded-lg border'>
+              <div key={item.id} className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg border'>
                 <div className='flex items-center justify-between'>
                   <div>
                     <h3 className='text-lg font-semibold'>{item.name}</h3>
-                    <p className='text-sm text-zinc-500'>{item.description || 'Sem descrição'}</p>
+                    <p className='text-sm text-[var(--aethel-text-tertiary)]'>{item.description || 'Sem descrição'}</p>
                   </div>
-                  <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>
+                  <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
                     {statusLabels[item.status] ?? item.status}
                   </span>
                 </div>
                 <button
                   onClick={() => toggleApplied(item)}
-                  className='mt-3 px-3 py-2 rounded bg-zinc-900 text-white text-sm'
+                  className='mt-3 px-3 py-2 rounded bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] text-sm'
                 >
                   {item.applied ? 'Reverter' : 'Aplicar'}
                 </button>

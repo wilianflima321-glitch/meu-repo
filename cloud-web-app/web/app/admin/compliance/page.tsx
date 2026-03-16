@@ -46,34 +46,34 @@ export default function Compliance() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Compliance e Privacidade</h1>
-          <p className='text-zinc-400'>Políticas legais e auditorias de conformidade.</p>
+          <p className='text-[var(--aethel-text-secondary)]'>Políticas legais e auditorias de conformidade.</p>
           {lastUpdated && (
-            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchPolicies}
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'
+          className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
         >
           Atualizar
         </button>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Políticas monitoradas</h3>
           <p className='text-2xl font-bold text-blue-600'>{summary.total}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Incidentes críticos</h3>
-          <p className='text-2xl font-bold text-red-600'>{summary.incidents}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-error)]'>{summary.incidents}</p>
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow overflow-hidden'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow overflow-hidden'>
         <table className='w-full table-auto'>
           <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
+            <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
               <th className='p-2 text-left'>Política</th>
               <th className='p-2 text-left'>Status</th>
               <th className='p-2 text-left'>Última auditoria</th>
@@ -83,15 +83,15 @@ export default function Compliance() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={4}>Carregando políticas...</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={4}>Carregando políticas...</td>
               </tr>
             ) : error ? (
               <tr>
-                <td className='p-2 text-sm text-red-500' colSpan={4}>{error}</td>
+                <td className='p-2 text-sm text-[var(--aethel-error)]' colSpan={4}>{error}</td>
               </tr>
             ) : policies.length === 0 ? (
               <tr>
-                <td className='p-2 text-sm text-zinc-500' colSpan={4}>Nenhuma política configurada.</td>
+                <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={4}>Nenhuma política configurada.</td>
               </tr>
             ) : (
               policies.map((policy) => (
@@ -103,7 +103,7 @@ export default function Compliance() {
                         ? 'bg-emerald-500/15 text-emerald-300'
                         : policy.status === 'review'
                         ? 'bg-amber-500/15 text-amber-300'
-                        : 'bg-zinc-800/70 text-zinc-400'
+                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}>
                       {policy.status === 'active'
                         ? 'Ativa'
@@ -123,7 +123,7 @@ export default function Compliance() {
         </table>
       </div>
 
-      <div className='mt-6 bg-zinc-900/60 border border-zinc-700 rounded-lg p-4 text-sm text-zinc-400'>
+      <div className='mt-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4 text-sm text-[var(--aethel-text-secondary)]'>
         Limitação: políticas são calculadas a partir de logs de auditoria. Para automações legais completas,
         integrar serviços externos de conformidade.
       </div>

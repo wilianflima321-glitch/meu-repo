@@ -97,24 +97,24 @@ export default function DownloadPage() {
   const CurrentIcon = current.icon
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[160px]" />
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
 
       <main className="relative z-10">
         <section className="mx-auto max-w-5xl px-6 pt-14 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
             <DownloadIcon />
             Versao {current.version} disponivel
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">
             Download <span className="gradient-text">Aethel Studio</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
             IDE e studio operacional para Apps e Research. Games e Films seguem em fase experimental.
           </p>
         </section>
@@ -132,8 +132,8 @@ export default function DownloadPage() {
                   onClick={() => setSelectedPlatform(platform)}
                   className={`flex items-center gap-3 rounded-2xl border px-5 py-4 text-left transition-all ${
                     isSelected
-                      ? 'border-blue-500/40 bg-blue-500/10 text-white'
-                      : 'border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20'
+                      ? 'border-blue-500/40 bg-[var(--aethel-primary)]/10 text-[var(--aethel-text-primary)]'
+                      : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
                   }`}
                 >
                   <Icon />
@@ -146,7 +146,7 @@ export default function DownloadPage() {
             })}
           </div>
 
-          <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-8">
+          <div className="mt-8 rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
               <div className="flex-1">
                 <div className="flex items-center gap-4">
@@ -155,10 +155,10 @@ export default function DownloadPage() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Aethel para {current.name}</h2>
-                    <p className="text-slate-400">Versao {current.version} ? {current.size}</p>
+                    <p className="text-[var(--aethel-text-secondary)]">Versao {current.version} ? {current.size}</p>
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-slate-500">Requisitos: {current.requirements}</p>
+                <p className="mt-4 text-sm text-[var(--aethel-text-tertiary)]">Requisitos: {current.requirements}</p>
                 <a
                   href={`/downloads/${current.file}`}
                   className="aethel-button aethel-button-primary mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
@@ -169,12 +169,12 @@ export default function DownloadPage() {
                 </a>
               </div>
 
-              <div className="md:w-px md:self-stretch md:bg-white/10" />
+              <div className="md:w-px md:self-stretch md:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]" />
 
               <div className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Incluido</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Incluido</h3>
                 {features.slice(0, 4).map((feature) => (
-                  <div key={feature} className="flex items-center gap-2 text-sm text-slate-300">
+                  <div key={feature} className="flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)]">
                     <CheckIcon />
                     <span>{feature}</span>
                   </div>
@@ -183,7 +183,7 @@ export default function DownloadPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-center text-sm text-slate-500">
+          <div className="mt-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <a href="/downloads/checksums.txt" className="text-blue-400 hover:underline">
               Verificar checksums SHA-256
             </a>
@@ -202,9 +202,9 @@ export default function DownloadPage() {
           <h2 className="text-2xl font-bold text-center">Tudo o que voce precisa para iterar</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {features.map((feature) => (
-              <div key={feature} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div key={feature} className="flex items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4">
                 <CheckIcon />
-                <span className="text-sm text-slate-300">{feature}</span>
+                <span className="text-sm text-[var(--aethel-text-secondary)]">{feature}</span>
               </div>
             ))}
           </div>
@@ -212,7 +212,7 @@ export default function DownloadPage() {
 
         <section className="mx-auto max-w-4xl px-6 pb-20 text-center">
           <h2 className="text-2xl font-bold">Prefere usar no navegador?</h2>
-          <p className="mt-3 text-slate-400">
+          <p className="mt-3 text-[var(--aethel-text-secondary)]">
             Abra o Aethel Studio diretamente no browser, com os mesmos recursos do desktop.
           </p>
           <Link

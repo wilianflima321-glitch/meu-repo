@@ -39,9 +39,9 @@ function stateStyles(state: SurfaceState) {
     case 'partial':
       return 'border-amber-500/30 bg-amber-500/10 text-amber-200'
     case 'unhealthy':
-      return 'border-red-500/30 bg-red-500/10 text-red-300'
+      return 'border-red-500/30 bg-[var(--aethel-error)]/10 text-red-300'
     default:
-      return 'border-slate-500/20 bg-slate-500/10 text-slate-300'
+      return 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-border-secondary)_10%,transparent)] text-[var(--aethel-text-secondary)]'
   }
 }
 
@@ -233,10 +233,10 @@ export default function StatusPage() {
           : 'Atualizando checks operacionais em tempo real.'
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-emerald-600/[0.05] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-blue-600/[0.05] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-[var(--aethel-primary-dark)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
@@ -244,11 +244,11 @@ export default function StatusPage() {
       <main className="relative z-10 px-6 pb-16 pt-12">
         <div className="mx-auto max-w-5xl">
           <header className="mb-10 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-sky-300">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-sky-300">
               Status publico
             </div>
             <h1 className="text-4xl font-bold sm:text-5xl">Runtime baseado em evidencia</h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-400">
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
               Esta pagina nao inventa uptime. Ela mostra apenas o que os checks publicos conseguem provar agora.
             </p>
           </header>
@@ -293,9 +293,9 @@ export default function StatusPage() {
             })}
           </section>
 
-          <section className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="text-xl font-semibold text-white">Limites desta pagina</h2>
-            <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
+          <section className="mt-10 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-6">
+            <h2 className="text-xl font-semibold text-[var(--aethel-text-primary)]">Limites desta pagina</h2>
+            <ul className="mt-4 space-y-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
               <li>Checks publicos nao substituem evidencia de producao para L4/L5.</li>
               <li>Historico de incidentes e uptime rolling ainda nao sao publicados aqui.</li>
               <li>Billing pode aparecer parcial mesmo com pricing publico pronto, porque depende de runtime real do gateway.</li>

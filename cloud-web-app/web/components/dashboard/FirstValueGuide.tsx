@@ -118,7 +118,7 @@ export function FirstValueGuide({
       : 'Session in progress'
 
   return (
-    <section className="aethel-m-4 aethel-rounded-lg border border-blue-500/30 bg-blue-500/10 aethel-p-4 md:aethel-m-6">
+    <section className="aethel-m-4 aethel-rounded-lg border border-[var(--aethel-primary)]/30 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] aethel-p-4 md:aethel-m-6">
       <div className="aethel-flex aethel-flex-col aethel-gap-4 md:flex-row md:aethel-items-center md:aethel-justify-between">
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-[var(--aethel-primary-light)]">Primeiro valor em menos de 2 minutos</h3>
@@ -126,9 +126,9 @@ export function FirstValueGuide({
             Crie um projeto, configure o provider de IA e abra o preview da IDE com um starter pronto para iteracao.
           </p>
           <div className="mt-3">
-            <div className="h-1.5 w-full rounded-full bg-slate-800/70">
+            <div className="h-1.5 w-full rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">
               <div
-                className="h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300"
+                className="h-1.5 rounded-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info-light)] transition-all duration-300"
                 style={{ width: `${Math.round(completionRatio * 100)}%` }}
               />
             </div>
@@ -143,44 +143,44 @@ export function FirstValueGuide({
             <li>{firstIdeOpened ? '[OK]' : '[ ]'} IDE live preview aberta ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
           </ul>
 
-          <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
+          <div className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">First value session</p>
-              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
+              <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                 {sessionStatusLabel}
               </span>
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              <div className="rounded border border-white/10 bg-slate-900/50 p-2">
+              <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
                 <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Started</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">
                   {sessionSummary.startedAt ? new Date(sessionSummary.startedAt).toLocaleTimeString() : '--'}
                 </p>
               </div>
-              <div className="rounded border border-white/10 bg-slate-900/50 p-2">
+              <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
                 <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Duration</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.durationMs)}</p>
               </div>
-              <div className="rounded border border-white/10 bg-slate-900/50 p-2">
+              <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
                 <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Target</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.targetMs)}</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/40 p-3">
+          <div className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Preview readiness</p>
-              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
+              <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                 {previewReadiness?.strategy || 'unknown'}
               </span>
               {previewReadiness?.managedProvider && (
-              <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
+              <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                   {previewReadiness.managedProviderLabel || previewReadiness.managedProvider}
                 </span>
               )}
               {previewReadiness?.status && (
-                <span className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
+                <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                   {previewReadiness.status}
                 </span>
               )}
@@ -208,7 +208,7 @@ export function FirstValueGuide({
                 {previewReadiness.recommendedCommands.slice(0, 2).map((command) => (
                   <code
                     key={command}
-                    className="rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-[10px] text-[var(--aethel-info)]"
+                    className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-info)]"
                   >
                     {command}
                   </code>
@@ -225,7 +225,7 @@ export function FirstValueGuide({
                   key={template.id}
                   type="button"
                   onClick={() => onStartTemplate(template.id)}
-                  className="rounded-lg border border-white/10 bg-slate-950/40 p-3 text-left transition-colors hover:border-blue-400/40 hover:bg-slate-900/70"
+                  className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3 text-left transition-colors hover:border-[color-mix(in_srgb,var(--aethel-primary-light)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
                 >
                   <div className="text-xs font-semibold text-[var(--aethel-text-primary)]">{template.label}</div>
                   <div className="mt-1 text-[11px] text-[var(--aethel-text-secondary)]">{template.description}</div>

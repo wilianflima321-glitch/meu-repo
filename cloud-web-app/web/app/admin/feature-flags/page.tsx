@@ -95,9 +95,9 @@ export default function FeatureFlagsAdmin() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Flags de recursos</h1>
-          <p className='text-sm text-zinc-500'>Controle de distribuição e habilitação por ambiente.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle de distribuição e habilitação por ambiente.</p>
         </div>
-        <button onClick={fetchFlags} className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm'>Atualizar</button>
+        <button onClick={fetchFlags} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
 
       {error && (
@@ -106,7 +106,7 @@ export default function FeatureFlagsAdmin() {
         </div>
       )}
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6'>
         <h2 className='text-xl font-semibold mb-4'>Nova flag</h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <input
@@ -148,14 +148,14 @@ export default function FeatureFlagsAdmin() {
           <button
             onClick={createFlag}
             disabled={saving || !form.key.trim() || !form.name.trim()}
-            className='px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50'
+            className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
           >
             {saving ? 'Salvando...' : 'Criar flag'}
           </button>
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow'>
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-xl font-semibold'>Flags ativas</h2>
           <input
@@ -166,13 +166,13 @@ export default function FeatureFlagsAdmin() {
           />
         </div>
         {loading ? (
-          <p className='text-sm text-zinc-500'>Carregando flags...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando flags...</p>
         ) : filtered.length === 0 ? (
-          <p className='text-sm text-zinc-500'>Nenhuma flag encontrada.</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Nenhuma flag encontrada.</p>
         ) : (
           <table className='w-full table-auto'>
             <thead>
-              <tr className='bg-zinc-800/70'>
+              <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
                 <th className='p-2 text-left'>Chave</th>
                 <th className='p-2 text-left'>Nome</th>
                 <th className='p-2 text-left'>Tipo</th>
@@ -191,14 +191,14 @@ export default function FeatureFlagsAdmin() {
                     {flag.type === 'percentage' ? `${flag.percentage ?? 0}%` : '—'}
                   </td>
                   <td className='p-2'>
-                    <span className='text-xs px-2 py-1 rounded bg-zinc-800/70 text-zinc-400'>
+                    <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
                       {flag.enabled ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
                   <td className='p-2'>
                     <button
                       onClick={() => toggleFlag(flag.key, flag.enabled)}
-                      className='px-2 py-1 bg-zinc-900 text-white rounded text-sm'
+                      className='px-2 py-1 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded text-sm'
                     >
                       {flag.enabled ? 'Desativar' : 'Ativar'}
                     </button>

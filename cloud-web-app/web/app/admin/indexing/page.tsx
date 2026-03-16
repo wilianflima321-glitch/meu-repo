@@ -71,14 +71,14 @@ export default function IndexingPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Indexação avançada</h1>
-          <p className="text-sm text-zinc-500">Controle de indexação RAG com auditoria.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Controle de indexação RAG com auditoria.</p>
         </div>
-        <button onClick={fetchData} className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm">Atualizar</button>
+        <button onClick={fetchData} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
 
       {error && <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">{error}</div>}
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Busca no projeto</h2>
         <div className="flex gap-4">
           <input
@@ -88,11 +88,11 @@ export default function IndexingPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="border p-2 flex-1"
           />
-          <button onClick={fetchData} className="bg-blue-600 text-white px-4 py-2 rounded">Buscar</button>
+          <button onClick={fetchData} className="bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded">Buscar</button>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Configurações de contexto</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -104,27 +104,27 @@ export default function IndexingPage() {
             <input type="number" value={maxFileSizeMb} onChange={(e) => setMaxFileSizeMb(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
-        <button onClick={updateConfig} disabled={saving} className="mt-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50">
+        <button onClick={updateConfig} disabled={saving} className="mt-4 bg-green-600 text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">
           {saving ? 'Salvando...' : 'Atualizar configurações'}
         </button>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Arquivos Indexados</h2>
         {loading ? (
-          <p className="text-sm text-zinc-500">Carregando arquivos...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando arquivos...</p>
         ) : (
           <ul>
             {files.map(file => (
               <li key={file.id} className="flex justify-between items-center p-2 border-b">
                 <div>
                   <h3 className="font-semibold">{file.name}</h3>
-                  <p className="text-sm text-zinc-400">{file.path}</p>
+                  <p className="text-sm text-[var(--aethel-text-secondary)]">{file.path}</p>
                   <p className="text-sm">{file.context || 'Sem contexto'}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 rounded text-xs bg-zinc-800/70">{file.indexed ? 'Indexado' : 'Não Indexado'}</span>
-                  <button onClick={() => toggleIndex(file)} className="bg-yellow-500 text-white px-3 py-1 rounded text-sm">Alternar</button>
+                  <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">{file.indexed ? 'Indexado' : 'Não Indexado'}</span>
+                  <button onClick={() => toggleIndex(file)} className="bg-yellow-500 text-[var(--aethel-text-primary)] px-3 py-1 rounded text-sm">Alternar</button>
                 </div>
               </li>
             ))}

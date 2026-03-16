@@ -109,25 +109,25 @@ function MetricCard({
   const isNegative = trend === 'down' || (change && change < 0);
   
   return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-zinc-500 uppercase tracking-wider">{title}</span>
-        <Icon className="w-4 h-4 text-zinc-500" />
+        <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase tracking-wider">{title}</span>
+        <Icon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-white">
+        <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
           {prefix}{typeof value === 'number' ? value.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : value}{suffix}
         </span>
         {change !== undefined && (
           <span className={`text-xs flex items-center ${
-            isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-zinc-500'
+            isPositive ? 'text-[var(--aethel-success)]' : isNegative ? 'text-red-400' : 'text-[var(--aethel-text-tertiary)]'
           }`}>
             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : isNegative ? <ArrowDownRight className="w-3 h-3" /> : null}
             {Math.abs(change).toFixed(1)}%
           </span>
         )}
       </div>
-      {subtitle && <p className="text-xs text-zinc-500 mt-1">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subtitle}</p>}
     </div>
   );
 }
@@ -137,8 +137,8 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
   const total = data.reduce((sum, item) => sum + item.cost, 0);
   
   return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
+      <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
         <Bot className="w-4 h-4" />
         Custo de IA por modelo
       </h3>
@@ -148,12 +148,12 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
         {data.map((item, i) => (
           <div key={item.model}>
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-zinc-300">{item.model}</span>
-              <span className="text-zinc-500">
+              <span className="text-[var(--aethel-text-secondary)]">{item.model}</span>
+              <span className="text-[var(--aethel-text-tertiary)]">
                 ${item.cost.toFixed(2)} ({item.percentage.toFixed(1)}%)
               </span>
             </div>
-            <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
+            <div className="h-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] rounded-full overflow-hidden">
               <div 
                 className="h-full rounded-full transition-all duration-500"
                 style={{ 
@@ -162,17 +162,17 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
                 }}
               />
             </div>
-            <p className="text-[10px] text-zinc-500 mt-0.5">
+            <p className="text-[10px] text-[var(--aethel-text-tertiary)] mt-0.5">
               {item.calls.toLocaleString()} chamadas
             </p>
           </div>
         ))}
       </div>
       
-      <div className="mt-4 pt-4 border-t border-zinc-700">
+      <div className="mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">
         <div className="flex justify-between text-sm">
-          <span className="text-zinc-500">Custo total de IA hoje</span>
-          <span className="text-white font-medium">${total.toFixed(2)}</span>
+          <span className="text-[var(--aethel-text-tertiary)]">Custo total de IA hoje</span>
+          <span className="text-[var(--aethel-text-primary)] font-medium">${total.toFixed(2)}</span>
         </div>
       </div>
     </div>
@@ -189,8 +189,8 @@ function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] })
   };
   
   return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
+      <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
         <PieChart className="w-4 h-4" />
         Receita por plano
       </h3>
@@ -204,10 +204,10 @@ function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] })
             />
             <div className="flex-1">
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-300 capitalize">{item.plan}</span>
-                <span className="text-white font-medium">${item.revenue.toLocaleString()}</span>
+                <span className="text-[var(--aethel-text-secondary)] capitalize">{item.plan}</span>
+                <span className="text-[var(--aethel-text-primary)] font-medium">${item.revenue.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-xs text-zinc-500">
+              <div className="flex justify-between text-xs text-[var(--aethel-text-tertiary)]">
                 <span>{item.users} usuários</span>
                 <span>{item.percentage.toFixed(1)}%</span>
               </div>
@@ -222,12 +222,12 @@ function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] })
 function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
   if (alerts.length === 0) {
     return (
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
+        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-3 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" />
           Alertas financeiros
         </h3>
-        <p className="text-sm text-zinc-500 text-center py-4">
+        <p className="text-sm text-[var(--aethel-text-tertiary)] text-center py-4">
           Nenhum alerta no momento
         </p>
       </div>
@@ -235,8 +235,8 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
   }
   
   return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-4">
-      <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
+      <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-3 flex items-center gap-2">
         <AlertTriangle className="w-4 h-4" />
         Alertas financeiros ({alerts.length})
       </h3>
@@ -246,7 +246,7 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
             key={i}
             className={`p-3 rounded-lg border ${
               alert.type === 'critical' 
-                ? 'bg-red-500/10 border-red-500/30' 
+                ? 'bg-[var(--aethel-error)]/10 border-red-500/30' 
                 : 'bg-yellow-500/10 border-yellow-500/30'
             }`}
           >
@@ -255,7 +255,7 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
             }`}>
               {alert.message}
             </p>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
               {alert.metric}: {alert.value} (limite: {alert.threshold})
             </p>
           </div>
@@ -267,10 +267,10 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
 
 function TransactionsTable({ transactions }: { transactions: FinanceMetrics['recentTransactions'] }) {
   const typeColors: Record<string, string> = {
-    subscription: 'text-green-400',
+    subscription: 'text-[var(--aethel-success)]',
     usage: 'text-blue-400',
     refund: 'text-red-400',
-    credit: 'text-cyan-400'
+    credit: 'text-[var(--aethel-info)]'
   };
 
   const typeLabels: Record<string, string> = {
@@ -281,13 +281,13 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
   };
   
   return (
-    <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="p-4 border-b border-zinc-700 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-white flex items-center gap-2">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg overflow-hidden">
+      <div className="p-4 border-b border-[var(--aethel-border-secondary)] flex items-center justify-between">
+        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] flex items-center gap-2">
           <CreditCard className="w-4 h-4" />
           Transações recentes
         </h3>
-        <button className="text-xs text-zinc-500 hover:text-white flex items-center gap-1">
+        <button className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-1">
           <Download className="w-3 h-3" />
           Exportar
         </button>
@@ -296,34 +296,34 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-700">
-              <th className="text-left text-xs text-zinc-500 font-normal px-4 py-2">Tipo</th>
-              <th className="text-left text-xs text-zinc-500 font-normal px-4 py-2">Usuário</th>
-              <th className="text-left text-xs text-zinc-500 font-normal px-4 py-2">Descrição</th>
-              <th className="text-right text-xs text-zinc-500 font-normal px-4 py-2">Valor</th>
-              <th className="text-right text-xs text-zinc-500 font-normal px-4 py-2">Hora</th>
+            <tr className="border-b border-[var(--aethel-border-secondary)]">
+              <th className="text-left text-xs text-[var(--aethel-text-tertiary)] font-normal px-4 py-2">Tipo</th>
+              <th className="text-left text-xs text-[var(--aethel-text-tertiary)] font-normal px-4 py-2">Usuário</th>
+              <th className="text-left text-xs text-[var(--aethel-text-tertiary)] font-normal px-4 py-2">Descrição</th>
+              <th className="text-right text-xs text-[var(--aethel-text-tertiary)] font-normal px-4 py-2">Valor</th>
+              <th className="text-right text-xs text-[var(--aethel-text-tertiary)] font-normal px-4 py-2">Hora</th>
             </tr>
           </thead>
           <tbody>
             {transactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-zinc-800 hover:bg-zinc-800/80/50">
+              <tr key={tx.id} className="border-b border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]/50">
                 <td className="px-4 py-2">
                   <span className={`capitalize ${typeColors[tx.type]}`}>
                     {typeLabels[tx.type] ?? tx.type}
                   </span>
                 </td>
                 <td className="px-4 py-2">
-                  <span className="text-zinc-300">{tx.userEmail}</span>
+                  <span className="text-[var(--aethel-text-secondary)]">{tx.userEmail}</span>
                 </td>
                 <td className="px-4 py-2">
-                  <span className="text-zinc-500">{tx.description}</span>
+                  <span className="text-[var(--aethel-text-tertiary)]">{tx.description}</span>
                 </td>
                 <td className="px-4 py-2 text-right">
-                  <span className={tx.type === 'refund' ? 'text-red-400' : 'text-green-400'}>
+                  <span className={tx.type === 'refund' ? 'text-red-400' : 'text-[var(--aethel-success)]'}>
                     {tx.type === 'refund' ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-right text-zinc-500">
+                <td className="px-4 py-2 text-right text-[var(--aethel-text-tertiary)]">
                   {new Date(tx.createdAt).toLocaleTimeString()}
                 </td>
               </tr>
@@ -372,7 +372,7 @@ export default function FinanceDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
+        <RefreshCw className="w-6 h-6 text-[var(--aethel-text-tertiary)] animate-spin" />
       </div>
     );
   }
@@ -383,7 +383,7 @@ export default function FinanceDashboard() {
         <p className="text-red-400">{error || 'Sem dados disponíveis'}</p>
         <button 
           onClick={fetchMetrics}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+          className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
         >
           Tentar novamente
         </button>
@@ -391,28 +391,28 @@ export default function FinanceDashboard() {
     );
   }
   
-  const profitColor = metrics.dailyProfit >= 0 ? 'text-green-400' : 'text-red-400';
+  const profitColor = metrics.dailyProfit >= 0 ? 'text-[var(--aethel-success)]' : 'text-red-400';
   
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Saúde financeira</h1>
-          <p className="text-sm text-zinc-500">MRR, custos e métricas de rentabilidade</p>
+          <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)]">Saúde financeira</h1>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">MRR, custos e métricas de rentabilidade</p>
         </div>
         
         <div className="flex items-center gap-3">
           {/* Date Range */}
-          <div className="flex items-center gap-1 bg-zinc-900/70 border border-zinc-700 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
             {(['today', '7d', '30d', 'mtd'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
                 className={`px-3 py-1 text-xs rounded ${
                   dateRange === range 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-zinc-500 hover:text-white'
+                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' 
+                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
                 {range === 'today' ? 'HOJE' : range === '7d' ? '7D' : range === '30d' ? '30D' : 'MTD'}
@@ -425,8 +425,8 @@ export default function FinanceDashboard() {
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-2 rounded-lg border ${
               autoRefresh 
-                ? 'border-green-500/30 bg-green-500/10 text-green-400' 
-                : 'border-zinc-700 text-zinc-500'
+                ? 'border-green-500/30 bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
+                : 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-tertiary)]'
             }`}
             title={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
           >

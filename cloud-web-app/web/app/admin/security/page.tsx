@@ -82,12 +82,12 @@ export default function AdminSecurity() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Seguranca e Logs</h1>
-          <p className='text-zinc-400'>Visao operacional de hardening, eventos criticos e trilha de auditoria.</p>
-          {lastUpdated && <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>}
+          <p className='text-[var(--aethel-text-secondary)]'>Visao operacional de hardening, eventos criticos e trilha de auditoria.</p>
+          {lastUpdated && <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
         <button
           onClick={fetchSecurity}
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm hover:bg-zinc-700/80'
+          className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
         >
           Atualizar
         </button>
@@ -99,7 +99,7 @@ export default function AdminSecurity() {
         </div>
       )}
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Eventos</h3>
           <p className='text-2xl font-bold text-blue-300'>{data?.stats.total ?? 0}</p>
@@ -114,20 +114,20 @@ export default function AdminSecurity() {
         </div>
       </div>
 
-      <div className='mb-6 bg-zinc-900/70 rounded-lg shadow p-4'>
+      <div className='mb-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <h2 className='text-xl font-semibold mb-4'>Configuracoes de Seguranca</h2>
         {loading ? (
-          <p className='text-sm text-zinc-500'>Carregando configuracoes...</p>
+          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Carregando configuracoes...</p>
         ) : (
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>
               <div>
                 <p className='font-medium'>2FA obrigatorio</p>
-                <p className='text-xs text-zinc-500'>Controlado por ambiente e politica global de autenticacao.</p>
+                <p className='text-xs text-[var(--aethel-text-tertiary)]'>Controlado por ambiente e politica global de autenticacao.</p>
               </div>
               <span
                 className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.enforce2FA ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
+                  data?.settings.enforce2FA ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
@@ -136,11 +136,11 @@ export default function AdminSecurity() {
             <div className='flex items-center justify-between'>
               <div>
                 <p className='font-medium'>Bloqueio de IP suspeito</p>
-                <p className='text-xs text-zinc-500'>Controlado por regras server-side e observabilidade de rede.</p>
+                <p className='text-xs text-[var(--aethel-text-tertiary)]'>Controlado por regras server-side e observabilidade de rede.</p>
               </div>
               <span
                 className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.blockSuspiciousIps ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
+                  data?.settings.blockSuspiciousIps ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
@@ -150,7 +150,7 @@ export default function AdminSecurity() {
         )}
       </div>
 
-      <div className='bg-zinc-900/70 rounded-lg shadow p-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex items-center justify-between mb-4 gap-3'>
           <h2 className='text-xl font-semibold'>Logs de Auditoria</h2>
           <input
@@ -158,12 +158,12 @@ export default function AdminSecurity() {
             placeholder='Buscar por acao, admin ou IP'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className='border border-zinc-700 bg-zinc-950/60 p-2 rounded text-sm text-zinc-100 placeholder:text-zinc-500'
+            className='border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] p-2 rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]'
           />
         </div>
         <table className='w-full'>
           <thead>
-            <tr className='bg-zinc-800/70 text-sm'>
+            <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
               <th className='p-3 text-left'>Acao</th>
               <th className='p-3 text-left'>Admin</th>
               <th className='p-3 text-left'>Severidade</th>
@@ -174,15 +174,15 @@ export default function AdminSecurity() {
           <tbody>
             {loading ? (
               <tr>
-                <td className='p-3 text-sm text-zinc-500' colSpan={5}>Carregando logs...</td>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Carregando logs...</td>
               </tr>
             ) : filteredLogs.length === 0 ? (
               <tr>
-                <td className='p-3 text-sm text-zinc-500' colSpan={5}>Nenhum log encontrado.</td>
+                <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={5}>Nenhum log encontrado.</td>
               </tr>
             ) : (
               filteredLogs.map((log) => (
-                <tr key={log.id} className='border-t border-zinc-800/70'>
+                <tr key={log.id} className='border-t border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]'>
                   <td className='p-3'>{log.action || '?'}</td>
                   <td className='p-3'>{log.adminEmail || '?'}</td>
                   <td className='p-3'>
@@ -192,7 +192,7 @@ export default function AdminSecurity() {
                           ? 'bg-rose-500/15 text-rose-300'
                           : log.severity === 'warning'
                             ? 'bg-amber-500/15 text-amber-300'
-                            : 'bg-zinc-800/70 text-zinc-400'
+                            : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >
                       {severityLabels[log.severity || 'info'] ?? log.severity ?? 'informacao'}

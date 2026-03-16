@@ -168,10 +168,10 @@ const StatusIcon: React.FC<{ status: ServiceStatus['status'] }> = ({ status }) =
 
 const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({ service, onFix }) => {
   const statusColors = {
-    online: 'border-emerald-500/30 bg-emerald-500/5',
-    offline: 'border-rose-500/30 bg-rose-500/5',
-    warning: 'border-yellow-500/30 bg-yellow-500/5',
-    checking: 'border-sky-500/30 bg-sky-500/5',
+    online: 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_5%,transparent)]',
+    offline: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_5%,transparent)]',
+    warning: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5',
+    checking: 'border-sky-500/30 bg-[var(--aethel-info)]/5',
   }
 
   return (
@@ -212,9 +212,9 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
 
 const ResourceBar: React.FC<{ label: string; value: number; icon: React.ReactNode }> = ({ label, value, icon }) => {
   const getColor = (val: number) => {
-    if (val < 50) return 'bg-emerald-400'
-    if (val < 80) return 'bg-yellow-400'
-    return 'bg-rose-400'
+    if (val < 50) return 'bg-[var(--aethel-success-light)]'
+    if (val < 80) return 'bg-[var(--aethel-warning-light)]'
+    return 'bg-[var(--aethel-error-light)]'
   }
 
   return (
@@ -225,7 +225,7 @@ const ResourceBar: React.FC<{ label: string; value: number; icon: React.ReactNod
           <span className="text-[var(--aethel-text-secondary)]">{label}</span>
           <span className="text-[var(--aethel-text-tertiary)]">{value.toFixed(0)}%</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-white/10">
+        <div className="h-2 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
           <div className={`h-full ${getColor(value)} transition-all duration-500`} style={{ width: `${value}%` }} />
         </div>
       </div>
@@ -290,7 +290,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
   return (
     <div className={`aethel-card ${className}`}>
       <div
-        className="flex cursor-pointer flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition-colors hover:bg-white/[0.03]"
+        className="flex cursor-pointer flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-3">
@@ -349,7 +349,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
             ))}
           </div>
 
-          <div className="border-t border-white/10 pt-4">
+          <div className="border-t border-[var(--aethel-border-subtle)] pt-4">
             <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--aethel-text-tertiary)]">Recursos do sistema</h4>
             <div className="space-y-3">
               <ResourceBar label="CPU" value={resources.cpuUsage} icon={<Cpu className="h-4 w-4" />} />
@@ -366,7 +366,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
           </div>
 
           {hasOffline && (
-            <div className="border-t border-white/10 pt-4">
+            <div className="border-t border-[var(--aethel-border-subtle)] pt-4">
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--aethel-text-tertiary)]">Acoes rapidas</h4>
               <div className="flex flex-wrap gap-2">
                 <button

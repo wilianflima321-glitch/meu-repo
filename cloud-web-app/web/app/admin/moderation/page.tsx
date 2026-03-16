@@ -107,36 +107,36 @@ const TARGET_LABELS: Record<ModerationItem['targetType'], string> = {
 function StatsBar({ stats }: { stats: ModerationStats }) {
   return (
     <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-3">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-zinc-500">Pendentes</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Pendentes</span>
           <Clock className="w-4 h-4 text-yellow-400" />
         </div>
-        <p className="text-xl font-bold text-white mt-1">{stats.pending}</p>
+        <p className="text-xl font-bold text-[var(--aethel-text-primary)] mt-1">{stats.pending}</p>
       </div>
       
-      <div className="bg-zinc-900/70 border border-red-500/30 rounded-lg p-3">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-red-500/30 rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-zinc-500">Urgentes</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Urgentes</span>
           <AlertTriangle className="w-4 h-4 text-red-400" />
         </div>
         <p className="text-xl font-bold text-red-400 mt-1">{stats.urgent}</p>
       </div>
       
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-3">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-zinc-500">Processados hoje</span>
-          <CheckCircle className="w-4 h-4 text-green-400" />
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Processados hoje</span>
+          <CheckCircle className="w-4 h-4 text-[var(--aethel-success)]" />
         </div>
-        <p className="text-xl font-bold text-white mt-1">{stats.todayProcessed}</p>
+        <p className="text-xl font-bold text-[var(--aethel-text-primary)] mt-1">{stats.todayProcessed}</p>
       </div>
       
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-3">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-zinc-500">Tempo médio</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Tempo médio</span>
           <Clock className="w-4 h-4 text-blue-400" />
         </div>
-        <p className="text-xl font-bold text-white mt-1">{stats.avgResponseTime}m</p>
+        <p className="text-xl font-bold text-[var(--aethel-text-primary)] mt-1">{stats.avgResponseTime}m</p>
       </div>
     </div>
   );
@@ -157,10 +157,10 @@ function ItemCard({
   const [showContent, setShowContent] = useState(false);
   
   const priorityColors = {
-    low: 'border-zinc-700 bg-zinc-900/60',
-    normal: 'border-blue-500/30 bg-blue-500/5',
+    low: 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
+    normal: 'border-blue-500/30 bg-[var(--aethel-primary)]/5',
     high: 'border-yellow-500/30 bg-yellow-500/5',
-    urgent: 'border-red-500/30 bg-red-500/10',
+    urgent: 'border-red-500/30 bg-[var(--aethel-error)]/10',
   };
   
   const typeIcons = {
@@ -184,12 +184,12 @@ function ItemCard({
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <TypeIcon className="w-4 h-4 text-zinc-500" />
-          <span className="text-sm text-zinc-300 capitalize">
+          <TypeIcon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+          <span className="text-sm text-[var(--aethel-text-secondary)] capitalize">
             {TYPE_LABELS[item.type]}
           </span>
           {item.priority === 'urgent' && (
-            <span className="px-2 py-0.5 text-xs bg-red-500 text-white rounded">
+            <span className="px-2 py-0.5 text-xs bg-[var(--aethel-error)] text-[var(--aethel-text-primary)] rounded">
               URGENTE
             </span>
           )}
@@ -199,19 +199,19 @@ function ItemCard({
             </span>
           )}
         </div>
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">
           {new Date(item.createdAt).toLocaleString()}
         </span>
       </div>
       
       {/* Target Info */}
       <div className="mb-3">
-        <p className="text-sm text-white">
-          <span className="text-zinc-500">Alvo:</span>{' '}
+        <p className="text-sm text-[var(--aethel-text-primary)]">
+          <span className="text-[var(--aethel-text-tertiary)]">Alvo:</span>{' '}
           <span className="capitalize">{TARGET_LABELS[item.targetType]}</span> ({item.targetId.slice(0, 8)}...)
         </p>
         {item.targetOwnerEmail && (
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
             Responsável: {item.targetOwnerEmail}
           </p>
         )}
@@ -219,9 +219,9 @@ function ItemCard({
       
       {/* Reason & Category */}
       {item.reason && (
-        <div className="mb-3 p-2 bg-zinc-800/80 rounded text-sm">
-          <span className="text-zinc-500">Motivo:</span>{' '}
-          <span className="text-zinc-200">{item.reason}</span>
+        <div className="mb-3 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] rounded text-sm">
+          <span className="text-[var(--aethel-text-tertiary)]">Motivo:</span>{' '}
+          <span className="text-[var(--aethel-text-secondary)]">{item.reason}</span>
           {item.category && (
             <span className="ml-2 px-2 py-0.5 text-xs bg-[var(--aethel-surface-quaternary)] rounded capitalize">
               {item.category}
@@ -235,14 +235,14 @@ function ItemCard({
         <div className="mb-3">
           <button 
             onClick={(e) => { e.stopPropagation(); setShowContent(!showContent); }}
-            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-white"
+            className="flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             {showContent ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
             {showContent ? 'Ocultar conteúdo' : 'Ver conteúdo'}
           </button>
           {showContent && (
-            <div className="mt-2 p-3 bg-zinc-950 border border-zinc-700 rounded text-sm font-mono overflow-x-auto max-h-48 overflow-y-auto">
-              <pre className="text-zinc-300 whitespace-pre-wrap">
+            <div className="mt-2 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-secondary)] rounded text-sm font-mono overflow-x-auto max-h-48 overflow-y-auto">
+              <pre className="text-[var(--aethel-text-secondary)] whitespace-pre-wrap">
                 {item.contentSnapshot.preview}
               </pre>
             </div>
@@ -254,7 +254,7 @@ function ItemCard({
       {item.autoFlags && item.autoFlags.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-1">
           {item.autoFlags.map((flag, i) => (
-            <span key={i} className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded">
+            <span key={i} className="px-2 py-0.5 text-xs bg-[var(--aethel-error)]/20 text-red-400 rounded">
               {flag}
             </span>
           ))}
@@ -263,38 +263,38 @@ function ItemCard({
       
       {/* Quick Actions */}
       {isSelected && (
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-zinc-700">
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">
           <button
             onClick={(e) => { e.stopPropagation(); onAction('approve'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <CheckCircle className="w-4 h-4" />
             Aprovar (A)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('reject'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-error-dark)] hover:bg-red-700 text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <XCircle className="w-4 h-4" />
             Rejeitar (R)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('escalate'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <ArrowUp className="w-4 h-4" />
             Escalar (E)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('shadowban'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <UserX className="w-4 h-4" />
             Banimento sombra (B)
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('skip'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded ml-auto"
+            className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-[var(--aethel-text-primary)] text-sm rounded ml-auto"
           >
             <SkipForward className="w-4 h-4" />
             Ignorar (S)
@@ -307,30 +307,30 @@ function ItemCard({
 
 function ShortcutsModal({ onClose }: { onClose: () => void }) {
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="bg-zinc-900/70 border border-zinc-700 rounded-lg p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] flex items-center justify-center z-50">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)] flex items-center gap-2">
             <Keyboard className="w-5 h-5" />
             Atalhos do teclado
           </h2>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white">
+          <button onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
             <XCircle className="w-5 h-5" />
           </button>
         </div>
         
         <div className="space-y-2">
           {Object.entries(SHORTCUTS).map(([key, action]) => (
-            <div key={key} className="flex items-center justify-between py-2 border-b border-zinc-700">
-              <span className="text-zinc-300">{action}</span>
-              <kbd className="px-2 py-1 bg-zinc-800/80 border border-zinc-600 rounded text-sm text-zinc-300 font-mono">
+            <div key={key} className="flex items-center justify-between py-2 border-b border-[var(--aethel-border-secondary)]">
+              <span className="text-[var(--aethel-text-secondary)]">{action}</span>
+              <kbd className="px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] rounded text-sm text-[var(--aethel-text-secondary)] font-mono">
                 {key}
               </kbd>
             </div>
           ))}
         </div>
         
-        <p className="text-xs text-zinc-500 mt-4">
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-4">
           Pressione qualquer tecla enquanto um item estiver selecionado para executar a ação.
         </p>
       </div>
@@ -480,7 +480,7 @@ export default function ModerationQueue() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-zinc-500 animate-spin" />
+        <RefreshCw className="w-6 h-6 text-[var(--aethel-text-tertiary)] animate-spin" />
       </div>
     );
   }
@@ -490,15 +490,15 @@ export default function ModerationQueue() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)] flex items-center gap-2">
             <Shield className="w-6 h-6" />
             Fila de moderação
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">
             Revisar e moderar conteúdos sinalizados
           </p>
           {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         
@@ -506,22 +506,22 @@ export default function ModerationQueue() {
           {/* Shortcuts hint */}
           <button
             onClick={() => setShowShortcuts(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/70 border border-zinc-700 rounded text-sm text-zinc-500 hover:text-white"
+            className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <Keyboard className="w-4 h-4" />
             Atalhos (?)
           </button>
           
           {/* Filter */}
-          <div className="flex items-center gap-1 bg-zinc-900/70 border border-zinc-700 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
             {(['pending', 'urgent', 'all'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 text-xs rounded capitalize ${
                   filter === f 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-zinc-500 hover:text-white'
+                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' 
+                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
                 {f === 'pending' ? 'pendentes' : f === 'urgent' ? 'urgentes' : 'todos'}
@@ -535,13 +535,13 @@ export default function ModerationQueue() {
             placeholder="Buscar alvo/motivo"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-1.5 text-xs rounded bg-zinc-900/70 border border-zinc-700 text-zinc-200"
+            className="px-3 py-1.5 text-xs rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]"
           />
           
           {/* Refresh */}
           <button
             onClick={fetchItems}
-            className="p-2 bg-zinc-900/70 border border-zinc-700 rounded-lg text-zinc-500 hover:text-white"
+            className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -553,10 +553,10 @@ export default function ModerationQueue() {
       
       {/* Queue */}
       {filteredItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 bg-zinc-900/70 border border-zinc-700 rounded-lg">
-          <CheckCircle className="w-12 h-12 text-green-400 mb-4" />
-          <p className="text-lg text-zinc-300">Tudo certo!</p>
-          <p className="text-sm text-zinc-500">Nenhum item na fila de moderação</p>
+        <div className="flex flex-col items-center justify-center h-64 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg">
+          <CheckCircle className="w-12 h-12 text-[var(--aethel-success)] mb-4" />
+          <p className="text-lg text-[var(--aethel-text-secondary)]">Tudo certo!</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhum item na fila de moderação</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -574,7 +574,7 @@ export default function ModerationQueue() {
       
       {/* Processing indicator */}
       {processing && (
-        <div className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <div className="fixed bottom-4 right-4 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded-lg flex items-center gap-2">
           <RefreshCw className="w-4 h-4 animate-spin" />
           Processando...
         </div>

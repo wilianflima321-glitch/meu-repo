@@ -86,7 +86,7 @@ function formatValue(value: number | null, unit: string): string {
 function statusBadgeClass(status: 'ok' | 'warn' | 'no_data'): string {
   if (status === 'ok') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
   if (status === 'warn') return 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-  return 'bg-zinc-700/30 text-zinc-300 border-zinc-600/40'
+  return 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)]/40'
 }
 
 export default function AdminAnalytics() {
@@ -215,10 +215,10 @@ export default function AdminAnalytics() {
       <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
         <div>
           <h1 className='text-3xl font-bold'>Analytics baseline</h1>
-          <p className='text-sm text-zinc-400'>Visao operacional de performance, funil e custo para janela configuravel.</p>
-          {lastUpdated && <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>}
+          <p className='text-sm text-[var(--aethel-text-secondary)]'>Visao operacional de performance, funil e custo para janela configuravel.</p>
+          {lastUpdated && <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>}
           {baseline?.capability && (
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>
               capability: {baseline.capability} | status: {baseline.capabilityStatus ?? 'IMPLEMENTED'}
             </p>
           )}
@@ -234,7 +234,7 @@ export default function AdminAnalytics() {
               const next = Number(event.target.value)
               if (next === 7 || next === 14 || next === 30) setWindowDays(next)
             }}
-            className='rounded border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-200'
+            className='rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)]'
           >
             <option value={7}>7 dias</option>
             <option value={14}>14 dias</option>
@@ -243,14 +243,14 @@ export default function AdminAnalytics() {
           <button
             type='button'
             onClick={handleExport}
-            className='rounded border border-blue-500/40 bg-blue-500/20 px-4 py-2 text-sm text-blue-100 hover:bg-blue-500/30'
+            className='rounded border border-blue-500/40 bg-[var(--aethel-primary)]/20 px-4 py-2 text-sm text-blue-100 hover:bg-[var(--aethel-primary)]/30'
           >
             Exportar JSON
           </button>
           <button
             type='button'
             onClick={fetchMetrics}
-            className='rounded border border-zinc-700/80 bg-zinc-900/70 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800/80'
+            className='rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
           >
             Atualizar
           </button>
@@ -269,20 +269,20 @@ export default function AdminAnalytics() {
       )}
 
       <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3' aria-busy={loading}>
-        <div className='rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-          <h3 className='text-sm font-semibold text-zinc-300'>Usuarios ativos (1h)</h3>
+        <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+          <h3 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Usuarios ativos (1h)</h3>
           <p className='mt-2 text-2xl font-semibold'>{loading ? '--' : metrics?.activeUsers ?? 0}</p>
-          <p className='text-xs text-zinc-500'>Req/min: {loading ? '--' : metrics?.requestsPerMinute ?? 0}</p>
+          <p className='text-xs text-[var(--aethel-text-tertiary)]'>Req/min: {loading ? '--' : metrics?.requestsPerMinute ?? 0}</p>
         </div>
-        <div className='rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-          <h3 className='text-sm font-semibold text-zinc-300'>Receita diaria</h3>
+        <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+          <h3 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Receita diaria</h3>
           <p className='mt-2 text-2xl font-semibold'>${loading ? '--' : (metrics?.dailyRevenue ?? 0).toFixed(2)}</p>
-          <p className='text-xs text-zinc-500'>AI cost today: ${loading ? '--' : (metrics?.aiCostToday ?? 0).toFixed(2)}</p>
+          <p className='text-xs text-[var(--aethel-text-tertiary)]'>AI cost today: ${loading ? '--' : (metrics?.aiCostToday ?? 0).toFixed(2)}</p>
         </div>
-        <div className='rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-          <h3 className='text-sm font-semibold text-zinc-300'>Tokens IA (24h)</h3>
+        <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+          <h3 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Tokens IA (24h)</h3>
           <p className='mt-2 text-2xl font-semibold'>{loading ? '--' : (metrics?.aiTokens ?? 0).toLocaleString()}</p>
-          <p className='text-xs text-zinc-500'>Fonte: /api/admin/ai/metrics</p>
+          <p className='text-xs text-[var(--aethel-text-tertiary)]'>Fonte: /api/admin/ai/metrics</p>
         </div>
       </div>
 
@@ -297,10 +297,10 @@ export default function AdminAnalytics() {
         </div>
       )}
 
-      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
+      <div className='mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
         <div className='mb-3 flex items-center justify-between'>
-          <h2 className='text-base font-semibold text-zinc-200'>Performance baseline ({windowDays}d)</h2>
-          <span className='text-xs text-zinc-500'>
+          <h2 className='text-base font-semibold text-[var(--aethel-text-secondary)]'>Performance baseline ({windowDays}d)</h2>
+          <span className='text-xs text-[var(--aethel-text-tertiary)]'>
             {baseline?.window?.startAt && baseline?.window?.endAt
               ? `${new Date(baseline.window.startAt).toLocaleDateString()} - ${new Date(baseline.window.endAt).toLocaleDateString()}`
               : 'Sem janela carregada'}
@@ -309,7 +309,7 @@ export default function AdminAnalytics() {
         <div className='overflow-x-auto' role='region' aria-label='Tabela de baseline de performance'>
           <table className='w-full text-sm'>
             <thead>
-              <tr className='border-b border-zinc-800/70 text-zinc-400'>
+              <tr className='border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
                 <th className='p-2 text-left'>Metric</th>
                 <th className='p-2 text-left'>P50</th>
                 <th className='p-2 text-left'>P95</th>
@@ -320,12 +320,12 @@ export default function AdminAnalytics() {
             </thead>
             <tbody>
               {baselineRows.map((row) => (
-                <tr key={row.name} className='border-b border-zinc-800/60'>
-                  <td className='p-2 text-zinc-200'>{row.label}</td>
-                  <td className='p-2 text-zinc-300'>{formatValue(row.data.p50, row.data.unit)}</td>
-                  <td className='p-2 text-zinc-300'>{formatValue(row.data.p95, row.data.unit)}</td>
-                  <td className='p-2 text-zinc-400'>{formatValue(row.data.target, row.data.unit)}</td>
-                  <td className='p-2 text-zinc-400'>{row.data.count}</td>
+                <tr key={row.name} className='border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_60%,transparent)]'>
+                  <td className='p-2 text-[var(--aethel-text-secondary)]'>{row.label}</td>
+                  <td className='p-2 text-[var(--aethel-text-secondary)]'>{formatValue(row.data.p50, row.data.unit)}</td>
+                  <td className='p-2 text-[var(--aethel-text-secondary)]'>{formatValue(row.data.p95, row.data.unit)}</td>
+                  <td className='p-2 text-[var(--aethel-text-secondary)]'>{formatValue(row.data.target, row.data.unit)}</td>
+                  <td className='p-2 text-[var(--aethel-text-secondary)]'>{row.data.count}</td>
                   <td className='p-2'>
                     <span className={`rounded border px-2 py-1 text-xs ${statusBadgeClass(row.data.status)}`}>
                       {row.data.status}
@@ -338,119 +338,119 @@ export default function AdminAnalytics() {
         </div>
         {baseline?.firstValue && (
           <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3'>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>First value median</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value median</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>
                 {baseline.firstValue.medianMs === null ? '--' : `${Math.round(baseline.firstValue.medianMs)} ms`}
               </p>
             </div>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>First value p95</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value p95</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>
                 {baseline.firstValue.p95Ms === null ? '--' : `${Math.round(baseline.firstValue.p95Ms)} ms`}
               </p>
             </div>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>First value samples</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>{baseline.firstValue.samples}</p>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value samples</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>{baseline.firstValue.samples}</p>
             </div>
           </div>
         )}
       </div>
 
-      <div className='rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-        <h2 className='mb-3 text-base font-semibold text-zinc-200'>Funnel ({windowDays}d)</h2>
+      <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+        <h2 className='mb-3 text-base font-semibold text-[var(--aethel-text-secondary)]'>Funnel ({windowDays}d)</h2>
         <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7'>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>Landing views</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Landing views</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.landingViews ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>Signups</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Signups</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.signups ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>Logins</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Logins</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.logins ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>Dashboard views</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Dashboard views</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.dashboardViews ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>Project creates</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Project creates</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.projectCreates ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>AI chats</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>AI chats</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.aiChats ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>IDE opens</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>IDE opens</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.ideOpens ?? 0}</p>
           </div>
         </div>
         <div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>First value: project</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value: project</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueProjectCreated ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>First value: AI success</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value: AI success</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueAiSuccess ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>First value: IDE open</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value: IDE open</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueIdeOpen ?? 0}</p>
           </div>
-          <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-            <p className='text-xs text-zinc-500'>First value completed</p>
+          <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value completed</p>
             <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueCompleted ?? 0}</p>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>
               signup conversion: {firstValueCompletionRate === null ? '--' : `${firstValueCompletionRate.toFixed(1)}%`}
             </p>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>
               project to complete: {firstValueFromProjectRate === null ? '--' : `${firstValueFromProjectRate.toFixed(1)}%`}
             </p>
           </div>
         </div>
         {baseline?.funnelConversions && (
           <div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5'>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>signup to project</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>signup to project</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>
                 {baseline.funnelConversions.signupToProjectCreate === null
                   ? '--'
                   : `${baseline.funnelConversions.signupToProjectCreate.toFixed(1)}%`}
               </p>
             </div>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>signup to AI chat</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>signup to AI chat</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>
                 {baseline.funnelConversions.signupToAiChat === null
                   ? '--'
                   : `${baseline.funnelConversions.signupToAiChat.toFixed(1)}%`}
               </p>
             </div>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>signup to IDE open</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>signup to IDE open</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>
                 {baseline.funnelConversions.signupToIdeOpen === null
                   ? '--'
                   : `${baseline.funnelConversions.signupToIdeOpen.toFixed(1)}%`}
               </p>
             </div>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>signup to first value</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>signup to first value</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>
                 {baseline.funnelConversions.signupToFirstValueComplete === null
                   ? '--'
                   : `${baseline.funnelConversions.signupToFirstValueComplete.toFixed(1)}%`}
               </p>
             </div>
-            <div className='rounded border border-zinc-800/70 bg-zinc-950/40 p-3'>
-              <p className='text-xs text-zinc-500'>project to first value</p>
-              <p className='mt-1 text-sm font-semibold text-zinc-100'>
+            <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
+              <p className='text-xs text-[var(--aethel-text-tertiary)]'>project to first value</p>
+              <p className='mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]'>
                 {baseline.funnelConversions.projectCreateToFirstValueComplete === null
                   ? '--'
                   : `${baseline.funnelConversions.projectCreateToFirstValueComplete.toFixed(1)}%`}

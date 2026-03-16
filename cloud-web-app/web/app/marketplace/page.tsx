@@ -156,10 +156,10 @@ export default function MarketplacePage() {
     })
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-purple-600/[0.06] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-blue-600/[0.05] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-primary-dark)]/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
@@ -170,19 +170,19 @@ export default function MarketplacePage() {
             Marketplace
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Marketplace de extensoes</h1>
-          <p className="mt-4 max-w-2xl text-lg text-slate-400">
+          <p className="mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
             Descubra extensoes para o IDE, agentes e automacoes. Instale direto no studio.
           </p>
         </section>
 
         <section className="mx-auto mt-10 max-w-6xl px-6">
           {loadError && (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-              <p className="text-slate-200">{loadError}</p>
+            <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-4">
+              <p className="text-[var(--aethel-text-primary)]">{loadError}</p>
             </div>
           )}
 
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <div className="mt-6 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-5">
             <div className="grid gap-4 md:grid-cols-3">
               <div className="md:col-span-2">
                 <input
@@ -190,7 +190,7 @@ export default function MarketplacePage() {
                   placeholder="Buscar extensoes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/60"
+                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-purple-500/60"
                 />
               </div>
 
@@ -198,7 +198,7 @@ export default function MarketplacePage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white focus:outline-none focus:border-purple-500/60"
+                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] focus:outline-none focus:border-purple-500/60"
                 >
                   <option value="downloads">Mais baixadas</option>
                   <option value="rating">Melhor avaliadas</option>
@@ -215,7 +215,7 @@ export default function MarketplacePage() {
                   className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
                     selectedCategory === category
                       ? 'bg-purple-500/20 text-purple-200 border border-purple-500/30'
-                      : 'border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white'
+                      : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   {categoryLabels[category] ?? category}
@@ -225,36 +225,36 @@ export default function MarketplacePage() {
           </div>
 
           {loading ? (
-            <div className="py-16 text-center text-slate-400">Carregando extensoes...</div>
+            <div className="py-16 text-center text-[var(--aethel-text-secondary)]">Carregando extensoes...</div>
           ) : (
             <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredExtensions.map((ext) => (
                 <div
                   key={ext.id}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-white/20"
+                  className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-6 transition-colors hover:border-[var(--aethel-border-secondary)]"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-sm font-semibold text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] text-sm font-semibold text-[var(--aethel-text-primary)]">
                       {getExtensionBadge(ext)}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-white">{ext.displayName}</h3>
-                      <p className="text-xs text-slate-500">
+                      <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)]">{ext.displayName}</h3>
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">
                         por {ext.publisher} ? v{ext.version}
                       </p>
                     </div>
                   </div>
 
-                  <p className="mt-4 line-clamp-2 text-sm text-slate-400">{ext.description}</p>
+                  <p className="mt-4 line-clamp-2 text-sm text-[var(--aethel-text-secondary)]">{ext.description}</p>
 
-                  <div className="mt-4 flex items-center gap-4 text-xs text-slate-500">
+                  <div className="mt-4 flex items-center gap-4 text-xs text-[var(--aethel-text-tertiary)]">
                     <span>Avaliacao {ext.rating.toFixed(1)}</span>
                     <span>Downloads {(ext.downloads / 1000).toFixed(0)}K</span>
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     {ext.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] text-slate-400">
+                      <span key={tag} className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] px-2.5 py-1 text-[10px] text-[var(--aethel-text-secondary)]">
                         {tag}
                       </span>
                     ))}
@@ -289,8 +289,8 @@ export default function MarketplacePage() {
 
           {!loading && filteredExtensions.length == 0 && (
             <div className="py-12 text-center">
-              <p className="text-lg text-slate-400">Nenhuma extensao encontrada</p>
-              <p className="mt-2 text-sm text-slate-500">Ajuste sua busca ou filtros</p>
+              <p className="text-lg text-[var(--aethel-text-secondary)]">Nenhuma extensao encontrada</p>
+              <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">Ajuste sua busca ou filtros</p>
             </div>
           )}
         </section>

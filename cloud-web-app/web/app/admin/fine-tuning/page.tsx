@@ -127,15 +127,15 @@ export default function FineTuningPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Ajuste fino detalhado</h1>
-          <p className="text-sm text-zinc-500">Pipeline de conjuntos de dados e tarefas com auditoria.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Pipeline de conjuntos de dados e tarefas com auditoria.</p>
         </div>
-        <button onClick={() => Promise.all([fetchDatasets(), fetchJobs()])} className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm">Atualizar</button>
+        <button onClick={() => Promise.all([fetchDatasets(), fetchJobs()])} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
 
       {error && <div className="bg-red-50 border border-red-200 text-rose-300 p-3 rounded mb-4">{error}</div>}
       {message && <div className="bg-green-50 border border-green-200 text-emerald-300 p-3 rounded mb-4">{message}</div>}
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Envio de conjunto de dados</h2>
         <div className="flex gap-4">
           <input
@@ -153,11 +153,11 @@ export default function FineTuningPage() {
             }}
             className="border p-2"
           />
-          <button onClick={handleUpload} disabled={loading} className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50">Enviar</button>
+          <button onClick={handleUpload} disabled={loading} className="bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Enviar</button>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Configurações de treinamento</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -178,35 +178,35 @@ export default function FineTuningPage() {
             <input type="number" step="0.001" value={learningRate} onChange={(e) => setLearningRate(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
-        <button onClick={handleStartTraining} disabled={loading || !selectedDataset} className="mt-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50">Iniciar treinamento</button>
+        <button onClick={handleStartTraining} disabled={loading || !selectedDataset} className="mt-4 bg-green-600 text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Iniciar treinamento</button>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Conjuntos de dados carregados</h2>
         {loading ? (
-          <p className="text-sm text-zinc-500">Carregando conjuntos de dados...</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando conjuntos de dados...</p>
         ) : (
           <ul>
             {datasets.map(dataset => (
               <li key={dataset.id} className="flex justify-between items-center p-2 border-b">
                 <span>{dataset.name} - {(dataset.size / 1024 / 1024).toFixed(1)}MB</span>
-                <span className="px-2 py-1 rounded text-xs bg-zinc-800/70">{dataset.status}</span>
+                <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">{dataset.status}</span>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Tarefas recentes</h2>
         {jobs.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma tarefa encontrada.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma tarefa encontrada.</p>
         ) : (
           <ul className="space-y-2">
             {jobs.map((job) => (
               <li key={job.id} className="border rounded p-3">
                 <div className="font-medium">{job.dataset?.name || 'Conjunto de dados'}</div>
-                <div className="text-sm text-zinc-400">Status: {job.status} • Épocas: {job.epochs} • Taxa: {job.learningRate}</div>
+                <div className="text-sm text-[var(--aethel-text-secondary)]">Status: {job.status} • Épocas: {job.epochs} • Taxa: {job.learningRate}</div>
               </li>
             ))}
           </ul>

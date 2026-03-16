@@ -207,15 +207,15 @@ export default function APIs() {
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-3xl font-bold'>Gerenciamento de APIs</h1>
-          <p className='text-zinc-400'>Status real de integracao com provedores externos e chaves de ambiente.</p>
+          <p className='text-[var(--aethel-text-secondary)]'>Status real de integracao com provedores externos e chaves de ambiente.</p>
           {lastUpdated && (
-            <p className='text-xs text-zinc-500'>Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchIntegrations}
           aria-label='Atualizar status de integracoes'
-          className='px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm hover:bg-zinc-700/80'
+          className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
         >
           Atualizar
         </button>
@@ -260,56 +260,56 @@ export default function APIs() {
         </div>
       )}
 
-      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-        <h2 className='text-sm font-semibold text-zinc-200'>AI Provider Setup Quick Check</h2>
+      <div className='mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+        <h2 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>AI Provider Setup Quick Check</h2>
         <div className='mt-3 space-y-2 text-xs'>
-          <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-            <span className='text-zinc-400'>1. Pelo menos um provider configurado</span>
+          <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+            <span className='text-[var(--aethel-text-secondary)]'>1. Pelo menos um provider configurado</span>
             <span className={hasConfiguredAIProvider ? 'text-emerald-300' : 'text-amber-300'}>
               {hasConfiguredAIProvider ? 'OK' : 'PENDENTE'}
             </span>
           </div>
-          <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-            <span className='text-zinc-400'>2. Runtime reiniciado após mudança de variáveis</span>
-            <span className='text-zinc-500'>manual</span>
+          <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+            <span className='text-[var(--aethel-text-secondary)]'>2. Runtime reiniciado após mudança de variáveis</span>
+            <span className='text-[var(--aethel-text-tertiary)]'>manual</span>
           </div>
-          <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-            <span className='text-zinc-400'>3. Validação de endpoint (`/api/ai/chat-advanced`)</span>
-            <span className='text-zinc-500'>use /ide chat</span>
+          <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+            <span className='text-[var(--aethel-text-secondary)]'>3. Validação de endpoint (`/api/ai/chat-advanced`)</span>
+            <span className='text-[var(--aethel-text-tertiary)]'>use /ide chat</span>
           </div>
         </div>
       </div>
 
-      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-        <h2 className='text-sm font-semibold text-zinc-200'>Production Runtime Quick Check</h2>
+      <div className='mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+        <h2 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Production Runtime Quick Check</h2>
         {productionRuntime?.runtimeReadiness ? (
           <div className='mt-3 space-y-2 text-xs'>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Probe readiness</span>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Probe readiness</span>
               <span className={productionRuntime.runtimeReadiness.probeReady ? 'text-emerald-300' : 'text-amber-300'}>
                 {productionRuntime.runtimeReadiness.probeReady ? 'READY' : 'BLOCKED'}
               </span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>DB / app runtime</span>
-              <span className='text-zinc-300'>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>DB / app runtime</span>
+              <span className='text-[var(--aethel-text-secondary)]'>
                 {productionRuntime.runtimeReadiness.databaseReachable ? 'db-ok' : 'db-blocked'} / {productionRuntime.runtimeReadiness.appRuntimeReachable ? 'app-ok' : 'app-blocked'}
               </span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Docker / auth</span>
-              <span className='text-zinc-300'>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Docker / auth</span>
+              <span className='text-[var(--aethel-text-secondary)]'>
                 {productionRuntime.runtimeReadiness.dockerDaemonReady ? 'docker-ok' : 'docker-blocked'} / {productionRuntime.runtimeReadiness.authReady ? 'auth-ok' : 'auth-blocked'}
               </span>
             </div>
             {productionRuntime.runtimeReadiness.databaseTarget ? (
-              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
-                database target: <span className='text-zinc-300'>{productionRuntime.runtimeReadiness.databaseTarget}</span>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-[var(--aethel-text-secondary)]'>
+                database target: <span className='text-[var(--aethel-text-secondary)]'>{productionRuntime.runtimeReadiness.databaseTarget}</span>
               </div>
             ) : null}
             {productionRuntime.runtimeReadiness.appBaseUrl ? (
-              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
-                app base url: <span className='text-zinc-300'>{productionRuntime.runtimeReadiness.appBaseUrl}</span>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-[var(--aethel-text-secondary)]'>
+                app base url: <span className='text-[var(--aethel-text-secondary)]'>{productionRuntime.runtimeReadiness.appBaseUrl}</span>
               </div>
             ) : null}
             {productionRuntime.runtimeReadiness.blockers?.length ? (
@@ -318,7 +318,7 @@ export default function APIs() {
               </div>
             ) : null}
             {productionRuntime.runtimeReadiness.instructions?.length ? (
-              <ul className='space-y-1 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+              <ul className='space-y-1 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-[var(--aethel-text-secondary)]'>
                 {productionRuntime.runtimeReadiness.instructions.map((instruction) => (
                   <li key={instruction}>- {instruction}</li>
                 ))}
@@ -327,7 +327,7 @@ export default function APIs() {
             {productionRuntime.runtimeReadiness.recommendedCommands?.length ? (
               <div className='flex flex-wrap gap-2 pt-1'>
                 {productionRuntime.runtimeReadiness.recommendedCommands.map((command) => (
-                  <span key={command} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                  <span key={command} className='rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)]'>
                     {command}
                   </span>
                 ))}
@@ -335,47 +335,47 @@ export default function APIs() {
             ) : null}
           </div>
         ) : (
-          <div className='mt-3 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+          <div className='mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-xs text-[var(--aethel-text-secondary)]'>
             Production runtime readiness unavailable.
           </div>
         )}
       </div>
 
-      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-        <h2 className='text-sm font-semibold text-zinc-200'>Billing Runtime Quick Check</h2>
+      <div className='mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+        <h2 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Billing Runtime Quick Check</h2>
         {billingRuntime ? (
           <div className='mt-3 space-y-2 text-xs'>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Runtime status</span>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Runtime status</span>
               <span className={billingRuntime.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
                 {String(billingRuntime.status).toUpperCase()}
               </span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Provider</span>
-              <span className='text-zinc-300'>{billingRuntime.provider?.label || 'unknown'}</span>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Provider</span>
+              <span className='text-[var(--aethel-text-secondary)]'>{billingRuntime.provider?.label || 'unknown'}</span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Checkout / Portal / Webhook</span>
-              <span className='text-zinc-300'>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Checkout / Portal / Webhook</span>
+              <span className='text-[var(--aethel-text-secondary)]'>
                 {String(Boolean(billingRuntime.checkoutReady))} / {String(Boolean(billingRuntime.portalReady))} / {String(Boolean(billingRuntime.webhookReady))}
               </span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Publishable key / price coverage</span>
-              <span className='text-zinc-300'>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Publishable key / price coverage</span>
+              <span className='text-[var(--aethel-text-secondary)]'>
                 {String(Boolean(billingRuntime.stripe?.publishableKeyConfigured))} / {billingRuntime.stripe?.configuredPriceCount ?? 0}/{billingRuntime.stripe?.requiredPriceCount ?? 0}
               </span>
             </div>
             {billingRuntime.provider?.webhookPath ? (
-              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
-                webhook path: <span className='text-zinc-300'>{billingRuntime.provider.webhookPath}</span>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-[var(--aethel-text-secondary)]'>
+                webhook path: <span className='text-[var(--aethel-text-secondary)]'>{billingRuntime.provider.webhookPath}</span>
               </div>
             ) : null}
             {billingRuntime.provider?.setupEnv?.length ? (
               <div className='flex flex-wrap gap-2 pt-1'>
                 {billingRuntime.provider.setupEnv.map((envKey) => (
-                  <span key={envKey} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                  <span key={envKey} className='rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)]'>
                     {envKey}
                   </span>
                 ))}
@@ -388,39 +388,39 @@ export default function APIs() {
             ) : null}
           </div>
         ) : (
-          <div className='mt-3 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+          <div className='mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-xs text-[var(--aethel-text-secondary)]'>
             Billing runtime readiness unavailable.
           </div>
         )}
       </div>
 
-      <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-        <h2 className='text-sm font-semibold text-zinc-200'>Preview Runtime Quick Check</h2>
+      <div className='mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+        <h2 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Preview Runtime Quick Check</h2>
         {previewRuntime ? (
           <div className='mt-3 space-y-2 text-xs'>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Runtime status</span>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Runtime status</span>
               <span className={previewRuntime.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
                 {String(previewRuntime.status || 'unknown').toUpperCase()}
               </span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Strategy</span>
-              <span className='text-zinc-300'>{previewRuntime.strategy || 'unknown'}</span>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Strategy</span>
+              <span className='text-[var(--aethel-text-secondary)]'>{previewRuntime.strategy || 'unknown'}</span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Provider / mode</span>
-              <span className='text-zinc-300'>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Provider / mode</span>
+              <span className='text-[var(--aethel-text-secondary)]'>
                 {previewRuntime.managedProviderLabel || 'none'} / {previewRuntime.managedProviderMode || 'unknown'}
               </span>
             </div>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Route provisioning</span>
-              <span className='text-zinc-300'>{String(Boolean(previewRuntime.routeProvisionSupported))}</span>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Route provisioning</span>
+              <span className='text-[var(--aethel-text-secondary)]'>{String(Boolean(previewRuntime.routeProvisionSupported))}</span>
             </div>
             {previewRuntime.preferredRuntimeUrl ? (
-              <div className='rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
-                preferred runtime: <span className='text-zinc-300'>{previewRuntime.preferredRuntimeUrl}</span>
+              <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-[var(--aethel-text-secondary)]'>
+                preferred runtime: <span className='text-[var(--aethel-text-secondary)]'>{previewRuntime.preferredRuntimeUrl}</span>
               </div>
             ) : null}
             {previewRuntime.blockers?.length ? (
@@ -429,7 +429,7 @@ export default function APIs() {
               </div>
             ) : null}
             {previewRuntime.instructions?.length ? (
-              <ul className='space-y-1 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+              <ul className='space-y-1 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-[var(--aethel-text-secondary)]'>
                 {previewRuntime.instructions.map((instruction) => (
                   <li key={instruction}>- {instruction}</li>
                 ))}
@@ -438,7 +438,7 @@ export default function APIs() {
             {previewRuntime.recommendedCommands?.length ? (
               <div className='flex flex-wrap gap-2 pt-1'>
                 {previewRuntime.recommendedCommands.map((command) => (
-                  <span key={command} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                  <span key={command} className='rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)]'>
                     {command}
                   </span>
                 ))}
@@ -446,18 +446,18 @@ export default function APIs() {
             ) : null}
           </div>
         ) : (
-          <div className='mt-3 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+          <div className='mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-xs text-[var(--aethel-text-secondary)]'>
             Preview runtime readiness unavailable.
           </div>
         )}
       </div>
 
       {operatorReadiness ? (
-        <div className='mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
-          <h2 className='text-sm font-semibold text-zinc-200'>Operator Readiness Aggregate</h2>
+        <div className='mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
+          <h2 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Operator Readiness Aggregate</h2>
           <div className='mt-3 space-y-2 text-xs'>
-            <div className='flex items-center justify-between rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2'>
-              <span className='text-zinc-400'>Aggregate status</span>
+            <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
+              <span className='text-[var(--aethel-text-secondary)]'>Aggregate status</span>
               <span className={operatorReadiness.status === 'ready' ? 'text-emerald-300' : 'text-amber-300'}>
                 {String(operatorReadiness.status).toUpperCase()}
               </span>
@@ -468,7 +468,7 @@ export default function APIs() {
               </div>
             ) : null}
             {operatorReadiness.instructions?.length ? (
-              <ul className='space-y-1 rounded border border-zinc-800/70 bg-zinc-950/40 px-3 py-2 text-zinc-400'>
+              <ul className='space-y-1 rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2 text-[var(--aethel-text-secondary)]'>
                 {operatorReadiness.instructions.map((instruction) => (
                   <li key={instruction}>- {instruction}</li>
                 ))}
@@ -477,7 +477,7 @@ export default function APIs() {
             {operatorReadiness.recommendedCommands?.length ? (
               <div className='flex flex-wrap gap-2 pt-1'>
                 {operatorReadiness.recommendedCommands.map((command) => (
-                  <span key={command} className='rounded border border-zinc-700 bg-zinc-950/50 px-2 py-1 text-[11px] text-zinc-300'>
+                  <span key={command} className='rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)]'>
                     {command}
                   </span>
                 ))}
@@ -487,7 +487,7 @@ export default function APIs() {
         </div>
       ) : null}
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Total</h3>
           <p className='text-2xl font-bold text-blue-300'>{summary.total}</p>
@@ -506,14 +506,14 @@ export default function APIs() {
         </div>
       </div>
 
-      <div className='bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar por nome ou ambiente'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label='Buscar integrações por nome ou chave de ambiente'
-          className='border border-zinc-700 bg-zinc-950/60 p-2 rounded w-full md:max-w-sm text-zinc-100 placeholder:text-zinc-500'
+          className='border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] p-2 rounded w-full md:max-w-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]'
         />
         <div className='flex items-center gap-2'>
           {(['all', 'configured', 'missing'] as const).map((status) => (
@@ -522,7 +522,7 @@ export default function APIs() {
               onClick={() => setStatusFilter(status)}
               aria-pressed={statusFilter === status}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
+                statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
               {status === 'all' ? 'Todas' : status === 'configured' ? 'Configuradas' : 'Ausentes'}
@@ -531,9 +531,9 @@ export default function APIs() {
         </div>
       </div>
 
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow overflow-hidden' aria-busy={loading}>
+      <table className='w-full table-auto bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow overflow-hidden' aria-busy={loading}>
         <thead>
-          <tr className='bg-zinc-800/70 text-sm'>
+          <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-sm'>
             <th className='p-2 text-left'>Nome</th>
             <th className='p-2 text-left'>Chave</th>
             <th className='p-2 text-left'>Status</th>
@@ -555,9 +555,9 @@ export default function APIs() {
             </tr>
           ) : filteredIntegrations.length === 0 ? null : (
             filteredIntegrations.map((integration) => (
-              <tr key={integration.id} className='border-t border-zinc-800/70'>
+              <tr key={integration.id} className='border-t border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]'>
                 <td className='p-2'>{integration.name}</td>
-                <td className='p-2 text-xs text-zinc-400'>
+                <td className='p-2 text-xs text-[var(--aethel-text-secondary)]'>
                   {integration.configured ? 'configured (masked)' : 'not configured'}
                 </td>
                 <td className='p-2'>
@@ -569,7 +569,7 @@ export default function APIs() {
                     {integration.configured ? 'Configurada' : 'Ausente'}
                   </span>
                 </td>
-                <td className='p-2 text-xs text-zinc-500'>{integration.envKey}</td>
+                <td className='p-2 text-xs text-[var(--aethel-text-tertiary)]'>{integration.envKey}</td>
               </tr>
             ))
           )}
@@ -581,14 +581,14 @@ export default function APIs() {
         </div>
       )}
 
-      <p className='mt-4 text-xs text-zinc-500'>
+      <p className='mt-4 text-xs text-[var(--aethel-text-tertiary)]'>
         Operacao esperada: status configurado deve refletir chave valida no ambiente de execucao e disponibilidade do provedor.
       </p>
 
-      <div className='mt-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4'>
+      <div className='mt-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
         <div className='mb-3 flex items-center justify-between'>
           <h2 className='text-base font-semibold'>Deprecacao de Rotas (2 ciclos)</h2>
-          <span className='text-xs text-zinc-500'>Telemetria operacional</span>
+          <span className='text-xs text-[var(--aethel-text-tertiary)]'>Telemetria operacional</span>
         </div>
         {compatError ? (
           <div className='aethel-state aethel-state-error text-sm' role='alert' aria-live='polite'>{compatError}</div>
@@ -606,7 +606,7 @@ export default function APIs() {
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>
               <thead>
-                <tr className='border-b border-zinc-800/80 text-zinc-400'>
+                <tr className='border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] text-[var(--aethel-text-secondary)]'>
                   <th className='p-2 text-left'>Rota</th>
                   <th className='p-2 text-left'>Replacement</th>
                   <th className='p-2 text-left'>Hits</th>
@@ -617,12 +617,12 @@ export default function APIs() {
               </thead>
               <tbody>
                 {compatRoutes.map((route) => (
-                  <tr key={`${route.status}:${route.route}`} className='border-b border-zinc-800/60'>
-                    <td className='p-2 font-mono text-xs text-zinc-300'>{route.route}</td>
-                    <td className='p-2 text-zinc-400'>{route.replacement}</td>
-                    <td className='p-2 text-zinc-300'>{route.hits}</td>
-                    <td className='p-2 text-zinc-500'>{route.lastHitAt ? new Date(route.lastHitAt).toLocaleString() : 'never'}</td>
-                    <td className='p-2 text-zinc-500'>{route.removalCycleTarget || 'n/a'}</td>
+                  <tr key={`${route.status}:${route.route}`} className='border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_60%,transparent)]'>
+                    <td className='p-2 font-mono text-xs text-[var(--aethel-text-secondary)]'>{route.route}</td>
+                    <td className='p-2 text-[var(--aethel-text-secondary)]'>{route.replacement}</td>
+                    <td className='p-2 text-[var(--aethel-text-secondary)]'>{route.hits}</td>
+                    <td className='p-2 text-[var(--aethel-text-tertiary)]'>{route.lastHitAt ? new Date(route.lastHitAt).toLocaleString() : 'never'}</td>
+                    <td className='p-2 text-[var(--aethel-text-tertiary)]'>{route.removalCycleTarget || 'n/a'}</td>
                     <td className='p-2'>
                       <span
                         className={`rounded px-2 py-1 text-xs ${
@@ -634,7 +634,7 @@ export default function APIs() {
                         {route.candidateForRemoval ? 'candidate' : 'monitor'}
                       </span>
                       {typeof route.silenceDays === 'number' && (
-                        <span className='ml-2 text-[11px] text-zinc-500'>{route.silenceDays}d silence</span>
+                        <span className='ml-2 text-[11px] text-[var(--aethel-text-tertiary)]'>{route.silenceDays}d silence</span>
                       )}
                     </td>
                   </tr>
@@ -648,7 +648,7 @@ export default function APIs() {
             Candidates ready for cutoff (subject to PM approval): {removalCandidates.join(', ')}
           </div>
         )}
-        <p className='mt-3 text-xs text-zinc-500'>
+        <p className='mt-3 text-xs text-[var(--aethel-text-tertiary)]'>
           Regra de corte: remover rota legada somente com 0 hits por 14 dias consecutivos e 0 uso frontend confirmado por scanner.
         </p>
       </div>

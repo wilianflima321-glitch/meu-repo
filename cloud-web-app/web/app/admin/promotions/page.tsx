@@ -146,22 +146,22 @@ export default function PromotionsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Promoções e cupons</h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-[var(--aethel-text-secondary)]">
             Gestão completa via Stripe diretamente no painel admin.
           </p>
           {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchPromotions}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
+          className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
           <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
@@ -172,11 +172,11 @@ export default function PromotionsPage() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Inativas</h3>
-          <p className="text-2xl font-bold text-zinc-400">{summary.inactive}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{summary.inactive}</p>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Criar promoção</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
@@ -232,17 +232,17 @@ export default function PromotionsPage() {
             />
           )}
         </div>
-        {formError && <p className="text-sm text-red-600 mt-2">{formError}</p>}
+        {formError && <p className="text-sm text-[var(--aethel-error)] mt-2">{formError}</p>}
         <button
           onClick={handleCreate}
           disabled={creating}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-60"
+          className="mt-4 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-60"
         >
           {creating ? 'Criando...' : 'Criar promoção'}
         </button>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Promoções</h2>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
           <input
@@ -259,8 +259,8 @@ export default function PromotionsPage() {
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
                   statusFilter === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-zinc-800/70 text-zinc-400'
+                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 {status === 'all' ? 'Todas' : status === 'active' ? 'Ativas' : 'Inativas'}
@@ -271,23 +271,23 @@ export default function PromotionsPage() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-16 bg-zinc-800/70 rounded animate-pulse" />
+              <div key={index} className="h-16 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] rounded animate-pulse" />
             ))}
           </div>
         ) : error ? (
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-[var(--aethel-error)]">{error}</p>
         ) : filteredPromotions.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma promoção encontrada no Stripe.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma promoção encontrada no Stripe.</p>
         ) : (
           <ul>
             {filteredPromotions.map((promo) => (
               <li key={promo.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-4 border-b">
                 <div>
                   <h3 className="font-semibold">{promo.name}</h3>
-                  <p className="text-sm text-zinc-400">
+                  <p className="text-sm text-[var(--aethel-text-secondary)]">
                     Código: {promo.code || 'N/D'} | Desconto: {formatDiscount(promo)}
                   </p>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">
                     Resgates: {promo.timesRedeemed ?? 0} | Expira em:{' '}
                     {promo.expiresAt ? new Date(promo.expiresAt).toLocaleDateString() : 'Sem expiração'}
                   </p>
@@ -295,7 +295,7 @@ export default function PromotionsPage() {
                 <div className="flex items-center gap-2 mt-2 md:mt-0">
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
-                      promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800/70 text-zinc-400'
+                      promo.active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}
                   >
                     {promo.active ? 'Ativa' : 'Inativa'}
@@ -309,7 +309,7 @@ export default function PromotionsPage() {
                   {promo.code && (
                     <button
                       onClick={() => navigator.clipboard.writeText(promo.code || '')}
-                      className="px-3 py-1 rounded text-xs bg-zinc-800/70 text-zinc-300"
+                      className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]"
                     >
                       Copiar código
                     </button>

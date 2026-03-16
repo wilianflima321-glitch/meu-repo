@@ -74,10 +74,10 @@ export function DashboardConnectivityTab({
                   <h3 className="text-lg font-semibold capitalize">{service.name.replace(/_/g, ' ')}</h3>
                   <span className={`text-xs rounded-full px-2 py-1 ${
                     service.status === 'healthy'
-                      ? 'bg-emerald-500/20 text-[var(--aethel-success)]'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
                       : service.status === 'degraded'
-                      ? 'bg-amber-500/20 text-[var(--aethel-warning)]'
-                      : 'bg-red-500/20 text-[var(--aethel-error)]'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+                      : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
                   }`}>
                     {String(formatConnectivityStatus(service.status)).toUpperCase()}
                   </span>
@@ -85,7 +85,7 @@ export function DashboardConnectivityTab({
 
                 <div className="space-y-2">
                   {service.endpoints.map((endpoint) => (
-                    <div key={`${service.name}-${endpoint.url}`} className="border border-slate-800 aethel-rounded aethel-p-3">
+                    <div key={`${service.name}-${endpoint.url}`} className="border border-[var(--aethel-border-primary)] aethel-rounded aethel-p-3">
                       <div className="aethel-flex aethel-justify-between aethel-items-center">
                         <span className={`${endpoint.healthy ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'} text-sm`}>
                           {endpoint.url}

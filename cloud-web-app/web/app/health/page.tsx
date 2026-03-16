@@ -16,20 +16,20 @@ export default function HealthPage(){
 
   <section className="aethel-card p-4">
         <h2 className="text-lg font-semibold mb-2">/health</h2>
-        {healthErr && <div className="text-red-500">Erro: {String(healthErr)}</div>}
-        <pre className="bg-slate-900 text-slate-200 p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(health ?? { status: 'unknown' }, null, 2)}</pre>
+        {healthErr && <div className="text-[var(--aethel-error)]">Erro: {String(healthErr)}</div>}
+        <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(health ?? { status: 'unknown' }, null, 2)}</pre>
       </section>
 
   <section className="aethel-card p-4">
         <h2 className="text-lg font-semibold mb-2">/auth/providers</h2>
         {provErr && <div className="text-yellow-500">Aviso: {String(provErr)}</div>}
-        <pre className="bg-slate-900 text-slate-200 p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(providers ?? {}, null, 2)}</pre>
+        <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(providers ?? {}, null, 2)}</pre>
       </section>
 
   <section className="aethel-card p-4">
         <h2 className="text-lg font-semibold mb-2">/billing/plans</h2>
         {plansErr && <div className="text-yellow-500">Aviso: {String(plansErr)}</div>}
-        <pre className="bg-slate-900 text-slate-200 p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(plans ?? [], null, 2)}</pre>
+        <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(plans ?? [], null, 2)}</pre>
       </section>
     </div>
   )

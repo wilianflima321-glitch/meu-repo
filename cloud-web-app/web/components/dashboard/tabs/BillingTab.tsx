@@ -193,7 +193,7 @@ function PlanCard({
           <div
             className={`
               w-12 h-12 rounded-xl flex items-center justify-center
-              ${isPopular ? 'bg-sky-500/20 text-[var(--aethel-info)]' : 'bg-slate-800 text-[var(--aethel-text-secondary)]'}
+              ${isPopular ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}
             `}
           >
             {planIcons[plan.id] || <Sparkles className="w-6 h-6" />}
@@ -215,19 +215,19 @@ function PlanCard({
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="rounded-lg bg-slate-900/60 p-3">
+          <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Tokens/mes</p>
             <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatTokenLimit(plan.limits.requests)}</p>
           </div>
-          <div className="rounded-lg bg-slate-900/60 p-3">
+          <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Projetos</p>
             <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatLimitValue(plan.limits.projects)}</p>
           </div>
-          <div className="rounded-lg bg-slate-900/60 p-3">
+          <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Storage</p>
             <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{plan.limits.storage}</p>
           </div>
-          <div className="rounded-lg bg-slate-900/60 p-3">
+          <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Colaboradores</p>
             <p className="text-sm text-[var(--aethel-text-primary)] font-semibold">{formatLimitValue(plan.limits.collaborators)}</p>
           </div>
@@ -377,7 +377,7 @@ export function BillingTab({
       )}
 
       <div className="flex justify-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1 text-sm">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1 text-sm">
           <button
             type="button"
             onClick={() => setBillingCycle('month')}
@@ -426,7 +426,7 @@ export function BillingTab({
       )}
 
       {billingReadiness && !billingReadiness.checkoutReady && (
-        <Card variant="bordered" padding="md" className="border-amber-500/30 bg-amber-500/10">
+        <Card variant="bordered" padding="md" className="border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
               <p className="text-sm font-semibold text-[var(--aethel-warning-light)]">Checkout ainda nao esta pronto</p>
@@ -435,11 +435,11 @@ export function BillingTab({
               </p>
               {billingReadiness.provider ? (
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
-                  <span className="rounded-full border border-amber-500/20 bg-black/20 px-2.5 py-1">
+                  <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] px-2.5 py-1">
                     provider {billingReadiness.provider.label}
                   </span>
                   {billingReadiness.provider.webhookPath ? (
-                    <span className="rounded-full border border-amber-500/20 bg-black/20 px-2.5 py-1">
+                    <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] px-2.5 py-1">
                       webhook {billingReadiness.provider.webhookPath}
                     </span>
                   ) : null}
@@ -461,7 +461,7 @@ export function BillingTab({
                   {billingReadiness.provider.setupEnv.map((envKey) => (
                     <span
                       key={envKey}
-                      className="rounded-full border border-amber-500/20 bg-black/20 px-2.5 py-1 text-[11px] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]"
+                      className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] px-2.5 py-1 text-[11px] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]"
                     >
                       {envKey}
                     </span>
@@ -474,7 +474,7 @@ export function BillingTab({
                 </p>
               ) : null}
               {billingReadiness.instructions?.length ? (
-                <div className="mt-4 rounded-xl border border-amber-500/20 bg-black/20 p-3">
+                <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] p-3">
                   <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--aethel-warning)_80%,transparent)]">
                     Proximas acoes
                   </p>
@@ -488,7 +488,7 @@ export function BillingTab({
                       {billingReadiness.recommendedCommands.map((command) => (
                         <code
                           key={command}
-                          className="rounded-full border border-amber-500/20 bg-slate-950/70 px-2.5 py-1 text-[11px] text-[var(--aethel-info)]"
+                          className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-info)]"
                         >
                           {command}
                         </code>
@@ -506,7 +506,7 @@ export function BillingTab({
       )}
 
       {billingActionError && (
-        <Card variant="bordered" padding="md" className="border-red-500/30 bg-red-500/10">
+        <Card variant="bordered" padding="md" className="border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-[var(--aethel-error)]">Falha na acao de billing</p>
@@ -523,7 +523,7 @@ export function BillingTab({
         <Card variant="elevated" padding="md">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] flex items-center justify-center">
                 {planIcons[effectiveCurrentPlan] || <Sparkles className="w-6 h-6 text-[var(--aethel-info)]" />}
               </div>
               <div>

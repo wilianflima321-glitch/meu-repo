@@ -108,14 +108,14 @@ function getStatusBg(status: string): string {
   switch (status) {
     case 'healthy':
     case 'online':
-      return 'bg-emerald-500/10 border-emerald-500/30'
+      return 'bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
     case 'degraded':
-      return 'bg-yellow-500/10 border-yellow-500/30'
+      return 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
     case 'critical':
     case 'offline':
-      return 'bg-rose-500/10 border-rose-500/30'
+      return 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
     default:
-      return 'bg-zinc-500/10 border-zinc-500/30'
+      return 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_40%,transparent)]'
   }
 }
 
@@ -154,7 +154,7 @@ const MetricBar: React.FC<{
   thresholds?: [number, number]
 }> = ({ label, value, icon, suffix = '%', thresholds = [70, 90] }) => {
   const color = getMetricColor(value, thresholds)
-  const bgColor = value >= thresholds[1] ? 'bg-rose-400' : value >= thresholds[0] ? 'bg-yellow-400' : 'bg-emerald-400'
+  const bgColor = value >= thresholds[1] ? 'bg-[var(--aethel-error-light)]' : value >= thresholds[0] ? 'bg-[var(--aethel-warning-light)]' : 'bg-[var(--aethel-success-light)]'
 
   return (
     <div className="space-y-1">
@@ -165,7 +165,7 @@ const MetricBar: React.FC<{
         </div>
         <span className={`font-mono ${color}`}>{value.toFixed(1)}{suffix}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+      <div className="h-2 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
         <div className={`h-full ${bgColor} transition-all duration-500 ease-out`} style={{ width: `${Math.min(100, value)}%` }} />
       </div>
     </div>
@@ -317,7 +317,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap justify-between gap-2 border-t border-white/10 pt-4 text-xs text-[var(--aethel-text-tertiary)]">
+      <div className="mt-6 flex flex-wrap justify-between gap-2 border-t border-[var(--aethel-border-subtle)] pt-4 text-xs text-[var(--aethel-text-tertiary)]">
         <span>Ultima atualizacao: {lastUpdate.toLocaleTimeString()}</span>
         <span>Aethel Engine v1.0.0</span>
       </div>

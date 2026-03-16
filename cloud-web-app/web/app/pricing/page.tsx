@@ -62,11 +62,11 @@ export default function PricingPage() {
   }, [isAnnual])
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       {/* Ambient bg */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.07] blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[150px]" />
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.07] blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[150px]" />
       </div>
 
       <PublicHeader />
@@ -74,13 +74,13 @@ export default function PricingPage() {
       <main className="relative z-10">
         {/* ── Hero ── */}
         <section className="mx-auto max-w-4xl px-4 pb-6 pt-16 text-center sm:px-6">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[13px] font-medium text-blue-300">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[13px] font-medium text-blue-300">
             Pricing transparente
           </div>
           <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
             Planos alinhados com uso real
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-zinc-400">
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
             Cada plano inclui tokens de IA, projetos, storage e acesso aos sistemas AAA.
             Sem surpresas, sem limites escondidos.
           </p>
@@ -102,12 +102,12 @@ export default function PricingPage() {
           </div>
 
           {/* Billing cycle toggle */}
-          <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+          <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
             <button
               type="button"
               onClick={() => setBillingCycle('month')}
               className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                billingCycle === 'month' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'
+                billingCycle === 'month' ? 'bg-white text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
               Mensal
@@ -116,7 +116,7 @@ export default function PricingPage() {
               type="button"
               onClick={() => setBillingCycle('year')}
               className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                billingCycle === 'year' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'
+                billingCycle === 'year' ? 'bg-white text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
               Anual
@@ -136,27 +136,27 @@ export default function PricingPage() {
                 className={`relative flex flex-col rounded-2xl border p-5 transition-all ${
                   plan.popular
                     ? 'border-blue-500/40 bg-gradient-to-b from-blue-500/[0.1] to-transparent shadow-xl shadow-blue-500/10'
-                    : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.12]'
+                    : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-blue-500/30">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-1 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-500/30">
                     Recomendado
                   </div>
                 )}
 
                 <div className="mb-5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">{plan.id}</p>
-                  <h2 className="mt-1 text-xl font-bold text-white">{plan.name}</h2>
-                  <p className="mt-1 text-xs text-zinc-500">{plan.description}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">{plan.id}</p>
+                  <h2 className="mt-1 text-xl font-bold text-[var(--aethel-text-primary)]">{plan.name}</h2>
+                  <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{plan.description}</p>
                 </div>
 
                 <div className="mb-5">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl font-bold text-white">R${plan.displayPriceBRL}</span>
-                    <span className="text-xs text-zinc-500">/{isAnnual ? 'ano' : 'mes'}</span>
+                    <span className="text-3xl font-bold text-[var(--aethel-text-primary)]">R${plan.displayPriceBRL}</span>
+                    <span className="text-xs text-[var(--aethel-text-tertiary)]">/{isAnnual ? 'ano' : 'mes'}</span>
                   </div>
-                  <p className="mt-1 text-[11px] text-zinc-600">
+                  <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">
                     US${plan.displayPrice}/{isAnnual ? 'year' : plan.interval}
                   </p>
                 </div>
@@ -169,17 +169,17 @@ export default function PricingPage() {
                     { label: 'Tokens/dia', value: formatLimit(plan.limits.tokensPerDay) },
                     { label: 'Collab', value: formatLimit(plan.limits.collaborators) },
                   ].map((item) => (
-                    <div key={item.label} className="rounded-lg bg-white/[0.03] p-2.5">
-                      <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-600">{item.label}</p>
-                      <p className="mt-0.5 text-sm font-semibold text-white">{item.value}</p>
+                    <div key={item.label} className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-2.5">
+                      <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">{item.label}</p>
+                      <p className="mt-0.5 text-sm font-semibold text-[var(--aethel-text-primary)]">{item.value}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Features */}
-                <ul className="mb-6 flex-1 space-y-2.5 border-t border-white/[0.06] pt-5">
+                <ul className="mb-6 flex-1 space-y-2.5 border-t border-[var(--aethel-border-subtle)] pt-5">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-xs text-zinc-400">
+                    <li key={feature} className="flex items-start gap-2 text-xs text-[var(--aethel-text-secondary)]">
                       <span className="mt-0.5 text-emerald-500 flex-shrink-0">
                         <Codicon name="check" />
                       </span>
@@ -216,15 +216,15 @@ export default function PricingPage() {
         {/* ── FAQ ── */}
         <section className="mx-auto mt-24 w-full max-w-3xl px-4 pb-24 sm:px-6">
           <div className="text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">FAQ</p>
-            <h2 className="mt-3 text-3xl font-bold text-white">Perguntas frequentes</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info)]">FAQ</p>
+            <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)]">Perguntas frequentes</h2>
           </div>
 
           <div className="mt-10 space-y-3">
             {FAQ_ITEMS.map((item, i) => (
               <div
                 key={item.q}
-                className="rounded-xl border border-white/[0.06] bg-white/[0.02] transition-colors hover:border-white/[0.1]"
+                className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)]"
               >
                 <button
                   type="button"
@@ -232,8 +232,8 @@ export default function PricingPage() {
                   className="flex w-full items-center justify-between p-5 text-left"
                   aria-expanded={openFaq === i}
                 >
-                  <span className="text-sm font-medium text-white">{item.q}</span>
-                  <span className={`ml-4 flex-shrink-0 text-zinc-500 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}>
+                  <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{item.q}</span>
+                  <span className={`ml-4 flex-shrink-0 text-[var(--aethel-text-tertiary)] transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}>
                     <Codicon name="chevron-down" />
                   </span>
                 </button>
@@ -242,7 +242,7 @@ export default function PricingPage() {
                     openFaq === i ? 'max-h-40 pb-5' : 'max-h-0'
                   }`}
                 >
-                  <p className="px-5 text-sm leading-relaxed text-zinc-400">{item.a}</p>
+                  <p className="px-5 text-sm leading-relaxed text-[var(--aethel-text-secondary)]">{item.a}</p>
                 </div>
               </div>
             ))}

@@ -64,7 +64,7 @@ function StatCard({
 }) {
   return (
     <Card variant="elevated" padding="md" className="relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
       
       <div className="flex items-start justify-between">
         <div>
@@ -93,7 +93,7 @@ function StatCard({
           )}
         </div>
         
-        <div className="p-3 rounded-xl bg-slate-800/50">
+        <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]">
           {icon}
         </div>
       </div>
@@ -204,9 +204,9 @@ export function OverviewTab({
                 <button
                   key={project.id}
                   onClick={() => onOpenProject?.(project.id)}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-colors text-left group"
+                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors text-left group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] flex items-center justify-center">
                     {project.type === 'unreal' ? (
                       <Code className="w-5 h-5 text-[var(--aethel-info)]" />
                     ) : (
@@ -248,7 +248,7 @@ export function OverviewTab({
                   key={activity.id}
                   className="flex items-start gap-3 text-sm"
                 >
-                  <div className="w-2 h-2 rounded-full bg-sky-500 mt-2" />
+                  <div className="w-2 h-2 rounded-full bg-[var(--aethel-info)] mt-2" />
                   <div className="flex-1">
                     <p className="text-[var(--aethel-text-primary)]">
                       <span className="font-medium">{activity.action}</span>{' '}

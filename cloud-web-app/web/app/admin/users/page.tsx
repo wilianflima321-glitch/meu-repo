@@ -82,18 +82,18 @@ export default function AdminUsers() {
         <div>
           <h1 className='text-3xl font-bold'>Gerenciar Usuários</h1>
           {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchUsers}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
+          className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
           <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
@@ -104,11 +104,11 @@ export default function AdminUsers() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Testes</h3>
-          <p className="text-2xl font-bold text-zinc-400">{summary.trials}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{summary.trials}</p>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input
           type="text"
           placeholder="Buscar por nome ou e-mail"
@@ -122,7 +122,7 @@ export default function AdminUsers() {
               key={plan}
               onClick={() => setPlanFilter(plan)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                planFilter === plan ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
+                planFilter === plan ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
               {plan === 'all' ? 'Todos' : (planLabels[plan] ?? plan)}
@@ -131,9 +131,9 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <table className='w-full bg-zinc-900/70 rounded-lg shadow'>
+      <table className='w-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
         <thead>
-          <tr className='bg-zinc-800/70'>
+          <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
             <th className='p-3'>Nome</th>
             <th className='p-3'>E-mail</th>
             <th className='p-3'>Plano</th>
@@ -145,15 +145,15 @@ export default function AdminUsers() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-3 text-sm text-zinc-500' colSpan={6}>Carregando usuários...</td>
+              <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>Carregando usuários...</td>
             </tr>
           ) : error ? (
             <tr>
-              <td className='p-3 text-sm text-red-500' colSpan={6}>{error}</td>
+              <td className='p-3 text-sm text-[var(--aethel-error)]' colSpan={6}>{error}</td>
             </tr>
           ) : filteredUsers.length === 0 ? (
             <tr>
-              <td className='p-3 text-sm text-zinc-500' colSpan={6}>Nenhum usuário encontrado.</td>
+              <td className='p-3 text-sm text-[var(--aethel-text-tertiary)]' colSpan={6}>Nenhum usuário encontrado.</td>
             </tr>
           ) : (
             filteredUsers.map(user => (
@@ -164,7 +164,7 @@ export default function AdminUsers() {
                     <span>{user.email}</span>
                     <button
                       onClick={() => navigator.clipboard.writeText(user.email)}
-                      className="text-xs text-zinc-500 hover:text-zinc-200"
+                      className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
                     >
                       Copiar
                     </button>

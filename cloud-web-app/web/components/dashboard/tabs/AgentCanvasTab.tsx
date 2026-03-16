@@ -77,7 +77,7 @@ export default function AgentCanvasTab() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 aethel-gap-4">
         <div className="aethel-card aethel-p-4 aethel-flex aethel-items-center aethel-gap-3">
-          <div className="aethel-p-2 bg-blue-500/10 aethel-rounded-lg">
+          <div className="aethel-p-2 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] aethel-rounded-lg">
             <svg className="w-5 h-5 text-[var(--aethel-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -88,7 +88,7 @@ export default function AgentCanvasTab() {
           </div>
         </div>
         <div className="aethel-card aethel-p-4 aethel-flex aethel-items-center aethel-gap-3">
-          <div className="aethel-p-2 bg-emerald-500/10 aethel-rounded-lg">
+          <div className="aethel-p-2 bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] aethel-rounded-lg">
             <svg className="w-5 h-5 text-[var(--aethel-success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -99,7 +99,7 @@ export default function AgentCanvasTab() {
           </div>
         </div>
         <div className="aethel-card aethel-p-4 aethel-flex aethel-items-center aethel-gap-3">
-          <div className="aethel-p-2 bg-blue-500/10 aethel-rounded-lg">
+          <div className="aethel-p-2 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] aethel-rounded-lg">
             <svg className="w-5 h-5 text-[var(--aethel-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>

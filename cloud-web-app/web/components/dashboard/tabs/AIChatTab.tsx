@@ -68,7 +68,7 @@ function MessageBubble({
       <div
         className={`
           flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
-          ${isUser ? 'bg-sky-600' : 'bg-gradient-to-br from-blue-500 to-cyan-500'}
+          ${isUser ? 'bg-[var(--aethel-info)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}
         `}
       >
         {isUser ? (
@@ -84,8 +84,8 @@ function MessageBubble({
           className={`
             inline-block p-4 rounded-2xl
             ${isUser
-              ? 'bg-sky-600 text-[var(--aethel-text-primary)] rounded-tr-none'
-              : 'bg-slate-800 text-[var(--aethel-text-primary)] rounded-tl-none'
+              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded-tr-none'
+              : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-tl-none'
             }
           `}
         >
@@ -129,14 +129,14 @@ function MessageBubble({
 function TypingIndicator() {
   return (
     <div className="flex gap-4">
-      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center">
         <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />
       </div>
-      <div className="bg-slate-800 rounded-2xl rounded-tl-none px-4 py-3">
+      <div className="bg-[var(--aethel-surface-tertiary)] rounded-2xl rounded-tl-none px-4 py-3">
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="w-2 h-2 bg-[var(--aethel-text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <div className="w-2 h-2 bg-[var(--aethel-text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <div className="w-2 h-2 bg-[var(--aethel-text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </div>
@@ -201,7 +201,7 @@ export function AIChatTab({
   return (
     <div className="h-[calc(100vh-180px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-4 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <Sparkles className="w-6 h-6 text-[var(--aethel-info)]" />
           <div>
@@ -252,7 +252,7 @@ export function AIChatTab({
       </div>
 
       {/* Input Area */}
-      <div className="pt-4 border-t border-slate-800">
+      <div className="pt-4 border-t border-[var(--aethel-border-primary)]">
         <form onSubmit={handleSubmit} className="relative">
           <textarea
             ref={inputRef}
@@ -260,7 +260,7 @@ export function AIChatTab({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-            className="w-full px-4 py-3 pr-24 bg-slate-800 border border-slate-700 rounded-xl text-[var(--aethel-text-primary)] placeholder-slate-500 resize-none focus:outline-none focus:border-sky-500 transition-colors"
+            className="w-full px-4 py-3 pr-24 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-xl text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] resize-none focus:outline-none focus:border-sky-500 transition-colors"
             rows={1}
             disabled={isGenerating}
           />
@@ -293,21 +293,21 @@ export function AIChatTab({
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Sugestões:</span>
           <button
             onClick={() => setInputValue('Explique este código: ')}
-            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
+            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <Code className="w-3 h-3 inline mr-1" />
             Explicar código
           </button>
           <button
             onClick={() => setInputValue('Refatore este código para: ')}
-            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
+            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <RefreshCw className="w-3 h-3 inline mr-1" />
             Refatorar
           </button>
           <button
             onClick={() => setInputValue('Crie um teste para: ')}
-            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-slate-800/50 hover:bg-slate-800 rounded-full transition-colors"
+            className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <Sparkles className="w-3 h-3 inline mr-1" />
             Criar teste

@@ -61,15 +61,15 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
         <PublicHeader />
         <main className="relative z-10 flex min-h-[70vh] items-center justify-center px-6">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center">
+          <div className="w-full max-w-md rounded-3xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-8 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
               <CheckCircle className="h-8 w-8 text-emerald-400" />
             </div>
             <h1 className="text-2xl font-bold">Mensagem enviada</h1>
-            <p className="mt-3 text-sm text-slate-400">
+            <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
               Obrigado pelo contato. Respondemos por email em ate 24 horas uteis.
             </p>
             <Link
@@ -86,9 +86,9 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-blue-600/[0.06] blur-[170px]" />
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[170px]" />
         <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-cyan-600/[0.05] blur-[160px]" />
       </div>
 
@@ -96,11 +96,11 @@ export default function ContactPage() {
 
       <main className="relative z-10">
         <section className="mx-auto max-w-6xl px-6 pt-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-300">
             Contato
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Entre em contato</h1>
-          <p className="mt-4 max-w-2xl text-lg text-slate-400">
+          <p className="mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
             Envie sua mensagem e descreva seu contexto. Se for enterprise, detalhe requisitos de compliance.
           </p>
         </section>
@@ -108,44 +108,44 @@ export default function ContactPage() {
         <section className="mx-auto mt-10 max-w-6xl px-6 pb-20">
           <div className="grid gap-10 lg:grid-cols-2">
             <div className="space-y-6">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-6">
                 <h2 className="text-lg font-semibold">Canais</h2>
-                <div className="mt-4 space-y-4 text-sm text-slate-400">
+                <div className="mt-4 space-y-4 text-sm text-[var(--aethel-text-secondary)]">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
                       <Mail className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-white">Email</p>
+                      <p className="text-[var(--aethel-text-primary)]">Email</p>
                       <p>contato@aethel.io</p>
                       <p>suporte@aethel.io</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
                       <Phone className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-white">Telefone</p>
+                      <p className="text-[var(--aethel-text-primary)]">Telefone</p>
                       <p>+55 (11) 4000-0000</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
                       <MapPin className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-white">Endereco</p>
+                      <p className="text-[var(--aethel-text-primary)]">Endereco</p>
                       <p>Av. Paulista, 1000 - Bela Vista</p>
                       <p>Sao Paulo - SP</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400">
                       <Clock className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-white">Horario</p>
+                      <p className="text-[var(--aethel-text-primary)]">Horario</p>
                       <p>Seg a sex: 9h - 18h</p>
                       <p>Suporte estendido para planos avancados</p>
                     </div>
@@ -153,9 +153,9 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-                <h3 className="text-white font-semibold">Perguntas frequentes</h3>
-                <p className="mt-2 text-sm text-slate-400">
+              <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-6">
+                <h3 className="text-[var(--aethel-text-primary)] font-semibold">Perguntas frequentes</h3>
+                <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
                   Algumas respostas estao na FAQ do pricing. Confira antes de abrir um ticket.
                 </p>
                 <Link
@@ -170,57 +170,57 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+            <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-6">
               <h2 className="text-lg font-semibold">Envie sua mensagem</h2>
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
                 Preencha o formulario com o maximo de contexto possivel.
               </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 {error && (
-                  <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+                  <div className="rounded-xl border border-red-500/40 bg-[var(--aethel-error)]/10 p-3 text-sm text-red-200">
                     {error}
                   </div>
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Nome</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Nome</label>
                     <input
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
                       placeholder="Seu nome"
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Email</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Email</label>
                     <input
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                      className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
                       placeholder="voce@empresa.com"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Empresa (opcional)</label>
+                  <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Empresa (opcional)</label>
                   <input
                     name="company"
                     value={formData.company}
                     onChange={handleChange}
-                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                    className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
                     placeholder="Nome da empresa"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Motivo do contato</label>
+                  <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Motivo do contato</label>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {contactReasons.map((reason) => (
                       <button
@@ -231,8 +231,8 @@ export default function ContactPage() {
                         }
                         className={`flex items-center gap-3 rounded-xl border p-4 text-left text-sm transition-all ${
                           formData.reason == reason.value
-                            ? 'border-blue-500/50 bg-blue-500/15 text-white'
-                            : 'border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/20'
+                            ? 'border-blue-500/50 bg-[var(--aethel-primary)]/15 text-[var(--aethel-text-primary)]'
+                            : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
                         }`}
                       >
                         <reason.icon className="h-5 w-5" />
@@ -243,14 +243,14 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Mensagem</label>
+                  <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Mensagem</label>
                   <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
                     rows={5}
                     required
-                    className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60"
+                    className="w-full resize-none rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-blue-500/60"
                     placeholder="Como podemos ajudar?"
                   />
                 </div>
@@ -263,7 +263,7 @@ export default function ContactPage() {
                   {!loading && <Send className="h-4 w-4" />}
                 </button>
 
-                <p className="text-xs text-slate-500 text-center">
+                <p className="text-xs text-[var(--aethel-text-tertiary)] text-center">
                   Ao enviar, voce concorda com a nossa{' '}
                   <Link href="/privacy" className="text-blue-300 hover:text-blue-200">
                     Politica de Privacidade

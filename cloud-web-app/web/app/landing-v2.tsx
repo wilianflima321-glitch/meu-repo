@@ -157,11 +157,11 @@ export default function LandingPageV2() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100">
+    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       {/* Skip to content */}
       <a
         href="#landing-mission"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-20 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-black focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-20 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-[var(--aethel-text-primary)] focus:shadow-lg"
       >
         Pular para conteudo principal
       </a>
@@ -170,8 +170,8 @@ export default function LandingPageV2() {
 
       {/* Ambient background */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/2 top-0 h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600/[0.07] blur-[180px]" />
-        <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-sky-600/[0.05] blur-[150px]" />
+        <div className="absolute left-1/2 top-0 h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--aethel-primary-dark)]/[0.07] blur-[180px]" />
+        <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[150px]" />
         <div className="absolute bottom-1/3 left-0 h-[400px] w-[400px] rounded-full bg-cyan-600/[0.04] blur-[120px]" />
       </div>
 
@@ -181,13 +181,13 @@ export default function LandingPageV2() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_0.8fr]">
             <div>
               {/* Badge */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-[13px] font-medium text-blue-300">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[13px] font-medium text-blue-300">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
                 Multi-agent studio OS
               </div>
 
               {/* Headline */}
-              <h1 className="max-w-[680px] text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-[3.5rem]">
+              <h1 className="max-w-[680px] text-4xl font-bold leading-[1.1] tracking-tight text-[var(--aethel-text-primary)] sm:text-5xl lg:text-[3.5rem]">
                 Crie apps com IA que{' '}
                 <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
                   nao mente
@@ -196,7 +196,7 @@ export default function LandingPageV2() {
               </h1>
 
               {/* Subheadline */}
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-400">
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-[var(--aethel-text-secondary)]">
                 Aethel unifica research, planejamento, codigo, preview e readiness operacional.
                 Multi-agent de verdade, rollback deterministico e politica anti-fake-success.
               </p>
@@ -205,8 +205,8 @@ export default function LandingPageV2() {
               <form onSubmit={handleMagicSubmit} className="mt-8 w-full max-w-xl" aria-label="Campo de missao inicial">
                 <div className={`relative transition-transform duration-300 ${isFocused ? 'scale-[1.01]' : ''}`}>
                   <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-cyan-500/60 via-blue-500/60 to-sky-500/60 opacity-50 blur-xl transition-opacity duration-300" />
-                  <div className="relative flex items-center rounded-2xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl">
-                    <span className="pl-4 pr-2 text-zinc-500">
+                  <div className="relative flex items-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] backdrop-blur-xl">
+                    <span className="pl-4 pr-2 text-[var(--aethel-text-tertiary)]">
                       <Codicon name="sparkle" />
                     </span>
                     <input
@@ -217,11 +217,11 @@ export default function LandingPageV2() {
                       onBlur={() => setIsFocused(false)}
                       placeholder={typingText || 'Descreva sua missao...'}
                       aria-label="Descreva sua missao inicial para o studio"
-                      className="h-14 w-full bg-transparent text-[15px] text-white placeholder:text-zinc-600 focus:outline-none"
+                      className="h-14 w-full bg-transparent text-[15px] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] focus:outline-none"
                     />
                     <button
                       type="submit"
-                      className="mr-2 flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-zinc-200 hover:shadow-lg hover:shadow-white/10 active:scale-95"
+                      className="mr-2 flex items-center gap-2 rounded-xl bg-[var(--aethel-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] transition-all hover:bg-[var(--aethel-primary-dark)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] active:scale-95"
                     >
                       Iniciar
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +239,7 @@ export default function LandingPageV2() {
                     key={m}
                     type="button"
                     onClick={() => setInputValue(m)}
-                    className="rounded-full border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-400 transition-all hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-200"
+                    className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] transition-all hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)]"
                   >
                     {m}
                   </button>
@@ -264,11 +264,11 @@ export default function LandingPageV2() {
             </div>
 
             {/* Right side - Live product card */}
-            <div className="rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent p-6 shadow-2xl shadow-blue-500/[0.08] backdrop-blur-xl">
+            <div className="rounded-3xl border border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-gradient-to-b from-white/[0.04] to-transparent p-6 shadow-2xl shadow-blue-500/[0.08] backdrop-blur-xl">
               <div className="mb-5 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-zinc-600">Honestidade tecnica</p>
-                  <h2 className="mt-1 text-lg font-bold text-white">Aethel agora</h2>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Honestidade tecnica</p>
+                  <h2 className="mt-1 text-lg font-bold text-[var(--aethel-text-primary)]">Aethel agora</h2>
                 </div>
                 <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
                   Apps = L4 target
@@ -283,11 +283,11 @@ export default function LandingPageV2() {
                   'Provider setup explicito com demo bridge',
                   'Preview canonico unificado',
                 ].map((claim) => (
-                  <div key={claim} className="flex items-center gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] p-3">
+                  <div key={claim} className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-3">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 text-xs">
                       <Codicon name="check" />
                     </span>
-                    <span className="text-sm text-zinc-300">{claim}</span>
+                    <span className="text-sm text-[var(--aethel-text-secondary)]">{claim}</span>
                   </div>
                 ))}
               </div>
@@ -296,13 +296,13 @@ export default function LandingPageV2() {
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3.5">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-400">Parcial</p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
+                  <p className="mt-1.5 text-xs leading-relaxed text-[var(--aethel-text-secondary)]">
                     Preview sandbox, billing, mobile IDE, production evidence.
                   </p>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">Congelado</p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
+                <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-3.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">Congelado</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-[var(--aethel-text-tertiary)]">
                     Games e Films permanecem L2 ate Apps fechar L4.
                   </p>
                 </div>
@@ -312,12 +312,12 @@ export default function LandingPageV2() {
         </section>
 
         {/* Metrics bar */}
-        <section className="border-y border-white/[0.04] bg-zinc-950/60">
+        <section className="border-y border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)]">
           <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-10 sm:px-6 md:grid-cols-4 lg:px-8">
             {METRICS.map((m) => (
               <div key={m.label} className="text-center">
-                <p className="text-3xl font-bold text-white">{m.value}</p>
-                <p className="mt-1 text-sm text-zinc-500">{m.label}</p>
+                <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">{m.value}</p>
+                <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{m.label}</p>
               </div>
             ))}
           </div>
@@ -327,10 +327,10 @@ export default function LandingPageV2() {
         <section className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-400">Diferenciais</p>
-            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)] sm:text-4xl">
               O que torna Aethel diferente
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-500">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-[var(--aethel-text-tertiary)]">
               Nao e so mais um wrapper de LLM. E um studio operacional completo com contratos reais.
             </p>
           </div>
@@ -339,33 +339,33 @@ export default function LandingPageV2() {
             {FEATURES.map((f) => (
               <article
                 key={f.title}
-                className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04]"
+                className="group relative rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-6 transition-all duration-300 hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
               >
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 transition-colors group-hover:bg-blue-500/15">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--aethel-primary)]/10 text-blue-400 transition-colors group-hover:bg-[var(--aethel-primary)]/15">
                     <Codicon name={f.icon} />
                   </div>
-                  <span className="rounded-full bg-white/[0.05] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                  <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
                     {f.badge}
                   </span>
                 </div>
-                <h3 className="text-base font-semibold text-white">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-500">{f.description}</p>
+                <h3 className="text-base font-semibold text-[var(--aethel-text-primary)]">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--aethel-text-tertiary)]">{f.description}</p>
               </article>
             ))}
           </div>
         </section>
 
         {/* Workflow */}
-        <section className="border-y border-white/[0.04] bg-zinc-950/40 py-24">
+        <section className="border-y border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)]/40 py-24">
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">Como funciona</p>
-                <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info)]">Como funciona</p>
+                <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)] sm:text-4xl">
                   Fluxo unico, sem trocar de produto
                 </h2>
-                <p className="mt-4 max-w-md text-base leading-relaxed text-zinc-500">
+                <p className="mt-4 max-w-md text-base leading-relaxed text-[var(--aethel-text-tertiary)]">
                   O objetivo e entregar um fluxo de Apps + Research coerente e auditavel.
                   Nao prometemos Unreal ou Premiere ao mesmo tempo.
                 </p>
@@ -384,14 +384,14 @@ export default function LandingPageV2() {
                 {WORKFLOW_STEPS.map((s) => (
                   <div
                     key={s.step}
-                    className="group flex gap-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
+                    className="group flex gap-5 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-5 transition-all hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
                   >
-                    <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${s.color} text-white font-bold text-sm`}>
+                    <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${s.color} text-[var(--aethel-text-primary)] font-bold text-sm`}>
                       {s.step}
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-white">{s.title}</h3>
-                      <p className="mt-1.5 text-sm leading-relaxed text-zinc-500">{s.description}</p>
+                      <h3 className="text-base font-semibold text-[var(--aethel-text-primary)]">{s.title}</h3>
+                      <p className="mt-1.5 text-sm leading-relaxed text-[var(--aethel-text-tertiary)]">{s.description}</p>
                     </div>
                   </div>
                 ))}
@@ -403,40 +403,40 @@ export default function LandingPageV2() {
         {/* Comparison table */}
         <section className="mx-auto w-full max-w-4xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">Comparacao</p>
-            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">Aethel vs. Mercado</h2>
-            <p className="mx-auto mt-4 max-w-xl text-base text-zinc-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info)]">Comparacao</p>
+            <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)] sm:text-4xl">Aethel vs. Mercado</h2>
+            <p className="mx-auto mt-4 max-w-xl text-base text-[var(--aethel-text-tertiary)]">
               Onde ja somos fortes e onde ainda precisamos fechar produto.
             </p>
           </div>
 
-          <div className="mt-12 overflow-hidden rounded-2xl border border-white/[0.06]">
+          <div className="mt-12 overflow-hidden rounded-2xl border border-[var(--aethel-border-subtle)]">
             <table className="w-full" role="table">
               <thead>
-                <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                  <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Feature</th>
+                <tr className="border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)]">
+                  <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Feature</th>
                   <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-blue-400">Aethel</th>
-                  <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-zinc-500">Outros IDEs AI</th>
+                  <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Outros IDEs AI</th>
                 </tr>
               </thead>
               <tbody>
                 {COMPARISON.map((row, i) => (
-                  <tr key={row.feature} className={`border-b border-white/[0.04] ${i % 2 === 0 ? 'bg-white/[0.01]' : ''}`}>
-                    <td className="px-5 py-3.5 text-sm text-zinc-300">{row.feature}</td>
+                  <tr key={row.feature} className={`border-b border-[var(--aethel-border-subtle)] ${i % 2 === 0 ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]' : ''}`}>
+                    <td className="px-5 py-3.5 text-sm text-[var(--aethel-text-secondary)]">{row.feature}</td>
                     <td className="px-5 py-3.5 text-center">
                       {row.aethel === true ? (
                         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 text-xs"><Codicon name="check" /></span>
                       ) : row.aethel === 'partial' ? (
                         <span className="text-xs font-medium text-amber-400">Parcial</span>
                       ) : (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500/10 text-red-400 text-xs"><Codicon name="close" /></span>
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--aethel-error)]/10 text-red-400 text-xs"><Codicon name="close" /></span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 text-center">
                       {row.others === true ? (
                         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 text-xs"><Codicon name="check" /></span>
                       ) : (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500/10 text-red-400 text-xs"><Codicon name="close" /></span>
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--aethel-error)]/10 text-red-400 text-xs"><Codicon name="close" /></span>
                       )}
                     </td>
                   </tr>
@@ -447,26 +447,26 @@ export default function LandingPageV2() {
         </section>
 
         {/* Testimonials */}
-        <section className="border-y border-white/[0.04] bg-zinc-950/40 py-24">
+        <section className="border-y border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)]/40 py-24">
           <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-400">Comunidade</p>
-              <h2 className="mt-3 text-3xl font-bold text-white">O que dizem os early adopters</h2>
+              <h2 className="mt-3 text-3xl font-bold text-[var(--aethel-text-primary)]">O que dizem os early adopters</h2>
             </div>
             <div className="mt-12 grid gap-6 sm:grid-cols-2">
               {TESTIMONIALS_PLACEHOLDER.map((t) => (
                 <blockquote
                   key={t.name}
-                  className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6"
+                  className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-6"
                 >
-                  <p className="text-sm leading-relaxed text-zinc-400">&ldquo;{t.text}&rdquo;</p>
+                  <p className="text-sm leading-relaxed text-[var(--aethel-text-secondary)]">&ldquo;{t.text}&rdquo;</p>
                   <div className="mt-5 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 text-sm font-bold text-white">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 text-sm font-bold text-[var(--aethel-text-primary)]">
                       {t.name[0]}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">{t.name}</p>
-                      <p className="text-xs text-zinc-500">{t.role}</p>
+                      <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{t.name}</p>
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">{t.role}</p>
                     </div>
                   </div>
                 </blockquote>
@@ -477,9 +477,9 @@ export default function LandingPageV2() {
 
         {/* Final CTA */}
         <section className="mx-auto w-full max-w-5xl px-4 py-24 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-blue-500/[0.08] via-sky-500/[0.05] to-transparent p-10 text-center sm:p-16">
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">Comece com uma missao real</h2>
-            <p className="mx-auto mt-4 max-w-lg text-base text-zinc-400">
+          <div className="overflow-hidden rounded-3xl border border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-gradient-to-br from-blue-500/[0.08] via-sky-500/[0.05] to-transparent p-10 text-center sm:p-16">
+            <h2 className="text-3xl font-bold text-[var(--aethel-text-primary)] sm:text-4xl">Comece com uma missao real</h2>
+            <p className="mx-auto mt-4 max-w-lg text-base text-[var(--aethel-text-secondary)]">
               Abra o dashboard, escolha um template e leve a primeira iteracao para o IDE.
               Sem cartao de credito para comecar.
             </p>

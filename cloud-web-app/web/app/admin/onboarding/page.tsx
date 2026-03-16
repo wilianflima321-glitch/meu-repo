@@ -98,14 +98,14 @@ export default function OnboardingAdminPage() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Onboarding quality</h1>
-          <p className="text-sm text-zinc-400">Conversao de first value, tempo de ativacao e evidencias por acao.</p>
-          {lastUpdated && <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>}
+          <p className="text-sm text-[var(--aethel-text-secondary)]">Conversao de first value, tempo de ativacao e evidencias por acao.</p>
+          {lastUpdated && <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
         <div className="flex items-center gap-2">
           <select
             value={days}
             onChange={(event) => setDays(Number(event.target.value) as 7 | 14 | 30)}
-            className="rounded border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-200"
+            className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)]"
             aria-label="Janela de dias"
           >
             <option value={7}>7 dias</option>
@@ -115,7 +115,7 @@ export default function OnboardingAdminPage() {
           <button
             type="button"
             onClick={fetchStats}
-            className="rounded border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800/80"
+            className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
           >
             Atualizar
           </button>
@@ -129,34 +129,34 @@ export default function OnboardingAdminPage() {
       )}
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-6" aria-busy={loading}>
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-          <p className="text-xs text-zinc-500">Usuarios unicos</p>
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Usuarios unicos</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : stats?.totals.uniqueUsers ?? 0}</p>
         </div>
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-          <p className="text-xs text-zinc-500">Acao total</p>
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Acao total</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : stats?.totals.totalActions ?? 0}</p>
         </div>
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-          <p className="text-xs text-zinc-500">First value / signup</p>
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">First value / signup</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : formatPercent(stats?.firstValue.completionRateFromSignup ?? null)}</p>
         </div>
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-          <p className="text-xs text-zinc-500">Median first value time</p>
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Median first value time</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : formatMs(stats?.firstValue.medianFirstValueTimeMs ?? null)}</p>
           {!loading && stats?.firstValue && (
-            <p className="mt-1 text-xs text-zinc-500">sample={stats.firstValue.sampleSize}</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">sample={stats.firstValue.sampleSize}</p>
           )}
         </div>
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-          <p className="text-xs text-zinc-500">P95 first value time</p>
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">P95 first value time</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : formatMs(stats?.firstValue.p95FirstValueTimeMs ?? null)}</p>
           {!loading && stats?.firstValue?.latestCompletedAt && (
-            <p className="mt-1 text-xs text-zinc-500">last={new Date(stats.firstValue.latestCompletedAt).toLocaleString()}</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">last={new Date(stats.firstValue.latestCompletedAt).toLocaleString()}</p>
           )}
         </div>
-        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-          <p className="text-xs text-zinc-500">First value SLO</p>
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">First value SLO</p>
           <p className="mt-2 text-lg font-semibold">
             {loading ? '--' : `target ${formatMs(stats?.firstValue.sloTargetMs ?? null)}`}
           </p>
@@ -176,58 +176,58 @@ export default function OnboardingAdminPage() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
-        <h2 className="mb-3 text-base font-semibold text-zinc-200">First value funnel</h2>
+      <div className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+        <h2 className="mb-3 text-base font-semibold text-[var(--aethel-text-secondary)]">First value funnel</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-            <p className="text-xs text-zinc-500">Signups</p>
+          <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Signups</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.signups ?? 0}</p>
           </div>
-          <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-            <p className="text-xs text-zinc-500">Onboarding entries</p>
+          <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Onboarding entries</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.onboardingEntries ?? 0}</p>
           </div>
-          <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-            <p className="text-xs text-zinc-500">First project</p>
+          <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">First project</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstProjectCreated ?? 0}</p>
           </div>
-          <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-            <p className="text-xs text-zinc-500">First AI success</p>
+          <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">First AI success</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstAiSuccess ?? 0}</p>
           </div>
-          <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-            <p className="text-xs text-zinc-500">First IDE open</p>
+          <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">First IDE open</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstIdeOpened ?? 0}</p>
           </div>
-          <div className="rounded border border-zinc-800/70 bg-zinc-950/40 p-3">
-            <p className="text-xs text-zinc-500">Completed</p>
+          <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Completed</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstValueCompleted ?? 0}</p>
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/70 p-4">
+      <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
         <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-base font-semibold text-zinc-200">Actions by type</h2>
+          <h2 className="text-base font-semibold text-[var(--aethel-text-secondary)]">Actions by type</h2>
           <input
             type="text"
             placeholder="Buscar acao"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="rounded border border-zinc-700/80 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-200"
+            className="rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)]"
           />
         </div>
         {filteredActions.length > 0 ? (
           <ul className="divide-y divide-zinc-800/70">
             {filteredActions.map(([action, count]) => (
               <li key={action} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-zinc-300">{action}</span>
-                <span className="text-zinc-500">{count}</span>
+                <span className="text-[var(--aethel-text-secondary)]">{action}</span>
+                <span className="text-[var(--aethel-text-tertiary)]">{count}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-zinc-500">Nenhuma acao registrada para o filtro atual.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma acao registrada para o filtro atual.</p>
         )}
       </div>
     </div>

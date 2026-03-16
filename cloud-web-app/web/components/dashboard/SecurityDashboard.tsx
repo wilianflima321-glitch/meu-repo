@@ -149,10 +149,10 @@ const Icons = {
 // ============================================================================
 
 const THREAT_LEVEL_COLORS: Record<ThreatLevel, { bg: string; text: string; border: string }> = {
-  critical: { bg: 'bg-red-500/20', text: 'text-[var(--aethel-error)]', border: 'border-red-500' },
+  critical: { bg: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]', text: 'text-[var(--aethel-error)]', border: 'border-[var(--aethel-error)]' },
   high: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500' },
-  medium: { bg: 'bg-yellow-500/20', text: 'text-[var(--aethel-warning)]', border: 'border-yellow-500' },
-  low: { bg: 'bg-blue-500/20', text: 'text-[var(--aethel-primary-light)]', border: 'border-blue-500' },
+  medium: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]', text: 'text-[var(--aethel-warning)]', border: 'border-[var(--aethel-warning)]' },
+  low: { bg: 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]', text: 'text-[var(--aethel-primary-light)]', border: 'border-[var(--aethel-primary)]' },
   none: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500' },
 };
 
@@ -282,7 +282,7 @@ function ErrorState({ message, onRetry }: ErrorStateProps) {
       <p className="text-[var(--aethel-text-secondary)] mb-4 max-w-md">{message}</p>
       <button
         onClick={onRetry}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-[var(--aethel-text-primary)] text-sm transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary-dark)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition-colors"
       >
         <Icons.Refresh />
         Try Again
@@ -405,7 +405,7 @@ function ThreatBreakdown({ data }: ThreatBreakdownProps) {
             </div>
             <div className="h-1.5 bg-[var(--aethel-border-primary)] rounded-full overflow-hidden">
               <div 
-                className="h-full bg-blue-500 transition-all duration-300"
+                className="h-full bg-[var(--aethel-primary)] transition-all duration-300"
                 style={{ width: `${percent}%` }}
               />
             </div>
@@ -431,8 +431,8 @@ function RateLimitCard({ status }: RateLimitCardProps) {
   
   return (
     <div className={`p-3 rounded-lg border ${
-      isCritical ? 'border-red-500/50 bg-red-500/10' :
-      isWarning ? 'border-yellow-500/50 bg-yellow-500/10' :
+      isCritical ? 'border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
+      isWarning ? 'border-[var(--aethel-warning)]/50 bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]' :
       'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]'
     }`}>
       <div className="flex items-center justify-between mb-2">
@@ -445,8 +445,8 @@ function RateLimitCard({ status }: RateLimitCardProps) {
         <div className="flex-1 h-2 bg-[var(--aethel-border-primary)] rounded-full overflow-hidden">
           <div 
             className={`h-full transition-all duration-300 ${
-              isCritical ? 'bg-red-500' :
-              isWarning ? 'bg-yellow-500' :
+              isCritical ? 'bg-[var(--aethel-error)]' :
+              isWarning ? 'bg-[var(--aethel-warning)]' :
               'bg-green-500'
             }`}
             style={{ width: `${percent}%` }}

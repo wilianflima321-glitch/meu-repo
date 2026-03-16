@@ -121,18 +121,18 @@ export default function AdminIpRegistryPage() {
   const licensesList = useMemo(() => Object.entries(data?.licenses || {}), [data]);
 
   if (loading && !data) return <div className="p-6">Carregando…</div>;
-  if (error) return <div className="p-6 text-red-600">Erro: {error}</div>;
+  if (error) return <div className="p-6 text-[var(--aethel-error)]">Erro: {error}</div>;
 
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Registro de IPs</h1>
-          <p className="text-sm text-zinc-500">Controle de permissões e licenças com auditoria.</p>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">Controle de permissões e licenças com auditoria.</p>
         </div>
         <div className="flex gap-2">
           <button className="px-3 py-1 bg-gray-200 rounded" onClick={fetchRegistry}>Atualizar</button>
-          <button className="px-3 py-1 bg-blue-600 text-white rounded" onClick={saveRegistry}>Salvar</button>
+          <button className="px-3 py-1 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded" onClick={saveRegistry}>Salvar</button>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function AdminIpRegistryPage() {
 
       {!data ? <div>Nenhum dado disponível.</div> : (
         <div className="grid md:grid-cols-2 gap-6">
-          <section className="bg-zinc-900/70 p-4 rounded-lg shadow">
+          <section className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
             <h2 className="text-xl font-medium mb-2">IPs permitidos</h2>
             <div className="flex gap-2 mb-4">
               <input
@@ -149,7 +149,7 @@ export default function AdminIpRegistryPage() {
                 className="border p-2 rounded text-sm flex-1"
                 placeholder="Adicionar identificador"
               />
-              <button className="px-3 py-2 bg-green-600 text-white rounded" onClick={addAllowed}>Adicionar</button>
+              <button className="px-3 py-2 bg-green-600 text-[var(--aethel-text-primary)] rounded" onClick={addAllowed}>Adicionar</button>
             </div>
             <ul className="list-disc pl-5 space-y-1">
               {allowedList.map(ip => (
@@ -160,7 +160,7 @@ export default function AdminIpRegistryPage() {
               ))}
             </ul>
           </section>
-          <section className="bg-zinc-900/70 p-4 rounded-lg shadow">
+          <section className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
             <h2 className="text-xl font-medium mb-2">Licenças</h2>
             <div className="grid grid-cols-1 gap-2 mb-4">
               <input
@@ -204,13 +204,13 @@ export default function AdminIpRegistryPage() {
                 value={licenseForm.notes}
                 onChange={(e) => setLicenseForm((prev) => ({ ...prev, notes: e.target.value }))}
               />
-              <button className="px-3 py-2 bg-sky-600 text-white rounded" onClick={addLicense}>Adicionar</button>
+              <button className="px-3 py-2 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded" onClick={addLicense}>Adicionar</button>
             </div>
             <ul className="space-y-2">
               {licensesList.map(([ip, lic]) => (
                 <li key={ip} className="border rounded p-3">
                   <div className="font-semibold">{ip}</div>
-                  <div className="text-sm text-zinc-400">Status: {statusLabels[lic.status] ?? lic.status}</div>
+                  <div className="text-sm text-[var(--aethel-text-secondary)]">Status: {statusLabels[lic.status] ?? lic.status}</div>
                   {lic.holder && <div className="text-sm">Titular: {lic.holder}</div>}
                   {lic.since && <div className="text-sm">Desde: {lic.since}</div>}
                   {lic.until && <div className="text-sm">Até: {lic.until}</div>}

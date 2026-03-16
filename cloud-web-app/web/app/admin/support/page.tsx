@@ -79,20 +79,20 @@ export default function Support() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className='text-3xl font-bold'>Suporte ao usuário</h1>
-          <p className='text-zinc-400'>Chamados reais do sistema de suporte.</p>
+          <p className='text-[var(--aethel-text-secondary)]'>Chamados reais do sistema de suporte.</p>
           {lastUpdated && (
-            <p className="text-xs text-zinc-500">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
         <button
           onClick={fetchTickets}
-          className="px-3 py-2 rounded bg-zinc-800/70 text-zinc-300 text-sm"
+          className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
           Atualizar
         </button>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="text-center">
           <h3 className="text-sm font-semibold">Total</h3>
           <p className="text-2xl font-bold text-blue-600">{summary.total}</p>
@@ -107,11 +107,11 @@ export default function Support() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Urgentes</h3>
-          <p className="text-2xl font-bold text-red-600">{summary.urgent}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-error)]">{summary.urgent}</p>
         </div>
       </div>
 
-      <div className="bg-zinc-900/70 p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input
           type="text"
           placeholder="Buscar por e-mail ou assunto"
@@ -125,7 +125,7 @@ export default function Support() {
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
+                statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
               {status === 'all' ? 'Todos' : (statusLabels[status] ?? status)}
@@ -136,7 +136,7 @@ export default function Support() {
               key={priority}
               onClick={() => setPriorityFilter(priority)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                priorityFilter === priority ? 'bg-blue-600 text-white' : 'bg-zinc-800/70 text-zinc-400'
+                priorityFilter === priority ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
               {priority === 'all' ? 'Todas prioridades' : (priorityLabels[priority] ?? priority)}
@@ -145,9 +145,9 @@ export default function Support() {
         </div>
       </div>
 
-      <table className='w-full table-auto bg-zinc-900/70 rounded-lg shadow'>
+      <table className='w-full table-auto bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
         <thead>
-          <tr className='bg-zinc-800/70'>
+          <tr className='bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'>
             <th className='p-2'>ID</th>
             <th className='p-2'>Usuário</th>
             <th className='p-2'>Assunto</th>
@@ -160,15 +160,15 @@ export default function Support() {
         <tbody>
           {loading ? (
             <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={7}>Carregando chamados...</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={7}>Carregando chamados...</td>
             </tr>
           ) : error ? (
             <tr>
-              <td className='p-2 text-sm text-red-500' colSpan={7}>{error}</td>
+              <td className='p-2 text-sm text-[var(--aethel-error)]' colSpan={7}>{error}</td>
             </tr>
           ) : filteredTickets.length === 0 ? (
             <tr>
-              <td className='p-2 text-sm text-zinc-500' colSpan={7}>Nenhum chamado encontrado.</td>
+              <td className='p-2 text-sm text-[var(--aethel-text-tertiary)]' colSpan={7}>Nenhum chamado encontrado.</td>
             </tr>
           ) : (
             filteredTickets.map((ticket) => (
@@ -179,7 +179,7 @@ export default function Support() {
                     <span>{ticket.email}</span>
                     <button
                       onClick={() => navigator.clipboard.writeText(ticket.email)}
-                      className="text-xs text-zinc-500 hover:text-zinc-200"
+                      className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
                     >
                       Copiar
                     </button>
@@ -187,7 +187,7 @@ export default function Support() {
                 </td>
                 <td className='p-2'>{ticket.subject}</td>
                 <td className='p-2'>
-                  <span className="px-2 py-1 rounded text-xs bg-zinc-800/70 text-zinc-400">
+                  <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]">
                     {statusLabels[ticket.status] ?? ticket.status}
                   </span>
                 </td>
@@ -197,7 +197,7 @@ export default function Support() {
                       ? 'bg-rose-500/15 text-rose-300'
                       : ticket.priority === 'high'
                       ? 'bg-amber-500/15 text-amber-300'
-                      : 'bg-zinc-800/70 text-zinc-400'
+                      : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                   }`}>
                     {priorityLabels[ticket.priority] ?? ticket.priority}
                   </span>
