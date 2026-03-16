@@ -46,8 +46,8 @@ function TrackHeader({
       style={{
         width: '200px',
         height: `${track.height}px`,
-        background: '#0f172a',
-        borderBottom: '1px solid #1e293b',
+        background: 'var(--aethel-surface-primary)',
+        borderBottom: '1px solid var(--aethel-surface-tertiary)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 8px',
@@ -64,7 +64,7 @@ function TrackHeader({
       {/* Track name */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ 
-          color: 'white', 
+          color: 'var(--aethel-text-primary)', 
           fontSize: '12px', 
           fontWeight: 500,
           overflow: 'hidden',
@@ -73,7 +73,7 @@ function TrackHeader({
         }}>
           {track.name}
         </div>
-        <div style={{ color: '#64748b', fontSize: '10px' }}>
+        <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: '10px' }}>
           {track.type.toUpperCase()}
         </div>
       </div>
@@ -84,26 +84,26 @@ function TrackHeader({
           style={{
             width: '20px',
             height: '20px',
-            background: track.visible ? '#374151' : '#1e293b',
+            background: track.visible ? 'var(--aethel-border-primary)' : 'var(--aethel-surface-tertiary)',
             border: 'none',
             borderRadius: '2px',
-            color: track.visible ? 'white' : '#64748b',
+            color: track.visible ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)',
             cursor: 'pointer',
             fontSize: '10px',
           }}
           title="Visibility"
         >
-          👁
+          
         </button>
         <button
           onClick={onToggleMute}
           style={{
             width: '20px',
             height: '20px',
-            background: track.muted ? '#ef4444' : '#1e293b',
+            background: track.muted ? 'var(--aethel-error)' : 'var(--aethel-surface-tertiary)',
             border: 'none',
             borderRadius: '2px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '10px',
           }}
@@ -117,10 +117,10 @@ function TrackHeader({
             style={{
               width: '20px',
               height: '20px',
-              background: track.solo ? '#f59e0b' : '#1e293b',
+              background: track.solo ? 'var(--aethel-warning)' : 'var(--aethel-surface-tertiary)',
               border: 'none',
               borderRadius: '2px',
-              color: 'white',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '10px',
             }}
@@ -134,16 +134,16 @@ function TrackHeader({
           style={{
             width: '20px',
             height: '20px',
-            background: track.locked ? '#3b82f6' : '#1e293b',
+            background: track.locked ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
             border: 'none',
             borderRadius: '2px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '10px',
           }}
           title="Lock"
         >
-          🔒
+          
         </button>
       </div>
     </div>
@@ -227,7 +227,7 @@ function TimelineClipComponent({
         bottom: '4px',
         background: clip.color,
         borderRadius: '4px',
-        border: isSelected ? '2px solid white' : '1px solid rgba(255,255,255,0.2)',
+        border: isSelected ? '2px solid var(--aethel-text-primary)' : '1px solid color-mix(in_srgb,var(--aethel-border-primary)_20%,transparent)',
         overflow: 'hidden',
         cursor: track.locked ? 'not-allowed' : 'pointer',
         opacity: clip.muted ? 0.5 : 1,
@@ -243,7 +243,7 @@ function TimelineClipComponent({
           bottom: 0,
           width: '8px',
           cursor: track.locked ? 'not-allowed' : 'ew-resize',
-          background: isSelected ? 'rgba(255,255,255,0.3)' : 'transparent',
+          background: isSelected ? 'color-mix(in_srgb,var(--aethel-text-primary)_30%,transparent)' : 'transparent',
         }}
         onMouseDown={(e) => handleMouseDown(e, 'trim-start')}
       />
@@ -255,7 +255,7 @@ function TimelineClipComponent({
           bottom: 0,
           width: '8px',
           cursor: track.locked ? 'not-allowed' : 'ew-resize',
-          background: isSelected ? 'rgba(255,255,255,0.3)' : 'transparent',
+          background: isSelected ? 'color-mix(in_srgb,var(--aethel-text-primary)_30%,transparent)' : 'transparent',
         }}
         onMouseDown={(e) => handleMouseDown(e, 'trim-end')}
       />
@@ -285,7 +285,7 @@ function TimelineClipComponent({
         )}
         {/* Clip name */}
         <div style={{
-          color: 'white',
+          color: 'var(--aethel-text-primary)',
           fontSize: '11px',
           fontWeight: 500,
           overflow: 'hidden',
@@ -298,7 +298,7 @@ function TimelineClipComponent({
         {/* Duration */}
         {clipWidth > 100 && (
           <div style={{
-            color: 'rgba(255,255,255,0.7)',
+            color: 'color-mix(in_srgb,var(--aethel-text-primary)_70%,transparent)',
             fontSize: '9px',
             marginLeft: clip.type === 'video' && clip.thumbnail && clipWidth > 60 ? '48px' : 0,
           }}>
@@ -324,7 +324,7 @@ function TimelineClipComponent({
                 style={{
                   flex: 1,
                   height: `${20 + Math.random() * 80}%`,
-                  background: 'white',
+                  background: 'var(--aethel-text-primary)',
                   borderRadius: '1px',
                 }}
               />
@@ -349,7 +349,7 @@ function TimelineClipComponent({
                   left: `${(kf.time / clip.duration) * 100}%`,
                   width: '4px',
                   height: '4px',
-                  background: '#f59e0b',
+                  background: 'var(--aethel-warning)',
                   borderRadius: '50%',
                   transform: 'translateX(-50%)',
                 }}
@@ -365,7 +365,7 @@ function TimelineClipComponent({
             top: '4px',
             fontSize: '10px',
           }}>
-            🔒
+            
           </div>
         )}
       </div>
@@ -396,8 +396,8 @@ function TrackContent({
       style={{
         flex: 1,
         height: `${track.height}px`,
-        background: track.visible ? '#1e293b' : '#0f172a',
-        borderBottom: '1px solid #374151',
+        background: track.visible ? 'var(--aethel-surface-tertiary)' : 'var(--aethel-surface-primary)',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         position: 'relative',
       }}
     >
@@ -464,15 +464,15 @@ function PlaybackControls({
       alignItems: 'center',
       gap: '12px',
       padding: '8px 16px',
-      background: '#0f172a',
-      borderBottom: '1px solid #1e293b',
+      background: 'var(--aethel-surface-primary)',
+      borderBottom: '1px solid var(--aethel-surface-tertiary)',
     }}>
       {/* Time display */}
       <div style={{
         fontFamily: 'monospace',
         fontSize: '14px',
-        color: 'white',
-        background: '#1e293b',
+        color: 'var(--aethel-text-primary)',
+        background: 'var(--aethel-surface-tertiary)',
         padding: '4px 8px',
         borderRadius: '4px',
         minWidth: '100px',
@@ -487,84 +487,84 @@ function PlaybackControls({
           style={{
             width: '32px',
             height: '32px',
-            background: '#1e293b',
+            background: 'var(--aethel-surface-tertiary)',
             border: 'none',
             borderRadius: '4px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '14px',
           }}
           title="Go to Start"
         >
-          ⏮
+          
         </button>
         <button
           onClick={onStepBackward}
           style={{
             width: '32px',
             height: '32px',
-            background: '#1e293b',
+            background: 'var(--aethel-surface-tertiary)',
             border: 'none',
             borderRadius: '4px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '14px',
           }}
           title="Step Back"
         >
-          ⏪
+          
         </button>
         <button
           onClick={isPlaying ? onPause : onPlay}
           style={{
             width: '40px',
             height: '32px',
-            background: isPlaying ? '#ef4444' : '#22c55e',
+            background: isPlaying ? 'var(--aethel-error)' : 'var(--aethel-success)',
             border: 'none',
             borderRadius: '4px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '14px',
           }}
           title={isPlaying ? 'Pause' : 'Play'}
         >
-          {isPlaying ? '⏸' : '▶'}
+          {isPlaying ? '' : ''}
         </button>
         <button
           onClick={onStepForward}
           style={{
             width: '32px',
             height: '32px',
-            background: '#1e293b',
+            background: 'var(--aethel-surface-tertiary)',
             border: 'none',
             borderRadius: '4px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '14px',
           }}
           title="Step Forward"
         >
-          ⏩
+          
         </button>
         <button
           onClick={onGoToEnd}
           style={{
             width: '32px',
             height: '32px',
-            background: '#1e293b',
+            background: 'var(--aethel-surface-tertiary)',
             border: 'none',
             borderRadius: '4px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             cursor: 'pointer',
             fontSize: '14px',
           }}
           title="Go to End"
         >
-          ⏭
+          
         </button>
       </div>
       {/* Duration display */}
-      <div style={{ color: '#64748b', fontSize: '12px' }}>
+      <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: '12px' }}>
         / {formatTime(duration)}
       </div>
     </div>
@@ -579,7 +579,7 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
     return (
       <div style={{
         padding: '16px',
-        color: '#64748b',
+        color: 'var(--aethel-text-quaternary)',
         textAlign: 'center',
       }}>
         Select a clip to edit its properties
@@ -588,12 +588,12 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
   }
   return (
     <div style={{ padding: '12px' }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '16px' }}>
+      <h3 style={{ color: 'var(--aethel-text-primary)', fontSize: '14px', marginBottom: '16px' }}>
         Clip Properties
       </h3>
       {/* Name */}
       <div style={{ marginBottom: '12px' }}>
-        <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
+        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
           Name
         </label>
         <input
@@ -602,18 +602,18 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           onChange={(e) => onUpdate({ ...clip, name: e.target.value })}
           style={{
             width: '100%',
-            background: '#1e293b',
-            border: '1px solid #374151',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '6px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             fontSize: '12px',
           }}
         />
       </div>
       {/* Timing */}
       <div style={{ marginBottom: '12px' }}>
-        <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
+        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
           Start Time
         </label>
         <input
@@ -623,17 +623,17 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           step={0.01}
           style={{
             width: '100%',
-            background: '#1e293b',
-            border: '1px solid #374151',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '6px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             fontSize: '12px',
           }}
         />
       </div>
       <div style={{ marginBottom: '12px' }}>
-        <label style={{ color: '#94a3b8', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
+        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'block', marginBottom: '4px' }}>
           Duration
         </label>
         <input
@@ -643,11 +643,11 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           step={0.01}
           style={{
             width: '100%',
-            background: '#1e293b',
-            border: '1px solid #374151',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
             padding: '6px',
-            color: 'white',
+            color: 'var(--aethel-text-primary)',
             fontSize: '12px',
           }}
         />
@@ -655,8 +655,8 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
       {/* Opacity */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '11px' }}>Opacity</label>
-          <span style={{ color: '#64748b', fontSize: '10px' }}>{Math.round(clip.opacity * 100)}%</span>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>Opacity</label>
+          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '10px' }}>{Math.round(clip.opacity * 100)}%</span>
         </div>
         <input
           type="range"
@@ -671,8 +671,8 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
       {/* Speed */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: '#94a3b8', fontSize: '11px' }}>Speed</label>
-          <span style={{ color: '#64748b', fontSize: '10px' }}>{clip.speed}x</span>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>Speed</label>
+          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '10px' }}>{clip.speed}x</span>
         </div>
         <input
           type="range"
@@ -688,8 +688,8 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
       {(clip.type === 'audio' || clip.type === 'video') && (
         <div style={{ marginBottom: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-            <label style={{ color: '#94a3b8', fontSize: '11px' }}>Audio Level</label>
-            <span style={{ color: '#64748b', fontSize: '10px' }}>{Math.round(clip.audioLevel * 100)}%</span>
+            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>Audio Level</label>
+            <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '10px' }}>{Math.round(clip.audioLevel * 100)}%</span>
           </div>
           <input
             type="range"
@@ -704,7 +704,7 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
       )}
       {/* Lock/Mute */}
       <div style={{ display: 'flex', gap: '8px' }}>
-        <label style={{ color: '#94a3b8', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
           <input
             type="checkbox"
             checked={clip.locked}
@@ -712,7 +712,7 @@ function ClipInspector({ clip, onUpdate }: ClipInspectorProps) {
           />
           Locked
         </label>
-        <label style={{ color: '#94a3b8', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
           <input
             type="checkbox"
             checked={clip.muted}
@@ -750,7 +750,7 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
   );
   return (
     <div style={{ padding: '12px' }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Effects</h3>
+      <h3 style={{ color: 'var(--aethel-text-primary)', fontSize: '14px', marginBottom: '12px' }}>Effects</h3>
       {/* Search */}
       <input
         type="text"
@@ -759,11 +759,11 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
         placeholder="Search effects..."
         style={{
           width: '100%',
-          background: '#1e293b',
-          border: '1px solid #374151',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: '4px',
           padding: '8px',
-          color: 'white',
+          color: 'var(--aethel-text-primary)',
           fontSize: '12px',
           marginBottom: '12px',
         }}
@@ -771,14 +771,14 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
       {/* Applied effects */}
       {clip && clip.effects.length > 0 && (
         <div style={{ marginBottom: '12px' }}>
-          <h4 style={{ color: '#94a3b8', fontSize: '11px', marginBottom: '8px' }}>
+          <h4 style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', marginBottom: '8px' }}>
             Applied Effects
           </h4>
           {clip.effects.map((effect) => (
             <div
               key={effect.id}
               style={{
-                background: '#1e293b',
+                background: 'var(--aethel-surface-tertiary)',
                 borderRadius: '4px',
                 padding: '8px',
                 marginBottom: '4px',
@@ -793,26 +793,26 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
                   checked={effect.enabled}
                   onChange={(e) => onUpdateEffect({ ...effect, enabled: e.target.checked })}
                 />
-                <span style={{ color: 'white', fontSize: '12px' }}>{effect.name}</span>
+                <span style={{ color: 'var(--aethel-text-primary)', fontSize: '12px' }}>{effect.name}</span>
               </div>
               <button
                 onClick={() => onRemoveEffect(effect.id)}
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#ef4444',
+                  color: 'var(--aethel-error)',
                   cursor: 'pointer',
                   fontSize: '14px',
                 }}
               >
-                ×
+                
               </button>
             </div>
           ))}
         </div>
       )}
       {/* Available effects */}
-      <h4 style={{ color: '#94a3b8', fontSize: '11px', marginBottom: '8px' }}>
+      <h4 style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', marginBottom: '8px' }}>
         Available Effects
       </h4>
       <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
@@ -823,19 +823,19 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
             disabled={!clip}
             style={{
               width: '100%',
-              background: '#1e293b',
+              background: 'var(--aethel-surface-tertiary)',
               border: 'none',
               borderRadius: '4px',
               padding: '8px',
               marginBottom: '4px',
-              color: clip ? 'white' : '#64748b',
+              color: clip ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)',
               cursor: clip ? 'pointer' : 'not-allowed',
               textAlign: 'left',
               fontSize: '12px',
             }}
           >
             <span>{effect.name}</span>
-            <span style={{ color: '#64748b', marginLeft: '8px', fontSize: '10px' }}>
+            <span style={{ color: 'var(--aethel-text-quaternary)', marginLeft: '8px', fontSize: '10px' }}>
               {effect.category}
             </span>
           </button>
@@ -856,10 +856,10 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
     frameRate: 30,
     resolution: { width: 1920, height: 1080 },
     tracks: [
-      { id: 'v1', name: 'Video 1', type: 'video', height: 60, visible: true, locked: false, muted: false, solo: false, color: '#3b82f6', volume: 1, pan: 0, clips: [] },
-      { id: 'v2', name: 'Video 2', type: 'video', height: 60, visible: true, locked: false, muted: false, solo: false, color: '#8b5cf6', volume: 1, pan: 0, clips: [] },
-      { id: 'a1', name: 'Audio 1', type: 'audio', height: 50, visible: true, locked: false, muted: false, solo: false, color: '#22c55e', volume: 1, pan: 0, clips: [] },
-      { id: 'a2', name: 'Audio 2', type: 'audio', height: 50, visible: true, locked: false, muted: false, solo: false, color: '#10b981', volume: 1, pan: 0, clips: [] },
+      { id: 'v1', name: 'Video 1', type: 'video', height: 60, visible: true, locked: false, muted: false, solo: false, color: 'var(--aethel-primary)', volume: 1, pan: 0, clips: [] },
+      { id: 'v2', name: 'Video 2', type: 'video', height: 60, visible: true, locked: false, muted: false, solo: false, color: 'var(--aethel-accent)', volume: 1, pan: 0, clips: [] },
+      { id: 'a1', name: 'Audio 1', type: 'audio', height: 50, visible: true, locked: false, muted: false, solo: false, color: 'var(--aethel-success)', volume: 1, pan: 0, clips: [] },
+      { id: 'a2', name: 'Audio 2', type: 'audio', height: 50, visible: true, locked: false, muted: false, solo: false, color: 'var(--aethel-success)', volume: 1, pan: 0, clips: [] },
     ],
     clips: new Map([
       ['clip1', {
@@ -879,7 +879,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         keyframes: [],
         effects: [],
         transitions: {},
-        color: '#3b82f6',
+        color: 'var(--aethel-primary)',
         locked: false,
         muted: false,
       }],
@@ -900,7 +900,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         keyframes: [],
         effects: [],
         transitions: {},
-        color: '#3b82f6',
+        color: 'var(--aethel-primary)',
         locked: false,
         muted: false,
       }],
@@ -921,7 +921,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         keyframes: [],
         effects: [],
         transitions: {},
-        color: '#22c55e',
+        color: 'var(--aethel-success)',
         locked: false,
         muted: false,
       }],
@@ -992,47 +992,47 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
     onChange?.(project);
   }, [project, onChange]);
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#0f172a' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--aethel-surface-primary)' }}>
       {/* Top bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '8px 16px',
-        background: '#0f172a',
-        borderBottom: '1px solid #1e293b',
+        background: 'var(--aethel-surface-primary)',
+        borderBottom: '1px solid var(--aethel-surface-tertiary)',
       }}>
-        <h2 style={{ color: 'white', fontSize: '16px' }}>🎬 {project.name}</h2>
+        <h2 style={{ color: 'var(--aethel-text-primary)', fontSize: '16px' }}> {project.name}</h2>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span style={{ color: '#64748b', fontSize: '12px' }}>
+          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '12px' }}>
             {project.resolution.width}x{project.resolution.height} @ {project.frameRate}fps
           </span>
           {/* Zoom controls */}
           <button
             onClick={() => setZoom(z => Math.max(0.1, z / 1.5))}
             style={{
-              background: '#1e293b',
+              background: 'var(--aethel-surface-tertiary)',
               border: 'none',
               borderRadius: '4px',
               padding: '4px 8px',
-              color: 'white',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '12px',
             }}
           >
             -
           </button>
-          <span style={{ color: '#94a3b8', fontSize: '11px', width: '40px', textAlign: 'center' }}>
+          <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', width: '40px', textAlign: 'center' }}>
             {Math.round(zoom * 100)}%
           </span>
           <button
             onClick={() => setZoom(z => Math.min(10, z * 1.5))}
             style={{
-              background: '#1e293b',
+              background: 'var(--aethel-surface-tertiary)',
               border: 'none',
               borderRadius: '4px',
               padding: '4px 8px',
-              color: 'white',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontSize: '12px',
             }}
@@ -1061,7 +1061,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Ruler */}
           <div style={{ display: 'flex' }}>
-            <div style={{ width: '200px', background: '#0f172a', borderBottom: '1px solid #1e293b' }} />
+            <div style={{ width: '200px', background: 'var(--aethel-surface-primary)', borderBottom: '1px solid var(--aethel-surface-tertiary)' }} />
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <TimelineRuler
                 duration={project.duration}
@@ -1103,8 +1103,8 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
           {/* Horizontal scrollbar */}
           <div style={{
             height: '12px',
-            background: '#0f172a',
-            borderTop: '1px solid #1e293b',
+            background: 'var(--aethel-surface-primary)',
+            borderTop: '1px solid var(--aethel-surface-tertiary)',
             paddingLeft: '200px',
           }}>
             <input
@@ -1120,21 +1120,21 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         {/* Right panel */}
         <div style={{
           width: '280px',
-          background: '#0f172a',
-          borderLeft: '1px solid #1e293b',
+          background: 'var(--aethel-surface-primary)',
+          borderLeft: '1px solid var(--aethel-surface-tertiary)',
           display: 'flex',
           flexDirection: 'column',
         }}>
           {/* Panel tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #1e293b' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--aethel-surface-tertiary)' }}>
             <button
               onClick={() => setActivePanel('inspector')}
               style={{
                 flex: 1,
                 padding: '10px',
-                background: activePanel === 'inspector' ? '#1e293b' : 'transparent',
+                background: activePanel === 'inspector' ? 'var(--aethel-surface-tertiary)' : 'transparent',
                 border: 'none',
-                color: activePanel === 'inspector' ? 'white' : '#64748b',
+                color: activePanel === 'inspector' ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)',
                 cursor: 'pointer',
                 fontSize: '12px',
               }}
@@ -1146,9 +1146,9 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
               style={{
                 flex: 1,
                 padding: '10px',
-                background: activePanel === 'effects' ? '#1e293b' : 'transparent',
+                background: activePanel === 'effects' ? 'var(--aethel-surface-tertiary)' : 'transparent',
                 border: 'none',
-                color: activePanel === 'effects' ? 'white' : '#64748b',
+                color: activePanel === 'effects' ? 'var(--aethel-text-primary)' : 'var(--aethel-text-quaternary)',
                 cursor: 'pointer',
                 fontSize: '12px',
               }}
